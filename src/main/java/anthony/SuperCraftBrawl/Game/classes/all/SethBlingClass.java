@@ -1,0 +1,111 @@
+package anthony.SuperCraftBrawl.Game.classes.all;
+
+import org.bukkit.Color;
+import org.bukkit.Material;
+import org.bukkit.SkullType;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.SkullMeta;
+
+import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import net.md_5.bungee.api.ChatColor;
+
+public class SethBlingClass extends BaseClass {
+
+	public SethBlingClass(GameInstance instance, Player player) {
+		super(instance, player);
+		baseVerticalJump = 1.5;
+	}
+
+	public ItemStack makeRed(ItemStack armour) {
+		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
+		lm.setColor(Color.RED);
+		armour.setItemMeta(lm);
+		return armour;
+	}
+
+	@Override
+	public void SetArmour(EntityEquipment playerEquip) {
+		ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
+
+		SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
+
+		meta.setOwner("SethBling");
+		meta.setDisplayName("");
+
+		playerskull.setItemMeta(meta);
+
+		playerEquip.setHelmet(playerskull);
+		playerEquip.setChestplate(makeRed(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
+				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+		playerEquip.setLeggings(makeRed(new ItemStack(Material.LEATHER_LEGGINGS)));
+		playerEquip.setBoots(makeRed(
+				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	}
+
+	public ItemStack getCmdBlock() {
+		return ItemHelper.setDetails(new ItemStack(Material.COMMAND, 1),
+				"" + ChatColor.GRAY + ChatColor.ITALIC + "Right Click", ChatColor.YELLOW + "");
+	}
+
+	@Override
+	public void SetItems(Inventory playerInv) {
+		playerInv.setItem(0, this.getAttackWeapon());
+		playerInv.setItem(1, this.getCmdBlock());
+	}
+
+	public void TestItems() {
+		player.getInventory().addItem(new ItemStack(instance.getItemToDrop()));
+		player.getInventory().addItem(new ItemStack(instance.getItemToDrop()));
+	}
+
+	@Override
+	public void UseItem(PlayerInteractEvent event) {
+		ItemStack item = event.getItem();
+		if (item != null && item.getType() == Material.COMMAND
+				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+					+ "Your command block skills rewarded you with special items!");
+			int amount = item.getAmount();
+			if (amount > 0) {
+				amount--;
+				if (amount == 0)
+					player.getInventory().clear(player.getInventory().getHeldItemSlot());
+				else
+					item.setAmount(amount);
+				event.setCancelled(true);
+				TestItems();
+			}
+		}
+	}
+
+	@Override
+	public ClassType getType() {
+		return ClassType.SethBling;
+	}
+
+	@Override
+	public void SetNameTag() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public ItemStack getAttackWeapon() {
+		ItemStack item = ItemHelper.addEnchant(ItemHelper.addEnchant(
+				ItemHelper.setDetails(new ItemStack(Material.REDSTONE_BLOCK, 1),
+						"" + ChatColor.RED + ChatColor.BOLD + "Seth's Block", ChatColor.YELLOW + ""),
+				Enchantment.KNOCKBACK, 2), Enchantment.DAMAGE_ALL, 3);
+		return item;
+	}
+
+}
