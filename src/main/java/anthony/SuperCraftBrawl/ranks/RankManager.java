@@ -2,14 +2,14 @@ package anthony.SuperCraftBrawl.ranks;
 
 import org.bukkit.entity.Player;
 
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 
 public class RankManager {
 	
-	private final Main main;
+	private final Core main;
 	
-	public RankManager(Main main) {
+	public RankManager(Core main) {
 		this.main = main;
 	}
 	

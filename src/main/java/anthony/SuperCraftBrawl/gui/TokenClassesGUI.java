@@ -3,7 +3,7 @@ package anthony.SuperCraftBrawl.gui;
 import org.bukkit.entity.Player;
 
 import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
@@ -14,10 +14,10 @@ import net.md_5.bungee.api.ChatColor;
 
 public class TokenClassesGUI implements InventoryProvider {
 
-	public Main main;
+	public Core main;
 	public SmartInventory inv;
 
-	public TokenClassesGUI(Main main) {
+	public TokenClassesGUI(Core main) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Token Classes").build();
 		this.main = main;

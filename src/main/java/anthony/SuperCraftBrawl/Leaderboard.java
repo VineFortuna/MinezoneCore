@@ -18,14 +18,14 @@ import org.bukkit.entity.EntityType;
 import anthony.SuperCraftBrawl.ranks.Rank;
 
 public class Leaderboard {
-	private Main main;
+	private Core main;
 	private HashMap<UUID, Integer> wins;
 	private HashMap<UUID, Rank> RoleID;
 	private ArrayList<UUID> lead;
 	private Connection c;
 	private int i;
 
-	public Leaderboard(Main main) {
+	public Leaderboard(Core main) {
 		this.main = main;
 		i = 0;
 		RoleID = new HashMap<>();

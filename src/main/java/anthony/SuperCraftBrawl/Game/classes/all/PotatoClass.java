@@ -24,7 +24,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 
 import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
@@ -40,7 +40,7 @@ public class PotatoClass extends BaseClass {
 		super(instance, player);
 	}
 
-	public Main getMain() {
+	public Core getMain() {
 		return instance.getManager().getMain();
 	}
 

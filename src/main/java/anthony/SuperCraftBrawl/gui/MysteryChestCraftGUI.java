@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -16,11 +16,11 @@ import net.md_5.bungee.api.ChatColor;
 
 public class MysteryChestCraftGUI implements InventoryProvider {
 
-	public Main main;
+	public Core main;
 	public SmartInventory inv;
 	public int cost = 100;
 
-	public MysteryChestCraftGUI(Main main) {
+	public MysteryChestCraftGUI(Core main) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
 				.title("" + ChatColor.YELLOW + ChatColor.BOLD + "Mystery Chest").build();
 		this.main = main;

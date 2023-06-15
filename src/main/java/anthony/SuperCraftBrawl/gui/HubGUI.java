@@ -16,7 +16,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
 import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -26,10 +26,10 @@ import net.md_5.bungee.api.ChatColor;
 
 public class HubGUI implements InventoryProvider {
 
-	public Main main;
+	public Core main;
 	public SmartInventory inv;
 
-	public HubGUI(Main main) {
+	public HubGUI(Core main) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Game Selector").build();
 		this.main = main;

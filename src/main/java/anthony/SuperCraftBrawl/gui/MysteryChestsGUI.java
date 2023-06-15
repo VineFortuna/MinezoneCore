@@ -20,7 +20,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import anthony.SuperCraftBrawl.Animation;
 import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -34,11 +34,11 @@ import net.minecraft.server.v1_8_R3.WorldServer;
 
 public class MysteryChestsGUI implements InventoryProvider {
 
-	public Main main;
+	public Core main;
 	public SmartInventory inv;
 	private Location loc;
 
-	public MysteryChestsGUI(Main main, Location loc) {
+	public MysteryChestsGUI(Core main, Location loc) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
 				.title("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Mystery Chest").build();
 		this.main = main;

@@ -20,22 +20,22 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.skywars.gui.KitSelectorGUI;
 
 public class GameManager implements Listener {
 
-	private Main main;
+	private Core main;
 	public Map<Maps, GameInstance> gameMap = new HashMap<Maps, GameInstance>();
 
-	public GameManager(Main main) {
+	public GameManager(Core main) {
 		this.main = main;
 		this.main.getServer().getPluginManager().registerEvents(this, main);
 	}
 
 	// Getters:
 
-	public Main getMain() {
+	public Core getMain() {
 		return this.main;
 	}
 

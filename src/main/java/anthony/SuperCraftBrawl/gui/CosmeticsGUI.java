@@ -12,7 +12,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.RankManager;
 import fr.minuskube.inv.ClickableItem;
@@ -23,11 +23,11 @@ import net.md_5.bungee.api.ChatColor;
 
 public class CosmeticsGUI implements InventoryProvider {
 
-	public Main main;
+	public Core main;
 	public SmartInventory inv;
 	private RankManager rm;
 
-	public CosmeticsGUI(Main main) {
+	public CosmeticsGUI(Core main) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(4, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Cosmetics").build();
 		this.main = main;

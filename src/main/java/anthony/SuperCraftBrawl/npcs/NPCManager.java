@@ -18,7 +18,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameManager;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -32,13 +32,13 @@ import net.md_5.bungee.api.ChatColor;
 
 public class NPCManager implements Listener {
 
-	private Main main;
+	private Core main;
 	private NPCLib npcLib;
 
 	// NPCS HERE:
 	private NPC scb, skywars;
 
-	public NPCManager(Main main) {
+	public NPCManager(Core main) {
 		this.main = main;
 		this.npcLib = new NPCLib(main);
 		load();

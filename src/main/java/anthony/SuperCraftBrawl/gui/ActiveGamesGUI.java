@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
@@ -20,10 +20,10 @@ import net.md_5.bungee.api.ChatColor;
 
 public class ActiveGamesGUI implements InventoryProvider {
 
-	public Main main;
+	public Core main;
 	public SmartInventory inv;
 
-	public ActiveGamesGUI(Main main) {
+	public ActiveGamesGUI(Core main) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Quick Join").build();
 		this.main = main;

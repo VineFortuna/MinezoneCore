@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.skywars.GameInstance;
@@ -20,9 +20,9 @@ import anthony.skywars.GameState;
 
 public class Commands implements CommandExecutor {
 
-	private Main main;
+	private Core main;
 
-	public Commands(Main main) {
+	public Commands(Core main) {
 		this.main = main;
 	}
 
