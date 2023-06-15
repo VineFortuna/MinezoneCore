@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 
@@ -16,11 +16,11 @@ public class HealTask implements Runnable {
 	private EnderCrystal crystal;
 	private Player p;
     private int count;
-	private Main main;
+	private Core main;
     private int expired;
     private BukkitTask te;
 
-	public HealTask(Player p, EnderCrystal crystal, Main main) {
+	public HealTask(Player p, EnderCrystal crystal, Core main) {
 		this.crystal = crystal;
 		this.p = p;
         count = 0;

@@ -93,7 +93,7 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 
 import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
@@ -126,11 +126,11 @@ public class GameManager implements Listener, PluginMessageListener {
 	public static HashMap<String, Integer> playercount;
 
 	private final ProjectileManager projManager;
-	private final Main main;
+	private final Core main;
 	public GameState state;
 	public GameType gameType;
 
-	public GameManager(Main main) {
+	public GameManager(Core main) {
 		this.main = main;
 		this.playercount = new HashMap<>();
 		this.gameMap = new HashMap<>();
@@ -1303,7 +1303,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	public Main getMain() {
+	public Core getMain() {
 		return main;
 	}
 

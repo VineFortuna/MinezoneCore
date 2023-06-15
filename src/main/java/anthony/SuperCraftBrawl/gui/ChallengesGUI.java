@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -15,10 +15,10 @@ import net.md_5.bungee.api.ChatColor;
 
 public class ChallengesGUI implements InventoryProvider {
 
-	public Main main;
+	public Core main;
 	public SmartInventory inv;
 
-	public ChallengesGUI(Main main) {
+	public ChallengesGUI(Core main) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(1, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Challenges").build();
 		this.main = main;

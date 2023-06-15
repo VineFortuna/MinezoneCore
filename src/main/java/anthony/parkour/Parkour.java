@@ -15,19 +15,19 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import fr.mrmicky.fastboard.FastBoard;
 import net.md_5.bungee.api.ChatColor;
 
 public class Parkour implements Listener {
 
-	private Main main;
+	private Core main;
 	public Map<Player, Arenas> players;
 	public Map<Player, Location> checkpoint;
 	public Map<Player, Integer> checkpointNum;
 	public Map<Player, FastBoard> b;
 
-	public Parkour(Main main) {
+	public Parkour(Core main) {
 		this.main = main;
 		this.players = new HashMap<Player, Arenas>();
 		this.checkpoint = new HashMap<Player, Location>();

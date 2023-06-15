@@ -8,15 +8,15 @@ import java.sql.Statement;
 
 import org.bukkit.Bukkit;
 
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 
 public class DatabaseManager {
 	String hostName = "mysql.apexhosting.gdn:3306", username = "apexMC437310", password = "Bacau17anthony";
 	
 	private Connection c;
-	private Main main;
+	private Core main;
 	
-	public DatabaseManager(Main main) {
+	public DatabaseManager(Core main) {
 		this.main = main;
 		loadConnection();
 	}

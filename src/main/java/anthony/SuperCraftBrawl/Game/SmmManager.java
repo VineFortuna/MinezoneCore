@@ -17,7 +17,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
 import fr.mrmicky.fastboard.FastBoard;
@@ -27,20 +27,20 @@ public class SmmManager implements Listener {
 
 	// Super Minezone Maker
 
-	private final Main main;
+	private final Core main;
 	List<BukkitRunnable> runnables = new ArrayList<>();
 	private BukkitRunnable time;
 	private int ticks = 0;
 	private FastBoard board;
 	private World SmmWorld;
 
-	public SmmManager(Main main) {
+	public SmmManager(Core main) {
 		this.main = main;
 		this.main.getServer().getPluginManager().registerEvents(this, main);
 		InitialiseMap();
 	}
 
-	public Main getMain() {
+	public Core getMain() {
 		return main;
 	}
 

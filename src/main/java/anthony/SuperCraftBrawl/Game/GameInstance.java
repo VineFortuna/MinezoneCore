@@ -134,7 +134,6 @@ public class GameInstance {
 		blueTeam = new ArrayList<Player>();
 		blackTeam = new ArrayList<Player>();
 		InitialiseMap();
-		//Test line
 	}
 
 	public GameManager getManager() {

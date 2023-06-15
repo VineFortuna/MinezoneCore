@@ -25,7 +25,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import com.google.common.collect.Lists;
 
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
@@ -40,10 +40,10 @@ import anthony.SuperCraftBrawl.ranks.Rank;
 
 public class Commands implements CommandExecutor, TabCompleter {
 
-	private final Main main;
+	private final Core main;
 	public List<Player> players;
 
-	public Commands(Main main) {
+	public Commands(Core main) {
 		this.main = main;
 	}
 

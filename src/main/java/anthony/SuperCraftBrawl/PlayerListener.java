@@ -65,9 +65,9 @@ import me.itzzmic.minezone.api.PunishAPI;
 
 public class PlayerListener implements Listener {
 
-	private final Main main;
+	private final Core main;
 
-	public PlayerListener(Main main) {
+	public PlayerListener(Core main) {
 		this.main = main;
 		this.main.getServer().getPluginManager().registerEvents(this, main);
 	}

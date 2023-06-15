@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
@@ -17,7 +17,7 @@ import net.md_5.bungee.api.ChatColor;
 
 public class QuitGUI implements InventoryProvider {
 
-	public Main main;
+	public Core main;
 	public SmartInventory invQuit;
 	public GameInstance instance;
 
@@ -26,7 +26,7 @@ public class QuitGUI implements InventoryProvider {
 
 	}
 
-	public QuitGUI(Main main) {
+	public QuitGUI(Core main) {
 		invQuit = SmartInventory.builder().id("myInventory").provider(this).size(1, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Leave your game?").build();
 		this.main = main;

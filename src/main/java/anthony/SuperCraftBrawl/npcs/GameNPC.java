@@ -9,7 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import net.jitse.npclib.NPCLib;
 import net.jitse.npclib.api.NPC;
 import net.jitse.npclib.api.events.NPCInteractEvent;
@@ -18,12 +18,12 @@ import net.md_5.bungee.api.ChatColor;
 
 public class GameNPC implements Listener{
 	
-	private Main main;
+	private Core main;
 	private NPCLib npcLib;
 	
 	private NPC gameLobbyNPC;
 	
-	public GameNPC(Main main, NPC gameLobbyNPC) {
+	public GameNPC(Core main, NPC gameLobbyNPC) {
 		this.main = main;
 		this.npcLib = new NPCLib(main);
 		this.gameLobbyNPC = gameLobbyNPC;

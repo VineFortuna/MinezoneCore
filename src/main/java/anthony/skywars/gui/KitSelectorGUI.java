@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.skywars.GameInstance;
 import anthony.skywars.kits.Kit;
 import fr.minuskube.inv.ClickableItem;
@@ -19,10 +19,10 @@ import net.md_5.bungee.api.ChatColor;
 
 public class KitSelectorGUI implements InventoryProvider {
 
-	public Main main;
+	public Core main;
 	public SmartInventory inv;
 
-	public KitSelectorGUI(Main main) {
+	public KitSelectorGUI(Core main) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Kit Selector").build();
 		this.main = main;

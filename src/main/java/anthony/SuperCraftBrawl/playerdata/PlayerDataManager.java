@@ -16,16 +16,16 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.permissions.PermissionAttachment;
 
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 
 public class PlayerDataManager implements Listener {
 
-	private final Main main;
+	private final Core main;
 	private final DatabaseManager manager;
 	private HashMap<Player, PlayerData> playerData = new HashMap<>();
 	private final HashMap<Player, PermissionAttachment> perms = new HashMap<>();
 
-	public PlayerDataManager(Main main) {
+	public PlayerDataManager(Core main) {
 		this.main = main;
 		this.manager = this.main.getDatabaseManager();
 		main.getServer().getPluginManager().registerEvents(this, main);

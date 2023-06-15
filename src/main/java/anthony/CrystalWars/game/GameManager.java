@@ -12,19 +12,19 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
 import anthony.CrystalWars.game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 
 public class GameManager implements Listener {
 	
-	private Main main;
+	private Core main;
 	public Map<Maps, GameInstance> gameMap = new HashMap<Maps, GameInstance>();
 	
-	public GameManager(Main main) {
+	public GameManager(Core main) {
 		this.main = main;
 		this.main.getServer().getPluginManager().registerEvents(this, main);
 	}
 	
-	public Main getMain() {
+	public Core getMain() {
 		return this.main;
 	}
 	

@@ -13,17 +13,17 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.util.Vector;
 
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import net.md_5.bungee.api.ChatColor;
 
 public class DoubleJumpManager implements Listener {
-	private final Main main;
+	private final Core main;
 	private final HashMap<Player, DoubleJumpData> data = new HashMap<>();
 
-	public DoubleJumpManager(Main main) {
+	public DoubleJumpManager(Core main) {
 		this.main = main;
 		main.getServer().getPluginManager().registerEvents(this, main);
 	}

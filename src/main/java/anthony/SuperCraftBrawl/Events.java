@@ -22,7 +22,7 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 
 public class Events implements Listener {
 
-	private Main main;
+	private Core main;
 	private BukkitRunnable event;
 	private final Vector vec1;
 	private final Location loc1;
@@ -31,7 +31,7 @@ public class Events implements Listener {
 	private HashSet<BukkitTask> tasks;
 	private Vector vec;
 
-	public Events(Main main) {
+	public Events(Core main) {
 		this.main = main;
 		loc2 = new Location(Bukkit.getWorld("world"), 1.5, 142, 19.5);
 		tasks = new HashSet<>();

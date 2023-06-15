@@ -3,7 +3,7 @@ package anthony.SuperCraftBrawl.gui;
 import org.bukkit.entity.Player;
 
 import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
@@ -15,10 +15,10 @@ import net.md_5.bungee.api.ChatColor;
 
 public class LevelClassesGUI implements InventoryProvider {
 
-	public Main main;
+	public Core main;
 	public SmartInventory inv;
 
-	public LevelClassesGUI(Main main) {
+	public LevelClassesGUI(Core main) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Level Classes").build();
 		this.main = main;

@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Main;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -18,13 +18,13 @@ import net.md_5.bungee.api.ChatColor;
 
 public class PurchaseClassInventory implements InventoryProvider {
 
-	public Main main;
+	public Core main;
 	public SmartInventory inv;
 	private ClassType type;
 	private Player player;
 	private PlayerData data;
 
-	public PurchaseClassInventory(Main main, ClassType type, Player player) {
+	public PurchaseClassInventory(Core main, ClassType type, Player player) {
 		this.main = main;
 		this.type = type;
 		this.player = player;
