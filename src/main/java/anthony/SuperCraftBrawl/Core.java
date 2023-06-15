@@ -112,7 +112,6 @@ public class Core extends JavaPlugin implements Listener {
 	public Core() {
 		this.staffchat = new ArrayList<Player>();
 		this.globalchat = new ArrayList<Player>();
-		//comment
 	}
 
 	public void TellAll(String message) {

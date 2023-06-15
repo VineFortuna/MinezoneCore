@@ -33,9 +33,9 @@ public class DonorClassesGUI implements InventoryProvider {
 			if (type.getMinRank() == Rank.VIP) {
 				contents.set(a, b,
 						ClickableItem.of(
-								ItemHelper.setDetails(new ItemStack(type.getItem()), "" + type.getTag(),
-										"" + ChatColor.GRAY + type.getClassDesc(),
-										"" + ChatColor.YELLOW + ChatColor.BOLD + "VIP" + ChatColor.WHITE + "+ exclusive!"),
+								ItemHelper.setDetails(new ItemStack(type.getItem()), type.getTag(),
+										type.buildDescription(),
+										String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + "VIP" + ChatColor.WHITE + "+ exclusive!"),
 								e -> {
 									Rank donor = type.getMinRank();
 
