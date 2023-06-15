@@ -22,28 +22,28 @@ public class ClassSelectorGUI implements InventoryProvider{
 	            .id("myInventory")
 	            .provider(this)
 	            .size(3, 9)
-	            .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Class Selector")
+	            .title(String.valueOf(ChatColor.DARK_GRAY) + ChatColor.BOLD + "Class Selector")
 	            .build();
 		this.main = main;
 	}
 
 	@Override
 	public void init(Player player, InventoryContents contents) {
-		contents.set(1, 2, ClickableItem.of(ItemHelper.setDetails(new ItemStack (Material.DIAMOND), "" + ChatColor.YELLOW + ChatColor.BOLD + "DONOR CLASSES", "" + ChatColor.GRAY + "Purchase a rank to access Donor Classes"), e->{ 
+		contents.set(1, 2, ClickableItem.of(ItemHelper.setDetails(new ItemStack (Material.DIAMOND), String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + "DONOR CLASSES", ChatColor.GRAY + "Purchase a rank to access Donor Classes"), e->{
 			inv.close(player);
 			new DonorClassesGUI(main).inv.open(player);
 		}));
 			
-			contents.set(1, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack (Material.ENCHANTED_BOOK), "" + ChatColor.YELLOW + ChatColor.BOLD + "FREE CLASSES", "" + ChatColor.GRAY + "All the free classes!"), e->{
+			contents.set(1, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack (Material.ENCHANTED_BOOK), String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + "FREE CLASSES", ChatColor.GRAY + "All the free classes!"), e->{
 				inv.close(player);
 				new InventoryGUI(main).inv.open(player);
 			}));
 				
-				contents.set(1, 6, ClickableItem.of(ItemHelper.setDetails(new ItemStack (Material.EMERALD), "" + ChatColor.YELLOW + ChatColor.BOLD + "TOKEN CLASSES", "" + ChatColor.GRAY + "You can buy these classes with coins!"), e->{
+				contents.set(1, 6, ClickableItem.of(ItemHelper.setDetails(new ItemStack (Material.EMERALD), String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + "TOKEN CLASSES", ChatColor.GRAY + "You can buy these classes with coins!"), e->{
 					inv.close(player);
 					new TokenClassesGUI(main).inv.open(player);
 				}));
-				contents.set(2, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack (Material.NETHER_STAR), "" + ChatColor.BLUE + ChatColor.BOLD + "LEVEL CLASSES", "" + ChatColor.GRAY + "Classes that can be unlocked with Levels"), e->{
+				contents.set(2, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack (Material.NETHER_STAR), String.valueOf(ChatColor.BLUE) + ChatColor.BOLD + "LEVEL CLASSES", ChatColor.GRAY + "Classes that can be unlocked with Levels"), e->{
 					inv.close(player);
 					new LevelClassesGUI(main).inv.open(player);
 				}));

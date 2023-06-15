@@ -1,22 +1,20 @@
 package anthony.SuperCraftBrawl.gui;
 
-import java.util.Map.Entry;
-
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.Map.Entry;
 
 public class ActiveGamesGUI implements InventoryProvider {
 
@@ -39,22 +37,22 @@ public class ActiveGamesGUI implements InventoryProvider {
 			if (entry.getValue().state == GameState.WAITING) {
 				if (entry.getValue().gameStartTime != null) {
 					contents.set(count, i, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.EMERALD_BLOCK),
-							"" + ChatColor.YELLOW + ChatColor.BOLD + mapName,
-							"" + ChatColor.RESET + "Starting In: " + ChatColor.YELLOW + entry.getValue().ticksTilStart
+							String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + mapName,
+							ChatColor.RESET + "Starting In: " + ChatColor.YELLOW + entry.getValue().ticksTilStart
 									+ "s",
-							"" + ChatColor.RESET + "Players: " + ChatColor.YELLOW + entry.getValue().players.size()
+							ChatColor.RESET + "Players: " + ChatColor.YELLOW + entry.getValue().players.size()
 									+ "/" + entry.getValue().gameType.getMaxPlayers(),
-							"", "" + ChatColor.RESET + ChatColor.UNDERLINE + "Click to join!"), e -> {
+							"", String.valueOf(ChatColor.RESET) + ChatColor.UNDERLINE + "Click to join!"), e -> {
 								main.getGameManager().JoinMap(player, entry.getValue().getMap());
 								inv.close(player);
 							}));
 				} else {
 					contents.set(count, i, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.EMERALD_BLOCK),
-							"" + ChatColor.YELLOW + ChatColor.BOLD + mapName,
-							"" + ChatColor.YELLOW + "Waiting for Players",
-							"" + ChatColor.RESET + "Players: " + ChatColor.YELLOW + entry.getValue().players.size()
+							String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + mapName,
+							ChatColor.YELLOW + "Waiting for Players",
+							ChatColor.RESET + "Players: " + ChatColor.YELLOW + entry.getValue().players.size()
 									+ "/" + entry.getValue().gameType.getMaxPlayers(),
-							"", "" + ChatColor.RESET + ChatColor.UNDERLINE + "Click to join!"), e -> {
+							"", String.valueOf(ChatColor.RESET) + ChatColor.UNDERLINE + "Click to join!"), e -> {
 								main.getGameManager().JoinMap(player, entry.getValue().getMap());
 								inv.close(player);
 							}));
@@ -62,11 +60,11 @@ public class ActiveGamesGUI implements InventoryProvider {
 			} else if (entry.getValue().state == GameState.STARTED) {
 				String state = "In Progress";
 				contents.set(count, i, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER),
-						"" + ChatColor.YELLOW + ChatColor.BOLD + mapName, "" + ChatColor.GREEN + state,
-						"" + ChatColor.RESET + "Players: " + ChatColor.YELLOW + entry.getValue().players.size() + "/"
+						String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + mapName, ChatColor.GREEN + state,
+						ChatColor.RESET + "Players: " + ChatColor.YELLOW + entry.getValue().players.size() + "/"
 								+ entry.getValue().gameType.getMaxPlayers(),
-						"" + ChatColor.RESET + "Spectators: " + ChatColor.YELLOW + entry.getValue().spectators.size(),
-						"", "" + ChatColor.RESET + ChatColor.UNDERLINE + "Click to spectate!"), e -> {
+						ChatColor.RESET + "Spectators: " + ChatColor.YELLOW + entry.getValue().spectators.size(),
+						"", String.valueOf(ChatColor.RESET) + ChatColor.UNDERLINE + "Click to spectate!"), e -> {
 							main.getGameManager().SpectatorJoinMap(player, entry.getValue().getMap());
 							inv.close(player);
 						}));
