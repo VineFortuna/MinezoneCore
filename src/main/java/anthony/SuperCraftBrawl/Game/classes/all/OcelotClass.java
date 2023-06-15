@@ -1,0 +1,132 @@
+package anthony.SuperCraftBrawl.Game.classes.all;
+
+import java.lang.reflect.Field;
+import java.util.UUID;
+
+import org.bukkit.Color;
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+
+import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import net.md_5.bungee.api.ChatColor;
+
+public class OcelotClass extends BaseClass {
+
+	public OcelotClass(GameInstance instance, Player player) {
+		super(instance, player);
+	}
+
+	@Override
+	public ClassType getType() {
+		return ClassType.Ocelot;
+	}
+
+	public ItemStack makeYellow(ItemStack armor) {
+		LeatherArmorMeta lm = (LeatherArmorMeta) armor.getItemMeta();
+		lm.setColor(Color.YELLOW);
+		armor.setItemMeta(lm);
+		return armor;
+	}
+
+	@Override
+	public void SetArmour(EntityEquipment playerEquip) {
+		String skullOwner = "3e668180-5fcc-5653-81e6-561c2df877d9";
+		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjU0ODM1MTlhYmY1MjM0MGNmM2FkOTNlNTE3NTY4YWQyNzZhZWFhMTg1OGZlMzNjNzdkOTM1M2Q5NzYwZDkwNSJ9fX0=";
+		ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+		SkullMeta meta = (SkullMeta) skull.getItemMeta();
+		GameProfile profile = new GameProfile(UUID.fromString(skullOwner), null);
+		profile.getProperties().put("textures", new Property("textures", texture));
+		Field profileField = null;
+
+		try {
+			profileField = meta.getClass().getDeclaredField("profile");
+			profileField.setAccessible(true);
+			profileField.set(meta, profile);
+		} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
+			e.printStackTrace();
+		}
+
+		skull.setItemMeta(meta);
+		playerEquip.setHelmet(skull);
+		playerEquip.setChestplate(makeYellow(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
+				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+		playerEquip.setLeggings(makeYellow(new ItemStack(Material.LEATHER_LEGGINGS)));
+		playerEquip.setBoots(makeYellow(
+				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+
+	}
+
+	@Override
+	public void SetNameTag() {
+
+	}
+
+	@SuppressWarnings("unlikely-arg-type")
+	@Override
+	public void Tick(int gameTicks) {
+		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
+			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+	}
+
+	@Override
+	public void SetItems(Inventory playerInv) {
+		playerInv.setItem(0, this.getAttackWeapon());
+		playerInv.setItem(1,
+				ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
+						instance.getManager().getMain().color("&7&lPurr Attack"), "",
+						"" + ChatColor.RESET + "Right click to effect players with:",
+						instance.getManager().getMain().color("   &r10 sec Slowness II")));
+	}
+
+	@Override
+	public void UseItem(PlayerInteractEvent event) {
+		ItemStack item = event.getItem();
+
+		if (item != null) {
+			if (item.getType() == Material.DIAMOND
+					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+				int amount = item.getAmount();
+				player.sendMessage(instance.getManager().getMain()
+						.color("&r&l(!) &rYou attacked all players with &7&lPurr Attack"));
+				for (Player gamePlayer : instance.players) {
+					if (player != gamePlayer) {
+						if (amount > 0) {
+							gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 200, 1));
+							gamePlayer.sendMessage(instance.getManager().getMain()
+									.color("&r&l(!) &rYou were attacked by &7&lPurr Attack"));
+						}
+					}
+				}
+				amount--;
+				if (amount == 0)
+					player.getInventory().clear(player.getInventory().getHeldItemSlot());
+			}
+		}
+	}
+
+	@Override
+	public ItemStack getAttackWeapon() {
+		ItemStack item = ItemHelper.addEnchant(
+				ItemHelper.addEnchant(new ItemStack(Material.RAW_FISH), Enchantment.DAMAGE_ALL, 3),
+				Enchantment.KNOCKBACK, 2);
+		return item;
+	}
+
+}
