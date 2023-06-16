@@ -97,13 +97,13 @@ public enum ClassType {
 	private int level = 0;
 	private Rank donor;
 
-	private ClassType(int id, int tokenCost, int level) {
+	ClassType(int id, int tokenCost, int level) {
 		this.id = id;
 		this.tokenCost = tokenCost;
 		this.level = level;
 	}
 
-	private ClassType(int id, int tokenCost, Rank donor) {
+	ClassType(int id, int tokenCost, Rank donor) {
 		this.id = id;
 		this.tokenCost = tokenCost;
 		this.donor = donor;
