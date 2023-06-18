@@ -76,7 +76,7 @@ import net.minecraft.server.v1_8_R3.WorldServer;
 
 public class Core extends JavaPlugin implements Listener {
 
-	static Plugin plugin;
+	static Core plugin;
 
 	public GameManager gameManager;
 	public InventoryGUI inventoryGUI;
@@ -113,6 +113,8 @@ public class Core extends JavaPlugin implements Listener {
 		this.staffchat = new ArrayList<Player>();
 		this.globalchat = new ArrayList<Player>();
 	}
+
+	public static Core inst(){ return plugin; }
 
 	public void TellAll(String message) {
 		for (Player staff : staffchat)
