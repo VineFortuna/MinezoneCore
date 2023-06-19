@@ -105,7 +105,7 @@ public class GameInstance {
 	public boolean wagers = false;
 
 	private int gameTime = 0;
-	
+
 	public Player firstBlood;
 
 	// Constructors:
@@ -757,12 +757,14 @@ public class GameInstance {
 	@SuppressWarnings("deprecation")
 	public void sendScoreboardUpdate(Player player) {
 		if (map != null) {
-			//Tab organization.
+			// Tab organization.
 			for (Player pl : Bukkit.getOnlinePlayers()) {
 				StringBuilder teamName = new StringBuilder();
 				Rank r = gameManager.getMain().getRankManager().getRank(player);
-				if(r == null) teamName.append(Rank.values().length);
-				else teamName.append(r.getTabListIndex());
+				if (r == null)
+					teamName.append(Rank.values().length);
+				else
+					teamName.append(r.getTabListIndex());
 				teamName.append("_").append(r);
 
 				Scoreboard board = pl.getScoreboard();
@@ -779,8 +781,10 @@ public class GameInstance {
 			for (Player pl : Bukkit.getOnlinePlayers()) {
 				StringBuilder teamName = new StringBuilder();
 				Rank r = gameManager.getMain().getRankManager().getRank(player);
-				if(r == null) teamName.append(Rank.values().length);
-				else teamName.append(r.getTabListIndex());
+				if (r == null)
+					teamName.append(Rank.values().length);
+				else
+					teamName.append(r.getTabListIndex());
 				teamName.append("_").append(r);
 
 				Scoreboard board = pl.getScoreboard();
@@ -1508,7 +1512,7 @@ public class GameInstance {
 						data.wins += 1;
 						data.winstreak += 1;
 						data.exp += 113;
-						
+
 						if (data.exp >= 2500) {
 							data.level++;
 							data.exp -= 2500;
@@ -1533,11 +1537,10 @@ public class GameInstance {
 								+ (baseClass.totalKills * 2) + " Tokens");
 						baseClass.totalTokens += baseClass.totalKills;
 					}
-					
+
 					if (this.firstBlood == winner) {
-						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
-								+ ChatColor.BOLD + "  First Blood: " + ChatColor.RESET
-								+ "10 Tokens");
+						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE + ChatColor.BOLD
+								+ "  First Blood: " + ChatColor.RESET + "10 Tokens");
 						data3.tokens += 10;
 					}
 
@@ -1581,11 +1584,10 @@ public class GameInstance {
 								+ (baseClass.totalKills * 2) + " Tokens");
 						baseClass.totalTokens += baseClass.totalKills;
 					}
-					
+
 					if (this.firstBlood == winner) {
-						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
-								+ ChatColor.BOLD + "  First Blood: " + ChatColor.RESET
-								+ "10 Tokens");
+						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE + ChatColor.BOLD
+								+ "  First Blood: " + ChatColor.RESET + "10 Tokens");
 						data3.tokens += 10;
 					}
 
