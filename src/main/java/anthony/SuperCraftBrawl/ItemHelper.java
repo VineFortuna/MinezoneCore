@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.scoreboard.DisplaySlot;
 
 import java.util.Arrays;
 import java.util.List;
@@ -92,6 +93,21 @@ public class ItemHelper {
 		} else {
 			meta.removeEnchant(Enchantment.DURABILITY);
 			meta.removeItemFlags(ItemFlag.HIDE_ENCHANTS);
+		}
+		item.setItemMeta(meta);
+		return item;
+	}
+
+	public static ItemStack setHideFlags(ItemStack item, boolean hide) {
+		if (item == null)
+			return null;
+		ItemMeta meta = item.getItemMeta();
+		if (meta == null)
+			return item;
+		if (hide) {
+			meta.addItemFlags(ItemFlag.values());
+		} else {
+			meta.removeItemFlags(ItemFlag.values());
 		}
 		item.setItemMeta(meta);
 		return item;

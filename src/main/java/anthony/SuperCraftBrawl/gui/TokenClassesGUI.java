@@ -32,8 +32,8 @@ public class TokenClassesGUI implements InventoryProvider {
 		for (ClassType type : ClassType.values()) {
 			if (type.getTokenCost() > 0) {
 				contents.set(a, b, ClickableItem.of(
-						ItemHelper.setDetails(type.getItem(), type.getTag(),
-								"" + ChatColor.GRAY + type.getClassDesc(), "",
+						ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true), type.getTag(),
+								type.buildDescription(), "",
 								playerData.isPurchased(type)
 										? "" + ChatColor.YELLOW + ChatColor.BOLD + "Purchased"
 										: "" + ChatColor.RESET + type.getTokenCost() + ChatColor.YELLOW + " tokens"),
