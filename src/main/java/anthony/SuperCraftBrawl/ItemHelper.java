@@ -26,7 +26,7 @@ public class ItemHelper {
 	public static ItemStack setDetails(ItemStack item, String name, List<String> lore, String... addon) {
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(name);
-		if(addon != null) lore.addAll(Arrays.asList(addon));
+		if(addon != null && !addon[0].isEmpty()) lore.addAll(Arrays.asList(addon));
 		im.setLore(lore);
 		item.setItemMeta(im);
 		return item;
