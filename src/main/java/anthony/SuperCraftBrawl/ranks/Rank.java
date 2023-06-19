@@ -119,10 +119,10 @@ public enum Rank {
             case SENIOR_MODERATOR: return 7;
             case STAFF_MANAGER: return 8;
             case SUPREME: return 9;
-            case QA: return 10;
-            case CAPTAIN: return 11;
-            case VIP: return 12;
-            case MODERATOR: return 13;
+            case MODERATOR: return 10;
+            case QA: return 11;
+            case CAPTAIN: return 12;
+            case VIP: return 13;
             case PARTNER: return 14;
             case TRAINEE: return 15;
         }
