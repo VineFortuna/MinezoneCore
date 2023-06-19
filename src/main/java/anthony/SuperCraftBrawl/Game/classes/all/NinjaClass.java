@@ -33,6 +33,10 @@ public class NinjaClass extends BaseClass {
 
 	private Cooldown shurikenCooldown = new Cooldown(200);
 	private int cooldownSec;
+	private int regenStars = 0;
+	private int starsCooldown = 0;
+	private boolean usedAllStars = false;
+	private ItemStack barrier = new ItemStack(Material.BARRIER);
 
 	public NinjaClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -84,6 +88,9 @@ public class NinjaClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
+		this.regenStars = 0;
+		this.starsCooldown = 0;
+		this.usedAllStars = false;
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv
 				.setItem(1,
@@ -111,9 +118,27 @@ public class NinjaClass extends BaseClass {
 	public void Tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getLives() > 0) {
 			if (gameTicks % 20 == 0) {
-				int number = getNumberOfShurikens();
-				if (number < 5)
-					player.getInventory().addItem(getShuriken());
+				if (this.starsCooldown != 0) {
+					this.starsCooldown--;
+				} else {
+					if (this.usedAllStars == true && this.starsCooldown == 0) {
+						if (this.regenStars != 5) {
+							player.getInventory().remove(this.barrier);
+							player.getInventory().addItem(getShuriken());
+							this.regenStars++;
+						} else {
+							this.usedAllStars = false;
+							this.regenStars = 0;
+							this.starsCooldown = 0;
+						}
+					}
+				}
+				if (this.usedAllStars == false && player.getInventory().getItem(2) == null
+						|| player.getInventory().getItem(1).getType() == Material.AIR) {
+					this.usedAllStars = true;
+					player.getInventory().setItem(2, this.barrier);
+					this.starsCooldown = 3;
+				}
 			}
 
 			if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Ninja
