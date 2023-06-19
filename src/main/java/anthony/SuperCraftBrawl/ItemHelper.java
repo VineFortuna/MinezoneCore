@@ -15,8 +15,13 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ItemHelper {
+<<<<<<< HEAD
 	public static ItemStack setDetails(ItemStack item, String name, String... lore) {
 		return setDetails(item, name, new ArrayList<>(Arrays.asList(lore)));
+=======
+	public static ItemStack setDetails(ItemStack item, String name, String...lore) {
+		return setDetails(item, name, lore == null || lore[0].isEmpty() ? null : Arrays.asList(lore));
+>>>>>>> 50718263984ef4626465a4805db7ceaedcf0d87b
 	}
 
 	public static ItemStack setDetails(ItemStack item, String name, List<String> lore) {
