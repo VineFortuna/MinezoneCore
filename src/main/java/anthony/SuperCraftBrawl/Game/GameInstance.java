@@ -185,7 +185,6 @@ public class GameInstance {
 		return state == GameState.WAITING && this.players.size() < gameType.getMaxPlayers();
 	}
 
-	@EventHandler
 	public void SendPlayerToMap(Player player) {
 		player.teleport(GetLobbyLoc());
 	}
