@@ -1325,11 +1325,18 @@ public class Core extends JavaPlugin implements Listener {
 
 	@SuppressWarnings("deprecation")
 	public void sendScoreboardUpdate(Player player) {
+		//Organized tab list
 		for (Player pl : Bukkit.getOnlinePlayers()) {
+			StringBuilder teamName = new StringBuilder();
+			Rank r = gameManager.getMain().getRankManager().getRank(player);
+			if(r == null) teamName.append(Rank.values().length);
+			else teamName.append(r.getTabListIndex());
+			teamName.append("_").append(r);
+
 			Scoreboard board = pl.getScoreboard();
-			Team team = board.getTeam(player.getName());
+			Team team = board.getTeam(teamName.toString());
 			if (team == null) {
-				team = board.registerNewTeam(player.getName());
+				team = board.registerNewTeam(teamName.toString());
 				team.addPlayer(player);
 			}
 
