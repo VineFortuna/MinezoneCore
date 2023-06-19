@@ -33,8 +33,8 @@ public class LevelClassesGUI implements InventoryProvider {
 
 		for (ClassType type : ClassType.values()) {
 			if (type.getTokenCost() == 0 && type.getMinRank() != Rank.VIP && type.getLevel() > 0) {
-				contents.set(a, b, ClickableItem.of(ItemHelper.setDetails(type.getItem(), type.getTag(),
-						"" + ChatColor.GRAY + type.getClassDesc(), "",
+				contents.set(a, b, ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true), type.getTag(),
+						type.buildDescription(), "",
 						playerData.level >= type.getLevel() ? "" + ChatColor.YELLOW + ChatColor.BOLD + "Unlocked"
 								: "" + ChatColor.RED + ChatColor.BOLD + "Unlocks at: " + ChatColor.YELLOW
 										+ ChatColor.BOLD + "Level " + type.getLevel()),

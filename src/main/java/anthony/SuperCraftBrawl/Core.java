@@ -307,6 +307,9 @@ public class Core extends JavaPlugin implements Listener {
 		runnable.runTaskTimer(this, 0, 6000);
 	}
 
+	//For tab organization.
+	private Scoreboard lobbyScoreBoard;
+
 	@Override
 	public void onEnable() {
 		plugin = this;
@@ -331,6 +334,7 @@ public class Core extends JavaPlugin implements Listener {
 		lobbyWorld = getServer().createWorld(new WorldCreator("lobby-1")); //Game servers
 		//lobbyWorld = getServer().createWorld(new WorldCreator("lobbies")); //Hub server
 		// getServer().createWorld(new WorldCreator("name"));
+		lobbyScoreBoard = Bukkit.getScoreboardManager().getNewScoreboard();
 
 		for (Player onlinePlayer : this.getServer().getOnlinePlayers())
 			this.ResetPlayer(onlinePlayer);
@@ -1357,6 +1361,8 @@ public class Core extends JavaPlugin implements Listener {
 		Player p = e.getPlayer();
 		String pName = p.getName();
 		p.setGameMode(GameMode.ADVENTURE);
+		//For tab organization.
+		p.setScoreboard(lobbyScoreBoard);
 		sendScoreboardUpdate(p);
 		// Message to send the server on join
 		e.setJoinMessage("" + ChatColor.BOLD + "[" + ChatColor.YELLOW + ChatColor.BOLD + "+" + ChatColor.RESET
