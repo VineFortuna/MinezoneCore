@@ -20,7 +20,7 @@ public class ChallengesGUI implements InventoryProvider {
 
 	public ChallengesGUI(Core main) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(1, 9)
-				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Challenges").build();
+				.title(String.valueOf(ChatColor.DARK_GRAY) + ChatColor.BOLD + "Challenges").build();
 		this.main = main;
 	}
 
