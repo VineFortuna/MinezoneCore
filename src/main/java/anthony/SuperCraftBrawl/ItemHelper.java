@@ -9,14 +9,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.PotionMeta;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class ItemHelper {
 	public static ItemStack setDetails(ItemStack item, String name, String...lore) {
-		return setDetails(item, name, Arrays.asList(lore));
+		return setDetails(item, name, new ArrayList<>(Arrays.asList(lore)));
 	}
 
 	public static ItemStack setDetails(ItemStack item, String name, List<String> lore) {
