@@ -437,11 +437,11 @@ public enum DuosMaps {
 			.setBounds(new Vector(4930.428, 160, 772.552), 60, 40)),
 
 	ColdWar("ColdWar", new MapInstance("coldwar")
-			.setSpawnPos(new Vector(4901.417, 158, 684.515), new Vector(4965.542, 159, 699.440),
-					new Vector(4966.426, 169, 699.505), new Vector(4959.482, 157, 741.519),
-					new Vector(4933.387, 158, 709.934))
-			.setLobbyLoc(new Vector(4931.475, 159, 624.508)).setSpecLoc(new Vector(4933.500, 175, 710.500))
-			.setBounds(new Vector(4931.500, 177, 708.500), 50, 50)),
+			.setSpawnPos(new Vector(1037.504, 152, 700.492), new Vector(1031.507, 150, 743.491),
+					new Vector(991.467, 151, 719.530), new Vector(1004.478, 151, 711.965),
+					new Vector(971.422, 151, 685.513))
+			.setLobbyLoc(new Vector(1002.428, 152, 626.585)).setSpecLoc(new Vector(1000.500, 162, 706.500))
+			.setBounds(new Vector(1000.500, 162, 706.500), 60, 50)),
 
 	WinterWorld("WinterWorld",
 			new MapInstance("winterworld")

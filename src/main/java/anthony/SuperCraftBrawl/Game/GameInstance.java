@@ -105,6 +105,8 @@ public class GameInstance {
 	public boolean wagers = false;
 
 	private int gameTime = 0;
+	
+	public Player firstBlood;
 
 	// Constructors:
 	public GameInstance(GameManager gameManager, Maps map) {
@@ -115,6 +117,7 @@ public class GameInstance {
 		this.players = new ArrayList<Player>();
 		this.winnerList = new ArrayList<Player>();
 		this.spectators = new ArrayList<Player>();
+		this.firstBlood = null;
 		classes = new HashMap<>();
 		oldClasses = new HashMap<>();
 		InitialiseMap();
@@ -128,6 +131,7 @@ public class GameInstance {
 		this.players = new ArrayList<Player>();
 		this.winnerList = new ArrayList<Player>();
 		this.spectators = new ArrayList<Player>();
+		this.firstBlood = null;
 		classes = new HashMap<>();
 		oldClasses = new HashMap<>();
 		team = new HashMap<Player, String>();
@@ -1431,13 +1435,6 @@ public class GameInstance {
 			data3 = gameManager.getMain().getDataManager().getPlayerData(winner);
 			winnerList.add(winner);
 			if (data3 != null) {
-				if (data3.exp >= 2500) {
-					data3.level++;
-					data3.exp -= 2500;
-					winner.sendMessage(getManager().getMain().color("&e&lLEVEL UPGRADED!"));
-					winner.sendMessage("You are now Level: " + data3.level + "!");
-				}
-
 				BaseClass bc = classes.get(winner);
 				if (data3.challenge1 == 0) {
 					if (bc != null) {
@@ -1511,6 +1508,13 @@ public class GameInstance {
 						data.wins += 1;
 						data.winstreak += 1;
 						data.exp += 113;
+						
+						if (data.exp >= 2500) {
+							data.level++;
+							data.exp -= 2500;
+							winner.sendMessage(getManager().getMain().color("&e&lLEVEL UPGRADED!"));
+							winner.sendMessage("You are now Level: " + data.level + "!");
+						}
 					}
 					baseClass.totalExp += 113;
 
@@ -1520,7 +1524,7 @@ public class GameInstance {
 					winner.sendMessage("" + ChatColor.BOLD + "||");
 					winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.YELLOW + ChatColor.BOLD
 							+ "  GAME WON");
-					winner.sendMessage("        " + "  1st Place: 10 Tokens");
+					winner.sendMessage("        " + "     Placed: #1: 10 Tokens");
 					baseClass.totalTokens += 10;
 
 					if (baseClass.totalKills >= 0) {
@@ -1528,6 +1532,13 @@ public class GameInstance {
 								+ "  " + baseClass.totalKills + " Kills: " + ChatColor.RESET + ChatColor.YELLOW
 								+ (baseClass.totalKills * 2) + " Tokens");
 						baseClass.totalTokens += baseClass.totalKills;
+					}
+					
+					if (this.firstBlood == winner) {
+						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
+								+ ChatColor.BOLD + "  First Blood: " + ChatColor.RESET
+								+ "10 Tokens");
+						data3.tokens += 10;
 					}
 
 					if (winner.hasPermission("scb.rankBonusOne")) {
@@ -1562,13 +1573,20 @@ public class GameInstance {
 					winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.YELLOW + ChatColor.BOLD
 							+ "  GAME WON");
 					winner.sendMessage("" + ChatColor.BOLD + "||");
-					winner.sendMessage("        " + "  1st Place: 10 Tokens");
+					winner.sendMessage("        " + "     Placed: #1: 10 Tokens");
 
 					if (baseClass.totalKills >= 0) {
 						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE + ChatColor.BOLD
 								+ "  " + baseClass.totalKills + " Kills: " + ChatColor.RESET + ChatColor.YELLOW
 								+ (baseClass.totalKills * 2) + " Tokens");
 						baseClass.totalTokens += baseClass.totalKills;
+					}
+					
+					if (this.firstBlood == winner) {
+						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
+								+ ChatColor.BOLD + "  First Blood: " + ChatColor.RESET
+								+ "10 Tokens");
+						data3.tokens += 10;
 					}
 
 					winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BOLD + "  Flawless Win: "
