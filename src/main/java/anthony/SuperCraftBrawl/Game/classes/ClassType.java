@@ -73,6 +73,9 @@ import anthony.SuperCraftBrawl.Game.classes.all.ZombieVillagerClass;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import net.md_5.bungee.api.ChatColor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum ClassType {
 
 	Cactus(1, 0, 0), TNT(2, 350, 0), Enderdragon(3, 0, Rank.VIP), Skeleton(4, 0, 0), Ninja(5, 1000, 0),
@@ -94,13 +97,13 @@ public enum ClassType {
 	private int level = 0;
 	private Rank donor;
 
-	private ClassType(int id, int tokenCost, int level) {
+	ClassType(int id, int tokenCost, int level) {
 		this.id = id;
 		this.tokenCost = tokenCost;
 		this.level = level;
 	}
 
-	private ClassType(int id, int tokenCost, Rank donor) {
+	ClassType(int id, int tokenCost, Rank donor) {
 		this.id = id;
 		this.tokenCost = tokenCost;
 		this.donor = donor;
@@ -547,6 +550,26 @@ public enum ClassType {
 
 	public String color(String c) {
 		return ChatColor.translateAlternateColorCodes('&', c);
+	}
+
+	public List<String> buildDescription(){
+		String text = getClassDesc();
+		if(text == null) return null;
+		final int maxLength = 30;
+
+		String[] split = text.split(" ");
+		List<String> lines = new ArrayList<>();
+		StringBuilder current = new StringBuilder();
+		for (String word : split) {
+			if (current.length() + word.length() + 1 <= maxLength) {
+				current.append(word).append(' ');
+			} else {
+				if(current.length() > 0) lines.add(ChatColor.GRAY + current.substring(0, current.length() - 1));
+				current = new StringBuilder(word).append(' ');
+			}
+		}
+		if (current.length() > 0) lines.add(ChatColor.GRAY + current.substring(0, current.length() - 1));
+		return lines;
 	}
 
 	public String getTag() {

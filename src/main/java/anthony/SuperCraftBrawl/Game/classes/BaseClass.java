@@ -84,13 +84,14 @@ public abstract class BaseClass {
 	public Timer mythicalGift = new Timer();
 	public Timer wizard = new Timer();
 	public boolean bedrockInvincibility = false;
-
+	
 	public int goldAmt = 0; // For Steve Class
 	public int coalAmt = 0; // For Steve Class
 	public int diaAmt = 0; // For Steve Class
 
 	public Player bountyTarget = null;
 
+	//This would also take in a SuperClass.
 	public BaseClass(GameInstance instance, Player player) {
 		this.instance = instance;
 		this.player = player;
