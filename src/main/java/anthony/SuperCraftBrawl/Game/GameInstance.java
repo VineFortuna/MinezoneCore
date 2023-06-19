@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import anthony.SuperCraftBrawl.Core;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -65,10 +66,10 @@ import net.md_5.bungee.api.ChatColor;
 public class GameInstance {
 
 	// Variables
-	private GameManager gameManager;
+	private final GameManager gameManager;
 	public Objective livesObjective;
 	public GameType gameType;
-	private Random random = new Random();
+	private final Random random = new Random();
 	private Maps map;
 	public DuosMaps duosMap;
 	private World mapWorld;
@@ -81,9 +82,9 @@ public class GameInstance {
 	public HashMap<Player, BaseClass> oldClasses;
 	public List<Player> playerPosition = new ArrayList<>();
 	public HashMap<Player, FastBoard> boards = new HashMap();
-	private HashMap<Player, ClassType> classSelection = new HashMap<>();
+	private final HashMap<Player, ClassType> classSelection = new HashMap<>();
 	public HashMap<Player, Timer> cooldowns = new HashMap<Player, Timer>();
-	private List<Player> winnerList;
+	private final List<Player> winnerList;
 	public BukkitRunnable gameStartTime;
 	public int ticksTilStart = 30;
 	List<BukkitRunnable> runnables = new ArrayList<>();
@@ -201,7 +202,7 @@ public class GameInstance {
 				player.teleport(GetSpecLoc());
 				gameManager.getMain().board.get(player).delete();
 				setGameScore(player);
-				player.setDisplayName("" + player.getName() + " " + ChatColor.RESET + ChatColor.GRAY + ChatColor.ITALIC
+				player.setDisplayName(player.getName() + " " + ChatColor.RESET + ChatColor.GRAY + ChatColor.ITALIC
 						+ "Spectator" + ChatColor.RESET);
 				return GameReason.SPECTATOR;
 			} else
@@ -215,7 +216,7 @@ public class GameInstance {
 		boards.put(player, board);
 
 		if (map != null) {
-			board.updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD + map.toString()
+			board.updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD + map
 					+ (map.GetInstance().gameType == GameType.FRENZY
 							? "" + ChatColor.GRAY + ChatColor.ITALIC + " (frenzy)"
 							: ""));
@@ -387,7 +388,6 @@ public class GameInstance {
 		return ticksTilStart = 60;
 	}
 
-	@EventHandler
 	public void StartGameTimer(Player player) {
 		if (gameStartTime == null) {
 			ticksTilStart = getSecondsUntilStart();
@@ -757,11 +757,18 @@ public class GameInstance {
 	@SuppressWarnings("deprecation")
 	public void sendScoreboardUpdate(Player player) {
 		if (map != null) {
+			//Tab organization.
 			for (Player pl : Bukkit.getOnlinePlayers()) {
+				StringBuilder teamName = new StringBuilder();
+				Rank r = gameManager.getMain().getRankManager().getRank(player);
+				if(r == null) teamName.append(Rank.values().length);
+				else teamName.append(r.getTabListIndex());
+				teamName.append("_").append(r);
+
 				Scoreboard board = pl.getScoreboard();
-				Team team = board.getTeam(player.getName());
+				Team team = board.getTeam(teamName.toString());
 				if (team == null) {
-					team = board.registerNewTeam(player.getName());
+					team = board.registerNewTeam(teamName.toString());
 					team.addPlayer(player);
 				}
 				BaseClass baseClass = classes.get(player);
@@ -770,10 +777,16 @@ public class GameInstance {
 			}
 		} else {
 			for (Player pl : Bukkit.getOnlinePlayers()) {
+				StringBuilder teamName = new StringBuilder();
+				Rank r = gameManager.getMain().getRankManager().getRank(player);
+				if(r == null) teamName.append(Rank.values().length);
+				else teamName.append(r.getTabListIndex());
+				teamName.append("_").append(r);
+
 				Scoreboard board = pl.getScoreboard();
-				Team team = board.getTeam(player.getName());
+				Team team = board.getTeam(teamName.toString());
 				if (team == null) {
-					team = board.registerNewTeam(player.getName());
+					team = board.registerNewTeam(teamName.toString());
 					team.addPlayer(player);
 				}
 			}
