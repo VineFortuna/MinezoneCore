@@ -1,13 +1,19 @@
 package anthony.SuperCraftBrawl.Game.classes.killercreepr;
 
+import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.ItemHelper;
 import com.avaje.ebean.validation.NotNull;
-import org.bukkit.Color;
-import org.bukkit.Material;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.util.Vector;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +21,11 @@ import java.util.Map;
 public class ExampleAnvilSuperClass extends SuperClass{
     public ExampleAnvilSuperClass() {
         super("anvil", 100);
+    }
+
+    @Override
+    public ClassInstance buildInstance(GameInstance gameInstance, Player p) {
+        return super.buildInstance(gameInstance, p);
     }
 
     @NotNull

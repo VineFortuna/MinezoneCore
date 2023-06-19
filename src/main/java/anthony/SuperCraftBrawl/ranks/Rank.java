@@ -85,16 +85,16 @@ public enum Rank {
      */
     SUPREME(17, color("&5&lSUPREME")); //UNRELEASED DONATION ROLE ;)
 
-    private int roleID;
-    private String tag;
+    private final int roleID;
+    private final String tag;
 
-    private Rank(int roleID, String tag) {
+    Rank(int roleID, String tag) {
         this.roleID = roleID; //CONSTRUCTOR
         this.tag = tag;
     }
     
     private static String color(String s) {
-    	return ChatColor.translateAlternateColorCodes('&', s);
+        return ChatColor.translateAlternateColorCodes('&', s);
     }
 
     public int getRoleID() { //ROLE ID
@@ -103,6 +103,30 @@ public enum Rank {
 
     public String getTag() { //TAG
         return tag;
+    }
+
+    public int getTabListIndex(){
+        //Lower numbers will show higher up in the tab list
+        switch (this){
+            case DEFAULT: return Rank.values().length;
+            case OWNER: return 0;
+            case ADMIN: return 1;
+            case DIRECTOR: return 2;
+            case DEVELOPER: return 3;
+            case BUILDER: return 4;
+            case MEDIA: return 5;
+            case SUPERVISOR: return 6;
+            case SENIOR_MODERATOR: return 7;
+            case STAFF_MANAGER: return 8;
+            case SUPREME: return 9;
+            case QA: return 10;
+            case CAPTAIN: return 11;
+            case VIP: return 12;
+            case MODERATOR: return 13;
+            case PARTNER: return 14;
+            case TRAINEE: return 15;
+        }
+        return 0;
     }
 
     public String getTagWithSpace() {
