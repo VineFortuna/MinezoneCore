@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -46,6 +47,11 @@ public class PlayerDataManager implements Listener {
 	public PlayerData getPlayerData(Player player) {
 		return playerData.get(player);
 	}
+	
+	public PlayerData getOffPlayerData(OfflinePlayer player) {
+		return playerData.get(player);
+	}
+
 
 	public boolean loadPlayer(Player player) {
 		try {
