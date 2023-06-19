@@ -122,10 +122,10 @@ public class SkeletonClass extends BaseClass {
 	@Override
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper
-				.addEnchant(ItemHelper.addEnchant(
+				.addEnchant(ItemHelper.addEnchant(ItemHelper.addEnchant(
 						ItemHelper.setDetails(new ItemStack(Material.BOW), ChatColor.GRAY + "Skeleton Bow",
 								ChatColor.GRAY + "", ChatColor.YELLOW + "Snipe your enemies with this!"),
-						Enchantment.ARROW_INFINITE, 1), Enchantment.DURABILITY, 10000);
+						Enchantment.ARROW_INFINITE, 1), Enchantment.DURABILITY, 10000), Enchantment.ARROW_KNOCKBACK, 1);
 		return item;
 	}
 

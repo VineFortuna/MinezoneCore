@@ -1,5 +1,5 @@
 name: MinezoneCore
-main: anthony.SuperCraftBrawl.Main
+main: anthony.SuperCraftBrawl.Core
 version: 1.0
 commands:
    join:
