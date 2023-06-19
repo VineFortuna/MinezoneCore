@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ItemHelper {
-	public static ItemStack setDetails(ItemStack item, String name, String...lore) {
+	public static ItemStack setDetails(ItemStack item, String name, String... lore) {
 		return setDetails(item, name, new ArrayList<>(Arrays.asList(lore)));
 	}
 
@@ -26,7 +26,8 @@ public class ItemHelper {
 	public static ItemStack setDetails(ItemStack item, String name, List<String> lore, String... addon) {
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(name);
-		if(addon != null) lore.addAll(Arrays.asList(addon));
+		if (addon != null)
+			lore.addAll(Arrays.asList(addon));
 		im.setLore(lore);
 		item.setItemMeta(im);
 		return item;
@@ -37,47 +38,59 @@ public class ItemHelper {
 		return item;
 	}
 
-	//killercreepr
-	public static ItemStack create(Material mat){ return new ItemStack(mat); }
-	public static ItemStack create(Material mat, String name){
+	// killercreepr
+	public static ItemStack create(Material mat) {
+		return new ItemStack(mat);
+	}
+
+	public static ItemStack create(Material mat, String name) {
 		ItemStack item = create(mat);
 		ItemMeta meta = item.getItemMeta();
-		if(meta == null) return item;
+		if (meta == null)
+			return item;
 		meta.setDisplayName(name);
 		item.setItemMeta(meta);
 		return item;
 	}
-	public static ItemStack create(Material mat, String name, List<String> lore){
+
+	public static ItemStack create(Material mat, String name, List<String> lore) {
 		ItemStack item = create(mat, name);
 		ItemMeta meta = item.getItemMeta();
-		if(meta == null) return item;
+		if (meta == null)
+			return item;
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		return item;
 	}
 
-	public static ItemStack create(Material mat, String name, List<String> lore, boolean hideFlags){
+	public static ItemStack create(Material mat, String name, List<String> lore, boolean hideFlags) {
 		ItemStack item = create(mat, name, lore);
 		ItemMeta meta = item.getItemMeta();
-		if(meta == null) return item;
-		if(hideFlags) meta.addItemFlags(ItemFlag.values());
-		else meta.removeItemFlags(ItemFlag.values());
+		if (meta == null)
+			return item;
+		if (hideFlags)
+			meta.addItemFlags(ItemFlag.values());
+		else
+			meta.removeItemFlags(ItemFlag.values());
 		item.setItemMeta(meta);
 		return item;
 	}
-	public static ItemStack create(Material mat, String name, List<String> lore, boolean hideFlags, boolean isGlowing){
+
+	public static ItemStack create(Material mat, String name, List<String> lore, boolean hideFlags, boolean isGlowing) {
 		ItemStack item = create(mat, name, lore, hideFlags);
 		return setGlowing(item, isGlowing);
 	}
 
-	public static ItemStack setGlowing(ItemStack item, boolean glowing){
-		if(item == null) return null;
+	public static ItemStack setGlowing(ItemStack item, boolean glowing) {
+		if (item == null)
+			return null;
 		ItemMeta meta = item.getItemMeta();
-		if(meta == null) return item;
-		if(glowing){
+		if (meta == null)
+			return item;
+		if (glowing) {
 			meta.addEnchant(Enchantment.DURABILITY, 1, true);
 			meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-		}else{
+		} else {
 			meta.removeEnchant(Enchantment.DURABILITY);
 			meta.removeItemFlags(ItemFlag.HIDE_ENCHANTS);
 		}
@@ -85,22 +98,25 @@ public class ItemHelper {
 		return item;
 	}
 
-	public static ItemStack setLore(ItemStack item, List<String> lore){
-		if(item == null) return null;
+	public static ItemStack setLore(ItemStack item, List<String> lore) {
+		if (item == null)
+			return null;
 		ItemMeta meta = item.getItemMeta();
-		if(meta == null) return item;
+		if (meta == null)
+			return item;
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		return item;
 	}
 
-	public static ItemStack setColor(ItemStack item, Color color){
-		if(isAirOrNull(item)) return item;
+	public static ItemStack setColor(ItemStack item, Color color) {
+		if (isAirOrNull(item))
+			return item;
 		ItemMeta meta = item.getItemMeta();
-		if(meta instanceof LeatherArmorMeta){
+		if (meta instanceof LeatherArmorMeta) {
 			LeatherArmorMeta m = (LeatherArmorMeta) meta;
 			m.setColor(color);
-		}else if(meta instanceof FireworkEffectMeta){
+		} else if (meta instanceof FireworkEffectMeta) {
 			FireworkEffectMeta m = (FireworkEffectMeta) meta;
 			m.setEffect(FireworkEffect.builder().withColor(color).build());
 		}
@@ -108,9 +124,11 @@ public class ItemHelper {
 		return item;
 	}
 
-	public static boolean isAirOrNull(ItemStack item){ return item == null || item.getType() == Material.AIR; }
+	public static boolean isAirOrNull(ItemStack item) {
+		return item == null || item.getType() == Material.AIR;
+	}
 
-	public static boolean isType(ItemStack item, Material mat){
+	public static boolean isType(ItemStack item, Material mat) {
 		return !isAirOrNull(item) && item.getType() == mat;
 	}
 }
