@@ -9,14 +9,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.scoreboard.DisplaySlot;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class ItemHelper {
 	public static ItemStack setDetails(ItemStack item, String name, String...lore) {
-		return setDetails(item, name, lore == null || lore[0].isEmpty() ? null : Arrays.asList(lore));
+		return setDetails(item, name, lore == null || lore[0] == null || lore[0].isEmpty() ? null : Arrays.asList(lore));
 	}
 
 	public static ItemStack setDetails(ItemStack item, String name, List<String> lore) {
@@ -26,8 +25,7 @@ public class ItemHelper {
 	public static ItemStack setDetails(ItemStack item, String name, List<String> lore, String... addon) {
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(name);
-		if (addon != null)
-			lore.addAll(Arrays.asList(addon));
+		if (addon != null) lore.addAll(Arrays.asList(addon));
 		im.setLore(lore);
 		item.setItemMeta(im);
 		return item;
