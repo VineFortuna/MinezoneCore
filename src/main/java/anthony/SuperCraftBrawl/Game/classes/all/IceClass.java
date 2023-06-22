@@ -2,24 +2,22 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 
 import java.util.List;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Color;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
@@ -197,9 +195,16 @@ public class IceClass extends BaseClass {
 				for (Entity en : nearby) {
 					if (en instanceof Player) {
 						Player p = (Player) en;
-
-						if (p.getGameMode() != GameMode.SPECTATOR)
+						if (p.getGameMode() != GameMode.SPECTATOR){
 							p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 110, 1));
+							Firework firework = p.getWorld().spawn(p.getEyeLocation(), Firework.class);
+							FireworkEffect effect = FireworkEffect.builder().flicker(true).withColor(Color.BLUE, Color.WHITE).build();
+							FireworkMeta meta = firework.getFireworkMeta();
+							meta.clearEffects();
+							meta.addEffect(effect);
+							firework.setFireworkMeta(meta);
+							firework.detonate();
+						}
 					}
 				}
 				player.sendMessage(
@@ -209,4 +214,16 @@ public class IceClass extends BaseClass {
 		}
 	}
 
+	@Override
+	public void Death(PlayerDeathEvent e) {
+		super.Death(e);
+		if(player.equals(e.getEntity().getKiller())){
+			if(player.getInventory().contains(Material.PACKED_ICE)) return;
+			//Regeneration ice bomb upon killing.
+			player.getInventory().addItem(
+					ItemHelper.setDetails(new ItemStack(Material.PACKED_ICE),
+							instance.getManager().getMain().color("&bFreeze Bomb"), "",
+							instance.getManager().getMain().color("&7Right click to freeze nearby enemies!")));
+		}
+	}
 }

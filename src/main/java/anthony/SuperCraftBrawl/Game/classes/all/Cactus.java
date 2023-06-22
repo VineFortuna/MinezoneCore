@@ -2,7 +2,9 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
@@ -13,6 +15,8 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import net.md_5.bungee.api.ChatColor;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Cactus extends BaseClass {
 
@@ -69,5 +73,17 @@ public class Cactus extends BaseClass {
 						"" + ChatColor.GREEN + ChatColor.BOLD + "Spikey Sword"), Enchantment.DAMAGE_ALL, 1),
 				Enchantment.DURABILITY, 10000);
 		return item;
+	}
+
+	@Override
+	public void DoDamage(EntityDamageByEntityEvent event) {
+		if(event.getEntity().equals(player) && event.getDamager() instanceof LivingEntity){
+			ItemStack held = player.getItemInHand();
+			if(held == null || held.getType() != Material.CACTUS) return;
+			LivingEntity damager = (LivingEntity) event.getDamager();
+			//Will deal 1-4 HP
+			int randomDmg = ThreadLocalRandom.current().nextInt(1, 5);
+			damager.damage(randomDmg, player);
+		}
 	}
 }
