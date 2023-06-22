@@ -1,12 +1,13 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.Random;
-
-import org.bukkit.Color;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.Cooldown;
+import anthony.SuperCraftBrawl.ItemHelper;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -19,16 +20,10 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import net.md_5.bungee.api.ChatColor;
-
 public class SquidClass extends BaseClass {
-
-	private Cooldown boosterCooldown = new Cooldown(10000), shurikenCooldown = new Cooldown(10000);
+	private final Cooldown boosterCooldown = new Cooldown(10000);
+	private final Cooldown shurikenCooldown = new Cooldown(10000);
+	private long inkCooldown;
 
 	public SquidClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -64,11 +59,13 @@ public class SquidClass extends BaseClass {
 	@Override
 	public void SetItems(Inventory playerInv) {
 		playerInv.setItem(0, this.getAttackWeapon());
+		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.COAL),
+				instance.getManager().getMain().color("&rInk &7(Right Click)")));
 	}
 
 	@Override
 	public void DoDamage(EntityDamageByEntityEvent event) {
-		BaseClass bc = instance.classes.get(player);
+        /*BaseClass bc = instance.classes.get(player);
 		if (bc != null && bc.getLives() <= 0)
 			return;
 
@@ -84,23 +81,44 @@ public class SquidClass extends BaseClass {
 
 				p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 90, 0, true));
 			}
-		}
+		}*/
 	}
 
 	private void abilityMsg() {
-		player.sendMessage("");
+        /*player.sendMessage("");
 		player.sendMessage(instance.getManager().getMain()
 				.color("&e&lCLASS TIP> &rCertain chance to give Blindness I to other players by hitting them!"));
-		player.sendMessage("");
+		player.sendMessage("");*/
 	}
 
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
-		if (item != null && item.getType() == Material.INK_SACK
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			this.abilityMsg();
-			event.setCancelled(true);
+		if(event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK){
+			if(item == null) return;
+			switch (item.getType()){
+				case INK_SACK:
+					event.setCancelled(true);
+					break;
+				case COAL:
+					if(inkCooldown > System.currentTimeMillis()){
+						int seconds = (int) ((inkCooldown - System.currentTimeMillis()) / 1000);
+						player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET
+								+ "Your Ink is still on cooldown for " + ChatColor.YELLOW + seconds
+								+ " more seconds ");
+						return;
+					}
+					                                                 //ticks
+					inkCooldown = System.currentTimeMillis() + (50L * 200);
+					player.getWorld().playEffect(player.getLocation(), Effect.SPLASH, 20);
+					player.getWorld().playSound(player.getLocation(), Sound.SPLASH, 1f, 1f);
+					for(Entity e : player.getWorld().getNearbyEntities(player.getLocation(), 10D, 10D, 10D)){
+						if(e instanceof Player && !e.equals(player)){
+							Player p = (Player) e;
+							p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 200, 0));
+						}
+					}
+			}
 		}
 	}
 
