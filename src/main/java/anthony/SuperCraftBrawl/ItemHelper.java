@@ -15,7 +15,7 @@ import java.util.List;
 
 public class ItemHelper {
 	public static ItemStack setDetails(ItemStack item, String name, String...lore) {
-		return setDetails(item, name, lore == null || lore[0] == null || (lore.length == 1 && lore[0].isEmpty()) ? null : Arrays.asList(lore));
+		return setDetails(item, name, lore == null || (lore.length == 1 && lore[0].isEmpty()) ? null : Arrays.asList(lore));
 	}
 
 	public static ItemStack setDetails(ItemStack item, String name, List<String> lore) {
