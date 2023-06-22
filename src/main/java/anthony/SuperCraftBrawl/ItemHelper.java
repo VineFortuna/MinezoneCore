@@ -15,6 +15,13 @@ import java.util.List;
 
 public class ItemHelper {
 	public static ItemStack setDetails(ItemStack item, String name, String...lore) {
+		if(lore != null){
+			int i = -1;
+			for(String s : lore){
+				i++;
+				if(s == null) lore[i] = "";
+			}
+		}
 		return setDetails(item, name, lore == null || (lore.length == 1 && lore[0].isEmpty()) ? null : Arrays.asList(lore));
 	}
 
@@ -25,7 +32,7 @@ public class ItemHelper {
 	public static ItemStack setDetails(ItemStack item, String name, List<String> lore, String... addon) {
 		ItemMeta im = item.getItemMeta();
 		im.setDisplayName(name);
-		if (addon != null) lore.addAll(Arrays.asList(addon));
+		if(addon != null && (addon.length > 0)) lore.addAll(Arrays.asList(addon));
 		im.setLore(lore);
 		item.setItemMeta(im);
 		return item;
