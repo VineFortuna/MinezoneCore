@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
+import anthony.SuperCraftBrawl.Game.classes.all.SnowGolemClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -1039,15 +1040,19 @@ public class GameManager implements Listener, PluginMessageListener {
 	@EventHandler
 	public void snowballs(EntityDamageByEntityEvent event) {
 		if (event.getDamager() instanceof Snowball) {
-			Snowball s = (Snowball) event.getDamager();
-			if (s.getShooter() instanceof Player) {
+			Snowball snowball = (Snowball) event.getDamager();
+			if (snowball.getShooter() instanceof Player) {
 				Player player = (Player) event.getEntity();
 				GameInstance i = this.GetInstanceOfPlayer(player);
 
 				if (i != null) {
 					if (i.duosMap != null) {
-						if (!(i.team.get(s.getShooter()).equals(i.team.get(player)))) {
-							player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 0));
+						if (!(i.team.get(snowball.getShooter()).equals(i.team.get(player)))) {
+							if (snowball.getShooter() instanceof SnowGolemClass) {
+								player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 2));
+							} else {
+								player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 0));
+							}
 						}
 					} else {
 						player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 0));
