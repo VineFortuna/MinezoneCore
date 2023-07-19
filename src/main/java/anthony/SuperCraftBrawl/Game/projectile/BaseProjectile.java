@@ -8,12 +8,13 @@ import org.bukkit.util.Vector;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 
 public abstract class BaseProjectile {
-	private GameInstance instance;
+	private final GameInstance instance;
 	public Location lastLoc;
-	private ProjectileOnHit onHit;
-	private Player shooter;
+	private final ProjectileOnHit onHit;
+	private final Player shooter;
 	private Entity summonedEntity;
-	private int maxAge, age = 0;
+	private final int maxAge;
+    private int age = 0;
 	public Vector lastVel = new Vector(0, 0, 0);
 	
 	public BaseProjectile(GameInstance instance, Player shooter, ProjectileOnHit onHit, int ageInTicks) {
