@@ -1,12 +1,9 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.Color;
-import org.bukkit.Effect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.Game.GameManager;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -19,6 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import anthony.SuperCraftBrawl.ItemHelper;
@@ -30,9 +28,14 @@ import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import net.md_5.bungee.api.ChatColor;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class SnowGolemClass extends BaseClass {
 
 	private Cooldown shurikenCooldown = new Cooldown(200);
+	private Cooldown platformCooldown = new Cooldown(20*1000);
 
 	public SnowGolemClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -71,14 +74,18 @@ public class SnowGolemClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		playerInv
-				.setItem(0,
-						ItemHelper.addEnchant(
-								ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.STICK),
-										ChatColor.GREEN + "Map Knocker"), Enchantment.DAMAGE_ALL, 3),
-								Enchantment.KNOCKBACK, 2));
-		playerInv.setItem(1, this.getSnowballs());
-		playerInv.setItem(2,
+		ItemStack slowballs = new ItemStack(ItemHelper.create(Material.SNOW_BALL, "" + ChatColor.RED + ChatColor.BOLD + "Slowballs").getType(), 5);
+
+
+		playerInv.setItem(0,
+				ItemHelper.addEnchant(
+						ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.STICK),
+								ChatColor.GREEN + "Map Knocker"), Enchantment.DAMAGE_ALL, 3),
+						Enchantment.KNOCKBACK, 2));
+		playerInv.setItem(1,
+				ItemHelper.create(Material.SNOW_BLOCK,"&fSnow Platform", Collections.singletonList("&7Right click to save yourself from falling")));
+		playerInv.setItem(2, slowballs);
+		playerInv.setItem(3,
 				ItemHelper.setDetails(new ItemStack(Material.PUMPKIN),
 						instance.getManager().getMain().color("&rPumpkin"),
 						instance.getManager().getMain().color("&7Right click to annoy other players")));
@@ -90,59 +97,56 @@ public class SnowGolemClass extends BaseClass {
 		ItemMeta meta = item.getItemMeta();
 
 		if (item != null) {
-			if (item.getType() == Material.SNOW_BALL) {
-				if (!(meta.getDisplayName().contains("Slowball"))) {
+			// SNOW PLATFORM ABILITY
+			if (item.getType() == Material.SNOW_BLOCK &&
+					(event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR)) {
+				if (platformCooldown.useAndResetCooldown()) {
 					if (player.getGameMode() != GameMode.SPECTATOR) {
-						if (shurikenCooldown.useAndResetCooldown()) {
-							int amount = item.getAmount();
-							if (amount > 0) {
-								amount--;
-								if (amount == 0)
-									player.getInventory().clear(player.getInventory().getHeldItemSlot());
-								else
-									item.setAmount(amount);
-								ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
-									@Override
-									public void onHit(Player hit) {
-										if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
-											Location hitLoc = this.getBaseProj().getEntity().getLocation();
-											player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
+						World playerWorld = player.getWorld();
+						Location playerLocation = player.getLocation();
 
-											for (Player gamePlayer : this.getNearby(3.0)) {
-												if (instance.duosMap != null) {
-													if (!(instance.team.get(gamePlayer)
-															.equals(instance.team.get(player)))) {
-														EntityDamageEvent damageEvent = new EntityDamageEvent(
-																gamePlayer, DamageCause.VOID, 5.5);
-														instance.getManager().getMain().getServer().getPluginManager()
-																.callEvent(damageEvent);
-														gamePlayer.damage(5.5, player);
-													}
-												} else {
-													EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-															DamageCause.VOID, 5.5);
-													instance.getManager().getMain().getServer().getPluginManager()
-															.callEvent(damageEvent);
-													gamePlayer.damage(5.5, player);
-												}
-											}
-											for (Player gamePlayer : instance.players) {
-												gamePlayer.playSound(hitLoc, Sound.EXPLODE, 2, 1);
-												gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_LARGE, 1);
-											}
-										}
+						// CREATING PLATFORM
+						int platformLength = 3; // Platform Length
+						int platformWidth = 3; // Platform Width
 
-									}
+						for (int x = -platformLength / 2; x <= platformWidth / 2; x++) {
+							for (int z = -platformWidth / 2; z <= platformLength / 2; z++) {
+								Location platformLocation = playerLocation.clone().subtract(0, 1, 0);
+								Block platformBlock = playerWorld.getBlockAt(platformLocation);
 
-								}, new ItemStack(Material.SNOW_BALL));
-								instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-										player.getLocation().getDirection().multiply(2.5D));
+								if (platformBlock.getType() == Material.AIR) {
+									platformBlock.setType(Material.SNOW_BLOCK);
+									platformBlock.setMetadata("SnowPlatform", new FixedMetadataValue(instance.getManager().getMain(), true));
+								}
 							}
-							event.setCancelled(true);
 						}
+
+						// PLAYING SOUND FOR CREATING PLATFORM
+						playerWorld.playSound(playerLocation, Sound.DIG_SNOW, 2, 1);
+
+						// REMOVING PLATFORM
+						Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
+							for (int x = -platformLength / 2; x <= platformWidth / 2; x++) {
+								for (int z = -platformWidth / 2; z <= platformLength / 2; z++) {
+									Location platformLocation = playerLocation.clone().subtract(0, 1, 0);
+									Block platformBlock = playerWorld.getBlockAt(platformLocation);
+
+									if (platformBlock.hasMetadata("SnowPlatform")) {
+										platformBlock.setType(Material.AIR);
+
+										platformBlock.removeMetadata("SnowPlatform", instance.getManager().getMain());
+									}
+								}
+							}
+						}, 3 * 20);
+
+						// PLAYING SOUND FOR REMOVING PLATFORM
+						playerWorld.playSound(playerLocation, Sound.DIG_SNOW, 2, 2);
 					}
 				}
-			} else if (item.getType() == Material.PUMPKIN
+			}
+
+			if (item.getType() == Material.PUMPKIN
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 				if (player.getGameMode() != GameMode.SPECTATOR) {
 					if (shurikenCooldown.useAndResetCooldown()) {

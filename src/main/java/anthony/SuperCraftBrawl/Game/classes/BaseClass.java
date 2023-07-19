@@ -1938,12 +1938,12 @@ public abstract class BaseClass {
 									BaseClass loserBc = instance.classes.get(losers);
 									PlayerData data3 = instance.getManager().getMain().getDataManager()
 											.getPlayerData(losers);
-									losers.sendMessage("" + ChatColor.BOLD + "=====================");
-									losers.sendMessage("" + ChatColor.BOLD + "||");
-									losers.sendMessage("" + ChatColor.BOLD + "||");
-									losers.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RED
+									losers.sendMessage(ChatColor.BOLD + "=====================");
+									losers.sendMessage(ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RED
 											+ ChatColor.BOLD + "  GAME LOST");
-									losers.sendMessage("" + ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "||");
 
 									int tokensEarned = 0;
 									if (instance.aliveTeams == 3)
@@ -1957,24 +1957,24 @@ public abstract class BaseClass {
 									loserBc.totalTokens += tokensEarned;
 
 									if (loserBc.totalKills >= 0) {
-										player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
+										player.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
 												+ ChatColor.BOLD + "  " + loserBc.totalKills + " Kills: "
 												+ ChatColor.RESET + ChatColor.YELLOW + loserBc.totalKills + " Tokens");
 										data3.tokens += loserBc.totalKills;
 										loserBc.totalTokens += loserBc.totalKills;
 									}
 									if (losers.hasPermission("scb.rankBonus")) {
-										losers.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
+										losers.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
 												+ ChatColor.BOLD + "  RANK BONUS: " + ChatColor.RESET + ChatColor.YELLOW
 												+ "10 Tokens");
 										data3.tokens += 10;
 										loserBc.totalTokens += 10;
 									}
-									losers.sendMessage("" + ChatColor.BOLD + "||");
-									losers.sendMessage("" + ChatColor.BOLD + "||");
-									losers.sendMessage("" + ChatColor.BOLD + "||");
-									losers.sendMessage("" + ChatColor.BOLD + "=====================");
-									losers.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) "
+									losers.sendMessage(ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "=====================");
+									losers.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + ChatColor.BOLD + "(!) "
 											+ ChatColor.RESET + "You have gained " + ChatColor.YELLOW + loserBc.totalExp
 											+ " EXP!");
 
@@ -1999,12 +1999,12 @@ public abstract class BaseClass {
 									BaseClass loserBc = instance.classes.get(losers);
 									PlayerData data3 = instance.getManager().getMain().getDataManager()
 											.getPlayerData(losers);
-									losers.sendMessage("" + ChatColor.BOLD + "=====================");
-									losers.sendMessage("" + ChatColor.BOLD + "||");
-									losers.sendMessage("" + ChatColor.BOLD + "||");
-									losers.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RED
+									losers.sendMessage(ChatColor.BOLD + "=====================");
+									losers.sendMessage(ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RED
 											+ ChatColor.BOLD + "  GAME LOST");
-									losers.sendMessage("" + ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "||");
 
 									int tokensEarned = 0;
 									if (instance.aliveTeams == 3)
@@ -2018,24 +2018,24 @@ public abstract class BaseClass {
 									loserBc.totalTokens += tokensEarned;
 
 									if (loserBc.totalKills >= 0) {
-										player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
+										player.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
 												+ ChatColor.BOLD + "  " + loserBc.totalKills + " Kills: "
 												+ ChatColor.RESET + ChatColor.YELLOW + loserBc.totalKills + " Tokens");
 										data3.tokens += loserBc.totalKills;
 										loserBc.totalTokens += loserBc.totalKills;
 									}
 									if (losers.hasPermission("scb.rankBonus")) {
-										losers.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
+										losers.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
 												+ ChatColor.BOLD + "  RANK BONUS: " + ChatColor.RESET + ChatColor.YELLOW
 												+ "10 Tokens");
 										data3.tokens += 10;
 										loserBc.totalTokens += 10;
 									}
-									losers.sendMessage("" + ChatColor.BOLD + "||");
-									losers.sendMessage("" + ChatColor.BOLD + "||");
-									losers.sendMessage("" + ChatColor.BOLD + "||");
-									losers.sendMessage("" + ChatColor.BOLD + "=====================");
-									losers.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) "
+									losers.sendMessage(ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "=====================");
+									losers.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + ChatColor.BOLD + "(!) "
 											+ ChatColor.RESET + "You have gained " + ChatColor.YELLOW + loserBc.totalExp
 											+ " EXP!");
 
@@ -2059,12 +2059,12 @@ public abstract class BaseClass {
 									BaseClass loserBc = instance.classes.get(losers);
 									PlayerData data3 = instance.getManager().getMain().getDataManager()
 											.getPlayerData(losers);
-									losers.sendMessage("" + ChatColor.BOLD + "=====================");
-									losers.sendMessage("" + ChatColor.BOLD + "||");
-									losers.sendMessage("" + ChatColor.BOLD + "||");
-									losers.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RED
+									losers.sendMessage(ChatColor.BOLD + "=====================");
+									losers.sendMessage(ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RED
 											+ ChatColor.BOLD + "  GAME LOST");
-									losers.sendMessage("" + ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "||");
 
 									int tokensEarned = 0;
 									if (instance.aliveTeams == 3)
@@ -2078,24 +2078,24 @@ public abstract class BaseClass {
 									loserBc.totalTokens += tokensEarned;
 
 									if (loserBc.totalKills >= 0) {
-										player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
+										player.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
 												+ ChatColor.BOLD + "  " + loserBc.totalKills + " Kills: "
 												+ ChatColor.RESET + ChatColor.YELLOW + loserBc.totalKills + " Tokens");
 										data3.tokens += loserBc.totalKills;
 										loserBc.totalTokens += loserBc.totalKills;
 									}
 									if (losers.hasPermission("scb.rankBonus")) {
-										losers.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
+										losers.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
 												+ ChatColor.BOLD + "  RANK BONUS: " + ChatColor.RESET + ChatColor.YELLOW
 												+ "10 Tokens");
 										data3.tokens += 10;
 										loserBc.totalTokens += 10;
 									}
-									losers.sendMessage("" + ChatColor.BOLD + "||");
-									losers.sendMessage("" + ChatColor.BOLD + "||");
-									losers.sendMessage("" + ChatColor.BOLD + "||");
-									losers.sendMessage("" + ChatColor.BOLD + "=====================");
-									losers.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) "
+									losers.sendMessage(ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "||");
+									losers.sendMessage(ChatColor.BOLD + "=====================");
+									losers.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + ChatColor.BOLD + "(!) "
 											+ ChatColor.RESET + "You have gained " + ChatColor.YELLOW + loserBc.totalExp
 											+ " EXP!");
 
@@ -2122,7 +2122,7 @@ public abstract class BaseClass {
 						CraftPlayer craft = (CraftPlayer) killer;
 						craft.getHandle().playerConnection.sendPacket(packet);
 					}
-					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
+					TellAll(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
 							+ p.getPlayer().getName() + " " + baseClass2.getType().getTag() + ChatColor.RED + " has "
 							+ lives + " life left");
 
@@ -2134,7 +2134,7 @@ public abstract class BaseClass {
 						CraftPlayer craft = (CraftPlayer) killer;
 						craft.getHandle().playerConnection.sendPacket(packet);
 					}
-					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
+					TellAll(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
 							+ p.getPlayer().getName() + " " + baseClass2.getType().getTag() + ChatColor.RED + " has "
 							+ lives + " lives left");
 				}
@@ -2220,13 +2220,13 @@ public abstract class BaseClass {
 	
 	private void healthPots(Player d) {
 		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				"" + ChatColor.YELLOW + ChatColor.BOLD + "Health Pot");
+				String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + "Health Pot");
 		Potion pot = new Potion(1);
 		pot.setType(PotionType.INSTANT_HEAL);
 		pot.setSplash(true);
 		pot.apply(item);
 		d.getInventory().addItem(item);
-		d.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.YELLOW
+		d.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.YELLOW
 				+ "You got a kill and got rewarded a " + ChatColor.YELLOW + ChatColor.BOLD + "Health Pot");
 	}
 
@@ -2251,7 +2251,7 @@ public abstract class BaseClass {
 				data.exp += 29;
 				baseClass3.totalExp += 29;
 
-				if (instance.getManager().getMain().tournament == true)
+				if (instance.getManager().getMain().tournament)
 					data.points++;
 
 				d.playSound(d.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
@@ -2289,8 +2289,8 @@ public abstract class BaseClass {
 						"&r&l(!) &rYour &r&lAggressive Gift has regenerated and you can get a new weapon if you'd like!"));
 				d.getInventory()
 						.addItem(ItemHelper.setDetails(new ItemStack(Material.CHEST, 1),
-								"" + ChatColor.RESET + ChatColor.ITALIC + "Agressive Gift", "",
-								"" + ChatColor.RESET + ChatColor.YELLOW + "Steals another player's main item"));
+								String.valueOf(ChatColor.RESET) + ChatColor.ITALIC + "Agressive Gift", "",
+								String.valueOf(ChatColor.RESET) + ChatColor.YELLOW + "Steals another player's main item"));
 			} else if (baseClass.getType() == ClassType.ButterGolem) {
 				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK, 1),
 						ChatColor.GREEN + "Butter Balls",
