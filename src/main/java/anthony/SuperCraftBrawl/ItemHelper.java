@@ -1,15 +1,16 @@
 package anthony.SuperCraftBrawl;
 
-import com.avaje.ebeaninternal.server.type.RsetDataReader;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
-import org.bukkit.Material;
+import org.bukkit.*;
+import org.bukkit.block.Skull;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkEffectMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.material.Dye;
 
 import java.util.Arrays;
 import java.util.List;
@@ -80,6 +81,148 @@ public class ItemHelper {
 	public static ItemStack create(Material mat, String name, List<String> lore, boolean hideFlags, boolean isGlowing) {
 		ItemStack item = create(mat, name, lore, hideFlags);
 		return setGlowing(item, isGlowing);
+	}
+
+	// Natowski
+	public static ItemStack createMonsterEgg(EntityType entityType, int amount) {
+		return new ItemStack(Material.MONSTER_EGG, amount, entityType.getTypeId());
+	}
+
+	public static ItemStack createMonsterEgg(EntityType entityType, int amount, String displayName) {
+		ItemStack itemStack = createMonsterEgg(entityType, amount);
+		ItemMeta itemMeta = itemStack.getItemMeta();
+
+		itemMeta.setDisplayName(displayName);
+		itemStack.setItemMeta(itemMeta);
+
+		return itemStack;
+	}
+
+	public static ItemStack createSkullHead(int amount, SkullType skullType) {
+		return new ItemStack(Material.SKULL_ITEM, 1, (short) skullType.ordinal());
+	}
+
+	public static ItemStack createSkullHead(int amount, SkullType skullType, String displayName) {
+		ItemStack itemStack = createSkullHead(amount, skullType);
+		SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
+
+		skullMeta.setDisplayName(displayName);
+		itemStack.setItemMeta(skullMeta);
+
+		return itemStack;
+	}
+
+	public static ItemStack createSkullHead(int amount, SkullType skullType, String displayName, List<String> lore) {
+		ItemStack itemStack = createSkullHead(amount, skullType, displayName);
+		SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
+
+		skullMeta.setDisplayName(displayName);
+		skullMeta.setLore(lore);
+		itemStack.setItemMeta(skullMeta);
+
+		return itemStack;
+	}
+
+	public static ItemStack createSkullHeadPlayer(int amount, String owner) {
+		ItemStack itemStack = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
+		SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
+
+		skullMeta.setOwner(owner);
+		itemStack.setItemMeta(skullMeta);
+
+		return itemStack;
+	}
+
+	public static ItemStack createSkullHeadPlayer(int amount, String owner, String displayName) {
+		ItemStack itemStack = createSkullHeadPlayer(amount, owner);
+		SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
+
+		skullMeta.setOwner(owner);
+		skullMeta.setDisplayName(displayName);
+		itemStack.setItemMeta(skullMeta);
+
+		return itemStack;
+	}
+
+	public static ItemStack createSkullHeadPlayer(int amount, String owner, String displayName, List<String> lore) {
+		ItemStack itemStack = createSkullHeadPlayer(amount, owner, displayName);
+		SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
+
+		skullMeta.setOwner(owner);
+		skullMeta.setDisplayName(displayName);
+		skullMeta.setLore(lore);
+		itemStack.setItemMeta(skullMeta);
+
+		return itemStack;
+	}
+
+	public static ItemStack createDye(DyeColor color) {
+		Dye dye = new Dye();
+		dye.setColor(color);
+
+		return dye.toItemStack();
+	}
+
+	public static ItemStack createDye(DyeColor color, int amount) {
+		ItemStack dyeItem = createDye(color);
+
+		dyeItem.setAmount(amount);
+
+		return dyeItem;
+	}
+
+	public static ItemStack createDye(DyeColor color, int amount, String displayName) {
+		ItemStack dyeItem = createDye(color, amount);
+		ItemMeta dyeItemMeta = dyeItem.getItemMeta();
+
+		dyeItemMeta.setDisplayName(displayName);
+		dyeItem.setItemMeta(dyeItemMeta);
+
+		return dyeItem;
+	}
+
+	public static ItemStack createDye(DyeColor color, int amount, String displayName, List<String> lore) {
+		ItemStack dyeItem = createDye(color, amount, displayName);
+		ItemMeta dyeItemMeta = dyeItem.getItemMeta();
+
+		dyeItemMeta.setDisplayName(displayName);
+		dyeItemMeta.setLore(lore);
+		dyeItem.setItemMeta(dyeItemMeta);
+
+		return dyeItem;
+	}
+
+	public static ItemStack createColoredArmor(Material armorPiece, Color color) {
+		ItemStack leatherArmor = new ItemStack(armorPiece);
+		LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) leatherArmor.getItemMeta();
+
+		leatherArmorMeta.setColor(color);
+		leatherArmor.setItemMeta(leatherArmorMeta);
+
+		return leatherArmor;
+	}
+
+	public static ItemStack createColoredArmor(Material armorPiece, Color color, String displayName) {
+		ItemStack leatherArmor = createColoredArmor(armorPiece, color);
+		LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) leatherArmor.getItemMeta();
+
+		leatherArmorMeta.setColor(color);
+		leatherArmorMeta.setDisplayName(displayName);
+		leatherArmor.setItemMeta(leatherArmorMeta);
+
+		return leatherArmor;
+	}
+
+	public static ItemStack createColoredArmor(Material armorPiece, Color color, String displayName, List<String> lore) {
+		ItemStack leatherArmor = createColoredArmor(armorPiece, color, displayName);
+		LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) leatherArmor.getItemMeta();
+
+		leatherArmorMeta.setColor(color);
+		leatherArmorMeta.setDisplayName(displayName);
+		leatherArmorMeta.setLore(lore);
+		leatherArmor.setItemMeta(leatherArmorMeta);
+
+		return leatherArmor;
 	}
 
 	public static ItemStack setGlowing(ItemStack item, boolean glowing) {
