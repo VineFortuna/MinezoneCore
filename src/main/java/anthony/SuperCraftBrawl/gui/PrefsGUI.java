@@ -101,15 +101,6 @@ public class PrefsGUI implements InventoryProvider {
 						}
 						inv.close(player);
 					}));
-			contents.set(2, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.SKULL_ITEM),
-					main.color("&eCustom Death Particles"), "", main.color("&e&lVIP+ &rexclusive!")), e -> {
-						if (player.hasPermission("scb.deathParticles")) {
-							new DeathParticlesGUI(main).inv.open(player);
-						} else {
-							player.sendMessage(main.color("&c&l(!) &rYou need the rank " + ChatColor.YELLOW
-									+ ChatColor.BOLD + "VIP " + "&rto use this feature!"));
-						}
-					}));
 		}
 	}
 
