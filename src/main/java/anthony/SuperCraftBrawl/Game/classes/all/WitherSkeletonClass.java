@@ -82,7 +82,7 @@ public class WitherSkeletonClass extends BaseClass {
 										ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER),
 												instance.getManager().getMain()
 														.color("&rEye of Ender &7(Right Click)")),
-										Enchantment.DAMAGE_ALL, 2),
+										Enchantment.DAMAGE_ALL, 1),
 						Enchantment.KNOCKBACK, 1);
 		return item;
 	}

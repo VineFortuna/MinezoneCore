@@ -114,6 +114,7 @@ public class ZombieClass extends BaseClass {
 				Zombie zombie = (Zombie) player.getWorld().spawnCreature(player.getLocation(), EntityType.ZOMBIE);
 				zombie.setBaby(true);
 				zombie.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Baby Zombie");
+				
 			}
 			player.sendMessage(instance.getManager().getMain().color("&e&l(!) &eSpawning army of Baby Zombies!"));
 		}
@@ -132,8 +133,10 @@ public class ZombieClass extends BaseClass {
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.IRON_SPADE),
-				instance.getManager().getMain().color("&2&lGrave Digger")), Enchantment.KNOCKBACK, 1);
+		ItemStack item = ItemHelper.addEnchant(
+				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.IRON_SPADE),
+						instance.getManager().getMain().color("&2&lGrave Digger")), Enchantment.DAMAGE_ALL, 1),
+				Enchantment.KNOCKBACK, 1);
 		ItemMeta meta = item.getItemMeta();
 		meta.spigot().setUnbreakable(true);
 		item.setItemMeta(meta);

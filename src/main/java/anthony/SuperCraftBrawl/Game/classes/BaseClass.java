@@ -56,6 +56,8 @@ public abstract class BaseClass {
 	public Score score;
 	public int totalTokens = 0;
 	public int totalKills = 0;
+	public int totalDeaths = 0;
+	public int placement = 0;
 	public int eachLifeKills = 0;
 	public int totalExp = 0;
 	public double baseVerticalJump = 1.0;
@@ -83,15 +85,18 @@ public abstract class BaseClass {
 	public Timer defensiveGift = new Timer();
 	public Timer mythicalGift = new Timer();
 	public Timer wizard = new Timer();
+	public Timer magmaCube = new Timer();
+	public Timer ocelot = new Timer();
+	public Timer cloud = new Timer();
 	public boolean bedrockInvincibility = false;
-	
+
 	public int goldAmt = 0; // For Steve Class
 	public int coalAmt = 0; // For Steve Class
 	public int diaAmt = 0; // For Steve Class
 
 	public Player bountyTarget = null;
 
-	//This would also take in a SuperClass.
+	// This would also take in a SuperClass.
 	public BaseClass(GameInstance instance, Player player) {
 		this.instance = instance;
 		this.player = player;
@@ -987,10 +992,12 @@ public abstract class BaseClass {
 					p.removePotionEffect(type.getType());
 
 				p.setFireTicks(0);
-				p.setLastDamage(0);
+				p.getInventory().clear();
+				//p.setLastDamage(0);
 				// data2.winstreak = 0;
 				BaseClass baseClass = instance.classes.get(killer);
 				BaseClass baseClass2 = instance.classes.get(p);
+				baseClass2.totalDeaths++;
 				baseClass2.eachLifeKills = 0;
 
 				Location loc = p.getLocation();
@@ -1642,6 +1649,9 @@ public abstract class BaseClass {
 									+ ChatColor.RED + " died");
 						}
 					} else {
+						if (killer != null) {
+							TellAll("Test msg");
+						}
 						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
 								+ p.getPlayer().getName() + " " + baseClass2.getType().getTag() + ChatColor.RED
 								+ " just died SO badly");
@@ -1883,6 +1893,7 @@ public abstract class BaseClass {
 						baseClass2.totalTokens += tokensEarned;
 						p.sendMessage("        " + "       Placed #" + instance.alivePlayers + ": " + tokensEarned
 								+ " Tokens");
+						baseClass2.placement = instance.alivePlayers;
 
 						if (baseClass2 != null && baseClass2.totalKills >= 0) {
 							player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
@@ -1893,8 +1904,7 @@ public abstract class BaseClass {
 						}
 						if (baseClass2 != null && instance.firstBlood == player) {
 							player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
-									+ ChatColor.BOLD + "    First Blood: " + ChatColor.RESET
-									+ "10 Tokens");
+									+ ChatColor.BOLD + "    First Blood: " + ChatColor.RESET + "10 Tokens");
 							data3.tokens += 10;
 						}
 						if (p.hasPermission("scb.rankBonus")) {
@@ -2217,7 +2227,7 @@ public abstract class BaseClass {
 		}
 
 	}
-	
+
 	private void healthPots(Player d) {
 		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
 				"" + ChatColor.YELLOW + ChatColor.BOLD + "Health Pot");
@@ -2246,21 +2256,23 @@ public abstract class BaseClass {
 				}
 				PlayerData data = instance.getManager().getMain().getDataManager().getPlayerData(d);
 
-				// data.tokens += 1;
-				data.kills += 1;
-				data.exp += 29;
-				baseClass3.totalExp += 29;
+				if (data != null) {
+					// data.tokens += 1;
+					data.kills += 1;
+					data.exp += 29;
+					baseClass3.totalExp += 29;
 
-				if (instance.getManager().getMain().tournament == true)
-					data.points++;
+					if (instance.getManager().getMain().tournament == true)
+						data.points++;
 
-				d.playSound(d.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
+					d.playSound(d.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
 
-				if (baseClass3 != null) {
-					baseClass3.totalTokens += 1;
-					baseClass3.totalKills++;
-					baseClass3.eachLifeKills++;
-					this.checkBountyKill(baseClass3, p, d);
+					if (baseClass3 != null) {
+						baseClass3.totalTokens += 1;
+						baseClass3.totalKills++;
+						baseClass3.eachLifeKills++;
+						this.checkBountyKill(baseClass3, p, d);
+					}
 				}
 			}
 		}

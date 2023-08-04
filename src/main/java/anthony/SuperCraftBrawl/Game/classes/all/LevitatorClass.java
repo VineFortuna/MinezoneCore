@@ -8,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.Sound;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -29,6 +30,8 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 
 public class LevitatorClass extends BaseClass {
 
@@ -87,6 +90,24 @@ public class LevitatorClass extends BaseClass {
 
 	@Override
 	public void Tick(int gameTicks) {
+		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Levitator
+				&& instance.classes.get(player).getLives() > 0) {
+			if (this.cooldown > 0) {
+				String msg = instance.getManager().getMain()
+						.color("&9&lLevitator Bow &rArrow regenerates in: &e" + this.cooldown + "s");
+				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
+						(byte) 2);
+				CraftPlayer craft = (CraftPlayer) player;
+				craft.getHandle().playerConnection.sendPacket(packet);
+			} else {
+				String msg = instance.getManager().getMain().color("&rYou can use &9&lLevitator Bow");
+				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
+						(byte) 2);
+				CraftPlayer craft = (CraftPlayer) player;
+				craft.getHandle().playerConnection.sendPacket(packet);
+			}
+		}
+
 		if (gameTicks % 20 == 0)
 			if (cooldown != 0)
 				cooldown--;
@@ -144,9 +165,9 @@ public class LevitatorClass extends BaseClass {
 						gamePlayer.playSound(loc, Sound.EXPLODE, 3, 1);
 					}
 
-					EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID, 11.5);
+					EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID, 10.0);
 					instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
-					p.damage(11.5, player);
+					p.damage(10.0, player);
 				}, 20);
 			}
 		}
