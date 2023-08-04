@@ -116,7 +116,7 @@ public class SpiderClass extends BaseClass {
 		ItemStack item = ItemHelper
 				.addEnchant(ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.SPIDER_EYE),
 						instance.getManager().getMain()
-						.color("&cSpider Eye &7(Right Click)")), Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 1);
+						.color("&cSpider Eye &7(Right Click)")), Enchantment.DAMAGE_ALL, 2), Enchantment.KNOCKBACK, 1);
 		return item;
 	}
 }

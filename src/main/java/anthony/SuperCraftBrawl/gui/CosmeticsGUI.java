@@ -206,6 +206,13 @@ public class CosmeticsGUI implements InventoryProvider {
 					}
 					inv.close(player);
 				}));
+		contents.set(3, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
+				"" + ChatColor.RESET + ChatColor.YELLOW + ChatColor.BOLD + "Win Effects", "",
+				"" + ChatColor.RESET + "Click to enable a custom win effect"),
+				e -> {
+					//here
+					inv.close(player);
+				}));
 	}
 
 	@Override

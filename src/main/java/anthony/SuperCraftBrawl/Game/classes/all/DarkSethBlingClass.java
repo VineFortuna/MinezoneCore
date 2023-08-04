@@ -250,9 +250,6 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 					player.sendMessage(instance.getManager().getMain().color(
 							"&2&l(!) &rYou teleported to the recently spawned item! (Could be good or bad luck idk lol)"));
 					this.usedTp = true;
-					EntityDamageEvent damageEvent = new EntityDamageEvent(player, DamageCause.PROJECTILE, 6.5);
-					instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
-					player.damage(4.5, player);
 				}
 			}
 		}

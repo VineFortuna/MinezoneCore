@@ -107,6 +107,9 @@ public class Core extends JavaPlugin implements Listener {
 	private ArrayList<String> msg;
 	public Map<Player, Player> wagers = new HashMap<Player, Player>();
 
+	// Player's game stats
+	public Map<Player, GameInstance> gameStats = new HashMap<Player, GameInstance>();
+
 	public boolean finalEvent = false;
 
 	public Core() {
@@ -114,7 +117,9 @@ public class Core extends JavaPlugin implements Listener {
 		this.globalchat = new ArrayList<Player>();
 	}
 
-	public static Core inst(){ return plugin; }
+	public static Core inst() {
+		return plugin;
+	}
 
 	public void TellAll(String message) {
 		for (Player staff : staffchat)
@@ -307,7 +312,7 @@ public class Core extends JavaPlugin implements Listener {
 		runnable.runTaskTimer(this, 0, 6000);
 	}
 
-	//For tab organization.
+	// For tab organization.
 	private Scoreboard lobbyScoreBoard;
 
 	@Override
@@ -331,8 +336,9 @@ public class Core extends JavaPlugin implements Listener {
 
 		getLogger().info("(!) You have enabled Minezone-Core");
 		// lobbyWorld = getServer().createWorld(new WorldCreator("lobby"));
-		lobbyWorld = getServer().createWorld(new WorldCreator("lobby-1")); //Game servers
-		//lobbyWorld = getServer().createWorld(new WorldCreator("lobbies")); //Hub server
+		lobbyWorld = getServer().createWorld(new WorldCreator("lobby-1")); // Game servers
+		// lobbyWorld = getServer().createWorld(new WorldCreator("lobbies")); //Hub
+		// server
 		// getServer().createWorld(new WorldCreator("name"));
 		lobbyScoreBoard = Bukkit.getScoreboardManager().getNewScoreboard();
 
@@ -343,17 +349,17 @@ public class Core extends JavaPlugin implements Listener {
 		// smmmanager = new SmmManager(this);
 		gameManager = new GameManager(this);
 		commands = new Commands(this);
-		//cmd = new anthony.skywars.commands.Commands(this);
+		// cmd = new anthony.skywars.commands.Commands(this);
 		djManager = new DoubleJumpManager(this);
 		databaseManager = new DatabaseManager(this);
 		dataManager = new PlayerDataManager(this);
 		npcManager = new NPCManager(this);
 		rankManager = new RankManager(this);
-		//gm = new anthony.CrystalWars.game.GameManager(this);
+		// gm = new anthony.CrystalWars.game.GameManager(this);
 		ag = new ActiveGamesGUI(this);
 		// p = new Parkour(this);
 		lb = new Leaderboard(this);
-		//swManager = new anthony.skywars.GameManager(this);
+		// swManager = new anthony.skywars.GameManager(this);
 		// cheat = new AntiCheat(this);
 
 		Bukkit.getServer().getPluginManager().registerEvents(this, this);
@@ -362,8 +368,8 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null || this.getSWCommands() != null) {
-			String[] commandTypes = { "join", "shop", "leave", "cw", "l", "players", "class", "spectate",
-					"startgame", "setlives", "purchases", "mainworld", "kit" };
+			String[] commandTypes = { "join", "shop", "leave", "cw", "l", "players", "class", "spectate", "startgame",
+					"gamestats", "setlives", "purchases", "mainworld", "kit" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -1329,12 +1335,14 @@ public class Core extends JavaPlugin implements Listener {
 
 	@SuppressWarnings("deprecation")
 	public void sendScoreboardUpdate(Player player) {
-		//Organized tab list
+		// Organized tab list
 		for (Player pl : Bukkit.getOnlinePlayers()) {
 			StringBuilder teamName = new StringBuilder();
 			Rank r = gameManager.getMain().getRankManager().getRank(player);
-			if(r == null) teamName.append(Rank.values().length);
-			else teamName.append(r.getTabListIndex());
+			if (r == null)
+				teamName.append(Rank.values().length);
+			else
+				teamName.append(r.getTabListIndex());
 			teamName.append("_").append(r);
 
 			Scoreboard board = pl.getScoreboard();
@@ -1361,13 +1369,13 @@ public class Core extends JavaPlugin implements Listener {
 		Player p = e.getPlayer();
 		String pName = p.getName();
 		p.setGameMode(GameMode.ADVENTURE);
-		//For tab organization.
+		// For tab organization.
 		p.setScoreboard(lobbyScoreBoard);
 		sendScoreboardUpdate(p);
 		// Message to send the server on join
-		e.setJoinMessage("" + ChatColor.BOLD + "[" + ChatColor.YELLOW + ChatColor.BOLD + "+" + ChatColor.RESET
+		e.setJoinMessage("" + ChatColor.BOLD + "[" + ChatColor.GREEN + ChatColor.BOLD + "+" + ChatColor.RESET
 				+ ChatColor.BOLD + "] " + ChatColor.RESET + getRankManager().getRank(p).getTagWithSpace() + ""
-				+ ChatColor.AQUA + pName + ChatColor.YELLOW + " connected");
+				+ ChatColor.AQUA + pName + ChatColor.GREEN + " connected");
 		String rank = getRankManager().getRank(p).getTagWithSpace();
 
 		if (rank.length() >= 16) {

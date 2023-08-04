@@ -143,8 +143,6 @@ public class PlayerListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockPlace(BlockPlaceEvent event) {
 		Player player = event.getPlayer();
-		if (!(player.isOp()))
-			event.setCancelled(true);
 		anthony.CrystalWars.game.GameInstance i = main.getCwManager().getInstanceOfPlayer(player);
 
 		if (i != null) {
@@ -164,6 +162,9 @@ public class PlayerListener implements Listener {
 				return;
 			}
 		}
+		
+		if (!(player.isOp()))
+			event.setCancelled(true);
 	}
 
 	@EventHandler

@@ -135,7 +135,7 @@ public class NotchClass extends BaseClass {
 						+ "Bro... You're still on cooldown for " + ChatColor.YELLOW + seconds + " more seconds ");
 			} else {
 				notch.restart();
-				int range = 20;
+				int range = 25;
 				Location endLoc = player.getEyeLocation();
 				BlockIterator b = new BlockIterator(player.getEyeLocation(), 0, range);
 
@@ -166,10 +166,10 @@ public class NotchClass extends BaseClass {
 							if (closest.distanceSquared(p.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
 								if (instance.duosMap != null) {
 									if (!(instance.team.get(p).equals(instance.team.get(player)))) {
-										p.setVelocity(dir.clone().multiply(-dist / 2.5));
+										p.setVelocity(dir.clone().multiply(-dist / 3.5));
 									}
 								} else {
-									p.setVelocity(dir.clone().multiply(-dist / 2.5));
+									p.setVelocity(dir.clone().multiply(-dist / 3.5));
 								}
 							}
 						}

@@ -62,8 +62,8 @@ public class EnderdragonClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		playerInv.addItem(this.getAttackWeapon());
-		playerInv.addItem(ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL, 5),
+		playerInv.setItem(0, this.getAttackWeapon());
+		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL, 5),
 				instance.getManager().getMain().color("&c&lTeleporter")));
 		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
 	}

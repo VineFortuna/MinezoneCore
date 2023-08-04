@@ -16,6 +16,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
@@ -61,6 +63,7 @@ public class JebClass extends BaseClass {
 		playerEquip.setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
 		playerEquip.setBoots(
 				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
 	}
 
 	@Override
@@ -108,7 +111,7 @@ public class JebClass extends BaseClass {
 							+ " more seconds gosh damn");
 				} else {
 					jeb.restart();
-					int range = 20;
+					int range = 25;
 					Location endLoc = player.getEyeLocation();
 					BlockIterator b = new BlockIterator(player.getEyeLocation(), 0, range);
 

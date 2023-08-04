@@ -65,6 +65,7 @@ public class PurchaseClassInventory implements InventoryProvider {
 						details.setPurchased();
 						data.tokens -= type.getTokenCost();
 						inv.close(player);
+						main.getDataManager().saveData(data);
 					} else {
 						player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
 								+ ChatColor.RESET + "You don't have enough tokens to purchase " + type.getTag());

@@ -62,6 +62,8 @@ import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
 import fr.mrmicky.fastboard.FastBoard;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class GameInstance {
 
@@ -80,6 +82,8 @@ public class GameInstance {
 	public Location recentDrop = null;
 	public HashMap<Player, BaseClass> classes;
 	public HashMap<Player, BaseClass> oldClasses;
+	public HashMap<Player, BaseClass> allClasses; // Keep track of all players' BaseClass, even ones that left game
+													// before end
 	public List<Player> playerPosition = new ArrayList<>();
 	public HashMap<Player, FastBoard> boards = new HashMap();
 	private final HashMap<Player, ClassType> classSelection = new HashMap<>();
@@ -120,6 +124,7 @@ public class GameInstance {
 		this.firstBlood = null;
 		classes = new HashMap<>();
 		oldClasses = new HashMap<>();
+		allClasses = new HashMap<>();
 		InitialiseMap();
 	}
 
@@ -134,6 +139,7 @@ public class GameInstance {
 		this.firstBlood = null;
 		classes = new HashMap<>();
 		oldClasses = new HashMap<>();
+		allClasses = new HashMap<>();
 		team = new HashMap<Player, String>();
 		redTeam = new ArrayList<Player>();
 		blueTeam = new ArrayList<Player>();
@@ -429,17 +435,19 @@ public class GameInstance {
 									+ ChatColor.GRAY + ChatColor.ITALIC + "Frenzy " + ChatColor.GREEN + ChatColor.BOLD
 									+ "game on " + ChatColor.RESET + ChatColor.BOLD + mapName + ChatColor.RESET
 									+ ChatColor.GREEN + ChatColor.BOLD + " is starting in 30 seconds.");
-							Bukkit.broadcastMessage(
-									"" + "    " + ChatColor.GREEN + ChatColor.BOLD + " Use " + ChatColor.RESET
-											+ "/join " + mapName + ChatColor.GREEN + ChatColor.BOLD + " to join!");
+							TextComponent message = new TextComponent(
+									"" + "     " + ChatColor.GREEN + ChatColor.BOLD + "Click here to join!");
+							message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/join " + mapName));
+							Bukkit.spigot().broadcast(message);
 						} else if (gameType == GameType.NORMAL) {
 							Bukkit.broadcastMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
 									+ ChatColor.RESET + ChatColor.GREEN + ChatColor.BOLD + "A game on "
 									+ ChatColor.RESET + ChatColor.BOLD + mapName + ChatColor.RESET + ChatColor.GREEN
 									+ ChatColor.BOLD + " is starting in 30 seconds.");
-							Bukkit.broadcastMessage(
-									"" + "    " + ChatColor.GREEN + ChatColor.BOLD + " Use " + ChatColor.RESET
-											+ "/join " + mapName + ChatColor.GREEN + ChatColor.BOLD + " to join!");
+							TextComponent message = new TextComponent(
+									"" + "     " + ChatColor.GREEN + ChatColor.BOLD + "Click here to join!");
+							message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/join " + mapName));
+							Bukkit.spigot().broadcast(message);
 						}
 						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 								+ "All players have joined. Game is now starting!");
@@ -510,6 +518,37 @@ public class GameInstance {
 				}
 			};
 			gameStartTime.runTaskTimer(gameManager.getMain(), 0, 20);
+		}
+	}
+
+	public void spawnLoc() { // Initially spawn all the players, at different locations than GetRespawnLoc()
+		MapInstance mi = null;
+		int size = 0;
+
+		if (map != null)
+			mi = this.map.GetInstance();
+		else
+			mi = this.duosMap.GetInstance();
+
+		size = 0;
+		Vector spawnPos = null;
+		boolean morePlayers = false; // If there's more players than spawn points, when set true it will spawn them
+										// at a random loc then
+
+		for (Player gamePlayer : this.players) {
+			if (morePlayers) {
+				spawnPos = mi.spawnPos.get(random.nextInt(mi.spawnPos.size()));
+				gamePlayer
+						.teleport(new Location(this.getMapWorld(), spawnPos.getX(), spawnPos.getY(), spawnPos.getZ()));
+			} else {
+				spawnPos = mi.spawnPos.get(size);
+				gamePlayer
+						.teleport(new Location(this.getMapWorld(), spawnPos.getX(), spawnPos.getY(), spawnPos.getZ()));
+				size++;
+
+				if (size >= this.players.size() - 1)
+					morePlayers = true;
+			}
 		}
 	}
 
@@ -649,9 +688,9 @@ public class GameInstance {
 		startLightningDropsTimer();
 		for (Player player : players) {
 			player.getInventory().clear();
-			player.teleport(GetRespawnLoc());
+			// player.teleport(GetRespawnLoc());
 		}
-
+		spawnLoc(); // Spawn all players in game
 		TellAll("" + ChatColor.BOLD + "===============================");
 		TellAll("" + ChatColor.BOLD + "||");
 		TellAll("" + ChatColor.BOLD + "||");
@@ -1051,6 +1090,8 @@ public class GameInstance {
 					else if (team.get(player).equals("Black"))
 						boardColor(o, player, ChatColor.BLACK);
 				}
+				Score line = o.getScore("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "--------------------");
+				line.setScore(0);
 				time = o.getScore("" + ChatColor.YELLOW + "Game Time: " + ChatColor.RESET + gameTime + "m");
 				time.setScore(0);
 				player.setScoreboard(c);
@@ -1163,6 +1204,7 @@ public class GameInstance {
 								if (!(players.contains(player))) {
 									getManager().getMain().ResetPlayer(player);
 								} else {
+									baseClass.LoadPlayer();
 									if (gameType == GameType.FRENZY) {
 										player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "Respawned",
 												"" + ChatColor.RESET + "Your new class for this life is "
@@ -1229,7 +1271,7 @@ public class GameInstance {
 					}
 					CheckForWin();
 				} else
-					baseClass.LoadPlayer();
+					player.getInventory().clear();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -1397,6 +1439,11 @@ public class GameInstance {
 
 	public void SetLobbyScoreboard(Player player) {
 		gameManager.getMain().LobbyBoard(player);
+		gameManager.getMain().gameStats.put(player, this);
+		TextComponent message = new TextComponent(
+				getManager().getMain().color("&2&l(!) &eThe match stats have been recorded. &e&lClick here to view!"));
+		message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/gamestats"));
+		player.spigot().sendMessage(message);
 	}
 
 	public void givePositionTokens(int position, int tokens) {
@@ -1521,6 +1568,7 @@ public class GameInstance {
 						}
 					}
 					baseClass.totalExp += 113;
+					baseClass.placement = 1;
 
 					winner.sendMessage("" + ChatColor.BOLD + "=====================");
 					winner.sendMessage("" + ChatColor.BOLD + "||");
@@ -1827,10 +1875,15 @@ public class GameInstance {
 			newBaseClass.lives = oldBaseClass.lives;
 			newBaseClass.tokens = oldBaseClass.tokens;
 			newBaseClass.score = newScore;
+			newBaseClass.totalTokens = oldBaseClass.totalTokens;
+			newBaseClass.totalExp = oldBaseClass.totalExp;
+			newBaseClass.totalKills = oldBaseClass.totalKills;
+			newBaseClass.bountyTarget = oldBaseClass.bountyTarget;
 
 			oldBaseClass.score.getScoreboard().resetScores(oldBaseClass.score.getEntry());
 
 			classes.put(player, newBaseClass);
+			allClasses.put(player, newBaseClass);
 			sendScoreboardUpdate(player);
 
 			player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1879,6 +1932,7 @@ public class GameInstance {
 			else
 				player.setDisplayName("" + player.getName() + " " + selectedClass.getTag() + ChatColor.GRAY);
 			classes.put(player, baseClass);
+			allClasses.put(player, baseClass);
 			player.setHealth(20.0);
 			player.setFoodLevel(20);
 			player.setGameMode(GameMode.ADVENTURE);
