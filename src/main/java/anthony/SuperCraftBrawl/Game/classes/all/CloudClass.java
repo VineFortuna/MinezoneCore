@@ -151,10 +151,10 @@ public class CloudClass extends BaseClass {
 				Player gamePlayer = (Player) e;
 				if (instance.classes.containsKey(gamePlayer) && instance.classes.get(gamePlayer).getLives() > 0) {
 					gamePlayer.getWorld().strikeLightningEffect(gamePlayer.getLocation());
-					gamePlayer.setFireTicks(140);
-					gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 200, 1));
-					gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 150, 1));
-					gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 250, 2));
+					gamePlayer.setFireTicks(80);
+					gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 110, 1));
+					gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 1));
+					gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 200, 2));
 				}
 			}
 		}
