@@ -9,11 +9,14 @@ import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -36,9 +39,10 @@ public class WitchClass extends BaseClass {
 	private boolean used = false;
 	private ItemStack broom = ItemHelper.addEnchant(
 			ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4),
-					"" + ChatColor.BLACK + ChatColor.BOLD + "Magic Broom"), Enchantment.DAMAGE_ALL, 2),
+					"" + ChatColor.BLACK + ChatColor.BOLD + "Magic Broom"), Enchantment.DAMAGE_ALL, 3),
 			Enchantment.KNOCKBACK, 1);
 	private int cooldown = 0;
+	private int regenBrooms = 0;
 
 	public WitchClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -77,6 +81,23 @@ public class WitchClass extends BaseClass {
 		playerEquip.setLeggings(makePurple(new ItemStack(Material.LEATHER_LEGGINGS)));
 		playerEquip.setBoots(makePurple(
 				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	}
+
+	@Override
+	public void ProjectileLaunch(ProjectileLaunchEvent event) {
+		if (event.getEntity() instanceof ThrownPotion) {
+			ThrownPotion potion = (ThrownPotion) event.getEntity();
+
+			if (potion.getShooter() instanceof Player) {
+				Player player = (Player) potion.getShooter();
+				if (player.getInventory().getHeldItemSlot() == 1) {
+					// Adjust the velocity of the potion
+					Vector velocity = potion.getVelocity();
+					potion.setVelocity(velocity.multiply(1.3)); // Increase the multiplier to adjust the throwing
+																// distance
+				}
+			}
+		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -126,23 +147,18 @@ public class WitchClass extends BaseClass {
 			}
 		}
 
-		if (player.isOnGround()) {
-			if (this.used == true) {
+		if (gameTicks % 40 == 0 && regenBrooms != 4) {
+			if (player.isOnGround()) {
 				BaseClass bc = instance.classes.get(player);
 				if (bc != null && bc.getLives() <= 0)
 					return;
-				player.getInventory()
-						.setItem(0,
-								ItemHelper
-										.addEnchant(
-												ItemHelper
-														.addEnchant(
-																ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4),
-																		"" + ChatColor.BLACK + ChatColor.BOLD
-																				+ "Magic Broom"),
-																Enchantment.DAMAGE_ALL, 2),
-												Enchantment.KNOCKBACK, 1));
-				this.used = false;
+
+				regenBrooms++;
+				player.getInventory().setItem(0,
+						ItemHelper.addEnchant(ItemHelper.addEnchant(
+								ItemHelper.setDetails(new ItemStack(Material.WHEAT, regenBrooms),
+										"" + ChatColor.BLACK + ChatColor.BOLD + "Magic Broom"),
+								Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 1));
 			}
 		}
 	}
@@ -151,6 +167,7 @@ public class WitchClass extends BaseClass {
 	public void SetItems(Inventory playerInv) {
 		this.used = false; // To reset each life
 		this.cooldown = 0; // Also same
+		this.regenBrooms = 4; // ALSO SAME LMFAO!!!
 
 		ItemStack weakness = new ItemStack(Material.POTION, 1);
 		Potion pot2 = new Potion(1);
@@ -192,13 +209,18 @@ public class WitchClass extends BaseClass {
 		ItemStack item = event.getItem();
 		if (item != null && item.getType() == Material.WHEAT
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			int amount = item.getAmount();
-			if (amount > 1) {
-				event.setCancelled(true);
-				player.setVelocity(new Vector(0, 1, 0).multiply(1.0D));
-				this.used = true;
-				amount--;
-				item.setAmount(amount);
+			ItemMeta meta = item.getItemMeta();
+
+			if (meta != null && meta.getDisplayName().contains("Magic")) {
+				int amount = item.getAmount();
+				if (amount > 1) {
+					event.setCancelled(true);
+					player.setVelocity(new Vector(0, 1, 0).multiply(1.15D));
+					this.used = true;
+					amount--;
+					item.setAmount(amount);
+					regenBrooms = amount;
+				}
 			}
 		}
 	}

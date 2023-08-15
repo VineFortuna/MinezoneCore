@@ -116,17 +116,17 @@ public class ChickenClass extends BaseClass {
 									if (instance.duosMap != null) {
 										if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
 											EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-													DamageCause.PROJECTILE, 6.0);
+													DamageCause.PROJECTILE, 5.0);
 											instance.getManager().getMain().getServer().getPluginManager()
 													.callEvent(damageEvent);
-											gamePlayer.damage(6.0, player);
+											gamePlayer.damage(5.0, player);
 										}
 									} else {
 										EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-												DamageCause.PROJECTILE, 6.0);
+												DamageCause.PROJECTILE, 5.0);
 										instance.getManager().getMain().getServer().getPluginManager()
 												.callEvent(damageEvent);
-										gamePlayer.damage(6.0, player);
+										gamePlayer.damage(5.0, player);
 									}
 								}
 								for (Player gamePlayer : instance.players) {

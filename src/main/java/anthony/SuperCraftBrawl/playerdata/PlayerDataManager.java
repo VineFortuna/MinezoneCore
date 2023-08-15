@@ -47,11 +47,10 @@ public class PlayerDataManager implements Listener {
 	public PlayerData getPlayerData(Player player) {
 		return playerData.get(player);
 	}
-	
+
 	public PlayerData getOffPlayerData(OfflinePlayer player) {
 		return playerData.get(player);
 	}
-
 
 	public boolean loadPlayer(Player player) {
 		try {
@@ -135,11 +134,12 @@ public class PlayerDataManager implements Listener {
 			int redstone = set.getInt("Redstone");
 			int web = set.getInt("Web");
 			int bottleEXP = set.getInt("BottleEXP");
+			int broomWinEffect = set.getInt("BroomWinEffect");
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
 					exp, level, bestTime, magicbroom, points, withersk, bonusTokens, bonusLevels, paintball,
 					santaoutfit, elf, gingerbreadman, killMsgs, challenge1, challenge2, challenge3, goldApple,
-					glowstone, redstone, web, bottleEXP);
+					glowstone, redstone, web, bottleEXP, broomWinEffect);
 		}
 		set.close();
 		stmt.close();
@@ -181,12 +181,12 @@ public class PlayerDataManager implements Listener {
 				+ data.muted + ", GoldApple = " + data.goldApple + ", Glowstone = " + data.glowstone + ", Redstone = "
 				+ data.redstone + ", Web = " + data.web + ", BottleEXP = " + data.bottleEXP + ", MysteryChests = "
 				+ data.mysteryChests + ", AstronautCosmetic = " + data.astronaut + ", SantaOutfit = " + data.santaoutfit
-				+ ", BestTime = " + data.bestTime + ", Exp = " + data.exp + ", Winstreak = " + data.winstreak
-				+ ", GingerBreadMan = " + data.gingerbreadman + ", Elf = " + data.elf + ", Challenge1 = "
-				+ data.challenge1 + ", Challenge2 = " + data.challenge2 + ", Challenge3 = " + data.challenge3
-				+ ", KillMsgs = " + data.killMsgs + ", Level = " + data.level + ", Deaths = " + data.deaths
-				+ ", Paintball = " + data.paintball + ", Wins = " + data.wins + " WHERE UUID = '"
-				+ data.playerUUID.toString() + "';");
+				+ ", BroomWinEffect = " + data.broomWinEffect + ", BestTime = " + data.bestTime + ", Exp = " + data.exp
+				+ ", Winstreak = " + data.winstreak + ", GingerBreadMan = " + data.gingerbreadman + ", Elf = "
+				+ data.elf + ", Challenge1 = " + data.challenge1 + ", Challenge2 = " + data.challenge2
+				+ ", Challenge3 = " + data.challenge3 + ", KillMsgs = " + data.killMsgs + ", Level = " + data.level
+				+ ", Deaths = " + data.deaths + ", Paintball = " + data.paintball + ", Wins = " + data.wins
+				+ " WHERE UUID = '" + data.playerUUID.toString() + "';");
 		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed) VALUES ";
 		int index = 0;
 

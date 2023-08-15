@@ -19,6 +19,7 @@ import anthony.SuperCraftBrawl.Game.classes.all.ButterBroClass;
 import anthony.SuperCraftBrawl.Game.classes.all.ButterGolemClass;
 import anthony.SuperCraftBrawl.Game.classes.all.Cactus;
 import anthony.SuperCraftBrawl.Game.classes.all.ChickenClass;
+import anthony.SuperCraftBrawl.Game.classes.all.CloudClass;
 import anthony.SuperCraftBrawl.Game.classes.all.CreeperClass;
 import anthony.SuperCraftBrawl.Game.classes.all.DarkSethBlingClass;
 import anthony.SuperCraftBrawl.Game.classes.all.DwellerClass;
@@ -85,12 +86,12 @@ public enum ClassType {
 	Squid(20, 0, 0), Spider(21, 0, 0), BabyCow(22, 0, Rank.VIP), Herobrine(23, 0, Rank.VIP), Bunny(24, 450, 0),
 	ButterBro(25, 1200, 0), Steve(28, 1000, 0), Notch(29, 1000, 0), Pig(30, 0, 0), Blaze(31, 0, 0), Potato(32, 750, 0),
 	Wither(33, 0, 0), Ocelot(34, 250, 0), Creeper(35, 0, 0), Noteblock(36, 800, 0), EnchantTable(37, 350, 0),
-	Present(38, 320, 0), Wizard(41, 0, Rank.VIP), Star(42, 850, 0), Dweller(43, 0, 0), Zombie(44, 0, 0),
+	Present(38, 0, 0), Wizard(41, 0, Rank.VIP), Star(42, 850, 0), Dweller(43, 0, 0), Zombie(44, 0, 0),
 	Silverfish(45, 0, 0), Anvil(46, 700, 0), Summoner(47, 525, 0), MagmaCube(48, 0, Rank.VIP), Villager(49, 0, 0),
 	ZombiePigman(51, 0, 3), Witch(13, 0, 5), ZombieVillager(50, 0, 10), Ice(54, 0, 15), Vampire(53, 800, 0),
 	Bee(55, 425, 0), Jeb(56, 0, 20), Hunter(57, 500, 0), FlintAndSteel(58, 0, 0), WitherSk(59, 1500, 0),
-	Levitator(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP);
-	//Wolf(63, 0, 35)/* , Guardian(63, 0, 30) */;
+	Levitator(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30);
+	// Wolf(63, 0, 35)/* , Guardian(63, 0, 30) */;
 
 	private int id;
 	private int tokenCost = 0;
@@ -138,8 +139,10 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new Cactus(instance, player);
-		//case Wolf:
-			//return new WolfClass(instance, player);
+		case Cloud:
+			return new CloudClass(instance, player);
+		// case Wolf:
+		// return new WolfClass(instance, player);
 		// case Guardian:
 		// return new GuardianClass(instance, player);
 		case Firework:
@@ -272,8 +275,10 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new ItemStack(Material.CACTUS);
-		//case Wolf:
-			//return new ItemStack(Material.BONE);
+		case Cloud:
+			return new ItemStack(Material.WOOL);
+		// case Wolf:
+		// return new ItemStack(Material.BONE);
 		// case Guardian:
 		// return new ItemStack(Material.PRISMARINE_SHARD);
 		case Firework:
@@ -416,8 +421,10 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return "A pricklyyy living thing, made up of thornws & blood..";
-		//case Wolf:
-			//return "Have your brothers defend you from enemies!";
+		case Cloud:
+			return "Use your powers to send cool effects on your opponents!";
+		// case Wolf:
+		// return "Have your brothers defend you from enemies!";
 		// case Guardian:
 		// return "Guard thyself and thy family (or something idk)";
 		case Firework:
@@ -552,9 +559,10 @@ public enum ClassType {
 		return ChatColor.translateAlternateColorCodes('&', c);
 	}
 
-	public List<String> buildDescription(){
+	public List<String> buildDescription() {
 		String text = getClassDesc();
-		if(text == null) return null;
+		if (text == null)
+			return null;
 		final int maxLength = 30;
 
 		String[] split = text.split(" ");
@@ -564,11 +572,13 @@ public enum ClassType {
 			if (current.length() + word.length() + 1 <= maxLength) {
 				current.append(word).append(' ');
 			} else {
-				if(current.length() > 0) lines.add(ChatColor.GRAY + current.substring(0, current.length() - 1));
+				if (current.length() > 0)
+					lines.add(ChatColor.GRAY + current.substring(0, current.length() - 1));
 				current = new StringBuilder(word).append(' ');
 			}
 		}
-		if (current.length() > 0) lines.add(ChatColor.GRAY + current.substring(0, current.length() - 1));
+		if (current.length() > 0)
+			lines.add(ChatColor.GRAY + current.substring(0, current.length() - 1));
 		return lines;
 	}
 
@@ -576,8 +586,11 @@ public enum ClassType {
 		switch (this) {
 		case Bat:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bat" + ChatColor.RESET;
-		//case Wolf: 
-			//return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Wolf" + ChatColor.RESET;
+		case Cloud:
+			return "" + ChatColor.GRAY + ChatColor.ITALIC + "Cloud" + ChatColor.RESET;
+		// case Wolf:
+		// return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Wolf"
+		// + ChatColor.RESET;
 		// case Guardian:
 		// return "" + ChatColor.GRAY + ChatColor.BOLD + "Guardian" + ChatColor.RESET;
 		case Firework:
