@@ -2262,13 +2262,10 @@ public abstract class BaseClass {
 					data.exp += 29;
 					baseClass3.totalExp += 29;
 
-<<<<<<< HEAD
 					if (instance.getManager().getMain().tournament == true)
 						data.points++;
-=======
 				if (instance.getManager().getMain().tournament)
 					data.points++;
->>>>>>> f41d2af3892ece24e81a4a178721b26f0701a60d
 
 					d.playSound(d.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
 
