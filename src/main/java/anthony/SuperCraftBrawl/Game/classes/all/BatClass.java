@@ -77,7 +77,6 @@ public class BatClass extends BaseClass {
 		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
 		player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 999999999, 1));
 		player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 1));
-
 	}
 
 	@SuppressWarnings("unlikely-arg-type")

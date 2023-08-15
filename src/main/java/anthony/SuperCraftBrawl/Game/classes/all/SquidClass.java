@@ -65,59 +65,57 @@ public class SquidClass extends BaseClass {
 
 	@Override
 	public void DoDamage(EntityDamageByEntityEvent event) {
-        /*BaseClass bc = instance.classes.get(player);
-		if (bc != null && bc.getLives() <= 0)
-			return;
-
-		Random rand = new Random();
-		int chance = rand.nextInt(9);
-
-		if (chance == 5 || chance == 1 || chance == 3 || chance == 7) {
-			if (event.getEntity() instanceof Player) {
-				Player p = (Player) event.getEntity();
-				if (instance.duosMap != null)
-					if (instance.team.get(p).equals(instance.team.get(player)))
-						return;
-
-				p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 90, 0, true));
-			}
-		}*/
+		/*
+		 * BaseClass bc = instance.classes.get(player); if (bc != null && bc.getLives()
+		 * <= 0) return;
+		 * 
+		 * Random rand = new Random(); int chance = rand.nextInt(9);
+		 * 
+		 * if (chance == 5 || chance == 1 || chance == 3 || chance == 7) { if
+		 * (event.getEntity() instanceof Player) { Player p = (Player)
+		 * event.getEntity(); if (instance.duosMap != null) if
+		 * (instance.team.get(p).equals(instance.team.get(player))) return;
+		 * 
+		 * p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 90, 0, true));
+		 * } }
+		 */
 	}
 
 	private void abilityMsg() {
-        /*player.sendMessage("");
-		player.sendMessage(instance.getManager().getMain()
-				.color("&e&lCLASS TIP> &rCertain chance to give Blindness I to other players by hitting them!"));
-		player.sendMessage("");*/
+		/*
+		 * player.sendMessage(""); player.sendMessage(instance.getManager().getMain()
+		 * .color("&e&lCLASS TIP> &rCertain chance to give Blindness I to other players by hitting them!"
+		 * )); player.sendMessage("");
+		 */
 	}
 
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
-		if(event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK){
-			if(item == null) return;
-			switch (item.getType()){
-				case INK_SACK:
-					event.setCancelled(true);
-					break;
-				case COAL:
-					if(inkCooldown > System.currentTimeMillis()){
-						int seconds = (int) ((inkCooldown - System.currentTimeMillis()) / 1000);
-						player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET
-								+ "Your Ink is still on cooldown for " + ChatColor.YELLOW + seconds
-								+ " more seconds ");
-						return;
+		if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+			if (item == null)
+				return;
+			switch (item.getType()) {
+			case INK_SACK:
+				event.setCancelled(true);
+				break;
+			case COAL:
+				if (inkCooldown > System.currentTimeMillis()) {
+					int seconds = (int) ((inkCooldown - System.currentTimeMillis()) / 1000);
+					player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "Your Ink is still on cooldown for "
+							+ ChatColor.YELLOW + seconds + " more seconds ");
+					return;
+				}
+				// ticks
+				inkCooldown = System.currentTimeMillis() + (50L * 200);
+				player.getWorld().playEffect(player.getLocation(), Effect.SPLASH, 20);
+				player.getWorld().playSound(player.getLocation(), Sound.SPLASH, 1f, 1f);
+				for (Entity e : player.getWorld().getNearbyEntities(player.getLocation(), 10D, 10D, 10D)) {
+					if (e instanceof Player && !e.equals(player)) {
+						Player p = (Player) e;
+						p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 0));
 					}
-					                                                 //ticks
-					inkCooldown = System.currentTimeMillis() + (50L * 200);
-					player.getWorld().playEffect(player.getLocation(), Effect.SPLASH, 20);
-					player.getWorld().playSound(player.getLocation(), Sound.SPLASH, 1f, 1f);
-					for(Entity e : player.getWorld().getNearbyEntities(player.getLocation(), 10D, 10D, 10D)){
-						if(e instanceof Player && !e.equals(player)){
-							Player p = (Player) e;
-							p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 200, 0));
-						}
-					}
+				}
 			}
 		}
 	}
