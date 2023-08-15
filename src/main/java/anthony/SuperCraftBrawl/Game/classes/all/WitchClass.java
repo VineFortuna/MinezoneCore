@@ -147,7 +147,7 @@ public class WitchClass extends BaseClass {
 			}
 		}
 
-		if (gameTicks % 40 == 0 && regenBrooms != 4) {
+		if (gameTicks % 20 == 0 && regenBrooms != 4) {
 			if (player.isOnGround()) {
 				BaseClass bc = instance.classes.get(player);
 				if (bc != null && bc.getLives() <= 0)
@@ -215,7 +215,7 @@ public class WitchClass extends BaseClass {
 				int amount = item.getAmount();
 				if (amount > 1) {
 					event.setCancelled(true);
-					player.setVelocity(new Vector(0, 1, 0).multiply(1.15D));
+					player.setVelocity(new Vector(0, 1, 0).multiply(1.2D));
 					this.used = true;
 					amount--;
 					item.setAmount(amount);
