@@ -1,6 +1,6 @@
 package anthony.SuperCraftBrawl.commands;
 
-import java.util.Arrays; 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -8,20 +8,15 @@ import java.util.Random;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.TNTPrimed;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import com.google.common.collect.Lists;
 
@@ -31,8 +26,8 @@ import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.gui.GameStatsGUI;
 import anthony.SuperCraftBrawl.gui.ShopCWGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -147,6 +142,22 @@ public class Commands implements CommandExecutor, TabCompleter {
 					}
 				}
 				break;
+
+			case "gamestats":
+				if (args.length >= 0) {
+					if (main.gameStats.containsKey(player)) {
+						if (main.gameStats.get(player) != null) {
+							if (main.gameStats.get(player).HasPlayer(player)) {
+								new GameStatsGUI(main, main.gameStats.get(player)).inv.open(player);
+								return true;
+							}
+						}
+					}
+					player.sendMessage(main.color("&c&l(!) &rThis game's stats have expired"));
+				}
+
+				return true;
+
 			case "join":
 				if (args.length > 0) {
 					String mapName = args[0];
@@ -223,18 +234,18 @@ public class Commands implements CommandExecutor, TabCompleter {
 					player.sendMessage(main.color("&c&l(!) &rThis map does not exist!"));
 				}
 				return true;
-				
+
 			case "sw":
 				if (args.length > 0) {
 					String map = args[0];
-					
+
 					for (anthony.skywars.Maps maps : anthony.skywars.Maps.values()) {
 						if (maps.toString().equalsIgnoreCase(map)) {
 							main.getSWManager().JoinGame(player, maps);
 							return true;
 						}
 					}
-					
+
 					player.sendMessage(main.color("&c&l(!) &rThis map does not exist!"));
 				}
 				return true;
@@ -415,7 +426,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 	public void leaveGame(Player player) {
 		GameInstance i = main.getGameManager().GetInstanceOfSpectator(player);
-		//anthony.CrystalWars.game.GameInstance i2 = main.getCwManager().getInstanceOfPlayer(player);
+		// anthony.CrystalWars.game.GameInstance i2 =
+		// main.getCwManager().getInstanceOfPlayer(player);
 		player.spigot().setCollidesWithEntities(true);
 		player.setAllowFlight(false);
 		player.setAllowFlight(true);
@@ -440,7 +452,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 					i.totalVotes--;
 					data.votes = 0;
 				}
-			}	
+			}
 
 			for (PotionEffect type : player.getActivePotionEffects())
 				player.removePotionEffect(type.getType());
@@ -463,21 +475,18 @@ public class Commands implements CommandExecutor, TabCompleter {
 			main.LobbyItems(player);
 			i.spectators.remove(player);
 			player.setDisplayName("" + player.getName());
-		} /*else if (i2 != null && main.getCwManager().removePlayer(player)) {
-			main.ResetPlayer(player);
-			player.setGameMode(GameMode.ADVENTURE);
-			main.LobbyBoard(player);
-			player.getInventory().clear();
-			main.LobbyItems(player);
-			player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-					+ "You have left your game");
-
-			for (PotionEffect type : player.getActivePotionEffects())
-				player.removePotionEffect(type.getType());
-			main.sendScoreboardUpdate(player);
-			player.setGameMode(GameMode.ADVENTURE);
-			removeArmor(player);
-		}*/ else {
+		} /*
+			 * else if (i2 != null && main.getCwManager().removePlayer(player)) {
+			 * main.ResetPlayer(player); player.setGameMode(GameMode.ADVENTURE);
+			 * main.LobbyBoard(player); player.getInventory().clear();
+			 * main.LobbyItems(player); player.sendMessage("" + ChatColor.RESET +
+			 * ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET +
+			 * "You have left your game");
+			 * 
+			 * for (PotionEffect type : player.getActivePotionEffects())
+			 * player.removePotionEffect(type.getType()); main.sendScoreboardUpdate(player);
+			 * player.setGameMode(GameMode.ADVENTURE); removeArmor(player); }
+			 */ else {
 			player.sendMessage("" + ChatColor.RESET + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
 					+ "You are not in a game!");
 		}

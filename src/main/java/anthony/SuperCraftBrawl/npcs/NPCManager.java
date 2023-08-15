@@ -36,7 +36,7 @@ public class NPCManager implements Listener {
 	private NPCLib npcLib;
 
 	// NPCS HERE:
-	private NPC scb, skywars;
+	private NPC scb, skywars, scbDuos;
 
 	public NPCManager(Core main) {
 		this.main = main;
@@ -48,26 +48,32 @@ public class NPCManager implements Listener {
 	private void load() {
 		int skinId = 277513;
 
-		if (main.lobbyWorld.getName().equals("lobbies")) {
-			MineSkinFetcher.fetchSkinFromIdAsync(skinId, skin -> {
-				scb = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "SUPER CRAFT BLOCKS",
-						main.color("&7Click to connect!"),
-						"" + ChatColor.AQUA + GameManager.playercount.getOrDefault("scb-1", 0) + " Players"));
-				scb.setLocation(new Location(main.getLobbyWorld(), 0.474, 51, 7.559, -179, -2));
-				scb.setSkin(skin);
-				scb.create();
+		// if (main.lobbyWorld.getName().equals("lobbies")) {
+		MineSkinFetcher.fetchSkinFromIdAsync(skinId, skin -> {
+			scb = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "SUPER CRAFT BLOCKS",
+					main.color("&7Click to connect!"),
+					"" + ChatColor.AQUA + GameManager.playercount.getOrDefault("scb-1", 0) + " Players"));
+			scb.setLocation(new Location(main.getLobbyWorld(), 0.474, 51, 7.559, -179, -2));
+			scb.setSkin(skin);
+			scb.create();
 
-				skywars = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "SKYWARS",
-						main.color("&7Click to connect!"), "" + ChatColor.AQUA + "0 Players"));
-				skywars.setLocation(new Location(main.getLobbyWorld(), 10.570, 51, 0.519, 90, -2));
-				skywars.setSkin(skin);
-				skywars.create();
+			scbDuos = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "SUPER CRAFT BLOCKS",
+					main.color("&7&lDuos"), main.color("&7Click to connect!")));
+			scbDuos.setLocation(new Location(main.getLobbyWorld(), 185.469, 106, 662.483, 179, -0));
+			scbDuos.setSkin(skin);
+			scbDuos.create();
 
-				// FIX IT SO THIS UPDATES EVERY 10 SECONDS
-			});
+			skywars = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "SKYWARS",
+					main.color("&7Click to connect!"), "" + ChatColor.AQUA + "0 Players"));
+			skywars.setLocation(new Location(main.getLobbyWorld(), 10.570, 51, 0.519, 90, -2));
+			skywars.setSkin(skin);
+			skywars.create();
 
-			update();
-		}
+			// FIX IT SO THIS UPDATES EVERY 10 SECONDS
+		});
+
+		update();
+		// }
 	}
 
 	private void update() { // Updates NPCs
@@ -120,18 +126,33 @@ public class NPCManager implements Listener {
 				player.sendMessage(main.color("&c&l(!) &rThere was a problem connecting to &esw-1"));
 			}
 			player.sendPluginMessage(main, "BungeeCord", b.toByteArray());
+		} else if (e.getNPC() == scbDuos) {
+			Bukkit.getMessenger().registerOutgoingPluginChannel(main, "BungeeCord");
+
+			ByteArrayOutputStream b = new ByteArrayOutputStream();
+			DataOutputStream out = new DataOutputStream(b);
+
+			try {
+				out.writeUTF("Connect");
+				out.writeUTF("scb-2");
+				player.sendMessage(main.color("&e&l(!) &rConnecting to &escb-2"));
+			} catch (Exception ex) {
+				player.sendMessage(main.color("&c&l(!) &rThere was a problem connecting to &escb-2"));
+			}
+			player.sendPluginMessage(main, "BungeeCord", b.toByteArray());
 		}
 	}
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
 		// Spawn npcs when player joins server
-		if (main.lobbyWorld.getName().equals("lobbies")) {
+		//if (main.lobbyWorld.getName().equals("lobbies")) {
 			Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(main, () -> {
 				Bukkit.getScheduler().runTask(main, () -> scb.show(e.getPlayer()));
 				Bukkit.getScheduler().runTask(main, () -> skywars.show(e.getPlayer()));
+				Bukkit.getScheduler().runTask(main, () -> scbDuos.show(e.getPlayer()));
 			}, 20L);
-		}
+		//}
 	}
 
 	/*

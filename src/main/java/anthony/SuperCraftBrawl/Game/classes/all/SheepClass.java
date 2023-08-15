@@ -34,11 +34,11 @@ import net.md_5.bungee.api.ChatColor;
 
 public class SheepClass extends BaseClass {
 
-	private boolean green = false, gray = false, black = false;
+	private boolean green = false, gray = false, black = false, pink = false, lime = false;
 
 	public SheepClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.2;
+		baseVerticalJump = 1.15;
 	}
 
 	public ItemStack setArmour(ItemStack armour, Color c) {
@@ -76,8 +76,7 @@ public class SheepClass extends BaseClass {
 	public ItemStack getStartWool() {
 		player.setDisplayName(
 				"" + player.getName() + " " + ChatColor.RESET + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
-		return ItemHelper.setDetails(new ItemStack(Material.WOOL, 1), "" + ChatColor.RESET + "White Wool",
-				ChatColor.YELLOW + "Right click!");
+		return ItemHelper.setDetails(new ItemStack(Material.WOOL, 1), "" + ChatColor.RESET + "White Wool");
 	}
 
 	public ItemStack getStartEnchanter() {
@@ -105,6 +104,9 @@ public class SheepClass extends BaseClass {
 	public void SetItems(Inventory playerInv) {
 		green = false; // To reset each life
 		gray = false; // Also same
+		lime = false;
+		black = false;
+		pink = false;
 		// To reset Sheep's scoreboard color
 		BaseClass bc = instance.classes.get(player);
 		if (bc.getLives() > 0 && bc.getLives() != 5) {
@@ -148,6 +150,20 @@ public class SheepClass extends BaseClass {
 					((LivingEntity) event.getEntity())
 							.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 55, 1, true));
 			}
+		} else if (pink == true) {
+			Random r = new Random();
+			int chance = r.nextInt(5);
+
+			if (chance == 0 || chance == 1)
+				player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 70, 1, true));
+		} else if (lime == true) {
+			if (event.getEntity() instanceof LivingEntity) {
+				Random r = new Random();
+				int chance = r.nextInt(5);
+				if (chance == 1 || chance == 3 || chance == 0)
+					((LivingEntity) event.getEntity())
+							.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 200, 2, true));
+			}
 		}
 	}
 
@@ -155,6 +171,8 @@ public class SheepClass extends BaseClass {
 		green = false; // To reset each life
 		gray = false; // Also same
 		black = false; // Also also same lol
+		pink = false; // ALSO SAME LOL!!!!
+		lime = false; // AHHHHH!!!!!!!!!!
 		ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
 
 		SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
@@ -177,9 +195,33 @@ public class SheepClass extends BaseClass {
 								instance.getManager().getMain().color("   &r3 sec Blindness II")),
 						Enchantment.DAMAGE_ALL, 4), Enchantment.KNOCKBACK, 1);
 
+		ItemStack pinkWool = ItemHelper
+				.addEnchant(
+						ItemHelper
+								.addEnchant(
+										ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, DyeColor.PINK.getData()),
+												instance.getManager().getMain().color("&9&lPink Wool"), "",
+												instance.getManager().getMain().color("&7Pink Wool ability:"),
+												instance.getManager().getMain()
+														.color("   &r3 sec Regen I chance on hit")),
+										Enchantment.DAMAGE_ALL, 3),
+						Enchantment.KNOCKBACK, 1);
+
+		ItemStack limeWool = ItemHelper
+				.addEnchant(
+						ItemHelper
+								.addEnchant(
+										ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, DyeColor.LIME.getData()),
+												instance.getManager().getMain().color("&2&lLime Wool"), "",
+												instance.getManager().getMain().color("&7Lime Wool ability:"),
+												instance.getManager().getMain()
+														.color("   &r3 sec Nausea chance on hit")),
+										Enchantment.DAMAGE_ALL, 3),
+						Enchantment.KNOCKBACK, 1);
+
 		ItemStack item = ItemHelper.addEnchant(
 				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, DyeColor.BLUE.getData()),
-						"" + ChatColor.BLUE + ChatColor.BOLD + "Blue Wool"), Enchantment.KNOCKBACK, 2),
+						"" + ChatColor.BLUE + ChatColor.BOLD + "Blue Wool"), Enchantment.KNOCKBACK, 3),
 				Enchantment.DAMAGE_ALL, 3);
 
 		ItemStack item4 = ItemHelper
@@ -206,7 +248,8 @@ public class SheepClass extends BaseClass {
 
 		ItemStack[] itemList = { item3, item, item4, item3, item, item3, item, item3, item, item3, item, item3, item,
 				item3, item, item3, item, item3, item, item5, item5, item5, item5, item5, item5, item5, item6, item6,
-				item6, item6, item6, item7, item7, item7, item7, item7, item7 };
+				item6, item6, item6, item7, item7, item7, item7, item7, item7, pinkWool, pinkWool, pinkWool, pinkWool,
+				limeWool, limeWool, limeWool, limeWool };
 		Random rand = new Random();
 		int randomNum = rand.nextInt(itemList.length);
 
@@ -276,9 +319,9 @@ public class SheepClass extends BaseClass {
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given "
 					+ ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "PURPLE WOOL");
 			player.setDisplayName(
-					"" + player.getName() + " " + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
+					"" + player.getName() + " " + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.LIGHT_PURPLE
+			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.DARK_PURPLE
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
@@ -318,6 +361,41 @@ public class SheepClass extends BaseClass {
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 			gray = true;
+		} else if (itemList[randomNum] == pinkWool) {
+			player.getInventory()
+					.setChestplate(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
+							Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.fromRGB(255, 105, 180)));
+			player.getInventory()
+					.setLeggings(setArmour(new ItemStack(Material.LEATHER_LEGGINGS), Color.fromRGB(255, 105, 180)));
+			player.getInventory().setBoots(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS),
+					Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.fromRGB(255, 105, 180)));
+
+			player.sendMessage(instance.getManager().getMain().color("&r&l(!) &rYou were given &9&lPINK WOOL"));
+			player.setDisplayName(instance.getManager().getMain().color("" + player.getName() + " &9&lSheep&r"));
+			BaseClass bc = instance.classes.get(player);
+			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.LIGHT_PURPLE
+					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
+			bc.score = newScore;
+			newScore.setScore(bc.getLives());
+			pink = true;
+		} else if (itemList[randomNum] == limeWool) {
+			player.getInventory()
+					.setChestplate(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
+							Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.LIME));
+			player.getInventory().setLeggings(setArmour(new ItemStack(Material.LEATHER_LEGGINGS), Color.LIME));
+			player.getInventory().setBoots(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS),
+					Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.LIME));
+
+			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.GREEN
+					+ ChatColor.BOLD + "LIME WOOL");
+			player.setDisplayName(
+					"" + player.getName() + " " + ChatColor.GREEN + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
+			BaseClass bc = instance.classes.get(player);
+			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.GREEN
+					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
+			bc.score = newScore;
+			newScore.setScore(bc.getLives());
+			lime = true;
 		}
 
 		player.getInventory().setItem(0, new ItemStack(itemList[randomNum]));

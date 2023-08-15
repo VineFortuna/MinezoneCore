@@ -1,7 +1,14 @@
 package anthony.SuperCraftBrawl;
 
+<<<<<<< HEAD
+import com.avaje.ebeaninternal.server.type.RsetDataReader;
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
+import org.bukkit.Material;
+=======
 import org.bukkit.*;
 import org.bukkit.block.Skull;
+>>>>>>> f41d2af3892ece24e81a4a178721b26f0701a60d
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemFlag;

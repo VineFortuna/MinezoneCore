@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.gui;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
@@ -37,22 +38,22 @@ public class ActiveGamesGUI implements InventoryProvider {
 			if (entry.getValue().state == GameState.WAITING) {
 				if (entry.getValue().gameStartTime != null) {
 					contents.set(count, i, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.EMERALD_BLOCK),
-							String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + mapName,
-							ChatColor.RESET + "Starting In: " + ChatColor.YELLOW + entry.getValue().ticksTilStart
+							"" + ChatColor.YELLOW + ChatColor.BOLD + mapName,
+							"" + ChatColor.RESET + "Starting In: " + ChatColor.YELLOW + entry.getValue().ticksTilStart
 									+ "s",
-							ChatColor.RESET + "Players: " + ChatColor.YELLOW + entry.getValue().players.size()
+							"" + ChatColor.RESET + "Players: " + ChatColor.YELLOW + entry.getValue().players.size()
 									+ "/" + entry.getValue().gameType.getMaxPlayers(),
-							"", String.valueOf(ChatColor.RESET) + ChatColor.UNDERLINE + "Click to join!"), e -> {
+							"", "" + ChatColor.RESET + ChatColor.UNDERLINE + "Click to join!"), e -> {
 								main.getGameManager().JoinMap(player, entry.getValue().getMap());
 								inv.close(player);
 							}));
 				} else {
 					contents.set(count, i, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.EMERALD_BLOCK),
-							String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + mapName,
-							ChatColor.YELLOW + "Waiting for Players",
-							ChatColor.RESET + "Players: " + ChatColor.YELLOW + entry.getValue().players.size()
+							"" + ChatColor.YELLOW + ChatColor.BOLD + mapName,
+							"" + ChatColor.YELLOW + "Waiting for Players",
+							"" + ChatColor.RESET + "Players: " + ChatColor.YELLOW + entry.getValue().players.size()
 									+ "/" + entry.getValue().gameType.getMaxPlayers(),
-							"", String.valueOf(ChatColor.RESET) + ChatColor.UNDERLINE + "Click to join!"), e -> {
+							"", "" + ChatColor.RESET + ChatColor.UNDERLINE + "Click to join!"), e -> {
 								main.getGameManager().JoinMap(player, entry.getValue().getMap());
 								inv.close(player);
 							}));
@@ -60,11 +61,11 @@ public class ActiveGamesGUI implements InventoryProvider {
 			} else if (entry.getValue().state == GameState.STARTED) {
 				String state = "In Progress";
 				contents.set(count, i, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER),
-						String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + mapName, ChatColor.GREEN + state,
-						ChatColor.RESET + "Players: " + ChatColor.YELLOW + entry.getValue().players.size() + "/"
+						"" + ChatColor.YELLOW + ChatColor.BOLD + mapName, "" + ChatColor.GREEN + state,
+						"" + ChatColor.RESET + "Players: " + ChatColor.YELLOW + entry.getValue().players.size() + "/"
 								+ entry.getValue().gameType.getMaxPlayers(),
-						ChatColor.RESET + "Spectators: " + ChatColor.YELLOW + entry.getValue().spectators.size(),
-						"", String.valueOf(ChatColor.RESET) + ChatColor.UNDERLINE + "Click to spectate!"), e -> {
+						"" + ChatColor.RESET + "Spectators: " + ChatColor.YELLOW + entry.getValue().spectators.size(),
+						"", "" + ChatColor.RESET + ChatColor.UNDERLINE + "Click to spectate!"), e -> {
 							main.getGameManager().SpectatorJoinMap(player, entry.getValue().getMap());
 							inv.close(player);
 						}));
