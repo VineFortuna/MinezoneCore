@@ -1042,20 +1042,27 @@ public class GameManager implements Listener, PluginMessageListener {
 		if (event.getDamager() instanceof Snowball) {
 			Snowball snowball = (Snowball) event.getDamager();
 			if (snowball.getShooter() instanceof Player) {
-				Player player = (Player) event.getEntity();
-				GameInstance i = this.GetInstanceOfPlayer(player);
+				Player shooter = (Player) snowball.getShooter();
+				Player hitPlayer = (Player) event.getEntity();
+				GameInstance i = this.GetInstanceOfPlayer(hitPlayer);
 
 				if (i != null) {
 					if (i.duosMap != null) {
-						if (!(i.team.get(snowball.getShooter()).equals(i.team.get(player)))) {
-							if (snowball.getShooter() instanceof SnowGolemClass) {
-								player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 2));
+						if (!(i.team.get(shooter).equals(i.team.get(hitPlayer)))) {
+							if (shooter instanceof SnowGolemClass) {
+								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 3));
+
 							} else {
-								player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 0));
+								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 0));
 							}
 						}
 					} else {
-						player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 0));
+						if (shooter instanceof SnowGolemClass) {
+							hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 3));
+
+						} else {
+							hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 0));
+						}
 					}
 				}
 			}
