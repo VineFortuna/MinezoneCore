@@ -27,7 +27,7 @@ import java.util.List;
 public class SnowGolemClass extends BaseClass {
 
 	private Cooldown pumpkinCooldown = new Cooldown(200);
-	private Cooldown platformCooldown = new Cooldown(20*1000);
+	private Cooldown platformCooldown = new Cooldown(20 * 1000);
 
 	private ItemStack weapon;
 
@@ -39,17 +39,20 @@ public class SnowGolemClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		// Head (helmet)
-		ItemStack playerHead = ItemHelper.createSkullHeadPlayer(1,"SnowGolem", ChatColor.WHITE + "SnowGolem Head");
+		ItemStack playerHead = ItemHelper.createSkullHeadPlayer(1, "SnowGolem", ChatColor.WHITE + "SnowGolem Head");
 
 		// Chestplate
-		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.WHITE,  ChatColor.WHITE + "SnowGolem's Chestplate");
+		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.WHITE,
+				ChatColor.WHITE + "SnowGolem's Chestplate");
 		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 
 		// Leggings
-		ItemStack leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, Color.WHITE,  ChatColor.WHITE + "SnowGolem's Leggings");
+		ItemStack leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, Color.WHITE,
+				ChatColor.WHITE + "SnowGolem's Leggings");
 
 		// Boots
-		ItemStack boots = ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.WHITE,  ChatColor.WHITE + "SnowGolem's Boots");
+		ItemStack boots = ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.WHITE,
+				ChatColor.WHITE + "SnowGolem's Boots");
 		boots.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 
 		// Setting armor
@@ -70,10 +73,12 @@ public class SnowGolemClass extends BaseClass {
 		this.weapon = weapon;
 
 		// Snow Platform
-		ItemStack snowPlatform = ItemHelper.create(Material.SNOW_BLOCK, ChatColor.WHITE + "Snow Platform", Collections.singletonList(ChatColor.GRAY + "Right click to save yourself from falling"));
+		ItemStack snowPlatform = ItemHelper.create(Material.SNOW_BLOCK, ChatColor.WHITE + "Snow Platform",
+				Collections.singletonList(ChatColor.GRAY + "Right click to save yourself from falling"));
 
 		// Slowballs
-		ItemStack slowballs = new ItemStack(ItemHelper.create(Material.SNOW_BALL, "" + ChatColor.RED + ChatColor.BOLD + "Slowballs").getType(), 5);
+		ItemStack slowballs = new ItemStack(
+				ItemHelper.create(Material.SNOW_BALL, "" + ChatColor.RED + ChatColor.BOLD + "Slowballs").getType(), 5);
 
 		// Pumpkin
 		List<String> pumpkinList = new ArrayList<>();
@@ -93,10 +98,9 @@ public class SnowGolemClass extends BaseClass {
 		ItemMeta meta = item.getItemMeta();
 
 		if (item != null) {
-
 			// SNOW PLATFORM ABILITY
-			if (item.getType() == Material.SNOW_BLOCK &&
-					(event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR)) {
+			if (item.getType() == Material.SNOW_BLOCK
+					&& (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR)) {
 				if (platformCooldown.useAndResetCooldown()) {
 					if (player.getGameMode() != GameMode.SPECTATOR) {
 						World playerWorld = player.getWorld();
@@ -113,13 +117,15 @@ public class SnowGolemClass extends BaseClass {
 
 								if (platformBlock.getType() == Material.AIR) {
 									platformBlock.setType(Material.SNOW_BLOCK);
-									platformBlock.setMetadata("SnowPlatform", new FixedMetadataValue(instance.getManager().getMain(), true));
+									platformBlock.setMetadata("SnowPlatform",
+											new FixedMetadataValue(instance.getManager().getMain(), true));
 								}
 							}
 						}
 
 						// PLAYING SOUND FOR CREATING PLATFORM
-						playerWorld.playSound(playerLocation, Sound.STEP_SNOW, 4, 2);
+						for (Player gamePlayer : instance.players)
+							gamePlayer.playSound(playerLocation, Sound.STEP_SNOW, 4, 2);
 
 						// REMOVING PLATFORM
 						Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
@@ -138,7 +144,8 @@ public class SnowGolemClass extends BaseClass {
 						}, 3 * 20);
 
 						// PLAYING SOUND FOR REMOVING PLATFORM
-						playerWorld.playSound(playerLocation, Sound.DIG_SNOW, 4, 4);
+						for (Player gamePlayer : instance.players)
+							gamePlayer.playSound(playerLocation, Sound.DIG_SNOW, 4, 4);
 					}
 				}
 			}
@@ -203,12 +210,13 @@ public class SnowGolemClass extends BaseClass {
 	}
 
 	@Override
-	public void setNameTag() {
-
+	public ItemStack getAttackWeapon() {
+		return weapon;
 	}
 
 	@Override
-	public ItemStack getAttackWeapon() {
-		return weapon;
+	public void SetNameTag() {
+		// TODO Auto-generated method stub
+
 	}
 }
