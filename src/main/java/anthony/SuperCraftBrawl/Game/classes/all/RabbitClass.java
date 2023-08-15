@@ -90,7 +90,7 @@ public class RabbitClass extends BaseClass {
 	public void Tick(int gameTicks) {
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
 			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
-		else if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
+		if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
 			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 2));
 	}
 

@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -25,8 +26,12 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 
 public class OcelotClass extends BaseClass {
+
+	private int cooldownSec = 0;
 
 	public OcelotClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -81,12 +86,32 @@ public class OcelotClass extends BaseClass {
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void Tick(int gameTicks) {
+		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Ocelot
+				&& instance.classes.get(player).getLives() > 0) {
+			this.cooldownSec = (20000 - ocelot.getTime()) / 1000 + 1;
+
+			if (ocelot.getTime() < 20000) {
+				String msg = instance.getManager().getMain()
+						.color("&7&lPurr Attack &rregenerates in: &e" + this.cooldownSec + "s");
+				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
+						(byte) 2);
+				CraftPlayer craft = (CraftPlayer) player;
+				craft.getHandle().playerConnection.sendPacket(packet);
+			} else {
+				String msg = instance.getManager().getMain().color("&rYou can use &7&lPurr Attack");
+				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
+						(byte) 2);
+				CraftPlayer craft = (CraftPlayer) player;
+				craft.getHandle().playerConnection.sendPacket(packet);
+			}
+		}
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
 			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
 	}
 
 	@Override
 	public void SetItems(Inventory playerInv) {
+		this.cooldownSec = 0; // Reset each life
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
@@ -102,21 +127,23 @@ public class OcelotClass extends BaseClass {
 		if (item != null) {
 			if (item.getType() == Material.DIAMOND
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-				int amount = item.getAmount();
-				player.sendMessage(instance.getManager().getMain()
-						.color("&r&l(!) &rYou attacked all players with &7&lPurr Attack"));
-				for (Player gamePlayer : instance.players) {
-					if (player != gamePlayer) {
-						if (amount > 0) {
-							gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 200, 1));
+				if (ocelot.getTime() < 20000) {
+					int seconds = (20000 - ocelot.getTime()) / 1000 + 1;
+					event.setCancelled(true);
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "Your &7&lPurr Attack is still regenerating for " + ChatColor.YELLOW + seconds + "s");
+				} else {
+					ocelot.restart();
+					player.sendMessage(instance.getManager().getMain()
+							.color("&r&l(!) &rYou attacked all players with &7&lPurr Attack"));
+					for (Player gamePlayer : instance.players) {
+						if (player != gamePlayer) {
+							gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 110, 2));
 							gamePlayer.sendMessage(instance.getManager().getMain()
 									.color("&r&l(!) &rYou were attacked by &7&lPurr Attack"));
 						}
 					}
 				}
-				amount--;
-				if (amount == 0)
-					player.getInventory().clear(player.getInventory().getHeldItemSlot());
 			}
 		}
 	}

@@ -678,6 +678,8 @@ public class GameManager implements Listener, PluginMessageListener {
 								target.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 1, true));
 							player.sendMessage(main.color("&6&l(!) &rYou blooped &e" + target.getName()));
 							target.sendMessage(main.color("&6&l(!) &rYou were blooped by &e" + player.getName()));
+							player.playSound(player.getLocation(), Sound.SLIME_ATTACK, 2, 1);
+							target.playSound(target.getLocation(), Sound.SLIME_ATTACK, 2, 1);
 							amount--;
 
 							if (amount == 0)
@@ -1102,6 +1104,12 @@ public class GameManager implements Listener, PluginMessageListener {
 
 			GameInstance instance = GetInstanceOfPlayer(player);
 			if (instance != null) {
+				if (instance.classes.containsKey(player)) {
+					BaseClass base = instance.classes.get(player);
+					if (this.spawnProt.containsKey(player) || base.bedrockInvincibility == true) {
+						event.setCancelled(true);
+					}
+				}
 				if (event instanceof EntityDamageByEntityEvent) {
 					EntityDamageByEntityEvent damageEvent = (EntityDamageByEntityEvent) event;
 					if (damageEvent.getDamager() instanceof Player) {
@@ -1110,6 +1118,20 @@ public class GameManager implements Listener, PluginMessageListener {
 						if (instance.state == GameState.STARTED) {
 							if (instance.duosMap != null) {
 								if (instance.team.get(player).equals(instance.team.get(damager))) {
+									event.setCancelled(true);
+									return;
+								}
+							}
+
+							if (instance.classes.containsKey(damager) && instance.classes.containsKey(player)) {
+								BaseClass baseClass = instance.classes.get(damager);
+								BaseClass baseClass2 = instance.classes.get(player);
+
+								if (this.spawnProt.containsKey(player) || baseClass2.bedrockInvincibility == true) {
+									event.setCancelled(true);
+									return;
+								}
+								if (this.spawnProt.containsKey(damager) || baseClass.bedrockInvincibility == true) {
 									event.setCancelled(true);
 									return;
 								}
@@ -1130,15 +1152,18 @@ public class GameManager implements Listener, PluginMessageListener {
 							}
 						}
 
-						if (instance.classes.containsKey(damager)) {
+						if (instance.classes.containsKey(damager) && instance.classes.containsKey(player)) {
 							BaseClass baseClass = instance.classes.get(damager);
+							BaseClass baseClass2 = instance.classes.get(player);
 
-							if (baseClass != null) {
-								if (this.spawnProt.containsKey(damager)) {
+							if (baseClass != null && baseClass2 != null) {
+								if (this.spawnProt.containsKey(damager) || baseClass.bedrockInvincibility == true) {
 									event.setCancelled(true);
+									return;
 								}
-								if (this.spawnProt.containsKey(player)) {
+								if (this.spawnProt.containsKey(player) || baseClass2.bedrockInvincibility == true) {
 									event.setCancelled(true);
+									return;
 								}
 								if (baseClass.getType() == ClassType.FlintAndSteel)
 									if (baseClass.flintUsed == true)
@@ -1161,6 +1186,8 @@ public class GameManager implements Listener, PluginMessageListener {
 							} else {
 								player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 120, 0, true));
 							}
+							player.setLastDamageCause(new EntityDamageByEntityEvent(shoot, player,
+									event.getCause(), event.getDamage()));
 						}
 					} else if (damageEvent.getDamager() instanceof SmallFireball) {
 						SmallFireball sf = (SmallFireball) damageEvent.getDamager();
@@ -1172,6 +1199,8 @@ public class GameManager implements Listener, PluginMessageListener {
 									event.setCancelled(true);
 								}
 							}
+							player.setLastDamageCause(new EntityDamageByEntityEvent(shoot, player,
+									event.getCause(), event.getDamage()));
 						}
 					} else if (damageEvent.getDamager() instanceof Fireball) {
 						Fireball sf = (Fireball) damageEvent.getDamager();
@@ -1183,12 +1212,15 @@ public class GameManager implements Listener, PluginMessageListener {
 									event.setCancelled(true);
 								}
 							}
+							player.setLastDamageCause(new EntityDamageByEntityEvent(shoot, player,
+									event.getCause(), event.getDamage()));
 						}
 					} else if (damageEvent.getDamager() instanceof Arrow) {
 						Arrow damager = (Arrow) damageEvent.getDamager();
 						if (damager.getShooter() instanceof Player) {
 							Player p = (Player) damager.getShooter();
 							BaseClass bc = instance.classes.get(p);
+							BaseClass pBc = instance.classes.get(player);
 
 							if (instance.duosMap != null) {
 								if (instance.team.get(p).equals(instance.team.get(player))) {
@@ -1197,12 +1229,26 @@ public class GameManager implements Listener, PluginMessageListener {
 								}
 							}
 
-							if (bc.getType() == ClassType.Vampire || bc.getType() == ClassType.WitherSk
-									|| bc.getType() == ClassType.Levitator || bc.getType() == ClassType.Firework)
-								bc.DoDamage(damageEvent);
+							if (bc != null && pBc != null) {
+								if (bc.getType() == ClassType.Vampire || bc.getType() == ClassType.WitherSk
+										|| bc.getType() == ClassType.Levitator || bc.getType() == ClassType.Firework) {
+									if (this.spawnProt.containsKey(p) || bc.bedrockInvincibility == true) {
+										event.setCancelled(true);
+										return;
+									}
+									if (this.spawnProt.containsKey(player) || pBc.bedrockInvincibility == true) {
+										event.setCancelled(true);
+										return;
+									}
+									player.setLastDamageCause(new EntityDamageByEntityEvent(p, player,
+											event.getCause(), event.getDamage()));
+									bc.DoDamage(damageEvent);
+								}
+							}
 						}
 					}
 				}
+				
 				if (!event.isCancelled() && event.getFinalDamage() >= player.getHealth() - 0.2) {
 					event.setCancelled(true);
 					if (event instanceof EntityDamageByEntityEvent) {
@@ -1211,6 +1257,13 @@ public class GameManager implements Listener, PluginMessageListener {
 							Player damager = (Player) damageEvent.getDamager();
 							player.setLastDamageCause(new EntityDamageByEntityEvent(damager, player, event.getCause(),
 									event.getDamage()));
+						} else if (damageEvent.getDamager() instanceof Arrow) {
+							Arrow a = (Arrow) damageEvent.getDamager();
+							if (a.getShooter() instanceof Player) {
+								Player damager = (Player) a.getShooter();
+								player.setLastDamageCause(new EntityDamageByEntityEvent(damager, player,
+										event.getCause(), event.getDamage()));
+							}
 						}
 					}
 					instance.PlayerDeath(player);
@@ -1716,9 +1769,9 @@ public class GameManager implements Listener, PluginMessageListener {
 					Player p = (Player) e;
 
 					if (p.getGameMode() != GameMode.SPECTATOR) {
-						EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.PROJECTILE, 25.0);
+						EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.PROJECTILE, 15.0);
 						getMain().getServer().getPluginManager().callEvent(damageEvent);
-						p.damage(40.0, e);
+						p.damage(15.0, e);
 					}
 				}
 			}
@@ -1959,6 +2012,19 @@ public class GameManager implements Listener, PluginMessageListener {
 			playercount.put(server, num);
 		}
 		return;
+	}
+
+	@EventHandler
+	public void onArmorBreak(PlayerItemDamageEvent event) {
+		// Check if the item being damaged is a piece of armor
+		if (event.getItem().getType().name().contains("HELMET")
+				|| event.getItem().getType().name().contains("CHESTPLATE")
+				|| event.getItem().getType().name().contains("LEGGINGS")
+				|| event.getItem().getType().name().contains("BOOTS")) {
+
+			// Cancel the event to prevent armor from breaking
+			event.setCancelled(true);
+		}
 	}
 
 	// All item interactions:

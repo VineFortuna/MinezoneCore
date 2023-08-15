@@ -15,6 +15,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
@@ -93,30 +94,35 @@ public class ZombiePigmanClass extends BaseClass {
 		ItemStack item = event.getItem();
 
 		if (item != null && item.getType() == Material.MONSTER_EGG) {
-			int amount = item.getAmount();
-			amount--;
+			ItemMeta meta = item.getItemMeta();
 
-			if (amount == 0)
-				player.getInventory().clear(player.getInventory().getHeldItemSlot());
-			else
-				item.setAmount(amount);
+			if (meta != null && meta.getDisplayName().contains("ZombiePigman")) {
+				int amount = item.getAmount();
+				amount--;
 
-			ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
-				@Override
-				public void onHit(Player hit) {
-					Location hitLoc = this.getBaseProj().getEntity().getLocation();
-					player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
-					PigZombie en = (PigZombie) player.getWorld().spawnCreature(hitLoc, EntityType.PIG_ZOMBIE);
-					EntityEquipment e = ((CraftLivingEntity) en).getEquipment();
-					e.setItemInHand(new ItemStack(Material.GOLD_SWORD));
-					en.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "ZombiePigman");
-					en.setAngry(true);
-					// en.setTarget(target);
-				}
+				if (amount == 0)
+					player.getInventory().clear(player.getInventory().getHeldItemSlot());
+				else
+					item.setAmount(amount);
 
-			}, new ItemStack(Material.MONSTER_EGG));
-			instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-					player.getLocation().getDirection().multiply(2.0D));
+				ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
+					@Override
+					public void onHit(Player hit) {
+						Location hitLoc = this.getBaseProj().getEntity().getLocation();
+						player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
+						PigZombie en = (PigZombie) player.getWorld().spawnCreature(hitLoc, EntityType.PIG_ZOMBIE);
+						EntityEquipment e = ((CraftLivingEntity) en).getEquipment();
+						e.setItemInHand(new ItemStack(Material.GOLD_SWORD));
+						en.setCustomName(
+								"" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "ZombiePigman");
+						en.setAngry(true);
+						// en.setTarget(target);
+					}
+
+				}, new ItemStack(Material.MONSTER_EGG));
+				instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+						player.getLocation().getDirection().multiply(2.0D));
+			}
 		}
 	}
 
