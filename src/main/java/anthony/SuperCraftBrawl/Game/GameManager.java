@@ -1052,15 +1052,15 @@ public class GameManager implements Listener, PluginMessageListener {
 					if (i.duosMap != null) {
 						if (!(i.team.get(shooter).equals(i.team.get(hitPlayer)))) {
 							if (i.classes.get(shooter).getType() == ClassType.SnowGolem)
-								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 2));
+								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 2)); // Slowness 3
 							else
-								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 0));
+								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 0)); // Slowness 1
 						}
 					} else {
 						if (i.classes.get(shooter).getType() == ClassType.SnowGolem)
-							hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 2));
+							hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 2)); // Slowness 3
 						else
-							hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 0));
+							hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 0)); // Slowness 1
 					}
 				}
 			}

@@ -11,11 +11,8 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 
 public class SuitsGUI implements InventoryProvider {
 
@@ -36,7 +33,7 @@ public class SuitsGUI implements InventoryProvider {
     public void init(Player player, InventoryContents contents) {
         PlayerData data = main.getDataManager().getPlayerData(player);
 
-        // Icons Items
+        // Icon Items
         ItemStack lockedCosmetic = ItemHelper.createDye(DyeColor.GRAY, 1, ChatColor.GRAY + "&&&&&&&");
 
             // Santa Outfit
@@ -44,7 +41,7 @@ public class SuitsGUI implements InventoryProvider {
 
 //        ItemStack santa = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
 
-            // Austronaut Outfit
+            // Astronaut Outfit
         ItemStack astronautHead = ItemHelper.create(Material.GLASS, ChatColor.YELLOW.toString() + ChatColor.BOLD + "Austronaut Outfit");
 
 
@@ -55,7 +52,11 @@ public class SuitsGUI implements InventoryProvider {
 
                 }));
 
-            // Austronaut Outfit
+
+
+
+
+            // Astronaut Outfit
         contents.set(1,1,ClickableItem.of(
                 astronautHead,
                 e -> {

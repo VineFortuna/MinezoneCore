@@ -35,7 +35,7 @@ public class GadgetsGUI implements InventoryProvider {
     public void init(Player player, InventoryContents contents) {
         PlayerData data = main.getDataManager().getPlayerData(player);
 
-        // Icons Items
+        // Icon Items
         ItemStack lockedCosmetic = ItemHelper.createDye(DyeColor.GRAY, 1, ChatColor.GRAY + "&&&&&&&");
 
             // Broom

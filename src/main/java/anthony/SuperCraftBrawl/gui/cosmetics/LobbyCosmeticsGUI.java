@@ -20,19 +20,19 @@ public class LobbyCosmeticsGUI implements InventoryProvider {
 
     public LobbyCosmeticsGUI(Core main) {
         inv = SmartInventory.builder()
-            .id("myInventory")
-            .provider(this)
-            .size(5, 9)
-            .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Lobby Cosmetics")
-            .build();
+                .id("myInventory")
+                .provider(this)
+                .size(5, 9)
+                .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Lobby Cosmetics")
+                .build();
         this.main = main;
-}
+    }
 
     @Override
     public void init(Player player, InventoryContents contents) {
         PlayerData data = main.getDataManager().getPlayerData(player);
 
-        // Button Items
+        // Icon Items
         ItemStack particles = ItemHelper.create(Material.NETHER_STAR, ChatColor.YELLOW + "Particle effects");
 
         ItemStack gadgets = ItemHelper.create(Material.GOLD_BARDING, ChatColor.YELLOW + "Gadgets");
@@ -43,7 +43,8 @@ public class LobbyCosmeticsGUI implements InventoryProvider {
 
         ItemStack morphs = ItemHelper.createSkullHeadPlayer(1, "Natowski", ChatColor.YELLOW + "Morphs");
 
-        // Setting Items
+
+        // Setting Icons
         contents.set(1, 2, ClickableItem.of(
                 particles,
                 e -> {
