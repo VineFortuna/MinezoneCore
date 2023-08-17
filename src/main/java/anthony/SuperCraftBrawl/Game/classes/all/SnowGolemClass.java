@@ -100,54 +100,86 @@ public class SnowGolemClass extends BaseClass {
 		if (item != null) {
 			// SNOW PLATFORM ABILITY
 			if (item.getType() == Material.SNOW_BLOCK
-					&& (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR)) {
-				if (platformCooldown.useAndResetCooldown()) {
-					if (player.getGameMode() != GameMode.SPECTATOR) {
-						World playerWorld = player.getWorld();
-						Location playerLocation = player.getLocation();
+			        && (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR)) {
+			    if (platformCooldown.useAndResetCooldown()) {
+			        if (player.getGameMode() != GameMode.SPECTATOR) {
+			            final World playerWorld = player.getWorld();
+			            final Location playerLocation = player.getLocation();
+			            final int platformLength = 3;
+			            final int platformWidth = 3;
+			            final int maxPlatforms = 5;
 
-						// CREATING PLATFORM
-						int platformLength = 3; // Platform Length
-						int platformWidth = 3; // Platform Width
+			            final int[] platformsCreated = { 0 };
+			            int platformDelay = 8; // in ticks
 
-						for (int x = -platformLength / 2; x <= platformLength / 2; x++) {
-							for (int z = -platformWidth / 2; z <= platformWidth / 2; z++) {
-								Location platformLocation = playerLocation.clone().add(x, -1, z);
-								Block platformBlock = playerWorld.getBlockAt(platformLocation);
+			            Bukkit.getScheduler().runTaskTimer(instance.getManager().getMain(), () -> {
+			                if (platformsCreated[0] < maxPlatforms) {
+			                    platformsCreated[0]++;
 
-								if (platformBlock.getType() == Material.AIR) {
-									platformBlock.setType(Material.SNOW_BLOCK);
-									platformBlock.setMetadata("SnowPlatform",
-											new FixedMetadataValue(instance.getManager().getMain(), true));
-								}
-							}
-						}
+			                    final int platformHeight = platformsCreated[0];
+			                    final Location centerLocation = playerLocation.clone().add(0, -platformHeight, 0);
 
-						// PLAYING SOUND FOR CREATING PLATFORM
-						for (Player gamePlayer : instance.players)
-							gamePlayer.playSound(playerLocation, Sound.STEP_SNOW, 4, 2);
+			                    // Creating platform
+			                    for (int x = -platformLength / 2; x <= platformLength / 2; x++) {
+			                        for (int z = -platformWidth / 2; z <= platformWidth / 2; z++) {
+			                            final Location platformLocation = centerLocation.clone().add(x, 0, z);
+			                            final Block platformBlock = playerWorld.getBlockAt(platformLocation);
 
-						// REMOVING PLATFORM
-						Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
-							for (int x = -platformLength / 2; x <= platformLength / 2; x++) {
-								for (int z = -platformWidth / 2; z <= platformWidth / 2; z++) {
-									Location platformLocation = playerLocation.clone().add(x, -1, z);
-									Block platformBlock = playerWorld.getBlockAt(platformLocation);
+			                            if (platformBlock.getType() == Material.AIR) {
+			                                platformBlock.setType(Material.SNOW_BLOCK);
+			                                platformBlock.setMetadata("SnowPlatform",
+			                                        new FixedMetadataValue(instance.getManager().getMain(), true));
+			                            }
+			                        }
+			                    }
 
-									if (platformBlock.hasMetadata("SnowPlatform")) {
-										platformBlock.setType(Material.AIR);
+			                    // Teleport player to center of platform
+			                    player.teleport(centerLocation.add(0, 1, 0));
 
-										platformBlock.removeMetadata("SnowPlatform", instance.getManager().getMain());
-									}
-								}
-							}
-						}, 3 * 20);
+			                    // Play sound for creating platform
+			                    for (Player gamePlayer : instance.players)
+			                        gamePlayer.playSound(playerLocation, Sound.STEP_SNOW, 4, 2);
 
-						// PLAYING SOUND FOR REMOVING PLATFORM
-						for (Player gamePlayer : instance.players)
-							gamePlayer.playSound(playerLocation, Sound.DIG_SNOW, 4, 4);
-					}
-				}
+			                    // Delay before removing platform
+			                    Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
+			                        for (int x = -platformLength / 2; x <= platformLength / 2; x++) {
+			                            for (int z = -platformWidth / 2; z <= platformWidth / 2; z++) {
+			                                final Location platformLocation = centerLocation.clone().add(x, 0, z);
+			                                final Block platformBlock = playerWorld.getBlockAt(platformLocation);
+
+			                                if (platformBlock.hasMetadata("SnowPlatform")) {
+			                                    platformBlock.setType(Material.AIR);
+			                                    platformBlock.removeMetadata("SnowPlatform", instance.getManager().getMain());
+			                                }
+			                            }
+			                        }
+			                    }, 3 * 20); // 3 seconds delay for removing platform
+
+			                    // Play sound for removing platform
+			                    for (Player gamePlayer : instance.players)
+			                        gamePlayer.playSound(playerLocation, Sound.DIG_SNOW, 4, 4);
+			                } else {
+			                    // Remove all platforms after creating them
+			                    for (int i = 1; i <= maxPlatforms; i++) {
+			                        final int platformHeight = i;
+			                        final Location centerLocation = playerLocation.clone().add(0, -platformHeight, 0);
+
+			                        for (int x = -platformLength / 2; x <= platformLength / 2; x++) {
+			                            for (int z = -platformWidth / 2; z <= platformWidth / 2; z++) {
+			                                final Location platformLocation = centerLocation.clone().add(x, 0, z);
+			                                final Block platformBlock = playerWorld.getBlockAt(platformLocation);
+
+			                                if (platformBlock.hasMetadata("SnowPlatform")) {
+			                                    platformBlock.setType(Material.AIR);
+			                                    platformBlock.removeMetadata("SnowPlatform", instance.getManager().getMain());
+			                                }
+			                            }
+			                        }
+			                    }
+			                }
+			            }, 0, platformDelay);
+			        }
+			    }
 			}
 
 			// PUMPKIN HEAD ABILITY
