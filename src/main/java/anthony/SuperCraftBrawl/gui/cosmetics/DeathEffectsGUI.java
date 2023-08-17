@@ -57,8 +57,8 @@ public class DeathEffectsGUI implements InventoryProvider {
 
 				}));
 
-		// Golden Apple
 		if (data != null) {
+			// Golden Apple
 			contents.set(0, 0, ClickableItem.of(
 					goldenApple,
 					e -> {
