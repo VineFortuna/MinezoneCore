@@ -1,12 +1,10 @@
 package anthony.SuperCraftBrawl;
 
-
-import com.avaje.ebeaninternal.server.type.RsetDataReader; 
+import anthony.ChatColorHelper;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Material;
 import org.bukkit.*;
-import org.bukkit.block.Skull;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemFlag;
@@ -17,6 +15,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.material.Dye;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class ItemHelper {
 
 	public static ItemStack setDetails(ItemStack item, String name, List<String> lore, String... addon) {
 		ItemMeta im = item.getItemMeta();
-		im.setDisplayName(name);
+		im.setDisplayName(ChatColorHelper.color(name));
 		if(addon != null){
 			if(addon.length >= 2 || addon[0] != null) lore.addAll(Arrays.asList(addon));
 		}
@@ -55,8 +54,16 @@ public class ItemHelper {
 		ItemMeta meta = item.getItemMeta();
 		if (meta == null)
 			return item;
-		meta.setDisplayName(name);
+
+		meta.setDisplayName(ChatColorHelper.color(name));
 		item.setItemMeta(meta);
+		return item;
+	}
+
+	public static ItemStack create(Material mat, String name, int amount) {
+		ItemStack item = create(mat, name);
+
+		item.setAmount(amount);
 		return item;
 	}
 
@@ -65,8 +72,45 @@ public class ItemHelper {
 		ItemMeta meta = item.getItemMeta();
 		if (meta == null)
 			return item;
-		meta.setLore(lore);
+		meta.setLore(ChatColorHelper.colorList(lore));
 		item.setItemMeta(meta);
+		return item;
+	}
+
+	public static ItemStack create(Material mat, String name, String loreLine1) {
+		ItemStack item = create(mat, name);
+		ItemMeta meta = item.getItemMeta();
+		if (meta == null)
+			return item;
+		List<String> loreList = new ArrayList<>();
+
+		loreList.add(ChatColorHelper.color(loreLine1));
+
+		meta.setLore(loreList);
+		item.setItemMeta(meta);
+		return item;
+	}
+
+	public static ItemStack create(Material mat, String name, String loreLine1, String loreLine2) {
+		ItemStack item = create(mat, name);
+		ItemMeta meta = item.getItemMeta();
+		if (meta == null)
+			return item;
+		List<String> loreList = new ArrayList<>();
+
+		loreList.add(ChatColorHelper.color(loreLine1));
+		loreList.add(ChatColorHelper.color(loreLine2));
+
+		meta.setLore(loreList);
+		item.setItemMeta(meta);
+		return item;
+	}
+
+	public static ItemStack create(Material mat, String name, List<String> lore, int amount) {
+		ItemStack item = create(mat, name, lore);
+
+		item.setAmount(amount);
+
 		return item;
 	}
 
@@ -97,7 +141,7 @@ public class ItemHelper {
 		ItemStack itemStack = createMonsterEgg(entityType, amount);
 		ItemMeta itemMeta = itemStack.getItemMeta();
 
-		itemMeta.setDisplayName(displayName);
+		itemMeta.setDisplayName(ChatColorHelper.color(displayName));
 		itemStack.setItemMeta(itemMeta);
 
 		return itemStack;
@@ -111,7 +155,7 @@ public class ItemHelper {
 		ItemStack itemStack = createSkullHead(amount, skullType);
 		SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
 
-		skullMeta.setDisplayName(displayName);
+		skullMeta.setDisplayName(ChatColorHelper.color(displayName));
 		itemStack.setItemMeta(skullMeta);
 
 		return itemStack;
@@ -121,15 +165,15 @@ public class ItemHelper {
 		ItemStack itemStack = createSkullHead(amount, skullType, displayName);
 		SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
 
-		skullMeta.setDisplayName(displayName);
-		skullMeta.setLore(lore);
+		skullMeta.setDisplayName(ChatColorHelper.color(displayName));
+		skullMeta.setLore(ChatColorHelper.colorList(lore));
 		itemStack.setItemMeta(skullMeta);
 
 		return itemStack;
 	}
 
 	public static ItemStack createSkullHeadPlayer(int amount, String owner) {
-		ItemStack itemStack = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
+		ItemStack itemStack = new ItemStack(Material.SKULL_ITEM, amount, (short) SkullType.PLAYER.ordinal());
 		SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
 
 		skullMeta.setOwner(owner);
@@ -142,8 +186,7 @@ public class ItemHelper {
 		ItemStack itemStack = createSkullHeadPlayer(amount, owner);
 		SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
 
-		skullMeta.setOwner(owner);
-		skullMeta.setDisplayName(displayName);
+		skullMeta.setDisplayName(ChatColorHelper.color(displayName));
 		itemStack.setItemMeta(skullMeta);
 
 		return itemStack;
@@ -153,9 +196,7 @@ public class ItemHelper {
 		ItemStack itemStack = createSkullHeadPlayer(amount, owner, displayName);
 		SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
 
-		skullMeta.setOwner(owner);
-		skullMeta.setDisplayName(displayName);
-		skullMeta.setLore(lore);
+		skullMeta.setLore(ChatColorHelper.colorList(lore));
 		itemStack.setItemMeta(skullMeta);
 
 		return itemStack;
@@ -180,7 +221,7 @@ public class ItemHelper {
 		ItemStack dyeItem = createDye(color, amount);
 		ItemMeta dyeItemMeta = dyeItem.getItemMeta();
 
-		dyeItemMeta.setDisplayName(displayName);
+		dyeItemMeta.setDisplayName(ChatColorHelper.color(displayName));
 		dyeItem.setItemMeta(dyeItemMeta);
 
 		return dyeItem;
@@ -190,8 +231,7 @@ public class ItemHelper {
 		ItemStack dyeItem = createDye(color, amount, displayName);
 		ItemMeta dyeItemMeta = dyeItem.getItemMeta();
 
-		dyeItemMeta.setDisplayName(displayName);
-		dyeItemMeta.setLore(lore);
+		dyeItemMeta.setLore(ChatColorHelper.colorList(lore));
 		dyeItem.setItemMeta(dyeItemMeta);
 
 		return dyeItem;
@@ -211,8 +251,7 @@ public class ItemHelper {
 		ItemStack leatherArmor = createColoredArmor(armorPiece, color);
 		LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) leatherArmor.getItemMeta();
 
-		leatherArmorMeta.setColor(color);
-		leatherArmorMeta.setDisplayName(displayName);
+		leatherArmorMeta.setDisplayName(ChatColorHelper.color(displayName));
 		leatherArmor.setItemMeta(leatherArmorMeta);
 
 		return leatherArmor;
@@ -222,12 +261,26 @@ public class ItemHelper {
 		ItemStack leatherArmor = createColoredArmor(armorPiece, color, displayName);
 		LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) leatherArmor.getItemMeta();
 
-		leatherArmorMeta.setColor(color);
-		leatherArmorMeta.setDisplayName(displayName);
-		leatherArmorMeta.setLore(lore);
+		leatherArmorMeta.setLore(ChatColorHelper.colorList(lore));
 		leatherArmor.setItemMeta(leatherArmorMeta);
 
 		return leatherArmor;
+	}
+
+	public static ItemStack setUnbreakable(ItemStack item) {
+		ItemMeta meta = item.getItemMeta();
+		meta.spigot().setUnbreakable(true);
+		item.setItemMeta(meta);
+
+		return item;
+	}
+
+	public static ItemStack setBreakable(ItemStack item) {
+		ItemMeta meta = item.getItemMeta();
+		meta.spigot().setUnbreakable(false);
+		item.setItemMeta(meta);
+
+		return item;
 	}
 
 	public static ItemStack setGlowing(ItemStack item, boolean glowing) {
