@@ -332,7 +332,7 @@ public class PlayerListener implements Listener {
 					}
 				}
 			}
-			AuthAPI api = AuthAPI.get();
+			//AuthAPI api = AuthAPI.get();
 			PunishAPI pu = PunishAPI.get();
 			if (pu.isPlayerMuted(event.getPlayer().getUniqueId())) {
 				String muteMsg = pu.getMuteMessage(event.getPlayer().getUniqueId());
@@ -340,10 +340,10 @@ public class PlayerListener implements Listener {
 				return;
 			}
 			if (censored) {
-				if (api.isPlayerAuthed(event.getPlayer()))
+				//if (api.isPlayerAuthed(event.getPlayer()))
 					Bukkit.broadcastMessage(message);
 			} else {
-				if (api.isPlayerAuthed(event.getPlayer()))
+				//if (api.isPlayerAuthed(event.getPlayer()))
 					Bukkit.broadcastMessage(message + event.getMessage());
 			}
 		}
