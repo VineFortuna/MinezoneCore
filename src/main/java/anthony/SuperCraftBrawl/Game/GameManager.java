@@ -1182,8 +1182,8 @@ public class GameManager implements Listener, PluginMessageListener {
 							} else {
 								player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 120, 0, true));
 							}
-							player.setLastDamageCause(new EntityDamageByEntityEvent(shoot, player,
-									event.getCause(), event.getDamage()));
+							player.setLastDamageCause(
+									new EntityDamageByEntityEvent(shoot, player, event.getCause(), event.getDamage()));
 						}
 					} else if (damageEvent.getDamager() instanceof SmallFireball) {
 						SmallFireball sf = (SmallFireball) damageEvent.getDamager();
@@ -1195,8 +1195,8 @@ public class GameManager implements Listener, PluginMessageListener {
 									event.setCancelled(true);
 								}
 							}
-							player.setLastDamageCause(new EntityDamageByEntityEvent(shoot, player,
-									event.getCause(), event.getDamage()));
+							player.setLastDamageCause(
+									new EntityDamageByEntityEvent(shoot, player, event.getCause(), event.getDamage()));
 						}
 					} else if (damageEvent.getDamager() instanceof Fireball) {
 						Fireball sf = (Fireball) damageEvent.getDamager();
@@ -1208,8 +1208,8 @@ public class GameManager implements Listener, PluginMessageListener {
 									event.setCancelled(true);
 								}
 							}
-							player.setLastDamageCause(new EntityDamageByEntityEvent(shoot, player,
-									event.getCause(), event.getDamage()));
+							player.setLastDamageCause(
+									new EntityDamageByEntityEvent(shoot, player, event.getCause(), event.getDamage()));
 						}
 					} else if (damageEvent.getDamager() instanceof Arrow) {
 						Arrow damager = (Arrow) damageEvent.getDamager();
@@ -1236,15 +1236,15 @@ public class GameManager implements Listener, PluginMessageListener {
 										event.setCancelled(true);
 										return;
 									}
-									player.setLastDamageCause(new EntityDamageByEntityEvent(p, player,
-											event.getCause(), event.getDamage()));
+									player.setLastDamageCause(new EntityDamageByEntityEvent(p, player, event.getCause(),
+											event.getDamage()));
 									bc.DoDamage(damageEvent);
 								}
 							}
 						}
 					}
 				}
-				
+
 				if (!event.isCancelled() && event.getFinalDamage() >= player.getHealth() - 0.2) {
 					event.setCancelled(true);
 					if (event instanceof EntityDamageByEntityEvent) {
