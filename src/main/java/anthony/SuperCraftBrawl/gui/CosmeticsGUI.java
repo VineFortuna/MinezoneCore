@@ -55,7 +55,7 @@ public class CosmeticsGUI implements InventoryProvider {
 		ItemStack lobby = ItemHelper.create(Material.BOOKSHELF, ChatColor.YELLOW + "Lobby Cosmetics");
 
 			// Game Cosmetics
-		ItemStack ingame = ItemHelper.create(Material.ENDER_PORTAL, ChatColor.YELLOW + "Game Cosmetics");
+		ItemStack ingame = ItemHelper.create(Material.ENDER_PORTAL_FRAME, ChatColor.YELLOW + "Game Cosmetics");
 
 		// Setting Icons
 		contents.set(1, 2, ClickableItem.of(

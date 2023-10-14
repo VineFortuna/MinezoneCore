@@ -196,7 +196,7 @@ public class IceClass extends BaseClass {
 					if (en instanceof Player) {
 						Player p = (Player) en;
 						if (p.getGameMode() != GameMode.SPECTATOR){
-							p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 110, 1));
+							p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 75, 5));
 							Firework firework = p.getWorld().spawn(p.getEyeLocation(), Firework.class);
 							FireworkEffect effect = FireworkEffect.builder().flicker(true).withColor(Color.BLUE, Color.WHITE).build();
 							FireworkMeta meta = firework.getFireworkMeta();
