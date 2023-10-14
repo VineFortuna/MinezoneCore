@@ -40,12 +40,13 @@ import java.util.Map.Entry;
 public class SnowGolemClass extends BaseClass {
 
 	private int cooldownSec = 0;
+	private int pumpkinDuration = 4; // 4 seconds
 
 	private ItemStack weapon;
 
 	public SnowGolemClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.3;
+		baseVerticalJump = 1.2;
 	}
 
 	@Override
@@ -79,8 +80,8 @@ public class SnowGolemClass extends BaseClass {
 
 		// Weapon
 		ItemStack weapon = ItemHelper.create(Material.STICK, ChatColor.GREEN + "Map Knocker");
-		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
-		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
+		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3); // Sharpness 3
+		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1); // Knockback 1
 
 		this.weapon = weapon;
 
@@ -248,7 +249,7 @@ public class SnowGolemClass extends BaseClass {
 								// Pumpkin Head Duration and Application
 								BukkitRunnable runTimer = new BukkitRunnable() {
 
-									int ticks = 10;
+									int ticks = pumpkinDuration;
 
 									@Override
 									public void run() {
