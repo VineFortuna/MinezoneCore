@@ -97,9 +97,9 @@ public class IceClass extends BaseClass {
 	public void Tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Ice
 				&& instance.classes.get(player).getLives() > 0) {
-			this.cooldownSec = (10000 - ice.getTime()) / 1000 + 1;
+			this.cooldownSec = (10 * 1000 - ice.getTime()) / 1000 + 1;
 
-			if (ice.getTime() < 10000) {
+			if (ice.getTime() < 10 * 1000) {
 				String msg = instance.getManager().getMain()
 						.color("&b&lFreeze Ray &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
@@ -127,7 +127,7 @@ public class IceClass extends BaseClass {
 					int seconds = (10000 - ice.getTime()) / 1000 + 1;
 					event.setCancelled(true);
 					player.sendMessage(
-							"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Broooo... You're still on cooldown for "
+							ChatColor.BOLD + "(!) " + ChatColor.RESET + "Broooo... You're still on cooldown for "
 									+ ChatColor.YELLOW + seconds + " more seconds ");
 				} else {
 					ice.restart();
@@ -163,7 +163,7 @@ public class IceClass extends BaseClass {
 								if (closest.distanceSquared(p.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
 									if (instance.duosMap != null) {
 										if (!(instance.team.get(p).equals(instance.team.get(player)))) {
-											p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 1));
+											p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,  2 * 20, 0)); // Slowness 1 for 2 seconds
 											EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID,
 													5.0);
 											instance.getManager().getMain().getServer().getPluginManager()
@@ -171,7 +171,7 @@ public class IceClass extends BaseClass {
 											p.damage(5.0, player);
 										}
 									} else {
-										p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 1));
+										p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 2 * 20, 0)); // Slowness 1 for 2 seconds
 										EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID, 5.0);
 										instance.getManager().getMain().getServer().getPluginManager()
 												.callEvent(damageEvent);
@@ -196,7 +196,7 @@ public class IceClass extends BaseClass {
 					if (en instanceof Player) {
 						Player p = (Player) en;
 						if (p.getGameMode() != GameMode.SPECTATOR){
-							p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 75, 5));
+							p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 2 * 60, 6)); // Slowness 7 for 2 seconds
 							Firework firework = p.getWorld().spawn(p.getEyeLocation(), Firework.class);
 							FireworkEffect effect = FireworkEffect.builder().flicker(true).withColor(Color.BLUE, Color.WHITE).build();
 							FireworkMeta meta = firework.getFireworkMeta();
@@ -219,7 +219,7 @@ public class IceClass extends BaseClass {
 		super.Death(e);
 		if(player.equals(e.getEntity().getKiller())){
 			if(player.getInventory().contains(Material.PACKED_ICE)) return;
-			//Regeneration ice bomb upon killing.
+			// Regeneration ice bomb upon killing.
 			player.getInventory().addItem(
 					ItemHelper.setDetails(new ItemStack(Material.PACKED_ICE),
 							instance.getManager().getMain().color("&bFreeze Bomb"), "",
