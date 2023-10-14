@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 
 import java.util.Random;
 
+import anthony.ChatColorHelper;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -23,6 +24,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -36,9 +38,10 @@ import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import org.bukkit.util.Vector;
 
 public class SummonerClass extends BaseClass {
-
+	private ItemStack weapon;
 	private BukkitRunnable egg;
 	int count = 0;
 
@@ -51,39 +54,32 @@ public class SummonerClass extends BaseClass {
 		return ClassType.Summoner;
 	}
 
-	public ItemStack makePurple(ItemStack armor) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armor.getItemMeta();
-		lm.setColor(Color.PURPLE);
-		armor.setItemMeta(lm);
-		return armor;
-	}
-
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
+		// Head (helmet)
+		ItemStack playerHead = ItemHelper.createSkullHeadPlayer(1, "Slimess", "&5Summoner Head");
 
-		SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
+		// Chestplate
+		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.PURPLE, "&5Summoner's Chestplate");
+		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 
-		meta.setOwner("Slimess");
-		meta.setDisplayName("");
+		// Leggings
+		ItemStack leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, Color.PURPLE, "&5Summoner Leggings");
 
-		playerskull.setItemMeta(meta);
+		// Boots
+		ItemStack boots = ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.PURPLE, "&5Summoner Boots");
+		boots.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 
-		playerEquip.setHelmet(playerskull);
-		playerEquip.setChestplate(makePurple(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makePurple(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makePurple(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+		// Setting armor
+		playerEquip.setHelmet(playerHead);
+		playerEquip.setChestplate(chestplate);
+		playerEquip.setLeggings(leggings);
+		playerEquip.setBoots(boots);
 	}
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(
-				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK),
-						instance.getManager().getMain().color("&0Book of Wisdom")), Enchantment.DAMAGE_ALL, 3),
-				Enchantment.KNOCKBACK, 1);
-		return item;
+		return weapon;
 	}
 
 	@Override
@@ -95,9 +91,20 @@ public class SummonerClass extends BaseClass {
 	@Override
 	public void SetItems(Inventory playerInv) {
 		count = 0;
-		playerInv.setItem(0, this.getAttackWeapon());
-		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.MONSTER_EGG),
-				instance.getManager().getMain().color("&2&lRandom Mob Pokeball")));
+
+		// Weapon
+		ItemStack weapon = ItemHelper.create(Material.ENCHANTED_BOOK,"&0Book of Wisdom");
+		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3); // Sharpness 3
+		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);  // Knockback 1
+
+		this.weapon = weapon;
+
+		// Summon Mob
+		ItemStack summonMob = ItemHelper.create(Material.MONSTER_EGG, "&2&lSummons Call");
+
+		// Setting items
+		playerInv.setItem(0, weapon);
+		playerInv.setItem(1, summonMob);
 	}
 
 	@Override
@@ -115,68 +122,126 @@ public class SummonerClass extends BaseClass {
 				}
 
 				Random r = new Random();
-				int chance = r.nextInt(3);
+				int chance = r.nextInt(3) + 1;
 
-				if (chance == 0) {
+				// Spawn Zombie
+				if (chance == 1) {
 					ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
 						@Override
 						public void onHit(Player hit) {
 							Location hitLoc = this.getBaseProj().getEntity().getLocation();
+							// Playing Sound
 							player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
-							Entity en = (Zombie) player.getWorld().spawnCreature(hitLoc, EntityType.ZOMBIE);
-							EntityEquipment e = ((CraftLivingEntity) en).getEquipment();
-							e.setHelmet(new ItemStack(Material.LEATHER_HELMET));
-							e.setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
-							e.setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-							e.setBoots(new ItemStack(Material.LEATHER_BOOTS));
-							e.setItemInHand(new ItemStack(Material.IRON_SWORD));
 
-							en.setCustomName(
-									"" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Zombie");
-							EntityDamageEvent damageEvent = new EntityDamageEvent(player, DamageCause.PROJECTILE, 2.0);
-							instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
-							player.damage(2.0);
+							// Spawning Zombie
+							Zombie en = (Zombie) player.getWorld().spawnCreature(hitLoc, EntityType.ZOMBIE);
+							// Customizing Zombie
+								// Setting Zombie to not de-spawn when far away
+							en.setRemoveWhenFarAway(false);
+								// Setting Zombie name to owner's
+							en.setCustomName(ChatColorHelper.color("&c" + player.getName() + "'s &eZombie"));
+								// Setting Custom name visible
+							en.setCustomNameVisible(true);
+								// Setting Zombie higher velocity
+							en.setVelocity(new Vector(1.15,1.15,1.15));
+								// Setting full unbreakable leather armor
+							EntityEquipment equipment = en.getEquipment();
+
+									// Helmet
+							ItemStack helmet = ItemHelper.create(Material.LEATHER_HELMET);
+							ItemHelper.setUnbreakable(helmet);
+									// Chestplate
+							ItemStack chestplate = ItemHelper.create(Material.LEATHER_CHESTPLATE);
+							ItemHelper.setUnbreakable(chestplate);
+									// Leggings
+							ItemStack leggings = ItemHelper.create(Material.LEATHER_LEGGINGS);
+							ItemHelper.setUnbreakable(leggings);
+									// Boots
+							ItemStack boots = ItemHelper.create(Material.LEATHER_BOOTS);
+							ItemHelper.setUnbreakable(boots);
+
+							equipment.setHelmet(helmet);
+							equipment.setChestplate(chestplate);
+							equipment.setLeggings(leggings);
+							equipment.setBoots(boots);
+
+								// Setting unbreakable diamond sword
+							ItemStack sword = ItemHelper.create(Material.DIAMOND_SWORD);
+							ItemHelper.setUnbreakable(sword);
+
+							equipment.setItemInHand(sword);
+
+							// Damage Summoner when spawns mob
+//							EntityDamageEvent damageEvent = new EntityDamageEvent(player, DamageCause.PROJECTILE, 2.0);
+//							instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+//							player.damage(2.0);
 						}
 
 					}, new ItemStack(Material.MONSTER_EGG));
 					instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 							player.getLocation().getDirection().multiply(2.0D));
-				} else if (chance == 1) {
-					ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
-						@Override
-						public void onHit(Player hit) {
-							Location hitLoc = this.getBaseProj().getEntity().getLocation();
-							player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
-							Creeper en = (Creeper) player.getWorld().spawnCreature(hitLoc, EntityType.CREEPER);
-							en.setPowered(true);
-							en.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW
-									+ "Charged Creeper");
-							EntityDamageEvent damageEvent = new EntityDamageEvent(player, DamageCause.PROJECTILE, 3.5);
-							instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
-							player.damage(4.0);
-						}
-
-					}, new ItemStack(Material.MONSTER_EGG));
-					instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-							player.getLocation().getDirection().multiply(2.0D));
+					// Spawn Creeper
 				} else if (chance == 2) {
 					ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
 						@Override
 						public void onHit(Player hit) {
 							Location hitLoc = this.getBaseProj().getEntity().getLocation();
+							// Playing Sound
 							player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
+
+							// Spawning Creeper
+							Creeper en = (Creeper) player.getWorld().spawnCreature(hitLoc, EntityType.CREEPER);
+							// Customizing Creeper
+								// Setting Creeper to not de-spawn when far away
+							en.setRemoveWhenFarAway(false);
+								// Setting Creeper Name to owner's
+							en.setCustomName(ChatColorHelper.color("&c" + player.getName() + "'s &eCreeper"));
+								// Setting Custom name visible
+							en.setCustomNameVisible(true);
+								// Setting to Charged Creeper
+								en.setPowered(true);
+						}
+
+					}, new ItemStack(Material.MONSTER_EGG));
+					instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+							player.getLocation().getDirection().multiply(2.0D));
+					// Spawn Skeleton
+				} else if (chance == 3) {
+					ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
+						@Override
+						public void onHit(Player hit) {
+							Location hitLoc = this.getBaseProj().getEntity().getLocation();
+							// Playing Sound
+							player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
+
+							// Spawning Skeleton
 							Skeleton en = (Skeleton) player.getWorld().spawnCreature(hitLoc, EntityType.SKELETON);
-							EntityEquipment e = ((CraftLivingEntity) en).getEquipment();
-							e.setHelmet(new ItemStack(Material.GOLD_HELMET));
-							e.setChestplate(new ItemStack(Material.GOLD_CHESTPLATE));
-							ItemStack item = ItemHelper.addEnchant(new ItemStack(Material.BOW), Enchantment.ARROW_FIRE,
-									1);
-							e.setItemInHand(item);
-							en.setCustomName(
-									"" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Skeleton");
-							EntityDamageEvent damageEvent = new EntityDamageEvent(player, DamageCause.PROJECTILE, 3.0);
-							instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
-							player.damage(3.0);
+							// Customizing Skeleton
+								// Setting Skeleton to not de-spawn when far away
+							en.setRemoveWhenFarAway(false);
+								// Setting Skeleton Name to owner's
+							en.setCustomName(ChatColorHelper.color("&c" + player.getName() + "'s &eSkeleton"));
+								// Setting Custom name visible
+							en.setCustomNameVisible(true);
+								// Setting Bow
+							EntityEquipment equipment = en.getEquipment();
+									// Setting Flame
+							ItemStack flameBow = ItemHelper.create(Material.BOW);
+							flameBow.addEnchantment(Enchantment.ARROW_FIRE, 1);
+									// Setting Unbreakable
+							ItemHelper.setUnbreakable(flameBow);
+							equipment.setItemInHand(flameBow);
+
+								// Setting unbreakable gold armor
+									// Helmet
+							ItemStack helmet = ItemHelper.create(Material.GOLD_HELMET);
+							ItemHelper.setUnbreakable(helmet);
+									// Chestplate
+							ItemStack chestplate = ItemHelper.create(Material.GOLD_CHESTPLATE);
+							ItemHelper.setUnbreakable(chestplate);
+
+							equipment.setHelmet(helmet);
+							equipment.setChestplate(chestplate);
 						}
 
 					}, new ItemStack(Material.MONSTER_EGG));

@@ -1,5 +1,6 @@
 package anthony.SuperCraftBrawl.Game;
 
+import anthony.ChatColorHelper;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
@@ -23,6 +24,7 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -40,6 +42,7 @@ import org.bukkit.event.player.PlayerFishEvent.State;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -2083,60 +2086,137 @@ public class GameManager implements Listener, PluginMessageListener {
 
 				break;
 
-			case MONSTER_EGG:
-				if (i != null && i.state == GameState.STARTED) {
-					if (meta.getDisplayName().contains("Zombie") && !(meta.getDisplayName().contains("Pigman"))) {
-						int amount = item.getAmount();
+				case MONSTER_EGG:
+					if (i != null && i.state == GameState.STARTED) {
+						// Zombie Monster Egg
+						if (meta.getDisplayName().contains("Zombie") && !(meta.getDisplayName().contains("Pigman"))) {
+							int amount = item.getAmount();
 
-						if (amount > 0) {
-							if (amount == 1)
-								player.getInventory().clear(player.getInventory().getHeldItemSlot());
-							else {
-								amount--;
-								item.setAmount(amount);
-							}
-							ItemProjectile proj = new ItemProjectile(i, player, new ProjectileOnHit() {
-								@Override
-								public void onHit(Player hit) {
-									Location hitLoc = this.getBaseProj().getEntity().getLocation();
-									@SuppressWarnings("deprecation")
-									Zombie en = (Zombie) player.getWorld().spawnCreature(hitLoc, EntityType.ZOMBIE);
-									en.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW
-											+ "Zombie");
+							if (amount > 0) {
+								if (amount == 1)
+									player.getInventory().clear(player.getInventory().getHeldItemSlot());
+								else {
+									amount--;
+									item.setAmount(amount);
 								}
+								ItemProjectile proj = new ItemProjectile(i, player, new ProjectileOnHit() {
+									@Override
+									public void onHit(Player hit) {
+										Location hitLoc = this.getBaseProj().getEntity().getLocation();
+										@SuppressWarnings("deprecation")
 
-							}, new ItemStack(Material.MONSTER_EGG));
-							i.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-									player.getLocation().getDirection().multiply(2.0D));
-						}
-					} else if (meta.getDisplayName().contains("Skeleton")) {
-						int amount = item.getAmount();
+										// Spawning Zombie
+										Zombie zombie = (Zombie) player.getWorld().spawnCreature(hitLoc, EntityType.ZOMBIE);
+										// Customizing Zombie
+										customizeMob(zombie, player);
+										customizeZombie(zombie);
 
-						if (amount > 0) {
-							if (amount == 1)
-								player.getInventory().clear(player.getInventory().getHeldItemSlot());
-							else {
-								amount--;
-								item.setAmount(amount);
+										// If ClassType == Summoner
+										if (i.classes.get(player).getType() == ClassType.Summoner) {
+											// Spawning Second Zombie
+											Zombie zombie2 = (Zombie) player.getWorld().spawnCreature(hitLoc, EntityType.ZOMBIE);
+											// Customizing Second Zombie
+											customizeMob(zombie2, player);
+											customizeZombie(zombie2);
+										}
+									}
+
+								}, new ItemStack(Material.MONSTER_EGG));
+								i.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+										player.getLocation().getDirection().multiply(2.0D));
 							}
-							ItemProjectile proj = new ItemProjectile(i, player, new ProjectileOnHit() {
-								@Override
-								public void onHit(Player hit) {
-									Location hitLoc = this.getBaseProj().getEntity().getLocation();
-									@SuppressWarnings("deprecation")
-									Skeleton en = (Skeleton) player.getWorld().spawnCreature(hitLoc,
-											EntityType.SKELETON);
-									en.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW
-											+ "Skeleton");
+							// Skeleton Monster Egg
+						} else if (meta.getDisplayName().contains("Skeleton")) {
+							int amount = item.getAmount();
+
+							if (amount > 0) {
+								if (amount == 1)
+									player.getInventory().clear(player.getInventory().getHeldItemSlot());
+								else {
+									amount--;
+									item.setAmount(amount);
 								}
+								ItemProjectile proj = new ItemProjectile(i, player, new ProjectileOnHit() {
+									@Override
+									public void onHit(Player hit) {
+										Location hitLoc = this.getBaseProj().getEntity().getLocation();
+										@SuppressWarnings("deprecation")
 
-							}, new ItemStack(Material.MONSTER_EGG));
-							i.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-									player.getLocation().getDirection().multiply(2.0D));
-						}
-					} else if (meta.getDisplayName().contains("Witch Pokeball")) {
-						int amount = item.getAmount();
+										// Spawning Skeleton
+										Skeleton skeleton = (Skeleton) player.getWorld().spawnCreature(hitLoc, EntityType.SKELETON);
+										// Customizing Skeleton
+										customizeMob(skeleton, player);
+										customizeSkeleton(skeleton);
 
+										// If ClassType == Summoner
+										if (i.classes.get(player).getType() == ClassType.Summoner) {
+											// Spawning Second Skeleton
+											Skeleton skeleton2 = (Skeleton) player.getWorld().spawnCreature(hitLoc, EntityType.SKELETON);
+											// Customizing Second Skeleton
+											customizeMob(skeleton2, player);
+											customizeSkeleton(skeleton2);
+										}
+									}
+								}, new ItemStack(Material.MONSTER_EGG));
+								i.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+										player.getLocation().getDirection().multiply(2.0D));
+							}
+							// Witch Monster Egg
+						} else if (meta.getDisplayName().contains("Witch Pokeball")) {
+							int amount = item.getAmount();
+
+							if (amount > 0) {
+								if (amount == 1)
+									player.getInventory().clear(player.getInventory().getHeldItemSlot());
+								else {
+									amount--;
+									item.setAmount(amount);
+								}
+								ItemProjectile proj = new ItemProjectile(i, player, new ProjectileOnHit() {
+									@Override
+									public void onHit(Player hit) {
+										Location hitLoc = this.getBaseProj().getEntity().getLocation();
+										@SuppressWarnings("deprecation")
+
+										// Spawning Witch
+										Witch witch = (Witch) player.getWorld().spawnCreature(hitLoc, EntityType.WITCH);
+										// Customizing Witch
+										customizeMob(witch, player);
+									}
+
+								}, new ItemStack(Material.MONSTER_EGG));
+								i.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+										player.getLocation().getDirection().multiply(2.0D));
+							}
+							// Creeper Monster Egg
+						} else if (meta.getDisplayName().contains("Creeper")) {
+							int amount = item.getAmount();
+
+							if (amount > 0) {
+								if (amount == 1)
+									player.getInventory().clear(player.getInventory().getHeldItemSlot());
+								else {
+									amount--;
+									item.setAmount(amount);
+								}
+								ItemProjectile proj = new ItemProjectile(i, player, new ProjectileOnHit() {
+									@Override
+									public void onHit(Player hit) {
+										Location hitLoc = this.getBaseProj().getEntity().getLocation();
+										@SuppressWarnings("deprecation")
+
+										// Spawning Creeper
+										Creeper creeper = (Creeper) player.getWorld().spawnCreature(hitLoc, EntityType.CREEPER);
+										// Customizing Creeper
+										customizeMob(creeper, player);
+
+										// If ClassType == Summoner
+											// Setting to Charged Creeper
+										if (i.classes.get(player).getType() == ClassType.Summoner) {
+											creeper.setPowered(true);
+										}
+
+									}
 						if (amount > 0) {
 							if (amount == 1)
 								player.getInventory().clear(player.getInventory().getHeldItemSlot());
@@ -2154,13 +2234,13 @@ public class GameManager implements Listener, PluginMessageListener {
 											"" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Witch");
 								}
 
-							}, new ItemStack(Material.MONSTER_EGG));
-							i.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-									player.getLocation().getDirection().multiply(2.0D));
+								}, new ItemStack(Material.MONSTER_EGG));
+								i.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+										player.getLocation().getDirection().multiply(2.0D));
+							}
 						}
 					}
-				}
-				break;
+					break;
 
 			case NETHER_STAR:
 				if (i != null && i.state == GameState.STARTED) {
@@ -2206,6 +2286,67 @@ public class GameManager implements Listener, PluginMessageListener {
 				}
 				break;
 			}
+		}
+	}
+
+	private void customizeSkeleton(Skeleton skeleton) {
+		// Setting Bow
+		EntityEquipment equipment = skeleton.getEquipment();
+			// Setting Punch
+		ItemStack punchBow = ItemHelper.create(Material.BOW);
+		punchBow.addEnchantment(Enchantment.ARROW_KNOCKBACK, 1);
+			// Setting Unbreakable
+		ItemHelper.setUnbreakable(punchBow);
+
+		equipment.setItemInHand(punchBow);
+	}
+
+	private void customizeZombie(Zombie zombie) {
+		// Setting full unbreakable diamond armor
+		EntityEquipment equipment = zombie.getEquipment();
+
+		// Helmet
+		ItemStack helmet = ItemHelper.create(Material.DIAMOND_HELMET);
+		ItemHelper.setUnbreakable(helmet);
+		// Chestplate
+		ItemStack chestplate = ItemHelper.create(Material.DIAMOND_CHESTPLATE);
+		ItemHelper.setUnbreakable(chestplate);
+		// Leggings
+		ItemStack leggings = ItemHelper.create(Material.DIAMOND_LEGGINGS);
+		ItemHelper.setUnbreakable(leggings);
+		// Boots
+		ItemStack boots = ItemHelper.create(Material.DIAMOND_BOOTS);
+		ItemHelper.setUnbreakable(boots);
+
+		equipment.setHelmet(helmet);
+		equipment.setChestplate(chestplate);
+		equipment.setLeggings(leggings);
+		equipment.setBoots(boots);
+
+		// Setting unbreakable diamond sword
+		ItemStack sword = ItemHelper.create(Material.DIAMOND_SWORD);
+		ItemHelper.setUnbreakable(sword);
+
+		equipment.setItemInHand(sword);
+	}
+
+	private void customizeMob(Creature mob, Player player) {
+		// Setting Mob to not de-spawn when far away
+		mob.setRemoveWhenFarAway(false);
+		// Setting Mob Name to owner's
+		mob.setCustomName(ChatColorHelper.color("&c" + player.getName() + "'s &e" + getMobTypeName(mob.getType()));
+		// Setting Custom name visible
+		mob.setCustomNameVisible(true);
+	}
+
+	private String getMobTypeName(EntityType entityType) {
+		switch (entityType) {
+			case SKELETON:
+				return "Skeleton";
+			case CREEPER:
+				return "Creeper";
+			case ZOMBIE:
+				return "Zombie";
 		}
 	}
 }
