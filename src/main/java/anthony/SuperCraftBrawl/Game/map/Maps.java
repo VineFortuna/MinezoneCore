@@ -193,6 +193,15 @@ public enum Maps {
 					.setLobbyLoc(new Vector(240.525, 142, 171.456)).setSpecLoc(new Vector(317.500, 141, 175.500))
 					.setBounds(new Vector(317.500, 141, 175.500), 47, 40).setSignLoc(new Vector(177.495, 107, 673.700))
 					.setMapType(MapType.COMMUNITY)),
+	
+	Canyon("Canyon",
+			new MapInstance("canyon")
+					.setSpawnPos(new Vector(275.479, 153, 168.490), new Vector(275.438, 149, 186.478),
+							new Vector(260.484, 146, 188.486), new Vector(247.500, 143, 181.451),
+							new Vector(247.400, 149, 178.459), new Vector(261.354, 151, 153.999))
+					.setLobbyLoc(new Vector(248.500, 155, 165.500)).setSpecLoc(new Vector(248.500, 155, 165.500))
+					.setBounds(new Vector(248.500, 155, 165.500), 100, 100).setSignLoc(new Vector(178.466, 106, 673.700))
+					.setMapType(MapType.COMMUNITY)),
 
 	Gateway("Gateway",
 			new MapInstance("gateway")
