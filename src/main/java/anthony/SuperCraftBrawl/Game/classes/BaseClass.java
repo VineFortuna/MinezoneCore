@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import anthony.ChatColorHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -166,7 +167,7 @@ public abstract class BaseClass {
 	}
 
 	// Event for EnderDragon class:
-	private void enderdragonEvent(Player p, Player killer, PlayerData data2, BaseClass baseClass) {
+	private void enderDragonEvent(Player p, Player killer, PlayerData data2, BaseClass baseClass) {
 		Location loc = p.getLocation();
 		List<Item> deathParticles = new ArrayList<>();
 
@@ -258,7 +259,7 @@ public abstract class BaseClass {
 
 				if (pClass != null) {
 					pClass.eachLifeKills = 0; // When player dies, reset kills they get each life
-					this.enderdragonEvent(p, killer, kData, kClass);
+					this.enderDragonEvent(p, killer, kData, kClass);
 
 					if (p.getLocation().getY() <= 50) {
 						if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
@@ -1001,43 +1002,48 @@ public abstract class BaseClass {
 				baseClass2.totalDeaths++;
 				baseClass2.eachLifeKills = 0;
 
-				Location loc = p.getLocation();
+				Location pLocation = p.getLocation();
 				List<Item> deathParticles = new ArrayList<>();
 
-				// Spawn the particles in a circle around the player
+				// DEATH PARTICLES
+					// Default
+				Material mat = Material.INK_SACK;
+
+					// Particles
+				if (data2 != null && p.hasPermission("scb.deathParticles")) {
+					if (data2.goldApple == 1) {
+						mat = Material.GOLDEN_APPLE;
+					} else if (data2.glowstone == 1) {
+						mat = Material.GLOWSTONE_DUST;
+					} else if (data2.redstone == 1) {
+						mat = Material.REDSTONE;
+					} else if (data2.web == 1) {
+						mat = Material.WEB;
+					} else if (data2.bottleEXP == 1) {
+						mat = Material.EXP_BOTTLE;
+					}
+				}
+
+				ItemStack particleItem;
+
+				if (mat == Material.INK_SACK)
+					particleItem = new ItemStack(Material.INK_SACK, 1, (short) 15);
+				else
+					particleItem = new ItemStack(mat);
+
+					// Spawn the particles in a circle around the player
 				for (int i = 0; i < 10; i++) {
 					double angle = i * Math.PI / 5;
-					double x = loc.getX() + Math.cos(angle) * 0.5;
-					double y = loc.getY() + 1.5;
-					double z = loc.getZ() + Math.sin(angle) * 0.5;
+					double x = pLocation.getX() + Math.cos(angle) * 0.5;
+					double y = pLocation.getY() + 1.5;
+					double z = pLocation.getZ() + Math.sin(angle) * 0.5;
 
-					Material mat = Material.INK_SACK; // Default
-					if (data2 != null && p.hasPermission("scb.deathParticles")) {
-						if (data2.goldApple == 1) {
-							mat = Material.GOLDEN_APPLE;
-						} else if (data2.glowstone == 1) {
-							mat = Material.GLOWSTONE_DUST;
-						} else if (data2.redstone == 1) {
-							mat = Material.REDSTONE;
-						} else if (data2.web == 1) {
-							mat = Material.WEB;
-						} else if (data2.bottleEXP == 1) {
-							mat = Material.EXP_BOTTLE;
-						}
-					}
-
-					ItemStack particleItem = null;
-
-					if (mat == Material.INK_SACK)
-						particleItem = new ItemStack(Material.INK_SACK, 1, (short) 15);
-					else
-						particleItem = new ItemStack(mat);
-					Item particle = loc.getWorld().dropItem(new Location(loc.getWorld(), x, y, z), particleItem);
+					Item particle = pLocation.getWorld().dropItem(new Location(pLocation.getWorld(), x, y, z), particleItem);
 					particle.setPickupDelay(Integer.MAX_VALUE);
 					deathParticles.add(particle);
 				}
 
-				// Schedule a task to remove the particles after 5 seconds
+					// Schedule a task to remove the particles after 5 seconds
 				Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
 					for (Item particle : deathParticles) {
 						particle.remove();
@@ -2230,15 +2236,22 @@ public abstract class BaseClass {
 	}
 
 	private void healthPots(Player d) {
-		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + "Health Pot");
-		Potion pot = new Potion(1);
-		pot.setType(PotionType.INSTANT_HEAL);
-		pot.setSplash(true);
-		pot.apply(item);
-		d.getInventory().addItem(item);
-		d.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.YELLOW
-				+ "You got a kill and got rewarded a " + ChatColor.YELLOW + ChatColor.BOLD + "Health Pot");
+		// If class type is Horse
+		if (getType() == ClassType.Horse) {
+			d.sendMessage(ChatColorHelper.color("&2&l(!) &r&eYou got rewarded with a special treat"));
+		}
+		// For other classes
+		else {
+			ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
+					String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + "Health Pot");
+			Potion pot = new Potion(1);
+			pot.setType(PotionType.INSTANT_HEAL);
+			pot.setSplash(true);
+			pot.apply(item);
+			d.getInventory().addItem(item);
+			d.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.YELLOW
+					+ "You got a kill and got rewarded a " + ChatColor.YELLOW + ChatColor.BOLD + "Health Pot");
+		}
 	}
 
 	// Gives the killer kills for stats, points for tourney, etc
