@@ -151,10 +151,10 @@ public class CloudClass extends BaseClass {
 				Player gamePlayer = (Player) e;
 				if (instance.classes.containsKey(gamePlayer) && instance.classes.get(gamePlayer).getLives() > 0) {
 					gamePlayer.getWorld().strikeLightningEffect(gamePlayer.getLocation());
-					gamePlayer.setFireTicks(80);
+					gamePlayer.setFireTicks(100);
 					gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 110, 1));
-					gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 1));
-					gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 200, 2));
+					gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 90, 0));
+					gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 160, 2));
 				}
 			}
 		}
@@ -207,7 +207,7 @@ public class CloudClass extends BaseClass {
 		int groundY = player.getWorld().getHighestBlockYAt(player.getLocation().getBlockX(),
 				player.getLocation().getBlockZ());
 
-		if (player.getHealth() >= 16 && player.isOnGround()) { // For white wool
+		if (player.getHealth() > 12 && player.isOnGround()) { // For white wool
 			if (whiteWool == false) {
 				resetAllWools();
 				this.whiteWool = true;
@@ -225,7 +225,7 @@ public class CloudClass extends BaseClass {
 				this.cyanWool = true;
 				player.getInventory().setItem(1, this.list.get(1));
 			}
-		} else if (player.getHealth() > 8 && player.getHealth() < 16) {
+		} else if (player.getHealth() > 8 && player.getHealth() <= 12) {
 			if (brownWool == false) {
 				resetAllWools();
 				this.brownWool = true;
