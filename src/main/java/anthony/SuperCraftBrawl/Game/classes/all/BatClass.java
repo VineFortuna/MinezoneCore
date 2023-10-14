@@ -32,7 +32,7 @@ public class BatClass extends BaseClass {
 
 	public BatClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.6;
+		baseVerticalJump = 1.5;
 	}
 
 	public ItemStack makeRed(ItemStack armour) {
