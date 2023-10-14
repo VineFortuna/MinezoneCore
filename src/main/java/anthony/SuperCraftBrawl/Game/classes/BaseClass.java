@@ -88,6 +88,7 @@ public abstract class BaseClass {
 	public Timer magmaCube = new Timer();
 	public Timer ocelot = new Timer();
 	public Timer cloud = new Timer();
+	public Timer snowGolem = new Timer();
 	public boolean bedrockInvincibility = false;
 
 	public int goldAmt = 0; // For Steve Class
