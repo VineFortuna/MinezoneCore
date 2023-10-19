@@ -1,8 +1,8 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.Random;
+import java.util.Random; 
 
-import anthony.ChatColorHelper;
+import anthony.SuperCraftBrawl.ChatColorHelper;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;

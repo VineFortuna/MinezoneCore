@@ -29,7 +29,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 
-public class  BedrockClass extends BaseClass {
+public class BedrockClass extends BaseClass {
 
 	private ItemStack weapon;
 	private ItemStack lavaBucket;
@@ -60,14 +60,16 @@ public class  BedrockClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		// Head (helmet)
-		ItemStack playerHead = ItemHelper.create( Material.BEDROCK, "&0Bedrock Head");
+		ItemStack playerHead = ItemHelper.create(Material.BEDROCK, "&0Bedrock Head");
 
 		// Chestplate
-		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.BLACK, "&0Bedrock Chestplate");
+		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.BLACK,
+				"&0Bedrock Chestplate");
 		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 
 		// Leggings
-		ItemStack leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, Color.BLACK, "&0Bedrock Leggings");
+		ItemStack leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, Color.BLACK,
+				"&0Bedrock Leggings");
 
 		// Boots
 		ItemStack boots = ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.BLACK, "&0Bedrock Boots");
@@ -85,14 +87,16 @@ public class  BedrockClass extends BaseClass {
 		originalArmor = player.getInventory().getArmorContents();
 
 		// Invincibility armor
-			// Chestplate
-		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.WHITE, "&0Bedrock Chestplate");
+		// Chestplate
+		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.WHITE,
+				"&0Bedrock Chestplate");
 		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 
-			// Leggings
-		ItemStack leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, Color.WHITE, "&0Bedrock Leggings");
+		// Leggings
+		ItemStack leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, Color.WHITE,
+				"&0Bedrock Leggings");
 
-			// Boots
+		// Boots
 		ItemStack boots = ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.WHITE, "&0Bedrock Boots");
 		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 
@@ -124,7 +128,8 @@ public class  BedrockClass extends BaseClass {
 		this.weapon = weapon;
 
 		// Lava
-		ItemStack lavaBucket = ItemHelper.create(Material.LAVA_BUCKET, ChatColor.GOLD + "Lava Bucket", ChatColor.GRAY + "Right click to set lava on opponents!");
+		ItemStack lavaBucket = ItemHelper.create(Material.LAVA_BUCKET, ChatColor.GOLD + "Lava Bucket",
+				ChatColor.GRAY + "Right click to set lava on opponents!");
 
 		this.lavaBucket = lavaBucket;
 
@@ -162,7 +167,7 @@ public class  BedrockClass extends BaseClass {
 		if (item != null) {
 			if (player.getGameMode() != GameMode.SPECTATOR) {
 				// BEDROCK INVINCIBILITY ABILITY
-				if (item == weapon) {
+				if (item.equals(weapon)) {
 					if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
 						// If ability is on cooldown
 						if (!invincibility.isReady()) {
@@ -173,14 +178,17 @@ public class  BedrockClass extends BaseClass {
 							// Setting cooldown
 							invincibility.use();
 							// Sending return message
-							invincibility.sendPlayerCustomUseAbilityChatMessage("&d&l(!) &rYou are now invincible for &e" + invincibilityDuration + "&rseconds");
-							invincibility.sendPlayerCustomUseAbilityChatMessage("&d&l(!) &rYou are also unable to hit other players");
+							invincibility.sendPlayerCustomUseAbilityChatMessage(
+									"&d&l(!) &rYou are now invincible for &e" + invincibilityDuration + "&rseconds");
+							invincibility.sendPlayerCustomUseAbilityChatMessage(
+									"&d&l(!) &rYou are also unable to hit other players");
 							// Setting invincibility
 							BaseClass bc = instance.classes.get(player);
 							bc.bedrockInvincibility = true;
 
 							// Playing sound
-							SoundManager.playSoundToAllPlayersFromAPlayerLocation(instance, player, Sound.ZOMBIE_INFECT , 3, 1);
+							SoundManager.playSoundToAllPlayersFromAPlayerLocation(instance, player, Sound.ZOMBIE_INFECT,
+									3, 1);
 
 							// Setting invincibility runnable
 							if (bedrock == null) {
@@ -203,7 +211,8 @@ public class  BedrockClass extends BaseClass {
 											}
 
 											// Playing sound when invincibility is over
-											SoundManager.playSoundToAllPlayersFromAPlayerLocation(instance, player, Sound.ZOMBIE_UNFECT , 3, 1);
+											SoundManager.playSoundToAllPlayersFromAPlayerLocation(instance, player,
+													Sound.ZOMBIE_UNFECT, 3, 1);
 										} else {
 											if (!armorModified) {
 												// Modifying armor when invincibility starts
@@ -219,34 +228,26 @@ public class  BedrockClass extends BaseClass {
 							}
 						}
 					}
-					// LAVA ABILITY
-					if (item == lavaBucket) {
-						if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
-							if (bedrockLava.getTime() < 10000) {
-								int seconds = (10000 - bedrockLava.getTime()) / 1000 + 1;
-								event.setCancelled(true);
-								player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-										+ "Your Lava is still on cooldown for " + ChatColor.YELLOW + seconds + "s");
-							} else {
-								bedrockLava.restart();
-								player.getInventory().clear(player.getInventory().getHeldItemSlot());
-								for (Player gamePlayer : instance.players) {
-									if (gamePlayer != player) {
-										if (instance.classes.containsKey(gamePlayer)
-												&& instance.classes.get(gamePlayer).getLives() > 0) {
-											if (gamePlayer.getGameMode() != GameMode.SPECTATOR) {
-												if (instance.duosMap != null) {
-													if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
-														Block block = instance.getMapWorld().getBlockAt(
-																gamePlayer.getLocation().getBlockX(),
-																gamePlayer.getLocation().getBlockY() + 1,
-																gamePlayer.getLocation().getBlockZ());
-														blockList.add(block.getType());
-														blockList2.add(block);
-														if (!(block.getType() == Material.STATIONARY_WATER))
-															block.setType(Material.LAVA);
-													}
-												} else {
+				}
+				// LAVA ABILITY
+				if (item.equals(lavaBucket)) {
+					if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
+						if (bedrockLava.getTime() < 10000) {
+							int seconds = (10000 - bedrockLava.getTime()) / 1000 + 1;
+							event.setCancelled(true);
+							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+									+ "Your Lava is still on cooldown for " + ChatColor.YELLOW + seconds + "s");
+						} else {
+							bedrockLava.restart();
+							player.getInventory().clear(player.getInventory().getHeldItemSlot());
+							for (Player gamePlayer : instance.players) {
+								if (gamePlayer != player) {
+									if (instance.classes.containsKey(gamePlayer)
+											&& instance.classes.get(gamePlayer).getLives() > 0) {
+										if (gamePlayer.getGameMode() != GameMode.SPECTATOR) {
+											if (instance.duosMap != null) {
+												if (!(instance.team.get(gamePlayer)
+														.equals(instance.team.get(player)))) {
 													Block block = instance.getMapWorld().getBlockAt(
 															gamePlayer.getLocation().getBlockX(),
 															gamePlayer.getLocation().getBlockY() + 1,
@@ -256,45 +257,55 @@ public class  BedrockClass extends BaseClass {
 													if (!(block.getType() == Material.STATIONARY_WATER))
 														block.setType(Material.LAVA);
 												}
+											} else {
+												Block block = instance.getMapWorld().getBlockAt(
+														gamePlayer.getLocation().getBlockX(),
+														gamePlayer.getLocation().getBlockY() + 1,
+														gamePlayer.getLocation().getBlockZ());
+												blockList.add(block.getType());
+												blockList2.add(block);
+												if (!(block.getType() == Material.STATIONARY_WATER))
+													block.setType(Material.LAVA);
 											}
 										}
 									}
+								}
 
-									if (lava == null) {
-										lava = new BukkitRunnable() {
-											int ticks = 1;
+								if (lava == null) {
+									lava = new BukkitRunnable() {
+										int ticks = 1;
 
-											@Override
-											public void run() {
-												if (ticks == 0 || instance.state == GameState.ENDED) {
-													this.cancel();
-												}
-												ticks--;
+										@Override
+										public void run() {
+											if (ticks == 0 || instance.state == GameState.ENDED) {
+												this.cancel();
 											}
+											ticks--;
+										}
 
-											@Override
-											public void cancel() {
-												int count = 0;
-												for (Block blocks : blockList2) {
-													blocks.setType(blockList.get(count));
-													count++;
-												}
-												lava = null;
+										@Override
+										public void cancel() {
+											int count = 0;
+											for (Block blocks : blockList2) {
+												blocks.setType(blockList.get(count));
+												count++;
 											}
-										};
-										lava.runTaskTimer(instance.getManager().getMain(), 0, 20);
-									}
+											lava = null;
+										}
+									};
+									lava.runTaskTimer(instance.getManager().getMain(), 0, 20);
 								}
 							}
 						}
 					}
 				}
+
 			}
 		}
 	}
 
 	@Override
-	public void GameEnd () {
+	public void GameEnd() {
 		if (lava != null) {
 			this.bedrockInvincibility = false;
 			lava.cancel();
@@ -302,7 +313,7 @@ public class  BedrockClass extends BaseClass {
 	}
 
 	@Override
-	public ItemStack getAttackWeapon () {
+	public ItemStack getAttackWeapon() {
 		return weapon;
 	}
 }
