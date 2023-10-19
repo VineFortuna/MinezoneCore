@@ -1,10 +1,10 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.List;
 import java.util.Random;
 
-import anthony.ChatColorHelper;
+import anthony.SuperCraftBrawl.ChatColorHelper;
 import anthony.SuperCraftBrawl.Game.classes.*;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
@@ -103,7 +103,7 @@ public class HorseClass extends BaseClass {
 		if (item != null) {
 			if (player.getGameMode() != GameMode.SPECTATOR) {
 				// JUMP ABILITY
-				if (item == saddle) {
+				if (item.equals(saddle)) {
 					if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
 						// If ability is on cooldown
 						if (!jumpAbility.isReady()) {
@@ -125,7 +125,9 @@ public class HorseClass extends BaseClass {
 								player.setVelocity(new Vector(0, jumpAbilityHeight, 0));
 
 								// Playing sound
-								SoundManager.playSoundToAllPlayersFromAPlayerLocation(instance, player, Sound.HORSE_ANGRY, 1, 1);
+								for (Player gamePlayer : instance.players)
+									gamePlayer.playSound(player.getLocation(), Sound.HORSE_ANGRY, 1, 1);
+								
 							}
 						}
 					}
