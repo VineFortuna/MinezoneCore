@@ -1,11 +1,11 @@
 package anthony.SuperCraftBrawl.Game.classes;
 
-import java.util.ArrayList;
+import java.util.ArrayList; 
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import anthony.ChatColorHelper;
+import anthony.SuperCraftBrawl.ChatColorHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
