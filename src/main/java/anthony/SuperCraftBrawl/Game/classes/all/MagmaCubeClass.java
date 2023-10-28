@@ -72,8 +72,8 @@ public class MagmaCubeClass extends BaseClass {
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(ItemHelper.addEnchant(
-				ItemHelper.addEnchant(new ItemStack(Material.WOOD_SWORD), Enchantment.DAMAGE_ALL, 1),
+		ItemStack item = ItemHelper.addEnchant(
+				ItemHelper.addEnchant(new ItemStack(Material.WOOD_SWORD),
 				Enchantment.KNOCKBACK, 1), Enchantment.DURABILITY, 999999);
 		return item;
 	}
