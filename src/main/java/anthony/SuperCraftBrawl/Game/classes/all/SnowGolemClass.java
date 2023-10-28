@@ -33,7 +33,7 @@ public class SnowGolemClass extends BaseClass {
 
 	public SnowGolemClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.2;
+		baseVerticalJump = 1.1;
 	}
 
 	@Override
@@ -193,7 +193,7 @@ public class SnowGolemClass extends BaseClass {
 												}
 											}
 										}
-									}, 3 * 20);
+									}, 4 * 20);
 
 									// PLAYING SOUND FOR REMOVING PLATFORM
 									for (Player gamePlayer : instance.players)
