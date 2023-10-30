@@ -962,8 +962,20 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (item != null && item.getType() == Material.MILK_BUCKET) {
 				if (bc != null && bc.getType() != ClassType.BabyCow) {
 					if (player.getGameMode() != GameMode.SPECTATOR) {
+						// Remove bad effects only: poison, wither, slowness, weakness, blindness, nausea
 						for (PotionEffect pe : player.getActivePotionEffects())
-							player.removePotionEffect(pe.getType());
+							if (pe.getType().equals(PotionEffectType.POISON)
+									|| pe.getType().equals(PotionEffectType.SLOW)
+									|| pe.getType().equals(PotionEffectType.SLOW_DIGGING)
+									|| pe.getType().equals(PotionEffectType.BLINDNESS)
+									|| pe.getType().equals(PotionEffectType.WEAKNESS)
+									|| pe.getType().equals(PotionEffectType.WITHER)
+									|| pe.getType().equals(PotionEffectType.CONFUSION)
+									|| pe.getType().equals(PotionEffectType.HUNGER)) {
+
+								player.removePotionEffect(pe.getType());
+							}
+						// Remove fire by setting fire ticks to 0
 						player.setFireTicks(0);
 						player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
 								+ ChatColor.RESET + "You feel refreshed!");
