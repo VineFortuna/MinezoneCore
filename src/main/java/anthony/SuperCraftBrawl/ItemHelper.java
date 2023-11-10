@@ -9,11 +9,11 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.FireworkEffectMeta;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.inventory.meta.*;
 import org.bukkit.material.Dye;
+import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -265,6 +265,22 @@ public class ItemHelper {
 		leatherArmor.setItemMeta(leatherArmorMeta);
 
 		return leatherArmor;
+	}
+
+	public static ItemStack createPotionItem(PotionType potionType, int amplifier, int durationSeconds, boolean splashable, boolean particles, boolean ambientParticles) {
+		ItemStack potionItem = new ItemStack(Material.POTION);
+
+		Potion potion = new Potion(null);
+		potion.setType(potionType);
+		potion.setSplash(splashable);
+
+		PotionMeta potionMeta = (PotionMeta) potionItem.getItemMeta();
+
+		potionMeta.addCustomEffect(new PotionEffect(potion.getType().getEffectType(), durationSeconds * 20, amplifier, ambientParticles, particles), true);
+		potionItem.setItemMeta(potionMeta);
+		potion.apply(potionItem);
+
+		return potionItem;
 	}
 
 	public static ItemStack setUnbreakable(ItemStack item) {
