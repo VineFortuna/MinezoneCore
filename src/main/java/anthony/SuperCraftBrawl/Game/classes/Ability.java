@@ -51,7 +51,7 @@ public class Ability {
     }
 
     public void sendPlayerRemainingCooldownChatMessage() {
-        player.sendMessage(ChatColorHelper.color("&9&l(!) &r&6" + abilityName + "&r is on cooldown for more " + "&6" + cooldown.getRemainingCooldownSeconds() + "&r seconds" ));
+        player.sendMessage(ChatColorHelper.color("&9&l(!) &r&6" + abilityName + "&r is on cooldown for " + "&6" + cooldown.getRemainingCooldownSeconds() + "&r seconds" ));
     }
 
     public String getAbilityName() {

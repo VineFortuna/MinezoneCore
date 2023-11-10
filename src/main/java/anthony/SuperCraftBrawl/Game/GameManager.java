@@ -5,7 +5,6 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import anthony.SuperCraftBrawl.Game.classes.all.SnowGolemClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -637,6 +636,12 @@ public class GameManager implements Listener, PluginMessageListener {
 		gameInstance.classes.get(player).onConsumingItem(event);
 	}
 
+	public void onPlayerMoveEvent(PlayerMoveEvent event) {
+		Player player = event.getPlayer();
+		GameInstance gameInstance = GetInstanceOfPlayer(player);
+		gameInstance.classes.get(player).onPlayerMove(event);
+	}
+
 
 	@EventHandler
 	public void shieldPotions(PlayerItemConsumeEvent event) {
@@ -648,6 +653,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (item.getType() == Material.POTION) {
 				if (meta.getDisplayName().contains("Mini-Shield Potion")) {
 					player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 1000, 0));
+					event.setCancelled(true);
 					player.getInventory().clear(player.getInventory().getHeldItemSlot());
 				}
 			}
@@ -2219,6 +2225,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									Creeper creeper = (Creeper) player.getWorld().spawnCreature(hitLoc, EntityType.CREEPER);
 									// Customizing Creeper
 									customizeMob(creeper, player);
+									customizeCreeper(creeper);
 
 									// If ClassType == Summoner
 									// Setting to Charged Creeper
@@ -2316,6 +2323,10 @@ public class GameManager implements Listener, PluginMessageListener {
 		ItemHelper.setUnbreakable(sword);
 
 		equipment.setItemInHand(sword);
+	}
+
+	private void customizeCreeper(Creeper creeper) {
+		creeper.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999, 1, false, false));
 	}
 
 	private void customizeMob(Creature mob, Player player) {

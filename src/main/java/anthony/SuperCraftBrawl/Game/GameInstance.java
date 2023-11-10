@@ -1,14 +1,8 @@
 package anthony.SuperCraftBrawl.Game;
 
-import java.util.ArrayList; 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Random;
 
-import anthony.SuperCraftBrawl.Core;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -26,15 +20,12 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
@@ -112,6 +103,8 @@ public class GameInstance {
 	private int gameTime = 0;
 
 	public Player firstBlood;
+
+	private final Map<UUID, Location> lastKnownLocations = new HashMap<>();
 
 	// Constructors:
 	public GameInstance(GameManager gameManager, Maps map) {
@@ -1015,7 +1008,7 @@ public class GameInstance {
 		// Skeleton Egg
 		ItemStack skeletonEgg = ItemHelper.createMonsterEgg(EntityType.SKELETON, 1, "&r&oSkeleton Pokeball");
 
-		// Creeper Egg (not in yet)
+		// Creeper Egg
 		ItemStack creeperEgg = ItemHelper.createMonsterEgg(EntityType.CREEPER, 1, "&r&oCreeper Pokeball");
 
 		// Golden Apple
@@ -1035,7 +1028,7 @@ public class GameInstance {
 				hammer, healthPot, extraLife, healthPot, new ItemStack(Material.MILK_BUCKET), new ItemStack(Material.MILK_BUCKET),
 				new ItemStack(Material.MILK_BUCKET), blooper, blooper, blooper, blooper, nuke, nuke, nuke, nuke, nuke,
 				bomb, pearl, pearl, miniShield, miniShield, slowballs, slowballs, slowballs, fireRes, fireRes, instagib,
-				instagib, instagib, broom, broom, zombieEgg, zombieEgg, zombieEgg, skeletonEgg, skeletonEgg, witchEgg, bounty);
+				instagib, instagib, broom, broom, zombieEgg, zombieEgg, zombieEgg, skeletonEgg, skeletonEgg, witchEgg, bounty, creeperEgg, creeperEgg);
 		return items.get(random.nextInt(items.size()));
 	}
 
@@ -2184,6 +2177,33 @@ public class GameInstance {
 			}
 			return true;
 		}
+		return false;
+	}
+
+	public boolean hasPlayerMovedPosition(Player player) {
+		UUID playerId = player.getUniqueId();
+		Location lastLocation = lastKnownLocations.get(playerId);
+
+		if (lastLocation != null) {
+			Location currentLocation = player.getLocation();
+
+			// Compare block coordinates to check for physical movement
+			int lastBlockX = lastLocation.getBlockX();
+			int lastBlockY = lastLocation.getBlockY();
+			int lastBlockZ = lastLocation.getBlockZ();
+
+			int currentBlockX = currentLocation.getBlockX();
+			int currentBlockY = currentLocation.getBlockY();
+			int currentBlockZ = currentLocation.getBlockZ();
+
+			if (lastBlockX != currentBlockX || lastBlockY != currentBlockY || lastBlockZ != currentBlockZ) {
+				lastKnownLocations.put(playerId, currentLocation);
+				return true;
+			}
+		} else {
+			lastKnownLocations.put(playerId, player.getLocation());
+		}
+
 		return false;
 	}
 }
