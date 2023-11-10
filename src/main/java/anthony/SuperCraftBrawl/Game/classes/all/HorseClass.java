@@ -1,8 +1,6 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.ArrayList; 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import anthony.SuperCraftBrawl.ChatColorHelper;
 import anthony.SuperCraftBrawl.Game.classes.*;
@@ -10,12 +8,13 @@ import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -26,19 +25,26 @@ import org.bukkit.util.Vector;
 public class HorseClass extends BaseClass {
 	private ItemStack weapon;
 	private ItemStack saddle;
-	private final Ability jumpAbility = new Ability("Jump Ability", 6, player);
+	private final Ability jumpAbility = new Ability("Jump Ability", 5, playerBaseClass);
 	private final double jumpAbilityHeight = 1.6;
+
 	// Creating Treats
 	private List<ItemStack> treatsItemsList = new ArrayList<>();
 
 	// Golden Carrot
-	private ItemStack goldenCarrotTreat = ItemHelper.create(Material.GOLDEN_CARROT, "&9SPEED Treat");
+	private ItemStack goldenCarrotTreat = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_CARROT),
+			"&9&lSPEED Treat",
+			"&7Eat it to get Speed 2 for 10 seconds");
 
 	// Golden Apple Treat
-	private ItemStack goldenAppleTreat = ItemHelper.create(Material.GOLDEN_APPLE, "&4STRENGTH Treat");
+	private ItemStack goldenAppleTreat = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE),
+			"&4&lSTRENGTH Treat",
+			"&7Eat it to get Strength 1 for 6 seconds");
 
 	// Enchanted Golden Apple Treat
-	private ItemStack goldenEnchantedAppleTreat = ItemHelper.create(Material.GOLDEN_APPLE, "&6FIRE RESISTANCE Treat");
+	private ItemStack goldenEnchantedAppleTreat = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE),
+			"&6&lFIRE RESISTANCE Treat",
+			"&7Eat it to get Fire Resistance for a minute");
 
 
 	public HorseClass(GameInstance instance, Player player) {
@@ -55,8 +61,20 @@ public class HorseClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		// Head (helmet)
-		ItemStack playerHead = ItemHelper.createSkullHeadPlayer(1, "kuba432110", "&6Horse Head");
+		ItemStack playerHead = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
+
+		SkullMeta meta = (SkullMeta) playerHead.getItemMeta();
+
+		meta.setOwner("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmU3OGM0NzYyNjc0ZGRlOGIxYTVhMWU4NzNiMzNmMjhlMTNlN2MxMDJiMTkzZjY4MzU0OWIzOGRjNzBlMCJ9fX0=");
+		meta.setDisplayName("aaaa");
+
+		playerHead.setItemMeta(meta);
+
+		playerEquip.setHelmet(playerHead);
+
+
+//		// Head (helmet)
+//		ItemStack playerHead = ItemHelper.createSkullHeadPlayer(1, "kuba432110", "&6Horse Head");
 
 		// Chestplate
 		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.ORANGE, "&6Horse Chestplate");
@@ -79,14 +97,14 @@ public class HorseClass extends BaseClass {
 	@Override
 	public void SetItems(Inventory playerInv) {
 		// Weapon
-		ItemStack weapon = ItemHelper.create(Material.HAY_BLOCK, ChatColorHelper.color("&6Hay Bale"));
+		ItemStack weapon = ItemHelper.create(Material.HAY_BLOCK, "&6Hay Bale");
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3); // Sharpness 3
 		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1); // Knockback 1
 
 		this.weapon = weapon;
 
 		// Jump Ability
-		ItemStack saddle = ItemHelper.create(Material.SADDLE, ChatColorHelper.color("&eJump Ability") + ChatColorHelper.color("&7Right click to do a high jump!"));
+		ItemStack saddle = ItemHelper.setDetails(new ItemStack(Material.SADDLE), "&eJump Ability", "&7Right click to do a high jump!");
 
 		this.saddle = saddle;
 
@@ -101,7 +119,7 @@ public class HorseClass extends BaseClass {
 		ItemStack item = event.getItem();
 
 		if (item != null) {
-			if (player.getGameMode() != GameMode.SPECTATOR) {
+			if (playerBaseClass.getGameMode() != GameMode.SPECTATOR) {
 				// JUMP ABILITY
 				if (item.equals(saddle)) {
 					if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
@@ -112,7 +130,7 @@ public class HorseClass extends BaseClass {
 						// If ability is available
 						else {
 							// If player is not on the ground
-							if (!player.isOnGround()) {
+							if (!playerBaseClass.isOnGround()) {
 								jumpAbility.sendPlayerCustomUseAbilityChatMessage("&c&l(!) &rYou have to be on the ground to use &6" + jumpAbility.getAbilityName());
 							}
 							// If player is on the ground
@@ -122,30 +140,45 @@ public class HorseClass extends BaseClass {
 								// Sending return message
 								jumpAbility.sendPlayerUseAbilityChatMessage();
 								// Jump Ability logic
-								player.setVelocity(new Vector(0, jumpAbilityHeight, 0));
+								playerBaseClass.setVelocity(new Vector(0, jumpAbilityHeight, 0));
 
 								// Playing sound
-								for (Player gamePlayer : instance.players)
-									gamePlayer.playSound(player.getLocation(), Sound.HORSE_ANGRY, 1, 1);
-								
+								SoundManager.playSoundToAllGamePlayersFromAPlayerLocation(instance, playerBaseClass, Sound.HORSE_ANGRY, 1, 1);
+
 							}
 						}
+					}
+				}
+				// EATING CARROT TREAT ITEM
+				if (item.getType().equals(goldenCarrotTreat.getType()) && (item.getItemMeta().equals(goldenCarrotTreat.getItemMeta()))) {
+					if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
+
+						if (playerBaseClass.getFoodLevel() != 20) {
+							return;
+						}
+						playerBaseClass.setFoodLevel(19);
+						Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
+							playerBaseClass.setFoodLevel(20);
+						}, 20L);
+
 					}
 				}
 			}
 		}
 	}
 
+	// Canceling Health Pot Giving Method
 	@Override
-	public void Death(PlayerDeathEvent e) {
-		super.Death(e);
+	protected void healthPots(Player d) {
+	}
 
-		if (player.equals(e.getEntity().getKiller())) {
-			TreatGiver treatGiver = new TreatGiver(this, treatsItemsList);
+	@Override
+	public void classesEvent(Player d, BaseClass baseClass) {
+		if (instance.classes.containsKey(d)) {
+				TreatGiver treatGiver = new TreatGiver(this, treatsItemsList);
+				treatGiver.giveRandomTreat(d);
 
-			treatGiver.giveRandomTreat(player);
-
-			player.sendMessage(ChatColorHelper.color("&2&l(!) &r&eYou got rewarded with a special treat"));
+				d.sendMessage(ChatColorHelper.color("&2&l(!) &r&eYou got rewarded with a special treat"));
 		}
 	}
 
@@ -155,57 +188,99 @@ public class HorseClass extends BaseClass {
 	 * Cancel the effects of items i.e. golden apples
 	 * Add the wanted effects to the player
 	 */
-	public void eatTreatItem(PlayerItemConsumeEvent e) {
+	@Override
+	public void onConsumingItem(PlayerItemConsumeEvent e) {
 		ItemStack item = e.getItem();
+		ItemMeta itemMeta = item.getItemMeta();
+		Material itemMaterial = item.getType();
 
-		// When Eating Treats
+
+		// Checking if item consumed is one of the treat items
+		if (itemMaterial.equals(goldenCarrotTreat.getType()) && (itemMeta.equals(goldenCarrotTreat.getItemMeta()))
+				|| (itemMaterial.equals(goldenAppleTreat.getType()) && (itemMeta.equals(goldenAppleTreat.getItemMeta()))
+				|| (itemMaterial.equals(goldenEnchantedAppleTreat.getType()) && (itemMeta.equals(goldenEnchantedAppleTreat.getItemMeta()))))) {
+			e.setCancelled(true);
+
+			List<PotionEffect> potionEffects = new ArrayList<>();
+
+			Collection<PotionEffect> activePotionEffects = playerBaseClass.getActivePotionEffects();
+
+			// If player has any effects
+			if (!activePotionEffects.isEmpty()) {
+				for (PotionEffect potionEffect : activePotionEffects) {
+					PotionEffectType potionEffectType = potionEffect.getType();
+					int amplifier =	potionEffect.getAmplifier();
+
+					// If player has absorption effect
+					if (potionEffectType.equals(PotionEffectType.ABSORPTION)) {
+						if (amplifier == 0) {
+
+						}
+					}
+				}
+			}
+
+
+			// When Eating Treats
 			// Golden Carrot
-		if (item == goldenCarrotTreat) {
-			e.setCancelled(true);
+			if (itemMaterial.equals(goldenCarrotTreat.getType()) && (itemMeta.equals(goldenCarrotTreat.getItemMeta()))) {
+				// Removing carrot after eating it
+				playerBaseClass.getInventory().removeItem(goldenCarrotTreat);
 
-			List<PotionEffect> potionEffects = new ArrayList<>();
+//				List<PotionEffect> potionEffects = new ArrayList<>();
 
-			// Speed 2 for 10 seconds
-			potionEffects.add(new PotionEffect(PotionEffectType.SPEED, 10 * 20, 1, false, true));
+//				// Speed 2 for 10 seconds
+//				potionEffects.add(new PotionEffect(PotionEffectType.SPEED, 10 * 20, 1, false, true));
+//
+//				// Absorption 1 (2 hearts) for 1 minute
+//				potionEffects.add(new PotionEffect(PotionEffectType.ABSORPTION, 60 * 20, 0, false, false));
 
-			// Absorption 1 (2 hearts) for 1 minute
-			potionEffects.add(new PotionEffect(PotionEffectType.ABSORPTION, 60 * 20, 0, false, false));
+				playerBaseClass.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 60 * 20, 0, false, false), true);
+				playerBaseClass.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 15 * 20, 1, false, true), true);
+//				this.player.addPotionEffects(potionEffects);
+//
+//				potionEffects.clear();
+			}
+			// Golden Apple
+			else if (itemMaterial.equals(goldenAppleTreat.getType()) && (itemMeta.equals(goldenAppleTreat.getItemMeta()))) {
+				// Removing golden apple after eating it
+				playerBaseClass.getInventory().removeItem(goldenAppleTreat);
 
-			player.addPotionEffects(potionEffects);
+				playerBaseClass.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 8 * 20, 1, false, true), true);
+				playerBaseClass.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 60 * 20, 0, false, false), true);
 
-			potionEffects.clear();
-		}
-		// Golden Apple
-		else if (item == goldenAppleTreat) {
-			e.setCancelled(true);
+//				List<PotionEffect> potionEffects = new ArrayList<>();
+//
+//				// Strength 1 for 10 seconds
+//				potionEffects.add(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 10 * 20, 0, false, true));
+//
+//				// Absorption 1 (2 hearts) for 1 minute
+//				potionEffects.add(new PotionEffect(PotionEffectType.ABSORPTION, 60 * 20, 0, false, false));
+//
+//				this.player.addPotionEffects(potionEffects);
+//
+//				potionEffects.clear();
+			}
+			// Enchanted Golden Apple
+			else if (itemMaterial.equals(goldenEnchantedAppleTreat.getType()) && (itemMeta.equals(goldenEnchantedAppleTreat.getItemMeta()))) {
+				// Removing enchanted golden apple after eating it
+				playerBaseClass.getInventory().removeItem(goldenEnchantedAppleTreat);
 
-			List<PotionEffect> potionEffects = new ArrayList<>();
+				playerBaseClass.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 60 * 20, 1, false, true), true);
+				playerBaseClass.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 60 * 20, 0, false, false), true);
 
-			// Strength 1 for 6 seconds
-			potionEffects.add(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 6 * 20, 0, false, true));
-
-			// Absorption 1 (2 hearts) for 1 minute
-			potionEffects.add(new PotionEffect(PotionEffectType.ABSORPTION, 60 * 20, 0, false, false));
-
-			player.addPotionEffects(potionEffects);
-
-			potionEffects.clear();
-		}
-		// Enchanted Golden Apple
-		else if (item == goldenEnchantedAppleTreat) {
-			e.setCancelled(true);
-
-			List<PotionEffect> potionEffects = new ArrayList<>();
-
-			// Fire Resistance for 1 minute
-			potionEffects.add(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 60 * 20, 1, false, true));
-
-			// Absorption 1 (2 hearts) for 1 minute
-			potionEffects.add(new PotionEffect(PotionEffectType.ABSORPTION, 60 * 20, 0, false, false));
-
-			player.addPotionEffects(potionEffects);
-
-			potionEffects.clear();
+//				List<PotionEffect> potionEffects = new ArrayList<>();
+//
+//				// Fire Resistance for 1 minute
+//				potionEffects.add(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 60 * 20, 1, false, true));
+//
+//				// Absorption 1 (2 hearts) for 1 minute
+//				potionEffects.add(new PotionEffect(PotionEffectType.ABSORPTION, 60 * 20, 0, false, false));
+//
+//				this.player.addPotionEffects(potionEffects);
+//
+//				potionEffects.clear();
+			}
 		}
 	}
 

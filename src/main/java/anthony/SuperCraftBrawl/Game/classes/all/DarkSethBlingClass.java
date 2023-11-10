@@ -13,8 +13,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
@@ -99,7 +97,7 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 			if (plItem.getType() == Material.COMMAND
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 				Random rand = new Random();
-				Player target = this.getRandomPlayer(player);
+				Player target = this.getRandomPlayer(playerBaseClass);
 
 				ItemStack item5 = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
 						"" + ChatColor.RED + ChatColor.BOLD + "Slowness", "");
@@ -209,7 +207,7 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 						fireRes, bigShield, instagib, instagib, instagib, broom, broom);
 
 				if (!this.doesPlayerContainItems(target.getInventory(), items)) {
-					player.sendMessage(instance.getManager().getMain()
+					playerBaseClass.sendMessage(instance.getManager().getMain()
 							.color("&2&l(!) &rNo item was found at this player! Please try again."));
 					return;
 				}
@@ -227,27 +225,27 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 				inv.clear(slots.get(i));
 				slots.clear();
 
-				player.getInventory().addItem(skeppy);
-				player.sendMessage(instance.getManager().getMain()
+				playerBaseClass.getInventory().addItem(skeppy);
+				playerBaseClass.sendMessage(instance.getManager().getMain()
 						.color("&2&l(!) &rYou were given a &e" + skeppy.getItemMeta().getDisplayName()));
 				target.sendMessage(instance.getManager().getMain().color("&2&l(!) &rWhoops! Your &e"
-						+ skeppy.getItemMeta().getDisplayName() + " &ritem was stolen by &e" + player.getName()));
+						+ skeppy.getItemMeta().getDisplayName() + " &ritem was stolen by &e" + playerBaseClass.getName()));
 				if (plItem.getAmount() == 1)
-					player.getInventory().clear(player.getInventory().getHeldItemSlot());
+					playerBaseClass.getInventory().clear(playerBaseClass.getInventory().getHeldItemSlot());
 				else
 					plItem.setAmount(plItem.getAmount() - 1);
 			} else if (plItem.getType() == Material.NETHER_STAR
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 				if (instance.recentDrop == null) {
-					player.sendMessage(
+					playerBaseClass.sendMessage(
 							instance.getManager().getMain().color("&c&l(!) &rThere are no drops you can pickup!"));
-				} else if (!(player.isOnGround())) {
-					player.sendMessage(instance.getManager().getMain()
+				} else if (!(playerBaseClass.isOnGround())) {
+					playerBaseClass.sendMessage(instance.getManager().getMain()
 							.color("&c&l(!) &rYou have to be on the ground to use this!"));
 				} else {
-					player.teleport(instance.recentDrop);
-					player.getInventory().remove(player.getItemInHand());
-					player.sendMessage(instance.getManager().getMain().color(
+					playerBaseClass.teleport(instance.recentDrop);
+					playerBaseClass.getInventory().remove(playerBaseClass.getItemInHand());
+					playerBaseClass.sendMessage(instance.getManager().getMain().color(
 							"&2&l(!) &rYou teleported to the recently spawned item! (Could be good or bad luck idk lol)"));
 					this.usedTp = true;
 				}

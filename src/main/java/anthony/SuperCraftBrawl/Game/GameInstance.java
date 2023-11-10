@@ -28,6 +28,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -380,10 +381,10 @@ public class GameInstance {
 
 	public void CheckForGameStart(Player player) {
 		if (map != null) {
-			if (players.size() == 2)
+			if (players.size() > 0)
 				StartGameTimer(player);
 		} else {
-			if (players.size() == 4)
+			if (players.size() > 0)
 				StartGameTimer(player);
 		}
 	}
@@ -895,81 +896,57 @@ public class GameInstance {
 
 	public ItemStack getItemToDrop() {
 
-		ItemStack item5 = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
+		// Slowness Pot
+		ItemStack slownessPot = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
 				"" + ChatColor.RED + ChatColor.BOLD + "Slowness", "");
-		Potion pot5 = new Potion(3);
-		pot5.setType(PotionType.SLOWNESS);
-		pot5.setSplash(true);
-		pot5.apply(item5);
 
-		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
+		Potion potionSlow = new Potion(3);
+		potionSlow.setType(PotionType.SLOWNESS);
+		potionSlow.setSplash(true);
+		PotionMeta meta3 = (PotionMeta) slownessPot.getItemMeta();
+		meta3.addCustomEffect(new PotionEffect(PotionEffectType.SLOW, 300, 1, true, true), true);
+		slownessPot.setItemMeta(meta3);
+		potionSlow.apply(slownessPot);
+
+		// Health Pot
+		ItemStack healthPot = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
 				"" + ChatColor.YELLOW + ChatColor.BOLD + "Instant Heal");
-		Potion pot = new Potion(1);
-		pot.setType(PotionType.INSTANT_HEAL);
-		pot.setSplash(true);
-		pot.apply(item);
 
-		ItemStack item2 = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
+		Potion potionHeal = new Potion(1);
+		potionHeal.setType(PotionType.INSTANT_HEAL);
+		potionHeal.setSplash(true);
+		PotionMeta potMeta = (PotionMeta) healthPot.getItemMeta();
+		potMeta.addCustomEffect(new PotionEffect(PotionEffectType.HEAL, 0, 1), true);
+		healthPot.setItemMeta(potMeta);
+		potionHeal.apply(healthPot);
+
+		// Speed Pot
+		ItemStack speedPot = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
 				"" + ChatColor.GREEN + ChatColor.BOLD + "Speed Pot");
-		Potion pot2 = new Potion(1);
-		pot2.setType(PotionType.SPEED);
-		pot2.setSplash(true);
-		pot2.apply(item2);
 
-		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4),
-				this.getManager().getMain().color("&0&lBroom"));
+		Potion potionSpeed = new Potion(1);
+		potionSpeed.setType(PotionType.SPEED);
+		potionSpeed.setSplash(true);
+		PotionMeta speedMeta = (PotionMeta) speedPot.getItemMeta();
+		speedMeta.addCustomEffect(new PotionEffect(PotionEffectType.SPEED, 600, 1, true, true), true);
+		speedPot.setItemMeta(speedMeta);
+		potionSpeed.apply(speedPot);
 
-		ItemStack item6 = ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD, 1, (short) 250),
-						"" + ChatColor.YELLOW + ChatColor.BOLD + "HAMMER", ChatColor.YELLOW + ""),
-				Enchantment.KNOCKBACK, 10);
-		item5.getDurability();
-
-		ItemStack item7 = ItemHelper.setDetails(new ItemStack(Material.DIAMOND_HOE, 3, (short) 250),
-				"" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Bazooka", ChatColor.YELLOW + "");
-		item5.getDurability();
-
-		ItemStack extraLife = ItemHelper.setDetails(new ItemStack(Material.PRISMARINE_SHARD),
-				"" + ChatColor.RESET + ChatColor.BOLD + "Extra Life");
-		ItemStack pearl = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL),
-				"" + ChatColor.RED + ChatColor.BOLD + "Teleporter");
-
-		ItemStack item8 = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				"" + ChatColor.RED + ChatColor.BOLD + "Bomb");
-		Potion pot8 = new Potion(1);
-		pot8.setType(PotionType.INSTANT_DAMAGE);
-		pot8.setSplash(true);
-		pot8.apply(item8);
-
+		// Fire Res Pot
 		ItemStack fireRes = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
 				"" + ChatColor.RED + ChatColor.BOLD + "Fire Resistance");
-		Potion pot9 = new Potion(1);
-		pot9.setType(PotionType.FIRE_RESISTANCE);
-		pot9.setSplash(true);
+
+		Potion potionFireRes = new Potion(1);
+		potionFireRes.setType(PotionType.FIRE_RESISTANCE);
+		potionFireRes.setSplash(true);
 		PotionMeta meta2 = (PotionMeta) fireRes.getItemMeta();
-		meta2.addCustomEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 600, 0), true);
+		meta2.addCustomEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 600, 0, true, true), true);
 		fireRes.setItemMeta(meta2);
-		pot9.apply(fireRes);
+		potionFireRes.apply(fireRes);
 
-		ItemStack slowballs = ItemHelper.setDetails(new ItemStack(Material.SNOW_BALL, 8),
-				"" + ChatColor.RED + ChatColor.BOLD + "Slowballs");
-
-		ItemStack miniShield = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				"" + ChatColor.YELLOW + "Mini-Shield Potion");
-
-		ItemStack bounty = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR, 1),
-				"" + ChatColor.YELLOW + "Bounty");
-
-		ItemStack blooper = ItemHelper.setDetails(new ItemStack(Material.RABBIT_FOOT),
-				gameManager.getMain().color("&6&lBlooper"));
-		ItemStack nuke = ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.TNT, 3), this.getManager().getMain().color("&4&lNuke")),
-				Enchantment.DAMAGE_ALL, 1);
+		// Bomb
 		ItemStack bomb = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
 				getManager().getMain().color("&4&lBomb"));
-		ItemStack instagib = ItemHelper.setDetails(new ItemStack(Material.GOLD_HOE, 5, (short) 250),
-				"" + ChatColor.GREEN + ChatColor.ITALIC + "Instagib", ChatColor.YELLOW + "");
-		instagib.getDurability();
 
 		Potion pot100 = new Potion(1);
 		pot100.setType(PotionType.INSTANT_DAMAGE);
@@ -979,46 +956,86 @@ public class GameInstance {
 		bomb.setItemMeta(meta);
 		pot100.apply(bomb);
 
-		Potion pot1000 = new Potion(1);
-		pot1000.setType(PotionType.INSTANT_HEAL);
-		pot1000.setSplash(true);
-		PotionMeta potMeta = (PotionMeta) item.getItemMeta();
-		potMeta.addCustomEffect(new PotionEffect(PotionEffectType.HEAL, 0, 1), true);
-		item.setItemMeta(potMeta);
-		pot1000.apply(item);
+		// Brooms
+		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4),
+				this.getManager().getMain().color("&0&lBroom"));
 
-		Potion speedPot = new Potion(1);
-		speedPot.setType(PotionType.SPEED);
-		speedPot.setSplash(true);
-		PotionMeta speedMeta = (PotionMeta) item2.getItemMeta();
-		speedMeta.addCustomEffect(new PotionEffect(PotionEffectType.SPEED, 600, 1), true);
-		item2.setItemMeta(speedMeta);
-		speedPot.apply(item2);
+		// Hammer
+		ItemStack hammer = ItemHelper.addEnchant(
+				ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD, 1, (short) 250),
+						"" + ChatColor.YELLOW + ChatColor.BOLD + "HAMMER", ChatColor.YELLOW + ""),
+				Enchantment.KNOCKBACK, 10);
+		hammer.getDurability();
 
-		ItemStack zombie = new ItemStack(Material.MONSTER_EGG, 1, EntityType.ZOMBIE.getTypeId());
-		ItemMeta zMeta = zombie.getItemMeta();
-		zMeta.setDisplayName("" + ChatColor.RESET + ChatColor.ITALIC + "Zombie Pokeball");
-		zombie.setItemMeta(zMeta);
+		// Bazooka
+		ItemStack bazooka = ItemHelper.setDetails(new ItemStack(Material.DIAMOND_HOE, 3, (short) 250),
+				"" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Bazooka", ChatColor.YELLOW + "");
+		bazooka.getDurability();
 
-		ItemStack witch = new ItemStack(Material.MONSTER_EGG, 1, EntityType.WITCH.getTypeId());
-		ItemMeta wMeta = witch.getItemMeta();
-		wMeta.setDisplayName("" + ChatColor.RESET + ChatColor.ITALIC + "Witch Pokeball");
-		witch.setItemMeta(wMeta);
+		// Extra Life
+		ItemStack extraLife = ItemHelper.setDetails(new ItemStack(Material.PRISMARINE_SHARD),
+				"" + ChatColor.RESET + ChatColor.BOLD + "Extra Life");
 
-		ItemStack skeleton = new ItemStack(Material.MONSTER_EGG, 1, EntityType.SKELETON.getTypeId());
-		ItemMeta sMeta = skeleton.getItemMeta();
-		sMeta.setDisplayName("" + ChatColor.RESET + ChatColor.ITALIC + "Skeleton Pokeball");
-		skeleton.setItemMeta(sMeta);
+		// Ender Pearl
+		ItemStack pearl = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL),
+				"" + ChatColor.RED + ChatColor.BOLD + "Teleporter");
+
+		// Slowballs
+		ItemStack slowballs = ItemHelper.setDetails(new ItemStack(Material.SNOW_BALL, 8),
+				"" + ChatColor.RED + ChatColor.BOLD + "Slowballs");
+
+		// Mini Shield
+		ItemStack miniShield = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
+				"" + ChatColor.YELLOW + "Mini-Shield Potion");
+
+		// Bounty
+		ItemStack bounty = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR, 1),
+				"" + ChatColor.YELLOW + "Bounty");
+
+		// Blooper
+		ItemStack blooper = ItemHelper.setDetails(new ItemStack(Material.RABBIT_FOOT),
+				gameManager.getMain().color("&6&lBlooper"));
+
+		// Nuke
+		ItemStack nuke = ItemHelper.addEnchant(
+				ItemHelper.setDetails(new ItemStack(Material.TNT, 3), this.getManager().getMain().color("&4&lNuke")),
+				Enchantment.DAMAGE_ALL, 1);
+
+		// Instagib
+		ItemStack instagib = ItemHelper.setDetails(new ItemStack(Material.GOLD_HOE, 5, (short) 250),
+				"" + ChatColor.GREEN + ChatColor.ITALIC + "Instagib", ChatColor.YELLOW + "");
+		instagib.getDurability();
+
+		// Zombie Egg
+		ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&r&oZombie Pokeball");
+
+		// Witch Egg
+		ItemStack witchEgg = ItemHelper.createMonsterEgg(EntityType.WITCH, 1, "&r&oWitch Pokeball");
+
+		// Skeleton Egg
+		ItemStack skeletonEgg = ItemHelper.createMonsterEgg(EntityType.SKELETON, 1, "&r&oSkeleton Pokeball");
+
+		// Creeper Egg (not in yet)
+		ItemStack creeperEgg = ItemHelper.createMonsterEgg(EntityType.CREEPER, 1, "&r&oCreeper Pokeball");
+
+		// Golden Apple
+		ItemStack goldenApple = ItemHelper.create(Material.GOLDEN_APPLE);
+
+		// Notch Apple
+		ItemStack notchApple = ItemHelper.create(Material.GOLDEN_APPLE, "&0&lNotch Apple");
+		notchApple.setDurability((short) 1);
+
+		List<ItemStack> itemsDropList = new ArrayList<>();
 
 		List<ItemStack> items = Arrays.asList(new ItemStack(Material.GOLDEN_APPLE),
 
 				ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE, 1, (short) 1),
 						"" + ChatColor.BLACK + ChatColor.BOLD + "Notch Apple"),
-				item5, item7, item7, item, item2, item5, item5, item2, item7, new ItemStack(Material.GOLDEN_APPLE),
-				item6, item, extraLife, item, new ItemStack(Material.MILK_BUCKET), new ItemStack(Material.MILK_BUCKET),
+				slownessPot, bazooka, bazooka, healthPot, speedPot, slownessPot, slownessPot, speedPot, bazooka, new ItemStack(Material.GOLDEN_APPLE),
+				hammer, healthPot, extraLife, healthPot, new ItemStack(Material.MILK_BUCKET), new ItemStack(Material.MILK_BUCKET),
 				new ItemStack(Material.MILK_BUCKET), blooper, blooper, blooper, blooper, nuke, nuke, nuke, nuke, nuke,
 				bomb, pearl, pearl, miniShield, miniShield, slowballs, slowballs, slowballs, fireRes, fireRes, instagib,
-				instagib, instagib, broom, broom, zombie, zombie, zombie, skeleton, skeleton, witch, bounty);
+				instagib, instagib, broom, broom, zombieEgg, zombieEgg, zombieEgg, skeletonEgg, skeletonEgg, witchEgg, bounty);
 		return items.get(random.nextInt(items.size()));
 	}
 
@@ -1196,29 +1213,29 @@ public class GameInstance {
 						if (baseClass.getLives() > 0) {
 							if (ticks == 0) {
 								player.teleport(GetRespawnLoc());
-								player.setGameMode(GameMode.ADVENTURE);
-								player.setHealth(20.0);
-								player.setAllowFlight(true);
-								getManager().spawnProtection2(player);
-
-								if (!(players.contains(player))) {
-									getManager().getMain().ResetPlayer(player);
-								} else {
-									baseClass.LoadPlayer();
-									if (gameType == GameType.FRENZY) {
-										player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "Respawned",
-												"" + ChatColor.RESET + "Your new class for this life is "
-														+ baseClass.getType().getTag());
-									} else
-										player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "Respawned", "");
-
-									baseClass.isDead = false;
-								}
-								this.cancel();
-							} else if (ticks <= 3 && state == GameState.STARTED) {
-								player.sendTitle("", "" + ChatColor.RED + ticks);
-								player.setGameMode(GameMode.SPECTATOR);
 							}
+							player.setGameMode(GameMode.ADVENTURE);
+							player.setHealth(20.0);
+							player.setAllowFlight(true);
+							getManager().spawnProtection2(player);
+
+							if (!(players.contains(player))) {
+								getManager().getMain().ResetPlayer(player);
+							} else {
+								baseClass.LoadPlayer();
+								if (gameType == GameType.FRENZY) {
+									player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "Respawned",
+											"" + ChatColor.RESET + "Your new class for this life is "
+													+ baseClass.getType().getTag());
+								} else
+									player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "Respawned", "");
+
+								baseClass.isDead = false;
+							}
+							this.cancel();
+						} else if (ticks <= 3 && state == GameState.STARTED) {
+							player.sendTitle("", "" + ChatColor.RED + ticks);
+							player.setGameMode(GameMode.SPECTATOR);
 						}
 						ticks--;
 					}

@@ -93,8 +93,8 @@ public class SnowGolemClass extends BaseClass {
 
 	@Override
 	public void Tick(int gameTicks) {
-		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.SnowGolem
-				&& instance.classes.get(player).getLives() > 0) {
+		if (instance.classes.containsKey(playerBaseClass) && instance.classes.get(playerBaseClass).getType() == ClassType.SnowGolem
+				&& instance.classes.get(playerBaseClass).getLives() > 0) {
 			this.cooldownSec = (20000 - snowGolem.getTime()) / 1000 + 1;
 
 			if (snowGolem.getTime() < 20000) {
@@ -102,13 +102,13 @@ public class SnowGolemClass extends BaseClass {
 						.color("&bSnow Platform &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
+				CraftPlayer craft = (CraftPlayer) playerBaseClass;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
 				String msg = instance.getManager().getMain().color("&rYou can use &bSnow Platform");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
+				CraftPlayer craft = (CraftPlayer) playerBaseClass;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			}
 		}
@@ -122,11 +122,11 @@ public class SnowGolemClass extends BaseClass {
 			// SNOW PLATFORM ABILITY
 			if (item.getType() == Material.SNOW_BLOCK
 					&& (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR)) {
-				if (player.getGameMode() != GameMode.SPECTATOR) {
+				if (playerBaseClass.getGameMode() != GameMode.SPECTATOR) {
 					if (snowGolem.getTime() < 20000) {
 						int seconds = (20000 - snowGolem.getTime()) / 1000 + 1;
 						event.setCancelled(true);
-						player.sendMessage(instance.getManager().getMain().color(
+						playerBaseClass.sendMessage(instance.getManager().getMain().color(
 								"&c&l(!) &rYour &bSnow Platform &ris still regenerating for &e" + seconds + "s"));
 					} else {
 						snowGolem.restart();
@@ -138,24 +138,24 @@ public class SnowGolemClass extends BaseClass {
 								if (ticks == 8) {
 									this.cancel();
 								} else {
-									Location targetLocation = new Location(player.getWorld(),
-											player.getLocation().getX(), player.getLocation().getY() + 1,
-											player.getLocation().getZ()); // Replace with
+									Location targetLocation = new Location(playerBaseClass.getWorld(),
+											playerBaseClass.getLocation().getX(), playerBaseClass.getLocation().getY() + 1,
+											playerBaseClass.getLocation().getZ()); // Replace with
 																			// your target
 																			// location
 
-									float originalYaw = player.getLocation().getYaw();
-									float originalPitch = player.getLocation().getPitch();
+									float originalYaw = playerBaseClass.getLocation().getYaw();
+									float originalPitch = playerBaseClass.getLocation().getPitch();
 
-									player.teleport(targetLocation);
+									playerBaseClass.teleport(targetLocation);
 
-									Location newLocation = player.getLocation();
+									Location newLocation = playerBaseClass.getLocation();
 									newLocation.setYaw(originalYaw);
 									newLocation.setPitch(originalPitch);
 
-									player.teleport(newLocation);
-									World playerWorld = player.getWorld();
-									Location playerLocation = player.getLocation();
+									playerBaseClass.teleport(newLocation);
+									World playerWorld = playerBaseClass.getWorld();
+									Location playerLocation = playerBaseClass.getLocation();
 
 									// CREATING PLATFORM
 									int platformLength = 3; // Platform Length
@@ -212,12 +212,12 @@ public class SnowGolemClass extends BaseClass {
 			// PUMPKIN HEAD ABILITY
 			if (item.getType() == Material.PUMPKIN
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-				if (player.getGameMode() != GameMode.SPECTATOR) {
+				if (playerBaseClass.getGameMode() != GameMode.SPECTATOR) {
 					int amount = item.getAmount();
 					if (amount > 0) {
 						amount--;
 						if (amount == 0)
-							player.getInventory().clear(player.getInventory().getHeldItemSlot());
+							playerBaseClass.getInventory().clear(playerBaseClass.getInventory().getHeldItemSlot());
 						else
 							item.setAmount(amount);
 
@@ -225,12 +225,12 @@ public class SnowGolemClass extends BaseClass {
 							BaseClass baseClass = instance.classes.get(gamePlayer);
 
 							// Pumpkin Head Feedback Sound
-							player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
+							playerBaseClass.playSound(playerBaseClass.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
 
-							if (player != gamePlayer) {
+							if (playerBaseClass != gamePlayer) {
 
 								// Pumpkin Head Sound
-								gamePlayer.playSound(player.getLocation(), Sound.AMBIENCE_CAVE, 1, 4);
+								gamePlayer.playSound(playerBaseClass.getLocation(), Sound.AMBIENCE_CAVE, 1, 4);
 
 								// Pumpkin Head Duration and Application
 								BukkitRunnable runTimer = new BukkitRunnable() {
