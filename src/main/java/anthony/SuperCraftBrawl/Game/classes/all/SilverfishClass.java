@@ -31,7 +31,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 public class SilverfishClass extends BaseClass {
-	private Ability wallAbility = new Ability("Silverfish Wall", 12, player);
+	private Ability wallAbility = new Ability("Silverfish Wall", 15, player);
 	private ItemStack weapon;
 	private ItemStack wallItem;
 
@@ -472,7 +472,7 @@ public class SilverfishClass extends BaseClass {
 							}
 						}
 				// Silverfish despawn after half the cooldown of the wall
-			}, (long) (wallAbility.getCooldownDurationSeconds() - 3) * 20);
+			}, (long) (wallAbility.getCooldownDurationSeconds() - wallAbility.getCooldownDurationSeconds()/2) * 20);
 		}
 
 		private void customizeSilverfish(Creature mob, Player player) {
