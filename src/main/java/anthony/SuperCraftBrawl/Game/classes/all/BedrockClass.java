@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import anthony.SuperCraftBrawl.Game.classes.Ability;
-import anthony.SuperCraftBrawl.Game.classes.SoundManager;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
