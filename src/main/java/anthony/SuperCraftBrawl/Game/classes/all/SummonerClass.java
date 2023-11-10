@@ -111,7 +111,7 @@ public class SummonerClass extends BaseClass {
 				if (egg != null)
 					return;
 				else if (count >= 7) {
-					playerBaseClass.sendMessage(instance.getManager().getMain()
+					player.sendMessage(instance.getManager().getMain()
 							.color("&c&l(!) &rYou have used the max amount of Spawn Eggs"));
 					return;
 				}
@@ -121,20 +121,20 @@ public class SummonerClass extends BaseClass {
 
 				// Spawn Zombie
 				if (chance == 1) {
-					ItemProjectile proj = new ItemProjectile(instance, playerBaseClass, new ProjectileOnHit() {
+					ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
 						@Override
 						public void onHit(Player hit) {
 							Location hitLoc = this.getBaseProj().getEntity().getLocation();
 							// Playing Sound
-							playerBaseClass.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
+							player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
 
 							// Spawning Zombie
-							Zombie en = (Zombie) playerBaseClass.getWorld().spawnCreature(hitLoc, EntityType.ZOMBIE);
+							Zombie en = (Zombie) player.getWorld().spawnCreature(hitLoc, EntityType.ZOMBIE);
 							// Customizing Zombie
 								// Setting Zombie to not de-spawn when far away
 							en.setRemoveWhenFarAway(false);
 								// Setting Zombie name to owner's
-							en.setCustomName(ChatColorHelper.color("&c" + playerBaseClass.getName() + "'s &eZombie"));
+							en.setCustomName(ChatColorHelper.color("&c" + player.getName() + "'s &eZombie"));
 								// Setting Custom name visible
 							en.setCustomNameVisible(true);
 								// Setting Zombie higher speed
@@ -173,24 +173,24 @@ public class SummonerClass extends BaseClass {
 						}
 
 					}, new ItemStack(Material.MONSTER_EGG));
-					instance.getManager().getProjManager().shootProjectile(proj, playerBaseClass.getEyeLocation(),
-							playerBaseClass.getLocation().getDirection().multiply(2.0D));
+					instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+							player.getLocation().getDirection().multiply(2.0D));
 					// Spawn Creeper
 				} else if (chance == 2) {
-					ItemProjectile proj = new ItemProjectile(instance, playerBaseClass, new ProjectileOnHit() {
+					ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
 						@Override
 						public void onHit(Player hit) {
 							Location hitLoc = this.getBaseProj().getEntity().getLocation();
 							// Playing Sound
-							playerBaseClass.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
+							player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
 
 							// Spawning Creeper
-							Creeper en = (Creeper) playerBaseClass.getWorld().spawnCreature(hitLoc, EntityType.CREEPER);
+							Creeper en = (Creeper) player.getWorld().spawnCreature(hitLoc, EntityType.CREEPER);
 							// Customizing Creeper
 								// Setting Creeper to not de-spawn when far away
 							en.setRemoveWhenFarAway(false);
 								// Setting Creeper Name to owner's
-							en.setCustomName(ChatColorHelper.color("&c" + playerBaseClass.getName() + "'s &eCreeper"));
+							en.setCustomName(ChatColorHelper.color("&c" + player.getName() + "'s &eCreeper"));
 								// Setting Custom name visible
 							en.setCustomNameVisible(true);
 								// Setting to Charged Creeper
@@ -198,24 +198,24 @@ public class SummonerClass extends BaseClass {
 						}
 
 					}, new ItemStack(Material.MONSTER_EGG));
-					instance.getManager().getProjManager().shootProjectile(proj, playerBaseClass.getEyeLocation(),
-							playerBaseClass.getLocation().getDirection().multiply(2.0D));
+					instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+							player.getLocation().getDirection().multiply(2.0D));
 					// Spawn Skeleton
 				} else if (chance == 3) {
-					ItemProjectile proj = new ItemProjectile(instance, playerBaseClass, new ProjectileOnHit() {
+					ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
 						@Override
 						public void onHit(Player hit) {
 							Location hitLoc = this.getBaseProj().getEntity().getLocation();
 							// Playing Sound
-							playerBaseClass.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
+							player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
 
 							// Spawning Skeleton
-							Skeleton en = (Skeleton) playerBaseClass.getWorld().spawnCreature(hitLoc, EntityType.SKELETON);
+							Skeleton en = (Skeleton) player.getWorld().spawnCreature(hitLoc, EntityType.SKELETON);
 							// Customizing Skeleton
 								// Setting Skeleton to not de-spawn when far away
 							en.setRemoveWhenFarAway(false);
 								// Setting Skeleton Name to owner's
-							en.setCustomName(ChatColorHelper.color("&c" + playerBaseClass.getName() + "'s &eSkeleton"));
+							en.setCustomName(ChatColorHelper.color("&c" + player.getName() + "'s &eSkeleton"));
 								// Setting Custom name visible
 							en.setCustomNameVisible(true);
 								// Setting Bow
@@ -240,8 +240,8 @@ public class SummonerClass extends BaseClass {
 						}
 
 					}, new ItemStack(Material.MONSTER_EGG));
-					instance.getManager().getProjManager().shootProjectile(proj, playerBaseClass.getEyeLocation(),
-							playerBaseClass.getLocation().getDirection().multiply(2.0D));
+					instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+							player.getLocation().getDirection().multiply(2.0D));
 				}
 				count++;
 
@@ -256,7 +256,7 @@ public class SummonerClass extends BaseClass {
 										.color("&9&l(!) &eRandom Spawn Egg Cooldown: " + ticks + "s");
 								PacketPlayOutChat packet = new PacketPlayOutChat(
 										ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
-								CraftPlayer craft = (CraftPlayer) playerBaseClass;
+								CraftPlayer craft = (CraftPlayer) player;
 								craft.getHandle().playerConnection.sendPacket(packet);
 							} else {
 								egg = null;

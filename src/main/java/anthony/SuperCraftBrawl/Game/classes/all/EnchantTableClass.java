@@ -75,6 +75,7 @@ public class EnchantTableClass extends BaseClass {
 		playerInv.setItem(1, enchantItem);
 
 		player.setTotalExperience(0);
+		player.setExp(0);
 
 		if (xpLevelsAmount> 0) {
 			player.giveExpLevels(xpLevelsAmount);
@@ -119,7 +120,7 @@ public class EnchantTableClass extends BaseClass {
 					return;
 				} else {
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &cSharpness 1");
+					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 1");
 
 					xpSpent = 1;
 					xpLevelsAmount -= 1;
@@ -133,8 +134,8 @@ public class EnchantTableClass extends BaseClass {
 				} else {
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
 					weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &cSharpness 1");
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &bKnockback 1");
+					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 1");
+					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback 1");
 
 					xpSpent = 2;
 					xpLevelsAmount -= 2;
@@ -149,8 +150,8 @@ public class EnchantTableClass extends BaseClass {
 				} else {
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
 					weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &cSharpness 1");
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &bKnockback 2");
+					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 1");
+					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback 2");
 
 					xpSpent = 3;
 					xpLevelsAmount -= 3;
@@ -166,9 +167,9 @@ public class EnchantTableClass extends BaseClass {
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
 					weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
 					weapon.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &cSharpness 1");
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &bKnockback 1");
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &6Fire Aspect 1");
+					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 1");
+					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback 1");
+					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &6&lFire Aspect 1");
 
 					xpSpent = 4;
 					xpLevelsAmount -= 5;
@@ -183,9 +184,9 @@ public class EnchantTableClass extends BaseClass {
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
 					weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
 					weapon.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &cSharpness 2");
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &bKnockback 1");
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &6Fire Aspect 1");
+					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 2");
+					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback 1");
+					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &6&lFire Aspect 1");
 
 					xpSpent = 8;
 					xpLevelsAmount -= 8;
