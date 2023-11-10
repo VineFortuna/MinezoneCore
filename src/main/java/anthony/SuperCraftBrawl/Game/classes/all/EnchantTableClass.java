@@ -21,7 +21,7 @@ import net.md_5.bungee.api.ChatColor;
 
 public class EnchantTableClass extends BaseClass {
 
-	private Ability enchantAbility = new Ability("Enchant Ability", 0, playerBaseClass);
+	private Ability enchantAbility = new Ability("Enchant Ability", 0, player);
 	private ItemStack weapon;
 	private int xpLevelsAmount = 0;
 	int levelEnchanted = 0;
@@ -74,35 +74,35 @@ public class EnchantTableClass extends BaseClass {
 		playerInv.setItem(0, weapon);
 		playerInv.setItem(1, enchantItem);
 
-		playerBaseClass.setTotalExperience(0);
+		player.setTotalExperience(0);
 
 		if (xpLevelsAmount> 0) {
-			playerBaseClass.giveExpLevels(xpLevelsAmount);
+			player.giveExpLevels(xpLevelsAmount);
 		}
 
 		levelEnchanted = 0;
 
-		playerBaseClass.sendMessage("" + ChatColor.BOLD + "===============================");
-		playerBaseClass.sendMessage("" + ChatColor.BOLD + "||");
-		playerBaseClass.sendMessage("" + ChatColor.BOLD + "|| " + ChatColor.AQUA + "      Get experience by killing players");
-		playerBaseClass.sendMessage("" + ChatColor.BOLD + "||");
-		playerBaseClass.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.UNDERLINE + "  Enchantments:");
-		playerBaseClass.sendMessage("" + ChatColor.BOLD + "||");
-		playerBaseClass.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  1 Level: Sharpness 1");
-		playerBaseClass.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  2 Levels: Sharpness 1 & Knockback 1");
-		playerBaseClass.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  3 Levels: Sharpness 1 & Knockback 2");
-		playerBaseClass.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  5 Levels: Sharpness 1 & Knockback 1 & Fire Aspect 1");
-		playerBaseClass.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  8 Levels: Sharpness 2 & Knockback 1 & Fire Aspect 1");
-		playerBaseClass.sendMessage("" + ChatColor.BOLD + "||");
-		playerBaseClass.sendMessage("" + ChatColor.BOLD + "||");
-		playerBaseClass.sendMessage("" + ChatColor.BOLD + "===============================");
+		player.sendMessage("" + ChatColor.BOLD + "===============================");
+		player.sendMessage("" + ChatColor.BOLD + "||");
+		player.sendMessage("" + ChatColor.BOLD + "|| " + ChatColor.AQUA + "      Get experience by killing players");
+		player.sendMessage("" + ChatColor.BOLD + "||");
+		player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.UNDERLINE + "  Enchantments:");
+		player.sendMessage("" + ChatColor.BOLD + "||");
+		player.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  1 Level: Sharpness 1");
+		player.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  2 Levels: Sharpness 1 & Knockback 1");
+		player.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  3 Levels: Sharpness 1 & Knockback 2");
+		player.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  5 Levels: Sharpness 1 & Knockback 1 & Fire Aspect 1");
+		player.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  8 Levels: Sharpness 2 & Knockback 1 & Fire Aspect 1");
+		player.sendMessage("" + ChatColor.BOLD + "||");
+		player.sendMessage("" + ChatColor.BOLD + "||");
+		player.sendMessage("" + ChatColor.BOLD + "===============================");
 	}
 
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
-		BaseClass bc = instance.classes.get(playerBaseClass);
-		Inventory inventory = playerBaseClass.getInventory();
+		BaseClass bc = instance.classes.get(player);
+		Inventory inventory = player.getInventory();
 		int xpSpent = 0;
 
 		// Enchant Ability
@@ -115,6 +115,7 @@ public class EnchantTableClass extends BaseClass {
 				// 1 Level
 			} else if (xpLevelsAmount == 1) {
 				if (levelEnchanted == 1) {
+					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rYou already have that enchantment");
 					return;
 				} else {
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
@@ -127,6 +128,7 @@ public class EnchantTableClass extends BaseClass {
 				// 2 Levels
 			} else if (xpLevelsAmount == 2) {
 				if (levelEnchanted == 2) {
+					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rYou already have that enchantment");
 					return;
 				} else {
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
@@ -142,6 +144,7 @@ public class EnchantTableClass extends BaseClass {
 				// 3 and 4 Levels
 			} else if (xpLevelsAmount == 3 || xpLevelsAmount == 4) {
 				if (levelEnchanted == 3) {
+					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rYou already have that enchantment");
 					return;
 				} else {
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
@@ -157,6 +160,7 @@ public class EnchantTableClass extends BaseClass {
 				// 5, 6 and 7 Levels
 			} else if (xpLevelsAmount == 5 || xpLevelsAmount == 6 || xpLevelsAmount == 7) {
 				if (levelEnchanted == 5) {
+					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rYou already have that enchantment");
 					return;
 				} else {
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
@@ -173,6 +177,7 @@ public class EnchantTableClass extends BaseClass {
 
 			} else {
 				if (levelEnchanted == 8) {
+					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rYou already have that enchantment");
 					return;
 				} else {
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
@@ -194,7 +199,7 @@ public class EnchantTableClass extends BaseClass {
 			inventory.setItem(0, weapon);
 
 			// Setting updated xp value
-			playerBaseClass.giveExpLevels(-xpSpent);
+			player.giveExpLevels(-xpSpent);
 		}
 	}
 
