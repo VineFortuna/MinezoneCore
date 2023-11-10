@@ -31,7 +31,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 public class SilverfishClass extends BaseClass {
-	private Ability wallAbility = new Ability("Silverfish Wall", 15, playerBaseClass);
+	private Ability wallAbility = new Ability("Silverfish Wall", 15, player);
 	private ItemStack weapon;
 	private ItemStack wallItem;
 
@@ -102,9 +102,9 @@ public class SilverfishClass extends BaseClass {
 		playerInv.setItem(0, weapon);
 		playerInv.setItem(1, wallItem);
 
-		for (Entity en : playerBaseClass.getWorld().getEntities())
+		for (Entity en : player.getWorld().getEntities())
 			if (!(en instanceof Player))
-				if (en.getName().contains(playerBaseClass.getName()))
+				if (en.getName().contains(player.getName()))
 					en.remove();
 	}
 
@@ -113,7 +113,7 @@ public class SilverfishClass extends BaseClass {
 		ItemStack item = event.getItem();
 
 		if (item != null) {
-			if (playerBaseClass.getGameMode() != GameMode.SPECTATOR) {
+			if (player.getGameMode() != GameMode.SPECTATOR) {
 				// WALL ABILITY
 				if (item.equals(wallItem)) {
 					if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
@@ -123,7 +123,7 @@ public class SilverfishClass extends BaseClass {
 						}
 						// If ability is available
 						else {
-							SilverfishWall createWall = new SilverfishWall(3, 3, playerBaseClass, 2, 0.2);
+							SilverfishWall createWall = new SilverfishWall(3, 3, player, 2, 0.2);
 							// Setting cooldown
 							wallAbility.use();
 							// Sending return message

@@ -33,7 +33,7 @@ public class BedrockClass extends BaseClass {
 
 	private ItemStack weapon;
 	private ItemStack lavaBucket;
-	private Ability invincibility = new Ability("Invincibility", 25, playerBaseClass);
+	private Ability invincibility = new Ability("Invincibility", 25, player);
 	private int invincibilityDuration = 3; // 3 Seconds Duration
 
 	private ItemStack[] originalArmor;
@@ -82,7 +82,7 @@ public class BedrockClass extends BaseClass {
 
 	public void modifyArmorDuringInvincibility() {
 		// Getting original armor
-		originalArmor = playerBaseClass.getInventory().getArmorContents();
+		originalArmor = player.getInventory().getArmorContents();
 
 		// Invincibility armor
 		// Chestplate
@@ -97,13 +97,13 @@ public class BedrockClass extends BaseClass {
 		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 
 		// Setting Armor
-		playerBaseClass.getInventory().setChestplate(chestplate);
-		playerBaseClass.getInventory().setLeggings(leggings);
-		playerBaseClass.getInventory().setBoots(boots);
+		player.getInventory().setChestplate(chestplate);
+		player.getInventory().setLeggings(leggings);
+		player.getInventory().setBoots(boots);
 	}
 
 	public void restoreOriginalArmor() {
-		playerBaseClass.getInventory().setArmorContents(originalArmor);
+		player.getInventory().setArmorContents(originalArmor);
 	}
 
 	@Override
@@ -141,15 +141,15 @@ public class BedrockClass extends BaseClass {
 			String msg = instance.getManager().getMain()
 					.color("&6&lBedrock Lava &rregenerates in: &e" + this.lavaCooldownSec + "s");
 			PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
-			CraftPlayer craft = (CraftPlayer) playerBaseClass;
+			CraftPlayer craft = (CraftPlayer) player;
 			craft.getHandle().playerConnection.sendPacket(packet);
 		} else {
-			if (instance.classes.containsKey(playerBaseClass) && instance.classes.get(playerBaseClass).getType() == ClassType.Bedrock
-					&& instance.classes.get(playerBaseClass).getLives() > 0) {
+			if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Bedrock
+					&& instance.classes.get(player).getLives() > 0) {
 				String msg = instance.getManager().getMain().color("&rYou can use &6&lBedrock Lava");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) playerBaseClass;
+				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			}
 		}
@@ -160,7 +160,7 @@ public class BedrockClass extends BaseClass {
 		ItemStack item = event.getItem();
 
 		if (item != null) {
-			if (playerBaseClass.getGameMode() != GameMode.SPECTATOR) {
+			if (player.getGameMode() != GameMode.SPECTATOR) {
 				// BEDROCK INVINCIBILITY ABILITY
 				if (item.equals(weapon)) {
 					if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
@@ -176,11 +176,11 @@ public class BedrockClass extends BaseClass {
 							invincibility.sendPlayerCustomUseAbilityChatMessage("&d&l(!) &rYou are now invincible for &e" + invincibilityDuration + "&rseconds");
 							invincibility.sendPlayerCustomUseAbilityChatMessage("&d&l(!) &rYou are also unable to hit other players");
 							// Setting invincibility
-							BaseClass bc = instance.classes.get(playerBaseClass);
+							BaseClass bc = instance.classes.get(player);
 							bc.bedrockInvincibility = true;
 
 							// Playing sound
-							SoundManager.playSoundToAllGamePlayersFromAPlayerLocation(instance, playerBaseClass, Sound.ZOMBIE_INFECT, 20, 1);
+							SoundManager.playSoundToAllGamePlayersFromAPlayerLocation(instance, player, Sound.ZOMBIE_INFECT, 20, 1);
 
 							// Setting invincibility runnable
 							if (bedrock == null) {
@@ -203,7 +203,7 @@ public class BedrockClass extends BaseClass {
 											}
 
 											// Playing sound when invincibility is over
-											SoundManager.playSoundToAllGamePlayersFromAPlayerLocation(instance, playerBaseClass, Sound.ZOMBIE_UNFECT, 20, 1);
+											SoundManager.playSoundToAllGamePlayersFromAPlayerLocation(instance, player, Sound.ZOMBIE_UNFECT, 20, 1);
 										} else {
 											if (!armorModified) {
 												// Modifying armor when invincibility starts
@@ -226,19 +226,19 @@ public class BedrockClass extends BaseClass {
 						if (bedrockLava.getTime() < 10000) {
 							int seconds = (10000 - bedrockLava.getTime()) / 1000 + 1;
 							event.setCancelled(true);
-							playerBaseClass.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
 									+ "Your Lava is still on cooldown for " + ChatColor.YELLOW + seconds + "s");
 						} else {
 							bedrockLava.restart();
-							playerBaseClass.getInventory().clear(playerBaseClass.getInventory().getHeldItemSlot());
+							player.getInventory().clear(player.getInventory().getHeldItemSlot());
 							for (Player gamePlayer : instance.players) {
-								if (gamePlayer != playerBaseClass) {
+								if (gamePlayer != player) {
 									if (instance.classes.containsKey(gamePlayer)
 											&& instance.classes.get(gamePlayer).getLives() > 0) {
 										if (gamePlayer.getGameMode() != GameMode.SPECTATOR) {
 											if (instance.duosMap != null) {
 												if (!(instance.team.get(gamePlayer)
-														.equals(instance.team.get(playerBaseClass)))) {
+														.equals(instance.team.get(player)))) {
 													Block block = instance.getMapWorld().getBlockAt(
 															gamePlayer.getLocation().getBlockX(),
 															gamePlayer.getLocation().getBlockY() + 1,

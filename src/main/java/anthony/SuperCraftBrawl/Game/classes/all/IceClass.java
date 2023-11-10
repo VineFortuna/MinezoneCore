@@ -63,7 +63,7 @@ public class IceClass extends BaseClass {
 		playerEquip.setLeggings(makeBlue(new ItemStack(Material.LEATHER_LEGGINGS)));
 		playerEquip.setBoots(makeBlue(
 				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerBaseClass.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
 	}
 
 	@Override
@@ -95,8 +95,8 @@ public class IceClass extends BaseClass {
 
 	@Override
 	public void Tick(int gameTicks) {
-		if (instance.classes.containsKey(playerBaseClass) && instance.classes.get(playerBaseClass).getType() == ClassType.Ice
-				&& instance.classes.get(playerBaseClass).getLives() > 0) {
+		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Ice
+				&& instance.classes.get(player).getLives() > 0) {
 			this.cooldownSec = (10 * 1000 - ice.getTime()) / 1000 + 1;
 
 			if (ice.getTime() < 10 * 1000) {
@@ -104,13 +104,13 @@ public class IceClass extends BaseClass {
 						.color("&b&lFreeze Ray &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) playerBaseClass;
+				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
 				String msg = instance.getManager().getMain().color("&rYou can use &b&lFreeze Ray");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) playerBaseClass;
+				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			}
 		}
@@ -126,14 +126,14 @@ public class IceClass extends BaseClass {
 				if (ice.getTime() < 10000) {
 					int seconds = (10000 - ice.getTime()) / 1000 + 1;
 					event.setCancelled(true);
-					playerBaseClass.sendMessage(
+					player.sendMessage(
 							ChatColor.BOLD + "(!) " + ChatColor.RESET + "Broooo... You're still on cooldown for "
 									+ ChatColor.YELLOW + seconds + " more seconds ");
 				} else {
 					ice.restart();
 					int range = 30;
-					Location endLoc = playerBaseClass.getEyeLocation();
-					BlockIterator b = new BlockIterator(playerBaseClass.getEyeLocation(), 0, range);
+					Location endLoc = player.getEyeLocation();
+					BlockIterator b = new BlockIterator(player.getEyeLocation(), 0, range);
 
 					while (b.hasNext()) {
 						Block block = b.next();
@@ -143,39 +143,39 @@ public class IceClass extends BaseClass {
 							break;
 					}
 
-					Vector dir = playerBaseClass.getEyeLocation().getDirection();
-					double maxDist = endLoc.distance(playerBaseClass.getEyeLocation());
+					Vector dir = player.getEyeLocation().getDirection();
+					double maxDist = endLoc.distance(player.getEyeLocation());
 
 					for (double t = 1; t < maxDist; t += 0.5) {
-						ParticleEffect.BLOCK_CRACK.display(playerBaseClass.getEyeLocation().add(dir.clone().multiply(t)), 0.0F,
+						ParticleEffect.BLOCK_CRACK.display(player.getEyeLocation().add(dir.clone().multiply(t)), 0.0F,
 								0.0F, 0.0F, 0.0F, 1, new BlockTexture(Material.ICE));
 					}
 
 					for (Player p : instance.players) {
-						p.playSound(playerBaseClass.getLocation(), Sound.GLASS, 1.0f, 1.0f);
-						if (p != playerBaseClass) {
-							Vector d = p.getLocation().add(0, 1, 0).subtract(playerBaseClass.getEyeLocation()).toVector();
+						p.playSound(player.getLocation(), Sound.GLASS, 1.0f, 1.0f);
+						if (p != player) {
+							Vector d = p.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
 							double dist = d.dot(dir);
 
 							if (dist < maxDist) {
-								Location closest = playerBaseClass.getEyeLocation().add(dir.clone().multiply(dist));
+								Location closest = player.getEyeLocation().add(dir.clone().multiply(dist));
 
 								if (closest.distanceSquared(p.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
 									if (instance.duosMap != null) {
-										if (!(instance.team.get(p).equals(instance.team.get(playerBaseClass)))) {
+										if (!(instance.team.get(p).equals(instance.team.get(player)))) {
 											p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,  2 * 20, 0)); // Slowness 1 for 2 seconds
 											EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID,
 													5.0);
 											instance.getManager().getMain().getServer().getPluginManager()
 													.callEvent(damageEvent);
-											p.damage(5.0, playerBaseClass);
+											p.damage(5.0, player);
 										}
 									} else {
 										p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 2 * 20, 0)); // Slowness 1 for 2 seconds
 										EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID, 5.0);
 										instance.getManager().getMain().getServer().getPluginManager()
 												.callEvent(damageEvent);
-										p.damage(5.0, playerBaseClass);
+										p.damage(5.0, player);
 									}
 								}
 							}
@@ -184,10 +184,10 @@ public class IceClass extends BaseClass {
 				}
 			} else if (item.getType() == Material.PACKED_ICE
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-				List<Entity> nearby = playerBaseClass.getNearbyEntities(10.0, 10.0, 10.0);
+				List<Entity> nearby = player.getNearbyEntities(10.0, 10.0, 10.0);
 
 				if (nearby.isEmpty()) {
-					playerBaseClass.sendMessage(
+					player.sendMessage(
 							instance.getManager().getMain().color("&c&l(!) &rNo nearby players have been found :("));
 					return;
 				}
@@ -207,9 +207,9 @@ public class IceClass extends BaseClass {
 						}
 					}
 				}
-				playerBaseClass.sendMessage(
+				player.sendMessage(
 						instance.getManager().getMain().color("&2&l(!) &rYou have &b&lFrozen &rnearby players!"));
-				playerBaseClass.getInventory().clear(playerBaseClass.getInventory().getHeldItemSlot());
+				player.getInventory().clear(player.getInventory().getHeldItemSlot());
 			}
 		}
 	}
@@ -217,10 +217,10 @@ public class IceClass extends BaseClass {
 	@Override
 	public void Death(PlayerDeathEvent e) {
 		super.Death(e);
-		if(playerBaseClass.equals(e.getEntity().getKiller())){
-			if(playerBaseClass.getInventory().contains(Material.PACKED_ICE)) return;
+		if(player.equals(e.getEntity().getKiller())){
+			if(player.getInventory().contains(Material.PACKED_ICE)) return;
 			// Regeneration ice bomb upon killing.
-			playerBaseClass.getInventory().addItem(
+			player.getInventory().addItem(
 					ItemHelper.setDetails(new ItemStack(Material.PACKED_ICE),
 							instance.getManager().getMain().color("&bFreeze Bomb"), "",
 							instance.getManager().getMain().color("&7Right click to freeze nearby enemies!")));
