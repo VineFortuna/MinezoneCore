@@ -43,7 +43,7 @@ public class Ability {
     }
 
     public void sendPlayerUseAbilityChatMessage() {
-        player.sendMessage(ChatColorHelper.color("&6" + abilityName + "&r was used"));
+        player.sendMessage(ChatColorHelper.color("&a&l(!) &6" + abilityName + "&r was used"));
     }
 
     public void sendPlayerCustomUseAbilityChatMessage(String message) {

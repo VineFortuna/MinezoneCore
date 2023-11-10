@@ -85,8 +85,8 @@ public class MagmaCubeClass extends BaseClass {
 
 	@Override
 	public void Tick(int gameTicks) {
-		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.MagmaCube
-				&& instance.classes.get(player).getLives() > 0) {
+		if (instance.classes.containsKey(playerBaseClass) && instance.classes.get(playerBaseClass).getType() == ClassType.MagmaCube
+				&& instance.classes.get(playerBaseClass).getLives() > 0) {
 			this.cooldownSec = (5000 - magmaCube.getTime()) / 1000 + 1;
 
 			if (magmaCube.getTime() < 5000) {
@@ -94,13 +94,13 @@ public class MagmaCubeClass extends BaseClass {
 						.color("&e&lMagmaCube Pokeball &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
+				CraftPlayer craft = (CraftPlayer) playerBaseClass;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
 				String msg = instance.getManager().getMain().color("&rYou can use &e&lMagmaCube Pokeball");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
+				CraftPlayer craft = (CraftPlayer) playerBaseClass;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			}
 		}
@@ -109,9 +109,9 @@ public class MagmaCubeClass extends BaseClass {
 	@Override
 	public void SetItems(Inventory playerInv) {
 		this.cooldownSec = 0; // Reset each life
-		for (Entity en : player.getWorld().getEntities())
+		for (Entity en : playerBaseClass.getWorld().getEntities())
 			if (!(en instanceof Player))
-				if (en.getName().contains(player.getName()))
+				if (en.getName().contains(playerBaseClass.getName()))
 					en.remove();
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.MONSTER_EGG, 7),
@@ -131,7 +131,7 @@ public class MagmaCubeClass extends BaseClass {
 					if (magmaCube.getTime() < 5000) {
 						int seconds = (5000 - magmaCube.getTime()) / 1000 + 1;
 						event.setCancelled(true);
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Brooo wait "
+						playerBaseClass.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Brooo wait "
 								+ ChatColor.YELLOW + seconds + ChatColor.RESET + " more seconds dawg");
 					} else {
 						magmaCube.restart();
@@ -139,26 +139,26 @@ public class MagmaCubeClass extends BaseClass {
 
 						if (amount > 0) {
 							if (amount == 1)
-								player.getInventory().clear(player.getInventory().getHeldItemSlot());
+								playerBaseClass.getInventory().clear(playerBaseClass.getInventory().getHeldItemSlot());
 							else {
 								amount--;
 								item.setAmount(amount);
 							}
-							ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
+							ItemProjectile proj = new ItemProjectile(instance, playerBaseClass, new ProjectileOnHit() {
 								@Override
 								public void onHit(Player hit) {
 									Location hitLoc = this.getBaseProj().getEntity().getLocation();
-									player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
-									MagmaCube en = (MagmaCube) player.getWorld().spawnCreature(hitLoc,
+									playerBaseClass.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
+									MagmaCube en = (MagmaCube) playerBaseClass.getWorld().spawnCreature(hitLoc,
 											EntityType.MAGMA_CUBE);
 									en.setSize(4);
-									en.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW
+									en.setCustomName("" + ChatColor.RED + playerBaseClass.getName() + "'s " + ChatColor.YELLOW
 											+ "MagmaCube");
 								}
 
 							}, new ItemStack(Material.MONSTER_EGG));
-							instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-									player.getLocation().getDirection().multiply(2.0D));
+							instance.getManager().getProjManager().shootProjectile(proj, playerBaseClass.getEyeLocation(),
+									playerBaseClass.getLocation().getDirection().multiply(2.0D));
 						}
 					}
 				}

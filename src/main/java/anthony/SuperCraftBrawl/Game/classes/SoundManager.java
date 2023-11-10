@@ -1,20 +1,27 @@
 package anthony.SuperCraftBrawl.Game.classes;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
 public class SoundManager {
 
     // Play a sound to each game player from a specific player location
-    public static void playSoundToAllPlayersFromAPlayerLocation(GameInstance gameInstance, Player player, Sound sound, float volume, float pitch) {
+    public static void playSoundToAllGamePlayersFromAPlayerLocation(GameInstance gameInstance, Player player, Sound sound, float volume, float pitch) {
         for (Player gamePlayer : gameInstance.players) {
             gamePlayer.playSound(player.getLocation(), sound, volume, pitch);
         }
     }
 
+    public static void playSoundToAllGamePlayersFromALocation(GameInstance gameInstance, Location location, Sound sound, float volume, float pitch) {
+        for (Player gamePlayer : gameInstance.players) {
+            gamePlayer.playSound(location, sound, volume, pitch);
+        }
+    }
+
     // Play a sound to each game player on its own location
-    public static void playSoundToAllPlayersOnEachPlayerLocation(GameInstance gameInstance, Sound sound, float volume, float pitch) {
+    public static void playSoundToAllGamePlayersOnEachPlayerLocation(GameInstance gameInstance, Sound sound, float volume, float pitch) {
         for (Player gamePlayer : gameInstance.players) {
             gamePlayer.playSound(gamePlayer.getLocation(), sound, volume, pitch);
         }
