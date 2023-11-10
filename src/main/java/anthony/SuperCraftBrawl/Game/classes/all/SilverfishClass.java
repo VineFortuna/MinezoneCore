@@ -92,7 +92,7 @@ public class SilverfishClass extends BaseClass {
 
 		this.weapon = weapon;
 
-		// Jump Ability
+		// Wall Ability
 		ItemStack wallItem = ItemHelper.create(Material.SMOOTH_BRICK, ChatColorHelper.color("&7Wall Ability"), ChatColorHelper.color("&7Right click to create a wall of silverfishes"));
 		wallItem.setDurability((short) 2);
 
@@ -415,14 +415,14 @@ public class SilverfishClass extends BaseClass {
 					// Removes the custom set metadata
 					block.removeMetadata(player.getDisplayName() + "Silverfish Block", instance.getManager().getMain());
 					// Sets the block to Air
-//					block.setType(Material.AIR);
+					block.setType(Material.AIR);
 
-					// Restore the original block type
-					int index = randomizedIndexes.get(randomizedIndexes.size() - 1);
-					block.setType(replacedBlocks.get(index));
-
-					// Restoring the replaced block
-					replacedBlocks.remove(replacedBlocks.size() - 1);
+//					// Restore the original block type
+//					int index = randomizedIndexes.get(randomizedIndexes.size() - 1);
+//					block.setType(replacedBlocks.get(index));
+//
+//					// Restoring the replaced block
+//					replacedBlocks.remove(replacedBlocks.size() - 1);
 
 					// Playing digging stone sound to all players
 					SoundManager.playSoundToAllGamePlayersFromALocation(instance, randomizedBlockLocation, Sound.DIG_STONE, 1, 1);
@@ -441,7 +441,7 @@ public class SilverfishClass extends BaseClass {
 
 				// Removing broken block from the list
 				wallLocations.remove(randomizedBlockLocation);
-				randomizedIndexes.remove(randomizedIndexes.size() - 1);
+//				randomizedIndexes.remove(randomizedIndexes.size() - 1);
 
 				// Break wall after a defined delay
 			}, (long) (startBreakingWallTime * 20));
@@ -462,23 +462,6 @@ public class SilverfishClass extends BaseClass {
 		}
 
 		public void despawnSilverfish() {
-			Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
-				for (Entity en : player.getWorld().getEntities())
-					if (!(en instanceof Player))
-						if (en.getType().equals(EntityType.SILVERFISH)) {
-							for (Player gamePlayer : instance.players) {
-								if (en.getName().contains(gamePlayer.getDisplayName())) {
-									return;
-								} else en.remove();
-							}
-
-							if (en.getName().isEmpty()) {
-								en.remove();
-							}
-						}
-			}, (long) 6 * 20);
-
-
 			Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
 				for (Entity en : player.getWorld().getEntities())
 					if (!(en instanceof Player))
