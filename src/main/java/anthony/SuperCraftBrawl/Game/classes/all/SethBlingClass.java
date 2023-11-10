@@ -64,8 +64,8 @@ public class SethBlingClass extends BaseClass {
 	}
 
 	public void TestItems() {
-		playerBaseClass.getInventory().addItem(new ItemStack(instance.getItemToDrop()));
-		playerBaseClass.getInventory().addItem(new ItemStack(instance.getItemToDrop()));
+		player.getInventory().addItem(new ItemStack(instance.getItemToDrop()));
+		player.getInventory().addItem(new ItemStack(instance.getItemToDrop()));
 	}
 
 	@Override
@@ -73,13 +73,13 @@ public class SethBlingClass extends BaseClass {
 		ItemStack item = event.getItem();
 		if (item != null && item.getType() == Material.COMMAND
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			playerBaseClass.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
 					+ "Your command block skills rewarded you with special items!");
 			int amount = item.getAmount();
 			if (amount > 0) {
 				amount--;
 				if (amount == 0)
-					playerBaseClass.getInventory().clear(playerBaseClass.getInventory().getHeldItemSlot());
+					player.getInventory().clear(player.getInventory().getHeldItemSlot());
 				else
 					item.setAmount(amount);
 				event.setCancelled(true);
