@@ -21,7 +21,17 @@ import java.util.List;
 
 public class ItemHelper {
 	public static ItemStack setDetails(ItemStack item, String name, String...lore) {
-		return setDetails(item, name, lore == null || (lore.length == 1 && lore[0].isEmpty()) ? null : Arrays.asList(lore));
+//		return setDetails(item, name, lore == null || (lore.length == 1 && lore[0].isEmpty()) ? null : Arrays.asList((lore)));
+
+		List<String> coloredLore = new ArrayList<>();
+
+		if (lore != null) {
+			for (String line : lore) {
+				coloredLore.add(ChatColorHelper.color(line));
+			}
+		}
+
+		return setDetails(item, name, coloredLore);
 	}
 
 	public static ItemStack setDetails(ItemStack item, String name, List<String> lore) {
@@ -133,6 +143,11 @@ public class ItemHelper {
 	}
 
 	// Natowski
+//	public static ItemStack createStainedClay() {
+//		return new ItemStack(Material.STAINED_CLAY, (short) id)
+//	}
+
+
 	public static ItemStack createMonsterEgg(EntityType entityType, int amount) {
 		return new ItemStack(Material.MONSTER_EGG, amount, entityType.getTypeId());
 	}
@@ -363,5 +378,34 @@ public class ItemHelper {
 
 	public static boolean isType(ItemStack item, Material mat) {
 		return !isAirOrNull(item) && item.getType() == mat;
+	}
+
+	public enum StainedClayColor {
+		WHITE(0),
+		ORANGE(1),
+		MAGENTA(2),
+		LIGHT_BLUE(3),
+		YELLOW(4),
+		LIME(5),
+		PINK(6),
+		GRAY(7),
+		LIGHT_GRAY(8),
+		CYAN(9),
+		PURPLE(10),
+		BLUE(11),
+		BROWN(12),
+		GREEN(13),
+		RED(14),
+		BLACK(15);
+
+		private final int colorCode;
+
+		StainedClayColor(int colorCode) {
+			this.colorCode = colorCode;
+		}
+
+		public int getColorCode() {
+			return colorCode;
+		}
 	}
 }
