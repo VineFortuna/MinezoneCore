@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import anthony.SuperCraftBrawl.PotionEffectListener;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -99,9 +100,9 @@ public abstract class BaseClass {
 	public Player bountyTarget = null;
 
 	// This would also take in a SuperClass.
-	public BaseClass(GameInstance instance, Player playerBaseClass) {
+	public BaseClass(GameInstance instance, Player player) {
 		this.instance = instance;
-		this.player = playerBaseClass;
+		this.player = player;
 	}
 
 	public int getLives() {
@@ -127,6 +128,9 @@ public abstract class BaseClass {
 	public void onConsumingItem(PlayerItemConsumeEvent event) {
 	};
 
+	public void onReceivingEffect(PotionEffectListener potionEffectListener) {
+	};
+
 	public void TakeDamage(EntityDamageEvent event) {
 	}; // To override
 
@@ -145,7 +149,7 @@ public abstract class BaseClass {
 	public void onEntityTarget(EntityTargetLivingEntityEvent event) {
 	} // To override
 
-	public void PlayerMove(PlayerMoveEvent event) {
+	public void onPlayerMove(PlayerMoveEvent event) {
 	}
 
 	public void Tick(int gameTicks) {
@@ -1064,10 +1068,10 @@ public abstract class BaseClass {
 							task.set(bukkit);
 						}
 					}
-					
-					if (baseClass.getType() == ClassType.Horse) {
-						
-					}
+				}
+
+				if (baseClass.getType() == ClassType.Horse) {
+
 				}
 
 				if (p.getLocation().getY() <= 50) {
@@ -2298,10 +2302,6 @@ public abstract class BaseClass {
 	// Classes such as Sheep & Hunter that when they get a kill, they one of their
 	// abilities back
 	public void classesEvent(Player d, BaseClass baseClass) {
-
-		player.sendMessage("test message");
-
-
 		if (instance.classes.containsKey(d)) {
 			// Sheep
 			baseClass = instance.classes.get(d);

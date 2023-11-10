@@ -5,7 +5,6 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import anthony.SuperCraftBrawl.Game.classes.all.SnowGolemClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -637,6 +636,13 @@ public class GameManager implements Listener, PluginMessageListener {
 		gameInstance.classes.get(player).onConsumingItem(event);
 	}
 
+	public void onPlayerMoveEvent(PlayerMoveEvent event) {
+		Player player = event.getPlayer();
+		GameInstance gameInstance = GetInstanceOfPlayer(player);
+		gameInstance.classes.get(player).onPlayerMove(event);
+	}
+
+
 	@EventHandler
 	public void shieldPotions(PlayerItemConsumeEvent event) {
 		Player player = event.getPlayer();
@@ -647,6 +653,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (item.getType() == Material.POTION) {
 				if (meta.getDisplayName().contains("Mini-Shield Potion")) {
 					player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 1000, 0));
+					event.setCancelled(true);
 					player.getInventory().clear(player.getInventory().getHeldItemSlot());
 				}
 			}
@@ -969,8 +976,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (item != null && item.getType() == Material.MILK_BUCKET) {
 				if (bc != null && bc.getType() != ClassType.BabyCow) {
 					if (player.getGameMode() != GameMode.SPECTATOR) {
-						// Remove bad effects only: poison, wither, slowness, weakness, blindness,
-						// nausea
+						// Remove bad effects only: poison, wither, slowness, weakness, blindness, nausea
 						for (PotionEffect pe : player.getActivePotionEffects())
 							if (pe.getType().equals(PotionEffectType.POISON)
 									|| pe.getType().equals(PotionEffectType.SLOW)
@@ -1076,18 +1082,13 @@ public class GameManager implements Listener, PluginMessageListener {
 					if (i.duosMap != null) {
 						if (!(i.team.get(shooter).equals(i.team.get(hitPlayer)))) {
 							if (i.classes.get(shooter).getType() == ClassType.SnowGolem)
-								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness
-																												// 3 -
-																												// Snowgolem
+								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness 3 - Snowgolem
 							else
-								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 0)); // Slowness
-																												// 1
+								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 0)); // Slowness 1
 						}
 					} else {
 						if (i.classes.get(shooter).getType() == ClassType.SnowGolem)
-							hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness 3
-																											// -
-																											// Snowgolem
+							hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness 3 - Snowgolem
 						else
 							hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 0)); // Slowness 1
 					}
@@ -1121,30 +1122,37 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void OnEntityDamage(EntityDamageEvent event) {
 		if (event.getEntity() instanceof Player) {
 			Player player = (Player) event.getEntity();
+
 			GameInstance instance = GetInstanceOfPlayer(player);
 			if (instance != null) {
 				if (instance.classes.containsKey(player)) {
 					BaseClass base = instance.classes.get(player);
-					if (this.spawnProt.containsKey(player) || base.bedrockInvincibility == true)
+					if (this.spawnProt.containsKey(player) || base.bedrockInvincibility == true) {
 						event.setCancelled(true);
+					}
 				}
 				if (event instanceof EntityDamageByEntityEvent) {
 					EntityDamageByEntityEvent damageEvent = (EntityDamageByEntityEvent) event;
 					if (damageEvent.getDamager() instanceof Player) {
 						Player damager = (Player) damageEvent.getDamager();
+
 						if (instance.state == GameState.STARTED) {
-							if (instance.duosMap != null
-									&& ((String) instance.team.get(player)).equals(instance.team.get(damager))) {
-								event.setCancelled(true);
-								return;
+							if (instance.duosMap != null) {
+								if (instance.team.get(player).equals(instance.team.get(damager))) {
+									event.setCancelled(true);
+									return;
+								}
 							}
+
 							if (instance.classes.containsKey(damager) && instance.classes.containsKey(player)) {
 								BaseClass baseClass = instance.classes.get(damager);
 								BaseClass baseClass2 = instance.classes.get(player);
+
 								if (this.spawnProt.containsKey(player) || baseClass2.bedrockInvincibility == true) {
 									event.setCancelled(true);
 									return;
@@ -1155,19 +1163,25 @@ public class GameManager implements Listener, PluginMessageListener {
 								}
 							}
 						}
-						GameInstance specInstance = GetInstanceOfPlayer(damager);
+
+						// For spectators:
+						GameInstance specInstance = this.GetInstanceOfPlayer(damager);
 						if (specInstance != null && specInstance.classes.containsKey(damager)
-								&& ((BaseClass) specInstance.classes.get(damager)).getLives() <= 0) {
+								&& specInstance.classes.get(damager).getLives() <= 0) {
 							event.setCancelled(true);
 						} else {
-							specInstance = GetInstanceOfSpectator(damager);
+							specInstance = this.GetInstanceOfSpectator(damager);
+
 							if (specInstance != null && specInstance.spectators.contains(damager)
-									&& damager.getWorld() == specInstance.getMapWorld())
+									&& damager.getWorld() == specInstance.getMapWorld()) {
 								event.setCancelled(true);
+							}
 						}
+
 						if (instance.classes.containsKey(damager) && instance.classes.containsKey(player)) {
 							BaseClass baseClass = instance.classes.get(damager);
 							BaseClass baseClass2 = instance.classes.get(player);
+
 							if (baseClass != null && baseClass2 != null) {
 								if (this.spawnProt.containsKey(damager) || baseClass.bedrockInvincibility == true) {
 									event.setCancelled(true);
@@ -1177,17 +1191,20 @@ public class GameManager implements Listener, PluginMessageListener {
 									event.setCancelled(true);
 									return;
 								}
-								if (baseClass.getType() == ClassType.FlintAndSteel && baseClass.flintUsed == true)
-									baseClass.DoDamage2(damageEvent);
+								if (baseClass.getType() == ClassType.FlintAndSteel)
+									if (baseClass.flintUsed == true)
+										baseClass.DoDamage2(damageEvent);
+
 								baseClass.DoDamage(damageEvent);
 							}
 						}
 					} else if (damageEvent.getDamager() instanceof WitherSkull) {
 						WitherSkull s = (WitherSkull) damageEvent.getDamager();
+
 						if (s.getShooter() instanceof Player) {
 							Player shoot = (Player) s.getShooter();
 							if (instance.duosMap != null) {
-								if (!((String) instance.team.get(player)).equals(instance.team.get(shoot))) {
+								if (!(instance.team.get(player).equals(instance.team.get(shoot)))) {
 									player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 120, 0, true));
 								} else {
 									event.setCancelled(true);
@@ -1195,28 +1212,34 @@ public class GameManager implements Listener, PluginMessageListener {
 							} else {
 								player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 120, 0, true));
 							}
-							player.setLastDamageCause((EntityDamageEvent) new EntityDamageByEntityEvent((Entity) shoot,
-									(Entity) player, event.getCause(), event.getDamage()));
+							player.setLastDamageCause(
+									new EntityDamageByEntityEvent(shoot, player, event.getCause(), event.getDamage()));
 						}
 					} else if (damageEvent.getDamager() instanceof SmallFireball) {
 						SmallFireball sf = (SmallFireball) damageEvent.getDamager();
+
 						if (sf.getShooter() instanceof Player) {
 							Player shoot = (Player) sf.getShooter();
-							if (instance.duosMap != null
-									&& ((String) instance.team.get(player)).equals(instance.team.get(shoot)))
-								event.setCancelled(true);
-							player.setLastDamageCause((EntityDamageEvent) new EntityDamageByEntityEvent((Entity) shoot,
-									(Entity) player, event.getCause(), event.getDamage()));
+							if (instance.duosMap != null) {
+								if (instance.team.get(player).equals(instance.team.get(shoot))) {
+									event.setCancelled(true);
+								}
+							}
+							player.setLastDamageCause(
+									new EntityDamageByEntityEvent(shoot, player, event.getCause(), event.getDamage()));
 						}
 					} else if (damageEvent.getDamager() instanceof Fireball) {
 						Fireball sf = (Fireball) damageEvent.getDamager();
+
 						if (sf.getShooter() instanceof Player) {
 							Player shoot = (Player) sf.getShooter();
-							if (instance.duosMap != null
-									&& ((String) instance.team.get(player)).equals(instance.team.get(shoot)))
-								event.setCancelled(true);
-							player.setLastDamageCause((EntityDamageEvent) new EntityDamageByEntityEvent((Entity) shoot,
-									(Entity) player, event.getCause(), event.getDamage()));
+							if (instance.duosMap != null) {
+								if (instance.team.get(player).equals(instance.team.get(shoot))) {
+									event.setCancelled(true);
+								}
+							}
+							player.setLastDamageCause(
+									new EntityDamageByEntityEvent(shoot, player, event.getCause(), event.getDamage()));
 						}
 					} else if (damageEvent.getDamager() instanceof Arrow) {
 						Arrow damager = (Arrow) damageEvent.getDamager();
@@ -1224,51 +1247,55 @@ public class GameManager implements Listener, PluginMessageListener {
 							Player p = (Player) damager.getShooter();
 							BaseClass bc = instance.classes.get(p);
 							BaseClass pBc = instance.classes.get(player);
-							if (instance.duosMap != null
-									&& ((String) instance.team.get(p)).equals(instance.team.get(player))) {
-								event.setCancelled(true);
-								return;
+
+							if (instance.duosMap != null) {
+								if (instance.team.get(p).equals(instance.team.get(player))) {
+									event.setCancelled(true);
+									return;
+								}
 							}
-							if (bc != null && pBc != null
-									&& (bc.getType() == ClassType.Vampire || bc.getType() == ClassType.WitherSk
-											|| bc.getType() == ClassType.Levitator
-											|| bc.getType() == ClassType.Firework)) {
-								if (this.spawnProt.containsKey(p) || bc.bedrockInvincibility == true) {
-									event.setCancelled(true);
-									return;
+
+							if (bc != null && pBc != null) {
+								if (bc.getType() == ClassType.Vampire || bc.getType() == ClassType.WitherSk
+										|| bc.getType() == ClassType.Levitator || bc.getType() == ClassType.Firework) {
+									if (this.spawnProt.containsKey(p) || bc.bedrockInvincibility == true) {
+										event.setCancelled(true);
+										return;
+									}
+									if (this.spawnProt.containsKey(player) || pBc.bedrockInvincibility == true) {
+										event.setCancelled(true);
+										return;
+									}
+									player.setLastDamageCause(new EntityDamageByEntityEvent(p, player, event.getCause(),
+											event.getDamage()));
+									bc.DoDamage(damageEvent);
 								}
-								if (this.spawnProt.containsKey(player) || pBc.bedrockInvincibility == true) {
-									event.setCancelled(true);
-									return;
-								}
-								player.setLastDamageCause((EntityDamageEvent) new EntityDamageByEntityEvent((Entity) p,
-										(Entity) player, event.getCause(), event.getDamage()));
-								bc.DoDamage(damageEvent);
 							}
 						}
 					}
 				}
+
 				if (!event.isCancelled() && event.getFinalDamage() >= player.getHealth() - 0.2) {
 					event.setCancelled(true);
 					if (event instanceof EntityDamageByEntityEvent) {
 						EntityDamageByEntityEvent damageEvent = (EntityDamageByEntityEvent) event;
 						if (damageEvent.getDamager() instanceof Player) {
 							Player damager = (Player) damageEvent.getDamager();
-							player.setLastDamageCause((EntityDamageEvent) new EntityDamageByEntityEvent(
-									(Entity) damager, (Entity) player, event.getCause(), event.getDamage()));
+							player.setLastDamageCause(new EntityDamageByEntityEvent(damager, player, event.getCause(),
+									event.getDamage()));
 						} else if (damageEvent.getDamager() instanceof Arrow) {
 							Arrow a = (Arrow) damageEvent.getDamager();
 							if (a.getShooter() instanceof Player) {
 								Player damager = (Player) a.getShooter();
-								player.setLastDamageCause((EntityDamageEvent) new EntityDamageByEntityEvent(
-										(Entity) damager, (Entity) player, event.getCause(), event.getDamage()));
+								player.setLastDamageCause(new EntityDamageByEntityEvent(damager, player,
+										event.getCause(), event.getDamage()));
 							}
 						}
 					}
 					instance.PlayerDeath(player);
 					return;
-				}
-				instance.classes.get(player).TakeDamage(event);
+				} else
+					instance.classes.get(player).TakeDamage(event);
 			}
 		}
 	}
@@ -2103,8 +2130,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									// If ClassType == Summoner
 									if (i.classes.get(player).getType() == ClassType.Summoner) {
 										// Spawning Second Zombie
-										Zombie zombie2 = (Zombie) player.getWorld().spawnCreature(hitLoc.add(1, 0, 1),
-												EntityType.ZOMBIE);
+										Zombie zombie2 = (Zombie) player.getWorld().spawnCreature(hitLoc.add(1,0, 1), EntityType.ZOMBIE);
 										// Customizing Second Zombie
 										customizeMob(zombie2, player);
 										customizeZombie(zombie2);
@@ -2133,8 +2159,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									@SuppressWarnings("deprecation")
 
 									// Spawning Skeleton
-									Skeleton skeleton = (Skeleton) player.getWorld().spawnCreature(hitLoc,
-											EntityType.SKELETON);
+									Skeleton skeleton = (Skeleton) player.getWorld().spawnCreature(hitLoc, EntityType.SKELETON);
 									// Customizing Skeleton
 									customizeMob(skeleton, player);
 									customizeSkeleton(skeleton);
@@ -2142,8 +2167,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									// If ClassType == Summoner
 									if (i.classes.get(player).getType() == ClassType.Summoner) {
 										// Spawning Second Skeleton
-										Skeleton skeleton2 = (Skeleton) player.getWorld()
-												.spawnCreature(hitLoc.add(1, 0, 1), EntityType.SKELETON);
+										Skeleton skeleton2 = (Skeleton) player.getWorld().spawnCreature(hitLoc.add(1,0, 1), EntityType.SKELETON);
 										// Customizing Second Skeleton
 										customizeMob(skeleton2, player);
 										customizeSkeleton(skeleton2);
@@ -2198,10 +2222,10 @@ public class GameManager implements Listener, PluginMessageListener {
 									@SuppressWarnings("deprecation")
 
 									// Spawning Creeper
-									Creeper creeper = (Creeper) player.getWorld().spawnCreature(hitLoc,
-											EntityType.CREEPER);
+									Creeper creeper = (Creeper) player.getWorld().spawnCreature(hitLoc, EntityType.CREEPER);
 									// Customizing Creeper
 									customizeMob(creeper, player);
+									customizeCreeper(creeper);
 
 									// If ClassType == Summoner
 									// Setting to Charged Creeper
@@ -2217,7 +2241,7 @@ public class GameManager implements Listener, PluginMessageListener {
 						}
 					}
 				}
-				break;
+						break;
 
 			case NETHER_STAR:
 				if (i != null && i.state == GameState.STARTED && meta.getDisplayName().contains("Bounty")) {
@@ -2257,7 +2281,6 @@ public class GameManager implements Listener, PluginMessageListener {
 			}
 		}
 	}
-
 	private void customizeSkeleton(Skeleton skeleton) {
 		// Setting Bow
 		EntityEquipment equipment = skeleton.getEquipment();
@@ -2302,6 +2325,10 @@ public class GameManager implements Listener, PluginMessageListener {
 		equipment.setItemInHand(sword);
 	}
 
+	private void customizeCreeper(Creeper creeper) {
+		creeper.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999, 1, false, false));
+	}
+
 	private void customizeMob(Creature mob, Player player) {
 		// Setting Mob to not de-spawn when far away
 		mob.setRemoveWhenFarAway(false);
@@ -2313,17 +2340,19 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	private String getMobTypeName(EntityType entityType) {
 		switch (entityType) {
-		case SKELETON:
-			return "Skeleton";
-		case CREEPER:
-			return "Creeper";
-		case ZOMBIE:
-			return "Zombie";
-		case WITCH:
-			return "Witch";
-		case SILVERFISH:
-			return "Silverfish";
+			case SKELETON:
+				return "Skeleton";
+			case CREEPER:
+				return "Creeper";
+			case ZOMBIE:
+				return "Zombie";
+			case WITCH:
+				return "Witch";
+			case SILVERFISH:
+				return "Silverfish";
 		}
 		return null;
 	}
 }
+
+
