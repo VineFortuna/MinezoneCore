@@ -1,4 +1,4 @@
-package anthony.SuperCraftBrawl.Game.classes;
+package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import org.bukkit.Location;
