@@ -34,8 +34,8 @@ public enum Maps {
 							new Vector(-1205.511, 137, 988.480), new Vector(-1214.476, 139, 1026.483),
 							new Vector(-1225.680, 138, 1048.468), new Vector(-1228.616, 133, 1048.462))
 					.setLobbyLoc(new Vector(-1274.005, 132, 1006.986)).setSpecLoc(new Vector(-1218.500, 141, 1007.500))
-					.setSignLoc(new Vector(176.481, 107, 673.700)).setBounds(new Vector(-1218.500, 141, 1007.500), 40, 80)
-					.setMapType(MapType.COMMUNITY)),
+					.setSignLoc(new Vector(176.481, 107, 673.700))
+					.setBounds(new Vector(-1218.500, 141, 1007.500), 40, 80).setMapType(MapType.COMMUNITY)),
 
 	Burrows("Burrows",
 			new MapInstance("burrows")
@@ -106,7 +106,7 @@ public enum Maps {
 					new Vector(-1229.484, 113, 957.462), new Vector(-1256.505, 134, 944.422))
 			.setLobbyLoc(new Vector(-1328.460, 122, 972.520)).setSpecLoc(new Vector(-1241.064, 139.40382, 977.987))
 			.setBounds(new Vector(-1249, 142, 976.499), 60, 65).setSignLoc(new Vector(173.550, 107, 673.700))
-			.setMapType(MapType.BODIL40)),
+			.setMapType(MapType.BODIL40).setGameType(GameType.FRENZY)),
 
 	Stronghold("Stronghold",
 			new MapInstance("stronghold")
@@ -193,14 +193,40 @@ public enum Maps {
 					.setLobbyLoc(new Vector(240.525, 142, 171.456)).setSpecLoc(new Vector(317.500, 141, 175.500))
 					.setBounds(new Vector(317.500, 141, 175.500), 47, 40).setSignLoc(new Vector(177.495, 107, 673.700))
 					.setMapType(MapType.COMMUNITY)),
-	
+
 	Canyon("Canyon",
 			new MapInstance("canyon")
 					.setSpawnPos(new Vector(275.479, 153, 168.490), new Vector(275.438, 149, 186.478),
 							new Vector(260.484, 146, 188.486), new Vector(247.500, 143, 181.451),
 							new Vector(247.400, 149, 178.459), new Vector(261.354, 151, 153.999))
 					.setLobbyLoc(new Vector(248.500, 155, 165.500)).setSpecLoc(new Vector(248.500, 155, 165.500))
-					.setBounds(new Vector(248.500, 155, 165.500), 100, 100).setSignLoc(new Vector(178.466, 106, 673.700))
+					.setBounds(new Vector(248.500, 155, 165.500), 100, 100)
+					.setSignLoc(new Vector(178.466, 106, 673.700)).setMapType(MapType.COMMUNITY)),
+
+	TheCraftOf87("TheCraftOf87",
+			new MapInstance("thecraftof87")
+					.setSpawnPos(new Vector(252.020, 144, 147.423), new Vector(266.495, 144, 134.415),
+							new Vector(282.450, 144, 124.553), new Vector(282.482, 144, 114.399),
+							new Vector(251.963, 144, 113.506), new Vector(236.484, 145, 125.520))
+					.setLobbyLoc(new Vector(254.433, 150, 204.499)).setSpecLoc(new Vector(251.994, 145, 119.004))
+					.setBounds(new Vector(251.994, 145, 119.004), 200, 200)
+					.setSignLoc(new Vector(178.466, 106, 673.700)).setMapType(MapType.COMMUNITY)),
+
+	Citadel("Citadel", new MapInstance("citadel")
+			.setSpawnPos(new Vector(285.435, 113, 207.493), new Vector(340.411, 76, 207.442),
+					new Vector(333.455, 88, 162.505), new Vector(296.493, 77, 204.466),
+					new Vector(349.399, 77, 124.430), new Vector(379.467, 73, 151.452))
+			.setLobbyLoc(new Vector(233.481, 126, 137.495)).setSpecLoc(new Vector(329.500, 121, 162.500))
+			.setBounds(new Vector(329.500, 121, 162.500), 300, 300).setSignLoc(new Vector(178.466, 106, 673.700))
+			.setMapType(MapType.FRENZY).setGameType(GameType.FRENZY)),
+
+	HighIslands("HighIslands",
+			new MapInstance("highislands")
+					.setSpawnPos(new Vector(247.444, 148, 159.515), new Vector(268.530, 146, 141.428),
+							new Vector(253.536, 142, 131.435), new Vector(263.553, 146, 120.491),
+							new Vector(242.424, 147, 121.429), new Vector(230.509, 145, 145.528))
+					.setLobbyLoc(new Vector(243.396, 168, 209.481)).setSpecLoc(new Vector(245.500, 185, 137.500))
+					.setBounds(new Vector(245.500, 185, 137.500), 100, 50).setSignLoc(new Vector(178.466, 106, 673.700))
 					.setMapType(MapType.COMMUNITY)),
 
 	Gateway("Gateway",
@@ -212,13 +238,22 @@ public enum Maps {
 					.setGameType(GameType.DUEL).setSignLoc(new Vector(168.300, 106, 669.556)).setMapType(MapType.DUEL)
 					.setSignLoc(new Vector(168.300, 106, 670.535)).setSpecLoc(new Vector(372.435, 100, 188.626))),
 
+	PaintBoardOG("PaintBoardOG",
+			new MapInstance("paintboardog")
+					.setSpawnPos(new Vector(372.466, 146, 255.510), new Vector(353.489, 146, 256.536),
+							new Vector(355.405, 146, 232.042), new Vector(376.475, 146, 224.455),
+							new Vector(386.497, 146, 238.394))
+					.setLobbyLoc(new Vector(380.502, 151, 301.543)).setBounds(new Vector(373.500, 158, 240.500), 50, 30)
+					.setGameType(GameType.DUEL).setSignLoc(new Vector(168.300, 106, 669.556))
+					.setSignLoc(new Vector(168.300, 106, 670.535)).setSpecLoc(new Vector(373.500, 158, 240.500))),
+
 	SimpleLand("SimpleLand",
 			new MapInstance("simpleland")
 					.setSpawnPos(new Vector(373.450, 138, 249.391), new Vector(415.468, 137, 242.428))
 					.setLobbyLoc(new Vector(392.484, 175, 320.476)).setBounds(new Vector(392.500, 167, 260.500), 40, 40)
-					.setGameType(GameType.DUEL).setSignLoc(new Vector(168.300, 106, 669.556)).setMapType(MapType.DUEL)
+					.setGameType(GameType.DUEL).setSignLoc(new Vector(168.300, 106, 669.556))
 					.setSignLoc(new Vector(168.300, 107, 667.580)).setSpecLoc(new Vector(392.500, 150, 260.500))),
-	
+
 	Pokemob("Pokemob",
 			new MapInstance("pokemob")
 					.setSpawnPos(new Vector(382.598, 109, 255.503), new Vector(372.513, 105, 237.486),
@@ -497,13 +532,13 @@ public enum Maps {
 					.setSignLoc(new Vector(199.535, 106, 673.700))
 					.setBounds(new Vector(1000.500, 162, 706.500), 60, 50)),
 
-	WinterWorld("WinterWorld",
-			new MapInstance("winterworld")
-					.setSpawnPos(new Vector(4922.576, 150, 717.625), new Vector(4913.556, 188, 671.417),
-							new Vector(4945.453, 195, 666.471), new Vector(4933.438, 212, 668.595),
-							new Vector(4953.467, 155, 680.587))
-					.setLobbyLoc(new Vector(4933.545, 181, 755.508)).setSpecLoc(new Vector(4930.500, 180, 700.500))
-					.setBounds(new Vector(4932.500, 215, 676.336), 60, 60).setSignLoc(new Vector(14.700, 149, -1.548))),
+	WinterWorld("WinterWorld", new MapInstance("winterworld")
+			.setSpawnPos(new Vector(4922.576, 150, 717.625), new Vector(4913.556, 188, 671.417),
+					new Vector(4945.453, 195, 666.471), new Vector(4933.438, 212, 668.595),
+					new Vector(4953.467, 155, 680.587))
+			.setLobbyLoc(new Vector(4933.545, 181, 755.508)).setSpecLoc(new Vector(4930.500, 180, 700.500))
+			.setBounds(new Vector(4932.500, 215, 676.336), 60, 60).setGameType(GameType.FRENZY)
+			.setSignLoc(new Vector(14.700, 149, -1.548))),
 
 	Winter("Winter", new MapInstance("winter")
 			.setSpawnPos(new Vector(4860.441, 144, 689.485), new Vector(4879.495, 154, 694.437),
