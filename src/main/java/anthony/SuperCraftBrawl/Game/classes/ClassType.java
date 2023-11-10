@@ -1,5 +1,6 @@
 package anthony.SuperCraftBrawl.Game.classes;
 
+import anthony.SuperCraftBrawl.Game.classes.all.*;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -8,69 +9,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.all.AnvilClass;
-import anthony.SuperCraftBrawl.Game.classes.all.BabyCowClass;
-import anthony.SuperCraftBrawl.Game.classes.all.BatClass;
-import anthony.SuperCraftBrawl.Game.classes.all.BedrockClass;
-import anthony.SuperCraftBrawl.Game.classes.all.BeeClass;
-import anthony.SuperCraftBrawl.Game.classes.all.BlazeClass;
-import anthony.SuperCraftBrawl.Game.classes.all.BunnyClass;
-import anthony.SuperCraftBrawl.Game.classes.all.ButterBroClass;
-import anthony.SuperCraftBrawl.Game.classes.all.ButterGolemClass;
-import anthony.SuperCraftBrawl.Game.classes.all.Cactus;
-import anthony.SuperCraftBrawl.Game.classes.all.ChickenClass;
-import anthony.SuperCraftBrawl.Game.classes.all.CloudClass;
-import anthony.SuperCraftBrawl.Game.classes.all.CreeperClass;
-import anthony.SuperCraftBrawl.Game.classes.all.DarkSethBlingClass;
-import anthony.SuperCraftBrawl.Game.classes.all.DwellerClass;
-import anthony.SuperCraftBrawl.Game.classes.all.ElfClass;
-import anthony.SuperCraftBrawl.Game.classes.all.EnchantTableClass;
-import anthony.SuperCraftBrawl.Game.classes.all.EnderdragonClass;
-import anthony.SuperCraftBrawl.Game.classes.all.EndermanClass;
-import anthony.SuperCraftBrawl.Game.classes.all.FireworkClass;
-import anthony.SuperCraftBrawl.Game.classes.all.FlindAndSteelClass;
-import anthony.SuperCraftBrawl.Game.classes.all.GhastClass;
-import anthony.SuperCraftBrawl.Game.classes.all.GingerBreadManClass;
-import anthony.SuperCraftBrawl.Game.classes.all.GuardianClass;
-import anthony.SuperCraftBrawl.Game.classes.all.HerobrineClass;
-import anthony.SuperCraftBrawl.Game.classes.all.HorseClass;
-import anthony.SuperCraftBrawl.Game.classes.all.HunterClass;
-import anthony.SuperCraftBrawl.Game.classes.all.IceClass;
-import anthony.SuperCraftBrawl.Game.classes.all.IrongolemClass;
-import anthony.SuperCraftBrawl.Game.classes.all.JebClass;
-import anthony.SuperCraftBrawl.Game.classes.all.LevitatorClass;
-import anthony.SuperCraftBrawl.Game.classes.all.MagmaCubeClass;
-import anthony.SuperCraftBrawl.Game.classes.all.NinjaClass;
-import anthony.SuperCraftBrawl.Game.classes.all.NotchClass;
-import anthony.SuperCraftBrawl.Game.classes.all.NoteblockClass;
-import anthony.SuperCraftBrawl.Game.classes.all.OcelotClass;
-import anthony.SuperCraftBrawl.Game.classes.all.PigClass;
-import anthony.SuperCraftBrawl.Game.classes.all.PotatoClass;
-import anthony.SuperCraftBrawl.Game.classes.all.PresentClass;
-import anthony.SuperCraftBrawl.Game.classes.all.RabbitClass;
-import anthony.SuperCraftBrawl.Game.classes.all.SatermelonClass;
-import anthony.SuperCraftBrawl.Game.classes.all.SethBlingClass;
-import anthony.SuperCraftBrawl.Game.classes.all.SheepClass;
-import anthony.SuperCraftBrawl.Game.classes.all.SilverfishClass;
-import anthony.SuperCraftBrawl.Game.classes.all.SkeletonClass;
-import anthony.SuperCraftBrawl.Game.classes.all.SlimeClass;
-import anthony.SuperCraftBrawl.Game.classes.all.SnowGolemClass;
-import anthony.SuperCraftBrawl.Game.classes.all.SpiderClass;
-import anthony.SuperCraftBrawl.Game.classes.all.SquidClass;
-import anthony.SuperCraftBrawl.Game.classes.all.StarClass;
-import anthony.SuperCraftBrawl.Game.classes.all.SteveClass;
-import anthony.SuperCraftBrawl.Game.classes.all.SummonerClass;
-import anthony.SuperCraftBrawl.Game.classes.all.TNTClass;
-import anthony.SuperCraftBrawl.Game.classes.all.VampireClass;
-import anthony.SuperCraftBrawl.Game.classes.all.VillagerClass;
-import anthony.SuperCraftBrawl.Game.classes.all.WitchClass;
-import anthony.SuperCraftBrawl.Game.classes.all.WitherClass;
-import anthony.SuperCraftBrawl.Game.classes.all.WitherSkeletonClass;
-import anthony.SuperCraftBrawl.Game.classes.all.WizardClass;
-import anthony.SuperCraftBrawl.Game.classes.all.WolfClass;
-import anthony.SuperCraftBrawl.Game.classes.all.ZombieClass;
-import anthony.SuperCraftBrawl.Game.classes.all.ZombiePigmanClass;
-import anthony.SuperCraftBrawl.Game.classes.all.ZombieVillagerClass;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import net.md_5.bungee.api.ChatColor;
 
@@ -79,18 +17,64 @@ import java.util.List;
 
 public enum ClassType {
 
-	Cactus(1, 0, 0), TNT(2, 350, 0), Enderdragon(3, 0, Rank.VIP), Skeleton(4, 0, 0), Ninja(5, 1000, 0),
-	IronGolem(6, 0, Rank.VIP), Enderman(7, 0, 0), Ghast(8, 0, Rank.VIP), Chicken(9, 400, 0), Slime(10, 0, Rank.VIP),
-	ButterGolem(11, 0, Rank.VIP), DarkSethBling(12, 800, 0), SnowGolem(14, 800, 0), Bat(15, 0, Rank.VIP),
-	SethBling(16, 0, Rank.VIP), Sheep(17, 550, 0), Horse(18, 0, 0), Melon(19, 0, Rank.VIP), Rabbit(26, 0, 0),
-	Squid(20, 0, 0), Spider(21, 0, 0), BabyCow(22, 0, Rank.VIP), Herobrine(23, 0, Rank.VIP), Bunny(24, 450, 0),
-	ButterBro(25, 1200, 0), Steve(28, 1000, 0), Notch(29, 1000, 0), Pig(30, 0, 0), Blaze(31, 0, 0), Potato(32, 750, 0),
-	Wither(33, 0, 0), Ocelot(34, 250, 0), Creeper(35, 0, 0), Noteblock(36, 800, 0), EnchantTable(37, 350, 0),
-	Present(38, 0, 0), Wizard(41, 0, Rank.VIP), Star(42, 850, 0), Dweller(43, 0, 0), Zombie(44, 0, 0),
-	Silverfish(45, 0, 0), Anvil(46, 700, 0), Summoner(47, 525, 0), MagmaCube(48, 0, Rank.VIP), Villager(49, 0, 0),
-	ZombiePigman(51, 0, 3), Witch(13, 0, 5), ZombieVillager(50, 0, 10), Ice(54, 0, 15), Vampire(53, 800, 0),
-	Bee(55, 425, 0), Jeb(56, 0, 20), Hunter(57, 500, 0), FlintAndSteel(58, 0, 0), WitherSk(59, 1500, 0),
-	Levitator(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30);
+	Cactus(1, 0, 0),
+	TNT(2, 350, 0),
+	Enderdragon(3, 0, Rank.VIP),
+	Skeleton(4, 0, 0),
+	Ninja(5, 1000, 0),
+	IronGolem(6, 0, Rank.VIP),
+	Enderman(7, 0, 0),
+	Ghast(8, 0, Rank.VIP),
+	Chicken(9, 400, 0),
+	Slime(10, 0, Rank.VIP),
+	ButterGolem(11, 0, Rank.VIP),
+	DarkSethBling(12, 800, 0),
+	SnowGolem(14, 800, 0),
+	Bat(15, 0, Rank.VIP),
+	SethBling(16, 0, Rank.VIP),
+	Sheep(17, 550, 0),
+	Horse(18, 0, 0),
+	Melon(19, 0, Rank.VIP),
+	Rabbit(26, 0, 0),
+	Squid(20, 0, 0),
+	Spider(21, 0, 0),
+	BabyCow(22, 0, Rank.VIP),
+	Herobrine(23, 0, Rank.VIP),
+	Bunny(24, 450, 0),
+	ButterBro(25, 1200, 0),
+	Steve(28, 1000, 0),
+	Notch(29, 1000, 0), Pig(30, 0, 0), Blaze(31, 0, 0), Potato(32, 750, 0),
+	Wither(33, 0, 0),
+	Ocelot(34, 250, 0),
+	Creeper(35, 0, 0),
+	Noteblock(36, 800, 0),
+	EnchantTable(37, 350, 0),
+	Present(38, 0, 0),
+	Wizard(41, 0, Rank.VIP),
+	Star(42, 850, 0),
+	Dweller(43, 0, 0),
+	Zombie(44, 0, 0),
+	Silverfish(45, 0, 0),
+	Anvil(46, 700, 0),
+	Summoner(47, 525, 0),
+	MagmaCube(48, 0, Rank.VIP),
+	Villager(49, 0, 0),
+	ZombiePigman(51, 0, 3),
+	Witch(13, 0, 5),
+	ZombieVillager(50, 0, 10),
+	Ice(54, 0, 15),
+	Vampire(53, 800, 0),
+	Bee(55, 425, 0),
+	Jeb(56, 0, 20),
+	Hunter(57, 500, 0),
+	FlintAndSteel(58, 0, 0),
+	WitherSk(59, 1500, 0),
+	Levitator(60, 0, 25),
+	Bedrock(61, 0, Rank.VIP),
+	Firework(62, 0, Rank.VIP),
+	Cloud(63, 0, 30),
+	LargeFernClass(64, 0, Rank.DEFAULT);
+
 	// Wolf(63, 0, 35)/* , Guardian(63, 0, 30) */;
 
 	private int id;
@@ -267,6 +251,8 @@ public enum ClassType {
 			return new BunnyClass(instance, player);
 		case Pig:
 			return new PigClass(instance, player);
+		case LargeFernClass:
+			return new LargeFernClass(instance, player);
 		}
 		return null;
 	}
@@ -412,6 +398,8 @@ public enum ClassType {
 			return new ItemStack(Material.POTATO_ITEM);
 		case Ocelot:
 			return new ItemStack(Material.RAW_FISH);
+		case LargeFernClass:
+			return new ItemStack(Material.DOUBLE_PLANT, 1, (short) 3);
 		}
 
 		return null;
@@ -550,6 +538,8 @@ public enum ClassType {
 			return "Use your Diamond of Despair to play tricks on your opponents!";
 		case Pig:
 			return "Hit and run. In your panic, you gain speed when hit";
+		case LargeFernClass:
+			return "??????";
 		}
 
 		return null;
@@ -720,6 +710,9 @@ public enum ClassType {
 			return "" + ChatColor.YELLOW + ChatColor.BOLD + "ButterBro" + ChatColor.RESET;
 		case Pig:
 			return "" + ChatColor.BLUE + ChatColor.ITALIC + "Pig" + ChatColor.RESET;
+		case LargeFernClass:
+			return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + "LargeFern" + ChatColor.RESET;
+
 		default:
 			break;
 
