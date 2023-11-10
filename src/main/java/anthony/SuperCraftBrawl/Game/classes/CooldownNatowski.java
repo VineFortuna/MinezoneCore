@@ -5,7 +5,7 @@ import net.md_5.bungee.api.ChatColor;
 public class CooldownNatowski {
     private long lastUsageTime;
     private final long cooldownDurationMillis;
-    private final long cooldownDurationSeconds;
+    private long cooldownDurationSeconds = 10;
     private static final ChatColor useMessageColor = ChatColor.GREEN;
 
     public CooldownNatowski(long cooldownDurationSeconds) {
