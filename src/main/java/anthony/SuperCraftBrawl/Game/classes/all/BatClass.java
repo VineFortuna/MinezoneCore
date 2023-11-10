@@ -74,20 +74,20 @@ public class BatClass extends BaseClass {
 						ItemHelper.setDetails(new ItemStack(Material.SHEARS), ChatColor.GREEN + "Shears",
 								ChatColor.GRAY + "Beat your enemies to peices!", ChatColor.YELLOW + ""),
 						Enchantment.KNOCKBACK, 1), Enchantment.DAMAGE_ALL, 3), Enchantment.DURABILITY, 10000));
-		playerBaseClass.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
-		playerBaseClass.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 999999999, 1));
-		playerBaseClass.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 1));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 999999999, 1));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 1));
 	}
 
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void Tick(int gameTicks) {
-		if (!(playerBaseClass.getActivePotionEffects().contains(PotionEffectType.SPEED)))
-			playerBaseClass.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
-		else if (!(playerBaseClass.getActivePotionEffects().contains(PotionEffectType.INVISIBILITY)))
-			playerBaseClass.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 999999999, 1));
-		else if (!(playerBaseClass.getActivePotionEffects().contains(PotionEffectType.DAMAGE_RESISTANCE)))
-			playerBaseClass.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 1));
+		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
+			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+		else if (!(player.getActivePotionEffects().contains(PotionEffectType.INVISIBILITY)))
+			player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 999999999, 1));
+		else if (!(player.getActivePotionEffects().contains(PotionEffectType.DAMAGE_RESISTANCE)))
+			player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 1));
 	}
 
 	@Override
