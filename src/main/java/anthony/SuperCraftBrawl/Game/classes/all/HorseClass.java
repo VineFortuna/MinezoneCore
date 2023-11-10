@@ -143,9 +143,7 @@ public class HorseClass extends BaseClass {
 								player.setVelocity(new Vector(0, jumpAbilityHeight, 0));
 
 								// Playing sound
-								for (Player gamePlayer : instance.players)
-									gamePlayer.playSound(player.getLocation(), Sound.HORSE_ANGRY, 1, 1);
-								//SoundManager.playSoundToAllGamePlayersFromAPlayerLocation(instance, player, Sound.HORSE_ANGRY, 1, 1);
+								SoundManager.playSoundToAllGamePlayersFromAPlayerLocation(instance, player, Sound.HORSE_ANGRY, 1, 1);
 
 							}
 						}
