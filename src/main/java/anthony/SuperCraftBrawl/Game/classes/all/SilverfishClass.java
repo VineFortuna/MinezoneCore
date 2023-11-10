@@ -1,11 +1,12 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.lang.reflect.Field; 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Consumer;
 
 import anthony.SuperCraftBrawl.ChatColorHelper;
 import anthony.SuperCraftBrawl.Game.classes.Ability;
+import anthony.SuperCraftBrawl.Game.classes.SoundManager;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -30,7 +31,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 public class SilverfishClass extends BaseClass {
-	private Ability wallAbility = new Ability("Silverfish Wall", 15, player);
+	private Ability wallAbility = new Ability("Silverfish Wall", 12, player);
 	private ItemStack weapon;
 	private ItemStack wallItem;
 
@@ -471,7 +472,7 @@ public class SilverfishClass extends BaseClass {
 							}
 						}
 				// Silverfish despawn after half the cooldown of the wall
-			}, (long) (wallAbility.getCooldownDurationSeconds() - wallAbility.getCooldownDurationSeconds()/2) * 20);
+			}, (long) (wallAbility.getCooldownDurationSeconds() - 3) * 20);
 		}
 
 		private void customizeSilverfish(Creature mob, Player player) {
