@@ -1,11 +1,10 @@
 package anthony.SuperCraftBrawl.Game.classes;
 
-import java.util.ArrayList; 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import anthony.SuperCraftBrawl.PotionEffectListener;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -127,10 +126,7 @@ public abstract class BaseClass {
 
 	public void onConsumingItem(PlayerItemConsumeEvent event) {
 	};
-
-	public void onReceivingEffect(PotionEffectListener potionEffectListener) {
-	};
-
+	
 	public void TakeDamage(EntityDamageEvent event) {
 	}; // To override
 
@@ -1068,10 +1064,6 @@ public abstract class BaseClass {
 							task.set(bukkit);
 						}
 					}
-				}
-
-				if (baseClass.getType() == ClassType.Horse) {
-
 				}
 
 				if (p.getLocation().getY() <= 50) {
