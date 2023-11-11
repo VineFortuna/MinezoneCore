@@ -31,10 +31,21 @@ public class GameStatsGUI implements InventoryProvider {
 		this.main = main;
 		this.i = i;
 	}
+	
+	private BaseClass matchMvp() {
+		BaseClass matchMvp = null;
+		for (Entry<Player, BaseClass> entry : i.allClasses.entrySet()) {
+			if (entry.getKey() != null) {
+				if (matchMvp == null || entry.getValue().totalKills > matchMvp.totalKills)
+					matchMvp = entry.getValue();
+			}
+		}
+		
+		return matchMvp;
+	}
 
 	@Override
 	public void init(Player player, InventoryContents contents) {
-		BaseClass matchMvp = null;
 		int x = 0, y = 0;
 
 		if (i != null) {
@@ -45,12 +56,9 @@ public class GameStatsGUI implements InventoryProvider {
 					statsMeta.setOwner(entry.getKey().getName());
 					stats.setItemMeta(statsMeta);
 
-					if (matchMvp == null || entry.getValue().totalKills > matchMvp.totalKills)
-						matchMvp = entry.getValue();
-
 					String rank = main.getRankManager().getRank(entry.getKey()).getTagWithSpace();
 
-					if (matchMvp == entry.getValue()) {
+					if (matchMvp() == entry.getValue()) {
 						contents.set(y, x,
 								ClickableItem.of(
 										ItemHelper.setDetails(stats, main.color("&e&lMATCH MVP"), "",
