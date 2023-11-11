@@ -1119,18 +1119,16 @@ public class Core extends JavaPlugin implements Listener {
 					player.sendMessage(color("&r- &e/tp <player>"));
 					player.sendMessage(color("&r- &e/tp <X> <Y> <Z>"));
 				} else if (args.length == 3) {
-					int x = Integer.parseInt(args[0]);
-					int y = Integer.parseInt(args[1]);
-					int z = Integer.parseInt(args[2]);
+					double x = Integer.parseInt(args[0]);
+					double y = Integer.parseInt(args[1]);
+					double z = Integer.parseInt(args[2]);
 
 					player.teleport(new Location(player.getWorld(), x, y, z));
 					player.sendMessage(color("&r&l(!) &rTeleporting to &e" + x + "&r, &e" + y + "&r, &e" + z));
 				}
-			} else {
-				player.sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-						+ "You need the rank " + ChatColor.GOLD + ChatColor.BOLD + "TRAINEE " + ChatColor.RESET
-						+ "to use this command");
-			}
+			} else
+				player.sendMessage(color("&c&l(!) &rYou need the rank " + ChatColor.GOLD + ChatColor.BOLD
+						+ "TRAINEE &rto use this command!"));
 		}
 
 		if (cmd.getName().equalsIgnoreCase("nick")) {
