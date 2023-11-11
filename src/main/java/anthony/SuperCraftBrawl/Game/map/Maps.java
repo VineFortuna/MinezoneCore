@@ -251,7 +251,7 @@ public enum Maps {
 			new MapInstance("simpleland")
 					.setSpawnPos(new Vector(373.450, 138, 249.391), new Vector(415.468, 137, 242.428))
 					.setLobbyLoc(new Vector(392.484, 175, 320.476)).setBounds(new Vector(392.500, 167, 260.500), 40, 40)
-					.setGameType(GameType.DUEL).setSignLoc(new Vector(168.300, 106, 669.556))
+					.setGameType(GameType.CLASSIC).setSignLoc(new Vector(168.300, 106, 669.556))
 					.setSignLoc(new Vector(168.300, 107, 667.580)).setSpecLoc(new Vector(392.500, 150, 260.500))),
 
 	Pokemob("Pokemob",
