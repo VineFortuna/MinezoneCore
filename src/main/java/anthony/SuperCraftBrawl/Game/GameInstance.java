@@ -99,9 +99,7 @@ public class GameInstance {
 	public List<Player> blackTeam;
 	public int tokensBet = 0;
 	public boolean wagers = false;
-
-	private int gameTime = 0;
-
+	public int gameTime = 0;
 	public Player firstBlood;
 
 	private final Map<UUID, Location> lastKnownLocations = new HashMap<>();
@@ -126,7 +124,7 @@ public class GameInstance {
 		this.gameManager = gameManager;
 		this.duosMap = map;
 		this.state = GameState.WAITING; // Default game state
-		this.gameType = GameType.NORMAL;
+		this.gameType = GameType.CLASSIC;
 		this.players = new ArrayList<Player>();
 		this.winnerList = new ArrayList<Player>();
 		this.spectators = new ArrayList<Player>();
@@ -226,7 +224,7 @@ public class GameInstance {
 							+ (map.GetInstance().gameType == GameType.FRENZY
 									? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
 									: "")
-							+ (map.GetInstance().gameType == GameType.NORMAL
+							+ (map.GetInstance().gameType == GameType.CLASSIC
 									? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
 									: "")
 							+ (map.GetInstance().gameType == GameType.DUEL
@@ -267,7 +265,7 @@ public class GameInstance {
 						return GameReason.FULL;
 					}
 					if (!(player.hasPermission("scb.bypassFull"))) {
-						if (gameType == GameType.NORMAL && players.size() >= 5) {
+						if (gameType == GameType.CLASSIC && players.size() >= 5) {
 							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is full!");
 							return GameReason.FULL;
 						}
@@ -301,7 +299,7 @@ public class GameInstance {
 													? "" + ChatColor.RESET + players.size() + "/"
 															+ gameType.getMaxPlayers()
 													: "")
-											+ (map.GetInstance().gameType == GameType.NORMAL
+											+ (map.GetInstance().gameType == GameType.CLASSIC
 													? "" + ChatColor.RESET + players.size() + "/"
 															+ gameType.getMaxPlayers()
 													: "")
@@ -326,7 +324,7 @@ public class GameInstance {
 										+ (map.GetInstance().gameType == GameType.FRENZY
 												? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
 												: "")
-										+ (map.GetInstance().gameType == GameType.NORMAL
+										+ (map.GetInstance().gameType == GameType.CLASSIC
 												? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
 												: "")
 										+ (map.GetInstance().gameType == GameType.DUEL
@@ -433,7 +431,7 @@ public class GameInstance {
 									"" + "     " + ChatColor.GREEN + ChatColor.BOLD + "Click here to join!");
 							message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/join " + mapName));
 							Bukkit.spigot().broadcast(message);
-						} else if (gameType == GameType.NORMAL) {
+						} else if (gameType == GameType.CLASSIC) {
 							Bukkit.broadcastMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
 									+ ChatColor.RESET + ChatColor.GREEN + ChatColor.BOLD + "A game on "
 									+ ChatColor.RESET + ChatColor.BOLD + mapName + ChatColor.RESET + ChatColor.GREEN
@@ -744,7 +742,7 @@ public class GameInstance {
 
 			@Override
 			public void run() {
-				if (gameTicks % 1200 == 0) {
+				if (gameTicks % (60 * 20) == 0) {
 					time.getScoreboard().resetScores(time.getEntry());
 					time = o.getScore("" + ChatColor.YELLOW + "Game Time: " + ChatColor.RESET + gameTime + "m");
 					time.setScore(0);
@@ -1994,7 +1992,7 @@ public class GameInstance {
 						board.updateLine(5, " "
 								+ (((this.map.GetInstance()).gameType == GameType.FRENZY) ? ("" + ChatColor.RESET
 										+ this.players.size() + "/" + this.gameType.getMaxPlayers()) : "")
-								+ (((this.map.GetInstance()).gameType == GameType.NORMAL) ? ("" + ChatColor.RESET
+								+ (((this.map.GetInstance()).gameType == GameType.CLASSIC) ? ("" + ChatColor.RESET
 										+ this.players.size() + "/" + this.gameType.getMaxPlayers()) : "")
 								+ (((this.map.GetInstance()).gameType == GameType.DUEL) ? ("" + ChatColor.RESET
 										+ this.players.size() + "/" + this.gameType.getMaxPlayers()) : ""));
@@ -2005,7 +2003,7 @@ public class GameInstance {
 							((this.map.GetInstance()).gameType == GameType.FRENZY)
 									? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
 									: "")
-							+ (((this.map.GetInstance()).gameType == GameType.NORMAL)
+							+ (((this.map.GetInstance()).gameType == GameType.CLASSIC)
 									? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
 									: "")
 							+ (((this.map.GetInstance()).gameType == GameType.DUEL)
@@ -2032,7 +2030,7 @@ public class GameInstance {
 								((this.map.GetInstance()).gameType == GameType.FRENZY) ? (
 
 								"" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers()) : "")
-										+ (((this.map.GetInstance()).gameType == GameType.NORMAL) ? (
+										+ (((this.map.GetInstance()).gameType == GameType.CLASSIC) ? (
 
 										"" + ChatColor.RESET + this.players.size() + "/"
 												+ this.gameType.getMaxPlayers()) : "")

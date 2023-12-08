@@ -279,7 +279,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	public int getNumOfGamesNormal() {
 		int num = 0;
 		for (Entry<Maps, GameInstance> entry : gameMap.entrySet()) {
-			if (entry.getValue().state == GameState.STARTED && entry.getValue().gameType == GameType.NORMAL) {
+			if (entry.getValue().state == GameState.STARTED && entry.getValue().gameType == GameType.CLASSIC) {
 				num++;
 			}
 		}
@@ -1346,7 +1346,7 @@ public class GameManager implements Listener, PluginMessageListener {
 				// if (entry.getValue().gameType == GameType.NORMAL &&
 				// entry.getValue().players.size() == 5)
 				// return null;
-				/* else */ if (entry.getValue().gameType == GameType.NORMAL && entry.getValue().players.size() < 5)
+				/* else */ if (entry.getValue().gameType == GameType.CLASSIC && entry.getValue().players.size() < 5)
 					return entry.getValue();
 				// else if (entry.getValue().gameType == GameType.DUEL &&
 				// entry.getValue().players.size() == 1)
