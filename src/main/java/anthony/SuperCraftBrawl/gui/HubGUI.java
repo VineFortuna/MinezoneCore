@@ -33,7 +33,7 @@ public class HubGUI implements InventoryProvider {
 
 	public HubGUI(Core main) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(4, 9)
-				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Game Selector").build();
+				.title(ChatColorHelper.color("&8&lGame Selector")).build();
 		this.main = main;
 
 	}
@@ -74,15 +74,13 @@ public class HubGUI implements InventoryProvider {
 								"&eClassic",
 								"&7Choose a class, kill everyone",
 								"",
-								"&eRight click to join a random map"),
+								"&e&nRight click&r&e to join a random map"),
 						e -> {
 							// If item was Left-clicked opens GUI to choose map
 							if (e.isLeftClick()) {
 								new ClassicModeGUI(main).inv.open(player);
 							// If item was Right-clicked join random game
 							} else if (e.isRightClick()) {
-								player.sendMessage("yo bitch");
-
 								main.getGameManager().JoinMap(player, randomizeMap(GameType.CLASSIC));
 							}
 						}));
