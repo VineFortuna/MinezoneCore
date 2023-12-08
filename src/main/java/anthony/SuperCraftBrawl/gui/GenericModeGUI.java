@@ -95,14 +95,26 @@ public class GenericModeGUI implements InventoryProvider {
             GameInstance gameInstance = main.getGameManager().getInstanceOfMap(map);
             String mapName = map.toString();
 
-//            System.out.println("Processing map: " + mapName + ", line: " + line + ", column: " + column);
+            ItemStack displayItem = null;
+
+            // Checking game playersSize to set due item
+            if (gameInstance != null) {
+                int playersSize = gameInstance.players.size();
+
+                // If it
+                if (playersSize >= gameType.getMaxPlayers()) {
+                    displayItem = new ItemStack(Material.STAINED_CLAY, 1, DyeColor.RED.getData());
+                } else {
+                    displayItem = new ItemStack(new ItemStack(Material.STAINED_CLAY, 1, DyeColor.YELLOW.getData()));
+                }
+            }
 
             if (gameInstance != null) {
                 // If game is waiting for players (have not started and have at least 1 player in it)
                 if (gameInstance.state == GameState.WAITING) {
                     // If start time initiated
                     if (gameInstance.gameStartTime != null) {
-                        contents.set(rows, column, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.EMERALD_BLOCK),
+                        contents.set(rows, column, ClickableItem.of(ItemHelper.setDetails(displayItem,
                                 "&e&l" + mapName,
                                 "&rStarting In: &e" + gameInstance.ticksTilStart + "s",
                                 "&rPlayers: &e" + gameInstance.players.size() + "/" + gameInstance.gameType.getMaxPlayers(),
@@ -113,7 +125,7 @@ public class GenericModeGUI implements InventoryProvider {
                         }));
                     } else {
                         // If start time has not initiated
-                        contents.set(rows, column, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.EMERALD_BLOCK),
+                        contents.set(rows, column, ClickableItem.of(ItemHelper.setDetails(displayItem,
                                 "&e&l" + mapName,
                                 "&eWaiting for players",
                                 "&rPlayers: &e" + gameInstance.players.size() + "/" + gameInstance.gameType.getMaxPlayers(),
@@ -139,7 +151,7 @@ public class GenericModeGUI implements InventoryProvider {
                 }
             } else {
                 // Set item for null gameInstances (no players in the map)
-                contents.set(rows, column, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.STAINED_CLAY, 1, DyeColor.BLUE.getData()),
+                contents.set(rows, column, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.STAINED_CLAY, 1, DyeColor.LIGHT_BLUE.getData()),
                         "&e&l" + mapName,
                         "&rPlayers: &e0/" + gameType.getMaxPlayers(),
                         "&r&nClick to join!"), e -> {
