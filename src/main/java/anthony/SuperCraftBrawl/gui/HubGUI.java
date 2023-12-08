@@ -74,6 +74,7 @@ public class HubGUI implements InventoryProvider {
 								"&eClassic",
 								"&7Choose a class, kill everyone",
 								"",
+								"&e&nLeft click&r&e to choose a map",
 								"&e&nRight click&r&e to join a random map"),
 						e -> {
 							// If item was Left-clicked opens GUI to choose map
@@ -92,7 +93,8 @@ public class HubGUI implements InventoryProvider {
 								"&eDuels",
 								"&71v1 someone until death",
 								"",
-								"&eRight click to join a random map"),
+								"&e&nLeft click&r&e to choose a map",
+								"&e&nRight click&r&e to join a random map"),
 						e -> {
 							// If item was Left-clicked opens GUI to choose map
 							if (e.isLeftClick()) {
@@ -110,7 +112,8 @@ public class HubGUI implements InventoryProvider {
 								"&eFrenzy",
 								"&7Random classes, big maps",
 								"",
-								"&eRight click to join a random map"),
+								"&eLeft click&r&e to choose a map",
+								"&e&nRight click&r&e to join a random map"),
 						e -> {
 							// If item was Left-clicked opens GUI to choose map
 							if (e.isLeftClick()) {
