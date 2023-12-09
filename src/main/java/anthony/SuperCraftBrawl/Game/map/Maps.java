@@ -244,15 +244,25 @@ public enum Maps {
 							new Vector(355.405, 146, 232.042), new Vector(376.475, 146, 224.455),
 							new Vector(386.497, 146, 238.394))
 					.setLobbyLoc(new Vector(380.502, 151, 301.543)).setBounds(new Vector(373.500, 158, 240.500), 50, 30)
+<<<<<<< HEAD
 					.setSignLoc(new Vector(168.300, 106, 669.556)).setSignLoc(new Vector(168.300, 106, 670.535))
 					.setSpecLoc(new Vector(373.500, 158, 240.500))),
+=======
+					.setGameType(GameType.CLASSIC).setSignLoc(new Vector(168.300, 106, 669.556))
+					.setSignLoc(new Vector(168.300, 106, 670.535)).setSpecLoc(new Vector(373.500, 158, 240.500))),
+>>>>>>> eacc3305db4925d2b2c7d92d8ed01d16b0b607a3
 
 	SimpleLand("SimpleLand",
 			new MapInstance("simpleland")
 					.setSpawnPos(new Vector(373.450, 138, 249.391), new Vector(415.468, 137, 242.428))
 					.setLobbyLoc(new Vector(392.484, 175, 320.476)).setBounds(new Vector(392.500, 167, 260.500), 40, 40)
+<<<<<<< HEAD
 					.setSignLoc(new Vector(168.300, 106, 669.556)).setSignLoc(new Vector(168.300, 107, 667.580))
 					.setSpecLoc(new Vector(392.500, 150, 260.500))),
+=======
+					.setGameType(GameType.CLASSIC).setSignLoc(new Vector(168.300, 106, 669.556))
+					.setSignLoc(new Vector(168.300, 107, 667.580)).setSpecLoc(new Vector(392.500, 150, 260.500))),
+>>>>>>> eacc3305db4925d2b2c7d92d8ed01d16b0b607a3
 
 	Pokemob("Pokemob",
 			new MapInstance("pokemob")
