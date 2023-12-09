@@ -171,7 +171,7 @@ public class GenericModeGUI implements InventoryProvider {
         // Setting "Go Back" Button
         contents.set(totalRows - 1, totalColumns - 1, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BARRIER),
                 "&7Go back"), e -> {
-            new HubGUI(main).inv.open(player);
+            new GameSelectorGUI(main).inv.open(player);
         }));
     }
 
