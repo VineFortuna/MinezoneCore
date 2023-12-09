@@ -4,27 +4,29 @@ import org.bukkit.util.Vector;
 
 public enum Arenas {
 
-	Parkour1(new ArenaInstance().setSpawnLoc(new Vector(-29.481, 137, 8.530))
-			.setBounds(new Vector(-111.500, 150, 24.500), 90, 20, 20), 2),
-	Default1(new ArenaInstance().setSpawnLoc(new Vector(8.456, 128, 492.479))
-			.setBounds(new Vector(52.720, 155, 496.461), 50, 40, 20), 2),
-	Default2(new ArenaInstance().setSpawnLoc(new Vector(-5.484, 128, 492.562))
-			.setBounds(new Vector(-42.383, 143, 492.474), 42, 25, 20), 1);
+	DeathParkour(new ArenaInstance().setSpawnLoc(new Vector(148.488, 99, 629.481))
+			.setBounds(new Vector(148.488, 99, 629.481), 40, 50, 30), 2, "Jessey2105");
 
 	private ArenaInstance i;
 	private int checkpointNum;
+	private String designer;
 
-	Arenas(ArenaInstance i, int checkpointNum) {
+	Arenas(ArenaInstance i, int checkpointNum, String designer) {
 		this.i = i;
 		this.checkpointNum = checkpointNum;
+		this.designer = designer;
 	}
 
 	public ArenaInstance getInstance() {
-		return i;
+		return this.i;
 	}
 
 	public int getCheckpoints() {
-		return checkpointNum;
+		return this.checkpointNum;
+	}
+	
+	public String getDesigner() {
+		return this.designer;
 	}
 
 }
