@@ -102,8 +102,7 @@ public class CreeperClass extends BaseClass {
 				if (player.getInventory().getItemInHand().getItemMeta().getDisplayName().contains("Creeper Potion")) {
 					// Adjust the velocity of the potion
 					Vector velocity = potion.getVelocity();
-					potion.setVelocity(velocity.multiply(1.3)); // Increase the multiplier to adjust the throwing
-																// distance
+					potion.setVelocity(velocity.multiply(1.3));
 				}
 			}
 		}
