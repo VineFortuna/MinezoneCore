@@ -25,6 +25,7 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.SmallFireball;
 import org.bukkit.event.EventHandler;
@@ -82,6 +83,7 @@ public class Core extends JavaPlugin implements Listener {
 	public InventoryGUI inventoryGUI;
 	public anthony.CrystalWars.game.GameManager gm;
 	public anthony.skywars.GameManager swManager;
+	public anthony.skywars.AbilityManager abilityManager;
 	public DonorClassesGUI donorGUI;
 	public HubGUI hubGUI;
 	public Commands commands;
@@ -121,10 +123,7 @@ public class Core extends JavaPlugin implements Listener {
 		return plugin;
 	}
 
-	public void TellAll(String message) {
-		for (Player staff : staffchat)
-			staff.sendMessage("" + ChatColor.GREEN + ChatColor.BOLD + "StaffChat> " + ChatColor.RESET + message);
-	}
+	// Getters:
 
 	public Parkour getParkour() {
 		return p;
@@ -136,6 +135,10 @@ public class Core extends JavaPlugin implements Listener {
 
 	public anthony.skywars.GameManager getSWManager() {
 		return this.swManager;
+	}
+
+	public anthony.skywars.AbilityManager getAbilityManager() {
+		return this.abilityManager;
 	}
 
 	public anthony.CrystalWars.game.GameManager getCwManager() {
@@ -273,39 +276,19 @@ public class Core extends JavaPlugin implements Listener {
 	 * }
 	 */
 
-	public void blazeEvent(Player player) {
-		Bukkit.getScheduler().runTaskLater(this, new Runnable() {
-			@Override
-			public void run() {
-				SmallFireball fireball = player.launchProjectile(SmallFireball.class);
-				fireball.setIsIncendiary(false);
-			}
-		}, 10L);
-	}
-
 	public void messages() {
-		String msg1 = color("&2&l(!) &rLook out for lightning as they can spawn powerups!");
-		String msg2 = color("&2&l(!) &rConsider joining our Discord server by using &e/socials");
-		String msg3 = color(
-				"&2&l(!) &rNot all maps are listed in lobby. Use &e/maplist &rfor a list of maps and &e/join <map> &rto play!");
-		String msg4 = color("&2&l(!) &rConsider purchasing a rank at &eminezone.tebex.io &rfor some awesome perks!");
+		Random random = new Random();
 
 		BukkitRunnable runnable = new BukkitRunnable() {
+			Announcements msg = null;
 
 			@Override
 			public void run() {
-				if (Bukkit.getOnlinePlayers().size() > 0) {
-					Random r = new Random();
-					int chance = r.nextInt(4);
-					if (chance == 0)
-						Bukkit.broadcastMessage(msg1);
-					else if (chance == 1)
-						Bukkit.broadcastMessage(msg2);
-					else if (chance == 2)
-						Bukkit.broadcastMessage(msg3);
-					else
-						Bukkit.broadcastMessage(msg4);
-				}
+				msg = Announcements.values()[random.nextInt(Announcements.values().length)];
+				String msgToPlayers = msg.getName();
+				if (Bukkit.getOnlinePlayers().size() > 0)
+					for (Player player : Bukkit.getOnlinePlayers())
+						player.sendMessage(msgToPlayers);
 			}
 
 		};
@@ -349,7 +332,7 @@ public class Core extends JavaPlugin implements Listener {
 		// smmmanager = new SmmManager(this);
 		gameManager = new GameManager(this);
 		commands = new Commands(this);
-		// cmd = new anthony.skywars.commands.Commands(this);
+		//cmd = new anthony.skywars.commands.Commands(this);
 		djManager = new DoubleJumpManager(this);
 		databaseManager = new DatabaseManager(this);
 		dataManager = new PlayerDataManager(this);
@@ -357,9 +340,10 @@ public class Core extends JavaPlugin implements Listener {
 		rankManager = new RankManager(this);
 		// gm = new anthony.CrystalWars.game.GameManager(this);
 		ag = new ActiveGamesGUI(this);
-		// p = new Parkour(this);
+		p = new Parkour(this);
 		lb = new Leaderboard(this);
-		// swManager = new anthony.skywars.GameManager(this);
+		//swManager = new anthony.skywars.GameManager(this);
+		//abilityManager = new anthony.skywars.AbilityManager(this);
 		// cheat = new AntiCheat(this);
 
 		Bukkit.getServer().getPluginManager().registerEvents(this, this);
@@ -376,9 +360,8 @@ public class Core extends JavaPlugin implements Listener {
 				if (pluginCommand != null) {
 					pluginCommand.setExecutor(commands);
 					pluginCommand.setTabCompleter(commands);
-				} else {
+				} else
 					System.out.print(command + " was null!");
-				}
 			}
 		}
 
@@ -470,7 +453,7 @@ public class Core extends JavaPlugin implements Listener {
 	public String staffhelp = "";
 	public String staffhelpReply = "";
 
-	@SuppressWarnings("null")
+	@SuppressWarnings({ "null", "deprecation" })
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		Player player = (Player) sender;
@@ -548,34 +531,30 @@ public class Core extends JavaPlugin implements Listener {
 
 					for (Player allPlayers : Bukkit.getOnlinePlayers()) {
 						if (args.length != 0) {
-							allPlayers.sendTitle("" + ChatColor.GREEN + "Announcement", "" + ChatColor.RESET + message
-									+ " - " + ChatColor.YELLOW + player.getName().substring(0, 3));
+							allPlayers.sendTitle(
+									"" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.UNDERLINE + "ANNOUNCEMENT",
+									"" + ChatColor.RESET + message + " - " + ChatColor.YELLOW
+											+ player.getName().substring(0, 3));
 							allPlayers.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
 									+ message + " - " + ChatColor.YELLOW + player.getName());
 						}
 					}
 				}
-			} else {
-				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank " + ChatColor.RED
-						+ ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to use this command!");
-			}
+			} else
+				player.sendMessage(color("&c&l(!) &rYou need the rank &c&lADMIN &rto use this command!"));
 		}
 
 		if (cmd.getName().equalsIgnoreCase("sc") && sender instanceof Player) {
 			if (player.hasPermission("scb.staffchat")) {
 				if (!(staffchat.contains(player))) {
 					staffchat.add(player);
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You have enabled "
-							+ ChatColor.YELLOW + "StaffChat");
+					player.sendMessage(color("&e&l(!) &rYou have &eenabled &rStaffChat"));
 				} else {
 					staffchat.remove(player);
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You have disabled "
-							+ ChatColor.YELLOW + "StaffChat");
+					player.sendMessage(color("&e&l(!) &rYou have &cdisabled &rStaffChat"));
 				}
-			} else {
-				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
-						+ ChatColor.GOLD + ChatColor.BOLD + "TRAINEE " + ChatColor.RESET + "to use this command");
-			}
+			} else
+				player.sendMessage(color("&c&l(!) &rYou need the rank &6&lTRAINEE &rto use this comamnd!"));
 		}
 
 		if (cmd.getName().equalsIgnoreCase("world")) {
@@ -617,13 +596,13 @@ public class Core extends JavaPlugin implements Listener {
 							player.sendMessage(color("&c&l(!) &rPlease enter a number that is greater/equal to 0"));
 						}
 					} catch (Exception e) {
-						player.sendMessage(color("&2&l(!) &rPlease enter a valid number!"));
+						player.sendMessage(color("&c&l(!) &rPlease enter a valid number!"));
 						e.printStackTrace();
 					}
 				} else
 					player.sendMessage(color("&r&l(!) &rIncorrect usage! Try doing: &e/setlevel <level>"));
 			} else
-				player.sendMessage(color("&2&l(!) &rYou need the rank &c&lADMIN &rto use this command!"));
+				player.sendMessage(color("&c&l(!) &rYou need the rank &c&lADMIN &rto use this command!"));
 		}
 
 		if (cmd.getName().equalsIgnoreCase("give")) {
@@ -728,8 +707,7 @@ public class Core extends JavaPlugin implements Listener {
 		}
 
 		if (cmd.getName().equalsIgnoreCase("socials") && sender instanceof Player) {
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Check out our server socials below: "
-					+ ChatColor.GREEN + "discord.gg/rQdaCZXaHF");
+			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Check out our server socials below:");
 			player.sendMessage("   -> discord.gg/rQdaCZXaHF");
 			player.sendMessage("   -> https://twitter.com/MinezoneMC");
 			player.sendMessage("   -> https://www.youtube.com/channel/UCEN83Z9wOUaKyBsZx5CoKfg");
@@ -1375,6 +1353,12 @@ public class Core extends JavaPlugin implements Listener {
 				+ ChatColor.BOLD + "] " + ChatColor.RESET + getRankManager().getRank(p).getTagWithSpace() + ""
 				+ ChatColor.AQUA + pName + ChatColor.GREEN + " connected");
 		String rank = getRankManager().getRank(p).getTagWithSpace();
+		
+		ItemStack cookie = new ItemStack(Material.COOKIE, 1);
+		Location loc = new Location(lobbyWorld, 144.584, 106, 663.454);
+		Item item = getServer().getWorlds().get(0).dropItemNaturally(loc, cookie);
+		item.setVelocity(item.getVelocity().zero()); // Make the item stationary
+		item.setPickupDelay(Integer.MAX_VALUE); // Set pickup delay to a large value
 
 		if (rank.length() >= 16) {
 			String s = rank.substring(0, 9);

@@ -199,7 +199,7 @@ public class BlazeClass extends BaseClass {
 				for (int i = 0; i < 4; i++) {
 					for (Player gamePlayer : instance.players)
 						gamePlayer.playEffect(player.getLocation(), Effect.BLAZE_SHOOT, 1);
-					instance.getManager().getMain().blazeEvent(player);
+					blazeEvent(player);
 				}
 			}
 		}
@@ -220,6 +220,16 @@ public class BlazeClass extends BaseClass {
 										Enchantment.FIRE_ASPECT, 1),
 						Enchantment.KNOCKBACK, 2);
 		return item;
+	}
+	
+	private void blazeEvent(Player player) { //Fireball launch when right click blaze rod
+		Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), new Runnable() {
+			@Override
+			public void run() {
+				SmallFireball fireball = player.launchProjectile(SmallFireball.class);
+				fireball.setIsIncendiary(false);
+			}
+		}, 10L);
 	}
 
 }
