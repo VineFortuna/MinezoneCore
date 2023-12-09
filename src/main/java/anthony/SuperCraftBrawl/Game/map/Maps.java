@@ -244,15 +244,15 @@ public enum Maps {
 							new Vector(355.405, 146, 232.042), new Vector(376.475, 146, 224.455),
 							new Vector(386.497, 146, 238.394))
 					.setLobbyLoc(new Vector(380.502, 151, 301.543)).setBounds(new Vector(373.500, 158, 240.500), 50, 30)
-					.setGameType(GameType.DUEL).setSignLoc(new Vector(168.300, 106, 669.556))
-					.setSignLoc(new Vector(168.300, 106, 670.535)).setSpecLoc(new Vector(373.500, 158, 240.500))),
+					.setSignLoc(new Vector(168.300, 106, 669.556)).setSignLoc(new Vector(168.300, 106, 670.535))
+					.setSpecLoc(new Vector(373.500, 158, 240.500))),
 
 	SimpleLand("SimpleLand",
 			new MapInstance("simpleland")
 					.setSpawnPos(new Vector(373.450, 138, 249.391), new Vector(415.468, 137, 242.428))
 					.setLobbyLoc(new Vector(392.484, 175, 320.476)).setBounds(new Vector(392.500, 167, 260.500), 40, 40)
-					.setGameType(GameType.DUEL).setSignLoc(new Vector(168.300, 106, 669.556))
-					.setSignLoc(new Vector(168.300, 107, 667.580)).setSpecLoc(new Vector(392.500, 150, 260.500))),
+					.setSignLoc(new Vector(168.300, 106, 669.556)).setSignLoc(new Vector(168.300, 107, 667.580))
+					.setSpecLoc(new Vector(392.500, 150, 260.500))),
 
 	Pokemob("Pokemob",
 			new MapInstance("pokemob")
@@ -278,6 +278,22 @@ public enum Maps {
 					.setLobbyLoc(new Vector(57.475, 109.31250, -130.494)).setSpecLoc(new Vector(59.525, 157, -64.436))
 					.setBounds(new Vector(55.500, 174, -57.500), 58, 58).setGameType(GameType.FRENZY)
 					.setSignLoc(new Vector(184.568, 106, 673.700)).setMapType(MapType.FRENZY)),
+	
+	SnowGlobe("SnowGlobe",
+			new MapInstance("snowglobe")
+					.setSpawnPos(new Vector(64.473, 107, -94.528), new Vector(87.499, 107, -70.563),
+							new Vector(70.451, 107, -24.514), new Vector(41.474, 107, -22.505),
+							new Vector(19.435, 107, -42.521), new Vector(19.404, 107, -67.537))
+					.setLobbyLoc(new Vector(57.475, 109.31250, -130.494)).setSpecLoc(new Vector(59.525, 157, -64.436))
+					.setBounds(new Vector(55.500, 174, -57.500), 58, 58).setGameType(GameType.FRENZY).setMapType(MapType.FRENZY)),
+	
+	SantaFactory("SantaFactory",
+			new MapInstance("santafactory")
+					.setSpawnPos(new Vector(64.473, 107, -94.528), new Vector(87.499, 107, -70.563),
+							new Vector(70.451, 107, -24.514), new Vector(41.474, 107, -22.505),
+							new Vector(19.435, 107, -42.521), new Vector(19.404, 107, -67.537))
+					.setLobbyLoc(new Vector(57.475, 109.31250, -130.494)).setSpecLoc(new Vector(59.525, 157, -64.436))
+					.setBounds(new Vector(55.500, 174, -57.500), 58, 58)),
 
 	Elven("Elven", new MapInstance("elven")
 			.setSpawnPos(new Vector(8.498, 150, -50.562), new Vector(23.065, 150, -26.283),

@@ -232,8 +232,8 @@ public class GameInstance {
 							+ (map.GetInstance().gameType == GameType.DUEL
 									? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
 									: ""),
-					"", "" + ChatColor.RESET + ChatColor.BOLD + "Status:",
-					"" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
+					"", "" + ChatColor.RESET + ChatColor.BOLD + "Status:", "" + ChatColor.RESET + ChatColor.ITALIC
+							+ " Need " + ChatColor.YELLOW + "1 " + ChatColor.RESET + ChatColor.ITALIC + "more player!");
 
 			boards.get(player)
 					.updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD + map.toString()
@@ -245,8 +245,8 @@ public class GameInstance {
 			board.updateLines("", "" + ChatColor.RESET + ChatColor.BOLD + "Class:", " " + ChatColor.RESET + "Random",
 					"", "" + ChatColor.RESET + ChatColor.BOLD + "Players:",
 					" " + ChatColor.RESET + players.size() + "/6", "",
-					"" + ChatColor.RESET + ChatColor.BOLD + "Status:",
-					"" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
+					"" + ChatColor.RESET + ChatColor.BOLD + "Status:", "" + ChatColor.RESET + ChatColor.ITALIC
+							+ " Need " + ChatColor.YELLOW + "1 " + ChatColor.RESET + ChatColor.ITALIC + "more player!");
 		}
 
 	}
@@ -515,36 +515,26 @@ public class GameInstance {
 		}
 	}
 
-	public void spawnLoc() { // Initially spawn all the players, at different locations than GetRespawnLoc()
-		MapInstance mi = null;
-		int size = 0;
-
-		if (map != null)
-			mi = this.map.GetInstance();
-		else
-			mi = this.duosMap.GetInstance();
-
-		size = 0;
-		Vector spawnPos = null;
-		boolean morePlayers = false; // If there's more players than spawn points, when set true it will spawn them
-										// at a random loc then
-
-		for (Player gamePlayer : this.players) {
-			if (morePlayers) {
-				spawnPos = mi.spawnPos.get(random.nextInt(mi.spawnPos.size()));
-				gamePlayer
-						.teleport(new Location(this.getMapWorld(), spawnPos.getX(), spawnPos.getY(), spawnPos.getZ()));
-			} else {
-				spawnPos = mi.spawnPos.get(size);
-				gamePlayer
-						.teleport(new Location(this.getMapWorld(), spawnPos.getX(), spawnPos.getY(), spawnPos.getZ()));
-				size++;
-
-				if (size >= this.players.size() - 1)
-					morePlayers = true;
-			}
-		}
-	}
+	/*
+	 * public void spawnLoc() { // Initially spawn all the players, at different
+	 * locations than GetRespawnLoc() MapInstance mi = null; int size = 0;
+	 * 
+	 * if (map != null) mi = this.map.GetInstance(); else mi =
+	 * this.duosMap.GetInstance();
+	 * 
+	 * size = 0; Vector spawnPos = null; boolean morePlayers = false; // If there's
+	 * more players than spawn points, when set true it will spawn them // at a
+	 * random loc then
+	 * 
+	 * for (Player gamePlayer : this.players) { if (morePlayers) { spawnPos =
+	 * mi.spawnPos.get(random.nextInt(mi.spawnPos.size())); gamePlayer .teleport(new
+	 * Location(this.getMapWorld(), spawnPos.getX(), spawnPos.getY(),
+	 * spawnPos.getZ())); } else { spawnPos = mi.spawnPos.get(size); gamePlayer
+	 * .teleport(new Location(this.getMapWorld(), spawnPos.getX(), spawnPos.getY(),
+	 * spawnPos.getZ())); size++;
+	 * 
+	 * if (size >= this.players.size() - 1) morePlayers = true; } } }
+	 */
 
 	public Location GetRespawnLoc() {
 		// Respawn location for each map
@@ -682,9 +672,9 @@ public class GameInstance {
 		startLightningDropsTimer();
 		for (Player player : players) {
 			player.getInventory().clear();
-			// player.teleport(GetRespawnLoc());
+			player.teleport(GetRespawnLoc());
 		}
-		spawnLoc(); // Spawn all players in game
+		// spawnLoc(); Spawn all players in game
 		TellAll("" + ChatColor.BOLD + "===============================");
 		TellAll("" + ChatColor.BOLD + "||");
 		TellAll("" + ChatColor.BOLD + "||");
@@ -1300,6 +1290,7 @@ public class GameInstance {
 
 	private BukkitRunnable endGameAnimation;
 	public int count = 0;
+	public Map<Player, WinEffects> effects = new HashMap<Player, WinEffects>();
 
 	public void EndGame() {
 		state = GameState.ENDED;
@@ -1308,129 +1299,126 @@ public class GameInstance {
 			if (!(en instanceof Player))
 				en.remove();
 
-		if (this.endGameAnimation == null) {
-			this.endGameAnimation = new BukkitRunnable() {
-				int ticks = 10;
-
-				@Override
-				public void run() {
-					for (Player p : winnerList) {
-						if (map != null) {
-							if (p == null || p.getWorld() != mapWorld) {
-								ticks = 0;
-							}
-						} else {
-							if (p == null || p.getWorld() != mapWorld) {
-								count += 1;
-
-								if (winnerList.size() >= 2 && count >= 2)
-									ticks = 0;
-								else if (winnerList.size() == 1 && count == 1)
-									ticks = 0;
-							}
-						}
-					}
-					if (ticks <= 10 && ticks > 0) {
-						if (!(winnerList.isEmpty())) {
-							for (Player w : winnerList) {
-								Firework fw = (Firework) w.getWorld().spawnEntity(w.getLocation(), EntityType.FIREWORK);
-								FireworkMeta fwm = fw.getFireworkMeta();
-								fwm.setPower(1);
-
-								Color c = null;
-								Random r = new Random();
-								int chance = r.nextInt(3);
-
-								if (chance == 0)
-									c = Color.BLUE;
-								else if (chance == 1)
-									c = Color.LIME;
-								else if (chance == 2)
-									c = Color.GREEN;
-								else
-									c = Color.YELLOW;
-								fwm.addEffect(FireworkEffect.builder().withColor(c).flicker(true).build());
-								fw.setFireworkMeta(fwm);
-							}
-						}
-					}
-					if (ticks == 0) {
-						endGameAnimation = null;
-						this.cancel();
-						String mapName = "";
-
-						if (map != null)
-							mapName = map.toString();
-						else
-							mapName = duosMap.toString();
-
-						for (Player gamePlayer : players) {
-							gamePlayer.setAllowFlight(false);
-							gamePlayer.setAllowFlight(true);
-							for (Player player : Bukkit.getOnlinePlayers()) {
-								if (gamePlayer != player) {
-									gamePlayer.showPlayer(player);
-								}
-							}
-						}
-
-						for (Player spectator : spectators) {
-							if (spectator.getWorld() == getMapWorld()) {
-								gameManager.getMain().LobbyBoard(spectator);
-								gameManager.getMain().LobbyItems(spectator);
-								gameManager.getMain().SendPlayerToHub(spectator);
-								spectator.setGameMode(GameMode.ADVENTURE);
-								spectator.setAllowFlight(false);
-								spectator.setAllowFlight(true);
-								spectator.setDisplayName("" + spectator.getName());
-								spectator.sendMessage(getManager().getMain().color("&2&l(!) &rThe game on &r&l"
-										+ mapName + " &rhas ended. Moving you back to spawn.."));
-								spectator.spigot().setCollidesWithEntities(true);
-								for (Player p : Bukkit.getOnlinePlayers()) {
-									p.showPlayer(spectator);
-								}
-							}
-						}
-						if (s != null) {
-							s.setLine(0, getManager().getMain().color("&2Lobby"));
-							s.setLine(1, getManager().getMain().color("&0" + mapName));
-							if (map != null)
-								s.setLine(2, getManager().getMain()
-										.color("&0Players: 0/" + getMap().GetInstance().gameType.getMaxPlayers()));
-							else
-								s.setLine(2, getManager().getMain().color("&0Players: 0/6"));
-
-							s.setLine(3, getManager().getMain().color("&030s"));
-							s.update();
-						}
-
-						for (Player player : players) {
-							gameManager.getMain().ResetPlayer(player);
-							BaseClass bc = classes.get(player);
-							bc.GameEnd();
-							SetLobbyScoreboard(player);
-							for (PotionEffect type : player.getActivePotionEffects())
-								player.removePotionEffect(type.getType());
-
-							removeArmor(player);
-							gameManager.getMain().LobbyItems(player);
-						}
-
-						for (BukkitRunnable runnable : runnables)
-							runnable.cancel();
-
-						Bukkit.unloadWorld(mapWorld, false);
-						if (map != null)
-							gameManager.RemoveMap(map);
-						else
-							gameManager.RemoveDuosMap(duosMap);
-					}
-
-					ticks--;
-				}
-			};
-			endGameAnimation.runTaskTimer(gameManager.getMain(), 0, 20);
+		if (!(winnerList.isEmpty())) {
+			for (Player w : winnerList) {
+				WinEffects we = new WinEffects(w, this);
+				we.checkWinEffect();
+				this.effects.put(w, we);
+			}
 		}
+
+		endGameAnimation = new BukkitRunnable() {
+			int ticks = 10;
+
+			@Override
+			public void run() {
+				for (Player p : winnerList) {
+					if (map != null) {
+						if (p == null || p.getWorld() != mapWorld) {
+							ticks = 0;
+						}
+					} else {
+						if (p == null || p.getWorld() != mapWorld) {
+							count += 1;
+
+							if (winnerList.size() >= 2 && count >= 2)
+								ticks = 0;
+							else if (winnerList.size() == 1 && count == 1)
+								ticks = 0;
+						}
+					}
+				}
+				if (ticks == 0) {
+					for (Entry<Player, WinEffects> entry : effects.entrySet()) //To remove win effects after 10 seconds or if player left
+						entry.getValue().removeWinEffects();
+					
+					endGameAnimation = null;
+					this.cancel();
+					String mapName = "";
+
+					if (map != null)
+						mapName = map.toString();
+					else
+						mapName = duosMap.toString();
+
+					for (Player gamePlayer : players) {
+						gamePlayer.setAllowFlight(false);
+						gamePlayer.setAllowFlight(true);
+						for (Player player : Bukkit.getOnlinePlayers()) {
+							if (gamePlayer != player) {
+								gamePlayer.showPlayer(player);
+							}
+						}
+					}
+
+					for (Player spectator : spectators) {
+						if (spectator.getWorld() == getMapWorld()) {
+							gameManager.getMain().LobbyBoard(spectator);
+							gameManager.getMain().LobbyItems(spectator);
+							gameManager.getMain().SendPlayerToHub(spectator);
+							spectator.setGameMode(GameMode.ADVENTURE);
+							spectator.setAllowFlight(false);
+							spectator.setAllowFlight(true);
+							spectator.setDisplayName("" + spectator.getName());
+							spectator.sendMessage(getManager().getMain().color("&2&l(!) &rThe game on &r&l" + mapName
+									+ " &rhas ended. Moving you back to spawn.."));
+							spectator.spigot().setCollidesWithEntities(true);
+							for (Player p : Bukkit.getOnlinePlayers()) {
+								p.showPlayer(spectator);
+							}
+						}
+					}
+					if (s != null) {
+						s.setLine(0, getManager().getMain().color("&2Lobby"));
+						s.setLine(1, getManager().getMain().color("&0" + mapName));
+						if (map != null)
+							s.setLine(2, getManager().getMain()
+									.color("&0Players: 0/" + getMap().GetInstance().gameType.getMaxPlayers()));
+						else
+							s.setLine(2, getManager().getMain().color("&0Players: 0/6"));
+
+						s.setLine(3, getManager().getMain().color("&030s"));
+						s.update();
+					}
+
+					for (Player player : players) {
+						gameManager.getMain().ResetPlayer(player);
+						BaseClass bc = classes.get(player);
+						bc.GameEnd();
+						SetLobbyScoreboard(player);
+						for (PotionEffect type : player.getActivePotionEffects())
+							player.removePotionEffect(type.getType());
+
+						removeArmor(player);
+						gameManager.getMain().LobbyItems(player);
+					}
+
+					for (BukkitRunnable runnable2 : runnables)
+						runnable2.cancel();
+
+					BukkitRunnable r = new BukkitRunnable() {
+
+						@Override
+						public void run() {
+							Bukkit.unloadWorld(mapWorld, false);
+
+							if (Bukkit.unloadWorld(mapWorld, false)) {
+								this.cancel();
+							}
+						}
+					};
+					r.runTaskTimer(getManager().getMain(), 0, 1);
+					if (map != null)
+						gameManager.RemoveMap(map);
+					else
+						gameManager.RemoveDuosMap(duosMap);
+
+				}
+
+				ticks--;
+			}
+		};
+		endGameAnimation.runTaskTimer(getManager().getMain(), 0, 20);
 	}
 
 	public void SetLobbyScoreboard(Player player) {
@@ -2041,7 +2029,9 @@ public class GameInstance {
 										"" + ChatColor.RESET + this.players.size() + "/"
 												+ this.gameType.getMaxPlayers()) : ""));
 								board.updateLine(7, "" + ChatColor.BOLD + "Status:");
-								board.updateLine(8, " " + ChatColor.ITALIC + "Waiting..");
+								board.updateLine(8,
+										"" + ChatColor.RESET + ChatColor.ITALIC + " Need " + ChatColor.YELLOW + "1 "
+												+ ChatColor.RESET + ChatColor.ITALIC + "more player!");
 							}
 						}
 					}
@@ -2070,7 +2060,9 @@ public class GameInstance {
 								FastBoard board = this.boards.get(gamePlayer);
 								board.updateLine(5, " " + this.players.size() + "/6");
 								board.updateLine(7, "" + ChatColor.BOLD + "Status:");
-								board.updateLine(8, " " + ChatColor.ITALIC + "Waiting..");
+								board.updateLine(8,
+										"" + ChatColor.RESET + ChatColor.ITALIC + " Need " + ChatColor.YELLOW + "1 "
+												+ ChatColor.RESET + ChatColor.ITALIC + "more player!");
 							}
 						}
 					}

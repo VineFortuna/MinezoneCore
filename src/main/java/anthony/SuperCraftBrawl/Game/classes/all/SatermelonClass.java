@@ -97,7 +97,7 @@ public class SatermelonClass extends BaseClass {
 
 	public ItemStack getGlisteringMelon() {
 		return ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.SPECKLED_MELON, 1),
-				"" + ChatColor.RESET + "Special Melon"), Enchantment.DAMAGE_ALL, 3);
+				"" + ChatColor.RESET + "Special Melon"), Enchantment.DAMAGE_ALL, 4);
 	}
 
 	public ItemStack getGold() {
