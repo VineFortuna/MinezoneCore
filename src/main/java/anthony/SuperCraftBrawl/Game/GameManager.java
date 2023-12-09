@@ -2094,7 +2094,7 @@ public class GameManager implements Listener, PluginMessageListener {
 						}
 						player.sendPluginMessage((Plugin) this.main, "BungeeCord", b.toByteArray());
 					}, 10L);
-					(new HubGUI(this.main)).inv.open(player);
+					(new GameSelectorGUI(this.main)).inv.open(player);
 				}
 				break;
 			case BARRIER:
