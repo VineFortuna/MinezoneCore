@@ -38,7 +38,7 @@ public class GingerBreadManClass extends BaseClass {
 
 	@Override
 	public ClassType getType() {
-		return null;
+		return ClassType.GingerBreadMan;
 	}
 
 	public ItemStack makeGreen(ItemStack armor) {

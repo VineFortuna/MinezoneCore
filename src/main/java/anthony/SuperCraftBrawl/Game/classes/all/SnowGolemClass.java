@@ -11,6 +11,8 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import anthony.SuperCraftBrawl.ItemHelper;
@@ -27,7 +29,7 @@ import java.util.List;
 public class SnowGolemClass extends BaseClass {
 
 	private int cooldownSec = 0;
-	private int pumpkinDuration = 4; // 4 seconds
+	private int pumpkinDuration = 10; // 10 seconds for pumpkin on players heads
 
 	private ItemStack weapon;
 
@@ -64,7 +66,6 @@ public class SnowGolemClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-
 		// Weapon
 		ItemStack weapon = ItemHelper.create(Material.STICK, ChatColor.GREEN + "Map Knocker");
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3); // Sharpness 3
@@ -140,9 +141,7 @@ public class SnowGolemClass extends BaseClass {
 								} else {
 									Location targetLocation = new Location(player.getWorld(),
 											player.getLocation().getX(), player.getLocation().getY() + 1,
-											player.getLocation().getZ()); // Replace with
-																			// your target
-																			// location
+											player.getLocation().getZ());
 
 									float originalYaw = player.getLocation().getYaw();
 									float originalPitch = player.getLocation().getPitch();
@@ -213,6 +212,7 @@ public class SnowGolemClass extends BaseClass {
 			if (item.getType() == Material.PUMPKIN
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 				if (player.getGameMode() != GameMode.SPECTATOR) {
+					player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 200, 0));
 					int amount = item.getAmount();
 					if (amount > 0) {
 						amount--;
@@ -250,7 +250,7 @@ public class SnowGolemClass extends BaseClass {
 										ticks--;
 									}
 								};
-								runTimer.runTaskTimer(instance.getManager().getMain(), 0, 20);
+								runTimer.runTaskTimer(instance.getManager().getMain(), 0, 20); //20 ticks = 1 second
 							}
 						}
 					}
@@ -272,7 +272,6 @@ public class SnowGolemClass extends BaseClass {
 
 	@Override
 	public void SetNameTag() {
-		// TODO Auto-generated method stub
-
+		
 	}
 }

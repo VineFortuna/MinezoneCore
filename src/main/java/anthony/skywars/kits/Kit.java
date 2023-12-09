@@ -11,8 +11,11 @@ import anthony.SuperCraftBrawl.ItemHelper;
 public enum Kit {
 	Knight("Knight",
 			new KitInstance().setKitItems(new ItemStack(Material.IRON_SWORD), new ItemStack(Material.APPLE, 3))),
-	Chicken("Chicken", new KitInstance().setKitItems(new ItemStack(Material.IRON_SWORD), new ItemStack(Material.EGG, 8),
-			ItemHelper.addEnchant(new ItemStack(Material.IRON_BOOTS), Enchantment.PROTECTION_FALL, 4)));
+	Chicken("Chicken",
+			new KitInstance().setKitItems(new ItemStack(Material.IRON_SWORD), new ItemStack(Material.EGG, 8),
+					ItemHelper.addEnchant(new ItemStack(Material.IRON_BOOTS), Enchantment.PROTECTION_FALL, 4))),
+	Ice("Ice", new KitInstance().setKitItems(new ItemStack(Material.STONE_PICKAXE),
+			ItemHelper.setDetails(new ItemStack(Material.PACKED_ICE, 1), "Bridge")));
 
 	public String name = "";
 	public KitInstance ki = null;

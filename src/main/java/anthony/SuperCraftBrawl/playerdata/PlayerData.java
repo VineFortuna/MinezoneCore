@@ -16,7 +16,7 @@ public class PlayerData {
 			yellow = 0, muted = 0, exp = 0, level = 0, bestTime = 0, magicbroom = 0, points = 0, withersk = 0,
 			bonusTokens = 0, bonusLevels = 0, paintball = 0, santaoutfit, elf, gingerbreadman, killMsgs = 0,
 			challenge1 = 0, challenge2 = 0, challenge3 = 0, goldApple = 0, glowstone = 0, redstone = 0, web = 0,
-			bottleEXP = 0, broomWinEffect = 0;;
+			bottleEXP = 0, broomWinEffect = 0, enderDragonEffect = 0, santaEffect = 0, fireParticlesEffect = 0;
 
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
 
@@ -25,7 +25,8 @@ public class PlayerData {
 			int votes, int mysteryChests, int blue, int red, int green, int yellow, int muted, int exp, int level,
 			int bestTime, int magicbroom, int points, int withersk, int bonusTokens, int bonusLevels, int paintball,
 			int santaoutfit, int elf, int gingerbreadman, int killMsgs, int challenge1, int challenge2, int challenge3,
-			int goldApple, int glowstone, int redstone, int web, int bottleEXP, int broomWWinEffect) {
+			int goldApple, int glowstone, int redstone, int web, int bottleEXP, int broomWWinEffect,
+			int enderDragonEffect, int santaEffect, int fireParticlesEffect) {
 		this(playerUUID, playerName, playerIP);
 		this.roleID = roleID;
 		this.tokens = tokens;
@@ -68,6 +69,9 @@ public class PlayerData {
 		this.web = web;
 		this.bottleEXP = bottleEXP;
 		this.broomWinEffect = broomWWinEffect;
+		this.enderDragonEffect = enderDragonEffect;
+		this.santaEffect = santaEffect;
+		this.fireParticlesEffect = fireParticlesEffect;
 	}
 
 	public boolean isPurchased(ClassType type) {

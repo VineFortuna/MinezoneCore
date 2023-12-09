@@ -535,7 +535,8 @@ public class GameManager implements Listener, PluginMessageListener {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
 
-		if ((player.getWorld() == main.getLobbyWorld()) || (i != null && i.state == GameState.WAITING)) {
+		if ((player.getWorld() == main.getLobbyWorld())
+				|| (i != null && (i.state == GameState.WAITING || i.state == GameState.ENDED))) {
 			if (item != null && item.getType() == Material.WHEAT
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 				double boosterStrength = 2.0;
@@ -641,7 +642,6 @@ public class GameManager implements Listener, PluginMessageListener {
 		GameInstance gameInstance = GetInstanceOfPlayer(player);
 		gameInstance.classes.get(player).onPlayerMove(event);
 	}
-
 
 	@EventHandler
 	public void shieldPotions(PlayerItemConsumeEvent event) {
@@ -974,9 +974,10 @@ public class GameManager implements Listener, PluginMessageListener {
 		if (instance != null && instance.state == GameState.STARTED) {
 			BaseClass bc = instance.classes.get(player);
 			if (item != null && item.getType() == Material.MILK_BUCKET) {
-				if (bc != null && bc.getType() != ClassType.BabyCow) {
+				if (bc != null && bc.getType() != ClassType.BabyCow && bc.getType() != ClassType.Santa) {
 					if (player.getGameMode() != GameMode.SPECTATOR) {
-						// Remove bad effects only: poison, wither, slowness, weakness, blindness, nausea
+						// Remove bad effects only: poison, wither, slowness, weakness, blindness,
+						// nausea
 						for (PotionEffect pe : player.getActivePotionEffects())
 							if (pe.getType().equals(PotionEffectType.POISON)
 									|| pe.getType().equals(PotionEffectType.SLOW)
@@ -1082,13 +1083,18 @@ public class GameManager implements Listener, PluginMessageListener {
 					if (i.duosMap != null) {
 						if (!(i.team.get(shooter).equals(i.team.get(hitPlayer)))) {
 							if (i.classes.get(shooter).getType() == ClassType.SnowGolem)
-								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness 3 - Snowgolem
+								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness
+																												// 3 -
+																												// Snowgolem
 							else
-								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 0)); // Slowness 1
+								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 0)); // Slowness
+																												// 1
 						}
 					} else {
 						if (i.classes.get(shooter).getType() == ClassType.SnowGolem)
-							hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness 3 - Snowgolem
+							hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness 3
+																											// -
+																											// Snowgolem
 						else
 							hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 0)); // Slowness 1
 					}
@@ -1752,6 +1758,12 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	@EventHandler
+	public void onEntityChangeBlock(EntityChangeBlockEvent event) {
+		if (event.getEntity() instanceof EnderDragon)
+			event.setCancelled(true);
+	}
+
+	@EventHandler
 	public void onIgnite(BlockIgniteEvent e) {
 		IgniteCause cause = e.getCause();
 		if (cause == IgniteCause.EXPLOSION || cause == IgniteCause.FIREBALL)
@@ -2130,7 +2142,8 @@ public class GameManager implements Listener, PluginMessageListener {
 									// If ClassType == Summoner
 									if (i.classes.get(player).getType() == ClassType.Summoner) {
 										// Spawning Second Zombie
-										Zombie zombie2 = (Zombie) player.getWorld().spawnCreature(hitLoc.add(1,0, 1), EntityType.ZOMBIE);
+										Zombie zombie2 = (Zombie) player.getWorld().spawnCreature(hitLoc.add(1, 0, 1),
+												EntityType.ZOMBIE);
 										// Customizing Second Zombie
 										customizeMob(zombie2, player);
 										customizeZombie(zombie2);
@@ -2159,7 +2172,8 @@ public class GameManager implements Listener, PluginMessageListener {
 									@SuppressWarnings("deprecation")
 
 									// Spawning Skeleton
-									Skeleton skeleton = (Skeleton) player.getWorld().spawnCreature(hitLoc, EntityType.SKELETON);
+									Skeleton skeleton = (Skeleton) player.getWorld().spawnCreature(hitLoc,
+											EntityType.SKELETON);
 									// Customizing Skeleton
 									customizeMob(skeleton, player);
 									customizeSkeleton(skeleton);
@@ -2167,7 +2181,8 @@ public class GameManager implements Listener, PluginMessageListener {
 									// If ClassType == Summoner
 									if (i.classes.get(player).getType() == ClassType.Summoner) {
 										// Spawning Second Skeleton
-										Skeleton skeleton2 = (Skeleton) player.getWorld().spawnCreature(hitLoc.add(1,0, 1), EntityType.SKELETON);
+										Skeleton skeleton2 = (Skeleton) player.getWorld()
+												.spawnCreature(hitLoc.add(1, 0, 1), EntityType.SKELETON);
 										// Customizing Second Skeleton
 										customizeMob(skeleton2, player);
 										customizeSkeleton(skeleton2);
@@ -2222,7 +2237,8 @@ public class GameManager implements Listener, PluginMessageListener {
 									@SuppressWarnings("deprecation")
 
 									// Spawning Creeper
-									Creeper creeper = (Creeper) player.getWorld().spawnCreature(hitLoc, EntityType.CREEPER);
+									Creeper creeper = (Creeper) player.getWorld().spawnCreature(hitLoc,
+											EntityType.CREEPER);
 									// Customizing Creeper
 									customizeMob(creeper, player);
 									customizeCreeper(creeper);
@@ -2241,7 +2257,7 @@ public class GameManager implements Listener, PluginMessageListener {
 						}
 					}
 				}
-						break;
+				break;
 
 			case NETHER_STAR:
 				if (i != null && i.state == GameState.STARTED && meta.getDisplayName().contains("Bounty")) {
@@ -2281,6 +2297,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			}
 		}
 	}
+
 	private void customizeSkeleton(Skeleton skeleton) {
 		// Setting Bow
 		EntityEquipment equipment = skeleton.getEquipment();
@@ -2340,19 +2357,17 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	private String getMobTypeName(EntityType entityType) {
 		switch (entityType) {
-			case SKELETON:
-				return "Skeleton";
-			case CREEPER:
-				return "Creeper";
-			case ZOMBIE:
-				return "Zombie";
-			case WITCH:
-				return "Witch";
-			case SILVERFISH:
-				return "Silverfish";
+		case SKELETON:
+			return "Skeleton";
+		case CREEPER:
+			return "Creeper";
+		case ZOMBIE:
+			return "Zombie";
+		case WITCH:
+			return "Witch";
+		case SILVERFISH:
+			return "Silverfish";
 		}
 		return null;
 	}
 }
-
-

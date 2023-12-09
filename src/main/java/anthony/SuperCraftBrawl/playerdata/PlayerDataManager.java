@@ -135,11 +135,15 @@ public class PlayerDataManager implements Listener {
 			int web = set.getInt("Web");
 			int bottleEXP = set.getInt("BottleEXP");
 			int broomWinEffect = set.getInt("BroomWinEffect");
+			int enderDragonEffect = set.getInt("EnderDragonEffect");
+			int santaEffect = set.getInt("SantaEffect");
+			int fireParticlesEffect = set.getInt("FireParticlesEffect");
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
 					exp, level, bestTime, magicbroom, points, withersk, bonusTokens, bonusLevels, paintball,
 					santaoutfit, elf, gingerbreadman, killMsgs, challenge1, challenge2, challenge3, goldApple,
-					glowstone, redstone, web, bottleEXP, broomWinEffect);
+					glowstone, redstone, web, bottleEXP, broomWinEffect, enderDragonEffect, santaEffect,
+					fireParticlesEffect);
 		}
 		set.close();
 		stmt.close();
@@ -173,14 +177,16 @@ public class PlayerDataManager implements Listener {
 		System.out.print("Saving data for " + data.playerName);
 		manager.executeUpdateCommand("UPDATE PlayerData SET LastPlayerName = '" + data.playerName + "', LastIP = '"
 				+ data.playerIP + "', RoleID = " + data.roleID + ", Tokens = " + data.tokens + ", Kills = " + data.kills
-				+ ", Losses = " + data.losses + ", Votes = " + data.votes + ", FlawlessWins = " + data.flawlessWins
-				+ ", BonusTokens = " + data.bonusTokens + ", BonusLevels = " + data.bonusLevels + ", WitherSk = "
-				+ data.withersk + ", Points = " + data.points + ", MagicBroom = " + data.magicbroom + ", Cwm = "
-				+ data.cwm + ", Blue = " + data.blue + ", Red = " + data.red + ", Green = " + data.green + ", Yellow = "
-				+ data.yellow + ", MelonCosmetic = " + data.melon + ", PrivateMessages = " + data.pm + ", Muted = "
-				+ data.muted + ", GoldApple = " + data.goldApple + ", Glowstone = " + data.glowstone + ", Redstone = "
-				+ data.redstone + ", Web = " + data.web + ", BottleEXP = " + data.bottleEXP + ", MysteryChests = "
-				+ data.mysteryChests + ", AstronautCosmetic = " + data.astronaut + ", SantaOutfit = " + data.santaoutfit
+				+ ", EnderDragonEffect = " + data.enderDragonEffect + ", SantaEffect = " + data.santaEffect
+				+ ", FireParticlesEffect = " + data.fireParticlesEffect + ", Losses = " + data.losses + ", Votes = "
+				+ data.votes + ", FlawlessWins = " + data.flawlessWins + ", BonusTokens = " + data.bonusTokens
+				+ ", BonusLevels = " + data.bonusLevels + ", WitherSk = " + data.withersk + ", Points = " + data.points
+				+ ", MagicBroom = " + data.magicbroom + ", Cwm = " + data.cwm + ", Blue = " + data.blue + ", Red = "
+				+ data.red + ", Green = " + data.green + ", Yellow = " + data.yellow + ", MelonCosmetic = " + data.melon
+				+ ", PrivateMessages = " + data.pm + ", Muted = " + data.muted + ", GoldApple = " + data.goldApple
+				+ ", Glowstone = " + data.glowstone + ", Redstone = " + data.redstone + ", Web = " + data.web
+				+ ", BottleEXP = " + data.bottleEXP + ", MysteryChests = " + data.mysteryChests
+				+ ", AstronautCosmetic = " + data.astronaut + ", SantaOutfit = " + data.santaoutfit
 				+ ", BroomWinEffect = " + data.broomWinEffect + ", BestTime = " + data.bestTime + ", Exp = " + data.exp
 				+ ", Winstreak = " + data.winstreak + ", GingerBreadMan = " + data.gingerbreadman + ", Elf = "
 				+ data.elf + ", Challenge1 = " + data.challenge1 + ", Challenge2 = " + data.challenge2

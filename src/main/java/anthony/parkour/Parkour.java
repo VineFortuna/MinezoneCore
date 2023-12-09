@@ -1,5 +1,6 @@
 package anthony.parkour;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import anthony.SuperCraftBrawl.ItemHelper;
@@ -26,6 +28,8 @@ public class Parkour implements Listener {
 	public Map<Player, Location> checkpoint;
 	public Map<Player, Integer> checkpointNum;
 	public Map<Player, FastBoard> b;
+	public Map<Player, String> time;
+	public Map<Player, BukkitRunnable> runnables;
 
 	public Parkour(Core main) {
 		this.main = main;
@@ -33,6 +37,8 @@ public class Parkour implements Listener {
 		this.checkpoint = new HashMap<Player, Location>();
 		this.checkpointNum = new HashMap<Player, Integer>();
 		this.b = new HashMap<Player, FastBoard>();
+		this.time = new HashMap<Player, String>();
+		this.runnables = new HashMap<Player, BukkitRunnable>();
 		this.main.getServer().getPluginManager().registerEvents(this, main);
 	}
 
@@ -42,14 +48,42 @@ public class Parkour implements Listener {
 			players.put(player, arena);
 			checkpoint.put(player, new Location(main.getLobbyWorld(), ai.getBlockX(), ai.getBlockY(), ai.getBlockZ()));
 			checkpointNum.put(player, 0);
+			double timeTaken = 0.0;
+			DecimalFormat decimalFormat = new DecimalFormat("#.#");
+			String formattedTime = decimalFormat.format(timeTaken);
+			time.put(player, formattedTime);
 			player.sendMessage(main.color("&e&l(!) &rYou have joined &r&l" + arena.toString()));
 			player.getInventory().clear();
 			gameBoard(player);
 			gameItems(player);
+			timeTicking(player);
 			player.setAllowFlight(false);
 		} else {
 			player.sendMessage(main.color("&c&l(!) &rYou are already in parkour mode!"));
 		}
+	}
+
+	private void timeTicking(Player player) {
+		BukkitRunnable r = new BukkitRunnable() {
+			double timeTaken = 0.0;
+
+			@Override
+			public void run() {
+				if (runnables.get(player) != null) {
+					DecimalFormat decimalFormat = new DecimalFormat("#.##");
+					String formattedTime = decimalFormat.format(timeTaken);
+					time.put(player, formattedTime);
+					b.get(player).updateLine(3, main.color("&r&lTime:&7 " + formattedTime + "s"));
+
+					timeTaken += 0.25;
+				} else {
+					this.cancel();
+					runnables.remove(player);
+				}
+			}
+		};
+		r.runTaskTimer(main, 0, 5);
+		runnables.put(player, r);
 	}
 
 	public void gameBoard(Player player) {
@@ -58,7 +92,7 @@ public class Parkour implements Listener {
 		b.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 				main.color(
 						"&r&lCheckpoints: &7" + checkpointNum.get(player) + "/" + players.get(player).getCheckpoints()),
-				"", main.color("&r&lTime:&7 0s"),
+				"", main.color("&r&lTime:&7 0.0s"),
 				"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 				main.color("&7minezone.club"));
 		this.b.put(player, b);
@@ -122,17 +156,23 @@ public class Parkour implements Listener {
 								+ players.get(player).getCheckpoints()));
 						player.sendMessage(main.color("&e&l(!) &rCheckpoint set!"));
 					}
-				} else if (player.getLocation().getBlock().getRelative(BlockFace.DOWN)
-						.getType() == Material.GLOWSTONE) {
-					player.sendTitle("PARKOUR COMPLETE!", main.color("&eSending to spawn.."));
-					main.getParkour().players.remove(player);
-					checkpointNum.remove(player);
-					checkpoint.remove(player);
-					b.remove(player);
-					main.ResetPlayer(player);
-					main.LobbyItems(player);
-					main.LobbyBoard(player);
-					player.setAllowFlight(true);
+					/*
+					 * } else if (player.getLocation().getBlock().getRelative(BlockFace.DOWN)
+					 * .getType() == Material.GLOWSTONE) { player.sendTitle("PARKOUR COMPLETE!",
+					 * main.color("&eSending to spawn.."));
+					 * main.getParkour().players.remove(player); checkpointNum.remove(player);
+					 * checkpoint.remove(player); b.remove(player); main.ResetPlayer(player);
+					 * main.LobbyItems(player); main.LobbyBoard(player);
+					 * player.setAllowFlight(true); }
+					 */
+				} else if (isPlayerInLava(player)) {
+					Vector v = players.get(player).getInstance().spawnLoc;
+					player.teleport(new Location(main.getLobbyWorld(), v.getBlockX(), v.getBlockY(), v.getBlockZ()));
+					checkpoint.put(player,
+							new Location(main.getLobbyWorld(), v.getBlockX(), v.getBlockY(), v.getBlockZ()));
+					checkpointNum.put(player, 0);
+					gameBoard(player);
+					player.sendMessage(main.color("&e&l(!) &rSent back to start"));
 				}
 			} else {
 				if (player.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.SEA_LANTERN) {
@@ -145,6 +185,11 @@ public class Parkour implements Listener {
 				}
 			}
 		}
+	}
+
+	private boolean isPlayerInLava(Player player) {
+		Material material = player.getLocation().getBlock().getType();
+		return material == Material.LAVA || material == Material.STATIONARY_LAVA;
 	}
 
 	@EventHandler
@@ -169,6 +214,8 @@ public class Parkour implements Listener {
 					player.sendMessage(main.color("&e&l(!) &rSent back to start"));
 					break;
 				case BARRIER:
+					this.time.remove(player);
+					this.runnables.remove(player);
 					main.getParkour().players.remove(player);
 					main.ResetPlayer(player);
 					main.LobbyItems(player);

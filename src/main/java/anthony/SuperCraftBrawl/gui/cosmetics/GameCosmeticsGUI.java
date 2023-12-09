@@ -43,6 +43,7 @@ public class GameCosmeticsGUI implements InventoryProvider {
         ItemStack gameOutfits = ItemHelper.create(Material.GOLD_CHESTPLATE, ChatColor.YELLOW + "Outfits");
 
         // Setting Items
+        
         contents.set(1, 2, ClickableItem.of(
                 arrowEffects,
                 e -> {
@@ -64,7 +65,7 @@ public class GameCosmeticsGUI implements InventoryProvider {
                     new DeathEffectsGUI(main).inv.open(player);
                 }));
 
-        contents.set(3, 3, ClickableItem.of(
+        contents.set(0, 4, ClickableItem.of(
                 winEffects,
                 e -> {
                     inv.close(player);
