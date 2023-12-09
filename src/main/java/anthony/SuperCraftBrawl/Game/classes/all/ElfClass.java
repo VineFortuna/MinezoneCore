@@ -39,7 +39,7 @@ public class ElfClass extends BaseClass {
 
 	@Override
 	public ClassType getType() {
-		return null;
+		return ClassType.Elf;
 	}
 
 	public ItemStack makeGreen(ItemStack armor) {
