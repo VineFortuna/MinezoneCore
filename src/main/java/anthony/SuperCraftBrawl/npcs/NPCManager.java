@@ -23,6 +23,7 @@ import anthony.SuperCraftBrawl.Game.GameManager;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.gui.ClassSelectorGUI;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import net.jitse.npclib.NPCLib;
 import net.jitse.npclib.api.NPC;
 import net.jitse.npclib.api.events.NPCInteractEvent;
@@ -36,7 +37,7 @@ public class NPCManager implements Listener {
 	private NPCLib npcLib;
 
 	// NPCS HERE:
-	private NPC scb, skywars, scbDuos;
+	private NPC scb, skywars, scbDuos, parkour;
 
 	public NPCManager(Core main) {
 		this.main = main;
@@ -59,9 +60,16 @@ public class NPCManager implements Listener {
 
 			scbDuos = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "SUPER CRAFT BLOCKS",
 					main.color("&7&lDuos"), main.color("&7Click to connect!")));
-			scbDuos.setLocation(new Location(main.getLobbyWorld(), 185.469, 106, 662.483, 179, -0));
+			scbDuos.setLocation(new Location(main.getLobbyWorld(), 186.462, 113, 649.534, 179, -0));
 			scbDuos.setSkin(skin);
 			scbDuos.create();
+
+			parkour = npcLib.createNPC(
+					Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + ChatColor.UNDERLINE + "PARKOUR FINISH",
+							main.color("&7Click to claim reward!")));
+			parkour.setLocation(new Location(main.getLobbyWorld(), 126.562, 115, 632.989, 179, -0));
+			parkour.setSkin(skin);
+			parkour.create();
 
 			skywars = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "SKYWARS",
 					main.color("&7Click to connect!"), "" + ChatColor.AQUA + "0 Players"));
@@ -140,19 +148,38 @@ public class NPCManager implements Listener {
 				player.sendMessage(main.color("&c&l(!) &rThere was a problem connecting to &escb-2"));
 			}
 			player.sendPluginMessage(main, "BungeeCord", b.toByteArray());
+		} else if (e.getNPC() == parkour) {
+			if (main.p.hasPlayer(player)) {
+				player.sendMessage(main.color("&r&l(!) &rHere is your reward: &e300 Tokens"));
+				player.sendMessage(main.color("&r&l(!) &rTime Taken: &e" + main.p.time.get(player)));
+				PlayerData data = main.getDataManager().getPlayerData(player);
+				main.p.runnables.remove(player);
+				main.p.time.remove(player);
+				main.getParkour().players.remove(player);
+				main.ResetPlayer(player);
+				main.LobbyItems(player);
+				player.setAllowFlight(true);
+
+				if (data != null) {
+					data.tokens += 300;
+					main.LobbyBoard(player);
+					main.SendPlayerToHub(player);
+				}
+			}
 		}
 	}
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
 		// Spawn npcs when player joins server
-		//if (main.lobbyWorld.getName().equals("lobbies")) {
-			Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(main, () -> {
-				Bukkit.getScheduler().runTask(main, () -> scb.show(e.getPlayer()));
-				Bukkit.getScheduler().runTask(main, () -> skywars.show(e.getPlayer()));
-				Bukkit.getScheduler().runTask(main, () -> scbDuos.show(e.getPlayer()));
-			}, 20L);
-		//}
+		// if (main.lobbyWorld.getName().equals("lobbies")) {
+		Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(main, () -> {
+			Bukkit.getScheduler().runTask(main, () -> scb.show(e.getPlayer()));
+			Bukkit.getScheduler().runTask(main, () -> skywars.show(e.getPlayer()));
+			Bukkit.getScheduler().runTask(main, () -> scbDuos.show(e.getPlayer()));
+			Bukkit.getScheduler().runTask(main, () -> parkour.show(e.getPlayer()));
+		}, 20L);
+		// }
 	}
 
 	/*
