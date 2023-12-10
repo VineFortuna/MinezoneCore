@@ -1,5 +1,7 @@
 package anthony.SuperCraftBrawl.gui;
 
+import anthony.SuperCraftBrawl.ChatColorHelper;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import anthony.SuperCraftBrawl.ItemHelper;
@@ -12,15 +14,21 @@ import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.inventory.ItemStack;
 
 public class LevelClassesGUI implements InventoryProvider {
 
 	public Core main;
 	public SmartInventory inv;
+	public int totalRows = 3;
+	public int totalColumns = 9;
 
 	public LevelClassesGUI(Core main) {
-		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
-				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Level Classes").build();
+		inv = SmartInventory.builder()
+				.id("myInventory")
+				.provider(this).size(totalRows, totalColumns)
+				.title(ChatColorHelper.color("&8&lLevel Classes"))
+				.build();
 		this.main = main;
 
 	}
@@ -73,6 +81,13 @@ public class LevelClassesGUI implements InventoryProvider {
 				}
 			}
 		}
+
+		// Setting "Go Back" Button
+		contents.set(totalRows - 1, totalColumns - 1, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BARRIER),
+				"&7Go back"), e -> {
+			new ClassSelectorGUI(main).inv.open(player);
+		}));
+
 	}
 
 	@Override
