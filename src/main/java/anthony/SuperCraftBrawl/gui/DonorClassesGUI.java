@@ -1,5 +1,7 @@
 package anthony.SuperCraftBrawl.gui;
 
+import anthony.SuperCraftBrawl.ChatColorHelper;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -17,10 +19,15 @@ public class DonorClassesGUI implements InventoryProvider {
 
 	public Core main;
 	public SmartInventory inv;
+	public int totalRows = 3;
+	public int totalColumns = 9;
 
 	public DonorClassesGUI(Core main) {
-		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
-				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Donor Classes").build();
+		inv = SmartInventory.builder()
+				.id("myInventory")
+				.provider(this).size(totalRows, totalColumns)
+				.title(ChatColorHelper.color("&8&lDonor Classes"))
+				.build();
 		this.main = main;
 	}
 
@@ -77,6 +84,13 @@ public class DonorClassesGUI implements InventoryProvider {
 				}
 			}
 		}
+
+		// Setting "Go Back" Button
+		contents.set(totalRows - 1, totalColumns - 1, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BARRIER),
+				"&7Go back"), e -> {
+			new ClassSelectorGUI(main).inv.open(player);
+		}));
+
 		/*contents.set(0, 0,
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.IRON_AXE), "" + ChatColor.ITALIC + "Irongolem",
