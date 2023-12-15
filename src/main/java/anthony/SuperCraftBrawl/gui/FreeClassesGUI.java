@@ -15,12 +15,12 @@ import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
 
-public class InventoryGUI implements InventoryProvider {
+public class FreeClassesGUI implements InventoryProvider {
 
 	public Core main;
 	public SmartInventory inv;
 
-	public InventoryGUI(Core main) {
+	public FreeClassesGUI(Core main) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Free Classes").build();
 		this.main = main;
@@ -31,6 +31,12 @@ public class InventoryGUI implements InventoryProvider {
 	public void init(Player player, InventoryContents contents) {
 		int a = 0;
 		int b = 0;
+
+		contents.set(2, 8, ClickableItem.of(
+				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
+					inv.close(player);
+					new ClassSelectorGUI(main).inv.open(player);
+				}));
 
 		for (ClassType type : ClassType.values()) {
 			if (type.getTokenCost() == 0 && type.getMinRank() != Rank.VIP && type.getLevel() == 0) {
@@ -74,6 +80,7 @@ public class InventoryGUI implements InventoryProvider {
 									}
 									inv.close(player);
 								}));
+
 				b++;
 
 				if (b > 8) {
