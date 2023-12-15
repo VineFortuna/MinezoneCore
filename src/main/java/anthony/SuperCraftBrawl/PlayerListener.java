@@ -41,7 +41,6 @@ import org.bukkit.inventory.ItemStack;
 import anthony.CrystalWars.game.GameState;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import me.itzzmic.auth.api.AuthAPI;
 import me.itzzmic.minezone.api.PunishAPI;
 
 public class PlayerListener implements Listener {
@@ -222,7 +221,7 @@ public class PlayerListener implements Listener {
 		ItemStack item = e.getItem();
 
 		if (item != null && item.getType() == Material.WATCH)
-			new HubGUI(main).inv.open(player);
+			new GameSelectorGUI(main).inv.open(player);
 	}
 
 	@EventHandler
