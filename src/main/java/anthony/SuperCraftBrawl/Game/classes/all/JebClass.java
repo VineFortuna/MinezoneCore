@@ -2,9 +2,11 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
@@ -68,6 +70,7 @@ public class JebClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
+		jeb.startTime = 10000;
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.STONE, 1), "" + ChatColor.GRAY + "Jeb's Call"));
@@ -96,6 +99,7 @@ public class JebClass extends BaseClass {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getPlayer().getItemInHand();
@@ -114,6 +118,7 @@ public class JebClass extends BaseClass {
 					int range = 25;
 					Location endLoc = player.getEyeLocation();
 					BlockIterator b = new BlockIterator(player.getEyeLocation(), 0, range);
+					player.playSound(player.getLocation(), Sound.DIG_STONE, 1, 1);
 
 					while (b.hasNext()) {
 						Block block = b.next();
@@ -143,9 +148,11 @@ public class JebClass extends BaseClass {
 									if (instance.duosMap != null) {
 										if (!(instance.team.get(p).equals(instance.team.get(player)))) {
 											p.setVelocity(dir.clone().multiply(dist / 4.3));
+											p.playSound(p.getLocation(), Sound.DIG_STONE, 1, 1);
 										}
 									} else {
 										p.setVelocity(dir.clone().multiply(dist / 4.3));
+										p.playSound(p.getLocation(), Sound.DIG_STONE, 1, 1);
 									}
 								}
 							}
