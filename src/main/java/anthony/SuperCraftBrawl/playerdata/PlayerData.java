@@ -1,5 +1,6 @@
 package anthony.SuperCraftBrawl.playerdata;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -16,9 +17,11 @@ public class PlayerData {
 			yellow = 0, muted = 0, exp = 0, level = 0, bestTime = 0, magicbroom = 0, points = 0, withersk = 0,
 			bonusTokens = 0, bonusLevels = 0, paintball = 0, santaoutfit, elf, gingerbreadman, killMsgs = 0,
 			challenge1 = 0, challenge2 = 0, challenge3 = 0, goldApple = 0, glowstone = 0, redstone = 0, web = 0,
-			bottleEXP = 0, broomWinEffect = 0, enderDragonEffect = 0, santaEffect = 0, fireParticlesEffect = 0;
+			bottleEXP = 0, broomWinEffect = 0, enderDragonEffect = 0, santaEffect = 0, fireParticlesEffect = 0,
+			challenge100 = 0, challenge101 = 0, challenge102 = 0, challenge103 = 0;
 
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
+	public ArrayList<Integer> customIntegers = new ArrayList<>();
 
 	public PlayerData(UUID playerUUID, String playerName, String playerIP, int roleID, int tokens, int wins, int kills,
 			int deaths, int flawlessWins, int losses, int winstreak, int cwm, int melon, int astronaut, int pm,
@@ -26,7 +29,8 @@ public class PlayerData {
 			int bestTime, int magicbroom, int points, int withersk, int bonusTokens, int bonusLevels, int paintball,
 			int santaoutfit, int elf, int gingerbreadman, int killMsgs, int challenge1, int challenge2, int challenge3,
 			int goldApple, int glowstone, int redstone, int web, int bottleEXP, int broomWWinEffect,
-			int enderDragonEffect, int santaEffect, int fireParticlesEffect) {
+			int enderDragonEffect, int santaEffect, int fireParticlesEffect, int challenge100, int challenge101,
+			int challenge102, int challenge103) {
 		this(playerUUID, playerName, playerIP);
 		this.roleID = roleID;
 		this.tokens = tokens;
@@ -72,6 +76,10 @@ public class PlayerData {
 		this.enderDragonEffect = enderDragonEffect;
 		this.santaEffect = santaEffect;
 		this.fireParticlesEffect = fireParticlesEffect;
+		this.challenge100 = challenge100;
+		this.challenge101 = challenge101;
+		this.challenge102 = challenge102;
+		this.challenge103 = challenge103;
 	}
 
 	public boolean isPurchased(ClassType type) {

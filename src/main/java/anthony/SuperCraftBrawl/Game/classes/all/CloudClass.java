@@ -313,6 +313,7 @@ public class CloudClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
+		cloud.startTime = 20000;
 		this.whiteWool = false; // Default when spawning in
 		this.blackWool = false;
 		this.lightGrayWool = false;

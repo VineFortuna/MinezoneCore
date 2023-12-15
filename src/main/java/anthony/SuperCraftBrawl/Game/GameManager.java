@@ -14,11 +14,16 @@ import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+
+import com.comphenix.protocol.wrappers.EnumWrappers.Particle;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
+
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -50,6 +55,7 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 import xyz.xenondevs.particle.ParticleEffect;
@@ -959,6 +965,8 @@ public class GameManager implements Listener, PluginMessageListener {
 							item.setAmount(amount);
 						e.setCancelled(true);
 						player.setVelocity(new Vector(0, 1, 0).multiply(1.3D));
+						for (Player gamePlayer : instance.players)
+							gamePlayer.playSound(player.getLocation(), Sound.BAT_TAKEOFF, 1, 1);
 					}
 				}
 			}
@@ -2034,7 +2042,45 @@ public class GameManager implements Listener, PluginMessageListener {
 			};
 			r.runTaskTimer(main, 0, 20);
 			this.spawnProt.put(player, r);
+			spawnProtParticles(player, i);
 		}
+	}
+
+	private void spawnProtParticles(Player player, GameInstance i) {
+		int durationTicks = 5 * 20; // 5 seconds in ticks
+		double radius = 1.0;
+		int particleCount = 20;
+
+		new BukkitRunnable() {
+			int ticks = 0;
+
+			@Override
+			public void run() {
+				if (ticks >= durationTicks) {
+					cancel();
+					return;
+				}
+
+				double angle = 2 * Math.PI * ticks / particleCount;
+				double x = radius * Math.cos(angle);
+				double z = radius * Math.sin(angle);
+
+				for (double yOffset = 0; yOffset <= 2; yOffset += 0.1) { // Iterate through Y coordinates
+					Location particleLoc = player.getLocation().clone().add(x, yOffset, z);
+
+					PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(EnumParticle.ENCHANTMENT_TABLE,
+							true, (float) particleLoc.getX(), (float) particleLoc.getY(), (float) particleLoc.getZ(),
+							0F, 0F, 0F, 0F, 1);
+
+					if (i != null) {
+						for (Player gamePlayer : i.players)
+							((CraftPlayer) gamePlayer).getHandle().playerConnection.sendPacket(packet);
+					}
+				}
+
+				ticks++;
+			}
+		}.runTaskTimer(main, 0L, 1L);
 	}
 
 	@Override

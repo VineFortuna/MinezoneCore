@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.doublejump;
 
 import java.util.HashMap;
 
+import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -12,6 +13,8 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.util.Vector;
+
+import com.comphenix.protocol.wrappers.EnumWrappers.Particle;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
@@ -94,7 +97,9 @@ public class DoubleJumpManager implements Listener {
 					Vector forwards = player.getLocation().getDirection().setY(0);
 					double forwardsStrength = forwards.length();
 					forwards.normalize().multiply(forwardsFactor + forwardsStrength / 5.0D);
+					player.getLocation().getWorld().playEffect(player.getLocation(), Effect.SNOWBALL_BREAK, 0);
 					player.setVelocity(new Vector(forwards.getX(), upFactor, forwards.getZ()));
+					player.getLocation().getWorld().playEffect(player.getLocation(), Effect.SNOWBALL_BREAK, 0);
 				}
 				// If can't double jump
 				else {

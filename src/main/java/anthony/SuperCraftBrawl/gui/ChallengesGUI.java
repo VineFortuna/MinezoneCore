@@ -30,33 +30,43 @@ public class ChallengesGUI implements InventoryProvider {
 
 		if (data != null) {
 			Material mat = null;
-			if (data.challenge1 == 0)
+			if (data.challenge100 == 0)
 				mat = Material.NETHER_STAR;
-			else if (data.challenge1 == 1)
+			else if (data.challenge100 == 1)
 				mat = Material.BARRIER;
 			contents.set(0, 0,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(mat),
-							main.color("&eNotch Class"), "", main.color("&rGet a win with Pig class")),
+							main.color("&eElf Class"), "", main.color("&rPlay a game on SnowGlobe")),
 							e -> {
 							}));
-			if (data.challenge2 == 0)
+			if (data.challenge101 == 0)
 				mat = Material.NETHER_STAR;
-			else if (data.challenge2 == 1)
+			else if (data.challenge101 == 1)
 				mat = Material.BARRIER;
 			contents.set(0, 1,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(mat),
-							main.color("&e50 Bonus Tokens"), "", main.color("&rGet a win")),
+							main.color("&eGingerBreadMan Class"), "", main.color("&rGet a win on SantaWorkshop")),
 							e -> {
 							}));
-			if (data.challenge3 == 0)
+			if (data.challenge102 == 0)
 				mat = Material.NETHER_STAR;
-			else if (data.challenge3 == 1)
+			else if (data.challenge102 == 1)
 				mat = Material.BARRIER;
 			contents.set(0, 2,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(mat),
-							main.color("&e1 Bonus Level"), "", main.color("&rFind & use an extra life")),
+							main.color("&eSanta Class"), "", main.color("&rPlay Elf on SantaWorkshop")),
 							e -> {
 							}));
+			
+			/*if (data.challenge103 == 0)
+				mat = Material.NETHER_STAR;
+			else if (data.challenge103 == 1)
+				mat = Material.BARRIER;
+			contents.set(0, 2,
+					ClickableItem.of(ItemHelper.setDetails(new ItemStack(mat),
+							main.color("&eSanta Class"), "", main.color("&rPlay Elf on SantaWorkshop")),
+							e -> {
+							}));*/
 		}
 	}
 

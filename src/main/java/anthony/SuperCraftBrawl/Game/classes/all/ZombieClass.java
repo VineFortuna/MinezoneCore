@@ -5,6 +5,7 @@ import java.util.Random;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -114,9 +115,9 @@ public class ZombieClass extends BaseClass {
 				Zombie zombie = (Zombie) player.getWorld().spawnCreature(player.getLocation(), EntityType.ZOMBIE);
 				zombie.setBaby(true);
 				zombie.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Baby Zombie");
-				
 			}
-			player.sendMessage(instance.getManager().getMain().color("&e&l(!) &eSpawning army of Baby Zombies!"));
+			player.sendMessage(instance.getManager().getMain().color("&e&l(!) &rSpawning army of &eBaby Zombies!"));
+			player.playSound(player.getLocation(), Sound.ZOMBIE_HURT, 1, 1);
 		}
 	}
 

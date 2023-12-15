@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -138,12 +139,16 @@ public class PlayerDataManager implements Listener {
 			int enderDragonEffect = set.getInt("EnderDragonEffect");
 			int santaEffect = set.getInt("SantaEffect");
 			int fireParticlesEffect = set.getInt("FireParticlesEffect");
+			int challenge100 = set.getInt("Challenge100");
+			int challenge101 = set.getInt("Challenge101");
+			int challenge102 = set.getInt("Challenge102");
+			int challenge103 = set.getInt("Challenge103");
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
 					exp, level, bestTime, magicbroom, points, withersk, bonusTokens, bonusLevels, paintball,
 					santaoutfit, elf, gingerbreadman, killMsgs, challenge1, challenge2, challenge3, goldApple,
 					glowstone, redstone, web, bottleEXP, broomWinEffect, enderDragonEffect, santaEffect,
-					fireParticlesEffect);
+					fireParticlesEffect, challenge100, challenge101, challenge102, challenge103);
 		}
 		set.close();
 		stmt.close();
@@ -158,6 +163,15 @@ public class PlayerDataManager implements Listener {
 			data.playerClasses.put(classID, new ClassDetails(purchased, timePurchased, gamesPlayed));
 		}
 		classSet.close();
+		
+		Statement favClassesState = c.createStatement();
+		ResultSet favClassesSet = favClassesState
+				.executeQuery("SELECT * FROM PlayerCustomIntegers WHERE UUID = '" + player.getUniqueId().toString() + "'");
+		
+		while (favClassesSet.next()) {
+			int classID = favClassesSet.getInt("CustomInteger");
+			data.customIntegers.add(classID);
+		}
 
 		return data;
 	}
@@ -177,6 +191,8 @@ public class PlayerDataManager implements Listener {
 		System.out.print("Saving data for " + data.playerName);
 		manager.executeUpdateCommand("UPDATE PlayerData SET LastPlayerName = '" + data.playerName + "', LastIP = '"
 				+ data.playerIP + "', RoleID = " + data.roleID + ", Tokens = " + data.tokens + ", Kills = " + data.kills
+				+ ", Challenge100 = " + data.challenge100 + ", Challenge101 = " + data.challenge101
+				+ ", Challenge102 = " + data.challenge102 + ", Challenge103 = " + data.challenge103
 				+ ", EnderDragonEffect = " + data.enderDragonEffect + ", SantaEffect = " + data.santaEffect
 				+ ", FireParticlesEffect = " + data.fireParticlesEffect + ", Losses = " + data.losses + ", Votes = "
 				+ data.votes + ", FlawlessWins = " + data.flawlessWins + ", BonusTokens = " + data.bonusTokens
@@ -212,6 +228,28 @@ public class PlayerDataManager implements Listener {
 			System.out.print("Executing " + updateCMD);
 			manager.executeUpdateCommand(updateCMD);
 		}
+		
+		 saveCustomIntegersToDatabase(data);
+	}
+	
+	private void saveCustomIntegersToDatabase(PlayerData data) {
+	    if (!data.customIntegers.isEmpty()) {
+	        StringBuilder updateCMD = new StringBuilder("INSERT INTO PlayerCustomIntegers (UUID, CustomInteger) VALUES ");
+	        int index = 0;
+
+	        for (Integer customInteger : data.customIntegers) {
+	            if (index != 0)
+	                updateCMD.append(", ");
+	            updateCMD.append("('").append(data.playerUUID.toString()).append("', ").append(customInteger).append(")");
+	            index++;
+	        }
+
+	        if (index > 0) {
+	            updateCMD.append(" ON DUPLICATE KEY UPDATE CustomInteger = VALUES (CustomInteger);");
+	            System.out.print("Executing " + updateCMD);
+	            manager.executeUpdateCommand(updateCMD.toString());
+	        }
+	    }
 	}
 
 }

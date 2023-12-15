@@ -132,6 +132,9 @@ public class VillagerClass extends BaseClass {
 							+ ChatColor.YELLOW + seconds + " more seconds ");
 				} else {
 					villager.restart();
+					for (Player gamePlayer : instance.players)
+						gamePlayer.playSound(player.getLocation(), Sound.VILLAGER_HAGGLE, 1, 1);
+					
 					ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
 						@Override
 						public void onHit(Player hit) {

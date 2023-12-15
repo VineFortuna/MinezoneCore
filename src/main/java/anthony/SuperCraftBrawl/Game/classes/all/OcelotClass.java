@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -112,6 +113,7 @@ public class OcelotClass extends BaseClass {
 	@Override
 	public void SetItems(Inventory playerInv) {
 		this.cooldownSec = 0; // Reset each life
+		ocelot.startTime = 20000;
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
@@ -137,6 +139,7 @@ public class OcelotClass extends BaseClass {
 					player.sendMessage(instance.getManager().getMain()
 							.color("&r&l(!) &rYou attacked all players with &7&lPurr Attack"));
 					for (Player gamePlayer : instance.players) {
+						gamePlayer.playSound(gamePlayer.getLocation(), Sound.CAT_MEOW, 1, 1);
 						if (player != gamePlayer) {
 							gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 110, 2));
 							gamePlayer.sendMessage(instance.getManager().getMain()
