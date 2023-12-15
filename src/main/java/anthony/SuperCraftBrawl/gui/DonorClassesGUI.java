@@ -1,5 +1,6 @@
 package anthony.SuperCraftBrawl.gui;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -29,6 +30,12 @@ public class DonorClassesGUI implements InventoryProvider {
 	public void init(Player player, InventoryContents contents) {
 		int a = 0;
 		int b = 0;
+		
+		contents.set(2, 8, ClickableItem.of(
+				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
+					inv.close(player);
+					new ClassSelectorGUI(main).inv.open(player);
+				}));
 
 		for (ClassType type : ClassType.values()) {
 			if (type.getMinRank() == Rank.VIP) {

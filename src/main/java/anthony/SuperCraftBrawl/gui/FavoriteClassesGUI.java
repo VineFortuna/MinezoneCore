@@ -20,7 +20,7 @@ public class FavoriteClassesGUI implements InventoryProvider {
 	public SmartInventory inv;
 
 	public FavoriteClassesGUI(Core main) {
-		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
+		inv = SmartInventory.builder().id("myInventory").provider(this).size(5, 9)
 				.title(String.valueOf(ChatColor.DARK_GRAY) + ChatColor.BOLD + "Favorite Classes").build();
 		this.main = main;
 	}
@@ -29,6 +29,12 @@ public class FavoriteClassesGUI implements InventoryProvider {
 	public void init(Player player, InventoryContents contents) {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 		int x = 0, y = 0;
+		
+		contents.set(4, 8, ClickableItem.of(
+				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
+					inv.close(player);
+					new ClassSelectorGUI(main).inv.open(player);
+				}));
 
 		if (data != null) {
 			if (!(data.customIntegers.isEmpty())) {

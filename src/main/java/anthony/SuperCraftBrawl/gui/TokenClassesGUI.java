@@ -1,6 +1,8 @@
 package anthony.SuperCraftBrawl.gui;
 
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.Core;
@@ -28,6 +30,12 @@ public class TokenClassesGUI implements InventoryProvider {
 		PlayerData playerData = main.getDataManager().getPlayerData(player);
 		int a = 0;
 		int b = 0;
+		
+		contents.set(2, 8, ClickableItem.of(
+				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
+					inv.close(player);
+					new ClassSelectorGUI(main).inv.open(player);
+				}));
 
 		for (ClassType type : ClassType.values()) {
 			if (type.getTokenCost() > 0) {
