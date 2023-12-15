@@ -302,11 +302,11 @@ public enum Maps {
 			.setSignLoc(new Vector(174.510, 106, 673.700)).setBounds(new Vector(55.506, 101, -50.546), 100, 100)),
 	
 	Slither("Slither", new MapInstance("slither")
-			.setSpawnPos(new Vector(75.480, 75, -77.569), new Vector(75.599, 83, -50.534),
-					new Vector(55.507, 75, -16.478), new Vector(35.419, 83, -50.504), new Vector(44.983, 86, -83.000),
-					new Vector(64.434, 83, -76.514))
-			.setLobbyLoc(new Vector(57.521, 87, -150.512)).setSpecLoc(new Vector(55.506, 101, -50.546))
-			.setSignLoc(new Vector(174.510, 106, 673.700)).setBounds(new Vector(55.506, 101, -50.546), 100, 100)),
+			.setSpawnPos(new Vector(68.402, 153, -135.507), new Vector(71.428, 151, -152.500),
+					new Vector(89.496, 146, -170.644), new Vector(86.463, 144, -156.639), new Vector(108.003, 146, -146.034),
+					new Vector(96.438, 147, -136.491))
+			.setLobbyLoc(new Vector(12.555, 184, -150.462)).setSpecLoc(new Vector(97.411, 171, -152.539))
+			.setSignLoc(new Vector(174.510, 106, 673.700)).setBounds(new Vector(97.411, 171, -152.539), 55, 100)),
 
 	Elven("Elven", new MapInstance("elven")
 			.setSpawnPos(new Vector(8.498, 150, -50.562), new Vector(23.065, 150, -26.283),
