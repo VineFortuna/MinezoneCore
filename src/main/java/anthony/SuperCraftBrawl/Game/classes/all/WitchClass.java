@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.ThrownPotion;
@@ -220,6 +221,9 @@ public class WitchClass extends BaseClass {
 					amount--;
 					item.setAmount(amount);
 					regenBrooms = amount;
+					
+					for (Player gamePlayer : instance.players)
+						gamePlayer.playSound(player.getLocation(), Sound.BAT_TAKEOFF, 1, 1);
 				}
 			}
 		}

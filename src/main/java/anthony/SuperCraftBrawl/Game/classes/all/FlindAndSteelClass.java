@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import org.bukkit.Color;
+import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -70,6 +71,7 @@ public class FlindAndSteelClass extends BaseClass {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void DoDamage2(EntityDamageByEntityEvent event) {
 		if (event.getEntity() instanceof Player) {
@@ -97,6 +99,9 @@ public class FlindAndSteelClass extends BaseClass {
 									ItemHelper.addEnchant(ItemHelper.addEnchant(new ItemStack(Material.FLINT_AND_STEEL),
 											Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 2),
 									Enchantment.FIRE_ASPECT, 1));
+					
+					for (Player gamePlayer : instance.players)
+						gamePlayer.playEffect(player.getLocation(), Effect.BLAZE_SHOOT, 1);
 					expire();
 				}
 			}
@@ -141,7 +146,7 @@ public class FlindAndSteelClass extends BaseClass {
 	private void cooldown() {
 		if (r == null) {
 			r = new BukkitRunnable() {
-				int ticks = 20;
+				int ticks = 10;
 
 				@Override
 				public void run() {
@@ -207,7 +212,7 @@ public class FlindAndSteelClass extends BaseClass {
 									}
 
 								};
-								r.runTaskTimer(instance.getManager().getMain(), 0, 10);
+								r.runTaskTimer(instance.getManager().getMain(), 0, 50);
 							}
 						}
 					}

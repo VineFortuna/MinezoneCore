@@ -10,7 +10,7 @@ import anthony.SuperCraftBrawl.Game.GameType;
 
 public class MapInstance {
 	public String worldName;
-	public GameType gameType = GameType.NORMAL;
+	public GameType gameType = GameType.CLASSIC;
 	public MapType mapType;
 	public Game two_vs_two = Game.FREE_FOR_ALL;
 	public List<Vector> spawnPos = new ArrayList<>();

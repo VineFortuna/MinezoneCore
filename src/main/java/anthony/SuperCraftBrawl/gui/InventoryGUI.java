@@ -7,6 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -34,31 +35,45 @@ public class InventoryGUI implements InventoryProvider {
 		for (ClassType type : ClassType.values()) {
 			if (type.getTokenCost() == 0 && type.getMinRank() != Rank.VIP && type.getLevel() == 0) {
 				ItemStack item = type.getItem();
-				
+
 				if (item == null)
 					item = new ItemStack(Material.WOOD);
-				contents.set(a, b, ClickableItem.of(ItemHelper.setDetails(new ItemStack(item),
-						"" + type.getTag(),
-						"" + ChatColor.GRAY + type.getClassDesc()),
-						e -> {
-							main.getGameManager().playerSelectClass(player, type);
-							;
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
-									+ "==============================================");
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| " + ChatColor.RESET
-									+ ChatColor.YELLOW + ChatColor.BOLD + "Selected Class: "
-									+ type.getTag());
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| " + ChatColor.RESET
-									+ ChatColor.YELLOW + ChatColor.BOLD + "Class Desc: " + ChatColor.RESET
-									+ ChatColor.YELLOW + type.getClassDesc());
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
-									+ "==============================================");
-							inv.close(player);
-						}));
+				contents.set(a, b,
+						ClickableItem.of(ItemHelper.setDetails(new ItemStack(item), "" + type.getTag(),
+								"" + ChatColor.GRAY + type.getClassDesc(), "",
+								"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
+										+ ChatColor.YELLOW + " to choose a class",
+								"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET
+										+ ChatColor.YELLOW + " to add a favorite class"),
+								e -> {
+									if (e.isLeftClick()) {
+										main.getGameManager().playerSelectClass(player, type);
+										player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
+												+ "==============================================");
+										player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
+										player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
+										player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| "
+												+ ChatColor.RESET + ChatColor.YELLOW + ChatColor.BOLD
+												+ "Selected Class: " + type.getTag());
+										player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| "
+												+ ChatColor.RESET + ChatColor.YELLOW + ChatColor.BOLD + "Class Desc: "
+												+ ChatColor.RESET + ChatColor.YELLOW + type.getClassDesc());
+										player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
+										player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
+										player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
+												+ "==============================================");
+									} else if (e.isRightClick()) {
+										PlayerData data = main.getDataManager().getPlayerData(player);
+
+										if (data != null) {
+											data.customIntegers.add(type.getID());
+											player.sendMessage(
+													main.color("&2&l(!) &rAdded new favorite class: " + type.getTag()));
+											main.getDataManager().saveData(data);
+										}
+									}
+									inv.close(player);
+								}));
 				b++;
 
 				if (b > 8) {

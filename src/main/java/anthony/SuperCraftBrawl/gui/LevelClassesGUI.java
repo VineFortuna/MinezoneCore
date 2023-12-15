@@ -33,31 +33,47 @@ public class LevelClassesGUI implements InventoryProvider {
 
 		for (ClassType type : ClassType.values()) {
 			if (type.getTokenCost() == 0 && type.getMinRank() != Rank.VIP && type.getLevel() > 0) {
-				contents.set(a, b, ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true), type.getTag(),
-						type.buildDescription(), "",
+				contents.set(a, b, ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true),
+						type.getTag(), type.buildDescription(), "",
 						playerData.level >= type.getLevel() ? "" + ChatColor.YELLOW + ChatColor.BOLD + "Unlocked"
 								: "" + ChatColor.RED + ChatColor.BOLD + "Unlocks at: " + ChatColor.YELLOW
-										+ ChatColor.BOLD + "Level " + type.getLevel()),
+										+ ChatColor.BOLD + "Level " + type.getLevel(),
+						"",
+						"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET + ChatColor.YELLOW
+								+ " to choose a class",
+						"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET + ChatColor.YELLOW
+								+ " to add a favorite class"),
 						e -> {
 							if (!(playerData.level >= type.getLevel())) {
 								player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
 								return;
 							}
 
-							main.getGameManager().playerSelectClass(player, type);
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
-									+ "==============================================");
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| " + ChatColor.RESET
-									+ ChatColor.YELLOW + ChatColor.BOLD + "Selected Class: " + type.getTag());
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| " + ChatColor.RESET
-									+ ChatColor.YELLOW + ChatColor.BOLD + "Class Desc: " + ChatColor.RESET
-									+ ChatColor.YELLOW + type.getClassDesc());
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
-									+ "==============================================");
+							if (e.isLeftClick()) {
+								main.getGameManager().playerSelectClass(player, type);
+								player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
+										+ "==============================================");
+								player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
+								player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
+								player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| " + ChatColor.RESET
+										+ ChatColor.YELLOW + ChatColor.BOLD + "Selected Class: " + type.getTag());
+								player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| " + ChatColor.RESET
+										+ ChatColor.YELLOW + ChatColor.BOLD + "Class Desc: " + ChatColor.RESET
+										+ ChatColor.YELLOW + type.getClassDesc());
+								player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
+								player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
+								player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
+										+ "==============================================");
+							} else if (e.isRightClick()) {
+								PlayerData data = main.getDataManager().getPlayerData(player);
+
+								if (data != null) {
+									data.customIntegers.add(type.getID());
+									player.sendMessage(main
+											.color("&2&l(!) &rAdded new favorite class: " + type.getTag()));
+									main.getDataManager().saveData(data);
+								}
+							}
 							inv.close(player);
 						}));
 				b++;

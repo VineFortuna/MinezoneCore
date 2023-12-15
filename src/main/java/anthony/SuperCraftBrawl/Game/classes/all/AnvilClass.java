@@ -79,6 +79,7 @@ public class AnvilClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
+		anvil.startTime = 15000;
 		this.used = false; // To reset each life
 		this.num = 0; // Same here
 		playerInv.setItem(0, this.getAttackWeapon());

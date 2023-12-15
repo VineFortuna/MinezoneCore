@@ -29,7 +29,7 @@ import java.util.List;
 public class SnowGolemClass extends BaseClass {
 
 	private int cooldownSec = 0;
-	private int pumpkinDuration = 10; // 10 seconds for pumpkin on players heads
+	private int pumpkinDuration = 5; // 5 seconds for pumpkin on players heads
 
 	private ItemStack weapon;
 
@@ -90,6 +90,7 @@ public class SnowGolemClass extends BaseClass {
 		playerInv.setItem(1, snowPlatform);
 		playerInv.setItem(2, slowballs);
 		playerInv.setItem(3, pumpkin);
+		snowGolem.startTime = 20000;
 	}
 
 	@Override
@@ -226,6 +227,7 @@ public class SnowGolemClass extends BaseClass {
 
 							// Pumpkin Head Feedback Sound
 							player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
+							player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 110, 0));
 
 							if (player != gamePlayer) {
 

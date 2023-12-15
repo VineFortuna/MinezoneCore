@@ -97,6 +97,9 @@ public class ChickenClass extends BaseClass {
 
 			event.setCancelled(true);
 			if (player.getGameMode() != GameMode.SPECTATOR) {
+				for (Player gamePlayer : instance.players)
+					gamePlayer.playSound(player.getLocation(), Sound.CHICKEN_HURT, 1, 1);
+				
 				int amount = item.getAmount();
 				if (amount > 0) {
 					amount--;

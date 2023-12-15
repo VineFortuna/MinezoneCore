@@ -82,6 +82,7 @@ public class IceClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
+		ice.startTime = 10000; //Reset cooldown
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.WOOL),

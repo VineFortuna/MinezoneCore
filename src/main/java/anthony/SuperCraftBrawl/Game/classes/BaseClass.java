@@ -42,6 +42,8 @@ import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameType;
+import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
@@ -91,6 +93,7 @@ public abstract class BaseClass {
 	public Timer cloud = new Timer();
 	public Timer snowGolem = new Timer();
 	public Timer santa = new Timer();
+	public Timer cookie = new Timer();
 	public boolean bedrockInvincibility = false;
 
 	public int goldAmt = 0; // For Steve Class
@@ -127,7 +130,7 @@ public abstract class BaseClass {
 
 	public void onConsumingItem(PlayerItemConsumeEvent event) {
 	};
-	
+
 	public void TakeDamage(EntityDamageEvent event) {
 	}; // To override
 
@@ -782,6 +785,48 @@ public abstract class BaseClass {
 									+ "You have gained " + ChatColor.YELLOW + pClass.totalExp + " EXP!");
 							p.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
 									+ "You have earned " + ChatColor.YELLOW + pClass.totalTokens + " Tokens!");
+							
+							if (this.instance != null) {
+								p.sendMessage("Test");
+								if (this.instance.getMap() == Maps.SnowGlobe) {
+									p.sendMessage("Test2");
+									int classID = 66;
+									PlayerData playerData = instance.getManager().getMain().getDataManager()
+											.getPlayerData(p);
+
+									if (playerData != null && playerData.challenge100 == 0) {
+										ClassDetails details = playerData.playerClasses.get(classID);
+
+										if (details == null) {
+											details = new ClassDetails();
+											playerData.playerClasses.put(classID, details);
+										}
+										details.setPurchased();
+										p.sendMessage(instance.getManager().getMain()
+												.color("&2&l(!) &rYou have unlocked &2&lElf &rclass!"));
+										instance.getManager().getMain().getDataManager().saveData(playerData);
+									}
+								} else if (this.instance.getMap() == Maps.SantaWorkshop) {
+									if (pClass != null && pClass.getType() == ClassType.Elf) {
+										int classID = 67;
+										PlayerData playerData = instance.getManager().getMain().getDataManager()
+												.getPlayerData(p);
+
+										if (playerData != null && playerData.challenge102 == 0) {
+											ClassDetails details = playerData.playerClasses.get(classID);
+
+											if (details == null) {
+												details = new ClassDetails();
+												playerData.playerClasses.put(classID, details);
+											}
+											details.setPurchased();
+											p.sendMessage(instance.getManager().getMain()
+													.color("&2&l(!) &rYou have unlocked &c&lSanta &rclass!"));
+											instance.getManager().getMain().getDataManager().saveData(playerData);
+										}
+									}
+								}
+							}
 
 							if (pData.exp >= 2500) {
 								pData.level++;
@@ -789,7 +834,7 @@ public abstract class BaseClass {
 								p.sendMessage(instance.getManager().getMain().color("&e&lLEVEL UPGRADED!"));
 								p.sendMessage("You are now Level: " + pData.level + "!");
 							}
-						} // START HERE
+						} 
 						/*
 						 * else { List<String> aliveTeam = new ArrayList<String>(); for (Entry<Player,
 						 * BaseClass> entry : instance.classes.entrySet()) { if
@@ -998,7 +1043,7 @@ public abstract class BaseClass {
 
 				p.setFireTicks(0);
 				p.getInventory().clear();
-				//p.setLastDamage(0);
+				// p.setLastDamage(0);
 				// data2.winstreak = 0;
 				BaseClass baseClass = instance.classes.get(killer);
 				BaseClass baseClass2 = instance.classes.get(p);
@@ -1009,10 +1054,10 @@ public abstract class BaseClass {
 				List<Item> deathParticles = new ArrayList<>();
 
 				// DEATH PARTICLES
-					// Default
+				// Default
 				Material mat = Material.INK_SACK;
 
-					// Particles
+				// Particles
 				if (data2 != null && p.hasPermission("scb.deathParticles")) {
 					if (data2.goldApple == 1) {
 						mat = Material.GOLDEN_APPLE;
@@ -1034,19 +1079,20 @@ public abstract class BaseClass {
 				else
 					particleItem = new ItemStack(mat);
 
-					// Spawn the particles in a circle around the player
+				// Spawn the particles in a circle around the player
 				for (int i = 0; i < 10; i++) {
 					double angle = i * Math.PI / 5;
 					double x = pLocation.getX() + Math.cos(angle) * 0.5;
 					double y = pLocation.getY() + 1.5;
 					double z = pLocation.getZ() + Math.sin(angle) * 0.5;
 
-					Item particle = pLocation.getWorld().dropItem(new Location(pLocation.getWorld(), x, y, z), particleItem);
+					Item particle = pLocation.getWorld().dropItem(new Location(pLocation.getWorld(), x, y, z),
+							particleItem);
 					particle.setPickupDelay(Integer.MAX_VALUE);
 					deathParticles.add(particle);
 				}
 
-					// Schedule a task to remove the particles after 5 seconds
+				// Schedule a task to remove the particles after 5 seconds
 				Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
 					for (Item particle : deathParticles) {
 						particle.remove();
@@ -1546,8 +1592,8 @@ public abstract class BaseClass {
 														.color("&2&l(!) " + getPlayerRank(p) + "&r "
 																+ p.getPlayer().getName() + " " + bc.getType().getTag()
 																+ " &cwas not strong enough to encounter "
-																+ getPlayerRank(shooter) + " &r" + shooter.getName() + " "
-																+ baseClass.getType().getTag()));
+																+ getPlayerRank(shooter) + " &r" + shooter.getName()
+																+ " " + baseClass.getType().getTag()));
 												this.healthPots(shooter);
 											} else {
 												this.giveStats(shooter, p);
@@ -1566,8 +1612,8 @@ public abstract class BaseClass {
 														.color("&2&l(!) " + getPlayerRank(p) + "&r "
 																+ p.getPlayer().getName() + " " + bc.getType().getTag()
 																+ " &cwas not strong enough to encounter "
-																+ getPlayerRank(shooter) + " &r" + shooter.getName() + " "
-																+ baseClass.getType().getTag()));
+																+ getPlayerRank(shooter) + " &r" + shooter.getName()
+																+ " " + baseClass.getType().getTag()));
 												this.healthPots(shooter);
 											} else {
 												this.giveStats(shooter, p);
@@ -1587,11 +1633,13 @@ public abstract class BaseClass {
 										if (lives == 0) {
 											if (killerData != null && killerData.killMsgs == 1) {
 												this.giveStats(shooter, p);
-												TellAll(instance.getManager().getMain().color("&2&l(!) "
-														+ getPlayerRank(p) + "&r " + p.getPlayer().getName() + " "
-														+ baseClass2.getType().getTag()
-														+ " &cwas not strong enough to encounter " + getPlayerRank(shooter)
-														+ " &r" + shooter.getName() + " " + baseClass.getType().getTag()));
+												TellAll(instance.getManager().getMain()
+														.color("&2&l(!) " + getPlayerRank(p) + "&r "
+																+ p.getPlayer().getName() + " "
+																+ baseClass2.getType().getTag()
+																+ " &cwas not strong enough to encounter "
+																+ getPlayerRank(shooter) + " &r" + shooter.getName()
+																+ " " + baseClass.getType().getTag()));
 												this.healthPots(shooter);
 											} else {
 												this.giveStats(shooter, p);
@@ -1605,11 +1653,13 @@ public abstract class BaseClass {
 										} else if (lives > 0) {
 											if (killerData != null && killerData.killMsgs == 1) {
 												this.giveStats(shooter, p);
-												TellAll(instance.getManager().getMain().color("&2&l(!) "
-														+ getPlayerRank(p) + "&r " + p.getPlayer().getName() + " "
-														+ baseClass2.getType().getTag()
-														+ " &cwas not strong enough to encounter " + getPlayerRank(shooter)
-														+ " &r" + shooter.getName() + " " + baseClass.getType().getTag()));
+												TellAll(instance.getManager().getMain()
+														.color("&2&l(!) " + getPlayerRank(p) + "&r "
+																+ p.getPlayer().getName() + " "
+																+ baseClass2.getType().getTag()
+																+ " &cwas not strong enough to encounter "
+																+ getPlayerRank(shooter) + " &r" + shooter.getName()
+																+ " " + baseClass.getType().getTag()));
 												this.healthPots(shooter);
 											} else {
 												this.giveStats(shooter, p);
@@ -1931,6 +1981,48 @@ public abstract class BaseClass {
 								+ "You have gained " + ChatColor.YELLOW + baseClass2.totalExp + " EXP!");
 						p.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
 								+ "You have earned " + ChatColor.YELLOW + baseClass2.totalTokens + " Tokens!");
+						
+						if (this.instance != null) {
+							if (this.instance.getMap() == Maps.SnowGlobe) {
+								int classID = 66;
+								PlayerData playerData = instance.getManager().getMain().getDataManager()
+										.getPlayerData(p);
+
+								if (playerData != null && playerData.challenge100 == 0) {
+									playerData.challenge100 = 1;
+									ClassDetails details = playerData.playerClasses.get(classID);
+
+									if (details == null) {
+										details = new ClassDetails();
+										playerData.playerClasses.put(classID, details);
+									}
+									details.setPurchased();
+									p.sendMessage(instance.getManager().getMain()
+											.color("&2&l(!) &rYou have unlocked &2&lElf &rclass!"));
+									instance.getManager().getMain().getDataManager().saveData(playerData);
+								}
+							} else if (this.instance.getMap() == Maps.SantaWorkshop) {
+								if (baseClass2 != null && baseClass2.getType() == ClassType.Elf) {
+									int classID = 67;
+									PlayerData playerData = instance.getManager().getMain().getDataManager()
+											.getPlayerData(p);
+
+									if (playerData != null && playerData.challenge102 == 0) {
+										playerData.challenge102 = 1;
+										ClassDetails details = playerData.playerClasses.get(classID);
+
+										if (details == null) {
+											details = new ClassDetails();
+											playerData.playerClasses.put(classID, details);
+										}
+										details.setPurchased();
+										p.sendMessage(instance.getManager().getMain()
+												.color("&2&l(!) &rYou have unlocked &c&lSanta &rclass!"));
+										instance.getManager().getMain().getDataManager().saveData(playerData);
+									}
+								}
+							}
+						}
 
 						if (data3.exp >= 2500) {
 							data3.level++;
@@ -2142,9 +2234,9 @@ public abstract class BaseClass {
 						CraftPlayer craft = (CraftPlayer) killer;
 						craft.getHandle().playerConnection.sendPacket(packet);
 					}
-					TellAll(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-							+ p.getPlayer().getName() + " " + baseClass2.getType().getTag() + ChatColor.RED + " has "
-							+ lives + " life left");
+					TellAll(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ getPlayerRank(p) + p.getPlayer().getName() + " " + baseClass2.getType().getTag()
+							+ ChatColor.RED + " has " + lives + " life left");
 
 				} else {
 					if (killer != null) {
@@ -2154,9 +2246,9 @@ public abstract class BaseClass {
 						CraftPlayer craft = (CraftPlayer) killer;
 						craft.getHandle().playerConnection.sendPacket(packet);
 					}
-					TellAll(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-							+ p.getPlayer().getName() + " " + baseClass2.getType().getTag() + ChatColor.RED + " has "
-							+ lives + " lives left");
+					TellAll(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ getPlayerRank(p) + p.getPlayer().getName() + " " + baseClass2.getType().getTag()
+							+ ChatColor.RED + " has " + lives + " lives left");
 				}
 				/*
 				 * if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
@@ -2240,17 +2332,17 @@ public abstract class BaseClass {
 
 	protected void healthPots(Player d) {
 //		 For other classes
-			ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-					String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + "Health Pot");
-			Potion pot = new Potion(1);
-			pot.setType(PotionType.INSTANT_HEAL);
-			pot.setSplash(true);
-			pot.apply(item);
-			d.getInventory().addItem(item);
-			d.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.YELLOW
-					+ "You got a kill and got rewarded a " + ChatColor.YELLOW + ChatColor.BOLD + "Health Pot");
-		}
-
+		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
+				String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + "Health Pot");
+		Potion pot = new Potion(1);
+		pot.setType(PotionType.INSTANT_HEAL);
+		pot.setSplash(true);
+		pot.apply(item);
+		d.getInventory().addItem(item);
+		d.sendMessage(
+				String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.YELLOW
+						+ "You got a kill and got rewarded a " + ChatColor.YELLOW + ChatColor.BOLD + "Health Pot");
+	}
 
 	// Gives the killer kills for stats, points for tourney, etc
 	private void giveStats(Player d, Player p) {
@@ -2276,8 +2368,8 @@ public abstract class BaseClass {
 
 					if (instance.getManager().getMain().tournament == true)
 						data.points++;
-				if (instance.getManager().getMain().tournament)
-					data.points++;
+					if (instance.getManager().getMain().tournament)
+						data.points++;
 
 					d.playSound(d.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
 
@@ -2315,10 +2407,9 @@ public abstract class BaseClass {
 			} else if (baseClass.getType() == ClassType.Present) {
 				d.sendMessage(instance.getManager().getMain().color(
 						"&r&l(!) &rYour &r&lAggressive Gift has regenerated and you can get a new weapon if you'd like!"));
-				d.getInventory()
-						.addItem(ItemHelper.setDetails(new ItemStack(Material.CHEST, 1),
-								String.valueOf(ChatColor.RESET) + ChatColor.ITALIC + "Agressive Gift", "",
-								String.valueOf(ChatColor.RESET) + ChatColor.YELLOW + "Steals another player's main item"));
+				d.getInventory().addItem(ItemHelper.setDetails(new ItemStack(Material.CHEST, 1),
+						String.valueOf(ChatColor.RESET) + ChatColor.ITALIC + "Agressive Gift", "",
+						String.valueOf(ChatColor.RESET) + ChatColor.YELLOW + "Steals another player's main item"));
 			} else if (baseClass.getType() == ClassType.ButterGolem) {
 				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK, 1),
 						ChatColor.GREEN + "Butter Balls",

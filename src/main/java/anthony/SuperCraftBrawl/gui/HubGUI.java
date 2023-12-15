@@ -11,6 +11,9 @@ import anthony.SuperCraftBrawl.ChatColorHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.practice.Game;
+import anthony.SuperCraftBrawl.practice.SCBPractice;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -149,6 +152,16 @@ public class HubGUI implements InventoryProvider {
 							}
 							player.sendPluginMessage(main, "BungeeCord", b.toByteArray());
 						}));
+		
+		/*contents.set(3, 6,
+				ClickableItem.of(
+						ItemHelper.setDetails(new ItemStack(Material.ARMOR_STAND),
+								"&eSCB Practice", "",
+								"&7Practice different classes"),
+						e -> {
+							inv.close(player);
+							new SCBPractice(player, Game.BowPractice);
+						}));*/
 				}
 
 		@Override

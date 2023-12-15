@@ -1,6 +1,5 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.Iterator;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -31,6 +30,7 @@ import net.md_5.bungee.api.ChatColor;
 public class SantaClass extends BaseClass {
 
 	private int cookiesEaten = 0;
+	private boolean strength = false, resistance = false, jump = false;
 	private ItemStack rudolph = ItemHelper.createMonsterEgg(EntityType.HORSE, 1, "&c&lRudolph");
 
 	public SantaClass(GameInstance instance, Player player) {
@@ -67,8 +67,11 @@ public class SantaClass extends BaseClass {
 	@Override
 	public void SetItems(Inventory playerInv) {
 		this.cookiesEaten = 0;
+		this.strength = false;
+		this.resistance = false;
+		this.jump = false;
 		playerInv.setItem(0, this.getAttackWeapon());
-		playerInv.setItem(1, new ItemStack(Material.MILK_BUCKET));
+		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.MILK_BUCKET), "Delicious Milk"));
 		playerInv.setItem(2, this.rudolph);
 	}
 
@@ -81,24 +84,35 @@ public class SantaClass extends BaseClass {
 			ItemMeta meta = item.getItemMeta();
 			if (item.getType() == Material.COOKIE
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-				if (this.cookiesEaten == 0)
-					player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 999999999, 0));
-				else if (this.cookiesEaten == 1)
-					player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
-				else if (this.cookiesEaten == 2)
-					player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 3));
-				else {
-					player.sendMessage(
-							instance.getManager().getMain().color("&c&l(!) &rYou have used all your cookies!"));
-					return;
-				}
+				if (cookie.getTime() < 3000) {
+					int seconds = (3000 - cookie.getTime()) / 1000 + 1;
+					event.setCancelled(true);
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Slow down Santa! Try again in "
+							+ ChatColor.YELLOW + seconds + "s");
+				} else {
+					cookie.restart();
+					if (this.cookiesEaten == 0) {
+						player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 999999999, 0));
+						strength = true;
+					} else if (this.cookiesEaten == 1) {
+						player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
+						this.resistance = true;
+					} else if (this.cookiesEaten == 2) {
+						player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 3));
+						this.jump = true;
+					} else {
+						player.sendMessage(instance.getManager().getMain()
+								.color("&c&l(!) &rYou have used all your delicious cookies!"));
+						return;
+					}
 
-				player.sendMessage(instance.getManager().getMain()
-						.color("&2&l(!) &rYou ate a cookie and gained an effect! (not just positive tho"));
-				player.playSound(player.getLocation(), Sound.EAT, 1, 1);
-				player.removePotionEffect(PotionEffectType.SLOW);
-				player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, this.cookiesEaten));
-				this.cookiesEaten++;
+					player.sendMessage(instance.getManager().getMain()
+							.color("&2&l(!) &rYou ate a cookie and gained an effect! (not just positive tho"));
+					player.playSound(player.getLocation(), Sound.EAT, 1, 1);
+					player.removePotionEffect(PotionEffectType.SLOW);
+					player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, this.cookiesEaten));
+					this.cookiesEaten++;
+				}
 			} else if (item.getType() == Material.MILK_BUCKET
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 				event.setCancelled(true);
@@ -110,18 +124,11 @@ public class SantaClass extends BaseClass {
 							+ "s");
 				} else {
 					santa.restart();
-					Iterator<PotionEffect> iterator = player.getActivePotionEffects().iterator();
+					for (PotionEffect type : player.getActivePotionEffects())
+						player.removePotionEffect(type.getType());
 
-					while (iterator.hasNext()) {
-						PotionEffect potionEffect = iterator.next();
-						if (potionEffect.getType() != PotionEffectType.SLOW
-								&& potionEffect.getType() != PotionEffectType.INCREASE_DAMAGE
-								&& potionEffect.getType() != PotionEffectType.DAMAGE_RESISTANCE
-								&& potionEffect.getType() != PotionEffectType.JUMP) {
-							iterator.remove();
-						}
-					}
-
+					checkActiveEffects();
+					player.playSound(player.getLocation(), Sound.WATER, 1, 1);
 					player.setFireTicks(0);
 					player.sendMessage(
 							instance.getManager().getMain().color("&2&l(!) &rHO HO HO! Dat milk be tastin' hella gud"));
@@ -156,6 +163,17 @@ public class SantaClass extends BaseClass {
 		}
 	}
 
+	private void checkActiveEffects() {
+		if (this.strength)
+			player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 999999999, 0));
+		if (this.resistance)
+			player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
+		if (this.jump)
+			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 3));
+		
+		player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, this.cookiesEaten));
+	}
+
 	@Override
 	public ClassType getType() {
 		return ClassType.Santa;
@@ -168,9 +186,11 @@ public class SantaClass extends BaseClass {
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(
-				ItemHelper.addEnchant(new ItemStack(Material.COOKIE), Enchantment.KNOCKBACK, 1), Enchantment.DAMAGE_ALL,
-				3);
+		ItemStack item = ItemHelper.addEnchant(ItemHelper.addEnchant(
+				ItemHelper.setDetails(new ItemStack(Material.COOKIE), "Delicious Cookie", "",
+						ChatColor.RESET + "1st Use: Strength 1, Slow 1",
+						ChatColor.RESET + "2nd Use: Resistance 1, Slow 2", ChatColor.RESET + "3rd Use: Jump 4, Slow 3"),
+				Enchantment.KNOCKBACK, 1), Enchantment.DAMAGE_ALL, 3);
 		return item;
 	}
 
