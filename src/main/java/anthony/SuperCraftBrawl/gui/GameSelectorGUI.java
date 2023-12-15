@@ -29,12 +29,12 @@ import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
 
-public class HubGUI implements InventoryProvider {
+public class GameSelectorGUI implements InventoryProvider {
 
 	public Core main;
 	public SmartInventory inv;
 
-	public HubGUI(Core main) {
+	public GameSelectorGUI(Core main) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(4, 9)
 				.title(ChatColorHelper.color("&8&lGame Selector")).build();
 		this.main = main;
