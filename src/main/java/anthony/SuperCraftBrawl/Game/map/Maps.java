@@ -244,25 +244,21 @@ public enum Maps {
 							new Vector(355.405, 146, 232.042), new Vector(376.475, 146, 224.455),
 							new Vector(386.497, 146, 238.394))
 					.setLobbyLoc(new Vector(380.502, 151, 301.543)).setBounds(new Vector(373.500, 158, 240.500), 50, 30)
-<<<<<<< HEAD
+
+					.setSignLoc(new Vector(168.300, 106, 669.556)).setSignLoc(new Vector(168.300, 106, 670.535))
+					.setSpecLoc(new Vector(373.500, 158, 240.500)).setGameType(GameType.CLASSIC)
 					.setSignLoc(new Vector(168.300, 106, 669.556)).setSignLoc(new Vector(168.300, 106, 670.535))
 					.setSpecLoc(new Vector(373.500, 158, 240.500))),
-=======
-					.setGameType(GameType.CLASSIC).setSignLoc(new Vector(168.300, 106, 669.556))
-					.setSignLoc(new Vector(168.300, 106, 670.535)).setSpecLoc(new Vector(373.500, 158, 240.500))),
->>>>>>> eacc3305db4925d2b2c7d92d8ed01d16b0b607a3
 
 	SimpleLand("SimpleLand",
 			new MapInstance("simpleland")
 					.setSpawnPos(new Vector(373.450, 138, 249.391), new Vector(415.468, 137, 242.428))
 					.setLobbyLoc(new Vector(392.484, 175, 320.476)).setBounds(new Vector(392.500, 167, 260.500), 40, 40)
-<<<<<<< HEAD
+
+					.setSignLoc(new Vector(168.300, 106, 669.556)).setSignLoc(new Vector(168.300, 107, 667.580))
+					.setSpecLoc(new Vector(392.500, 150, 260.500)).setGameType(GameType.CLASSIC)
 					.setSignLoc(new Vector(168.300, 106, 669.556)).setSignLoc(new Vector(168.300, 107, 667.580))
 					.setSpecLoc(new Vector(392.500, 150, 260.500))),
-=======
-					.setGameType(GameType.CLASSIC).setSignLoc(new Vector(168.300, 106, 669.556))
-					.setSignLoc(new Vector(168.300, 107, 667.580)).setSpecLoc(new Vector(392.500, 150, 260.500))),
->>>>>>> eacc3305db4925d2b2c7d92d8ed01d16b0b607a3
 
 	Pokemob("Pokemob",
 			new MapInstance("pokemob")
@@ -288,22 +284,29 @@ public enum Maps {
 					.setLobbyLoc(new Vector(57.475, 109.31250, -130.494)).setSpecLoc(new Vector(59.525, 157, -64.436))
 					.setBounds(new Vector(55.500, 174, -57.500), 58, 58).setGameType(GameType.FRENZY)
 					.setSignLoc(new Vector(184.568, 106, 673.700)).setMapType(MapType.FRENZY)),
-	
+
 	SnowGlobe("SnowGlobe",
 			new MapInstance("snowglobe")
-					.setSpawnPos(new Vector(64.473, 107, -94.528), new Vector(87.499, 107, -70.563),
-							new Vector(70.451, 107, -24.514), new Vector(41.474, 107, -22.505),
-							new Vector(19.435, 107, -42.521), new Vector(19.404, 107, -67.537))
-					.setLobbyLoc(new Vector(57.475, 109.31250, -130.494)).setSpecLoc(new Vector(59.525, 157, -64.436))
-					.setBounds(new Vector(55.500, 174, -57.500), 58, 58).setGameType(GameType.FRENZY).setMapType(MapType.FRENZY)),
+					.setSpawnPos(new Vector(59.406, 88, -56.496), new Vector(73.458, 82, -64.531),
+							new Vector(76.497, 87, -43.573), new Vector(54.522, 85, -26.457),
+							new Vector(36.357, 86, -41.507), new Vector(50.477, 85, -71.601))
+					.setLobbyLoc(new Vector(57.475, 109.31250, -130.494)).setSpecLoc(new Vector(58.500, 101, -48.500))
+					.setBounds(new Vector(58.500, 101, -48.500), 60, 60).setGameType(GameType.FRENZY)
+					.setSignLoc(new Vector(210.700, 106, 670.480)).setMapType(MapType.FRENZY)),
+
+	SantaWorkshop("SantaWorkshop", new MapInstance("santafactory")
+			.setSpawnPos(new Vector(75.480, 75, -77.569), new Vector(75.599, 83, -50.534),
+					new Vector(55.507, 75, -16.478), new Vector(35.419, 83, -50.504), new Vector(44.983, 86, -83.000),
+					new Vector(64.434, 83, -76.514))
+			.setLobbyLoc(new Vector(57.521, 87, -150.512)).setSpecLoc(new Vector(55.506, 101, -50.546))
+			.setSignLoc(new Vector(174.510, 106, 673.700)).setBounds(new Vector(55.506, 101, -50.546), 100, 100)),
 	
-	SantaFactory("SantaFactory",
-			new MapInstance("santafactory")
-					.setSpawnPos(new Vector(64.473, 107, -94.528), new Vector(87.499, 107, -70.563),
-							new Vector(70.451, 107, -24.514), new Vector(41.474, 107, -22.505),
-							new Vector(19.435, 107, -42.521), new Vector(19.404, 107, -67.537))
-					.setLobbyLoc(new Vector(57.475, 109.31250, -130.494)).setSpecLoc(new Vector(59.525, 157, -64.436))
-					.setBounds(new Vector(55.500, 174, -57.500), 58, 58)),
+	Slither("Slither", new MapInstance("slither")
+			.setSpawnPos(new Vector(75.480, 75, -77.569), new Vector(75.599, 83, -50.534),
+					new Vector(55.507, 75, -16.478), new Vector(35.419, 83, -50.504), new Vector(44.983, 86, -83.000),
+					new Vector(64.434, 83, -76.514))
+			.setLobbyLoc(new Vector(57.521, 87, -150.512)).setSpecLoc(new Vector(55.506, 101, -50.546))
+			.setSignLoc(new Vector(174.510, 106, 673.700)).setBounds(new Vector(55.506, 101, -50.546), 100, 100)),
 
 	Elven("Elven", new MapInstance("elven")
 			.setSpawnPos(new Vector(8.498, 150, -50.562), new Vector(23.065, 150, -26.283),

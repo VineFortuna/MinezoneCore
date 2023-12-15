@@ -1,9 +1,11 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
@@ -74,9 +76,13 @@ public class GhastClass extends BaseClass {
 	public void ProjectileLaunch(ProjectileLaunchEvent event) {
 		Entity e = event.getEntity();
 
-		if (e instanceof Arrow)
+		if (e instanceof Arrow) {
+			for (Player gamePlayer : Bukkit.getOnlinePlayers()) //Play Ghast sound when shoot arrows
+				gamePlayer.playSound(player.getLocation(), Sound.GHAST_SCREAM, 2, 2);
+			
 			if (this.cooldown == 0)
 				this.cooldown = 2;
+		}
 	}
 
 	@Override

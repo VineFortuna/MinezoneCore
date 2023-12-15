@@ -19,6 +19,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class SquidClass extends BaseClass {
 	private final Cooldown boosterCooldown = new Cooldown(10000);
@@ -106,7 +107,6 @@ public class SquidClass extends BaseClass {
 							+ ChatColor.YELLOW + seconds + " more seconds ");
 					return;
 				}
-				// ticks
 				inkCooldown = System.currentTimeMillis() + (50L * 200);
 				player.getWorld().playEffect(player.getLocation(), Effect.SPLASH, 20);
 				player.getWorld().playSound(player.getLocation(), Sound.SPLASH, 1f, 1f);
@@ -114,6 +114,20 @@ public class SquidClass extends BaseClass {
 					if (e instanceof Player && !e.equals(player)) {
 						Player p = (Player) e;
 						p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 0));
+						Location playerLocation = p.getEyeLocation();
+						double radius = 2.0;
+						int particleCount = 20;
+
+						for (int i = 0; i < particleCount; i++) {
+							double angle = 2 * Math.PI * i / particleCount;
+							double x = radius * Math.cos(angle);
+							double z = radius * Math.sin(angle);
+
+							Location particleLoc = playerLocation.clone().add(x, 0, z);
+
+							p.getWorld().spigot().playEffect(particleLoc, Effect.SMOKE, 0, 0, 0, 0, 0, 0, 1, 30);
+							player.getWorld().spigot().playEffect(particleLoc, Effect.SMOKE, 0, 0, 0, 0, 0, 0, 1, 30);
+						}
 					}
 				}
 			}

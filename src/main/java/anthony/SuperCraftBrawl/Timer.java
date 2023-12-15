@@ -2,7 +2,7 @@ package anthony.SuperCraftBrawl;
 
 public class Timer {
 
-	long startTime = System.currentTimeMillis() - 100000;
+	public long startTime = System.currentTimeMillis() - 100000;
 	
 	public void restart() {
 		startTime = System.currentTimeMillis();

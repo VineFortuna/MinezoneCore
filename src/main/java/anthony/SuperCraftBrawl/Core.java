@@ -27,7 +27,6 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.SmallFireball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -35,7 +34,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -49,7 +47,6 @@ import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.SmmManager;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.commands.Commands;
 import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
@@ -63,6 +60,8 @@ import anthony.SuperCraftBrawl.npcs.NPCManager;
 import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
+import anthony.SuperCraftBrawl.practice.BowPractice;
+import anthony.SuperCraftBrawl.practice.SCBPractice;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.ranks.RankManager;
 import anthony.parkour.Parkour;
@@ -332,7 +331,7 @@ public class Core extends JavaPlugin implements Listener {
 		// smmmanager = new SmmManager(this);
 		gameManager = new GameManager(this);
 		commands = new Commands(this);
-		//cmd = new anthony.skywars.commands.Commands(this);
+		// cmd = new anthony.skywars.commands.Commands(this);
 		djManager = new DoubleJumpManager(this);
 		databaseManager = new DatabaseManager(this);
 		dataManager = new PlayerDataManager(this);
@@ -342,8 +341,8 @@ public class Core extends JavaPlugin implements Listener {
 		ag = new ActiveGamesGUI(this);
 		p = new Parkour(this);
 		lb = new Leaderboard(this);
-		//swManager = new anthony.skywars.GameManager(this);
-		//abilityManager = new anthony.skywars.AbilityManager(this);
+		// swManager = new anthony.skywars.GameManager(this);
+		// abilityManager = new anthony.skywars.AbilityManager(this);
 		// cheat = new AntiCheat(this);
 
 		Bukkit.getServer().getPluginManager().registerEvents(this, this);
@@ -352,7 +351,7 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null || this.getSWCommands() != null) {
-			String[] commandTypes = { "join", "shop", "leave", "cw", "l", "players", "class", "spectate", "startgame",
+			String[] commandTypes = { "join", "fav", "shop", "leave", "cw", "l", "players", "class", "spectate", "startgame",
 					"gamestats", "setlives", "purchases", "mainworld", "kit" };
 
 			for (String command : commandTypes) {
@@ -364,6 +363,8 @@ public class Core extends JavaPlugin implements Listener {
 					System.out.print(command + " was null!");
 			}
 		}
+		
+		enablePracticeModes();
 
 		new BukkitRunnable() {
 			@Override
@@ -392,6 +393,12 @@ public class Core extends JavaPlugin implements Listener {
 				}
 			}
 		}.runTaskTimer(this, 0, 20);
+	}
+	
+	public static BowPractice bowPractice;
+	
+	private void enablePracticeModes() {
+		this.bowPractice = new BowPractice();
 	}
 
 	public Location GetLobbyLoc() {
@@ -1353,7 +1360,7 @@ public class Core extends JavaPlugin implements Listener {
 				+ ChatColor.BOLD + "] " + ChatColor.RESET + getRankManager().getRank(p).getTagWithSpace() + ""
 				+ ChatColor.AQUA + pName + ChatColor.GREEN + " connected");
 		String rank = getRankManager().getRank(p).getTagWithSpace();
-		
+
 		ItemStack cookie = new ItemStack(Material.COOKIE, 1);
 		Location loc = new Location(lobbyWorld, 144.584, 106, 663.454);
 		Item item = getServer().getWorlds().get(0).dropItemNaturally(loc, cookie);

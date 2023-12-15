@@ -158,6 +158,24 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 				return true;
 
+			case "fav":
+				if (args.length >= 0) {
+					String className = args[0];
+
+					for (ClassType type : ClassType.values()) {
+						if (className != null && className.equalsIgnoreCase(type.toString())) {
+							PlayerData playerData = main.getDataManager().getPlayerData(player);
+
+							if (playerData != null) {
+								playerData.customIntegers.add(type.getID());
+								player.sendMessage(main.color("&2&l(!) &rNew favorite class! " + type.getTag()));
+								main.getDataManager().saveData(playerData);
+							}
+						}
+					}
+				}
+				return true;
+
 			case "join":
 				if (args.length > 0) {
 					String mapName = args[0];

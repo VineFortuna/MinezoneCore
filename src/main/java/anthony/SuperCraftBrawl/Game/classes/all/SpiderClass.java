@@ -3,11 +3,13 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
@@ -82,6 +84,15 @@ public class SpiderClass extends BaseClass {
 
 			p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 80, 0, true));
 		}
+	}
+	
+	@Override
+	public void TakeDamage(EntityDamageEvent event) {
+		if (instance.getManager().spawnProt.containsKey(player))
+			return;
+		
+		for (Player gamePlayer : instance.players)
+			gamePlayer.playSound(player.getLocation(), Sound.SPIDER_DEATH, 1, 1);
 	}
 
 	private void abilityMsg() {
