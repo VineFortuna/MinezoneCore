@@ -32,12 +32,6 @@ public class FreeClassesGUI implements InventoryProvider {
 		int a = 0;
 		int b = 0;
 
-		contents.set(2, 8, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
-					inv.close(player);
-					new ClassSelectorGUI(main).inv.open(player);
-				}));
-
 		for (ClassType type : ClassType.values()) {
 			if (type.getTokenCost() == 0 && type.getMinRank() != Rank.VIP && type.getLevel() == 0) {
 				ItemStack item = type.getItem();
@@ -94,6 +88,12 @@ public class FreeClassesGUI implements InventoryProvider {
 				}
 			}
 		}
+		
+		contents.set(2, 8, ClickableItem.of(
+				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
+					inv.close(player);
+					new ClassSelectorGUI(main).inv.open(player);
+				}));
 	}
 
 	@Override

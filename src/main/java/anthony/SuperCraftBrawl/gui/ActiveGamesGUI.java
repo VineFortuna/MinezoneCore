@@ -44,7 +44,8 @@ public class ActiveGamesGUI implements InventoryProvider {
 			ItemStack displayItem = null;
 
 			if (gameType == GameType.CLASSIC) {
-				displayItem = ItemHelper.createSkullHeadPlayer(1, player.getName());
+				//displayItem = ItemHelper.createSkullHeadPlayer(1, player.getName());
+				displayItem = new ItemStack(Material.REDSTONE_BLOCK);
 			} else if (gameType == GameType.DUEL) {
 				displayItem = new ItemStack(Material.IRON_SWORD);
 			} else if (gameType == GameType.FRENZY) {

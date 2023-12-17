@@ -8,6 +8,7 @@ import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -255,6 +256,7 @@ public class SheepClass extends BaseClass {
 
 		BaseClass bc2 = instance.classes.get(player);
 		bc2.score.getScoreboard().resetScores(bc2.score.getEntry());
+		player.playSound(player.getLocation(), Sound.SHEEP_IDLE, 1, 1);
 
 		if (itemList[randomNum] == item3) {
 			player.getInventory()
