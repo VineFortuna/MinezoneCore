@@ -79,12 +79,6 @@ public class SlimeClass extends BaseClass {
 		playerEquip.setLeggings(makeYellow(new ItemStack(Material.LEATHER_LEGGINGS)));
 		playerEquip.setBoots(makeYellow(
 				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-
-		/*
-		 * BaseClass baseClass = instance.classes.get(player); player.setCustomName("" +
-		 * baseClass.getType().getTag() + ChatColor.RESET + player.getName());
-		 * player.setCustomNameVisible(true);
-		 */
 	}
 
 	@Override

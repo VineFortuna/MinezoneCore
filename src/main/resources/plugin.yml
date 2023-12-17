@@ -206,6 +206,7 @@ permissions:
          scb.color: true
          scb.bypassQueue: true
          scb.customKillMsgs: true
+         scb.winEffects: true
    scb.vip:
       description: Vip perms
       children:

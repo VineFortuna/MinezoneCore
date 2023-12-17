@@ -31,7 +31,7 @@ public class EnderdragonClass extends BaseClass {
 
 	public EnderdragonClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.5;
+		baseVerticalJump = 1.6;
 	}
 
 	public ItemStack makeBlack(ItemStack armour) {

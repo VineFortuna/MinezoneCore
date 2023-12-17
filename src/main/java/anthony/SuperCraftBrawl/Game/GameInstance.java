@@ -103,6 +103,7 @@ public class GameInstance {
 	public Player firstBlood;
 	private final Map<UUID, Location> lastKnownLocations = new HashMap<>();
 	public List<ItemStack> allItemDrops = new ArrayList<>();
+	public List<Player> favClassSelection = new ArrayList<>();
 
 	// Constructors:
 	public GameInstance(GameManager gameManager, Maps map) {
@@ -514,36 +515,26 @@ public class GameInstance {
 		}
 	}
 
-	/*public void spawnLoc() { // Initially spawn all the players, at different locations than GetRespawnLoc()
-		MapInstance mi = null;
-		int size = 0;
-
-		if (map != null)
-			mi = this.map.GetInstance();
-		else
-			mi = this.duosMap.GetInstance();
-
-		size = 0;
-		Vector spawnPos = null;
-		boolean morePlayers = false; // If there's more players than spawn points, when set true it will spawn them
-										// at a random loc then
-
-		for (Player gamePlayer : this.players) {
-			if (morePlayers) {
-				spawnPos = mi.spawnPos.get(random.nextInt(mi.spawnPos.size()));
-				gamePlayer
-						.teleport(new Location(this.getMapWorld(), spawnPos.getX(), spawnPos.getY(), spawnPos.getZ()));
-			} else {
-				spawnPos = mi.spawnPos.get(size);
-				gamePlayer
-						.teleport(new Location(this.getMapWorld(), spawnPos.getX(), spawnPos.getY(), spawnPos.getZ()));
-				size++;
-
-				if (size >= this.players.size() - 1)
-					morePlayers = true;
-			}
-		}
-	}*/
+	/*
+	 * public void spawnLoc() { // Initially spawn all the players, at different
+	 * locations than GetRespawnLoc() MapInstance mi = null; int size = 0;
+	 * 
+	 * if (map != null) mi = this.map.GetInstance(); else mi =
+	 * this.duosMap.GetInstance();
+	 * 
+	 * size = 0; Vector spawnPos = null; boolean morePlayers = false; // If there's
+	 * more players than spawn points, when set true it will spawn them // at a
+	 * random loc then
+	 * 
+	 * for (Player gamePlayer : this.players) { if (morePlayers) { spawnPos =
+	 * mi.spawnPos.get(random.nextInt(mi.spawnPos.size())); gamePlayer .teleport(new
+	 * Location(this.getMapWorld(), spawnPos.getX(), spawnPos.getY(),
+	 * spawnPos.getZ())); } else { spawnPos = mi.spawnPos.get(size); gamePlayer
+	 * .teleport(new Location(this.getMapWorld(), spawnPos.getX(), spawnPos.getY(),
+	 * spawnPos.getZ())); size++;
+	 * 
+	 * if (size >= this.players.size() - 1) morePlayers = true; } } }
+	 */
 
 	public Location GetRespawnLoc() {
 		// Respawn location for each map
@@ -683,7 +674,7 @@ public class GameInstance {
 			player.getInventory().clear();
 			player.teleport(GetRespawnLoc());
 		}
-		//GetRespawnLoc(); // Spawn all players in game
+		// GetRespawnLoc(); // Spawn all players in game
 		TellAll("" + ChatColor.BOLD + "===============================");
 		TellAll("" + ChatColor.BOLD + "||");
 		TellAll("" + ChatColor.BOLD + "||");
@@ -775,7 +766,7 @@ public class GameInstance {
 		};
 		runnable.runTaskTimer(gameManager.getMain(), 0, 1);
 		runnables.add(runnable);
-		
+
 		BukkitRunnable r = new BukkitRunnable() {
 
 			@Override
@@ -783,7 +774,7 @@ public class GameInstance {
 				for (Player gamePlayer : players)
 					sendScoreboardUpdate(gamePlayer);
 			}
-			
+
 		};
 		r.runTaskLater(getManager().getMain(), 20);
 	}
@@ -797,44 +788,32 @@ public class GameInstance {
 
 	@SuppressWarnings("deprecation")
 	public void sendScoreboardUpdate(Player player) {
-		if (map != null) {
-			// Tab organization.
-			for (Player pl : Bukkit.getOnlinePlayers()) {
-				StringBuilder teamName = new StringBuilder();
-				Rank r = gameManager.getMain().getRankManager().getRank(player);
-				if (r == null)
-					teamName.append(Rank.values().length);
-				else
-					teamName.append(r.getTabListIndex());
-				teamName.append("_").append(r);
+		// Organized tab list
+		for (Player pl : Bukkit.getOnlinePlayers()) {
+			StringBuilder teamName = new StringBuilder();
+			Rank r = gameManager.getMain().getRankManager().getRank(player);
+			if (r == null)
+				teamName.append(Rank.values().length);
+			else
+				teamName.append(r.getTabListIndex());
 
-				Scoreboard board = pl.getScoreboard();
-				Team team = board.getTeam(teamName.toString());
-				if (team == null) {
-					team = board.registerNewTeam(teamName.toString());
-					team.addPlayer(player);
-				}
-				BaseClass baseClass = classes.get(player);
-				String type = shortenString(baseClass.getType().getTag(), 12) + " " + ChatColor.RESET;
-				team.setPrefix(type);
-			}
-		} else {
-			for (Player pl : Bukkit.getOnlinePlayers()) {
-				StringBuilder teamName = new StringBuilder();
-				Rank r = gameManager.getMain().getRankManager().getRank(player);
-				if (r == null)
-					teamName.append(Rank.values().length);
-				else
-					teamName.append(r.getTabListIndex());
-				teamName.append("_").append(r);
+			teamName.append("_").append(r);
 
-				Scoreboard board = pl.getScoreboard();
-				Team team = board.getTeam(teamName.toString());
-				if (team == null) {
-					team = board.registerNewTeam(teamName.toString());
-					team.addPlayer(player);
-				}
+			Scoreboard board = pl.getScoreboard();
+			Team team = board.getTeam(teamName.toString());
+			if (team == null) {
+				team = board.registerNewTeam(teamName.toString());
+				team.addPlayer(player);
 			}
+
+			String className = this.classes.get(player).getType().getTag() + " " + ChatColor.RESET;
+
+			if (className.length() >= 8) {
+				String s = className.substring(0, 8) + " " + ChatColor.RESET;
+				team.setPrefix(s);
+				continue;
+			}
+			team.setPrefix(className);
 		}
 	}
 
@@ -1219,6 +1198,7 @@ public class GameInstance {
 				BukkitRunnable runTimer = new BukkitRunnable() {
 					int ticks = 3;
 
+					@SuppressWarnings("deprecation")
 					public void run() {
 						if (GameInstance.this.state == GameState.ENDED) {
 							cancel();
@@ -1243,8 +1223,20 @@ public class GameInstance {
 										player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "Respawned",
 												"" + ChatColor.RESET + "Your new class for this life is "
 														+ baseClass.getType().getTag());
+										new BukkitRunnable() { // Get rid of title after 1.5 seconds
+											@Override
+											public void run() {
+												player.sendTitle("", "");
+											}
+										}.runTaskLater(getManager().getMain(), 30);
 									} else {
 										player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "Respawned", "");
+										new BukkitRunnable() { // Get rid of title after 1.5 seconds
+											@Override
+											public void run() {
+												player.sendTitle("", "");
+											}
+										}.runTaskLater(getManager().getMain(), 30);
 									}
 									baseClass.isDead = false;
 								}
@@ -1437,20 +1429,20 @@ public class GameInstance {
 						runnable2.cancel();
 
 					BukkitRunnable r = new BukkitRunnable() {
-					    @Override
-					    public void run() {
-					    	Bukkit.unloadWorld(mapWorld, false);
-					        if (Bukkit.unloadWorld(mapWorld, false)) {
-					            this.cancel();
-					        }
-					    }
+						@Override
+						public void run() {
+							Bukkit.unloadWorld(mapWorld, false);
+							if (Bukkit.unloadWorld(mapWorld, false)) {
+								this.cancel();
+							}
+						}
 					};
 					r.runTaskTimer(getManager().getMain(), 0, 1);
-					
-					 if (map != null)
-							gameManager.RemoveMap(map);
-						else
-							gameManager.RemoveDuosMap(duosMap);
+
+					if (map != null)
+						gameManager.RemoveMap(map);
+					else
+						gameManager.RemoveDuosMap(duosMap);
 				}
 
 				ticks--;
@@ -1592,39 +1584,37 @@ public class GameInstance {
 					baseClass.totalExp += 113;
 					baseClass.placement = 1;
 
-					winner.sendMessage("" + ChatColor.BOLD + "=====================");
-					winner.sendMessage("" + ChatColor.BOLD + "||");
-					winner.sendMessage("" + ChatColor.BOLD + "||");
+					winner.sendMessage("" + ChatColor.BOLD + "===========================");
 					winner.sendMessage("" + ChatColor.BOLD + "||");
 					winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.YELLOW + ChatColor.BOLD
 							+ "  GAME WON");
-					winner.sendMessage("        " + "     Placed: #1: 10 Tokens");
+					winner.sendMessage("" + ChatColor.BOLD + "||");
+					winner.sendMessage(ChatColor.BOLD + "||        " + ChatColor.RESET + "   Placed: #1: "
+							+ ChatColor.GREEN + "10 Tokens");
 					baseClass.totalTokens += 10;
 
 					if (baseClass.totalKills >= 0) {
-						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE + ChatColor.BOLD
-								+ "  " + baseClass.totalKills + " Kills: " + ChatColor.RESET + ChatColor.YELLOW
+						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  "
+								+ baseClass.totalKills + " Kills: " + ChatColor.RESET + ChatColor.GREEN
 								+ (baseClass.totalKills * 2) + " Tokens");
 						baseClass.totalTokens += baseClass.totalKills;
 					}
 
 					if (this.firstBlood == winner) {
-						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE + ChatColor.BOLD
-								+ "  First Blood: " + ChatColor.RESET + "10 Tokens");
+						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET
+								+ "  First Blood: " + ChatColor.GREEN + "10 Tokens");
 						data3.tokens += 10;
 					}
 
 					if (winner.hasPermission("scb.rankBonusOne")) {
-						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE + ChatColor.BOLD
-								+ "  RANK BONUS: " + ChatColor.RESET + ChatColor.YELLOW + "10 Tokens");
+						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Rank Bonus: "
+								+ ChatColor.GREEN + "10 Tokens");
 						baseClass.totalTokens += 10;
 					}
 					winner.sendMessage("" + ChatColor.BOLD + "||");
-					winner.sendMessage("" + ChatColor.BOLD + "||");
-					winner.sendMessage("" + ChatColor.BOLD + "||");
-					winner.sendMessage("" + ChatColor.BOLD + "=====================");
-					winner.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.GREEN + "You have earned "
-							+ baseClass.totalTokens + " Tokens!");
+					winner.sendMessage("" + ChatColor.BOLD + "===========================");
+					winner.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You have earned "
+							+ ChatColor.GREEN + baseClass.totalTokens + " Tokens!");
 
 					if (data != null)
 						data.tokens += baseClass.totalTokens;
@@ -1640,39 +1630,37 @@ public class GameInstance {
 					}
 					baseClass.totalExp += 133;
 
-					winner.sendMessage("" + ChatColor.BOLD + "=====================");
-					winner.sendMessage("" + ChatColor.BOLD + "||");
+					winner.sendMessage("" + ChatColor.BOLD + "===========================");
 					winner.sendMessage("" + ChatColor.BOLD + "||");
 					winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.YELLOW + ChatColor.BOLD
 							+ "  GAME WON");
 					winner.sendMessage("" + ChatColor.BOLD + "||");
-					winner.sendMessage("        " + "     Placed: #1: 10 Tokens");
+					winner.sendMessage(ChatColor.BOLD + "||        " + ChatColor.RESET + "   Placed: #1: "
+							+ ChatColor.GREEN + "10 Tokens");
 
 					if (baseClass.totalKills >= 0) {
-						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE + ChatColor.BOLD
-								+ "  " + baseClass.totalKills + " Kills: " + ChatColor.RESET + ChatColor.YELLOW
-								+ (baseClass.totalKills * 2) + " Tokens");
+						winner.sendMessage(
+								"" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  " + baseClass.totalKills
+										+ " Kills: " + ChatColor.GREEN + (baseClass.totalKills * 2) + " Tokens");
 						baseClass.totalTokens += baseClass.totalKills;
 					}
 
 					if (this.firstBlood == winner) {
-						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE + ChatColor.BOLD
-								+ "  First Blood: " + ChatColor.RESET + "10 Tokens");
+						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET
+								+ "  First Blood: " + ChatColor.GREEN + "10 Tokens");
 						data3.tokens += 10;
 					}
 
-					winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BOLD + "  Flawless Win: "
-							+ ChatColor.RESET + ChatColor.YELLOW + "10 Tokens");
+					winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Flawless Win: "
+							+ ChatColor.GREEN + "10 Tokens");
 					baseClass.totalTokens += 10;
 					if (winner.hasPermission("scb.rankBonus")) {
-						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE + ChatColor.BOLD
-								+ "  RANK BONUS: " + ChatColor.RESET + ChatColor.YELLOW + "10 Tokens");
+						winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Rank Bonus: "
+								+ ChatColor.GREEN + "10 Tokens");
 						baseClass.totalTokens += 10;
 					}
 					winner.sendMessage("" + ChatColor.BOLD + "||");
-					winner.sendMessage("" + ChatColor.BOLD + "||");
-					winner.sendMessage("" + ChatColor.BOLD + "||");
-					winner.sendMessage("" + ChatColor.BOLD + "=====================");
+					winner.sendMessage("" + ChatColor.BOLD + "===========================");
 					winner.getInventory().clear();
 					winner.setGameMode(GameMode.ADVENTURE);
 
@@ -1685,8 +1673,8 @@ public class GameInstance {
 						}
 					}
 					// baseClass.totalTokens += baseClass.totalKills * 2;
-					winner.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.GREEN + "You have earned "
-							+ baseClass.totalTokens + " Tokens!");
+					winner.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You have earned "
+							+ ChatColor.GREEN + baseClass.totalTokens + " Tokens!");
 
 					if (data != null)
 						data.tokens += baseClass.totalTokens;
@@ -1926,20 +1914,35 @@ public class GameInstance {
 			PlayerData playerData = gameManager.getMain().getDataManager().getPlayerData(player);
 			ClassType selectedClass = gameType != GameType.FRENZY ? classSelection.get(player) : null;
 			if (selectedClass == null) {
-				selectedClass = ClassType.values()[rand.nextInt(ClassType.values().length)];
-				if (gameType != GameType.FRENZY) {
-					while (attempts <= 500) {
-						attempts++;
-						ClassType classType = ClassType.values()[rand.nextInt(ClassType.values().length)];
-						Rank donor = classType.getMinRank();
+				if (this.favClassSelection.contains(player)) {
+					if (playerData != null) {
+						int randomIndex = rand.nextInt(playerData.customIntegers.size());
+						int randValue = playerData.customIntegers.get(randomIndex);
 
-						if (playerData.playerClasses.get(classType.getID()) != null
-								&& playerData.playerClasses.get(classType.getID()).purchased
-								|| classType.getTokenCost() == 0) {
-							if (playerData.level >= classType.getLevel()) {
-								if (donor == null || player.hasPermission("scb." + donor.toString().toLowerCase())) {
-									selectedClass = classType;
-									break;
+						for (ClassType type : ClassType.values()) {
+							if (type.getID() == randValue) {
+								selectedClass = type;
+								break;
+							}
+						}
+					}
+				} else {
+					selectedClass = ClassType.values()[rand.nextInt(ClassType.values().length)];
+					if (gameType != GameType.FRENZY) {
+						while (attempts <= 500) {
+							attempts++;
+							ClassType classType = ClassType.values()[rand.nextInt(ClassType.values().length)];
+							Rank donor = classType.getMinRank();
+
+							if (playerData.playerClasses.get(classType.getID()) != null
+									&& playerData.playerClasses.get(classType.getID()).purchased
+									|| classType.getTokenCost() == 0) {
+								if (playerData.level >= classType.getLevel()) {
+									if (donor == null
+											|| player.hasPermission("scb." + donor.toString().toLowerCase())) {
+										selectedClass = classType;
+										break;
+									}
 								}
 							}
 						}

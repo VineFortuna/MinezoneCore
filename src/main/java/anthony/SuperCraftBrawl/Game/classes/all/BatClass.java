@@ -28,11 +28,9 @@ import net.md_5.bungee.api.ChatColor;
 
 public class BatClass extends BaseClass {
 
-	private Cooldown boosterCooldown = new Cooldown(3000), shurikenCooldown = new Cooldown(200);
-
 	public BatClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.5;
+		baseVerticalJump = 1.6;
 	}
 
 	public ItemStack makeRed(ItemStack armour) {

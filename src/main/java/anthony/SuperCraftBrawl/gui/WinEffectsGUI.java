@@ -43,8 +43,11 @@ public class WinEffectsGUI implements InventoryProvider {
 		if (data != null) {
 			contents.set(0, 0,
 					ClickableItem.of(
-							ItemHelper.setDetails(new ItemStack(Material.WHEAT), main.color("&2&lMagic Broom"), "",
-									main.color("&rFly around the map with this"), main.color("&rwhen you win a game")),
+							ItemHelper
+									.setDetails(new ItemStack(Material.WHEAT), main.color("&2&lMagic Broom"), "",
+											main.color("&rFly around the map with this"),
+											main.color("&rwhen you win a game"), "", "" + ChatColor.BLUE
+													+ ChatColor.BOLD + "CAPTAIN" + ChatColor.RESET + "+ exclusive!"),
 							e -> {
 								resetWinEffects(data);
 								data.broomWinEffect = 1;

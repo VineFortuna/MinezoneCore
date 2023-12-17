@@ -210,7 +210,7 @@ public enum Maps {
 							new Vector(251.963, 144, 113.506), new Vector(236.484, 145, 125.520))
 					.setLobbyLoc(new Vector(254.433, 150, 204.499)).setSpecLoc(new Vector(251.994, 145, 119.004))
 					.setBounds(new Vector(251.994, 145, 119.004), 200, 200)
-					.setSignLoc(new Vector(178.466, 106, 673.700)).setMapType(MapType.COMMUNITY)),
+					.setSignLoc(new Vector(178.466, 107, 673.700)).setMapType(MapType.COMMUNITY)),
 
 	Citadel("Citadel", new MapInstance("citadel")
 			.setSpawnPos(new Vector(285.435, 113, 207.493), new Vector(340.411, 76, 207.442),
@@ -294,12 +294,12 @@ public enum Maps {
 					.setBounds(new Vector(58.500, 101, -48.500), 60, 60).setGameType(GameType.FRENZY)
 					.setSignLoc(new Vector(210.700, 106, 670.480)).setMapType(MapType.FRENZY)),
 
-	SantaWorkshop("SantaWorkshop", new MapInstance("santafactory")
+	SantasWorkshop("SantasWorkshop", new MapInstance("santafactory")
 			.setSpawnPos(new Vector(75.480, 75, -77.569), new Vector(75.599, 83, -50.534),
 					new Vector(55.507, 75, -16.478), new Vector(35.419, 83, -50.504), new Vector(44.983, 86, -83.000),
 					new Vector(64.434, 83, -76.514))
 			.setLobbyLoc(new Vector(57.521, 87, -150.512)).setSpecLoc(new Vector(55.506, 101, -50.546))
-			.setSignLoc(new Vector(174.510, 106, 673.700)).setBounds(new Vector(55.506, 101, -50.546), 100, 100)),
+			.setSignLoc(new Vector(174.510, 107, 673.700)).setBounds(new Vector(55.506, 101, -50.546), 100, 100)),
 	
 	Slither("Slither", new MapInstance("slither")
 			.setSpawnPos(new Vector(68.402, 153, -135.507), new Vector(71.428, 151, -152.500),

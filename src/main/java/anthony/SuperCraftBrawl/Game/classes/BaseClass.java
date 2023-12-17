@@ -94,6 +94,7 @@ public abstract class BaseClass {
 	public Timer snowGolem = new Timer();
 	public Timer santa = new Timer();
 	public Timer cookie = new Timer();
+	public Timer wallAbility = new Timer();
 	public boolean bedrockInvincibility = false;
 
 	public int goldAmt = 0; // For Steve Class
@@ -785,7 +786,7 @@ public abstract class BaseClass {
 									+ "You have gained " + ChatColor.YELLOW + pClass.totalExp + " EXP!");
 							p.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
 									+ "You have earned " + ChatColor.YELLOW + pClass.totalTokens + " Tokens!");
-							
+
 							if (this.instance != null) {
 								p.sendMessage("Test");
 								if (this.instance.getMap() == Maps.SnowGlobe) {
@@ -806,7 +807,7 @@ public abstract class BaseClass {
 												.color("&2&l(!) &rYou have unlocked &2&lElf &rclass!"));
 										instance.getManager().getMain().getDataManager().saveData(playerData);
 									}
-								} else if (this.instance.getMap() == Maps.SantaWorkshop) {
+								} else if (this.instance.getMap() == Maps.SantasWorkshop) {
 									if (pClass != null && pClass.getType() == ClassType.Elf) {
 										int classID = 67;
 										PlayerData playerData = instance.getManager().getMain().getDataManager()
@@ -834,7 +835,7 @@ public abstract class BaseClass {
 								p.sendMessage(instance.getManager().getMain().color("&e&lLEVEL UPGRADED!"));
 								p.sendMessage("You are now Level: " + pData.level + "!");
 							}
-						} 
+						}
 						/*
 						 * else { List<String> aliveTeam = new ArrayList<String>(); for (Entry<Player,
 						 * BaseClass> entry : instance.classes.entrySet()) { if
@@ -1934,7 +1935,6 @@ public abstract class BaseClass {
 						PlayerData data3 = instance.getManager().getMain().getDataManager().getPlayerData(p);
 						p.sendMessage("" + ChatColor.BOLD + "=====================");
 						p.sendMessage("" + ChatColor.BOLD + "||");
-						p.sendMessage("" + ChatColor.BOLD + "||");
 						p.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RED + ChatColor.BOLD
 								+ "  GAME LOST");
 						p.sendMessage("" + ChatColor.BOLD + "||");
@@ -1951,37 +1951,35 @@ public abstract class BaseClass {
 						}
 						data3.tokens += tokensEarned;
 						baseClass2.totalTokens += tokensEarned;
-						p.sendMessage("        " + "       Placed #" + instance.alivePlayers + ": " + tokensEarned
-								+ " Tokens");
+						p.sendMessage("        " + "       Placed #" + instance.alivePlayers + ": " + ChatColor.GREEN
+								+ tokensEarned + " Tokens");
 						baseClass2.placement = instance.alivePlayers;
 
 						if (baseClass2 != null && baseClass2.totalKills >= 0) {
-							player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
-									+ ChatColor.BOLD + "  " + baseClass2.totalKills + " Kills: " + ChatColor.RESET
-									+ ChatColor.YELLOW + (baseClass2.totalKills * 2) + " Tokens");
+							player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  "
+									+ baseClass2.totalKills + " Kills: " + ChatColor.GREEN + (baseClass2.totalKills * 2)
+									+ " Tokens");
 							data3.tokens += baseClass2.totalKills * 2;
 							baseClass2.totalTokens += baseClass2.totalKills;
 						}
 						if (baseClass2 != null && instance.firstBlood == player) {
-							player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
-									+ ChatColor.BOLD + "    First Blood: " + ChatColor.RESET + "10 Tokens");
+							player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET
+									+ "  First Blood: " + ChatColor.GREEN + "10 Tokens");
 							data3.tokens += 10;
 						}
 						if (p.hasPermission("scb.rankBonus")) {
-							p.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE + ChatColor.BOLD
-									+ "  RANK BONUS: " + ChatColor.RESET + ChatColor.YELLOW + "10 Tokens");
+							p.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET
+									+ "  Rank Bonus: " + ChatColor.GREEN + "10 Tokens");
 							data3.tokens += 10;
 							baseClass2.totalTokens += 10;
 						}
 						p.sendMessage("" + ChatColor.BOLD + "||");
-						p.sendMessage("" + ChatColor.BOLD + "||");
-						p.sendMessage("" + ChatColor.BOLD + "||");
 						p.sendMessage("" + ChatColor.BOLD + "=====================");
 						p.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-								+ "You have gained " + ChatColor.YELLOW + baseClass2.totalExp + " EXP!");
+								+ "You have gained " + ChatColor.GREEN + baseClass2.totalExp + " EXP!");
 						p.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-								+ "You have earned " + ChatColor.YELLOW + baseClass2.totalTokens + " Tokens!");
-						
+								+ "You have earned " + ChatColor.GREEN + baseClass2.totalTokens + " Tokens!");
+
 						if (this.instance != null) {
 							if (this.instance.getMap() == Maps.SnowGlobe) {
 								int classID = 66;
@@ -2001,7 +1999,7 @@ public abstract class BaseClass {
 											.color("&2&l(!) &rYou have unlocked &2&lElf &rclass!"));
 									instance.getManager().getMain().getDataManager().saveData(playerData);
 								}
-							} else if (this.instance.getMap() == Maps.SantaWorkshop) {
+							} else if (this.instance.getMap() == Maps.SantasWorkshop) {
 								if (baseClass2 != null && baseClass2.getType() == ClassType.Elf) {
 									int classID = 67;
 									PlayerData playerData = instance.getManager().getMain().getDataManager()

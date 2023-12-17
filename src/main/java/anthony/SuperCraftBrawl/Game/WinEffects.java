@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -40,15 +41,18 @@ public class WinEffects {
 			PlayerData data = i.getManager().getMain().getDataManager().getPlayerData(player);
 
 			if (data != null) {
-				if (data.enderDragonEffect == 1)
-					enderDragonEffect();
-				else if (data.santaEffect == 1)
-					santaEffect();
-				else if (data.fireParticlesEffect == 1)
-					fireParticlesEffect();
-				else if (data.broomWinEffect == 1)
-					magicBroomEffect();
-				else
+				if (player.hasPermission("scb.winEffects")) {
+					if (data.enderDragonEffect == 1)
+						enderDragonEffect();
+					else if (data.santaEffect == 1)
+						santaEffect();
+					else if (data.fireParticlesEffect == 1)
+						fireParticlesEffect();
+					else if (data.broomWinEffect == 1)
+						magicBroomEffect();
+					else
+						defaultEffect();
+				} else
 					defaultEffect();
 			}
 		}
@@ -67,8 +71,8 @@ public class WinEffects {
 				i.getManager().getMain().color("&2&lMagic Broom"));
 		player.getInventory().setItem(0, broom);
 	}
-	
-	private ItemStack makeRed(ItemStack armour) { //FOR SANTA EFFECT
+
+	private ItemStack makeRed(ItemStack armour) { // FOR SANTA EFFECT
 		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
 		lm.setColor(Color.RED);
 		armour.setItemMeta(lm);
@@ -88,9 +92,8 @@ public class WinEffects {
 		player.getInventory().setLeggings(makeRed(new ItemStack(Material.LEATHER_LEGGINGS)));
 		player.getInventory().setBoots(makeRed(
 				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		
-		final Horse horse = (Horse) player.getWorld().spawnEntity(player.getLocation(),
-				EntityType.HORSE);
+
+		final Horse horse = (Horse) player.getWorld().spawnEntity(player.getLocation(), EntityType.HORSE);
 		horse.setTamed(true);
 		horse.setOwner(player);
 		horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
@@ -108,24 +111,39 @@ public class WinEffects {
 
 		if (this.defaultEffect == true) {
 			if (player.getWorld() == i.getMapWorld()) {
-				Firework fw = (Firework) player.getWorld().spawnEntity(player.getLocation(), EntityType.FIREWORK);
-				FireworkMeta fwm = fw.getFireworkMeta();
-				fwm.setPower(1);
+				BukkitRunnable runnable = new BukkitRunnable() {
+					int sec = 0;
 
-				Color c = null;
-				Random r = new Random();
-				int chance = r.nextInt(3);
+					@Override
+					public void run() {
+						if (sec == 9) {
+							this.cancel();
+						} else {
+							Firework fw = (Firework) player.getWorld().spawnEntity(player.getLocation(), EntityType.FIREWORK);
+							FireworkMeta fwm = fw.getFireworkMeta();
+							fwm.setPower(1);
 
-				if (chance == 0)
-					c = Color.BLUE;
-				else if (chance == 1)
-					c = Color.LIME;
-				else if (chance == 2)
-					c = Color.GREEN;
-				else
-					c = Color.YELLOW;
-				fwm.addEffect(FireworkEffect.builder().withColor(c).flicker(true).build());
-				fw.setFireworkMeta(fwm);
+							Color c = null;
+							Random r = new Random();
+							int chance = r.nextInt(3);
+
+							if (chance == 0)
+								c = Color.BLUE;
+							else if (chance == 1)
+								c = Color.LIME;
+							else if (chance == 2)
+								c = Color.GREEN;
+							else
+								c = Color.YELLOW;
+							fwm.addEffect(FireworkEffect.builder().withColor(c).flicker(true).build());
+							fw.setFireworkMeta(fwm);
+						}
+						
+						sec++;
+					}
+					
+				};
+				runnable.runTaskTimer(i.getManager().getMain(), 0, 20);
 			}
 		}
 	}

@@ -10,6 +10,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
@@ -74,6 +75,7 @@ public class SkeletonClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
+		skeleAttack.startTime = 5000; //Reset cooldown
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv
 				.setItem(1,
@@ -108,6 +110,20 @@ public class SkeletonClass extends BaseClass {
 				worldPlayer.playSound(player.getLocation(), Sound.SKELETON_HURT, 1, 1);
 		}
 	}
+	
+	@Override
+    public void DoDamage(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof Arrow) {
+            Arrow arrow = (Arrow) event.getDamager();
+            double arrowVelocity = arrow.getVelocity().length();
+            double modifiedDamage = event.getDamage() * arrowVelocity;
+            
+            if (modifiedDamage >= 10) //Nerf arrow damage when fully charged
+            	modifiedDamage = 8.05;
+
+            event.setDamage(modifiedDamage);
+        }
+    }
 
 	@Override
 	public ClassType getType() {

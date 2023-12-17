@@ -56,10 +56,11 @@ public class SteveClass extends BaseClass {
 	public void SetArmour(EntityEquipment playerEquip) {
 		playerEquip.setHelmet(new ItemStack(Material.LEATHER_HELMET));
 		playerEquip.setChestplate(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4));
+				Enchantment.PROTECTION_ENVIRONMENTAL, 3));
 		playerEquip.setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
 		playerEquip.setBoots(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4));
+				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 2));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
 	}
 
 	@Override

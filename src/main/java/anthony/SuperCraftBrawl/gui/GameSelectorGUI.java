@@ -69,11 +69,12 @@ public class GameSelectorGUI implements InventoryProvider {
 				+ GameManager.playercount.getOrDefault("scb-2", 0);
 
 		// Classic Mode Button
-		ItemStack skullPlayer = ItemHelper.createSkullHeadPlayer(1, player.getName());
+		//ItemStack skullPlayer = ItemHelper.createSkullHeadPlayer(1, player.getName());
+		ItemStack sethBling = new ItemStack(Material.REDSTONE_BLOCK);
 
 		contents.set(1, 2,
 				ClickableItem.of(
-						ItemHelper.setDetails(skullPlayer,
+						ItemHelper.setDetails(sethBling,
 								"&eClassic",
 								"&7Choose a class, kill everyone",
 								"",
@@ -115,7 +116,7 @@ public class GameSelectorGUI implements InventoryProvider {
 								"&eFrenzy",
 								"&7Random classes, big maps",
 								"",
-								"&eLeft click&r&e to choose a map",
+								"&e&nLeft click&r&e to choose a map",
 								"&e&nRight click&r&e to join a random map"),
 						e -> {
 							// If item was Left-clicked opens GUI to choose map

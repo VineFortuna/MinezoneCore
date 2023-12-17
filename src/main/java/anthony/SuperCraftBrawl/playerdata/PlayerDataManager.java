@@ -163,15 +163,18 @@ public class PlayerDataManager implements Listener {
 			data.playerClasses.put(classID, new ClassDetails(purchased, timePurchased, gamesPlayed));
 		}
 		classSet.close();
-		
+
 		Statement favClassesState = c.createStatement();
-		ResultSet favClassesSet = favClassesState
-				.executeQuery("SELECT * FROM PlayerCustomIntegers WHERE UUID = '" + player.getUniqueId().toString() + "'");
-		
+		ResultSet favClassesSet = favClassesState.executeQuery(
+				"SELECT * FROM PlayerCustomIntegers WHERE UUID = '" + player.getUniqueId().toString() + "'");
+
 		while (favClassesSet.next()) {
 			int classID = favClassesSet.getInt("CustomInteger");
 			data.customIntegers.add(classID);
 		}
+
+		favClassesSet.close();
+		favClassesState.close();
 
 		return data;
 	}
@@ -228,28 +231,29 @@ public class PlayerDataManager implements Listener {
 			System.out.print("Executing " + updateCMD);
 			manager.executeUpdateCommand(updateCMD);
 		}
-		
-		 saveCustomIntegersToDatabase(data);
+
+		saveCustomIntegersToDatabase(data);
 	}
-	
+
 	private void saveCustomIntegersToDatabase(PlayerData data) {
-	    if (!data.customIntegers.isEmpty()) {
-	        StringBuilder updateCMD = new StringBuilder("INSERT INTO PlayerCustomIntegers (UUID, CustomInteger) VALUES ");
-	        int index = 0;
+		String s = "DELETE FROM PlayerCustomIntegers WHERE UUID = '" + data.playerUUID.toString() + "'";
+		StringBuilder updateCMD = new StringBuilder("INSERT INTO PlayerCustomIntegers (UUID, CustomInteger) VALUES ");
+		int index = 0;
 
-	        for (Integer customInteger : data.customIntegers) {
-	            if (index != 0)
-	                updateCMD.append(", ");
-	            updateCMD.append("('").append(data.playerUUID.toString()).append("', ").append(customInteger).append(")");
-	            index++;
-	        }
+		for (Integer customInteger : data.customIntegers) {
+			if (index != 0)
+				updateCMD.append(", ");
+			updateCMD.append("('").append(data.playerUUID.toString()).append("', ").append(customInteger).append(")");
+			index++;
+		}
 
-	        if (index > 0) {
-	            updateCMD.append(" ON DUPLICATE KEY UPDATE CustomInteger = VALUES (CustomInteger);");
-	            System.out.print("Executing " + updateCMD);
-	            manager.executeUpdateCommand(updateCMD.toString());
-	        }
-	    }
+		if (index > 0) {
+			updateCMD.append(" ON DUPLICATE KEY UPDATE CustomInteger = VALUES (CustomInteger);");
+			System.out.print("Executing " + updateCMD);
+			manager.multiExecuteUpdateCommand(s, updateCMD.toString());
+		} else {
+			manager.multiExecuteUpdateCommand(s);
+		}
 	}
 
 }

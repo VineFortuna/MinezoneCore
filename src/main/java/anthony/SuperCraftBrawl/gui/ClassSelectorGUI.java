@@ -5,6 +5,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Core;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -38,7 +40,7 @@ public class ClassSelectorGUI implements InventoryProvider {
 						String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + "FREE CLASSES",
 						ChatColor.GRAY + "All the free classes!"), e -> {
 							inv.close(player);
-							new InventoryGUI(main).inv.open(player);
+							new FreeClassesGUI(main).inv.open(player);
 						}));
 
 		contents.set(1, 6,
@@ -58,9 +60,25 @@ public class ClassSelectorGUI implements InventoryProvider {
 		contents.set(0, 4,
 				ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK),
 						String.valueOf(ChatColor.GOLD) + ChatColor.BOLD + "FAVORITE CLASSES",
-						ChatColor.GRAY + "Your favorite classes here!"), e -> {
+						ChatColor.GRAY + "Your favorite classes here!", "",
+						"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET + ChatColor.YELLOW
+								+ " to choose a class",
+						"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET + ChatColor.YELLOW
+								+ " to choose random favorite class"),
+						e -> {
 							inv.close(player);
-							new FavoriteClassesGUI(main).inv.open(player);
+
+							if (e.isLeftClick())
+								new FavoriteClassesGUI(main).inv.open(player);
+							else if (e.isRightClick()) {
+								GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
+
+								if (instance != null && instance.state == GameState.WAITING) {
+									instance.favClassSelection.add(player);
+									player.sendMessage(
+											main.color("&2&l(!) &rYou selected to go a random favorite class!"));
+								}
+							}
 						}));
 	}
 
