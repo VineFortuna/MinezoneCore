@@ -68,20 +68,22 @@ public class WinEffectsGUI implements InventoryProvider {
 			meta.setOwner("SethBling");
 			meta.setDisplayName("");
 			playerskull.setItemMeta(meta);
-			
+
 			ItemStack santa = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
 			SkullMeta santaMeta = (SkullMeta) santa.getItemMeta();
 			santaMeta.setOwner("Santa");
 			santaMeta.setDisplayName("");
 			santa.setItemMeta(santaMeta);
 
-			contents.set(0, 2, ClickableItem.of(ItemHelper.setDetails(santa, main.color("&cSanta Claus Effect"), "",
-					main.color("&rBecome old Saint Nick himself"), main.color("&rand ride along!")), e -> {
-						resetWinEffects(data);
-						data.santaEffect = 1;
-						inv.close(player);
-						player.sendMessage(main.color("&e&l(!) &rYou have enabled &eSanta Claus &rwin effect"));
-					}));
+			contents.set(0, 2,
+					ClickableItem.of(ItemHelper.setDetails(santa, main.color("&cSanta Claus Effect"), "",
+							main.color("&rBecome old Saint Nick himself"), main.color("&rand ride along!"), "",
+							"" + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN" + ChatColor.RESET + "+ exclusive!"), e -> {
+								resetWinEffects(data);
+								data.santaEffect = 1;
+								inv.close(player);
+								player.sendMessage(main.color("&e&l(!) &rYou have enabled &eSanta Claus &rwin effect"));
+							}));
 
 			contents.set(0, 0, ClickableItem.of(ItemHelper.setDetails(playerskull, main.color("&cDefault Effect"), "",
 					main.color("&rFireworks shoot up when winning"), main.color("&ra game!")), e -> {

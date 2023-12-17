@@ -1002,6 +1002,7 @@ public class GameManager implements Listener, PluginMessageListener {
 						player.setFireTicks(0);
 						player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
 								+ ChatColor.RESET + "You feel refreshed!");
+						player.playSound(player.getLocation(), Sound.WATER, 1, 1);
 						int amount = item.getAmount();
 						if (amount > 0) {
 							amount--;
@@ -1271,7 +1272,8 @@ public class GameManager implements Listener, PluginMessageListener {
 
 							if (bc != null && pBc != null) {
 								if (bc.getType() == ClassType.Vampire || bc.getType() == ClassType.WitherSk
-										|| bc.getType() == ClassType.Levitator || bc.getType() == ClassType.Firework) {
+										|| bc.getType() == ClassType.Levitator || bc.getType() == ClassType.Firework
+										|| bc.getType() == ClassType.Skeleton) {
 									if (this.spawnProt.containsKey(p) || bc.bedrockInvincibility == true) {
 										event.setCancelled(true);
 										return;
@@ -2159,6 +2161,8 @@ public class GameManager implements Listener, PluginMessageListener {
 				if ((i != null && i.classes.containsKey(player) && ((BaseClass) i.classes.get(player)).getLives() <= 0)
 						|| i2 != null)
 					(new QuitGUI(this.main)).invQuit.open(player);
+				if (i != null && i.state == GameState.WAITING)
+					new QuitGUI(this.main).invQuit.open(player);
 				break;
 			case MONSTER_EGG:
 				if (i != null && i.state == GameState.STARTED) {

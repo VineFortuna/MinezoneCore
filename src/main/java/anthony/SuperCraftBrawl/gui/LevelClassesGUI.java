@@ -99,10 +99,11 @@ public class LevelClassesGUI implements InventoryProvider {
 		}
 
 		// Setting "Go Back" Button
-		contents.set(totalRows - 1, totalColumns - 1, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BARRIER),
-				"&7Go back"), e -> {
-			new ClassSelectorGUI(main).inv.open(player);
-		}));
+		contents.set(2, 8, ClickableItem.of(
+				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
+					inv.close(player);
+					new ClassSelectorGUI(main).inv.open(player);
+				}));
 
 	}
 
