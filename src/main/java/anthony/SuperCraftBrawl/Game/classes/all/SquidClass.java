@@ -113,7 +113,7 @@ public class SquidClass extends BaseClass {
 				for (Entity e : player.getWorld().getNearbyEntities(player.getLocation(), 10D, 10D, 10D)) {
 					if (e instanceof Player && !e.equals(player)) {
 						Player p = (Player) e;
-						p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 0));
+						p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 75, 0));
 						Location playerLocation = p.getEyeLocation();
 						double radius = 2.0;
 						int particleCount = 20;

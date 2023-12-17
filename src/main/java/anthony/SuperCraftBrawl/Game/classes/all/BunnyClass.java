@@ -31,7 +31,7 @@ public class BunnyClass extends BaseClass {
 
 	public BunnyClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.2;
+		baseVerticalJump = 1.15;
 	}
 
 	public ItemStack makeRed(ItemStack armour) {
@@ -79,7 +79,7 @@ public class BunnyClass extends BaseClass {
 						instance.getManager().getMain().color("&7Right click to gain:"),
 						instance.getManager().getMain().color("   &r5 sec Regeneration II"),
 						instance.getManager().getMain().color("   &r5 sec Speed V")));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2));
 		player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 2));
 	}
 
@@ -87,7 +87,7 @@ public class BunnyClass extends BaseClass {
 	@Override
 	public void Tick(int gameTicks) {
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
-			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2));
 		else if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
 			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 2));
 	}
@@ -104,7 +104,7 @@ public class BunnyClass extends BaseClass {
 					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 110, 1));
 				} else if (ticks == 0) {
 					player.removePotionEffect(PotionEffectType.SPEED);
-					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2));
 					this.cancel();
 				}
 

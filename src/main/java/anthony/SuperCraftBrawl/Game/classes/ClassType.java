@@ -407,7 +407,7 @@ public enum ClassType {
 		case Vampire:
 			return "Use your bow to poison your enemies!";
 		case ZombiePigman:
-			return "Summon your brothers to help you\nfight your enemies while you smack\nthem with your Gold Sword!";
+			return "Summon your brothers to help you fight your enemies while you smack them with your Gold Sword!";
 		// case WitherSk:
 		// return "A very powerful character ready to dominate";
 		case ZombieVillager:

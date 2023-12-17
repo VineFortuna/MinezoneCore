@@ -52,6 +52,8 @@ import anthony.SuperCraftBrawl.commands.Commands;
 import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.SuperCraftBrawl.gui.DonorClassesGUI;
+import anthony.SuperCraftBrawl.gui.FreeClassesGUI;
+import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
 import anthony.SuperCraftBrawl.gui.HubGUI;
 import anthony.SuperCraftBrawl.gui.InventoryGUI;
 import anthony.SuperCraftBrawl.gui.StatsGUI;
@@ -79,12 +81,12 @@ public class Core extends JavaPlugin implements Listener {
 	static Core plugin;
 
 	public GameManager gameManager;
-	public InventoryGUI inventoryGUI;
+	public FreeClassesGUI inventoryGUI;
 	public anthony.CrystalWars.game.GameManager gm;
 	public anthony.skywars.GameManager swManager;
 	public anthony.skywars.AbilityManager abilityManager;
 	public DonorClassesGUI donorGUI;
-	public HubGUI hubGUI;
+	public GameSelectorGUI hubGUI;
 	public Commands commands;
 	public anthony.skywars.commands.Commands cmd;
 	public World lobbyWorld;
@@ -225,11 +227,11 @@ public class Core extends JavaPlugin implements Listener {
 		return gameManager;
 	}
 
-	public HubGUI getHubGUI() {
+	public GameSelectorGUI getHubGUI() {
 		return hubGUI;
 	}
 
-	public InventoryGUI getInventoryGUI() {
+	public FreeClassesGUI getInventoryGUI() {
 		return inventoryGUI;
 	}
 
@@ -1326,6 +1328,7 @@ public class Core extends JavaPlugin implements Listener {
 				teamName.append(Rank.values().length);
 			else
 				teamName.append(r.getTabListIndex());
+			
 			teamName.append("_").append(r);
 
 			Scoreboard board = pl.getScoreboard();
@@ -1386,7 +1389,7 @@ public class Core extends JavaPlugin implements Listener {
 		p.sendMessage("");
 		p.sendMessage("----------------------------------------------");
 		p.sendTitle("" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.UNDERLINE + "MINEZONE",
-				"" + ChatColor.RESET + ChatColor.YELLOW + "Part II Season 3 out now!");
+				color("&c&lCHRISTMAS UPDATE &r&lAVAILABLE NOW!"));
 		for (PotionEffect type : p.getActivePotionEffects())
 			p.removePotionEffect(type.getType());
 	}
