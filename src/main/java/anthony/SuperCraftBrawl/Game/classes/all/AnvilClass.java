@@ -2,13 +2,14 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 
 import java.util.List;
 
+import anthony.SuperCraftBrawl.ChatColorHelper;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Effect;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -36,6 +37,7 @@ public class AnvilClass extends BaseClass {
 	private boolean used = false;
 	private int cooldownSec;
 	private int num = 0;
+	private int stompAbilityCooldown = 10 * 1000;
 
 	public AnvilClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -79,7 +81,7 @@ public class AnvilClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		anvil.startTime = 15000;
+//		anvil.startTime = 15000;
 		this.used = false; // To reset each life
 		this.num = 0; // Same here
 		playerInv.setItem(0, this.getAttackWeapon());

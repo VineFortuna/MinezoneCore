@@ -97,7 +97,7 @@ public class BlazeClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		blazeRod.startTime = 15000; //Reset cooldown
+//		blazeRod.startTime = 15000; //Reset cooldown
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.addEnchant(ItemHelper.addEnchant(new ItemStack(Material.BOW), Enchantment.ARROW_INFINITE, 1),
