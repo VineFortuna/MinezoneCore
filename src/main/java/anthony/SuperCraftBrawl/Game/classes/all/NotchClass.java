@@ -70,7 +70,7 @@ public class NotchClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		notch.startTime = 10000;
+//		notch.startTime = 10000;
 		playerInv.setItem(0, ItemHelper.addEnchant(
 				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.STONE_SWORD),
 						"" + ChatColor.BLACK + ChatColor.BOLD + "Notch's Sword"), Enchantment.KNOCKBACK, 1),
