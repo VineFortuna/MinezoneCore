@@ -90,7 +90,7 @@ public class SnowGolemClass extends BaseClass {
 		playerInv.setItem(1, snowPlatform);
 		playerInv.setItem(2, slowballs);
 		playerInv.setItem(3, pumpkin);
-		snowGolem.startTime = 20000;
+//		snowGolem.startTime = 20000;
 	}
 
 	@Override

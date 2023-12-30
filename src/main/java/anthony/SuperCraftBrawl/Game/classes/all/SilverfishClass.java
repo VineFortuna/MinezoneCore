@@ -5,10 +5,8 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import anthony.SuperCraftBrawl.ChatColorHelper;
-import anthony.SuperCraftBrawl.Game.classes.Ability;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
@@ -26,8 +24,6 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
@@ -45,11 +41,17 @@ public class SilverfishClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.GRAY,
-				"&7Silverfish Chestplate");
+		// Head (helmet)
+		ItemStack playerHead = ItemHelper.createSkullHeadPlayer(1, "kuba432110", "&7Silverfish Head");
+
+		// Chestplate
+		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.GRAY, "&7Silverfish Chestplate");
 		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
-		ItemStack leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, Color.GRAY,
-				"&7Silverfish Leggings");
+
+		// Leggings
+		ItemStack leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, Color.GRAY, "&7Silverfish Leggings");
+
+		// Boots
 		ItemStack boots = ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.GRAY, "&7Silverfish Boots");
 		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 
@@ -82,39 +84,44 @@ public class SilverfishClass extends BaseClass {
 	public void Tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Silverfish
 				&& instance.classes.get(player).getLives() > 0) {
-			this.cooldownSec = (10000 - wallAbility.getTime()) / 1000 + 1;
+//			this.cooldownSec = (10000 - wallAbility.getTime()) / 1000 + 1;
 
-			if (wallAbility.getTime() < 10000) {
-				String msg = instance.getManager().getMain()
-						.color("&7Wall Ability &rregenerates in: &e" + this.cooldownSec + "s");
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
-			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &7Wall Ability");
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
-			}
+//			if (wallAbility.getTime() < 10000) {
+//				String msg = instance.getManager().getMain()
+//						.color("&7Wall Ability &rregenerates in: &e" + this.cooldownSec + "s");
+//				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
+//						(byte) 2);
+//				CraftPlayer craft = (CraftPlayer) player;
+//				craft.getHandle().playerConnection.sendPacket(packet);
+//			} else {
+//				String msg = instance.getManager().getMain().color("&rYou can use &7Wall Ability");
+//				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
+//						(byte) 2);
+//				CraftPlayer craft = (CraftPlayer) player;
+//				craft.getHandle().playerConnection.sendPacket(packet);
+//			}
 		}
 	}
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		wallAbility.startTime = 10000; // Reset cooldown;
+//		wallAbility.startTime = 10000; // Reset cooldown;
 		ItemStack weapon = ItemHelper.create(Material.IRON_HOE, ChatColorHelper.color("&7Silverfish Weapon"));
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
 		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
 		this.weapon = weapon;
 
 		// Wall Ability
-		ItemStack wallItem = ItemHelper.create(Material.SMOOTH_BRICK, ChatColorHelper.color("&7Wall Ability"),
-				ChatColorHelper.color("&7Right click to create a wall of silverfishes"));
+		ItemStack wallItem = ItemHelper.setDetails(new ItemStack(Material.SMOOTH_BRICK),
+				"&7&lWall Ability",
+				"&fCreate a wall of silverfishes",
+				"&e&nLeft Click&r&7 to place a wall &ofurther",
+				"&e&nRight Click&r&7 to place a wall &ocloser");
 		wallItem.setDurability((short) 2);
+
 		this.wallItem = wallItem;
 
+		// Settings Items
 		playerInv.setItem(0, weapon);
 		playerInv.setItem(1, wallItem);
 
@@ -127,12 +134,17 @@ public class SilverfishClass extends BaseClass {
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
+		Action action = event.getAction();
 
 		if (item != null) {
 			if (player.getGameMode() != GameMode.SPECTATOR) {
 				// WALL ABILITY
 				if (item.equals(wallItem)) {
-					if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+					// If Right Button Clicked
+					if (action == Action.RIGHT_CLICK_AIR
+							|| action == Action.RIGHT_CLICK_BLOCK
+							|| action == Action.LEFT_CLICK_AIR
+							|| action == Action.LEFT_CLICK_BLOCK) {
 						// If ability is on cooldown
 						if (wallAbility.getTime() < 10000) {
 							int seconds = (10000 - wallAbility.getTime()) / 1000 + 1;
@@ -143,11 +155,18 @@ public class SilverfishClass extends BaseClass {
 							wallAbility.restart();
 							SilverfishWall createWall = new SilverfishWall(3, 3, player, 2, 0.2);
 							// Wall logic
-							if (event.getAction() == Action.RIGHT_CLICK_BLOCK)
+								// When right or left click on block
+							if (action == Action.RIGHT_CLICK_BLOCK) {
 								createWall.buildWallClickedBlock(event.getClickedBlock());
-							// When right click on air
-							else if (event.getAction() == Action.RIGHT_CLICK_AIR)
-								createWall.buildWallClickedAir();
+
+							}    // When right click on air
+							else if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+								createWall.buildWallClickedAir(2);
+
+							}	// When left click on air
+							else if (event.getAction() == Action.LEFT_CLICK_AIR) {
+								createWall.buildWallClickedAir(6);
+							}
 						}
 					}
 				}
@@ -184,8 +203,7 @@ public class SilverfishClass extends BaseClass {
 		private List<Material> replacedBlocks = new ArrayList<Material>();
 		List<Integer> randomizedIndexes = new ArrayList<>();
 
-		public SilverfishWall(int wallHeight, int wallWidth, Player player, double startBreakingWallTime,
-				double delayBetweenBreakingBlocks) {
+		public SilverfishWall(int wallHeight, int wallWidth, Player player, double startBreakingWallTime, double delayBetweenBreakingBlocks) {
 			this.player = player;
 			this.playerLocation = player.getLocation();
 			this.playerDirection = playerLocation.getDirection();
@@ -206,12 +224,11 @@ public class SilverfishClass extends BaseClass {
 		}
 
 		// Right-Click Air Action
-		public void buildWallClickedAir() {
+		public void buildWallClickedAir(int distanceFromPlayer) {
 
 			double yawRadians = Math.toRadians(playerLocation.getYaw());
-			double xOffset = -5 * Math.sin(yawRadians);
-			double zOffset = 5 * Math.cos(yawRadians);
-
+			double xOffset = -distanceFromPlayer * Math.sin(yawRadians);
+			double zOffset = distanceFromPlayer * Math.cos(yawRadians);
 			Location wallLocation = playerLocation.clone().add(xOffset, -1, zOffset);
 
 			buildWall(wallLocation);
@@ -219,8 +236,8 @@ public class SilverfishClass extends BaseClass {
 		}
 
 		/**
-		 * Checks the player yaw to determine which of the 4 directions the wall is
-		 * going to be built. Returns an int from 1 to 4.
+		 * Checks the player yaw to determine which of the 4 directions the wall is going to be built.
+		 * Returns an int from 1 to 4.
 		 *
 		 */
 		public int getPlayerSightDirection() {
@@ -254,11 +271,11 @@ public class SilverfishClass extends BaseClass {
 		}
 
 		/**
-		 * Randomize one of the possible blocks a silverfish can spawn from. Possible
-		 * blocks: Cobblestone, Stone, Stone Brick and Mossy, Cracked and Chiseled stone
-		 * bricks. Replaced blocks: Air, Grass, Long Grass, Vine, Water, Stationary
-		 * Water, Lava, Stationary Lava. Sets the block type and data to the one
-		 * randomized. Sets the block metadata to differ from.
+		 * Randomize one of the possible blocks a silverfish can spawn from.
+		 * Possible blocks: Cobblestone, Stone, Stone Brick and Mossy, Cracked and Chiseled stone bricks.
+		 * Replaced blocks: Air, Grass, Long Grass, Vine, Water, Stationary Water, Lava, Stationary Lava.
+		 * Sets the block type and data to the one randomized.
+		 * Sets the block metadata to differ from.
 		 *
 		 * @param location The location the randomized block will be gotten from.
 		 */
@@ -266,49 +283,52 @@ public class SilverfishClass extends BaseClass {
 			Block block = location.getBlock();
 
 			// Checks if block is one of the possible replaced materials
-			if (block.getType() == Material.AIR || block.getType() == Material.GRASS
-					|| block.getType() == Material.LONG_GRASS || block.getType() == Material.VINE
-					|| block.getType() == Material.WATER || block.getType() == Material.STATIONARY_WATER
-					|| block.getType() == Material.LAVA || block.getType() == Material.STATIONARY_LAVA) {
+			if (block.getType() == Material.AIR
+					|| block.getType() == Material.GRASS
+					|| block.getType() == Material.LONG_GRASS
+					|| block.getType() == Material.VINE
+					|| block.getType() == Material.WATER
+					|| block.getType() == Material.STATIONARY_WATER
+					|| block.getType() == Material.LAVA
+					|| block.getType() == Material.STATIONARY_LAVA) {
 
 				// Randomizes a number from 1 to 8
 				Random random = new Random();
 				int randomNumber = random.nextInt(8) + 1;
 
 				switch (randomNumber) {
-				case 1:
-					// Stone
-					block.setType(Material.STONE);
-					break;
-				case 2:
-					// Cobblestone
-					block.setType(Material.COBBLESTONE);
-					break;
-				case 3:
-					// Stone Brick
-					block.setType(Material.SMOOTH_BRICK);
-					break;
-				case 4:
-					// Chiseled Stone Brick
-					block.setType(Material.SMOOTH_BRICK);
-					block.setData((byte) 3);
-					break;
-				case 5:
-					// Cracked Stone Brick
-					block.setType(Material.SMOOTH_BRICK);
-					block.setData((byte) 2);
-					break;
-				case 6:
-				case 7:
-				case 8:
-					// Mossy Stone Brick
-					block.setType(Material.SMOOTH_BRICK);
-					block.setData((byte) 1);
-					break;
+					case 1:
+						// Stone
+						block.setType(Material.STONE);
+						break;
+					case 2:
+						// Cobblestone
+						block.setType(Material.COBBLESTONE);
+						break;
+					case 3:
+						// Stone Brick
+						block.setType(Material.SMOOTH_BRICK);
+						break;
+					case 4:
+						// Chiseled Stone Brick
+						block.setType(Material.SMOOTH_BRICK);
+						block.setData((byte) 3);
+						break;
+					case 5:
+						// Cracked Stone Brick
+						block.setType(Material.SMOOTH_BRICK);
+						block.setData((byte) 2);
+						break;
+					case 6:
+					case 7:
+					case 8:
+						// Mossy Stone Brick
+						block.setType(Material.SMOOTH_BRICK);
+						block.setData((byte) 1);
+						break;
 				}
 				// Setting block metadata
-				block.setMetadata(player.getDisplayName() + "Silverfish Block",
-						new FixedMetadataValue(instance.getManager().getMain(), true));
+				block.setMetadata(player.getDisplayName() + "Silverfish Block", new FixedMetadataValue(instance.getGameManager().getMain(), true));
 			}
 		}
 
@@ -324,25 +344,24 @@ public class SilverfishClass extends BaseClass {
 					int z = 0;
 
 					switch (wallDirection) {
-					case 1:
-						break;
-					case 2:
-						z = x;
-						break;
-					case 3:
-						z = x;
-						x = 0;
-						break;
-					case 4:
-						z = -x;
-						break;
+						case 1:
+							break;
+						case 2:
+							z = x;
+							break;
+						case 3:
+							z = x;
+							x = 0;
+							break;
+						case 4:
+							z = -x;
+							break;
 					}
 
 					Location wallLocation = location.clone().add(x, y, z);
 					Block block = wallLocation.getBlock();
 					originalBlocks.add(block); // Store the original block
-					replacedBlocks.add(block.getType()); // Initially, the replaced block is the same as the original
-															// block
+					replacedBlocks.add(block.getType()); // Initially, the replaced block is the same as the original block
 					wallLocations.add(wallLocation);
 				}
 			}
@@ -358,7 +377,7 @@ public class SilverfishClass extends BaseClass {
 			for (Location blockLocation : wallLocations) {
 				t++;
 
-				Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
+				Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
 					behavior.accept(blockLocation);
 				}, (long) ((delayBetweenBlocks * t) * 20));
 
@@ -391,9 +410,10 @@ public class SilverfishClass extends BaseClass {
 		}
 
 		/**
-		 * Removes the all blocks after a predetermined amount of seconds. Checks if
-		 * blocks from a location have the wall block metadata. Removes the metadata
-		 * from those blocks. Sets those blocks to Air.
+		 * Removes the all blocks after a predetermined amount of seconds.
+		 * Checks if blocks from a location have the wall block metadata.
+		 * Removes the metadata from those blocks.
+		 * Sets those blocks to Air.
 		 *
 		 * @param location The location the randomized block will be gotten from.
 		 *
@@ -408,11 +428,11 @@ public class SilverfishClass extends BaseClass {
 			Block block = randomizedBlockLocation.getBlock();
 
 			// Removing Block
-			Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
+			Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
 				// Checks if block has the custom set metadata
 				if (block.hasMetadata(player.getDisplayName() + "Silverfish Block")) {
 					// Removes the custom set metadata
-					block.removeMetadata(player.getDisplayName() + "Silverfish Block", instance.getManager().getMain());
+					block.removeMetadata(player.getDisplayName() + "Silverfish Block", instance.getGameManager().getMain());
 					// Sets the block to Air
 					block.setType(Material.AIR);
 
@@ -424,8 +444,7 @@ public class SilverfishClass extends BaseClass {
 //					replacedBlocks.remove(replacedBlocks.size() - 1);
 
 					// Playing digging stone sound to all players
-					SoundManager.playSoundToAllGamePlayersFromALocation(instance, randomizedBlockLocation,
-							Sound.DIG_STONE, 1, 1);
+					SoundManager.playSoundToAllGamePlayersFromALocation(instance, randomizedBlockLocation, Sound.DIG_STONE, 1, 1);
 
 					// Adding Stone/Cobblestone block breaking particles
 					for (Player gamePlayer : instance.players) {
@@ -463,13 +482,12 @@ public class SilverfishClass extends BaseClass {
 		}
 
 		public void despawnSilverfish() {
-			Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
+			Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
 				for (Entity en : player.getWorld().getEntities())
 					if (!(en instanceof Player))
 						if (en.getType().equals(EntityType.SILVERFISH)) {
 							if (en.getName().contains(player.getName())) {
-								if (en.getName().contains(ChatColorHelper.color("&eSilverfish")))
-									;
+								if (en.getName().contains(ChatColorHelper.color("&eSilverfish")));
 								en.remove();
 							}
 						}
