@@ -34,6 +34,7 @@ public class WitherClass extends BaseClass {
 
 	public WitherClass(GameInstance instance, Player player) {
 		super(instance, player);
+		baseVerticalJump = 1.1;
 	}
 
 	@Override
