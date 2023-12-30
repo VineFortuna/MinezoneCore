@@ -111,7 +111,7 @@ public class SlimeClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		slimeBall.startTime = 5000;
+//		slimeBall.startTime = 5000;
 		playerInv.setItem(0, this.getAttackWeapon());
 		ItemStack slime = getSlimeBall();
 		slime.setAmount(1);
