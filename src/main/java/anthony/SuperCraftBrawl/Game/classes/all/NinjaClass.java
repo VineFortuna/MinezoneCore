@@ -32,6 +32,7 @@ import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 public class NinjaClass extends BaseClass {
 
 	private Cooldown shurikenCooldown = new Cooldown(200);
+	private int dashCooldown = 12 * 1000;
 	private int cooldownSec;
 	private int regenStars = 0;
 	private int starsCooldown = 0;
@@ -40,7 +41,7 @@ public class NinjaClass extends BaseClass {
 
 	public NinjaClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.3;
+		baseVerticalJump = 1.1;
 	}
 
 	public ItemStack makeBlack(ItemStack armour) {
@@ -144,9 +145,9 @@ public class NinjaClass extends BaseClass {
 
 			if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Ninja
 					&& instance.classes.get(player).getLives() > 0) {
-				this.cooldownSec = (10000 - ninja.getTime()) / 1000 + 1;
+				this.cooldownSec = (dashCooldown - ninja.getTime()) / 1000 + 1;
 
-				if (ninja.getTime() < 10000) {
+				if (ninja.getTime() < dashCooldown) {
 					String msg = instance.getManager().getMain()
 							.color("&7Katana Dash &rregenerates in: &e" + this.cooldownSec + "s");
 					PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
@@ -170,8 +171,8 @@ public class NinjaClass extends BaseClass {
 
 		if (item != null && item.getType() == Material.STICK
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			if (ninja.getTime() < 10000) {
-				int seconds = (10000 - ninja.getTime()) / 1000 + 1;
+			if (ninja.getTime() < dashCooldown) {
+				int seconds = (dashCooldown - ninja.getTime()) / 1000 + 1;
 				event.setCancelled(true);
 				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
 						+ "Your Katana boost is on cooldown for " + ChatColor.YELLOW + seconds + " more seconds ");
