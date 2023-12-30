@@ -5,8 +5,11 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import anthony.SuperCraftBrawl.ChatColorHelper;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
@@ -34,6 +37,7 @@ public class SilverfishClass extends BaseClass {
 	private ItemStack weapon;
 	private ItemStack wallItem;
 	private int cooldownSec = 0;
+	private int wallCooldown = 10 * 1000;
 
 	public SilverfishClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -84,22 +88,22 @@ public class SilverfishClass extends BaseClass {
 	public void Tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Silverfish
 				&& instance.classes.get(player).getLives() > 0) {
-//			this.cooldownSec = (10000 - wallAbility.getTime()) / 1000 + 1;
+			this.cooldownSec = (wallCooldown - wallAbility.getTime()) / 1000 + 1;
 
-//			if (wallAbility.getTime() < 10000) {
-//				String msg = instance.getManager().getMain()
-//						.color("&7Wall Ability &rregenerates in: &e" + this.cooldownSec + "s");
-//				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-//						(byte) 2);
-//				CraftPlayer craft = (CraftPlayer) player;
-//				craft.getHandle().playerConnection.sendPacket(packet);
-//			} else {
-//				String msg = instance.getManager().getMain().color("&rYou can use &7Wall Ability");
-//				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-//						(byte) 2);
-//				CraftPlayer craft = (CraftPlayer) player;
-//				craft.getHandle().playerConnection.sendPacket(packet);
-//			}
+			if (wallAbility.getTime() < wallCooldown) {
+				String msg = instance.getGameManager().getMain()
+						.color("&7Wall Ability &rregenerates in: &e" + this.cooldownSec + "s");
+				PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
+						(byte) 2);
+				CraftPlayer craft = (CraftPlayer) player;
+				craft.getHandle().playerConnection.sendPacket(packet);
+			} else {
+				String msg = instance.getGameManager().getMain().color("&rYou can use &7Wall Ability");
+				PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
+						(byte) 2);
+				CraftPlayer craft = (CraftPlayer) player;
+				craft.getHandle().playerConnection.sendPacket(packet);
+			}
 		}
 	}
 
@@ -140,17 +144,16 @@ public class SilverfishClass extends BaseClass {
 			if (player.getGameMode() != GameMode.SPECTATOR) {
 				// WALL ABILITY
 				if (item.equals(wallItem)) {
-					// If Right Button Clicked
+					// Check Right or Left Button Click
 					if (action == Action.RIGHT_CLICK_AIR
 							|| action == Action.RIGHT_CLICK_BLOCK
 							|| action == Action.LEFT_CLICK_AIR
 							|| action == Action.LEFT_CLICK_BLOCK) {
 						// If ability is on cooldown
-						if (wallAbility.getTime() < 10000) {
-							int seconds = (10000 - wallAbility.getTime()) / 1000 + 1;
+						if (wallAbility.getTime() < wallCooldown) {
+							int seconds = (wallCooldown - wallAbility.getTime()) / 1000 + 1;
 							event.setCancelled(true);
-							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ "Your Wall Ability is still on cooldown for " + ChatColor.YELLOW + seconds + "s");
+							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Your Wall Ability is still on cooldown for " + ChatColor.YELLOW + seconds + "s");
 						} else {
 							wallAbility.restart();
 							SilverfishWall createWall = new SilverfishWall(3, 3, player, 2, 0.2);
