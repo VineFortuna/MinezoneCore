@@ -87,7 +87,7 @@ public class AnvilClass extends BaseClass {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.ANVIL),
-						instance.getManager().getMain().color("&e&lGoomba Stomp!"),
+						instance.getGameManager().getMain().color("&e&lGoomba Stomp!"),
 						"" + ChatColor.RESET + ChatColor.GRAY + "Right click in air to slam down on your opponents!"));
 	}
 
@@ -98,21 +98,22 @@ public class AnvilClass extends BaseClass {
 			if (player.isOnGround()) {
 				this.used = false;
 				List<Entity> players = player.getNearbyEntities(3.0, 1.0, 3.0);
-				for (Entity e : players) {
-					if (e instanceof Player) {
-						Player gamePlayer = (Player) e;
+				for (Entity entity : players) {
+					if (entity instanceof Player) {
+						Player gamePlayer = (Player) entity;
 						if (gamePlayer != player) {
 							gamePlayer.setVelocity(new Vector(0, 1, 0).multiply(0.5D));
-							if (this.num >= 15)
-								this.num = 15;
+//							if (this.num >= 15)
+//								this.num = 15;
 
-							EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer, DamageCause.VOID,
-									this.num);
-							instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+							EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer, DamageCause.MAGIC, this.num);
+//							instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 							gamePlayer.damage(this.num, player);
 							this.num = 0; // To reset
 						}
 					}
+
+
 				}
 				for (Player gamePlayer : instance.players) {
 					gamePlayer.playSound(player.getLocation(), Sound.ANVIL_LAND, 1, 1);
@@ -123,9 +124,9 @@ public class AnvilClass extends BaseClass {
 
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Anvil
 				&& instance.classes.get(player).getLives() > 0) {
-			this.cooldownSec = (15000 - anvil.getTime()) / 1000 + 1;
+			this.cooldownSec = (stompAbilityCooldown - anvil.getTime()) / 1000 + 1;
 
-			if (anvil.getTime() < 15000) {
+			if (anvil.getTime() < stompAbilityCooldown) {
 				String msg = "" + ChatColor.RESET + ChatColor.YELLOW + ChatColor.BOLD + "Goomba Stomp "
 						+ ChatColor.RESET + " regenerates in: " + ChatColor.YELLOW + cooldownSec + "s";
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
@@ -149,53 +150,64 @@ public class AnvilClass extends BaseClass {
 
 		if (item != null && item.getType() == Material.ANVIL) {
 			if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-				if (anvil.getTime() < 15000) {
-					int seconds = (15000 - anvil.getTime()) / 1000 + 1;
+				if (anvil.getTime() < stompAbilityCooldown) {
+					int seconds = (stompAbilityCooldown - anvil.getTime()) / 1000 + 1;
 					event.setCancelled(true);
 					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
 							+ "Your Goomba Stomp is still on cooldown for " + ChatColor.YELLOW + seconds
 							+ " more seconds ");
 				} else {
 					anvil.restart();
-					if (!(player.isOnGround())) {
-						int y = 1;
-						Block b = player.getLocation().getBlock();
-						boolean c = false;
 
-						while (c == false) {
-							Location loc = new Location(player.getWorld(), b.getX(), b.getY() - y, b.getZ());
-							Block b2 = loc.getBlock();
-
-							if (b2.getY() <= 50)
-								return;
-
-							if (b2 != null && b2.getType() != null && b2.getType() == Material.AIR) {
-								y++;
-							} else {
-								b = loc.getBlock();
-								c = true;
-								break;
-							}
-						}
-						double maxHeight = 10.0; // Maximum height for maximum damage
-						double heightRatio = (double) y / maxHeight;
-						double damage = 20.0 * heightRatio;
-
-						if (damage > 20.0) {
-							damage = 20.0; // Cap the damage at 20.0
-						}
-
-						this.num = (int) Math.ceil(damage);
-						player.setVelocity(new Vector(0, -1.5, 0).multiply(1.0D));
-						player.playEffect(player.getLocation(), Effect.TILE_BREAK, 1);
-						this.used = true;
-					} else {
-						player.sendMessage(
-								instance.getManager().getMain().color("&c&l(!) &rYou cannot use this on the ground!"));
-					}
+					stompAbility();
+					this.used = true;
 				}
 			}
 		}
 	}
 
+	@SuppressWarnings("deprecation")
+	private void stompAbility() {
+		if ((player.isOnGround())) {
+			player.sendMessage(ChatColorHelper.color("&c&l(!) &rYou cannot use this on the ground!"));
+			return;
+		}
+
+		int maxHeight = 20;
+		int currentHeight = calculateFallHeight(player);
+
+		this.num = (int) calculateDamage(currentHeight, maxHeight);
+		applyStompEffects(player);
+	}
+
+	private int calculateFallHeight(Player player) {
+		int y = 1;
+		Block block = player.getLocation().getBlock();
+
+		// Loop while blockType is Air
+		while (block.getType() == Material.AIR && block.getY() > 50) {
+			y++;
+			block = block.getRelative(BlockFace.DOWN);
+		}
+
+		return y;
+	}
+
+	private double calculateDamage(int currentHeight, int maxHeight) {
+			double heightRatio = (double) currentHeight / maxHeight;
+			double maxDamage = 19.0; // Set the maximum damage to 6 hearts
+			double damage = maxDamage * heightRatio;
+
+			// Debug messages
+			System.out.println("Height Ratio: " + heightRatio);
+			System.out.println("Calculated Damage: " + damage);
+
+			return Math.min(damage, maxDamage); // Cap the damage at the maximum value
+	}
+
+	private void applyStompEffects(Player player) {
+		player.setVelocity(new Vector(0, -1.5, 0).multiply(1.0D));
+		player.playEffect(player.getLocation(), Effect.TILE_BREAK, 1);
+		// Perform any additional logic related to the stomp ability
+	}
 }
