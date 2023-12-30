@@ -92,14 +92,14 @@ public class OcelotClass extends BaseClass {
 			this.cooldownSec = (20000 - ocelot.getTime()) / 1000 + 1;
 
 			if (ocelot.getTime() < 20000) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&7&lPurr Attack &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &7&lPurr Attack");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &7&lPurr Attack");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -113,13 +113,13 @@ public class OcelotClass extends BaseClass {
 	@Override
 	public void SetItems(Inventory playerInv) {
 		this.cooldownSec = 0; // Reset each life
-		ocelot.startTime = 20000;
+//		ocelot.startTime = 20000;
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
-						instance.getManager().getMain().color("&7&lPurr Attack"), "",
+						instance.getGameManager().getMain().color("&7&lPurr Attack"), "",
 						"" + ChatColor.RESET + "Right click to effect players with:",
-						instance.getManager().getMain().color("   &r10 sec Slowness II")));
+						instance.getGameManager().getMain().color("   &r10 sec Slowness II")));
 	}
 
 	@Override
@@ -136,13 +136,13 @@ public class OcelotClass extends BaseClass {
 							+ "Your &7&lPurr Attack is still regenerating for " + ChatColor.YELLOW + seconds + "s");
 				} else {
 					ocelot.restart();
-					player.sendMessage(instance.getManager().getMain()
+					player.sendMessage(instance.getGameManager().getMain()
 							.color("&r&l(!) &rYou attacked all players with &7&lPurr Attack"));
 					for (Player gamePlayer : instance.players) {
 						gamePlayer.playSound(gamePlayer.getLocation(), Sound.CAT_MEOW, 1, 1);
 						if (player != gamePlayer) {
 							gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 110, 2));
-							gamePlayer.sendMessage(instance.getManager().getMain()
+							gamePlayer.sendMessage(instance.getGameManager().getMain()
 									.color("&r&l(!) &rYou were attacked by &7&lPurr Attack"));
 						}
 					}
