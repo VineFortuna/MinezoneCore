@@ -81,7 +81,7 @@ public class LargeFernClass extends BaseClass {
 
         // Boots
         ItemStack boots = ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.GREEN, "&2Large Fern Boots");
-        chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
+        boots.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 
         // Setting Armor
         playerEquip.setHelmet(playerHead);
