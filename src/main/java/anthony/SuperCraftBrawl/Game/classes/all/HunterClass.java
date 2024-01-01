@@ -1,13 +1,15 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.Random;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -25,11 +27,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
+import java.util.Random;
 
 public class HunterClass extends BaseClass {
 
@@ -74,7 +72,7 @@ public class HunterClass extends BaseClass {
 	@Override
 	public ItemStack getAttackWeapon() {
 		ItemStack sword = ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.GOLD_SWORD),
-				instance.getManager().getMain().color("&c&lFighter Sword")), Enchantment.KNOCKBACK, 2);
+				instance.getGameManager().getMain().color("&c&lFighter Sword")), Enchantment.KNOCKBACK, 2);
 		ItemMeta meta = sword.getItemMeta();
 		meta.spigot().setUnbreakable(true);
 		sword.setItemMeta(meta);
@@ -94,8 +92,8 @@ public class HunterClass extends BaseClass {
 					if (instance.team.get(p).equals(instance.team.get(player)))
 						return;
 
-				if (instance.getManager().spawnProt.containsKey(p)
-						|| instance.getManager().spawnProt.containsKey(player))
+				if (instance.getGameManager().spawnProt.containsKey(p)
+						|| instance.getGameManager().spawnProt.containsKey(player))
 					return;
 
 				BaseClass bc = instance.classes.get(player);
@@ -105,17 +103,17 @@ public class HunterClass extends BaseClass {
 				count++;
 				player.getInventory()
 						.addItem(ItemHelper.setDetails(new ItemStack(Material.REDSTONE),
-								instance.getManager().getMain().color("&c&lBlood Lust"), "",
-								instance.getManager().getMain().color("&7Get 5 of this to get an OP potion!")));
+								instance.getGameManager().getMain().color("&c&lBlood Lust"), "",
+								instance.getGameManager().getMain().color("&7Get 5 of this to get an OP potion!")));
 
 				if (count >= 5) {
 					player.getInventory().remove(Material.REDSTONE);
 
 					if (chance2 == 0) {
-						player.sendMessage(instance.getManager().getMain()
+						player.sendMessage(instance.getGameManager().getMain()
 								.color("&2&l(!) &rYour 5 Blood Lust rewarded you with a Strength I potion"));
 						ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-								instance.getManager().getMain().color("&eStrength Potion &7(5 sec)"));
+								instance.getGameManager().getMain().color("&eStrength Potion &7(5 sec)"));
 						Potion pot = new Potion(1);
 						pot.setType(PotionType.STRENGTH);
 						pot.setSplash(true);
@@ -126,10 +124,10 @@ public class HunterClass extends BaseClass {
 						player.getInventory().addItem(item);
 						count = 0;
 					} else {
-						player.sendMessage(instance.getManager().getMain()
+						player.sendMessage(instance.getGameManager().getMain()
 								.color("&2&l(!) &rYour 5 Blood Lust rewarded you with a Resistance I potion"));
 						ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-								instance.getManager().getMain().color("&eResistance Potion &7(15 sec)"));
+								instance.getGameManager().getMain().color("&eResistance Potion &7(15 sec)"));
 						Potion pot = new Potion(1);
 						pot.setType(PotionType.FIRE_RESISTANCE);
 						pot.setSplash(true);
@@ -163,8 +161,8 @@ public class HunterClass extends BaseClass {
 		player.getInventory().setItem(0, this.getAttackWeapon());
 		player.getInventory().setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.FEATHER),
-						instance.getManager().getMain().color("&b&lDash"),
-						instance.getManager().getMain().color("&7A quick escape or attack")));
+						instance.getGameManager().getMain().color("&b&lDash"),
+						instance.getGameManager().getMain().color("&7A quick escape or attack")));
 	}
 
 	@Override

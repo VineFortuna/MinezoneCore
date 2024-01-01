@@ -1,8 +1,13 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.lang.reflect.Field;
-import java.util.UUID;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -22,15 +27,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import java.lang.reflect.Field;
+import java.util.UUID;
 
 public class VampireClass extends BaseClass {
 
@@ -131,7 +129,7 @@ public class VampireClass extends BaseClass {
 	private void restart() {
 		this.launched = false;
 		this.hitPlayer = false;
-		String msg = instance.getManager().getMain().color("&9&l(!) &rYou can now use &eVampire's Bow");
+		String msg = instance.getGameManager().getMain().color("&9&l(!) &rYou can now use &eVampire's Bow");
 		PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
 		CraftPlayer craft = (CraftPlayer) player;
 		craft.getHandle().playerConnection.sendPacket(packet);
@@ -153,7 +151,7 @@ public class VampireClass extends BaseClass {
 
 					if (ticks == 0) {
 						restart();
-						String msg = instance.getManager().getMain().color("&9&l(!) &rYou can now use &eVampire's Bow");
+						String msg = instance.getGameManager().getMain().color("&9&l(!) &rYou can now use &eVampire's Bow");
 						PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 								(byte) 2);
 						CraftPlayer craft = (CraftPlayer) player;
@@ -161,7 +159,7 @@ public class VampireClass extends BaseClass {
 						r = null;
 						this.cancel();
 					} else {
-						String msg = instance.getManager().getMain()
+						String msg = instance.getGameManager().getMain()
 								.color("&9&l(!) &eVampire's Bow Cooldown: " + ticks + "s");
 						PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 								(byte) 2);
@@ -172,13 +170,13 @@ public class VampireClass extends BaseClass {
 					ticks--;
 				}
 			};
-			r.runTaskTimer(instance.getManager().getMain(), 0, 20);
+			r.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
 		}
 	}
 
 	private void abilityMsg() {
 		player.sendMessage("");
-		player.sendMessage(instance.getManager().getMain()
+		player.sendMessage(instance.getGameManager().getMain()
 				.color("&e&lCLASS TIP> &rShoot players with your bow to infect them with Poison II for 5 seconds"));
 		player.sendMessage("");
 	}
@@ -196,7 +194,7 @@ public class VampireClass extends BaseClass {
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper.addEnchant(ItemHelper.addEnchant(
 				ItemHelper.setDetails(new ItemStack(Material.GHAST_TEAR),
-						instance.getManager().getMain().color("Ghast Tear &7(Right Click)")),
+						instance.getGameManager().getMain().color("Ghast Tear &7(Right Click)")),
 				Enchantment.DAMAGE_ALL, 2), Enchantment.KNOCKBACK, 1);
 		return item;
 	}

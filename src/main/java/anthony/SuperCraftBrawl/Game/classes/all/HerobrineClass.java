@@ -1,7 +1,12 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.Random;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -19,14 +24,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import java.util.Random;
 
 public class HerobrineClass extends BaseClass {
 
@@ -74,7 +72,7 @@ public class HerobrineClass extends BaseClass {
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
 						"" + ChatColor.RESET + ChatColor.BOLD + "Diamond of Despair", "",
-						instance.getManager().getMain().color("&7Right click to send effects on enemies!")));
+						instance.getGameManager().getMain().color("&7Right click to send effects on enemies!")));
 	}
 
 	@Override
@@ -84,14 +82,14 @@ public class HerobrineClass extends BaseClass {
 			this.cooldownSec = (20000 - herobrine.getTime()) / 1000 + 1;
 
 			if (herobrine.getTime() < 20000) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&b&lDiamond of Despair &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &b&lDiamond of Despair");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &b&lDiamond of Despair");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -127,7 +125,7 @@ public class HerobrineClass extends BaseClass {
 								gamePlayers.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 2));
 							}
 						}
-						gamePlayers.sendMessage(instance.getManager().getMain()
+						gamePlayers.sendMessage(instance.getGameManager().getMain()
 								.color("&2&l(!) &e" + player.getName() + " &rslowed all players!"));
 					}
 				} else if (chance == 1) {
@@ -141,7 +139,7 @@ public class HerobrineClass extends BaseClass {
 								gamePlayers.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 80, 1));
 							}
 						}
-						gamePlayers.sendMessage(instance.getManager().getMain()
+						gamePlayers.sendMessage(instance.getGameManager().getMain()
 								.color("&2&l(!) &e" + player.getName() + " &rpoisoned all players!"));
 					}
 				} else if (chance == 2) {
@@ -163,7 +161,7 @@ public class HerobrineClass extends BaseClass {
 								}
 							}
 						}
-						gamePlayers.sendMessage(instance.getManager().getMain()
+						gamePlayers.sendMessage(instance.getGameManager().getMain()
 								.color("&2&l(!) &e" + player.getName() + " &rset their enemies on fire!"));
 					}
 				}

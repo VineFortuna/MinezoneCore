@@ -1,10 +1,16 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.Color;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.Cooldown;
+import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
+import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -17,17 +23,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.util.Vector;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
-import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 
 public class NinjaClass extends BaseClass {
 
@@ -148,14 +143,14 @@ public class NinjaClass extends BaseClass {
 				this.cooldownSec = (dashCooldown - ninja.getTime()) / 1000 + 1;
 
 				if (ninja.getTime() < dashCooldown) {
-					String msg = instance.getManager().getMain()
+					String msg = instance.getGameManager().getMain()
 							.color("&7Katana Dash &rregenerates in: &e" + this.cooldownSec + "s");
 					PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 							(byte) 2);
 					CraftPlayer craft = (CraftPlayer) player;
 					craft.getHandle().playerConnection.sendPacket(packet);
 				} else {
-					String msg = instance.getManager().getMain().color("&rYou can use &7Katana Dash");
+					String msg = instance.getGameManager().getMain().color("&rYou can use &7Katana Dash");
 					PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 							(byte) 2);
 					CraftPlayer craft = (CraftPlayer) player;
@@ -184,7 +179,7 @@ public class NinjaClass extends BaseClass {
 				Vector vel = player.getLocation().getDirection().multiply(boosterStrength);
 				player.setVelocity(vel);
 			}
-		} else if (item != null && item.getType() == Material.NETHER_STAR
+		} else if (item != null && item.getType() == Material.NETHER_STAR && item.isSimilar(getShuriken())
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK
 						|| event.getAction() == Action.LEFT_CLICK_AIR
 						|| event.getAction() == Action.LEFT_CLICK_BLOCK)) {
@@ -212,7 +207,7 @@ public class NinjaClass extends BaseClass {
 							}
 
 						}, new ItemStack(Material.NETHER_STAR));
-						instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+						instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 								player.getLocation().getDirection().multiply(3.0D));
 					}
 					event.setCancelled(true);

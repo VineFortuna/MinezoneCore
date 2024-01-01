@@ -1,12 +1,12 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.Color;
-import org.bukkit.Effect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
+import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.ItemHelper;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -18,13 +18,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
-import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 
 public class DwellerClass extends BaseClass {
 
@@ -72,9 +65,9 @@ public class DwellerClass extends BaseClass {
 						ItemHelper
 								.addEnchant(
 										ItemHelper.setDetails(new ItemStack(Material.BONE), "", "",
-												instance.getManager().getMain()
+												instance.getGameManager().getMain()
 														.color("&7Once a life use to throw bone"),
-												instance.getManager().getMain().color("&7& do insane damage!")),
+												instance.getGameManager().getMain().color("&7& do insane damage!")),
 										Enchantment.DAMAGE_ALL, 4),
 						Enchantment.KNOCKBACK, 1);
 	}
@@ -109,7 +102,7 @@ public class DwellerClass extends BaseClass {
 								@SuppressWarnings("deprecation")
 								EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
 										DamageCause.PROJECTILE, 8.0);
-								instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+								instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 								gamePlayer.damage(8.0, player);
 							}
 							for (Player gamePlayer : instance.players) {
@@ -120,7 +113,7 @@ public class DwellerClass extends BaseClass {
 						}
 
 					}, new ItemStack(Material.BONE));
-					instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+					instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 							player.getLocation().getDirection().multiply(3.0D));
 				}
 				event.setCancelled(true);
