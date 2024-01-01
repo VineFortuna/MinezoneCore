@@ -1,13 +1,12 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.Random;
-
-import org.bukkit.ChatColor;
-import org.bukkit.Color;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
@@ -23,15 +22,10 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 import xyz.xenondevs.particle.ParticleEffect;
 import xyz.xenondevs.particle.data.texture.BlockTexture;
+
+import java.util.Random;
 
 public class NotchClass extends BaseClass {
 
@@ -87,14 +81,14 @@ public class NotchClass extends BaseClass {
 			this.cooldownSec = (10000 - notch.getTime()) / 1000 + 1;
 
 			if (notch.getTime() < 10000) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&0Collape X-Axis &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &0Collape X-Axis");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &0Collape X-Axis");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -116,16 +110,16 @@ public class NotchClass extends BaseClass {
 				player.getInventory()
 						.addItem(ItemHelper.setDetails(new ItemStack(Material.GRASS),
 								"" + ChatColor.BLACK + "Collapse X-Axis", "",
-								instance.getManager().getMain().color("&7Pull enemies when aiming at them!"),
-								instance.getManager().getMain().color("   &rRange: &e20 blocks")));
-				player.sendMessage(instance.getManager().getMain().color("&2&l(!) &rYou were given &0Collapse X-Axis"));
+								instance.getGameManager().getMain().color("&7Pull enemies when aiming at them!"),
+								instance.getGameManager().getMain().color("   &rRange: &e20 blocks")));
+				player.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rYou were given &0Collapse X-Axis"));
 			} else {
 				player.getInventory()
 						.addItem(ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR),
 								"" + ChatColor.YELLOW + "Teleport a Player", "",
-								instance.getManager().getMain().color("&7Teleport a random player to you!")));
+								instance.getGameManager().getMain().color("&7Teleport a random player to you!")));
 				player.sendMessage(
-						instance.getManager().getMain().color("&2&l(!) &rYou were given &eTeleport a Player"));
+						instance.getGameManager().getMain().color("&2&l(!) &rYou were given &eTeleport a Player"));
 			}
 		} else if (item.getType() == Material.GRASS
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
@@ -181,7 +175,7 @@ public class NotchClass extends BaseClass {
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 			if (!(player.isOnGround())) {
 				player.sendMessage(
-						instance.getManager().getMain().color("&c&l(!) &rYou need to be on the ground to use this!"));
+						instance.getGameManager().getMain().color("&c&l(!) &rYou need to be on the ground to use this!"));
 				return;
 			}
 			Random random = new Random();
@@ -198,8 +192,8 @@ public class NotchClass extends BaseClass {
 
 			gamePlayer.teleport(player);
 			gamePlayer.sendMessage(
-					instance.getManager().getMain().color("&2&l(!) &rYou got teleported to &e" + player.getName()));
-			player.sendMessage(instance.getManager().getMain()
+					instance.getGameManager().getMain().color("&2&l(!) &rYou got teleported to &e" + player.getName()));
+			player.sendMessage(instance.getGameManager().getMain()
 					.color("&2&l(!) &rYou teleported &e" + gamePlayer.getName() + "&r to you!"));
 			player.getInventory().clear(player.getInventory().getHeldItemSlot());
 		}

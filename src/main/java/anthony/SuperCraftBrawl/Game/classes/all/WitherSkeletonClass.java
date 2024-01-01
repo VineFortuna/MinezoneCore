@@ -1,27 +1,21 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.List;
-import java.util.Random;
-
-import org.bukkit.Color;
-import org.bukkit.Effect;
-import org.bukkit.FireworkEffect;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Firework;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
@@ -31,13 +25,8 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import java.util.List;
+import java.util.Random;
 
 public class WitherSkeletonClass extends BaseClass {
 
@@ -80,7 +69,7 @@ public class WitherSkeletonClass extends BaseClass {
 						ItemHelper
 								.addEnchant(
 										ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER),
-												instance.getManager().getMain()
+												instance.getGameManager().getMain()
 														.color("&rEye of Ender &7(Right Click)")),
 										Enchantment.DAMAGE_ALL, 1),
 						Enchantment.KNOCKBACK, 1);
@@ -135,7 +124,7 @@ public class WitherSkeletonClass extends BaseClass {
 												@SuppressWarnings("deprecation")
 												EntityDamageEvent damageEvent = new EntityDamageEvent(p,
 														DamageCause.WITHER, 8.0);
-												instance.getManager().getMain().getServer().getPluginManager()
+												instance.getGameManager().getMain().getServer().getPluginManager()
 														.callEvent(damageEvent);
 												p.damage(8.0, player);
 											}
@@ -144,7 +133,7 @@ public class WitherSkeletonClass extends BaseClass {
 											@SuppressWarnings("deprecation")
 											EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.WITHER,
 													8.0);
-											instance.getManager().getMain().getServer().getPluginManager()
+											instance.getGameManager().getMain().getServer().getPluginManager()
 													.callEvent(damageEvent);
 											p.damage(8.0, player);
 										}
@@ -199,11 +188,11 @@ public class WitherSkeletonClass extends BaseClass {
 												.addEnchant(
 														ItemHelper.addEnchant(
 																ItemHelper.setDetails(new ItemStack(Material.BOW),
-																		instance.getManager().getMain()
+																		instance.getGameManager().getMain()
 																				.color("&7&lWitherSk Bow")),
 																Enchantment.DURABILITY, 1000),
 														Enchantment.ARROW_INFINITE, 1));
-						String msg = instance.getManager().getMain()
+						String msg = instance.getGameManager().getMain()
 								.color("&9&l(!) &eYou can now use &7&lWither's Bow");
 						PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 								(byte) 2);
@@ -243,7 +232,7 @@ public class WitherSkeletonClass extends BaseClass {
 
 					@SuppressWarnings("deprecation")
 					EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.WITHER, dmg);
-					instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+					instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 					p.damage(dmg, player);
 					p.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 100, 1));
 					Firework fw = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
@@ -291,7 +280,7 @@ public class WitherSkeletonClass extends BaseClass {
 		this.bow = ItemHelper
 				.addEnchant(ItemHelper.addEnchant(
 						ItemHelper.setDetails(new ItemStack(Material.BOW),
-								instance.getManager().getMain().color("&7&lWitherSk Bow")),
+								instance.getGameManager().getMain().color("&7&lWitherSk Bow")),
 						Enchantment.DURABILITY, 1000), Enchantment.ARROW_INFINITE, 1);
 
 		playerInv.setItem(0, this.getAttackWeapon());
@@ -301,7 +290,7 @@ public class WitherSkeletonClass extends BaseClass {
 
 	private void abilityMsg() {
 		player.sendMessage("");
-		player.sendMessage(instance.getManager().getMain().color(
+		player.sendMessage(instance.getGameManager().getMain().color(
 				"&e&lCLASS TIP> &rShoot players with your bow to give Wither effect, & do damage. Also very rare chance to do INSANE damage :)"));
 		player.sendMessage("");
 	}
