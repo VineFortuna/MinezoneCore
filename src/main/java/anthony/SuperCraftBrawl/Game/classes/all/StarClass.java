@@ -1,7 +1,10 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.List;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -18,11 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
+import java.util.List;
 
 public class StarClass extends BaseClass {
 
@@ -52,16 +51,16 @@ public class StarClass extends BaseClass {
 									if (e.getName().contains(player.getName())) {
 										if (player.getHealth() <= 18.0) {
 											player.setHealth(player.getHealth() + 2.0);
-											player.sendMessage(instance.getManager().getMain()
+											player.sendMessage(instance.getGameManager().getMain()
 													.color("&e&l(!) &rJeffrey just gave you an extra 2 hearts!"));
 											count--;
 										} else if (player.getHealth() > 18.0 && player.getHealth() < 20.0) {
 											double p = 20.0 - player.getHealth();
-											player.sendMessage(instance.getManager().getMain().color(
+											player.sendMessage(instance.getGameManager().getMain().color(
 													"&e&l(!) &rJeffrey just gave you an extra " + p + " hearts!"));
 											count--;
 										} else
-											player.sendMessage(instance.getManager().getMain()
+											player.sendMessage(instance.getGameManager().getMain()
 													.color("&c&l(!) &rYou are already full of health!"));
 									}
 								}
@@ -71,7 +70,7 @@ public class StarClass extends BaseClass {
 				}
 			} else {
 				player.sendMessage(
-						instance.getManager().getMain().color("&c&l(!) &rYour pet Jeffrey's heal power ran out :("));
+						instance.getGameManager().getMain().color("&c&l(!) &rYour pet Jeffrey's heal power ran out :("));
 				isSpawned = false; // To reset
 			}
 		}
@@ -127,10 +126,10 @@ public class StarClass extends BaseClass {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.MONSTER_EGG),
-						instance.getManager().getMain().color("&e&lJeffrey Pokeball"), "",
-						instance.getManager().getMain().color("&7Spawn your Jeffrey to heal you!"),
-						instance.getManager().getMain().color("   &rMax 10 heal uses"),
-						instance.getManager().getMain().color("   &rHeals 2 hearts per sec")));
+						instance.getGameManager().getMain().color("&e&lJeffrey Pokeball"), "",
+						instance.getGameManager().getMain().color("&7Spawn your Jeffrey to heal you!"),
+						instance.getGameManager().getMain().color("   &rMax 10 heal uses"),
+						instance.getGameManager().getMain().color("   &rHeals 2 hearts per sec")));
 	}
 
 	@Override
@@ -143,7 +142,7 @@ public class StarClass extends BaseClass {
 				Entity pig = player.getLocation().getWorld().spawnEntity(player.getLocation(), EntityType.PIG);
 				pig.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.RESET + "Jeffrey");
 				pig.setCustomNameVisible(true);
-				player.sendMessage(instance.getManager().getMain().color(
+				player.sendMessage(instance.getGameManager().getMain().color(
 						"&e&l(!) &rYou spawned in Jeffrey! You need to be within 5 blocks of him to regenerate"));
 				isSpawned = true;
 				player.getInventory().remove(Material.MONSTER_EGG);

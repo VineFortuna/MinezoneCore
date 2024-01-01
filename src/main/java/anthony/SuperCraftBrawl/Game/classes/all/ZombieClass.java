@@ -1,7 +1,10 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.Random;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -22,11 +25,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
+import java.util.Random;
 
 public class ZombieClass extends BaseClass {
 
@@ -116,7 +115,7 @@ public class ZombieClass extends BaseClass {
 				zombie.setBaby(true);
 				zombie.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Baby Zombie");
 			}
-			player.sendMessage(instance.getManager().getMain().color("&e&l(!) &rSpawning army of &eBaby Zombies!"));
+			player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rSpawning army of &eBaby Zombies!"));
 			player.playSound(player.getLocation(), Sound.ZOMBIE_HURT, 1, 1);
 		}
 	}
@@ -136,7 +135,7 @@ public class ZombieClass extends BaseClass {
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper.addEnchant(
 				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.IRON_SPADE),
-						instance.getManager().getMain().color("&2&lGrave Digger")), Enchantment.DAMAGE_ALL, 1),
+						instance.getGameManager().getMain().color("&2&lGrave Digger")), Enchantment.DAMAGE_ALL, 1),
 				Enchantment.KNOCKBACK, 1);
 		ItemMeta meta = item.getItemMeta();
 		meta.spigot().setUnbreakable(true);

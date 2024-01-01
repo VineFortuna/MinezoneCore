@@ -1,26 +1,22 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.Random;
-
-import org.bukkit.Bukkit;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Color;
-import org.bukkit.Effect;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Firework;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
@@ -31,13 +27,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import java.util.Random;
 
 public class FireworkClass extends BaseClass {
 
@@ -87,16 +77,16 @@ public class FireworkClass extends BaseClass {
 						ItemHelper.addEnchant(ItemHelper.addEnchant(
 								ItemHelper.setDetails(new ItemStack(Material.BOW),
 										"" + ChatColor.RED + ChatColor.BOLD + "Firework Bow", "",
-										instance.getManager().getMain()
+										instance.getGameManager().getMain()
 												.color("&7Shoot players and infect with either:"),
-										instance.getManager().getMain().color("   &r6 sec Poison II"),
-										instance.getManager().getMain().color("   &r5 sec Blindness II"),
-										instance.getManager().getMain().color("   &r5 sec Slowness III"),
-										instance.getManager().getMain().color("   &r10 sec Weakness II")),
+										instance.getGameManager().getMain().color("   &r6 sec Poison II"),
+										instance.getGameManager().getMain().color("   &r5 sec Blindness II"),
+										instance.getGameManager().getMain().color("   &r5 sec Slowness III"),
+										instance.getGameManager().getMain().color("   &r10 sec Weakness II")),
 								Enchantment.ARROW_INFINITE, 1), Enchantment.DURABILITY, 1000));
 		playerInv.setItem(2, new ItemStack(Material.ARROW));
 
-		msg = instance.getManager().getMain().color("&9&l(!) &eYou can use &c&lFirework Bow");
+		msg = instance.getGameManager().getMain().color("&9&l(!) &eYou can use &c&lFirework Bow");
 		packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
 		craft.getHandle().playerConnection.sendPacket(packet);
 	}
@@ -107,7 +97,7 @@ public class FireworkClass extends BaseClass {
 				.addEnchant(
 						ItemHelper.addEnchant(
 								ItemHelper.setDetails(new ItemStack(Material.FIREWORK), "", "",
-										instance.getManager().getMain()
+										instance.getGameManager().getMain()
 												.color("&7Right click to ride ur firework highhhh!!")),
 								Enchantment.DAMAGE_ALL, 3),
 						Enchantment.KNOCKBACK, 1);
@@ -125,13 +115,13 @@ public class FireworkClass extends BaseClass {
 		if (gameTicks % 20 == 0)
 			if (this.cooldown != 0) {
 				this.cooldown--;
-				msg = instance.getManager().getMain()
+				msg = instance.getGameManager().getMain()
 						.color("&9&l(!) &c&lFirework Bow &ecooldown: " + this.cooldown + "s");
 				packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
 				craft.getHandle().playerConnection.sendPacket(packet);
 
 				if (this.cooldown == 0) {
-					msg = instance.getManager().getMain().color("&9&l(!) &eYou can use &c&lFirework Bow");
+					msg = instance.getGameManager().getMain().color("&9&l(!) &eYou can use &c&lFirework Bow");
 					packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
 					craft.getHandle().playerConnection.sendPacket(packet);
 				}
@@ -147,7 +137,7 @@ public class FireworkClass extends BaseClass {
 				this.cooldown = 5;
 			} else if (this.cooldown > 0) {
 				event.setCancelled(true);
-				player.sendMessage(instance.getManager().getMain().color(
+				player.sendMessage(instance.getGameManager().getMain().color(
 						"&c&l(!) &rYour &c&lFirework Bow &ris still on cooldown for &e" + this.cooldown + " seconds"));
 			}
 		}
@@ -166,7 +156,7 @@ public class FireworkClass extends BaseClass {
 							EntityType.FIREWORK);
 					FireworkMeta fwm = fw.getFireworkMeta();
 
-					fwm.setPower(1);
+					fwm.setPower(0);
 					fwm.addEffect(FireworkEffect.builder().withColor(Color.GREEN).flicker(true).build());
 					fw.setFireworkMeta(fwm);
 				} else if (chance == 1) {
@@ -175,7 +165,7 @@ public class FireworkClass extends BaseClass {
 							EntityType.FIREWORK);
 					FireworkMeta fwm = fw.getFireworkMeta();
 
-					fwm.setPower(1);
+					fwm.setPower(0);
 					fwm.addEffect(FireworkEffect.builder().withColor(Color.BLACK).flicker(true).build());
 					fw.setFireworkMeta(fwm);
 				} else if (chance == 2) {
@@ -184,7 +174,7 @@ public class FireworkClass extends BaseClass {
 							EntityType.FIREWORK);
 					FireworkMeta fwm = fw.getFireworkMeta();
 
-					fwm.setPower(1);
+					fwm.setPower(0);
 					fwm.addEffect(FireworkEffect.builder().withColor(Color.SILVER).flicker(true).build());
 					fw.setFireworkMeta(fwm);
 				} else if (chance == 3) {
@@ -193,7 +183,7 @@ public class FireworkClass extends BaseClass {
 							EntityType.FIREWORK);
 					FireworkMeta fwm = fw.getFireworkMeta();
 
-					fwm.setPower(1);
+					fwm.setPower(0);
 					fwm.addEffect(FireworkEffect.builder().withColor(Color.GRAY).flicker(true).build());
 					fw.setFireworkMeta(fwm);
 				}
@@ -222,9 +212,9 @@ public class FireworkClass extends BaseClass {
 					fw.setVelocity(velocity);
 					fw.setFireworkMeta(fwm);
 					fw.setPassenger(player);
-					player.sendMessage(instance.getManager().getMain().color("&2&l(!) &rFlyyy me to the moon!"));
+					player.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rFlyyy me to the moon!"));
 				} else
-					player.sendMessage(instance.getManager().getMain()
+					player.sendMessage(instance.getGameManager().getMain()
 							.color("&c&l(!) &rYou already used your Firework ability this life!"));
 			}
 		}

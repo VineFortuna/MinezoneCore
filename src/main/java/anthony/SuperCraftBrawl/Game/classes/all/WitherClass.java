@@ -1,12 +1,17 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -19,13 +24,6 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 
 public class WitherClass extends BaseClass {
 
@@ -108,7 +106,7 @@ public class WitherClass extends BaseClass {
 						@Override
 						public void run() {
 							if (ticks <= 5 && ticks > 0) {
-								String msg = instance.getManager().getMain()
+								String msg = instance.getGameManager().getMain()
 										.color("&9&l(!) &eWither's Bow Cooldown: " + ticks + "s");
 								PacketPlayOutChat packet = new PacketPlayOutChat(
 										ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
@@ -117,7 +115,7 @@ public class WitherClass extends BaseClass {
 							} else if (ticks == 0) {
 								witherBow = null;
 								this.cancel();
-								String msg = instance.getManager().getMain()
+								String msg = instance.getGameManager().getMain()
 										.color("&9&l(!) &eYou can now use Wither's Bow");
 								PacketPlayOutChat packet = new PacketPlayOutChat(
 										ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
@@ -130,7 +128,7 @@ public class WitherClass extends BaseClass {
 						}
 
 					};
-					witherBow.runTaskTimer(instance.getManager().getMain(), 0, 20);
+					witherBow.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
 				}
 			}
 		}

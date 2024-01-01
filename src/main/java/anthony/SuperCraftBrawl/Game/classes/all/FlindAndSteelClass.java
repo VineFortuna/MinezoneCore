@@ -1,5 +1,12 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Color;
 import org.bukkit.Effect;
 import org.bukkit.GameMode;
@@ -15,24 +22,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-
 public class FlindAndSteelClass extends BaseClass {
 
 	private BukkitRunnable r;
 	private boolean isUsed = false;
 	private int initialLives = 0;
 	private ItemStack flint = ItemHelper.addEnchant(
-			ItemHelper.setDetails(new ItemStack(Material.FLINT), instance.getManager().getMain().color("&4&lFlint")),
+			ItemHelper.setDetails(new ItemStack(Material.FLINT), instance.getGameManager().getMain().color("&4&lFlint")),
 			Enchantment.DAMAGE_ALL, 3);
 	private ItemStack steel = ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.IRON_INGOT),
-			instance.getManager().getMain().color("&b&lSteel")), Enchantment.KNOCKBACK, 2);
+			instance.getGameManager().getMain().color("&b&lSteel")), Enchantment.KNOCKBACK, 2);
 
 	public FlindAndSteelClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -90,7 +89,7 @@ public class FlindAndSteelClass extends BaseClass {
 
 					r.cancel();
 					r = null;
-					player.sendMessage(instance.getManager().getMain()
+					player.sendMessage(instance.getGameManager().getMain()
 							.color("&2&l(!) &rYou made &4Flint&7And&bSteel&r! You have &e15 seconds &rto go nuts"));
 					player.getInventory().remove(this.flint);
 					player.getInventory().remove(this.steel);
@@ -125,7 +124,7 @@ public class FlindAndSteelClass extends BaseClass {
 						}
 					}
 					if (ticks == 0) {
-						player.sendMessage(instance.getManager().getMain()
+						player.sendMessage(instance.getGameManager().getMain()
 								.color("&2&l(!) &rYour &4Flint&7And&bSteel&r ran out of power!"));
 						player.getInventory().remove(Material.FLINT_AND_STEEL);
 						player.getInventory().addItem(flint);
@@ -139,7 +138,7 @@ public class FlindAndSteelClass extends BaseClass {
 				}
 
 			};
-			r.runTaskTimer(instance.getManager().getMain(), 0, 20);
+			r.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
 		}
 	}
 
@@ -160,7 +159,7 @@ public class FlindAndSteelClass extends BaseClass {
 						r = null;
 						this.cancel();
 					} else {
-						String msg = instance.getManager().getMain()
+						String msg = instance.getGameManager().getMain()
 								.color("&9&l(!) &eAbility Cooldown: " + ticks + "s");
 						PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 								(byte) 2);
@@ -172,7 +171,7 @@ public class FlindAndSteelClass extends BaseClass {
 				}
 
 			};
-			r.runTaskTimer(instance.getManager().getMain(), 0, 20);
+			r.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
 		}
 	}
 
@@ -183,8 +182,8 @@ public class FlindAndSteelClass extends BaseClass {
 				if (flintUsed == false) {
 					if (event.getEntity() instanceof Player) {
 						Player p = (Player) event.getEntity();
-						if (instance.getManager().spawnProt.containsKey(p)
-								|| instance.getManager().spawnProt.containsKey(player))
+						if (instance.getGameManager().spawnProt.containsKey(p)
+								|| instance.getGameManager().spawnProt.containsKey(player))
 							return;
 							
 							if (instance.duosMap != null)
@@ -212,7 +211,7 @@ public class FlindAndSteelClass extends BaseClass {
 									}
 
 								};
-								r.runTaskTimer(instance.getManager().getMain(), 0, 50);
+								r.runTaskTimer(instance.getGameManager().getMain(), 0, 50);
 							}
 						}
 					}

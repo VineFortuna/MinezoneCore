@@ -1,10 +1,10 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -25,21 +25,21 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 public class DarkSethBlingClass extends BaseClass implements Listener {
 
 	public boolean usedTp = false;
+	public ItemStack teleporterItem;
 
 	public DarkSethBlingClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.5;
-		instance.getManager().getMain().getServer().getPluginManager().registerEvents(this,
-				instance.getManager().getMain());
+		instance.getGameManager().getMain().getServer().getPluginManager().registerEvents(this,
+				instance.getGameManager().getMain());
 	}
 
 	public ItemStack makeNavy(ItemStack armour) {
@@ -76,10 +76,10 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 				ItemHelper.setDetails(new ItemStack(Material.COMMAND),
 						"" + ChatColor.RED + ChatColor.BOLD + "Item Stealer", "",
 						ChatColor.GRAY + "Steal an item from one of your opponents"));
-		playerInv.setItem(2,
-				ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR),
-						"" + ChatColor.RED + ChatColor.BOLD + "Item Teleporter", "",
-						ChatColor.GRAY + "Teleport to a recent lightning drop"));
+		this.teleporterItem = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR),
+				"" + ChatColor.RED + ChatColor.BOLD + "Item Teleporter", "",
+				ChatColor.GRAY + "Teleport to a recent lightning drop");
+		playerInv.setItem(2, teleporterItem);
 	}
 
 	private Player getRandomPlayer(Player cant) {
@@ -121,7 +121,7 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 				pot2.apply(item2);
 
 				ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4),
-						instance.getManager().getMain().color("&0&lBroom"));
+						instance.getGameManager().getMain().color("&0&lBroom"));
 
 				ItemStack item6 = ItemHelper.addEnchant(
 						ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD, 1, (short) 250),
@@ -158,11 +158,11 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 						"" + ChatColor.YELLOW + "Mini-Shield Potion");
 
 				ItemStack blooper = ItemHelper.setDetails(new ItemStack(Material.RABBIT_FOOT),
-						instance.getManager().getMain().color("&6&lBlooper"));
+						instance.getGameManager().getMain().color("&6&lBlooper"));
 				ItemStack nuke = ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.TNT, 3),
-						instance.getManager().getMain().color("&4&lNuke")), Enchantment.DAMAGE_ALL, 1);
+						instance.getGameManager().getMain().color("&4&lNuke")), Enchantment.DAMAGE_ALL, 1);
 				ItemStack bomb = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-						instance.getManager().getMain().color("&4&lBomb"));
+						instance.getGameManager().getMain().color("&4&lBomb"));
 				ItemStack instagib = ItemHelper.setDetails(new ItemStack(Material.GOLD_HOE, 5, (short) 250),
 						"" + ChatColor.GREEN + ChatColor.ITALIC + "Instagib", ChatColor.YELLOW + "");
 				instagib.getDurability();
@@ -192,7 +192,7 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 				speedPot.apply(item2);
 
 				ItemStack bigShield = ItemHelper.setDetails(new ItemStack(Material.WATER_BUCKET),
-						instance.getManager().getMain().color("&eShield Potion"));
+						instance.getGameManager().getMain().color("&eShield Potion"));
 
 				List<ItemStack> items = Arrays.asList(new ItemStack(Material.GOLDEN_APPLE),
 						/*
@@ -207,7 +207,7 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 						fireRes, bigShield, instagib, instagib, instagib, broom, broom);
 
 				if (!this.doesPlayerContainItems(target.getInventory(), items)) {
-					player.sendMessage(instance.getManager().getMain()
+					player.sendMessage(instance.getGameManager().getMain()
 							.color("&2&l(!) &rNo item was found at this player! Please try again."));
 					return;
 				}
@@ -226,26 +226,26 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 				slots.clear();
 
 				player.getInventory().addItem(skeppy);
-				player.sendMessage(instance.getManager().getMain()
+				player.sendMessage(instance.getGameManager().getMain()
 						.color("&2&l(!) &rYou were given a &e" + skeppy.getItemMeta().getDisplayName()));
-				target.sendMessage(instance.getManager().getMain().color("&2&l(!) &rWhoops! Your &e"
+				target.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rWhoops! Your &e"
 						+ skeppy.getItemMeta().getDisplayName() + " &ritem was stolen by &e" + player.getName()));
 				if (plItem.getAmount() == 1)
 					player.getInventory().clear(player.getInventory().getHeldItemSlot());
 				else
 					plItem.setAmount(plItem.getAmount() - 1);
-			} else if (plItem.getType() == Material.NETHER_STAR
+			} else if (plItem.getType() == Material.NETHER_STAR && plItem.isSimilar(teleporterItem)
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 				if (instance.recentDrop == null) {
 					player.sendMessage(
-							instance.getManager().getMain().color("&c&l(!) &rThere are no drops you can pickup!"));
+							instance.getGameManager().getMain().color("&c&l(!) &rThere are no drops you can pickup!"));
 				} else if (!(player.isOnGround())) {
-					player.sendMessage(instance.getManager().getMain()
+					player.sendMessage(instance.getGameManager().getMain()
 							.color("&c&l(!) &rYou have to be on the ground to use this!"));
 				} else {
 					player.teleport(instance.recentDrop);
 					player.getInventory().remove(player.getItemInHand());
-					player.sendMessage(instance.getManager().getMain().color(
+					player.sendMessage(instance.getGameManager().getMain().color(
 							"&2&l(!) &rYou teleported to the recently spawned item! (Could be good or bad luck idk lol)"));
 					this.usedTp = true;
 				}

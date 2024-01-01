@@ -1,10 +1,15 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
+import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
@@ -18,19 +23,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
+import org.bukkit.material.Banner;
+import org.bukkit.material.Door;
+import org.bukkit.material.Skull;
 import org.bukkit.util.Vector;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
-import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 
 public class EndermanClass extends BaseClass {
 
@@ -73,8 +69,8 @@ public class EndermanClass extends BaseClass {
 	@Override
 	public void SetItems(Inventory playerInv) {
 		stick = ItemHelper.setDetails(new ItemStack(Material.STICK),
-				instance.getManager().getMain().color("&c&lBlock Pickup"), "",
-				instance.getManager().getMain().color("&7Right click to grab the block you're standing on"));
+				instance.getGameManager().getMain().color("&c&lBlock Pickup"), "",
+				instance.getGameManager().getMain().color("&7Right click to grab the block you're standing on"));
 		used = false;
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL, 10),
@@ -96,14 +92,14 @@ public class EndermanClass extends BaseClass {
 			this.cooldownSec = (10000 - pearlTimer.getTime()) / 1000 + 1;
 
 			if (pearlTimer.getTime() < 10000) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&c&lTeleporter &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &c&lTeleporter");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &c&lTeleporter");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -126,11 +122,11 @@ public class EndermanClass extends BaseClass {
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 			if (used == true) {
 				player.sendMessage(
-						instance.getManager().getMain().color("&c&l(!) &rYou already have a block in your inventory!"));
+						instance.getGameManager().getMain().color("&c&l(!) &rYou already have a block in your inventory!"));
 				return;
 			} else if (!(player.isOnGround())) {
 				player.sendMessage(
-						instance.getManager().getMain().color("&r&l(!) &rYou must be on the ground to use this item!"));
+						instance.getGameManager().getMain().color("&r&l(!) &rYou must be on the ground to use this item!"));
 				return;
 			}
 
@@ -140,23 +136,41 @@ public class EndermanClass extends BaseClass {
 				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
 						+ "Your stick is still on cooldown for " + ChatColor.YELLOW + seconds + " more seconds ");
 			} else {
-				enderman.restart();
 				Block block = player.getWorld().getBlockAt(player.getLocation().getBlockX(),
 						player.getLocation().getBlockY() - 1, player.getLocation().getBlockZ());
-
-				if (block.getType() != null && block.getType() != Material.AIR) {
+				Block blockInside = player.getWorld().getBlockAt(player.getLocation());
+				
+				if (blockInside.getType().isSolid() && player.getLocation().getY() % 1 != 0) {
+					newItem = new ItemStack(blockInside.getType(), 1);
+				} else if (block.getType().isSolid()) {
 					newItem = new ItemStack(block.getType(), 1);
-					player.getInventory().addItem(newItem);
-					player.sendMessage(
-							instance.getManager().getMain().color("&r&l(!) &rYou picked up &e1 " + block.getType()));
-					used = true;
 				} else {
-					enderman.restart();
-					player.sendMessage(instance.getManager().getMain()
-							.color("&c&l(!) &rYou tried picking up air or a null block. Please try again."));
+					player.sendMessage(instance.getGameManager().getMain()
+							.color("&c&l(!) &rThere is no block under you. Please try again."));
+					return;
 				}
+				enderman.restart();
+				if (newItem.getType() == Material.DOUBLE_STEP || newItem.getType() == Material.DOUBLE_STONE_SLAB2 ||
+						newItem.getType() == Material.WOOD_DOUBLE_STEP)
+					newItem.setType(Material.valueOf(newItem.getType().name().replace("DOUBLE_", "")));
+				else if (newItem.getData() instanceof Door)
+					newItem.setType(Material.WOOD_DOOR);
+				else if (newItem.getData() instanceof Skull)
+					newItem.setType(Material.SKULL_ITEM);
+				else if (newItem.getType() == Material.SOIL)
+					newItem.setType(Material.DIRT);
+				else if (newItem.getType() == Material.BED_BLOCK)
+					newItem.setType(Material.BED);
+				else if (newItem.getData() instanceof Banner)
+					newItem.setType(Material.BANNER);
+				ItemHelper.setDetails(newItem, instance.getGameManager().getMain().color(
+						"&e&lBlock"));
+				player.getInventory().addItem(newItem);
+				player.sendMessage(
+						instance.getGameManager().getMain().color("&r&l(!) &rYou picked up &e1 " + newItem.getType()));
+				used = true;
 			}
-		} else if (item != null && item.getType() == newItem.getType()) {
+		} else if (item != null && newItem != null && item.hasItemMeta() && item.isSimilar(newItem)) {
 			Vector direction = player.getLocation().getDirection();
 			player.getInventory().remove(newItem);
 			ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
@@ -170,7 +184,7 @@ public class EndermanClass extends BaseClass {
 					Location loc = hit.getLocation();
 					Vector v = direction;
 					EntityDamageEvent damageEvent = new EntityDamageEvent(hit, DamageCause.PROJECTILE, 4.5);
-					instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+					instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 					hit.damage(4.5, player);
 					v.setY(1.0);
 					hit.setVelocity(v);
@@ -179,7 +193,7 @@ public class EndermanClass extends BaseClass {
 				}
 
 			}, new ItemStack(newItem));
-			instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+			instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 					player.getLocation().getDirection().multiply(2.0D));
 
 			newItem = null;

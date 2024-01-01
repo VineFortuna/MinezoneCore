@@ -1,11 +1,14 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -18,12 +21,6 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
 
 public class SpiderClass extends BaseClass {
 
@@ -88,7 +85,7 @@ public class SpiderClass extends BaseClass {
 	
 	@Override
 	public void TakeDamage(EntityDamageEvent event) {
-		if (instance.getManager().spawnProt.containsKey(player))
+		if (instance.getGameManager().spawnProt.containsKey(player))
 			return;
 		
 		for (Player gamePlayer : instance.players)
@@ -97,7 +94,7 @@ public class SpiderClass extends BaseClass {
 
 	private void abilityMsg() {
 		player.sendMessage("");
-		player.sendMessage(instance.getManager().getMain()
+		player.sendMessage(instance.getGameManager().getMain()
 				.color("&e&lCLASS TIP> &rCertain chance to infect other players with Poison I by hitting them!"));
 		player.sendMessage("");
 	}
@@ -126,7 +123,7 @@ public class SpiderClass extends BaseClass {
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper
 				.addEnchant(ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.SPIDER_EYE),
-						instance.getManager().getMain()
+						instance.getGameManager().getMain()
 						.color("&cSpider Eye &7(Right Click)")), Enchantment.DAMAGE_ALL, 2), Enchantment.KNOCKBACK, 1);
 		return item;
 	}

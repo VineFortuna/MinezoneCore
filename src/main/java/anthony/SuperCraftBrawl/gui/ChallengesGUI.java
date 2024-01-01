@@ -1,17 +1,16 @@
 package anthony.SuperCraftBrawl.gui;
 
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class ChallengesGUI implements InventoryProvider {
 
@@ -45,7 +44,7 @@ public class ChallengesGUI implements InventoryProvider {
 				mat = Material.BARRIER;
 			contents.set(0, 1,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(mat),
-							main.color("&eGingerBreadMan Class"), "", main.color("&rGet a win on SantaWorkshop")),
+							main.color("&eGingerBreadMan Class"), "", main.color("&rGet a win on SantasWorkshop")),
 							e -> {
 							}));
 			if (data.challenge102 == 0)
@@ -54,7 +53,7 @@ public class ChallengesGUI implements InventoryProvider {
 				mat = Material.BARRIER;
 			contents.set(0, 2,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(mat),
-							main.color("&eSanta Class"), "", main.color("&rPlay Elf on SantaWorkshop")),
+							main.color("&eSanta Class"), "", main.color("&rPlay Elf on SantasWorkshop")),
 							e -> {
 							}));
 			
