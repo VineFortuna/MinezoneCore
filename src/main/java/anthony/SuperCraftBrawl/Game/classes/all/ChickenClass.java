@@ -1,14 +1,15 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.lang.reflect.Field;
-import java.util.UUID;
-
-import org.bukkit.Color;
-import org.bukkit.Effect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
+import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.ItemHelper;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -21,17 +22,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
-import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import net.md_5.bungee.api.ChatColor;
+import java.lang.reflect.Field;
+import java.util.UUID;
 
 public class ChickenClass extends BaseClass {
 
@@ -120,14 +112,14 @@ public class ChickenClass extends BaseClass {
 										if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
 											EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
 													DamageCause.PROJECTILE, 5.0);
-											instance.getManager().getMain().getServer().getPluginManager()
+											instance.getGameManager().getMain().getServer().getPluginManager()
 													.callEvent(damageEvent);
 											gamePlayer.damage(5.0, player);
 										}
 									} else {
 										EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
 												DamageCause.PROJECTILE, 5.0);
-										instance.getManager().getMain().getServer().getPluginManager()
+										instance.getGameManager().getMain().getServer().getPluginManager()
 												.callEvent(damageEvent);
 										gamePlayer.damage(5.0, player);
 									}
@@ -141,7 +133,7 @@ public class ChickenClass extends BaseClass {
 						}
 
 					}, new ItemStack(Material.EGG));
-					instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+					instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 							player.getLocation().getDirection().multiply(2.5D));
 				}
 			}

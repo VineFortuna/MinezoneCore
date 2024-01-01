@@ -19,7 +19,6 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class SquidClass extends BaseClass {
 	private final Cooldown boosterCooldown = new Cooldown(10000);
@@ -54,14 +53,15 @@ public class SquidClass extends BaseClass {
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 		playerEquip.setLeggings(makePurple(new ItemStack(Material.LEATHER_LEGGINGS)));
 		playerEquip.setBoots(makePurple(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+				ItemHelper.addEnchant(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS),
+						Enchantment.PROTECTION_ENVIRONMENTAL, 4), Enchantment.DEPTH_STRIDER, 3)));
 	}
 
 	@Override
 	public void SetItems(Inventory playerInv) {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.COAL),
-				instance.getManager().getMain().color("&rInk &7(Right Click)")));
+				instance.getGameManager().getMain().color("&rInk &7(Right Click)")));
 	}
 
 	@Override
@@ -149,7 +149,7 @@ public class SquidClass extends BaseClass {
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper.addEnchant(ItemHelper.addEnchant(
 				ItemHelper.setDetails(new ItemStack(Material.INK_SACK),
-						instance.getManager().getMain().color("&rInk Sack &7(Right Click)")),
+						instance.getGameManager().getMain().color("&rInk Sack &7(Right Click)")),
 				Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 2);
 		return item;
 	}

@@ -1,31 +1,20 @@
 package anthony.SuperCraftBrawl.Game.classes;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Random;
-
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameType;
+import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.Timer;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.EnderCrystal;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Skeleton;
-import org.bukkit.entity.Zombie;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.entity.*;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -38,16 +27,10 @@ import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Score;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Timer;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameType;
-import anthony.SuperCraftBrawl.Game.map.Maps;
-import anthony.SuperCraftBrawl.playerdata.ClassDetails;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Random;
 
 public abstract class BaseClass {
 
@@ -170,7 +153,7 @@ public abstract class BaseClass {
 	}
 
 	private String getPlayerRank(Player p) {
-		return instance.getManager().getMain().getRankManager().getRank(p).getTagWithSpace();
+		return instance.getGameManager().getMain().getRankManager().getRank(p).getTagWithSpace();
 	}
 
 	// Event for EnderDragon class:
@@ -212,7 +195,7 @@ public abstract class BaseClass {
 		}
 
 		// Schedule a task to remove the particles after 5 seconds
-		Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
+		Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
 			for (Item particle : deathParticles) {
 				particle.remove();
 			}
@@ -223,9 +206,9 @@ public abstract class BaseClass {
 				if (killer != null) {
 					Location pLoc = p.getLocation();
 					EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc, EntityType.ENDER_CRYSTAL);
-					HealTask task = new HealTask(killer, crystal, instance.getManager().getMain());
+					HealTask task = new HealTask(killer, crystal, instance.getGameManager().getMain());
 					BukkitTask bukkit = Bukkit.getScheduler()
-							.runTaskTimerAsynchronously(instance.getManager().getMain(), task, 0, 2L);
+							.runTaskTimerAsynchronously(instance.getGameManager().getMain(), task, 0, 2L);
 					task.set(bukkit);
 				}
 			}
@@ -247,8 +230,8 @@ public abstract class BaseClass {
 						en.remove();
 
 			if (p.getGameMode() != GameMode.SPECTATOR) {
-				PlayerData pData = instance.getManager().getMain().getDataManager().getPlayerData(p); // Data of player
-				PlayerData kData = instance.getManager().getMain().getDataManager().getPlayerData(killer); // Data of
+				PlayerData pData = instance.getGameManager().getMain().getDataManager().getPlayerData(p); // Data of player
+				PlayerData kData = instance.getGameManager().getMain().getDataManager().getPlayerData(killer); // Data of
 																											// killer
 				BaseClass pClass = null;
 				BaseClass kClass = null;
@@ -279,7 +262,7 @@ public abstract class BaseClass {
 
 								if (instance.classes.containsKey(d)) {
 									kClass = instance.classes.get(d);
-									kData = instance.getManager().getMain().getDataManager().getPlayerData(d);
+									kData = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
 									if (kData != null && kData.killMsgs == 1 && kClass != null) {
 										d.playSound(d.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
 										kData.kills += 1;
@@ -287,13 +270,13 @@ public abstract class BaseClass {
 										kClass.totalExp += 29;
 
 										// If tournament mode is on, give 1 point for kill:
-										if (instance.getManager().getMain().tournament == true)
+										if (instance.getGameManager().getMain().tournament == true)
 											kData.points++;
 
 										// kClass.totalTokens += 1;
 										kClass.totalKills++;
 										kClass.eachLifeKills++;
-										TellAll(instance.getManager().getMain()
+										TellAll(instance.getGameManager().getMain()
 												.color("&2&l(!) &cHello? AND GOODBYE TO " + getPlayerRank(p)
 														+ ChatColor.WHITE + p.getPlayer().getName() + " "
 														+ pClass.getType().getTag() + " &cAND ANYONE ELSE STANDING IN "
@@ -307,7 +290,7 @@ public abstract class BaseClass {
 										kClass.totalExp += 29;
 
 										// If tournament mode is on, give 1 point for kill:
-										if (instance.getManager().getMain().tournament == true)
+										if (instance.getGameManager().getMain().tournament == true)
 											kData.points++;
 
 										// kClass.totalTokens += 1;
@@ -326,23 +309,23 @@ public abstract class BaseClass {
 
 									if (pData != null && pData.killMsgs == 1) {
 										if (chance == 0) {
-											TellAll(instance.getManager().getMain()
+											TellAll(instance.getGameManager().getMain()
 													.color("&2&l(!) "
-															+ instance.getManager().getMain().getRankManager()
+															+ instance.getGameManager().getMain().getRankManager()
 																	.getRank(player).getTagWithSpace()
 															+ "&r " + p.getPlayer().getName() + " "
 															+ pClass.getType().getTag()
 															+ " &csaid NO THANK YOU and took the easy way out"));
 										} else {
-											TellAll(instance.getManager().getMain().color("&2&l(!) "
-													+ instance.getManager().getMain().getRankManager().getRank(player)
+											TellAll(instance.getGameManager().getMain().color("&2&l(!) "
+													+ instance.getGameManager().getMain().getRankManager().getRank(player)
 															.getTagWithSpace()
 													+ "&r " + p.getPlayer().getName() + " " + pClass.getType().getTag()
 													+ " &cwalked off the edge.."));
 										}
 									} else {
 										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-												+ instance.getManager().getMain().getRankManager().getRank(player)
+												+ instance.getGameManager().getMain().getRankManager().getRank(player)
 														.getTagWithSpace()
 												+ p.getPlayer().getName() + " " + pClass.getType().getTag()
 												+ ChatColor.RED + " fell into the void");
@@ -357,14 +340,14 @@ public abstract class BaseClass {
 
 									if (instance.classes.containsKey(d)) {
 										kClass = instance.classes.get(d);
-										kData = instance.getManager().getMain().getDataManager().getPlayerData(d);
+										kData = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
 										d.playSound(d.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
 										kData.kills += 1;
 										kData.exp += 29;
 										kClass.totalExp += 29;
 
 										// If tournament mode is on, give 1 point for kill:
-										if (instance.getManager().getMain().tournament == true)
+										if (instance.getGameManager().getMain().tournament == true)
 											kData.points++;
 
 										// kClass.totalTokens += 1;
@@ -372,7 +355,7 @@ public abstract class BaseClass {
 										kClass.eachLifeKills++;
 
 										if (kData != null && kData.killMsgs == 1 && kClass != null) {
-											TellAll(instance.getManager().getMain()
+											TellAll(instance.getGameManager().getMain()
 													.color("&2&l(!) &cHello? AND GOODBYE TO " + getPlayerRank(p)
 															+ ChatColor.WHITE + p.getPlayer().getName() + " "
 															+ pClass.getType().getTag()
@@ -392,15 +375,15 @@ public abstract class BaseClass {
 
 										if (pData != null && pData.killMsgs == 1) {
 											if (chance == 0) {
-												TellAll(instance.getManager().getMain().color("&2&l(!) "
-														+ instance.getManager().getMain().getRankManager()
+												TellAll(instance.getGameManager().getMain().color("&2&l(!) "
+														+ instance.getGameManager().getMain().getRankManager()
 																.getRank(player).getTagWithSpace()
 														+ "&r " + p.getPlayer().getName() + " "
 														+ pClass.getType().getTag()
 														+ " &csaid NO THANK YOU and took the easy way out"));
 											} else {
-												TellAll(instance.getManager().getMain().color("&2&l(!) "
-														+ instance.getManager().getMain().getRankManager()
+												TellAll(instance.getGameManager().getMain().color("&2&l(!) "
+														+ instance.getGameManager().getMain().getRankManager()
 																.getRank(player).getTagWithSpace()
 														+ "&r " + p.getPlayer().getName() + " "
 														+ pClass.getType().getTag() + " &cwalked off the edge.."));
@@ -408,7 +391,7 @@ public abstract class BaseClass {
 										} else {
 											TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
 													+ ChatColor.RESET
-													+ instance.getManager().getMain().getRankManager().getRank(player)
+													+ instance.getGameManager().getMain().getRankManager().getRank(player)
 															.getTagWithSpace()
 													+ p.getPlayer().getName() + " " + pClass.getType().getTag()
 													+ ChatColor.RED + " fell into the void");
@@ -421,23 +404,23 @@ public abstract class BaseClass {
 
 									if (pData != null && pData.killMsgs == 1) {
 										if (chance == 0) {
-											TellAll(instance.getManager().getMain()
+											TellAll(instance.getGameManager().getMain()
 													.color("&2&l(!) "
-															+ instance.getManager().getMain().getRankManager()
+															+ instance.getGameManager().getMain().getRankManager()
 																	.getRank(player).getTagWithSpace()
 															+ "&r " + p.getPlayer().getName() + " "
 															+ pClass.getType().getTag()
 															+ " &csaid NO THANK YOU and took the easy way out"));
 										} else {
-											TellAll(instance.getManager().getMain().color("&2&l(!) "
-													+ instance.getManager().getMain().getRankManager().getRank(player)
+											TellAll(instance.getGameManager().getMain().color("&2&l(!) "
+													+ instance.getGameManager().getMain().getRankManager().getRank(player)
 															.getTagWithSpace()
 													+ "&r " + p.getPlayer().getName() + " " + pClass.getType().getTag()
 													+ " &cwalked off the edge.."));
 										}
 									} else {
 										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-												+ instance.getManager().getMain().getRankManager().getRank(player)
+												+ instance.getGameManager().getMain().getRankManager().getRank(player)
 														.getTagWithSpace()
 												+ p.getPlayer().getName() + " " + pClass.getType().getTag()
 												+ ChatColor.RED + " fell into the void");
@@ -450,23 +433,23 @@ public abstract class BaseClass {
 
 								if (pData != null && pData.killMsgs == 1) {
 									if (chance == 0) {
-										TellAll(instance.getManager().getMain()
+										TellAll(instance.getGameManager().getMain()
 												.color("&2&l(!) "
-														+ instance.getManager().getMain().getRankManager()
+														+ instance.getGameManager().getMain().getRankManager()
 																.getRank(player).getTagWithSpace()
 														+ "&r " + p.getPlayer().getName() + " "
 														+ pClass.getType().getTag()
 														+ " &csaid NO THANK YOU and took the easy way out"));
 									} else {
-										TellAll(instance.getManager().getMain().color("&2&l(!) "
-												+ instance.getManager().getMain().getRankManager().getRank(player)
+										TellAll(instance.getGameManager().getMain().color("&2&l(!) "
+												+ instance.getGameManager().getMain().getRankManager().getRank(player)
 														.getTagWithSpace()
 												+ "&r " + p.getPlayer().getName() + " " + pClass.getType().getTag()
 												+ " &cwalked off the edge.."));
 									}
 								} else {
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ instance.getManager().getMain().getRankManager().getRank(player)
+											+ instance.getGameManager().getMain().getRankManager().getRank(player)
 													.getTagWithSpace()
 											+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
 											+ " fell into the void");
@@ -479,23 +462,23 @@ public abstract class BaseClass {
 
 							if (pData != null && pData.killMsgs == 1) {
 								if (chance == 0) {
-									TellAll(instance.getManager().getMain()
+									TellAll(instance.getGameManager().getMain()
 											.color("&2&l(!) "
-													+ instance.getManager().getMain().getRankManager().getRank(player)
+													+ instance.getGameManager().getMain().getRankManager().getRank(player)
 															.getTagWithSpace()
 													+ "&r " + p.getPlayer().getName() + " " + pClass.getType().getTag()
 													+ " &csaid NO THANK YOU and took the easy way out"));
 								} else {
-									TellAll(instance.getManager().getMain()
+									TellAll(instance.getGameManager().getMain()
 											.color("&2&l(!) "
-													+ instance.getManager().getMain().getRankManager().getRank(player)
+													+ instance.getGameManager().getMain().getRankManager().getRank(player)
 															.getTagWithSpace()
 													+ "&r " + p.getPlayer().getName() + " " + pClass.getType().getTag()
 													+ " &cwalked off the edge.."));
 								}
 							} else {
 								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-										+ instance.getManager().getMain().getRankManager().getRank(player)
+										+ instance.getGameManager().getMain().getRankManager().getRank(player)
 												.getTagWithSpace()
 										+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
 										+ " fell into the void");
@@ -532,7 +515,7 @@ public abstract class BaseClass {
 
 							if (instance.classes.containsKey(d)) {
 								kClass = instance.classes.get(d);
-								kData = instance.getManager().getMain().getDataManager().getPlayerData(d);
+								kData = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
 								if (d != p || killer != p) {
 									d.playSound(d.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
 									kData.kills += 1;
@@ -540,7 +523,7 @@ public abstract class BaseClass {
 									kClass.totalExp += 29;
 
 									// If tournament mode is on, give 1 point for kill:
-									if (instance.getManager().getMain().tournament == true)
+									if (instance.getGameManager().getMain().tournament == true)
 										kData.points++;
 
 									// kClass.totalTokens += 1;
@@ -548,7 +531,7 @@ public abstract class BaseClass {
 									kClass.eachLifeKills++;
 
 									if (kData != null && kData.killMsgs == 1) {
-										TellAll(instance.getManager().getMain()
+										TellAll(instance.getGameManager().getMain()
 												.color("&2&l(!) " + getPlayerRank(p) + "&r " + p.getPlayer().getName()
 														+ " " + pClass.getType().getTag()
 														+ " &cwas not strong enough to encounter " + getPlayerRank(d)
@@ -591,7 +574,7 @@ public abstract class BaseClass {
 
 								if (instance.classes.containsKey(player)) {
 									kClass = instance.classes.get(d);
-									PlayerData killerData = instance.getManager().getMain().getDataManager()
+									PlayerData killerData = instance.getGameManager().getMain().getDataManager()
 											.getPlayerData(d);
 									if (d != p || killer != p) {
 										ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
@@ -607,7 +590,7 @@ public abstract class BaseClass {
 										kClass.totalExp += 29;
 
 										// If tournament mode is on, give 1 point for kill:
-										if (instance.getManager().getMain().tournament == true)
+										if (instance.getGameManager().getMain().tournament == true)
 											kData.points++;
 
 										// kClass.totalTokens += 1;
@@ -621,7 +604,7 @@ public abstract class BaseClass {
 												+ ChatColor.YELLOW + ChatColor.BOLD + "Health Pot");
 
 										if (killerData != null && killerData.killMsgs == 1) {
-											TellAll(instance.getManager().getMain().color("&2&l(!) " + getPlayerRank(p)
+											TellAll(instance.getGameManager().getMain().color("&2&l(!) " + getPlayerRank(p)
 													+ "&r " + p.getPlayer().getName() + " " + pClass.getType().getTag()
 													+ " &cwas not strong enough to encounter " + getPlayerRank(d)
 													+ " &r" + d.getName() + " " + kClass.getType().getTag()));
@@ -712,13 +695,13 @@ public abstract class BaseClass {
 					kClass = instance.classes.get(killer);
 
 					if (lives == 0) {
-						PlayerData data = instance.getManager().getMain().getDataManager().getPlayerData(p);
+						PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(p);
 
 						if (data != null) {
 							data.losses += 1;
 						}
 						if (killer != null) {
-							String msg = instance.getManager().getMain().color("&4&lELIMINATED &e" + p.getName());
+							String msg = instance.getGameManager().getMain().color("&4&lELIMINATED &e" + p.getName());
 							PacketPlayOutChat packet = new PacketPlayOutChat(
 									ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
 							CraftPlayer craft = (CraftPlayer) killer;
@@ -733,7 +716,7 @@ public abstract class BaseClass {
 
 							if (data != null) {
 								data.mysteryChests++;
-								player.sendMessage(instance.getManager().getMain()
+								player.sendMessage(instance.getGameManager().getMain()
 										.color("&5&l(!) &rYou have found &e1 Mystery Chest!"));
 							}
 						}
@@ -792,7 +775,7 @@ public abstract class BaseClass {
 								if (this.instance.getMap() == Maps.SnowGlobe) {
 									p.sendMessage("Test2");
 									int classID = 66;
-									PlayerData playerData = instance.getManager().getMain().getDataManager()
+									PlayerData playerData = instance.getGameManager().getMain().getDataManager()
 											.getPlayerData(p);
 
 									if (playerData != null && playerData.challenge100 == 0) {
@@ -803,14 +786,14 @@ public abstract class BaseClass {
 											playerData.playerClasses.put(classID, details);
 										}
 										details.setPurchased();
-										p.sendMessage(instance.getManager().getMain()
+										p.sendMessage(instance.getGameManager().getMain()
 												.color("&2&l(!) &rYou have unlocked &2&lElf &rclass!"));
-										instance.getManager().getMain().getDataManager().saveData(playerData);
+										instance.getGameManager().getMain().getDataManager().saveData(playerData);
 									}
 								} else if (this.instance.getMap() == Maps.SantasWorkshop) {
 									if (pClass != null && pClass.getType() == ClassType.Elf) {
 										int classID = 67;
-										PlayerData playerData = instance.getManager().getMain().getDataManager()
+										PlayerData playerData = instance.getGameManager().getMain().getDataManager()
 												.getPlayerData(p);
 
 										if (playerData != null && playerData.challenge102 == 0) {
@@ -821,9 +804,9 @@ public abstract class BaseClass {
 												playerData.playerClasses.put(classID, details);
 											}
 											details.setPurchased();
-											p.sendMessage(instance.getManager().getMain()
+											p.sendMessage(instance.getGameManager().getMain()
 													.color("&2&l(!) &rYou have unlocked &c&lSanta &rclass!"));
-											instance.getManager().getMain().getDataManager().saveData(playerData);
+											instance.getGameManager().getMain().getDataManager().saveData(playerData);
 										}
 									}
 								}
@@ -832,7 +815,7 @@ public abstract class BaseClass {
 							if (pData.exp >= 2500) {
 								pData.level++;
 								pData.exp -= 2500;
-								p.sendMessage(instance.getManager().getMain().color("&e&lLEVEL UPGRADED!"));
+								p.sendMessage(instance.getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
 								p.sendMessage("You are now Level: " + pData.level + "!");
 							}
 						}
@@ -971,7 +954,7 @@ public abstract class BaseClass {
 
 					} else if (lives == 1) {
 						if (killer != null) {
-							String msg = instance.getManager().getMain().color("&4&lKILLED &e" + p.getName());
+							String msg = instance.getGameManager().getMain().color("&4&lKILLED &e" + p.getName());
 							PacketPlayOutChat packet = new PacketPlayOutChat(
 									ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
 							CraftPlayer craft = (CraftPlayer) killer;
@@ -983,7 +966,7 @@ public abstract class BaseClass {
 
 					} else {
 						if (killer != null) {
-							String msg = instance.getManager().getMain().color("&4&lKILLED &e" + p.getName());
+							String msg = instance.getGameManager().getMain().color("&4&lKILLED &e" + p.getName());
 							PacketPlayOutChat packet = new PacketPlayOutChat(
 									ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
 							CraftPlayer craft = (CraftPlayer) killer;
@@ -1000,7 +983,7 @@ public abstract class BaseClass {
 	}
 
 	private void checkBountyKill(BaseClass kClass, Player playerKilled, Player killer) {
-		PlayerData data = instance.getManager().getMain().getDataManager().getPlayerData(killer);
+		PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(killer);
 		if (data != null) {
 			if (kClass.bountyTarget != null) {
 				if (kClass.bountyTarget == playerKilled) {
@@ -1008,13 +991,13 @@ public abstract class BaseClass {
 					data.tokens += 25;
 					killer.sendMessage("");
 					player.sendMessage("");
-					killer.sendMessage(instance.getManager().getMain()
+					killer.sendMessage(instance.getGameManager().getMain()
 							.color("&2&l(!) &e&lBOUNTY CLAIMED! &rYou earned &e25 Bonus Tokens!"));
-					player.sendMessage(instance.getManager().getMain().color("&2&l(!) &e&lBOUNTY CLAIMED! &e"
+					player.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &e&lBOUNTY CLAIMED! &e"
 							+ killer.getName() + " &rhas claimed their bounty on you!"));
-					killer.sendTitle(instance.getManager().getMain().color("&e&lBOUNTY"),
-							instance.getManager().getMain().color("&rYou claimed &e25 Bonus Tokens!"));
-					player.sendTitle(instance.getManager().getMain().color("&e&lBOUNTY"), instance.getManager()
+					killer.sendTitle(instance.getGameManager().getMain().color("&e&lBOUNTY"),
+							instance.getGameManager().getMain().color("&rYou claimed &e25 Bonus Tokens!"));
+					player.sendTitle(instance.getGameManager().getMain().color("&e&lBOUNTY"), instance.getGameManager()
 							.getMain().color("&e" + killer.getName() + " &rhas claimed their bounty on you!"));
 					killer.sendMessage("");
 					player.sendMessage("");
@@ -1037,15 +1020,18 @@ public abstract class BaseClass {
 						en.remove();
 
 			if (isDead) {
-				PlayerData data2 = instance.getManager().getMain().getDataManager().getPlayerData(p);
+				PlayerData data2 = instance.getGameManager().getMain().getDataManager().getPlayerData(p);
 				data2.deaths += 1;
 				for (PotionEffect type : p.getActivePotionEffects())
 					p.removePotionEffect(type.getType());
 
 				p.setFireTicks(0);
 				p.getInventory().clear();
+				EntityDamageEvent event = new EntityDamageEvent(p, DamageCause.VOID, 0);
+				p.setLastDamageCause(event);
+				Bukkit.getServer().getPluginManager().callEvent(event);
 				// p.setLastDamage(0);
-				// data2.winstreak = 0;
+				//data2.winstreak = 0;
 				BaseClass baseClass = instance.classes.get(killer);
 				BaseClass baseClass2 = instance.classes.get(p);
 				baseClass2.totalDeaths++;
@@ -1094,7 +1080,7 @@ public abstract class BaseClass {
 				}
 
 				// Schedule a task to remove the particles after 5 seconds
-				Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
+				Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
 					for (Item particle : deathParticles) {
 						particle.remove();
 					}
@@ -1106,9 +1092,9 @@ public abstract class BaseClass {
 							Location pLoc = p.getLocation();
 							EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc,
 									EntityType.ENDER_CRYSTAL);
-							HealTask task = new HealTask(killer, crystal, instance.getManager().getMain());
+							HealTask task = new HealTask(killer, crystal, instance.getGameManager().getMain());
 							BukkitTask bukkit = Bukkit.getScheduler()
-									.runTaskTimerAsynchronously(instance.getManager().getMain(), task, 0, 2L);
+									.runTaskTimerAsynchronously(instance.getGameManager().getMain(), task, 0, 2L);
 							task.set(bukkit);
 						}
 					}
@@ -1125,12 +1111,12 @@ public abstract class BaseClass {
 
 							if (instance.classes.containsKey(d)) {
 								baseClass = instance.classes.get(d);
-								PlayerData killerData = instance.getManager().getMain().getDataManager()
+								PlayerData killerData = instance.getGameManager().getMain().getDataManager()
 										.getPlayerData(d);
 
 								if (killerData != null && killerData.killMsgs == 1) {
 									this.giveStats(d, p);
-									TellAll(instance.getManager().getMain()
+									TellAll(instance.getGameManager().getMain()
 											.color("&2&l(!) &cHello? AND GOODBYE TO " + getPlayerRank(p)
 													+ ChatColor.WHITE + p.getPlayer().getName() + " "
 													+ baseClass2.getType().getTag() + " &cAND ANYONE ELSE STANDING IN "
@@ -1151,23 +1137,23 @@ public abstract class BaseClass {
 
 								if (data2 != null && data2.killMsgs == 1) {
 									if (chance == 0) {
-										TellAll(instance.getManager().getMain()
+										TellAll(instance.getGameManager().getMain()
 												.color("&2&l(!) "
-														+ instance.getManager().getMain().getRankManager()
+														+ instance.getGameManager().getMain().getRankManager()
 																.getRank(player).getTagWithSpace()
 														+ "&r " + p.getPlayer().getName() + " "
 														+ baseClass2.getType().getTag()
 														+ " &csaid NO THANK YOU and took the easy way out"));
 									} else {
-										TellAll(instance.getManager().getMain().color("&2&l(!) "
-												+ instance.getManager().getMain().getRankManager().getRank(player)
+										TellAll(instance.getGameManager().getMain().color("&2&l(!) "
+												+ instance.getGameManager().getMain().getRankManager().getRank(player)
 														.getTagWithSpace()
 												+ "&r " + p.getPlayer().getName() + " " + baseClass2.getType().getTag()
 												+ " &cwalked off the edge.."));
 									}
 								} else {
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ instance.getManager().getMain().getRankManager().getRank(player)
+											+ instance.getGameManager().getMain().getRankManager().getRank(player)
 													.getTagWithSpace()
 											+ p.getPlayer().getName() + " " + baseClass2.getType().getTag()
 											+ ChatColor.RED + " fell into the void");
@@ -1182,11 +1168,11 @@ public abstract class BaseClass {
 
 								if (instance.classes.containsKey(d)) {
 									baseClass = instance.classes.get(d);
-									PlayerData killerData = instance.getManager().getMain().getDataManager()
+									PlayerData killerData = instance.getGameManager().getMain().getDataManager()
 											.getPlayerData(d);
 									if (killerData != null && killerData.killMsgs == 1) {
 										this.giveStats(d, p);
-										TellAll(instance.getManager().getMain().color("&2&l(!) &cHello? AND GOODBYE TO "
+										TellAll(instance.getGameManager().getMain().color("&2&l(!) &cHello? AND GOODBYE TO "
 												+ getPlayerRank(p) + ChatColor.WHITE + p.getPlayer().getName() + " "
 												+ baseClass2.getType().getTag() + " &cAND ANYONE ELSE STANDING IN "
 												+ getPlayerRank(d) + ChatColor.WHITE + d.getName() + " "
@@ -1205,22 +1191,22 @@ public abstract class BaseClass {
 
 									if (data2 != null && data2.killMsgs == 1) {
 										if (chance == 0) {
-											TellAll(instance.getManager().getMain().color("&2&l(!) "
-													+ instance.getManager().getMain().getRankManager().getRank(player)
+											TellAll(instance.getGameManager().getMain().color("&2&l(!) "
+													+ instance.getGameManager().getMain().getRankManager().getRank(player)
 															.getTagWithSpace()
 													+ "&r " + p.getPlayer().getName() + " "
 													+ baseClass2.getType().getTag()
 													+ " &csaid NO THANK YOU and took the easy way out"));
 										} else {
-											TellAll(instance.getManager().getMain().color("&2&l(!) "
-													+ instance.getManager().getMain().getRankManager().getRank(player)
+											TellAll(instance.getGameManager().getMain().color("&2&l(!) "
+													+ instance.getGameManager().getMain().getRankManager().getRank(player)
 															.getTagWithSpace()
 													+ "&r " + p.getPlayer().getName() + " "
 													+ baseClass2.getType().getTag() + " &cwalked off the edge.."));
 										}
 									} else {
 										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-												+ instance.getManager().getMain().getRankManager().getRank(player)
+												+ instance.getGameManager().getMain().getRankManager().getRank(player)
 														.getTagWithSpace()
 												+ p.getPlayer().getName() + " " + baseClass2.getType().getTag()
 												+ ChatColor.RED + " fell into the void");
@@ -1233,23 +1219,23 @@ public abstract class BaseClass {
 
 								if (data2 != null && data2.killMsgs == 1) {
 									if (chance == 0) {
-										TellAll(instance.getManager().getMain()
+										TellAll(instance.getGameManager().getMain()
 												.color("&2&l(!) "
-														+ instance.getManager().getMain().getRankManager()
+														+ instance.getGameManager().getMain().getRankManager()
 																.getRank(player).getTagWithSpace()
 														+ "&r " + p.getPlayer().getName() + " "
 														+ baseClass2.getType().getTag()
 														+ " &csaid NO THANK YOU and took the easy way out"));
 									} else {
-										TellAll(instance.getManager().getMain().color("&2&l(!) "
-												+ instance.getManager().getMain().getRankManager().getRank(player)
+										TellAll(instance.getGameManager().getMain().color("&2&l(!) "
+												+ instance.getGameManager().getMain().getRankManager().getRank(player)
 														.getTagWithSpace()
 												+ "&r " + p.getPlayer().getName() + " " + baseClass2.getType().getTag()
 												+ " &cwalked off the edge.."));
 									}
 								} else {
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ instance.getManager().getMain().getRankManager().getRank(player)
+											+ instance.getGameManager().getMain().getRankManager().getRank(player)
 													.getTagWithSpace()
 											+ p.getPlayer().getName() + " " + baseClass2.getType().getTag()
 											+ ChatColor.RED + " fell into the void");
@@ -1262,24 +1248,24 @@ public abstract class BaseClass {
 
 							if (data2 != null && data2.killMsgs == 1) {
 								if (chance == 0) {
-									TellAll(instance.getManager().getMain()
+									TellAll(instance.getGameManager().getMain()
 											.color("&2&l(!) "
-													+ instance.getManager().getMain().getRankManager().getRank(player)
+													+ instance.getGameManager().getMain().getRankManager().getRank(player)
 															.getTagWithSpace()
 													+ "&r " + p.getPlayer().getName() + " "
 													+ baseClass2.getType().getTag()
 													+ " &csaid NO THANK YOU and took the easy way out"));
 								} else {
-									TellAll(instance.getManager().getMain()
+									TellAll(instance.getGameManager().getMain()
 											.color("&2&l(!) "
-													+ instance.getManager().getMain().getRankManager().getRank(player)
+													+ instance.getGameManager().getMain().getRankManager().getRank(player)
 															.getTagWithSpace()
 													+ "&r " + p.getPlayer().getName() + " "
 													+ baseClass2.getType().getTag() + " &cwalked off the edge.."));
 								}
 							} else {
 								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-										+ instance.getManager().getMain().getRankManager().getRank(player)
+										+ instance.getGameManager().getMain().getRankManager().getRank(player)
 												.getTagWithSpace()
 										+ p.getPlayer().getName() + " " + baseClass2.getType().getTag() + ChatColor.RED
 										+ " fell into the void");
@@ -1287,7 +1273,7 @@ public abstract class BaseClass {
 							p.teleport(instance.GetSpecLoc());
 						}
 					} else if (killer != null && instance.classes.containsKey(killer)) {
-						PlayerData killerData = instance.getManager().getMain().getDataManager().getPlayerData(killer);
+						PlayerData killerData = instance.getGameManager().getMain().getDataManager().getPlayerData(killer);
 						if (killer != p) {
 							if (instance.gameType == GameType.FRENZY) {
 								BaseClass bc = instance.oldClasses.get(p);
@@ -1295,7 +1281,7 @@ public abstract class BaseClass {
 
 									if (killerData != null && killerData.killMsgs == 1) {
 										this.giveStats(killer, p);
-										TellAll(instance.getManager().getMain().color("&2&l(!) " + getPlayerRank(p)
+										TellAll(instance.getGameManager().getMain().color("&2&l(!) " + getPlayerRank(p)
 												+ "&r " + p.getPlayer().getName() + " " + bc.getType().getTag()
 												+ " &cwas not strong enough to encounter " + getPlayerRank(killer)
 												+ " &r" + killer.getName() + " " + baseClass.getType().getTag()));
@@ -1311,7 +1297,7 @@ public abstract class BaseClass {
 								} else {
 									if (killerData != null && killerData.killMsgs == 1) {
 										this.giveStats(killer, p);
-										TellAll(instance.getManager().getMain().color("&2&l(!) " + getPlayerRank(p)
+										TellAll(instance.getGameManager().getMain().color("&2&l(!) " + getPlayerRank(p)
 												+ "&r " + p.getPlayer().getName() + " " + bc.getType().getTag()
 												+ " &cwas not strong enough to encounter " + getPlayerRank(killer)
 												+ " &r" + killer.getName() + " " + baseClass.getType().getTag()));
@@ -1330,7 +1316,7 @@ public abstract class BaseClass {
 								if (lives == 0) {
 									if (killerData != null && killerData.killMsgs == 1) {
 										this.giveStats(killer, p);
-										TellAll(instance.getManager().getMain().color("&2&l(!) " + getPlayerRank(p)
+										TellAll(instance.getGameManager().getMain().color("&2&l(!) " + getPlayerRank(p)
 												+ "&r " + p.getPlayer().getName() + " " + baseClass2.getType().getTag()
 												+ " &cwas not strong enough to encounter " + getPlayerRank(killer)
 												+ " &r" + killer.getName() + " " + baseClass.getType().getTag()));
@@ -1345,7 +1331,7 @@ public abstract class BaseClass {
 								} else if (lives > 0) {
 									if (killerData != null && killerData.killMsgs == 1) {
 										this.giveStats(killer, p);
-										TellAll(instance.getManager().getMain().color("&2&l(!) " + getPlayerRank(p)
+										TellAll(instance.getGameManager().getMain().color("&2&l(!) " + getPlayerRank(p)
 												+ "&r " + p.getPlayer().getName() + " " + baseClass2.getType().getTag()
 												+ " &cwas not strong enough to encounter " + getPlayerRank(killer)
 												+ " &r" + killer.getName() + " " + baseClass.getType().getTag()));
@@ -1395,23 +1381,23 @@ public abstract class BaseClass {
 
 						if (data2 != null && data2.killMsgs == 1) {
 							if (chance == 0) {
-								TellAll(instance.getManager().getMain()
+								TellAll(instance.getGameManager().getMain()
 										.color("&2&l(!) "
-												+ instance.getManager().getMain().getRankManager().getRank(player)
+												+ instance.getGameManager().getMain().getRankManager().getRank(player)
 														.getTagWithSpace()
 												+ "&r " + p.getPlayer().getName() + " " + baseClass2.getType().getTag()
 												+ " &csaid NO THANK YOU and took the easy way out"));
 							} else {
-								TellAll(instance.getManager().getMain()
+								TellAll(instance.getGameManager().getMain()
 										.color("&2&l(!) "
-												+ instance.getManager().getMain().getRankManager().getRank(player)
+												+ instance.getGameManager().getMain().getRankManager().getRank(player)
 														.getTagWithSpace()
 												+ "&r " + p.getPlayer().getName() + " " + baseClass2.getType().getTag()
 												+ " &cwalked off the edge.."));
 							}
 						} else {
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ instance.getManager().getMain().getRankManager().getRank(player).getTagWithSpace()
+									+ instance.getGameManager().getMain().getRankManager().getRank(player).getTagWithSpace()
 									+ p.getPlayer().getName() + " " + baseClass2.getType().getTag() + ChatColor.RED
 									+ " fell into the void");
 						}
@@ -1448,7 +1434,7 @@ public abstract class BaseClass {
 
 						if (instance.classes.containsKey(player)) {
 							baseClass = instance.classes.get(d);
-							PlayerData killerData = instance.getManager().getMain().getDataManager().getPlayerData(d);
+							PlayerData killerData = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
 							if (d != p || killer != p) {
 								if (instance.gameType == GameType.FRENZY) {
 									BaseClass bc = instance.oldClasses.get(p);
@@ -1456,7 +1442,7 @@ public abstract class BaseClass {
 
 										if (killerData != null && killerData.killMsgs == 1) {
 											this.giveStats(d, p);
-											TellAll(instance.getManager().getMain().color("&2&l(!) " + getPlayerRank(p)
+											TellAll(instance.getGameManager().getMain().color("&2&l(!) " + getPlayerRank(p)
 													+ "&r " + p.getPlayer().getName() + " " + bc.getType().getTag()
 													+ " &cwas not strong enough to encounter " + getPlayerRank(d)
 													+ " &r" + d.getName() + " " + baseClass.getType().getTag()));
@@ -1474,7 +1460,7 @@ public abstract class BaseClass {
 									} else {
 										if (killerData != null && killerData.killMsgs == 1) {
 											this.giveStats(d, p);
-											TellAll(instance.getManager().getMain().color("&2&l(!) " + getPlayerRank(p)
+											TellAll(instance.getGameManager().getMain().color("&2&l(!) " + getPlayerRank(p)
 													+ "&r " + p.getPlayer().getName() + " " + bc.getType().getTag()
 													+ " &cwas not strong enough to encounter " + getPlayerRank(d)
 													+ " &r" + d.getName() + " " + baseClass.getType().getTag()));
@@ -1495,7 +1481,7 @@ public abstract class BaseClass {
 									if (lives == 0) {
 										if (killerData != null && killerData.killMsgs == 1) {
 											this.giveStats(d, p);
-											TellAll(instance.getManager().getMain().color("&2&l(!) " + getPlayerRank(p)
+											TellAll(instance.getGameManager().getMain().color("&2&l(!) " + getPlayerRank(p)
 													+ "&r " + p.getPlayer().getName() + " "
 													+ baseClass2.getType().getTag()
 													+ " &cwas not strong enough to encounter " + getPlayerRank(d)
@@ -1513,7 +1499,7 @@ public abstract class BaseClass {
 									} else if (lives > 0) {
 										if (killerData != null && killerData.killMsgs == 1) {
 											this.giveStats(d, p);
-											TellAll(instance.getManager().getMain().color("&2&l(!) " + getPlayerRank(p)
+											TellAll(instance.getGameManager().getMain().color("&2&l(!) " + getPlayerRank(p)
 													+ "&r " + p.getPlayer().getName() + " "
 													+ baseClass2.getType().getTag()
 													+ " &cwas not strong enough to encounter " + getPlayerRank(d)
@@ -1580,7 +1566,7 @@ public abstract class BaseClass {
 
 							if (instance.classes.containsKey(player)) {
 								baseClass = instance.classes.get(shooter);
-								PlayerData killerData = instance.getManager().getMain().getDataManager()
+								PlayerData killerData = instance.getGameManager().getMain().getDataManager()
 										.getPlayerData(shooter);
 								if (shooter != p || killer != p) {
 									if (instance.gameType == GameType.FRENZY) {
@@ -1589,7 +1575,7 @@ public abstract class BaseClass {
 
 											if (killerData != null && killerData.killMsgs == 1) {
 												this.giveStats(shooter, p);
-												TellAll(instance.getManager().getMain()
+												TellAll(instance.getGameManager().getMain()
 														.color("&2&l(!) " + getPlayerRank(p) + "&r "
 																+ p.getPlayer().getName() + " " + bc.getType().getTag()
 																+ " &cwas not strong enough to encounter "
@@ -1609,7 +1595,7 @@ public abstract class BaseClass {
 										} else {
 											if (killerData != null && killerData.killMsgs == 1) {
 												this.giveStats(shooter, p);
-												TellAll(instance.getManager().getMain()
+												TellAll(instance.getGameManager().getMain()
 														.color("&2&l(!) " + getPlayerRank(p) + "&r "
 																+ p.getPlayer().getName() + " " + bc.getType().getTag()
 																+ " &cwas not strong enough to encounter "
@@ -1634,7 +1620,7 @@ public abstract class BaseClass {
 										if (lives == 0) {
 											if (killerData != null && killerData.killMsgs == 1) {
 												this.giveStats(shooter, p);
-												TellAll(instance.getManager().getMain()
+												TellAll(instance.getGameManager().getMain()
 														.color("&2&l(!) " + getPlayerRank(p) + "&r "
 																+ p.getPlayer().getName() + " "
 																+ baseClass2.getType().getTag()
@@ -1654,7 +1640,7 @@ public abstract class BaseClass {
 										} else if (lives > 0) {
 											if (killerData != null && killerData.killMsgs == 1) {
 												this.giveStats(shooter, p);
-												TellAll(instance.getManager().getMain()
+												TellAll(instance.getGameManager().getMain()
 														.color("&2&l(!) " + getPlayerRank(p) + "&r "
 																+ p.getPlayer().getName() + " "
 																+ baseClass2.getType().getTag()
@@ -1710,22 +1696,22 @@ public abstract class BaseClass {
 									+ ChatColor.RED + " died");
 						}
 					} else {
-						if (killer != null) {
-							TellAll("Test msg");
-						}
+//						if (killer != null) {
+//							TellAll("Test msg");
+//						}
 						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
 								+ p.getPlayer().getName() + " " + baseClass2.getType().getTag() + ChatColor.RED
 								+ " just died SO badly");
 					}
 				} else if (killer != null) {
-					PlayerData killerData = instance.getManager().getMain().getDataManager().getPlayerData(killer);
+					PlayerData killerData = instance.getGameManager().getMain().getDataManager().getPlayerData(killer);
 					if (killer != p) {
 						if (instance.gameType == GameType.FRENZY) {
 							BaseClass bc = instance.oldClasses.get(p);
 							if (lives > 0) {
 								if (killerData != null && killerData.killMsgs == 1) {
 									this.giveStats(killer, p);
-									TellAll(instance.getManager().getMain()
+									TellAll(instance.getGameManager().getMain()
 											.color("&2&l(!) " + getPlayerRank(p) + "&r " + p.getPlayer().getName() + " "
 													+ bc.getType().getTag() + " &cwas not strong enough to encounter "
 													+ getPlayerRank(killer) + " &r" + killer.getName() + " "
@@ -1743,7 +1729,7 @@ public abstract class BaseClass {
 							} else {
 								if (killerData != null && killerData.killMsgs == 1) {
 									this.giveStats(killer, p);
-									TellAll(instance.getManager().getMain()
+									TellAll(instance.getGameManager().getMain()
 											.color("&2&l(!) " + getPlayerRank(p) + "&r " + p.getPlayer().getName() + " "
 													+ bc.getType().getTag() + " &cwas not strong enough to encounter "
 													+ getPlayerRank(killer) + " &r" + killer.getName() + " "
@@ -1765,7 +1751,7 @@ public abstract class BaseClass {
 							if (lives == 0) {
 								if (killerData != null && killerData.killMsgs == 1) {
 									this.giveStats(killer, p);
-									TellAll(instance.getManager().getMain()
+									TellAll(instance.getGameManager().getMain()
 											.color("&2&l(!) " + getPlayerRank(p) + "&r " + p.getPlayer().getName() + " "
 													+ baseClass2.getType().getTag()
 													+ " &cwas not strong enough to encounter " + getPlayerRank(killer)
@@ -1783,7 +1769,7 @@ public abstract class BaseClass {
 							} else if (lives > 0) {
 								if (killerData != null && killerData.killMsgs == 1) {
 									this.giveStats(killer, p);
-									TellAll(instance.getManager().getMain()
+									TellAll(instance.getGameManager().getMain()
 											.color("&2&l(!) " + getPlayerRank(p) + "&r " + p.getPlayer().getName() + " "
 													+ baseClass2.getType().getTag()
 													+ " &cwas not strong enough to encounter " + getPlayerRank(killer)
@@ -1891,13 +1877,14 @@ public abstract class BaseClass {
 				baseClass = instance.classes.get(killer);
 
 				if (lives == 0) {
-					PlayerData data = instance.getManager().getMain().getDataManager().getPlayerData(p);
+					PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(p);
 
 					if (data != null) {
 						data.losses += 1;
+						data.winstreak = 0;
 					}
 					if (killer != null) {
-						String msg = instance.getManager().getMain().color("&4&lELIMINATED &e" + p.getName());
+						String msg = instance.getGameManager().getMain().color("&4&lELIMINATED &e" + p.getName());
 						PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 								(byte) 2);
 						CraftPlayer craft = (CraftPlayer) killer;
@@ -1912,7 +1899,7 @@ public abstract class BaseClass {
 
 						if (data != null) {
 							data.mysteryChests++;
-							player.sendMessage(instance.getManager().getMain()
+							player.sendMessage(instance.getGameManager().getMain()
 									.color("&5&l(!) &rYou have found &e1 Mystery Chest!"));
 						}
 					}
@@ -1932,7 +1919,7 @@ public abstract class BaseClass {
 					}
 
 					if (instance.getMap() != null) {
-						PlayerData data3 = instance.getManager().getMain().getDataManager().getPlayerData(p);
+						PlayerData data3 = instance.getGameManager().getMain().getDataManager().getPlayerData(p);
 						p.sendMessage("" + ChatColor.BOLD + "=====================");
 						p.sendMessage("" + ChatColor.BOLD + "||");
 						p.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RED + ChatColor.BOLD
@@ -1983,7 +1970,7 @@ public abstract class BaseClass {
 						if (this.instance != null) {
 							if (this.instance.getMap() == Maps.SnowGlobe) {
 								int classID = 66;
-								PlayerData playerData = instance.getManager().getMain().getDataManager()
+								PlayerData playerData = instance.getGameManager().getMain().getDataManager()
 										.getPlayerData(p);
 
 								if (playerData != null && playerData.challenge100 == 0) {
@@ -1995,14 +1982,14 @@ public abstract class BaseClass {
 										playerData.playerClasses.put(classID, details);
 									}
 									details.setPurchased();
-									p.sendMessage(instance.getManager().getMain()
+									p.sendMessage(instance.getGameManager().getMain()
 											.color("&2&l(!) &rYou have unlocked &2&lElf &rclass!"));
-									instance.getManager().getMain().getDataManager().saveData(playerData);
+									instance.getGameManager().getMain().getDataManager().saveData(playerData);
 								}
 							} else if (this.instance.getMap() == Maps.SantasWorkshop) {
 								if (baseClass2 != null && baseClass2.getType() == ClassType.Elf) {
 									int classID = 67;
-									PlayerData playerData = instance.getManager().getMain().getDataManager()
+									PlayerData playerData = instance.getGameManager().getMain().getDataManager()
 											.getPlayerData(p);
 
 									if (playerData != null && playerData.challenge102 == 0) {
@@ -2014,9 +2001,9 @@ public abstract class BaseClass {
 											playerData.playerClasses.put(classID, details);
 										}
 										details.setPurchased();
-										p.sendMessage(instance.getManager().getMain()
+										p.sendMessage(instance.getGameManager().getMain()
 												.color("&2&l(!) &rYou have unlocked &c&lSanta &rclass!"));
-										instance.getManager().getMain().getDataManager().saveData(playerData);
+										instance.getGameManager().getMain().getDataManager().saveData(playerData);
 									}
 								}
 							}
@@ -2025,7 +2012,7 @@ public abstract class BaseClass {
 						if (data3.exp >= 2500) {
 							data3.level++;
 							data3.exp -= 2500;
-							p.sendMessage(instance.getManager().getMain().color("&e&lLEVEL UPGRADED!"));
+							p.sendMessage(instance.getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
 							p.sendMessage("You are now Level: " + data3.level + "!");
 						}
 					} else {
@@ -2041,12 +2028,12 @@ public abstract class BaseClass {
 						instance.teamsAlive++;
 						if (instance.team.get(p).equals("Red")) {
 							if (!(aliveTeam.contains("Red"))) {
-								TellAll(instance.getManager().getMain()
+								TellAll(instance.getGameManager().getMain()
 										.color("&2&l(!) &c&lRed Team &r has been eliminated!"));
 
 								for (Player losers : instance.redTeam) {
 									BaseClass loserBc = instance.classes.get(losers);
-									PlayerData data3 = instance.getManager().getMain().getDataManager()
+									PlayerData data3 = instance.getGameManager().getMain().getDataManager()
 											.getPlayerData(losers);
 									losers.sendMessage(ChatColor.BOLD + "=====================");
 									losers.sendMessage(ChatColor.BOLD + "||");
@@ -2092,22 +2079,22 @@ public abstract class BaseClass {
 										data3.level++;
 										data3.exp -= 2500;
 										losers.sendMessage(
-												instance.getManager().getMain().color("&e&lLEVEL UPGRADED!"));
+												instance.getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
 										losers.sendMessage("You are now Level: " + data3.level + "!");
 									}
 
-									losers.sendMessage(instance.getManager().getMain()
+									losers.sendMessage(instance.getGameManager().getMain()
 											.color("&2&l(!) &rYou have gained &e" + loserBc.totalTokens + " Tokens"));
 								}
 							}
 						} else if (instance.team.get(p).equals("Blue")) {
 							if (!(aliveTeam.contains("Blue"))) {
-								TellAll(instance.getManager().getMain()
+								TellAll(instance.getGameManager().getMain()
 										.color("&2&l(!) &b&lBlue Team &r has been eliminated!"));
 
 								for (Player losers : instance.blueTeam) {
 									BaseClass loserBc = instance.classes.get(losers);
-									PlayerData data3 = instance.getManager().getMain().getDataManager()
+									PlayerData data3 = instance.getGameManager().getMain().getDataManager()
 											.getPlayerData(losers);
 									losers.sendMessage(ChatColor.BOLD + "=====================");
 									losers.sendMessage(ChatColor.BOLD + "||");
@@ -2153,21 +2140,21 @@ public abstract class BaseClass {
 										data3.level++;
 										data3.exp -= 2500;
 										losers.sendMessage(
-												instance.getManager().getMain().color("&e&lLEVEL UPGRADED!"));
+												instance.getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
 										losers.sendMessage("You are now Level: " + data3.level + "!");
 									}
-									losers.sendMessage(instance.getManager().getMain()
+									losers.sendMessage(instance.getGameManager().getMain()
 											.color("&2&l(!) &rYou have gained &e" + loserBc.totalTokens + " Tokens"));
 								}
 							}
 						} else if (instance.team.get(p).equals("Black")) {
 							if (!(aliveTeam.contains("Black"))) {
-								TellAll(instance.getManager().getMain()
+								TellAll(instance.getGameManager().getMain()
 										.color("&2&l(!) &0&lBlack Team &r has been eliminated!"));
 
 								for (Player losers : instance.blackTeam) {
 									BaseClass loserBc = instance.classes.get(losers);
-									PlayerData data3 = instance.getManager().getMain().getDataManager()
+									PlayerData data3 = instance.getGameManager().getMain().getDataManager()
 											.getPlayerData(losers);
 									losers.sendMessage(ChatColor.BOLD + "=====================");
 									losers.sendMessage(ChatColor.BOLD + "||");
@@ -2213,10 +2200,10 @@ public abstract class BaseClass {
 										data3.level++;
 										data3.exp -= 2500;
 										losers.sendMessage(
-												instance.getManager().getMain().color("&e&lLEVEL UPGRADED!"));
+												instance.getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
 										losers.sendMessage("You are now Level: " + data3.level + "!");
 									}
-									losers.sendMessage(instance.getManager().getMain()
+									losers.sendMessage(instance.getGameManager().getMain()
 											.color("&2&l(!) &rYou have gained &e" + loserBc.totalTokens + " Tokens"));
 								}
 							}
@@ -2226,7 +2213,7 @@ public abstract class BaseClass {
 
 				} else if (lives == 1) {
 					if (killer != null) {
-						String msg = instance.getManager().getMain().color("&4&lKILLED &e" + p.getName());
+						String msg = instance.getGameManager().getMain().color("&4&lKILLED &e" + p.getName());
 						PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 								(byte) 2);
 						CraftPlayer craft = (CraftPlayer) killer;
@@ -2238,7 +2225,7 @@ public abstract class BaseClass {
 
 				} else {
 					if (killer != null) {
-						String msg = instance.getManager().getMain().color("&4&lKILLED &e" + p.getName());
+						String msg = instance.getGameManager().getMain().color("&4&lKILLED &e" + p.getName());
 						PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 								(byte) 2);
 						CraftPlayer craft = (CraftPlayer) killer;
@@ -2351,12 +2338,12 @@ public abstract class BaseClass {
 				if (instance.firstBlood == null) {
 					instance.firstBlood = d;
 					TellAll("");
-					TellAll(instance.getManager().getMain().color("&2&l(!) &r" + getPlayerRank(d) + d.getName() + " "
+					TellAll(instance.getGameManager().getMain().color("&2&l(!) &r" + getPlayerRank(d) + d.getName() + " "
 							+ baseClass3.getType().getTag() + " &edrew first blood!"));
 					TellAll("");
 					baseClass3.totalTokens += 10;
 				}
-				PlayerData data = instance.getManager().getMain().getDataManager().getPlayerData(d);
+				PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
 
 				if (data != null) {
 					// data.tokens += 1;
@@ -2364,9 +2351,9 @@ public abstract class BaseClass {
 					data.exp += 29;
 					baseClass3.totalExp += 29;
 
-					if (instance.getManager().getMain().tournament == true)
+					if (instance.getGameManager().getMain().tournament == true)
 						data.points++;
-					if (instance.getManager().getMain().tournament)
+					if (instance.getGameManager().getMain().tournament)
 						data.points++;
 
 					d.playSound(d.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
@@ -2390,20 +2377,20 @@ public abstract class BaseClass {
 			baseClass = instance.classes.get(d);
 			if (baseClass.getType() == ClassType.Sheep && baseClass.getLives() > 0) {
 				d.getInventory().addItem(new ItemStack(Material.ENCHANTMENT_TABLE));
-				d.sendMessage(instance.getManager().getMain()
+				d.sendMessage(instance.getGameManager().getMain()
 						.color("&r&l(!) &rYou got a kill and now you can switch your wool color if you'd like!"));
 
 			} else if (baseClass.getType() == ClassType.Hunter) {
 				if (!(d.getInventory().contains(Material.FEATHER))) {
-					d.sendMessage(instance.getManager().getMain()
+					d.sendMessage(instance.getGameManager().getMain()
 							.color("&r&l(!) &rYour &r&lDash &rhas been regenerated for getting a kill!"));
 					d.getInventory()
 							.addItem(ItemHelper.setDetails(new ItemStack(Material.FEATHER),
-									instance.getManager().getMain().color("&b&lDash"),
-									instance.getManager().getMain().color("&7A quick escape or attack")));
+									instance.getGameManager().getMain().color("&b&lDash"),
+									instance.getGameManager().getMain().color("&7A quick escape or attack")));
 				}
 			} else if (baseClass.getType() == ClassType.Present) {
-				d.sendMessage(instance.getManager().getMain().color(
+				d.sendMessage(instance.getGameManager().getMain().color(
 						"&r&l(!) &rYour &r&lAggressive Gift has regenerated and you can get a new weapon if you'd like!"));
 				d.getInventory().addItem(ItemHelper.setDetails(new ItemStack(Material.CHEST, 1),
 						String.valueOf(ChatColor.RESET) + ChatColor.ITALIC + "Agressive Gift", "",
@@ -2412,7 +2399,7 @@ public abstract class BaseClass {
 				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK, 1),
 						ChatColor.GREEN + "Butter Balls",
 						ChatColor.YELLOW + "Right click to throw DEADLY butter balls!");
-				d.sendMessage(instance.getManager().getMain()
+				d.sendMessage(instance.getGameManager().getMain()
 						.color("&2&l(!) &rYou got a kill and gained an extra &2Butter Ball"));
 				d.getInventory().addItem(item);
 			}

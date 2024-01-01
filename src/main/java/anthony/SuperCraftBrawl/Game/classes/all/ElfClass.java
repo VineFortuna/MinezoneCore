@@ -1,11 +1,13 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.Color;
-import org.bukkit.Effect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
+import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -18,15 +20,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.Vector;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
-import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import net.md_5.bungee.api.ChatColor;
 
 public class ElfClass extends BaseClass {
 
@@ -103,7 +96,7 @@ public class ElfClass extends BaseClass {
 							for (Player gamePlayer : this.getNearby(3.0)) {
 								EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
 										DamageCause.PROJECTILE, 6.0);
-								instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+								instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 								gamePlayer.damage(6.0, player);
 								gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 200, 2, true));
 							}
@@ -115,7 +108,7 @@ public class ElfClass extends BaseClass {
 						}
 
 					}, new ItemStack(Material.SUGAR));
-					instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+					instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 							player.getLocation().getDirection().multiply(2.5D));
 				}
 				event.setCancelled(true);
@@ -125,7 +118,7 @@ public class ElfClass extends BaseClass {
 			if (player.getGameMode() != GameMode.SPECTATOR) {
 				if (this.cake == false) {
 					if (player.getHealth() >= 18.0) {
-						player.sendMessage(instance.getManager().getMain()
+						player.sendMessage(instance.getGameManager().getMain()
 								.color("&c&l(!) &rDon't waste your cake like that!"));
 					} else {
 						int uses = 7;
@@ -139,12 +132,12 @@ public class ElfClass extends BaseClass {
 							
 							player.setHealth(player.getHealth() + 1.0);
 						}
-						player.sendMessage(instance.getManager().getMain()
+						player.sendMessage(instance.getGameManager().getMain()
 								.color("&e&l(!) &rWow that was a delicious cake! I'm ready to fight again"));
 					}
 				} else
 					player.sendMessage(
-							instance.getManager().getMain().color("&c&l(!) &rYou already used your cake this life"));
+							instance.getGameManager().getMain().color("&c&l(!) &rYou already used your cake this life"));
 			}
 		}
 	}

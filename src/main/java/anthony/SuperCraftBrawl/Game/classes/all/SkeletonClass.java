@@ -1,10 +1,12 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Color;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
@@ -16,13 +18,6 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 
 public class SkeletonClass extends BaseClass {
 
@@ -57,14 +52,14 @@ public class SkeletonClass extends BaseClass {
 			this.cooldownSec = (5000 - skeleAttack.getTime()) / 1000 + 1;
 
 			if (skeleAttack.getTime() < 5000) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&7Attack Arrow &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &7Attack Arrow");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &7Attack Arrow");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -81,7 +76,7 @@ public class SkeletonClass extends BaseClass {
 				.setItem(1,
 						ItemHelper.addEnchant(ItemHelper.addEnchant(
 								ItemHelper.setDetails(new ItemStack(Material.BONE), "", "",
-										instance.getManager().getMain()
+										instance.getGameManager().getMain()
 												.color("&7Right click to shoot an Attack Arrow!")),
 								Enchantment.DAMAGE_ALL, 2), Enchantment.KNOCKBACK, 1));
 		playerInv.setItem(2, new ItemStack(Material.ARROW));

@@ -13,8 +13,8 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>8</source>
+					<target>8</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -65,7 +65,7 @@
 			<artifactId>bukkit-nms</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>C:\Users\antho\eclipse-workspace\TheArchive-Core\spigot-1.8.8.jar</systemPath>
+			<systemPath>C:\Users\Family\Desktop\Spigot\spigot-1.8.8-R0.1-SNAPSHOT-latest.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
@@ -115,16 +115,14 @@
 			<artifactId>SCBAuth</artifactId>
 			<version>1.5</version>
 			<scope>system</scope>
-			<systemPath>C:\Users\antho\OneDrive\Desktop\Server Stuff\MinezoneAuth.jar</systemPath>
+			<systemPath>F:\Downloads\MinezoneAuth.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>org.bukkit.nms</groupId>
 			<artifactId>PunishSystem</artifactId>
 			<version>1.9</version>
 			<scope>system</scope>
-			<systemPath>
-				C:\Users\antho\OneDrive\Desktop\Server Stuff\PunishSystem.jar
-			</systemPath>
+			<systemPath>F:\Downloads\PunishSystem.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.comphenix.protocol</groupId>

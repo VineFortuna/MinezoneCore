@@ -1,10 +1,18 @@
 package anthony.SuperCraftBrawl.commands;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Random;
-
+import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.Game.GameType;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.gui.GameStatsGUI;
+import anthony.SuperCraftBrawl.gui.ShopCWGUI;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.ranks.Rank;
+import com.google.common.collect.Lists;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -18,20 +26,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
-import com.google.common.collect.Lists;
-
-import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Game.GameType;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.map.Maps;
-import anthony.SuperCraftBrawl.gui.GameStatsGUI;
-import anthony.SuperCraftBrawl.gui.ShopCWGUI;
-import anthony.SuperCraftBrawl.playerdata.ClassDetails;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import anthony.SuperCraftBrawl.ranks.Rank;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Random;
 
 public class Commands implements CommandExecutor, TabCompleter {
 
@@ -98,11 +96,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 				if (instance2 != null) {
 					if (player.hasPermission("scb.startGame")) {
-						if (instance2.state == GameState.WAITING && instance2.players.size() >= 2) {
+						if (instance2.state == GameState.WAITING && instance2.players.size() >= 1) {
 							instance2.TellAll(
 									main.color("&2&l(!) &rGame has been force started by &e" + player.getName()));
 							instance2.ticksTilStart = 0;
-						} else if (instance2.state == GameState.WAITING && !(instance2.players.size() >= 2))
+						} else if (instance2.state == GameState.WAITING)
 							player.sendMessage(main.color("&c&l(!) &rNot enough players to start!"));
 						else if (instance2.state == GameState.STARTED)
 							sender.sendMessage(main.color("&c&l(!) &rGame is already in progress!"));
@@ -114,33 +112,41 @@ public class Commands implements CommandExecutor, TabCompleter {
 				break;
 
 			case "setlives":
-				if (player.getName().equals("chirpinsince02")) {
-					if (args.length > 0) {
-						Player target = Bukkit.getServer().getPlayerExact(args[0]);
+				if (args.length >= 2) {
+					Player target = Bukkit.getServer().getPlayerExact(args[0]);
+					
+					int num = 0;
+					try {
+						num = Integer.parseInt(args[1]);
+					} catch (NumberFormatException ex) {
+						player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD
+								+ "(!) " + ChatColor.RESET + "Please specify the number of lives!");
+						return false;
+					}
+					
+					if (target != null) {
 						GameInstance i = main.getGameManager().GetInstanceOfPlayer(target);
-						BaseClass baseClass2 = i.classes.get(target);
-						int num = Integer.parseInt(args[1]);
-
-						if (i.state == GameState.STARTED) {
-							if (i != null) {
-								if (target != null) {
-									baseClass2.lives = num;
-									player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD
-											+ "(!) " + ChatColor.RESET + "You have set " + ChatColor.YELLOW
-											+ target.getName() + ChatColor.RESET + "'s lives to " + ChatColor.YELLOW
-											+ num);
-									baseClass2.score.setScore(baseClass2.lives);
-								} else
-									player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD
-											+ "(!) " + ChatColor.RESET + "Please specify a player!");
+						if (i != null) {
+							if (i.state == GameState.STARTED) {
+								BaseClass baseClass2 = i.classes.get(target);
+								baseClass2.lives = num;
+								player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD
+										+ "(!) " + ChatColor.RESET + "You have set " + ChatColor.YELLOW
+										+ target.getName() + ChatColor.RESET + "'s lives to " + ChatColor.YELLOW
+										+ num);
+								baseClass2.score.setScore(baseClass2.lives);
 							} else
 								player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-										+ ChatColor.RESET + "This player is not in a game!");
+										+ ChatColor.RESET + "Game must be started in order to use this!");
 						} else
 							player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-									+ ChatColor.RESET + "Game must be started in order to use this!");
-					}
-				}
+									+ ChatColor.RESET + "This player is not in a game!");
+					} else
+						player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD
+								+ "(!) " + ChatColor.RESET + "Please specify a player!");
+				} else
+					player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "Incorrect usage! Try doing: " + ChatColor.RESET + ChatColor.GREEN + "/setlives <player> <lives>");
 				break;
 
 			case "gamestats":
@@ -148,7 +154,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 					if (main.gameStats.containsKey(player)) {
 						if (main.gameStats.get(player) != null) {
 							if (main.gameStats.get(player).HasPlayer(player)) {
-								new GameStatsGUI(main, main.gameStats.get(player)).inv.open(player);
+								try {
+									new GameStatsGUI(main, main.gameStats.get(player)).inv.open(player);
+								} catch (NullPointerException ex) {
+									player.sendMessage(main.color("&c&l(!) &rThis game's stats cannot be viewed. Did a player leave early?"));
+								}
 								return true;
 							}
 						}
@@ -159,7 +169,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 				return true;
 
 			case "fav":
-				if (args.length >= 0) {
+				if (args.length > 0) {
 					String className = args[0];
 
 					for (ClassType type : ClassType.values()) {
@@ -167,13 +177,22 @@ public class Commands implements CommandExecutor, TabCompleter {
 							PlayerData playerData = main.getDataManager().getPlayerData(player);
 
 							if (playerData != null) {
-								playerData.customIntegers.add(type.getID());
-								player.sendMessage(main.color("&2&l(!) &rNew favorite class! " + type.getTag()));
-								main.getDataManager().saveData(playerData);
+								if (!playerData.customIntegers.contains(type.getID())) {
+									playerData.customIntegers.add(type.getID());
+									player.sendMessage(main.color("&2&l(!) &rNew favorite class! " + type.getTag()));
+									main.getDataManager().saveData(playerData);
+								} else
+									player.sendMessage(main.color("&c&l(!) &rThis class is already favorited!"));
 							}
+							return true;
 						}
 					}
-				}
+					player.sendMessage(main.color(
+							"&c&l(!) &rThis class does not exist! Use &e/classes &rfor a list of playable classes"));
+				} else
+					player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "Incorrect usage! Try doing: " + ChatColor.RESET + ChatColor.GREEN + "/fav <classname>");
+				
 				return true;
 
 			case "join":

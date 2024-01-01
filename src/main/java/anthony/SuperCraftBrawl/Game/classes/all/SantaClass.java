@@ -1,10 +1,11 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
@@ -20,12 +21,6 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
 
 public class SantaClass extends BaseClass {
 
@@ -101,12 +96,12 @@ public class SantaClass extends BaseClass {
 						player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 3));
 						this.jump = true;
 					} else {
-						player.sendMessage(instance.getManager().getMain()
+						player.sendMessage(instance.getGameManager().getMain()
 								.color("&c&l(!) &rYou have used all your delicious cookies!"));
 						return;
 					}
 
-					player.sendMessage(instance.getManager().getMain()
+					player.sendMessage(instance.getGameManager().getMain()
 							.color("&2&l(!) &rYou ate a cookie and gained an effect! (not just positive tho"));
 					player.playSound(player.getLocation(), Sound.EAT, 1, 1);
 					player.removePotionEffect(PotionEffectType.SLOW);
@@ -131,7 +126,7 @@ public class SantaClass extends BaseClass {
 					player.playSound(player.getLocation(), Sound.WATER, 1, 1);
 					player.setFireTicks(0);
 					player.sendMessage(
-							instance.getManager().getMain().color("&2&l(!) &rHO HO HO! Dat milk be tastin' hella gud"));
+							instance.getGameManager().getMain().color("&2&l(!) &rHO HO HO! Dat milk be tastin' hella gud"));
 				}
 			} else if (item.getType() == this.rudolph.getType()) {
 				if (meta != null && meta.getDisplayName() != null) {
@@ -148,7 +143,7 @@ public class SantaClass extends BaseClass {
 						player.teleport(horse.getLocation());
 						horse.setPassenger(player);
 
-						Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), new BukkitRunnable() {
+						Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new BukkitRunnable() {
 							@Override
 							public void run() {
 								if (!horse.isDead()) {

@@ -1,11 +1,10 @@
 package anthony.SuperCraftBrawl.Game.map;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import anthony.SuperCraftBrawl.Game.GameType;
 import org.bukkit.util.Vector;
 
-import anthony.SuperCraftBrawl.Game.GameType;
+import java.util.ArrayList;
+import java.util.List;
 
 public enum Maps {
 
@@ -421,6 +420,7 @@ public enum Maps {
 							new Vector(337.445, 105, 233.402),
 							new Vector(373.408, 108, 275.570))
 					.setLobbyLoc(new Vector(286.560, 113, 254.505))
+					.setSpecLoc(new Vector(362.537, 117, 230.920))
 					.setBounds(new Vector(353.450, 125, 254.414), 50, 50)
 					.setSignLoc(new Vector(192.516, 106, 673.700))
 					.setMapType(MapType.SCB)),
@@ -965,7 +965,7 @@ public enum Maps {
 					.setSignLoc(new Vector(201.537, 108, 673.700))
 					.setBounds(new Vector(4925.490, 189, 558.485), 45, 42)),
 	SantasWorkshop("SantasWorkshop",
-			new MapInstance("santaworkshop")
+			new MapInstance("santafactory")
 					.setSpawnPos(
 							new Vector(55.541, 83.5, -83.159),
 							new Vector(73, 86, -43),
@@ -975,8 +975,8 @@ public enum Maps {
 							new Vector(74, 74, -62),
 							new Vector(55, 74, -47),
 							new Vector(33, 82, -21))
-					.setLobbyLoc(new Vector(56, 86, -132))
-					.setSpecLoc(new Vector(4925.490, 150, 558.485))
+					.setLobbyLoc(new Vector(57, 85, -150))
+					.setSpecLoc(new Vector(55.654, 101, -50.585))
 					.setSignLoc(new Vector(201.537, 107, 673.700))
 					.setBounds(new Vector(55, 74, -43), 100, 100)),
 	Slither("Slither",

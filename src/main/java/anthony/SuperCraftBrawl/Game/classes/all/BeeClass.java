@@ -1,16 +1,18 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.lang.reflect.Field;
-import java.util.UUID;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
-import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -20,20 +22,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.material.SpawnEgg;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
+import java.lang.reflect.Field;
+import java.util.UUID;
 
 public class BeeClass extends BaseClass {
 
@@ -84,8 +78,8 @@ public class BeeClass extends BaseClass {
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper.addEnchant(ItemHelper.addEnchant(
 				ItemHelper.setDetails(new ItemStack(Material.GLOWSTONE_DUST),
-						instance.getManager().getMain().color("&eNectar"), "",
-						instance.getManager().getMain().color("&7Right click to gain energy")),
+						instance.getGameManager().getMain().color("&eNectar"), "",
+						instance.getGameManager().getMain().color("&7Right click to gain energy")),
 				Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 1);
 
 		return item;
@@ -100,12 +94,12 @@ public class BeeClass extends BaseClass {
 	public void SetItems(Inventory playerInv) {
 		playerInv.setItem(0, getAttackWeapon());
 		ItemStack pollen = ItemHelper.setDetails(new ItemStack(Material.RED_ROSE, 1, (short) 6),
-				instance.getManager().getMain().color("Pollen"), "",
-				instance.getManager().getMain().color("&7Right click to get nutrients"));
+				instance.getGameManager().getMain().color("Pollen"), "",
+				instance.getGameManager().getMain().color("&7Right click to get nutrients"));
 		playerInv.setItem(1, pollen);
 		playerInv.setItem(2,
-				ItemHelper.setDetails(new ItemStack(Material.STICK), instance.getManager().getMain().color("&eStinger"),
-						instance.getManager().getMain().color("&7Hit a player with this to give poison!")));
+				ItemHelper.setDetails(new ItemStack(Material.STICK), instance.getGameManager().getMain().color("&eStinger"),
+						instance.getGameManager().getMain().color("&7Hit a player with this to give poison!")));
 	}
 
 	@Override
@@ -123,8 +117,8 @@ public class BeeClass extends BaseClass {
 			if (p.getItemInHand().getType() == Material.STICK) {
 				if (event.getEntity() instanceof Player) {
 					Player p2 = (Player) event.getEntity();
-					if (instance.getManager().spawnProt.containsKey(p)
-							|| instance.getManager().spawnProt.containsKey(p2))
+					if (instance.getGameManager().spawnProt.containsKey(p)
+							|| instance.getGameManager().spawnProt.containsKey(p2))
 						return;
 
 					if (instance.duosMap != null)
@@ -137,7 +131,7 @@ public class BeeClass extends BaseClass {
 				}
 
 				p.getInventory().clear(p.getInventory().getHeldItemSlot());
-				p.sendMessage(instance.getManager().getMain()
+				p.sendMessage(instance.getGameManager().getMain()
 						.color("&2&l(!) &rYou used your stinger and now you're weak for 5 seconds"));
 
 				if (weak == null) {
@@ -168,7 +162,7 @@ public class BeeClass extends BaseClass {
 						}
 
 					};
-					weak.runTaskTimer(instance.getManager().getMain(), 0, 20);
+					weak.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
 				}
 			}
 		}
@@ -192,7 +186,7 @@ public class BeeClass extends BaseClass {
 						bee.restart();
 						player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 110, 0));
 						player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 110, 0));
-						player.sendMessage(instance.getManager().getMain()
+						player.sendMessage(instance.getGameManager().getMain()
 								.color("&2&l(!) &rYour &eNectar &rhas given you more energy for 5 seconds"));
 					}
 				}
@@ -201,7 +195,7 @@ public class BeeClass extends BaseClass {
 				if (player.getGameMode() != GameMode.SPECTATOR) {
 					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 65, 2));
 					player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 100, 0));
-					player.sendMessage(instance.getManager().getMain()
+					player.sendMessage(instance.getGameManager().getMain()
 							.color("&2&l(!) &rYour Pollen has given you nutrients for 3 seconds"));
 					player.getInventory().clear(player.getInventory().getHeldItemSlot());
 				}

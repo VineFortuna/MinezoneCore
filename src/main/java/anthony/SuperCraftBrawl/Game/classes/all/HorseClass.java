@@ -1,9 +1,11 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.*;
-
 import anthony.SuperCraftBrawl.ChatColorHelper;
-import anthony.SuperCraftBrawl.Game.classes.*;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -17,10 +19,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
 import org.bukkit.util.Vector;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Random;
 
 public class HorseClass extends BaseClass {
 	private ItemStack weapon;
@@ -157,7 +161,7 @@ public class HorseClass extends BaseClass {
 							return;
 						}
 						player.setFoodLevel(19);
-						Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
+						Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
 							player.setFoodLevel(20);
 						}, 20L);
 

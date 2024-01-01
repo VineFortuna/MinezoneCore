@@ -1,19 +1,14 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URLEncoder;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Color;
-import org.bukkit.Effect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Blaze;
@@ -30,18 +25,8 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.util.Vector;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-
-import java.util.Base64;
 import java.lang.reflect.Field;
+import java.util.UUID;
 
 public class BlazeClass extends BaseClass {
 
@@ -103,7 +88,7 @@ public class BlazeClass extends BaseClass {
 				ItemHelper.addEnchant(ItemHelper.addEnchant(new ItemStack(Material.BOW), Enchantment.ARROW_INFINITE, 1),
 						Enchantment.DURABILITY, 1000));
 		playerInv.setItem(2, ItemHelper.setDetails(new ItemStack(Material.MOB_SPAWNER),
-				instance.getManager().getMain().color("&6&lBlaze Army &7(Right Click)")));
+				instance.getGameManager().getMain().color("&6&lBlaze Army &7(Right Click)")));
 		playerInv.setItem(3, new ItemStack(Material.ARROW));
 	}
 
@@ -123,14 +108,14 @@ public class BlazeClass extends BaseClass {
 			this.cooldownSec = (15000 - blazeRod.getTime()) / 1000 + 1;
 
 			if (blazeRod.getTime() < 15000) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&e&lBlaze Rod &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &e&lBlaze Rod");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &e&lBlaze Rod");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -148,7 +133,7 @@ public class BlazeClass extends BaseClass {
 			if (player.getGameMode() != GameMode.SPECTATOR) {
 				Location loc = player.getLocation();
 				player.getInventory().clear(player.getInventory().getHeldItemSlot());
-				player.sendMessage(instance.getManager().getMain().color("&2&l(!) &rYou spawned &6&lBlaze Army"));
+				player.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rYou spawned &6&lBlaze Army"));
 				Blaze b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
 				b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
 				float yaw = loc.getYaw();
@@ -214,9 +199,9 @@ public class BlazeClass extends BaseClass {
 								.addEnchant(
 										ItemHelper.addEnchant(
 												ItemHelper.setDetails(new ItemStack(Material.BLAZE_ROD), "",
-														instance.getManager().getMain()
+														instance.getGameManager().getMain()
 																.color("&7Right click to shoot up"),
-														instance.getManager().getMain().color("&7& shoot fireballs!")),
+														instance.getGameManager().getMain().color("&7& shoot fireballs!")),
 												Enchantment.DAMAGE_ALL, 1),
 										Enchantment.FIRE_ASPECT, 1),
 						Enchantment.KNOCKBACK, 2);
@@ -224,7 +209,7 @@ public class BlazeClass extends BaseClass {
 	}
 	
 	private void blazeEvent(Player player) { //Fireball launch when right click blaze rod
-		Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), new Runnable() {
+		Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new Runnable() {
 			@Override
 			public void run() {
 				SmallFireball fireball = player.launchProjectile(SmallFireball.class);

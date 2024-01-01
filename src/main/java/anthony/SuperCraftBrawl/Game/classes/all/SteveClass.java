@@ -1,7 +1,10 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.Random;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.gui.CraftableItemsGUI;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -17,18 +20,13 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import anthony.SuperCraftBrawl.gui.CraftableItemsGUI;
+import java.util.Random;
 
 public class SteveClass extends BaseClass {
 
 	private ItemStack stonePick = ItemHelper.addEnchant(
 			ItemHelper.setDetails(new ItemStack(Material.STONE_PICKAXE),
-					instance.getManager().getMain().color("&rStone Pickaxe &7(Right Click)")),
+					instance.getGameManager().getMain().color("&rStone Pickaxe &7(Right Click)")),
 			Enchantment.DURABILITY, 10000);
 	private ItemStack gold = new ItemStack(Material.GOLD_INGOT, goldAmt);
 	private ItemStack coal = new ItemStack(Material.COAL, coalAmt);
@@ -143,7 +141,7 @@ public class SteveClass extends BaseClass {
 
 	private void abilityMsg() {
 		player.sendMessage("");
-		player.sendMessage(instance.getManager().getMain().color(
+		player.sendMessage(instance.getGameManager().getMain().color(
 				"&e&lCLASS TIP> &rHit other players to gain items, and when you have 4 of an item, use the crafting table to craft and then right click that block you crafted to give you cool things!"));
 		player.sendMessage("");
 	}
@@ -154,7 +152,7 @@ public class SteveClass extends BaseClass {
 
 		if (item != null && item.getType() == Material.WORKBENCH
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			new CraftableItemsGUI(instance.getManager().getMain()).inv.open(player);
+			new CraftableItemsGUI(instance.getGameManager().getMain()).inv.open(player);
 		} else if (item != null && item.getType() == Material.STONE_PICKAXE
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 			this.abilityMsg();

@@ -1,7 +1,10 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.Random;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -14,18 +17,12 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import net.md_5.bungee.api.ChatColor;
+import java.util.Random;
 
 public class BabyCowClass extends BaseClass {
 
@@ -74,10 +71,10 @@ public class BabyCowClass extends BaseClass {
 						Enchantment.KNOCKBACK, 2));
 		playerInv.setItem(2,
 				ItemHelper.setDetails(new ItemStack(Material.MILK_BUCKET),
-						instance.getManager().getMain().color("&r&lMommy's Milk &7(Right Click)"), "",
-						instance.getManager().getMain().color("&7Right click to gain:"),
-						instance.getManager().getMain().color("   &rPermanent Speed I"),
-						instance.getManager().getMain().color("   &r30 sec Strength I")));
+						instance.getGameManager().getMain().color("&r&lMommy's Milk &7(Right Click)"), "",
+						instance.getGameManager().getMain().color("&7Right click to gain:"),
+						instance.getGameManager().getMain().color("   &rPermanent Speed I"),
+						instance.getGameManager().getMain().color("   &r30 sec Strength I")));
 	}
 
 	@Override
@@ -107,7 +104,7 @@ public class BabyCowClass extends BaseClass {
 				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
 				player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 600, 0));
 				player.getInventory().clear(player.getInventory().getHeldItemSlot());
-				player.sendMessage(instance.getManager().getMain().color(
+				player.sendMessage(instance.getGameManager().getMain().color(
 						"&2&l(!) &rYour &eMommy's Milk &rgave you permanent Speed I and Strength I for 30 seconds!"));
 			}
 		}

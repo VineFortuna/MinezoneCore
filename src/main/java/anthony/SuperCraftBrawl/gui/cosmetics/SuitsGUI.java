@@ -42,7 +42,7 @@ public class SuitsGUI implements InventoryProvider {
 //        ItemStack santa = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
 
             // Astronaut Outfit
-        ItemStack astronautHead = ItemHelper.create(Material.GLASS, ChatColor.YELLOW.toString() + ChatColor.BOLD + "Austronaut Outfit");
+        ItemStack astronautHead = ItemHelper.create(Material.GLASS, ChatColor.YELLOW.toString() + ChatColor.BOLD + "Astronaut Outfit");
 
 
         // Setting Items

@@ -1,14 +1,20 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.Ability;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -19,14 +25,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BedrockClass extends BaseClass {
 
@@ -41,7 +41,7 @@ public class BedrockClass extends BaseClass {
 
 	private BukkitRunnable lava;
 	private BukkitRunnable bedrock;
-	private List<Material> blockList;
+	private List<BlockState> blockList;
 	private List<Block> blockList2;
 	private int lavaCooldownSec;
 
@@ -137,7 +137,7 @@ public class BedrockClass extends BaseClass {
 		this.lavaCooldownSec = (10000 - bedrockLava.getTime()) / 1000 + 1;
 
 		if (bedrockLava.getTime() < 10000) {
-			String msg = instance.getManager().getMain()
+			String msg = instance.getGameManager().getMain()
 					.color("&6&lBedrock Lava &rregenerates in: &e" + this.lavaCooldownSec + "s");
 			PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
 			CraftPlayer craft = (CraftPlayer) player;
@@ -145,7 +145,7 @@ public class BedrockClass extends BaseClass {
 		} else {
 			if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Bedrock
 					&& instance.classes.get(player).getLives() > 0) {
-				String msg = instance.getManager().getMain().color("&rYou can use &6&lBedrock Lava");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &6&lBedrock Lava");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -172,7 +172,7 @@ public class BedrockClass extends BaseClass {
 							// Setting cooldown
 							invincibility.use();
 							// Sending return message
-							invincibility.sendPlayerCustomUseAbilityChatMessage("&d&l(!) &rYou are now invincible for &e" + invincibilityDuration + "&rseconds");
+							invincibility.sendPlayerCustomUseAbilityChatMessage("&d&l(!) &rYou are now invincible for &e" + invincibilityDuration + " &rseconds");
 							invincibility.sendPlayerCustomUseAbilityChatMessage("&d&l(!) &rYou are also unable to hit other players");
 							// Setting invincibility
 							BaseClass bc = instance.classes.get(player);
@@ -214,7 +214,7 @@ public class BedrockClass extends BaseClass {
 										ticks--;
 									}
 								};
-								bedrock.runTaskTimer(instance.getManager().getMain(), 0, 20);
+								bedrock.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
 							}
 						}
 					}
@@ -231,7 +231,7 @@ public class BedrockClass extends BaseClass {
 							bedrockLava.restart();
 							player.getInventory().clear(player.getInventory().getHeldItemSlot());
 							for (Player gamePlayer : instance.players) {
-								if (gamePlayer != player) {
+								//if (gamePlayer != player) {
 									if (instance.classes.containsKey(gamePlayer)
 											&& instance.classes.get(gamePlayer).getLives() > 0) {
 										if (gamePlayer.getGameMode() != GameMode.SPECTATOR) {
@@ -242,22 +242,21 @@ public class BedrockClass extends BaseClass {
 															gamePlayer.getLocation().getBlockX(),
 															gamePlayer.getLocation().getBlockY() + 1,
 															gamePlayer.getLocation().getBlockZ());
-													blockList.add(block.getType());
+													blockList.add(block.getState());
 													blockList2.add(block);
-													if (!(block.getType() == Material.STATIONARY_WATER))
-														block.setType(Material.LAVA);
+													block.setType(Material.LAVA);
 												}
 											} else {
 												Block block = instance.getMapWorld().getBlockAt(
 														gamePlayer.getLocation().getBlockX(),
 														gamePlayer.getLocation().getBlockY() + 1,
 														gamePlayer.getLocation().getBlockZ());
-												blockList.add(block.getType());
+												
+												blockList.add(block.getState());
 												blockList2.add(block);
-												if (!(block.getType() == Material.STATIONARY_WATER))
-													block.setType(Material.LAVA);
+												block.setType(Material.LAVA);
 											}
-										}
+										//}
 									}
 								}
 
@@ -277,13 +276,16 @@ public class BedrockClass extends BaseClass {
 										public void cancel() {
 											int count = 0;
 											for (Block blocks : blockList2) {
-												blocks.setType(blockList.get(count));
+												BlockState blockState = blocks.getState();
+												blockState.setType(blockList.get(count).getType());
+												blockState.setData(blockList.get(count).getData());
+												blockState.update(true);
 												count++;
 											}
 											lava = null;
 										}
 									};
-									lava.runTaskTimer(instance.getManager().getMain(), 0, 20);
+									lava.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
 								}
 							}
 						}

@@ -1,5 +1,9 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -18,11 +22,6 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
 
 public class PigClass extends BaseClass {
 
@@ -113,14 +112,14 @@ public class PigClass extends BaseClass {
 
 	@Override
 	public void TakeDamage(EntityDamageEvent event) {
-		if (instance.getManager().spawnProt.containsKey(player))
+		if (instance.getGameManager().spawnProt.containsKey(player))
 			return;
 
 		if (event instanceof EntityDamageByEntityEvent) {
 			EntityDamageByEntityEvent e = (EntityDamageByEntityEvent) event;
 			if (e.getDamager() instanceof Player) {
 				Player k = (Player) e.getDamager();
-				if (instance.getManager().spawnProt.containsKey(k))
+				if (instance.getGameManager().spawnProt.containsKey(k))
 					return;
 				if (instance.classes.containsKey(k)) {
 					if (instance.classes.get(k).getLives() <= 0) {
@@ -139,7 +138,7 @@ public class PigClass extends BaseClass {
 						.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 2, true));
 			}
 			event.getEntity()
-					.sendMessage(instance.getManager().getMain().color("&6&l(!) &rOuch! You gained some speed"));
+					.sendMessage(instance.getGameManager().getMain().color("&6&l(!) &rOuch! You gained some speed"));
 
 			for (Player gamePlayer : instance.players)
 				gamePlayer.playSound(player.getLocation(), Sound.PIG_DEATH, 1, 1);
@@ -148,7 +147,7 @@ public class PigClass extends BaseClass {
 
 	private void abilityMsg() {
 		player.sendMessage("");
-		player.sendMessage(instance.getManager().getMain().color(
+		player.sendMessage(instance.getGameManager().getMain().color(
 				"&e&lCLASS TIP> &rWhen set on fire, you'll recieve a cooked porkchop for as long as you're on fire for, with Fire Aspect I"));
 		player.sendMessage("");
 	}
@@ -177,7 +176,7 @@ public class PigClass extends BaseClass {
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper.addEnchant(ItemHelper.addEnchant(
 				ItemHelper.setDetails(new ItemStack(Material.PORK),
-						instance.getManager().getMain().color("&rRaw Pork &7(Right Click)")),
+						instance.getGameManager().getMain().color("&rRaw Pork &7(Right Click)")),
 				Enchantment.DAMAGE_ALL, 4), Enchantment.KNOCKBACK, 1);
 		return item;
 	}
