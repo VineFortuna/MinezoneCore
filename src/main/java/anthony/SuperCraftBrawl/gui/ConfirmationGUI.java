@@ -41,23 +41,28 @@ public class ConfirmationGUI implements InventoryProvider {
                 new ItemStack(Material.EMERALD_BLOCK),
                 "&aConfirm"),
                 e -> {
-                    if (confirmAction != null) {
-                        confirmAction.performAction(player);
-                }
-                }));
+                    if (e.isLeftClick()) {
+                        if (confirmAction != null) {
+                            confirmAction.performAction(player);
+                        }
+                    }
+                })
+        );
 
         contents.set(0, 6, ClickableItem.of(ItemHelper.setDetails(
                 new ItemStack(Material.REDSTONE_BLOCK),
                 "&cCancel"),
                 e -> {
-                    if (cancelAction != null)
-                        cancelAction.performAction(player);
-                    inv.close(player);
-                }));
+                    if (e.isLeftClick()) {
+                        if (cancelAction != null) {
+                            cancelAction.performAction(player);
+                        }
+                    }
+                })
+        );
     }
 
     @Override
     public void update(Player player, InventoryContents contents) {
-
     }
 }
