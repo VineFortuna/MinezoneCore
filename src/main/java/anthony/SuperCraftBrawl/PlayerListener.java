@@ -280,7 +280,7 @@ public class PlayerListener implements Listener {
 					"n e x l y", "fuck you", "fuckyou", "fuck", "shit", "sh!t", "bitch", "pussy", "fucker",
 					"motherfucker", "celestepvp", "celeste", "kys", "pu$$y"));
 			Boolean censored = false;
-			PlayerData data = main.getDataManager().getPlayerData(event.getPlayer());
+			PlayerData data = main.getPlayerDataManager().getPlayerData(event.getPlayer());
 			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
 			String message = "";
 
@@ -370,7 +370,7 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void cosmetics(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
-		PlayerData data = main.getDataManager().getPlayerData(player);
+		PlayerData data = main.getPlayerDataManager().getPlayerData(player);
 		ItemStack item = event.getItem();
 		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
 		anthony.skywars.GameInstance i2 = null;
@@ -392,7 +392,7 @@ public class PlayerListener implements Listener {
 							int amt = item.getAmount();
 							amt--;
 							data.paintball--;
-							main.getDataManager().saveData(data);
+							main.getPlayerDataManager().saveData(data);
 							item.setAmount(amt);
 
 							for (Player players : Bukkit.getOnlinePlayers())

@@ -6,9 +6,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticManager;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,13 +26,16 @@ import anthony.SuperCraftBrawl.Core;
 public class PlayerDataManager implements Listener {
 
 	private final Core main;
-	private final DatabaseManager manager;
-	private HashMap<Player, PlayerData> playerData = new HashMap<>();
+	private final DatabaseManager databaseManager;
+	private HashMap<Player, PlayerData> playerDataMap = new HashMap<>();
 	private final HashMap<Player, PermissionAttachment> perms = new HashMap<>();
+	private final CosmeticManager cosmeticManager;
 
-	public PlayerDataManager(Core main) {
+
+	public PlayerDataManager(Core main, CosmeticManager cosmeticManager) {
 		this.main = main;
-		this.manager = this.main.getDatabaseManager();
+		this.databaseManager = this.main.getDatabaseManager();
+		this.cosmeticManager = cosmeticManager;
 		main.getServer().getPluginManager().registerEvents(this, main);
 	}
 
@@ -46,25 +52,25 @@ public class PlayerDataManager implements Listener {
 	}
 
 	public PlayerData getPlayerData(Player player) {
-		return playerData.get(player);
+		return playerDataMap.get(player);
 	}
 
 	public PlayerData getOffPlayerData(OfflinePlayer player) {
-		return playerData.get(player);
+		return playerDataMap.get(player);
 	}
 
 	public boolean loadPlayer(Player player) {
 		try {
-			System.out.print("Loading data for " + player.getName());
-			PlayerData data = getSavedData(player);
-			if (data == null)
-				data = loadNewData(player);
+			System.out.print("Loading playerData for " + player.getName());
+			PlayerData playerData = getSavedData(player);
+			if (playerData == null)
+				playerData = loadNewData(player);
 
-			playerData.put(player, data);
+			playerDataMap.put(player, playerData);
 
 			PermissionAttachment a = player.addAttachment(main);
 			perms.put(player, a);
-			a.setPermission("scb." + data.getRank().toString().toLowerCase(), true);
+			a.setPermission("scb." + playerData.getRank().toString().toLowerCase(), true);
 
 		} catch (Exception e) {
 			return false;
@@ -73,7 +79,7 @@ public class PlayerDataManager implements Listener {
 	}
 
 	public void unloadPlayer(Player player) {
-		PlayerData data = playerData.remove(player);
+		PlayerData data = playerDataMap.remove(player);
 		saveData(data);
 		perms.remove(player);
 	}
@@ -81,11 +87,11 @@ public class PlayerDataManager implements Listener {
 	public PlayerData getSavedData(Player player) throws SQLException {
 		System.out.print("Getting saved data for " + player.getName());
 		PlayerData data = null;
-		Connection c = manager.getConnection();
-		if (c.isClosed()) {
+		Connection connection = databaseManager.getConnection();
+		if (connection.isClosed()) {
 			System.out.println("Connection is closed!");
 		}
-		Statement stmt = c.createStatement();
+		Statement stmt = connection.createStatement();
 		ResultSet set = null;
 		try {
 			set = stmt.executeQuery("SELECT * FROM PlayerData WHERE UUID = '" + player.getUniqueId().toString() + "'");
@@ -152,7 +158,7 @@ public class PlayerDataManager implements Listener {
 		}
 		set.close();
 		stmt.close();
-		Statement classState = c.createStatement();
+		Statement classState = connection.createStatement();
 		ResultSet classSet = classState
 				.executeQuery("SELECT * FROM PlayerClasses WHERE UUID = '" + player.getUniqueId().toString() + "'");
 		while (classSet.next()) {
@@ -164,7 +170,7 @@ public class PlayerDataManager implements Listener {
 		}
 		classSet.close();
 
-		Statement favClassesState = c.createStatement();
+		Statement favClassesState = connection.createStatement();
 		ResultSet favClassesSet = favClassesState.executeQuery(
 				"SELECT * FROM PlayerCustomIntegers WHERE UUID = '" + player.getUniqueId().toString() + "'");
 
@@ -184,7 +190,7 @@ public class PlayerDataManager implements Listener {
 		String lastIp = player.getAddress().getAddress().getHostAddress();
 		PlayerData newData = new PlayerData(player.getUniqueId(), player.getName(), lastIp);
 
-		manager.executeUpdateCommand("INSERT INTO PlayerData (`UUID`, `LastPlayerName`, `LastIP`) VALUES ('"
+		databaseManager.executeUpdateCommand("INSERT INTO PlayerData (`UUID`, `LastPlayerName`, `LastIP`) VALUES ('"
 				+ player.getUniqueId().toString() + "', '" + player.getName() + "', '" + lastIp + "');");
 
 		return newData;
@@ -196,7 +202,7 @@ public class PlayerDataManager implements Listener {
 
 	public void saveData(PlayerData data) {
 		System.out.print("Saving data for " + data.playerName);
-		manager.executeUpdateCommand("UPDATE PlayerData SET LastPlayerName = '" + data.playerName + "', LastIP = '"
+		databaseManager.executeUpdateCommand("UPDATE PlayerData SET LastPlayerName = '" + data.playerName + "', LastIP = '"
 				+ data.playerIP + "', RoleID = " + data.roleID + ", Tokens = " + data.tokens + ", Kills = " + data.kills
 				+ ", Challenge100 = " + data.challenge100 + ", Challenge101 = " + data.challenge101
 				+ ", Challenge102 = " + data.challenge102 + ", Challenge103 = " + data.challenge103
@@ -233,7 +239,7 @@ public class PlayerDataManager implements Listener {
 		if (index > 0) {
 			updateCMD += "ON DUPLICATE KEY UPDATE TimePurchased = VALUES (TimePurchased), Purchased = VALUES (Purchased), GamesPlayed = VALUES (GamesPlayed);";
 			System.out.print("Executing " + updateCMD);
-			manager.executeUpdateCommand(updateCMD);
+			databaseManager.executeUpdateCommand(updateCMD);
 		}
 
 		saveCustomIntegersToDatabase(data);
@@ -254,10 +260,27 @@ public class PlayerDataManager implements Listener {
 		if (index > 0) {
 			updateCMD.append(" ON DUPLICATE KEY UPDATE CustomInteger = VALUES (CustomInteger);");
 			System.out.print("Executing " + updateCMD);
-			manager.multiExecuteUpdateCommand(s, updateCMD.toString());
+			databaseManager.multiExecuteUpdateCommand(s, updateCMD.toString());
 		} else {
-			manager.multiExecuteUpdateCommand(s);
+			databaseManager.multiExecuteUpdateCommand(s);
 		}
+	}
+
+	// Cosmetics
+	public List<Cosmetic> getAllCosmetics() {
+		return cosmeticManager.getAllCosmetics();
+	}
+
+	public void addOwnedCosmetic(Player player, Cosmetic cosmetic) {
+		PlayerData playerData = playerDataMap.get(player);
+		if (playerData != null) {
+			playerData.addOwnedCosmetic(cosmetic);
+		}
+	}
+
+	public List<Cosmetic> getOwnedCosmetics(Player player) {
+		PlayerData playerData = playerDataMap.get(player);
+		return (playerData != null) ? playerData.getOwnedCosmetics() : new ArrayList<>();
 	}
 
 }

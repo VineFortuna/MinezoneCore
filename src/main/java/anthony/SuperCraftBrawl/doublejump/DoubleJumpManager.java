@@ -2,6 +2,8 @@ package anthony.SuperCraftBrawl.doublejump;
 
 import java.util.HashMap;
 
+import anthony.SuperCraftBrawl.cosmetics.types.DoubleJumpSound;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
@@ -14,13 +16,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.util.Vector;
 
-import com.comphenix.protocol.wrappers.EnumWrappers.Particle;
-
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import net.md_5.bungee.api.ChatColor;
 
 public class DoubleJumpManager implements Listener {
 	private final Core main;
@@ -92,7 +91,14 @@ public class DoubleJumpManager implements Listener {
 
 					if (player.getWorld() == main.getLobbyWorld()) {
 						forwardsFactor = 1.0;
-						player.playSound(player.getLocation(), Sound.CHICKEN_EGG_POP, 1, 1);
+
+						PlayerData playerData = main.getPlayerDataManager().getPlayerData(player);
+
+						if (playerData.getActiveCosmetic(DoubleJumpSound.class) != null) {
+							DoubleJumpSound doubleJumpSound = (DoubleJumpSound) playerData.getActiveCosmetic(DoubleJumpSound.class);
+
+							doubleJumpSound.playSoundAtPlayerLocation(player);
+						}
 					}
 					Vector forwards = player.getLocation().getDirection().setY(0);
 					double forwardsStrength = forwards.length();
