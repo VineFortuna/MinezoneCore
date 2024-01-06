@@ -90,14 +90,14 @@ public class MagmaCubeClass extends BaseClass {
 			this.cooldownSec = (5000 - magmaCube.getTime()) / 1000 + 1;
 
 			if (magmaCube.getTime() < 5000) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&e&lMagmaCube Pokeball &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &e&lMagmaCube Pokeball");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &e&lMagmaCube Pokeball");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -116,7 +116,7 @@ public class MagmaCubeClass extends BaseClass {
 					en.remove();
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.MONSTER_EGG, 7),
-		instance.getManager().getMain().color("&e&lMagmaCube Pokeball")));
+		instance.getGameManager().getMain().color("&e&lMagmaCube Pokeball")));
 	}
 
 	@Override
@@ -158,7 +158,7 @@ public class MagmaCubeClass extends BaseClass {
 								}
 
 							}, new ItemStack(Material.MONSTER_EGG));
-							instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+							instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}
 					}
