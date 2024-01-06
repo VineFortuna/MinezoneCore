@@ -91,14 +91,14 @@ public class SilverfishClass extends BaseClass {
 			this.cooldownSec = (wallCooldown - wallAbility.getTime()) / 1000 + 1;
 
 			if (wallAbility.getTime() < wallCooldown) {
-				String msg = instance.getGameManager().getMain()
+				String msg = instance.getManager().getMain()
 						.color("&7Wall Ability &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getGameManager().getMain().color("&rYou can use &7Wall Ability");
+				String msg = instance.getManager().getMain().color("&rYou can use &7Wall Ability");
 				PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -109,7 +109,7 @@ public class SilverfishClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-//		wallAbility.startTime = 10000; // Reset cooldown;
+		wallAbility.startTime = System.currentTimeMillis() - 100000;
 		ItemStack weapon = ItemHelper.create(Material.IRON_HOE, ChatColorHelper.color("&7Silverfish Weapon"));
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
 		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
@@ -331,7 +331,7 @@ public class SilverfishClass extends BaseClass {
 						break;
 				}
 				// Setting block metadata
-				block.setMetadata(player.getDisplayName() + "Silverfish Block", new FixedMetadataValue(instance.getGameManager().getMain(), true));
+				block.setMetadata(player.getDisplayName() + "Silverfish Block", new FixedMetadataValue(instance.getManager().getMain(), true));
 			}
 		}
 
@@ -380,7 +380,7 @@ public class SilverfishClass extends BaseClass {
 			for (Location blockLocation : wallLocations) {
 				t++;
 
-				Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
+				Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
 					behavior.accept(blockLocation);
 				}, (long) ((delayBetweenBlocks * t) * 20));
 
@@ -431,11 +431,11 @@ public class SilverfishClass extends BaseClass {
 			Block block = randomizedBlockLocation.getBlock();
 
 			// Removing Block
-			Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
+			Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
 				// Checks if block has the custom set metadata
 				if (block.hasMetadata(player.getDisplayName() + "Silverfish Block")) {
 					// Removes the custom set metadata
-					block.removeMetadata(player.getDisplayName() + "Silverfish Block", instance.getGameManager().getMain());
+					block.removeMetadata(player.getDisplayName() + "Silverfish Block", instance.getManager().getMain());
 					// Sets the block to Air
 					block.setType(Material.AIR);
 
@@ -485,7 +485,7 @@ public class SilverfishClass extends BaseClass {
 		}
 
 		public void despawnSilverfish() {
-			Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
+			Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
 				for (Entity en : player.getWorld().getEntities())
 					if (!(en instanceof Player))
 						if (en.getType().equals(EntityType.SILVERFISH)) {
