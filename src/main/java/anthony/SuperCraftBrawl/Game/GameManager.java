@@ -2160,9 +2160,9 @@ public class GameManager implements Listener, PluginMessageListener {
 			case BARRIER:
 				if ((i != null && i.classes.containsKey(player) && ((BaseClass) i.classes.get(player)).getLives() <= 0)
 						|| i2 != null)
-					(new QuitGUI(this.main)).invQuit.open(player);
+					(new LeaveGameGUI(this.main)).inv.open(player);
 				if (i != null && i.state == GameState.WAITING)
-					new QuitGUI(this.main).invQuit.open(player);
+					new LeaveGameGUI(this.main).inv.open(player);
 				break;
 			case MONSTER_EGG:
 				if (i != null && i.state == GameState.STARTED) {

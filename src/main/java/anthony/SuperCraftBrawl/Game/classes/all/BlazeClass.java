@@ -232,5 +232,4 @@ public class BlazeClass extends BaseClass {
 			}
 		}, 10L);
 	}
-
 }

@@ -240,5 +240,4 @@ public class NinjaClass extends BaseClass {
 						Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 1);
 		return item;
 	}
-
 }
