@@ -116,7 +116,7 @@ public class MagmaCubeClass extends BaseClass {
 					en.remove();
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.MONSTER_EGG, 7),
-				instance.getManager().getMain().color("&e&lMagmaCube Pokeball")));
+		instance.getManager().getMain().color("&e&lMagmaCube Pokeball")));
 	}
 
 	@Override
