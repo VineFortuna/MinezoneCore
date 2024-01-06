@@ -88,7 +88,7 @@ public class NinjaClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		ninja.startTime = 10000; //Reset cooldown
+		ninja.startTime = System.currentTimeMillis() - 100000;
 		this.regenStars = 0;
 		this.starsCooldown = 0;
 		this.usedAllStars = false;

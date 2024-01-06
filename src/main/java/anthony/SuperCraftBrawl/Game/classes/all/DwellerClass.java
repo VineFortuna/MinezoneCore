@@ -52,7 +52,7 @@ public class DwellerClass extends BaseClass {
 
 		SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
 
-		meta.setOwner("GigaChad");
+		meta.setOwner("CavemanFilms");
 		meta.setDisplayName("");
 
 		playerskull.setItemMeta(meta);

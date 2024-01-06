@@ -1481,15 +1481,18 @@ public class GameInstance {
 			player.sendMessage("" + ChatColor.BOLD + message);
 		}
 	}
+	
+	public void givePointsAgain(Player player, PlayerData data, int num) {
+		if (data != null)
+			data.points += num;
+	}
 
 	public void givePoints(int position, int points) {
 		if (playerPosition.size() >= position) {
 			Player player = playerPosition.get(playerPosition.size() - position);
 			PlayerData data = gameManager.getMain().getDataManager().getPlayerData(player);
 
-			if (data != null) {
-				data.points += points;
-			}
+			givePointsAgain(player, data, points);
 		}
 	}
 
@@ -1498,6 +1501,7 @@ public class GameInstance {
 		PlayerData data3 = null;
 		for (Player winner : winners) {
 			data3 = gameManager.getMain().getDataManager().getPlayerData(winner);
+			this.playerPosition.add(winner);
 			winnerList.add(winner);
 			if (data3 != null) {
 				BaseClass bc = classes.get(winner);
@@ -1554,11 +1558,12 @@ public class GameInstance {
 		 * 5); givePositionTokens(4, 3); givePositionTokens(5, 1);
 		 */
 
-		if (getManager().getMain().tournament == true) {
+		if (getManager().getMain().tournament) {
 			givePoints(1, 10);
 			givePoints(2, 7);
 			givePoints(3, 5);
-			givePoints(4, 1);
+			givePoints(4, 3);
+			givePoints(5, 1);
 		}
 
 		for (Player winner : winners) {
@@ -1627,6 +1632,11 @@ public class GameInstance {
 						data.flawlessWins += 1;
 						data.winstreak += 1;
 						data.exp += 133;
+						
+						if (getManager().getMain().tournament == true) {
+							givePointsAgain(winner, data, 5);
+							winner.sendMessage("Gained extra 5 points for flawless");
+						}
 					}
 					baseClass.totalExp += 133;
 
@@ -1698,11 +1708,6 @@ public class GameInstance {
 
 		if (map != null) {
 			if (baseClass.getLives() >= 5) {
-				if (data != null) {
-					if (getManager().getMain().tournament == true) {
-						data.points += 5;
-					}
-				}
 				if (winnerList.get(0).hasPermission("scb.customWin")) {
 					if (data.cwm == 1) {
 						customFlawWinMsg(winnerList.get(0));
@@ -1746,11 +1751,6 @@ public class GameInstance {
 				}
 			}
 			if (baseClass.getLives() >= 5) {
-				if (data != null) {
-					if (getManager().getMain().tournament == true) {
-						data.points += 5;
-					}
-				}
 				if (display.hasPermission("scb.customWin")) {
 					if (data.cwm == 1) {
 						customFlawWinMsg(display);
@@ -2073,6 +2073,18 @@ public class GameInstance {
 								board.updateLine(8, " " + ChatColor.ITALIC + "Waiting..");
 							}
 						}
+					}
+					if (this.players.size() < 1) {
+						BukkitRunnable r = new BukkitRunnable() {
+							@Override
+							public void run() {
+								Bukkit.unloadWorld(mapWorld, false);
+								if (Bukkit.unloadWorld(mapWorld, false)) { 
+									this.cancel();
+								}
+							}
+						};
+						r.runTaskTimer(getManager().getMain(), 0, 1);
 					}
 				} else {
 					for (Player gamePlayer : this.players) {
