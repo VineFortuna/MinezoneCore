@@ -189,6 +189,10 @@ public class PlayerDataManager implements Listener {
 
 		return newData;
 	}
+	
+	public void resetPoints() {
+		manager.executeUpdateCommand("UPDATE PlayerData SET Points = 0");
+	}
 
 	public void saveData(PlayerData data) {
 		System.out.print("Saving data for " + data.playerName);
