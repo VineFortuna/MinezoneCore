@@ -69,7 +69,7 @@ public class HerobrineClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		herobrine.startTime = 20000;
+		herobrine.startTime = System.currentTimeMillis() - 100000;
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.DIAMOND),

@@ -108,7 +108,7 @@ public class MagmaCubeClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		magmaCube.startTime = 5000; //Reset cooldown
+		magmaCube.startTime = System.currentTimeMillis() - 100000;
 		this.cooldownSec = 0; // Reset each life
 		for (Entity en : player.getWorld().getEntities())
 			if (!(en instanceof Player))

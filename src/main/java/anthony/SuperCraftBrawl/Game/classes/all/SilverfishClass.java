@@ -103,7 +103,7 @@ public class SilverfishClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		wallAbility.startTime = 10000; // Reset cooldown;
+		wallAbility.startTime = System.currentTimeMillis() - 100000;
 		ItemStack weapon = ItemHelper.create(Material.IRON_HOE, ChatColorHelper.color("&7Silverfish Weapon"));
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
 		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
