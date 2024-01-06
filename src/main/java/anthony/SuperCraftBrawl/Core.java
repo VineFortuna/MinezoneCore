@@ -575,6 +575,9 @@ public class Core extends JavaPlugin implements Listener {
 							if (data != null) {
 								data.level = num;
 								player.sendMessage(color("&2&l(!) &rYou set your level to &e" + num + "!"));
+								if (this.getGameManager().GetInstanceOfPlayer(player) == null)
+									LobbyBoard(player);
+								this.getDataManager().saveData(data);
 							}
 						} else {
 							player.sendMessage(color("&c&l(!) &rPlease enter a number that is greater/equal to 0"));
@@ -885,7 +888,8 @@ public class Core extends JavaPlugin implements Listener {
 						data.exp -= 2500;
 						player.sendMessage("Level upgraded to " + data.level + "!");
 					}
-					LobbyBoard(player);
+					if (this.getGameManager().GetInstanceOfPlayer(player) == null)
+						LobbyBoard(player);
 					this.getDataManager().saveData(data);
 				}
 			}
@@ -1041,7 +1045,8 @@ public class Core extends JavaPlugin implements Listener {
 												+ target.getName() + ChatColor.RESET + " " + num + " Tokens!");
 								target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given "
 										+ num + " Tokens!");
-								LobbyBoard(target);
+								if (this.getGameManager().GetInstanceOfPlayer(player) == null)
+									LobbyBoard(target);
 								this.getDataManager().saveData(data);
 							} else {
 								player.sendMessage(

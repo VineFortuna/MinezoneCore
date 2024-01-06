@@ -35,7 +35,15 @@ public class GameStatsGUI implements InventoryProvider {
 			if (entry.getKey() != null) {
 				if (matchMvp == null || entry.getValue().totalKills > matchMvp.totalKills)
 					matchMvp = entry.getValue();
+				else if (entry.getValue().totalKills == matchMvp.totalKills) {
+					if (i.getWinnerList().contains(entry.getKey()) ||
+							entry.getValue().totalDeaths < matchMvp.totalDeaths)
+						matchMvp = entry.getValue();
+				}
 			}
+		}
+		if (matchMvp.totalKills == 0) {
+			matchMvp = null;
 		}
 		
 		return matchMvp;
@@ -55,7 +63,7 @@ public class GameStatsGUI implements InventoryProvider {
 					
 					String rank = main.getRankManager().getRank(entry.getKey()).getTagWithSpace();
 					
-					if (matchMvp() == entry.getValue()) {
+					if (matchMvp() != null && matchMvp() == entry.getValue()) {
 						contents.set(y, x,
 								ClickableItem.of(
 										ItemHelper.setDetails(stats, main.color("&e&lMATCH MVP"), "",

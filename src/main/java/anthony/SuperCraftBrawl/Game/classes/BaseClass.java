@@ -811,7 +811,7 @@ public abstract class BaseClass {
 									}
 								}
 							}
-
+							
 							if (pData.exp >= 2500) {
 								pData.level++;
 								pData.exp -= 2500;

@@ -1,11 +1,7 @@
 package anthony.SuperCraftBrawl.gui;
 
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.RankManager;
 import fr.minuskube.inv.ClickableItem;
@@ -13,6 +9,9 @@ import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class PrefsGUI implements InventoryProvider {
 
@@ -68,12 +67,12 @@ public class PrefsGUI implements InventoryProvider {
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.PAPER),
 							main.color("&ePrivate Messages"), "", line),
 							e -> {
-								if (data.pm == 0) {
+								if (data.pm == 1) {
 									player.sendMessage("" + ChatColor.RESET + ChatColor.BOLD + "(!) " + ChatColor.RESET
 											+ "You have disabled " + ChatColor.YELLOW + "Private Messages");
-									data.pm = 1;
-								} else {
 									data.pm = 0;
+								} else {
+									data.pm = 1;
 									player.sendMessage("" + ChatColor.RESET + ChatColor.BOLD + "(!) " + ChatColor.RESET
 											+ "You have enabled " + ChatColor.YELLOW + "Private Messages");
 								}
