@@ -75,7 +75,7 @@ public class SkeletonClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		skeleAttack.startTime = 5000; //Reset cooldown
+//		skeleAttack.startTime = 5000; //Reset cooldown
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv
 				.setItem(1,
