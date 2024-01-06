@@ -28,7 +28,7 @@ public class NPCManager implements Listener {
 	private NPCLib npcLib;
 
 	// NPCS HERE:
-	private NPC scb, skywars, scbDuos, parkour, scbModes;
+	private NPC scb, skywars, scbDuos, parkour, scbModes, socialMedia;
 
 	public NPCManager(Core main) {
 		this.main = main;
@@ -63,6 +63,12 @@ public class NPCManager implements Listener {
 			scbModes.setLocation(new Location(main.getLobbyWorld(), 192.506, 113, 649.530, 179, -0));
 			scbModes.setSkin(skin2);
 			scbModes.create();
+			
+			socialMedia = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "View Social Medias", "",
+					main.color("&7Click to check the list!")));
+			socialMedia.setLocation(new Location(main.getLobbyWorld(), 192.962, 115.5, 632.989, 137, 10));
+			socialMedia.setSkin(skin2);
+			socialMedia.create();
 
 			parkour = npcLib.createNPC(
 					Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + ChatColor.UNDERLINE + "PARKOUR FINISH",
@@ -168,6 +174,16 @@ public class NPCManager implements Listener {
 			}
 		} else if (e.getNPC() == scbModes) {
 			new GameSelectorGUI(main).inv.open(player);
+		} else if (e.getNPC() == socialMedia) {
+			player.sendMessage("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-------[Social Media]-------");
+			player.sendMessage("");
+			player.sendMessage(main.color("&eDiscord: &7https://discord.gg/FSZpmY9FZB"));
+			player.sendMessage(main.color("&eStore: &7minezone.tebex.io"));
+			player.sendMessage(main.color("&eYouTube: &7https://www.youtube.com/@minezone6480"));
+			player.sendMessage(main.color("&eTwitter: &7https://twitter.com/MinezoneMC"));
+			player.sendMessage(main.color("&eTikTok: &7https://www.tiktok.com/@minezonemc"));
+			player.sendMessage("");
+			player.sendMessage("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "----------------------------");
 		}
 	}
 
@@ -181,6 +197,7 @@ public class NPCManager implements Listener {
 			Bukkit.getScheduler().runTask(main, () -> scbDuos.show(e.getPlayer()));
 			Bukkit.getScheduler().runTask(main, () -> parkour.show(e.getPlayer()));
 			Bukkit.getScheduler().runTask(main, () -> scbModes.show(e.getPlayer()));
+			Bukkit.getScheduler().runTask(main, () -> socialMedia.show(e.getPlayer()));
 		}, 20L);
 		// }
 	}
