@@ -1,16 +1,10 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
-import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import anthony.SuperCraftBrawl.ItemHelper;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import org.bukkit.*;
+import org.bukkit.Color;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.SkullType;
+import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -24,10 +18,20 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.util.Vector;
 
+import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.Cooldown;
+import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
+import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+
 public class NinjaClass extends BaseClass {
 
 	private Cooldown shurikenCooldown = new Cooldown(200);
-	private int dashCooldown = 12 * 1000;
 	private int cooldownSec;
 	private int regenStars = 0;
 	private int starsCooldown = 0;
@@ -36,7 +40,7 @@ public class NinjaClass extends BaseClass {
 
 	public NinjaClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.1;
+		baseVerticalJump = 1.3;
 	}
 
 	public ItemStack makeBlack(ItemStack armour) {
@@ -84,7 +88,7 @@ public class NinjaClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-//		ninja.startTime = 10000; //Reset cooldown
+		ninja.startTime = System.currentTimeMillis() - 100000;
 		this.regenStars = 0;
 		this.starsCooldown = 0;
 		this.usedAllStars = false;
@@ -140,9 +144,9 @@ public class NinjaClass extends BaseClass {
 
 			if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Ninja
 					&& instance.classes.get(player).getLives() > 0) {
-				this.cooldownSec = (dashCooldown - ninja.getTime()) / 1000 + 1;
+				this.cooldownSec = (10000 - ninja.getTime()) / 1000 + 1;
 
-				if (ninja.getTime() < dashCooldown) {
+				if (ninja.getTime() < 10000) {
 					String msg = instance.getGameManager().getMain()
 							.color("&7Katana Dash &rregenerates in: &e" + this.cooldownSec + "s");
 					PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
@@ -166,8 +170,8 @@ public class NinjaClass extends BaseClass {
 
 		if (item != null && item.getType() == Material.STICK
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			if (ninja.getTime() < dashCooldown) {
-				int seconds = (dashCooldown - ninja.getTime()) / 1000 + 1;
+			if (ninja.getTime() < 10000) {
+				int seconds = (10000 - ninja.getTime()) / 1000 + 1;
 				event.setCancelled(true);
 				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
 						+ "Your Katana boost is on cooldown for " + ChatColor.YELLOW + seconds + " more seconds ");
@@ -179,7 +183,7 @@ public class NinjaClass extends BaseClass {
 				Vector vel = player.getLocation().getDirection().multiply(boosterStrength);
 				player.setVelocity(vel);
 			}
-		} else if (item != null && item.getType() == Material.NETHER_STAR && item.isSimilar(getShuriken())
+		} else if (item != null && item.getType() == Material.NETHER_STAR
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK
 						|| event.getAction() == Action.LEFT_CLICK_AIR
 						|| event.getAction() == Action.LEFT_CLICK_BLOCK)) {
@@ -236,5 +240,4 @@ public class NinjaClass extends BaseClass {
 						Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 1);
 		return item;
 	}
-
 }

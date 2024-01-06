@@ -982,6 +982,7 @@ public abstract class BaseClass {
 
 	}
 
+	@SuppressWarnings("deprecation")
 	private void checkBountyKill(BaseClass kClass, Player playerKilled, Player killer) {
 		PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(killer);
 		if (data != null) {
@@ -1046,17 +1047,16 @@ public abstract class BaseClass {
 
 				// Particles
 				if (data2 != null && p.hasPermission("scb.deathParticles")) {
-					if (data2.goldApple == 1) {
+					if (data2.goldApple == 1)
 						mat = Material.GOLDEN_APPLE;
-					} else if (data2.glowstone == 1) {
+					else if (data2.glowstone == 1)
 						mat = Material.GLOWSTONE_DUST;
-					} else if (data2.redstone == 1) {
+					else if (data2.redstone == 1)
 						mat = Material.REDSTONE;
-					} else if (data2.web == 1) {
+					else if (data2.web == 1)
 						mat = Material.WEB;
-					} else if (data2.bottleEXP == 1) {
+					else if (data2.bottleEXP == 1)
 						mat = Material.EXP_BOTTLE;
-					}
 				}
 
 				ItemStack particleItem;
@@ -1955,8 +1955,8 @@ public abstract class BaseClass {
 							data3.tokens += 10;
 						}
 						if (p.hasPermission("scb.rankBonus")) {
-							p.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET
-									+ "  Rank Bonus: " + ChatColor.GREEN + "10 Tokens");
+							p.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Rank Bonus: "
+									+ ChatColor.GREEN + "10 Tokens");
 							data3.tokens += 10;
 							baseClass2.totalTokens += 10;
 						}
@@ -2235,55 +2235,6 @@ public abstract class BaseClass {
 							+ getPlayerRank(p) + p.getPlayer().getName() + " " + baseClass2.getType().getTag()
 							+ ChatColor.RED + " has " + lives + " lives left");
 				}
-				/*
-				 * if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
-				 * EntityDamageByEntityEvent entityDamageEvent = (EntityDamageByEntityEvent)
-				 * p.getLastDamageCause(); Entity damager = entityDamageEvent.getDamager();
-				 *
-				 * if (damager instanceof Player) { Player d = (Player) damager; PlayerData data
-				 * = instance.getManager().getMain().getDataManager().getPlayerData(d);
-				 *
-				 * if (instance.classes.containsKey(d)) { BaseClass baseClass3 =
-				 * instance.classes.get(d); // data.tokens += 1; data.kills += 1; data.exp +=
-				 * 29; baseClass3.totalExp += 29;
-				 *
-				 * if (instance.getManager().getMain().tournament == true) data.points++;
-				 *
-				 * d.playSound(d.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
-				 *
-				 * if (baseClass3 != null) { baseClass3.totalTokens += 1;
-				 * baseClass3.totalKills++; baseClass3.eachLifeKills++; } } } else if (damager
-				 * instanceof Arrow) { Arrow a = (Arrow) damager;
-				 *
-				 * if (a.getShooter() instanceof Player) { Player shooter = (Player)
-				 * a.getShooter(); PlayerData data =
-				 * instance.getManager().getMain().getDataManager().getPlayerData(shooter);
-				 *
-				 * if (instance.classes.containsKey(shooter)) { BaseClass baseClass3 =
-				 * instance.classes.get(shooter); // data.tokens += 1; data.kills += 1; data.exp
-				 * += 29;
-				 *
-				 * if (instance.getManager().getMain().tournament == true) data.points++;
-				 *
-				 * shooter.playSound(shooter.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
-				 *
-				 * if (baseClass3 != null) { baseClass3.totalTokens += 1;
-				 * baseClass3.totalKills++; baseClass3.eachLifeKills++; baseClass3.totalExp +=
-				 * 29; } } } } else if (killer != null) { PlayerData data =
-				 * instance.getManager().getMain().getDataManager().getPlayerData(killer);
-				 *
-				 * if (instance.classes.containsKey(killer)) { BaseClass baseClass3 =
-				 * instance.classes.get(killer); // data.tokens += 1; data.kills += 1; data.exp
-				 * += 29;
-				 *
-				 * if (instance.getManager().getMain().tournament == true) data.points++;
-				 *
-				 * killer.playSound(killer.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
-				 *
-				 * if (baseClass3 != null) { baseClass3.totalTokens += 1;
-				 * baseClass3.totalKills++; baseClass3.eachLifeKills++; baseClass3.totalExp +=
-				 * 29; } } } } else { p.teleport(instance.GetSpecLoc()); }
-				 */
 
 				if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
 					EntityDamageByEntityEvent entityDamageEvent = (EntityDamageByEntityEvent) p.getLastDamageCause();
@@ -2315,8 +2266,8 @@ public abstract class BaseClass {
 
 	}
 
+	// Giving health potions on kill
 	protected void healthPots(Player d) {
-//		 For other classes
 		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
 				String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + "Health Pot");
 		Potion pot = new Potion(1);
@@ -2331,6 +2282,7 @@ public abstract class BaseClass {
 
 	// Gives the killer kills for stats, points for tourney, etc
 	private void giveStats(Player d, Player p) {
+		PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
 		if (d != null) {
 			if (instance.classes.containsKey(d)) {
 				BaseClass baseClass3 = instance.classes.get(d);
@@ -2342,19 +2294,23 @@ public abstract class BaseClass {
 							+ baseClass3.getType().getTag() + " &edrew first blood!"));
 					TellAll("");
 					baseClass3.totalTokens += 10;
+					
+					//if (data != null)
+						//if (instance.getGameManager().getMain().tournament)
+							//instance.givePointsAgain(d, data, 2);
 				}
-				PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
+				PlayerData data2 = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
 
-				if (data != null) {
-					// data.tokens += 1;
-					data.kills += 1;
-					data.exp += 29;
+				if (data2 != null) {
+					//if (instance.getGameManager().getMain().tournament == true)
+						//instance.givePointsAgain(d, data, 1);
+					data2.kills += 1;
+					data2.exp += 29;
 					baseClass3.totalExp += 29;
-
 					if (instance.getGameManager().getMain().tournament == true)
-						data.points++;
+						data2.points++;
 					if (instance.getGameManager().getMain().tournament)
-						data.points++;
+						data2.points++;
 
 					d.playSound(d.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
 
