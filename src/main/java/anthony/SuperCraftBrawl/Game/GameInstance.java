@@ -23,6 +23,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.Potion;
@@ -353,10 +354,10 @@ public class GameInstance {
 
 	public void CheckForGameStart(Player player) {
 		if (map != null) {
-			if (players.size() == 1)
+			if (players.size() == 2)
 				StartGameTimer(player);
 		} else {
-			if (players.size() == 1)
+			if (players.size() == 2)
 				StartGameTimer(player);
 		}
 	}
@@ -652,6 +653,7 @@ public class GameInstance {
 		for (Player player : players) {
 			player.getInventory().clear();
 			player.teleport(GetRespawnLoc());
+			player.setFireTicks(0);
 		}
 		// GetRespawnLoc(); // Spawn all players in game
 		TellAll("" + ChatColor.BOLD + "===============================");
@@ -808,7 +810,7 @@ public class GameInstance {
 				if (mat.isSolid()) {
 					return loc.add(0, 1, 0);
 				}
-				if (loc.getY() < 40 || !isInBounds(loc)) // Too low down without finding block
+				if (loc.getY() < 40) // Too low down without finding block
 					break;
 			}
 			if (attempts > 500)
@@ -911,7 +913,8 @@ public class GameInstance {
 		pot100.setType(PotionType.INSTANT_DAMAGE);
 		pot100.setSplash(true);
 		PotionMeta meta = (PotionMeta) bomb.getItemMeta();
-		meta.addCustomEffect(new PotionEffect(PotionEffectType.HARM, 100, 1000), true);
+		meta.addCustomEffect(new PotionEffect(PotionEffectType.HARM, 0, 100), true);
+		meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 		bomb.setItemMeta(meta);
 		pot100.apply(bomb);
 
@@ -976,6 +979,9 @@ public class GameInstance {
 
 		// Creeper Egg
 		ItemStack creeperEgg = ItemHelper.createMonsterEgg(EntityType.CREEPER, 1, "&r&oCreeper Pokeball");
+		
+		// Milk Bucket
+		ItemStack milk = ItemHelper.create(Material.MILK_BUCKET);
 
 		// Golden Apple
 		ItemStack goldenApple = ItemHelper.create(Material.GOLDEN_APPLE);
@@ -1004,6 +1010,7 @@ public class GameInstance {
 		allItemDrops.add(witchEgg);
 		allItemDrops.add(skeletonEgg);
 		allItemDrops.add(creeperEgg);
+		allItemDrops.add(milk);
 		allItemDrops.add(goldenApple);
 		allItemDrops.add(notchApple);
 
@@ -1012,12 +1019,12 @@ public class GameInstance {
 				ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE, 1, (short) 1),
 						"" + ChatColor.BLACK + ChatColor.BOLD + "Notch Apple"),
 				slownessPot, bazooka, bazooka, healthPot, speedPot, slownessPot, slownessPot, speedPot, bazooka,
-				new ItemStack(Material.GOLDEN_APPLE), hammer, healthPot, extraLife, healthPot,
-				new ItemStack(Material.MILK_BUCKET), new ItemStack(Material.MILK_BUCKET),
-				new ItemStack(Material.MILK_BUCKET), blooper, blooper, blooper, blooper, nuke, nuke, nuke, nuke, nuke,
+				goldenApple, hammer, healthPot, extraLife, healthPot,
+				milk, milk, milk, blooper, blooper, blooper, blooper, nuke, nuke, nuke, nuke, nuke,
 				bomb, pearl, pearl, miniShield, miniShield, slowballs, slowballs, slowballs, fireRes, fireRes, instagib,
 				instagib, instagib, broom, broom, zombieEgg, zombieEgg, zombieEgg, skeletonEgg, skeletonEgg, witchEgg,
 				bounty, creeperEgg, creeperEgg);
+		
 		return items.get(random.nextInt(items.size()));
 	}
 
@@ -2201,5 +2208,13 @@ public class GameInstance {
 		}
 
 		return false;
+	}
+	
+	public List<ItemStack> getAllItemDrops() {
+		return allItemDrops;
+	}
+	
+	public List<Player> getWinnerList() {
+		return winnerList;
 	}
 }

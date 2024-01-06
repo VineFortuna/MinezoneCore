@@ -96,7 +96,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 				if (instance2 != null) {
 					if (player.hasPermission("scb.startGame")) {
-						if (instance2.state == GameState.WAITING && instance2.players.size() >= 1) {
+						if (instance2.state == GameState.WAITING && instance2.players.size() >= 2) {
 							instance2.TellAll(
 									main.color("&2&l(!) &rGame has been force started by &e" + player.getName()));
 							instance2.ticksTilStart = 0;
