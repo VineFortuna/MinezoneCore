@@ -79,7 +79,7 @@ public class AnvilClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		anvil.startTime = 15000;
+		anvil.startTime = System.currentTimeMillis() - 100000;
 		this.used = false; // To reset each life
 		this.num = 0; // Same here
 		playerInv.setItem(0, this.getAttackWeapon());
@@ -102,7 +102,7 @@ public class AnvilClass extends BaseClass {
 						if (gamePlayer != player) {
 							gamePlayer.setVelocity(new Vector(0, 1, 0).multiply(0.5D));
 							if (this.num >= 15)
-								this.num = 15;
+								this.num = 12;
 
 							EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer, DamageCause.VOID,
 									this.num);

@@ -353,8 +353,8 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null || this.getSWCommands() != null) {
-			String[] commandTypes = { "join", "fav", "shop", "leave", "cw", "l", "players", "class", "spectate", "startgame",
-					"gamestats", "setlives", "purchases", "mainworld", "kit" };
+			String[] commandTypes = { "join", "fav", "shop", "leave", "cw", "l", "players", "class", "spectate",
+					"startgame", "gamestats", "setlives", "purchases", "mainworld", "kit" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -365,7 +365,7 @@ public class Core extends JavaPlugin implements Listener {
 					System.out.print(command + " was null!");
 			}
 		}
-		
+
 		enablePracticeModes();
 
 		new BukkitRunnable() {
@@ -396,9 +396,9 @@ public class Core extends JavaPlugin implements Listener {
 			}
 		}.runTaskTimer(this, 0, 20);
 	}
-	
+
 	public static BowPractice bowPractice;
-	
+
 	private void enablePracticeModes() {
 		this.bowPractice = new BowPractice();
 	}
@@ -1212,7 +1212,28 @@ public class Core extends JavaPlugin implements Listener {
 					player.sendMessage(color("&e&l(!) &eTournament mode now enabled!"));
 					for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
 						PlayerData data = this.getDataManager().getPlayerData(onlinePlayers);
-						data.points = 0;
+
+						if (data != null) {
+							data.points = 0;
+							LobbyBoard(onlinePlayers);
+						}
+					}
+					this.getDataManager().resetPoints();
+				}
+			}
+		}
+
+		if (cmd.getName().equalsIgnoreCase("tournamentmodewithoutreset")) {
+			if (player.hasPermission("scb.toggleTournament")) {
+				if (tournament == true) {
+					tournament = false;
+					player.sendMessage(color("&e&l(!) &eTournament mode disabled!"));
+					for (Player onlinePlayers : Bukkit.getOnlinePlayers())
+						LobbyBoard(onlinePlayers);
+				} else {
+					tournament = true;
+					player.sendMessage(color("&e&l(!) &eTournament mode now enabled!"));
+					for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
 						LobbyBoard(onlinePlayers);
 					}
 				}
@@ -1328,7 +1349,7 @@ public class Core extends JavaPlugin implements Listener {
 				teamName.append(Rank.values().length);
 			else
 				teamName.append(r.getTabListIndex());
-			
+
 			teamName.append("_").append(r);
 
 			Scoreboard board = pl.getScoreboard();

@@ -113,7 +113,7 @@ public class OcelotClass extends BaseClass {
 	@Override
 	public void SetItems(Inventory playerInv) {
 		this.cooldownSec = 0; // Reset each life
-		ocelot.startTime = 20000;
+		ocelot.startTime = System.currentTimeMillis() - 100000;
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
