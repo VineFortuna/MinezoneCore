@@ -85,7 +85,7 @@ public class AnvilClass extends BaseClass {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.ANVIL),
-						instance.getManager().getMain().color("&e&lGoomba Stomp!"),
+						instance.getGameManager().getMain().color("&e&lGoomba Stomp!"),
 						"" + ChatColor.RESET + ChatColor.GRAY + "Right click in air to slam down on your opponents!"));
 	}
 
@@ -106,7 +106,7 @@ public class AnvilClass extends BaseClass {
 
 							EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer, DamageCause.VOID,
 									this.num);
-							instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+							instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 							gamePlayer.damage(this.num, player);
 							this.num = 0; // To reset
 						}
@@ -189,7 +189,7 @@ public class AnvilClass extends BaseClass {
 						this.used = true;
 					} else {
 						player.sendMessage(
-								instance.getManager().getMain().color("&c&l(!) &rYou cannot use this on the ground!"));
+								instance.getGameManager().getMain().color("&c&l(!) &rYou cannot use this on the ground!"));
 					}
 				}
 			}
