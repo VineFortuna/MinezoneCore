@@ -998,7 +998,7 @@ public class GameManager implements Listener, PluginMessageListener {
 						player.setFireTicks(0);
 						player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
 								+ ChatColor.RESET + "You feel refreshed!");
-						player.playSound(player.getLocation(), Sound.WATER, 1, 1);
+						player.playSound(player.getLocation(), Sound.DRINK, 1, 1);
 						int amount = item.getAmount();
 						if (amount > 0) {
 							amount--;
@@ -2307,7 +2307,7 @@ public class GameManager implements Listener, PluginMessageListener {
 				break;
 
 			case NETHER_STAR:
-				if (i != null && i.state == GameState.STARTED && meta.getDisplayName().contains("Bounty")) {
+				if (i != null && i.state == GameState.STARTED && meta != null && meta.getDisplayName().contains("Bounty")) {
 					int amount = item.getAmount();
 					if (amount > 0) {
 						if (amount == 1) {
