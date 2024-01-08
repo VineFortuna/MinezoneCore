@@ -140,7 +140,6 @@ public class BunnyClass extends BaseClass {
 	@Override
 	public void SetNameTag() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
