@@ -1554,19 +1554,6 @@ public class GameInstance {
 			if (baseClass != null) {
 				if (baseClass.getLives() < 5) {
 					PlayerData data = gameManager.getMain().getDataManager().getPlayerData(winner);
-
-					if (data != null) {
-						data.wins += 1;
-						data.winstreak += 1;
-						data.exp += 113;
-
-						if (data.exp >= 2500) {
-							data.level++;
-							data.exp -= 2500;
-							winner.sendMessage(getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
-							winner.sendMessage("You are now Level: " + data.level + "!");
-						}
-					}
 					baseClass.totalExp += 113;
 					baseClass.placement = 1;
 
@@ -1664,6 +1651,19 @@ public class GameInstance {
 
 					if (data != null)
 						data.tokens += baseClass.totalTokens;
+				}
+			}
+			PlayerData data = gameManager.getMain().getDataManager().getPlayerData(winner);
+			if (data != null) {
+				data.wins += 1;
+				data.winstreak += 1;
+				data.exp += 113;
+
+				if (data.exp >= 2500) {
+					data.level++;
+					data.exp -= 2500;
+					winner.sendMessage(getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
+					winner.sendMessage("You are now Level: " + data.level + "!");
 				}
 			}
 		}
