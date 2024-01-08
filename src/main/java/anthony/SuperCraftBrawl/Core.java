@@ -3,7 +3,6 @@ package anthony.SuperCraftBrawl;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameManager;
 import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Game.SmmManager;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -70,7 +69,6 @@ public class Core extends JavaPlugin implements Listener {
 	public anthony.skywars.commands.Commands cmd;
 	public World lobbyWorld;
 	public PlayerListener listener;
-	public SmmManager smmmanager;
 	public DoubleJumpManager djManager;
 	protected final Cooldown cooldownTime = null;
 	public RankManager rankManager;
@@ -148,10 +146,6 @@ public class Core extends JavaPlugin implements Listener {
 	// public AntiCheat getAntiCheat() {
 	// return cheat;
 	// }
-
-	public SmmManager getSmmManager() {
-		return smmmanager;
-	}
 
 	public DatabaseManager getDatabaseManager() {
 		return databaseManager;
@@ -331,8 +325,8 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null || this.getSWCommands() != null) {
-			String[] commandTypes = { "join", "fav", "shop", "leave", "cw", "l", "players", "class", "spectate",
-					"startgame", "gamestats", "setlives", "purchases", "mainworld", "kit" };
+			String[] commandTypes = { "join", "fav", "shop", "leave", "cw", "l", "players", "class", "spectate", "startgame",
+					"gamestats", "setlives", "purchases", "mainworld", "kit" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -343,7 +337,7 @@ public class Core extends JavaPlugin implements Listener {
 					System.out.print(command + " was null!");
 			}
 		}
-
+		
 		enablePracticeModes();
 
 		new BukkitRunnable() {
@@ -374,9 +368,9 @@ public class Core extends JavaPlugin implements Listener {
 			}
 		}.runTaskTimer(this, 0, 20);
 	}
-
+	
 	public static BowPractice bowPractice;
-
+	
 	private void enablePracticeModes() {
 		this.bowPractice = new BowPractice();
 	}
@@ -1157,7 +1151,7 @@ public class Core extends JavaPlugin implements Listener {
 			PlayerData data = this.getDataManager().getPlayerData(target);
 
 			if (target != null) {
-				if (data.pm == 0) {
+				if (data.pm == 1) {
 					String message = "";
 
 					for (int i = 1; i != args.length; i++) {
@@ -1168,7 +1162,7 @@ public class Core extends JavaPlugin implements Listener {
 							+ target.getName() + ChatColor.RESET + ": " + ChatColor.RESET + message);
 					target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.GRAY
 							+ player.getName() + " --> You" + ChatColor.RESET + ": " + ChatColor.RESET + message);
-				} else if (data.pm == 1) {
+				} else if (data.pm == 0) {
 					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.YELLOW
 							+ target.getName() + ChatColor.LIGHT_PURPLE + " has private messaging disabled!");
 				}
@@ -1194,28 +1188,7 @@ public class Core extends JavaPlugin implements Listener {
 					player.sendMessage(color("&e&l(!) &eTournament mode now enabled!"));
 					for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
 						PlayerData data = this.getDataManager().getPlayerData(onlinePlayers);
-
-						if (data != null) {
-							data.points = 0;
-							LobbyBoard(onlinePlayers);
-						}
-					}
-					this.getDataManager().resetPoints();
-				}
-			}
-		}
-
-		if (cmd.getName().equalsIgnoreCase("tournamentmodewithoutreset")) {
-			if (player.hasPermission("scb.toggleTournament")) {
-				if (tournament == true) {
-					tournament = false;
-					player.sendMessage(color("&e&l(!) &eTournament mode disabled!"));
-					for (Player onlinePlayers : Bukkit.getOnlinePlayers())
-						LobbyBoard(onlinePlayers);
-				} else {
-					tournament = true;
-					player.sendMessage(color("&e&l(!) &eTournament mode now enabled!"));
-					for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
+						data.points = 0;
 						LobbyBoard(onlinePlayers);
 					}
 				}
@@ -1331,7 +1304,7 @@ public class Core extends JavaPlugin implements Listener {
 				teamName.append(Rank.values().length);
 			else
 				teamName.append(r.getTabListIndex());
-
+			
 			teamName.append("_").append(r);
 
 			Scoreboard board = pl.getScoreboard();
