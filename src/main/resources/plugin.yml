@@ -150,6 +150,7 @@ permissions:
          scb.giveTokens: true
          scb.broadcast: true
          scb.ignite: true
+         scb.give: true
          punish.networkban: true
    scb.developer:
       description: Developer perms
@@ -160,7 +161,6 @@ permissions:
          scb.gms: true
          scb.gmsp: true
          scb.gma: true
-   
    scb.moderator:
       description: Moderator perms
       children:

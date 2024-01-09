@@ -587,35 +587,14 @@ public class Core extends JavaPlugin implements Listener {
 		}
 
 		if (cmd.getName().equalsIgnoreCase("give")) {
-			if (args.length > 0 && args.length < 4) {
-				Player target = Bukkit.getServer().getPlayerExact(args[0]);
-				Material mat = testMaterial(args[1]);
-				int amount = Integer.parseInt(args[2]);
-				ItemStack item = null;
-				if (mat != null) {
-					item = new ItemStack(mat, amount);
-					target.getInventory().addItem(item);
-				} else {
-					player.sendMessage(color("&c&l(!) &rInvalid item!"));
-					return false;
-				}
-				if (target != player) {
-					target.sendMessage(color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()));
-				} else {
-					player.sendMessage(color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()));
-				}
-			} else if (args.length > 3 && args.length < 6) {
-				Player target = Bukkit.getServer().getPlayerExact(args[0]);
-				Material mat = testMaterial(args[1]);
-				int amount = Integer.parseInt(args[2]);
-				Enchantment ench = testEnchant(args[3]);
-				int level = Integer.parseInt(args[4]);
-				ItemStack item = null;
-
-				if (level > 0) {
+			if (player.hasPermission("scb.give")) {
+				if (args.length > 0 && args.length < 4) {
+					Player target = Bukkit.getServer().getPlayerExact(args[0]);
+					Material mat = testMaterial(args[1]);
+					int amount = Integer.parseInt(args[2]);
+					ItemStack item = null;
 					if (mat != null) {
 						item = new ItemStack(mat, amount);
-						enchantments(item, ench, level);
 						target.getInventory().addItem(item);
 					} else {
 						player.sendMessage(color("&c&l(!) &rInvalid item!"));
@@ -624,15 +603,40 @@ public class Core extends JavaPlugin implements Listener {
 					if (target != player) {
 						target.sendMessage(color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()));
 					} else {
-						player.sendMessage(color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()
-								+ " &rwith &e " + ench.getName() + " " + level));
+						player.sendMessage(color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()));
+					}
+				} else if (args.length > 3 && args.length < 6) {
+					Player target = Bukkit.getServer().getPlayerExact(args[0]);
+					Material mat = testMaterial(args[1]);
+					int amount = Integer.parseInt(args[2]);
+					Enchantment ench = testEnchant(args[3]);
+					int level = Integer.parseInt(args[4]);
+					ItemStack item = null;
+					
+					if (level > 0) {
+						if (mat != null) {
+							item = new ItemStack(mat, amount);
+							enchantments(item, ench, level);
+							target.getInventory().addItem(item);
+						} else {
+							player.sendMessage(color("&c&l(!) &rInvalid item!"));
+							return false;
+						}
+						if (target != player) {
+							target.sendMessage(color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()));
+						} else {
+							player.sendMessage(color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()
+									+ " &rwith &e " + ench.getName() + " " + level));
+						}
+					} else {
+						player.sendMessage(color("&c&l(!) &rPlease enter an Enchantment level higher than 0!"));
 					}
 				} else {
-					player.sendMessage(color("&c&l(!) &rPlease enter an Enchantment level higher than 0!"));
+					player.sendMessage(color(
+							"&c&l(!) &rIncorrect usage! Try doing: &e/give <player> <item> <amount> <enchantment> <level>"));
 				}
 			} else {
-				player.sendMessage(color(
-						"&c&l(!) &rIncorrect usage! Try doing: &e/give <player> <item> <amount> <enchantment> <level>"));
+				player.sendMessage(color("&c&l(!) &rYou need the rank &c&lADMIN &rto use this command!"));
 			}
 		}
 
