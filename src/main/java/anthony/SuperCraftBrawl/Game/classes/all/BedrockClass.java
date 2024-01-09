@@ -231,7 +231,7 @@ public class BedrockClass extends BaseClass {
 							bedrockLava.restart();
 							player.getInventory().clear(player.getInventory().getHeldItemSlot());
 							for (Player gamePlayer : instance.players) {
-								//if (gamePlayer != player) {
+								if (gamePlayer != player) {
 									if (instance.classes.containsKey(gamePlayer)
 											&& instance.classes.get(gamePlayer).getLives() > 0) {
 										if (gamePlayer.getGameMode() != GameMode.SPECTATOR) {
@@ -256,7 +256,7 @@ public class BedrockClass extends BaseClass {
 												blockList2.add(block);
 												block.setType(Material.LAVA);
 											}
-										//}
+										}
 									}
 								}
 
