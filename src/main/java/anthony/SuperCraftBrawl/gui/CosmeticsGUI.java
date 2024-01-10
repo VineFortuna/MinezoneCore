@@ -2,9 +2,16 @@ package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.gui.cosmetics.GameCosmeticsGUI;
 import anthony.SuperCraftBrawl.gui.cosmetics.LobbyCosmeticsGUI;
+import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.SkullType;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Wolf;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.Core;
@@ -40,7 +47,7 @@ public class CosmeticsGUI implements InventoryProvider {
 	@SuppressWarnings("deprecation")
 	@Override
 	public void init(Player player, InventoryContents contents) {
-		PlayerData data = main.getPlayerDataManager().getPlayerData(player);
+		PlayerData data = main.getDataManager().getPlayerData(player);
 
 		// Icon Items
 

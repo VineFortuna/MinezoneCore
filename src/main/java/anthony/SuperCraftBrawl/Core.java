@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import anthony.SuperCraftBrawl.cosmetics.CosmeticManager;
-import anthony.SuperCraftBrawl.gui.*;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -31,7 +29,6 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -57,6 +54,8 @@ import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.SuperCraftBrawl.gui.DonorClassesGUI;
 import anthony.SuperCraftBrawl.gui.FreeClassesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
+import anthony.SuperCraftBrawl.gui.HubGUI;
+import anthony.SuperCraftBrawl.gui.InventoryGUI;
 import anthony.SuperCraftBrawl.gui.StatsGUI;
 import anthony.SuperCraftBrawl.gui.StatsTargetGUI;
 import anthony.SuperCraftBrawl.npcs.NPCManager;
@@ -80,10 +79,9 @@ import net.minecraft.server.v1_8_R3.WorldServer;
 public class Core extends JavaPlugin implements Listener {
 
 	static Core plugin;
-	private DuelsWagerManager duelsWagerManager;
 
 	public GameManager gameManager;
-	public FreeClassesGUI freeClassesGUI;
+	public FreeClassesGUI inventoryGUI;
 	public anthony.CrystalWars.game.GameManager gm;
 	public anthony.skywars.GameManager swManager;
 	public anthony.skywars.AbilityManager abilityManager;
@@ -99,7 +97,7 @@ public class Core extends JavaPlugin implements Listener {
 	public RankManager rankManager;
 	public List<Player> staffchat;
 	public List<Player> globalchat;
-	public PlayerDataManager playerDataManager;
+	public PlayerDataManager dataManager;
 	public DatabaseManager databaseManager;
 	public NPCManager npcManager;
 	public ActiveGamesGUI ag;
@@ -117,8 +115,6 @@ public class Core extends JavaPlugin implements Listener {
 
 	public boolean finalEvent = false;
 
-
-	// Constructor
 	public Core() {
 		this.staffchat = new ArrayList<Player>();
 		this.globalchat = new ArrayList<Player>();
@@ -128,12 +124,8 @@ public class Core extends JavaPlugin implements Listener {
 		return plugin;
 	}
 
-	public void TellAll(String message) {
-		for (Player staff : staffchat)
-			staff.sendMessage("" + ChatColor.GREEN + ChatColor.BOLD + "StaffChat> " + ChatColor.RESET + message);
-	}
+	// Getters:
 
-	// Getters
 	public Parkour getParkour() {
 		return p;
 	}
@@ -154,8 +146,8 @@ public class Core extends JavaPlugin implements Listener {
 		return gm;
 	}
 
-	public PlayerDataManager getPlayerDataManager() {
-		return playerDataManager;
+	public PlayerDataManager getDataManager() {
+		return dataManager;
 	}
 
 	public Leaderboard getLeaderboard() {
@@ -222,21 +214,11 @@ public class Core extends JavaPlugin implements Listener {
 		}
 	}
 
-	@EventHandler
-	public void onRightClickingPlayer(PlayerInteractEntityEvent e) {
-		if (e.getRightClicked() instanceof Player) {
-			Player clickedPlayer = (Player) e.getRightClicked();
-			Player player = (Player) e.getPlayer();
-
-			// Handle dueling GUI behavior
-//			handleDuelingGUI(clickedPlayer, player);
-		}
-	}
-
 	public Location getSCBLoc() {
 		return new Location(lobbyWorld, -8.531, 161, -406.493);
 	}
 
+	@EventHandler
 	public void SendPlayerToSCB(Player player) {
 		player.teleport(getSCBLoc());
 	}
@@ -249,8 +231,8 @@ public class Core extends JavaPlugin implements Listener {
 		return hubGUI;
 	}
 
-	public FreeClassesGUI getFreeClassesGUI() {
-		return freeClassesGUI;
+	public FreeClassesGUI getInventoryGUI() {
+		return inventoryGUI;
 	}
 
 	public DonorClassesGUI getDonorGUI() {
@@ -350,17 +332,11 @@ public class Core extends JavaPlugin implements Listener {
 		listener = new PlayerListener(this);
 		// smmmanager = new SmmManager(this);
 		gameManager = new GameManager(this);
-
-//		duelsWagerManager = new DuelsWagerManager();
-//		commands = new Commands(this, duelsWagerManager);
-
 		commands = new Commands(this);
 		// cmd = new anthony.skywars.commands.Commands(this);
-
 		djManager = new DoubleJumpManager(this);
 		databaseManager = new DatabaseManager(this);
-		CosmeticManager cosmeticManager = new CosmeticManager();
-		playerDataManager = new PlayerDataManager(this, cosmeticManager);
+		dataManager = new PlayerDataManager(this);
 		npcManager = new NPCManager(this);
 		rankManager = new RankManager(this);
 		// gm = new anthony.CrystalWars.game.GameManager(this);
@@ -378,7 +354,7 @@ public class Core extends JavaPlugin implements Listener {
 
 		if (this.getCommands() != null || this.getSWCommands() != null) {
 			String[] commandTypes = { "join", "fav", "shop", "leave", "cw", "l", "players", "class", "spectate",
-					"startgame", "gamestats", "setlives", "purchases", "mainworld", "kit", "duel", "items", "effect", "particle"};
+					"startgame", "gamestats", "setlives", "purchases", "mainworld", "kit" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -431,7 +407,7 @@ public class Core extends JavaPlugin implements Listener {
 		return new Location(lobbyWorld, -5.533, 143, 19.468);
 	}
 
-
+	@EventHandler
 	public void SendPlayerToMap(Player player) {
 		player.teleport(GetLobbyLoc());
 	}
@@ -440,6 +416,7 @@ public class Core extends JavaPlugin implements Listener {
 		return new Location(lobbyWorld, 953.529, 177, 1036.495);
 	}
 
+	@EventHandler
 	public void SendPlayerToStaff(Player player) {
 		player.teleport(GetStaffLoc());
 	}
@@ -456,6 +433,7 @@ public class Core extends JavaPlugin implements Listener {
 			return new Location(lobbyWorld, 0.478, 51, 0.550);
 	}
 
+	@EventHandler
 	public void SendPlayerToHub(Player player) {
 		player.teleport(GetHubLoc());
 	}
@@ -613,7 +591,7 @@ public class Core extends JavaPlugin implements Listener {
 
 		if (cmd.getName().equalsIgnoreCase("setlevel")) {
 			if (player.hasPermission("scb.setlevel")) {
-				PlayerData data = getPlayerDataManager().getPlayerData(player);
+				PlayerData data = getDataManager().getPlayerData(player);
 				if (args.length > 0) {
 					try {
 						int num = Integer.parseInt(args[0]);
@@ -923,7 +901,7 @@ public class Core extends JavaPlugin implements Listener {
 							+ ChatColor.GREEN + "/exp <amount>");
 				} else if (args.length == 1) {
 					int num = Integer.parseInt(args[0]);
-					PlayerData data = this.getPlayerDataManager().getPlayerData(player);
+					PlayerData data = this.getDataManager().getPlayerData(player);
 					data.exp += num;
 					player.sendMessage("Added " + num + " to your account");
 
@@ -942,7 +920,7 @@ public class Core extends JavaPlugin implements Listener {
 					Player target = Bukkit.getPlayerExact(args[0]);
 
 					if (target != null) {
-						PlayerData data = this.getPlayerDataManager().getPlayerData(target);
+						PlayerData data = this.getDataManager().getPlayerData(target);
 						data.muted = 0;
 						player.sendMessage(color("&r&l(!) &e" + target.getName() + " &rhas been unmuted"));
 					} else {
@@ -1009,7 +987,7 @@ public class Core extends JavaPlugin implements Listener {
 		}
 
 		if (cmd.getName().equalsIgnoreCase("color")) {
-			PlayerData data = this.getPlayerDataManager().getPlayerData(player);
+			PlayerData data = this.getDataManager().getPlayerData(player);
 
 			if (player.hasPermission("scb.color")) {
 				if (data != null) {
@@ -1077,7 +1055,7 @@ public class Core extends JavaPlugin implements Listener {
 						try {
 							int num = Integer.parseInt(args[2]);
 
-							PlayerData data = this.getPlayerDataManager().getPlayerData(target);
+							PlayerData data = this.getDataManager().getPlayerData(target);
 							if (target != null) {
 								data.tokens += num;
 
@@ -1087,7 +1065,7 @@ public class Core extends JavaPlugin implements Listener {
 								target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given "
 										+ num + " Tokens!");
 								LobbyBoard(target);
-								this.getPlayerDataManager().saveData(data);
+								this.getDataManager().saveData(data);
 							} else {
 								player.sendMessage(
 										"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Please specify a player!");
@@ -1194,7 +1172,7 @@ public class Core extends JavaPlugin implements Listener {
 				return true;
 			}
 			Player target = Bukkit.getServer().getPlayerExact(args[0]);
-			PlayerData data = this.getPlayerDataManager().getPlayerData(target);
+			PlayerData data = this.getDataManager().getPlayerData(target);
 
 			if (target != null) {
 				if (data.pm == 0) {
@@ -1233,7 +1211,7 @@ public class Core extends JavaPlugin implements Listener {
 					tournament = true;
 					player.sendMessage(color("&e&l(!) &eTournament mode now enabled!"));
 					for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
-						PlayerData data = this.getPlayerDataManager().getPlayerData(onlinePlayers);
+						PlayerData data = this.getDataManager().getPlayerData(onlinePlayers);
 
 						if (data != null) {
 							data.points = 0;
@@ -1268,7 +1246,7 @@ public class Core extends JavaPlugin implements Listener {
 					player.sendMessage(color("&r&l(!) &rIncorrect usage! Try doing: &e/points <player>"));
 				} else {
 					Player target = Bukkit.getServer().getPlayerExact(args[0]);
-					PlayerData data = this.getPlayerDataManager().getPlayerData(target);
+					PlayerData data = this.getDataManager().getPlayerData(target);
 
 					if (target != null) {
 						if (data != null) {
@@ -1439,24 +1417,11 @@ public class Core extends JavaPlugin implements Listener {
 
 	public Map<Player, EntityArmorStand> msHologram = new HashMap<Player, EntityArmorStand>();
 
-	public void mysteryChestHologram(Player player) {
-		PlayerData playerData = this.getPlayerDataManager().getPlayerData(player);
+	public void mysteryChestHologram(Player p) {
+		PlayerData data = this.getDataManager().getPlayerData(p);
 
-		if (playerData != null) {
-			// Your existing code when playerData is not null
-			// ...
-			System.out.println("getPlayerData DID NOT returned null for player " + player.getName());
-			player.sendMessage("getPlayerData DID NOT returned null for player " + player.getName());
-		} else {
-			// Log or print a message indicating that playerData is null
-			System.out.println("Warning: getPlayerData returned null for player " + player.getName());
-			player.sendMessage("Warning: getPlayerData returned null for player " + player.getName());
-			// You can also use a logging framework like Java's Logger for more advanced logging
-		}
-
-
-		if (!(this.msHologram.containsKey(player))) {
-			if (playerData != null) {
+		if (!(this.msHologram.containsKey(p))) {
+			if (data != null) {
 				Location loc = new Location(this.getLobbyWorld(), 194.520, 116, 641.500);
 				WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
 				EntityArmorStand stand = new EntityArmorStand(s);
@@ -1467,19 +1432,19 @@ public class Core extends JavaPlugin implements Listener {
 				stand.setGravity(false);
 				stand.setInvisible(true);
 				PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
-				((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+				((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
 
 				loc = new Location(this.getLobbyWorld(), 194.520, 115.7, 641.500);
 				stand = new EntityArmorStand(s);
 
 				stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-				stand.setCustomName(color("&e&l" + playerData.mysteryChests + " &eto open!"));
+				stand.setCustomName(color("&e&l" + data.mysteryChests + " &eto open!"));
 				stand.setCustomNameVisible(true);
 				stand.setGravity(false);
 				stand.setInvisible(true);
 				packet = new PacketPlayOutSpawnEntityLiving(stand);
-				((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-				this.msHologram.put(player, stand);
+				((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+				this.msHologram.put(p, stand);
 			}
 		}
 	}
@@ -1509,7 +1474,7 @@ public class Core extends JavaPlugin implements Listener {
 			}
 			player.sendPluginMessage(this, "BungeeCord", b.toByteArray());
 		}, 10L);
-		PlayerData data = this.getPlayerDataManager().getPlayerData(player);
+		PlayerData data = this.getDataManager().getPlayerData(player);
 		GameInstance instance = this.getGameManager().GetInstanceOfPlayer(player);
 		PunishAPI pu = PunishAPI.get();
 
@@ -1546,7 +1511,7 @@ public class Core extends JavaPlugin implements Listener {
 	@EventHandler
 	public void join(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
-		PlayerData data = this.getPlayerDataManager().getPlayerData(player);
+		PlayerData data = this.getDataManager().getPlayerData(player);
 
 		if (data != null)
 			player.setLevel(data.level);
@@ -1596,7 +1561,7 @@ public class Core extends JavaPlugin implements Listener {
 
 	public void LobbyBoard(Player player) {
 		FastBoard board = new FastBoard(player);
-		PlayerData data = this.getPlayerDataManager().getPlayerData(player);
+		PlayerData data = this.getDataManager().getPlayerData(player);
 		this.board.put(player, board);
 
 		if (this.getCommands() == null && this.getSWCommands() == null) {
@@ -1725,8 +1690,8 @@ public class Core extends JavaPlugin implements Listener {
 
 		// Saving data for players on server restart
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			PlayerData data = this.getPlayerDataManager().getPlayerData(player);
-			this.getPlayerDataManager().saveData(data);
+			PlayerData data = this.getDataManager().getPlayerData(player);
+			this.getDataManager().saveData(data);
 		}
 
 		getLeaderboard().close();
@@ -1737,10 +1702,4 @@ public class Core extends JavaPlugin implements Listener {
 			Bukkit.unloadWorld(world, false);
 		}
 	}
-
-	private void handleDuelingGUI(Player clickedPlayer, Player player) {
-		new DuelsWagerGUI(this, clickedPlayer).inv.open(player);
-	}
 }
-
-

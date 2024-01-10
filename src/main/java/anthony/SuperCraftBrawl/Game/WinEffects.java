@@ -4,6 +4,7 @@ import java.util.Random;
 
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.enchantments.Enchantment;
@@ -20,32 +21,34 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import me.itzzmic.auth.Main;
+import net.md_5.bungee.api.ChatColor;
 
 public class WinEffects {
 
 	private Player player;
-	private GameInstance gameInstance;
+	private GameInstance i;
 	private EnderDragon dragon;
 	private boolean defaultEffect = false;
 
-	public WinEffects(Player player, GameInstance gameInstance) {
+	public WinEffects(Player player, GameInstance i) {
 		this.player = player;
-		this.gameInstance = gameInstance;
+		this.i = i;
 	}
 
 	public void checkWinEffect() { // Database checking here
-		if (gameInstance != null) {
-			PlayerData playerData = gameInstance.getGameManager().getMain().getPlayerDataManager().getPlayerData(player);
+		if (i != null) {
+			PlayerData data = i.getManager().getMain().getDataManager().getPlayerData(player);
 
-			if (playerData != null) {
+			if (data != null) {
 				if (player.hasPermission("scb.winEffects")) {
-					if (playerData.enderDragonEffect == 1)
+					if (data.enderDragonEffect == 1)
 						enderDragonEffect();
-					else if (playerData.santaEffect == 1)
+					else if (data.santaEffect == 1)
 						santaEffect();
-					else if (playerData.fireParticlesEffect == 1)
+					else if (data.fireParticlesEffect == 1)
 						fireParticlesEffect();
-					else if (playerData.broomWinEffect == 1)
+					else if (data.broomWinEffect == 1)
 						magicBroomEffect();
 					else
 						defaultEffect();
@@ -65,7 +68,7 @@ public class WinEffects {
 
 	private void magicBroomEffect() {
 		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT),
-				gameInstance.getGameManager().getMain().color("&2&lMagic Broom"));
+				i.getManager().getMain().color("&2&lMagic Broom"));
 		player.getInventory().setItem(0, broom);
 	}
 
@@ -96,6 +99,7 @@ public class WinEffects {
 		horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
 		player.teleport(horse.getLocation());
 		horse.setPassenger(player);
+
 	}
 
 	private void fireParticlesEffect() {
@@ -106,7 +110,7 @@ public class WinEffects {
 		this.defaultEffect = true;
 
 		if (this.defaultEffect == true) {
-			if (player.getWorld() == gameInstance.getMapWorld()) {
+			if (player.getWorld() == i.getMapWorld()) {
 				BukkitRunnable runnable = new BukkitRunnable() {
 					int sec = 0;
 
@@ -139,7 +143,7 @@ public class WinEffects {
 					}
 					
 				};
-				runnable.runTaskTimer(gameInstance.getGameManager().getMain(), 0, 20);
+				runnable.runTaskTimer(i.getManager().getMain(), 0, 20);
 			}
 		}
 	}

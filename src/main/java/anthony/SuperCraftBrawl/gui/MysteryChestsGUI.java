@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
@@ -46,7 +47,7 @@ public class MysteryChestsGUI implements InventoryProvider {
 
 	@Override
 	public void init(Player player, InventoryContents contents) {
-		PlayerData data = main.getPlayerDataManager().getPlayerData(player);
+		PlayerData data = main.getDataManager().getPlayerData(player);
 		Location newLoc = new Location(player.getWorld(), loc.getX() + 1, loc.getY() + 2, loc.getZ() + 0.5);
 
 		if (data != null) {
@@ -208,7 +209,7 @@ public class MysteryChestsGUI implements InventoryProvider {
 													stand);
 											((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 											main.msHologram.put(player, stand);
-											main.getPlayerDataManager().saveData(data);
+											main.getDataManager().saveData(data);
 										}
 									}
 								}

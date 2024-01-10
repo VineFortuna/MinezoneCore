@@ -35,12 +35,8 @@ public class GameSelectorGUI implements InventoryProvider {
 	public SmartInventory inv;
 
 	public GameSelectorGUI(Core main) {
-		inv = SmartInventory.builder().
-				id("myInventory").
-				provider(this).
-				size(4, 9).
-				title(ChatColorHelper.color("&8&lGame Selector")).
-				build();
+		inv = SmartInventory.builder().id("myInventory").provider(this).size(4, 9)
+				.title(ChatColorHelper.color("&8&lGame Selector")).build();
 		this.main = main;
 
 	}
