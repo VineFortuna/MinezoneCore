@@ -15,6 +15,7 @@ import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 
+import com.comphenix.protocol.wrappers.EnumWrappers.Particle;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.ChatColor;
@@ -54,6 +55,7 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 import xyz.xenondevs.particle.ParticleEffect;
@@ -246,7 +248,7 @@ public class GameManager implements Listener, PluginMessageListener {
 								if (!(player.getLocation().distance(gamePlayer.getLocation()) <= radius)) {
 									EntityDamageEvent damageEvent = new EntityDamageEvent(player,
 											DamageCause.PROJECTILE, 1.5);
-									instance.getGameManager().getMain().getServer().getPluginManager()
+									instance.getManager().getMain().getServer().getPluginManager()
 											.callEvent(damageEvent);
 									player.damage(1.5);
 								}
@@ -302,7 +304,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	public String mapName = "";
 
-	public int getActiveGamesCount() {
+	public int getActiveGames() {
 		int count = 0;
 		for (Entry<Maps, GameInstance> games : gameMap.entrySet()) {
 			if (games.getValue().state == GameState.WAITING || games.getValue().state == GameState.STARTED) {
@@ -311,19 +313,6 @@ public class GameManager implements Listener, PluginMessageListener {
 			}
 		}
 		return count;
-	}
-
-	public Map<Maps, GameInstance> getActiveGames() {
-		Map<Maps, GameInstance> activeGames = new HashMap<>();
-
-		for (Entry<Maps, GameInstance> entry : gameMap.entrySet()) {
-			if (entry.getValue().state == GameState.WAITING || entry.getValue().state == GameState.STARTED) {
-
-				activeGames.put(entry.getKey(), entry.getValue());
-			}
-		}
-
-		return activeGames;
 	}
 
 	public String getActiveMapName() {
@@ -549,7 +538,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		Player player = event.getPlayer();
-		PlayerData data = main.getPlayerDataManager().getPlayerData(player);
+		PlayerData data = main.getDataManager().getPlayerData(player);
 		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
 
 		if ((player.getWorld() == main.getLobbyWorld())
@@ -621,7 +610,7 @@ public class GameManager implements Listener, PluginMessageListener {
 											@SuppressWarnings("deprecation")
 											EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID,
 													damage);
-											i.getGameManager().getMain().getServer().getPluginManager()
+											i.getManager().getMain().getServer().getPluginManager()
 													.callEvent(damageEvent);
 											p.damage(damage, player);
 										}
@@ -629,7 +618,7 @@ public class GameManager implements Listener, PluginMessageListener {
 										@SuppressWarnings("deprecation")
 										EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID,
 												damage);
-										i.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+										i.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 										p.damage(damage, player);
 									}
 									p.setVelocity(new Vector(0, 1, 0).multiply(height));
@@ -669,13 +658,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		if (item != null) {
 			if (item.getType() == Material.POTION) {
 				if (meta.getDisplayName().contains("Mini-Shield Potion")) {
-					player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 50 * 20, 1));
-
-					// Doing 1 Heart of Damage
-					EntityDamageEvent damageEvent = new EntityDamageEvent(player, EntityDamageEvent.DamageCause.VOID, 2.0);
-					main.getServer().getPluginManager().callEvent(damageEvent);
-					player.damage(2.0, player);
-
+					player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 1000, 0));
 					event.setCancelled(true);
 					player.getInventory().clear(player.getInventory().getHeldItemSlot());
 				}
@@ -751,7 +734,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		ItemStack item = event.getItem();
 		Player player = event.getPlayer();
 		GameInstance instance = this.GetInstanceOfPlayer(player);
-		PlayerData data = main.getPlayerDataManager().getPlayerData(player);
+		PlayerData data = main.getDataManager().getPlayerData(player);
 
 		if (instance != null) {
 			if (instance.state == GameState.WAITING && instance.players.size() >= 2) {
@@ -785,7 +768,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	public void extraLife(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		Player player = event.getPlayer();
-		PlayerData data = getMain().getPlayerDataManager().getPlayerData(player);
+		PlayerData data = getMain().getDataManager().getPlayerData(player);
 		GameInstance instance = this.GetInstanceOfPlayer(player);
 
 		if (instance != null) {
@@ -834,7 +817,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	public void cosmeticMelon(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
 		ItemStack item = e.getItem();
-		PlayerData data = main.getPlayerDataManager().getPlayerData(player);
+		PlayerData data = main.getDataManager().getPlayerData(player);
 		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
 
 		if ((player.getWorld() == main.getLobbyWorld()) || (i != null && i.state == GameState.WAITING)) {
@@ -843,7 +826,7 @@ public class GameManager implements Listener, PluginMessageListener {
 					if (shurikenCooldown.useAndResetCooldown()) {
 						if (data.melon > 0) {
 							data.melon--;
-							main.getPlayerDataManager().saveData(data);
+							main.getDataManager().saveData(data);
 							String msg = main.color("&9&l(!) &rYou have &e" + data.melon + " melons");
 							PacketPlayOutChat packet = new PacketPlayOutChat(
 									ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
@@ -932,14 +915,14 @@ public class GameManager implements Listener, PluginMessageListener {
 														.equals(instance.team.get(player)))) {
 													EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
 															DamageCause.VOID, 5.0);
-													instance.getGameManager().getMain().getServer().getPluginManager()
+													instance.getManager().getMain().getServer().getPluginManager()
 															.callEvent(damageEvent);
 													gamePlayer.damage(5.0, player);
 												}
 											} else {
 												EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
 														DamageCause.VOID, 5.5);
-												instance.getGameManager().getMain().getServer().getPluginManager()
+												instance.getManager().getMain().getServer().getPluginManager()
 														.callEvent(damageEvent);
 												gamePlayer.damage(5.5, player);
 											}
@@ -953,7 +936,7 @@ public class GameManager implements Listener, PluginMessageListener {
 								}
 
 							}, new ItemStack(Material.TNT));
-							instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+							instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}
 						e.setCancelled(true);
@@ -1913,7 +1896,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	public boolean RemovePlayerFromAll(Player player) {
-		PlayerData data = main.getPlayerDataManager().getPlayerData(player);
+		PlayerData data = main.getDataManager().getPlayerData(player);
 		GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
 
 		if (data.votes == 1) {
@@ -2218,7 +2201,7 @@ public class GameManager implements Listener, PluginMessageListener {
 								}
 
 							}, new ItemStack(Material.MONSTER_EGG));
-							i.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+							i.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}
 						// Skeleton Monster Egg
@@ -2256,7 +2239,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									}
 								}
 							}, new ItemStack(Material.MONSTER_EGG));
-							i.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+							i.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}
 						// Witch Monster Egg
@@ -2283,7 +2266,7 @@ public class GameManager implements Listener, PluginMessageListener {
 								}
 
 							}, new ItemStack(Material.MONSTER_EGG));
-							i.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+							i.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}
 						// Creeper Monster Egg
@@ -2319,7 +2302,7 @@ public class GameManager implements Listener, PluginMessageListener {
 								}
 
 							}, new ItemStack(Material.MONSTER_EGG));
-							i.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+							i.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}
 					}

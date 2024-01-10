@@ -1,13 +1,11 @@
 package anthony.SuperCraftBrawl.playerdata;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.UUID;
 
-import anthony.SuperCraftBrawl.Currencies;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
-import anthony.SuperCraftBrawl.cosmetics.CosmeticManager;
 import anthony.SuperCraftBrawl.ranks.Rank;
-import org.bukkit.entity.Player;
 
 public class PlayerData {
 	public UUID playerUUID;
@@ -25,20 +23,14 @@ public class PlayerData {
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
 	public ArrayList<Integer> customIntegers = new ArrayList<>();
 
-	private Map<Currencies, Integer> currencyAmounts = new HashMap<>();
-
-	private CosmeticManager cosmeticManager;
-	private List<Cosmetic> ownedCosmetics = new ArrayList<>();
-	private Map<Class<? extends Cosmetic>, Cosmetic> activeCosmeticsByType;
-
-
 	public PlayerData(UUID playerUUID, String playerName, String playerIP, int roleID, int tokens, int wins, int kills,
-					  int deaths, int flawlessWins, int losses, int winstreak, int cwm, int melon, int astronaut, int pm,
-					  int votes, int mysteryChests, int blue, int red, int green, int yellow, int muted, int exp, int level,
-					  int bestTime, int magicbroom, int points, int withersk, int bonusTokens, int bonusLevels, int paintball,
-					  int santaoutfit, int elf, int gingerbreadman, int killMsgs, int challenge1, int challenge2, int challenge3,
-					  int goldApple, int glowstone, int redstone, int web, int bottleEXP, int broomWWinEffect, int enderDragonEffect,
-					  int santaEffect, int fireParticlesEffect, int challenge100, int challenge101, int challenge102, int challenge103) {
+			int deaths, int flawlessWins, int losses, int winstreak, int cwm, int melon, int astronaut, int pm,
+			int votes, int mysteryChests, int blue, int red, int green, int yellow, int muted, int exp, int level,
+			int bestTime, int magicbroom, int points, int withersk, int bonusTokens, int bonusLevels, int paintball,
+			int santaoutfit, int elf, int gingerbreadman, int killMsgs, int challenge1, int challenge2, int challenge3,
+			int goldApple, int glowstone, int redstone, int web, int bottleEXP, int broomWWinEffect,
+			int enderDragonEffect, int santaEffect, int fireParticlesEffect, int challenge100, int challenge101,
+			int challenge102, int challenge103) {
 		this(playerUUID, playerName, playerIP);
 		this.roleID = roleID;
 		this.tokens = tokens;
@@ -88,20 +80,6 @@ public class PlayerData {
 		this.challenge101 = challenge101;
 		this.challenge102 = challenge102;
 		this.challenge103 = challenge103;
-
-		// Setting currency amounts
-		currencyAmounts.put(Currencies.TOKENS, tokens);
-	}
-
-	public PlayerData(UUID playerUUID, String playerName, String playerIP, Map<Currencies, Integer> initialCurrencyAmounts) {
-		this(playerUUID, playerName, playerIP);
-		this.currencyAmounts.putAll(initialCurrencyAmounts);
-	}
-
-	public PlayerData(UUID playerUUID, String playerName, String playerIP) {
-		this.playerUUID = playerUUID;
-		this.playerName = playerName;
-		this.playerIP = playerIP;
 	}
 
 	public boolean isPurchased(ClassType type) {
@@ -109,76 +87,12 @@ public class PlayerData {
 				|| type.getTokenCost() == 0;
 	}
 
-	// Cosmetics
-	public void addOwnedCosmetic(Cosmetic cosmetic) {
-		ownedCosmetics.add(cosmetic);
+	public PlayerData(UUID playerUUID, String playerName, String playerIP) {
+		this.playerUUID = playerUUID;
+		this.playerName = playerName;
+		this.playerIP = playerIP;
+
 	}
-
-	public List<Cosmetic> getOwnedCosmetics() {
-		return new ArrayList<>(ownedCosmetics);
-	}
-
-	public CosmeticManager getCosmeticManager() {
-		return cosmeticManager;
-	}
-
-	// Active Cosmetics
-	public Cosmetic getActiveCosmetic(Class<? extends Cosmetic> cosmeticType) {
-		return activeCosmeticsByType.get(cosmeticType);
-	}
-
-	public void setActiveCosmetic(Class<? extends Cosmetic> cosmeticType, Cosmetic cosmetic) {
-		activeCosmeticsByType.put(cosmeticType, cosmetic);
-	}
-
-	public void removeActiveCosmetic(Class<? extends Cosmetic> cosmeticType) {
-		activeCosmeticsByType.remove(cosmeticType);
-	}
-
-	// Equipping Cosmetics
-	public void equipCosmetic(Class<? extends Cosmetic> cosmeticType, Cosmetic cosmetic) {
-		// Check if there is already an active cosmetic of the same type
-		if (activeCosmeticsByType.containsKey(cosmeticType)) {
-			// Check if parameter cosmetic is already equipped
-			if (!cosmetic.equals(getActiveCosmetic(cosmeticType))) {
-				// Remove active cosmetic of that type
-				removeActiveCosmetic(cosmeticType);
-			} else return;
-		}
-
-		// Setting parameter cosmetic as the active one
-		setActiveCosmetic(cosmeticType, cosmetic);
-	}
-
-	public int getCurrencyAmount(Currencies currency) {
-		return currencyAmounts.getOrDefault(currency, 0);
-	}
-
-	public void addCurrency(Currencies currency, int amount) {
-		int currentAmount = currencyAmounts.getOrDefault(currency, 0);
-		currencyAmounts.put(currency, currentAmount + amount);
-	}
-
-	public void removeCurrency(Currencies currency, int amount) {
-		int currentAmount = currencyAmounts.getOrDefault(currency, 0);
-		int newAmount = Math.max(0, currentAmount - amount);
-		currencyAmounts.put(currency, newAmount);
-	}
-
-
-	public void setTokens(int amount) {
-		tokens = amount;
-	}
-
-	public void addTokens(int amount) {
-		tokens += amount;
-	}
-
-	public void removeTokens(int amount) {
-		// Assure token balance is not lower than 0
-		tokens = Math.max(0, tokens -= amount);
-	}
-
 
 	public Rank getRank() {
 		return Rank.getRankFromID(roleID);

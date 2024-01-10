@@ -2,7 +2,7 @@ package anthony.SuperCraftBrawl.gui.cosmetics;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.gui.WinEffectsGUI;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -14,76 +14,66 @@ import org.bukkit.inventory.ItemStack;
 
 public class GameCosmeticsGUI implements InventoryProvider {
 
-    public Core main;
-    public SmartInventory inv;
+	public Core main;
+	public SmartInventory inv;
 
-    public GameCosmeticsGUI(Core main) {
-        inv = SmartInventory.builder()
-                .id("myInventory")
-                .provider(this)
-                .size(5, 9)
-                .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Game Cosmetics")
-                .build();
-        this.main = main;
-    }
+	public GameCosmeticsGUI(Core main) {
+		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
+				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Game Cosmetics").build();
+		this.main = main;
+	}
 
-    @Override
-    public void init(Player player, InventoryContents contents) {
-        // Button Items
-        ItemStack arrowEffects = ItemHelper.create(Material.ARROW, ChatColor.YELLOW + "Arrow Effects");
+	@Override
+	public void init(Player player, InventoryContents contents) {
+		PlayerData data = main.getDataManager().getPlayerData(player);
 
-        ItemStack killEffects = ItemHelper.create(Material.IRON_SWORD, ChatColor.YELLOW + "Kill Effects");
+		// Button Items
+		ItemStack arrowEffects = ItemHelper.create(Material.ARROW, ChatColor.YELLOW + "Arrow Effects");
 
-        ItemStack deathEffects = ItemHelper.create(Material.REDSTONE, ChatColor.YELLOW + "Death Effects");
+		ItemStack killEffects = ItemHelper.create(Material.IRON_SWORD, ChatColor.YELLOW + "Kill Effects");
 
-        ItemStack winEffects = ItemHelper.create(Material.BEACON, ChatColor.YELLOW + "Win Effects");
+		ItemStack deathEffects = ItemHelper.create(Material.REDSTONE, ChatColor.YELLOW + "Death Effects");
 
-        ItemStack gameOutfits = ItemHelper.create(Material.GOLD_CHESTPLATE, ChatColor.YELLOW + "Outfits");
+		ItemStack winEffects = ItemHelper.create(Material.BEACON, ChatColor.YELLOW + "Win Effects");
 
-        // Setting Items
-        contents.set(1, 2, ClickableItem.of(
-                killEffects,
-                e -> {
-                    inv.close(player);
-                    new KillEffectsGUI(main).inv.open(player);
-                }
-        ));
+		ItemStack gameOutfits = ItemHelper.create(Material.GOLD_CHESTPLATE, ChatColor.YELLOW + "Outfits");
 
-        contents.set(1, 4, ClickableItem.of(
-                winEffects,
-                e -> {
-                    inv.close(player);
-                    new WinEffectsGUI(main).inv.open(player);
-                }
-        ));
-        
-        contents.set(1, 6, ClickableItem.of(
-                arrowEffects,
-                e -> {
-                    inv.close(player);
-                    new ArrowEffectsGUI(main).inv.open(player);
-                }
-        ));
+		// Setting Items
 
+		contents.set(1, 2, ClickableItem.of(arrowEffects, e -> {
+			inv.close(player);
+			new ArrowEffectsGUI(main).inv.open(player);
+		}));
 
-        contents.set(3, 3, ClickableItem.of(
-                deathEffects,
-                e -> {
-                    inv.close(player);
-                    new DeathEffectsGUI(main).inv.open(player);
-                }
-        ));
+		contents.set(1, 6, ClickableItem.of(killEffects, e -> {
+			inv.close(player);
+			new KillEffectsGUI(main).inv.open(player);
+		}));
 
-        contents.set(3, 5, ClickableItem.of(
-                gameOutfits,
-                e -> {
-                    inv.close(player);
-                    new GameOutfitsGUI(main).inv.open(player);
-                }
-        ));
-    }
+		contents.set(1, 6, ClickableItem.of(deathEffects, e -> {
+			inv.close(player);
+			new DeathEffectsGUI(main).inv.open(player);
+		}));
 
-    @Override
-    public void update(Player player, InventoryContents contents) {
-    }
+		contents.set(0, 4, ClickableItem.of(winEffects, e -> {
+			inv.close(player);
+
+			if (player.hasPermission("scb.winEffects"))
+				new WinEffectsGUI(main).inv.open(player);
+			else
+				player.sendMessage(main.color(
+						"&c&l(!) &rYou need the rank " + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN &rto use this!"));
+		}));
+
+		contents.set(3, 5, ClickableItem.of(gameOutfits, e -> {
+			inv.close(player);
+			new GameOutfitsGUI(main).inv.open(player);
+		}));
+
+	}
+
+	@Override
+	public void update(Player player, InventoryContents contents) {
+
+	}
 }
