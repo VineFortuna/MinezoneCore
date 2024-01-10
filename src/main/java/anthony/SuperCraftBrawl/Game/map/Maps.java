@@ -741,14 +741,14 @@ public enum Maps {
 	NetherFortress("NetherFortress",
 			new MapInstance("netherfortress")
 					.setSpawnPos(
-							new Vector(5031.383, 145, 585.477),
-							new Vector(5060.463, 150, 591.422),
-							new Vector(5065.438, 158, 624.535),
-							new Vector(5038.497, 145, 635.504),
-							new Vector(5059.595, 145, 606.429),
-							new Vector(5038.436, 138, 591.371))
-					.setLobbyLoc(new Vector(5000.505, 155, 597.490))
-					.setSpecLoc(new Vector(5050.741, 155.40139, 606.475))
+							new Vector(5031.383, 82, 585.477),
+							new Vector(5060.463, 87, 591.422),
+							new Vector(5065.498, 90, 630.511),
+							new Vector(5038.497, 82, 635.504),
+							new Vector(5059.595, 87, 606.429),
+							new Vector(5038.436, 81, 591.371))
+					.setLobbyLoc(new Vector(5000.521, 92, 597.435))
+					.setSpecLoc(new Vector(5050.741, 110, 606.475))
 					.setBounds(new Vector(5052.502, 160, 610.468), 30, 45)
 					.setSignLoc(new Vector(209.700, 106, 668.489))
 					.setMapType(MapType.SETHBLING)),
