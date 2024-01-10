@@ -1,34 +1,33 @@
-package anthony.SuperCraftBrawl.Game.abilities;
+package anthony.SuperCraftBrawl.Game.classes;
 
 import anthony.SuperCraftBrawl.ChatColorHelper;
-import anthony.SuperCraftBrawl.Game.classes.CooldownNatowski;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class AbilityOld {
+public class Ability {
     private final String abilityName; // Name of the ability
     private final Player player; // Player regarding that class's ability
     private ItemStack triggerItem; // Item that is clicked for the ability to be used
     private CooldownNatowski cooldown; // Cooldown of the ability (in seconds)
 
-    public AbilityOld(String name, Player player) {
+    public Ability(String name, Player player) {
         this.abilityName = name;
         this.player = player;
     }
 
-    public AbilityOld(String name, Player player, ItemStack triggerItem) {
+    public Ability(String name, Player player, ItemStack triggerItem) {
         this.abilityName = name;
         this.player = player;
         this.triggerItem = triggerItem;
     }
 
-    public AbilityOld(String name, int cooldownSeconds, Player player) {
+    public Ability(String name, int cooldownSeconds, Player player) {
         this.abilityName = name;
         this.cooldown = new CooldownNatowski(cooldownSeconds);
         this.player = player;
     }
 
-    public AbilityOld(String name, int cooldownSeconds, Player player, ItemStack triggerItem) {
+    public Ability(String name, int cooldownSeconds, Player player, ItemStack triggerItem) {
         this.abilityName = name;
         this.cooldown = new CooldownNatowski(cooldownSeconds);
         this.player = player;
