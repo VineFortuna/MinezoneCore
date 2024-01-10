@@ -213,7 +213,8 @@ public class GameInstance {
 									? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
 									: ""),
 					"", "" + ChatColor.RESET + ChatColor.BOLD + "Status:",
-					"" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
+					"" + ChatColor.RESET + ChatColor.ITALIC + " Need " + ChatColor.RESET + ChatColor.YELLOW + "1 "
+							+ ChatColor.RESET + ChatColor.ITALIC + " more player!");
 
 			boards.get(player)
 					.updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD + map.toString()
@@ -226,7 +227,8 @@ public class GameInstance {
 					"", "" + ChatColor.RESET + ChatColor.BOLD + "Players:",
 					" " + ChatColor.RESET + players.size() + "/6", "",
 					"" + ChatColor.RESET + ChatColor.BOLD + "Status:",
-					"" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
+					"" + ChatColor.RESET + ChatColor.ITALIC + " Need " + ChatColor.RESET + ChatColor.YELLOW + "1 "
+							+ ChatColor.RESET + ChatColor.ITALIC + " more player!");
 		}
 
 	}
@@ -959,9 +961,8 @@ public class GameInstance {
 				gameManager.getMain().color("&6&lBlooper"));
 
 		// Nuke
-		ItemStack nuke = ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.TNT, 3), this.getGameManager().getMain().color("&4&lNuke")),
-				Enchantment.DAMAGE_ALL, 1);
+		ItemStack nuke = ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.TNT, 3),
+				this.getGameManager().getMain().color("&4&lNuke")), Enchantment.DAMAGE_ALL, 1);
 
 		// Instagib
 		ItemStack instagib = ItemHelper.setDetails(new ItemStack(Material.GOLD_HOE, 5, (short) 250),
@@ -979,7 +980,7 @@ public class GameInstance {
 
 		// Creeper Egg
 		ItemStack creeperEgg = ItemHelper.createMonsterEgg(EntityType.CREEPER, 1, "&r&oCreeper Pokeball");
-		
+
 		// Milk Bucket
 		ItemStack milk = ItemHelper.create(Material.MILK_BUCKET);
 
@@ -1019,12 +1020,11 @@ public class GameInstance {
 				ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE, 1, (short) 1),
 						"" + ChatColor.BLACK + ChatColor.BOLD + "Notch Apple"),
 				slownessPot, bazooka, bazooka, healthPot, speedPot, slownessPot, slownessPot, speedPot, bazooka,
-				goldenApple, hammer, healthPot, extraLife, healthPot,
-				milk, milk, milk, blooper, blooper, blooper, blooper, nuke, nuke, nuke, nuke, nuke,
-				bomb, pearl, pearl, miniShield, miniShield, slowballs, slowballs, slowballs, fireRes, fireRes, instagib,
-				instagib, instagib, broom, broom, zombieEgg, zombieEgg, zombieEgg, skeletonEgg, skeletonEgg, witchEgg,
-				bounty, creeperEgg, creeperEgg);
-		
+				goldenApple, hammer, healthPot, extraLife, healthPot, milk, milk, milk, blooper, blooper, blooper,
+				blooper, nuke, nuke, nuke, nuke, nuke, bomb, pearl, pearl, miniShield, miniShield, slowballs, slowballs,
+				slowballs, fireRes, fireRes, instagib, instagib, instagib, broom, broom, zombieEgg, zombieEgg,
+				zombieEgg, skeletonEgg, skeletonEgg, witchEgg, bounty, creeperEgg, creeperEgg);
+
 		return items.get(random.nextInt(items.size()));
 	}
 
@@ -1378,8 +1378,8 @@ public class GameInstance {
 							spectator.setAllowFlight(false);
 							spectator.setAllowFlight(true);
 							spectator.setDisplayName("" + spectator.getName());
-							spectator.sendMessage(getGameManager().getMain().color("&2&l(!) &rThe game on &r&l" + mapName
-									+ " &rhas ended. Moving you back to spawn.."));
+							spectator.sendMessage(getGameManager().getMain().color("&2&l(!) &rThe game on &r&l"
+									+ mapName + " &rhas ended. Moving you back to spawn.."));
 							spectator.spigot().setCollidesWithEntities(true);
 							for (Player p : Bukkit.getOnlinePlayers()) {
 								p.showPlayer(spectator);
@@ -1440,8 +1440,8 @@ public class GameInstance {
 	public void SetLobbyScoreboard(Player player) {
 		gameManager.getMain().LobbyBoard(player);
 		gameManager.getMain().gameStats.put(player, this);
-		TextComponent message = new TextComponent(
-				getGameManager().getMain().color("&2&l(!) &eThe match stats have been recorded. &e&lClick here to view!"));
+		TextComponent message = new TextComponent(getGameManager().getMain()
+				.color("&2&l(!) &eThe match stats have been recorded. &e&lClick here to view!"));
 		message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/gamestats"));
 		player.spigot().sendMessage(message);
 	}
@@ -1828,8 +1828,8 @@ public class GameInstance {
 						+ ChatColor.RESET + "won on " + ChatColor.BOLD + ChatColor.WHITE + ChatColor.YELLOW
 						+ ChatColor.BOLD + map.toString());
 			} else if (chance == 2) {
-				Bukkit.broadcastMessage(this.getGameManager().getMain().color("&r&l(!) &rThe game on &e&l" + map.toString()
-						+ " &rwas too easy for " + tag + "&e" + winner.getName()));
+				Bukkit.broadcastMessage(this.getGameManager().getMain().color("&r&l(!) &rThe game on &e&l"
+						+ map.toString() + " &rwas too easy for " + tag + "&e" + winner.getName()));
 			} else if (chance == 3) {
 				Bukkit.broadcastMessage(this.getGameManager().getMain().color("&r&l(!) &rGet out of the way for " + tag
 						+ "&e" + winner.getName() + ". &rHe &r&lDOMINATED &ron &e&l" + map.toString()));
@@ -2056,7 +2056,10 @@ public class GameInstance {
 										"" + ChatColor.RESET + this.players.size() + "/"
 												+ this.gameType.getMaxPlayers()) : ""));
 								board.updateLine(7, "" + ChatColor.BOLD + "Status:");
-								board.updateLine(8, " " + ChatColor.ITALIC + "Waiting..");
+								board.updateLine(8,
+										"" + ChatColor.RESET + ChatColor.ITALIC + " Need " + ChatColor.RESET
+												+ ChatColor.YELLOW + "1 " + ChatColor.RESET + ChatColor.ITALIC
+												+ " more player!");
 							}
 						}
 					}
@@ -2085,7 +2088,10 @@ public class GameInstance {
 								FastBoard board = this.boards.get(gamePlayer);
 								board.updateLine(5, " " + this.players.size() + "/6");
 								board.updateLine(7, "" + ChatColor.BOLD + "Status:");
-								board.updateLine(8, " " + ChatColor.ITALIC + "Waiting..");
+								board.updateLine(8,
+										"" + ChatColor.RESET + ChatColor.ITALIC + " Need " + ChatColor.RESET
+												+ ChatColor.YELLOW + "1 " + ChatColor.RESET + ChatColor.ITALIC
+												+ " more player!");
 							}
 						}
 					}
@@ -2162,9 +2168,9 @@ public class GameInstance {
 		if (players.contains(player)) {
 			if (classes.containsKey(player)) {
 				BaseClass baseClass = classes.get(player);
-				if (event.getPlayer().getItemInHand().getType() == Material.ENDER_PEARL &&
-						event.getPlayer().getItemInHand().hasItemMeta() &&
-						event.getPlayer().getItemInHand().getItemMeta().getDisplayName().contains("Teleporters")
+				if (event.getPlayer().getItemInHand().getType() == Material.ENDER_PEARL
+						&& event.getPlayer().getItemInHand().hasItemMeta()
+						&& event.getPlayer().getItemInHand().getItemMeta().getDisplayName().contains("Teleporters")
 						&& (event.getAction() == Action.RIGHT_CLICK_AIR
 								|| event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 					if (baseClass.pearlTimer.getTime() < 10000) {
@@ -2209,11 +2215,11 @@ public class GameInstance {
 
 		return false;
 	}
-	
+
 	public List<ItemStack> getAllItemDrops() {
 		return allItemDrops;
 	}
-	
+
 	public List<Player> getWinnerList() {
 		return winnerList;
 	}
