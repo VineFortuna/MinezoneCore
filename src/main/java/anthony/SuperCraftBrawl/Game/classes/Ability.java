@@ -1,8 +1,9 @@
 package anthony.SuperCraftBrawl.Game.classes;
 
-import anthony.SuperCraftBrawl.ChatColorHelper;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import anthony.SuperCraftBrawl.ChatColorHelper;
 
 public class Ability {
     private final String abilityName; // Name of the ability
