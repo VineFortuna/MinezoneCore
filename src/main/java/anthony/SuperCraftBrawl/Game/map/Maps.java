@@ -752,7 +752,31 @@ public enum Maps {
 					.setBounds(new Vector(5052.502, 160, 610.468), 30, 45)
 					.setSignLoc(new Vector(209.700, 106, 668.489))
 					.setMapType(MapType.SETHBLING)),
+	
+	Plains("Plains",
+			new MapInstance("plains")
+					.setSpawnPos(
+							new Vector(26.542, 167, -84.494),
+							new Vector(-6.535, 167, -84.533))
+					.setLobbyLoc(new Vector(12.536, 186, -150.517))
+					.setSpecLoc(new Vector(10.500, 176, -84.500))
+					.setBounds(new Vector(10.500, 176, -84.500), 50, 35)
+					.setSignLoc(new Vector(209.700, 106, 668.489))
+					.setGameType(GameType.DUEL)
+					.setMapType(MapType.COMMUNITY)),
 
+	SandStorm("SandStorm",
+			new MapInstance("sandstorm")
+					.setSpawnPos(
+							new Vector(-11.576, 176, -80.546),
+							new Vector(30.519, 176, -80.498))
+					.setLobbyLoc(new Vector(12.525, 187, -150.471))
+					.setSpecLoc(new Vector(9.500, 183, -80.500))
+					.setBounds(new Vector(9.500, 183, -80.500), 50, 30)
+					.setSignLoc(new Vector(209.700, 106, 668.489))
+					.setGameType(GameType.DUEL)
+					.setMapType(MapType.COMMUNITY)),
+	
 	Clockwork("Clockwork",
 			new MapInstance("clockwork")
 					.setSpawnPos(
