@@ -44,7 +44,6 @@ import org.bukkit.util.Vector;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameManager;
 import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Game.SmmManager;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -54,8 +53,6 @@ import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.SuperCraftBrawl.gui.DonorClassesGUI;
 import anthony.SuperCraftBrawl.gui.FreeClassesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
-import anthony.SuperCraftBrawl.gui.HubGUI;
-import anthony.SuperCraftBrawl.gui.InventoryGUI;
 import anthony.SuperCraftBrawl.gui.StatsGUI;
 import anthony.SuperCraftBrawl.gui.StatsTargetGUI;
 import anthony.SuperCraftBrawl.npcs.NPCManager;
@@ -91,7 +88,6 @@ public class Core extends JavaPlugin implements Listener {
 	public anthony.skywars.commands.Commands cmd;
 	public World lobbyWorld;
 	public PlayerListener listener;
-	public SmmManager smmmanager;
 	public DoubleJumpManager djManager;
 	protected final Cooldown cooldownTime = null;
 	public RankManager rankManager;
@@ -169,10 +165,6 @@ public class Core extends JavaPlugin implements Listener {
 	// public AntiCheat getAntiCheat() {
 	// return cheat;
 	// }
-
-	public SmmManager getSmmManager() {
-		return smmmanager;
-	}
 
 	public DatabaseManager getDatabaseManager() {
 		return databaseManager;

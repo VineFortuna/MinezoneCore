@@ -24,7 +24,6 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.gui.ClassSelectorGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
-import anthony.SuperCraftBrawl.gui.HubGUI;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import net.jitse.npclib.NPCLib;
 import net.jitse.npclib.api.NPC;
