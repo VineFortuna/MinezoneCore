@@ -213,8 +213,7 @@ public class GameInstance {
 									? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
 									: ""),
 					"", "" + ChatColor.RESET + ChatColor.BOLD + "Status:",
-					"" + ChatColor.RESET + ChatColor.ITALIC + " Need " + ChatColor.RESET + ChatColor.YELLOW + "1 "
-							+ ChatColor.RESET + ChatColor.ITALIC + " more player!");
+					"" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
 
 			boards.get(player)
 					.updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD + map.toString()
@@ -227,8 +226,7 @@ public class GameInstance {
 					"", "" + ChatColor.RESET + ChatColor.BOLD + "Players:",
 					" " + ChatColor.RESET + players.size() + "/6", "",
 					"" + ChatColor.RESET + ChatColor.BOLD + "Status:",
-					"" + ChatColor.RESET + ChatColor.ITALIC + " Need " + ChatColor.RESET + ChatColor.YELLOW + "1 "
-							+ ChatColor.RESET + ChatColor.ITALIC + " more player!");
+					"" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
 		}
 
 	}
@@ -2056,10 +2054,7 @@ public class GameInstance {
 										"" + ChatColor.RESET + this.players.size() + "/"
 												+ this.gameType.getMaxPlayers()) : ""));
 								board.updateLine(7, "" + ChatColor.BOLD + "Status:");
-								board.updateLine(8,
-										"" + ChatColor.RESET + ChatColor.ITALIC + " Need " + ChatColor.RESET
-												+ ChatColor.YELLOW + "1 " + ChatColor.RESET + ChatColor.ITALIC
-												+ " more player!");
+								board.updateLine(8, "" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
 							}
 						}
 					}
@@ -2088,10 +2083,7 @@ public class GameInstance {
 								FastBoard board = this.boards.get(gamePlayer);
 								board.updateLine(5, " " + this.players.size() + "/6");
 								board.updateLine(7, "" + ChatColor.BOLD + "Status:");
-								board.updateLine(8,
-										"" + ChatColor.RESET + ChatColor.ITALIC + " Need " + ChatColor.RESET
-												+ ChatColor.YELLOW + "1 " + ChatColor.RESET + ChatColor.ITALIC
-												+ " more player!");
+								board.updateLine(8, "" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
 							}
 						}
 					}
