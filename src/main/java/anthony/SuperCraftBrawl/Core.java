@@ -1,29 +1,23 @@
 package anthony.SuperCraftBrawl;
 
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameManager;
-import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import anthony.SuperCraftBrawl.Game.map.Maps;
-import anthony.SuperCraftBrawl.commands.Commands;
-import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
-import anthony.SuperCraftBrawl.gui.*;
-import anthony.SuperCraftBrawl.npcs.NPCManager;
-import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
-import anthony.SuperCraftBrawl.practice.BowPractice;
-import anthony.SuperCraftBrawl.ranks.Rank;
-import anthony.SuperCraftBrawl.ranks.RankManager;
-import anthony.parkour.Parkour;
-import fr.mrmicky.fastboard.FastBoard;
-import me.itzzmic.minezone.api.PunishAPI;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.*;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
-import org.bukkit.*;
+import org.bukkit.WorldCreator;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -47,17 +41,44 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import anthony.SuperCraftBrawl.Game.ActionBarManager;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameManager;
+import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.Cooldown;
+import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.commands.Commands;
+import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
+import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
+import anthony.SuperCraftBrawl.gui.DonorClassesGUI;
+import anthony.SuperCraftBrawl.gui.FreeClassesGUI;
+import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
+import anthony.SuperCraftBrawl.gui.StatsGUI;
+import anthony.SuperCraftBrawl.gui.StatsTargetGUI;
+import anthony.SuperCraftBrawl.npcs.NPCManager;
+import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
+import anthony.SuperCraftBrawl.practice.BowPractice;
+import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.SuperCraftBrawl.ranks.RankManager;
+import anthony.parkour.Parkour;
+import fr.mrmicky.fastboard.FastBoard;
+import me.itzzmic.minezone.api.PunishAPI;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.ChatComponentText;
+import net.minecraft.server.v1_8_R3.EntityArmorStand;
+import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerListHeaderFooter;
+import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
+import net.minecraft.server.v1_8_R3.WorldServer;
 
 public class Core extends JavaPlugin implements Listener {
 
 	static Core plugin;
 
+	
+	private ActionBarManager actionBarManager;
 	public GameManager gameManager;
 	public FreeClassesGUI inventoryGUI;
 	public anthony.CrystalWars.game.GameManager gm;
@@ -92,6 +113,8 @@ public class Core extends JavaPlugin implements Listener {
 
 	public boolean finalEvent = false;
 
+	private long tickCounter = 0;
+	
 	public Core() {
 		this.staffchat = new ArrayList<Player>();
 		this.globalchat = new ArrayList<Player>();
@@ -103,6 +126,14 @@ public class Core extends JavaPlugin implements Listener {
 
 	// Getters:
 
+	public ActionBarManager getActionBarManager() {
+		return actionBarManager;
+	}
+	
+	public long getCurrentTick() {
+		return tickCounter;
+	}
+	
 	public Parkour getParkour() {
 		return p;
 	}
@@ -311,6 +342,7 @@ public class Core extends JavaPlugin implements Listener {
 		dataManager = new PlayerDataManager(this);
 		npcManager = new NPCManager(this);
 		rankManager = new RankManager(this);
+		actionBarManager = new ActionBarManager(this);
 		// gm = new anthony.CrystalWars.game.GameManager(this);
 		ag = new ActiveGamesGUI(this);
 		p = new Parkour(this);
@@ -367,6 +399,14 @@ public class Core extends JavaPlugin implements Listener {
 				}
 			}
 		}.runTaskTimer(this, 0, 20);
+	
+		new BukkitRunnable() {
+			
+			@Override
+			public void run() {
+				tickCounter++;				
+			}
+		}.runTaskTimer(this, 0, 1);
 	}
 	
 	public static BowPractice bowPractice;
