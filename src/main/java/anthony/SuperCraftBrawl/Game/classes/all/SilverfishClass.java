@@ -34,10 +34,6 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 public class SilverfishClass extends BaseClass {
-<<<<<<< Updated upstream
-=======
-	private Ability wallAbility = new Ability("Silverfish Wall", 15, player);
->>>>>>> Stashed changes
 	private ItemStack weapon;
 	private ItemStack wallItem;
 	private int cooldownSec = 0;
@@ -154,7 +150,6 @@ public class SilverfishClass extends BaseClass {
 							|| action == Action.LEFT_CLICK_AIR
 							|| action == Action.LEFT_CLICK_BLOCK) {
 						// If ability is on cooldown
-<<<<<<< Updated upstream
 						if (wallAbility.getTime() < wallCooldown) {
 							int seconds = (wallCooldown - wallAbility.getTime()) / 1000 + 1;
 							event.setCancelled(true);
@@ -162,18 +157,6 @@ public class SilverfishClass extends BaseClass {
 						} else {
 							wallAbility.restart();
 							SilverfishWall createWall = new SilverfishWall(3, 3, player, 2, 0.2);
-=======
-						if (!wallAbility.isReady()) {
-							wallAbility.sendPlayerRemainingCooldownChatMessage();
-						}
-						// If ability is available
-						else {
-							SilverfishWall createWall = new SilverfishWall(3, 3, player, 2, 0.2);
-							// Setting cooldown
-							wallAbility.use();
-							// Sending return message
-							wallAbility.sendPlayerUseAbilityChatMessage();
->>>>>>> Stashed changes
 							// Wall logic
 								// When right or left click on block
 							if (action == Action.RIGHT_CLICK_BLOCK) {
