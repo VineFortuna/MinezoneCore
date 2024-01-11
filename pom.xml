@@ -43,12 +43,12 @@
 	</build>
 	<repositories>
 		<repository>
-			<id>spigot-repo</id>
-			<url>https://hub.spigotmc.org/nexus/content/repositories/public/</url>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 		</repository>
 		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/groups/public/</url>
+			<id>spigot-repo</id>
+			<url>https://hub.spigotmc.org/nexus/content/repositories/public/</url>
 		</repository>
 		<repository>
 			<id>jitpack.io</id>
@@ -60,12 +60,29 @@
 		</repository>
 	</repositories>
 	<dependencies>
+		<!-- Run the following commands in root: -->
+		<!-- 
+			mvn install:install-file -Dfile="lib/spigot-1.8.8.jar" -DgroupId="org.bukkit.nms" -DartifactId=bukkit-nms -Dversion="1.0" -Dpackaging=jar -B
+			mvn install:install-file -Dfile="lib/MinezoneAuth.jar" -DgroupId="me.itzzmic.auth" -DartifactId=SCBAuth -Dversion="1.5" -Dpackaging=jar -B
+			mvn install:install-file -Dfile="lib/PunishSystem.jar" -DgroupId="me.itzzmic.minezone" -DartifactId=PunishSystem -Dversion="1.9" -Dpackaging=jar -B
+		 -->
 		<dependency>
 			<groupId>org.bukkit.nms</groupId>
 			<artifactId>bukkit-nms</artifactId>
 			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>C:\Users\antho\eclipse-workspace\TheArchive-Core\spigot-1.8.8.jar</systemPath>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>me.itzzmic.auth</groupId>
+			<artifactId>SCBAuth</artifactId>
+			<version>1.5</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>me.itzzmic.minezone</groupId>
+			<artifactId>PunishSystem</artifactId>
+			<version>1.9</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
@@ -109,22 +126,6 @@
 			<artifactId>FastBoard</artifactId>
 			<version>1.1.0</version>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.bukkit.nms</groupId>
-			<artifactId>SCBAuth</artifactId>
-			<version>1.5</version>
-			<scope>system</scope>
-			<systemPath>C:\Users\antho\OneDrive\Desktop\Server Stuff\MinezoneAuth.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>org.bukkit.nms</groupId>
-			<artifactId>PunishSystem</artifactId>
-			<version>1.9</version>
-			<scope>system</scope>
-			<systemPath>
-				C:\Users\antho\OneDrive\Desktop\Server Stuff\PunishSystem.jar
-			</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.comphenix.protocol</groupId>
