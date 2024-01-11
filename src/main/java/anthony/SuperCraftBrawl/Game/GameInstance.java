@@ -819,6 +819,11 @@ public class GameInstance {
 		}
 	}
 
+	/*
+	 * Starts the timer of 30 seconds for each item drop
+	 * in a game. If player is DarkSethBling, it tells
+	 * them the location the item spawned
+	 */
 	public void startLightningDropsTimer() {
 		BukkitRunnable runnable = new BukkitRunnable() {
 			@Override
@@ -859,7 +864,7 @@ public class GameInstance {
 
 		// Slowness Pot
 		ItemStack slownessPot = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				"" + ChatColor.RED + ChatColor.BOLD + "Slowness", "");
+				"" + ChatColor.RED + ChatColor.BOLD + "Slowness");
 
 		Potion potionSlow = new Potion(3);
 		potionSlow.setType(PotionType.SLOWNESS);
