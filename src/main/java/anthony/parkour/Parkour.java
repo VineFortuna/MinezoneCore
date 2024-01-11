@@ -1,9 +1,9 @@
 package anthony.parkour;
 
-import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Map;
-
+import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.ItemHelper;
+import fr.mrmicky.fastboard.FastBoard;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
@@ -16,10 +16,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Core;
-import fr.mrmicky.fastboard.FastBoard;
-import net.md_5.bungee.api.ChatColor;
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Parkour implements Listener {
 
@@ -168,6 +167,7 @@ public class Parkour implements Listener {
 				} else if (isPlayerInLava(player)) {
 					Vector v = players.get(player).getInstance().spawnLoc;
 					player.teleport(new Location(main.getLobbyWorld(), v.getBlockX(), v.getBlockY(), v.getBlockZ()));
+					player.setFireTicks(0);
 					checkpoint.put(player,
 							new Location(main.getLobbyWorld(), v.getBlockX(), v.getBlockY(), v.getBlockZ()));
 					checkpointNum.put(player, 0);

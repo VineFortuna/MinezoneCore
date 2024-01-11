@@ -1,14 +1,13 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.lang.reflect.Field;
-import java.util.Random;
-import java.util.UUID;
-
-import org.bukkit.Color;
-import org.bukkit.DyeColor;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -24,14 +23,9 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Score;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
+import java.lang.reflect.Field;
+import java.util.Random;
+import java.util.UUID;
 
 public class SheepClass extends BaseClass {
 
@@ -192,8 +186,8 @@ public class SheepClass extends BaseClass {
 				.addEnchant(ItemHelper.addEnchant(
 						ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, DyeColor.BLACK.getData()),
 								"" + ChatColor.BLACK + ChatColor.BOLD + "Black Wool", "",
-								instance.getManager().getMain().color("&7Black Wool ability:"),
-								instance.getManager().getMain().color("   &r3 sec Blindness II")),
+								instance.getGameManager().getMain().color("&7Black Wool ability:"),
+								instance.getGameManager().getMain().color("   &r3 sec Blindness II")),
 						Enchantment.DAMAGE_ALL, 4), Enchantment.KNOCKBACK, 1);
 
 		ItemStack pinkWool = ItemHelper
@@ -201,9 +195,9 @@ public class SheepClass extends BaseClass {
 						ItemHelper
 								.addEnchant(
 										ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, DyeColor.PINK.getData()),
-												instance.getManager().getMain().color("&9&lPink Wool"), "",
-												instance.getManager().getMain().color("&7Pink Wool ability:"),
-												instance.getManager().getMain()
+												instance.getGameManager().getMain().color("&9&lPink Wool"), "",
+												instance.getGameManager().getMain().color("&7Pink Wool ability:"),
+												instance.getGameManager().getMain()
 														.color("   &r3 sec Regen I chance on hit")),
 										Enchantment.DAMAGE_ALL, 3),
 						Enchantment.KNOCKBACK, 1);
@@ -213,9 +207,9 @@ public class SheepClass extends BaseClass {
 						ItemHelper
 								.addEnchant(
 										ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, DyeColor.LIME.getData()),
-												instance.getManager().getMain().color("&2&lLime Wool"), "",
-												instance.getManager().getMain().color("&7Lime Wool ability:"),
-												instance.getManager().getMain()
+												instance.getGameManager().getMain().color("&2&lLime Wool"), "",
+												instance.getGameManager().getMain().color("&7Lime Wool ability:"),
+												instance.getGameManager().getMain()
 														.color("   &r3 sec Nausea chance on hit")),
 										Enchantment.DAMAGE_ALL, 3),
 						Enchantment.KNOCKBACK, 1);
@@ -235,16 +229,16 @@ public class SheepClass extends BaseClass {
 				.addEnchant(ItemHelper.addEnchant(
 						ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, DyeColor.GREEN.getData()),
 								"" + ChatColor.DARK_GREEN + ChatColor.BOLD + "Green Wool", "",
-								instance.getManager().getMain().color("&7Green Wool ability:"),
-								instance.getManager().getMain().color("   &r3 sec Poison I")),
+								instance.getGameManager().getMain().color("&7Green Wool ability:"),
+								instance.getGameManager().getMain().color("   &r3 sec Poison I")),
 						Enchantment.KNOCKBACK, 1), Enchantment.DAMAGE_ALL, 3);
 
 		ItemStack item6 = ItemHelper
 				.addEnchant(ItemHelper.addEnchant(
 						ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, DyeColor.GRAY.getData()),
 								"" + ChatColor.GRAY + ChatColor.BOLD + "Gray Wool", "",
-								instance.getManager().getMain().color("&7Gray Wool ability:"),
-								instance.getManager().getMain().color("   &r3 sec Slowness II")),
+								instance.getGameManager().getMain().color("&7Gray Wool ability:"),
+								instance.getGameManager().getMain().color("   &r3 sec Slowness II")),
 						Enchantment.KNOCKBACK, 2), Enchantment.DAMAGE_ALL, 3);
 
 		ItemStack[] itemList = { item3, item, item4, item3, item, item3, item, item3, item, item3, item, item3, item,
@@ -372,8 +366,8 @@ public class SheepClass extends BaseClass {
 			player.getInventory().setBoots(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS),
 					Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.fromRGB(255, 105, 180)));
 
-			player.sendMessage(instance.getManager().getMain().color("&r&l(!) &rYou were given &9&lPINK WOOL"));
-			player.setDisplayName(instance.getManager().getMain().color("" + player.getName() + " &9&lSheep&r"));
+			player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou were given &9&lPINK WOOL"));
+			player.setDisplayName(instance.getGameManager().getMain().color("" + player.getName() + " &9&lSheep&r"));
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.LIGHT_PURPLE
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));

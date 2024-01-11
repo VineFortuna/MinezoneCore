@@ -1,28 +1,20 @@
 package anthony.SuperCraftBrawl.Game;
 
-import java.util.Random;
-
+import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
-import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Firework;
-import org.bukkit.entity.Horse;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import me.itzzmic.auth.Main;
-import net.md_5.bungee.api.ChatColor;
+import java.util.Random;
 
 public class WinEffects {
 
@@ -38,7 +30,7 @@ public class WinEffects {
 
 	public void checkWinEffect() { // Database checking here
 		if (i != null) {
-			PlayerData data = i.getManager().getMain().getDataManager().getPlayerData(player);
+			PlayerData data = i.getGameManager().getMain().getDataManager().getPlayerData(player);
 
 			if (data != null) {
 				if (player.hasPermission("scb.winEffects")) {
@@ -68,7 +60,7 @@ public class WinEffects {
 
 	private void magicBroomEffect() {
 		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT),
-				i.getManager().getMain().color("&2&lMagic Broom"));
+				i.getGameManager().getMain().color("&2&lMagic Broom"));
 		player.getInventory().setItem(0, broom);
 	}
 
@@ -143,7 +135,7 @@ public class WinEffects {
 					}
 					
 				};
-				runnable.runTaskTimer(i.getManager().getMain(), 0, 20);
+				runnable.runTaskTimer(i.getGameManager().getMain(), 0, 20);
 			}
 		}
 	}

@@ -1,23 +1,20 @@
 package anthony.SuperCraftBrawl.gui;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
-
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
+
+import java.util.Map.Entry;
 
 public class GameStatsGUI implements InventoryProvider {
 
@@ -38,7 +35,15 @@ public class GameStatsGUI implements InventoryProvider {
 			if (entry.getKey() != null) {
 				if (matchMvp == null || entry.getValue().totalKills > matchMvp.totalKills)
 					matchMvp = entry.getValue();
+				else if (entry.getValue().totalKills == matchMvp.totalKills) {
+					if (i.getWinnerList().contains(entry.getKey()) ||
+							entry.getValue().totalDeaths < matchMvp.totalDeaths)
+						matchMvp = entry.getValue();
+				}
 			}
+		}
+		if (matchMvp.totalKills == 0) {
+			matchMvp = null;
 		}
 		
 		return matchMvp;
@@ -47,7 +52,7 @@ public class GameStatsGUI implements InventoryProvider {
 	@Override
 	public void init(Player player, InventoryContents contents) {
 		int x = 0, y = 0;
-
+		
 		if (i != null) {
 			for (Entry<Player, BaseClass> entry : i.allClasses.entrySet()) {
 				if (entry.getKey() != null) {
@@ -55,10 +60,10 @@ public class GameStatsGUI implements InventoryProvider {
 					SkullMeta statsMeta = (SkullMeta) stats.getItemMeta();
 					statsMeta.setOwner(entry.getKey().getName());
 					stats.setItemMeta(statsMeta);
-
+					
 					String rank = main.getRankManager().getRank(entry.getKey()).getTagWithSpace();
-
-					if (matchMvp() == entry.getValue()) {
+					
+					if (matchMvp() != null && matchMvp() == entry.getValue()) {
 						contents.set(y, x,
 								ClickableItem.of(
 										ItemHelper.setDetails(stats, main.color("&e&lMATCH MVP"), "",
@@ -67,8 +72,7 @@ public class GameStatsGUI implements InventoryProvider {
 														+ i.allClasses.get(entry.getKey()).getType().getTag()),
 												main.color("&rKills: &e" + i.allClasses.get(entry.getKey()).totalKills),
 												main.color(
-														"&rDeaths: &e" + i.allClasses.get(entry.getKey()).totalDeaths),
-												main.color("&rFirst Blood: &e" + isFirstBlood(entry.getKey(), i))),
+														"&rDeaths: &e" + i.allClasses.get(entry.getKey()).totalDeaths)),
 										e -> {
 										}));
 					} else {
@@ -80,15 +84,23 @@ public class GameStatsGUI implements InventoryProvider {
 														+ i.allClasses.get(entry.getKey()).getType().getTag()),
 												main.color("&rKills: &e" + i.allClasses.get(entry.getKey()).totalKills),
 												main.color(
-														"&rDeaths: &e" + i.allClasses.get(entry.getKey()).totalDeaths),
-												main.color("&rFirst Blood: &e" + isFirstBlood(entry.getKey(), i))),
+														"&rDeaths: &e" + i.allClasses.get(entry.getKey()).totalDeaths)),
 										e -> {
 										}));
 					}
+					if (isFirstBlood(entry.getKey(), i)) {
+						statsMeta = (SkullMeta) stats.getItemMeta();
+						ItemHelper.setDetails(stats, statsMeta.getDisplayName(), statsMeta.getLore(),
+								main.color("&eFirst Blood"));
+					}
+					
+					contents.set(y, x,
+							ClickableItem.of(stats, e -> {
+							}));
 				}
-
+				
 				x++;
-
+				
 				if (x > 8) {
 					y++;
 					x = 0;

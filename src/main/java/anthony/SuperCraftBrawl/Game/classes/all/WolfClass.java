@@ -1,10 +1,12 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -26,18 +28,13 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
-
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
 import xyz.xenondevs.particle.ParticleEffect;
 import xyz.xenondevs.particle.data.texture.BlockTexture;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class WolfClass extends BaseClass {
 
@@ -114,7 +111,7 @@ public class WolfClass extends BaseClass {
 
 	@Override
 	public void TakeDamage(EntityDamageEvent event) {
-		if (instance.getManager().spawnProt.containsKey(player)) {
+		if (instance.getGameManager().spawnProt.containsKey(player)) {
 			event.setCancelled(true);
 			return;
 		}
@@ -123,11 +120,11 @@ public class WolfClass extends BaseClass {
 			EntityDamageByEntityEvent e = (EntityDamageByEntityEvent) event;
 			if (e.getDamager() instanceof Player) {
 				Player k = (Player) e.getDamager();
-				if (instance.getManager().spawnProt.containsKey(k)) {
+				if (instance.getGameManager().spawnProt.containsKey(k)) {
 					event.setCancelled(true);
 					return;
 				}
-				if (instance.getManager().spawnProt.containsKey(player)) {
+				if (instance.getGameManager().spawnProt.containsKey(player)) {
 					event.setCancelled(true);
 					return;
 				}

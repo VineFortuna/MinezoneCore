@@ -1,5 +1,10 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -8,7 +13,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.ThrownPotion;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -19,12 +23,6 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
 
 public class CreeperClass extends BaseClass {
 
@@ -69,7 +67,7 @@ public class CreeperClass extends BaseClass {
 		if (bc != null && bc.getLives() <= 0)
 			return;
 		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				instance.getManager().getMain().color("&c&lCreeper Potion"));
+				instance.getGameManager().getMain().color("&c&lCreeper Potion"));
 		Potion pot3 = new Potion(1);
 		pot3.setType(PotionType.INSTANT_DAMAGE);
 		pot3.setSplash(true);
@@ -116,7 +114,7 @@ public class CreeperClass extends BaseClass {
 						"" + ChatColor.YELLOW + ChatColor.BOLD + "Creeper Essence"), Enchantment.DAMAGE_ALL, 3),
 				Enchantment.KNOCKBACK, 1));
 		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				instance.getManager().getMain().color("&c&lCreeper Potion"));
+				instance.getGameManager().getMain().color("&c&lCreeper Potion"));
 		Potion pot3 = new Potion(1);
 		pot3.setType(PotionType.INSTANT_DAMAGE);
 		pot3.setSplash(true);
@@ -159,7 +157,7 @@ public class CreeperClass extends BaseClass {
 				}
 			} else if (item.getType() == Material.STONE_BUTTON
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-				if (!(instance.getManager().spawnProt.containsKey(player))) {
+				if (!(instance.getGameManager().spawnProt.containsKey(player))) {
 					if (player.getGameMode() != GameMode.SPECTATOR) {
 						TNTPrimed tnt = player.getWorld().spawn(player.getLocation().add(0, 1, 0), TNTPrimed.class);
 						tnt.setFuseTicks(0);

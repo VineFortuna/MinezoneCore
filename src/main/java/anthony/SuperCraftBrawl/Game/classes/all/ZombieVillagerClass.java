@@ -1,12 +1,12 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.Color;
-import org.bukkit.Effect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
+import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.ItemHelper;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -18,13 +18,6 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
-import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 
 public class ZombieVillagerClass extends BaseClass {
 
@@ -82,8 +75,8 @@ public class ZombieVillagerClass extends BaseClass {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.POISONOUS_POTATO, 7), "", "",
-						instance.getManager().getMain().color("&7Throw at players to infect with:"),
-						instance.getManager().getMain().color("   &r4 sec Poison III")));
+						instance.getGameManager().getMain().color("&7Throw at players to infect with:"),
+						instance.getGameManager().getMain().color("   &r4 sec Poison III")));
 	}
 
 	@Override
@@ -113,7 +106,7 @@ public class ZombieVillagerClass extends BaseClass {
 									if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
 										gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 80, 2));
 									}
-								} else {
+								} else if (gamePlayer != player) {
 									gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 80, 2));
 								}
 							}
@@ -127,7 +120,7 @@ public class ZombieVillagerClass extends BaseClass {
 					}
 
 				}, new ItemStack(Material.POISONOUS_POTATO));
-				instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+				instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 						player.getLocation().getDirection().multiply(2.0D));
 			}
 		}

@@ -1,9 +1,11 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.lang.reflect.Field;
-import java.util.Random;
-import java.util.UUID;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -21,13 +23,9 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import java.lang.reflect.Field;
+import java.util.Random;
+import java.util.UUID;
 
 public class RabbitClass extends BaseClass {
 
@@ -120,13 +118,13 @@ public class RabbitClass extends BaseClass {
 					Vector dir = player.getLocation().getDirection();
 					dir.setY(1.0);
 					p.setVelocity(dir);
-					player.sendMessage(instance.getManager().getMain().color("&2&l(!) &rWeapon upgraded!"));
+					player.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rWeapon upgraded!"));
 					player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 3));
 				}
 			} else {
 				player.getInventory().remove(Material.RABBIT_FOOT);
 				player.getInventory().addItem(this.getAttackWeapon());
-				player.sendMessage(instance.getManager().getMain().color("&2&l(!) &rWeapon downgraded :("));
+				player.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rWeapon downgraded :("));
 				player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 2));
 			}
 		}
@@ -134,7 +132,7 @@ public class RabbitClass extends BaseClass {
 
 	private void abilityMsg() {
 		player.sendMessage("");
-		player.sendMessage(instance.getManager().getMain().color(
+		player.sendMessage(instance.getGameManager().getMain().color(
 				"&e&lCLASS TIP> &rRandom chance when hitting other players to shoot them up & back, and have Knockback III applied on your weapon for 1 hit"));
 		player.sendMessage("");
 	}
@@ -169,7 +167,7 @@ public class RabbitClass extends BaseClass {
 						ItemHelper
 								.addEnchant(
 										ItemHelper.setDetails(new ItemStack(Material.RABBIT_FOOT),
-												instance.getManager().getMain()
+												instance.getGameManager().getMain()
 														.color("&rRabbit's Foot &7(Right Click)")),
 										Enchantment.DAMAGE_ALL, 3),
 						Enchantment.KNOCKBACK, 1);

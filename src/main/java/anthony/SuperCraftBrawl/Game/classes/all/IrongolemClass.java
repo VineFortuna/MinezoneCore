@@ -1,11 +1,15 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.Color;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
+import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -19,19 +23,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
-import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 
 public class IrongolemClass extends BaseClass {
 
@@ -73,7 +65,7 @@ public class IrongolemClass extends BaseClass {
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.RED_ROSE, 1),
 						"" + ChatColor.RESET + ChatColor.RED + ChatColor.BOLD + "Rose of Elevation", "",
-						instance.getManager().getMain().color("&7Throw at enemies to levitate & do damage!")));
+						instance.getGameManager().getMain().color("&7Throw at enemies to levitate & do damage!")));
 	}
 
 	@Override
@@ -83,14 +75,14 @@ public class IrongolemClass extends BaseClass {
 			this.cooldownSec = (5000 - golem.getTime()) / 1000 + 1;
 
 			if (golem.getTime() < 5000) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&c&lRose of Elevation &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &c&lRose of Elevation");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &c&lRose of Elevation");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -125,7 +117,7 @@ public class IrongolemClass extends BaseClass {
 							if (hit != null) {
 								@SuppressWarnings("deprecation")
 								EntityDamageEvent damageEvent = new EntityDamageEvent(hit, DamageCause.VOID, 5.5);
-								instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+								instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 								hit.damage(5.5, player);
 								Location loc = hit.getLocation();
 								Vector v = direction;
@@ -138,7 +130,7 @@ public class IrongolemClass extends BaseClass {
 					}
 
 				}, new ItemStack(Material.RED_ROSE));
-				instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+				instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 						player.getLocation().getDirection().multiply(2.5D));
 			}
 		}

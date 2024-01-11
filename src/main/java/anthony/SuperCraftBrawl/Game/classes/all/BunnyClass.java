@@ -1,8 +1,12 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.lang.reflect.Field;
-import java.util.UUID;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -18,14 +22,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
+import java.lang.reflect.Field;
+import java.util.UUID;
 
 public class BunnyClass extends BaseClass {
 
@@ -76,9 +74,9 @@ public class BunnyClass extends BaseClass {
 						Enchantment.KNOCKBACK, 1));
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.GOLDEN_CARROT), "", "",
-						instance.getManager().getMain().color("&7Right click to gain:"),
-						instance.getManager().getMain().color("   &r5 sec Regeneration II"),
-						instance.getManager().getMain().color("   &r5 sec Speed V")));
+						instance.getGameManager().getMain().color("&7Right click to gain:"),
+						instance.getGameManager().getMain().color("   &r5 sec Regeneration II"),
+						instance.getGameManager().getMain().color("   &r5 sec Speed V")));
 		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2));
 		player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 2));
 	}
@@ -111,7 +109,7 @@ public class BunnyClass extends BaseClass {
 				ticks--;
 			}
 		};
-		runTimer.runTaskTimer(instance.getManager().getMain(), 0, 20);
+		runTimer.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
 	}
 
 	@Override
@@ -142,7 +140,6 @@ public class BunnyClass extends BaseClass {
 	@Override
 	public void SetNameTag() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override

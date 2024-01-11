@@ -57,14 +57,14 @@ public class SkeletonClass extends BaseClass {
 			this.cooldownSec = (5000 - skeleAttack.getTime()) / 1000 + 1;
 
 			if (skeleAttack.getTime() < 5000) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&7Attack Arrow &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &7Attack Arrow");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &7Attack Arrow");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -75,13 +75,13 @@ public class SkeletonClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-//		skeleAttack.startTime = 5000; //Reset cooldown
+		skeleAttack.startTime = System.currentTimeMillis() - 100000;
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv
 				.setItem(1,
 						ItemHelper.addEnchant(ItemHelper.addEnchant(
 								ItemHelper.setDetails(new ItemStack(Material.BONE), "", "",
-										instance.getManager().getMain()
+										instance.getGameManager().getMain()
 												.color("&7Right click to shoot an Attack Arrow!")),
 								Enchantment.DAMAGE_ALL, 2), Enchantment.KNOCKBACK, 1));
 		playerInv.setItem(2, new ItemStack(Material.ARROW));

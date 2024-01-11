@@ -100,14 +100,14 @@ public class SnowGolemClass extends BaseClass {
 			this.cooldownSec = (20000 - snowGolem.getTime()) / 1000 + 1;
 
 			if (snowGolem.getTime() < 20000) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&bSnow Platform &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &bSnow Platform");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &bSnow Platform");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -128,7 +128,7 @@ public class SnowGolemClass extends BaseClass {
 					if (snowGolem.getTime() < 20000) {
 						int seconds = (20000 - snowGolem.getTime()) / 1000 + 1;
 						event.setCancelled(true);
-						player.sendMessage(instance.getManager().getMain().color(
+						player.sendMessage(instance.getGameManager().getMain().color(
 								"&c&l(!) &rYour &bSnow Platform &ris still regenerating for &e" + seconds + "s"));
 					} else {
 						snowGolem.restart();
@@ -169,7 +169,7 @@ public class SnowGolemClass extends BaseClass {
 											if (platformBlock.getType() == Material.AIR) {
 												platformBlock.setType(Material.SNOW_BLOCK);
 												platformBlock.setMetadata("SnowPlatform",
-														new FixedMetadataValue(instance.getManager().getMain(), true));
+														new FixedMetadataValue(instance.getGameManager().getMain(), true));
 											}
 										}
 									}
@@ -179,7 +179,7 @@ public class SnowGolemClass extends BaseClass {
 										gamePlayer.playSound(playerLocation, Sound.STEP_SNOW, 4, 2);
 
 									// REMOVING PLATFORM
-									Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
+									Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
 										for (int x = -platformLength / 2; x <= platformLength / 2; x++) {
 											for (int z = -platformWidth / 2; z <= platformWidth / 2; z++) {
 												Location platformLocation = playerLocation.clone().add(x, -1, z);
@@ -189,7 +189,7 @@ public class SnowGolemClass extends BaseClass {
 													platformBlock.setType(Material.AIR);
 
 													platformBlock.removeMetadata("SnowPlatform",
-															instance.getManager().getMain());
+															instance.getGameManager().getMain());
 												}
 											}
 										}
@@ -204,7 +204,7 @@ public class SnowGolemClass extends BaseClass {
 							}
 
 						};
-						runnable.runTaskTimer(instance.getManager().getMain(), 0, 2);
+						runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 2);
 					}
 				}
 			}
@@ -252,7 +252,7 @@ public class SnowGolemClass extends BaseClass {
 										ticks--;
 									}
 								};
-								runTimer.runTaskTimer(instance.getManager().getMain(), 0, 20); //20 ticks = 1 second
+								runTimer.runTaskTimer(instance.getGameManager().getMain(), 0, 20); //20 ticks = 1 second
 							}
 						}
 					}
