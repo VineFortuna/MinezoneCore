@@ -52,9 +52,9 @@ public class SquidClass extends BaseClass {
 		playerEquip.setChestplate(makePurple(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 		playerEquip.setLeggings(makePurple(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makePurple(
-				ItemHelper.addEnchant(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS),
-						Enchantment.PROTECTION_ENVIRONMENTAL, 4), Enchantment.DEPTH_STRIDER, 3)));
+		playerEquip.setBoots(makePurple(ItemHelper.addEnchant(
+				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4),
+				Enchantment.DEPTH_STRIDER, 3)));
 	}
 
 	@Override
@@ -147,10 +147,9 @@ public class SquidClass extends BaseClass {
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.INK_SACK),
-						instance.getGameManager().getMain().color("&rInk Sack &7(Right Click)")),
-				Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 2);
+		ItemStack item = ItemHelper.addEnchant(
+				ItemHelper.addEnchant(new ItemStack(Material.INK_SACK), Enchantment.DAMAGE_ALL, 3),
+				Enchantment.KNOCKBACK, 2);
 		return item;
 	}
 }
