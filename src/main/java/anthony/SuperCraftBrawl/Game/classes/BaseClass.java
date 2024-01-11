@@ -1,20 +1,31 @@
 package anthony.SuperCraftBrawl.Game.classes;
 
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameType;
-import anthony.SuperCraftBrawl.Game.map.Maps;
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Timer;
-import anthony.SuperCraftBrawl.playerdata.ClassDetails;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import org.bukkit.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Random;
+
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.entity.*;
-import org.bukkit.event.entity.*;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.EnderCrystal;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Zombie;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -27,10 +38,17 @@ import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Score;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Random;
+import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.Timer;
+import anthony.SuperCraftBrawl.Game.ActionBarManager;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameType;
+import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 
 public abstract class BaseClass {
 
@@ -90,6 +108,10 @@ public abstract class BaseClass {
 	public BaseClass(GameInstance instance, Player player) {
 		this.instance = instance;
 		this.player = player;
+	}
+	
+	public ActionBarManager getActionBarManager() {
+		return instance.getGameManager().getMain().getActionBarManager();
 	}
 
 	public int getLives() {
