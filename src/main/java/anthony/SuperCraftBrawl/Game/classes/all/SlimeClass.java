@@ -90,16 +90,11 @@ public class SlimeClass extends BaseClass {
 			if (slimeBall.getTime() < 5000) {
 				String msg = "" + ChatColor.RESET + ChatColor.GREEN + ChatColor.BOLD + "Gooey Grenade "
 						+ ChatColor.RESET + " regenerates in: " + ChatColor.YELLOW + cooldownSec + "s";
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "slimeball.cooldown", msg, 2);
+				getActionBarManager().setActionBar(player, "slimeball.test", "Test!!!", 20);
 			} else {
 				String msg = "" + ChatColor.RESET + "You can use " + ChatColor.GREEN + ChatColor.BOLD + "Gooey Grenade";
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "slimeball.cooldown", msg, 2);
 			}
 		}
 	}
