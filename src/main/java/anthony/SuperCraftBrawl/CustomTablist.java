@@ -1,25 +1,6 @@
 package anthony.SuperCraftBrawl;
 
-import java.net.http.WebSocket.Listener;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
-
-import com.avaje.ebeaninternal.server.cluster.Packet;
-
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerInfo;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerListHeaderFooter;
-import net.minecraft.server.v1_8_R3.PacketPlayOutScoreboardDisplayObjective;
-import net.minecraft.server.v1_8_R3.PacketPlayOutScoreboardObjective;
+import org.bukkit.event.Listener;
 
 public class CustomTablist implements Listener {
 

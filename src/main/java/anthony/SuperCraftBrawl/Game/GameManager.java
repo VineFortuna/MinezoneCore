@@ -667,7 +667,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	@EventHandler
-	public void EntityDeathEvent​(EntityDeathEvent entity) {
+	public void EntityDeathEvent(EntityDeathEvent entity) {
 		List<EntityType> entities = new ArrayList<>(Arrays.asList(EntityType.ZOMBIE, EntityType.SKELETON,
 				EntityType.CREEPER, EntityType.PIG_ZOMBIE, EntityType.MAGMA_CUBE, EntityType.SILVERFISH));
 		if (entities.contains(entity.getEntityType())) {
