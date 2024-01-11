@@ -87,14 +87,14 @@ public class NotchClass extends BaseClass {
 			this.cooldownSec = (10000 - notch.getTime()) / 1000 + 1;
 
 			if (notch.getTime() < 10000) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&0Collape X-Axis &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &0Collape X-Axis");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &0Collape X-Axis");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -116,16 +116,16 @@ public class NotchClass extends BaseClass {
 				player.getInventory()
 						.addItem(ItemHelper.setDetails(new ItemStack(Material.GRASS),
 								"" + ChatColor.BLACK + "Collapse X-Axis", "",
-								instance.getManager().getMain().color("&7Pull enemies when aiming at them!"),
-								instance.getManager().getMain().color("   &rRange: &e20 blocks")));
-				player.sendMessage(instance.getManager().getMain().color("&2&l(!) &rYou were given &0Collapse X-Axis"));
+								instance.getGameManager().getMain().color("&7Pull enemies when aiming at them!"),
+								instance.getGameManager().getMain().color("   &rRange: &e20 blocks")));
+				player.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rYou were given &0Collapse X-Axis"));
 			} else {
 				player.getInventory()
 						.addItem(ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR),
 								"" + ChatColor.YELLOW + "Teleport a Player", "",
-								instance.getManager().getMain().color("&7Teleport a random player to you!")));
+								instance.getGameManager().getMain().color("&7Teleport a random player to you!")));
 				player.sendMessage(
-						instance.getManager().getMain().color("&2&l(!) &rYou were given &eTeleport a Player"));
+						instance.getGameManager().getMain().color("&2&l(!) &rYou were given &eTeleport a Player"));
 			}
 		} else if (item.getType() == Material.GRASS
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
@@ -181,7 +181,7 @@ public class NotchClass extends BaseClass {
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 			if (!(player.isOnGround())) {
 				player.sendMessage(
-						instance.getManager().getMain().color("&c&l(!) &rYou need to be on the ground to use this!"));
+						instance.getGameManager().getMain().color("&c&l(!) &rYou need to be on the ground to use this!"));
 				return;
 			}
 			Random random = new Random();
@@ -198,8 +198,8 @@ public class NotchClass extends BaseClass {
 
 			gamePlayer.teleport(player);
 			gamePlayer.sendMessage(
-					instance.getManager().getMain().color("&2&l(!) &rYou got teleported to &e" + player.getName()));
-			player.sendMessage(instance.getManager().getMain()
+					instance.getGameManager().getMain().color("&2&l(!) &rYou got teleported to &e" + player.getName()));
+			player.sendMessage(instance.getGameManager().getMain()
 					.color("&2&l(!) &rYou teleported &e" + gamePlayer.getName() + "&r to you!"));
 			player.getInventory().clear(player.getInventory().getHeldItemSlot());
 		}

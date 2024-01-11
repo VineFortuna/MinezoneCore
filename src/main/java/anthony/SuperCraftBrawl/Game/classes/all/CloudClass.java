@@ -1,20 +1,17 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.Map.Entry;
-
-import org.bukkit.Color;
-import org.bukkit.DyeColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
@@ -34,16 +31,11 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 public class CloudClass extends BaseClass {
 
@@ -53,18 +45,18 @@ public class CloudClass extends BaseClass {
 	// Checking if sword was used or not
 	private boolean used = false;
 	private ItemStack wool = ItemHelper.setDetails(new ItemStack(Material.WOOL),
-			instance.getManager().getMain().color("&b&lStorm Cloud"));
+			instance.getGameManager().getMain().color("&b&lStorm Cloud"));
 	private List<ItemStack> list = new ArrayList<>(Arrays.asList(
 			ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, DyeColor.BLACK.getData()),
-					instance.getManager().getMain().color("&b&lStorm Cloud")),
+					instance.getGameManager().getMain().color("&b&lStorm Cloud")),
 			ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, DyeColor.CYAN.getData()),
-					instance.getManager().getMain().color("&b&lStorm Cloud")),
+					instance.getGameManager().getMain().color("&b&lStorm Cloud")),
 			ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, DyeColor.GRAY.getData()),
-					instance.getManager().getMain().color("&b&lStorm Cloud")),
+					instance.getGameManager().getMain().color("&b&lStorm Cloud")),
 			ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, DyeColor.RED.getData()),
-					instance.getManager().getMain().color("&b&lStorm Cloud")),
+					instance.getGameManager().getMain().color("&b&lStorm Cloud")),
 			ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, DyeColor.BROWN.getData()),
-					instance.getManager().getMain().color("&b&lStorm Cloud"))));
+					instance.getGameManager().getMain().color("&b&lStorm Cloud"))));
 
 	public CloudClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -114,7 +106,7 @@ public class CloudClass extends BaseClass {
 	@Override
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.WOOD_SWORD),
-				instance.getManager().getMain().color("&b&lCloud Sword"));
+				instance.getGameManager().getMain().color("&b&lCloud Sword"));
 		ItemMeta meta = item.getItemMeta();
 		meta.spigot().setUnbreakable(true);
 		item.setItemMeta(meta);
@@ -186,7 +178,7 @@ public class CloudClass extends BaseClass {
 			}
 
 		};
-		runnable.runTaskTimer(instance.getManager().getMain(), 0, 20);
+		runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
 	}
 
 	private void resetAllWools() {
@@ -249,7 +241,7 @@ public class CloudClass extends BaseClass {
 				shootSnowballs(player);
 				this.blackWool = false;
 				player.getInventory().setItem(1, this.list.get(3));
-				instance.TellAll(instance.getManager().getMain().color("&b&lStorm Cloud: &rGET OUTTA MY WAY!"));
+				instance.TellAll(instance.getGameManager().getMain().color("&b&lStorm Cloud: &rGET OUTTA MY WAY!"));
 			}
 			if (lightGrayWool) {
 				if (getNearestPlayer()) {
@@ -261,13 +253,13 @@ public class CloudClass extends BaseClass {
 				strikeNearbyPlayers(player);
 				this.cyanWool = false;
 				player.getInventory().setItem(1, this.list.get(3));
-				instance.TellAll(instance.getManager().getMain().color("&b&lStorm Cloud: &rLightning blast away!"));
+				instance.TellAll(instance.getGameManager().getMain().color("&b&lStorm Cloud: &rLightning blast away!"));
 			}
 			if (brownWool) {
 				tntRain(player);
 				brownWool = false;
 				player.getInventory().setItem(1, this.list.get(3));
-				instance.TellAll(instance.getManager().getMain().color("&b&lStorm Cloud: &rIncoming rain!"));
+				instance.TellAll(instance.getGameManager().getMain().color("&b&lStorm Cloud: &rIncoming rain!"));
 			}
 			this.used = false;
 		}
@@ -282,7 +274,7 @@ public class CloudClass extends BaseClass {
 			this.cooldownSec = (20000 - cloud.getTime()) / 1000 + 1;
 
 			if (cloud.getTime() < 20000) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&b&lStorm Cloud &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
@@ -290,7 +282,7 @@ public class CloudClass extends BaseClass {
 				craft.getHandle().playerConnection.sendPacket(packet);
 
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &b&lStorm Cloud");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &b&lStorm Cloud");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -301,14 +293,14 @@ public class CloudClass extends BaseClass {
 
 	// Send messages to player each life about abilities
 	private void forcesOfNature() {
-		player.sendMessage(instance.getManager().getMain().color("&9&lForces Of Nature"));
-		player.sendMessage(instance.getManager().getMain().color("&r&lStorm Wind: &rBlow away nearby enemies"));
+		player.sendMessage(instance.getGameManager().getMain().color("&9&lForces Of Nature"));
+		player.sendMessage(instance.getGameManager().getMain().color("&r&lStorm Wind: &rBlow away nearby enemies"));
 		player.sendMessage("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Lightning Strike: " + ChatColor.RESET
 				+ "Channel lightning to nearest player");
-		player.sendMessage(instance.getManager().getMain()
+		player.sendMessage(instance.getGameManager().getMain()
 				.color("&7&lLightning Blast: &rChannel lightning to all near players & do effects"));
-		player.sendMessage(instance.getManager().getMain().color("&0&lSnow Blast: &rPelt enemies with snow"));
-		player.sendMessage(instance.getManager().getMain().color("&c&lTNT Rain: &rSend TNT rain on all enemies"));
+		player.sendMessage(instance.getGameManager().getMain().color("&0&lSnow Blast: &rPelt enemies with snow"));
+		player.sendMessage(instance.getGameManager().getMain().color("&c&lTNT Rain: &rSend TNT rain on all enemies"));
 	}
 
 	@Override
@@ -337,7 +329,7 @@ public class CloudClass extends BaseClass {
 				if (cloud.getTime() < 20000) {
 					int seconds = (20000 - cloud.getTime()) / 1000 + 1;
 					event.setCancelled(true);
-					player.sendMessage(instance.getManager().getMain()
+					player.sendMessage(instance.getGameManager().getMain()
 							.color("&c&l(!) &rYour &b&lStorm Cloud &ris still regenerating for &e" + seconds + "s"));
 				} else {
 					cloud.restart();
@@ -372,14 +364,14 @@ public class CloudClass extends BaseClass {
 		}
 
 		player.sendMessage(
-				instance.getManager().getMain().color("&2&l(!) &rNo nearby players found. Please try again."));
+				instance.getGameManager().getMain().color("&2&l(!) &rNo nearby players found. Please try again."));
 		return false; // Didn't find cuz get good kid
 	}
 
 	private void damageTarget(Player target, double value) { // Damage a specific player
 		@SuppressWarnings("deprecation")
 		EntityDamageEvent damageEvent = new EntityDamageEvent(target, DamageCause.PROJECTILE, value);
-		instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+		instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 		target.damage(value, player);
 	}
 
@@ -443,6 +435,6 @@ public class CloudClass extends BaseClass {
 				ticks += 5;
 			}
 		};
-		runnable.runTaskTimer(instance.getManager().getMain(), 0, 5);
+		runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 5);
 	}
 }

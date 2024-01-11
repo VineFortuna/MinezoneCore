@@ -1,11 +1,10 @@
 package anthony.SuperCraftBrawl.Game.map;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import anthony.SuperCraftBrawl.Game.GameType;
 import org.bukkit.util.Vector;
 
-import anthony.SuperCraftBrawl.Game.GameType;
+import java.util.ArrayList;
+import java.util.List;
 
 public enum Maps {
 
@@ -23,8 +22,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(211.499, 152.19487, 389.566))
 					.setBounds(new Vector(216.500, 160, 382.500), 35, 45)
 					.setSignLoc(new Vector(203.500, 107, 673.700))
-					.setMapType(MapType.SCB)
-	),
+					.setMapType(MapType.SCB)),
 
 	Village("Village",
 			new MapInstance("village")
@@ -39,8 +37,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(-1182.500, 147, 1016.500))
 					.setBounds(new Vector(-1182.500, 147, 1016.500), 42, 70)
 					.setSignLoc(new Vector(195.544, 106, 673.700))
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	FloorIsLava("FloorIsLava",
 			new MapInstance("floorislava")
@@ -55,8 +52,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(-1218.500, 141, 1007.500))
 					.setSignLoc(new Vector(176.481, 107, 673.700))
 					.setBounds(new Vector(-1218.500, 141, 1007.500), 40, 80)
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	Burrows("Burrows",
 			new MapInstance("burrows")
@@ -71,8 +67,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(-1270.500, 143, 1036.500))
 					.setSignLoc(new Vector(176.481, 108, 673.700))
 					.setBounds(new Vector(-1270.500, 143, 1036.500), 35, 32)
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	CandyOverdose("CandyOverdose",
 			new MapInstance("candyoverdose")
@@ -88,8 +83,7 @@ public enum Maps {
 					.setSignLoc(new Vector(182.555, 108, 673.700))
 					.setBounds(new Vector(-1296.500, 149, 1081.500), 42, 40)
 					.setMapType(MapType.FRENZY)
-					.setGameType(GameType.FRENZY)
-	),
+					.setGameType(GameType.FRENZY)),
 
 	NorthernSeas("NorthernSeas", new MapInstance("northernseas")
 			.setSpawnPos(
@@ -102,8 +96,7 @@ public enum Maps {
 			.setLobbyLoc(new Vector(-1239.519, 125, 890.484))
 			.setSpecLoc(new Vector(-1241.538, 162, 969.491))
 			.setBounds(new Vector(-1241.500, 165, 979.500), 60, 60)
-			.setSignLoc(new Vector(203.500, 108, 673.700))
-	),
+			.setSignLoc(new Vector(203.500, 108, 673.700))),
 
 	CandyLand("CandyLand",
 			new MapInstance("candylandclassic")
@@ -118,8 +111,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(-1264.500, 157, 1011.500))
 					.setBounds(new Vector(-1265.532, 160, 1010.443), 50, 33)
 					.setSignLoc(new Vector(205.536, 107, 673.700))
-					.setMapType(MapType.SCB)
-	),
+					.setMapType(MapType.SCB)),
 
 	HauntedMansion("HauntedMansion",
 			new MapInstance("hauntedmansion")
@@ -134,8 +126,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(-1207.500, 138, 959.500))
 					.setBounds(new Vector(-1207.500, 138, 959.500), 100, 100)
 					.setSignLoc(new Vector(175.503, 108, 673.700))
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	CliffSide("CliffSide",
 			new MapInstance("cliffside")
@@ -150,8 +141,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(-1137.465, 153, 976.451))
 					.setBounds(new Vector(-1137.465, 153, 976.451), 200, 200)
 					.setSignLoc(new Vector(177.495, 106, 673.700))
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	JungleRiver("JungleRiver",
 			new MapInstance("jungleriver")
@@ -167,8 +157,7 @@ public enum Maps {
 					.setBounds(new Vector(-1249, 142, 976.499), 60, 65)
 					.setSignLoc(new Vector(173.550, 107, 673.700))
 					.setMapType(MapType.BODIL40)
-					.setGameType(GameType.FRENZY)
-	),
+					.setGameType(GameType.FRENZY)),
 
 	Stronghold("Stronghold",
 			new MapInstance("stronghold")
@@ -183,8 +172,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(98.559, 155.27324, -561.960))
 					.setBounds(new Vector(99.500, 163, -553.500), 35, 50)
 					.setSignLoc(new Vector(209.700, 107, 667.472))
-					.setMapType(MapType.SETHBLING)
-	),
+					.setMapType(MapType.SETHBLING)),
 
 	Icefall("Icefall",
 			new MapInstance("iceland")
@@ -199,8 +187,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(-572.825, 127.77250, -10.992))
 					.setBounds(new Vector(-585.519, 129, -10.543), 60, 55)
 					.setSignLoc(new Vector(41.554, 117, 3.700))
-					.setMapType(MapType.SCB)
-	),
+					.setMapType(MapType.SCB)),
 
 	Marooned("Marooned",
 			new MapInstance("marooned")
@@ -215,8 +202,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(61.508, 115, -77.462))
 					.setBounds(new Vector(70.500, 116, 7.500), 60, 60)
 					.setSignLoc(new Vector(175.503, 106, 673.700))
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	Orbital("Orbital", new MapInstance("orbital")
 			.setSpawnPos(
@@ -231,8 +217,7 @@ public enum Maps {
 			.setBounds(new Vector(55.484, 113, 6.503), 35, 50)
 			.setSignLoc(new Vector(168.300, 106, 669.523))
 			.setMapType(MapType.DUEL)
-			.setGameType(GameType.DUEL)
-	),
+			.setGameType(GameType.DUEL)),
 
 	SandTemple("SandTemple",
 			new MapInstance("sandtemple")
@@ -246,8 +231,7 @@ public enum Maps {
 					.setBounds(new Vector(-5.480, 123, 8.448), 40, 30)
 					.setSignLoc(new Vector(168.300, 106, 667.580))
 					.setMapType(MapType.DUEL)
-					.setGameType(GameType.DUEL)
-	),
+					.setGameType(GameType.DUEL)),
 
 	TheEnd("TheEnd",
 			new MapInstance("theend")
@@ -262,8 +246,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(364.373, 161.05132, 215.139))
 					.setBounds(new Vector(373.442, 159, 218.488), 50, 40)
 					.setSignLoc(new Vector(209.700, 107, 668.489))
-					.setMapType(MapType.SETHBLING)
-	),
+					.setMapType(MapType.SETHBLING)),
 
 	BlossomHill("BlossomHill",
 			new MapInstance("blossomhill")
@@ -278,8 +261,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(344.500, 163, 160.500))
 					.setBounds(new Vector(344.500, 163, 160.500), 40, 60)
 					.setSignLoc(new Vector(176.481, 106, 673.700))
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	BlossomHillF("BlossomHill",
 			new MapInstance("blossomhill")
@@ -295,8 +277,7 @@ public enum Maps {
 					.setBounds(new Vector(344.500, 163, 160.500), 40, 60)
 					.setSignLoc(new Vector(196.474, 106, 673.700))
 					.setMapType(MapType.FRENZY)
-					.setGameType(GameType.FRENZY)
-	),
+					.setGameType(GameType.FRENZY)),
 
 	Tropical("Tropical",
 			new MapInstance("tropical")
@@ -311,8 +292,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(403.845, 124.41554, 157.094))
 					.setBounds(new Vector(404.461, 123, 152.472), 50, 50)
 					.setSignLoc(new Vector(200.504, 106, 673.700))
-					.setMapType(MapType.BODIL40)
-	),
+					.setMapType(MapType.BODIL40)),
 
 	Waterfall("Waterfall",
 			new MapInstance("waterfall")
@@ -327,8 +307,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(317.500, 141, 175.500))
 					.setBounds(new Vector(317.500, 141, 175.500), 47, 40)
 					.setSignLoc(new Vector(177.495, 107, 673.700))
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	Canyon("Canyon",
 			new MapInstance("canyon")
@@ -343,8 +322,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(248.500, 155, 165.500))
 					.setBounds(new Vector(248.500, 155, 165.500), 100, 100)
 					.setSignLoc(new Vector(178.466, 106, 673.700))
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	TheCraftOf87("TheCraftOf87",
 			new MapInstance("thecraftof87")
@@ -359,8 +337,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(251.994, 145, 119.004))
 					.setBounds(new Vector(251.994, 145, 119.004), 200, 200)
 					.setSignLoc(new Vector(178.466, 107, 673.700))
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	Citadel("Citadel", new MapInstance("citadel")
 			.setSpawnPos(
@@ -375,8 +352,7 @@ public enum Maps {
 			.setBounds(new Vector(329.500, 121, 162.500), 300, 300)
 			.setSignLoc(new Vector(178.466, 106, 673.700))
 			.setMapType(MapType.FRENZY)
-			.setGameType(GameType.FRENZY)
-	),
+			.setGameType(GameType.FRENZY)),
 
 	HighIslands("HighIslands",
 			new MapInstance("highislands")
@@ -391,8 +367,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(245.500, 185, 137.500))
 					.setBounds(new Vector(245.500, 185, 137.500), 100, 50)
 					.setSignLoc(new Vector(178.466, 106, 673.700))
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	Gateway("Gateway",
 			new MapInstance("gateway")
@@ -408,8 +383,7 @@ public enum Maps {
 					.setBounds(new Vector(372.483, 128, 188.497), 50, 50)
 					.setSignLoc(new Vector(168.300, 106, 669.556))
 					.setMapType(MapType.DUEL)
-					.setGameType(GameType.DUEL)
-	),
+					.setGameType(GameType.DUEL)),
 
 	PaintBoardOG("PaintBoardOG",
 			new MapInstance("paintboardog")
@@ -423,23 +397,18 @@ public enum Maps {
 					.setSpecLoc(new Vector(373.500, 158, 240.500))
 					.setBounds(new Vector(373.500, 158, 240.500), 50, 30)
 					.setSignLoc(new Vector(168.300, 106, 669.556))
-					.setGameType(GameType.CLASSIC)
-	),
+					.setGameType(GameType.CLASSIC)),
 
 	SimpleLand("SimpleLand",
 			new MapInstance("simpleland")
 					.setSpawnPos(
 							new Vector(373.450, 138, 249.391),
-							new Vector(415.468, 137, 242.428),
-							new Vector(391.475, 143, 266.477),
-							new Vector(392.487, 147, 238.300),
-							new Vector(372.492, 146, 247.562))
+							new Vector(415.468, 137, 242.428))
 					.setLobbyLoc(new Vector(392.484, 175, 320.476))
 					.setSpecLoc(new Vector(392.500, 150, 260.500))
 					.setBounds(new Vector(392.500, 167, 260.500), 40, 40)
 					.setSignLoc(new Vector(168.300, 107, 667.580))
-					.setGameType(GameType.CLASSIC)
-	),
+					.setGameType(GameType.CLASSIC)),
 
 	Pokemob("Pokemob",
 			new MapInstance("pokemob")
@@ -451,10 +420,10 @@ public enum Maps {
 							new Vector(337.445, 105, 233.402),
 							new Vector(373.408, 108, 275.570))
 					.setLobbyLoc(new Vector(286.560, 113, 254.505))
+					.setSpecLoc(new Vector(362.537, 117, 230.920))
 					.setBounds(new Vector(353.450, 125, 254.414), 50, 50)
 					.setSignLoc(new Vector(192.516, 106, 673.700))
-					.setMapType(MapType.SCB)
-	),
+					.setMapType(MapType.SCB)),
 
 	Revenge("Revenge",
 			new MapInstance("atronach")
@@ -468,8 +437,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(-8.435, 116, -2.488)).setSpecLoc(new Vector(87.665, 146.01941, 6.043))
 					.setBounds(new Vector(83.500, 150, 3.500), 60, 60).setGameType(GameType.FRENZY)
 					.setSignLoc(new Vector(183.513, 106, 673.700))
-					.setMapType(MapType.FRENZY)
-	),
+					.setMapType(MapType.FRENZY)),
 
 	Atronach("Atronach",
 			new MapInstance("atronach2")
@@ -485,8 +453,7 @@ public enum Maps {
 					.setBounds(new Vector(55.500, 174, -57.500), 58, 58)
 					.setSignLoc(new Vector(184.568, 106, 673.700))
 					.setMapType(MapType.FRENZY)
-					.setGameType(GameType.FRENZY)
-	),
+					.setGameType(GameType.FRENZY)),
 
 	SnowGlobe("SnowGlobe",
 			new MapInstance("snowglobe")
@@ -501,8 +468,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(59.525, 157, -64.436))
 					.setBounds(new Vector(55.500, 174, -57.500), 58, 58)
 					.setMapType(MapType.FRENZY)
-					.setGameType(GameType.FRENZY)
-	),
+					.setGameType(GameType.FRENZY)),
 
 	Elven("Elven", new MapInstance("elven")
 			.setSpawnPos(
@@ -527,8 +493,7 @@ public enum Maps {
 			.setBounds(new Vector(-22.500, 254, 1.500), 100, 100)
 			.setSignLoc(new Vector(182.542, 107, 673.700))
 			.setMapType(MapType.FRENZY)
-			.setGameType(GameType.FRENZY)
-	),
+			.setGameType(GameType.FRENZY)),
 
 	Limbo("Limbo",
 			new MapInstance("limbo")
@@ -544,8 +509,7 @@ public enum Maps {
 					.setBounds(new Vector(24.500, 162, -155.500), 60, 60)
 					.setSignLoc(new Vector(183.513, 107, 673.700))
 					.setMapType(MapType.FRENZY)
-					.setGameType(GameType.FRENZY)
-	),
+					.setGameType(GameType.FRENZY)),
 
 	Treehouse("Treehouse",
 			new MapInstance("treehouse")
@@ -561,8 +525,7 @@ public enum Maps {
 					.setBounds(new Vector(-45.518, 173, 162.461), 60, 58)
 					.setSignLoc(new Vector(183.513, 108, 673.700))
 					.setMapType(MapType.FRENZY)
-					.setGameType(GameType.FRENZY)
-	),
+					.setGameType(GameType.FRENZY)),
 
 	Frigid("Frigid",
 			new MapInstance("frigid")
@@ -578,8 +541,7 @@ public enum Maps {
 					.setBounds(new Vector(-43.545, 146, 92.435), 70, 70)
 					.setSignLoc(new Vector(184.568, 107, 673.700))
 					.setMapType(MapType.FRENZY)
-					.setGameType(GameType.FRENZY)
-	),
+					.setGameType(GameType.FRENZY)),
 
 	DragonsDescent("DragonsDescent",
 			new MapInstance("dragonsdescent")
@@ -594,8 +556,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(525.965, 152.19487, -24.033))
 					.setBounds(new Vector(511.485, 154, -17.473), 55, 38)
 					.setSignLoc(new Vector(204.530, 107, 673.700))
-					.setMapType(MapType.SCB)
-	),
+					.setMapType(MapType.SCB)),
 
 	FoundTemple("FoundTemple",
 			new MapInstance("losttemple")
@@ -611,8 +572,7 @@ public enum Maps {
 					.setBounds(new Vector(1015.500, 224, -1044.500), 65, 65)
 					.setSignLoc(new Vector(182.542, 106, 673.700))
 					.setMapType(MapType.FRENZY)
-					.setGameType(GameType.FRENZY)
-	),
+					.setGameType(GameType.FRENZY)),
 
 	Crescent("Crescent",
 			new MapInstance("crescent")
@@ -628,8 +588,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(5050.500, 141, 686.500))
 					.setBounds(new Vector(5050.500, 141, 686.500), 40, 40)
 					.setSignLoc(new Vector(-48.507, 128, -28.700))
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	WaterShrine("WaterShrine",
 			new MapInstance("watershrine")
@@ -643,8 +602,7 @@ public enum Maps {
 					.setBounds(new Vector(5052.006, 150, 594.466), 30, 35)
 					.setSignLoc(new Vector(168.300, 107, 668.496))
 					.setGameType(GameType.DUEL)
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	Monolith("Monolith",
 			new MapInstance("monolith")
@@ -659,8 +617,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(5045.500, 170, 671.500))
 					.setBounds(new Vector(5044.516, 197, 634.462), 40, 40)
 					.setSignLoc(new Vector(193.487, 108, 673.700))
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	JungleBoogie("JungleBoogie",
 			new MapInstance("jungleboogie")
@@ -675,8 +632,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(5038.500, 159, 679.500))
 					.setBounds(new Vector(5038.500, 159, 679.500), 35, 40)
 					.setSignLoc(new Vector(203.500, 106, 673.700))
-					.setMapType(MapType.SCB)
-	),
+					.setMapType(MapType.SCB)),
 
 	TiltedTowers("TiltedTowers",
 			new MapInstance("tilted")
@@ -691,8 +647,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(5120.586, 165, 662.533))
 					.setBounds(new Vector(5120.586, 165, 662.533), 200, 200)
 					.setSignLoc(new Vector(184.568, 108, 673.700))
-					.setGameType(GameType.FRENZY)
-	),
+					.setGameType(GameType.FRENZY)),
 
 	BeachBowl("BeachBowl",
 			new MapInstance("beachbowl")
@@ -707,8 +662,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(5122.500, 156, 687.500))
 					.setBounds(new Vector(5122.500, 156, 687.500), 40, 40)
 					.setSignLoc(new Vector(175.503, 107, 673.700))
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	FungiForest("FungiForest",
 			new MapInstance("fungiforest")
@@ -723,8 +677,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(5057.500, 144, 626.500))
 					.setBounds(new Vector(5057.418, 156, 641.470), 40, 40)
 					.setSignLoc(new Vector(205.536, 106, 673.700))
-					.setMapType(MapType.SCB)
-	),
+					.setMapType(MapType.SCB)),
 
 	PaintBoard("PaintBoard",
 			new MapInstance("paintboard")
@@ -738,8 +691,7 @@ public enum Maps {
 					.setBounds(new Vector(5027.500, 157, 628.500), 30, 50)
 					.setSignLoc(new Vector(168.300, 107, 669.523))
 					.setMapType(MapType.COMMUNITY)
-					.setGameType(GameType.DUEL)
-	),
+					.setGameType(GameType.DUEL)),
 
 	Multiverse("Multiverse",
 			new MapInstance("multiverse")
@@ -754,8 +706,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(5054.805, 187.05035, 716.117))
 					.setBounds(new Vector(5059.500, 201, 732.500), 90, 58)
 					.setSignLoc(new Vector(193.487, 106, 673.700))
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	CommCollab("CommCollab",
 			new MapInstance("communitycollab")
@@ -770,8 +721,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(5042.537, 171, 679.629))
 					.setBounds(new Vector(5042.537, 171, 679.629), 200, 200)
 					.setSignLoc(new Vector(177.495, 108, 673.700))
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	Apex("Apex",
 			new MapInstance("apex")
@@ -786,25 +736,47 @@ public enum Maps {
 					.setSpecLoc(new Vector(5036.585, 140.16749, 668.634))
 					.setBounds(new Vector(5038.500, 143, 676.500), 50, 45)
 					.setSignLoc(new Vector(194.555, 108, 673.700))
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	NetherFortress("NetherFortress",
 			new MapInstance("netherfortress")
 					.setSpawnPos(
-							new Vector(5031.383, 145, 585.477),
-							new Vector(5060.463, 150, 591.422),
-							new Vector(5065.438, 158, 624.535),
-							new Vector(5038.497, 145, 635.504),
-							new Vector(5059.595, 145, 606.429),
-							new Vector(5038.436, 138, 591.371))
-					.setLobbyLoc(new Vector(5000.505, 155, 597.490))
-					.setSpecLoc(new Vector(5050.741, 155.40139, 606.475))
+							new Vector(5031.383, 82, 585.477),
+							new Vector(5060.463, 87, 591.422),
+							new Vector(5065.498, 90, 630.511),
+							new Vector(5038.497, 82, 635.504),
+							new Vector(5059.595, 87, 606.429),
+							new Vector(5038.436, 81, 591.371))
+					.setLobbyLoc(new Vector(5000.521, 92, 597.435))
+					.setSpecLoc(new Vector(5050.741, 110, 606.475))
 					.setBounds(new Vector(5052.502, 160, 610.468), 30, 45)
 					.setSignLoc(new Vector(209.700, 106, 668.489))
-					.setMapType(MapType.SETHBLING)
-	),
+					.setMapType(MapType.SETHBLING)),
+	
+	Plains("Plains",
+			new MapInstance("plains")
+					.setSpawnPos(
+							new Vector(26.542, 167, -84.494),
+							new Vector(-6.535, 167, -84.533))
+					.setLobbyLoc(new Vector(12.536, 186, -150.517))
+					.setSpecLoc(new Vector(10.500, 176, -84.500))
+					.setBounds(new Vector(10.500, 176, -84.500), 50, 35)
+					.setSignLoc(new Vector(209.700, 106, 668.489))
+					.setGameType(GameType.DUEL)
+					.setMapType(MapType.COMMUNITY)),
 
+	SandStorm("SandStorm",
+			new MapInstance("sandstorm")
+					.setSpawnPos(
+							new Vector(-11.576, 176, -80.546),
+							new Vector(30.519, 176, -80.498))
+					.setLobbyLoc(new Vector(12.525, 187, -150.471))
+					.setSpecLoc(new Vector(9.500, 183, -80.500))
+					.setBounds(new Vector(9.500, 183, -80.500), 50, 30)
+					.setSignLoc(new Vector(209.700, 106, 668.489))
+					.setGameType(GameType.DUEL)
+					.setMapType(MapType.COMMUNITY)),
+	
 	Clockwork("Clockwork",
 			new MapInstance("clockwork")
 					.setSpawnPos(
@@ -818,8 +790,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(5001.898, 175.41397, 605.166))
 					.setBounds(new Vector(4999.434, 178, 604.478), 35, 30)
 					.setSignLoc(new Vector(204.530, 108, 673.700))
-					.setMapType(MapType.SCB)
-	),
+					.setMapType(MapType.SCB)),
 
 	PileOfBodies("PileOfBodies",
 			new MapInstance("pileofbodies")
@@ -834,8 +805,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(4946.051, 154.19487, 570.383))
 					.setBounds(new Vector(4947.534, 162, 548.541), 60, 60)
 					.setSignLoc(new Vector(201.537, 107, 673.700))
-					.setMapType(MapType.SETHBLING)
-	),
+					.setMapType(MapType.SETHBLING)),
 
 	Aperature("Aperature",
 			new MapInstance("aperature")
@@ -850,8 +820,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(4947.441, 180.73035, 651.318))
 					.setBounds(new Vector(4947.520, 180, 651.493), 35, 35)
 					.setSignLoc(new Vector(195.544, 107, 673.700))
-					.setMapType(MapType.COMMUNITY)
-	),
+					.setMapType(MapType.COMMUNITY)),
 
 	Mushroom("Mushroom",
 			new MapInstance("mushroom")
@@ -866,8 +835,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(4977.357, 159.40111, 850.104))
 					.setBounds(new Vector(4972.566, 160, 847.504), 35, 60)
 					.setSignLoc(new Vector(209.700, 107, 670.454))
-					.setMapType(MapType.SETHBLING)
-	),
+					.setMapType(MapType.SETHBLING)),
 	MushroomCastle("MushroomCastle",
 			new MapInstance("mushroomcastle")
 					.setSpawnPos(
@@ -879,8 +847,7 @@ public enum Maps {
 					.setBounds(new Vector(4909.448, 195, 876.408), 40, 40)
 					.setSignLoc(new Vector(168.300, 106, 668.496))
 					.setMapType(MapType.DUEL)
-					.setGameType(GameType.DUEL)
-	),
+					.setGameType(GameType.DUEL)),
 
 	/*
 	 * Archfield("Archfield", new MapInstance("archfield") .setSpawnPos(new
@@ -902,8 +869,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4884.519, 146, 733.478))
 					.setSpecLoc(new Vector(4956.479, 149, 738.454))
 					.setSignLoc(new Vector(201.537, 106, 673.700))
-					.setBounds(new Vector(4956.479, 149, 738.454), 50, 50)
-	),
+					.setBounds(new Vector(4956.479, 149, 738.454), 50, 50)),
 
 	CherryGrove("CherryGrove",
 			new MapInstance("cherrygrove")
@@ -916,8 +882,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4517.374, 197, 746.590))
 					.setSpecLoc(new Vector(4574.500, 193, 736.498))
 					.setBounds(new Vector(4592.500, 224, 743.500), 50, 70)
-					.setSignLoc(new Vector(200.504, 108, 673.700))
-	),
+					.setSignLoc(new Vector(200.504, 108, 673.700))),
 
 	Mountain("Mountain",
 			new MapInstance("mountain")
@@ -930,8 +895,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4819.523, 186, 788.498))
 					.setSpecLoc(new Vector(4885.436, 158, 790.454))
 					.setBounds(new Vector(4885.436, 158, 790.454), 45, 40)
-					.setSignLoc(new Vector(200.504, 107, 673.700))
-	),
+					.setSignLoc(new Vector(200.504, 107, 673.700))),
 
 	Mansion("Mansion",
 			new MapInstance("mansion")
@@ -944,8 +908,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4933.467, 151, 719.522))
 					.setSpecLoc(new Vector(4922.493, 149, 812.282))
 					.setBounds(new Vector(4932.483, 188, 811.481), 50, 60)
-					.setSignLoc(new Vector(204.530, 106, 673.700))
-	),
+					.setSignLoc(new Vector(204.530, 106, 673.700))),
 
 	TempleOfMars("TempleOfMars",
 			new MapInstance("templeofmars")
@@ -957,8 +920,7 @@ public enum Maps {
 							new Vector(4888.461, 158, 782.541))
 					.setLobbyLoc(new Vector(4930.449, 163, 690.517))
 					.setSpecLoc(new Vector(4930.428, 160, 772.552))
-					.setBounds(new Vector(4930.428, 160, 772.552), 60, 40)
-	),
+					.setBounds(new Vector(4930.428, 160, 772.552), 60, 40)),
 
 	ColdWar("ColdWar",
 			new MapInstance("coldwar")
@@ -971,8 +933,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(1002.428, 152, 626.585))
 					.setSpecLoc(new Vector(1000.500, 162, 706.500))
 					.setBounds(new Vector(1000.500, 162, 706.500), 60, 50)
-					.setSignLoc(new Vector(199.535, 106, 673.700))
-	),
+					.setSignLoc(new Vector(199.535, 106, 673.700))),
 
 	WinterWorld("WinterWorld",
 			new MapInstance("winterworld")
@@ -986,8 +947,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(4930.500, 180, 700.500))
 					.setBounds(new Vector(4932.500, 215, 676.336), 60, 60)
 					.setSignLoc(new Vector(14.700, 149, -1.548))
-					.setGameType(GameType.FRENZY)
-	),
+					.setGameType(GameType.FRENZY)),
 
 	Winter("Winter",
 			new MapInstance("winter")
@@ -1000,8 +960,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4829.660, 155, 684.561))
 					.setSpecLoc(new Vector(4898.485, 159, 685.393))
 					.setBounds(new Vector(4897.500, 182, 686.500), 50, 50)
-					.setSignLoc(new Vector(173.550, 106, 673.700))
-	),
+					.setSignLoc(new Vector(173.550, 106, 673.700))),
 
 	BarnYard("BarnYard",
 			new MapInstance("barnyard")
@@ -1015,8 +974,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4714.534, 157, 685.505))
 					.setSpecLoc(new Vector(4784.510, 160, 686.470))
 					.setBounds(new Vector(4786.500, 176, 686.500), 51, 60)
-					.setSignLoc(new Vector(193.487, 107, 673.700))
-	),
+					.setSignLoc(new Vector(193.487, 107, 673.700))),
 
 	YinYang("YinYang",
 			new MapInstance("yingyang")
@@ -1029,10 +987,9 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4926.488, 156, 493.466))
 					.setSpecLoc(new Vector(4925.490, 150, 558.485))
 					.setSignLoc(new Vector(201.537, 108, 673.700))
-					.setBounds(new Vector(4925.490, 189, 558.485), 45, 42)
-	),
+					.setBounds(new Vector(4925.490, 189, 558.485), 45, 42)),
 	SantasWorkshop("SantasWorkshop",
-			new MapInstance("santaworkshop")
+			new MapInstance("santafactory")
 					.setSpawnPos(
 							new Vector(55.541, 83.5, -83.159),
 							new Vector(73, 86, -43),
@@ -1042,11 +999,10 @@ public enum Maps {
 							new Vector(74, 74, -62),
 							new Vector(55, 74, -47),
 							new Vector(33, 82, -21))
-					.setLobbyLoc(new Vector(56, 86, -132))
-					.setSpecLoc(new Vector(4925.490, 150, 558.485))
+					.setLobbyLoc(new Vector(57, 85, -150))
+					.setSpecLoc(new Vector(55.654, 101, -50.585))
 					.setSignLoc(new Vector(201.537, 107, 673.700))
-					.setBounds(new Vector(55, 74, -43), 100, 100)
-	),
+					.setBounds(new Vector(55, 74, -43), 100, 100)),
 	Slither("Slither",
 			new MapInstance("slither")
 					.setSpawnPos(

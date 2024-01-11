@@ -1,7 +1,12 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.List;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -19,13 +24,7 @@ import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import java.util.List;
 
 public class TNTClass extends BaseClass {
 
@@ -55,7 +54,7 @@ public class TNTClass extends BaseClass {
 
 	public ItemStack getTNT() {
 		return ItemHelper.setDetails(new ItemStack(Material.TNT, 1), "", "",
-				instance.getManager().getMain().color("&7Spawn TNT to a random player around you"));
+				instance.getGameManager().getMain().color("&7Spawn TNT to a random player around you"));
 	}
 
 	@Override
@@ -72,14 +71,14 @@ public class TNTClass extends BaseClass {
 			this.cooldownSec = (10000 - tntItem.getTime()) / 1000 + 1;
 
 			if (tntItem.getTime() < 10000) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&c&lTNT &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &c&lTNT");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &c&lTNT");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -115,7 +114,7 @@ public class TNTClass extends BaseClass {
 									p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 1));
 									TNTPrimed tnt = p.getWorld().spawn(p.getLocation().add(0, 5, 0), TNTPrimed.class);
 									tnt.setFuseTicks(40);
-									player.sendMessage(instance.getManager().getMain()
+									player.sendMessage(instance.getGameManager().getMain()
 											.color("&e&l(!) &rSpawning a TNT at &e" + p.getName() + "'s &rlocation"));
 									tntItem.restart();
 									return;
@@ -125,7 +124,7 @@ public class TNTClass extends BaseClass {
 					}
 
 					player.sendMessage(
-							instance.getManager().getMain().color("&c&l(!) &rNo nearby players have been found!"));
+							instance.getGameManager().getMain().color("&c&l(!) &rNo nearby players have been found!"));
 				}
 			}
 		}

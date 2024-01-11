@@ -1,14 +1,15 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.Random;
-
-import org.bukkit.Color;
-import org.bukkit.Effect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
+import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -22,15 +23,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
-import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import java.util.Random;
 
 public class VillagerClass extends BaseClass {
 
@@ -88,10 +81,10 @@ public class VillagerClass extends BaseClass {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.BAKED_POTATO, 1), "", "",
-						instance.getManager().getMain().color("&7Gives players 1 of 3 things:"),
-						instance.getManager().getMain().color("   &r3 sec Blindness I"),
-						instance.getManager().getMain().color("   &r3 sec Slowness II"),
-						instance.getManager().getMain().color("   &r4 sec Weakness I")));
+						instance.getGameManager().getMain().color("&7Gives players 1 of 3 things:"),
+						instance.getGameManager().getMain().color("   &r3 sec Blindness I"),
+						instance.getGameManager().getMain().color("   &r3 sec Slowness II"),
+						instance.getGameManager().getMain().color("   &r4 sec Weakness I")));
 		playerInv.setItem(2, instance.getItemToDrop());
 	}
 
@@ -102,14 +95,14 @@ public class VillagerClass extends BaseClass {
 			this.cooldownSec = (5000 - villager.getTime()) / 1000 + 1;
 
 			if (villager.getTime() < 5000) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&2Baked Potato &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &2Baked Potato");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &2Baked Potato");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -157,7 +150,7 @@ public class VillagerClass extends BaseClass {
 												gamePlayer.addPotionEffect(
 														new PotionEffect(PotionEffectType.WEAKNESS, 90, 0));
 										}
-									} else {
+									} else if (gamePlayer != player) {
 										if (chance >= 0 && chance <= 40)
 											gamePlayer.addPotionEffect(
 													new PotionEffect(PotionEffectType.BLINDNESS, 75, 0));
@@ -177,7 +170,7 @@ public class VillagerClass extends BaseClass {
 						}
 
 					}, new ItemStack(Material.BAKED_POTATO));
-					instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+					instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 							player.getLocation().getDirection().multiply(2.0D));
 				}
 			}
