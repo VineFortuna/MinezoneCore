@@ -1,8 +1,12 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.lang.reflect.Field;
-import java.util.UUID;
-
+import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -20,14 +24,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import java.lang.reflect.Field;
+import java.util.UUID;
 
 public class PotatoClass extends BaseClass {
 
@@ -41,7 +39,7 @@ public class PotatoClass extends BaseClass {
 	}
 
 	public Core getMain() {
-		return instance.getManager().getMain();
+		return instance.getGameManager().getMain();
 	}
 
 	@Override
@@ -107,7 +105,7 @@ public class PotatoClass extends BaseClass {
 											ItemHelper.addEnchant(ItemHelper.addEnchant(bakedPotato,
 													Enchantment.DAMAGE_ALL, sharpness), Enchantment.KNOCKBACK, 1),
 											Enchantment.FIRE_ASPECT, 1));
-					player.sendMessage(instance.getManager().getMain()
+					player.sendMessage(instance.getGameManager().getMain()
 							.color("&r&l(!) &rYou recieved a baked potato for being on fire"));
 				}
 			}
@@ -134,9 +132,9 @@ public class PotatoClass extends BaseClass {
 									Enchantment.DAMAGE_ALL, sharpness));
 							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 4 - sharpness));
 						}
-					}.runTaskLater(instance.getManager().getMain(), 1);
+					}.runTaskLater(instance.getGameManager().getMain(), 1);
 
-					player.sendMessage(instance.getManager().getMain()
+					player.sendMessage(instance.getGameManager().getMain()
 							.color("&6&l(!) &rYou gave up a level of Sharpness for some speed"));
 				}
 			} else if (item.getType() == Material.BAKED_POTATO
@@ -158,9 +156,9 @@ public class PotatoClass extends BaseClass {
 													Enchantment.FIRE_ASPECT, 1));
 							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 4 - sharpness));
 						}
-					}.runTaskLater(instance.getManager().getMain(), 1);
+					}.runTaskLater(instance.getGameManager().getMain(), 1);
 
-					player.sendMessage(instance.getManager().getMain()
+					player.sendMessage(instance.getGameManager().getMain()
 							.color("&6&l(!) &rYou gave up a level of Sharpness for some speed"));
 				}
 			}

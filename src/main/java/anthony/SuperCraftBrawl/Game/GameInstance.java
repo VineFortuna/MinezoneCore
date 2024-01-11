@@ -1,53 +1,13 @@
 package anthony.SuperCraftBrawl.Game;
 
-import java.util.*;
-import java.util.Map.Entry;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
-import org.bukkit.block.Sign;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Firework;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.Potion;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionType;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
-import org.bukkit.scoreboard.Team;
-import org.bukkit.util.Vector;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.all.DarkSethBlingClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
@@ -56,6 +16,26 @@ import fr.mrmicky.fastboard.FastBoard;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.*;
+import org.bukkit.block.Sign;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.*;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.*;
+import org.bukkit.util.Vector;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 public class GameInstance {
 
@@ -140,7 +120,7 @@ public class GameInstance {
 		InitialiseMap();
 	}
 
-	public GameManager getManager() {
+	public GameManager getGameManager() {
 		return gameManager;
 	}
 
@@ -396,7 +376,7 @@ public class GameInstance {
 				@Override
 				public void run() {
 					if (s != null) {
-						s.setLine(3, getManager().getMain().color("&0" + ticksTilStart + "s"));
+						s.setLine(3, getGameManager().getMain().color("&0" + ticksTilStart + "s"));
 						s.update();
 					}
 					int ticks = ticksTilStart;
@@ -638,7 +618,7 @@ public class GameInstance {
 
 	public void StartGame() {
 		if (s != null) {
-			s.setLine(0, getManager().getMain().color("&2In Progress"));
+			s.setLine(0, getGameManager().getMain().color("&2In Progress"));
 			s.setLine(3, "" + ChatColor.BLACK + ChatColor.UNDERLINE + "Spectate");
 			s.update();
 		}
@@ -673,6 +653,7 @@ public class GameInstance {
 		for (Player player : players) {
 			player.getInventory().clear();
 			player.teleport(GetRespawnLoc());
+			player.setFireTicks(0);
 		}
 		// GetRespawnLoc(); // Spawn all players in game
 		TellAll("" + ChatColor.BOLD + "===============================");
@@ -776,7 +757,7 @@ public class GameInstance {
 			}
 
 		};
-		r.runTaskLater(getManager().getMain(), 20);
+		r.runTaskLater(getGameManager().getMain(), 20);
 	}
 
 	private String shortenString(String msg, int length) {
@@ -838,6 +819,11 @@ public class GameInstance {
 		}
 	}
 
+	/*
+	 * Starts the timer of 30 seconds for each item drop
+	 * in a game. If player is DarkSethBling, it tells
+	 * them the location the item spawned
+	 */
 	public void startLightningDropsTimer() {
 		BukkitRunnable runnable = new BukkitRunnable() {
 			@Override
@@ -862,7 +848,7 @@ public class GameInstance {
 							DarkSethBlingClass d = (DarkSethBlingClass) bc;
 
 							if (d.usedTp == false) {
-								gamePlayer.sendMessage(getManager().getMain()
+								gamePlayer.sendMessage(getGameManager().getMain()
 										.color("&2&l(!) &eAn item just spawned at &e&l" + x + ", " + y + ", " + z));
 							}
 						}
@@ -878,7 +864,7 @@ public class GameInstance {
 
 		// Slowness Pot
 		ItemStack slownessPot = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				"" + ChatColor.RED + ChatColor.BOLD + "Slowness", "");
+				"" + ChatColor.RED + ChatColor.BOLD + "Slowness");
 
 		Potion potionSlow = new Potion(3);
 		potionSlow.setType(PotionType.SLOWNESS);
@@ -926,19 +912,20 @@ public class GameInstance {
 
 		// Bomb
 		ItemStack bomb = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				getManager().getMain().color("&4&lBomb"));
+				getGameManager().getMain().color("&4&lBomb"));
 
 		Potion pot100 = new Potion(1);
 		pot100.setType(PotionType.INSTANT_DAMAGE);
 		pot100.setSplash(true);
 		PotionMeta meta = (PotionMeta) bomb.getItemMeta();
-		meta.addCustomEffect(new PotionEffect(PotionEffectType.HARM, 100, 1000), true);
+		meta.addCustomEffect(new PotionEffect(PotionEffectType.HARM, 0, 100), true);
+		meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
 		bomb.setItemMeta(meta);
 		pot100.apply(bomb);
 
 		// Brooms
 		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4),
-				this.getManager().getMain().color("&0&lBroom"));
+				this.getGameManager().getMain().color("&0&lBroom"));
 
 		// Hammer
 		ItemStack hammer = ItemHelper.addEnchant(
@@ -977,9 +964,8 @@ public class GameInstance {
 				gameManager.getMain().color("&6&lBlooper"));
 
 		// Nuke
-		ItemStack nuke = ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.TNT, 3), this.getManager().getMain().color("&4&lNuke")),
-				Enchantment.DAMAGE_ALL, 1);
+		ItemStack nuke = ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.TNT, 3),
+				this.getGameManager().getMain().color("&4&lNuke")), Enchantment.DAMAGE_ALL, 1);
 
 		// Instagib
 		ItemStack instagib = ItemHelper.setDetails(new ItemStack(Material.GOLD_HOE, 5, (short) 250),
@@ -997,6 +983,9 @@ public class GameInstance {
 
 		// Creeper Egg
 		ItemStack creeperEgg = ItemHelper.createMonsterEgg(EntityType.CREEPER, 1, "&r&oCreeper Pokeball");
+
+		// Milk Bucket
+		ItemStack milk = ItemHelper.create(Material.MILK_BUCKET);
 
 		// Golden Apple
 		ItemStack goldenApple = ItemHelper.create(Material.GOLDEN_APPLE);
@@ -1025,6 +1014,7 @@ public class GameInstance {
 		allItemDrops.add(witchEgg);
 		allItemDrops.add(skeletonEgg);
 		allItemDrops.add(creeperEgg);
+		allItemDrops.add(milk);
 		allItemDrops.add(goldenApple);
 		allItemDrops.add(notchApple);
 
@@ -1033,12 +1023,11 @@ public class GameInstance {
 				ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE, 1, (short) 1),
 						"" + ChatColor.BLACK + ChatColor.BOLD + "Notch Apple"),
 				slownessPot, bazooka, bazooka, healthPot, speedPot, slownessPot, slownessPot, speedPot, bazooka,
-				new ItemStack(Material.GOLDEN_APPLE), hammer, healthPot, extraLife, healthPot,
-				new ItemStack(Material.MILK_BUCKET), new ItemStack(Material.MILK_BUCKET),
-				new ItemStack(Material.MILK_BUCKET), blooper, blooper, blooper, blooper, nuke, nuke, nuke, nuke, nuke,
-				bomb, pearl, pearl, miniShield, miniShield, slowballs, slowballs, slowballs, fireRes, fireRes, instagib,
-				instagib, instagib, broom, broom, zombieEgg, zombieEgg, zombieEgg, skeletonEgg, skeletonEgg, witchEgg,
-				bounty, creeperEgg, creeperEgg);
+				goldenApple, hammer, healthPot, extraLife, healthPot, milk, milk, milk, blooper, blooper, blooper,
+				blooper, nuke, nuke, nuke, nuke, nuke, bomb, pearl, pearl, miniShield, miniShield, slowballs, slowballs,
+				slowballs, fireRes, fireRes, instagib, instagib, instagib, broom, broom, zombieEgg, zombieEgg,
+				zombieEgg, skeletonEgg, skeletonEgg, witchEgg, bounty, creeperEgg, creeperEgg);
+
 		return items.get(random.nextInt(items.size()));
 	}
 
@@ -1206,7 +1195,7 @@ public class GameInstance {
 							cancel();
 							player.setAllowFlight(true);
 							player.setGameMode(GameMode.ADVENTURE);
-							GameInstance.this.getManager().getMain().ResetPlayer(player);
+							GameInstance.this.getGameManager().getMain().ResetPlayer(player);
 						}
 						if (baseClass.getLives() > 0)
 							if (this.ticks == 0) {
@@ -1214,9 +1203,9 @@ public class GameInstance {
 								player.setGameMode(GameMode.ADVENTURE);
 								player.setHealth(20.0D);
 								player.setAllowFlight(true);
-								GameInstance.this.getManager().spawnProtection2(player);
+								GameInstance.this.getGameManager().spawnProtection2(player);
 								if (!GameInstance.this.players.contains(player)) {
-									GameInstance.this.getManager().getMain().ResetPlayer(player);
+									GameInstance.this.getGameManager().getMain().ResetPlayer(player);
 								} else {
 									baseClass.LoadPlayer();
 									if (GameInstance.this.gameType == GameType.FRENZY) {
@@ -1228,7 +1217,7 @@ public class GameInstance {
 											public void run() {
 												player.sendTitle("", "");
 											}
-										}.runTaskLater(getManager().getMain(), 30);
+										}.runTaskLater(getGameManager().getMain(), 30);
 									} else {
 										player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "Respawned", "");
 										new BukkitRunnable() { // Get rid of title after 1.5 seconds
@@ -1236,7 +1225,7 @@ public class GameInstance {
 											public void run() {
 												player.sendTitle("", "");
 											}
-										}.runTaskLater(getManager().getMain(), 30);
+										}.runTaskLater(getGameManager().getMain(), 30);
 									}
 									baseClass.isDead = false;
 								}
@@ -1392,8 +1381,8 @@ public class GameInstance {
 							spectator.setAllowFlight(false);
 							spectator.setAllowFlight(true);
 							spectator.setDisplayName("" + spectator.getName());
-							spectator.sendMessage(getManager().getMain().color("&2&l(!) &rThe game on &r&l" + mapName
-									+ " &rhas ended. Moving you back to spawn.."));
+							spectator.sendMessage(getGameManager().getMain().color("&2&l(!) &rThe game on &r&l"
+									+ mapName + " &rhas ended. Moving you back to spawn.."));
 							spectator.spigot().setCollidesWithEntities(true);
 							for (Player p : Bukkit.getOnlinePlayers()) {
 								p.showPlayer(spectator);
@@ -1401,15 +1390,15 @@ public class GameInstance {
 						}
 					}
 					if (s != null) {
-						s.setLine(0, getManager().getMain().color("&2Lobby"));
-						s.setLine(1, getManager().getMain().color("&0" + mapName));
+						s.setLine(0, getGameManager().getMain().color("&2Lobby"));
+						s.setLine(1, getGameManager().getMain().color("&0" + mapName));
 						if (map != null)
-							s.setLine(2, getManager().getMain()
+							s.setLine(2, getGameManager().getMain()
 									.color("&0Players: 0/" + getMap().GetInstance().gameType.getMaxPlayers()));
 						else
-							s.setLine(2, getManager().getMain().color("&0Players: 0/6"));
+							s.setLine(2, getGameManager().getMain().color("&0Players: 0/6"));
 
-						s.setLine(3, getManager().getMain().color("&030s"));
+						s.setLine(3, getGameManager().getMain().color("&030s"));
 						s.update();
 					}
 
@@ -1437,7 +1426,7 @@ public class GameInstance {
 							}
 						}
 					};
-					r.runTaskTimer(getManager().getMain(), 0, 1);
+					r.runTaskTimer(getGameManager().getMain(), 0, 1);
 
 					if (map != null)
 						gameManager.RemoveMap(map);
@@ -1448,14 +1437,14 @@ public class GameInstance {
 				ticks--;
 			}
 		};
-		endGameAnimation.runTaskTimer(getManager().getMain(), 0, 20);
+		endGameAnimation.runTaskTimer(getGameManager().getMain(), 0, 20);
 	}
 
 	public void SetLobbyScoreboard(Player player) {
 		gameManager.getMain().LobbyBoard(player);
 		gameManager.getMain().gameStats.put(player, this);
-		TextComponent message = new TextComponent(
-				getManager().getMain().color("&2&l(!) &eThe match stats have been recorded. &e&lClick here to view!"));
+		TextComponent message = new TextComponent(getGameManager().getMain()
+				.color("&2&l(!) &eThe match stats have been recorded. &e&lClick here to view!"));
 		message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/gamestats"));
 		player.spigot().sendMessage(message);
 	}
@@ -1481,18 +1470,15 @@ public class GameInstance {
 			player.sendMessage("" + ChatColor.BOLD + message);
 		}
 	}
-	
-	public void givePointsAgain(Player player, PlayerData data, int num) {
-		if (data != null)
-			data.points += num;
-	}
 
 	public void givePoints(int position, int points) {
 		if (playerPosition.size() >= position) {
 			Player player = playerPosition.get(playerPosition.size() - position);
 			PlayerData data = gameManager.getMain().getDataManager().getPlayerData(player);
 
-			givePointsAgain(player, data, points);
+			if (data != null) {
+				data.points += points;
+			}
 		}
 	}
 
@@ -1501,14 +1487,13 @@ public class GameInstance {
 		PlayerData data3 = null;
 		for (Player winner : winners) {
 			data3 = gameManager.getMain().getDataManager().getPlayerData(winner);
-			this.playerPosition.add(winner);
 			winnerList.add(winner);
 			if (data3 != null) {
 				BaseClass bc = classes.get(winner);
 				if (data3.challenge1 == 0) {
 					if (bc != null) {
 						if (bc.getType() == ClassType.Pig) {
-							winner.sendMessage(getManager().getMain()
+							winner.sendMessage(getGameManager().getMain()
 									.color("&9&l(!) &rYou got a win with " + bc.getType().getTag()
 											+ " &rand have now unlocked the " + ClassType.Notch.getTag()
 											+ " &rclass!"));
@@ -1525,7 +1510,7 @@ public class GameInstance {
 					}
 				}
 				if (data3.challenge2 == 0) {
-					winner.sendMessage(getManager().getMain()
+					winner.sendMessage(getGameManager().getMain()
 							.color("&9&l(!) &rYou got a win and you are now rewarded with &e50 Bonus Tokens"));
 					data3.challenge2 = 1;
 
@@ -1540,7 +1525,7 @@ public class GameInstance {
 			if (chance >= 0 && chance < 25) {
 				if (data3 != null) {
 					data3.mysteryChests++;
-					winner.sendMessage(getManager().getMain().color("&5&l(!) &rYou have found &e1 Mystery Chest!"));
+					winner.sendMessage(getGameManager().getMain().color("&5&l(!) &rYou have found &e1 Mystery Chest!"));
 				}
 			}
 		}
@@ -1558,12 +1543,11 @@ public class GameInstance {
 		 * 5); givePositionTokens(4, 3); givePositionTokens(5, 1);
 		 */
 
-		if (getManager().getMain().tournament) {
+		if (getGameManager().getMain().tournament == true) {
 			givePoints(1, 10);
 			givePoints(2, 7);
 			givePoints(3, 5);
-			givePoints(4, 3);
-			givePoints(5, 1);
+			givePoints(4, 1);
 		}
 
 		for (Player winner : winners) {
@@ -1573,19 +1557,6 @@ public class GameInstance {
 			if (baseClass != null) {
 				if (baseClass.getLives() < 5) {
 					PlayerData data = gameManager.getMain().getDataManager().getPlayerData(winner);
-
-					if (data != null) {
-						data.wins += 1;
-						data.winstreak += 1;
-						data.exp += 113;
-
-						if (data.exp >= 2500) {
-							data.level++;
-							data.exp -= 2500;
-							winner.sendMessage(getManager().getMain().color("&e&lLEVEL UPGRADED!"));
-							winner.sendMessage("You are now Level: " + data.level + "!");
-						}
-					}
 					baseClass.totalExp += 113;
 					baseClass.placement = 1;
 
@@ -1632,11 +1603,6 @@ public class GameInstance {
 						data.flawlessWins += 1;
 						data.winstreak += 1;
 						data.exp += 133;
-						
-						if (getManager().getMain().tournament == true) {
-							givePointsAgain(winner, data, 5);
-							winner.sendMessage("Gained extra 5 points for flawless");
-						}
 					}
 					baseClass.totalExp += 133;
 
@@ -1676,7 +1642,7 @@ public class GameInstance {
 
 					if (data != null) {
 						if (data.bonusTokens == 0) {
-							winner.sendMessage(getManager().getMain().color(
+							winner.sendMessage(getGameManager().getMain().color(
 									"&2&l(!) &rYou have completed the &eDouble Tokens &rchallenge! You will recieve double tokens for this game"));
 							data.bonusTokens = 1;
 							baseClass.totalTokens *= 2;
@@ -1688,6 +1654,19 @@ public class GameInstance {
 
 					if (data != null)
 						data.tokens += baseClass.totalTokens;
+				}
+			}
+			PlayerData data = gameManager.getMain().getDataManager().getPlayerData(winner);
+			if (data != null) {
+				data.wins += 1;
+				data.winstreak += 1;
+				data.exp += 113;
+
+				if (data.exp >= 2500) {
+					data.level++;
+					data.exp -= 2500;
+					winner.sendMessage(getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
+					winner.sendMessage("You are now Level: " + data.level + "!");
 				}
 			}
 		}
@@ -1708,6 +1687,11 @@ public class GameInstance {
 
 		if (map != null) {
 			if (baseClass.getLives() >= 5) {
+				if (data != null) {
+					if (getGameManager().getMain().tournament == true) {
+						data.points += 5;
+					}
+				}
 				if (winnerList.get(0).hasPermission("scb.customWin")) {
 					if (data.cwm == 1) {
 						customFlawWinMsg(winnerList.get(0));
@@ -1751,6 +1735,11 @@ public class GameInstance {
 				}
 			}
 			if (baseClass.getLives() >= 5) {
+				if (data != null) {
+					if (getGameManager().getMain().tournament == true) {
+						data.points += 5;
+					}
+				}
 				if (display.hasPermission("scb.customWin")) {
 					if (data.cwm == 1) {
 						customFlawWinMsg(display);
@@ -1785,7 +1774,7 @@ public class GameInstance {
 
 		for (Player p : players) {
 			PlayerData data4 = gameManager.getMain().getDataManager().getPlayerData(p);
-			this.getManager().getMain().getDataManager().saveData(data4);
+			this.getGameManager().getMain().getDataManager().saveData(data4);
 		}
 	}
 
@@ -1842,11 +1831,11 @@ public class GameInstance {
 						+ ChatColor.RESET + "won on " + ChatColor.BOLD + ChatColor.WHITE + ChatColor.YELLOW
 						+ ChatColor.BOLD + map.toString());
 			} else if (chance == 2) {
-				Bukkit.broadcastMessage(this.getManager().getMain().color("&r&l(!) &rThe game on &e&l" + map.toString()
-						+ " &rwas too easy for " + tag + " &e" + winner.getName()));
+				Bukkit.broadcastMessage(this.getGameManager().getMain().color("&r&l(!) &rThe game on &e&l"
+						+ map.toString() + " &rwas too easy for " + tag + "&e" + winner.getName()));
 			} else if (chance == 3) {
-				Bukkit.broadcastMessage(this.getManager().getMain().color("&r&l(!) &rGet out of the way for " + tag
-						+ " &e" + winner.getName() + ". &rHe &r&lDOMINATED &ron &e&l" + map.toString()));
+				Bukkit.broadcastMessage(this.getGameManager().getMain().color("&r&l(!) &rGet out of the way for " + tag
+						+ "&e" + winner.getName() + ". &rHe &r&lDOMINATED &ron &e&l" + map.toString()));
 			}
 		} else {
 			if (chance == 0) {
@@ -1859,11 +1848,11 @@ public class GameInstance {
 						+ ChatColor.WHITE + " just " + ChatColor.BOLD + "FLAWLESSLY " + ChatColor.RESET + "won on "
 						+ ChatColor.BOLD + ChatColor.WHITE + ChatColor.YELLOW + ChatColor.BOLD + duosMap.toString());
 			} else if (chance == 2) {
-				Bukkit.broadcastMessage(this.getManager().getMain().color("&r&l(!) &rThe game on &e&l"
-						+ duosMap.toString() + " &rwas too easy for " + tag + " &e" + winner.getName()));
+				Bukkit.broadcastMessage(this.getGameManager().getMain().color("&r&l(!) &rThe game on &e&l"
+						+ duosMap.toString() + " &rwas too easy for " + tag + "&e" + winner.getName()));
 			} else if (chance == 3) {
-				Bukkit.broadcastMessage(this.getManager().getMain().color("&r&l(!) &rGet out of the way for " + tag
-						+ " &e" + winner.getName() + ". &rHe &r&lDOMINATED &ron &e&l" + duosMap.toString()));
+				Bukkit.broadcastMessage(this.getGameManager().getMain().color("&r&l(!) &rGet out of the way for " + tag
+						+ "&e" + winner.getName() + ". &rHe &r&lDOMINATED &ron &e&l" + duosMap.toString()));
 			}
 		}
 	}
@@ -2070,21 +2059,9 @@ public class GameInstance {
 										"" + ChatColor.RESET + this.players.size() + "/"
 												+ this.gameType.getMaxPlayers()) : ""));
 								board.updateLine(7, "" + ChatColor.BOLD + "Status:");
-								board.updateLine(8, " " + ChatColor.ITALIC + "Waiting..");
+								board.updateLine(8, "" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
 							}
 						}
-					}
-					if (this.players.size() < 1) {
-						BukkitRunnable r = new BukkitRunnable() {
-							@Override
-							public void run() {
-								Bukkit.unloadWorld(mapWorld, false);
-								if (Bukkit.unloadWorld(mapWorld, false)) { 
-									this.cancel();
-								}
-							}
-						};
-						r.runTaskTimer(getManager().getMain(), 0, 1);
 					}
 				} else {
 					for (Player gamePlayer : this.players) {
@@ -2099,7 +2076,7 @@ public class GameInstance {
 						if (this.gameStartTime != null) {
 							this.gameStartTime.cancel();
 							this.gameStartTime = null;
-							TellAll(getManager().getMain()
+							TellAll(getGameManager().getMain()
 									.color("&c&l(!) &rGame start cancelled. Not enough players!"));
 							for (Player gamePlayer : this.players) {
 								this.totalVotes = 0;
@@ -2111,7 +2088,7 @@ public class GameInstance {
 								FastBoard board = this.boards.get(gamePlayer);
 								board.updateLine(5, " " + this.players.size() + "/6");
 								board.updateLine(7, "" + ChatColor.BOLD + "Status:");
-								board.updateLine(8, " " + ChatColor.ITALIC + "Waiting..");
+								board.updateLine(8, "" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
 							}
 						}
 					}
@@ -2168,13 +2145,13 @@ public class GameInstance {
 				SetLobbyScoreboard(player);
 				RemovePlayer(player);
 			}
-			getManager().getMain().ResetPlayer(player);
+			getGameManager().getMain().ResetPlayer(player);
 			if (this.s != null) {
 				if (this.map != null) {
-					this.s.setLine(2, getManager().getMain().color("&0Players: " + this.players.size() + "/"
+					this.s.setLine(2, getGameManager().getMain().color("&0Players: " + this.players.size() + "/"
 							+ (getMap().GetInstance()).gameType.getMaxPlayers()));
 				} else {
-					this.s.setLine(2, getManager().getMain().color("&0Players: " + this.players.size() + "/6"));
+					this.s.setLine(2, getGameManager().getMain().color("&0Players: " + this.players.size() + "/6"));
 				}
 				this.s.update();
 			}
@@ -2189,6 +2166,8 @@ public class GameInstance {
 			if (classes.containsKey(player)) {
 				BaseClass baseClass = classes.get(player);
 				if (event.getPlayer().getItemInHand().getType() == Material.ENDER_PEARL
+						&& event.getPlayer().getItemInHand().hasItemMeta()
+						&& event.getPlayer().getItemInHand().getItemMeta().getDisplayName().contains("Teleporters")
 						&& (event.getAction() == Action.RIGHT_CLICK_AIR
 								|| event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 					if (baseClass.pearlTimer.getTime() < 10000) {
@@ -2232,5 +2211,13 @@ public class GameInstance {
 		}
 
 		return false;
+	}
+
+	public List<ItemStack> getAllItemDrops() {
+		return allItemDrops;
+	}
+
+	public List<Player> getWinnerList() {
+		return winnerList;
 	}
 }

@@ -74,7 +74,7 @@ public class HerobrineClass extends BaseClass {
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
 						"" + ChatColor.RESET + ChatColor.BOLD + "Diamond of Despair", "",
-						instance.getManager().getMain().color("&7Right click to send effects on enemies!")));
+						instance.getGameManager().getMain().color("&7Right click to send effects on enemies!")));
 	}
 
 	@Override
@@ -84,14 +84,14 @@ public class HerobrineClass extends BaseClass {
 			this.cooldownSec = (20000 - herobrine.getTime()) / 1000 + 1;
 
 			if (herobrine.getTime() < 20000) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&b&lDiamond of Despair &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &b&lDiamond of Despair");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &b&lDiamond of Despair");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -127,7 +127,7 @@ public class HerobrineClass extends BaseClass {
 								gamePlayers.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 2));
 							}
 						}
-						gamePlayers.sendMessage(instance.getManager().getMain()
+						gamePlayers.sendMessage(instance.getGameManager().getMain()
 								.color("&2&l(!) &e" + player.getName() + " &rslowed all players!"));
 					}
 				} else if (chance == 1) {
@@ -141,7 +141,7 @@ public class HerobrineClass extends BaseClass {
 								gamePlayers.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 80, 1));
 							}
 						}
-						gamePlayers.sendMessage(instance.getManager().getMain()
+						gamePlayers.sendMessage(instance.getGameManager().getMain()
 								.color("&2&l(!) &e" + player.getName() + " &rpoisoned all players!"));
 					}
 				} else if (chance == 2) {
@@ -163,7 +163,7 @@ public class HerobrineClass extends BaseClass {
 								}
 							}
 						}
-						gamePlayers.sendMessage(instance.getManager().getMain()
+						gamePlayers.sendMessage(instance.getGameManager().getMain()
 								.color("&2&l(!) &e" + player.getName() + " &rset their enemies on fire!"));
 					}
 				}

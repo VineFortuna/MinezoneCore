@@ -1,11 +1,13 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.Color;
-import org.bukkit.Effect;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.Cooldown;
+import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
+import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.ItemHelper;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -16,15 +18,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
-import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import net.md_5.bungee.api.ChatColor;
 
 public class ButterBroClass extends BaseClass {
 
@@ -63,8 +56,8 @@ public class ButterBroClass extends BaseClass {
 
 	public ItemStack getFlowerCharge() {
 		return ItemHelper.setDetails(new ItemStack(Material.RED_ROSE, 1),
-				instance.getManager().getMain().color("&c&lFlower Charges"), "",
-				instance.getManager().getMain().color("&7Right click to throw explosive/firey charges!"));
+				instance.getGameManager().getMain().color("&c&lFlower Charges"), "",
+				instance.getGameManager().getMain().color("&7Right click to throw explosive/firey charges!"));
 	}
 
 	@Override
@@ -104,7 +97,7 @@ public class ButterBroClass extends BaseClass {
 											if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
 												EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
 														DamageCause.PROJECTILE, 4.0);
-												instance.getManager().getMain().getServer().getPluginManager()
+												instance.getGameManager().getMain().getServer().getPluginManager()
 														.callEvent(damageEvent);
 												gamePlayer.damage(4.0, player);
 												gamePlayer.setFireTicks(80);
@@ -112,7 +105,7 @@ public class ButterBroClass extends BaseClass {
 										} else {
 											EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
 													DamageCause.PROJECTILE, 4.0);
-											instance.getManager().getMain().getServer().getPluginManager()
+											instance.getGameManager().getMain().getServer().getPluginManager()
 													.callEvent(damageEvent);
 											gamePlayer.damage(4.0, player);
 											gamePlayer.setFireTicks(80);
@@ -129,7 +122,7 @@ public class ButterBroClass extends BaseClass {
 							}
 
 						}, new ItemStack(Material.FIREBALL));
-						instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+						instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 								player.getLocation().getDirection().multiply(2.0D));
 					}
 					event.setCancelled(true);

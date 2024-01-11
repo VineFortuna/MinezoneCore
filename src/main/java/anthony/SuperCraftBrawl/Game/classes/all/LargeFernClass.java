@@ -1,18 +1,18 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import anthony.SuperCraftBrawl.Game.GameInstance; 
-import anthony.SuperCraftBrawl.Game.classes.*;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.CooldownNatowski;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.SuperCraftBrawl.ItemHelper;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import net.minecraft.server.v1_8_R3.BlockWoodButton;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -162,14 +162,14 @@ public class LargeFernClass extends BaseClass {
                                                 @SuppressWarnings("deprecation")
                                                 EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
                                                         EntityDamageEvent.DamageCause.VOID, sporeDamage);
-                                                instance.getManager().getMain().getServer().getPluginManager()
+                                                instance.getGameManager().getMain().getServer().getPluginManager()
                                                         .callEvent(damageEvent);
                                                 gamePlayer.damage(sporeDamage, player);
                                             }
                                         } else {
                                             EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
                                                     EntityDamageEvent.DamageCause.VOID, sporeDamage);
-                                            instance.getManager().getMain().getServer().getPluginManager()
+                                            instance.getGameManager().getMain().getServer().getPluginManager()
                                                     .callEvent(damageEvent);
                                             gamePlayer.damage(sporeDamage, player);
                                         }
@@ -197,14 +197,14 @@ public class LargeFernClass extends BaseClass {
                                                 @SuppressWarnings("deprecation")
                                                 EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
                                                         EntityDamageEvent.DamageCause.VOID, sporeDamage);
-                                                instance.getManager().getMain().getServer().getPluginManager()
+                                                instance.getGameManager().getMain().getServer().getPluginManager()
                                                         .callEvent(damageEvent);
                                                 gamePlayer.damage(sporeDamage, player);
                                             }
                                         } else {
                                             EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
                                                     EntityDamageEvent.DamageCause.VOID, sporeDamage);
-                                            instance.getManager().getMain().getServer().getPluginManager()
+                                            instance.getGameManager().getMain().getServer().getPluginManager()
                                                     .callEvent(damageEvent);
                                             gamePlayer.damage(sporeDamage, player);
                                         }
@@ -232,14 +232,14 @@ public class LargeFernClass extends BaseClass {
                                                 @SuppressWarnings("deprecation")
                                                 EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
                                                         EntityDamageEvent.DamageCause.VOID, sporeDamage);
-                                                instance.getManager().getMain().getServer().getPluginManager()
+                                                instance.getGameManager().getMain().getServer().getPluginManager()
                                                         .callEvent(damageEvent);
                                                 gamePlayer.damage(sporeDamage, player);
                                             }
                                         } else {
                                             EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
                                                     EntityDamageEvent.DamageCause.VOID, sporeDamage);
-                                            instance.getManager().getMain().getServer().getPluginManager()
+                                            instance.getGameManager().getMain().getServer().getPluginManager()
                                                     .callEvent(damageEvent);
                                             gamePlayer.damage(sporeDamage, player);
                                         }
@@ -267,14 +267,14 @@ public class LargeFernClass extends BaseClass {
                                                 @SuppressWarnings("deprecation")
                                                 EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
                                                         EntityDamageEvent.DamageCause.VOID, sporeDamage);
-                                                instance.getManager().getMain().getServer().getPluginManager()
+                                                instance.getGameManager().getMain().getServer().getPluginManager()
                                                         .callEvent(damageEvent);
                                                 gamePlayer.damage(sporeDamage, player);
                                             }
                                         } else {
                                             EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
                                                     EntityDamageEvent.DamageCause.VOID, sporeDamage);
-                                            instance.getManager().getMain().getServer().getPluginManager()
+                                            instance.getGameManager().getMain().getServer().getPluginManager()
                                                     .callEvent(damageEvent);
                                             gamePlayer.damage(sporeDamage, player);
                                         }
@@ -302,14 +302,14 @@ public class LargeFernClass extends BaseClass {
                                                 @SuppressWarnings("deprecation")
                                                 EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
                                                         EntityDamageEvent.DamageCause.VOID, sporeDamage);
-                                                instance.getManager().getMain().getServer().getPluginManager()
+                                                instance.getGameManager().getMain().getServer().getPluginManager()
                                                         .callEvent(damageEvent);
                                                 gamePlayer.damage(sporeDamage, player);
                                             }
                                         } else {
                                             EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
                                                     EntityDamageEvent.DamageCause.VOID, sporeDamage);
-                                            instance.getManager().getMain().getServer().getPluginManager()
+                                            instance.getGameManager().getMain().getServer().getPluginManager()
                                                     .callEvent(damageEvent);
                                             gamePlayer.damage(sporeDamage, player);
                                         }
@@ -363,11 +363,11 @@ public class LargeFernClass extends BaseClass {
                     org.bukkit.util.Vector shotDirection5 = player.getLocation().getDirection().add(offset5).normalize();
 
                         // Shoot the projectile with the modified direction
-                        instance.getManager().getProjManager().shootProjectile(itemProjectile, player.getEyeLocation(), shotDirection.multiply(1.5D));
-                        instance.getManager().getProjManager().shootProjectile(itemProjectile2, player.getEyeLocation(), shotDirection2.multiply(1.5D));
-                        instance.getManager().getProjManager().shootProjectile(itemProjectile3, player.getEyeLocation(), shotDirection3.multiply(1.5D));
-                        instance.getManager().getProjManager().shootProjectile(itemProjectile4, player.getEyeLocation(), shotDirection4.multiply(1.5D));
-                        instance.getManager().getProjManager().shootProjectile(itemProjectile5, player.getEyeLocation(), shotDirection5.multiply(1.5D));
+                        instance.getGameManager().getProjManager().shootProjectile(itemProjectile, player.getEyeLocation(), shotDirection.multiply(1.5D));
+                        instance.getGameManager().getProjManager().shootProjectile(itemProjectile2, player.getEyeLocation(), shotDirection2.multiply(1.5D));
+                        instance.getGameManager().getProjManager().shootProjectile(itemProjectile3, player.getEyeLocation(), shotDirection3.multiply(1.5D));
+                        instance.getGameManager().getProjManager().shootProjectile(itemProjectile4, player.getEyeLocation(), shotDirection4.multiply(1.5D));
+                        instance.getGameManager().getProjManager().shootProjectile(itemProjectile5, player.getEyeLocation(), shotDirection5.multiply(1.5D));
 //                    }
 
 //                    Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
@@ -411,7 +411,7 @@ public class LargeFernClass extends BaseClass {
                 transfernAbility.sendPlayerCustomUseAbilityChatMessage("&9&l(!) &rStand still for &6" + transfernAbility.getCooldownDurationSeconds() + " seconds");
 
                 TransfernRunnable runnableInstance = new TransfernRunnable();
-                runnableInstance.runTaskTimer(instance.getManager().getMain(), 0, 20);
+                runnableInstance.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
             }
         }
     }

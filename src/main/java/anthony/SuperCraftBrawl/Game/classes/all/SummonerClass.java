@@ -1,19 +1,21 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.Random; 
-
 import anthony.SuperCraftBrawl.ChatColorHelper;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
+import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Skeleton;
-import org.bukkit.entity.Zombie;
+import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
@@ -23,14 +25,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
-import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import java.util.Random;
 
 public class SummonerClass extends BaseClass {
 	private ItemStack weapon;
@@ -111,7 +106,7 @@ public class SummonerClass extends BaseClass {
 				if (egg != null)
 					return;
 				else if (count >= 7) {
-					player.sendMessage(instance.getManager().getMain()
+					player.sendMessage(instance.getGameManager().getMain()
 							.color("&c&l(!) &rYou have used the max amount of Spawn Eggs"));
 					return;
 				}
@@ -173,7 +168,7 @@ public class SummonerClass extends BaseClass {
 						}
 
 					}, new ItemStack(Material.MONSTER_EGG));
-					instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+					instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 							player.getLocation().getDirection().multiply(2.0D));
 					// Spawn Creeper
 				} else if (chance == 2) {
@@ -198,7 +193,7 @@ public class SummonerClass extends BaseClass {
 						}
 
 					}, new ItemStack(Material.MONSTER_EGG));
-					instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+					instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 							player.getLocation().getDirection().multiply(2.0D));
 					// Spawn Skeleton
 				} else if (chance == 3) {
@@ -240,7 +235,7 @@ public class SummonerClass extends BaseClass {
 						}
 
 					}, new ItemStack(Material.MONSTER_EGG));
-					instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+					instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 							player.getLocation().getDirection().multiply(2.0D));
 				}
 				count++;
@@ -252,7 +247,7 @@ public class SummonerClass extends BaseClass {
 						@Override
 						public void run() {
 							if (ticks <= 5 && ticks > 0) {
-								String msg = instance.getManager().getMain()
+								String msg = instance.getGameManager().getMain()
 										.color("&9&l(!) &eRandom Spawn Egg Cooldown: " + ticks + "s");
 								PacketPlayOutChat packet = new PacketPlayOutChat(
 										ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
@@ -266,7 +261,7 @@ public class SummonerClass extends BaseClass {
 							ticks--;
 						}
 					};
-					egg.runTaskTimer(instance.getManager().getMain(), 0, 20);
+					egg.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
 				}
 			}
 		}

@@ -1,23 +1,29 @@
 package anthony.SuperCraftBrawl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameManager;
+import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.Cooldown;
+import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.commands.Commands;
+import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
+import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.npcs.NPCManager;
+import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
+import anthony.SuperCraftBrawl.practice.BowPractice;
+import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.SuperCraftBrawl.ranks.RankManager;
+import anthony.parkour.Parkour;
+import fr.mrmicky.fastboard.FastBoard;
+import me.itzzmic.minezone.api.PunishAPI;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
-import org.bukkit.WorldCreator;
+import org.bukkit.*;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -41,37 +47,12 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameManager;
-import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import anthony.SuperCraftBrawl.Game.map.Maps;
-import anthony.SuperCraftBrawl.commands.Commands;
-import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
-import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
-import anthony.SuperCraftBrawl.gui.DonorClassesGUI;
-import anthony.SuperCraftBrawl.gui.FreeClassesGUI;
-import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
-import anthony.SuperCraftBrawl.gui.StatsGUI;
-import anthony.SuperCraftBrawl.gui.StatsTargetGUI;
-import anthony.SuperCraftBrawl.npcs.NPCManager;
-import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
-import anthony.SuperCraftBrawl.practice.BowPractice;
-import anthony.SuperCraftBrawl.practice.SCBPractice;
-import anthony.SuperCraftBrawl.ranks.Rank;
-import anthony.SuperCraftBrawl.ranks.RankManager;
-import anthony.parkour.Parkour;
-import fr.mrmicky.fastboard.FastBoard;
-import me.itzzmic.minezone.api.PunishAPI;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.ChatComponentText;
-import net.minecraft.server.v1_8_R3.EntityArmorStand;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerListHeaderFooter;
-import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
-import net.minecraft.server.v1_8_R3.WorldServer;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 public class Core extends JavaPlugin implements Listener {
 
@@ -209,8 +190,7 @@ public class Core extends JavaPlugin implements Listener {
 	public Location getSCBLoc() {
 		return new Location(lobbyWorld, -8.531, 161, -406.493);
 	}
-
-	@EventHandler
+	
 	public void SendPlayerToSCB(Player player) {
 		player.teleport(getSCBLoc());
 	}
@@ -345,8 +325,8 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null || this.getSWCommands() != null) {
-			String[] commandTypes = { "join", "fav", "shop", "leave", "cw", "l", "players", "class", "spectate",
-					"startgame", "gamestats", "setlives", "purchases", "mainworld", "kit" };
+			String[] commandTypes = { "join", "fav", "shop", "leave", "cw", "l", "players", "class", "spectate", "startgame",
+					"gamestats", "setlives", "purchases", "mainworld", "kit" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -357,7 +337,7 @@ public class Core extends JavaPlugin implements Listener {
 					System.out.print(command + " was null!");
 			}
 		}
-
+		
 		enablePracticeModes();
 
 		new BukkitRunnable() {
@@ -388,9 +368,9 @@ public class Core extends JavaPlugin implements Listener {
 			}
 		}.runTaskTimer(this, 0, 20);
 	}
-
+	
 	public static BowPractice bowPractice;
-
+	
 	private void enablePracticeModes() {
 		this.bowPractice = new BowPractice();
 	}
@@ -398,8 +378,7 @@ public class Core extends JavaPlugin implements Listener {
 	public Location GetLobbyLoc() {
 		return new Location(lobbyWorld, -5.533, 143, 19.468);
 	}
-
-	@EventHandler
+	
 	public void SendPlayerToMap(Player player) {
 		player.teleport(GetLobbyLoc());
 	}
@@ -407,8 +386,7 @@ public class Core extends JavaPlugin implements Listener {
 	public Location GetStaffLoc() {
 		return new Location(lobbyWorld, 953.529, 177, 1036.495);
 	}
-
-	@EventHandler
+	
 	public void SendPlayerToStaff(Player player) {
 		player.teleport(GetStaffLoc());
 	}
@@ -424,8 +402,7 @@ public class Core extends JavaPlugin implements Listener {
 		else
 			return new Location(lobbyWorld, 0.478, 51, 0.550);
 	}
-
-	@EventHandler
+	
 	public void SendPlayerToHub(Player player) {
 		player.teleport(GetHubLoc());
 	}
@@ -592,6 +569,9 @@ public class Core extends JavaPlugin implements Listener {
 							if (data != null) {
 								data.level = num;
 								player.sendMessage(color("&2&l(!) &rYou set your level to &e" + num + "!"));
+								if (this.getGameManager().GetInstanceOfPlayer(player) == null)
+									LobbyBoard(player);
+								this.getDataManager().saveData(data);
 							}
 						} else {
 							player.sendMessage(color("&c&l(!) &rPlease enter a number that is greater/equal to 0"));
@@ -607,35 +587,14 @@ public class Core extends JavaPlugin implements Listener {
 		}
 
 		if (cmd.getName().equalsIgnoreCase("give")) {
-			if (args.length > 0 && args.length < 4) {
-				Player target = Bukkit.getServer().getPlayerExact(args[0]);
-				Material mat = testMaterial(args[1]);
-				int amount = Integer.parseInt(args[2]);
-				ItemStack item = null;
-				if (mat != null) {
-					item = new ItemStack(mat, amount);
-					target.getInventory().addItem(item);
-				} else {
-					player.sendMessage(color("&c&l(!) &rInvalid item!"));
-					return false;
-				}
-				if (target != player) {
-					target.sendMessage(color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()));
-				} else {
-					player.sendMessage(color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()));
-				}
-			} else if (args.length > 3 && args.length < 6) {
-				Player target = Bukkit.getServer().getPlayerExact(args[0]);
-				Material mat = testMaterial(args[1]);
-				int amount = Integer.parseInt(args[2]);
-				Enchantment ench = testEnchant(args[3]);
-				int level = Integer.parseInt(args[4]);
-				ItemStack item = null;
-
-				if (level > 0) {
+			if (player.hasPermission("scb.give")) {
+				if (args.length > 0 && args.length < 4) {
+					Player target = Bukkit.getServer().getPlayerExact(args[0]);
+					Material mat = testMaterial(args[1]);
+					int amount = Integer.parseInt(args[2]);
+					ItemStack item = null;
 					if (mat != null) {
 						item = new ItemStack(mat, amount);
-						enchantments(item, ench, level);
 						target.getInventory().addItem(item);
 					} else {
 						player.sendMessage(color("&c&l(!) &rInvalid item!"));
@@ -644,15 +603,40 @@ public class Core extends JavaPlugin implements Listener {
 					if (target != player) {
 						target.sendMessage(color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()));
 					} else {
-						player.sendMessage(color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()
-								+ " &rwith &e " + ench.getName() + " " + level));
+						player.sendMessage(color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()));
+					}
+				} else if (args.length > 3 && args.length < 6) {
+					Player target = Bukkit.getServer().getPlayerExact(args[0]);
+					Material mat = testMaterial(args[1]);
+					int amount = Integer.parseInt(args[2]);
+					Enchantment ench = testEnchant(args[3]);
+					int level = Integer.parseInt(args[4]);
+					ItemStack item = null;
+					
+					if (level > 0) {
+						if (mat != null) {
+							item = new ItemStack(mat, amount);
+							enchantments(item, ench, level);
+							target.getInventory().addItem(item);
+						} else {
+							player.sendMessage(color("&c&l(!) &rInvalid item!"));
+							return false;
+						}
+						if (target != player) {
+							target.sendMessage(color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()));
+						} else {
+							player.sendMessage(color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()
+									+ " &rwith &e " + ench.getName() + " " + level));
+						}
+					} else {
+						player.sendMessage(color("&c&l(!) &rPlease enter an Enchantment level higher than 0!"));
 					}
 				} else {
-					player.sendMessage(color("&c&l(!) &rPlease enter an Enchantment level higher than 0!"));
+					player.sendMessage(color(
+							"&c&l(!) &rIncorrect usage! Try doing: &e/give <player> <item> <amount> <enchantment> <level>"));
 				}
 			} else {
-				player.sendMessage(color(
-						"&c&l(!) &rIncorrect usage! Try doing: &e/give <player> <item> <amount> <enchantment> <level>"));
+				player.sendMessage(color("&c&l(!) &rYou need the rank &c&lADMIN &rto use this command!"));
 			}
 		}
 
@@ -897,11 +881,14 @@ public class Core extends JavaPlugin implements Listener {
 					data.exp += num;
 					player.sendMessage("Added " + num + " to your account");
 
-					if (data.exp >= 5000) {
+					if (data.exp >= 2500) {
 						data.level++;
-						data.exp -= 5000;
+						data.exp -= 2500;
 						player.sendMessage("Level upgraded to " + data.level + "!");
 					}
+					if (this.getGameManager().GetInstanceOfPlayer(player) == null)
+						LobbyBoard(player);
+					this.getDataManager().saveData(data);
 				}
 			}
 		}
@@ -1056,7 +1043,8 @@ public class Core extends JavaPlugin implements Listener {
 												+ target.getName() + ChatColor.RESET + " " + num + " Tokens!");
 								target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given "
 										+ num + " Tokens!");
-								LobbyBoard(target);
+								if (this.getGameManager().GetInstanceOfPlayer(player) == null)
+									LobbyBoard(target);
 								this.getDataManager().saveData(data);
 							} else {
 								player.sendMessage(
@@ -1167,7 +1155,7 @@ public class Core extends JavaPlugin implements Listener {
 			PlayerData data = this.getDataManager().getPlayerData(target);
 
 			if (target != null) {
-				if (data.pm == 0) {
+				if (data.pm == 1) {
 					String message = "";
 
 					for (int i = 1; i != args.length; i++) {
@@ -1178,7 +1166,7 @@ public class Core extends JavaPlugin implements Listener {
 							+ target.getName() + ChatColor.RESET + ": " + ChatColor.RESET + message);
 					target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.GRAY
 							+ player.getName() + " --> You" + ChatColor.RESET + ": " + ChatColor.RESET + message);
-				} else if (data.pm == 1) {
+				} else if (data.pm == 0) {
 					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.YELLOW
 							+ target.getName() + ChatColor.LIGHT_PURPLE + " has private messaging disabled!");
 				}
@@ -1204,28 +1192,7 @@ public class Core extends JavaPlugin implements Listener {
 					player.sendMessage(color("&e&l(!) &eTournament mode now enabled!"));
 					for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
 						PlayerData data = this.getDataManager().getPlayerData(onlinePlayers);
-
-						if (data != null) {
-							data.points = 0;
-							LobbyBoard(onlinePlayers);
-						}
-					}
-					this.getDataManager().resetPoints();
-				}
-			}
-		}
-
-		if (cmd.getName().equalsIgnoreCase("tournamentmodewithoutreset")) {
-			if (player.hasPermission("scb.toggleTournament")) {
-				if (tournament == true) {
-					tournament = false;
-					player.sendMessage(color("&e&l(!) &eTournament mode disabled!"));
-					for (Player onlinePlayers : Bukkit.getOnlinePlayers())
-						LobbyBoard(onlinePlayers);
-				} else {
-					tournament = true;
-					player.sendMessage(color("&e&l(!) &eTournament mode now enabled!"));
-					for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
+						data.points = 0;
 						LobbyBoard(onlinePlayers);
 					}
 				}
@@ -1341,7 +1308,7 @@ public class Core extends JavaPlugin implements Listener {
 				teamName.append(Rank.values().length);
 			else
 				teamName.append(r.getTabListIndex());
-
+			
 			teamName.append("_").append(r);
 
 			Scoreboard board = pl.getScoreboard();
@@ -1673,6 +1640,9 @@ public class Core extends JavaPlugin implements Listener {
 
 	@Override
 	public void onDisable() {
+		ByteArrayOutputStream b = new ByteArrayOutputStream();
+		DataOutputStream out = new DataOutputStream(b);
+		
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			p.kickPlayer(color("&c&lSERVER IS RESTARTING\n&e\n" + msg.get(new Random().nextInt(msg.size()))));
 		}

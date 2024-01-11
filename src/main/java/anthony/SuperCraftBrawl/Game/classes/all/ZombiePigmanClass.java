@@ -1,10 +1,13 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
+import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -18,14 +21,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
-import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import net.md_5.bungee.api.ChatColor;
 
 public class ZombiePigmanClass extends BaseClass {
 
@@ -86,7 +81,7 @@ public class ZombiePigmanClass extends BaseClass {
 
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.MONSTER_EGG, 5),
-				instance.getManager().getMain().color("&2&lZombiePigman Pokeball")));
+				instance.getGameManager().getMain().color("&2&lZombiePigman Pokeball")));
 	}
 
 	@Override
@@ -120,7 +115,7 @@ public class ZombiePigmanClass extends BaseClass {
 					}
 
 				}, new ItemStack(Material.MONSTER_EGG));
-				instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+				instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 						player.getLocation().getDirection().multiply(2.0D));
 			}
 		}

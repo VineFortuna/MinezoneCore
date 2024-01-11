@@ -145,14 +145,14 @@ public class SlimeClass extends BaseClass {
 											@SuppressWarnings("deprecation")
 											EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
 													DamageCause.VOID, 5.0);
-											instance.getManager().getMain().getServer().getPluginManager()
+											instance.getGameManager().getMain().getServer().getPluginManager()
 													.callEvent(damageEvent);
 											gamePlayer.damage(5.0, player);
 										}
 									} else {
 										EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
 												DamageCause.VOID, 5.0);
-										instance.getManager().getMain().getServer().getPluginManager()
+										instance.getGameManager().getMain().getServer().getPluginManager()
 												.callEvent(damageEvent);
 										gamePlayer.damage(5.0, player);
 									}
@@ -166,7 +166,7 @@ public class SlimeClass extends BaseClass {
 						}
 
 					}, new ItemStack(Material.SLIME_BALL));
-					instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+					instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 							player.getLocation().getDirection().multiply(2.0D));
 				}
 				event.setCancelled(true);

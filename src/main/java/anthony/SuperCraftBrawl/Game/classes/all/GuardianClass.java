@@ -1,11 +1,10 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.World;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -15,17 +14,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.plugin.Plugin;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
 
 public class GuardianClass extends BaseClass {
 
@@ -100,9 +91,9 @@ public class GuardianClass extends BaseClass {
 				tnt.setVelocity(player.getLocation().getDirection().multiply(1.0));
 				tnt.setFuseTicks(40);
 				tnt.setMetadata("thrower",
-						new FixedMetadataValue(instance.getManager().getMain(), player.getUniqueId().toString()));
+						new FixedMetadataValue(instance.getGameManager().getMain(), player.getUniqueId().toString()));
 
-				Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
+				Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
 					if (!tnt.isDead()) {
 						Location tntLoc = tnt.getLocation();
 						for (Player p : world.getPlayers()) {

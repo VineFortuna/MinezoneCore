@@ -1,7 +1,12 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.Random;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
+import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -16,13 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
-import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import net.md_5.bungee.api.ChatColor;
+import java.util.Random;
 
 public class PresentClass extends BaseClass {
 
@@ -103,13 +102,13 @@ public class PresentClass extends BaseClass {
 
 								if (bc != null) {
 									player.getInventory().setItem(0, bc.getAttackWeapon());
-									player.sendMessage(instance.getManager().getMain()
+									player.sendMessage(instance.getGameManager().getMain()
 											.color("&e&l(!) &rYou stole &e" + hit.getName() + "'s &rattack weapon: &e"
 													+ bc.getAttackWeapon().getType().toString()));
 								}
 							}
 						}, new ItemStack(Material.CHEST));
-						instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+						instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 								player.getLocation().getDirection().multiply(2.0D));
 					}
 				} else if (item.getType() == Material.TRAPPED_CHEST && (event.getAction() == Action.RIGHT_CLICK_AIR
@@ -129,12 +128,12 @@ public class PresentClass extends BaseClass {
 
 								if (bc != null) {
 									bc.LoadArmor(player);
-									player.sendMessage(instance.getManager().getMain()
+									player.sendMessage(instance.getGameManager().getMain()
 											.color("&e&l(!) &rYou stole &e" + hit.getName() + "'s &rarmor"));
 								}
 							}
 						}, new ItemStack(Material.CHEST));
-						instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+						instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 								player.getLocation().getDirection().multiply(2.0D));
 					}
 				} else if (item.getType() == Material.ENDER_CHEST && (event.getAction() == Action.RIGHT_CLICK_AIR
@@ -158,13 +157,13 @@ public class PresentClass extends BaseClass {
 
 									if (chance == 0) {
 										baseVerticalJump = bc.baseVerticalJump;
-										player.sendMessage(instance.getManager().getMain()
+										player.sendMessage(instance.getGameManager().getMain()
 												.color("&e&l(!) &rYou got &e" + hit.getName() + "'s &rDouble Jump!"));
 									} else if (chance == 1) {
 										for (PotionEffect type : hit.getActivePotionEffects()) {
 											player.addPotionEffect(type);
 											player.sendMessage(
-													instance.getManager().getMain().color("&e&l(!) &rYou got one of &e"
+													instance.getGameManager().getMain().color("&e&l(!) &rYou got one of &e"
 															+ hit.getName() + "'s &rpotion effects!"));
 											return;
 										}
@@ -172,7 +171,7 @@ public class PresentClass extends BaseClass {
 								}
 							}
 						}, new ItemStack(Material.ENDER_CHEST));
-						instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+						instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 								player.getLocation().getDirection().multiply(2.0D));
 					}
 				}

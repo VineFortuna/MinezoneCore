@@ -86,12 +86,12 @@ public class IceClass extends BaseClass {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.WOOL),
-						instance.getManager().getMain().color("&bFreeze Ray"), "",
-						instance.getManager().getMain().color("&7Right click to shoot a player with freeze ray!")));
+						instance.getGameManager().getMain().color("&bFreeze Ray"), "",
+						instance.getGameManager().getMain().color("&7Right click to shoot a player with freeze ray!")));
 		playerInv.setItem(2,
 				ItemHelper.setDetails(new ItemStack(Material.PACKED_ICE),
-						instance.getManager().getMain().color("&bFreeze Bomb"), "",
-						instance.getManager().getMain().color("&7Right click to freeze nearby enemies!")));
+						instance.getGameManager().getMain().color("&bFreeze Bomb"), "",
+						instance.getGameManager().getMain().color("&7Right click to freeze nearby enemies!")));
 	}
 
 	@Override
@@ -101,14 +101,14 @@ public class IceClass extends BaseClass {
 			this.cooldownSec = (10 * 1000 - ice.getTime()) / 1000 + 1;
 
 			if (ice.getTime() < 10 * 1000) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&b&lFreeze Ray &rregenerates in: &e" + this.cooldownSec + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &b&lFreeze Ray");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &b&lFreeze Ray");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -166,7 +166,7 @@ public class IceClass extends BaseClass {
 											p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 2 * 20, 0));
 											EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID,
 													5.0);
-											instance.getManager().getMain().getServer().getPluginManager()
+											instance.getGameManager().getMain().getServer().getPluginManager()
 													.callEvent(damageEvent);
 											p.damage(5.0, player);
 										}
@@ -176,7 +176,7 @@ public class IceClass extends BaseClass {
 																												// 2
 																												// seconds
 										EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID, 5.0);
-										instance.getManager().getMain().getServer().getPluginManager()
+										instance.getGameManager().getMain().getServer().getPluginManager()
 												.callEvent(damageEvent);
 										p.damage(5.0, player);
 									}
@@ -191,7 +191,7 @@ public class IceClass extends BaseClass {
 
 				if (nearby.isEmpty()) {
 					player.sendMessage(
-							instance.getManager().getMain().color("&c&l(!) &rNo nearby players have been found :("));
+							instance.getGameManager().getMain().color("&c&l(!) &rNo nearby players have been found :("));
 					return;
 				}
 
@@ -212,7 +212,7 @@ public class IceClass extends BaseClass {
 					}
 				}
 				player.sendMessage(
-						instance.getManager().getMain().color("&2&l(!) &rYou have &b&lFrozen &rnearby players!"));
+						instance.getGameManager().getMain().color("&2&l(!) &rYou have &b&lFrozen &rnearby players!"));
 				player.getInventory().clear(player.getInventory().getHeldItemSlot());
 			}
 		}
@@ -227,8 +227,8 @@ public class IceClass extends BaseClass {
 			// Regeneration ice bomb upon killing.
 			player.getInventory()
 					.addItem(ItemHelper.setDetails(new ItemStack(Material.PACKED_ICE),
-							instance.getManager().getMain().color("&bFreeze Bomb"), "",
-							instance.getManager().getMain().color("&7Right click to freeze nearby enemies!")));
+							instance.getGameManager().getMain().color("&bFreeze Bomb"), "",
+							instance.getGameManager().getMain().color("&7Right click to freeze nearby enemies!")));
 		}
 	}
 }

@@ -14,8 +14,6 @@ import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
-
-import com.comphenix.protocol.wrappers.EnumWrappers.Particle;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.ChatColor;
@@ -23,7 +21,6 @@ import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
-
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -55,7 +52,6 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 import xyz.xenondevs.particle.ParticleEffect;
@@ -248,7 +244,7 @@ public class GameManager implements Listener, PluginMessageListener {
 								if (!(player.getLocation().distance(gamePlayer.getLocation()) <= radius)) {
 									EntityDamageEvent damageEvent = new EntityDamageEvent(player,
 											DamageCause.PROJECTILE, 1.5);
-									instance.getManager().getMain().getServer().getPluginManager()
+									instance.getGameManager().getMain().getServer().getPluginManager()
 											.callEvent(damageEvent);
 									player.damage(1.5);
 								}
@@ -610,7 +606,7 @@ public class GameManager implements Listener, PluginMessageListener {
 											@SuppressWarnings("deprecation")
 											EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID,
 													damage);
-											i.getManager().getMain().getServer().getPluginManager()
+											i.getGameManager().getMain().getServer().getPluginManager()
 													.callEvent(damageEvent);
 											p.damage(damage, player);
 										}
@@ -618,7 +614,7 @@ public class GameManager implements Listener, PluginMessageListener {
 										@SuppressWarnings("deprecation")
 										EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID,
 												damage);
-										i.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+										i.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 										p.damage(damage, player);
 									}
 									p.setVelocity(new Vector(0, 1, 0).multiply(height));
@@ -915,14 +911,14 @@ public class GameManager implements Listener, PluginMessageListener {
 														.equals(instance.team.get(player)))) {
 													EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
 															DamageCause.VOID, 5.0);
-													instance.getManager().getMain().getServer().getPluginManager()
+													instance.getGameManager().getMain().getServer().getPluginManager()
 															.callEvent(damageEvent);
 													gamePlayer.damage(5.0, player);
 												}
 											} else {
 												EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
 														DamageCause.VOID, 5.5);
-												instance.getManager().getMain().getServer().getPluginManager()
+												instance.getGameManager().getMain().getServer().getPluginManager()
 														.callEvent(damageEvent);
 												gamePlayer.damage(5.5, player);
 											}
@@ -936,7 +932,7 @@ public class GameManager implements Listener, PluginMessageListener {
 								}
 
 							}, new ItemStack(Material.TNT));
-							instance.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+							instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}
 						e.setCancelled(true);
@@ -1002,7 +998,7 @@ public class GameManager implements Listener, PluginMessageListener {
 						player.setFireTicks(0);
 						player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
 								+ ChatColor.RESET + "You feel refreshed!");
-						player.playSound(player.getLocation(), Sound.WATER, 1, 1);
+						player.playSound(player.getLocation(), Sound.DRINK, 1, 1);
 						int amount = item.getAmount();
 						if (amount > 0) {
 							amount--;
@@ -1075,7 +1071,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	@EventHandler
-	public void onPortal(PlayerPortalEvent event) {
+	public void onPortal(EntityPortalEvent event) {
 		event.setCancelled(true);
 	}
 
@@ -1311,7 +1307,8 @@ public class GameManager implements Listener, PluginMessageListener {
 					instance.PlayerDeath(player);
 					return;
 				} else
-					instance.classes.get(player).TakeDamage(event);
+					if (instance.classes.containsKey(player))
+						instance.classes.get(player).TakeDamage(event);
 			}
 		}
 	}
@@ -2201,7 +2198,7 @@ public class GameManager implements Listener, PluginMessageListener {
 								}
 
 							}, new ItemStack(Material.MONSTER_EGG));
-							i.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+							i.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}
 						// Skeleton Monster Egg
@@ -2239,7 +2236,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									}
 								}
 							}, new ItemStack(Material.MONSTER_EGG));
-							i.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+							i.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}
 						// Witch Monster Egg
@@ -2266,7 +2263,7 @@ public class GameManager implements Listener, PluginMessageListener {
 								}
 
 							}, new ItemStack(Material.MONSTER_EGG));
-							i.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+							i.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}
 						// Creeper Monster Egg
@@ -2302,7 +2299,7 @@ public class GameManager implements Listener, PluginMessageListener {
 								}
 
 							}, new ItemStack(Material.MONSTER_EGG));
-							i.getManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+							i.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}
 					}
@@ -2310,7 +2307,7 @@ public class GameManager implements Listener, PluginMessageListener {
 				break;
 
 			case NETHER_STAR:
-				if (i != null && i.state == GameState.STARTED && meta.getDisplayName().contains("Bounty")) {
+				if (i != null && i.state == GameState.STARTED && meta != null && meta.getDisplayName().contains("Bounty")) {
 					int amount = item.getAmount();
 					if (amount > 0) {
 						if (amount == 1) {

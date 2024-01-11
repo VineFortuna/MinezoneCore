@@ -1,9 +1,14 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.lang.reflect.Field;
-import java.util.Random;
-import java.util.UUID;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -23,16 +28,9 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import java.lang.reflect.Field;
+import java.util.Random;
+import java.util.UUID;
 
 public class WizardClass extends BaseClass {
 
@@ -181,7 +179,7 @@ public class WizardClass extends BaseClass {
 															"" + ChatColor.RESET + "Magic Wand"),
 													Enchantment.DAMAGE_ALL, 4));
 							fireball = true;
-							player.sendMessage(instance.getManager().getMain()
+							player.sendMessage(instance.getGameManager().getMain()
 									.color("&e&l(!) &rI cast spell.. Fireball fireball fireball!!"));
 						} else if (chance == 1) {
 							for (Player gamePlayer : instance.players) {
@@ -206,7 +204,7 @@ public class WizardClass extends BaseClass {
 																	Enchantment.DAMAGE_ALL, 3),
 															Enchantment.KNOCKBACK, 2));
 							blindness = true;
-							player.sendMessage(instance.getManager().getMain()
+							player.sendMessage(instance.getGameManager().getMain()
 									.color("&e&l(!) &rI cast spell.. Let my enemy see darkness"));
 						} else if (chance == 2) {
 							for (Player gamePlayer : instance.players) {
@@ -231,7 +229,7 @@ public class WizardClass extends BaseClass {
 																			"" + ChatColor.RESET + "Magic Wand"),
 																	Enchantment.DAMAGE_ALL, 3),
 															Enchantment.KNOCKBACK, 1));
-							player.sendMessage(instance.getManager().getMain()
+							player.sendMessage(instance.getGameManager().getMain()
 									.color("&e&l(!) &rI cast spell.. Speedy speedy jumpy jumpy!"));
 						}
 					} else {
