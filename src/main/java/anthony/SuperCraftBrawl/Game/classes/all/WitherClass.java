@@ -108,7 +108,7 @@ public class WitherClass extends BaseClass {
 						@Override
 						public void run() {
 							if (ticks <= 5 && ticks > 0) {
-								String msg = instance.getManager().getMain()
+								String msg = instance.getGameManager().getMain()
 										.color("&9&l(!) &eWither's Bow Cooldown: " + ticks + "s");
 								PacketPlayOutChat packet = new PacketPlayOutChat(
 										ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
@@ -117,7 +117,7 @@ public class WitherClass extends BaseClass {
 							} else if (ticks == 0) {
 								witherBow = null;
 								this.cancel();
-								String msg = instance.getManager().getMain()
+								String msg = instance.getGameManager().getMain()
 										.color("&9&l(!) &eYou can now use Wither's Bow");
 								PacketPlayOutChat packet = new PacketPlayOutChat(
 										ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
@@ -130,7 +130,7 @@ public class WitherClass extends BaseClass {
 						}
 
 					};
-					witherBow.runTaskTimer(instance.getManager().getMain(), 0, 20);
+					witherBow.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
 				}
 			}
 		}

@@ -1,13 +1,13 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.DyeColor;
-import org.bukkit.Effect;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
@@ -15,8 +15,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
@@ -24,14 +24,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.util.Vector;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 
 public class LevitatorClass extends BaseClass {
 
@@ -93,14 +85,14 @@ public class LevitatorClass extends BaseClass {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Levitator
 				&& instance.classes.get(player).getLives() > 0) {
 			if (this.cooldown > 0) {
-				String msg = instance.getManager().getMain()
+				String msg = instance.getGameManager().getMain()
 						.color("&9&lLevitator Bow &rArrow regenerates in: &e" + this.cooldown + "s");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			} else {
-				String msg = instance.getManager().getMain().color("&rYou can use &9&lLevitator Bow");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &9&lLevitator Bow");
 				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
 						(byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
@@ -122,7 +114,7 @@ public class LevitatorClass extends BaseClass {
 						ItemHelper.addEnchant(ItemHelper.addEnchant(
 								ItemHelper.setDetails(new ItemStack(Material.BOW),
 										"" + ChatColor.DARK_PURPLE + "Levitator Bow", "",
-										instance.getManager().getMain()
+										instance.getGameManager().getMain()
 												.color("&7Levitate your opponents by shooting them!")),
 								Enchantment.ARROW_INFINITE, 1), Enchantment.DURABILITY, 1000));
 		playerInv.setItem(2, new ItemStack(Material.ARROW));
@@ -140,7 +132,7 @@ public class LevitatorClass extends BaseClass {
 				this.dir = p.getLocation().getDirection();
 			} else if (this.cooldown > 0) {
 				event.setCancelled(true);
-				player.sendMessage(instance.getManager().getMain().color(
+				player.sendMessage(instance.getGameManager().getMain().color(
 						"&c&l(!) &rYour &eLevitator Bow &ris still on cooldown for &e" + this.cooldown + " seconds"));
 			}
 		}
@@ -159,14 +151,14 @@ public class LevitatorClass extends BaseClass {
 				for (Player gamePlayer : instance.players)
 					gamePlayer.playSound(loc, Sound.EXPLODE, 1, 1);
 
-				Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
+				Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
 					for (Player gamePlayer : instance.players) {
 						gamePlayer.playEffect(p.getLocation(), Effect.EXPLOSION_HUGE, 1);
 						gamePlayer.playSound(loc, Sound.EXPLODE, 3, 1);
 					}
 
 					EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID, 10.0);
-					instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+					instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 					p.damage(10.0, player);
 				}, 20);
 			}

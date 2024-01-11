@@ -1,18 +1,17 @@
 package anthony.SuperCraftBrawl.gui;
 
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class ClassSelectorGUI implements InventoryProvider {
 
@@ -77,6 +76,8 @@ public class ClassSelectorGUI implements InventoryProvider {
 									instance.favClassSelection.add(player);
 									player.sendMessage(
 											main.color("&2&l(!) &rYou selected to go a random favorite class!"));
+								} else {
+									new FavoriteClassesGUI(main).inv.open(player);
 								}
 							}
 						}));

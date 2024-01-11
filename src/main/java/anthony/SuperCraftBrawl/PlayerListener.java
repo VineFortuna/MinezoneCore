@@ -1,17 +1,11 @@
 package anthony.SuperCraftBrawl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.gui.*;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import me.itzzmic.minezone.api.PunishAPI;
+import org.apache.commons.lang3.StringUtils;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -30,18 +24,14 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Door;
 
-import anthony.CrystalWars.game.GameState;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import me.itzzmic.minezone.api.PunishAPI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 public class PlayerListener implements Listener {
 
@@ -90,40 +80,40 @@ public class PlayerListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockBreak(BlockBreakEvent event) {
 		Player player = event.getPlayer();
-		anthony.CrystalWars.game.GameInstance i = main.getCwManager().getInstanceOfPlayer(player);
+		//anthony.CrystalWars.game.GameInstance i = main.getCwManager().getInstanceOfPlayer(player);
 		Block b = event.getBlock();
 
-		if (i != null) {
-			if (i.getState() == GameState.IN_PROGRESS) {
-				if (i.blocksPlaced.contains(b.getLocation().toVector())) {
-					event.setCancelled(false);
-					return;
-				}
-				event.setCancelled(true);
-				player.sendMessage(main.color("&c&l(!) &rYou can only destroy blocks placed by players!"));
-			}
-		} else {
+//		if (i != null) {
+//			if (i.getState() == GameState.IN_PROGRESS) {
+//				if (i.blocksPlaced.contains(b.getLocation().toVector())) {
+//					event.setCancelled(false);
+//					return;
+//				}
+//				event.setCancelled(true);
+//				player.sendMessage(main.color("&c&l(!) &rYou can only destroy blocks placed by players!"));
+//			}
+//		} else {
 			if (player.isOp())
 				event.setCancelled(false);
 			else
 				event.setCancelled(true);
-		}
-		i = null;
-		anthony.skywars.GameInstance i2 = main.getSWManager().getInstanceOfPlayer(player);
-
-		if (i2 != null) {
-			if (i2.getState() == anthony.skywars.GameState.STARTED) {
-				event.setCancelled(false);
-				return;
-			}
-		}
-		i2 = null;
+//		}
+//		i = null;
+//		anthony.skywars.GameInstance i2 = main.getSWManager().getInstanceOfPlayer(player);
+//
+//		if (i2 != null) {
+//			if (i2.getState() == anthony.skywars.GameState.STARTED) {
+//				event.setCancelled(false);
+//				return;
+//			}
+//		}
+//		i2 = null;
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockPlace(BlockPlaceEvent event) {
 		Player player = event.getPlayer();
-		anthony.CrystalWars.game.GameInstance i = main.getCwManager().getInstanceOfPlayer(player);
+		/* anthony.CrystalWars.game.GameInstance i = main.getCwManager().getInstanceOfPlayer(player);
 
 		if (i != null) {
 			if (i.getState() == GameState.IN_PROGRESS) {
@@ -141,7 +131,7 @@ public class PlayerListener implements Listener {
 				event.setCancelled(false);
 				return;
 			}
-		}
+		} */
 		
 		if (!(player.isOp()))
 			event.setCancelled(true);
@@ -265,86 +255,108 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onChat(AsyncPlayerChatEvent event) {
 		// StaffChat
+		event.setCancelled(true);
 		if (main.staffchat.contains(event.getPlayer())) {
 			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
 			String message = tag + event.getPlayer().getDisplayName() + ": " + event.getMessage();
 
 			for (Player staff : main.staffchat) {
 				TellAll(message);
-				event.setCancelled(true);
 				return;
 			}
 		} else {
 			// Chat filter
-			List<String> words = new ArrayList<>(Arrays.asList("nibba", "nigga", "porn", "pornhub", "cum", "nexly",
-					"n e x l y", "fuck you", "fuckyou", "fuck", "shit", "sh!t", "bitch", "pussy", "fucker",
-					"motherfucker", "celestepvp", "celeste", "kys", "pu$$y"));
-			Boolean censored = false;
+			List<String> filteredWords = new ArrayList<>(Arrays.asList(
+					"nibba", "nigga", "nigger", "porn", "pornhub", "cum", "nexly",
+					"fuck you", "fuckyou", "fuck", "shit", "sh!t", "bitch", "pussy", "fucker",
+					"motherfucker", "celestepvp", "celeste", "kys", "pu$$y", "fag", "faggot",
+					"bitchass", "cunt", "retard", "asshole", "penis", "fucker", "twat", "cock", "ass"));
 			PlayerData data = main.getDataManager().getPlayerData(event.getPlayer());
 			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
-			String message = "";
-
+			String message = event.getMessage();
+			
+//			if (event.getPlayer().hasPermission("scb.chat"))
+//				message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
+//						+ ChatColor.YELLOW + "] " + tag + event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
+//			else
+//				message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
+//						+ ChatColor.YELLOW + "] " + tag + ChatColor.GRAY + event.getPlayer().getDisplayName() + ": ";
+			
+			event.setFormat(ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
+							+ ChatColor.YELLOW + "] " + tag); // This part will always be included
+			String displayName = event.getPlayer().getDisplayName(); // Base display name
+			
+			if (data.blue == 1)
+				displayName = ChatColor.BLUE + displayName;
+			else if (data.red == 1)
+				displayName = ChatColor.RED + displayName;
+			else if (data.green == 1)
+				displayName = ChatColor.GREEN + displayName;
+			else if (data.yellow == 1)
+				displayName = ChatColor.YELLOW + displayName;
+			
 			if (event.getPlayer().hasPermission("scb.chat"))
-				message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
-						+ ChatColor.YELLOW + "] " + tag + event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
-			else
-				message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
-						+ ChatColor.YELLOW + "] " + tag + ChatColor.GRAY + event.getPlayer().getDisplayName() + ": ";
-
-			event.setCancelled(true);
-
-			String msg2 = event.getMessage();
-			for (String word : words) {
-				if (msg2.contains(word))
-					censored = true;
-
-				msg2 = msg2.toString().replaceAll(word.toLowerCase(), "***");
+				event.setFormat(event.getFormat() + displayName + ChatColor.RESET + ": ");
+			else {
+				displayName = ChatColor.GRAY + displayName;
+				event.setFormat(event.getFormat() + displayName + ": ");
 			}
-
-			if (censored) {
-				if (event.getPlayer().hasPermission("scb.chat"))
-					message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
-							+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + event.getPlayer().getDisplayName()
-							+ ChatColor.RESET + ": " + msg2.toString();
-				else
-					message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
-							+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + ChatColor.GRAY
-							+ event.getPlayer().getDisplayName() + ": " + msg2.toString();
-			} else {
-				if (data != null) {
-					if (data.blue == 1) {
-						message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
-								+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + ChatColor.BLUE
-								+ event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
-					} else if (data.red == 1) {
-						message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
-								+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + ChatColor.RED
-								+ event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
-					} else if (data.green == 1) {
-						message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
-								+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + ChatColor.GREEN
-								+ event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
-					} else if (data.yellow == 1) {
-						message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
-								+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + ChatColor.YELLOW
-								+ event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
-					}
-				}
+			
+			String tempmsg = "";
+			for (String msgWord : message.split(" ")) { // Loop through each word and check if it is a banned word
+				if (filteredWords.contains(msgWord.toLowerCase())) {
+					tempmsg += StringUtils.repeat('*', msgWord.length()) + " ";
+				} else
+					tempmsg += msgWord + " ";
 			}
-			//AuthAPI api = AuthAPI.get();
+			message = tempmsg.trim();
+			event.setMessage(message);
+
+//			if (censored) {
+//				if (event.getPlayer().hasPermission("scb.chat"))
+//					message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
+//							+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + event.getPlayer().getDisplayName()
+//							+ ChatColor.RESET + ": " + msg2;
+//				else
+//					message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
+//							+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + ChatColor.GRAY
+//							+ event.getPlayer().getDisplayName() + ": " + msg2;
+//			} else {
+//				if (data != null) {
+//					if (data.blue == 1) {
+//						message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
+//								+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + ChatColor.BLUE
+//								+ event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
+//					} else if (data.red == 1) {
+//						message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
+//								+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + ChatColor.RED
+//								+ event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
+//					} else if (data.green == 1) {
+//						message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
+//								+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + ChatColor.GREEN
+//								+ event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
+//					} else if (data.yellow == 1) {
+//						message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
+//								+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + ChatColor.YELLOW
+//								+ event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
+//					}
+//				}
+//			}
+//			//AuthAPI api = AuthAPI.get();
 			PunishAPI pu = PunishAPI.get();
 			if (pu.isPlayerMuted(event.getPlayer().getUniqueId())) {
 				String muteMsg = pu.getMuteMessage(event.getPlayer().getUniqueId());
 				event.getPlayer().sendMessage(muteMsg);
 				return;
 			}
-			if (censored) {
-				//if (api.isPlayerAuthed(event.getPlayer()))
-					Bukkit.broadcastMessage(message);
-			} else {
-				//if (api.isPlayerAuthed(event.getPlayer()))
-					Bukkit.broadcastMessage(message + event.getMessage());
-			}
+				Bukkit.broadcastMessage(event.getFormat() + event.getMessage());
+//			if (censored) {
+//				//if (api.isPlayerAuthed(event.getPlayer()))
+//					Bukkit.broadcastMessage(message);
+//			} else {
+//				//if (api.isPlayerAuthed(event.getPlayer()))
+//					Bukkit.broadcastMessage(message + event.getMessage());
+//			}
 		}
 	}
 
@@ -468,7 +480,8 @@ public class PlayerListener implements Listener {
 				&& block.getType() != Material.WALL_SIGN && block.getType() != Material.WOOL
 				&& block.getType() != Material.CHEST && block.getType() != Material.LONG_GRASS
 				&& block.getType() != Material.RED_ROSE && block.getType() != Material.DEAD_BUSH
-				&& block.getType() != Material.FLOWER_POT) {
+				&& block.getType() != Material.FLOWER_POT && block.getType() != Material.DOUBLE_PLANT
+				&& block.getType() != Material.BED_BLOCK && !(block.getState().getData() instanceof Door)) {
 			Material og = block.getType();
 			Byte data = block.getData();
 			if (og == Material.WOOL) {
