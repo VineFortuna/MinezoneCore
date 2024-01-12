@@ -381,7 +381,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(369.458, 115, 258.441))
 					.setSpecLoc(new Vector(372.435, 100, 188.626))
 					.setBounds(new Vector(372.483, 128, 188.497), 50, 50)
-					.setSignLoc(new Vector(168.300, 106, 669.556))
+					.setSignLoc(new Vector(168.300, 106, 670.508))
 					.setMapType(MapType.DUEL)
 					.setGameType(GameType.DUEL)),
 
@@ -741,14 +741,14 @@ public enum Maps {
 	NetherFortress("NetherFortress",
 			new MapInstance("netherfortress")
 					.setSpawnPos(
-							new Vector(5031.383, 82, 585.477),
-							new Vector(5060.463, 87, 591.422),
-							new Vector(5065.498, 90, 630.511),
-							new Vector(5038.497, 82, 635.504),
-							new Vector(5059.595, 87, 606.429),
-							new Vector(5038.436, 81, 591.371))
-					.setLobbyLoc(new Vector(5000.521, 92, 597.435))
-					.setSpecLoc(new Vector(5050.741, 110, 606.475))
+							new Vector(5031.383, 146, 585.477),
+							new Vector(5060.463, 131, 591.422),
+							new Vector(5065.498, 146, 630.511),
+							new Vector(5038.497, 146, 635.504),
+							new Vector(5059.595, 146, 606.429),
+							new Vector(5038.436, 139, 591.371))
+					.setLobbyLoc(new Vector(5000.521, 157, 597.435))
+					.setSpecLoc(new Vector(5050.741, 160, 606.475))
 					.setBounds(new Vector(5052.502, 160, 610.468), 30, 45)
 					.setSignLoc(new Vector(209.700, 106, 668.489))
 					.setMapType(MapType.SETHBLING)),
@@ -761,7 +761,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(12.536, 186, -150.517))
 					.setSpecLoc(new Vector(10.500, 176, -84.500))
 					.setBounds(new Vector(10.500, 176, -84.500), 50, 35)
-					.setSignLoc(new Vector(209.700, 106, 668.489))
+					.setSignLoc(new Vector(168.300, 107, 667.546))
 					.setGameType(GameType.DUEL)
 					.setMapType(MapType.COMMUNITY)),
 
@@ -773,7 +773,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(12.525, 187, -150.471))
 					.setSpecLoc(new Vector(9.500, 183, -80.500))
 					.setBounds(new Vector(9.500, 183, -80.500), 50, 30)
-					.setSignLoc(new Vector(209.700, 106, 668.489))
+					.setSignLoc(new Vector(168.300, 107, 670.508))
 					.setGameType(GameType.DUEL)
 					.setMapType(MapType.COMMUNITY)),
 	
