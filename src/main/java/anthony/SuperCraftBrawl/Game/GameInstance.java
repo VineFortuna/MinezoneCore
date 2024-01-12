@@ -918,8 +918,7 @@ public class GameInstance {
 		pot100.setType(PotionType.INSTANT_DAMAGE);
 		pot100.setSplash(true);
 		PotionMeta meta = (PotionMeta) bomb.getItemMeta();
-		meta.addCustomEffect(new PotionEffect(PotionEffectType.HARM, 0, 100), true);
-		meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+		meta.addCustomEffect(new PotionEffect(PotionEffectType.HARM, 100, 1000), true);
 		bomb.setItemMeta(meta);
 		pot100.apply(bomb);
 

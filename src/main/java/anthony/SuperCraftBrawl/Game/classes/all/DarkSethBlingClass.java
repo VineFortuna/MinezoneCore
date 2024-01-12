@@ -96,7 +96,10 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 				int i;
 				for (i = 0; i < playerInventory.getSize(); i++) {
 					for (ItemStack itemDrop : this.instance.getAllItemDrops()) {
-						if (playerInventory.getItem(i) != null && playerInventory.getItem(i).isSimilar(itemDrop)) {
+						if (playerInventory.getItem(i) != null && (playerInventory.getItem(i).isSimilar(itemDrop) ||
+								playerInventory.getItem(i).hasItemMeta() &&
+										playerInventory.getItem(i).getItemMeta().getDisplayName()
+												.equals(instance.getGameManager().getMain().color("&4&lBomb")))) {
 							slots.add(Integer.valueOf(i));
 							break;
 						}
@@ -158,7 +161,10 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 	private boolean doesPlayerContainItems(Inventory inv) {
 		for (int i = 0; i < inv.getSize(); i++) {
 			for (ItemStack itemDrop : this.instance.getAllItemDrops()) {
-				if (inv.getItem(i) != null && inv.getItem(i).isSimilar(itemDrop))
+				if (inv.getItem(i) != null && (inv.getItem(i).isSimilar(itemDrop) ||
+						inv.getItem(i).hasItemMeta() &&
+								inv.getItem(i).getItemMeta().getDisplayName()
+										.equals(instance.getGameManager().getMain().color("&4&lBomb"))))
 					return true;
 			}
 		}
