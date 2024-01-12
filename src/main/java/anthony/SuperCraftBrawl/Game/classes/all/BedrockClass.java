@@ -139,17 +139,12 @@ public class BedrockClass extends BaseClass {
 		if (bedrockLava.getTime() < 10000) {
 			String msg = instance.getGameManager().getMain()
 					.color("&6&lBedrock Lava &rregenerates in: &e" + this.lavaCooldownSec + "s");
-			PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
-			CraftPlayer craft = (CraftPlayer) player;
-			craft.getHandle().playerConnection.sendPacket(packet);
+			getActionBarManager().setActionBar(player, "bedrock.cooldown", msg, 2);
 		} else {
 			if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Bedrock
 					&& instance.classes.get(player).getLives() > 0) {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &6&lBedrock Lava");
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "bedrock.cooldown", msg, 2);
 			}
 		}
 	}

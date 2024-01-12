@@ -34,7 +34,6 @@ public class FireworkClass extends BaseClass {
 	private boolean used = false;
 	private int cooldown = 0;
 	private String msg = "";
-	private PacketPlayOutChat packet;
 	private CraftPlayer craft = (CraftPlayer) player;
 	private Random r = new Random();
 
@@ -87,8 +86,7 @@ public class FireworkClass extends BaseClass {
 		playerInv.setItem(2, new ItemStack(Material.ARROW));
 
 		msg = instance.getGameManager().getMain().color("&9&l(!) &eYou can use &c&lFirework Bow");
-		packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
-		craft.getHandle().playerConnection.sendPacket(packet);
+		getActionBarManager().setActionBar(player, "firework.cooldown", msg, 2);
 	}
 
 	@Override
@@ -117,13 +115,11 @@ public class FireworkClass extends BaseClass {
 				this.cooldown--;
 				msg = instance.getGameManager().getMain()
 						.color("&9&l(!) &c&lFirework Bow &ecooldown: " + this.cooldown + "s");
-				packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "firework.cooldown", msg, 2);
 
 				if (this.cooldown == 0) {
 					msg = instance.getGameManager().getMain().color("&9&l(!) &eYou can use &c&lFirework Bow");
-					packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
-					craft.getHandle().playerConnection.sendPacket(packet);
+					getActionBarManager().setActionBar(player, "firework.cooldown", msg, 2);
 				}
 			}
 	}

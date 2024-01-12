@@ -99,17 +99,11 @@ public class WizardClass extends BaseClass {
 			if (wizard.getTime() < 3000) {
 				String msg = "" + ChatColor.RESET + ChatColor.RED + ChatColor.BOLD + "Fireballs " + ChatColor.RESET
 						+ " regenerates in: " + ChatColor.YELLOW + cooldownSec + "s";
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "wizard.cooldown", msg, 2);
 			} else {
 				if (fireball) {
 					String msg = "" + ChatColor.RESET + "You can use " + ChatColor.RED + ChatColor.BOLD + "Fireballs";
-					PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-							(byte) 2);
-					CraftPlayer craft = (CraftPlayer) player;
-					craft.getHandle().playerConnection.sendPacket(packet);
+					getActionBarManager().setActionBar(player, "wizard.cooldown", msg, 2);
 				}
 			}
 		}

@@ -249,10 +249,7 @@ public class SummonerClass extends BaseClass {
 							if (ticks <= 5 && ticks > 0) {
 								String msg = instance.getGameManager().getMain()
 										.color("&9&l(!) &eRandom Spawn Egg Cooldown: " + ticks + "s");
-								PacketPlayOutChat packet = new PacketPlayOutChat(
-										ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
-								CraftPlayer craft = (CraftPlayer) player;
-								craft.getHandle().playerConnection.sendPacket(packet);
+								getActionBarManager().setActionBar(player, "random.egg.cooldown", msg, 2);
 							} else {
 								egg = null;
 								this.cancel();

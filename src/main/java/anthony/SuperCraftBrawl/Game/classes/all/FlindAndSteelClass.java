@@ -161,10 +161,7 @@ public class FlindAndSteelClass extends BaseClass {
 					} else {
 						String msg = instance.getGameManager().getMain()
 								.color("&9&l(!) &eAbility Cooldown: " + ticks + "s");
-						PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-								(byte) 2);
-						CraftPlayer craft = (CraftPlayer) player;
-						craft.getHandle().playerConnection.sendPacket(packet);
+						getActionBarManager().setActionBar(player, "fns.cooldown", msg, 2);
 					}
 
 					ticks--;

@@ -276,17 +276,11 @@ public class CloudClass extends BaseClass {
 			if (cloud.getTime() < 20000) {
 				String msg = instance.getGameManager().getMain()
 						.color("&b&lStorm Cloud &rregenerates in: &e" + this.cooldownSec + "s");
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "cloud.cooldown", msg, 2);
 
 			} else {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &b&lStorm Cloud");
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "cloud.cooldown", msg, 2);
 			}
 		}
 	}
