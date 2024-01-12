@@ -91,7 +91,6 @@ public class SlimeClass extends BaseClass {
 				String msg = "" + ChatColor.RESET + ChatColor.GREEN + ChatColor.BOLD + "Gooey Grenade "
 						+ ChatColor.RESET + " regenerates in: " + ChatColor.YELLOW + cooldownSec + "s";
 				getActionBarManager().setActionBar(player, "slimeball.cooldown", msg, 2);
-				getActionBarManager().setActionBar(player, "slimeball.test", "Test!!!", 20);
 			} else {
 				String msg = "" + ChatColor.RESET + "You can use " + ChatColor.GREEN + ChatColor.BOLD + "Gooey Grenade";
 				getActionBarManager().setActionBar(player, "slimeball.cooldown", msg, 2);

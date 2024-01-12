@@ -77,16 +77,10 @@ public class IrongolemClass extends BaseClass {
 			if (golem.getTime() < 5000) {
 				String msg = instance.getGameManager().getMain()
 						.color("&c&lRose of Elevation &rregenerates in: &e" + this.cooldownSec + "s");
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "rose.cooldown", msg, 2);
 			} else {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &c&lRose of Elevation");
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "rose.cooldown", msg, 2);
 			}
 		}
 	}

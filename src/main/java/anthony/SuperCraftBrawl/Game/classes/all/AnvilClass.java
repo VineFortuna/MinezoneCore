@@ -108,16 +108,10 @@ public class AnvilClass extends BaseClass {
 			if (this.anvil.getTime() < this.stompAbilityCooldown) {
 				String msg = "" + ChatColor.RESET + ChatColor.YELLOW + ChatColor.BOLD + "Goomba Stomp "
 						+ ChatColor.RESET + " regenerates in: " + ChatColor.YELLOW + this.cooldownSec + "s";
-				PacketPlayOutChat packet = new PacketPlayOutChat(
-						IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
-				CraftPlayer craft = (CraftPlayer) this.player;
-				(craft.getHandle()).playerConnection.sendPacket((Packet) packet);
+				getActionBarManager().setActionBar(player, "anvil.cooldown", msg, 2);
 			} else {
 				String msg = "" + ChatColor.RESET + "You can use " + ChatColor.YELLOW + ChatColor.BOLD + "Goomba Stomp";
-				PacketPlayOutChat packet = new PacketPlayOutChat(
-						IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
-				CraftPlayer craft = (CraftPlayer) this.player;
-				(craft.getHandle()).playerConnection.sendPacket((Packet) packet);
+				getActionBarManager().setActionBar(player, "anvil.cooldown", msg, 2);
 			}
 		}
 	}

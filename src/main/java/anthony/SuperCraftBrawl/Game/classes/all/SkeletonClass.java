@@ -59,16 +59,10 @@ public class SkeletonClass extends BaseClass {
 			if (skeleAttack.getTime() < 5000) {
 				String msg = instance.getGameManager().getMain()
 						.color("&7Attack Arrow &rregenerates in: &e" + this.cooldownSec + "s");
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "arrow.cooldown", msg, 2);
 			} else {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &7Attack Arrow");
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "arrow.cooldown", msg, 2);
 			}
 		}
 	}

@@ -92,16 +92,10 @@ public class MagmaCubeClass extends BaseClass {
 			if (magmaCube.getTime() < 5000) {
 				String msg = instance.getGameManager().getMain()
 						.color("&e&lMagmaCube Pokeball &rregenerates in: &e" + this.cooldownSec + "s");
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "magmacube.cooldown", msg, 2);
 			} else {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &e&lMagmaCube Pokeball");
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "magmacube.cooldown", msg, 2);
 			}
 		}
 	}

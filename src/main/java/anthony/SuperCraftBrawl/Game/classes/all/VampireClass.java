@@ -130,9 +130,7 @@ public class VampireClass extends BaseClass {
 		this.launched = false;
 		this.hitPlayer = false;
 		String msg = instance.getGameManager().getMain().color("&9&l(!) &rYou can now use &eVampire's Bow");
-		PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
-		CraftPlayer craft = (CraftPlayer) player;
-		craft.getHandle().playerConnection.sendPacket(packet);
+		getActionBarManager().setActionBar(player, "vampire.cooldown", msg, 2);
 	}
 
 	private void cooldown() {
@@ -152,19 +150,13 @@ public class VampireClass extends BaseClass {
 					if (ticks == 0) {
 						restart();
 						String msg = instance.getGameManager().getMain().color("&9&l(!) &rYou can now use &eVampire's Bow");
-						PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-								(byte) 2);
-						CraftPlayer craft = (CraftPlayer) player;
-						craft.getHandle().playerConnection.sendPacket(packet);
+						getActionBarManager().setActionBar(player, "vampire.cooldown", msg, 2);
 						r = null;
 						this.cancel();
 					} else {
 						String msg = instance.getGameManager().getMain()
 								.color("&9&l(!) &eVampire's Bow Cooldown: " + ticks + "s");
-						PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-								(byte) 2);
-						CraftPlayer craft = (CraftPlayer) player;
-						craft.getHandle().playerConnection.sendPacket(packet);
+						getActionBarManager().setActionBar(player, "vampire.cooldown", msg, 2);
 					}
 
 					ticks--;
