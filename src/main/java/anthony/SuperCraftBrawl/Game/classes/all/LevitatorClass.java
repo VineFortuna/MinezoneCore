@@ -87,16 +87,10 @@ public class LevitatorClass extends BaseClass {
 			if (this.cooldown > 0) {
 				String msg = instance.getGameManager().getMain()
 						.color("&9&lLevitator Bow &rArrow regenerates in: &e" + this.cooldown + "s");
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "levitator.cooldown", msg, 2);
 			} else {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &9&lLevitator Bow");
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "levitator.cooldown", msg, 2);
 			}
 		}
 
