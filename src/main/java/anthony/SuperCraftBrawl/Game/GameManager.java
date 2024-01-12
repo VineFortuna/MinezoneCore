@@ -978,7 +978,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		if (instance != null && instance.state == GameState.STARTED) {
 			BaseClass bc = instance.classes.get(player);
 			if (item != null && item.getType() == Material.MILK_BUCKET) {
-				if (bc != null && bc.getType() != ClassType.BabyCow && bc.getType() != ClassType.Santa) {
+				if (bc != null && bc.getType() != ClassType.BabyCow) {
 					if (player.getGameMode() != GameMode.SPECTATOR) {
 						// Remove bad effects only: poison, wither, slowness, weakness, blindness,
 						// nausea

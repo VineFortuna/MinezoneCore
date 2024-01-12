@@ -30,7 +30,7 @@ public enum ClassType {
 	ZombiePigman(51, 0, 3), Witch(13, 0, 5), ZombieVillager(50, 0, 10), Ice(54, 0, 15), Vampire(53, 800, 0),
 	Bee(55, 425, 0), Jeb(56, 0, 20), Hunter(57, 500, 0), FlintAndSteel(58, 0, 0), WitherSk(59, 1500, 0),
 	Levitator(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30),
-	LargeFernClass(64, 0, Rank.DEFAULT), GingerBreadMan(65, 100, 0), Elf(66, 100, 0), Santa(67, 200, 0);
+	LargeFernClass(64, 0, Rank.DEFAULT);
 
 	// Wolf(63, 0, 35)/* , Guardian(63, 0, 30) */;
 
@@ -80,12 +80,6 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new Cactus(instance, player);
-		case Santa:
-			return new SantaClass(instance, player);
-		case Elf:
-			return new ElfClass(instance, player);
-		case GingerBreadMan:
-			return new GingerBreadManClass(instance, player);
 		case Cloud:
 			return new CloudClass(instance, player);
 		case Firework:
@@ -220,20 +214,6 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new ItemStack(Material.CACTUS);
-		case Santa:
-			ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-
-			SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
-
-			meta.setOwner("Santa");
-			meta.setDisplayName("");
-
-			playerskull.setItemMeta(meta);
-			return new ItemStack(playerskull);
-		case Elf:
-			return new ItemStack(Material.CAKE);
-		case GingerBreadMan:
-			return new ItemStack(Material.COOKIE);
 		case Cloud:
 			return new ItemStack(Material.WOOL);
 		case Firework:
@@ -378,12 +358,6 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return "A pricklyyy living thing, made up of thornws & blood..";
-		case Santa:
-			return "HO HO HO MERRRRRYY CHRISTMAS!!!";
-		case Elf:
-			return "Santa's little helper, but secretly evil...";
-		case GingerBreadMan:
-			return "Do you know, the Muffin Man?!?!?!";
 		case Cloud:
 			return "Use your powers to send cool effects on your opponents!";
 		case Firework:
@@ -548,14 +522,8 @@ public enum ClassType {
 		switch (this) {
 		case Bat:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bat" + ChatColor.RESET;
-		case Santa:
-			return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "Santa" + ChatColor.RESET;
 		case Cloud:
 			return "" + ChatColor.GRAY + ChatColor.ITALIC + "Cloud" + ChatColor.RESET;
-		case Elf:
-			return "" + ChatColor.DARK_GREEN + ChatColor.BOLD + "Elf" + ChatColor.RESET;
-		case GingerBreadMan:
-			return color("&c&lGingerBread&0&lMan") + ChatColor.RESET;
 		// case Wolf:
 		// return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Wolf"
 		// + ChatColor.RESET;
