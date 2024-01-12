@@ -77,17 +77,13 @@ public class Core extends JavaPlugin implements Listener {
 
 	static Core plugin;
 
-	
 	private ActionBarManager actionBarManager;
 	public GameManager gameManager;
 	public FreeClassesGUI inventoryGUI;
 	public anthony.CrystalWars.game.GameManager gm;
-	public anthony.skywars.GameManager swManager;
-	public anthony.skywars.AbilityManager abilityManager;
 	public DonorClassesGUI donorGUI;
 	public GameSelectorGUI hubGUI;
 	public Commands commands;
-	public anthony.skywars.commands.Commands cmd;
 	public World lobbyWorld;
 	public PlayerListener listener;
 	public DoubleJumpManager djManager;
@@ -114,7 +110,7 @@ public class Core extends JavaPlugin implements Listener {
 	public boolean finalEvent = false;
 
 	private long tickCounter = 0;
-	
+
 	public Core() {
 		this.staffchat = new ArrayList<Player>();
 		this.globalchat = new ArrayList<Player>();
@@ -129,25 +125,13 @@ public class Core extends JavaPlugin implements Listener {
 	public ActionBarManager getActionBarManager() {
 		return actionBarManager;
 	}
-	
+
 	public long getCurrentTick() {
 		return tickCounter;
 	}
-	
+
 	public Parkour getParkour() {
 		return p;
-	}
-
-	public anthony.skywars.commands.Commands getSWCommands() {
-		return this.cmd;
-	}
-
-	public anthony.skywars.GameManager getSWManager() {
-		return this.swManager;
-	}
-
-	public anthony.skywars.AbilityManager getAbilityManager() {
-		return this.abilityManager;
 	}
 
 	public anthony.CrystalWars.game.GameManager getCwManager() {
@@ -221,7 +205,7 @@ public class Core extends JavaPlugin implements Listener {
 	public Location getSCBLoc() {
 		return new Location(lobbyWorld, -8.531, 161, -406.493);
 	}
-	
+
 	public void SendPlayerToSCB(Player player) {
 		player.teleport(getSCBLoc());
 	}
@@ -356,9 +340,9 @@ public class Core extends JavaPlugin implements Listener {
 		Bukkit.getMessenger().registerIncomingPluginChannel(this, "BungeeCord", gameManager);
 		messages();
 
-		if (this.getCommands() != null || this.getSWCommands() != null) {
-			String[] commandTypes = { "join", "fav", "shop", "leave", "cw", "l", "players", "class", "spectate", "startgame",
-					"gamestats", "setlives", "purchases", "mainworld", "kit" };
+		if (this.getCommands() != null) {
+			String[] commandTypes = { "join", "fav", "shop", "leave", "cw", "l", "players", "class", "spectate",
+					"startgame", "gamestats", "setlives", "purchases", "mainworld", "kit" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -369,7 +353,7 @@ public class Core extends JavaPlugin implements Listener {
 					System.out.print(command + " was null!");
 			}
 		}
-		
+
 		enablePracticeModes();
 
 		new BukkitRunnable() {
@@ -399,18 +383,18 @@ public class Core extends JavaPlugin implements Listener {
 				}
 			}
 		}.runTaskTimer(this, 0, 20);
-	
+
 		new BukkitRunnable() {
-			
+
 			@Override
 			public void run() {
-				tickCounter++;				
+				tickCounter++;
 			}
 		}.runTaskTimer(this, 0, 1);
 	}
-	
+
 	public static BowPractice bowPractice;
-	
+
 	private void enablePracticeModes() {
 		this.bowPractice = new BowPractice();
 	}
@@ -418,7 +402,7 @@ public class Core extends JavaPlugin implements Listener {
 	public Location GetLobbyLoc() {
 		return new Location(lobbyWorld, -5.533, 143, 19.468);
 	}
-	
+
 	public void SendPlayerToMap(Player player) {
 		player.teleport(GetLobbyLoc());
 	}
@@ -426,7 +410,7 @@ public class Core extends JavaPlugin implements Listener {
 	public Location GetStaffLoc() {
 		return new Location(lobbyWorld, 953.529, 177, 1036.495);
 	}
-	
+
 	public void SendPlayerToStaff(Player player) {
 		player.teleport(GetStaffLoc());
 	}
@@ -437,12 +421,12 @@ public class Core extends JavaPlugin implements Listener {
 		// return new Location(lobbyWorld, 288.507, 119, 2346.529);
 
 		// return new Location(lobbyWorld, -58.507, 125, -18.519, -179, -1);
-		if (this.getCommands() != null || this.getSWCommands() != null)
-			return new Location(lobbyWorld, 189.495, 115, 629.438, -0, 1);
-		else
-			return new Location(lobbyWorld, 0.478, 51, 0.550);
+		// if (this.getCommands() != null || this.getSWCommands() != null)
+		return new Location(lobbyWorld, 189.495, 115, 629.438, -0, 1);
+		// else
+		// return new Location(lobbyWorld, 0.478, 51, 0.550);
 	}
-	
+
 	public void SendPlayerToHub(Player player) {
 		player.teleport(GetHubLoc());
 	}
@@ -652,7 +636,7 @@ public class Core extends JavaPlugin implements Listener {
 					Enchantment ench = testEnchant(args[3]);
 					int level = Integer.parseInt(args[4]);
 					ItemStack item = null;
-					
+
 					if (level > 0) {
 						if (mat != null) {
 							item = new ItemStack(mat, amount);
@@ -1348,7 +1332,7 @@ public class Core extends JavaPlugin implements Listener {
 				teamName.append(Rank.values().length);
 			else
 				teamName.append(r.getTabListIndex());
-			
+
 			teamName.append("_").append(r);
 
 			Scoreboard board = pl.getScoreboard();
@@ -1550,10 +1534,10 @@ public class Core extends JavaPlugin implements Listener {
 
 		// return new Location(lobbyWorld, -58.507, 125, -18.519, -179, -1);
 
-		if (this.getCommands() != null || this.getSWCommands() != null)
+		//if (this.getCommands() != null || this.getSWCommands() != null)
 			return new Location(lobbyWorld, 189.495, 115, 629.438, -0, 1);
-		else
-			return new Location(lobbyWorld, 0.478, 51, 0.550);
+		//else
+			//return new Location(lobbyWorld, 0.478, 51, 0.550);
 	}
 
 	public HashMap<Player, FastBoard> board = new HashMap<>();
@@ -1563,7 +1547,7 @@ public class Core extends JavaPlugin implements Listener {
 		PlayerData data = this.getDataManager().getPlayerData(player);
 		this.board.put(player, board);
 
-		if (this.getCommands() == null && this.getSWCommands() == null) {
+		if (this.getCommands() == null) {
 			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + "MINEZONE");
 			if (data != null) {
 				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
@@ -1581,9 +1565,6 @@ public class Core extends JavaPlugin implements Listener {
 
 		if (tournament == false) {
 			String gameServer = "SUPER CRAFT BLOCKS";
-
-			if (this.getSWCommands() != null)
-				gameServer = "SKYWARS";
 			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + gameServer);
 			if (data != null) {
 				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
@@ -1613,7 +1594,7 @@ public class Core extends JavaPlugin implements Listener {
 	}
 
 	public void LobbyItems(Player player) {
-		if (this.getCommands() != null || this.getSWCommands() != null) {
+		if (this.getCommands() != null) {
 			player.getInventory().setItem(1,
 					ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER), "" + ChatColor.GRAY + "Quick Join"));
 			player.getInventory().setItem(3,
@@ -1682,7 +1663,7 @@ public class Core extends JavaPlugin implements Listener {
 	public void onDisable() {
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
 		DataOutputStream out = new DataOutputStream(b);
-		
+
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			p.kickPlayer(color("&c&lSERVER IS RESTARTING\n&e\n" + msg.get(new Random().nextInt(msg.size()))));
 		}

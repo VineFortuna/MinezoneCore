@@ -272,21 +272,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 				}
 				return true;
 
-			case "sw":
-				if (args.length > 0) {
-					String map = args[0];
-
-					for (anthony.skywars.Maps maps : anthony.skywars.Maps.values()) {
-						if (maps.toString().equalsIgnoreCase(map)) {
-							main.getSWManager().JoinGame(player, maps);
-							return true;
-						}
-					}
-
-					player.sendMessage(main.color("&c&l(!) &rThis map does not exist!"));
-				}
-				return true;
-
 			case "spectate":
 				if (sender instanceof Player) {
 					if (args.length > 0) {

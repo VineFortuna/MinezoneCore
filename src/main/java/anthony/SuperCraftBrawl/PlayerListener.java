@@ -142,22 +142,7 @@ public class PlayerListener implements Listener {
 		if (e.getCause() == EntityDamageEvent.DamageCause.FALL)
 			e.setCancelled(true);
 	}
-
-	@EventHandler
-	public void onPlayerDropItem(PlayerDropItemEvent event) {
-		Player player = event.getPlayer();
-		anthony.skywars.GameInstance i = null;
-		
-		if (main.getSWManager() != null)
-			i = main.getSWManager().getInstanceOfPlayer(player);
-
-		if (i != null && i.getState() == anthony.skywars.GameState.STARTED)
-			event.setCancelled(false);
-		else
-			event.setCancelled(true);
-		i = null;
-	}
-
+	
 	@EventHandler
 	public void armorStand(EntityDamageByEntityEvent e) {
 		if (e.getDamager() instanceof Player)
@@ -385,18 +370,12 @@ public class PlayerListener implements Listener {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 		ItemStack item = event.getItem();
 		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
-		anthony.skywars.GameInstance i2 = null;
-		
-		if (main.getSWManager() != null)
-			i2 = main.getSWManager().getInstanceOfPlayer(player);
 
 		if (item != null) {
 			if (item.getType() == Material.GOLD_BARDING
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 				if ((player.getWorld() == main.getLobbyWorld())
 						|| (i != null && i.state == anthony.SuperCraftBrawl.Game.GameState.WAITING)) {
-					if (i2 != null) //If player is in SkyWars game
-						return;
 					
 					if (data != null) {
 						if (data.paintball > 0) {
