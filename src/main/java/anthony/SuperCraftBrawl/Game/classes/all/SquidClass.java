@@ -21,8 +21,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 public class SquidClass extends BaseClass {
-	private final Cooldown boosterCooldown = new Cooldown(10000);
-	private final Cooldown shurikenCooldown = new Cooldown(10000);
+	private int cooldownSec = 0;
 	private long inkCooldown;
 
 	public SquidClass(GameInstance instance, Player player) {
@@ -63,31 +62,22 @@ public class SquidClass extends BaseClass {
 		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.COAL),
 				instance.getGameManager().getMain().color("&rInk &7(Right Click)")));
 	}
-
+	
 	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
-		/*
-		 * BaseClass bc = instance.classes.get(player); if (bc != null && bc.getLives()
-		 * <= 0) return;
-		 * 
-		 * Random rand = new Random(); int chance = rand.nextInt(9);
-		 * 
-		 * if (chance == 5 || chance == 1 || chance == 3 || chance == 7) { if
-		 * (event.getEntity() instanceof Player) { Player p = (Player)
-		 * event.getEntity(); if (instance.duosMap != null) if
-		 * (instance.team.get(p).equals(instance.team.get(player))) return;
-		 * 
-		 * p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 90, 0, true));
-		 * } }
-		 */
-	}
+	public void Tick(int gameTicks) {
+		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Squid
+				&& instance.classes.get(player).getLives() > 0) {
+			this.cooldownSec = (int) ((inkCooldown - System.currentTimeMillis()) / 1000);
 
-	private void abilityMsg() {
-		/*
-		 * player.sendMessage(""); player.sendMessage(instance.getManager().getMain()
-		 * .color("&e&lCLASS TIP> &rCertain chance to give Blindness I to other players by hitting them!"
-		 * )); player.sendMessage("");
-		 */
+			if (inkCooldown > System.currentTimeMillis()) {
+				String msg = instance.getGameManager().getMain()
+						.color("&rInk regenerates in: &e" + this.cooldownSec + "s");
+				getActionBarManager().setActionBar(player, "squid.cooldown", msg, 2);
+			} else {
+				String msg = instance.getGameManager().getMain().color("&rYou can use Ink");
+				getActionBarManager().setActionBar(player, "squid.cooldown", msg, 2);
+			}
+		}
 	}
 
 	@Override

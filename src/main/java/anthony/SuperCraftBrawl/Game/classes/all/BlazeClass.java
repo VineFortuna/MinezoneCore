@@ -1,9 +1,8 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URLEncoder;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -13,8 +12,6 @@ import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.EntityType;
@@ -37,11 +34,6 @@ import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-
-import java.util.Base64;
-import java.lang.reflect.Field;
 
 public class BlazeClass extends BaseClass {
 
@@ -133,6 +125,60 @@ public class BlazeClass extends BaseClass {
 		}
 	}
 
+	private void spawnBlazes(Location loc, float yaw) {
+		List<Blaze> blazes = new ArrayList<>();
+		player.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rYou spawned &6&lBlaze Army"));
+		Blaze b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
+		b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
+		blazes.add(b);
+
+		if (yaw > 45 && yaw <= 135) {
+			loc = new Location(player.getWorld(), player.getLocation().getX(), player.getLocation().getY(),
+					player.getLocation().getZ() + 1);
+			b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
+			b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
+			blazes.add(b);
+			loc = new Location(player.getWorld(), player.getLocation().getX(), player.getLocation().getY(),
+					player.getLocation().getZ() - 1);
+			b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
+			b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
+			blazes.add(b);
+		} else if (yaw <= -45 && yaw > -135) {
+			loc = new Location(player.getWorld(), player.getLocation().getX(), player.getLocation().getY(),
+					player.getLocation().getZ() + 1);
+			b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
+			b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
+			blazes.add(b);
+			loc = new Location(player.getWorld(), player.getLocation().getX(), player.getLocation().getY(),
+					player.getLocation().getZ() - 1);
+			b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
+			b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
+			blazes.add(b);
+		} else {
+			loc = new Location(player.getWorld(), player.getLocation().getX() + 1, player.getLocation().getY(),
+					player.getLocation().getZ());
+			b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
+			b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
+			blazes.add(b);
+			loc = new Location(player.getWorld(), player.getLocation().getX() - 1, player.getLocation().getY(),
+					player.getLocation().getZ());
+			b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
+			b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
+			blazes.add(b);
+		}
+
+		//After 25 seconds, remove all the blazes that were spawned
+		int delay = 25 * 20;
+		Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new Runnable() {
+			@Override
+			public void run() {
+				for (Blaze b : blazes)
+					if (b != null && !(b.isDead()))
+						b.remove();
+			}
+		}, delay);
+	}
+
 	@SuppressWarnings("deprecation")
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
@@ -142,39 +188,8 @@ public class BlazeClass extends BaseClass {
 			if (player.getGameMode() != GameMode.SPECTATOR) {
 				Location loc = player.getLocation();
 				player.getInventory().clear(player.getInventory().getHeldItemSlot());
-				player.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rYou spawned &6&lBlaze Army"));
-				Blaze b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
-				b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
 				float yaw = loc.getYaw();
-
-				if (yaw > 45 && yaw <= 135) {
-					loc = new Location(player.getWorld(), player.getLocation().getX(), player.getLocation().getY(),
-							player.getLocation().getZ() + 1);
-					b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
-					b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
-					loc = new Location(player.getWorld(), player.getLocation().getX(), player.getLocation().getY(),
-							player.getLocation().getZ() - 1);
-					b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
-					b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
-				} else if (yaw <= -45 && yaw > -135) {
-					loc = new Location(player.getWorld(), player.getLocation().getX(), player.getLocation().getY(),
-							player.getLocation().getZ() + 1);
-					b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
-					b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
-					loc = new Location(player.getWorld(), player.getLocation().getX(), player.getLocation().getY(),
-							player.getLocation().getZ() - 1);
-					b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
-					b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
-				} else {
-					loc = new Location(player.getWorld(), player.getLocation().getX() + 1, player.getLocation().getY(),
-							player.getLocation().getZ());
-					b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
-					b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
-					loc = new Location(player.getWorld(), player.getLocation().getX() - 1, player.getLocation().getY(),
-							player.getLocation().getZ());
-					b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
-					b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
-				}
+				spawnBlazes(loc, yaw);
 			}
 		} else if (item != null && item.getType() == Material.BLAZE_ROD
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
@@ -203,21 +218,15 @@ public class BlazeClass extends BaseClass {
 	@Override
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper
-				.addEnchant(
-						ItemHelper
-								.addEnchant(
-										ItemHelper.addEnchant(
-												ItemHelper.setDetails(new ItemStack(Material.BLAZE_ROD), "",
-														instance.getGameManager().getMain()
-																.color("&7Right click to shoot up"),
-														instance.getGameManager().getMain().color("&7& shoot fireballs!")),
-												Enchantment.DAMAGE_ALL, 1),
-										Enchantment.FIRE_ASPECT, 1),
-						Enchantment.KNOCKBACK, 2);
+				.addEnchant(ItemHelper.addEnchant(ItemHelper.addEnchant(
+						ItemHelper.setDetails(new ItemStack(Material.BLAZE_ROD), "",
+								instance.getGameManager().getMain().color("&7Right click to shoot up"),
+								instance.getGameManager().getMain().color("&7& shoot fireballs!")),
+						Enchantment.DAMAGE_ALL, 1), Enchantment.FIRE_ASPECT, 1), Enchantment.KNOCKBACK, 2);
 		return item;
 	}
-	
-	private void blazeEvent(Player player) { //Fireball launch when right click blaze rod
+
+	private void blazeEvent(Player player) { // Fireball launch when right click blaze rod
 		Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new Runnable() {
 			@Override
 			public void run() {

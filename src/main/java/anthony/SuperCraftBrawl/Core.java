@@ -1393,7 +1393,7 @@ public class Core extends JavaPlugin implements Listener {
 		p.sendMessage("");
 		p.sendMessage("----------------------------------------------");
 		p.sendTitle("" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.UNDERLINE + "MINEZONE",
-				color("&c&lCHRISTMAS UPDATE &r&lAVAILABLE NOW!"));
+				color("&2&lNEW &c&lSCB &2&lUPDATE!"));
 		for (PotionEffect type : p.getActivePotionEffects())
 			p.removePotionEffect(type.getType());
 	}
@@ -1534,10 +1534,10 @@ public class Core extends JavaPlugin implements Listener {
 
 		// return new Location(lobbyWorld, -58.507, 125, -18.519, -179, -1);
 
-		//if (this.getCommands() != null || this.getSWCommands() != null)
-			return new Location(lobbyWorld, 189.495, 115, 629.438, -0, 1);
-		//else
-			//return new Location(lobbyWorld, 0.478, 51, 0.550);
+		// if (this.getCommands() != null || this.getSWCommands() != null)
+		return new Location(lobbyWorld, 189.495, 115, 629.438, -0, 1);
+		// else
+		// return new Location(lobbyWorld, 0.478, 51, 0.550);
 	}
 
 	public HashMap<Player, FastBoard> board = new HashMap<>();

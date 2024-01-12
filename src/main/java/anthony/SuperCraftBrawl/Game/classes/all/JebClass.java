@@ -170,8 +170,8 @@ public class JebClass extends BaseClass {
 	@Override
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper.addEnchant(
-				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.WOOD_SWORD),
-						"" + ChatColor.BLACK + ChatColor.BOLD + "Jeb's Sword"), Enchantment.DAMAGE_ALL, 1),
+				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.STONE_SWORD),
+						"" + ChatColor.BLACK + ChatColor.BOLD + "Jeb's Sword"), Enchantment.KNOCKBACK, 1),
 				Enchantment.DURABILITY, 10000);
 		return item;
 	}
