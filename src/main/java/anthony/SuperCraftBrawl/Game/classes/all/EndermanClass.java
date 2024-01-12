@@ -94,16 +94,10 @@ public class EndermanClass extends BaseClass {
 			if (pearlTimer.getTime() < 10000) {
 				String msg = instance.getGameManager().getMain()
 						.color("&c&lTeleporter &rregenerates in: &e" + this.cooldownSec + "s");
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "teleport.cooldown", msg, 2);
 			} else {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &c&lTeleporter");
-				PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "teleport.cooldown", msg, 2);
 			}
 		}
 	}

@@ -93,16 +93,10 @@ public class SilverfishClass extends BaseClass {
 			if (wallAbility.getTime() < wallCooldown) {
 				String msg = instance.getGameManager().getMain()
 						.color("&7Wall Ability &rregenerates in: &e" + this.cooldownSec + "s");
-				PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "wall.cooldown", msg, 2);
 			} else {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &7Wall Ability");
-				PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
+				getActionBarManager().setActionBar(player, "wall.cooldown", msg, 2);
 			}
 		}
 	}

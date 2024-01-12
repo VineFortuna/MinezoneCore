@@ -194,10 +194,7 @@ public class WitherSkeletonClass extends BaseClass {
 														Enchantment.ARROW_INFINITE, 1));
 						String msg = instance.getGameManager().getMain()
 								.color("&9&l(!) &eYou can now use &7&lWither's Bow");
-						PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-								(byte) 2);
-						CraftPlayer craft = (CraftPlayer) player;
-						craft.getHandle().playerConnection.sendPacket(packet);
+						getActionBarManager().setActionBar(player, "wither.skeleton.cooldown", msg, 2);
 					}
 				}
 			}
