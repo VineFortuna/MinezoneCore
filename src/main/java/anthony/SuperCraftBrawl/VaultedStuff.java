@@ -9,6 +9,6 @@ public enum VaultedStuff {
 	NeoVillage, EggHunt, WitchesBrew, 
 	
 	//Classes:
-	Dweller, Fluxty;
+	Dweller, Fluxty, Elf, GingerBreadMan, Santa;
 
 }

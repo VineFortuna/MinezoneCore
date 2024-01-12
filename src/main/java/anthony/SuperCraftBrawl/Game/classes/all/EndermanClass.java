@@ -34,7 +34,7 @@ public class EndermanClass extends BaseClass {
 	private ItemStack stick;
 	private ItemStack newItem = null;
 	private boolean used = false;
-	private int cooldownSec;
+	private int pearlCooldownSec, itemPickupCooldownSec;
 
 	public EndermanClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -90,15 +90,27 @@ public class EndermanClass extends BaseClass {
 
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Enderman
 				&& instance.classes.get(player).getLives() > 0) {
-			this.cooldownSec = (10000 - pearlTimer.getTime()) / 1000 + 1;
+			this.pearlCooldownSec = (10000 - pearlTimer.getTime()) / 1000 + 1;
+			this.itemPickupCooldownSec = (10000 - enderman.getTime()) / 1000 + 1;
 
+			//For pearl cooldown message
 			if (pearlTimer.getTime() < 10000) {
 				String msg = instance.getGameManager().getMain()
-						.color("&c&lTeleporter &rregenerates in: &e" + this.cooldownSec + "s");
+						.color("&c&lTeleporter &rin: &e" + this.pearlCooldownSec + "s");
 				getActionBarManager().setActionBar(player, "teleport.cooldown", msg, 2);
 			} else {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &c&lTeleporter");
 				getActionBarManager().setActionBar(player, "teleport.cooldown", msg, 2);
+			}
+			
+			//For Item Pickup cooldown message
+			if (enderman.getTime() < 10000) {
+				String msg = instance.getGameManager().getMain()
+						.color("&c&lBlock Pickup &rin: &e" + this.itemPickupCooldownSec + "s");
+				getActionBarManager().setActionBar(player, "itemPickup.cooldown", msg, 2);
+			} else {
+				String msg = instance.getGameManager().getMain().color("&rYou can use &c&lBlock Pickup");
+				getActionBarManager().setActionBar(player, "itemPickup.cooldown", msg, 2);
 			}
 		}
 	}
