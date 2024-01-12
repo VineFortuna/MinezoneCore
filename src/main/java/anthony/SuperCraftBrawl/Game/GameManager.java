@@ -167,17 +167,6 @@ public class GameManager implements Listener, PluginMessageListener {
 					}
 				}
 			}
-
-			if (main.getSWManager() != null) {
-				anthony.skywars.GameInstance i = main.getSWManager().getInstanceOfPlayer(player);
-
-				if (i != null) {
-					if (i.getState() == anthony.skywars.GameState.STARTED)
-						event.setCancelled(false);
-					else
-						event.setCancelled(true);
-				}
-			}
 		}
 	}
 
@@ -854,10 +843,6 @@ public class GameManager implements Listener, PluginMessageListener {
 	public void onInv(InventoryClickEvent e) {
 		Player player = (Player) e.getWhoClicked();
 		GameInstance instance = this.GetInstanceOfPlayer(player);
-		anthony.skywars.GameInstance swInstance = null;
-
-		if (main.getSWManager() != null)
-			swInstance = main.getSWManager().getInstanceOfPlayer(player);
 
 		if (instance != null) {
 			/*
@@ -870,10 +855,6 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (!(player.isOp()))
 				e.setCancelled(true);
 		}
-
-		if (swInstance != null)
-			if (swInstance.getState() == anthony.skywars.GameState.STARTED)
-				e.setCancelled(false);
 	}
 
 	@EventHandler
