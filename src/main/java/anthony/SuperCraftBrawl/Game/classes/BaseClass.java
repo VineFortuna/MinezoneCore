@@ -794,44 +794,6 @@ public abstract class BaseClass {
 
 							if (this.instance != null) {
 								p.sendMessage("Test");
-								if (this.instance.getMap() == Maps.SnowGlobe) {
-									p.sendMessage("Test2");
-									int classID = 66;
-									PlayerData playerData = instance.getGameManager().getMain().getDataManager()
-											.getPlayerData(p);
-
-									if (playerData != null && playerData.challenge100 == 0) {
-										ClassDetails details = playerData.playerClasses.get(classID);
-
-										if (details == null) {
-											details = new ClassDetails();
-											playerData.playerClasses.put(classID, details);
-										}
-										details.setPurchased();
-										p.sendMessage(instance.getGameManager().getMain()
-												.color("&2&l(!) &rYou have unlocked &2&lElf &rclass!"));
-										instance.getGameManager().getMain().getDataManager().saveData(playerData);
-									}
-								} else if (this.instance.getMap() == Maps.SantasWorkshop) {
-									if (pClass != null && pClass.getType() == ClassType.Elf) {
-										int classID = 67;
-										PlayerData playerData = instance.getGameManager().getMain().getDataManager()
-												.getPlayerData(p);
-
-										if (playerData != null && playerData.challenge102 == 0) {
-											ClassDetails details = playerData.playerClasses.get(classID);
-
-											if (details == null) {
-												details = new ClassDetails();
-												playerData.playerClasses.put(classID, details);
-											}
-											details.setPurchased();
-											p.sendMessage(instance.getGameManager().getMain()
-													.color("&2&l(!) &rYou have unlocked &c&lSanta &rclass!"));
-											instance.getGameManager().getMain().getDataManager().saveData(playerData);
-										}
-									}
-								}
 							}
 
 							if (pData.exp >= 2500) {
@@ -1985,48 +1947,6 @@ public abstract class BaseClass {
 								+ "You have gained " + ChatColor.GREEN + baseClass2.totalExp + " EXP!");
 						p.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
 								+ "You have earned " + ChatColor.GREEN + baseClass2.totalTokens + " Tokens!");
-
-						if (this.instance != null) {
-							if (this.instance.getMap() == Maps.SnowGlobe) {
-								int classID = 66;
-								PlayerData playerData = instance.getGameManager().getMain().getDataManager()
-										.getPlayerData(p);
-
-								if (playerData != null && playerData.challenge100 == 0) {
-									playerData.challenge100 = 1;
-									ClassDetails details = playerData.playerClasses.get(classID);
-
-									if (details == null) {
-										details = new ClassDetails();
-										playerData.playerClasses.put(classID, details);
-									}
-									details.setPurchased();
-									p.sendMessage(instance.getGameManager().getMain()
-											.color("&2&l(!) &rYou have unlocked &2&lElf &rclass!"));
-									instance.getGameManager().getMain().getDataManager().saveData(playerData);
-								}
-							} else if (this.instance.getMap() == Maps.SantasWorkshop) {
-								if (baseClass2 != null && baseClass2.getType() == ClassType.Elf) {
-									int classID = 67;
-									PlayerData playerData = instance.getGameManager().getMain().getDataManager()
-											.getPlayerData(p);
-
-									if (playerData != null && playerData.challenge102 == 0) {
-										playerData.challenge102 = 1;
-										ClassDetails details = playerData.playerClasses.get(classID);
-
-										if (details == null) {
-											details = new ClassDetails();
-											playerData.playerClasses.put(classID, details);
-										}
-										details.setPurchased();
-										p.sendMessage(instance.getGameManager().getMain()
-												.color("&2&l(!) &rYou have unlocked &c&lSanta &rclass!"));
-										instance.getGameManager().getMain().getDataManager().saveData(playerData);
-									}
-								}
-							}
-						}
 
 						if (data3.exp >= 2500) {
 							data3.level++;
