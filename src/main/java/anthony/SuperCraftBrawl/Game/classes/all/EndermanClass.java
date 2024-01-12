@@ -9,6 +9,7 @@ import anthony.SuperCraftBrawl.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import org.apache.commons.lang.WordUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -161,7 +162,8 @@ public class EndermanClass extends BaseClass {
 						"&e&lBlock"));
 				player.getInventory().addItem(newItem);
 				player.sendMessage(
-						instance.getGameManager().getMain().color("&r&l(!) &rYou picked up &e1 " + newItem.getType()));
+						instance.getGameManager().getMain().color("&r&l(!) &rYou picked up &e1 " +
+								WordUtils.capitalizeFully(newItem.getType().name().replace('_', ' ').replaceAll("[0-9]", ""))));
 				used = true;
 			}
 		} else if (item != null && newItem != null && item.hasItemMeta() && item.isSimilar(newItem)) {
