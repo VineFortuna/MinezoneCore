@@ -144,12 +144,13 @@ public class PlayerDataManager implements Listener {
 			int challenge101 = set.getInt("Challenge101");
 			int challenge102 = set.getInt("Challenge102");
 			int challenge103 = set.getInt("Challenge103");
+			int matchMvps = set.getInt("MatchMvps");
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
 					exp, level, bestTime, magicbroom, points, withersk, bonusTokens, bonusLevels, paintball,
 					santaoutfit, elf, gingerbreadman, killMsgs, challenge1, challenge2, challenge3, goldApple,
 					glowstone, redstone, web, bottleEXP, broomWinEffect, enderDragonEffect, santaEffect,
-					fireParticlesEffect, challenge100, challenge101, challenge102, challenge103);
+					fireParticlesEffect, challenge100, challenge101, challenge102, challenge103, matchMvps);
 		}
 		set.close();
 		stmt.close();
@@ -190,7 +191,7 @@ public class PlayerDataManager implements Listener {
 
 		return newData;
 	}
-	
+
 	public void resetPoints() {
 		manager.executeUpdateCommand("UPDATE PlayerData SET Points = 0");
 	}
@@ -199,8 +200,8 @@ public class PlayerDataManager implements Listener {
 		System.out.print("Saving data for " + data.playerName);
 		manager.executeUpdateCommand("UPDATE PlayerData SET LastPlayerName = '" + data.playerName + "', LastIP = '"
 				+ data.playerIP + "', RoleID = " + data.roleID + ", Tokens = " + data.tokens + ", Kills = " + data.kills
-				+ ", Challenge100 = " + data.challenge100 + ", Challenge101 = " + data.challenge101
-				+ ", Challenge102 = " + data.challenge102 + ", Challenge103 = " + data.challenge103
+				+ ", MatchMvps = " + data.matchMvps + ", Challenge100 = " + data.challenge100 + ", Challenge101 = "
+				+ data.challenge101 + ", Challenge102 = " + data.challenge102 + ", Challenge103 = " + data.challenge103
 				+ ", EnderDragonEffect = " + data.enderDragonEffect + ", SantaEffect = " + data.santaEffect
 				+ ", FireParticlesEffect = " + data.fireParticlesEffect + ", Losses = " + data.losses + ", Votes = "
 				+ data.votes + ", FlawlessWins = " + data.flawlessWins + ", BonusTokens = " + data.bonusTokens
