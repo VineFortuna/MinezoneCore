@@ -91,6 +91,9 @@ public class GameManager implements Listener, PluginMessageListener {
 				BaseClass bc = i.classes.get(player);
 				if (bc != null) {
 					if (event.getTarget() instanceof LivingEntity) {
+						if (i.classes.get(player).getLives() <= 0) {
+							event.setCancelled(true);
+						}
 						if (i.getMap() != null) {
 							if (event.getEntity().getName().contains(player.getName()))
 								event.setCancelled(true);
@@ -111,10 +114,6 @@ public class GameManager implements Listener, PluginMessageListener {
 									event.setCancelled(true);
 						}
 					}
-				}
-
-				if (i.classes.get(player).getLives() <= 0) {
-					event.setCancelled(true);
 				}
 			} else {
 				i = this.GetInstanceOfSpectator(player);
