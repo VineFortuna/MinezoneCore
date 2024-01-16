@@ -844,7 +844,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		Player player = (Player) e.getWhoClicked();
 		GameInstance instance = this.GetInstanceOfPlayer(player);
 
-		if (instance != null) {
+		//if (instance != null) {
 			/*
 			 * if (e.getCurrentItem().getType() == Material.COAL) { e.setCancelled(true); }
 			 * else if (e.getCurrentItem().getType() == Material.IRON_INGOT) {
@@ -854,7 +854,12 @@ public class GameManager implements Listener, PluginMessageListener {
 			 */
 			if (!(player.isOp()))
 				e.setCancelled(true);
-		}
+		//}
+	}
+	
+	@EventHandler
+	public void onPlayerDropItem(PlayerDropItemEvent e) {
+		e.setCancelled(true);
 	}
 
 	@EventHandler

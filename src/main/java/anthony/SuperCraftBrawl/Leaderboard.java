@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 
 import anthony.SuperCraftBrawl.ranks.Rank;
 
@@ -22,6 +24,8 @@ public class Leaderboard {
 	private HashMap<UUID, Integer> wins;
 	private HashMap<UUID, Rank> RoleID;
 	private ArrayList<UUID> lead;
+	private ArrayList<String> lead2;
+	private ResultSet set;
 	private Connection c;
 	private int i;
 
@@ -31,6 +35,7 @@ public class Leaderboard {
 		RoleID = new HashMap<>();
 		wins = new HashMap<>();
 		lead = new ArrayList<>();
+		lead2 = new ArrayList<>();
 		c = main.getDatabaseManager().getConnection();
 		Bukkit.getScheduler().runTaskTimerAsynchronously(main, () -> {
 			wins.clear();
@@ -39,33 +44,38 @@ public class Leaderboard {
 			try {
 				Statement s = c.createStatement();
 				int a = 0;
-				ResultSet set = s.executeQuery("SELECT UUID, Wins, RoleID FROM PlayerData ORDER BY Wins DESC");
+				set = s.executeQuery("SELECT UUID, LastPlayerName, Wins, RoleID FROM PlayerData ORDER BY Wins DESC");
 				while (set.next()) {
-					if (a == 10){
+					if (a == 10) {
 						break;
 					}
 					UUID id = UUID.fromString(set.getString("UUID"));
-					String name;
-				OfflinePlayer off = Bukkit.getOfflinePlayer(id);
-				name = off.getName();
-				if (name == null){
-					continue;
-				}
-				a++;
+					String name = set.getString("LastPlayerName");
+					if (name == null) {
+						continue;
+					}
+					a++;
 					lead.add(id);
+					lead2.add(name);
 					wins.put(id, set.getInt("Wins"));
 					RoleID.put(id, Rank.getRankFromID(set.getInt("RoleID")));
 				}
-				set.close();
-				s.close();
 				if (i == 0) {
 					i = 1;
 					Bukkit.getScheduler().runTask(main, () -> {
-						winsBoard();
+						try {
+							winsBoard();
+						} catch (SQLException e) {
+							e.printStackTrace();
+						}
 					});
 				} else {
 					Bukkit.getScheduler().runTask(main, () -> {
-						updateBoard();
+						try {
+							updateBoard();
+						} catch (SQLException e) {
+							e.printStackTrace();
+						}
 					});
 				}
 			} catch (Exception e) {
@@ -76,8 +86,8 @@ public class Leaderboard {
 	}
 
 	public void close() {
-		for (Entity e : main.getLobbyWorld().getEntities()){
-			if (e instanceof ArmorStand){
+		for (Entity e : main.getLobbyWorld().getEntities()) {
+			if (e instanceof ArmorStand) {
 				e.remove();
 			}
 		}
@@ -87,11 +97,11 @@ public class Leaderboard {
 		RoleID.clear();
 	}
 
-	public void winsBoard() {
+	public void winsBoard() throws SQLException {
 		for (Entity entity : main.getLobbyWorld().getEntities()) {
 			if (entity.getType() == EntityType.ARMOR_STAND) {
 				ArmorStand st = (ArmorStand) entity;
-				
+
 				if (!(st.getItemInHand().getType() == Material.CHEST))
 					entity.remove();
 			}
@@ -109,26 +119,25 @@ public class Leaderboard {
 
 		for (UUID id : lead) {
 			loc.setY(loc.getY() - 0.24);
-			String name;
-			OfflinePlayer off = Bukkit.getOfflinePlayer(id);
-			name = off.getName();
+			String name = lead2.get(count - 1);
 
 			Integer win = wins.get(id);
 			stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 			stand.setVisible(false);
 			stand.setGravity(false);
 			stand.setCustomNameVisible(true);
-			stand.setCustomName(main.color("&e&l#" + count + ": " + RoleID.get(id).getTag() + " &e" + name + " &r- " + win));
+			stand.setCustomName(
+					main.color("&e&l#" + count + ": " + RoleID.get(id).getTag() + " &e" + name + " &r- " + win));
 
 			count++;
 		}
 	}
 
-	public void updateBoard() {
+	public void updateBoard() throws SQLException {
 		for (Entity e : main.getLobbyWorld().getEntities())
 			if (e instanceof ArmorStand)
 				e.remove();
-		
+
 		Location loc = new Location(main.getLobbyWorld(), 189.519, 106.5, 678.471);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
@@ -140,16 +149,15 @@ public class Leaderboard {
 
 		for (UUID id : lead) {
 			loc.setY(loc.getY() - 0.24);
-			String name;
-			OfflinePlayer off = Bukkit.getOfflinePlayer(id);
-			name = off.getName();
+			String name = lead2.get(count - 1);
 
 			Integer win = wins.get(id);
 			stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 			stand.setVisible(false);
 			stand.setGravity(false);
 			stand.setCustomNameVisible(true);
-			stand.setCustomName(main.color("&e&l#" + count + ": " + RoleID.get(id).getTag() + " &e" + name + " &r- " + win));
+			stand.setCustomName(
+					main.color("&e&l#" + count + ": " + RoleID.get(id).getTag() + " &e" + name + " &r- " + win));
 
 			count++;
 		}

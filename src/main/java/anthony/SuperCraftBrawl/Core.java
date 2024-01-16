@@ -1352,6 +1352,8 @@ public class Core extends JavaPlugin implements Listener {
 			team.setPrefix(rank);
 		}
 	}
+	
+	public Map<Player, Holograms> holograms = new HashMap<Player, Holograms>();
 
 	@SuppressWarnings("deprecation")
 	@EventHandler
@@ -1622,6 +1624,9 @@ public class Core extends JavaPlugin implements Listener {
 		player.setAllowFlight(true);
 		LobbyItems(player);
 		mysteryChestHologram(player);
+		
+		if (!(holograms.containsKey(player)))
+			holograms.put(player, new Holograms(this, player)); //All players' holograms
 	}
 
 	public Location GetSpawnLocation() {
