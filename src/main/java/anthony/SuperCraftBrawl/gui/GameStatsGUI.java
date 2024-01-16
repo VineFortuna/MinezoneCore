@@ -42,9 +42,8 @@ public class GameStatsGUI implements InventoryProvider {
 				}
 			}
 		}
-		if (matchMvp.totalKills == 0) {
+		if (matchMvp.totalKills == 0)
 			matchMvp = null;
-		}
 		
 		return matchMvp;
 	}
