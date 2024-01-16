@@ -22,23 +22,23 @@ public class Holograms {
 	private Core main;
 	private Player player;
 	private List<EntityArmorStand> playerStats;
-	
+
 	/*
-	 * This entire class keeps track of all the holograms the player
-	 * should have in the lobby
+	 * This entire class keeps track of all the holograms the player should have in
+	 * the lobby
 	 */
 	public Holograms(Core main, Player player) {
 		this.main = main;
 		this.player = player;
 		this.playerStats = new ArrayList<EntityArmorStand>();
-		giveHolograms(); //To give holograms to player in lobby when joining the server
+		giveHolograms(); // To give holograms to player in lobby when joining the server
 	}
-	
+
 	private void giveHolograms() {
 		scbPlayerStats();
 		destroyBoards();
 	}
-	
+
 	private void scbPlayerStats() {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 
@@ -67,7 +67,7 @@ public class Holograms {
 			packet = new PacketPlayOutSpawnEntityLiving(stand);
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
-			
+
 			loc = new Location(main.getLobbyWorld(), 193.500, 105.3, 660.500);
 			stand = new EntityArmorStand(s);
 
@@ -79,7 +79,7 @@ public class Holograms {
 			packet = new PacketPlayOutSpawnEntityLiving(stand);
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
-			
+
 			loc = new Location(main.getLobbyWorld(), 193.500, 105.0, 660.500);
 			stand = new EntityArmorStand(s);
 
@@ -91,7 +91,7 @@ public class Holograms {
 			packet = new PacketPlayOutSpawnEntityLiving(stand);
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
-			
+
 			loc = new Location(main.getLobbyWorld(), 193.500, 104.7, 660.500);
 			stand = new EntityArmorStand(s);
 
@@ -103,7 +103,7 @@ public class Holograms {
 			packet = new PacketPlayOutSpawnEntityLiving(stand);
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
-			
+
 			loc = new Location(main.getLobbyWorld(), 193.500, 104.4, 660.500);
 			stand = new EntityArmorStand(s);
 
@@ -115,12 +115,12 @@ public class Holograms {
 			packet = new PacketPlayOutSpawnEntityLiving(stand);
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
-			
+
 			loc = new Location(main.getLobbyWorld(), 193.500, 104.1, 660.500);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&rMatch Mvps: &eSoonTM"));
+			stand.setCustomName(color("&rMatch Mvps: &e" + data.matchMvps));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -129,10 +129,10 @@ public class Holograms {
 			playerStats.add(stand);
 		}
 	}
-	
+
 	/*
-	 * This method gets rid of all the holograms from player if
-	 * they aren't in the lobby
+	 * This method gets rid of all the holograms from player if they aren't in the
+	 * lobby
 	 */
 	private void destroyBoards() {
 		BukkitRunnable r = new BukkitRunnable() {
@@ -142,12 +142,10 @@ public class Holograms {
 				if (player.getWorld() != main.getLobbyWorld()) {
 					if (main.holograms.containsKey(player))
 						main.holograms.remove(player);
-					
+
 					for (EntityArmorStand stand : playerStats) {
-						PacketPlayOutEntityDestroy destroyPacket = new PacketPlayOutEntityDestroy(
-								stand.getId());
-						((CraftPlayer) player).getHandle().playerConnection
-								.sendPacket(destroyPacket);
+						PacketPlayOutEntityDestroy destroyPacket = new PacketPlayOutEntityDestroy(stand.getId());
+						((CraftPlayer) player).getHandle().playerConnection.sendPacket(destroyPacket);
 					}
 					playerStats.clear();
 				}
@@ -155,9 +153,9 @@ public class Holograms {
 		};
 		r.runTaskTimer(main, 0, 1);
 	}
-	
+
 	public String color(String c) {
 		return ChatColor.translateAlternateColorCodes('&', c);
 	}
-	
+
 }

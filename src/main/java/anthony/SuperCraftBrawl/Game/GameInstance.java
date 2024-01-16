@@ -820,9 +820,8 @@ public class GameInstance {
 	}
 
 	/*
-	 * Starts the timer of 30 seconds for each item drop
-	 * in a game. If player is DarkSethBling, it tells
-	 * them the location the item spawned
+	 * Starts the timer of 30 seconds for each item drop in a game. If player is
+	 * DarkSethBling, it tells them the location the item spawned
 	 */
 	public void startLightningDropsTimer() {
 		BukkitRunnable runnable = new BukkitRunnable() {
@@ -1481,9 +1480,52 @@ public class GameInstance {
 		}
 	}
 
+	/*
+	 * Returns the Match Mvp of a game
+	 */
+	private BaseClass matchMvp() {
+		BaseClass matchMvp = null;
+		for (Entry<Player, BaseClass> entry : this.allClasses.entrySet()) {
+			if (entry.getKey() != null) {
+				if (matchMvp == null || entry.getValue().totalKills > matchMvp.totalKills)
+					matchMvp = entry.getValue();
+				else if (entry.getValue().totalKills == matchMvp.totalKills) {
+					if (this.getWinnerList().contains(entry.getKey())
+							|| entry.getValue().totalDeaths < matchMvp.totalDeaths)
+						matchMvp = entry.getValue();
+				}
+			}
+		}
+		if (matchMvp.totalKills == 0)
+			matchMvp = null;
+
+		return matchMvp;
+	}
+
+	/*
+	 * Checks who was the Match Mvp
+	 */
+	private void checkForMatchMvp() {
+		if (matchMvp() != null) {
+			for (Entry<Player, BaseClass> entry : this.allClasses.entrySet()) {
+				if (entry.getKey() != null) {
+					if (matchMvp() == entry.getValue()) {
+						Player mvp = entry.getKey();
+						PlayerData data = gameManager.getMain().getDataManager().getPlayerData(mvp);
+						
+						if (data != null)
+							data.matchMvps++;
+						return;
+					}
+				}
+			}
+		}
+	}
+
 	public void WinGame(List<Player> winners) {
 		// playerPosition.add(winner);
 		PlayerData data3 = null;
+		checkForMatchMvp();
 		for (Player winner : winners) {
 			data3 = gameManager.getMain().getDataManager().getPlayerData(winner);
 			winnerList.add(winner);
