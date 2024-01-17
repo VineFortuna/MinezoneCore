@@ -67,7 +67,7 @@ public class SquidClass extends BaseClass {
 	public void Tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Squid
 				&& instance.classes.get(player).getLives() > 0) {
-			this.cooldownSec = (int) ((inkCooldown - System.currentTimeMillis()) / 1000);
+			this.cooldownSec = (int) ((inkCooldown - System.currentTimeMillis()) / 1000) + 1;
 
 			if (inkCooldown > System.currentTimeMillis()) {
 				String msg = instance.getGameManager().getMain()
