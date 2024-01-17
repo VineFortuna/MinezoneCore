@@ -88,11 +88,11 @@ public class SlimeClass extends BaseClass {
 			this.cooldownSec = (5000 - slimeBall.getTime()) / 1000 + 1;
 
 			if (slimeBall.getTime() < 5000) {
-				String msg = "" + ChatColor.RESET + ChatColor.GREEN + ChatColor.BOLD + "Gooey Grenade "
-						+ ChatColor.RESET + " regenerates in: &e" + cooldownSec + "s";
+				String msg = instance.getGameManager().getMain()
+						.color("&a&lGooey Grenade &rregenerates in: &e" + cooldownSec + "s");
 				getActionBarManager().setActionBar(player, "slimeball.cooldown", msg, 2);
 			} else {
-				String msg = "" + ChatColor.RESET + "You can use " + ChatColor.GREEN + ChatColor.BOLD + "Gooey Grenade";
+				String msg = instance.getGameManager().getMain().color("&rYou can use &a&lGooey Grenade");
 				getActionBarManager().setActionBar(player, "slimeball.cooldown", msg, 2);
 			}
 		}
