@@ -72,7 +72,7 @@ public class Holograms {
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&rLevel: &e" + data.level));
+			stand.setCustomName(color("&eLevel: &r" + data.level));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -84,7 +84,7 @@ public class Holograms {
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&rWins: &e" + data.wins));
+			stand.setCustomName(color("&eWins: &r" + data.wins));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -96,7 +96,7 @@ public class Holograms {
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&rFlawless Wins: &e" + data.flawlessWins));
+			stand.setCustomName(color("&eFlawless Wins: &r" + data.flawlessWins));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -108,7 +108,7 @@ public class Holograms {
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&rKills: &e" + data.kills));
+			stand.setCustomName(color("&eKills: &r" + data.kills));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -120,7 +120,7 @@ public class Holograms {
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&rMatch Mvps: &e" + data.matchMvps));
+			stand.setCustomName(color("&eMatch MVPs: &r" + data.matchMvps));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
