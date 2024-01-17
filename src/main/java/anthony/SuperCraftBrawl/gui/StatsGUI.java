@@ -36,7 +36,9 @@ public class StatsGUI implements InventoryProvider {
 							"" + ChatColor.RESET + ChatColor.GREEN + "Winstreak: " + ChatColor.RESET + data.winstreak,
 							"" + ChatColor.RESET + ChatColor.GREEN + "Flawless Wins: " + ChatColor.RESET
 									+ data.flawlessWins,
-							"" + ChatColor.RESET + ChatColor.GREEN + "Losses: " + ChatColor.RESET + data.losses, "",
+							"" + ChatColor.RESET + ChatColor.GREEN + "Losses: " + ChatColor.RESET + data.losses,
+							"" + ChatColor.RESET + ChatColor.GREEN + "Match MVPs: " + ChatColor.RESET
+									+ data.matchMvps, "",
 							"" + ChatColor.RESET + ChatColor.GREEN + "Kills: " + ChatColor.RESET + data.kills,
 							"" + ChatColor.RESET + ChatColor.GREEN + "Deaths: " + ChatColor.RESET + data.deaths), e -> {
 							}));
