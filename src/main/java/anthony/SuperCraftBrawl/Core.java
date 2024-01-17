@@ -1419,7 +1419,7 @@ public class Core extends JavaPlugin implements Listener {
 				EntityArmorStand stand = new EntityArmorStand(s);
 
 				stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-				stand.setCustomName("" + ChatColor.BLUE + ChatColor.BOLD + "MYSTERY CHESTS");
+				stand.setCustomName("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MYSTERY CHESTS");
 				stand.setCustomNameVisible(true);
 				stand.setGravity(false);
 				stand.setInvisible(true);
