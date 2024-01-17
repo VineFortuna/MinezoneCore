@@ -55,7 +55,6 @@ import anthony.SuperCraftBrawl.gui.DonorClassesGUI;
 import anthony.SuperCraftBrawl.gui.FreeClassesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
 import anthony.SuperCraftBrawl.gui.StatsGUI;
-import anthony.SuperCraftBrawl.gui.StatsTargetGUI;
 import anthony.SuperCraftBrawl.leaderboards.KillsBoard;
 import anthony.SuperCraftBrawl.npcs.NPCManager;
 import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
@@ -1262,7 +1261,7 @@ public class Core extends JavaPlugin implements Listener {
 				} else if (args.length == 1) {
 					Player target = Bukkit.getServer().getPlayerExact(args[0]);
 					if (target != null) {
-						new StatsTargetGUI(this, target).inv.open(player);
+						new StatsGUI(this, target).inv.open(player);
 						player.sendMessage(
 								"" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Opening "
 										+ ChatColor.YELLOW + target.getName() + "'s" + ChatColor.RESET + " statistics");
