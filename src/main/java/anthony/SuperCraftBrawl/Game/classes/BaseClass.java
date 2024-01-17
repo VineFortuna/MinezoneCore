@@ -1281,7 +1281,7 @@ public abstract class BaseClass {
 										TellAll(instance.getGameManager().getMain().color("&2&l(!) " + getPlayerRank(p)
 												+ "&r" + p.getPlayer().getName() + " " + bc.getType().getTag()
 												+ " &cwas not strong enough to encounter " + getPlayerRank(killer)
-												+ " &r" + killer.getName() + " " + baseClass.getType().getTag()));
+												+ "&r" + killer.getName() + " " + baseClass.getType().getTag()));
 									} else {
 										this.giveStats(killer, p);
 										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1300,7 +1300,7 @@ public abstract class BaseClass {
 										TellAll(instance.getGameManager().getMain().color("&2&l(!) " + getPlayerRank(p)
 												+ "&r" + p.getPlayer().getName() + " " + baseClass2.getType().getTag()
 												+ " &cwas not strong enough to encounter " + getPlayerRank(killer)
-												+ " &r" + killer.getName() + " " + baseClass.getType().getTag()));
+												+ "&r" + killer.getName() + " " + baseClass.getType().getTag()));
 									} else {
 										this.giveStats(killer, p);
 										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1315,7 +1315,7 @@ public abstract class BaseClass {
 										TellAll(instance.getGameManager().getMain().color("&2&l(!) " + getPlayerRank(p)
 												+ "&r" + p.getPlayer().getName() + " " + baseClass2.getType().getTag()
 												+ " &cwas not strong enough to encounter " + getPlayerRank(killer)
-												+ " &r" + killer.getName() + " " + baseClass.getType().getTag()));
+												+ "&r" + killer.getName() + " " + baseClass.getType().getTag()));
 									} else {
 										this.giveStats(killer, p);
 										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1426,7 +1426,7 @@ public abstract class BaseClass {
 											TellAll(instance.getGameManager().getMain().color("&2&l(!) " + getPlayerRank(p)
 													+ "&r" + p.getPlayer().getName() + " " + bc.getType().getTag()
 													+ " &cwas not strong enough to encounter " + getPlayerRank(d)
-													+ " &r" + d.getName() + " " + baseClass.getType().getTag()));
+													+ "&r" + d.getName() + " " + baseClass.getType().getTag()));
 											this.healthPots(d);
 										} else {
 											this.giveStats(d, p);
@@ -1444,7 +1444,7 @@ public abstract class BaseClass {
 											TellAll(instance.getGameManager().getMain().color("&2&l(!) " + getPlayerRank(p)
 													+ "&r" + p.getPlayer().getName() + " " + bc.getType().getTag()
 													+ " &cwas not strong enough to encounter " + getPlayerRank(d)
-													+ " &r" + d.getName() + " " + baseClass.getType().getTag()));
+													+ "&r" + d.getName() + " " + baseClass.getType().getTag()));
 											this.healthPots(d);
 										} else {
 											this.giveStats(d, p);
@@ -1466,7 +1466,7 @@ public abstract class BaseClass {
 													+ "&r" + p.getPlayer().getName() + " "
 													+ baseClass2.getType().getTag()
 													+ " &cwas not strong enough to encounter " + getPlayerRank(d)
-													+ " &r" + d.getName() + " " + baseClass.getType().getTag()));
+													+ "&r" + d.getName() + " " + baseClass.getType().getTag()));
 											this.healthPots(d);
 										} else {
 											this.giveStats(d, p);
@@ -1484,7 +1484,7 @@ public abstract class BaseClass {
 													+ "&r" + p.getPlayer().getName() + " "
 													+ baseClass2.getType().getTag()
 													+ " &cwas not strong enough to encounter " + getPlayerRank(d)
-													+ " &r" + d.getName() + " " + baseClass.getType().getTag()));
+													+ "&r" + d.getName() + " " + baseClass.getType().getTag()));
 											this.healthPots(d);
 										} else {
 											this.giveStats(d, p);
@@ -1560,7 +1560,7 @@ public abstract class BaseClass {
 														.color("&2&l(!) " + getPlayerRank(p) + "&r"
 																+ p.getPlayer().getName() + " " + bc.getType().getTag()
 																+ " &cwas not strong enough to encounter "
-																+ getPlayerRank(shooter) + " &r" + shooter.getName()
+																+ getPlayerRank(shooter) + "&r" + shooter.getName()
 																+ " " + baseClass.getType().getTag()));
 												this.healthPots(shooter);
 											} else {
@@ -1606,7 +1606,7 @@ public abstract class BaseClass {
 																+ p.getPlayer().getName() + " "
 																+ baseClass2.getType().getTag()
 																+ " &cwas not strong enough to encounter "
-																+ getPlayerRank(shooter) + " &r" + shooter.getName()
+																+ getPlayerRank(shooter) + "&r" + shooter.getName()
 																+ " " + baseClass.getType().getTag()));
 												this.healthPots(shooter);
 											} else {
@@ -1626,7 +1626,7 @@ public abstract class BaseClass {
 																+ p.getPlayer().getName() + " "
 																+ baseClass2.getType().getTag()
 																+ " &cwas not strong enough to encounter "
-																+ getPlayerRank(shooter) + " &r" + shooter.getName()
+																+ getPlayerRank(shooter) + "&r" + shooter.getName()
 																+ " " + baseClass.getType().getTag()));
 												this.healthPots(shooter);
 											} else {
@@ -1695,7 +1695,7 @@ public abstract class BaseClass {
 									TellAll(instance.getGameManager().getMain()
 											.color("&2&l(!) " + getPlayerRank(p) + "&r" + p.getPlayer().getName() + " "
 													+ bc.getType().getTag() + " &cwas not strong enough to encounter "
-													+ getPlayerRank(killer) + " &r" + killer.getName() + " "
+													+ getPlayerRank(killer) + "&r" + killer.getName() + " "
 													+ baseClass.getType().getTag()));
 									this.healthPots(killer);
 								} else {
@@ -1713,7 +1713,7 @@ public abstract class BaseClass {
 									TellAll(instance.getGameManager().getMain()
 											.color("&2&l(!) " + getPlayerRank(p) + "&r" + p.getPlayer().getName() + " "
 													+ bc.getType().getTag() + " &cwas not strong enough to encounter "
-													+ getPlayerRank(killer) + " &r" + killer.getName() + " "
+													+ getPlayerRank(killer) + "&r" + killer.getName() + " "
 													+ baseClass.getType().getTag()));
 									this.healthPots(killer);
 								} else {
@@ -1736,7 +1736,7 @@ public abstract class BaseClass {
 											.color("&2&l(!) " + getPlayerRank(p) + "&r" + p.getPlayer().getName() + " "
 													+ baseClass2.getType().getTag()
 													+ " &cwas not strong enough to encounter " + getPlayerRank(killer)
-													+ " &r" + killer.getName() + " " + baseClass.getType().getTag()));
+													+ "&r" + killer.getName() + " " + baseClass.getType().getTag()));
 									this.healthPots(killer);
 								} else {
 									this.giveStats(killer, p);
@@ -1754,7 +1754,7 @@ public abstract class BaseClass {
 											.color("&2&l(!) " + getPlayerRank(p) + "&r" + p.getPlayer().getName() + " "
 													+ baseClass2.getType().getTag()
 													+ " &cwas not strong enough to encounter " + getPlayerRank(killer)
-													+ " &r" + killer.getName() + " " + baseClass.getType().getTag()));
+													+ "&r" + killer.getName() + " " + baseClass.getType().getTag()));
 									this.healthPots(killer);
 								} else {
 									this.giveStats(killer, p);
