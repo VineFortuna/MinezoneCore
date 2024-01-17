@@ -336,7 +336,7 @@ public class Core extends JavaPlugin implements Listener {
 		ag = new ActiveGamesGUI(this);
 		p = new Parkour(this);
 		lb = new Leaderboard(this);
-		kb = new KillsBoard(this);
+		//kb = new KillsBoard(this);
 		// swManager = new anthony.skywars.GameManager(this);
 		// abilityManager = new anthony.skywars.AbilityManager(this);
 		// cheat = new AntiCheat(this);
