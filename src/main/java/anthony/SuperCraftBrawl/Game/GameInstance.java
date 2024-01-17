@@ -6,6 +6,7 @@ import anthony.SuperCraftBrawl.Game.classes.all.DarkSethBlingClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.Holograms;
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
@@ -1382,6 +1383,10 @@ public class GameInstance {
 							spectator.sendMessage(getGameManager().getMain().color("&2&l(!) &rThe game on &r&l"
 									+ mapName + " &rhas ended. Moving you back to spawn.."));
 							spectator.spigot().setCollidesWithEntities(true);
+
+							if (!(getGameManager().getMain().holograms.containsKey(spectator)))
+								getGameManager().getMain().holograms.put(spectator,
+										new Holograms(getGameManager().getMain(), spectator));
 							for (Player p : Bukkit.getOnlinePlayers()) {
 								p.showPlayer(spectator);
 							}
@@ -1512,7 +1517,7 @@ public class GameInstance {
 					if (matchMvp() == entry.getValue()) {
 						Player mvp = entry.getKey();
 						PlayerData data = gameManager.getMain().getDataManager().getPlayerData(mvp);
-						
+
 						if (data != null)
 							data.matchMvps++;
 						return;
