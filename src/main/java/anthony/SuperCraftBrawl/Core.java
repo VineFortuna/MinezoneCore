@@ -55,7 +55,7 @@ import anthony.SuperCraftBrawl.gui.DonorClassesGUI;
 import anthony.SuperCraftBrawl.gui.FreeClassesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
 import anthony.SuperCraftBrawl.gui.StatsGUI;
-import anthony.SuperCraftBrawl.gui.StatsTargetGUI;
+import anthony.SuperCraftBrawl.leaderboards.KillsBoard;
 import anthony.SuperCraftBrawl.npcs.NPCManager;
 import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -101,6 +101,7 @@ public class Core extends JavaPlugin implements Listener {
 	public Parkour p;
 	// public AntiCheat cheat;
 	public Leaderboard lb;
+	public KillsBoard kb;
 	private ArrayList<String> msg;
 	public Map<Player, Player> wagers = new HashMap<Player, Player>();
 
@@ -144,6 +145,10 @@ public class Core extends JavaPlugin implements Listener {
 
 	public Leaderboard getLeaderboard() {
 		return lb;
+	}
+	
+	public KillsBoard getKillsLeaderboard() {
+		return kb;
 	}
 
 	public String color(String c) {
@@ -331,6 +336,7 @@ public class Core extends JavaPlugin implements Listener {
 		ag = new ActiveGamesGUI(this);
 		p = new Parkour(this);
 		lb = new Leaderboard(this);
+		kb = new KillsBoard(this);
 		// swManager = new anthony.skywars.GameManager(this);
 		// abilityManager = new anthony.skywars.AbilityManager(this);
 		// cheat = new AntiCheat(this);
@@ -1255,7 +1261,7 @@ public class Core extends JavaPlugin implements Listener {
 				} else if (args.length == 1) {
 					Player target = Bukkit.getServer().getPlayerExact(args[0]);
 					if (target != null) {
-						new StatsTargetGUI(this, target).inv.open(player);
+						new StatsGUI(this, target).inv.open(player);
 						player.sendMessage(
 								"" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Opening "
 										+ ChatColor.YELLOW + target.getName() + "'s" + ChatColor.RESET + " statistics");

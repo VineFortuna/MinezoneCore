@@ -17,16 +17,26 @@ public class StatsGUI implements InventoryProvider {
 
 	public Core main;
 	public SmartInventory inv;
+	private Player target;
 
 	public StatsGUI(Core main) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Your Statistics").build();
 		this.main = main;
+	}
 
+	public StatsGUI(Core main, Player target) {
+		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
+				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + target.getName()).build();
+		this.main = main;
+		this.target = target;
 	}
 
 	@Override
 	public void init(Player player, InventoryContents contents) {
+		if (this.target != null)
+			player = target;
+		
 		PlayerData data = main.getDataManager().getPlayerData(player);
 
 		if (data != null) {
@@ -37,9 +47,8 @@ public class StatsGUI implements InventoryProvider {
 							"" + ChatColor.RESET + ChatColor.GREEN + "Flawless Wins: " + ChatColor.RESET
 									+ data.flawlessWins,
 							"" + ChatColor.RESET + ChatColor.GREEN + "Losses: " + ChatColor.RESET + data.losses,
-							"" + ChatColor.RESET + ChatColor.GREEN + "Match MVPs: " + ChatColor.RESET
-									+ data.matchMvps, "",
-							"" + ChatColor.RESET + ChatColor.GREEN + "Kills: " + ChatColor.RESET + data.kills,
+							"" + ChatColor.RESET + ChatColor.GREEN + "Match MVPs: " + ChatColor.RESET + data.matchMvps,
+							"", "" + ChatColor.RESET + ChatColor.GREEN + "Kills: " + ChatColor.RESET + data.kills,
 							"" + ChatColor.RESET + ChatColor.GREEN + "Deaths: " + ChatColor.RESET + data.deaths), e -> {
 							}));
 		}
@@ -47,6 +56,6 @@ public class StatsGUI implements InventoryProvider {
 
 	@Override
 	public void update(Player player, InventoryContents contents) {
-
+		
 	}
 }
