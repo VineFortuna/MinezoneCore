@@ -92,7 +92,7 @@ public class SquidClass extends BaseClass {
 				break;
 			case COAL:
 				if (inkCooldown > System.currentTimeMillis()) {
-					int seconds = (int) ((inkCooldown - System.currentTimeMillis()) / 1000);
+					int seconds = (int) ((inkCooldown - System.currentTimeMillis()) / 1000) + 1;
 					player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "Your Ink is still on cooldown for "
 							+ ChatColor.YELLOW + seconds + " more seconds ");
 					return;
