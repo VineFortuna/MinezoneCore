@@ -83,7 +83,7 @@ public class KillsBoard {
 				e.printStackTrace();
 			}
 
-		}, 0, 10 * 60);
+		}, 0, 20 * 60);
 	}
 
 	public void close() {
@@ -144,7 +144,7 @@ public class KillsBoard {
 		stand.setVisible(false);
 		stand.setGravity(false);
 		stand.setCustomNameVisible(true);
-		stand.setCustomName(main.color("&e&l<==&nSCB LIFETIME WINS&r&e&l==>"));
+		stand.setCustomName(main.color("&e&l<==&nLIFETIME KILLS&r&e&l==>"));
 		int count = 1;
 		loc.setY(loc.getY() - 0.4);
 
