@@ -170,6 +170,10 @@ public class EndermanClass extends BaseClass {
 					newItem.setType(Material.BED);
 				else if (newItem.getData() instanceof Banner)
 					newItem.setType(Material.BANNER);
+				else if (newItem.getType() == Material.BREWING_STAND)
+					newItem.setType(Material.BREWING_STAND_ITEM);
+				else if (newItem.getType() == Material.CAULDRON)
+					newItem.setType(Material.CAULDRON_ITEM);
 				ItemHelper.setDetails(newItem, instance.getGameManager().getMain().color(
 						"&e&lBlock"));
 				player.getInventory().addItem(newItem);
