@@ -20,7 +20,7 @@ public class CooldownNatowski {
     }
 
     public long getRemainingCooldownSeconds() {
-        return remainingCooldownMillis() / 1000;
+        return cooldownDurationSeconds - remainingCooldownMillis() / 1000;
     }
 
     public boolean isReady() {
