@@ -30,7 +30,7 @@ public enum ClassType {
 	ZombiePigman(51, 0, 3), Witch(13, 0, 5), ZombieVillager(50, 0, 10), Ice(54, 0, 15), Vampire(53, 800, 0),
 	Bee(55, 425, 0), Jeb(56, 0, 20), Hunter(57, 500, 0), FlintAndSteel(58, 0, 0), WitherSk(59, 1500, 0),
 	Levitator(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30),
-	LargeFernClass(64, 0, Rank.DEFAULT);
+	LargeFern(64, 0, Rank.DEFAULT);
 
 	// Wolf(63, 0, 35)/* , Guardian(63, 0, 30) */;
 
@@ -196,7 +196,7 @@ public enum ClassType {
 			return new BunnyClass(instance, player);
 		case Pig:
 			return new PigClass(instance, player);
-		case LargeFernClass:
+		case LargeFern:
 			return new LargeFernClass(instance, player);
 // 		case Wolf:
 // 			return new WolfClass(instance, player);
@@ -339,7 +339,7 @@ public enum ClassType {
 			return new ItemStack(Material.POTATO_ITEM);
 		case Ocelot:
 			return new ItemStack(Material.RAW_FISH);
-		case LargeFernClass:
+		case LargeFern:
 			return new ItemStack(Material.DOUBLE_PLANT, 1, (short) 3);
 // 		case Wolf:
 // 			return new ItemStack(Material.BONE);
@@ -476,7 +476,7 @@ public enum ClassType {
 			return "Use your Diamond of Despair to play tricks on your opponents!";
 		case Pig:
 			return "Hit and run. In your panic, you gain speed when hit";
-		case LargeFernClass:
+		case LargeFern:
 			return "??????";
 //		case Wolf:
 //			return "Have your brothers defend you from enemies!";
@@ -649,7 +649,7 @@ public enum ClassType {
 			return "" + ChatColor.YELLOW + ChatColor.BOLD + "ButterBro" + ChatColor.RESET;
 		case Pig:
 			return "" + ChatColor.BLUE + ChatColor.ITALIC + "Pig" + ChatColor.RESET;
-		case LargeFernClass:
+		case LargeFern:
 			return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + "LargeFern" + ChatColor.RESET;
 // 		case Wolf:
 // 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Wolf" + ChatColor.RESET;

@@ -55,23 +55,8 @@ public class VampireClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		String skullOwner = "273485a7-6d51-5be3-8d1d-8c71bb9d01e4";
 		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTMyMDI2OGIyYjJiODlhOGY5ZDg0MDI2MTY5YWQyNWQ0ZTkzZjczODY5NmFjZWM1Y2E1ODcyNjU3ZTdlNjYifX19";
-		ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
-		SkullMeta meta = (SkullMeta) skull.getItemMeta();
-		GameProfile profile = new GameProfile(UUID.fromString(skullOwner), null);
-		profile.getProperties().put("textures", new Property("textures", texture));
-		Field profileField = null;
-
-		try {
-			profileField = meta.getClass().getDeclaredField("profile");
-			profileField.setAccessible(true);
-			profileField.set(meta, profile);
-		} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-			e.printStackTrace();
-		}
-
-		skull.setItemMeta(meta);
+		ItemStack skull = ItemHelper.createSkullTexture(texture);
 		playerEquip.setHelmet(skull);
 		playerEquip.setChestplate(makeGray(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));

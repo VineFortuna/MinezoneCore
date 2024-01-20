@@ -40,11 +40,11 @@ public class BabyCowClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
+		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDBiYzYxYjk3NTdhN2I4M2UwM2NkMjUwN2EyMTU3OTEzYzJjZjAxNmU3YzA5NmE0ZDZjZjFmZTFiOGRiIn19fQ==";
+		ItemStack playerskull = ItemHelper.createSkullTexture(texture);
 
 		SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
-
-		meta.setOwner("BabyCow");
+		
 		meta.setDisplayName("");
 
 		playerskull.setItemMeta(meta);
@@ -98,8 +98,6 @@ public class BabyCowClass extends BaseClass {
 			if (item.getType() == Material.MILK_BUCKET
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 				event.setCancelled(true);
-				for (PotionEffect type : player.getActivePotionEffects())
-					player.removePotionEffect(type.getType());
 				player.setFireTicks(0);
 				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
 				player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 600, 0));

@@ -45,7 +45,8 @@ public class SummonerClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		// Head (helmet)
-		ItemStack playerHead = ItemHelper.createSkullHeadPlayer(1, "Slimess", "&5Summoner Head");
+		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTA2ODZhMGQ5MzliYzlhY2YxY2UxZjY2OGQ0MDg0ZTdlNjRkNjE1NTUzZmIxYzM2ZjUxMjdiNDFjOGNiNzkxMSJ9fX0=";
+		ItemStack playerHead = ItemHelper.setDetails(ItemHelper.createSkullTexture(texture), "&5Summoner Head");
 
 		// Chestplate
 		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.PURPLE, "&5Summoner's Chestplate");

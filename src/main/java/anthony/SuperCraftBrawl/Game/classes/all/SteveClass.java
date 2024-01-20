@@ -7,6 +7,7 @@ import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.gui.CraftableItemsGUI;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.SkullType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -52,7 +53,7 @@ public class SteveClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		playerEquip.setHelmet(new ItemStack(Material.LEATHER_HELMET));
+		playerEquip.setHelmet(new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal()));
 		playerEquip.setChestplate(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 3));
 		playerEquip.setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));

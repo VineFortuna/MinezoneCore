@@ -43,16 +43,7 @@ public class SatermelonClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-
-		SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
-
-		meta.setOwner("AnthonyFortuna");
-		meta.setDisplayName("");
-
-		playerskull.setItemMeta(meta);
-
-		playerEquip.setHelmet(playerskull);
+		playerEquip.setHelmet(new ItemStack(Material.MELON_BLOCK));
 		playerEquip.setChestplate(makeGreen(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 		playerEquip.setLeggings(makeGreen(new ItemStack(Material.LEATHER_LEGGINGS)));

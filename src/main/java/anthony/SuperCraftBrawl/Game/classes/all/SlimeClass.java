@@ -56,23 +56,9 @@ public class SlimeClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		String skullOwner = "bd49fca8-317f-5838-8063-91e8e47423f1";
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMThjYmUzNzk5NDUwNTgyM2NhODVmNDQ4ZGExNTFmN2NjMTJiMTRmODIxZTlkOTZmZDg2MWJhOTQ4OGUwYWZmOCJ9fX0=";
-		ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
-		SkullMeta meta = (SkullMeta) skull.getItemMeta();
-		GameProfile profile = new GameProfile(UUID.fromString(skullOwner), null);
-		profile.getProperties().put("textures", new Property("textures", texture));
-		Field profileField = null;
-
-		try {
-			profileField = meta.getClass().getDeclaredField("profile");
-			profileField.setAccessible(true);
-			profileField.set(meta, profile);
-		} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-			e.printStackTrace();
-		}
-
-		skull.setItemMeta(meta);
+		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWI1ODk5MDBmNDkwNzM3ZjU1OGQ5NzJhZGViYjQ0YjFhZjk2N2ZlOGQwMzJmMTc4NTU4ZDkzNzcxY2E3YzUzZSJ9fX0=";
+		ItemStack skull = ItemHelper.createSkullTexture(texture);
+		
 		playerEquip.setHelmet(skull);
 		playerEquip.setChestplate(makeYellow(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));

@@ -959,31 +959,31 @@ public class GameManager implements Listener, PluginMessageListener {
 		Player player = e.getPlayer();
 		ItemStack item = e.getItem();
 		GameInstance instance = this.GetInstanceOfPlayer(player);
-
+		
 		if (instance != null && instance.state == GameState.STARTED) {
 			BaseClass bc = instance.classes.get(player);
 			if (item != null && item.getType() == Material.MILK_BUCKET) {
-				if (bc != null && bc.getType() != ClassType.BabyCow) {
-					if (player.getGameMode() != GameMode.SPECTATOR) {
-						// Remove bad effects only: poison, wither, slowness, weakness, blindness,
-						// nausea
-						for (PotionEffect pe : player.getActivePotionEffects())
-							if (pe.getType().equals(PotionEffectType.POISON)
-									|| pe.getType().equals(PotionEffectType.SLOW)
-									|| pe.getType().equals(PotionEffectType.SLOW_DIGGING)
-									|| pe.getType().equals(PotionEffectType.BLINDNESS)
-									|| pe.getType().equals(PotionEffectType.WEAKNESS)
-									|| pe.getType().equals(PotionEffectType.WITHER)
-									|| pe.getType().equals(PotionEffectType.CONFUSION)
-									|| pe.getType().equals(PotionEffectType.HUNGER)) {
-
-								player.removePotionEffect(pe.getType());
-							}
-						// Remove fire by setting fire ticks to 0
-						player.setFireTicks(0);
+				if (player.getGameMode() != GameMode.SPECTATOR) {
+					// Remove bad effects only: poison, wither, slowness, weakness, blindness,
+					// nausea
+					for (PotionEffect pe : player.getActivePotionEffects())
+						if (pe.getType().equals(PotionEffectType.POISON)
+								|| pe.getType().equals(PotionEffectType.SLOW)
+								|| pe.getType().equals(PotionEffectType.SLOW_DIGGING)
+								|| pe.getType().equals(PotionEffectType.BLINDNESS)
+								|| pe.getType().equals(PotionEffectType.WEAKNESS)
+								|| pe.getType().equals(PotionEffectType.WITHER)
+								|| pe.getType().equals(PotionEffectType.CONFUSION)
+								|| pe.getType().equals(PotionEffectType.HUNGER)) {
+							
+							player.removePotionEffect(pe.getType());
+						}
+					// Remove fire by setting fire ticks to 0
+					player.setFireTicks(0);
+					player.playSound(player.getLocation(), Sound.DRINK, 1, 1);
+					if (bc != null && bc.getType() != ClassType.BabyCow) { // BabyCow milk bucket has its own behaviour
 						player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
 								+ ChatColor.RESET + "You feel refreshed!");
-						player.playSound(player.getLocation(), Sound.DRINK, 1, 1);
 						int amount = item.getAmount();
 						if (amount > 0) {
 							amount--;
