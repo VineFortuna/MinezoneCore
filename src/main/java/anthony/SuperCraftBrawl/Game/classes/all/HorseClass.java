@@ -8,6 +8,7 @@ import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.ItemHelper;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -65,20 +66,11 @@ public class HorseClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		ItemStack playerHead = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-
-		SkullMeta meta = (SkullMeta) playerHead.getItemMeta();
-
-		meta.setOwner("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmU3OGM0NzYyNjc0ZGRlOGIxYTVhMWU4NzNiMzNmMjhlMTNlN2MxMDJiMTkzZjY4MzU0OWIzOGRjNzBlMCJ9fX0=");
-		meta.setDisplayName("aaaa");
-
-		playerHead.setItemMeta(meta);
+		// Head (helmet)
+		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDJlYjk2N2FiOTRmZGQ0MWE2MzI1ZjEyNzdkNmRjMDE5MjI2ZTVjZjM0OTc3ZWVlNjk1OTdmYWZjZjVlIn19fQ==";
+		ItemStack playerHead = ItemHelper.setDetails(ItemHelper.createSkullTexture(texture), "&6Horse Head");
 
 		playerEquip.setHelmet(playerHead);
-
-
-//		// Head (helmet)
-//		ItemStack playerHead = ItemHelper.createSkullHeadPlayer(1, "kuba432110", "&6Horse Head");
 
 		// Chestplate
 		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.ORANGE, "&6Horse Chestplate");

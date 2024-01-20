@@ -46,7 +46,9 @@ public class SilverfishClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		// Head (helmet)
-		ItemStack playerHead = ItemHelper.createSkullHeadPlayer(1, "kuba432110", "&7Silverfish Head");
+		String texture = "\"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGE5MWRhYjgzOTFhZjVmZGE1NGFjZDJjMGIxOGZiZDgxOWI4NjVlMWE4ZjFkNjIzODEzZmE3NjFlOTI0NTQwIn19fQ==";
+		ItemStack skull = ItemHelper.createSkullTexture(texture);
+		playerEquip.setHelmet(skull);
 
 		// Chestplate
 		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.GRAY, "&7Silverfish Chestplate");
@@ -63,25 +65,6 @@ public class SilverfishClass extends BaseClass {
 		playerEquip.setChestplate(chestplate);
 		playerEquip.setLeggings(leggings);
 		playerEquip.setBoots(boots);
-
-		String skullOwner = "62c23398-f60c-5c15-8a3c-94aeed5f4c42";
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTgxNGNmNWM0YzdmZmViMjA3NTU1ODU3NjJjYjhiOTc2OWNlYzU4Y2E5OTcwY2FhOTAzNzBjZTI3YjcxNGVhNiJ9fX0=";
-		ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
-		SkullMeta meta = (SkullMeta) skull.getItemMeta();
-		GameProfile profile = new GameProfile(UUID.fromString(skullOwner), null);
-		profile.getProperties().put("textures", new Property("textures", texture));
-		Field profileField = null;
-
-		try {
-			profileField = meta.getClass().getDeclaredField("profile");
-			profileField.setAccessible(true);
-			profileField.set(meta, profile);
-		} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-			e.printStackTrace();
-		}
-
-		skull.setItemMeta(meta);
-		playerEquip.setHelmet(skull);
 	}
 
 	@Override

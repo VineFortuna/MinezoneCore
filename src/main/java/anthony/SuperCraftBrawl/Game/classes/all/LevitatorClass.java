@@ -49,16 +49,8 @@ public class LevitatorClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
 
-		SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
-
-		meta.setOwner("_Shulker_");
-		meta.setDisplayName("");
-
-		playerskull.setItemMeta(meta);
-
-		playerEquip.setHelmet(playerskull);
+		playerEquip.setHelmet(new ItemStack(Material.STAINED_CLAY, 1, (short) 10));
 		playerEquip.setChestplate(makePurple(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 		playerEquip.setLeggings(makePurple(new ItemStack(Material.LEATHER_LEGGINGS)));

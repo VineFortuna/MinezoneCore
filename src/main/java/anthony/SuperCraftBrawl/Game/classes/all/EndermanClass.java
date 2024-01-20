@@ -50,13 +50,11 @@ public class EndermanClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
+		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2E1OWJiMGE3YTMyOTY1YjNkOTBkOGVhZmE4OTlkMTgzNWY0MjQ1MDllYWRkNGU2YjcwOWFkYTUwYjljZiJ9fX0=";
+		ItemStack playerskull = ItemHelper.createSkullTexture(texture);
 
 		SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
-
-		meta.setOwner("_Enderman");
 		meta.setDisplayName("");
-
 		playerskull.setItemMeta(meta);
 
 		playerEquip.setHelmet(playerskull);

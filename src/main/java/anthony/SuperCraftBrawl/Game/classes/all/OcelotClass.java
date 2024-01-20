@@ -52,23 +52,9 @@ public class OcelotClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		String skullOwner = "3e668180-5fcc-5653-81e6-561c2df877d9";
 		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjU0ODM1MTlhYmY1MjM0MGNmM2FkOTNlNTE3NTY4YWQyNzZhZWFhMTg1OGZlMzNjNzdkOTM1M2Q5NzYwZDkwNSJ9fX0=";
-		ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
-		SkullMeta meta = (SkullMeta) skull.getItemMeta();
-		GameProfile profile = new GameProfile(UUID.fromString(skullOwner), null);
-		profile.getProperties().put("textures", new Property("textures", texture));
-		Field profileField = null;
-
-		try {
-			profileField = meta.getClass().getDeclaredField("profile");
-			profileField.setAccessible(true);
-			profileField.set(meta, profile);
-		} catch (NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
-			e.printStackTrace();
-		}
-
-		skull.setItemMeta(meta);
+		ItemStack skull = ItemHelper.createSkullTexture(texture);
+		
 		playerEquip.setHelmet(skull);
 		playerEquip.setChestplate(makeYellow(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
