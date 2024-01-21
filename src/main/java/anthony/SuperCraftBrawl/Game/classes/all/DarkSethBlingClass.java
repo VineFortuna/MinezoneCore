@@ -83,30 +83,31 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 		ItemStack plItem = event.getItem();
 		if (plItem != null)
 			if (plItem.getType() == Material.COMMAND
-					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+					&& event.getAction().toString().contains("RIGHT_CLICK")) {
 				Random rand = new Random();
 				Player target = getRandomPlayer(this.player);
-				if (!doesPlayerContainItems((Inventory) target.getInventory())) {
-					this.player.sendMessage(this.instance.getGameManager().getMain()
-							.color("&2&l(!) &rNo item was found at this player! Please try again."));
-					return;
-				}
 				ArrayList<Integer> slots = new ArrayList<>();
 				PlayerInventory playerInventory = target.getInventory();
 				int i;
 				for (i = 0; i < playerInventory.getSize(); i++) {
-					for (ItemStack itemDrop : this.instance.getAllItemDrops()) {
-						if (playerInventory.getItem(i) != null && (playerInventory.getItem(i).isSimilar(itemDrop) ||
-								playerInventory.getItem(i).hasItemMeta() &&
-										playerInventory.getItem(i).getItemMeta().getDisplayName()
-												.equals(instance.getGameManager().getMain().color("&4&lBomb")))) {
-							slots.add(Integer.valueOf(i));
-							break;
+					ItemStack playerItem = playerInventory.getItem(i);
+					if (playerItem != null && playerItem.getType() != null && playerItem.getType() != Material.AIR) {
+						for (ItemStack itemDrop : this.instance.getAllItemDrops()) {
+							if (playerItem.isSimilar(itemDrop) ||
+									(playerItem.hasItemMeta() && playerItem.getItemMeta().hasDisplayName()
+											&& playerItem.getItemMeta().getDisplayName()
+											.equals(instance.getGameManager().getMain().color("&4&lBomb")))) {
+								slots.add(i);
+								break;
+							}
 						}
 					}
 				}
-				if (slots.isEmpty())
-					Bukkit.getLogger().severe("Something went wrong!");
+				if (slots.isEmpty()) {
+					this.player.sendMessage(this.instance.getGameManager().getMain()
+							.color("&2&l(!) &rNo item was found at this player! Please try again."));
+					return;
+				}
 				i = rand.nextInt(slots.size());
 				ItemStack skeppy = playerInventory.getItem(((Integer) slots.get(i)).intValue());
 				playerInventory.clear(((Integer) slots.get(i)).intValue());
@@ -156,18 +157,5 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 								"" + ChatColor.DARK_GRAY + "Dark Command Block", new String[0]),
 						Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 2);
 		return item;
-	}
-
-	private boolean doesPlayerContainItems(Inventory inv) {
-		for (int i = 0; i < inv.getSize(); i++) {
-			for (ItemStack itemDrop : this.instance.getAllItemDrops()) {
-				if (inv.getItem(i) != null && (inv.getItem(i).isSimilar(itemDrop) ||
-						inv.getItem(i).hasItemMeta() &&
-								inv.getItem(i).getItemMeta().getDisplayName()
-										.equals(instance.getGameManager().getMain().color("&4&lBomb"))))
-					return true;
-			}
-		}
-		return false;
 	}
 }
