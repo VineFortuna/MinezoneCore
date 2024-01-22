@@ -219,12 +219,11 @@ public enum ClassType {
 		case Firework:
 			return new ItemStack(Material.FIREWORK);
 		case Levitator:
-			ItemStack item = new ItemStack(Material.STAINED_CLAY, 1, (byte) DyeColor.PURPLE.getData());
-			return item;
+			return new ItemStack(Material.STAINED_CLAY, 1, (byte) DyeColor.PURPLE.getData());
 		case Dweller:
 			return new ItemStack(Material.BONE);
 		case WitherSk:
-			return new ItemStack(Material.EYE_OF_ENDER);
+			return ItemHelper.createSkullHead(1, SkullType.WITHER);
 		case Rabbit:
 			return new ItemStack(Material.RABBIT_FOOT);
 		case FlintAndSteel:
@@ -240,21 +239,15 @@ public enum ClassType {
 		case Vampire:
 			return new ItemStack(Material.GHAST_TEAR);
 		case ZombiePigman:
-			ItemStack skullZombiePigman = ItemHelper.createSkullHeadPlayer(1, "ZombiePigMan");
-			return skullZombiePigman;
+			return ItemHelper.createSkullTexture("e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWY5OGEzY2ZkZjhjMTNlZTY2MzQxNDBmOTQ1YjcxZDJlNDg4ZmY0ODVlMTBjMzNhZTI1ODIxZDgyZDg0OGE3MyJ9fX0=");
 		case Villager:
-			return new ItemStack(Material.EMERALD_BLOCK);
+			return new ItemStack(Material.EMERALD);
 		case DarkSethBling:
 			return new ItemStack(Material.COAL_BLOCK);
 		case ZombieVillager:
 			return new ItemStack(Material.ROTTEN_FLESH);
 		case MagmaCube:
-			ItemStack playerskull2 = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-			SkullMeta meta2 = (SkullMeta) playerskull2.getItemMeta();
-			meta2.setOwner("MagmaCube");
-			meta2.setDisplayName("");
-			playerskull2.setItemMeta(meta2);
-			return new ItemStack(playerskull2);
+			return ItemHelper.createSkullTexture("e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGFhNmM0NWIyY2Y3OTc1Yjk1ZmJjY2U0ZWQ5YjA2NDZhYzAwY2I5Y2M5ZjY2ZGM1YzI0ZTgxZDJjOTFlZTdjMSJ9fX0=");
 		case Summoner:
 			return new ItemStack(Material.ENCHANTED_BOOK);
 		case Anvil:
@@ -262,8 +255,7 @@ public enum ClassType {
 		case Silverfish:
 			return new ItemStack(Material.IRON_HOE);
 		case Zombie:
-			ItemStack skullZombie = ItemHelper.createSkullHead(1, SkullType.ZOMBIE);
-			return skullZombie;
+			return ItemHelper.createSkullHead(1, SkullType.ZOMBIE);
 		case Star:
 			return new ItemStack(Material.NETHER_STAR);
 		case Wizard:
@@ -291,10 +283,9 @@ public enum ClassType {
 		case Blaze:
 			return new ItemStack(Material.BLAZE_ROD);
 		case Wither:
-			return new ItemStack(Material.NETHER_STAR);
+			return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODg2ZGMwY2ZjYWVlY2ZlMWFiNjkxNDZlNGQ0ZjExOTA4MzcwNzZhNjdkZWMxMzVmYWJkYTYyNzFmMzc1ZDAxZiJ9fX0=");
 		case Creeper:
-			ItemStack creeperSkull = ItemHelper.createSkullHead(1, SkullType.CREEPER);
-			return creeperSkull;
+			return ItemHelper.createSkullHead(1, SkullType.CREEPER);
 		case IronGolem:
 			return new ItemStack(new ItemStack(Material.IRON_AXE));
 		case Ghast:

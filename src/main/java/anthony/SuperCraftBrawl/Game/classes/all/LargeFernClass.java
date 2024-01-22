@@ -32,7 +32,7 @@ import java.util.UUID;
 public class LargeFernClass extends BaseClass {
 
     private int numberOfSporesProjectiles = 5;
-    private final Ability sporesAbility = new Ability("Spore Launch", 3, player);
+    private final Ability sporesAbility = new Ability("Spore Launch", 5, player);
     private final Ability transfernAbility = new Ability("Transfern", 9, player);
     private final CooldownNatowski transfernAbilitySmallFernTimer = new CooldownNatowski(2);
     private ItemStack weapon;
@@ -140,8 +140,6 @@ public class LargeFernClass extends BaseClass {
                 else {
                     // Setting the ability on cooldown
                     sporesAbility.use();
-                    // Sending return message
-                    sporesAbility.sendPlayerUseAbilityChatMessage();
     
                     ItemProjectile itemProjectile = new ItemProjectile(instance, player, new ProjectileOnHit() {
                         @Override
