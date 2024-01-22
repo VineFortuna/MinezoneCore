@@ -42,14 +42,8 @@ public class GhastClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-
-		SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
-
-		meta.setOwner("ghast");
-		meta.setDisplayName("");
-
-		playerskull.setItemMeta(meta);
+		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzY4OGU2MTY0MmEwYjY4NjQzZjRiYTM2OTJmZTIwNjYyMmI0ZDlhN2QzOTY1YmEwYmUxMzI5YzIxMzJkIn19fQ==";
+		ItemStack playerskull = ItemHelper.createSkullTexture(texture);
 
 		playerEquip.setHelmet(playerskull);
 		playerEquip.setChestplate(makeWhite(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
@@ -61,13 +55,23 @@ public class GhastClass extends BaseClass {
 
 	@Override
 	public void Tick(int gameTicks) {
-		if (this.cooldown <= 2 && this.cooldown != 0) {
-
-			if (gameTicks % 20 == 0) {
-				this.cooldown--;
-
-				if (this.cooldown <= 0)
-					player.getInventory().addItem(new ItemStack(Material.ARROW));
+		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Ghast
+				&& instance.classes.get(player).getLives() > 0) {
+			if (this.cooldown <= 2 && this.cooldown != 0) {
+				String msg = instance.getGameManager().getMain()
+						.color("&c&lGhast Fireball &rin: &e" + this.cooldown + "s");
+				getActionBarManager().setActionBar(player, "fireball.cooldown", msg, 2);
+				if (gameTicks % 20 == 0) {
+					this.cooldown--;
+					
+					if (this.cooldown <= 0) {
+						player.getInventory().addItem(new ItemStack(Material.ARROW));
+					}
+				}
+			}
+			if (this.cooldown <= 0) {
+				String msg = instance.getGameManager().getMain().color("&rYou can use &c&lGhast Fireball");
+				getActionBarManager().setActionBar(player, "fireball.cooldown", msg, 2);
 			}
 		}
 	}
