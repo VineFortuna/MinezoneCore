@@ -38,9 +38,20 @@ public class WinEffectsGUI implements InventoryProvider {
 	@Override
 	public void init(Player player, InventoryContents contents) {
 		PlayerData data = main.getDataManager().getPlayerData(player);
-
+		
+		// Icons Items
+		ItemStack lockedCosmetic = ItemHelper.createDye(DyeColor.GRAY, 1, ChatColor.GRAY + "&&&&&&&");
+		
+		
+		// Setting Items
+		contents.fillRect(1,1, 7,7, ClickableItem.of(
+				lockedCosmetic,
+				e -> {
+				
+				}));
+		
 		if (data != null) {
-			contents.set(0, 1,
+			contents.set(1, 2,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.WHEAT), main.color("&cMagic Broom"),
 							"", main.color("&rFly around the map with this"), main.color("&rwhen you win!"), "",
 							"" + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN" + ChatColor.RESET + "+ exclusive!"), e -> {
@@ -50,7 +61,7 @@ public class WinEffectsGUI implements InventoryProvider {
 								player.sendMessage(main.color("&e&l(!) &rYou have enabled &eMagic Broom &rwin effect"));
 							}));
 
-			contents.set(0, 3,
+			contents.set(1, 4,
 					ClickableItem.of(
 							ItemHelper
 									.setDetails(new ItemStack(Material.DRAGON_EGG), main.color("&cEnderDragon"), "",
@@ -63,19 +74,13 @@ public class WinEffectsGUI implements InventoryProvider {
 								inv.close(player);
 								player.sendMessage(main.color("&e&l(!) &rYou have enabled &eEnderDragon &rwin effect"));
 							}));
-			ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-			SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
-			meta.setOwner("SethBling");
-			meta.setDisplayName("");
-			playerskull.setItemMeta(meta);
+			String sethblingTexture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I4NmI4MjE1YjM2MTBlYWE2NDhjMjNjNGEyMGFkNjc1OWYyNTFlZjg1NDc2ODI5ZGQ2ZDE4NDI4MjNiMTEzIn19fQ==";
+			ItemStack playerskull = ItemHelper.createSkullTexture(sethblingTexture);
+			
+			String santaTexture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19";
+			ItemStack santa = ItemHelper.createSkullTexture(santaTexture);
 
-			ItemStack santa = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-			SkullMeta santaMeta = (SkullMeta) santa.getItemMeta();
-			santaMeta.setOwner("Santa");
-			santaMeta.setDisplayName("");
-			santa.setItemMeta(santaMeta);
-
-			contents.set(0, 2,
+			contents.set(1, 3,
 					ClickableItem.of(ItemHelper.setDetails(santa, main.color("&cSanta Claus Effect"), "",
 							main.color("&rBecome old Saint Nick himself"), main.color("&rand ride along!"), "",
 							"" + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN" + ChatColor.RESET + "+ exclusive!"), e -> {
@@ -85,7 +90,7 @@ public class WinEffectsGUI implements InventoryProvider {
 								player.sendMessage(main.color("&e&l(!) &rYou have enabled &eSanta Claus &rwin effect"));
 							}));
 
-			contents.set(0, 0, ClickableItem.of(ItemHelper.setDetails(playerskull, main.color("&cDefault Effect"), "",
+			contents.set(1, 1, ClickableItem.of(ItemHelper.setDetails(playerskull, main.color("&cDefault Effect"), "",
 					main.color("&rFireworks shoot up when winning"), main.color("&ra game!")), e -> {
 						resetWinEffects(data);
 						inv.close(player);

@@ -175,7 +175,7 @@ public class NPCManager implements Listener {
 		} else if (e.getNPC() == scbModes) {
 			new GameSelectorGUI(main).inv.open(player);
 		} else if (e.getNPC() == socialMedia) {
-			player.sendMessage("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-------[Social Media]-------");
+			player.sendMessage(main.color("&8&m-------&8[Social Media]&8&m-------"));
 			player.sendMessage("");
 			player.sendMessage(main.color("&eDiscord: &7https://discord.gg/FSZpmY9FZB"));
 			player.sendMessage(main.color("&eStore: &7minezone.tebex.io"));
@@ -183,7 +183,7 @@ public class NPCManager implements Listener {
 			player.sendMessage(main.color("&eTwitter: &7https://twitter.com/MinezoneMC"));
 			player.sendMessage(main.color("&eTikTok: &7https://www.tiktok.com/@minezonemc"));
 			player.sendMessage("");
-			player.sendMessage("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "----------------------------");
+			player.sendMessage(main.color("&8&m----------------------------"));
 		}
 	}
 

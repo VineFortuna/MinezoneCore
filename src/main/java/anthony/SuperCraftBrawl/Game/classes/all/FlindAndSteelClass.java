@@ -53,7 +53,7 @@ public class FlindAndSteelClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWJhZGJjNDA5OWU1YjZiNGE3ZDA4NjVlODhhMThiNjFiMjYzZGI3YTc1NmYyNzI0ZTc3YjQzZTIwMGM5MTAxOCJ9fX0=";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture);
+		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
 		
 		playerEquip.setHelmet(playerskull);
 		playerEquip.setChestplate(makeBlack(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),

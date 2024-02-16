@@ -667,7 +667,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		GameInstance i = this.GetInstanceOfPlayer(player);
 
 		if (item != null && item.getType() == Material.RABBIT_FOOT
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+				&& event.getAction().toString().contains("RIGHT_CLICK")) {
 			ItemMeta meta = item.getItemMeta();
 			if (meta.getDisplayName().contains("Blooper")) {
 				int amount = item.getAmount();
