@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -722,10 +724,15 @@ public class Core extends JavaPlugin implements Listener {
 		}
 
 		if (cmd.getName().equalsIgnoreCase("socials") && sender instanceof Player) {
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Check out our server socials below:");
-			player.sendMessage("   -> discord.gg/rQdaCZXaHF");
-			player.sendMessage("   -> https://twitter.com/MinezoneMC");
-			player.sendMessage("   -> https://www.youtube.com/channel/UCEN83Z9wOUaKyBsZx5CoKfg");
+			player.sendMessage(this.color("&8&m-------&8[Social Media]&8&m-------"));
+			player.sendMessage("");
+			player.sendMessage(this.color("&eDiscord: &7https://discord.gg/FSZpmY9FZB"));
+			player.sendMessage(this.color("&eStore: &7minezone.tebex.io"));
+			player.sendMessage(this.color("&eYouTube: &7https://www.youtube.com/@minezone6480"));
+			player.sendMessage(this.color("&eTwitter: &7https://twitter.com/MinezoneMC"));
+			player.sendMessage(this.color("&eTikTok: &7https://www.tiktok.com/@minezonemc"));
+			player.sendMessage("");
+			player.sendMessage(this.color("&8&m----------------------------"));
 		}
 
 		if (cmd.getName().equalsIgnoreCase("vanish") && sender instanceof Player) {
@@ -959,7 +966,10 @@ public class Core extends JavaPlugin implements Listener {
 								+ getRankManager().getRank(player).getTagWithSpace() + ChatColor.YELLOW
 								+ player.getName() + " " + ChatColor.RESET + "invited all players in the Lobby to join "
 								+ ChatColor.YELLOW + mapName);
-						Bukkit.broadcastMessage("" + ChatColor.RESET + "Use " + ChatColor.GREEN + "/join " + mapName);
+						TextComponent message = new TextComponent(
+								"" + "     " + ChatColor.GREEN + ChatColor.BOLD + "Click here to join!");
+						message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/join " + mapName));
+						Bukkit.spigot().broadcast(message);
 					} else {
 						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
 								+ "You must be in a Waiting Lobby to use this command");
@@ -1038,6 +1048,10 @@ public class Core extends JavaPlugin implements Listener {
 						data.red = 0;
 						data.blue = 0;
 						data.yellow = 0;
+					} else {
+						player.sendMessage(
+								"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
+										+ ChatColor.GREEN + "/color blue/green/red/yellow/reset");
 					}
 				}
 			} else {
@@ -1256,7 +1270,7 @@ public class Core extends JavaPlugin implements Listener {
 			if (i != null && i.state == GameState.STARTED)
 				player.sendMessage(color("&c&l(!) &rYou cannot use this in a game!"));
 			else {
-				if (args.length == 0) {
+				if (args.length == 0 || args[0].equals(player.getName())) {
 					new StatsGUI(this).inv.open(player);
 				} else if (args.length == 1) {
 					Player target = Bukkit.getServer().getPlayerExact(args[0]);
@@ -1285,8 +1299,8 @@ public class Core extends JavaPlugin implements Listener {
 				long s = TimeUnit.MILLISECONDS.toSeconds(t);
 				if (!target.isOnline()) {
 					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + target.getName()
-							+ " was last online " + ChatColor.GREEN + h + " hours, " + (m - h * 60) + " minutes, and "
-							+ (s - m * 60) + " seconds ago");
+							+ " was last online " + ChatColor.GREEN + h + " hours, " + (m - h * 60)
+							+ " minutes, and " + (s - m * 60) + " seconds ago");
 				} else {
 					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + target.getName()
 							+ " was last online " + ChatColor.GREEN + "now");

@@ -68,7 +68,7 @@ public class HorseClass extends BaseClass {
 	public void SetArmour(EntityEquipment playerEquip) {
 		// Head (helmet)
 		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDJlYjk2N2FiOTRmZGQ0MWE2MzI1ZjEyNzdkNmRjMDE5MjI2ZTVjZjM0OTc3ZWVlNjk1OTdmYWZjZjVlIn19fQ==";
-		ItemStack playerHead = ItemHelper.setDetails(ItemHelper.createSkullTexture(texture), "&6Horse Head");
+		ItemStack playerHead = ItemHelper.createSkullTexture(texture, "&6Horse Head");
 
 		playerEquip.setHelmet(playerHead);
 

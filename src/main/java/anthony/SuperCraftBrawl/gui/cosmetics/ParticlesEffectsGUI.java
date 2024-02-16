@@ -24,7 +24,7 @@ public class ParticlesEffectsGUI implements InventoryProvider {
                 .id("myInventory")
                 .provider(this)
                 .size(6, 9)
-                .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Particles Effects")
+                .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Particle Effects")
                 .build();
         this.main = main;
     }

@@ -21,6 +21,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
 
@@ -63,28 +65,39 @@ public class CreeperClass extends BaseClass {
 
 	@Override
 	public void Tick(int gameTicks) {
-		BaseClass bc = instance.classes.get(player);
-		if (bc != null && bc.getLives() <= 0)
-			return;
-		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				instance.getGameManager().getMain().color("&c&lCreeper Potion"));
-		Potion pot3 = new Potion(1);
-		pot3.setType(PotionType.INSTANT_DAMAGE);
-		pot3.setSplash(true);
-		pot3.apply(item);
-
-		if (!(player.getInventory().contains(item)) && !(player.getInventory().contains(barrier))) {
-			player.getInventory().addItem(barrier);
-			this.cooldownSec = 3;
-		}
-
-		if (gameTicks % 20 == 0 && this.cooldownSec != 0) {
-			cooldownSec--;
-
-			if (this.cooldownSec <= 0) {
-				if (!(player.getInventory().contains(item))) {
-					player.getInventory().remove(barrier);
-					player.getInventory().addItem(item);
+		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Creeper
+				&& instance.classes.get(player).getLives() > 0) {
+			int seconds = (10000 - tnt.getTime()) / 1000 + 1;
+			
+			if (tnt.getTime() < 10000) {
+				String msg = instance.getGameManager().getMain()
+						.color("&c&lDestructionators &rregenerates in: &e" + seconds + "s");
+				getActionBarManager().setActionBar(player, "tnt.cooldown", msg, 2);
+			} else {
+				String msg = instance.getGameManager().getMain().color("&rYou can use &c&lDestructionators");
+				getActionBarManager().setActionBar(player, "tnt.cooldown", msg, 2);
+			}
+			
+			ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
+					instance.getGameManager().getMain().color("&c&lCreeper Potion"));
+			Potion pot3 = new Potion(1);
+			pot3.setType(PotionType.INSTANT_DAMAGE);
+			pot3.setSplash(true);
+			pot3.apply(item);
+			
+			if (!(player.getInventory().contains(item)) && !(player.getInventory().contains(barrier))) {
+				player.getInventory().addItem(barrier);
+				this.cooldownSec = 3;
+			}
+			
+			if (gameTicks % 20 == 0 && this.cooldownSec != 0) {
+				cooldownSec--;
+				
+				if (this.cooldownSec <= 0) {
+					if (!(player.getInventory().contains(item))) {
+						player.getInventory().remove(barrier);
+						player.getInventory().addItem(item);
+					}
 				}
 			}
 		}
@@ -125,7 +138,7 @@ public class CreeperClass extends BaseClass {
 		playerInv.setItem(3, ItemHelper.setDetails(new ItemStack(Material.STONE_BUTTON),
 				"" + ChatColor.RED + ChatColor.BOLD + "Suicide Button"));
 	}
-
+	
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();

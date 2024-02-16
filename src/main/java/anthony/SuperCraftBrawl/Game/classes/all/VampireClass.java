@@ -55,8 +55,8 @@ public class VampireClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTMyMDI2OGIyYjJiODlhOGY5ZDg0MDI2MTY5YWQyNWQ0ZTkzZjczODY5NmFjZWM1Y2E1ODcyNjU3ZTdlNjYifX19";
-		ItemStack skull = ItemHelper.createSkullTexture(texture);
+		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTI2YTk4ZDQwMzhlYWJhNDdlMDJlZWUxNTUxZGE5OTJhYTVhZDQ2NzA1YTc4MWY0NjE0NzA0MmQyOWNhZjEwNCJ9fX0=";
+		ItemStack skull = ItemHelper.createSkullTexture(texture, "");
 		playerEquip.setHelmet(skull);
 		playerEquip.setChestplate(makeGray(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));

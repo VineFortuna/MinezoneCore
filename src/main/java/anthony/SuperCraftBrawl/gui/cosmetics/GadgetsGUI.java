@@ -48,14 +48,14 @@ public class GadgetsGUI implements InventoryProvider {
         melonList.add(ChatColor.DARK_GRAY + "A delicious melon that gives you...");
         melonList.add(ChatColor.DARK_GRAY + "                  Superpowers!");
         melonList.add("");
-        melonList.add("You have " + ChatColor.YELLOW + data.melon + ChatColor.RESET + " Melons");
+        melonList.add(ChatColor.RESET + "You have " + ChatColor.YELLOW + data.melon + ChatColor.RESET + " Melons");
         ItemStack melon = ItemHelper.create(Material.MELON, ChatColor.YELLOW.toString() + ChatColor.BOLD + "Melons", melonList);
 
             // Paintball
         List<String> paintballList = new ArrayList<>();
         paintballList.add(ChatColor.DARK_GRAY + "Shoot paintballs as you want");
         paintballList.add("");
-        paintballList.add("You have " + ChatColor.YELLOW + data.paintball + ChatColor.RESET + " Paintballs");
+        paintballList.add(ChatColor.RESET + "You have " + ChatColor.YELLOW + data.paintball + ChatColor.RESET + " Paintballs");
         ItemStack paintball = ItemHelper.create(Material.GOLD_BARDING, ChatColor.YELLOW.toString() + ChatColor.BOLD + "Paintball Gun", paintballList);
 
         // Setting Items
@@ -89,7 +89,7 @@ public class GadgetsGUI implements InventoryProvider {
                 }));
 
             // Paintball Gadget
-        contents.set(1, 3, ClickableItem.of(
+        contents.set(1, 2, ClickableItem.of(
                 paintball,
                 e -> {
                     if (data.paintball > 0) {
@@ -113,7 +113,7 @@ public class GadgetsGUI implements InventoryProvider {
                 }));
 
             // Melon Gadget
-        contents.set(1, 5, ClickableItem.of(
+        contents.set(1, 3, ClickableItem.of(
                 melon,
                 e -> {
                     if (data.melon > 0) {

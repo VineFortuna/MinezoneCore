@@ -33,7 +33,8 @@ public class RabbitClass extends BaseClass {
 			.addEnchant(
 					ItemHelper.addEnchant(
 							ItemHelper.setDetails(new ItemStack(Material.RABBIT_FOOT),
-									"" + ChatColor.RESET + "Rabbit Foot", ChatColor.GRAY + "", ChatColor.YELLOW + ""),
+									instance.getGameManager().getMain()
+											.color("&rRabbit's Foot &7(Right Click)")),
 							Enchantment.DAMAGE_ALL, 4),
 					Enchantment.KNOCKBACK, 3);
 
@@ -52,7 +53,7 @@ public class RabbitClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWI4OTY5MmQxOGFkYjk2NDJiZTI2Y2UzNjA5NmNhNTcyMDYxMWEwYzU2Njg0YjgzY2RmMGJkYzRkOGRiYzAyZCJ9fX0=";
-		ItemStack skull = ItemHelper.createSkullTexture(texture);
+		ItemStack skull = ItemHelper.createSkullTexture(texture, "");
 		
 		playerEquip.setHelmet(skull);
 		playerEquip.setChestplate(makeGray(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
@@ -99,7 +100,7 @@ public class RabbitClass extends BaseClass {
 
 			if (!(player.getInventory().contains(this.rabbitFoot))) {
 				if (chance >= 0 && chance <= 40) {
-					player.getInventory().remove(Material.RABBIT_FOOT);
+					player.getInventory().remove(this.getAttackWeapon());
 					player.getInventory().addItem(this.rabbitFoot);
 					Vector dir = player.getLocation().getDirection();
 					dir.setY(1.0);
@@ -108,7 +109,7 @@ public class RabbitClass extends BaseClass {
 					player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 3));
 				}
 			} else {
-				player.getInventory().remove(Material.RABBIT_FOOT);
+				player.getInventory().remove(this.rabbitFoot);
 				player.getInventory().addItem(this.getAttackWeapon());
 				player.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rWeapon downgraded :("));
 				player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 2));
@@ -128,8 +129,8 @@ public class RabbitClass extends BaseClass {
 		ItemStack item = event.getItem();
 
 		if (item != null) {
-			if (item.getType() == Material.RABBIT_FOOT
-					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+			if ((item.isSimilar(this.getAttackWeapon()) || item.isSimilar(this.rabbitFoot)) &&
+					event.getAction().toString().contains("RIGHT_CLICK")) {
 				event.setCancelled(true);
 				this.abilityMsg();
 			}

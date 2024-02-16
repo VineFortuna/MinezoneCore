@@ -37,7 +37,8 @@ public class SuitsGUI implements InventoryProvider {
         ItemStack lockedCosmetic = ItemHelper.createDye(DyeColor.GRAY, 1, ChatColor.GRAY + "&&&&&&&");
 
             // Santa Outfit
-        ItemStack santaHead = ItemHelper.createSkullHeadPlayer(1, "Santa_", ChatColor.RED.toString() + ChatColor.BOLD + "Santa Outfit");
+        String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19";
+        ItemStack santaHead = ItemHelper.setDetails(ItemHelper.createSkullTexture(texture), ChatColor.RED.toString() + ChatColor.BOLD + "Santa Outfit");
 
 //        ItemStack santa = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
 

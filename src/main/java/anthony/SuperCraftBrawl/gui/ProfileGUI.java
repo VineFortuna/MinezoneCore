@@ -20,7 +20,7 @@ public class ProfileGUI implements InventoryProvider {
 	private RankManager rm;
 
 	public ProfileGUI(Core main) {
-		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
+		inv = SmartInventory.builder().id("myInventory").provider(this).size(5, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Profile").build();
 		this.main = main;
 	}
@@ -31,14 +31,15 @@ public class ProfileGUI implements InventoryProvider {
 
 	@Override
 	public void init(Player player, InventoryContents contents) {
-		contents.set(1, 3, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.REDSTONE_COMPARATOR),
+		contents.fillRow(4, ClickableItem.of(ItemHelper.setDetails(
+				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
+		
+		contents.set(4, 3, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.REDSTONE_COMPARATOR),
 				"" + ChatColor.RESET + ChatColor.YELLOW + "Preferences"), e -> {
-					inv.close(player);
 					new PrefsGUI(main).inv.open(player);
 				}));
-		contents.set(1, 5, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK),
+		contents.set(4, 5, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BOOK),
 				"" + ChatColor.RESET + ChatColor.YELLOW + "My Stats"), e -> {
-					inv.close(player);
 					new StatsGUI(main).inv.open(player);
 				}));
 	}

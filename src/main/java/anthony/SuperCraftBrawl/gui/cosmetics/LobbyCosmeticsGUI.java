@@ -9,6 +9,7 @@ import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.SkullType;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -41,7 +42,7 @@ public class LobbyCosmeticsGUI implements InventoryProvider {
 
         ItemStack lobbyOutfits = ItemHelper.create(Material.GOLD_HELMET, ChatColor.YELLOW + "Outfits");
 
-        ItemStack morphs = ItemHelper.createSkullHeadPlayer(1, "Natowski", ChatColor.YELLOW + "Morphs");
+        ItemStack morphs = ItemHelper.createSkullHead(1, SkullType.ZOMBIE, ChatColor.YELLOW + "Morphs");
 
 
         // Setting Icons

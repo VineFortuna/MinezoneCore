@@ -58,7 +58,7 @@ public class BlazeClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjU5Njk4MmMzZGJhN2Y2NzRjZmI5M2RkMzllMTcxM2E4ZWMxMjk5MDQ3M2FjYmZkODVhMThmZDkwOTE4ZGE0MSJ9fX0=";
-		ItemStack skull = ItemHelper.createSkullTexture(texture);
+		ItemStack skull = ItemHelper.createSkullTexture(texture, "");
 		
 		playerEquip.setHelmet(skull);
 		playerEquip.setChestplate(makeGreen(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
