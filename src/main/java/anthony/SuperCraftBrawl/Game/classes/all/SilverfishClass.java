@@ -46,8 +46,8 @@ public class SilverfishClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		// Head (helmet)
-		String texture = "\"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGE5MWRhYjgzOTFhZjVmZGE1NGFjZDJjMGIxOGZiZDgxOWI4NjVlMWE4ZjFkNjIzODEzZmE3NjFlOTI0NTQwIn19fQ==";
-		ItemStack skull = ItemHelper.createSkullTexture(texture);
+		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGE5MWRhYjgzOTFhZjVmZGE1NGFjZDJjMGIxOGZiZDgxOWI4NjVlMWE4ZjFkNjIzODEzZmE3NjFlOTI0NTQwIn19fQ==";
+		ItemStack skull = ItemHelper.createSkullTexture(texture, "");
 		playerEquip.setHelmet(skull);
 
 		// Chestplate
@@ -59,7 +59,7 @@ public class SilverfishClass extends BaseClass {
 
 		// Boots
 		ItemStack boots = ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.GRAY, "&7Silverfish Boots");
-		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
+		boots.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 
 		// Setting Armor
 		playerEquip.setChestplate(chestplate);

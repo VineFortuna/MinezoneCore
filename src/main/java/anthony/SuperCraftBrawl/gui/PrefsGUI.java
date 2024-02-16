@@ -20,7 +20,7 @@ public class PrefsGUI implements InventoryProvider {
 	private RankManager rm;
 
 	public PrefsGUI(Core main) {
-		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
+		inv = SmartInventory.builder().id("myInventory").provider(this).size(5, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Preferences").build();
 		this.main = main;
 	}
@@ -33,14 +33,24 @@ public class PrefsGUI implements InventoryProvider {
 	public void init(Player player, InventoryContents contents) {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 		String line = "";
+		
+		contents.fillRow(4, ClickableItem.of(ItemHelper.setDetails(
+				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
+		
+		contents.set(4, 3, ClickableItem.of(ItemHelper.setGlowing(ItemHelper.setDetails(new ItemStack(Material.REDSTONE_COMPARATOR),
+				"" + ChatColor.RESET + ChatColor.YELLOW + "Preferences"), true), e -> {}));
+		contents.set(4, 5, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BOOK),
+				"" + ChatColor.RESET + ChatColor.YELLOW + "My Stats"), e -> {
+			new StatsGUI(main).inv.open(player);
+		}));
 
 		if (data != null) {
 			if (data.cwm == 0) {
-				line = main.color("&eEnable");
+				line = main.color("&aEnable");
 			} else {
 				line = main.color("&cDisable");
 			}
-			contents.set(1, 2, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
+			contents.set(2, 2, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
 					main.color("&eCustom Win Messages"), "", line), e -> {
 						if (player.hasPermission("scb.customWin")) {
 							if (data.cwm == 1) {
@@ -59,11 +69,11 @@ public class PrefsGUI implements InventoryProvider {
 						inv.close(player);
 					}));
 			if (data.pm == 0) {
-				line = main.color("&eEnable");
+				line = main.color("&aEnable");
 			} else {
 				line = main.color("&cDisable");
 			}
-			contents.set(1, 6,
+			contents.set(2, 6,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.PAPER),
 							main.color("&ePrivate Messages"), "", line),
 							e -> {
@@ -80,11 +90,11 @@ public class PrefsGUI implements InventoryProvider {
 							}));
 
 			if (data.killMsgs == 0) {
-				line = main.color("&eEnable");
+				line = main.color("&aEnable");
 			} else {
 				line = main.color("&cDisable");
 			}
-			contents.set(0, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
+			contents.set(2, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
 					main.color("&eCustom Kill Messages"), "", line), e -> {
 						if (player.hasPermission("scb.customKillMsgs")) {
 							if (data.killMsgs == 0) {

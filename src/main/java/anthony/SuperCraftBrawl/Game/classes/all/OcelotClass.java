@@ -53,7 +53,7 @@ public class OcelotClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjU0ODM1MTlhYmY1MjM0MGNmM2FkOTNlNTE3NTY4YWQyNzZhZWFhMTg1OGZlMzNjNzdkOTM1M2Q5NzYwZDkwNSJ9fX0=";
-		ItemStack skull = ItemHelper.createSkullTexture(texture);
+		ItemStack skull = ItemHelper.createSkullTexture(texture, "");
 		
 		playerEquip.setHelmet(skull);
 		playerEquip.setChestplate(makeYellow(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
@@ -113,7 +113,7 @@ public class OcelotClass extends BaseClass {
 					int seconds = (20000 - ocelot.getTime()) / 1000 + 1;
 					event.setCancelled(true);
 					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "Your &7&lPurr Attack is still regenerating for " + ChatColor.YELLOW + seconds + "s");
+							+ "Your Purr Attack is still regenerating for " + ChatColor.YELLOW + seconds + "s");
 				} else {
 					ocelot.restart();
 					player.sendMessage(instance.getGameManager().getMain()

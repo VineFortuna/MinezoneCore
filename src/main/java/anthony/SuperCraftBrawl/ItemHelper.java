@@ -237,6 +237,10 @@ public class ItemHelper {
 		itemStack.setItemMeta(skullMeta);
 		return itemStack;
 	}
+	
+	public static ItemStack createSkullTexture(String textureUrl, String displayName) {
+		return setDetails(createSkullTexture(textureUrl), displayName);
+	}
 
 	public static ItemStack createDye(DyeColor color) {
 		Dye dye = new Dye();

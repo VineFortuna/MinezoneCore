@@ -32,12 +32,12 @@ import java.util.UUID;
 public class LargeFernClass extends BaseClass {
 
     private int numberOfSporesProjectiles = 5;
-    private final Ability sporesAbility = new Ability("Spore Launch", 5, player);
+    private final Ability sporesAbility = new Ability("Spore Launch", 4, player);
     private final Ability transfernAbility = new Ability("Transfern", 9, player);
     private final CooldownNatowski transfernAbilitySmallFernTimer = new CooldownNatowski(2);
     private ItemStack weapon;
     private ItemStack disguiseAbilityItem;
-    private boolean isTransferned = false;
+    private boolean isTransferned;
     private Location fernLocation;
     int sporeDamage = 4;
 
@@ -54,7 +54,7 @@ public class LargeFernClass extends BaseClass {
     public void SetArmour(EntityEquipment playerEquip) {
         // Head (helmet)
         String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDQxNTczYmYyZTAyNzBiYjYyMDNkMmI3NjRkZDdkMGNiYmM1ZDdiMWJhNmNkY2NjOWFmNWZmNDc0MzRhMGViNCJ9fX0=";
-        ItemStack playerHead = ItemHelper.setDetails(ItemHelper.createSkullTexture(texture), "&2Large Fern Head");
+        ItemStack playerHead = ItemHelper.createSkullTexture(texture, "&2Large Fern Head");
 
         // Chestplate
         ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.GREEN, "&2Large Fern Chestplate");
@@ -101,6 +101,8 @@ public class LargeFernClass extends BaseClass {
         // Setting Items
         playerInv.setItem(0, weapon);
         playerInv.setItem(1, disguiseAbilityItem);
+        
+        isTransferned = false;
     }
     
     @Override

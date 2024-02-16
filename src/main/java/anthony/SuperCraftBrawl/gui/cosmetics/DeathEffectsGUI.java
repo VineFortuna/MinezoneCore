@@ -44,10 +44,10 @@ public class DeathEffectsGUI implements InventoryProvider {
 		ItemStack lockedCosmetic = ItemHelper.createDye(DyeColor.GRAY, 1, ChatColor.GRAY + "&&&&&&&");
 
 		ItemStack goldenApple = ItemHelper.create(Material.GOLDEN_APPLE, org.bukkit.ChatColor.YELLOW + "Golden Apple");
-		ItemStack glowstone = ItemHelper.create(Material.GOLDEN_APPLE, org.bukkit.ChatColor.YELLOW + "Glowstone");
-		ItemStack redstone = ItemHelper.create(Material.GOLDEN_APPLE, org.bukkit.ChatColor.YELLOW + "Redstone");
-		ItemStack cobweb = ItemHelper.create(Material.GOLDEN_APPLE, org.bukkit.ChatColor.YELLOW + "Cobweb");
-		ItemStack expBottle = ItemHelper.create(Material.GOLDEN_APPLE, org.bukkit.ChatColor.YELLOW + "Exp Bottle");
+		ItemStack glowstone = ItemHelper.create(Material.GLOWSTONE_DUST, org.bukkit.ChatColor.YELLOW + "Glowstone");
+		ItemStack redstone = ItemHelper.create(Material.REDSTONE, org.bukkit.ChatColor.YELLOW + "Redstone");
+		ItemStack cobweb = ItemHelper.create(Material.WEB, org.bukkit.ChatColor.YELLOW + "Cobweb");
+		ItemStack expBottle = ItemHelper.create(Material.EXP_BOTTLE, org.bukkit.ChatColor.YELLOW + "Exp Bottle");
 
 
 		// Setting Items
@@ -59,7 +59,7 @@ public class DeathEffectsGUI implements InventoryProvider {
 
 		if (data != null) {
 			// Golden Apple
-			contents.set(0, 0, ClickableItem.of(
+			contents.set(1, 1, ClickableItem.of(
 					goldenApple,
 					e -> {
 						if (data.goldApple == 0) {
@@ -73,7 +73,7 @@ public class DeathEffectsGUI implements InventoryProvider {
 					}));
 
 			// Glowstone
-			contents.set(0, 1, ClickableItem.of(
+			contents.set(1, 2, ClickableItem.of(
 					glowstone,
 					e -> {
 						if (data.glowstone == 0) {
@@ -87,7 +87,7 @@ public class DeathEffectsGUI implements InventoryProvider {
 					}));
 
 			// Redstone
-			contents.set(0, 2, ClickableItem.of(
+			contents.set(1, 3, ClickableItem.of(
 					redstone,
 					e -> {
 						if (data.redstone == 0) {
@@ -101,7 +101,7 @@ public class DeathEffectsGUI implements InventoryProvider {
 					}));
 
 			// Cobweb
-			contents.set(0, 3, ClickableItem.of(
+			contents.set(1, 4, ClickableItem.of(
 					cobweb,
 					e -> {
 						if (data.web == 0) {
@@ -115,7 +115,7 @@ public class DeathEffectsGUI implements InventoryProvider {
 					}));
 
 			// Exp Bottle
-			contents.set(0, 4, ClickableItem.of(
+			contents.set(1, 5, ClickableItem.of(
 					expBottle,
 					e -> {
 						if (data.bottleEXP == 0) {
