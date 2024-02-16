@@ -212,7 +212,7 @@ public class PlayerListener implements Listener {
 
 		if (item != null) {
 			if (item.getType() == Material.SKULL_ITEM)
-				new ProfileGUI(main).inv.open(player);
+				new StatsGUI(main).inv.open(player);
 			else if (item.getType() == Material.NETHER_STAR)
 				if (player.getWorld() == main.getLobbyWorld())
 					new ChallengesGUI(main).inv.open(player);

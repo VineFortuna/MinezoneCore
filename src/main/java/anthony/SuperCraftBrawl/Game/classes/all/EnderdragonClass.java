@@ -53,7 +53,7 @@ public class EnderdragonClass extends BaseClass {
 				Enchantment.PROTECTION_ENVIRONMENTAL, 3)));
 		playerEquip.setLeggings(makeBlack(new ItemStack(Material.LEATHER_LEGGINGS)));
 		playerEquip.setBoots(makeBlack(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 2)));
+				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 	}
 
 	@Override

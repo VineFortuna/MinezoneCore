@@ -78,7 +78,7 @@ public class CloudClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDQ4Mjg3NzM3MTU0NDZlNDczZjVhMTY0OTMzYTVkODgyM2RmYjg1OGFmOTA0OTAxMzVjNDE3ZWZlMTY1OTgxZCJ9fX0=";
-		ItemStack skull = ItemHelper.createSkullTexture(texture);
+		ItemStack skull = ItemHelper.createSkullTexture(texture, "");
 		
 		playerEquip.setHelmet(skull);
 		playerEquip.setChestplate(makeGray(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
