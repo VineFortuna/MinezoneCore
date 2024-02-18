@@ -7,7 +7,6 @@ import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.ranks.Rank;
@@ -29,7 +28,7 @@ public enum ClassType {
 	Silverfish(45, 0, 0), Anvil(46, 700, 0), Summoner(47, 525, 0), MagmaCube(48, 0, Rank.VIP), Villager(49, 0, 0),
 	ZombiePigman(51, 0, 3), Witch(13, 0, 5), ZombieVillager(50, 0, 10), Ice(54, 0, 15), Vampire(53, 800, 0),
 	Bee(55, 425, 0), Jeb(56, 0, 20), Hunter(57, 500, 0), FlintAndSteel(58, 0, 0), WitherSk(59, 1500, 0),
-	Levitator(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30),
+	Shulker(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30),
 	LargeFern(64, 0, Rank.DEFAULT);
 
 	// Wolf(63, 0, 35)/* , Guardian(63, 0, 30) */;
@@ -84,8 +83,8 @@ public enum ClassType {
 			return new CloudClass(instance, player);
 		case Firework:
 			return new FireworkClass(instance, player);
-		case Levitator:
-			return new LevitatorClass(instance, player);
+		case Shulker:
+			return new ShulkerClass(instance, player);
 		case WitherSk:
 			return new WitherSkeletonClass(instance, player);
 		case Rabbit:
@@ -218,7 +217,7 @@ public enum ClassType {
 			return new ItemStack(Material.WOOL);
 		case Firework:
 			return new ItemStack(Material.FIREWORK);
-		case Levitator:
+		case Shulker:
 			return new ItemStack(Material.STAINED_CLAY, 1, (byte) DyeColor.PURPLE.getData());
 		case Dweller:
 			return new ItemStack(Material.BONE);
@@ -353,7 +352,7 @@ public enum ClassType {
 			return "Use your powers to send cool effects on your opponents!";
 		case Firework:
 			return "Shoot colorful fireworks and inflict different effects!";
-		case Levitator:
+		case Shulker:
 			return "You want me? I want you baby, my sugar boo, Im levitating";
 		case WitherSk:
 			return "Shoot your withering blasts at other players!";
@@ -525,8 +524,8 @@ public enum ClassType {
 			return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "Firework" + ChatColor.RESET;
 		case Bedrock:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bedrock" + ChatColor.RESET;
-		case Levitator:
-			return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + ChatColor.ITALIC + "Levitator" + ChatColor.RESET;
+		case Shulker:
+			return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + ChatColor.ITALIC + "Shulker" + ChatColor.RESET;
 		case WitherSk:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "WitherSk" + ChatColor.RESET;
 		case FlintAndSteel:
