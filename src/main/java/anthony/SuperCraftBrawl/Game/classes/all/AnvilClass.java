@@ -107,7 +107,7 @@ public class AnvilClass extends BaseClass {
 			this.cooldownSec = (this.stompAbilityCooldown - this.anvil.getTime()) / 1000 + 1;
 			if (this.anvil.getTime() < this.stompAbilityCooldown) {
 				String msg = "" + ChatColor.RESET + ChatColor.YELLOW + ChatColor.BOLD + "Goomba Stomp "
-						+ ChatColor.RESET + " regenerates in: " + ChatColor.YELLOW + this.cooldownSec + "s";
+						+ ChatColor.RESET + "regenerates in: " + ChatColor.YELLOW + this.cooldownSec + "s";
 				getActionBarManager().setActionBar(player, "anvil.cooldown", msg, 2);
 			} else {
 				String msg = "" + ChatColor.RESET + "You can use " + ChatColor.YELLOW + ChatColor.BOLD + "Goomba Stomp";

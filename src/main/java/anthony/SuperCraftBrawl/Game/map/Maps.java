@@ -458,14 +458,17 @@ public enum Maps {
 	SnowGlobe("SnowGlobe",
 			new MapInstance("snowglobe")
 					.setSpawnPos(
-							new Vector(64.473, 107, -94.528),
-							new Vector(87.499, 107, -70.563),
-							new Vector(70.451, 107, -24.514),
-							new Vector(41.474, 107, -22.505),
-							new Vector(19.435, 107, -42.521),
-							new Vector(19.404, 107, -67.537))
+							new Vector(57.534, 97, -58.306),
+							new Vector(56.528, 85, -28.124),
+							new Vector(72.410, 87, -36.435),
+							new Vector(59.537, 88, -45.849),
+							new Vector(71.164, 82, -65.119),
+							new Vector(56.558, 101, -47.634),
+							new Vector(65.324, 86, -70.961),
+							new Vector(59.461, 87, -45.481),
+							new Vector(50.451, 87, -66.228))
 					.setLobbyLoc(new Vector(57.475, 109.31250, -130.494))
-					.setSpecLoc(new Vector(59.525, 157, -64.436))
+					.setSpecLoc(new Vector(66.578, 100, -34.391))
 					.setBounds(new Vector(55.500, 174, -57.500), 58, 58)
 					.setMapType(MapType.FRENZY)
 					.setGameType(GameType.FRENZY)),

@@ -1253,7 +1253,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 							if (bc != null && pBc != null) {
 								if (bc.getType() == ClassType.Vampire || bc.getType() == ClassType.WitherSk
-										|| bc.getType() == ClassType.Levitator || bc.getType() == ClassType.Firework
+										|| bc.getType() == ClassType.Shulker || bc.getType() == ClassType.Firework
 										|| bc.getType() == ClassType.Skeleton) {
 									if (this.spawnProt.containsKey(p) || bc.bedrockInvincibility == true) {
 										event.setCancelled(true);
