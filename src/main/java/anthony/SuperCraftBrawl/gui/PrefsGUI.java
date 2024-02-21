@@ -68,7 +68,7 @@ public class PrefsGUI implements InventoryProvider {
 						}
 						inv.close(player);
 					}));
-			if (data.pm == 0) {
+			if (data.pm == 1) {
 				line = main.color("&aEnable");
 			} else {
 				line = main.color("&cDisable");
@@ -77,12 +77,12 @@ public class PrefsGUI implements InventoryProvider {
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.PAPER),
 							main.color("&ePrivate Messages"), "", line),
 							e -> {
-								if (data.pm == 1) {
+								if (data.pm == 0) {
 									player.sendMessage("" + ChatColor.RESET + ChatColor.BOLD + "(!) " + ChatColor.RESET
 											+ "You have disabled " + ChatColor.YELLOW + "Private Messages");
-									data.pm = 0;
-								} else {
 									data.pm = 1;
+								} else {
+									data.pm = 0;
 									player.sendMessage("" + ChatColor.RESET + ChatColor.BOLD + "(!) " + ChatColor.RESET
 											+ "You have enabled " + ChatColor.YELLOW + "Private Messages");
 								}
@@ -94,7 +94,7 @@ public class PrefsGUI implements InventoryProvider {
 			} else {
 				line = main.color("&cDisable");
 			}
-			contents.set(2, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
+			contents.set(1, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
 					main.color("&eCustom Kill Messages"), "", line), e -> {
 						if (player.hasPermission("scb.customKillMsgs")) {
 							if (data.killMsgs == 0) {

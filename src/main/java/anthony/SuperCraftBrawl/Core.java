@@ -1199,7 +1199,7 @@ public class Core extends JavaPlugin implements Listener {
 			PlayerData data = this.getDataManager().getPlayerData(target);
 
 			if (target != null) {
-				if (data.pm == 1) {
+				if (data.pm == 0) {
 					String message = "";
 
 					for (int i = 1; i != args.length; i++) {
@@ -1210,7 +1210,7 @@ public class Core extends JavaPlugin implements Listener {
 							+ target.getName() + ChatColor.RESET + ": " + ChatColor.RESET + message);
 					target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.GRAY
 							+ player.getName() + " --> You" + ChatColor.RESET + ": " + ChatColor.RESET + message);
-				} else if (data.pm == 0) {
+				} else if (data.pm == 1) {
 					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.YELLOW
 							+ target.getName() + ChatColor.LIGHT_PURPLE + " has private messaging disabled!");
 				}
