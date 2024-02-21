@@ -30,6 +30,7 @@ import java.util.UUID;
 public class SheepClass extends BaseClass {
 
 	private boolean green = false, gray = false, black = false, pink = false, lime = false;
+	int lastWool = -1;
 
 	public SheepClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -154,14 +155,6 @@ public class SheepClass extends BaseClass {
 		black = false; // Also also same lol
 		pink = false; // ALSO SAME LOL!!!!
 		lime = false; // AHHHHH!!!!!!!!!!
-		ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-
-		SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
-
-		meta.setOwner("DerpTheSheep");
-		meta.setDisplayName("");
-
-		playerskull.setItemMeta(meta);
 
 		ItemStack item3 = ItemHelper.addEnchant(
 				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, DyeColor.RED.getData()),
@@ -233,6 +226,12 @@ public class SheepClass extends BaseClass {
 				limeWool, limeWool, limeWool, limeWool };
 		Random rand = new Random();
 		int randomNum = rand.nextInt(itemList.length);
+		if (lastWool >= 0) {
+			while (itemList[randomNum].isSimilar(itemList[lastWool])) {
+				randomNum = rand.nextInt(itemList.length);
+			}
+		}
+		lastWool = randomNum;
 
 		BaseClass bc2 = instance.classes.get(player);
 		bc2.score.getScoreboard().resetScores(bc2.score.getEntry());
@@ -352,7 +351,7 @@ public class SheepClass extends BaseClass {
 			player.getInventory().setBoots(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS),
 					Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.fromRGB(255, 105, 180)));
 
-			player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou were given &9&lPINK WOOL"));
+			player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou were given &d&lPINK WOOL"));
 			player.setDisplayName(instance.getGameManager().getMain().color("" + player.getName() + " &9&lSheep&r"));
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.LIGHT_PURPLE

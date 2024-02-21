@@ -125,7 +125,7 @@ public class StarClass extends BaseClass {
 		}
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
-				ItemHelper.setDetails(new ItemStack(Material.MONSTER_EGG),
+				ItemHelper.setDetails(ItemHelper.createMonsterEgg(EntityType.PIG, 1),
 						instance.getGameManager().getMain().color("&e&lJeffrey Pokeball"), "",
 						instance.getGameManager().getMain().color("&7Spawn your Jeffrey to heal you!"),
 						instance.getGameManager().getMain().color("   &rMax 10 heal uses"),

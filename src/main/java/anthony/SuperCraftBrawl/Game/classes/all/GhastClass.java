@@ -82,7 +82,7 @@ public class GhastClass extends BaseClass {
 
 		if (e instanceof Arrow) {
 			for (Player gamePlayer : Bukkit.getOnlinePlayers()) // Play Ghast sound when shoot arrows
-				gamePlayer.playSound(player.getLocation(), Sound.GHAST_SCREAM, 2, 2);
+				gamePlayer.playSound(player.getLocation(), Sound.GHAST_SCREAM, 1, 1);
 
 			if (this.cooldown == 0)
 				this.cooldown = 2;

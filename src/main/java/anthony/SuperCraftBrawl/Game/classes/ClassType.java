@@ -29,7 +29,7 @@ public enum ClassType {
 	ZombiePigman(51, 0, 3), Witch(13, 0, 5), ZombieVillager(50, 0, 10), Ice(54, 0, 15), Vampire(53, 800, 0),
 	Bee(55, 425, 0), Jeb(56, 0, 20), Hunter(57, 500, 0), FlintAndSteel(58, 0, 0), WitherSk(59, 1500, 0),
 	Shulker(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30),
-	LargeFern(64, 0, Rank.DEFAULT);
+	LargeFern(64, 0, 0), Vindicator(65, 0, Rank.VIP);
 
 	// Wolf(63, 0, 35)/* , Guardian(63, 0, 30) */;
 
@@ -197,6 +197,8 @@ public enum ClassType {
 			return new PigClass(instance, player);
 		case LargeFern:
 			return new LargeFernClass(instance, player);
+		case Vindicator:
+			return new VindicatorClass(instance, player);
 // 		case Wolf:
 // 			return new WolfClass(instance, player);
 //		case Guardian:
@@ -331,6 +333,8 @@ public enum ClassType {
 			return new ItemStack(Material.RAW_FISH);
 		case LargeFern:
 			return new ItemStack(Material.DOUBLE_PLANT, 1, (short) 3);
+		case Vindicator:
+			return new ItemStack(Material.IRON_AXE);
 // 		case Wolf:
 // 			return new ItemStack(Material.BONE);
 // 		case Guardian:
@@ -468,6 +472,8 @@ public enum ClassType {
 			return "Hit and run. In your panic, you gain speed when hit";
 		case LargeFern:
 			return "??????";
+		case Vindicator:
+			return "Vindicate yourself in front of your enemies";
 //		case Wolf:
 //			return "Have your brothers defend you from enemies!";
 //		case Guardian:
@@ -641,6 +647,8 @@ public enum ClassType {
 			return "" + ChatColor.BLUE + ChatColor.ITALIC + "Pig" + ChatColor.RESET;
 		case LargeFern:
 			return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + "LargeFern" + ChatColor.RESET;
+		case Vindicator:
+			return "" + ChatColor.GRAY + "Vindicator" + ChatColor.RESET;
 // 		case Wolf:
 // 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Wolf" + ChatColor.RESET;
 // 		case Guardian:

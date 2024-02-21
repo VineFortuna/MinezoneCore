@@ -103,7 +103,7 @@ public class MagmaCubeClass extends BaseClass {
 				if (en.getName().contains(player.getName()))
 					en.remove();
 		playerInv.setItem(0, this.getAttackWeapon());
-		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.MONSTER_EGG, 7),
+		playerInv.setItem(1, ItemHelper.createMonsterEgg(EntityType.MAGMA_CUBE, 7,
 		instance.getGameManager().getMain().color("&e&lMagmaCube Pokeball")));
 	}
 
