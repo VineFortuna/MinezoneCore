@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.EnderCrystal;
 import org.bukkit.entity.Entity;
@@ -34,7 +35,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Score;
 
@@ -96,6 +99,7 @@ public abstract class BaseClass {
 	public Timer santa = new Timer();
 	public Timer cookie = new Timer();
 	public Timer wallAbility = new Timer();
+	public Timer vindication = new Timer();
 	public boolean bedrockInvincibility = false;
 
 	public int goldAmt = 0; // For Steve Class
@@ -232,6 +236,28 @@ public abstract class BaseClass {
 					BukkitTask bukkit = Bukkit.getScheduler()
 							.runTaskTimerAsynchronously(instance.getGameManager().getMain(), task, 0, 2L);
 					task.set(bukkit);
+				}
+			}
+			if (baseClass.getType() == ClassType.Vindicator) {
+				if (killer != null) {
+					if (killer.hasPotionEffect(PotionEffectType.SPEED) && killer.getGameMode() != GameMode.SPECTATOR) {
+						for (PotionEffect effect : killer.getActivePotionEffects()) {
+							if (effect.getType().equals(PotionEffectType.SPEED) && effect.getAmplifier() == 1) {
+								killer.getInventory().getItem(0).addEnchantment(Enchantment.DAMAGE_ALL, 1);
+								killer.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rWeapon upgraded to Sharpness I"));
+								BukkitRunnable r = new BukkitRunnable() {
+									public void run() {
+										if (killer.getGameMode() != GameMode.SPECTATOR) {
+											killer.getInventory().getItem(0).removeEnchantment(Enchantment.DAMAGE_ALL);
+											killer.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rWeapon downgraded"));
+										}
+									}
+								};
+								r.runTaskLater(instance.getGameManager().getMain(), 10 * 20L);
+								break;
+							}
+						}
+					}
 				}
 			}
 		}
@@ -767,8 +793,8 @@ public abstract class BaseClass {
 							}
 							pClass.tokens += tokensEarned;
 							pClass.totalTokens += tokensEarned;
-							p.sendMessage("        " + "       Placed #" + instance.alivePlayers + ": " + tokensEarned
-									+ " Tokens");
+							p.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE + ChatColor.BOLD
+									+ "  Placed #" + instance.alivePlayers + ": " + tokensEarned + " Tokens");
 
 							if (pClass != null && pClass.totalKills >= 0) {
 								player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE

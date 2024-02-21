@@ -165,14 +165,9 @@ public class Parkour implements Listener {
 					 * player.setAllowFlight(true); }
 					 */
 				} else if (isPlayerInLava(player)) {
-					Vector v = players.get(player).getInstance().spawnLoc;
-					player.teleport(new Location(main.getLobbyWorld(), v.getBlockX(), v.getBlockY(), v.getBlockZ()));
+					player.teleport(checkpoint.get(player));
+					player.sendMessage(main.color("&e&l(!) &rSent back to checkpoint"));
 					player.setFireTicks(0);
-					checkpoint.put(player,
-							new Location(main.getLobbyWorld(), v.getBlockX(), v.getBlockY(), v.getBlockZ()));
-					checkpointNum.put(player, 0);
-					gameBoard(player);
-					player.sendMessage(main.color("&e&l(!) &rSent back to start"));
 				}
 			} else {
 				if (player.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.SEA_LANTERN) {
@@ -214,12 +209,14 @@ public class Parkour implements Listener {
 					player.sendMessage(main.color("&e&l(!) &rSent back to start"));
 					break;
 				case BARRIER:
+					Location start = players.get(player).getInstance().spawnLoc.toLocation(player.getWorld());
 					this.time.remove(player);
 					this.runnables.remove(player);
 					main.getParkour().players.remove(player);
 					main.ResetPlayer(player);
 					main.LobbyItems(player);
 					main.LobbyBoard(player);
+					player.teleport(start);
 					player.sendMessage(main.color("&r&l(!) &rYou have left parkour mode"));
 					player.setAllowFlight(true);
 					break;
