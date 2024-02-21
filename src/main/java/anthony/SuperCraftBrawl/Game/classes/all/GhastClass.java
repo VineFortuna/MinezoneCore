@@ -63,7 +63,7 @@ public class GhastClass extends BaseClass {
 				getActionBarManager().setActionBar(player, "fireball.cooldown", msg, 2);
 				if (gameTicks % 20 == 0) {
 					this.cooldown--;
-					
+
 					if (this.cooldown <= 0) {
 						player.getInventory().addItem(new ItemStack(Material.ARROW));
 					}
@@ -81,9 +81,9 @@ public class GhastClass extends BaseClass {
 		Entity e = event.getEntity();
 
 		if (e instanceof Arrow) {
-			for (Player gamePlayer : Bukkit.getOnlinePlayers()) //Play Ghast sound when shoot arrows
+			for (Player gamePlayer : Bukkit.getOnlinePlayers()) // Play Ghast sound when shoot arrows
 				gamePlayer.playSound(player.getLocation(), Sound.GHAST_SCREAM, 2, 2);
-			
+
 			if (this.cooldown == 0)
 				this.cooldown = 2;
 		}
