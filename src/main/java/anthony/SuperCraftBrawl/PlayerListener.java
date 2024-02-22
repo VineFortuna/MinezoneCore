@@ -6,7 +6,9 @@ import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import me.itzzmic.minezone.api.PunishAPI;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
+import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
+import org.bukkit.block.ContainerBlock;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -25,8 +27,10 @@ import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Door;
+import org.bukkit.material.Skull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -460,7 +464,9 @@ public class PlayerListener implements Listener {
 				&& block.getType() != Material.CHEST && block.getType() != Material.LONG_GRASS
 				&& block.getType() != Material.RED_ROSE && block.getType() != Material.DEAD_BUSH
 				&& block.getType() != Material.FLOWER_POT && block.getType() != Material.DOUBLE_PLANT
-				&& block.getType() != Material.BED_BLOCK && !(block.getState().getData() instanceof Door)) {
+				&& block.getType() != Material.BED_BLOCK && !(block.getState().getData() instanceof Door)
+				&& !(block.getState() instanceof InventoryHolder) && !(block.getState() instanceof Banner)
+				&& block.getType() != Material.SKULL && block.getType() != Material.SOIL) {
 			Material og = block.getType();
 			Byte data = block.getData();
 			if (og == Material.WOOL) {
