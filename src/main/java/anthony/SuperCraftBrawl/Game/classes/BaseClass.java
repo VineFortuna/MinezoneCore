@@ -100,6 +100,7 @@ public abstract class BaseClass {
 	public Timer cookie = new Timer();
 	public Timer wallAbility = new Timer();
 	public Timer vindication = new Timer();
+	public Timer summon = new Timer();
 	public boolean bedrockInvincibility = false;
 
 	public int goldAmt = 0; // For Steve Class
@@ -1079,30 +1080,8 @@ public abstract class BaseClass {
 									EntityType.ENDER_CRYSTAL);
 							HealTask task = new HealTask(killer, crystal, instance.getGameManager().getMain());
 							BukkitTask bukkit = Bukkit.getScheduler()
-									.runTaskTimerAsynchronously(instance.getGameManager().getMain(), task, 0, 2L);
+									.runTaskTimerAsynchronously(instance.getGameManager().getMain(), task, 0, 20L);
 							task.set(bukkit);
-						}
-					}
-					if (baseClass.getType() == ClassType.Vindicator) {
-						if (killer != null) {
-							if (killer.hasPotionEffect(PotionEffectType.SPEED) && killer.getGameMode() != GameMode.SPECTATOR) {
-								for (PotionEffect effect : killer.getActivePotionEffects()) {
-									if (effect.getType().equals(PotionEffectType.SPEED) && effect.getAmplifier() == 1) {
-										killer.getInventory().getItem(0).addEnchantment(Enchantment.DAMAGE_ALL, 1);
-										killer.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rWeapon upgraded to Sharpness I"));
-										BukkitRunnable r = new BukkitRunnable() {
-											public void run() {
-												if (killer.getGameMode() != GameMode.SPECTATOR) {
-													killer.getInventory().getItem(0).removeEnchantment(Enchantment.DAMAGE_ALL);
-													killer.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rWeapon downgraded"));
-												}
-											}
-										};
-										r.runTaskLater(instance.getGameManager().getMain(), 10 * 20L);
-										break;
-									}
-								}
-							}
 						}
 					}
 				}

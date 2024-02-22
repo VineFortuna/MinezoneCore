@@ -288,7 +288,7 @@ public enum ClassType {
 		case Creeper:
 			return ItemHelper.createSkullHead(1, SkullType.CREEPER);
 		case IronGolem:
-			return new ItemStack(new ItemStack(Material.IRON_AXE));
+			return new ItemStack(new ItemStack(Material.IRON_BLOCK));
 		case Ghast:
 			return new ItemStack(new ItemStack(Material.GHAST_TEAR));
 		case Slime:

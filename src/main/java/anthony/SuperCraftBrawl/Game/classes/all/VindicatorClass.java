@@ -30,6 +30,7 @@ public class VindicatorClass extends BaseClass {
     
     public VindicatorClass(GameInstance instance, Player player) {
         super(instance, player);
+        baseVerticalJump = 0.9;
     }
     
     public ItemStack makePink(ItemStack armour) {
@@ -64,9 +65,9 @@ public class VindicatorClass extends BaseClass {
     public void Tick(int gameTicks) {
         if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Vindicator
                 && instance.classes.get(player).getLives() > 0) {
-            this.cooldownSec = (25000 - vindication.getTime()) / 1000 + 1;
+            this.cooldownSec = (30000 - vindication.getTime()) / 1000 + 1;
         
-            if (vindication.getTime() < 25000) {
+            if (vindication.getTime() < 30000) {
                 String msg = instance.getGameManager().getMain()
                         .color("&c&lVindication &rregenerates in: &e" + cooldownSec + "s");
                 getActionBarManager().setActionBar(player, "vindication.cooldown", msg, 2);
@@ -88,13 +89,31 @@ public class VindicatorClass extends BaseClass {
     }
     
     @Override
+    public void DoDamage(EntityDamageByEntityEvent event) {
+        BaseClass bc = instance.classes.get(player);
+        if (bc != null && bc.getLives() <= 0)
+            return;
+        if (player.hasPotionEffect(PotionEffectType.SPEED) && player.getGameMode() != GameMode.SPECTATOR) {
+            for (PotionEffect effect : player.getActivePotionEffects()) {
+                if (effect.getType().equals(PotionEffectType.SPEED) && effect.getAmplifier() == 2) {
+                    player.removePotionEffect(PotionEffectType.SPEED);
+                    player.removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 60, 0));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60, 1));
+                    player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rYou lost your speed and strength"));
+                }
+            }
+        }
+    }
+    
+    @Override
     public void UseItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         
         if (item != null && item.getType() == Material.EMERALD
                 && event.getAction().toString().contains("RIGHT_CLICK")) {
-            if (vindication.getTime() < 25000) {
-                int seconds = (25000 - vindication.getTime()) / 1000 + 1;
+            if (vindication.getTime() < 30000) {
+                int seconds = (30000 - vindication.getTime()) / 1000 + 1;
                 event.setCancelled(true);
                 player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
                         + "Vindication is still regenerating for " + ChatColor.YELLOW + seconds + " more seconds ");
@@ -102,9 +121,10 @@ public class VindicatorClass extends BaseClass {
                 vindication.restart();
                 if (player.hasPotionEffect(PotionEffectType.SPEED))
                     player.removePotionEffect(PotionEffectType.SPEED);
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 300, 1));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 2));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 100, 0));
                 player.playSound(player.getLocation(), Sound.VILLAGER_HAGGLE, 1, 1);
-                player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rGet a kill in 15 seconds to gain a quick burst of strength"));
+                player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rYou gained a quick burst of speed and strength"));
             }
         }
     }

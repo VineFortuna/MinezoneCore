@@ -653,7 +653,8 @@ public class GameManager implements Listener, PluginMessageListener {
 	@EventHandler
 	public void EntityDeathEvent(EntityDeathEvent entity) {
 		List<EntityType> entities = new ArrayList<>(Arrays.asList(EntityType.ZOMBIE, EntityType.SKELETON,
-				EntityType.CREEPER, EntityType.PIG_ZOMBIE, EntityType.MAGMA_CUBE, EntityType.SILVERFISH));
+				EntityType.CREEPER, EntityType.PIG_ZOMBIE, EntityType.MAGMA_CUBE, EntityType.SILVERFISH,
+				EntityType.WITCH));
 		if (entities.contains(entity.getEntityType())) {
 			entity.getDrops().clear();
 			entity.setDroppedExp(0);
@@ -895,10 +896,10 @@ public class GameManager implements Listener, PluginMessageListener {
 												if (!(instance.team.get(gamePlayer)
 														.equals(instance.team.get(player)))) {
 													EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-															DamageCause.VOID, 5.0);
+															DamageCause.VOID, 5.5);
 													instance.getGameManager().getMain().getServer().getPluginManager()
 															.callEvent(damageEvent);
-													gamePlayer.damage(5.0, player);
+													gamePlayer.damage(5.5, player);
 												}
 											} else {
 												EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
