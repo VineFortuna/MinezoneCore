@@ -238,28 +238,6 @@ public abstract class BaseClass {
 					task.set(bukkit);
 				}
 			}
-			if (baseClass.getType() == ClassType.Vindicator) {
-				if (killer != null) {
-					if (killer.hasPotionEffect(PotionEffectType.SPEED) && killer.getGameMode() != GameMode.SPECTATOR) {
-						for (PotionEffect effect : killer.getActivePotionEffects()) {
-							if (effect.getType().equals(PotionEffectType.SPEED) && effect.getAmplifier() == 1) {
-								killer.getInventory().getItem(0).addEnchantment(Enchantment.DAMAGE_ALL, 1);
-								killer.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rWeapon upgraded to Sharpness I"));
-								BukkitRunnable r = new BukkitRunnable() {
-									public void run() {
-										if (killer.getGameMode() != GameMode.SPECTATOR) {
-											killer.getInventory().getItem(0).removeEnchantment(Enchantment.DAMAGE_ALL);
-											killer.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rWeapon downgraded"));
-										}
-									}
-								};
-								r.runTaskLater(instance.getGameManager().getMain(), 10 * 20L);
-								break;
-							}
-						}
-					}
-				}
-			}
 		}
 	}
 
@@ -1105,6 +1083,28 @@ public abstract class BaseClass {
 							task.set(bukkit);
 						}
 					}
+					if (baseClass.getType() == ClassType.Vindicator) {
+						if (killer != null) {
+							if (killer.hasPotionEffect(PotionEffectType.SPEED) && killer.getGameMode() != GameMode.SPECTATOR) {
+								for (PotionEffect effect : killer.getActivePotionEffects()) {
+									if (effect.getType().equals(PotionEffectType.SPEED) && effect.getAmplifier() == 1) {
+										killer.getInventory().getItem(0).addEnchantment(Enchantment.DAMAGE_ALL, 1);
+										killer.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rWeapon upgraded to Sharpness I"));
+										BukkitRunnable r = new BukkitRunnable() {
+											public void run() {
+												if (killer.getGameMode() != GameMode.SPECTATOR) {
+													killer.getInventory().getItem(0).removeEnchantment(Enchantment.DAMAGE_ALL);
+													killer.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rWeapon downgraded"));
+												}
+											}
+										};
+										r.runTaskLater(instance.getGameManager().getMain(), 10 * 20L);
+										break;
+									}
+								}
+							}
+						}
+					}
 				}
 
 				if (p.getLocation().getY() <= 50) {
@@ -1945,7 +1945,8 @@ public abstract class BaseClass {
 						}
 						data3.tokens += tokensEarned;
 						baseClass2.totalTokens += tokensEarned;
-						p.sendMessage("        " + "       Placed #" + instance.alivePlayers + ": " + ChatColor.GREEN
+						p.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET
+								+ "  Placed #" + instance.alivePlayers + ": " + ChatColor.GREEN
 								+ tokensEarned + " Tokens");
 						baseClass2.placement = instance.alivePlayers;
 
