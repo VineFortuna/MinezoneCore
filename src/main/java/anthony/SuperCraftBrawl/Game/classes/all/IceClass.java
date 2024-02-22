@@ -159,20 +159,20 @@ public class IceClass extends BaseClass {
 										if (!(instance.team.get(p).equals(instance.team.get(player)))) {
 											p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 2 * 20, 0));
 											EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID,
-													5.0);
+													4.5);
 											instance.getGameManager().getMain().getServer().getPluginManager()
 													.callEvent(damageEvent);
-											p.damage(5.0, player);
+											p.damage(4.5, player);
 										}
 									} else {
 										p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 2 * 20, 0)); // Slowness
 																												// 1 for
 																												// 2
 																												// seconds
-										EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID, 5.0);
+										EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID, 4.5);
 										instance.getGameManager().getMain().getServer().getPluginManager()
 												.callEvent(damageEvent);
-										p.damage(5.0, player);
+										p.damage(4.5, player);
 									}
 								}
 							}
