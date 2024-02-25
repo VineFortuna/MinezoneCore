@@ -282,13 +282,13 @@ public enum Maps {
 	Tropical("Tropical",
 			new MapInstance("tropical")
 					.setSpawnPos(
-							new Vector(408.509, 120, 122.405),
-							new Vector(436.509, 122.25000, 156.559),
-							new Vector(422.545, 104, 173.471),
-							new Vector(380.358, 103, 155.491),
-							new Vector(404.051, 120, 157.006),
-							new Vector(424.504, 103, 140.493))
-					.setLobbyLoc(new Vector(333.583, 107, 154.515))
+							new Vector(408.509, 101, 122.405),
+							new Vector(436.509, 82, 156.559),
+							new Vector(422.545, 82, 173.471),
+							new Vector(380.358, 80, 155.491),
+							new Vector(404.051, 96, 157.006),
+							new Vector(424.504, 84, 140.493))
+					.setLobbyLoc(new Vector(333.583, 90, 154.515))
 					.setSpecLoc(new Vector(403.845, 124.41554, 157.094))
 					.setBounds(new Vector(404.461, 123, 152.472), 50, 50)
 					.setSignLoc(new Vector(200.504, 106, 673.700))
