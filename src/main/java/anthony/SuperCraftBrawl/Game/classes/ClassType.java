@@ -28,8 +28,8 @@ public enum ClassType {
 	Silverfish(45, 0, 0), Anvil(46, 700, 0), Summoner(47, 525, 0), MagmaCube(48, 0, Rank.VIP), Villager(49, 0, 0),
 	ZombiePigman(51, 0, 3), Witch(13, 0, 5), ZombieVillager(50, 0, 10), Ice(54, 0, 15), Vampire(53, 800, 0),
 	Bee(55, 425, 0), Jeb(56, 0, 20), Hunter(57, 500, 0), FlintAndSteel(58, 0, 0), WitherSk(59, 1500, 0),
-	Shulker(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30),
-	LargeFern(64, 0, 0), Vindicator(65, 0, Rank.VIP);
+	Shulker(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30), LargeFern(64, 0, 0),
+	Vindicator(65, 0, Rank.VIP), Fade(66, 0, Rank.VIP);
 
 	// Wolf(63, 0, 35)/* , Guardian(63, 0, 30) */;
 
@@ -79,6 +79,8 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new Cactus(instance, player);
+		case Fade:
+			return new FadeClass(instance, player);
 		case Cloud:
 			return new CloudClass(instance, player);
 		case Firework:
@@ -215,6 +217,8 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new ItemStack(Material.CACTUS);
+		case Fade:
+			return new ItemStack(Material.STRING);
 		case Cloud:
 			return new ItemStack(Material.WOOL);
 		case Firework:
@@ -240,7 +244,8 @@ public enum ClassType {
 		case Vampire:
 			return new ItemStack(Material.GHAST_TEAR);
 		case ZombiePigman:
-			return ItemHelper.createSkullTexture("e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWY5OGEzY2ZkZjhjMTNlZTY2MzQxNDBmOTQ1YjcxZDJlNDg4ZmY0ODVlMTBjMzNhZTI1ODIxZDgyZDg0OGE3MyJ9fX0=");
+			return ItemHelper.createSkullTexture(
+					"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWY5OGEzY2ZkZjhjMTNlZTY2MzQxNDBmOTQ1YjcxZDJlNDg4ZmY0ODVlMTBjMzNhZTI1ODIxZDgyZDg0OGE3MyJ9fX0=");
 		case Villager:
 			return new ItemStack(Material.EMERALD);
 		case DarkSethBling:
@@ -248,7 +253,8 @@ public enum ClassType {
 		case ZombieVillager:
 			return new ItemStack(Material.ROTTEN_FLESH);
 		case MagmaCube:
-			return ItemHelper.createSkullTexture("e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGFhNmM0NWIyY2Y3OTc1Yjk1ZmJjY2U0ZWQ5YjA2NDZhYzAwY2I5Y2M5ZjY2ZGM1YzI0ZTgxZDJjOTFlZTdjMSJ9fX0=");
+			return ItemHelper.createSkullTexture(
+					"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGFhNmM0NWIyY2Y3OTc1Yjk1ZmJjY2U0ZWQ5YjA2NDZhYzAwY2I5Y2M5ZjY2ZGM1YzI0ZTgxZDJjOTFlZTdjMSJ9fX0=");
 		case Summoner:
 			return new ItemStack(Material.ENCHANTED_BOOK);
 		case Anvil:
@@ -284,7 +290,8 @@ public enum ClassType {
 		case Blaze:
 			return new ItemStack(Material.BLAZE_ROD);
 		case Wither:
-			return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODg2ZGMwY2ZjYWVlY2ZlMWFiNjkxNDZlNGQ0ZjExOTA4MzcwNzZhNjdkZWMxMzVmYWJkYTYyNzFmMzc1ZDAxZiJ9fX0=");
+			return ItemHelper.createSkullTexture(
+					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODg2ZGMwY2ZjYWVlY2ZlMWFiNjkxNDZlNGQ0ZjExOTA4MzcwNzZhNjdkZWMxMzVmYWJkYTYyNzFmMzc1ZDAxZiJ9fX0=");
 		case Creeper:
 			return ItemHelper.createSkullHead(1, SkullType.CREEPER);
 		case IronGolem:
@@ -352,6 +359,8 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return "A pricklyyy living thing, made up of thornws & blood..";
+		case Fade:
+			return "Fade out of existence from your opponents briefly!";
 		case Cloud:
 			return "Use your powers to send cool effects on your opponents!";
 		case Firework:
@@ -518,6 +527,8 @@ public enum ClassType {
 		switch (this) {
 		case Bat:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bat" + ChatColor.RESET;
+		case Fade:
+			return "" + ChatColor.BLACK + ChatColor.BOLD + ChatColor.ITALIC + "Fade" + ChatColor.RESET;
 		case Cloud:
 			return "" + ChatColor.GRAY + ChatColor.ITALIC + "Cloud" + ChatColor.RESET;
 		// case Wolf:

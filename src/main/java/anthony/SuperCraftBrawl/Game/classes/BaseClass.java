@@ -59,6 +59,7 @@ public abstract class BaseClass {
 	protected final Player player;
 	public int lives = 5;
 	public boolean isDead = false;
+	public boolean fadeAbilityActive = false;
 	public int tokens = 0;
 	public Score score;
 	public int totalTokens = 0;
@@ -100,6 +101,7 @@ public abstract class BaseClass {
 	public Timer cookie = new Timer();
 	public Timer wallAbility = new Timer();
 	public Timer vindication = new Timer();
+	public Timer fadeAbility = new Timer();
 	public Timer summon = new Timer();
 	public boolean bedrockInvincibility = false;
 

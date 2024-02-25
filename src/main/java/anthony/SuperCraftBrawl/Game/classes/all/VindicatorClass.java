@@ -78,8 +78,8 @@ public class VindicatorClass extends BaseClass {
         }
         if (gameTicks % 5 == 0) {
             if (!player.hasPotionEffect(PotionEffectType.SPEED) && player.getGameMode() != GameMode.SPECTATOR &&
-                    !player.getNearbyEntities(6, 6, 6).isEmpty()) {
-                for (Entity nearby : player.getNearbyEntities(6, 6, 6)) {
+                    !player.getNearbyEntities(8, 8, 8).isEmpty()) {
+                for (Entity nearby : player.getNearbyEntities(8, 8, 8)) {
                     if (nearby instanceof Player && instance.players.contains(nearby)) {
                         player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 40, 0));
                     }
@@ -123,6 +123,7 @@ public class VindicatorClass extends BaseClass {
                     player.removePotionEffect(PotionEffectType.SPEED);
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 2));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 100, 0));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 100, 0));
                 player.playSound(player.getLocation(), Sound.VILLAGER_HAGGLE, 1, 1);
                 player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rYou gained a quick burst of speed and strength"));
             }
