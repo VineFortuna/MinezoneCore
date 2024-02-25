@@ -151,6 +151,9 @@ public class GameManager implements Listener, PluginMessageListener {
 
 			if (instance != null) {
 				if (instance.state == GameState.STARTED) {
+					if (instance.classes.containsKey(player) && instance.classes.get(player).fadeAbilityActive == true) {
+						event.setCancelled(true);
+					}
 					if (instance.classes.containsKey(player) && instance.classes.get(player).getLives() <= 0)
 						event.setCancelled(true);
 					else
@@ -1157,6 +1160,9 @@ public class GameManager implements Listener, PluginMessageListener {
 								if (this.spawnProt.containsKey(damager) || baseClass.bedrockInvincibility == true) {
 									event.setCancelled(true);
 									return;
+								}
+								if (instance.classes.containsKey(damager) && instance.classes.get(damager).fadeAbilityActive == true) {
+									event.setCancelled(true);
 								}
 							}
 						}
