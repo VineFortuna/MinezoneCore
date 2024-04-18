@@ -55,7 +55,6 @@ public class ChickenClass extends BaseClass {
 	public ItemStack getEggs() {
 		return ItemHelper.setDetails(new ItemStack(Material.EGG, 10), ChatColor.YELLOW + "Explosive Eggs", "",
 				ChatColor.GRAY + "Right click to throw DEADLY eggs!");
-		//
 	}
 
 	@Override
@@ -98,17 +97,17 @@ public class ChickenClass extends BaseClass {
 									if (instance.duosMap != null) {
 										if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
 											EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-													DamageCause.PROJECTILE, 4.0);
+													DamageCause.PROJECTILE, 2.8);
 											instance.getGameManager().getMain().getServer().getPluginManager()
 													.callEvent(damageEvent);
-											gamePlayer.damage(4.0, player);
+											gamePlayer.damage(2.8, player);
 										}
 									} else {
 										EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-												DamageCause.PROJECTILE, 4.0);
+												DamageCause.PROJECTILE, 2.8);
 										instance.getGameManager().getMain().getServer().getPluginManager()
 												.callEvent(damageEvent);
-										gamePlayer.damage(4.0, player);
+										gamePlayer.damage(2.8, player);
 									}
 								}
 								for (Player gamePlayer : instance.players) {
