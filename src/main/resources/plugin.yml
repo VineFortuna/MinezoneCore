@@ -21,6 +21,8 @@ commands:
       description: Fav classes
    gamestats:
       description: Stats after a game
+   fly:
+      description: Fly command
    list:
       description: List of online players
    leave:

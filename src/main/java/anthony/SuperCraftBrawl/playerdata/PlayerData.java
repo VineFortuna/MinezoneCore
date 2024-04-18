@@ -18,7 +18,7 @@ public class PlayerData {
 			bonusTokens = 0, bonusLevels = 0, paintball = 0, santaoutfit, elf, gingerbreadman, killMsgs = 0,
 			challenge1 = 0, challenge2 = 0, challenge3 = 0, goldApple = 0, glowstone = 0, redstone = 0, web = 0,
 			bottleEXP = 0, broomWinEffect = 0, enderDragonEffect = 0, santaEffect = 0, fireParticlesEffect = 0,
-			challenge100 = 0, challenge101 = 0, challenge102 = 0, challenge103 = 0, matchMvps = 0;
+			challenge100 = 0, challenge101 = 0, challenge102 = 0, challenge103 = 0, matchMvps = 0, fly = 0;
 
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
 	public ArrayList<Integer> customIntegers = new ArrayList<>();
@@ -30,7 +30,7 @@ public class PlayerData {
 			int santaoutfit, int elf, int gingerbreadman, int killMsgs, int challenge1, int challenge2, int challenge3,
 			int goldApple, int glowstone, int redstone, int web, int bottleEXP, int broomWWinEffect,
 			int enderDragonEffect, int santaEffect, int fireParticlesEffect, int challenge100, int challenge101,
-			int challenge102, int challenge103, int matchMvps) {
+			int challenge102, int challenge103, int matchMvps, int fly) {
 		this(playerUUID, playerName, playerIP);
 		this.roleID = roleID;
 		this.tokens = tokens;
@@ -81,6 +81,7 @@ public class PlayerData {
 		this.challenge102 = challenge102;
 		this.challenge103 = challenge103;
 		this.matchMvps = matchMvps;
+		this.fly = fly;
 	}
 
 	public boolean isPurchased(ClassType type) {

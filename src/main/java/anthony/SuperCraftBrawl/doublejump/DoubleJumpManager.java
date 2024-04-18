@@ -20,6 +20,7 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import net.md_5.bungee.api.ChatColor;
 
 public class DoubleJumpManager implements Listener {
@@ -68,6 +69,11 @@ public class DoubleJumpManager implements Listener {
 		Player player = event.getPlayer();
 
 		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
+		PlayerData playerData = main.getDataManager().getPlayerData(player);
+		
+		if (i == null && (playerData != null && playerData.fly == 1))
+			return;
+		
 		if (i != null && (i.state == GameState.STARTED || i.state == GameState.ENDED)) {
 			if (i.classes.get(player).getLives() <= 0) {
 				return;
