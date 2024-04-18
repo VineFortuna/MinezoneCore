@@ -145,12 +145,13 @@ public class PlayerDataManager implements Listener {
 			int challenge102 = set.getInt("Challenge102");
 			int challenge103 = set.getInt("Challenge103");
 			int matchMvps = set.getInt("MatchMvps");
+			int fly = set.getInt("Fly");
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
 					exp, level, bestTime, magicbroom, points, withersk, bonusTokens, bonusLevels, paintball,
 					santaoutfit, elf, gingerbreadman, killMsgs, challenge1, challenge2, challenge3, goldApple,
 					glowstone, redstone, web, bottleEXP, broomWinEffect, enderDragonEffect, santaEffect,
-					fireParticlesEffect, challenge100, challenge101, challenge102, challenge103, matchMvps);
+					fireParticlesEffect, challenge100, challenge101, challenge102, challenge103, matchMvps, fly);
 		}
 		set.close();
 		stmt.close();
@@ -209,8 +210,8 @@ public class PlayerDataManager implements Listener {
 				+ ", MagicBroom = " + data.magicbroom + ", Cwm = " + data.cwm + ", Blue = " + data.blue + ", Red = "
 				+ data.red + ", Green = " + data.green + ", Yellow = " + data.yellow + ", MelonCosmetic = " + data.melon
 				+ ", PrivateMessages = " + data.pm + ", Muted = " + data.muted + ", GoldApple = " + data.goldApple
-				+ ", Glowstone = " + data.glowstone + ", Redstone = " + data.redstone + ", Web = " + data.web
-				+ ", BottleEXP = " + data.bottleEXP + ", MysteryChests = " + data.mysteryChests
+				+ ", Fly = " + data.fly + ", Glowstone = " + data.glowstone + ", Redstone = " + data.redstone
+				+ ", Web = " + data.web + ", BottleEXP = " + data.bottleEXP + ", MysteryChests = " + data.mysteryChests
 				+ ", AstronautCosmetic = " + data.astronaut + ", SantaOutfit = " + data.santaoutfit
 				+ ", BroomWinEffect = " + data.broomWinEffect + ", BestTime = " + data.bestTime + ", Exp = " + data.exp
 				+ ", Winstreak = " + data.winstreak + ", GingerBreadMan = " + data.gingerbreadman + ", Elf = "

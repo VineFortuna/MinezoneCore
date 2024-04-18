@@ -111,29 +111,52 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 				break;
 
+			case "fly":
+				instance2 = main.getGameManager().GetInstanceOfPlayer(player);
+				PlayerData flyData = main.getDataManager().getPlayerData(player);
+
+				if (instance2 == null) {
+					if (player.hasPermission("scb.fly")) {
+						if (flyData != null) {
+							if (flyData.fly == 0) {
+								player.sendMessage(main.color("&e&l(!) &rYou have enabled flight!"));
+								flyData.fly = 1;
+							} else {
+								player.sendMessage(main.color("&e&l(!) &rYou have disabled flight!"));
+								flyData.fly = 0;
+							}
+							main.getDataManager().saveData(flyData); // Save even when server restarts
+						}
+					} else
+						player.sendMessage(main.color("&c&l(!) &rYou need the rank " + ChatColor.BLUE + ChatColor.BOLD
+								+ "CAPTAIN &rto use this command!"));
+				} else
+					player.sendMessage(main.color("&c&l(!) &rYou cannot use this in game!"));
+
+				break;
+
 			case "setlives":
 				if (args.length >= 2) {
 					Player target = Bukkit.getServer().getPlayerExact(args[0]);
-					
+
 					int num = 0;
 					try {
 						num = Integer.parseInt(args[1]);
 					} catch (NumberFormatException ex) {
-						player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD
-								+ "(!) " + ChatColor.RESET + "Please specify the number of lives!");
+						player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
+								+ ChatColor.RESET + "Please specify the number of lives!");
 						return false;
 					}
-					
+
 					if (target != null) {
 						GameInstance i = main.getGameManager().GetInstanceOfPlayer(target);
 						if (i != null) {
 							if (i.state == GameState.STARTED) {
 								BaseClass baseClass2 = i.classes.get(target);
 								baseClass2.lives = num;
-								player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD
-										+ "(!) " + ChatColor.RESET + "You have set " + ChatColor.YELLOW
-										+ target.getName() + ChatColor.RESET + "'s lives to " + ChatColor.YELLOW
-										+ num);
+								player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
+										+ ChatColor.RESET + "You have set " + ChatColor.YELLOW + target.getName()
+										+ ChatColor.RESET + "'s lives to " + ChatColor.YELLOW + num);
 								baseClass2.score.setScore(baseClass2.lives);
 							} else
 								player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
@@ -142,11 +165,12 @@ public class Commands implements CommandExecutor, TabCompleter {
 							player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
 									+ ChatColor.RESET + "This player is not in a game!");
 					} else
-						player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD
-								+ "(!) " + ChatColor.RESET + "Please specify a player!");
+						player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
+								+ ChatColor.RESET + "Please specify a player!");
 				} else
 					player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "Incorrect usage! Try doing: " + ChatColor.RESET + ChatColor.GREEN + "/setlives <player> <lives>");
+							+ "Incorrect usage! Try doing: " + ChatColor.RESET + ChatColor.GREEN
+							+ "/setlives <player> <lives>");
 				break;
 
 			case "gamestats":
@@ -157,7 +181,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 								try {
 									new GameStatsGUI(main, main.gameStats.get(player)).inv.open(player);
 								} catch (NullPointerException ex) {
-									player.sendMessage(main.color("&c&l(!) &rThis game's stats cannot be viewed. Did a player leave early?"));
+									player.sendMessage(main.color(
+											"&c&l(!) &rThis game's stats cannot be viewed. Did a player leave early?"));
 								}
 								return true;
 							}
@@ -192,7 +217,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 				} else
 					player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
 							+ "Incorrect usage! Try doing: " + ChatColor.RESET + ChatColor.GREEN + "/fav <classname>");
-				
+
 				return true;
 
 			case "join":

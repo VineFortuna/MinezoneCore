@@ -349,7 +349,7 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null) {
-			String[] commandTypes = { "join", "fav", "shop", "leave", "cw", "l", "players", "class", "spectate",
+			String[] commandTypes = { "join", "fav", "fly", "shop", "leave", "cw", "l", "players", "class", "spectate",
 					"startgame", "gamestats", "setlives", "purchases", "mainworld", "kit" };
 
 			for (String command : commandTypes) {
