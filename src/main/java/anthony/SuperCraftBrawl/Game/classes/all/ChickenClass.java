@@ -55,6 +55,7 @@ public class ChickenClass extends BaseClass {
 	public ItemStack getEggs() {
 		return ItemHelper.setDetails(new ItemStack(Material.EGG, 10), ChatColor.YELLOW + "Explosive Eggs", "",
 				ChatColor.GRAY + "Right click to throw DEADLY eggs!");
+		//
 	}
 
 	@Override
