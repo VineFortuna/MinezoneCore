@@ -2189,7 +2189,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									}
 								}
 
-							}, new ItemStack(Material.MONSTER_EGG));
+							}, ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1));
 							i.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}
@@ -2227,7 +2227,7 @@ public class GameManager implements Listener, PluginMessageListener {
 										customizeSkeleton(skeleton2);
 									}
 								}
-							}, new ItemStack(Material.MONSTER_EGG));
+							}, ItemHelper.createMonsterEgg(EntityType.SKELETON, 1));
 							i.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}
@@ -2254,7 +2254,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									customizeMob(witch, player);
 								}
 
-							}, new ItemStack(Material.MONSTER_EGG));
+							}, ItemHelper.createMonsterEgg(EntityType.WITCH, 1));
 							i.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}
@@ -2290,7 +2290,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 								}
 
-							}, new ItemStack(Material.MONSTER_EGG));
+							}, ItemHelper.createMonsterEgg(EntityType.CREEPER, 1));
 							i.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}

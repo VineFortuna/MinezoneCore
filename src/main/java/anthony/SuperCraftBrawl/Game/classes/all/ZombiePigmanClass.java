@@ -108,7 +108,7 @@ public class ZombiePigmanClass extends BaseClass {
 						player.playSound(player.getLocation(), Sound.ZOMBIE_PIG_ANGRY, 1, 1);
 					}
 
-				}, new ItemStack(Material.MONSTER_EGG));
+				}, ItemHelper.createMonsterEgg(EntityType.PIG_ZOMBIE, 1));
 				instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 						player.getLocation().getDirection().multiply(2.0D));
 			}
