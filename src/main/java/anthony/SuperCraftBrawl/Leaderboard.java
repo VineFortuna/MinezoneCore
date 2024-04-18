@@ -127,7 +127,7 @@ public class Leaderboard {
 			stand.setGravity(false);
 			stand.setCustomNameVisible(true);
 			stand.setCustomName(
-					main.color("&b&l#" + count + ":" + " &e" + name + " &r- " + win));
+					main.color("&b#" + count + ":" + " &e" + name + " &r- " + win));
 
 			count++;
 		}
@@ -157,7 +157,7 @@ public class Leaderboard {
 			stand.setGravity(false);
 			stand.setCustomNameVisible(true);
 			stand.setCustomName(
-					main.color("&b&l#" + count + ":" + " &e" + name + " &r- " + win));
+					main.color("&b#" + count + ":" + " &e" + name + " &r- " + win));
 
 			count++;
 		}
