@@ -145,7 +145,7 @@ public class MagmaCubeClass extends BaseClass {
 											+ "MagmaCube");
 								}
 
-							}, new ItemStack(Material.MONSTER_EGG));
+							}, ItemHelper.createMonsterEgg(EntityType.MAGMA_CUBE, 1));
 							instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}

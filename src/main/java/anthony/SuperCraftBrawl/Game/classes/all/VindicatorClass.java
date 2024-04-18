@@ -30,7 +30,6 @@ public class VindicatorClass extends BaseClass {
     
     public VindicatorClass(GameInstance instance, Player player) {
         super(instance, player);
-        baseVerticalJump = 0.9;
     }
     
     public ItemStack makePink(ItemStack armour) {
@@ -63,6 +62,9 @@ public class VindicatorClass extends BaseClass {
     
     @Override
     public void Tick(int gameTicks) {
+        if (!(player.getActivePotionEffects().contains(PotionEffectType.WEAKNESS)))
+            player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
+        
         if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Vindicator
                 && instance.classes.get(player).getLives() > 0) {
             this.cooldownSec = (30000 - vindication.getTime()) / 1000 + 1;
@@ -98,9 +100,10 @@ public class VindicatorClass extends BaseClass {
                 if (effect.getType().equals(PotionEffectType.SPEED) && effect.getAmplifier() == 2) {
                     player.removePotionEffect(PotionEffectType.SPEED);
                     player.removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 60, 0));
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 60, 1));
-                    player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rYou lost your speed and strength"));
+                    player.removePotionEffect(PotionEffectType.WEAKNESS);
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 200, 1));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 200, 1));
+                    player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rYou lost your energy"));
                 }
             }
         }
@@ -123,9 +126,8 @@ public class VindicatorClass extends BaseClass {
                     player.removePotionEffect(PotionEffectType.SPEED);
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 2));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 100, 0));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 100, 0));
                 player.playSound(player.getLocation(), Sound.VILLAGER_HAGGLE, 1, 1);
-                player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rYou gained a quick burst of speed and strength"));
+                player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rYou gained a sudden burst of energy. Chase down your enemies!"));
             }
         }
     }
