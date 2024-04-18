@@ -431,7 +431,6 @@ public class GameInstance {
 							player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1);
 					} else if (ticks == 25 || ticks == 20 || ticks == 15 || ticks == 10)
 						player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1);
-
 					else if (ticks == 5 || ticks == 4 || ticks == 3 || ticks == 2) {
 						for (Player player : players)
 							player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1);
