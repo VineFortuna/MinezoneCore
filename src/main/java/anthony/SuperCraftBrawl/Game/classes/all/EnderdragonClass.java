@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Color;
@@ -54,7 +55,7 @@ public class EnderdragonClass extends BaseClass {
 	public void SetItems(Inventory playerInv) {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL, 5),
-				instance.getGameManager().getMain().color("&c&lTeleporter")));
+				"" + ChatColor.BLACK + ChatColor.BOLD + "Teleporters"));
 		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
 	}
 
