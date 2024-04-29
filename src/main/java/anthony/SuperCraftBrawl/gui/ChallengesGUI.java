@@ -25,9 +25,23 @@ public class ChallengesGUI implements InventoryProvider {
 
 	@Override
 	public void init(Player player, InventoryContents contents) {
-		contents.set(0, 0, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.BEDROCK), main.color("&cNo new challenges yet")), e -> {
-				}));
+		PlayerData data = main.getDataManager().getPlayerData(player);
+//		contents.set(0, 0, ClickableItem.of(
+//				ItemHelper.setDetails(new ItemStack(Material.BEDROCK), main.color("&cNo new challenges yet")), e -> {
+//				}));
+		if (data != null) {
+			Material mat = null;
+			if (data.challenge3 == 0)
+				mat = Material.NETHER_STAR;
+			else if (data.challenge3 == 1)
+				mat = Material.BARRIER;
+			contents.set(0, 0,
+					ClickableItem.of(ItemHelper.setDetails(new ItemStack(mat),
+									main.color("&e1 Bonus Level"), data.challenge3 == 1?main.color("&aCOMPLETED"):"",
+									main.color("&rFind & use an extra life")),
+							e -> {
+							}));
+		}
 	}
 
 	@Override

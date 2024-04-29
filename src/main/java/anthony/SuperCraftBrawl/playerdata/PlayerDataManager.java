@@ -163,7 +163,8 @@ public class PlayerDataManager implements Listener {
 			boolean purchased = classSet.getInt("Purchased") == 1;
 			int timePurchased = classSet.getInt("TimePurchased");
 			int gamesPlayed = classSet.getInt("GamesPlayed");
-			data.playerClasses.put(classID, new ClassDetails(purchased, timePurchased, gamesPlayed));
+			int gamesWon = classSet.getInt("GamesWon");
+			data.playerClasses.put(classID, new ClassDetails(purchased, timePurchased, gamesPlayed, gamesWon));
 		}
 		classSet.close();
 
@@ -219,7 +220,7 @@ public class PlayerDataManager implements Listener {
 				+ ", Challenge3 = " + data.challenge3 + ", KillMsgs = " + data.killMsgs + ", Level = " + data.level
 				+ ", Deaths = " + data.deaths + ", Paintball = " + data.paintball + ", Wins = " + data.wins
 				+ " WHERE UUID = '" + data.playerUUID.toString() + "';");
-		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed) VALUES ";
+		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon) VALUES ";
 		int index = 0;
 
 		for (Entry<Integer, ClassDetails> entry : data.playerClasses.entrySet()) {
@@ -228,13 +229,14 @@ public class PlayerDataManager implements Listener {
 					updateCMD += ", ";
 				updateCMD += "('" + data.playerUUID.toString() + "', " + entry.getKey() + ", "
 						+ entry.getValue().timePurchased + ", " + (entry.getValue().purchased ? 1 : 0) + ", "
-						+ entry.getValue().gamesPlayed + ")";
+						+ entry.getValue().gamesPlayed + ", " + entry.getValue().gamesWon + ")";
 				index++;
 			}
 		}
 
 		if (index > 0) {
-			updateCMD += "ON DUPLICATE KEY UPDATE TimePurchased = VALUES (TimePurchased), Purchased = VALUES (Purchased), GamesPlayed = VALUES (GamesPlayed);";
+			updateCMD += "ON DUPLICATE KEY UPDATE TimePurchased = VALUES (TimePurchased), Purchased = VALUES (Purchased), " +
+					"GamesPlayed = VALUES (GamesPlayed), GamesWon = VALUES (GamesWon);";
 			System.out.print("Executing " + updateCMD);
 			manager.executeUpdateCommand(updateCMD);
 		}

@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -31,6 +32,7 @@ public class PotatoClass extends BaseClass {
 
 	private ItemStack potato = new ItemStack(Material.POTATO_ITEM);
 	private ItemStack bakedPotato = new ItemStack(Material.BAKED_POTATO);
+	private ItemStack poisonPotato = new ItemStack(Material.POISONOUS_POTATO);
 	private int sharpness = 4;
 	public boolean bp = false;
 
@@ -79,6 +81,38 @@ public class PotatoClass extends BaseClass {
 		playerInv.setItem(0, ItemHelper.addEnchant(ItemHelper.addEnchant(potato, Enchantment.DAMAGE_ALL, sharpness),
 				Enchantment.KNOCKBACK, 2));
 	}
+	
+	@Override
+	public void Tick(int gameTicks) {
+		if (player.hasPotionEffect(PotionEffectType.POISON)) {
+			if (!(player.getInventory().contains(poisonPotato))) {
+				player.getInventory()
+						.setItem(0,
+								ItemHelper.addEnchant(
+										ItemHelper.addEnchant(poisonPotato,
+												Enchantment.DAMAGE_ALL, sharpness), Enchantment.KNOCKBACK, 1));
+				player.sendMessage(instance.getGameManager().getMain()
+						.color("&r&l(!) &rYou recieved a poisonous potato for being poisoned"));
+			}
+		}
+	}
+	
+	@Override
+	public void DoDamage(EntityDamageByEntityEvent event) {
+		BaseClass bc = instance.classes.get(player);
+		if (bc != null && bc.getLives() <= 0)
+			return;
+		if (player.getInventory().contains(Material.POISONOUS_POTATO)) {
+			if (event.getEntity() instanceof Player) {
+				Player p = (Player) event.getEntity();
+				if (instance.duosMap != null)
+					if (instance.team.get(p).equals(instance.team.get(player)))
+						return;
+				
+				p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 40, 0, true));
+			}
+		}
+	}
 
 	@Override
 	public void TakeDamage(EntityDamageEvent event) {
@@ -109,9 +143,9 @@ public class PotatoClass extends BaseClass {
 					sharpness--;
 					player.getInventory().removeItem(potato);
 					player.removePotionEffect(PotionEffectType.SPEED);
-
+					
 					new BukkitRunnable() {
-
+						
 						@Override
 						public void run() {
 							player.getInventory().setItem(0, ItemHelper.addEnchant(new ItemStack(Material.POTATO_ITEM),
@@ -119,7 +153,7 @@ public class PotatoClass extends BaseClass {
 							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 4 - sharpness));
 						}
 					}.runTaskLater(instance.getGameManager().getMain(), 1);
-
+					
 					player.sendMessage(instance.getGameManager().getMain()
 							.color("&6&l(!) &rYou gave up a level of Sharpness for some speed"));
 				}
@@ -129,9 +163,9 @@ public class PotatoClass extends BaseClass {
 					sharpness--;
 					player.getInventory().removeItem(bakedPotato);
 					player.removePotionEffect(PotionEffectType.SPEED);
-
+					
 					new BukkitRunnable() {
-
+						
 						@Override
 						public void run() {
 							player.getInventory()
@@ -143,7 +177,30 @@ public class PotatoClass extends BaseClass {
 							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 4 - sharpness));
 						}
 					}.runTaskLater(instance.getGameManager().getMain(), 1);
-
+					
+					player.sendMessage(instance.getGameManager().getMain()
+							.color("&6&l(!) &rYou gave up a level of Sharpness for some speed"));
+				}
+			} else if (item.getType() == Material.POISONOUS_POTATO
+					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+				if (sharpness <= 4 && sharpness >= 2) {
+					sharpness--;
+					player.getInventory().removeItem(poisonPotato);
+					player.removePotionEffect(PotionEffectType.SPEED);
+					
+					new BukkitRunnable() {
+						
+						@Override
+						public void run() {
+							player.getInventory()
+									.setItem(0,
+											ItemHelper.addEnchant(
+													new ItemStack(Material.POISONOUS_POTATO),
+													Enchantment.DAMAGE_ALL, sharpness));
+							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 4 - sharpness));
+						}
+					}.runTaskLater(instance.getGameManager().getMain(), 1);
+					
 					player.sendMessage(instance.getGameManager().getMain()
 							.color("&6&l(!) &rYou gave up a level of Sharpness for some speed"));
 				}

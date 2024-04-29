@@ -215,11 +215,17 @@ public class PlayerListener implements Listener {
 		ItemStack item = e.getItem();
 
 		if (item != null) {
-			if (item.getType() == Material.SKULL_ITEM)
-				new StatsGUI(main).inv.open(player);
-			else if (item.getType() == Material.NETHER_STAR)
+			if (item.getType() == Material.SKULL_ITEM) {
+				if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+					if (item.getItemMeta().getDisplayName().contains("Profile"))
+						new StatsGUI(main).inv.open(player);
+					else if (item.getItemMeta().getDisplayName().contains("Tournament"))
+						new TournamentGUI(main).inv.open(player);
+				}
+			} else if (item.getType() == Material.NETHER_STAR) {
 				if (player.getWorld() == main.getLobbyWorld())
 					new ChallengesGUI(main).inv.open(player);
+			}
 		}
 	}
 
@@ -227,12 +233,21 @@ public class PlayerListener implements Listener {
 	public void containerInteract(PlayerInteractEvent e) {
 		List<Material> list = new ArrayList<>(Arrays.asList(Material.FURNACE, Material.HOPPER, Material.ANVIL,
 				Material.ENCHANTMENT_TABLE, Material.ANVIL, Material.WORKBENCH, Material.BREWING_STAND,
-				Material.TRAPPED_CHEST, Material.ENDER_CHEST, Material.BEACON));
+				Material.TRAPPED_CHEST, Material.ENDER_CHEST, Material.BEACON, Material.DISPENSER, Material.DROPPER,
+				Material.CHEST));
 		if (e.getAction() == Action.RIGHT_CLICK_BLOCK && list.contains(e.getClickedBlock().getType())) {
 			Player player = e.getPlayer();
-
 			if (!player.isOp())
 				e.setCancelled(true);
+		}
+	}
+	
+	@EventHandler
+	public void playerRightClick(PlayerInteractEntityEvent e) {
+		if (main.getGameManager().GetInstanceOfPlayer(e.getPlayer()) == null
+				&& e.getRightClicked() instanceof Player) {
+			Player target = ((Player) e.getRightClicked()).getPlayer();
+			new StatsGUI(main, target).inv.open(e.getPlayer());
 		}
 	}
 
@@ -256,10 +271,10 @@ public class PlayerListener implements Listener {
 		} else {
 			// Chat filter
 			List<String> filteredWords = new ArrayList<>(Arrays.asList(
-					"nibba", "nigga", "nigger", "porn", "pornhub", "cum", "nexly",
-					"fuck you", "fuckyou", "fuck", "shit", "sh!t", "bitch", "pussy", "fucker",
+					"nibba", "nigga", "niggas", "nigger", "niggers", "porn", "pornhub",
+					"cum", "fuck you", "fuckyou", "fuck", "bitch", "pussy", "fucker",
 					"motherfucker", "celestepvp", "celeste", "kys", "pu$$y", "fag", "faggot",
-					"bitchass", "cunt", "retard", "asshole", "penis", "fucker", "twat", "cock", "ass"));
+					"bitchass", "cunt", "retard", "penis", "fucker", "twat", "cock"));
 			PlayerData data = main.getDataManager().getPlayerData(event.getPlayer());
 			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
 			String message = event.getMessage();

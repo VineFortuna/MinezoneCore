@@ -43,6 +43,10 @@ public class PurchaseClassInventory implements InventoryProvider {
 
 	@Override
 	public void init(Player player, InventoryContents contents) {
+		contents.fill(ClickableItem.of(
+				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, data.tokens >= type.getTokenCost()?
+						DyeColor.LIME.getData():DyeColor.RED.getData()), ""), e -> {
+				}));
 		contents.set(1, 4, ClickableItem.of(ItemHelper.setDetails(type.getItem(),
 				"" + ChatColor.RESET + "Are you sure you want to purchase?", "",
 				"" + ChatColor.RESET + ChatColor.BOLD + "Class: " + type.getTag(), "" + ChatColor.RESET
@@ -71,84 +75,6 @@ public class PurchaseClassInventory implements InventoryProvider {
 								+ ChatColor.RESET + "You don't have enough tokens to purchase " + type.getTag());
 						inv.close(player);
 					}
-				}));
-		contents.set(0, 0, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(0, 1, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(0, 2, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(0, 3, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(0, 4, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(0, 5, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(0, 6, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(0, 7, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(0, 8, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(1, 0, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(1, 1, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(1, 2, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(1, 3, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(1, 5, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(1, 6, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(1, 7, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(1, 8, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(2, 0, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(2, 1, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(2, 2, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(2, 3, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(2, 4, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(2, 5, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(2, 6, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(2, 7, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
-				}));
-		contents.set(2, 8, ClickableItem.of(
-				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()), ""), e -> {
 				}));
 	}
 
