@@ -1480,6 +1480,7 @@ public class GameInstance {
 
 			if (data != null) {
 				data.points += points;
+				getGameManager().getMain().tourney.put(player.getName(), data.points);
 			}
 		}
 	}
@@ -1527,12 +1528,12 @@ public class GameInstance {
 	}
 
 	public void WinGame(List<Player> winners) {
-		// playerPosition.add(winner);
 		PlayerData data3 = null;
 		checkForMatchMvp();
 		for (Player winner : winners) {
 			data3 = gameManager.getMain().getDataManager().getPlayerData(winner);
 			winnerList.add(winner);
+			playerPosition.add(winner);
 			if (data3 != null) {
 				BaseClass bc = classes.get(winner);
 				if (data3.challenge1 == 0) {
@@ -1593,6 +1594,7 @@ public class GameInstance {
 			givePoints(2, 7);
 			givePoints(3, 5);
 			givePoints(4, 1);
+			getGameManager().getMain().sortTourney();
 		}
 
 		for (Player winner : winners) {
