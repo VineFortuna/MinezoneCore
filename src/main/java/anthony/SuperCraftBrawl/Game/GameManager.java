@@ -770,7 +770,8 @@ public class GameManager implements Listener, PluginMessageListener {
 									.color("&9&l(!) &rYou used an extra life and now rewarded with &e1 Bonus Level"));
 							data.level += 1;
 							data.challenge3 = 1;
-							player.sendMessage(getMain().color("&9&l(!) &rYou are now level &e" + data.level));
+							player.sendMessage(instance.getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
+							player.sendMessage("You are now Level: " + data.level + "!");
 						}
 					}
 					BaseClass baseClass = instance.classes.get(player);

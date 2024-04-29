@@ -580,14 +580,6 @@ public enum Maps {
 	Crescent("Crescent",
 			new MapInstance("crescent")
 					.setSpawnPos(
-//							new Vector(5024.412, 124, 686.483),
-//							new Vector(5039.468, 124, 672.524),
-//							new Vector(5050.506, 124, 660.473),
-//							new Vector(5064.491, 124, 675.514),
-//							new Vector(5076.455, 124, 686.479),
-//							new Vector(5061.467, 124, 700.504),
-//							new Vector(5050.474, 124, 712.472))
-//					NEW SPAWN LOCATIONS
 					new Vector(5068.115, 129, 712.473),
 							new Vector(5020.488, 129, 696.607),
 							new Vector(5036.411, 129, 712.445),
@@ -597,7 +589,7 @@ public enum Maps {
 							new Vector(5052.359, 141, 696.622))
 					.setLobbyLoc(new Vector(5051.459, 129, 623.500))
 					.setSpecLoc(new Vector(5050.500, 141, 686.500))
-					.setBounds(new Vector(5050.500, 141, 686.500), 40, 40)
+					.setBounds(new Vector(5052.500, 141, 696.500), 45, 45)
 					.setSignLoc(new Vector(-48.507, 128, -28.700))
 					.setMapType(MapType.COMMUNITY)),
 

@@ -299,8 +299,10 @@ public abstract class BaseClass {
 										kClass.totalExp += 29;
 
 										// If tournament mode is on, give 1 point for kill:
-										if (instance.getGameManager().getMain().tournament == true)
+										if (instance.getGameManager().getMain().tournament) {
 											kData.points++;
+											instance.getGameManager().getMain().tourney.put(d.getName(), kData.points);
+										}
 
 										// kClass.totalTokens += 1;
 										kClass.totalKills++;
@@ -319,8 +321,10 @@ public abstract class BaseClass {
 										kClass.totalExp += 29;
 
 										// If tournament mode is on, give 1 point for kill:
-										if (instance.getGameManager().getMain().tournament == true)
+										if (instance.getGameManager().getMain().tournament) {
 											kData.points++;
+											instance.getGameManager().getMain().tourney.put(d.getName(), kData.points);
+										}
 
 										// kClass.totalTokens += 1;
 										kClass.totalKills++;
@@ -376,8 +380,10 @@ public abstract class BaseClass {
 										kClass.totalExp += 29;
 
 										// If tournament mode is on, give 1 point for kill:
-										if (instance.getGameManager().getMain().tournament == true)
+										if (instance.getGameManager().getMain().tournament) {
 											kData.points++;
+											instance.getGameManager().getMain().tourney.put(d.getName(), kData.points);
+										}
 
 										// kClass.totalTokens += 1;
 										kClass.totalKills++;
@@ -552,8 +558,10 @@ public abstract class BaseClass {
 									kClass.totalExp += 29;
 
 									// If tournament mode is on, give 1 point for kill:
-									if (instance.getGameManager().getMain().tournament == true)
+									if (instance.getGameManager().getMain().tournament) {
 										kData.points++;
+										instance.getGameManager().getMain().tourney.put(d.getName(), kData.points);
+									}
 
 									// kClass.totalTokens += 1;
 									kClass.totalKills++;
@@ -619,8 +627,10 @@ public abstract class BaseClass {
 										kClass.totalExp += 29;
 
 										// If tournament mode is on, give 1 point for kill:
-										if (instance.getGameManager().getMain().tournament == true)
+										if (instance.getGameManager().getMain().tournament) {
 											kData.points++;
+											instance.getGameManager().getMain().tourney.put(d.getName(), kData.points);
+										}
 
 										// kClass.totalTokens += 1;
 										kClass.totalKills++;
@@ -2235,6 +2245,7 @@ public abstract class BaseClass {
 		PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
 		if (d != null) {
 			if (instance.classes.containsKey(d)) {
+				PlayerData data2 = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
 				BaseClass baseClass3 = instance.classes.get(d);
 				// For first blood:
 				if (instance.firstBlood == null) {
@@ -2244,23 +2255,20 @@ public abstract class BaseClass {
 							+ baseClass3.getType().getTag() + " &edrew first blood!"));
 					TellAll("");
 					baseClass3.totalTokens += 10;
-					
-					//if (data != null)
-						//if (instance.getGameManager().getMain().tournament)
-							//instance.givePointsAgain(d, data, 2);
+					if (instance.getGameManager().getMain().tournament) {
+						data2.points += 2;
+						instance.getGameManager().getMain().tourney.put(d.getName(), data2.points);
+					}
 				}
-				PlayerData data2 = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
 
 				if (data2 != null) {
-					//if (instance.getGameManager().getMain().tournament == true)
-						//instance.givePointsAgain(d, data, 1);
 					data2.kills += 1;
 					data2.exp += 29;
 					baseClass3.totalExp += 29;
-					if (instance.getGameManager().getMain().tournament == true)
+					if (instance.getGameManager().getMain().tournament) {
 						data2.points++;
-					if (instance.getGameManager().getMain().tournament)
-						data2.points++;
+						instance.getGameManager().getMain().tourney.put(d.getName(), data2.points);
+					}
 
 					d.playSound(d.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
 

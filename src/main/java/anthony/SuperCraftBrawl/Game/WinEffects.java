@@ -117,7 +117,7 @@ public class WinEffects {
 
 							Color c = null;
 							Random r = new Random();
-							int chance = r.nextInt(3);
+							int chance = r.nextInt(4);
 
 							if (chance == 0)
 								c = Color.BLUE;

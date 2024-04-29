@@ -37,7 +37,7 @@ public class SteveClass extends BaseClass {
 	private int kb = 1;
 	private int sharp = 1;
 	private int fortune = 0;
-	// private int blind = 0;
+	//private int blind = 0;
 
 	public SteveClass(GameInstance instance, Player player) {
 		super(instance, player);

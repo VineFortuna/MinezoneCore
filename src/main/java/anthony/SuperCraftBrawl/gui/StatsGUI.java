@@ -51,7 +51,7 @@ public class StatsGUI implements InventoryProvider {
 		}));
 		contents.set(4, 5, ClickableItem.of(ItemHelper.setGlowing(ItemHelper.setDetails(new ItemStack(Material.BOOK),
 				"" + ChatColor.RESET + ChatColor.YELLOW + "My Stats"),
-				data.playerName.equals(player.getDisplayName())), e -> {
+				data.playerName.equals(player.getName())), e -> {
 			if (this.target != null && this.target != player)
 				new StatsGUI(main).inv.open(player);
 		}));
@@ -67,6 +67,8 @@ public class StatsGUI implements InventoryProvider {
 							Arrays.asList(main.color("&aRank: &r" + data.getRank().getTag()),
 									main.color("&aLevel: &r" + data.level),
 									main.color("&aMatches Played: &r" + (data.wins + data.losses)))), e-> {}));
+			contents.set(2, 2,
+					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FEATHER), "&cComing soon..."), e-> {}));
 			contents.set(2, 4,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
 							"" + ChatColor.RESET + ChatColor.GREEN + "Wins: " + ChatColor.RESET + data.wins,
@@ -78,6 +80,11 @@ public class StatsGUI implements InventoryProvider {
 							"", "" + ChatColor.RESET + ChatColor.GREEN + "Kills: " + ChatColor.RESET + data.kills,
 							"" + ChatColor.RESET + ChatColor.GREEN + "Deaths: " + ChatColor.RESET + data.deaths), e -> {
 							}));
+			String tournamentTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGYzOTk3YzQzMDkxNjk0ZmMyZmI3NmM4ODNhNzZjY2U4OWYwMjI3ZTVjOWYxZGZlIn19fQ==";
+			contents.set(2, 6,
+					ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(tournamentTexture),
+							main.color("&cComing soon...")), e-> {}));
+			
 		}
 	}
 
