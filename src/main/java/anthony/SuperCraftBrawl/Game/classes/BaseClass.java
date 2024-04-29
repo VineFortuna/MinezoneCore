@@ -243,6 +243,21 @@ public abstract class BaseClass {
 			}
 		}
 	}
+	
+	public Player getNearestPlayer(double x, double y, double z) {
+		for (Entity target : player.getNearbyEntities(x, y, z)) {
+			if (target instanceof Player) {
+				if (instance.duosMap != null) {
+					if (!instance.team.get(target).equals(instance.team.get(player))) {
+						return (Player) target;
+					}
+				} else {
+					return (Player) target;
+				}
+			}
+		}
+		return null;
+	}
 
 	public void Death2(PlayerDeathEvent e) {
 		isDead = false;

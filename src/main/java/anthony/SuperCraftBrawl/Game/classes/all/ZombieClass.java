@@ -42,6 +42,7 @@ public class ZombieClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
+		String altTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzNmN2NjZjYxZGJjM2Y5ZmU5YTYzMzNjZGUwYzBlMTQzOTllYjJlZWE3MWQzNGNmMjIzYjNhY2UyMjA1MSJ9fX0=";
 		ItemStack z = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.ZOMBIE.ordinal());
 		playerEquip.setHelmet(z);
 		playerEquip.setChestplate(makePink(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
@@ -114,6 +115,7 @@ public class ZombieClass extends BaseClass {
 				Zombie zombie = (Zombie) player.getWorld().spawnCreature(player.getLocation(), EntityType.ZOMBIE);
 				zombie.setBaby(true);
 				zombie.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Baby Zombie");
+				zombie.setTarget(getNearestPlayer(100, 100, 100));
 			}
 			player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rSpawning army of &eBaby Zombies!"));
 			player.playSound(player.getLocation(), Sound.ZOMBIE_HURT, 1, 1);

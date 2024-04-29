@@ -3,17 +3,16 @@ package anthony.SuperCraftBrawl.playerdata;
 public class ClassDetails {
 
 	public boolean purchased = false, hasUpdated = false;
-	public int timePurchased = 0, gamesPlayed = 0, gamesWon = 0;
+	public int timePurchased = 0, gamesPlayed = 0;
 
 	public ClassDetails() {
 
 	}
 
-	public ClassDetails(boolean purchased, int timePurchased, int gamesPlayed, int gamesWon) {
+	public ClassDetails(boolean purchased, int timePurchased, int gamesPlayed) {
 		this.purchased = purchased;
 		this.timePurchased = timePurchased;
 		this.gamesPlayed = gamesPlayed;
-		this.gamesWon = gamesWon;
 	}
 
 	public void setPurchased() {
