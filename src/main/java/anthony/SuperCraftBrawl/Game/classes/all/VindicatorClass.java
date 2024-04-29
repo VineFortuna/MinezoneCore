@@ -78,7 +78,7 @@ public class VindicatorClass extends BaseClass {
                 getActionBarManager().setActionBar(player, "vindication.cooldown", msg, 2);
             }
         }
-        if (gameTicks % 5 == 0) {
+        if (gameTicks % 2 == 0) {
             if (!player.hasPotionEffect(PotionEffectType.SPEED) && player.getGameMode() != GameMode.SPECTATOR &&
                     !player.getNearbyEntities(8, 8, 8).isEmpty()) {
                 for (Entity nearby : player.getNearbyEntities(8, 8, 8)) {
@@ -101,8 +101,8 @@ public class VindicatorClass extends BaseClass {
                     player.removePotionEffect(PotionEffectType.SPEED);
                     player.removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
                     player.removePotionEffect(PotionEffectType.WEAKNESS);
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 200, 1));
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 200, 1));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 160, 1));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 160, 1));
                     player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rYou lost your energy"));
                 }
             }
