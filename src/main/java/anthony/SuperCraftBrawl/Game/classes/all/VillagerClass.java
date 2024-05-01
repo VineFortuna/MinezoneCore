@@ -122,6 +122,7 @@ public class VillagerClass extends BaseClass {
 						public void onHit(Player hit) {
 							if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
 								Location hitLoc = this.getBaseProj().getEntity().getLocation();
+								player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
 								Random r = new Random();
 								int chance = r.nextInt(100);
 
