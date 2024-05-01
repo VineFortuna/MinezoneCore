@@ -42,6 +42,8 @@ public class StatsGUI implements InventoryProvider {
 		if (this.target != null)
 			data = main.getDataManager().getPlayerData(target);
 		
+		contents.fillRow(0, ClickableItem.of(ItemHelper.setDetails(
+				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 		contents.fillRow(4, ClickableItem.of(ItemHelper.setDetails(
 				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 		
@@ -67,8 +69,8 @@ public class StatsGUI implements InventoryProvider {
 							Arrays.asList(main.color("&aRank: &r" + data.getRank().getTag()),
 									main.color("&aLevel: &r" + data.level),
 									main.color("&aMatches Played: &r" + (data.wins + data.losses)))), e-> {}));
-			contents.set(2, 2,
-					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FEATHER), "&cComing soon..."), e-> {}));
+			/*contents.set(2, 2,
+					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FEATHER), "&cComing soon..."), e-> {}));*/
 			contents.set(2, 4,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
 							"" + ChatColor.RESET + ChatColor.GREEN + "Wins: " + ChatColor.RESET + data.wins,
@@ -81,9 +83,15 @@ public class StatsGUI implements InventoryProvider {
 							"" + ChatColor.RESET + ChatColor.GREEN + "Deaths: " + ChatColor.RESET + data.deaths), e -> {
 							}));
 			String tournamentTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGYzOTk3YzQzMDkxNjk0ZmMyZmI3NmM4ODNhNzZjY2U4OWYwMjI3ZTVjOWYxZGZlIn19fQ==";
-			contents.set(2, 6,
+			/*contents.set(2, 6,
 					ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(tournamentTexture),
-							main.color("&cComing soon...")), e-> {}));
+							main.color("&cComing soon...")), e-> {}));*/
+			String fishingTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTk2YTQ4ZGNkYWY0MThmMjJjZDE4NjdjMWViMGFlMjgyYzI4NGI2Nzk5MDZiNzk3ODFkOGQyYjJlZWJhMjEwMiJ9fX0=";
+			contents.set(4, 0,
+					ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(fishingTexture),
+							main.color("&eFishing")), e-> {
+						new FishingGUI(main).inv.open(player);
+					}));
 			
 		}
 	}

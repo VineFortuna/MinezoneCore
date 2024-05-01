@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -98,6 +99,7 @@ public class Core extends JavaPlugin implements Listener {
 	// public AntiCheat cheat;
 	public Leaderboard lb;
 	public KillsBoard kb;
+	public Fishing fishing;
 	private ArrayList<String> msg;
 	public Map<Player, Player> wagers = new HashMap<Player, Player>();
 
@@ -333,6 +335,7 @@ public class Core extends JavaPlugin implements Listener {
 		ag = new ActiveGamesGUI(this);
 		p = new Parkour(this);
 		lb = new Leaderboard(this);
+		fishing = new Fishing(this);
 		//kb = new KillsBoard(this);
 		// swManager = new anthony.skywars.GameManager(this);
 		// abilityManager = new anthony.skywars.AbilityManager(this);
@@ -1239,7 +1242,7 @@ public class Core extends JavaPlugin implements Listener {
 							PlayerData data = this.getDataManager().getPlayerData(onlinePlayers);
 							LobbyBoard(onlinePlayers);
 							ItemStack tournament = ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGYzOTk3YzQzMDkxNjk0ZmMyZmI3NmM4ODNhNzZjY2U4OWYwMjI3ZTVjOWYxZGZlIn19fQ==");
-							player.getInventory().setItem(6, ItemHelper.setDetails(tournament, "" + ChatColor.GRAY + "Tournament"));
+							onlinePlayers.getInventory().setItem(6, ItemHelper.setDetails(tournament, "" + ChatColor.GRAY + "Tournament"));
 							tourney.put(onlinePlayers.getName(), data.points);
 						}
 					}
