@@ -63,7 +63,7 @@ public class VindicatorClass extends BaseClass {
     @Override
     public void Tick(int gameTicks) {
         if (!(player.getActivePotionEffects().contains(PotionEffectType.WEAKNESS)))
-            player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
         
         if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Vindicator
                 && instance.classes.get(player).getLives() > 0) {
@@ -101,7 +101,6 @@ public class VindicatorClass extends BaseClass {
                     player.removePotionEffect(PotionEffectType.SPEED);
                     player.removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
                     player.removePotionEffect(PotionEffectType.WEAKNESS);
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 160, 1));
                     player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 160, 1));
                     player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rYou lost your energy"));
                 }
