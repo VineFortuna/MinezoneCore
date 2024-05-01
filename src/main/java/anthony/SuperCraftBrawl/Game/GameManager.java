@@ -2282,6 +2282,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									// Customizing Creeper
 									customizeMob(creeper, player);
 									customizeCreeper(creeper);
+									
 
 									// If ClassType == Summoner
 									// Setting to Charged Creeper
