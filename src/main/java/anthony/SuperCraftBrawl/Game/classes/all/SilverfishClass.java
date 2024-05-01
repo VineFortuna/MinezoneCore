@@ -459,6 +459,7 @@ public class SilverfishClass extends BaseClass {
 
 			// Customizing Creeper
 			customizeSilverfish(silverfish, player);
+			silverfish.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
 		}
 
 		public void despawnSilverfish() {
