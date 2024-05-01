@@ -2178,6 +2178,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									// Customizing Zombie
 									customizeMob(zombie, player);
 									customizeZombie(zombie);
+									zombie.setTarget(i.getNearestPlayer(player, 100, 100, 100));
 
 									// If ClassType == Summoner
 									if (i.classes.get(player).getType() == ClassType.Summoner) {
@@ -2187,6 +2188,7 @@ public class GameManager implements Listener, PluginMessageListener {
 										// Customizing Second Zombie
 										customizeMob(zombie2, player);
 										customizeZombie(zombie2);
+										zombie2.setTarget(i.getNearestPlayer(player, 100, 100, 100));
 									}
 								}
 
@@ -2217,6 +2219,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									// Customizing Skeleton
 									customizeMob(skeleton, player);
 									customizeSkeleton(skeleton);
+									skeleton.setTarget(i.getNearestPlayer(player, 100, 100, 100));
 
 									// If ClassType == Summoner
 									if (i.classes.get(player).getType() == ClassType.Summoner) {
@@ -2226,6 +2229,7 @@ public class GameManager implements Listener, PluginMessageListener {
 										// Customizing Second Skeleton
 										customizeMob(skeleton2, player);
 										customizeSkeleton(skeleton2);
+										skeleton2.setTarget(i.getNearestPlayer(player, 100, 100, 100));
 									}
 								}
 							}, ItemHelper.createMonsterEgg(EntityType.SKELETON, 1));
@@ -2253,6 +2257,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									Witch witch = (Witch) player.getWorld().spawnCreature(hitLoc, EntityType.WITCH);
 									// Customizing Witch
 									customizeMob(witch, player);
+									witch.setTarget(i.getNearestPlayer(player, 100, 100, 100));
 								}
 
 							}, ItemHelper.createMonsterEgg(EntityType.WITCH, 1));
@@ -2282,6 +2287,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									// Customizing Creeper
 									customizeMob(creeper, player);
 									customizeCreeper(creeper);
+									creeper.setTarget(i.getNearestPlayer(player, 100, 100, 100));
 									
 
 									// If ClassType == Summoner

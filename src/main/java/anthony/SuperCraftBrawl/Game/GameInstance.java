@@ -2232,6 +2232,21 @@ public class GameInstance {
 		}
 		return false;
 	}
+	
+	public Player getNearestPlayer(Player player, double x, double y, double z) {
+		for (Entity target : player.getNearbyEntities(x, y, z)) {
+			if (target instanceof Player) {
+				if (this.duosMap != null) {
+					if (!this.team.get(target).equals(this.team.get(player))) {
+						return (Player) target;
+					}
+				} else {
+					return (Player) target;
+				}
+			}
+		}
+		return null;
+	}
 
 	public boolean hasPlayerMovedPosition(Player player) {
 		UUID playerId = player.getUniqueId();
