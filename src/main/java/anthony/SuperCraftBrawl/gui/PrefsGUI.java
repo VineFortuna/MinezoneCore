@@ -34,8 +34,6 @@ public class PrefsGUI implements InventoryProvider {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 		String line = "";
 		
-		contents.fillRow(0, ClickableItem.of(ItemHelper.setDetails(
-				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 		contents.fillRow(4, ClickableItem.of(ItemHelper.setDetails(
 				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 		
@@ -96,7 +94,7 @@ public class PrefsGUI implements InventoryProvider {
 			} else {
 				line = main.color("&cDisable");
 			}
-			contents.set(2, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
+			contents.set(1, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
 					main.color("&eCustom Kill Messages"), "", line), e -> {
 						if (player.hasPermission("scb.customKillMsgs")) {
 							if (data.killMsgs == 0) {
