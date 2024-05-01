@@ -53,6 +53,7 @@ public class GameInstance {
 	public List<Player> players;
 	public List<Player> spectators;
 	public Location recentDrop = null;
+	public int lastSpawn = -1;
 	public HashMap<Player, BaseClass> classes;
 	public HashMap<Player, BaseClass> oldClasses;
 	public HashMap<Player, BaseClass> allClasses; // Keep track of all players' BaseClass, even ones that left game
@@ -528,7 +529,14 @@ public class GameInstance {
 		if (mapInstance.spawnPos.size() == 0)
 			return GetLobbyLoc().add(new Vector(42, 2, 2.5));
 		else {
-			Vector spawnPos = mapInstance.spawnPos.get(random.nextInt(mapInstance.spawnPos.size()));
+			int rand = random.nextInt(mapInstance.spawnPos.size());
+			if (lastSpawn >= 0) {
+				while (rand == lastSpawn) {
+					rand = random.nextInt(mapInstance.spawnPos.size());
+				}
+			}
+			lastSpawn = rand;
+			Vector spawnPos = mapInstance.spawnPos.get(rand);
 			return new Location(mapWorld, spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
 		}
 	}
