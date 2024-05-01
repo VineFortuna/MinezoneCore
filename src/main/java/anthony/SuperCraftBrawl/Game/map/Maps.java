@@ -916,7 +916,7 @@ public enum Maps {
 	TempleOfMars("TempleOfMars",
 			new MapInstance("templeofmars")
 					.setSpawnPos(
-							new Vector(4962.489, 155, 742.402),
+							new Vector(4946.934, 151, 749.479),
 							new Vector(4946.502, 153, 788.490),
 							new Vector(4918.471, 149, 768.472),
 							new Vector(4888.509, 148, 779.695),
