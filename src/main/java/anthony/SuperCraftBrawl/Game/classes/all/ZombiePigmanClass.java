@@ -106,6 +106,7 @@ public class ZombiePigmanClass extends BaseClass {
 								"" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "ZombiePigman");
 						en.setAngry(true);
 						player.playSound(player.getLocation(), Sound.ZOMBIE_PIG_ANGRY, 1, 1);
+						en.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
 					}
 
 				}, ItemHelper.createMonsterEgg(EntityType.PIG_ZOMBIE, 1));
