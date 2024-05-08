@@ -104,6 +104,7 @@ public abstract class BaseClass {
 	public Timer fadeAbility = new Timer();
 	public Timer summon = new Timer();
 	public boolean bedrockInvincibility = false;
+	public boolean hunterDash = true;
 
 	public int goldAmt = 0; // For Steve Class
 	public int coalAmt = 0; // For Steve Class
@@ -2295,13 +2296,10 @@ public abstract class BaseClass {
 						.color("&r&l(!) &rYou got a kill and now you can switch your wool color if you'd like!"));
 
 			} else if (baseClass.getType() == ClassType.Hunter) {
-				if (!(d.getInventory().contains(Material.FEATHER))) {
+				if (!hunterDash) {
 					d.sendMessage(instance.getGameManager().getMain()
 							.color("&r&l(!) &rYour &r&lDash &rhas been regenerated for getting a kill!"));
-					d.getInventory()
-							.addItem(ItemHelper.setDetails(new ItemStack(Material.FEATHER),
-									instance.getGameManager().getMain().color("&b&lDash"),
-									instance.getGameManager().getMain().color("&7A quick escape or attack")));
+					hunterDash = true;
 				}
 			} else if (baseClass.getType() == ClassType.Present) {
 				d.sendMessage(instance.getGameManager().getMain().color(
