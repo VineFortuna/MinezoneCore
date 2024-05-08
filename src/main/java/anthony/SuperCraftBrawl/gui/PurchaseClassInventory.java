@@ -31,7 +31,7 @@ public class PurchaseClassInventory implements InventoryProvider {
 		this.data = main.getDataManager().getPlayerData(player);
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9).title("" + ChatColor.YELLOW
 				+ ChatColor.BOLD + "Purchase " + type + "?").build();
-		ClassDetails details = data.playerClasses.get(data);
+		ClassDetails details = data.playerClasses.get(type.getID());
 
 		if (details != null && details.purchased) {
 			player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET

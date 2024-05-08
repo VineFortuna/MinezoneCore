@@ -207,7 +207,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 									player.sendMessage(main.color("&2&l(!) &rNew favorite class! " + type.getTag()));
 									main.getDataManager().saveData(playerData);
 								} else
-									player.sendMessage(main.color("&c&l(!) &rThis class is already added to favourites!"));
+									player.sendMessage(main.color("&c&l(!) &rThis class is already added to favorites!"));
 							}
 							return true;
 						}

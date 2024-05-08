@@ -244,7 +244,8 @@ public class GameManager implements Listener, PluginMessageListener {
 					}
 				} else {
 					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You cannot teleport there!");
-					player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
+					player.getInventory().addItem(ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL),
+							"" + ChatColor.RED + ChatColor.BOLD + "Teleporter"));
 				}
 			}
 	}
