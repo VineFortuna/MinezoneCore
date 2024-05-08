@@ -174,7 +174,7 @@ public class GameInstance {
 
 	public GameReason AddSpectator(Player player) {
 		if (state == GameState.STARTED) {
-			if (!players.contains(player)) {
+			if (!players.contains(player) || !spectators.contains(player)) {
 				spectators.add(player);
 				for (Player gamePlayer : players) {
 					gamePlayer.hidePlayer(player);
@@ -241,6 +241,8 @@ public class GameInstance {
 	}
 
 	public GameReason AddPlayer(Player player) {
+		player.setAllowFlight(false);
+		player.setAllowFlight(true);
 		if (state == GameState.WAITING) {
 			if (!players.contains(player)) {
 				if (this.map != null) {
@@ -1176,7 +1178,6 @@ public class GameInstance {
 	}
 
 	public void PlayerDeath(Player player) {
-		this.blindness = 0;
 		if (this.gameType == GameType.FRENZY)
 			rerandomizeClass(player);
 		final BaseClass baseClass = this.classes.get(player);

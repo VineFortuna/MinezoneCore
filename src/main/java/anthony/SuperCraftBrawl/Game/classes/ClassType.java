@@ -366,7 +366,7 @@ public enum ClassType {
 		case Firework:
 			return "Shoot colorful fireworks and inflict different effects!";
 		case Shulker:
-			return "You want me? I want you baby, my sugar boo, Im levitating";
+			return "You want me? I want you baby, my sugar boo, I'm levitating";
 		case WitherSk:
 			return "Shoot your withering blasts at other players!";
 		case Rabbit:
@@ -374,7 +374,7 @@ public enum ClassType {
 		case FlintAndSteel:
 			return "Combo your flint & steel for a special reward";
 		case Hunter:
-			return "Damage your enemies to gain Blood Lust to get special enchants!";
+			return "Damage your enemies to gain Blood Lust to get special potions!";
 		case Jeb:
 			return "Notch vs. Jeb, who wins?";
 		case Bee:
@@ -388,7 +388,7 @@ public enum ClassType {
 		// case WitherSk:
 		// return "A very powerful character ready to dominate";
 		case ZombieVillager:
-			return "A poisonous creature..";
+			return "A poisonous creature...";
 		case Villager:
 			return "Toss your potatoes to confuse your enemies";
 		case MagmaCube:
@@ -404,7 +404,7 @@ public enum ClassType {
 		case Dweller:
 			return "Beware the Dweller of SCB!";
 		case Star:
-			return "Born in 1964 Jeffrey.. Jeffrey Besos";
+			return "Born in 1964 Jeffrey... Jeffrey Besos";
 		case Wizard:
 			return "A Wizard with different spells!";
 		case Present:
@@ -424,7 +424,7 @@ public enum ClassType {
 		case Wither:
 			return "Utilize your explosive skulls to defeat your enemies!";
 		case Notch:
-			return "The owner of Minecraft..";
+			return "The owner of Minecraft...";
 		case Blaze:
 			return "ITS A BLAZE LOL!";
 		case Steve:
@@ -466,7 +466,7 @@ public enum ClassType {
 		case Slime:
 			return "Throw sticky grenades and attack enemies!";
 		case ButterGolem:
-			return "Once a proud member of the Sky Army, the ButterGolem now stands as a relic of a bygone era..";
+			return "Once a proud member of the Sky Army, the ButterGolem now stands as a relic of a bygone era...";
 		case Bat:
 			return "Dance around your opponents with SUPER high jumps!";
 		case SethBling:
@@ -474,7 +474,7 @@ public enum ClassType {
 		case Melon:
 			return "The Owner of the server in the game?!";
 		case BabyCow:
-			return "moo.. MOO!!";
+			return "moo... MOO!!";
 		case Herobrine:
 			return "Use your Diamond of Despair to play tricks on your opponents!";
 		case Pig:
@@ -488,7 +488,7 @@ public enum ClassType {
 //		case Guardian:
 //			return "Guard thyself and thy family (or something idk)";
 //		case Fluxty:
-//			return: "We cannot have HATERS in the community.. So use your Wood Axe to kick em all out!";
+//			return: "We cannot have HATERS in the community... So use your Wood Axe to kick em all out!";
 //		case Snowman:
 //			return "This is a Snowman, not a SnowGolem. Get it right pleb!";
 		}

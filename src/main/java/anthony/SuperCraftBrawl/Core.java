@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import anthony.SuperCraftBrawl.Game.*;
 import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -40,10 +41,6 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 
-import anthony.SuperCraftBrawl.Game.ActionBarManager;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameManager;
-import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -1255,6 +1252,7 @@ public class Core extends JavaPlugin implements Listener {
 							PlayerData data = this.getDataManager().getPlayerData(p);
 							data.points = 0;
 							LobbyBoard(p);
+							this.getDataManager().saveData(data);
 						}
 						tourney.put(s, 0);
 					}
@@ -1316,9 +1314,9 @@ public class Core extends JavaPlugin implements Listener {
                         public void run() {
                             for (Player p : Bukkit.getOnlinePlayers()) {
 								if (size == 1) {
-									p.sendTitle(color("&6And the winner is.."), "");
+									p.sendTitle(color("&6And the winner is..."), "");
 								} else {
-									p.sendTitle(color("&aPlaced #" + size), "");
+									p.sendTitle(color("&aPlacing #" + size), "");
 								}
 								String name = names.get(size-1);
                                 new BukkitRunnable() {
@@ -1903,6 +1901,11 @@ public class Core extends JavaPlugin implements Listener {
 	public void onDisable() {
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
 		DataOutputStream out = new DataOutputStream(b);
+		
+		for (GameInstance instance : gameManager.gameMap.values()) {
+			for (Map.Entry<Player, WinEffects> entry : instance.effects.entrySet())
+				entry.getValue().removeWinEffects();
+		}
 
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			p.kickPlayer(color("&c&lSERVER IS RESTARTING\n&e\n" + msg.get(new Random().nextInt(msg.size()))));

@@ -1,5 +1,6 @@
 package anthony.SuperCraftBrawl.gui;
 
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -45,14 +46,28 @@ public class TokenClassesGUI implements InventoryProvider {
 								playerData.isPurchased(type) ? "" + ChatColor.YELLOW + ChatColor.BOLD + "Purchased"
 										: "" + ChatColor.RESET + type.getTokenCost() + ChatColor.YELLOW + " tokens",
 								"",
-								"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
-										+ ChatColor.YELLOW + " to choose a class",
-								"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET
-										+ ChatColor.YELLOW + " to add a favorite class"),
+										"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
+												+ ChatColor.YELLOW + " to choose a class",
+										"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET
+												+ ChatColor.YELLOW + " to view rewards",
+										"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Shift Click" + ChatColor.RESET
+												+ ChatColor.YELLOW + " to add a favorite class",
+										main.color("&aNext reward:"),
+										progressBar(player, type)),
 								e -> {
+							
 									if (playerData.playerClasses.get(type.getID()) != null
 											&& playerData.playerClasses.get(type.getID()).purchased) {
-										if (e.isLeftClick()) {
+										if (e.isShiftClick()) {
+											PlayerData data = main.getDataManager().getPlayerData(player);
+											
+											if (data != null) {
+												data.customIntegers.add(type.getID());
+												player.sendMessage(main
+														.color("&2&l(!) &rAdded new favorite class: " + type.getTag()));
+												main.getDataManager().saveData(data);
+											}
+										} if (e.isLeftClick()) {
 											main.getGameManager().playerSelectClass(player, type);
 											player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
 													+ "==============================================");
@@ -69,17 +84,10 @@ public class TokenClassesGUI implements InventoryProvider {
 											player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
 											player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
 													+ "==============================================");
+											inv.close(player);
 										} else if (e.isRightClick()) {
-											PlayerData data = main.getDataManager().getPlayerData(player);
-
-											if (data != null) {
-												data.customIntegers.add(type.getID());
-												player.sendMessage(main
-														.color("&2&l(!) &rAdded new favorite class: " + type.getTag()));
-												main.getDataManager().saveData(data);
-											}
+											new ClassRewardsGUI(main, type).inv.open(player);
 										}
-										inv.close(player);
 									} else {
 										new PurchaseClassInventory(main, type, player);
 									}
@@ -382,5 +390,24 @@ public class TokenClassesGUI implements InventoryProvider {
 	@Override
 	public void update(Player player, InventoryContents contents) {
 
+	}
+	
+	public String progressBar(Player player, ClassType type) {
+		String str = "";
+		PlayerData data = main.getDataManager().getPlayerData(player);
+		//ClassDetails details = data.playerClasses.get(type.getID());
+		//int progress = details.gamesPlayed/5;
+		int progress = 0;
+		str += main.color("&8[");
+		for (int i = 1; i <= 20; i++) {
+			if (i <= progress)
+				str += main.color("&a|");
+			else
+				str += main.color("&7|");
+			
+		}
+		//str += main.color("&8] &7(" + details.gamesPlayed + "/100)");
+		str += main.color("&8] &7(" + progress + "/100)");
+		return str;
 	}
 }

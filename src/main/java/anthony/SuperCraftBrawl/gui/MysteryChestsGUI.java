@@ -188,32 +188,7 @@ public class MysteryChestsGUI implements InventoryProvider {
 										stand.remove();
 										main.getGameManager().chestCanOpen = false;
 										data.mysteryChests--;
-										
-										if (data != null && main.msHologram.get(player) != null) {
-											if (player.getWorld() == main.getLobbyWorld()) {
-												EntityArmorStand stand = main.msHologram.get(player);
-												PacketPlayOutEntityDestroy destroyPacket = new PacketPlayOutEntityDestroy(
-														stand.getId());
-												((CraftPlayer) player).getHandle().playerConnection
-														.sendPacket(destroyPacket);
-												loc = new Location(main.getLobbyWorld(), 194.520, 115.7, 641.500);
-												
-												WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
-												stand = new EntityArmorStand(s);
-												
-												stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-												stand.setCustomName(
-														main.color("&e&l" + data.mysteryChests + " &eto open!"));
-												stand.setCustomNameVisible(true);
-												stand.setGravity(false);
-												stand.setInvisible(true);
-												PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(
-														stand);
-												((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-												main.msHologram.put(player, stand);
-												main.getDataManager().saveData(data);
-											}
-										}
+										hologram(player);
 									}
 								}.runTaskLater(main, 100);
 							}
@@ -233,6 +208,7 @@ public class MysteryChestsGUI implements InventoryProvider {
 							data.mysteryChests++;
 							main.LobbyBoard(player);
 							player.sendMessage(main.color("&9&l(!) &rYou crafted &e1 MysteryChest!"));
+							hologram(player);
 						} else
 							player.sendMessage(main.color("&c&l(!) &rYou do not have enough to craft a MysteryChest!"));
 
@@ -257,6 +233,35 @@ public class MysteryChestsGUI implements InventoryProvider {
 
 			fw.setFireworkMeta(fwm);
 		}, 15);
+	}
+	
+	private void hologram(Player player) {
+		PlayerData data = main.getDataManager().getPlayerData(player);
+		if (data != null && main.msHologram.get(player) != null) {
+			if (player.getWorld() == main.getLobbyWorld()) {
+				EntityArmorStand stand = main.msHologram.get(player);
+				PacketPlayOutEntityDestroy destroyPacket = new PacketPlayOutEntityDestroy(
+						stand.getId());
+				((CraftPlayer) player).getHandle().playerConnection
+						.sendPacket(destroyPacket);
+				loc = new Location(main.getLobbyWorld(), 194.520, 115.7, 641.500);
+				
+				WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
+				stand = new EntityArmorStand(s);
+				
+				stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+				stand.setCustomName(
+						main.color("&e&l" + data.mysteryChests + " &eto open!"));
+				stand.setCustomNameVisible(true);
+				stand.setGravity(false);
+				stand.setInvisible(true);
+				PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(
+						stand);
+				((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+				main.msHologram.put(player, stand);
+				main.getDataManager().saveData(data);
+			}
+		}
 	}
 
 }

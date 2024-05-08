@@ -30,32 +30,31 @@ import org.bukkit.util.Vector;
 import java.util.Random;
 
 public class HunterClass extends BaseClass {
-
+	
 	private int count = 0;
-	private boolean dash = true;
-
+	
 	public HunterClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.2;
 	}
-
+	
 	@Override
 	public ClassType getType() {
 		return ClassType.Hunter;
 	}
-
+	
 	public ItemStack makeRed(ItemStack armour) {
 		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
 		lm.setColor(Color.RED);
 		armour.setItemMeta(lm);
 		return armour;
 	}
-
+	
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGI2NmZjNDkyMDI5ZmNmMDMxMTZkOGZlYWZjNjRhOWM3NGQ4MTE4ZmZlN2RlODMxNGUzZWY1ZjY4YzEwYjMifX19";
 		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-
+		
 		playerEquip.setHelmet(playerskull);
 		playerEquip.setChestplate(makeRed(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
@@ -63,7 +62,7 @@ public class HunterClass extends BaseClass {
 		playerEquip.setBoots(makeRed(
 				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 	}
-
+	
 	@Override
 	public ItemStack getAttackWeapon() {
 		ItemStack sword = ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.GOLD_SWORD),
@@ -73,37 +72,37 @@ public class HunterClass extends BaseClass {
 		sword.setItemMeta(meta);
 		return sword;
 	}
-
+	
 	@Override
 	public void DoDamage(EntityDamageByEntityEvent event) {
 		Random rand = new Random();
 		int chance = rand.nextInt(100);
 		int chance2 = rand.nextInt(2);
-
+		
 		if (chance >= 0) {
 			if (event.getEntity() instanceof Player) {
 				Player p = (Player) event.getEntity();
 				if (instance.duosMap != null)
 					if (instance.team.get(p).equals(instance.team.get(player)))
 						return;
-
+				
 				if (instance.getGameManager().spawnProt.containsKey(p)
 						|| instance.getGameManager().spawnProt.containsKey(player))
 					return;
-
+				
 				BaseClass bc = instance.classes.get(player);
 				if (bc != null && bc.getLives() <= 0)
 					return;
-
+				
 				count++;
 				player.getInventory()
 						.setItem(8, ItemHelper.setDetails(new ItemStack(Material.REDSTONE, count),
 								instance.getGameManager().getMain().color("&c&lBlood Lust"), "",
 								instance.getGameManager().getMain().color("&7Get 8 of this to get an OP potion!")));
-
+				
 				if (count >= 8) {
 					player.getInventory().remove(Material.REDSTONE);
-
+					
 					if (chance2 == 0) {
 						player.sendMessage(instance.getGameManager().getMain()
 								.color("&2&l(!) &rYour 8 Blood Lust rewarded you with a Strength I potion"));
@@ -137,16 +136,16 @@ public class HunterClass extends BaseClass {
 			}
 		}
 	}
-
+	
 	@Override
 	public void SetNameTag() {
-
+	
 	}
-
+	
 	@Override
 	public void SetItems(Inventory playerInv) {
 		count = 0;
-		dash = true;
+		hunterDash = true;
 		player.sendMessage("" + ChatColor.BOLD + "===============================");
 		player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RED + ChatColor.BOLD
 				+ ChatColor.UNDERLINE + "  Hunter:");
@@ -160,27 +159,26 @@ public class HunterClass extends BaseClass {
 						instance.getGameManager().getMain().color("&b&lDash"),
 						instance.getGameManager().getMain().color("&7A quick escape or attack")));
 	}
-
+	
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
-		if (dash) {
-			if (item != null) {
-				if (item.getType() == Material.FEATHER
-						&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+		if (item != null) {
+			if (item.getType() == Material.FEATHER
+					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+				if (hunterDash) {
 					double boosterStrength = 1.6;
 					for (Player gamePlayer : instance.players)
 						gamePlayer.playSound(player.getLocation(), Sound.BAT_TAKEOFF, 1, 1);
 					Vector vel = player.getLocation().getDirection().multiply(boosterStrength);
 					player.setVelocity(vel);
-					dash = false;
+					hunterDash = false;
 					//player.getInventory().clear(player.getInventory().getHeldItemSlot());
+				} else {
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "You already used your dash ");
 				}
 			}
-		} else {
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-					+ "You already used your dash ");
 		}
 	}
-
 }
