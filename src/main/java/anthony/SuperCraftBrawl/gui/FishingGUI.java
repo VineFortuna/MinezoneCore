@@ -2,6 +2,8 @@ package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.fishing.FishRarity;
 import anthony.SuperCraftBrawl.fishing.FishType;
+import anthony.SuperCraftBrawl.playerdata.FishingDetails;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -24,9 +26,9 @@ public class FishingGUI implements InventoryProvider {
     public Core main;
     public SmartInventory inv;
     
-    public FishingGUI(Core main) {
+    public FishingGUI(Core main, SmartInventory parent) {
         inv = SmartInventory.builder().id("myInventory").provider(this).size(6, 9)
-                .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Fishing").build();
+                .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Fishing").parent(parent).build();
         this.main = main;
         
     }
@@ -45,10 +47,15 @@ public class FishingGUI implements InventoryProvider {
         int b = 0;
     
         for (FishType type : FishType.values()) {
-            ItemStack item = type.getItem();
-        
-            if (item == null)
-                item = new ItemStack(Material.BARRIER);
+            FishingDetails details = data.playerFishing.get(type.getId());
+            ItemStack item = ItemHelper.setDetails(ItemHelper.createDye(DyeColor.GRAY, 1), main.color("&c???"));
+            
+            if (details != null && details.timesCaught > 0) {
+                item = type.getItem();
+                ItemHelper.setDetails(item, item.getItemMeta().getDisplayName(),
+                        item.getItemMeta().getLore(), "", main.color("&7Times caught: " + details.timesCaught));
+            }
+    
             contents.set(a, b,
                     ClickableItem.of(item,
                             e -> {
@@ -67,19 +74,20 @@ public class FishingGUI implements InventoryProvider {
                     ClickableItem.of(ItemHelper.createSkullHeadPlayer(1, data.playerName, main.color("&e" + data.playerName),
                             Arrays.asList(main.color("&aRank: &r" + data.getRank().getTag()),
                                     main.color("&aLevel: &r" + data.level),
-                                    main.color("&aFish Caught: &r" + (data.totalcaught)))), e -> {
+                                    main.color("&aCaught: &r" + (data.totalcaught)))), e -> {
                     }));
         }
         
         contents.set(5, 8, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
-                    new StatsGUI(main).inv.open(player);
+                    inv.getParent().get().open(player);
                 }));
         contents.set(5, 3, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.EMERALD), ChatColor.GRAY + "Rewards"), e -> {
+                    new FishingRewardsGUI(main, inv).inv.open(player);
                 }));
         contents.set(5, 5, ClickableItem.of(
-                ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD), ChatColor.GRAY + "Upgrades"), e -> {
+                ItemHelper.setDetails(new ItemStack(Material.ANVIL), ChatColor.GRAY + "Upgrades"), e -> {
                 }));
         contents.set(5, 0, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.PAPER), ChatColor.GRAY + "Chance Breakdown",
