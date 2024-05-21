@@ -1,9 +1,12 @@
 package anthony.SuperCraftBrawl.fishing;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
+import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
+import anthony.SuperCraftBrawl.playerdata.FishingDetails;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,7 +26,6 @@ public class Fishing implements Listener {
     private final int size = FishType.values().length;
     private ArrayList<Item> fishItems = new ArrayList<>();
     private final ArrayList<FishType> fishTypes = new ArrayList<>();
-    private FishType fish;
     private final int common = FishRarity.COMMON.getChance();
     private final int rare = FishRarity.RARE.getChance();
     private final int epic = FishRarity.EPIC.getChance();
@@ -44,33 +46,50 @@ public class Fishing implements Listener {
             Item i = (Item) event.getCaught();
             event.setExpToDrop(0);
             Player p = event.getPlayer();
-            getFish();
+            PlayerData data = main.getDataManager().getPlayerData(p);
+            FishType fish = getFish();
+            FishingDetails details = data.playerFishing.get(fish.getId());
+            
             i.getItemStack().setType(fish.getItem().getType());
             i.getItemStack().setDurability(fish.getItem().getDurability());
             i.getItemStack().setItemMeta(fish.getItem().getItemMeta());
             i.setPickupDelay(Integer.MAX_VALUE);
             fishItems.add(i);
+            if (details == null) {
+                details = new FishingDetails();
+                data.playerFishing.put(fish.getId(), details);
+            }
             p.sendMessage(main.color("&r&l(&3&l!&r&l) &rYou caught a "
                     + fish.getRarity().getColor() + fish.getName() + "&r!"));
-    
-            p.sendMessage(main.color("&2&l=============================================="));
-            p.sendMessage(main.color("&2&l||"));
-            if (fish.isFish()) {
-                p.sendMessage(main.color("&2&l|| &e&lCAUGHT " + fish.getRarity().getColor() + "&l"
-                        + fish.getRarity().getName().toUpperCase() + " &e&lFISH: " +  fish.getName()));
-            } else {
-                p.sendMessage(main.color("&2&l|| &e&lCAUGHT " + fish.getRarity().getColor() + "&l"
-                        + fish.getRarity().getName().toUpperCase() + "&e&l: " +  fish.getName()));
+            
+            if (details.timesCaught == 0) {
+                p.sendMessage(main.color("&2&l=============================================="));
+                p.sendMessage(main.color("&2&l||"));
+                if (fish.isFish()) {
+                    p.sendMessage(main.color("&2&l|| &e&lCAUGHT " + fish.getRarity().getColor() + "&l"
+                            + fish.getRarity().getName().toUpperCase() + " &e&lSEA CREATURE: " + fish.getName()));
+                } else {
+                    p.sendMessage(main.color("&2&l|| &e&lCAUGHT " + fish.getRarity().getColor() + "&l"
+                            + fish.getRarity().getName().toUpperCase() + "&e&l: " + fish.getName()));
+                }
+                p.sendMessage(main.color("&2&l|| &7" + fish.getDesc()));
+                p.sendMessage(main.color("&2&l||"));
+                p.sendMessage(main.color("&2&l=============================================="));
             }
-            p.sendMessage(main.color("&2&l|| &7" + fish.getDesc()));
-            p.sendMessage(main.color("&2&l||"));
-            p.sendMessage(main.color("&2&l=============================================="));
+            if (fish == FishType.CRATE) {
+                p.sendMessage(main.color("&5&l(!) &rYou have found &e1 Mystery Chest!"));
+                data.mysteryChests++;
+            }
             reward(p, fish.getRarity());
+            data.totalcaught++;
+            data.caught++;
+            details.timesCaught++;
+            main.getDataManager().saveData(data);
             removeFish(i);
         }
     }
     
-    public void getRandomFish() {
+    public FishType getRandomFish() {
         ArrayList<FishType> fishes = new ArrayList<>();
         FishRarity rarity;
         int r = rand.nextInt(100) + 1;
@@ -89,7 +108,7 @@ public class Fishing implements Listener {
             if (t.getRarity() == rarity)
                 fishes.add(t);
         }
-        fish = fishes.get(rand.nextInt(fishes.size()));
+        return fishes.get(rand.nextInt(fishes.size()));
     }
     
     @EventHandler
@@ -106,22 +125,22 @@ public class Fishing implements Listener {
             }
         }, 60L);
     }
-    public void getRandomLoot(FishRarity rarity) {
+    public FishType getRandomLoot(FishRarity rarity) {
         ArrayList<FishType> loot = new ArrayList<>();
         for (FishType l : fishTypes) {
             if (l.getRarity() == rarity)
                 loot.add(l);
         }
-        fish = loot.get(rand.nextInt(loot.size()));
+        return loot.get(rand.nextInt(loot.size()));
     }
-    public void getFish() {
+    public FishType getFish() {
         int r = rand.nextInt(100)+1;
         if (r <= treasure)
-            getRandomLoot(FishRarity.TREASURE);
+            return getRandomLoot(FishRarity.TREASURE);
         else if (r <= treasure + junk)
-            getRandomLoot(FishRarity.JUNK);
-        else
-            getRandomFish();
+            return getRandomLoot(FishRarity.JUNK);
+        
+        return getRandomFish();
     }
     
     public void reward(Player p, FishRarity rarity) {
@@ -142,6 +161,40 @@ public class Fishing implements Listener {
                 break;
                 
         }
-        
+        //particles(p, rarity);
+    }
+    
+    public void particles(Player p, FishRarity r) {
+        Color c;
+        switch (r) {
+            case COMMON:
+                c = Color.GRAY;
+                break;
+            case RARE:
+                c = Color.LIME;
+                break;
+            case EPIC:
+                c = Color.PURPLE;
+                break;
+            case MYTHIC:
+                c = Color.RED;
+                break;
+            case LEGENDARY:
+                c = Color.ORANGE;
+                break;
+            case JUNK:
+                c = Color.BLACK;
+                break;
+            case TREASURE:
+                c = Color.YELLOW;
+                break;
+            default:
+                c = Color.NAVY;
+                break;
+        }
+        for (int t = 0; t < 2 * Math.PI; t += Math.PI/4) {
+            p.getWorld().spigot().playEffect(p.getLocation().add(Math.cos(t), 1, Math.sin(t)),
+                    Effect.COLOURED_DUST, 0, 1, c.getRed(), c.getGreen(), c.getBlue(), 1, 0, 1);
+        }
     }
 }

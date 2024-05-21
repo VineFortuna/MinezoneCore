@@ -1881,6 +1881,20 @@ public class Core extends JavaPlugin implements Listener {
 			return false;
 		return true;
 	}
+	
+	public String progressBar(int progress, int nextLevel, int segments) {
+		String str = "";
+		str += this.color("&8[");
+		double frac = (double) progress/nextLevel;
+		for (int i = 0; i < segments; i++) {
+			if (i < Math.floor(frac*segments))
+				str += this.color("&a|");
+			else
+				str += this.color("&7|");
+		}
+		str += this.color("&8] &7(" + progress + "/" + nextLevel + ")");
+		return str;
+	}
 
 	public void SendToFactions(Player player) {
 		Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");

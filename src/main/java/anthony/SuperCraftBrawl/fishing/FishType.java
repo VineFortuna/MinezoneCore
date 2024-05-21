@@ -10,51 +10,56 @@ import java.util.ArrayList;
 
 public enum FishType {
     
-    COD("Cod", FishRarity.COMMON),
-    SALMON("Salmon", FishRarity.COMMON),
-    TROUT("Trout", FishRarity.COMMON),
-    GOBY("Goby", FishRarity.COMMON),
-    BASS("Bass", FishRarity.COMMON),
-    CARP("Carp", FishRarity.COMMON),
-    URCHIN("Sea Urchin", FishRarity.COMMON),
-    PICKLES("Sea Pickles", FishRarity.RARE),
-    SQUID("Squid", FishRarity.RARE),
-    CLOWNFISH("Clownfish", FishRarity.RARE),
-    SHRIMP("Shrimp", FishRarity.RARE),
-    STARFISH("Starfish", FishRarity.RARE),
-    LOBSTER("Lobster", FishRarity.RARE),
-    CRAB("Crab", FishRarity.RARE),
-    HERMITCRAB("Hermit Crab", FishRarity.EPIC),
-    PUFFERFISH("Pufferfish", FishRarity.EPIC),
-    GLOWSQUID("Glow Squid", FishRarity.EPIC),
-    JELLYFISH("Jellyfish", FishRarity.EPIC),
-    OCTOPUS("Octopus", FishRarity.EPIC),
-    TURTLE("Turtle", FishRarity.MYTHIC),
-    NAUTILUS("Nautilus", FishRarity.MYTHIC),
-    PIRANHA("Piranha", FishRarity.MYTHIC),
-    ANGLERFISH("Anglerfish", FishRarity.MYTHIC),
-    BLOBFISH("Blobfish", FishRarity.LEGENDARY),
-    LEVIATHAN("Swamp Monster", FishRarity.LEGENDARY),
-    SHARK("Shark", FishRarity.LEGENDARY),
-    WHALE("Whale", FishRarity.LEGENDARY),
-    LILYPAD("Lilypad", FishRarity.JUNK),
-    STRING("Fishing Line", FishRarity.JUNK),
-    BUCKET("Bucket", FishRarity.JUNK),
-    BOTTLE("Empty Bottle", FishRarity.JUNK),
-    BOOTS("Old Boots", FishRarity.JUNK),
-    NAUTILUSSHELL("Nautilus Shell", FishRarity.JUNK),
-    TROPHY("Fishing Trophy", FishRarity.TREASURE),
-    MAP("Treasure Map", FishRarity.TREASURE),
-    CRATE("MysteryChest", FishRarity.TREASURE);
+    COD(1, "Cod", FishRarity.COMMON),
+    SALMON(2, "Salmon", FishRarity.COMMON),
+    TROUT(3, "Trout", FishRarity.COMMON),
+    GOBY(4, "Goby", FishRarity.COMMON),
+    BASS(5, "Bass", FishRarity.COMMON),
+    CARP(6, "Carp", FishRarity.COMMON),
+    URCHIN(7, "Sea Urchin", FishRarity.COMMON),
+    PICKLES(8, "Sea Pickles", FishRarity.RARE),
+    SQUID(9, "Squid", FishRarity.RARE),
+    CLOWNFISH(10, "Clownfish", FishRarity.RARE),
+    SHRIMP(11, "Shrimp", FishRarity.RARE),
+    STARFISH(12, "Starfish", FishRarity.RARE),
+    LOBSTER(13, "Lobster", FishRarity.RARE),
+    CRAB(14, "Crab", FishRarity.RARE),
+    HERMITCRAB(15, "Hermit Crab", FishRarity.EPIC),
+    PUFFERFISH(16, "Pufferfish", FishRarity.EPIC),
+    GLOWSQUID(17, "Glow Squid", FishRarity.EPIC),
+    JELLYFISH(18, "Jellyfish", FishRarity.EPIC),
+    OCTOPUS(19, "Octopus", FishRarity.EPIC),
+    TURTLE(20, "Turtle", FishRarity.MYTHIC),
+    NAUTILUS(21, "Nautilus", FishRarity.MYTHIC),
+    PIRANHA(21, "Piranha", FishRarity.MYTHIC),
+    ANGLERFISH(22, "Anglerfish", FishRarity.MYTHIC),
+    BLOBFISH(23, "Blobfish", FishRarity.LEGENDARY),
+    LEVIATHAN(24, "Swamp Monster", FishRarity.LEGENDARY),
+    SHARK(25, "Shark", FishRarity.LEGENDARY),
+    WHALE(26, "Whale", FishRarity.LEGENDARY),
+    LILYPAD(27, "Lilypad", FishRarity.JUNK),
+    STRING(28, "Fishing Line", FishRarity.JUNK),
+    BUCKET(29, "Bucket", FishRarity.JUNK),
+    BOTTLE(30, "Empty Bottle", FishRarity.JUNK),
+    BOOTS(31, "Old Boots", FishRarity.JUNK),
+    NAUTILUSSHELL(32, "Nautilus Shell", FishRarity.JUNK),
+    TROPHY(33, "Fishing Trophy", FishRarity.TREASURE),
+    MAP(34, "Treasure Map", FishRarity.TREASURE),
+    CRATE(35, "MysteryChest", FishRarity.TREASURE);
     
+    private int id;
     private String name;
     private FishRarity rarity;
     
-    private FishType(String name, FishRarity rarity) {
+    private FishType(int id, String name, FishRarity rarity) {
+        this.id = id;
         this.name = name;
         this.rarity = rarity;
     }
     
+    public int getId() {
+        return this.id;
+    }
     public String getName() {
         return this.name;
     }
@@ -181,7 +186,7 @@ public enum FishType {
     public String getDesc() {
         switch (this) {
             case COD:
-                return "Boring";
+                return "Something's fishy...";
             case SALMON:
                 return "Mr. Salmon bring me a drink";
             case TROUT:
@@ -189,7 +194,7 @@ public enum FishType {
             case GOBY:
                 return "Rudy";
             case BASS:
-                return "Not the instrument";
+                return "Don't try playing this guy";
             case CARP:
                 return "Holy carp!";
             case URCHIN:
@@ -239,7 +244,7 @@ public enum FishType {
             case BOTTLE:
                 return "No message in this bottle unfortunately";
             case BUCKET:
-                return "";
+                return "There's a hole in my bucket";
             case LILYPAD:
                 return "";
             case STRING:

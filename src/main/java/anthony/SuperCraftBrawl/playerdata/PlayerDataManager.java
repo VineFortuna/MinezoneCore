@@ -146,13 +146,16 @@ public class PlayerDataManager implements Listener {
 			int challenge103 = set.getInt("Challenge103");
 			int matchMvps = set.getInt("MatchMvps");
 			int fly = set.getInt("Fly");
-			//int totalcaught = set.getInt("TotalCaught");
+			int totalcaught = set.getInt("TotalCaught");
+			int caught = set.getInt("Caught");
+			int rewardLevel = set.getInt("RewardLevel");
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
 					exp, level, bestTime, magicbroom, points, withersk, bonusTokens, bonusLevels, paintball,
 					santaoutfit, elf, gingerbreadman, killMsgs, challenge1, challenge2, challenge3, goldApple,
 					glowstone, redstone, web, bottleEXP, broomWinEffect, enderDragonEffect, santaEffect,
-					fireParticlesEffect, challenge100, challenge101, challenge102, challenge103, matchMvps, fly);
+					fireParticlesEffect, challenge100, challenge101, challenge102, challenge103, matchMvps, fly,
+					totalcaught, caught, rewardLevel);
 		}
 		set.close();
 		stmt.close();
@@ -164,9 +167,23 @@ public class PlayerDataManager implements Listener {
 			boolean purchased = classSet.getInt("Purchased") == 1;
 			int timePurchased = classSet.getInt("TimePurchased");
 			int gamesPlayed = classSet.getInt("GamesPlayed");
-			data.playerClasses.put(classID, new ClassDetails(purchased, timePurchased, gamesPlayed));
+			int gamesWon = classSet.getInt("GamesWon");
+			boolean reward1 = classSet.getInt("Reward1") == 1;
+			boolean reward2 = classSet.getInt("Reward2") == 1;
+			data.playerClasses.put(classID, new ClassDetails(purchased, timePurchased, gamesPlayed, gamesWon,
+					reward1, reward2));
 		}
 		classSet.close();
+		
+		Statement fishingState = c.createStatement();
+		ResultSet fishingSet = fishingState
+				.executeQuery("SELECT * FROM PlayerFishing WHERE UUID = '" + player.getUniqueId().toString() + "'");
+		while (fishingSet.next()) {
+			int fishID = fishingSet.getInt("FishID");
+			int timesCaught = fishingSet.getInt("TimesCaught");
+			data.playerFishing.put(fishID, new FishingDetails(timesCaught));
+		}
+		fishingSet.close();
 
 		Statement favClassesState = c.createStatement();
 		ResultSet favClassesSet = favClassesState.executeQuery(
@@ -219,8 +236,10 @@ public class PlayerDataManager implements Listener {
 				+ data.elf + ", Challenge1 = " + data.challenge1 + ", Challenge2 = " + data.challenge2
 				+ ", Challenge3 = " + data.challenge3 + ", KillMsgs = " + data.killMsgs + ", Level = " + data.level
 				+ ", Deaths = " + data.deaths + ", Paintball = " + data.paintball + ", Wins = " + data.wins
+				+ ", TotalCaught = " + data.totalcaught + ", Caught = " + data.caught + ", RewardLevel = " + data.rewardLevel
 				+ " WHERE UUID = '" + data.playerUUID.toString() + "';");
-		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed) VALUES ";
+		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon," +
+				"Reward1, Reward2) VALUES ";
 		int index = 0;
 	
 		for (Entry<Integer, ClassDetails> entry : data.playerClasses.entrySet()) {
@@ -229,13 +248,32 @@ public class PlayerDataManager implements Listener {
 					updateCMD += ", ";
 				updateCMD += "('" + data.playerUUID.toString() + "', " + entry.getKey() + ", "
 						+ entry.getValue().timePurchased + ", " + (entry.getValue().purchased ? 1 : 0) + ", "
-						+ entry.getValue().gamesPlayed + ")";
+						+ entry.getValue().gamesPlayed + "," + entry.getValue().gamesWon + ", "
+						+ (entry.getValue().reward1 ? 1 : 0) + ", " + (entry.getValue().reward2 ? 1 : 0) + ")";
 				index++;
 			}
 		}
 
 		if (index > 0) {
-			updateCMD += "ON DUPLICATE KEY UPDATE TimePurchased = VALUES (TimePurchased), Purchased = VALUES (Purchased), GamesPlayed = VALUES (GamesPlayed);";
+			updateCMD += " ON DUPLICATE KEY UPDATE TimePurchased = VALUES (TimePurchased), Purchased = VALUES (Purchased), GamesPlayed = VALUES (GamesPlayed)," +
+					"GamesWon = VALUES (GamesWon), Reward1 = VALUES (Reward1), Reward2 = VALUES (Reward2);";
+			System.out.print("Executing " + updateCMD);
+			manager.executeUpdateCommand(updateCMD);
+		}
+		
+		updateCMD = "INSERT INTO PlayerFishing (UUID, FishID, TimesCaught) VALUES ";
+		index = 0;
+		
+		for (Entry<Integer, FishingDetails> entry : data.playerFishing.entrySet()) {
+            if (index != 0)
+                updateCMD += ", ";
+            updateCMD += "('" + data.playerUUID.toString() + "', " + entry.getKey() + ", "
+                    + entry.getValue().timesCaught + ")";
+            index++;
+        }
+		
+		if (index > 0) {
+			updateCMD += " ON DUPLICATE KEY UPDATE TimesCaught = VALUES (TimesCaught);";
 			System.out.print("Executing " + updateCMD);
 			manager.executeUpdateCommand(updateCMD);
 		}
