@@ -174,7 +174,7 @@ public class GameInstance {
 
 	public GameReason AddSpectator(Player player) {
 		if (state == GameState.STARTED) {
-			if (!players.contains(player) || !spectators.contains(player)) {
+			if (!players.contains(player)) {
 				spectators.add(player);
 				for (Player gamePlayer : players) {
 					gamePlayer.hidePlayer(player);
@@ -183,6 +183,7 @@ public class GameInstance {
 				player.setAllowFlight(true);
 				player.teleport(GetSpecLoc());
 				gameManager.getMain().board.get(player).delete();
+				player.sendMessage("Scoreboard");
 				setGameScore(player);
 				player.setDisplayName(player.getName() + " " + ChatColor.RESET + ChatColor.GRAY + ChatColor.ITALIC
 						+ "Spectator" + ChatColor.RESET);
