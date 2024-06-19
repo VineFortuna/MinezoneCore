@@ -1,7 +1,9 @@
 package anthony.SuperCraftBrawl;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import me.itzzmic.minezone.api.PunishAPI;
 import org.apache.commons.lang3.StringUtils;
@@ -167,8 +169,17 @@ public class PlayerListener implements Listener {
 
 		if (e.getItem() != null && e.getItem().getType() == Material.ENCHANTED_BOOK) {
 			e.setCancelled(true);
-			if (i == null)
+			if (i == null) {
+				PlayerData data = main.getDataManager().getPlayerData(player);
+				for (ClassType type : ClassType.values()) {
+					ClassDetails details = data.playerClasses.get(type.getID());
+					if (details == null) {
+						details = new ClassDetails();
+						data.playerClasses.put(type.getID(), details);
+					}
+				}
 				new ClassSelectorGUI(main).inv.open(player);
+			}
 		}
 	}
 
