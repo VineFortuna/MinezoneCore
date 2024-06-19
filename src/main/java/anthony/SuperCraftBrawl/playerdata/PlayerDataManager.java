@@ -149,13 +149,15 @@ public class PlayerDataManager implements Listener {
 			int totalcaught = set.getInt("TotalCaught");
 			int caught = set.getInt("Caught");
 			int rewardLevel = set.getInt("RewardLevel");
+			int lureLevel = set.getInt("LureLevel");
+			int lure = set.getInt("Lure");
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
 					exp, level, bestTime, magicbroom, points, withersk, bonusTokens, bonusLevels, paintball,
 					santaoutfit, elf, gingerbreadman, killMsgs, challenge1, challenge2, challenge3, goldApple,
 					glowstone, redstone, web, bottleEXP, broomWinEffect, enderDragonEffect, santaEffect,
 					fireParticlesEffect, challenge100, challenge101, challenge102, challenge103, matchMvps, fly,
-					totalcaught, caught, rewardLevel);
+					totalcaught, caught, rewardLevel, lureLevel, lure);
 		}
 		set.close();
 		stmt.close();
@@ -236,7 +238,8 @@ public class PlayerDataManager implements Listener {
 				+ data.elf + ", Challenge1 = " + data.challenge1 + ", Challenge2 = " + data.challenge2
 				+ ", Challenge3 = " + data.challenge3 + ", KillMsgs = " + data.killMsgs + ", Level = " + data.level
 				+ ", Deaths = " + data.deaths + ", Paintball = " + data.paintball + ", Wins = " + data.wins
-				+ ", TotalCaught = " + data.totalcaught + ", Caught = " + data.caught + ", RewardLevel = " + data.rewardLevel
+				+ ", TotalCaught = " + data.totalcaught + ", Caught = " + data.caught
+				+ ", RewardLevel = " + data.rewardLevel + ", LureLevel = " + data.lureLevel + ", Lure = " + data.lure
 				+ " WHERE UUID = '" + data.playerUUID.toString() + "';");
 		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon," +
 				"Reward1, Reward2) VALUES ";

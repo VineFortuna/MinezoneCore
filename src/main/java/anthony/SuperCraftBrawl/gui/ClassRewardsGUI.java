@@ -21,31 +21,61 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Arrays;
+
 public class ClassRewardsGUI implements InventoryProvider {
     
     public Core main;
     public ClassType type;
     public SmartInventory inv;
     
-    public ClassRewardsGUI(Core main, ClassType type) {
+    public ClassRewardsGUI(Core main, ClassType type, SmartInventory parent) {
         inv = SmartInventory.builder().id("myInventory").provider(this).size(1, 9)
-                .title(String.valueOf(ChatColor.DARK_GRAY) + ChatColor.BOLD + "Class Rewards").build();
+                .title(String.valueOf(ChatColor.DARK_GRAY) + ChatColor.BOLD + "Class Rewards").parent(parent).build();
         this.main = main;
         this.type = type;
     }
     
     @Override
     public void init(Player player, InventoryContents contents) {
+    
         PlayerData data = main.getDataManager().getPlayerData(player);
-        //ClassDetails details = data.playerClasses.get(type.getID());
+        ClassDetails details = data.playerClasses.get(type.getID());
+        
+        ItemStack tokens = ItemHelper.setDetails(new ItemStack(Material.EMERALD), main.color("&e&l100 Tokens"));
+        if (details.gamesPlayed < 50) {
+            ItemHelper.setLore(tokens, Arrays.asList("", main.progressBar(details.gamesPlayed, 50, 25)));
+        } else {
+            if (details.reward1) {
+                ItemHelper.setLore(tokens, Arrays.asList("", main.color("&a&lREWARD CLAIMED")));
+                ItemHelper.setGlowing(tokens, true);
+            } else {
+                ItemHelper.setLore(tokens, Arrays.asList("", main.color("&eClick to claim reward")));
+            }
+        }
+    
+        ItemStack head = ItemHelper.setDetails(headReward(type), main.color("&e&lAlternate Head"));
+        if (details.gamesPlayed < 100) {
+            ItemHelper.setLore(head , Arrays.asList("", main.progressBar(details.gamesPlayed, 100, 25)));
+        } else {
+            if (details.reward1) {
+                ItemHelper.setLore(head , Arrays.asList("", main.color("&a&lREWARD CLAIMED")));
+                ItemHelper.setGlowing(head , true);
+            } else {
+                ItemHelper.setLore(head , Arrays.asList("", main.color("&eClick to claim reward")));
+            }
+        }
+        
         contents.set(0, 0,
-                ClickableItem.of(tokenReward(),
-                        e -> {
+                ClickableItem.of(tokens, e -> {
                         }));
         contents.set(0, 1,
-                ClickableItem.of(headReward(type),
-                        e -> {
+                ClickableItem.of(head, e -> {
                         }));
+        contents.set(0, 8, ClickableItem.of(
+                ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
+                    inv.getParent().get().open(player);
+                }));
     }
     
     @Override
@@ -53,10 +83,6 @@ public class ClassRewardsGUI implements InventoryProvider {
     
     }
     
-    public ItemStack tokenReward() {
-        return ItemHelper.setDetails(new ItemStack(Material.EMERALD), main.color("100 Tokens"),
-                main.color("test"));
-    }
     public ItemStack headReward(ClassType type) {
         switch (type) {
             case Cactus:

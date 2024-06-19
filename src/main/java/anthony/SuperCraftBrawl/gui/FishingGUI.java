@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.fishing.FishRarity;
 import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import org.bukkit.DyeColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -68,6 +69,8 @@ public class FishingGUI implements InventoryProvider {
                 b = 0;
             }
         }
+        
+        Location fishingLoc = new Location(main.getLobbyWorld(), 303.500, 91, 527.500);
     
         if (data != null) {
             contents.set(0, 4,
@@ -77,6 +80,18 @@ public class FishingGUI implements InventoryProvider {
                                     main.color("&aCaught: &r" + (data.totalcaught)))), e -> {
                     }));
         }
+    
+        contents.set(0, 8,
+                ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
+                        main.color("&aGo Fishing!")), e -> {
+                    if (main.getGameManager().GetInstanceOfPlayer(player) == null) {
+                        player.teleport(fishingLoc);
+                        player.sendMessage(main.color("&r&l(&3&l!&r&l) &rGrab a rod and go fishing!"));
+                    } else {
+                        player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
+                                + ChatColor.RESET + "You are in a game");
+                    }
+                }));
         
         contents.set(5, 8, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
@@ -88,6 +103,7 @@ public class FishingGUI implements InventoryProvider {
                 }));
         contents.set(5, 5, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.ANVIL), ChatColor.GRAY + "Upgrades"), e -> {
+                    new FishingUpgradesGUI(main, inv).inv.open(player);
                 }));
         contents.set(5, 0, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.PAPER), ChatColor.GRAY + "Chance Breakdown",

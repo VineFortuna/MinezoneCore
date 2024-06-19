@@ -28,7 +28,7 @@ public class TokenClassesGUI implements InventoryProvider {
 
 	@Override
 	public void init(Player player, InventoryContents contents) {
-		PlayerData playerData = main.getDataManager().getPlayerData(player);
+		PlayerData data = main.getDataManager().getPlayerData(player);
 		int a = 0;
 		int b = 0;
 		
@@ -40,10 +40,17 @@ public class TokenClassesGUI implements InventoryProvider {
 
 		for (ClassType type : ClassType.values()) {
 			if (type.getTokenCost() > 0) {
+				
+				ClassDetails details = data.playerClasses.get(type.getID());
+				int played = details.gamesPlayed;
+				int nextLevel = 50;
+				if (played > 50)
+					nextLevel = 100;
+				
 				contents.set(a, b,
 						ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true),
 								type.getTag(), type.buildDescription(), "",
-								playerData.isPurchased(type) ? "" + ChatColor.YELLOW + ChatColor.BOLD + "Purchased"
+								data.isPurchased(type) ? "" + ChatColor.YELLOW + ChatColor.BOLD + "Purchased"
 										: "" + ChatColor.RESET + type.getTokenCost() + ChatColor.YELLOW + " tokens",
 								"",
 										"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
@@ -52,15 +59,14 @@ public class TokenClassesGUI implements InventoryProvider {
 												+ ChatColor.YELLOW + " to view rewards",
 										"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Shift Click" + ChatColor.RESET
 												+ ChatColor.YELLOW + " to add a favorite class",
+										"",
 										main.color("&aNext reward:"),
-										progressBar(player, type)),
+										main.progressBar(played, nextLevel, 25)),
 								e -> {
 							
-									if (playerData.playerClasses.get(type.getID()) != null
-											&& playerData.playerClasses.get(type.getID()).purchased) {
+									if (data.playerClasses.get(type.getID()) != null
+											&& data.playerClasses.get(type.getID()).purchased) {
 										if (e.isShiftClick()) {
-											PlayerData data = main.getDataManager().getPlayerData(player);
-											
 											if (data != null) {
 												data.customIntegers.add(type.getID());
 												player.sendMessage(main
@@ -86,7 +92,7 @@ public class TokenClassesGUI implements InventoryProvider {
 													+ "==============================================");
 											inv.close(player);
 										} else if (e.isRightClick()) {
-											new ClassRewardsGUI(main, type).inv.open(player);
+											new ClassRewardsGUI(main, type, inv).inv.open(player);
 										}
 									} else {
 										new PurchaseClassInventory(main, type, player);
@@ -390,24 +396,5 @@ public class TokenClassesGUI implements InventoryProvider {
 	@Override
 	public void update(Player player, InventoryContents contents) {
 
-	}
-	
-	public String progressBar(Player player, ClassType type) {
-		String str = "";
-		PlayerData data = main.getDataManager().getPlayerData(player);
-		//ClassDetails details = data.playerClasses.get(type.getID());
-		//int progress = details.gamesPlayed/5;
-		int progress = 0;
-		str += main.color("&8[");
-		for (int i = 1; i <= 20; i++) {
-			if (i <= progress)
-				str += main.color("&a|");
-			else
-				str += main.color("&7|");
-			
-		}
-		//str += main.color("&8] &7(" + details.gamesPlayed + "/100)");
-		str += main.color("&8] &7(" + progress + "/100)");
-		return str;
 	}
 }
