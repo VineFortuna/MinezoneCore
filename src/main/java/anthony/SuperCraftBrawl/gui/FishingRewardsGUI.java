@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -14,8 +15,12 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.StringUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class FishingRewardsGUI implements InventoryProvider {
     
@@ -37,7 +42,18 @@ public class FishingRewardsGUI implements InventoryProvider {
         
         int next = 2;
     
-        String[] rewards = {"&e100 Tokens", "&d150 EXP", "&e250 Tokens", "&aFisherman Outfit", "&6???"};
+        String[] rewards = {"&e100 Tokens", "&d150 EXP", "&aFish Death Effect", "&e400 Tokens", "&6Pirate Outfit"};
+    
+        List<String> rewardStrings = new ArrayList<>();
+        rewardStrings.add(main.color("&eNext reward:"));
+        rewardStrings.add(main.progressBar(data.caught, next, 25));
+        if (data.caught >= next) {
+            rewardStrings.add(main.color("&aLeft Click to claim 25 Tokens"));
+            rewardStrings.add(main.color("&aRight Click to claim 50 EXP"));
+        } else {
+            rewardStrings.add(main.color("&e25 Tokens or 50 EXP"));
+        }
+        rewardStrings.add("");
         
         if (data != null) {
             if (level < 5) {
@@ -48,12 +64,8 @@ public class FishingRewardsGUI implements InventoryProvider {
                                 main.color(rewards[level]),
                                 main.color(data.totalcaught >= nextReward ? "&aClick to claim" : "")), e -> {
                             if (data.totalcaught >= nextReward) {
-                                String reward = main.color(rewards[level]);
-                                if (level == 4) {
-                                    reward = main.color("Fisherman Class");
-                                }
                                 player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                        + "You have earned " + reward + "Tokens!");
+                                        + "You have earned " + rewards[level] + "Tokens!");
                                 data.rewardLevel++;
                                 switch (level) {
                                     case 0:
@@ -72,17 +84,17 @@ public class FishingRewardsGUI implements InventoryProvider {
                                         }
                                         break;
                                     case 2:
-                                        data.tokens += 250;
                                         player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                                + "You have earned " + ChatColor.GREEN + 250 + " Tokens!");
+                                                + "You have earned " + ChatColor.GREEN + " Fish Death Effect!");
                                         break;
                                     case 3:
+                                        data.tokens += 400;
                                         player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                                + "You have earned " + ChatColor.GREEN + " Fisherman Outfit!");
+                                                + "You have earned " + ChatColor.GREEN + 400 + " Tokens!");
                                         break;
                                     case 4:
                                         player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                                + "You have earned " + ChatColor.GREEN + " Fisherman Class!");
+                                                + "You have earned " + ChatColor.GREEN + " Fisherman Outfit!");
                                         break;
                                 }
                                 if (main.getGameManager().GetInstanceOfPlayer(player) == null)
@@ -94,17 +106,14 @@ public class FishingRewardsGUI implements InventoryProvider {
             } else {
                 contents.set(1, 1, ClickableItem.of(
                         ItemHelper.setDetails(new ItemStack(Material.MINECART),
-                                main.color("&aMilestone Reward"),
+                                main.color("&aMilestone"),
                                 main.color("&eAll rewards claimed!")), e -> {
                         }));
             }
     
             contents.set(1, 4, ClickableItem.of(
-                    ItemHelper.setDetails(new ItemStack(Material.DIAMOND), main.color("&aReward"),
-                            main.color("&eNext reward:"),
-                            main.progressBar(data.caught, next, 25),
-                            main.color(data.caught >= next?"&aLeft Click to claim 25 Tokens\n" +
-                                    "&aRight Click to claim 50 EXP":"&725 Tokens or 50 EXP")), e -> {
+                    ItemHelper.setDetails(new ItemStack(Material.DIAMOND), main.color("&aSell"),
+                            rewardStrings), e -> {
                         if (data.caught >= next && (e.isLeftClick() || e.isRightClick())) {
                             data.caught -= next;
                             new FishingRewardsGUI(main, inv.getParent().get()).inv.open(player);
@@ -128,6 +137,21 @@ public class FishingRewardsGUI implements InventoryProvider {
                         }
                     }));
         }
+        int totalFished = 0, length = FishType.values().length;
+        for (FishType type : FishType.values()) {
+            FishingDetails details = data.playerFishing.get(type.getId());
+            if (details != null) {
+                totalFished++;
+            }
+        }
+        
+        String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWY1ZDM4MTlhNjVkYjc5YzQ1ZmQwMDE0MWMwODgyZTQ3YWQyMzRjMGU1Zjg5OTJiZjRhZjE4Y2VkMGUxZWNkYyJ9fX0=";
+        contents.set(1, 7, ClickableItem.of(
+                ItemHelper.setDetails(ItemHelper.createSkullTexture(texture), totalFished == length?
+                        main.color("&6Fisherman Class"):main.color("&7???"),
+                        totalFished == length?
+                        main.color("&a&lUNLOCKED"):main.progressBar(totalFished, length, length)), e -> {
+                }));
         
         contents.set(2, 8, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {

@@ -32,10 +32,18 @@ public class FreeClassesGUI implements InventoryProvider {
 	public void init(Player player, InventoryContents contents) {
 		int a = 0;
 		int b = 0;
+		
+		PlayerData data = main.getDataManager().getPlayerData(player);
 
 		for (ClassType type : ClassType.values()) {
 			if (type.getTokenCost() == 0 && type.getMinRank() != Rank.VIP && type.getLevel() == 0) {
 				ItemStack item = type.getItem();
+				
+				ClassDetails details = data.playerClasses.get(type.getID());
+				int played = details.gamesPlayed;
+				int nextLevel = 50;
+				if (played > 50)
+					nextLevel = 100;
 
 				if (item == null)
 					item = new ItemStack(Material.WOOD);
@@ -48,11 +56,11 @@ public class FreeClassesGUI implements InventoryProvider {
 										+ ChatColor.YELLOW + " to view rewards",
 								"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Shift Click" + ChatColor.RESET
 										+ ChatColor.YELLOW + " to add a favorite class",
-										progressBar(player, type)),
+										"",
+										main.color("&aNext reward:"),
+										main.progressBar(played, nextLevel, 25)),
 								e -> {
 									if (e.isShiftClick()) {
-										PlayerData data = main.getDataManager().getPlayerData(player);
-										
 										if (data != null) {
 											data.customIntegers.add(type.getID());
 											player.sendMessage(
@@ -77,7 +85,7 @@ public class FreeClassesGUI implements InventoryProvider {
 												+ "==============================================");
 										inv.close(player);
 									} else if (e.isRightClick()) {
-										new ClassRewardsGUI(main, type).inv.open(player);
+										new ClassRewardsGUI(main, type, inv).inv.open(player);
 									}
 								}));
 
@@ -105,24 +113,6 @@ public class FreeClassesGUI implements InventoryProvider {
 	@Override
 	public void update(Player player, InventoryContents contents) {
 
-	}
-	
-	public String progressBar(Player player, ClassType type) {
-		String str = "";
-		PlayerData data = main.getDataManager().getPlayerData(player);
-		ClassDetails details = data.playerClasses.get(type.getID());
-		int progress = 7;
-			//progress = details.gamesPlayed/5;
-		str += main.color("&8[");
-		for (int i = 0; i < 20; i++) {
-			if (i <= progress)
-				str += main.color("&a|");
-			else
-				str += main.color("&7|");
-			
-		}
-		str += main.color("&8] &7(" + progress*5 + "/100)");
-		return str;
 	}
 
 }
