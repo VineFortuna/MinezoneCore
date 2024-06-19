@@ -13,6 +13,8 @@ import anthony.SuperCraftBrawl.Game.projectile.ProjectileManager;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
+import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
@@ -2117,6 +2119,14 @@ public class GameManager implements Listener, PluginMessageListener {
 			case COMPASS:
 				if (i != null) {
 					if (i.state == GameState.WAITING) {
+						PlayerData data = main.getDataManager().getPlayerData(player);
+						for (ClassType type : ClassType.values()) {
+							ClassDetails details = data.playerClasses.get(type.getID());
+							if (details == null) {
+								details = new ClassDetails();
+								data.playerClasses.put(type.getID(), details);
+							}
+						}
 						(new ClassSelectorGUI(this.main)).inv.open(player);
 					} else if (((BaseClass) i.classes.get(player)).getLives() <= 0) {
 						(new SpectatorGUI(this.main)).inv.open(player);
