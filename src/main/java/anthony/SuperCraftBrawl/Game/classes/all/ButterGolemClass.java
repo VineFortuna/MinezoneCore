@@ -36,14 +36,8 @@ public class ButterGolemClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-
-		SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
-
-		meta.setOwner("SkyDoesMinecraft");
-		meta.setDisplayName("");
-
-		playerskull.setItemMeta(meta);
+		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTZhMjYyMjIxYjUwOWY5YWNjZDliYzMwNWFiNGVkY2NiNWMyMDQ4MjExYTdhYjRlMDg4YTY1M2VkMzA2ZGMzIn19fQ==";
+		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
 
 		playerEquip.setHelmet(playerskull);
 		playerEquip.setChestplate(makeYellow(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
