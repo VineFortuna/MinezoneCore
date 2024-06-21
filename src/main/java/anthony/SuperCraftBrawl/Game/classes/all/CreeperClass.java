@@ -156,7 +156,7 @@ public class CreeperClass extends BaseClass {
 					pot3.apply(item2);
 					player.getInventory().setItem(1, item2);
 				}
-			} else if (item.getType() == Material.TNT
+			} else if (item.getType() == Material.TNT && item.getAmount() == 1
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 				if (tnt.getTime() < 10000) {
 					int seconds = (10000 - tnt.getTime()) / 1000 + 1;
