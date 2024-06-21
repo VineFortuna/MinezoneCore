@@ -51,7 +51,7 @@ public class StatsGUI implements InventoryProvider {
 		}));
 		contents.set(4, 5, ClickableItem.of(ItemHelper.setGlowing(ItemHelper.setDetails(new ItemStack(Material.BOOK),
 				"" + ChatColor.RESET + ChatColor.YELLOW + "My Stats"),
-				data.playerName.equals(player.getDisplayName())), e -> {
+				data.playerName.equals(player.getName())), e -> {
 			if (this.target != null && this.target != player)
 				new StatsGUI(main).inv.open(player);
 		}));

@@ -48,14 +48,8 @@ public class NinjaClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-
-		SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
-
-		meta.setOwner("_fergul_");
-		meta.setDisplayName("");
-
-		playerskull.setItemMeta(meta);
+		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODc1ZGZlZTI5ZTMxNjY4M2VhZWE3MGNlMzc2MzIyYWFhZGViNmVjY2I1ZTk5ZGVhMjY3MmY3NDQ1ZGQ4MWMzIn19fQ==";
+		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
 
 		playerEquip.setHelmet(playerskull);
 		playerEquip.setChestplate(makeBlack(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
