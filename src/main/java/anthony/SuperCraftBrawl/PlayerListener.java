@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import me.itzzmic.minezone.api.PunishAPI;
@@ -80,6 +81,23 @@ public class PlayerListener implements Listener {
 		else
 			e.setCancelled(false);
 	}
+	
+	@EventHandler
+    public void onPlayerInteract(PlayerInteractEntityEvent event) {
+        if (event.getRightClicked() instanceof Player) {
+            Player player = event.getPlayer();
+            Player target = (Player) event.getRightClicked();
+            
+            if (player != null && target != null) {
+            	GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
+            	
+            	if (i != null && i.state == GameState.STARTED)
+            		return;
+            	
+            	new StatsGUI(main, target).inv.open(player);
+            }
+        }
+    }
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockBreak(BlockBreakEvent event) {

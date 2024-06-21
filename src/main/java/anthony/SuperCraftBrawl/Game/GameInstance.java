@@ -240,6 +240,8 @@ public class GameInstance {
 	}
 
 	public GameReason AddPlayer(Player player) {
+		player.setAllowFlight(false);
+		player.setAllowFlight(true);
 		if (state == GameState.WAITING) {
 			if (!players.contains(player)) {
 				if (this.map != null) {
@@ -2021,6 +2023,8 @@ public class GameInstance {
 	}
 
 	public boolean RemovePlayer(Player player) {
+		player.setAllowFlight(false);
+		player.setAllowFlight(true);
 		BaseClass baseClass = this.classes.remove(player);
 		this.playerPosition.remove(player);
 		if (this.spectators.contains(player)) {
