@@ -104,27 +104,27 @@ public class SatermelonClass extends BaseClass {
 		if (chance == 0) {
 			ItemStack melon = getMelon();
 			melon.setAmount(1);
-			player.getInventory().setItem(0, melon);
+			player.getInventory().addItem(melon);
 
 			ItemStack soup = getSoup();
 			soup.setAmount(1);
-			player.getInventory().setItem(1, soup);
+			player.getInventory().addItem(soup);
 		} else if (chance == 1) {
 			ItemStack beacon = getBeacon();
 			beacon.setAmount(1);
-			player.getInventory().setItem(0, beacon);
+			player.getInventory().addItem(beacon);
 
 			ItemStack regen = getRegenerators();
 			regen.setAmount(3);
-			player.getInventory().setItem(1, regen);
+			player.getInventory().addItem(regen);
 		} else if (chance == 2) {
 			ItemStack melon2 = getGlisteringMelon();
 			melon2.setAmount(1);
-			player.getInventory().setItem(0, melon2);
+			player.getInventory().addItem(melon2);
 
 			ItemStack nugget = getGold();
 			nugget.setAmount(1);
-			player.getInventory().setItem(1, nugget);
+			player.getInventory().addItem(nugget);
 		} else {
 			return;
 		}

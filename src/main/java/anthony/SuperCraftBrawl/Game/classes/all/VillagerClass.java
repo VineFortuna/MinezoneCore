@@ -47,14 +47,8 @@ public class VillagerClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-
-		SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
-
-		meta.setOwner("Villager");
-		meta.setDisplayName("");
-
-		playerskull.setItemMeta(meta);
+		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDcxYjhiMmFlN2ZiMjc4MmRiZWU5M2E3ZTY3OTc4M2M1MGQ1YTg4NDA0NTcwOGEyMTU5NDE3ODVkN2MzY2NkIn19fQ==";
+		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
 
 		playerEquip.setHelmet(playerskull);
 		playerEquip.setChestplate(makeBrown(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
@@ -128,6 +122,7 @@ public class VillagerClass extends BaseClass {
 						public void onHit(Player hit) {
 							if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
 								Location hitLoc = this.getBaseProj().getEntity().getLocation();
+								player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
 								Random r = new Random();
 								int chance = r.nextInt(100);
 
