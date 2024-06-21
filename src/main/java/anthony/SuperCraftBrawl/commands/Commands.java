@@ -120,9 +120,13 @@ public class Commands implements CommandExecutor, TabCompleter {
 						if (flyData != null) {
 							if (flyData.fly == 0) {
 								player.sendMessage(main.color("&e&l(!) &rYou have enabled flight!"));
+								player.setAllowFlight(false);
+								player.setAllowFlight(true);
 								flyData.fly = 1;
 							} else {
 								player.sendMessage(main.color("&e&l(!) &rYou have disabled flight!"));
+								player.setAllowFlight(false);
+								player.setAllowFlight(true);
 								flyData.fly = 0;
 							}
 							main.getDataManager().saveData(flyData); // Save even when server restarts

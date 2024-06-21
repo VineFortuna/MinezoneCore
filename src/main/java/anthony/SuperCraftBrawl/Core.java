@@ -59,6 +59,7 @@ import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
 import anthony.SuperCraftBrawl.gui.StatsGUI;
 import anthony.SuperCraftBrawl.leaderboards.KillsBoard;
 import anthony.SuperCraftBrawl.npcs.NPCManager;
+import anthony.SuperCraftBrawl.packets.PacketMain;
 import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
@@ -95,6 +96,7 @@ public class Core extends JavaPlugin implements Listener {
 	public List<Player> globalchat;
 	public PlayerDataManager dataManager;
 	public DatabaseManager databaseManager;
+	public PacketMain packetMain;
 	public NPCManager npcManager;
 	public ActiveGamesGUI ag;
 	public boolean tournament = false;
@@ -220,6 +222,10 @@ public class Core extends JavaPlugin implements Listener {
 	public GameManager getGameManager() {
 		return gameManager;
 	}
+	
+	public PacketMain getPacketMain() {
+		return packetMain;
+	}
 
 	public GameSelectorGUI getHubGUI() {
 		return hubGUI;
@@ -330,6 +336,7 @@ public class Core extends JavaPlugin implements Listener {
 		// cmd = new anthony.skywars.commands.Commands(this);
 		djManager = new DoubleJumpManager(this);
 		databaseManager = new DatabaseManager(this);
+		packetMain = new PacketMain(this);
 		dataManager = new PlayerDataManager(this);
 		npcManager = new NPCManager(this);
 		rankManager = new RankManager(this);
@@ -1384,6 +1391,7 @@ public class Core extends JavaPlugin implements Listener {
 		// For tab organization.
 		p.setScoreboard(lobbyScoreBoard);
 		sendScoreboardUpdate(p);
+		//this.packetMain.injectPlayer(p);
 		// Message to send the server on join
 		e.setJoinMessage("" + ChatColor.BOLD + "[" + ChatColor.GREEN + ChatColor.BOLD + "+" + ChatColor.RESET
 				+ ChatColor.BOLD + "] " + ChatColor.RESET + getRankManager().getRank(p).getTagWithSpace() + ""
@@ -1457,6 +1465,7 @@ public class Core extends JavaPlugin implements Listener {
 	@EventHandler
 	public void leave(PlayerQuitEvent e) {
 		Player player = e.getPlayer();
+		//this.packetMain.removePlayer(player);
 		Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
 			ByteArrayOutputStream b = new ByteArrayOutputStream();
 			DataOutputStream out = new DataOutputStream(b);
