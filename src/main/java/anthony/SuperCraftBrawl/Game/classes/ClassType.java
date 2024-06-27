@@ -29,9 +29,9 @@ public enum ClassType {
 	ZombiePigman(51, 0, 3), Witch(13, 0, 5), ZombieVillager(50, 0, 10), Ice(54, 0, 15), Vampire(53, 800, 0),
 	Bee(55, 425, 0), Jeb(56, 0, 20), Hunter(57, 500, 0), FlintAndSteel(58, 0, 0), WitherSk(59, 1500, 0),
 	Shulker(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30), LargeFern(64, 0, 0),
-	Vindicator(65, 0, Rank.VIP), Fade(66, 0, Rank.VIP), Wolf(67, 0, 0);
+	Vindicator(65, 0, Rank.VIP), Fade(66, 0, Rank.VIP), Fisherman(67, 0, 0);
 
-	// Wolf(63, 0, 35)/* , Guardian(63, 0, 30) */;
+	// Wolf(67, 0, 35)/* , Guardian(68, 0, 30) */;
 
 	private int id;
 	private int tokenCost = 0;
@@ -201,8 +201,10 @@ public enum ClassType {
 			return new LargeFernClass(instance, player);
 		case Vindicator:
 			return new VindicatorClass(instance, player);
- 		case Wolf:
- 			return new WolfClass(instance, player);
+		case Fisherman:
+			return new VindicatorClass(instance, player);
+// 		case Wolf:
+// 			return new WolfClass(instance, player);
 //		case Guardian:
 //			return new GuardianClass(instance, player);
 //		case Fluxty:
@@ -342,8 +344,10 @@ public enum ClassType {
 			return new ItemStack(Material.DOUBLE_PLANT, 1, (short) 3);
 		case Vindicator:
 			return new ItemStack(Material.IRON_AXE);
- 		case Wolf:
- 			return new ItemStack(Material.BONE);
+		case Fisherman:
+			return new ItemStack(Material.FISHING_ROD;
+// 		case Wolf:
+// 			return new ItemStack(Material.BONE);
 // 		case Guardian:
 // 			return new ItemStack(Material.PRISMARINE_SHARD);
 //		case Snowman:
@@ -385,8 +389,6 @@ public enum ClassType {
 			return "Use your bow to poison your enemies!";
 		case ZombiePigman:
 			return "Summon your brothers to help you fight your enemies while you smack them with your Gold Sword!";
-		// case WitherSk:
-		// return "A very powerful character ready to dominate";
 		case ZombieVillager:
 			return "A poisonous creature...";
 		case Villager:
@@ -483,8 +485,8 @@ public enum ClassType {
 			return "??????";
 		case Vindicator:
 			return "Vindicate yourself in front of your enemies";
-		case Wolf:
-			return "Have your brothers defend you from enemies!";
+//		case Wolf:
+//			return "Have your brothers defend you from enemies!";
 //		case Guardian:
 //			return "Guard thyself and thy family (or something idk)";
 //		case Fluxty:
@@ -657,8 +659,10 @@ public enum ClassType {
 			return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + "LargeFern" + ChatColor.RESET;
 		case Vindicator:
 			return "" + ChatColor.GRAY + "Vindicator" + ChatColor.RESET;
- 		case Wolf:
- 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Wolf" + ChatColor.RESET;
+		case Fisherman:
+			return "" + ChatColor.DARK_AQUA  + ChatColor.ITALIC + "Fisherman" + ChatColor.RESET;
+// 		case Wolf:
+// 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Wolf" + ChatColor.RESET;
 // 		case Guardian:
 // 			return "" + ChatColor.GRAY + ChatColor.BOLD + "Guardian" + ChatColor.RESET;
 // 		case Snowman:
