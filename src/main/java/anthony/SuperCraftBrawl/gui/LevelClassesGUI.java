@@ -75,6 +75,7 @@ public class LevelClassesGUI implements InventoryProvider {
 									player.sendMessage(main
 											.color("&2&l(!) &rAdded new favorite class: " + type.getTag()));
 									main.getDataManager().saveData(data);
+									inv.close(player);
 								}
 							} else if (e.isLeftClick()) {
 								main.getGameManager().playerSelectClass(player, type);
@@ -91,10 +92,10 @@ public class LevelClassesGUI implements InventoryProvider {
 								player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
 								player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
 										+ "==============================================");
+								inv.close(player);
 							} else if (e.isRightClick()) {
 								new ClassRewardsGUI(main, type, inv).inv.open(player);
 							}
-							inv.close(player);
 						}));
 				b++;
 
@@ -113,7 +114,6 @@ public class LevelClassesGUI implements InventoryProvider {
 		// Setting "Go Back" Button
 		contents.set(2, 8, ClickableItem.of(
 				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
-					inv.close(player);
 					new ClassSelectorGUI(main).inv.open(player);
 				}));
 

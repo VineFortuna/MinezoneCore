@@ -10,8 +10,11 @@ import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class FishingUpgradesGUI implements InventoryProvider {
     
@@ -55,6 +58,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                                     main.color("&eClick to enable")), e -> {
                                 data.lure = 1;
                                 main.getDataManager().saveData(data);
+                                addLure(player, data.lureLevel);
                                 new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
                             }));
                 } else if (lure == 1) {
@@ -63,6 +67,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                                     main.color("&eClick to disable")), e -> {
                                 data.lure = 0;
                                 main.getDataManager().saveData(data);
+                                disableLure(player);
                                 new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
                             }));
                 }
@@ -76,6 +81,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                                 data.lureLevel++;
                                 player.sendMessage(main.color("&2&l(!) &rPurchased &aLure I"));
                                 main.getDataManager().saveData(data);
+                                addLure(player, data.lureLevel);
                                 if (main.getGameManager().GetInstanceOfPlayer(player) == null)
                                     main.LobbyBoard(player);
                                 new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
@@ -108,6 +114,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                                 data.lureLevel++;
                                 player.sendMessage(main.color("&2&l(!) &rPurchased &aLure II"));
                                 main.getDataManager().saveData(data);
+                                addLure(player, data.lureLevel);
                                 if (main.getGameManager().GetInstanceOfPlayer(player) == null)
                                     main.LobbyBoard(player);
                                 new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
@@ -132,6 +139,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                                 data.lureLevel++;
                                 player.sendMessage(main.color("&2&l(!) &rPurchased &aLure III"));
                                 main.getDataManager().saveData(data);
+                                addLure(player, data.lureLevel);
                                 if (main.getGameManager().GetInstanceOfPlayer(player) == null)
                                     main.LobbyBoard(player);
                                 new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
@@ -154,5 +162,22 @@ public class FishingUpgradesGUI implements InventoryProvider {
     
     }
     
-    
+    public void addLure(Player player, int level) {
+        if (player.getInventory().getItem(5) != null &&
+                player.getInventory().getItem(5).getType() == Material.FISHING_ROD) {
+            ItemStack item = player.getInventory().getItem(5);
+            ItemMeta meta = item.getItemMeta();
+            meta.addEnchant(Enchantment.LURE, level, true);
+            item.setItemMeta(meta);
+        }
+    }
+    public void disableLure(Player player) {
+        if (player.getInventory().getItem(5) != null &&
+                player.getInventory().getItem(5).getType() == Material.FISHING_ROD) {
+            ItemStack item = player.getInventory().getItem(5);
+            ItemMeta meta = item.getItemMeta();
+            meta.removeEnchant(Enchantment.LURE);
+            item.setItemMeta(meta);
+        }
+    }
 }
