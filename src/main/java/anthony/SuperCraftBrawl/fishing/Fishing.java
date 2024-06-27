@@ -79,6 +79,12 @@ public class Fishing implements Listener {
             if (fish == FishType.CRATE) {
                 p.sendMessage(main.color("&5&l(!) &rYou have found &e1 Mystery Chest!"));
                 data.mysteryChests++;
+            } else if (fish == FishType.TOKENS) {
+                int r = rand.nextInt(15) + 11;
+                p.sendMessage(main.color("&5&l(!) &rYou have found &e" + r + " Tokens!"));
+                data.tokens += r;
+                if (main.getGameManager().GetInstanceOfPlayer(p) == null)
+                    main.LobbyBoard(p);
             }
             reward(p, fish.getRarity());
             data.totalcaught++;
