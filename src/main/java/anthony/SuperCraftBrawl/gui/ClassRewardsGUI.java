@@ -14,6 +14,7 @@ import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -41,13 +42,14 @@ public class ClassRewardsGUI implements InventoryProvider {
     
         PlayerData data = main.getDataManager().getPlayerData(player);
         ClassDetails details = data.playerClasses.get(type.getID());
+        int played = details.gamesPlayed + details.gamesWon;
         
         ItemStack tokens = ItemHelper.setDetails(new ItemStack(Material.EMERALD), main.color("&e&l100 Tokens"));
-        if (details.gamesPlayed < 50) {
-            ItemHelper.setLore(tokens, Arrays.asList("", main.progressBar(details.gamesPlayed, 50, 25)));
+        if (played < 50) {
+            ItemHelper.setLore(tokens, Arrays.asList("", main.progressBar(played, 50, 25)));
         } else {
             if (details.reward1) {
-                ItemHelper.setLore(tokens, Arrays.asList("", main.color("&a&lREWARD CLAIMED")));
+                ItemHelper.setLore(tokens, Arrays.asList("", main.color("&a&lCLAIMED")));
                 ItemHelper.setGlowing(tokens, true);
             } else {
                 ItemHelper.setLore(tokens, Arrays.asList("", main.color("&eClick to claim reward")));
@@ -55,23 +57,42 @@ public class ClassRewardsGUI implements InventoryProvider {
         }
     
         ItemStack head = ItemHelper.setDetails(headReward(type), main.color("&e&lAlternate Head"));
-        if (details.gamesPlayed < 100) {
-            ItemHelper.setLore(head , Arrays.asList("", main.progressBar(details.gamesPlayed, 100, 25)));
+        if (played < 1) {
+            ItemHelper.setLore(head , Arrays.asList("", main.progressBar(played, 100, 25)));
         } else {
-            if (details.reward1) {
-                ItemHelper.setLore(head , Arrays.asList("", main.color("&a&lREWARD CLAIMED")));
+            if (details.reward2) {
+                ItemHelper.setLore(head , Arrays.asList("", main.color("&a&lENABLED"), main.color("&eClick to disable")));
                 ItemHelper.setGlowing(head , true);
             } else {
-                ItemHelper.setLore(head , Arrays.asList("", main.color("&eClick to claim reward")));
+                ItemHelper.setLore(head , Arrays.asList("", main.color("&eClick to enable")));
             }
         }
         
         contents.set(0, 0,
                 ClickableItem.of(tokens, e -> {
-                        }));
+                    if (played >= 50) {
+                        if (!details.reward1) {
+                            details.reward1 = true;
+                            player.sendMessage("Claimed");
+                            main.getDataManager().saveData(data);
+                            player.closeInventory();
+                        }
+                    }
+                    }));
         contents.set(0, 1,
                 ClickableItem.of(head, e -> {
-                        }));
+                    if (played >= 1) {
+                        if (!details.reward2) {
+                            details.reward2 = true;
+                            player.sendMessage("Enabled");
+                        } else {
+                            details.reward2 = false;
+                            player.sendMessage("Disabled");
+                        }
+                        main.getDataManager().saveData(data);
+                        player.closeInventory();
+                    }
+                }));
         contents.set(0, 8, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
                     inv.getParent().get().open(player);
@@ -83,137 +104,134 @@ public class ClassRewardsGUI implements InventoryProvider {
     
     }
     
-    public ItemStack headReward(ClassType type) {
+    public static ItemStack headReward(ClassType type) {
         switch (type) {
             case Cactus:
-                return new ItemStack(Material.CACTUS);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTA0ZjFhNTU5NDNjNTk0ZTcxMTllODg0YzVkYTJhMmJjYThlN2U2NTE2YTA2NDlhYTdlNTU2NThlMGU5In19fQ==");
             case Fade:
-                return new ItemStack(Material.STRING);
+                return ItemHelper.setColor(ItemHelper.create(Material.STAINED_GLASS), Color.BLACK);
             case Cloud:
-                return new ItemStack(Material.WOOL);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDVjMWU3YTFlMzMxZDIyYjk0YzUzMzY1MTc0NzY2YzdjY2EwNzgzYjhiNDZjY2UwNmMwYjE3MjQ0YjMyOGQ0MiJ9fX0=");
             case Firework:
-                return new ItemStack(Material.FIREWORK);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODNkNDlkZGU3NWUxMmI2MGViZTZlODk4MWVhNGZiMjY2YjIwNzUyYzJmNTVlOTZhZjExM2MyODdlZWQ2M2U4MSJ9fX0=");
             case Shulker:
-                return new ItemStack(Material.STAINED_CLAY, 1, (byte) DyeColor.PURPLE.getData());
+                return ItemHelper.setColor(ItemHelper.create(Material.STAINED_CLAY), Color.PURPLE);
             case Dweller:
-                return new ItemStack(Material.BONE);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2JlM2NhMzc5MDAzNTRiODFiMjU5MWI4ZTljYzcwNmMyYTQ1MGZlZTM3MGVlNTIyZTZiOWYzMmRjMDM2Y2E4MCJ9fX0=");
             case WitherSk:
-                return ItemHelper.createSkullHead(1, SkullType.WITHER);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjhjMDE2NWU5YjJkYmQ3OGRhYzkxMjc3ZTk3ZDlhMDI2NDhmMzA1OWUxMjZhNTk0MWE4NGQwNTQyOWNlIn19fQ==");
             case Rabbit:
-                return new ItemStack(Material.RABBIT_FOOT);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDUxMDM4MzlmZGU4M2EwMmZhYzFjOTk4YWI2MWFiODc3NzhjZjgxZjlkZDZjOWIzOGMzYjJiMGFjOTI5YWUzOSJ9fX0=");
             case FlintAndSteel:
-                return new ItemStack(Material.FLINT_AND_STEEL);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTAwZjYwNzI4NDZhMjhmOWNkZDE5YmIwY2E2MTQyMDljZWI1MWZiYzI4Mzc2ZmM4ZTU4M2JkMThjYzk1N2ZkOSJ9fX0=");
             case Hunter:
-                return new ItemStack(Material.GOLD_SWORD);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzk1NzEyYjZlMWIzOGY5MmUyMWE1MmZiNzlhZjUzM2I3M2JiNWRkNWNiZGFmOTJlZTY0YjkzYWFhN2M0NjRkIn19fQ==");
             case Jeb:
-                return new ItemStack(Material.STONE);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDNhMmYzN2Y3YjBmMjY2MzljNmYzZGMxZTI3YjI0NGM0NzAzNzk3NjY3NjRlZmM3MTQzNjk3YThlMTViNiJ9fX0=");
             case Bee:
-                return new ItemStack(Material.GLOWSTONE_DUST);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDUzYzZhODRiNWE1NGMxMDIyMTAyNzgwZTVkNTJiYWQ2NmZkNDJmYzY2NGY2ZGFjOThlOTQxOTY2OTdiOSJ9fX0=");
             case Ice:
-                return new ItemStack(Material.ICE);
+                return new ItemStack(Material.PACKED_ICE);
             case Vampire:
-                return new ItemStack(Material.GHAST_TEAR);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjVhNzAwNzAwN2Q1YTM5NmQ2MDQ5YzcxYWI2ZmY1ZmVkYjZjYTNlMTc1M2IzZmQ2ZjEzYmI2OTQ2YTdlMGRhZiJ9fX0=");
             case ZombiePigman:
-                return ItemHelper.createSkullTexture(
-                        "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWY5OGEzY2ZkZjhjMTNlZTY2MzQxNDBmOTQ1YjcxZDJlNDg4ZmY0ODVlMTBjMzNhZTI1ODIxZDgyZDg0OGE3MyJ9fX0=");
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2VhYmFlY2M1ZmFlNWE4YTQ5Yzg4NjNmZjQ4MzFhYWEyODQxOThmMWEyMzk4ODkwYzc2NWUwYThkZTE4ZGE4YyJ9fX0=");
             case Villager:
-                return new ItemStack(Material.EMERALD);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTVhMGIwN2UzNmVhZmRlY2YwNTljOGNiMTM0YTdiZjBhMTY3ZjkwMDk2NmYxMDk5MjUyZDkwMzI3NjQ2MWNjZSJ9fX0=");
             case DarkSethBling:
                 return new ItemStack(Material.COAL_BLOCK);
             case ZombieVillager:
-                return new ItemStack(Material.ROTTEN_FLESH);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTQwMzVhY2EyNmJlOTdiZTg0MDY0MDZmMTU1N2ZhOTkwNzM4NzcwZmUwMzgxOTRhNGFiODFjZTBjODM5NmM3MiJ9fX0=");
             case MagmaCube:
-                return ItemHelper.createSkullTexture(
-                        "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGFhNmM0NWIyY2Y3OTc1Yjk1ZmJjY2U0ZWQ5YjA2NDZhYzAwY2I5Y2M5ZjY2ZGM1YzI0ZTgxZDJjOTFlZTdjMSJ9fX0=");
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzAyNzgzNDhlNjU3YjlkN2ExNGM4MjQ5ZmNlZjFiNGI5YmQ0ZTQ4YTY1OThkYzU2NDRhNzAxYmQ0OGI0MjcxMSJ9fX0=");
             case Summoner:
-                return new ItemStack(Material.ENCHANTED_BOOK);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2FmZmNlNjVmNDIzNjY0N2VjZDZkNTVjMTI3ZWVmOGU3ZTEzMmY0M2QwMTQzMmFlYTM2MGYwYjY3YzhhNjY3NyJ9fX0=");
             case Anvil:
-                return new ItemStack(Material.ANVIL);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGNmN2FmNTQ4ZGNhNmEyYTk0MmVkNzI2NDBkZDgwZTUwMGY4MzI5OGY4OWMzMWUzYWI0YTVmNmNlMjBlMmY0ZCJ9fX0=");
             case Silverfish:
-                return new ItemStack(Material.IRON_HOE);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTJlYzJjM2NiOTVhYjc3ZjdhNjBmYjRkMTYwYmNlZDRiODc5MzI5YjYyNjYzZDdhOTg2MDY0MmU1ODhhYjIxMCJ9fX0=");
             case Zombie:
-                return ItemHelper.createSkullHead(1, SkullType.ZOMBIE);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjY5Yjk3MzRkMGU3YmYwNjBmZWRjNmJmN2ZlYzY0ZTFmN2FkNmZjODBiMGZkODQ0MWFkMGM3NTA4Yzg1MGQ3MyJ9fX0=");
             case Star:
-                return new ItemStack(Material.NETHER_STAR);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDQwMWM1MWEyODI0ODZiYTBiNWZiYzZjZWU4ZDlkNThiMzk1MjBjNWM0MzkzNTc1Mjk5OTUzYzI3M2JhMGY3MCJ9fX0=");
             case Wizard:
-                return new ItemStack(Material.BLAZE_POWDER);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2JmYzE3ZWQ5MjhhZGZhZmZmYmY5ZjkxNTg5ZjBkNWI3YWIyMTZmNzRjMGQ3MjE0ZjI5ZTY5NDM4ZTYwOTdiMCJ9fX0=");
             case Present:
-                return new ItemStack(Material.CHEST);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTI5MTljNjczMTdjNzY3ODQzOGZmNTIwYzk4ZGRlMGUzYjRkNjg3NjljODkzOGE1YTNkZTI5NjhlZGZjNzMxNCJ9fX0=");
             case Noteblock:
-                return new ItemStack(Material.NOTE_BLOCK);
+                return new ItemStack(Material.JUKEBOX);
             case Bedrock:
-                return new ItemStack(Material.BEDROCK);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmZjY2ZlNTA5NmEzMzViOWFiNzhhYjRmNzc4YWU0OTlmNGNjYWI0ZTJjOTVmYTM0OTIyN2ZkMDYwNzU5YmFhZiJ9fX0=");
             case EnchantTable:
-                return new ItemStack(Material.ENCHANTMENT_TABLE);
+                return new ItemStack(Material.BOOKSHELF);
             case Skeleton:
-                return new ItemStack(Material.SKULL_ITEM);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWUzOTFjNmU1MzVmN2FhNWEyYjZlZTZkMTM3ZjU5ZjJkN2M2MGRlZjg4ODUzYmE2MTFjZWIyZDE2YTdlN2M3MyJ9fX0=");
             case Enderman:
-                return new ItemStack(Material.ENDER_PEARL);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmJhNjkzNzJhMDk0MGRkZjE0N2U0NjM5ODc5NDU1MDViMWJlOTcwOGE1MzM4OTRlNGY1Mjk3ODg0MmEyY2Q1NSJ9fX0=");
             case Horse:
-                return new ItemStack(Material.LEASH);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzk5YmI1MGQxYTIxNGMzOTQ5MTdlMjViYjNmMmUyMDY5OGJmOThjYTcwM2U0Y2MwOGI0MjQ2MmRmMzA5ZDZlNiJ9fX0=");
             case Squid:
-                return new ItemStack(Material.INK_SACK);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTczMjdlZTExODEyYjc2NGM3YWRlNzBiMjgyY2NlNGM1OGU2MzViMjAxNTI0NDA4MWQxNDkwNTQzZGE3MjgwZSJ9fX0=");
             case Spider:
-                return new ItemStack(Material.SPIDER_EYE);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWVjNTU3NDYwM2YzMDQ4ZjIxYWQ1YTNjOTRkOTcxMTU3MDYwMTFmZTZiYTY3NzgxMDkxYjhhOWFjMTBhZjU0ZiJ9fX0=");
             case Pig:
-                return new ItemStack(Material.PORK);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWJiOWJjMGYwMWRiZDc2MmEwOGQ5ZTc3YzA4MDY5ZWQ3Yzk1MzY0YWEzMGNhMTA3MjIwODU2MWI3MzBlOGQ3NSJ9fX0=");
             case Blaze:
-                return new ItemStack(Material.BLAZE_ROD);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTgwNDZkMzhhOTdjOTFmNTk5NDllYTc0MmVmZDc0ODI3Y2NlZGVmZTk4NTI4NTUyY2QzMjdiNGI2MWMzOWI1ZiJ9fX0=");
             case Wither:
-                return ItemHelper.createSkullTexture(
-                        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODg2ZGMwY2ZjYWVlY2ZlMWFiNjkxNDZlNGQ0ZjExOTA4MzcwNzZhNjdkZWMxMzVmYWJkYTYyNzFmMzc1ZDAxZiJ9fX0=");
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTE2OWM5MGM4ODc0YWI1NzViMjAxYjYxNmE2OWVhYzdlMGI1YWM2OWJiY2NjYmIyNzcyZTM2Nzc2ZmU2OTQ0MSJ9fX0=");
             case Creeper:
-                return ItemHelper.createSkullHead(1, SkullType.CREEPER);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzAyMTMwMzFlNjdlZTRiNjJhMGQ5MzljZDIyZjliMmQ4Zjg0NDIyMDRhYzM1ZGIwMzA4OThlZDk4MzZkMDNkOSJ9fX0=");
             case IronGolem:
-                return new ItemStack(new ItemStack(Material.IRON_BLOCK));
+                return new ItemStack(Material.IRON_BLOCK);
             case Ghast:
-                return new ItemStack(new ItemStack(Material.GHAST_TEAR));
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzhmNzdlZWVlZjZmZmIyZjY4MThlNTc2OTg3OTRhZTAzNTFhYjMyYmEyMzRkNjIxYzIyZmU0Y2U4ZTE1OTlkMiJ9fX0=");
             case Slime:
-                return new ItemStack(new ItemStack(Material.SLIME_BALL));
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjU0ZjJiNGNiNmQyMWQzNTZlYzVjMGNiNmY1MTY2ZmVlMzExOWM3ZGM1OWUyMDgzOWMyMDMzMWNkMTNlNDM5ZCJ9fX0=");
             case ButterGolem:
-                return new ItemStack(new ItemStack(Material.GOLD_AXE));
+                return new ItemStack(Material.GOLD_BLOCK);
             case Enderdragon:
-                return new ItemStack(new ItemStack(Material.DRAGON_EGG));
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWVjM2ZmNTYzMjkwYjEzZmYzYmNjMzY4OThhZjdlYWE5ODhiNmNjMThkYzI1NDE0N2Y1ODM3NGFmZTliMjFiOSJ9fX0=");
             case Bat:
-                return new ItemStack(new ItemStack(Material.SHEARS));
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDczYWY2OWVkOWJmNjdlMmY1NDAzZGQ3ZDI4YmJlMzIwMzQ3NDliYmZiNjM1YWMxNzg5YTQxMjA1M2NkY2JmMCJ9fX0=");
             case SethBling:
-                return new ItemStack(new ItemStack(Material.REDSTONE_BLOCK));
+                return new ItemStack(Material.REDSTONE_BLOCK);
             case Melon:
-                return new ItemStack(new ItemStack(Material.MELON));
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWY5YzJlOWUwYThmNTJhYjg1NDdkYTZlMmE2ODg4NTUyZmE0ZTFkZWEyNDM3Y2ZmNjViMDdhMTg5N2NmYmI2OCJ9fX0=");
             case BabyCow:
-                return new ItemStack(new ItemStack(Material.RED_MUSHROOM));
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGM0YjVmNmQ3NTEyNjM4MGY1MjBhNjdjYTU3YmM5YTU2YWExMWRiOGFmZTdlNWRjYjJhNTJkZmNmZWFlMDc4NSJ9fX0=");
             case Herobrine:
-                return new ItemStack(new ItemStack(Material.DIAMOND));
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWI3OGFiM2EzODhhNjliNTFhNjI1YjA2MGI3YzY3ZjQ3ZTczM2IyMTliMzMxMjE2YTY3OTFhZDZhYTU3YThmZCJ9fX0=");
             case Ninja:
-                return new ItemStack(Material.STICK);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjg1MzIxNWU0ZTM5NDZmMjAwNmRmYmVhNjFjOTIzY2U3MzQyYjEzZjIzZmE3ZjM1ZjJhNDBlODQ1M2VhYzdlNSJ9fX0=");
             case TNT:
-                return new ItemStack(Material.TNT);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjhlNmJkZmFlNmI3MWRkMmExNTc4NTExZjk4N2Q1OTJjMGJhY2I4Yzc5M2M2YWJkMDU4YzdhZjU4NzJkZDQxYyJ9fX0=");
             case Chicken:
-                return new ItemStack(Material.EGG);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjg2YzcxYjMxMGVjZmQ1Y2E4MGNmMTM2NGJhYzdmMjUxOWM3MjYwZjI5M2E4OGVkNzY2MzA0ZDAzOWY2YmU4NSJ9fX0=");
             case Witch:
-                return new ItemStack(Material.WHEAT);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjEwMDVlY2I2OGIzZGY3MThlNzQwYjk5NGE2M2I4ODM2NDk0YTQ5OTJkMzYzZWEzODAxYzM5YjZhZTM2N2M2OCJ9fX0=");
             case Sheep:
-                return new ItemStack(Material.WOOL);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzAzMDcxODY1NmNhOGJlZGIxNWQ3MzA3YWJmMThkN2ViOGJjY2UxMGFlMDZhZGVmY2MyNjRmZjRlNDEyY2M0YiJ9fX0=");
             case SnowGolem:
-                return new ItemStack(Material.SNOW_BALL);
+                return new ItemStack(Material.SNOW_BLOCK);
             case Bunny:
-                return new ItemStack(Material.GOLDEN_CARROT);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzYwZDM3YWQyOWE0MDhmOGNkMmJhYWM1MTBlNTQwOGNiN2I3MTVkMjVkZTYxMzM0MmExY2I1YzNkMTA1ZTM0ZiJ9fX0=");
             case ButterBro:
-                return new ItemStack(Material.GOLD_INGOT);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2NlYzI3MTI1NGFjM2JlODQxMzM3M2JhZDdjMjUyYTE3YTU0Mzc4ZDNjODgwNWIwY2RjN2MxMmQ0ODg2N2QxNyJ9fX0=");
             case Steve:
-                return new ItemStack(Material.STONE_PICKAXE);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjNiMDk4OTY3MzQwZGFhYzUyOTI5M2MyNGUwNDkxMDUwOWIyMDhlN2I5NDU2M2MzZWYzMWRlYzdiMzc1MCJ9fX0=");
             case Notch:
-                return new ItemStack(Material.GRASS);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTNmYmU0YTZjNTk0ZDgxYTMwNzM5MjE4N2ZhMThlMjQ1ZjQwODZlZjRkYmUzYzE1NzEzZjBhNDk0ZjU2ODg2NSJ9fX0=");
             case Potato:
-                return new ItemStack(Material.POTATO_ITEM);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzcwZmIzNzdkMmI1MDEwN2Y1NDZjMjc5YTIyODNjZTJkMDY3ZTQ1NGNhOWZhYTEzMTU5YTgzNmQ0N2MzZDAyYiJ9fX0=");
             case Ocelot:
-                return new ItemStack(Material.RAW_FISH);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTYwMzllMzYxYmYwZjEyNTRiYmIzOTFjMTYzYTYwMjUwMzBmY2RmOThjMjA3MDVkY2E4NWY1NDQwNWRmMDRiZSJ9fX0=");
             case LargeFern:
-                return new ItemStack(Material.DOUBLE_PLANT, 1, (short) 3);
+                return new ItemStack(Material.LEAVES);
             case Vindicator:
-                return new ItemStack(Material.IRON_AXE);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjE5Y2M3ZGNhYzg2MzQzMzZjYzQwN2M1NzEyOTNmZWVmYWZjYTBlMWVmZDVlMmM4ZjVkMjIyNjdhNzI5ZDAwMyJ9fX0=");
             case Wolf:
-                return new ItemStack(Material.BONE);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjBjN2Y4ODUzMjZiYTA5NDljMzE2Njk2ZDE5ZDUzMDgyYjk5NGU5YjQ4Y2FkNjY3MzU1OGRkNmM1YmNhYjQ5In19fQ==");
         }
         return ItemHelper.create(Material.SKULL_ITEM);
     }

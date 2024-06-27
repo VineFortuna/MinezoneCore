@@ -61,7 +61,7 @@ public class GadgetsGUI implements InventoryProvider {
         ItemStack paintball = ItemHelper.create(Material.GOLD_BARDING, ChatColor.YELLOW.toString() + ChatColor.BOLD + "Paintball Gun", paintballList);
     
         List<String> fishingrodList = new ArrayList<>();
-        fishingrodList.add(ChatColor.DARK_GRAY + "Save the turtles");
+        fishingrodList.add(ChatColor.DARK_GRAY + "Let's go fishing!");
         ItemStack fishingrod = ItemHelper.create(Material.FISHING_ROD, ChatColor.DARK_AQUA.toString() + ChatColor.BOLD + "Fishing Rod", fishingrodList);
         ItemHelper.setUnbreakable(fishingrod);
         if (data.lure == 1 && data.lureLevel > 0) {
