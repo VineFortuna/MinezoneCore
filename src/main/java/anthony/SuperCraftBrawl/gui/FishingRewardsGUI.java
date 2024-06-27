@@ -45,6 +45,7 @@ public class FishingRewardsGUI implements InventoryProvider {
         String[] rewards = {"&e100 Tokens", "&d150 EXP", "&aFish Death Effect", "&e400 Tokens", "&6Pirate Outfit"};
     
         List<String> rewardStrings = new ArrayList<>();
+        rewardStrings.add(main.color("&7Claim these as many times as you'd like"));
         rewardStrings.add(main.color("&eNext reward:"));
         rewardStrings.add(main.progressBar(data.caught, next, 25));
         if (data.caught >= next) {
@@ -58,7 +59,8 @@ public class FishingRewardsGUI implements InventoryProvider {
         if (data != null) {
             if (level < 5) {
                 contents.set(1, 1, ClickableItem.of(
-                        ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), main.color("&aMilestone Reward"),
+                        ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), main.color("&aMilestone"),
+                                main.color("&7These rewards can only be claimed once"),
                                 main.color("&eNext reward:"),
                                 main.progressBar(data.totalcaught, nextReward, 25),
                                 main.color(rewards[level]),
@@ -101,12 +103,15 @@ public class FishingRewardsGUI implements InventoryProvider {
                                     main.LobbyBoard(player);
                                 main.getDataManager().saveData(data);
                                 new FishingRewardsGUI(main, inv.getParent().get()).inv.open(player);
+                            } else {
+                                player.sendMessage(main.color("&c&l(!) &rGo fish some more!"));
                             }
                         }));
             } else {
                 contents.set(1, 1, ClickableItem.of(
                         ItemHelper.setDetails(new ItemStack(Material.MINECART),
                                 main.color("&aMilestone"),
+                                main.color("&7These rewards can only be claimed once"),
                                 main.color("&eAll rewards claimed!")), e -> {
                         }));
             }
@@ -134,6 +139,8 @@ public class FishingRewardsGUI implements InventoryProvider {
                             if (main.getGameManager().GetInstanceOfPlayer(player) == null)
                                 main.LobbyBoard(player);
                             main.getDataManager().saveData(data);
+                        } else {
+                            player.sendMessage(main.color("&c&l(!) &rGo fish some more!"));
                         }
                     }));
         }
@@ -144,13 +151,17 @@ public class FishingRewardsGUI implements InventoryProvider {
                 totalFished++;
             }
         }
+        int fished = totalFished;
         
         String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWY1ZDM4MTlhNjVkYjc5YzQ1ZmQwMDE0MWMwODgyZTQ3YWQyMzRjMGU1Zjg5OTJiZjRhZjE4Y2VkMGUxZWNkYyJ9fX0=";
         contents.set(1, 7, ClickableItem.of(
                 ItemHelper.setDetails(ItemHelper.createSkullTexture(texture), totalFished == length?
                         main.color("&6Fisherman Class"):main.color("&7???"),
-                        totalFished == length?
+                        totalFished == length ?
                         main.color("&a&lUNLOCKED"):main.progressBar(totalFished, length, length)), e -> {
+                    if (fished < length) {
+                        player.sendMessage(main.color("&c&l(!) &rGo fish some more!"));
+                    }
                 }));
         
         contents.set(2, 8, ClickableItem.of(

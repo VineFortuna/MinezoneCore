@@ -40,7 +40,7 @@ public class FreeClassesGUI implements InventoryProvider {
 				ItemStack item = type.getItem();
 				
 				ClassDetails details = data.playerClasses.get(type.getID());
-				int played = details.gamesPlayed;
+				int played = details.gamesPlayed + details.gamesWon;
 				int nextLevel = 50;
 				if (played > 50)
 					nextLevel = 100;
@@ -66,6 +66,7 @@ public class FreeClassesGUI implements InventoryProvider {
 											player.sendMessage(
 													main.color("&2&l(!) &rAdded new favorite class: " + type.getTag()));
 											main.getDataManager().saveData(data);
+											inv.close(player);
 										}
 									} else if (e.isLeftClick()) {
 										main.getGameManager().playerSelectClass(player, type);
@@ -105,7 +106,6 @@ public class FreeClassesGUI implements InventoryProvider {
 		
 		contents.set(2, 8, ClickableItem.of(
 				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
-					inv.close(player);
 					new ClassSelectorGUI(main).inv.open(player);
 				}));
 	}

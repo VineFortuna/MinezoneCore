@@ -3,7 +3,11 @@ package anthony.SuperCraftBrawl.gui;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
+import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -26,6 +30,19 @@ public class ClassSelectorGUI implements InventoryProvider {
 
 	@Override
 	public void init(Player player, InventoryContents contents) {
+		boolean updated = false;
+		PlayerData data = main.getDataManager().getPlayerData(player);
+		for (ClassType type : ClassType.values()) {
+			ClassDetails details = data.playerClasses.get(type.getID());
+			if (details == null) {
+				updated = true;
+				details = new ClassDetails();
+				data.playerClasses.put(type.getID(), details);
+			}
+		}
+		if (updated)
+			main.getDataManager().saveData(data);
+			
 		contents.set(1, 2,
 				ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
 						String.valueOf(ChatColor.RED) + ChatColor.BOLD + "DONOR CLASSES",

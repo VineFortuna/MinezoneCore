@@ -739,6 +739,13 @@ public abstract class BaseClass {
 
 						if (data != null) {
 							data.losses += 1;
+							ClassType type = pClass.getType();
+							ClassDetails details = data.playerClasses.get(type.getID());
+							if (details == null) {
+								details = new ClassDetails();
+								data.playerClasses.put(type.getID(), details);
+							}
+							details.gamesPlayed++;
 						}
 						if (killer != null) {
 							String msg = instance.getGameManager().getMain().color("&4&lELIMINATED &e" + p.getName());
@@ -1880,6 +1887,13 @@ public abstract class BaseClass {
 
 					if (data != null) {
 						data.losses += 1;
+						ClassType type = baseClass2.getType();
+						ClassDetails details = data.playerClasses.get(type.getID());
+						if (details == null) {
+							details = new ClassDetails();
+							data.playerClasses.put(type.getID(), details);
+						}
+						details.gamesPlayed++;
 						data.winstreak = 0;
 					}
 					if (killer != null) {

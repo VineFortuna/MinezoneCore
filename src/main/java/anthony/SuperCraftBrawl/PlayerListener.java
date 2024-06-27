@@ -166,18 +166,9 @@ public class PlayerListener implements Listener {
 	public void tokenClassGUI(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
 		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
-
 		if (e.getItem() != null && e.getItem().getType() == Material.ENCHANTED_BOOK) {
 			e.setCancelled(true);
 			if (i == null) {
-				PlayerData data = main.getDataManager().getPlayerData(player);
-				for (ClassType type : ClassType.values()) {
-					ClassDetails details = data.playerClasses.get(type.getID());
-					if (details == null) {
-						details = new ClassDetails();
-						data.playerClasses.put(type.getID(), details);
-					}
-				}
 				new ClassSelectorGUI(main).inv.open(player);
 			}
 		}

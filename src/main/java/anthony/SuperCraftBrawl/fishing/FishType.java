@@ -43,7 +43,7 @@ public enum FishType {
     BOTTLE(30, "Empty Bottle", FishRarity.JUNK),
     BOOTS(31, "Old Boots", FishRarity.JUNK),
     NAUTILUSSHELL(32, "Nautilus Shell", FishRarity.JUNK),
-    TROPHY(33, "Fishing Trophy", FishRarity.TREASURE),
+    TOKENS(33, "Token Sack", FishRarity.TREASURE),
     MAP(34, "Treasure Map", FishRarity.TREASURE),
     CRATE(35, "MysteryChest", FishRarity.TREASURE);
     
@@ -172,9 +172,9 @@ public enum FishType {
             case NAUTILUSSHELL:
                 return ItemHelper.createSkullTexture(
                         "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODEyNmNhYzE2ZmQ4ZTQ3NTE2ZTg0NTIwY2QzOTgxYzQ1ZDcwOGY1NWQzNDU4NDk0ZDhmMDgxYzUwNWQ2ZDMwNCJ9fX0=");
-            case TROPHY:
+            case TOKENS:
                 return ItemHelper.createSkullTexture(
-                        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2QwZDViNThiM2RlMjQzNGM3NWVhN2MwOGMyYjgwMmQ1OTVlZmQxMGJhZDA4YTZmNjYxZTliNThiNDkwYmFmNyJ9fX0=");
+                        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2QyNGRjNTgwNjljMTIxMmI1MjlhNGFlNWQ0ZTczYmUwOTkwZDQ2ZmU5MzcxYjFmNzllODE2NGI0Mjg1OWFjOCJ9fX0=");
             case MAP:
                 return ItemHelper.create(Material.MAP);
             case CRATE:
@@ -188,7 +188,7 @@ public enum FishType {
             case COD:
                 return "Something's fishy...";
             case SALMON:
-                return "Mr. Salmon bring me a drink";
+                return "Mr. Salmon, bring me a drink";
             case TROUT:
                 return "Don't pout";
             case GOBY:
@@ -218,15 +218,15 @@ public enum FishType {
             case TURTLE:
                 return "I like turtles";
             case OCTOPUS:
-                return "";
+                return "That's a lot of arms";
             case JELLYFISH:
                 return "Is there a peanutbutterfish too?";
             case CRAB:
                 return "Always crabby for some reason";
             case HERMITCRAB:
-                return "";
+                return "Home sweet home";
             case NAUTILUS:
-                return "";
+                return "Naut my problem";
             case PIRANHA:
                 return "Looking sharp";
             case ANGLERFISH:
@@ -246,13 +246,13 @@ public enum FishType {
             case BUCKET:
                 return "There's a hole in my bucket";
             case LILYPAD:
-                return "";
+                return "Totally not an industry plant";
             case STRING:
                 return "Can't catch anything with this";
             case NAUTILUSSHELL:
                 return "Something's missing...";
-            case TROPHY:
-                return "Everyone's a winner!";
+            case TOKENS:
+                return "Sweet cash";
             case MAP:
                 return "Could it lead to the fabled treasure?";
             case CRATE:

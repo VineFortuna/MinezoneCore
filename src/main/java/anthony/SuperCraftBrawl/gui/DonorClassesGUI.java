@@ -36,7 +36,6 @@ public class DonorClassesGUI implements InventoryProvider {
 		
 		contents.set(2, 8, ClickableItem.of(
 				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
-					inv.close(player);
 					new ClassSelectorGUI(main).inv.open(player);
 				}));
 
@@ -72,6 +71,7 @@ public class DonorClassesGUI implements InventoryProvider {
 												player.sendMessage(main
 														.color("&2&l(!) &rAdded new favorite class: " + type.getTag()));
 												main.getDataManager().saveData(data);
+												inv.close(player);
 											}
 										} else if (e.isLeftClick()) {
 											main.getGameManager().playerSelectClass(player, type);
@@ -90,10 +90,10 @@ public class DonorClassesGUI implements InventoryProvider {
 											player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
 											player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
 													+ "==============================================");
+											inv.close(player);
 										} else if (e.isRightClick()) {
 											new ClassRewardsGUI(main, type, inv).inv.open(player);
 										}
-										inv.close(player);
 									} else {
 										player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD
 												+ "(!) " + ChatColor.RESET

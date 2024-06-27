@@ -1546,6 +1546,14 @@ public class GameInstance {
 			playerPosition.add(winner);
 			if (data3 != null) {
 				BaseClass bc = classes.get(winner);
+				ClassType type = bc.getType();
+				ClassDetails details = data3.playerClasses.get(type.getID());
+				if (details == null) {
+					details = new ClassDetails();
+					data3.playerClasses.put(type.getID(), details);
+				}
+				details.gamesWon++;
+				details.gamesPlayed++;
 				if (data3.challenge1 == 0) {
 					if (bc != null) {
 						if (bc.getType() == ClassType.Pig) {
@@ -1555,13 +1563,13 @@ public class GameInstance {
 											+ " &rclass!"));
 							data3.challenge1 = 1;
 							int classID = 29;
-							ClassDetails details = data3.playerClasses.get(classID);
+							ClassDetails notchdetails = data3.playerClasses.get(classID);
 
-							if (details == null) {
-								details = new ClassDetails();
-								data3.playerClasses.put(classID, details);
+							if (notchdetails == null) {
+								notchdetails = new ClassDetails();
+								data3.playerClasses.put(classID, notchdetails);
 							}
-							details.setPurchased();
+							notchdetails.setPurchased();
 						}
 					}
 				}
@@ -2046,8 +2054,16 @@ public class GameInstance {
 				if (baseClass != null) {
 					baseClass.score.getScoreboard().resetScores(baseClass.score.getEntry());
 					PlayerData data = this.gameManager.getMain().getDataManager().getPlayerData(player);
-					if (this.state != GameState.ENDED && this.state != GameState.WAITING && data != null)
+					if (this.state != GameState.ENDED && this.state != GameState.WAITING && data != null) {
 						data.losses++;
+						ClassType type = baseClass.getType();
+						ClassDetails details = data.playerClasses.get(type.getID());
+						if (details == null) {
+							details = new ClassDetails();
+							data.playerClasses.put(type.getID(), details);
+						}
+						details.gamesPlayed++;
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
