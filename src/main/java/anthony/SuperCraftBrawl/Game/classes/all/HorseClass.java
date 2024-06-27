@@ -107,6 +107,10 @@ public class HorseClass extends BaseClass {
 		// Settings Items
 		playerInv.setItem(0, weapon);
 		playerInv.setItem(1, saddle);
+		
+		TreatGiver treatGiver = new TreatGiver(this, treatsItemsList);
+		treatGiver.giveRandomTreat(player);
+		
 	}
 
 	@SuppressWarnings("deprecation") // isOnGround() method

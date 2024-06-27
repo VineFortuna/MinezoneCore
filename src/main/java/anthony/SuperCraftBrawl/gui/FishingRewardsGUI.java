@@ -38,7 +38,7 @@ public class FishingRewardsGUI implements InventoryProvider {
     public void init(Player player, InventoryContents contents) {
         PlayerData data = main.getDataManager().getPlayerData(player);
         int level = data.rewardLevel;
-        int nextReward = 25 + 50*level;
+        int nextReward = 15 * (int) Math.pow(2, level);
         
         int next = 2;
     
@@ -96,7 +96,7 @@ public class FishingRewardsGUI implements InventoryProvider {
                                         break;
                                     case 4:
                                         player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                                + "You have earned " + ChatColor.GREEN + " Fisherman Outfit!");
+                                                + "You have earned " + ChatColor.GREEN + " Pirate Outfit!");
                                         break;
                                 }
                                 if (main.getGameManager().GetInstanceOfPlayer(player) == null)
