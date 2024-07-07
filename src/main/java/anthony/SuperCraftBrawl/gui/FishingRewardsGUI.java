@@ -48,10 +48,10 @@ public class FishingRewardsGUI implements InventoryProvider {
         rewardStrings.add(main.color("&eNext reward:"));
         rewardStrings.add(main.progressBar(data.caught, next, 25));
         if (data.caught >= next) {
-            rewardStrings.add(main.color("&aLeft Click to claim 20 Tokens"));
+            rewardStrings.add(main.color("&aLeft Click to claim 15 Tokens"));
             rewardStrings.add(main.color("&aRight Click to claim 30 EXP"));
         } else {
-            rewardStrings.add(main.color("&e20 Tokens or 30 EXP"));
+            rewardStrings.add(main.color("&e15 Tokens or 30 EXP"));
         }
         rewardStrings.add("");
         
@@ -120,9 +120,9 @@ public class FishingRewardsGUI implements InventoryProvider {
                             data.caught -= next;
                             new FishingRewardsGUI(main, inv.getParent().get()).inv.open(player);
                             if (e.isLeftClick()) {
-                                data.tokens += 20;
+                                data.tokens += 15;
                                 player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                        + "You have earned " + ChatColor.GREEN + 20 + " Tokens!");
+                                        + "You have earned " + ChatColor.GREEN + 15 + " Tokens!");
                             } else if (e.isRightClick()){
                                 data.exp += 30;
                                 player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET

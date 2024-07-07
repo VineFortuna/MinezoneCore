@@ -63,7 +63,7 @@ public class Fishing implements Listener {
                 details = new FishingDetails();
                 data.playerFishing.put(fish.getId(), details);
             }
-            p.sendMessage(main.color("&r&l(&3&l!&r&l) &rYou caught a "
+            p.sendMessage(main.color("&3&l(!) &rYou caught a "
                     + fish.getRarity().getColor() + fish.getName() + "&r!"));
             
             if (details.timesCaught == 0) {
@@ -81,11 +81,11 @@ public class Fishing implements Listener {
                 p.sendMessage(main.color("&2&l=============================================="));
             }
             if (fish == FishType.CRATE) {
-                p.sendMessage(main.color("&5&l(!) &rYou have found &e1 Mystery Chest!"));
+                p.sendMessage(main.color("&3&l(!) &rYou have found &e1 Mystery Chest!"));
                 data.mysteryChests++;
             } else if (fish == FishType.TOKENS) {
-                int r = rand.nextInt(15) + 11;
-                p.sendMessage(main.color("&5&l(!) &rYou have found &e" + r + " Tokens!"));
+                int r = rand.nextInt(25) + 11;
+                p.sendMessage(main.color("&3&l(!) &rYou have found &e" + r + " Tokens!"));
                 data.tokens += r;
                 if (main.getGameManager().GetInstanceOfPlayer(p) == null)
                     main.LobbyBoard(p);
@@ -94,7 +94,11 @@ public class Fishing implements Listener {
             data.totalcaught++;
             data.caught++;
             details.addCaught(1);
-            //main.getDataManager().saveData(data);
+            if (main.getTotalFish(p) == FishType.values().length) {
+                p.playSound(p.getLocation(), Sound.FIREWORK_TWINKLE, 1, 1);
+                p.sendMessage(main.color("&3&l(!) &rCongratulations! You caught everything!"));
+            }
+            main.getDataManager().saveData(data);
             removeFish(i);
         }
     }
@@ -133,7 +137,7 @@ public class Fishing implements Listener {
                 fishItems.remove(i);
                 i.remove();
             }
-        }, 60L);
+        }, 80L);
     }
     public FishType getRandomLoot(FishRarity rarity) {
         ArrayList<FishType> loot = new ArrayList<>();
