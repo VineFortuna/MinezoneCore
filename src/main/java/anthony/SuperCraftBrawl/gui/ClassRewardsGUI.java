@@ -1,25 +1,18 @@
 package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
-import fr.minuskube.inv.InventoryListener;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.SkullType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
@@ -74,6 +67,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                         if (!details.reward1) {
                             details.reward1 = true;
                             player.sendMessage("Claimed");
+                            details.hasUpdated = true;
                             main.getDataManager().saveData(data);
                             player.closeInventory();
                         }
@@ -89,6 +83,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                             details.reward2 = false;
                             player.sendMessage("Disabled");
                         }
+                        details.hasUpdated = true;
                         main.getDataManager().saveData(data);
                         player.closeInventory();
                     }
@@ -109,13 +104,13 @@ public class ClassRewardsGUI implements InventoryProvider {
             case Cactus:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTA0ZjFhNTU5NDNjNTk0ZTcxMTllODg0YzVkYTJhMmJjYThlN2U2NTE2YTA2NDlhYTdlNTU2NThlMGU5In19fQ==");
             case Fade:
-                return ItemHelper.setColor(ItemHelper.create(Material.STAINED_GLASS), Color.BLACK);
+                return new ItemStack(Material.STAINED_GLASS, 1, (short) ItemHelper.StainedClayColor.BLACK.getColorCode());
             case Cloud:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDVjMWU3YTFlMzMxZDIyYjk0YzUzMzY1MTc0NzY2YzdjY2EwNzgzYjhiNDZjY2UwNmMwYjE3MjQ0YjMyOGQ0MiJ9fX0=");
             case Firework:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODNkNDlkZGU3NWUxMmI2MGViZTZlODk4MWVhNGZiMjY2YjIwNzUyYzJmNTVlOTZhZjExM2MyODdlZWQ2M2U4MSJ9fX0=");
             case Shulker:
-                return ItemHelper.setColor(ItemHelper.create(Material.STAINED_CLAY), Color.PURPLE);
+                return new ItemStack(Material.STAINED_CLAY, 1, (short) ItemHelper.StainedClayColor.PURPLE.getColorCode());
             case Dweller:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2JlM2NhMzc5MDAzNTRiODFiMjU5MWI4ZTljYzcwNmMyYTQ1MGZlZTM3MGVlNTIyZTZiOWYzMmRjMDM2Y2E4MCJ9fX0=");
             case WitherSk:
@@ -213,7 +208,7 @@ public class ClassRewardsGUI implements InventoryProvider {
             case Sheep:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzAzMDcxODY1NmNhOGJlZGIxNWQ3MzA3YWJmMThkN2ViOGJjY2UxMGFlMDZhZGVmY2MyNjRmZjRlNDEyY2M0YiJ9fX0=");
             case SnowGolem:
-                return new ItemStack(Material.SNOW_BLOCK);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWZkZmQxZjc1MzhjMDQwMjU4YmU3YTkxNDQ2ZGE4OWVkODQ1Y2M1ZWY3MjhlYjVlNjkwNTQzMzc4ZmNmNCJ9fX0=");
             case Bunny:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzYwZDM3YWQyOWE0MDhmOGNkMmJhYWM1MTBlNTQwOGNiN2I3MTVkMjVkZTYxMzM0MmExY2I1YzNkMTA1ZTM0ZiJ9fX0=");
             case ButterBro:
@@ -227,11 +222,13 @@ public class ClassRewardsGUI implements InventoryProvider {
             case Ocelot:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTYwMzllMzYxYmYwZjEyNTRiYmIzOTFjMTYzYTYwMjUwMzBmY2RmOThjMjA3MDVkY2E4NWY1NDQwNWRmMDRiZSJ9fX0=");
             case LargeFern:
-                return new ItemStack(Material.LEAVES);
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjEzYTY4MzJjMTdjZWJiZDM1ODc2NjQwM2ZmM2NmZTAzMjJiNzBmNTQwZmQ3MzBjMTUyMGRiNjUwOThkZjRkZSJ9fX0=");
             case Vindicator:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjE5Y2M3ZGNhYzg2MzQzMzZjYzQwN2M1NzEyOTNmZWVmYWZjYTBlMWVmZDVlMmM4ZjVkMjIyNjdhNzI5ZDAwMyJ9fX0=");
-            case Wolf:
-                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjBjN2Y4ODUzMjZiYTA5NDljMzE2Njk2ZDE5ZDUzMDgyYjk5NGU5YjQ4Y2FkNjY3MzU1OGRkNmM1YmNhYjQ5In19fQ==");
+            case Fisherman:
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjlhYzgwNGEyYzVhOGVhNTdlZjY5NjU3YWI2NDM0N2QxZWQzNmIzNGNhNzBhMjE4ZjZhNjNkNWI2YWEyZmU5ZiJ9fX0=");
+//            case Wolf:
+//                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjBjN2Y4ODUzMjZiYTA5NDljMzE2Njk2ZDE5ZDUzMDgyYjk5NGU5YjQ4Y2FkNjY3MzU1OGRkNmM1YmNhYjQ5In19fQ==");
         }
         return ItemHelper.create(Material.SKULL_ITEM);
     }

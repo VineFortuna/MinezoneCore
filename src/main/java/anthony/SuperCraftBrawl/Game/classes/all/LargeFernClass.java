@@ -54,7 +54,7 @@ public class LargeFernClass extends BaseClass {
     public void SetArmour(EntityEquipment playerEquip) {
         // Head (helmet)
         String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDQxNTczYmYyZTAyNzBiYjYyMDNkMmI3NjRkZDdkMGNiYmM1ZDdiMWJhNmNkY2NjOWFmNWZmNDc0MzRhMGViNCJ9fX0=";
-        ItemStack playerHead = ItemHelper.createSkullTexture(texture, "&2Large Fern Head");
+        ItemStack playerskull = ItemHelper.createSkullTexture(texture, "&2Large Fern Head");
 
         // Chestplate
         ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.GREEN, "&2Large Fern Chestplate");
@@ -68,7 +68,7 @@ public class LargeFernClass extends BaseClass {
         boots.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 
         // Setting Armor
-        playerEquip.setHelmet(playerHead);
+        playerEquip.setHelmet(getHelmet(playerskull));;
         playerEquip.setChestplate(chestplate);
         playerEquip.setLeggings(leggings);
         playerEquip.setBoots(boots);

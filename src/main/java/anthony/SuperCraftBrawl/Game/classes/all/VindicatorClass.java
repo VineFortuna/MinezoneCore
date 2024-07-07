@@ -42,9 +42,9 @@ public class VindicatorClass extends BaseClass {
     @Override
     public void SetArmour(EntityEquipment playerEquip) {
         String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGFlZWQ5ZDhlZDE3NjllNzdlM2NmZTExZGMxNzk2NjhlZDBkYjFkZTZjZTI5ZjFjOGUwZDVmZTVlNjU3M2I2MCJ9fX0=";
-        ItemStack skull = ItemHelper.createSkullTexture(texture, "");
-        
-        playerEquip.setHelmet(skull);
+        ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
+    
+        playerEquip.setHelmet(getHelmet(playerskull));
         playerEquip.setChestplate(makePink(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
                 Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
         playerEquip.setLeggings(makePink(new ItemStack(Material.LEATHER_LEGGINGS)));

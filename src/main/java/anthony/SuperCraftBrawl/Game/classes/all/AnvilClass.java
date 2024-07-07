@@ -52,7 +52,7 @@ public class AnvilClass extends BaseClass {
 	}
 
 	public void SetArmour(EntityEquipment playerEquip) {
-		playerEquip.setHelmet(new ItemStack(Material.IRON_BLOCK));
+		playerEquip.setHelmet(getHelmet(new ItemStack(Material.IRON_BLOCK)));
 		playerEquip.setChestplate(makeGray(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 		playerEquip.setLeggings(makeGray(new ItemStack(Material.LEATHER_LEGGINGS)));

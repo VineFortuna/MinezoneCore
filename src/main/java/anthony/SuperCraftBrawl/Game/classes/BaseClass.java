@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import anthony.SuperCraftBrawl.gui.ClassRewardsGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -27,6 +28,7 @@ import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -103,6 +105,7 @@ public abstract class BaseClass {
 	public Timer vindication = new Timer();
 	public Timer fadeAbility = new Timer();
 	public Timer summon = new Timer();
+	public Timer fishing = new Timer();
 	public boolean bedrockInvincibility = false;
 	public boolean hunterDash = true;
 
@@ -165,6 +168,9 @@ public abstract class BaseClass {
 
 	public void onPlayerMove(PlayerMoveEvent event) {
 	}
+	
+	public void onFish(PlayerFishEvent event) {
+	} // To override
 
 	public void Tick(int gameTicks) {
 	} // To override
@@ -180,6 +186,14 @@ public abstract class BaseClass {
 
 	public void LoadArmor(Player player) {
 		SetArmour(player.getEquipment());
+	}
+	
+	public ItemStack getHelmet(ItemStack helmet) {
+		PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(player);
+		ClassDetails details = data.playerClasses.get(this.getType().getID());
+		if (details.reward2)
+			return ClassRewardsGUI.headReward(this.getType());
+		return helmet;
 	}
 
 	private String getPlayerRank(Player p) {
@@ -739,13 +753,13 @@ public abstract class BaseClass {
 
 						if (data != null) {
 							data.losses += 1;
-							ClassType type = pClass.getType();
-							ClassDetails details = data.playerClasses.get(type.getID());
+							int classID = pClass.getType().getID();
+							ClassDetails details = data.playerClasses.get(classID);
 							if (details == null) {
 								details = new ClassDetails();
-								data.playerClasses.put(type.getID(), details);
+								data.playerClasses.put(classID, details);
 							}
-							details.gamesPlayed++;
+							details.playGame();
 						}
 						if (killer != null) {
 							String msg = instance.getGameManager().getMain().color("&4&lELIMINATED &e" + p.getName());

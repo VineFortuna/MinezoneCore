@@ -1546,14 +1546,13 @@ public class GameInstance {
 			playerPosition.add(winner);
 			if (data3 != null) {
 				BaseClass bc = classes.get(winner);
-				ClassType type = bc.getType();
-				ClassDetails details = data3.playerClasses.get(type.getID());
+				int classID = bc.getType().getID();
+				ClassDetails details = data3.playerClasses.get(classID);
 				if (details == null) {
 					details = new ClassDetails();
-					data3.playerClasses.put(type.getID(), details);
+					data3.playerClasses.put(classID, details);
 				}
-				details.gamesWon++;
-				details.gamesPlayed++;
+				details.winGame();
 				if (data3.challenge1 == 0) {
 					if (bc != null) {
 						if (bc.getType() == ClassType.Pig) {
@@ -1562,7 +1561,7 @@ public class GameInstance {
 											+ " &rand have now unlocked the " + ClassType.Notch.getTag()
 											+ " &rclass!"));
 							data3.challenge1 = 1;
-							int classID = 29;
+							classID = 29;
 							ClassDetails notchdetails = data3.playerClasses.get(classID);
 
 							if (notchdetails == null) {
@@ -2062,7 +2061,7 @@ public class GameInstance {
 							details = new ClassDetails();
 							data.playerClasses.put(type.getID(), details);
 						}
-						details.gamesPlayed++;
+						details.playGame();
 					}
 				}
 			} catch (Exception e) {

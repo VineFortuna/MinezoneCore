@@ -7,33 +7,34 @@ import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.SuperCraftBrawl.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.MagmaCube;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class FishermanClass extends BaseClass {
     
     private int cooldownSec;
+    private int hits;
+    private ArrayList<Item> puffer = new ArrayList<>();
     
     private ItemStack flyingFish = ItemHelper.setDetails(new ItemStack(Material.RAW_FISH),
-            "&a&lFlying Fish",
+            "&b&lFlying Fish",
             "&7Launch at enemies to fishslap them");
     
     private ItemStack pufferFish = ItemHelper.setDetails(new ItemStack(Material.RAW_FISH, 1, (short) 3),
@@ -46,8 +47,12 @@ public class FishermanClass extends BaseClass {
             "&7Swim away with Speed for 5 seconds");
     
     private ItemStack healFish = ItemHelper.setDetails(new ItemStack(Material.COOKED_FISH, 1, (short) 1),
-            "&a&lHealing Fish",
-            "&7Eat it to gain 1 heart");
+            "&d&lHealing Fish",
+            "&7Eat to gain 1.5 hearts");
+    
+    private ItemStack bucket = ItemHelper.setDetails(new ItemStack(Material.BUCKET, 1), "&7Bucket");
+    
+    private ItemStack waterbucket = ItemHelper.setDetails(new ItemStack(Material.WATER_BUCKET, 1), "&3Fish Bucket &7(Right Click)");
     
     public FishermanClass(GameInstance instance, Player player) {
         super(instance, player);
@@ -67,10 +72,10 @@ public class FishermanClass extends BaseClass {
     
     @Override
     public void SetArmour(EntityEquipment playerEquip) {
-        String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDcxYjhiMmFlN2ZiMjc4MmRiZWU5M2E3ZTY3OTc4M2M1MGQ1YTg4NDA0NTcwOGEyMTU5NDE3ODVkN2MzY2NkIn19fQ==";
+        String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWY1ZDM4MTlhNjVkYjc5YzQ1ZmQwMDE0MWMwODgyZTQ3YWQyMzRjMGU1Zjg5OTJiZjRhZjE4Y2VkMGUxZWNkYyJ9fX0=";
         ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-        
-        playerEquip.setHelmet(playerskull);
+    
+        playerEquip.setHelmet(getHelmet(playerskull));
         playerEquip.setChestplate(makeBrown(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
                 Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
         playerEquip.setLeggings(makeBrown(new ItemStack(Material.LEATHER_LEGGINGS)));
@@ -80,8 +85,8 @@ public class FishermanClass extends BaseClass {
     
     @Override
     public ItemStack getAttackWeapon() {
-        return ItemHelper.addEnchant(ItemHelper.addEnchant(new ItemStack(Material.FISHING_ROD), Enchantment.DAMAGE_ALL, 3),
-                Enchantment.KNOCKBACK, 1);
+        return ItemHelper.setUnbreakable(ItemHelper.addEnchant(ItemHelper.addEnchant(new ItemStack(Material.FISHING_ROD), Enchantment.DAMAGE_ALL, 3),
+                Enchantment.KNOCKBACK, 1));
     }
     
     @Override
@@ -90,28 +95,91 @@ public class FishermanClass extends BaseClass {
     }
     
     @Override
+    public void onFish(PlayerFishEvent event) {
+        if (event.getState() == PlayerFishEvent.State.IN_GROUND) {
+            if (fishing.getTime() < 5000) {
+                int seconds = (5000 - fishing.getTime()) / 1000 + 1;
+                player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                        + "Your Fishing Rod is still regenerating for " + ChatColor.YELLOW + seconds
+                        + " more seconds ");
+            } else {
+                Location d = event.getHook().getLocation();
+                Vector v = d.toVector().subtract(player.getLocation().toVector()).normalize();
+                player.setVelocity(v.multiply(2.5).add(new Vector(0, 1, 0)));
+                fishing.restart();
+            }
+        }
+    }
+    
+    /*@Override
+    public void ProjectileHit(ProjectileHitEvent event) {
+        if (event.getEntity() instanceof FishHook)
+            event.getEntity().setBounce(true);
+    }*/
+    
+    @Override
     public void SetItems(Inventory playerInv) {
-        villager.startTime = System.currentTimeMillis() - 100000;
+        hits = 0;
+        fishing.startTime = System.currentTimeMillis() - 100000;
         playerInv.setItem(0, this.getAttackWeapon());
-        playerInv.setItem(1,
-                ItemHelper.setDetails(new ItemStack(Material.BUCKET, 1), "", "",
-                        instance.getGameManager().getMain().color("&7Collect 5 Fish to use")));
-        playerInv.setItem(2, instance.getItemToDrop());
+        playerInv.setItem(1, bucket);
     }
     
     @Override
     public void Tick(int gameTicks) {
-        if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Villager
+        if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Fisherman
                 && instance.classes.get(player).getLives() > 0) {
-            this.cooldownSec = (5000 - villager.getTime()) / 1000 + 1;
+            this.cooldownSec = (5000 - fishing.getTime()) / 1000 + 1;
             
-            if (villager.getTime() < 5000) {
+            if (gameTicks % 10 == 0) {
+                for (Item fish : puffer) {
+                    boolean nearby = false;
+                    Location loc = fish.getLocation();
+                    for (Player p : instance.players) {
+                        if (p.getGameMode() != GameMode.SPECTATOR
+                                && p != player && p.getLocation().distance(fish.getLocation()) <= 1) {
+                            nearby = true;
+                            p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 120, 0));
+                        }
+                    }
+                    if (nearby) {
+                        player.getWorld().createExplosion(loc.getX(), loc.getY(), loc.getZ(), 1, false, false);
+                        player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
+                        fish.remove();
+                        puffer.remove(fish);
+                    }
+                }
+            }
+            if (fishing.getTime() < 5000) {
                 String msg = instance.getGameManager().getMain()
-                        .color("&2Baked Potato &rregenerates in: &e" + this.cooldownSec + "s");
-                getActionBarManager().setActionBar(player, "potato.cooldown", msg, 2);
+                        .color("&2Fishing Rod &rregenerates in: &e" + this.cooldownSec + "s");
+                getActionBarManager().setActionBar(player, "fishing.cooldown", msg, 2);
             } else {
-                String msg = instance.getGameManager().getMain().color("&rYou can use &2Baked Potato");
-                getActionBarManager().setActionBar(player, "potato.cooldown", msg, 2);
+                String msg = instance.getGameManager().getMain().color("&rYou can use &2Fishing Rod");
+                getActionBarManager().setActionBar(player, "fishing.cooldown", msg, 2);
+            }
+        }
+    }
+    
+    @Override
+    public void DoDamage(EntityDamageByEntityEvent event) {
+        BaseClass bc = instance.classes.get(player);
+        if (bc != null && bc.getLives() <= 0)
+            return;
+    
+        if (event.getEntity() instanceof Player) {
+            Player p = (Player) event.getEntity();
+            if (instance.duosMap != null)
+                if (instance.team.get(p).equals(instance.team.get(player)))
+                    return;
+            if (hits < 5) {
+                hits++;
+                if (hits == 5) {
+                    player.sendMessage(instance.getGameManager().getMain()
+                            .color("&2&l(!) &rYour bucket is full of fish. Bring out the whole ocean!"));
+                    player.getInventory().setItem(1, waterbucket);
+                    player.playSound(player.getLocation(), Sound.WATER, 1, 1);
+                }
             }
         }
     }
@@ -119,11 +187,12 @@ public class FishermanClass extends BaseClass {
     @Override
     public void UseItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
+        boolean remove = false;
         if (item != null && event.getAction().toString().contains("RIGHT_CLICK")) {
-            int amount = item.getAmount();
-            if (item.getType() == Material.BUCKET) {
-                player.sendMessage("Collect more fish");
-            } else if (item.getType() == Material.WATER_BUCKET) {
+            if (item.isSimilar(bucket)) {
+                player.sendMessage(instance.getGameManager().getMain()
+                        .color("&c&l(!) &rCollect " + (5 - hits) + " more fish!"));
+            } else if (item.isSimilar(waterbucket)) {
                 Random r = new Random();
                 for (int i = 1; i <= 5; i++) {
                     int chance = r.nextInt(4) + 1;
@@ -136,14 +205,32 @@ public class FishermanClass extends BaseClass {
                     else
                         player.getInventory().addItem(healFish);
                 }
+                player.getInventory().setItem(1, bucket);
+                player.playSound(player.getLocation(), Sound.SPLASH2, 1, 1);
+                hits = 0;
             } else if (item.isSimilar(healFish)) {
-                player.setHealth(player.getHealth() + 2);
-                player.getInventory().remove(healFish);
+                double heal = Math.min(3, player.getMaxHealth() - player.getHealth());
+                if (heal > 0) {
+                    player.setHealth(player.getHealth() + heal);
+                    player.playSound(player.getLocation(), Sound.EAT, 1, 1);
+                    remove = true;
+                } else {
+                    player.sendMessage(instance.getGameManager().getMain()
+                            .color("&c&l(!) &rYou are already full of health!"));
+                }
             } else if (item.isSimilar(speedFish)) {
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 0));
-                    player.getInventory().remove(speedFish);
-        
+                remove = true;
+                int duration = 0;
+                for (PotionEffect effect : player.getActivePotionEffects()) {
+                    if (effect.getType() == PotionEffectType.SPEED) {
+                        duration = effect.getDuration();
+                        player.removePotionEffect(PotionEffectType.SPEED);
+                    }
+                }
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 5 * 20 + duration, 0));
+                player.playSound(player.getLocation(), Sound.EAT, 1, 1);
             } else if (item.isSimilar(flyingFish)) {
+                remove = true;
                 if (player.getGameMode() != GameMode.SPECTATOR) {
                     ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
                         @Override
@@ -151,33 +238,70 @@ public class FishermanClass extends BaseClass {
                             if (instance.duosMap != null)
                                 if (instance.team.get(hit).equals(instance.team.get(player)))
                                     return;
-            
+                
                             player.playSound(hit.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
-                            hit.damage(2.0, player);
+                
+                            Vector v = player.getLocation().getDirection();
+                            EntityDamageEvent damageEvent = new EntityDamageEvent(hit, EntityDamageEvent.DamageCause.PROJECTILE, 4.5);
+                            instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+                            hit.damage(1.5, player);
+                            v.setY(0.7);
+                            hit.setVelocity(v);
+                
                             for (Player gamePlayer : instance.players)
-                                gamePlayer.playSound(hit.getLocation(), Sound.SPLASH, 2, 1);
-            
+                                gamePlayer.playSound(hit.getLocation(), Sound.SPLASH, 1, 1);
+                
                         }
-        
+            
                     }, new ItemStack(Material.RAW_FISH));
                     instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
                             player.getLocation().getDirection().multiply(2.0D));
                 }
-                event.setCancelled(true);
             } else if (item.isSimilar(pufferFish)) {
+                remove = true;
                 ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
                     @Override
                     public void onHit(Player hit) {
                         Location hitLoc = this.getBaseProj().getEntity().getLocation();
                         player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
-                       player.getWorld().dropItem(hitLoc, pufferFish);
+                        Item fish = player.getWorld().dropItem(hitLoc, pufferFish);
+                        fish.setPickupDelay(Integer.MAX_VALUE);
+                        BukkitRunnable r = new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                puffer.add(fish);
+                                player.getWorld().playEffect(fish.getLocation().add(0, 0.5, 0), Effect.VILLAGER_THUNDERCLOUD, 1);
+                                player.playSound(fish.getLocation(), Sound.FIRE_IGNITE, 1, 1);
+                            }
+                        };
+                        r.runTaskLater(instance.getGameManager().getMain(), 20 * 2);
+                        r = new BukkitRunnable() {
+                            @Override
+                            public void run() {
+                                if (puffer.contains(fish)) {
+                                    Location loc = fish.getLocation();
+                                    player.getWorld().createExplosion(loc.getX(), loc.getY(), loc.getZ(), 2, false, false);
+                                    fish.remove();
+                                    puffer.remove(fish);
+                                }
+                            }
+                        };
+                        r.runTaskLater(instance.getGameManager().getMain(), 20 * 10);
                     }
         
                 }, pufferFish);
                 instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
                         player.getLocation().getDirection().multiply(2.0D));
             }
+            if (remove) {
+                event.setCancelled(true);
+                int amount = item.getAmount();
+                amount--;
+                if (amount == 0)
+                    player.getInventory().remove(player.getItemInHand());
+                else
+                    player.getItemInHand().setAmount(amount);
+            }
         }
     }
-    
 }

@@ -49,8 +49,8 @@ public class CreeperClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		ItemStack creeperHelmet = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.CREEPER.ordinal());
-		playerEquip.setHelmet(creeperHelmet);
+		ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.CREEPER.ordinal());
+		playerEquip.setHelmet(getHelmet(playerskull));
 		playerEquip.setChestplate(makeGreen(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 		playerEquip.setLeggings(makeGreen(new ItemStack(Material.LEATHER_LEGGINGS)));

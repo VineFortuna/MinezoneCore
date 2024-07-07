@@ -6,13 +6,17 @@ import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.EnumParticle;
+import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 import org.bukkit.*;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -89,8 +93,8 @@ public class Fishing implements Listener {
             reward(p, fish.getRarity());
             data.totalcaught++;
             data.caught++;
-            details.timesCaught++;
-            main.getDataManager().saveData(data);
+            details.addCaught(1);
+            //main.getDataManager().saveData(data);
             removeFish(i);
         }
     }
@@ -167,7 +171,7 @@ public class Fishing implements Listener {
                 break;
                 
         }
-        //particles(p, rarity);
+        particles(p, rarity);
     }
     
     public void particles(Player p, FishRarity r) {
@@ -197,10 +201,6 @@ public class Fishing implements Listener {
             default:
                 c = Color.NAVY;
                 break;
-        }
-        for (int t = 0; t < 2 * Math.PI; t += Math.PI/4) {
-            p.getWorld().spigot().playEffect(p.getLocation().add(Math.cos(t), 1, Math.sin(t)),
-                    Effect.COLOURED_DUST, 0, 1, c.getRed(), c.getGreen(), c.getBlue(), 1, 0, 1);
         }
     }
 }

@@ -41,7 +41,7 @@ public class SnowGolemClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		// Head (helmet)
-		ItemStack playerHead = ItemHelper.createSkullHeadPlayer(1, "SnowGolem", ChatColor.WHITE + "SnowGolem Head");
+		ItemStack playerskull = ItemHelper.createSkullHeadPlayer(1, "SnowGolem", ChatColor.WHITE + "SnowGolem Head");
 
 		// Chestplate
 		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.WHITE,
@@ -58,7 +58,7 @@ public class SnowGolemClass extends BaseClass {
 		boots.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 
 		// Setting armor
-		playerEquip.setHelmet(playerHead);
+		playerEquip.setHelmet(getHelmet(playerskull));
 		playerEquip.setChestplate(chestplate);
 		playerEquip.setLeggings(leggings);
 		playerEquip.setBoots(boots);

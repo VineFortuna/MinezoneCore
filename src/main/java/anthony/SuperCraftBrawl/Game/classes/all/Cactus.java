@@ -26,7 +26,7 @@ public class Cactus extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		playerEquip.setHelmet(new ItemStack(Material.CACTUS));
+		playerEquip.setHelmet(getHelmet(new ItemStack(Material.CACTUS)));
 		playerEquip.setChestplate(ItemHelper.addEnchant(
 				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE), Enchantment.THORNS, 1),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4));

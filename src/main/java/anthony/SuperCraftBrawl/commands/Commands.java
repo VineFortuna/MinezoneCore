@@ -7,6 +7,7 @@ import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.gui.GameStatsGUI;
 import anthony.SuperCraftBrawl.gui.ShopCWGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
@@ -193,7 +194,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 				return true;
 
-			case "fav":
+			/*case "fav":
 				if (args.length > 0) {
 					String className = args[0];
 
@@ -218,7 +219,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 					player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
 							+ "Incorrect usage! Try doing: " + ChatColor.RESET + ChatColor.GREEN + "/fav <classname>");
 
-				return true;
+				return true;*/
 
 			case "join":
 				if (args.length > 0) {
@@ -342,6 +343,13 @@ public class Commands implements CommandExecutor, TabCompleter {
 										return false;
 									}
 								}
+								if (type == ClassType.Fisherman) {
+									if (main.getTotalFish(player) < FishType.values().length && !player.isOp()) {
+										player.sendMessage(
+												main.color("&c&l(!) &rYou have not unlocked this class yet!"));
+										return false;
+									}
+								}
 
 								if (donor == null || sender.hasPermission("scb." + donor.toString().toLowerCase())) {
 									GameInstance game = main.getGameManager().GetInstanceOfPlayer((Player) sender);
@@ -420,9 +428,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 				return true;
 
 			case "leave":
-				this.leaveGame(player);
-				return true;
-
 			case "l":
 				this.leaveGame(player);
 				return true;

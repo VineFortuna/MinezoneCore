@@ -1,5 +1,6 @@
 package anthony.SuperCraftBrawl.gui;
 
+import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -38,6 +39,11 @@ public class FreeClassesGUI implements InventoryProvider {
 		for (ClassType type : ClassType.values()) {
 			if (type.getTokenCost() == 0 && type.getMinRank() != Rank.VIP && type.getLevel() == 0) {
 				ItemStack item = type.getItem();
+				
+				int fished = main.getTotalFish(player);
+				if (type == ClassType.Fisherman && fished < FishType.values().length) {
+					continue;
+				}
 				
 				ClassDetails details = data.playerClasses.get(type.getID());
 				int played = details.gamesPlayed + details.gamesWon;
