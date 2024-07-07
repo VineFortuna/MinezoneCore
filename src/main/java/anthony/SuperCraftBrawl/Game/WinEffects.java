@@ -1,11 +1,11 @@
 package anthony.SuperCraftBrawl.Game;
 
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.all.DarkSethBlingClass;
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -15,7 +15,9 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class WinEffects {
@@ -24,6 +26,8 @@ public class WinEffects {
 	private GameInstance i;
 	private EnderDragon dragon;
 	private boolean defaultEffect = false;
+	private boolean rainEffect = false;
+	private ArrayList<Item> fish = new ArrayList<>();
 
 	public WinEffects(Player player, GameInstance i) {
 		this.player = player;
@@ -44,6 +48,8 @@ public class WinEffects {
 						fireParticlesEffect();
 					else if (data.broomWinEffect == 1)
 						magicBroomEffect();
+					else if (data.fishRainEffect == 1)
+						fishRainEffect();
 					else
 						defaultEffect();
 				} else
@@ -99,6 +105,48 @@ public class WinEffects {
 	private void fireParticlesEffect() {
 
 	}
+	public Location getItemRainLoc() {
+		Random rand = new Random();
+		int attempts = 0;
+		Location respawnLoc = i.GetRespawnLoc();
+		while (true) {
+			Location loc = respawnLoc.clone().add(rand.nextFloat() * 50 - 25, 25, rand.nextFloat() * 50 - 25);
+			Location loc2 = loc.clone();
+			while (true) {
+				loc2.setY(loc2.getY() - 1);
+				Material mat = loc2.getBlock().getType();
+				if (mat.isSolid()) {
+					return loc;
+				}
+				if (loc2.getY() < 40) // Too low down without finding block
+					break;
+			}
+			if (attempts > 100)
+				return respawnLoc.add(0, 25, 0);
+			attempts++;
+		}
+	}
+	private void fishRainEffect() {
+		this.rainEffect = true;
+		if (player.getWorld() == i.getMapWorld()) {
+			i.getMapWorld().setStorm(true);
+			i.getMapWorld().setThundering(true);
+			BukkitRunnable runnable = new BukkitRunnable() {
+				int rep = 0;
+				@Override
+				public void run() {
+					if (rep == 120) {
+						this.cancel();
+					} else {
+						Item i = player.getWorld().dropItem(getItemRainLoc(), new ItemStack(Material.RAW_FISH));
+						fish.add(i);
+					}
+					rep++;
+				}
+			};
+			runnable.runTaskTimer(i.getGameManager().getMain(), 0, 2);
+		}
+	}
 
 	private void defaultEffect() {
 		this.defaultEffect = true;
@@ -147,7 +195,15 @@ public class WinEffects {
 	public void removeWinEffects() {
 		if (this.dragon != null && !(this.dragon.isDead())) {
 			this.dragon.remove();
-		} else if (this.defaultEffect == true)
+		} else if (this.defaultEffect) {
 			this.defaultEffect = false;
+		} else if (this.rainEffect) {
+			i.getMapWorld().setStorm(false);
+			i.getMapWorld().setThundering(false);
+			for (Item i : fish) {
+				i.remove();
+			}
+			this.rainEffect = false;
+		}
 	}
 }

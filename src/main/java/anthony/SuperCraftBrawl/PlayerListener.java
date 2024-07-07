@@ -6,15 +6,13 @@ import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import me.itzzmic.minezone.api.PunishAPI;
+import net.minecraft.server.v1_8_R3.EntityFishingHook;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.block.ContainerBlock;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Snowball;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -33,6 +31,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Door;
 import org.bukkit.material.Skull;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -153,7 +152,8 @@ public class PlayerListener implements Listener {
 	public void armorStand(EntityDamageByEntityEvent e) {
 		if (e.getDamager() instanceof Player)
 			if (e.getEntity() instanceof ArmorStand)
-				e.setCancelled(true);
+				if (((Player) e.getDamager()).getPlayer().getGameMode() != GameMode.CREATIVE)
+					e.setCancelled(true);
 	}
 
 	@EventHandler(priority = EventPriority.NORMAL)
@@ -415,6 +415,12 @@ public class PlayerListener implements Listener {
 				}
 			}
 		}
+	}
+	
+	@EventHandler
+	public void onHookHit(EntityDamageByEntityEvent event) {
+		if (event.getDamager() instanceof FishHook)
+			event.setCancelled(true);
 	}
 
 	@EventHandler

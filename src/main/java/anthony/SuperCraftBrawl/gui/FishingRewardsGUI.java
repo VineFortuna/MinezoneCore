@@ -37,45 +37,42 @@ public class FishingRewardsGUI implements InventoryProvider {
     @Override
     public void init(Player player, InventoryContents contents) {
         PlayerData data = main.getDataManager().getPlayerData(player);
-        int level = data.rewardLevel;
-        int nextReward = 15 * (int) Math.pow(2, level);
+        int nextReward = 15 * (int) Math.pow(2, data.rewardLevel);
         
-        int next = 2;
+        int next = 25;
     
-        String[] rewards = {"&e100 Tokens", "&d150 EXP", "&aFish Death Effect", "&e400 Tokens", "&6Pirate Outfit"};
+        String[] milestonerewards = {"&e100 Tokens", "&d150 EXP", "&cFish Death Effect", "&e400 Tokens", "&3Pirate Outfit"};
     
         List<String> rewardStrings = new ArrayList<>();
         rewardStrings.add(main.color("&7Claim these as many times as you'd like"));
         rewardStrings.add(main.color("&eNext reward:"));
         rewardStrings.add(main.progressBar(data.caught, next, 25));
         if (data.caught >= next) {
-            rewardStrings.add(main.color("&aLeft Click to claim 25 Tokens"));
-            rewardStrings.add(main.color("&aRight Click to claim 50 EXP"));
+            rewardStrings.add(main.color("&aLeft Click to claim 20 Tokens"));
+            rewardStrings.add(main.color("&aRight Click to claim 30 EXP"));
         } else {
-            rewardStrings.add(main.color("&e25 Tokens or 50 EXP"));
+            rewardStrings.add(main.color("&e20 Tokens or 30 EXP"));
         }
         rewardStrings.add("");
         
         if (data != null) {
-            if (level < 5) {
+            if (data.rewardLevel < 5) {
                 contents.set(1, 1, ClickableItem.of(
                         ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), main.color("&aMilestone"),
                                 main.color("&7These rewards can only be claimed once"),
                                 main.color("&eNext reward:"),
                                 main.progressBar(data.totalcaught, nextReward, 25),
-                                main.color(rewards[level]),
+                                main.color(milestonerewards[data.rewardLevel]),
                                 main.color(data.totalcaught >= nextReward ? "&aClick to claim" : "")), e -> {
                             if (data.totalcaught >= nextReward) {
-                                player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                        + "You have earned " + rewards[level] + "Tokens!");
                                 data.rewardLevel++;
-                                switch (level) {
-                                    case 0:
+                                switch (data.rewardLevel) {
+                                    case 1:
                                         data.tokens += 100;
                                         player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
                                                 + "You have earned " + ChatColor.GREEN + 100 + " Tokens!");
                                         break;
-                                    case 1:
+                                    case 2:
                                         data.exp += 150;
                                         player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
                                                 + "You have gained " + ChatColor.GREEN + 150 + " EXP!");
@@ -85,16 +82,16 @@ public class FishingRewardsGUI implements InventoryProvider {
                                             player.sendMessage("Level upgraded to " + data.level + "!");
                                         }
                                         break;
-                                    case 2:
+                                    case 3:
                                         player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
                                                 + "You have earned " + ChatColor.GREEN + " Fish Death Effect!");
                                         break;
-                                    case 3:
+                                    case 4:
                                         data.tokens += 400;
                                         player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
                                                 + "You have earned " + ChatColor.GREEN + 400 + " Tokens!");
                                         break;
-                                    case 4:
+                                    case 5:
                                         player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
                                                 + "You have earned " + ChatColor.GREEN + " Pirate Outfit!");
                                         break;
@@ -123,13 +120,13 @@ public class FishingRewardsGUI implements InventoryProvider {
                             data.caught -= next;
                             new FishingRewardsGUI(main, inv.getParent().get()).inv.open(player);
                             if (e.isLeftClick()) {
-                                data.tokens += 25;
+                                data.tokens += 20;
                                 player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                        + "You have earned " + ChatColor.GREEN + 25 + " Tokens!");
+                                        + "You have earned " + ChatColor.GREEN + 20 + " Tokens!");
                             } else if (e.isRightClick()){
-                                data.exp += 50;
+                                data.exp += 30;
                                 player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                        + "You have gained " + ChatColor.GREEN + 50 + " EXP!");
+                                        + "You have gained " + ChatColor.GREEN + 30 + " EXP!");
                                 if (data.exp >= 2500) {
                                     data.level++;
                                     data.exp -= 2500;
@@ -144,21 +141,15 @@ public class FishingRewardsGUI implements InventoryProvider {
                         }
                     }));
         }
-        int totalFished = 0, length = FishType.values().length;
-        for (FishType type : FishType.values()) {
-            FishingDetails details = data.playerFishing.get(type.getId());
-            if (details != null) {
-                totalFished++;
-            }
-        }
-        int fished = totalFished;
+        int length = FishType.values().length;
+        int fished = main.getTotalFish(player);
         
         String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWY1ZDM4MTlhNjVkYjc5YzQ1ZmQwMDE0MWMwODgyZTQ3YWQyMzRjMGU1Zjg5OTJiZjRhZjE4Y2VkMGUxZWNkYyJ9fX0=";
         contents.set(1, 7, ClickableItem.of(
-                ItemHelper.setDetails(ItemHelper.createSkullTexture(texture), totalFished == length?
+                ItemHelper.setDetails(ItemHelper.createSkullTexture(texture), fished == length?
                         main.color("&6Fisherman Class"):main.color("&7???"),
-                        totalFished == length ?
-                        main.color("&a&lUNLOCKED"):main.progressBar(totalFished, length, length)), e -> {
+                        fished == length ?
+                        main.color("&a&lUNLOCKED"):main.progressBar(fished, length, length)), e -> {
                     if (fished < length) {
                         player.sendMessage(main.color("&c&l(!) &rGo fish some more!"));
                     }

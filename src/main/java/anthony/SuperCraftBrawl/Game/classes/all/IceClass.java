@@ -57,7 +57,7 @@ public class IceClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		playerEquip.setHelmet(new ItemStack(Material.PACKED_ICE));
+		playerEquip.setHelmet(getHelmet(new ItemStack(Material.PACKED_ICE)));
 		playerEquip.setChestplate(makeBlue(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 		playerEquip.setLeggings(makeBlue(new ItemStack(Material.LEATHER_LEGGINGS)));

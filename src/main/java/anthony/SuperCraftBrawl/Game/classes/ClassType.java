@@ -202,7 +202,7 @@ public enum ClassType {
 		case Vindicator:
 			return new VindicatorClass(instance, player);
 		case Fisherman:
-			return new VindicatorClass(instance, player);
+			return new FishermanClass(instance, player);
 // 		case Wolf:
 // 			return new WolfClass(instance, player);
 //		case Guardian:
@@ -345,7 +345,7 @@ public enum ClassType {
 		case Vindicator:
 			return new ItemStack(Material.IRON_AXE);
 		case Fisherman:
-			return new ItemStack(Material.FISHING_ROD;
+			return new ItemStack(Material.FISHING_ROD);
 // 		case Wolf:
 // 			return new ItemStack(Material.BONE);
 // 		case Guardian:
@@ -485,6 +485,8 @@ public enum ClassType {
 			return "??????";
 		case Vindicator:
 			return "Vindicate yourself in front of your enemies";
+		case Fisherman:
+			return "Let's go fishing!";
 //		case Wolf:
 //			return "Have your brothers defend you from enemies!";
 //		case Guardian:
@@ -494,7 +496,6 @@ public enum ClassType {
 //		case Snowman:
 //			return "This is a Snowman, not a SnowGolem. Get it right pleb!";
 		}
-
 		return null;
 	}
 

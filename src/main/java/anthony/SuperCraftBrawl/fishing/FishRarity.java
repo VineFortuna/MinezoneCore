@@ -3,13 +3,13 @@ package anthony.SuperCraftBrawl.fishing;
 import org.bukkit.ChatColor;
 
 public enum FishRarity {
-    JUNK("Junk", "&c", 18),
+    JUNK("Junk", "&c", 16),
     COMMON("Common", "&7", 40),
     RARE("Rare", "&a", 28),
     EPIC("Epic", "&d", 18),
     MYTHIC("Mythic", "&c", 10),
     LEGENDARY("Legendary", "&6", 4),
-    TREASURE("Treasure", "&6", 2);
+    TREASURE("Treasure", "&6", 4);
     
     private String display;
     private String color;
