@@ -59,9 +59,9 @@ public class PotatoClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2Y0NjI0ZWJmN2Q0MTlhMTFlNDNlZDBjMjAzOGQzMmNkMDlhZDFkN2E2YzZlMjBmNjMzOWNiY2ZlMzg2ZmQxYyJ9fX0=";
-		ItemStack skull = ItemHelper.createSkullTexture(texture, "");
+		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
 		
-		playerEquip.setHelmet(skull);
+		playerEquip.setHelmet(getHelmet(playerskull));
 		playerEquip.setChestplate(makeYellow(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 		playerEquip.setLeggings(makeYellow(new ItemStack(Material.LEATHER_LEGGINGS)));

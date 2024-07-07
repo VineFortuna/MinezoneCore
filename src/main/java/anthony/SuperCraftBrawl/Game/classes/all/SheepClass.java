@@ -47,9 +47,9 @@ public class SheepClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTIyYWIwNTA4OTAwNjRlMjhhOWY0MDFiMmZjYjgyOThlODI0OWMzYTlmOWI2MGVkZmEwMDc4YzRiMDI1YjllMyJ9fX0=";
-		ItemStack skull = ItemHelper.createSkullTexture(texture, "");
+		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
 		
-		playerEquip.setHelmet(skull);
+		playerEquip.setHelmet(getHelmet(playerskull));
 		playerEquip.setChestplate(setArmour(new ItemStack(Material.LEATHER_CHESTPLATE), Color.WHITE));
 		playerEquip.setLeggings(setArmour(new ItemStack(Material.LEATHER_LEGGINGS), Color.WHITE));
 		playerEquip.setBoots(setArmour(new ItemStack(Material.LEATHER_BOOTS), Color.WHITE));

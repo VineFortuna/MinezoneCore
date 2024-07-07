@@ -14,7 +14,6 @@ import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
-import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
@@ -41,7 +40,6 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.painting.PaintingBreakEvent;
 import org.bukkit.event.player.*;
-import org.bukkit.event.player.PlayerFishEvent.State;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
@@ -399,7 +397,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	private HashMap<Player, BukkitRunnable> borderRunnables = new HashMap<>();
-
+	
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent e) {
 		Player player = e.getPlayer();
@@ -616,11 +614,6 @@ public class GameManager implements Listener, PluginMessageListener {
 							}
 						}
 					}
-				} else if (item.getType() == Material.WATER_BUCKET && (event.getAction() == Action.RIGHT_CLICK_AIR
-						|| event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-					player.getInventory().clear(player.getInventory().getHeldItemSlot());
-					player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 1000, 1));
-					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 125, 1));
 				}
 			}
 		}
@@ -637,6 +630,15 @@ public class GameManager implements Listener, PluginMessageListener {
 		Player player = event.getPlayer();
 		GameInstance gameInstance = GetInstanceOfPlayer(player);
 		gameInstance.classes.get(player).onPlayerMove(event);
+	}
+	
+	@EventHandler
+	public void onFish(PlayerFishEvent event) {
+		Player player = event.getPlayer();
+		GameInstance gameInstance = GetInstanceOfPlayer(player);
+		if (gameInstance != null) {
+			gameInstance.classes.get(player).onFish(event);
+		}
 	}
 
 	@EventHandler
@@ -664,6 +666,13 @@ public class GameManager implements Listener, PluginMessageListener {
 		if (entities.contains(entity.getEntityType())) {
 			entity.getDrops().clear();
 			entity.setDroppedExp(0);
+		}
+	}
+	
+	@EventHandler
+	public void onHookHit(EntityDamageByEntityEvent event) {
+		if (event.getDamager() instanceof FishHook) {
+			event.setCancelled(true);
 		}
 	}
 
@@ -795,7 +804,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	@EventHandler
+	/*@EventHandler
 	public void onFish(PlayerFishEvent e) {
 		if (boosterCooldown.useAndResetCooldown()) {
 			if (e.getState() == State.IN_GROUND) {
@@ -803,7 +812,7 @@ public class GameManager implements Listener, PluginMessageListener {
 						new Vector(e.getPlayer().getVelocity().getX(), 2.5, e.getPlayer().getVelocity().getY()));
 			}
 		}
-	}
+	}*/
 
 	@EventHandler
 	public void cosmeticMelon(PlayerInteractEvent e) {
@@ -1335,6 +1344,21 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (instance != null) {
 				BaseClass baseClass = instance.classes.get(player);
 				baseClass.ProjectileHit(event);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void ProjectileHit(ProjectileHitEvent event) {
+		if (event.getEntity() instanceof FishHook) {
+			if (event.getEntity().getShooter() instanceof Player) {
+				Player player = (Player) event.getEntity().getShooter();
+				GameInstance instance = this.GetInstanceOfPlayer(player);
+				if (instance != null) {
+					event.getEntity().setBounce(true);
+					BaseClass baseClass = instance.classes.get(player);
+					baseClass.ProjectileHit(event);
+				}
 			}
 		}
 	}

@@ -32,7 +32,6 @@ public class FishingUpgradesGUI implements InventoryProvider {
     public void init(Player player, InventoryContents contents) {
         PlayerData data = main.getDataManager().getPlayerData(player);
         int level = data.lureLevel;
-        int lure = data.lure;
     
         contents.set(1, 3, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), main.color("&eLure I"),
@@ -52,7 +51,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                         ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.LIME.getData()),
                                 main.color("&aPurchased")), e -> {
                         }));
-                if (lure == 0) {
+                if (data.lure == 0) {
                     contents.set(1, 2, ClickableItem.of(
                             ItemHelper.setDetails(ItemHelper.createDye(DyeColor.GRAY, 1), main.color("&cDisabled"),
                                     main.color("&eClick to enable")), e -> {
@@ -61,7 +60,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                                 addLure(player, data.lureLevel);
                                 new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
                             }));
-                } else if (lure == 1) {
+                } else if (data.lure == 1) {
                     contents.set(1, 2, ClickableItem.of(
                             ItemHelper.setDetails(ItemHelper.createDye(DyeColor.LIME, 1), main.color("&aEnabled"),
                                     main.color("&eClick to disable")), e -> {
@@ -78,6 +77,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                                 main.color("&aClick to purchase")), e -> {
                             if (data.tokens >= 500) {
                                 data.tokens -= 500;
+                                data.lure = 1;
                                 data.lureLevel++;
                                 player.sendMessage(main.color("&2&l(!) &rPurchased &aLure I"));
                                 main.getDataManager().saveData(data);
@@ -111,6 +111,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                                 main.color("&aClick to purchase")), e -> {
                             if (data.tokens >= 1000) {
                                 data.tokens -= 1000;
+                                data.lure = 1;
                                 data.lureLevel++;
                                 player.sendMessage(main.color("&2&l(!) &rPurchased &aLure II"));
                                 main.getDataManager().saveData(data);
@@ -136,6 +137,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                                 main.color("&aClick to purchase")), e -> {
                             if (data.tokens >= 1500) {
                                 data.tokens -= 1500;
+                                data.lure = 1;
                                 data.lureLevel++;
                                 player.sendMessage(main.color("&2&l(!) &rPurchased &aLure III"));
                                 main.getDataManager().saveData(data);

@@ -9,8 +9,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import anthony.SuperCraftBrawl.Game.*;
+import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
@@ -92,6 +94,7 @@ public class Core extends JavaPlugin implements Listener {
 	public Map<String, Integer> tourney = new HashMap<>();
 	public HashMap<Player, Boolean> ao = new HashMap<>();
 	public HashMap<Player, Boolean> so = new HashMap<>();
+	public HashMap<Player, Boolean> po = new HashMap<>();
 	public Parkour p;
 	// public AntiCheat cheat;
 	public Leaderboard lb;
@@ -1525,6 +1528,18 @@ public class Core extends JavaPlugin implements Listener {
 
 		return false;
 
+	}
+	
+	public int getTotalFish(Player player) {
+		PlayerData data = this.getDataManager().getPlayerData(player);
+		int totalFished = 0;
+		for (FishType type : FishType.values()) {
+			FishingDetails details = data.playerFishing.get(type.getId());
+			if (details != null) {
+				totalFished++;
+			}
+		}
+		return totalFished;
 	}
 
 	public void LobbyScoreboard(Player player) {

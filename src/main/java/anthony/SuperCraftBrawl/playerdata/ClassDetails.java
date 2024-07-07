@@ -24,6 +24,17 @@ public class ClassDetails {
 		hasUpdated = true;
 		timePurchased = (int) (System.currentTimeMillis() / 1000);
 	}
+	
+	public void winGame() {
+		gamesWon++;
+		gamesPlayed++;
+		hasUpdated = true;
+	}
+	
+	public void playGame() {
+		gamesPlayed++;
+		hasUpdated = true;
+	}
 
 	@Override
 	public String toString() {

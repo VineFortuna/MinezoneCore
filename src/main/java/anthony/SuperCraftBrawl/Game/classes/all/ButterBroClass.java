@@ -39,8 +39,8 @@ public class ButterBroClass extends BaseClass {
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTZhMjYyMjIxYjUwOWY5YWNjZDliYzMwNWFiNGVkY2NiNWMyMDQ4MjExYTdhYjRlMDg4YTY1M2VkMzA2ZGMzIn19fQ==";
 		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-
-		playerEquip.setHelmet(playerskull);
+		
+		playerEquip.setHelmet(getHelmet(playerskull));;
 		playerEquip.setChestplate(makeYellow(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 		playerEquip.setLeggings(makeYellow(new ItemStack(Material.LEATHER_LEGGINGS)));

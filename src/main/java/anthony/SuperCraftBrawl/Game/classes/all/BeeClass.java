@@ -53,9 +53,9 @@ public class BeeClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1NGIyMTdmMjBmNWNmZjE0YWI0NGRkMjhhMWU5M2VmM2EyYTJiZGQzMjU2ZTlmOWYzMzk0NmU3MDEwYTc3OCJ9fX0=";
-		ItemStack skull = ItemHelper.createSkullTexture(texture, "");
+		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
 		
-		playerEquip.setHelmet(skull);
+		playerEquip.setHelmet(getHelmet(playerskull));
 		playerEquip.setChestplate(makeYellow(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 3)));
 		playerEquip.setLeggings(makeYellow(new ItemStack(Material.LEATHER_LEGGINGS)));
