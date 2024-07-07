@@ -50,14 +50,14 @@ public class ClassRewardsGUI implements InventoryProvider {
         }
     
         ItemStack head = ItemHelper.setDetails(headReward(type), main.color("&e&lAlternate Head"));
-        if (played < 1) {
-            ItemHelper.setLore(head , Arrays.asList("", main.progressBar(played, 100, 25)));
+        if (played < 100) {
+            ItemHelper.setLore(head, Arrays.asList("", main.progressBar(played, 100, 25)));
         } else {
             if (details.reward2) {
-                ItemHelper.setLore(head , Arrays.asList("", main.color("&a&lENABLED"), main.color("&eClick to disable")));
-                ItemHelper.setGlowing(head , true);
+                ItemHelper.setLore(head, Arrays.asList("", main.color("&a&lENABLED"), main.color("&eClick to disable")));
+                ItemHelper.setGlowing(head, true);
             } else {
-                ItemHelper.setLore(head , Arrays.asList("", main.color("&eClick to enable")));
+                ItemHelper.setLore(head, Arrays.asList("", main.color("&eClick to enable")));
             }
         }
         
@@ -66,7 +66,11 @@ public class ClassRewardsGUI implements InventoryProvider {
                     if (played >= 50) {
                         if (!details.reward1) {
                             details.reward1 = true;
-                            player.sendMessage("Claimed");
+                            player.sendMessage(
+                                    main.color("&d&l(!) &rYou have earned &a100 Tokens!"));
+                            data.tokens += 100;
+                            if (main.getGameManager().GetInstanceOfPlayer(player) == null)
+                                main.LobbyBoard(player);
                             details.hasUpdated = true;
                             main.getDataManager().saveData(data);
                             player.closeInventory();
@@ -75,18 +79,24 @@ public class ClassRewardsGUI implements InventoryProvider {
                     }));
         contents.set(0, 1,
                 ClickableItem.of(head, e -> {
-                    if (played >= 1) {
+                    if (played >= 100) {
                         if (!details.reward2) {
                             details.reward2 = true;
-                            player.sendMessage("Enabled");
+                            player.sendMessage(
+                                    main.color("&2&l(!) &rEnabled alternate head for " + type.getTag()));
                         } else {
                             details.reward2 = false;
-                            player.sendMessage("Disabled");
+                            player.sendMessage(
+                                    main.color("&2&l(!) &rDisabled alternate head for " + type.getTag()));
                         }
                         details.hasUpdated = true;
                         main.getDataManager().saveData(data);
                         player.closeInventory();
                     }
+                }));
+        contents.set(0, 7, ClickableItem.of(
+                ItemHelper.setDetails(new ItemStack(Material.PAPER), "&aWhen using this class:",
+                        "&a- Match played: +1 point", "&a- Match won: +1 point"), e -> {
                 }));
         contents.set(0, 8, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {

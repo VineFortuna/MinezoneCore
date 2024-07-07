@@ -4,8 +4,8 @@ import org.bukkit.ChatColor;
 
 public enum FishRarity {
     JUNK("Junk", "&c", 16),
-    COMMON("Common", "&7", 40),
-    RARE("Rare", "&a", 28),
+    COMMON("Common", "&7", 42),
+    RARE("Rare", "&a", 26),
     EPIC("Epic", "&d", 18),
     MYTHIC("Mythic", "&c", 10),
     LEGENDARY("Legendary", "&6", 4),

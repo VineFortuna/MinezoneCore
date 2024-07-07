@@ -129,8 +129,9 @@ public class WinEffects {
 	private void fishRainEffect() {
 		this.rainEffect = true;
 		if (player.getWorld() == i.getMapWorld()) {
-			i.getMapWorld().setStorm(true);
-			i.getMapWorld().setThundering(true);
+			World w = player.getWorld();
+			w.setStorm(true);
+			w.setThundering(true);
 			BukkitRunnable runnable = new BukkitRunnable() {
 				int rep = 0;
 				@Override
@@ -198,8 +199,8 @@ public class WinEffects {
 		} else if (this.defaultEffect) {
 			this.defaultEffect = false;
 		} else if (this.rainEffect) {
-			i.getMapWorld().setStorm(false);
-			i.getMapWorld().setThundering(false);
+			player.getWorld().setStorm(false);
+			player.getWorld().setThundering(false);
 			for (Item i : fish) {
 				i.remove();
 			}

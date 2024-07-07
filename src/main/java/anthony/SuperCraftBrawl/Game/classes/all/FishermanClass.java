@@ -137,9 +137,9 @@ public class FishermanClass extends BaseClass {
                     Location loc = fish.getLocation();
                     for (Player p : instance.players) {
                         if (p.getGameMode() != GameMode.SPECTATOR
-                                && p != player && p.getLocation().distance(fish.getLocation()) <= 1) {
+                                && p != player && p.getLocation().distance(fish.getLocation()) <= 1.5) {
                             nearby = true;
-                            p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 120, 0));
+                            p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 3 * 20, 0));
                         }
                     }
                     if (nearby) {
