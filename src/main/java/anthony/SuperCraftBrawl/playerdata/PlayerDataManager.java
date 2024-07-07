@@ -140,6 +140,7 @@ public class PlayerDataManager implements Listener {
 			int enderDragonEffect = set.getInt("EnderDragonEffect");
 			int santaEffect = set.getInt("SantaEffect");
 			int fireParticlesEffect = set.getInt("FireParticlesEffect");
+			int fishRainEffect = set.getInt("FishRainEffect");
 			int challenge100 = set.getInt("Challenge100");
 			int challenge101 = set.getInt("Challenge101");
 			int challenge102 = set.getInt("Challenge102");
@@ -156,8 +157,8 @@ public class PlayerDataManager implements Listener {
 					exp, level, bestTime, magicbroom, points, withersk, bonusTokens, bonusLevels, paintball,
 					santaoutfit, elf, gingerbreadman, killMsgs, challenge1, challenge2, challenge3, goldApple,
 					glowstone, redstone, web, bottleEXP, broomWinEffect, enderDragonEffect, santaEffect,
-					fireParticlesEffect, challenge100, challenge101, challenge102, challenge103, matchMvps, fly,
-					totalcaught, caught, rewardLevel, lureLevel, lure);
+					fireParticlesEffect, fishRainEffect, challenge100, challenge101, challenge102, challenge103,
+					matchMvps, fly, totalcaught, caught, rewardLevel, lureLevel, lure);
 		}
 		set.close();
 		stmt.close();
@@ -240,7 +241,7 @@ public class PlayerDataManager implements Listener {
 				+ ", Deaths = " + data.deaths + ", Paintball = " + data.paintball + ", Wins = " + data.wins
 				+ ", TotalCaught = " + data.totalcaught + ", Caught = " + data.caught
 				+ ", RewardLevel = " + data.rewardLevel + ", LureLevel = " + data.lureLevel + ", Lure = " + data.lure
-				+ " WHERE UUID = '" + data.playerUUID.toString() + "';");
+				+ ", FishRainEffect = " + data.fishRainEffect + " WHERE UUID = '" + data.playerUUID.toString() + "';");
 		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon," +
 				"Reward1, Reward2) VALUES ";
 		int index = 0;
@@ -251,7 +252,7 @@ public class PlayerDataManager implements Listener {
 					updateCMD += ", ";
 				updateCMD += "('" + data.playerUUID.toString() + "', " + entry.getKey() + ", "
 						+ entry.getValue().timePurchased + ", " + (entry.getValue().purchased ? 1 : 0) + ", "
-						+ entry.getValue().gamesPlayed + "," + entry.getValue().gamesWon + ", "
+						+ entry.getValue().gamesPlayed + ", " + entry.getValue().gamesWon + ", "
 						+ (entry.getValue().reward1 ? 1 : 0) + ", " + (entry.getValue().reward2 ? 1 : 0) + ")";
 				index++;
 			}
@@ -268,11 +269,13 @@ public class PlayerDataManager implements Listener {
 		index = 0;
 		
 		for (Entry<Integer, FishingDetails> entry : data.playerFishing.entrySet()) {
-            if (index != 0)
-                updateCMD += ", ";
-            updateCMD += "('" + data.playerUUID.toString() + "', " + entry.getKey() + ", "
-                    + entry.getValue().timesCaught + ")";
-            index++;
+			if (entry.getValue().hasUpdated) {
+				if (index != 0)
+					updateCMD += ", ";
+				updateCMD += "('" + data.playerUUID.toString() + "', " + entry.getKey() + ", "
+						+ entry.getValue().timesCaught + ")";
+				index++;
+			}
         }
 		
 		if (index > 0) {

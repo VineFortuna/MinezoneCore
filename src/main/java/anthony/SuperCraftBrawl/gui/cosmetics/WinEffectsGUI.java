@@ -33,6 +33,7 @@ public class WinEffectsGUI implements InventoryProvider {
 		data.santaEffect = 0;
 		data.enderDragonEffect = 0;
 		data.fireParticlesEffect = 0;
+		data.fishRainEffect = 0;
 	}
 
 	@Override
@@ -89,6 +90,20 @@ public class WinEffectsGUI implements InventoryProvider {
 								inv.close(player);
 								player.sendMessage(main.color("&e&l(!) &rYou have enabled &eSanta Claus &rwin effect"));
 							}));
+			if (data.rewardLevel >= 3) {
+				contents.set(1, 5,
+						ClickableItem.of(
+								ItemHelper
+										.setDetails(new ItemStack(Material.RAW_FISH), main.color("&cFish Rain"), "",
+												main.color("&rIt's raining fish"),
+												"", main.color("&aFishing reward!")),
+								e -> {
+									resetWinEffects(data);
+									data.fishRainEffect = 1;
+									inv.close(player);
+									player.sendMessage(main.color("&e&l(!) &rYou have enabled &eFish Rain &rwin effect"));
+								}));
+			}
 
 			contents.set(1, 1, ClickableItem.of(ItemHelper.setDetails(playerskull, main.color("&cDefault Effect"), "",
 					main.color("&rFireworks shoot up when winning"), main.color("&ra game!")), e -> {

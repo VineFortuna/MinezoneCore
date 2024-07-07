@@ -49,7 +49,7 @@ public class FadeClass extends BaseClass {
 		ItemStack boots = ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.BLACK);
 		boots.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 
-		playerEquip.setHelmet(head);
+		playerEquip.setHelmet(getHelmet(head));
 		playerEquip.setChestplate(chestplate);
 		playerEquip.setLeggings(leggings);
 		playerEquip.setBoots(boots);

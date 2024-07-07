@@ -60,9 +60,9 @@ public class WizardClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODM4NTY0ZTI4YWJhOTgzMDFkYmRhNWZhZmQ4NmQxZGE0ZTJlYWVlZjEyZWE5NGRjZjQ0MGI4ODNlNTU5MzExYyJ9fX0=";
-		ItemStack skull = ItemHelper.createSkullTexture(texture, "");
+		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
 		
-		playerEquip.setHelmet(skull);
+		playerEquip.setHelmet(getHelmet(playerskull));
 		playerEquip.setChestplate(makeGreen(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 		playerEquip.setLeggings(makeGreen(new ItemStack(Material.LEATHER_LEGGINGS)));

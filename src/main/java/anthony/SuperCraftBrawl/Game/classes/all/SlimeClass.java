@@ -57,9 +57,9 @@ public class SlimeClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWI1ODk5MDBmNDkwNzM3ZjU1OGQ5NzJhZGViYjQ0YjFhZjk2N2ZlOGQwMzJmMTc4NTU4ZDkzNzcxY2E3YzUzZSJ9fX0=";
-		ItemStack skull = ItemHelper.createSkullTexture(texture, "");
+		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
 		
-		playerEquip.setHelmet(skull);
+		playerEquip.setHelmet(getHelmet(playerskull));
 		playerEquip.setChestplate(makeYellow(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 		playerEquip.setLeggings(makeYellow(new ItemStack(Material.LEATHER_LEGGINGS)));

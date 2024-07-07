@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.gui.cosmetics;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -38,13 +39,13 @@ public class SuitsGUI implements InventoryProvider {
 
             // Santa Outfit
         String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19";
-        ItemStack santaHead = ItemHelper.setDetails(ItemHelper.createSkullTexture(texture), ChatColor.RED.toString() + ChatColor.BOLD + "Santa Outfit");
-
-//        ItemStack santa = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
+        ItemStack santaHead = ItemHelper.createSkullTexture(texture, ChatColor.RED.toString() + ChatColor.BOLD + "Santa Outfit");
 
             // Astronaut Outfit
         ItemStack astronautHead = ItemHelper.create(Material.GLASS, ChatColor.YELLOW.toString() + ChatColor.BOLD + "Astronaut Outfit");
 
+        texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjlhYzgwNGEyYzVhOGVhNTdlZjY5NjU3YWI2NDM0N2QxZWQzNmIzNGNhNzBhMjE4ZjZhNjNkNWI2YWEyZmU5ZiJ9fX0=";
+        ItemStack pirateHead = ItemHelper.createSkullTexture(texture, "&3&lPirate Outfit", "", "&aFishing reward!");
 
         // Setting Items
         contents.fillRect(1,1, 7,7, ClickableItem.of(
@@ -128,6 +129,36 @@ public class SuitsGUI implements InventoryProvider {
                         }
                     }
 
+                    inv.close(player);
+                }));
+        contents.set(1,3,ClickableItem.of(
+                pirateHead,
+                e -> {
+                    if (data.rewardLevel >= 5) {
+                        if (!(main.po.containsKey(player))) {
+                            main.po.put(player, true);
+                            player.getInventory().setHelmet(pirateHead);
+                            player.getInventory().setChestplate(
+                                    ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.GREEN, ChatColor.DARK_AQUA + "Pirate Outfit"));
+                            player.getInventory().setLeggings(
+                                    ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, Color.MAROON, ChatColor.DARK_AQUA + "Pirate Outfit"));
+                            player.getInventory().setBoots(
+                                    ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.BLACK, ChatColor.DARK_AQUA + "Pirate Outfit"));
+                            player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                    + "You have equipped " + ChatColor.DARK_AQUA + "Pirate Outfit");
+                        } else {
+                            main.po.remove(player);
+                            player.getInventory().setHelmet(new ItemStack(Material.AIR));
+                            player.getInventory().setChestplate(new ItemStack(Material.AIR));
+                            player.getInventory().setLeggings(new ItemStack(Material.AIR));
+                            player.getInventory().setBoots(new ItemStack(Material.AIR));
+                            player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                    + "You have unequipped " + ChatColor.DARK_AQUA + "Pirate Outfit");
+                        }
+                    } else {
+                        player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                + "You have not unlocked this cosmetic yet!");
+                    }
                     inv.close(player);
                 }));
     }
