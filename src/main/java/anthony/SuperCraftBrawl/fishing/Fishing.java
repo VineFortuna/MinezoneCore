@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.fishing;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
@@ -79,6 +80,10 @@ public class Fishing implements Listener {
                 p.sendMessage(main.color("&2&l|| &7" + fish.getDesc()));
                 p.sendMessage(main.color("&2&l||"));
                 p.sendMessage(main.color("&2&l=============================================="));
+                if (main.getTotalFish(p) == FishType.values().length-1) {
+                    p.playSound(p.getLocation(), Sound.FIREWORK_TWINKLE, 1, 1);
+                    p.sendMessage(main.color("&3&l(!) &rCongratulations! You caught everything!"));
+                }
             }
             if (fish == FishType.CRATE) {
                 p.sendMessage(main.color("&3&l(!) &rYou have found &e1 Mystery Chest!"));
@@ -94,10 +99,6 @@ public class Fishing implements Listener {
             data.totalcaught++;
             data.caught++;
             details.addCaught(1);
-            if (main.getTotalFish(p) == FishType.values().length) {
-                p.playSound(p.getLocation(), Sound.FIREWORK_TWINKLE, 1, 1);
-                p.sendMessage(main.color("&3&l(!) &rCongratulations! You caught everything!"));
-            }
             main.getDataManager().saveData(data);
             removeFish(i);
         }

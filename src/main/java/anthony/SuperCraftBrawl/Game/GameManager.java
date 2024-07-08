@@ -2425,7 +2425,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	private void customizeCreeper(Creeper creeper) {
-		creeper.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999, 1, false, false));
+		creeper.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999, 0, false, false));
 	}
 
 	private void customizeMob(Creature mob, Player player) {
