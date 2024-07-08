@@ -26,17 +26,26 @@ public class FishingGUI implements InventoryProvider {
     
     public Core main;
     public SmartInventory inv;
+    private Player target;
     
     public FishingGUI(Core main, SmartInventory parent) {
         inv = SmartInventory.builder().id("myInventory").provider(this).size(6, 9)
                 .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Fishing").parent(parent).build();
         this.main = main;
-        
+    }
+    
+    public FishingGUI(Core main, Player target, SmartInventory parent) {
+        inv = SmartInventory.builder().id("myInventory").provider(this).size(6, 9)
+                .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Fishing").parent(parent).build();
+        this.main = main;
+        this.target = target;
     }
     
     @Override
     public void init(Player player, InventoryContents contents) {
         PlayerData data = main.getDataManager().getPlayerData(player);
+        if (this.target != null)
+            data = main.getDataManager().getPlayerData(target);
         
         contents.fillRow(0, ClickableItem.of(ItemHelper.setDetails(
                 new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
@@ -70,7 +79,7 @@ public class FishingGUI implements InventoryProvider {
             }
         }
         
-        Location fishingLoc = new Location(main.getLobbyWorld(), 303.500, 91, 527.500);
+        Location fishingLoc = new Location(main.getLobbyWorld(), 303.500, 91.0, 526.500, 144.4F, 0.0F);
     
         if (data != null) {
             contents.set(0, 4,
@@ -86,7 +95,7 @@ public class FishingGUI implements InventoryProvider {
                         main.color("&aGo Fishing!")), e -> {
                     if (main.getGameManager().GetInstanceOfPlayer(player) == null) {
                         player.teleport(fishingLoc);
-                        player.sendMessage(main.color("&r&l(&3&l!&r&l) &rGrab a rod and go fishing!"));
+                        player.sendMessage(main.color("&3&l(!) &rGrab a rod and go fishing!"));
                     } else {
                         player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
                                 + ChatColor.RESET + "You are in a game");

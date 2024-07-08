@@ -25,6 +25,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 
 public class FishermanClass extends BaseClass {
@@ -43,7 +44,7 @@ public class FishermanClass extends BaseClass {
             "&7Lifespan of 45 seconds");
     
     private ItemStack speedFish = ItemHelper.setDetails(new ItemStack(Material.RAW_FISH, 1, (short) 2),
-            "&a&lSpeedy Fish",
+            "&a&lTricky Fish",
             "&7Swim away with Speed for 5 seconds");
     
     private ItemStack healFish = ItemHelper.setDetails(new ItemStack(Material.COOKED_FISH, 1, (short) 1),
@@ -111,12 +112,6 @@ public class FishermanClass extends BaseClass {
         }
     }
     
-    /*@Override
-    public void ProjectileHit(ProjectileHitEvent event) {
-        if (event.getEntity() instanceof FishHook)
-            event.getEntity().setBounce(true);
-    }*/
-    
     @Override
     public void SetItems(Inventory playerInv) {
         hits = 0;
@@ -132,7 +127,9 @@ public class FishermanClass extends BaseClass {
             this.cooldownSec = (5000 - fishing.getTime()) / 1000 + 1;
             
             if (gameTicks % 10 == 0) {
-                for (Item fish : puffer) {
+                Iterator<Item> it= puffer.iterator();
+                while (it.hasNext()) {
+                    Item fish = it.next();
                     boolean nearby = false;
                     Location loc = fish.getLocation();
                     for (Player p : instance.players) {
@@ -244,7 +241,7 @@ public class FishermanClass extends BaseClass {
                             Vector v = player.getLocation().getDirection();
                             EntityDamageEvent damageEvent = new EntityDamageEvent(hit, EntityDamageEvent.DamageCause.PROJECTILE, 4.5);
                             instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
-                            hit.damage(1.5, player);
+                            hit.damage(2, player);
                             v.setY(0.7);
                             hit.setVelocity(v);
                 
@@ -274,7 +271,7 @@ public class FishermanClass extends BaseClass {
                                 player.playSound(fish.getLocation(), Sound.FIRE_IGNITE, 1, 1);
                             }
                         };
-                        r.runTaskLater(instance.getGameManager().getMain(), 20 * 2);
+                        r.runTaskLater(instance.getGameManager().getMain(), 20);
                         r = new BukkitRunnable() {
                             @Override
                             public void run() {
