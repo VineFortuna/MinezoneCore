@@ -90,7 +90,10 @@ public class StatsGUI implements InventoryProvider {
 			contents.set(4, 0,
 					ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(fishingTexture),
 							main.color("&eFishing")), e-> {
-						new FishingGUI(main, inv).inv.open(player);
+						if (target != null)
+							new FishingGUI(main, target, inv).inv.open(player);
+						else
+							new FishingGUI(main, inv).inv.open(player);
 					}));
 			
 		}
