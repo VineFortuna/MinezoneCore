@@ -3,7 +3,11 @@ package anthony.SuperCraftBrawl.gui;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
+import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -26,11 +30,23 @@ public class ClassSelectorGUI implements InventoryProvider {
 
 	@Override
 	public void init(Player player, InventoryContents contents) {
+		boolean updated = false;
+		PlayerData data = main.getDataManager().getPlayerData(player);
+		for (ClassType type : ClassType.values()) {
+			ClassDetails details = data.playerClasses.get(type.getID());
+			if (details == null) {
+				updated = true;
+				details = new ClassDetails();
+				data.playerClasses.put(type.getID(), details);
+			}
+		}
+		if (updated)
+			main.getDataManager().saveData(data);
+			
 		contents.set(1, 2,
 				ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
 						String.valueOf(ChatColor.RED) + ChatColor.BOLD + "DONOR CLASSES",
 						ChatColor.GRAY + "Purchase a rank to access Donor Classes"), e -> {
-							inv.close(player);
 							new DonorClassesGUI(main).inv.open(player);
 						}));
 
@@ -38,7 +54,6 @@ public class ClassSelectorGUI implements InventoryProvider {
 				ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK),
 						String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + "FREE CLASSES",
 						ChatColor.GRAY + "All the free classes!"), e -> {
-							inv.close(player);
 							new FreeClassesGUI(main).inv.open(player);
 						}));
 
@@ -46,14 +61,12 @@ public class ClassSelectorGUI implements InventoryProvider {
 				ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.EMERALD),
 						String.valueOf(ChatColor.BLUE) + ChatColor.BOLD + "TOKEN CLASSES",
 						ChatColor.GRAY + "You can buy these classes with coins!"), e -> {
-							inv.close(player);
 							new TokenClassesGUI(main).inv.open(player);
 						}));
 		contents.set(2, 4,
 				ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR),
 						String.valueOf(ChatColor.LIGHT_PURPLE) + ChatColor.BOLD + "LEVEL CLASSES",
 						ChatColor.GRAY + "Classes that can be unlocked with Levels"), e -> {
-							inv.close(player);
 							new LevelClassesGUI(main).inv.open(player);
 						}));
 		contents.set(0, 4,
@@ -65,7 +78,6 @@ public class ClassSelectorGUI implements InventoryProvider {
 						"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET + ChatColor.YELLOW
 								+ " to choose random favorite class"),
 						e -> {
-							inv.close(player);
 
 							if (e.isLeftClick())
 								new FavoriteClassesGUI(main).inv.open(player);

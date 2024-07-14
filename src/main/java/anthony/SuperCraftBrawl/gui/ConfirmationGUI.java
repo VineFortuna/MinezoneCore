@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.ChatColorHelper;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -38,7 +39,7 @@ public class ConfirmationGUI implements InventoryProvider {
     @Override
     public void init(Player player, InventoryContents contents) {
         contents.set(0, 2, ClickableItem.of(ItemHelper.setDetails(
-                new ItemStack(Material.EMERALD_BLOCK),
+                new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.LIME.getData()),
                 "&aConfirm"),
                 e -> {
                     if (confirmAction != null) {
@@ -47,7 +48,7 @@ public class ConfirmationGUI implements InventoryProvider {
                 }));
 
         contents.set(0, 6, ClickableItem.of(ItemHelper.setDetails(
-                new ItemStack(Material.REDSTONE_BLOCK),
+                        new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.RED.getData()),
                 "&cCancel"),
                 e -> {
                     if (cancelAction != null)

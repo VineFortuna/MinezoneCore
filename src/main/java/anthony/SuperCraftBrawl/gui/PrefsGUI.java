@@ -34,6 +34,8 @@ public class PrefsGUI implements InventoryProvider {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 		String line = "";
 		
+		contents.fillRow(0, ClickableItem.of(ItemHelper.setDetails(
+				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 		contents.fillRow(4, ClickableItem.of(ItemHelper.setDetails(
 				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 		
@@ -46,9 +48,9 @@ public class PrefsGUI implements InventoryProvider {
 
 		if (data != null) {
 			if (data.cwm == 0) {
-				line = main.color("&aEnable");
+				line = main.color("&c&lDISABLED");
 			} else {
-				line = main.color("&cDisable");
+				line = main.color("&a&lENABLED");
 			}
 			contents.set(2, 2, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
 					main.color("&eCustom Win Messages"), "", line), e -> {
@@ -69,9 +71,9 @@ public class PrefsGUI implements InventoryProvider {
 						inv.close(player);
 					}));
 			if (data.pm == 1) {
-				line = main.color("&aEnable");
+				line = main.color("&c&lDISABLED");
 			} else {
-				line = main.color("&cDisable");
+				line = main.color("&a&lENABLED");
 			}
 			contents.set(2, 6,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.PAPER),
@@ -90,11 +92,11 @@ public class PrefsGUI implements InventoryProvider {
 							}));
 
 			if (data.killMsgs == 0) {
-				line = main.color("&aEnable");
+				line = main.color("&c&lDISABLED");
 			} else {
-				line = main.color("&cDisable");
+				line = main.color("&a&lENABLED");
 			}
-			contents.set(1, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
+			contents.set(2, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
 					main.color("&eCustom Kill Messages"), "", line), e -> {
 						if (player.hasPermission("scb.customKillMsgs")) {
 							if (data.killMsgs == 0) {

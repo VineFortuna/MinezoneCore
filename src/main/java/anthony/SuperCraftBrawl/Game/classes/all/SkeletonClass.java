@@ -42,7 +42,7 @@ public class SkeletonClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		playerEquip.setHelmet(new ItemStack(Material.SKULL_ITEM));
+		playerEquip.setHelmet(getHelmet(new ItemStack(Material.SKULL_ITEM)));
 		playerEquip.setChestplate(makeGray(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 		playerEquip.setLeggings(makeGray(new ItemStack(Material.LEATHER_LEGGINGS)));

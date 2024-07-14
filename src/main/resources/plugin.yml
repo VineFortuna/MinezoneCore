@@ -15,8 +15,6 @@ commands:
       description: Crystal wars
    players:
       description: List of players in your game
-   tournamentmodewithoutreset:
-      description: Idk
    fav:
       description: Fav classes
    gamestats:
@@ -27,8 +25,8 @@ commands:
       description: List of online players
    leave:
       description: Leave the game you are currently in
-   tournamentmodetoggle:
-      description: Toggle Tournament
+   tournament:
+      description: Tournament mode
    class:
       description: Class command
    startgame:
@@ -46,6 +44,8 @@ commands:
       permission: scb.setrank
    setlives:
       description: Set lives command!
+   setpoints:
+      description: Set points command!
    online:
       description: Online players command!
    purchases:

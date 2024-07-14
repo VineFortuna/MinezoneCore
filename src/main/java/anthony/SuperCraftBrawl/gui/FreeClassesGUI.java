@@ -1,5 +1,7 @@
 package anthony.SuperCraftBrawl.gui;
 
+import anthony.SuperCraftBrawl.fishing.FishType;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -31,10 +33,23 @@ public class FreeClassesGUI implements InventoryProvider {
 	public void init(Player player, InventoryContents contents) {
 		int a = 0;
 		int b = 0;
+		
+		PlayerData data = main.getDataManager().getPlayerData(player);
 
 		for (ClassType type : ClassType.values()) {
 			if (type.getTokenCost() == 0 && type.getMinRank() != Rank.VIP && type.getLevel() == 0) {
 				ItemStack item = type.getItem();
+				
+				int fished = main.getTotalFish(player);
+				if (type == ClassType.Fisherman && fished < FishType.values().length) {
+					continue;
+				}
+				
+				ClassDetails details = data.playerClasses.get(type.getID());
+				int played = details.gamesPlayed + details.gamesWon;
+				int nextLevel = 50;
+				if (played > 50)
+					nextLevel = 100;
 
 				if (item == null)
 					item = new ItemStack(Material.WOOD);
@@ -44,9 +59,22 @@ public class FreeClassesGUI implements InventoryProvider {
 								"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
 										+ ChatColor.YELLOW + " to choose a class",
 								"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET
-										+ ChatColor.YELLOW + " to add a favorite class"),
+										+ ChatColor.YELLOW + " to view rewards",
+								"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Shift Click" + ChatColor.RESET
+										+ ChatColor.YELLOW + " to add a favorite class",
+										"",
+										main.color("&aNext reward:"),
+										main.progressBar(played, nextLevel, 25)),
 								e -> {
-									if (e.isLeftClick()) {
+									if (e.isShiftClick()) {
+										if (data != null) {
+											data.customIntegers.add(type.getID());
+											player.sendMessage(
+													main.color("&2&l(!) &rAdded new favorite class: " + type.getTag()));
+											main.getDataManager().saveData(data);
+											inv.close(player);
+										}
+									} else if (e.isLeftClick()) {
 										main.getGameManager().playerSelectClass(player, type);
 										player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
 												+ "==============================================");
@@ -62,17 +90,10 @@ public class FreeClassesGUI implements InventoryProvider {
 										player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
 										player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
 												+ "==============================================");
+										inv.close(player);
 									} else if (e.isRightClick()) {
-										PlayerData data = main.getDataManager().getPlayerData(player);
-
-										if (data != null) {
-											data.customIntegers.add(type.getID());
-											player.sendMessage(
-													main.color("&2&l(!) &rAdded new favorite class: " + type.getTag()));
-											main.getDataManager().saveData(data);
-										}
+										new ClassRewardsGUI(main, type, inv).inv.open(player);
 									}
-									inv.close(player);
 								}));
 
 				b++;
@@ -91,7 +112,6 @@ public class FreeClassesGUI implements InventoryProvider {
 		
 		contents.set(2, 8, ClickableItem.of(
 				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
-					inv.close(player);
 					new ClassSelectorGUI(main).inv.open(player);
 				}));
 	}

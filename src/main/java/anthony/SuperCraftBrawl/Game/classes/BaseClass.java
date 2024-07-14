@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import anthony.SuperCraftBrawl.gui.ClassRewardsGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -27,6 +28,7 @@ import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -103,7 +105,9 @@ public abstract class BaseClass {
 	public Timer vindication = new Timer();
 	public Timer fadeAbility = new Timer();
 	public Timer summon = new Timer();
+	public Timer fishing = new Timer();
 	public boolean bedrockInvincibility = false;
+	public boolean hunterDash = true;
 
 	public int goldAmt = 0; // For Steve Class
 	public int coalAmt = 0; // For Steve Class
@@ -164,6 +168,9 @@ public abstract class BaseClass {
 
 	public void onPlayerMove(PlayerMoveEvent event) {
 	}
+	
+	public void onFish(PlayerFishEvent event) {
+	} // To override
 
 	public void Tick(int gameTicks) {
 	} // To override
@@ -179,6 +186,14 @@ public abstract class BaseClass {
 
 	public void LoadArmor(Player player) {
 		SetArmour(player.getEquipment());
+	}
+	
+	public ItemStack getHelmet(ItemStack helmet) {
+		PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(player);
+		ClassDetails details = data.playerClasses.get(this.getType().getID());
+		if (details != null && details.reward2)
+			return ClassRewardsGUI.headReward(this.getType());
+		return helmet;
 	}
 
 	private String getPlayerRank(Player p) {
@@ -299,8 +314,10 @@ public abstract class BaseClass {
 										kClass.totalExp += 29;
 
 										// If tournament mode is on, give 1 point for kill:
-										if (instance.getGameManager().getMain().tournament == true)
+										if (instance.getGameManager().getMain().tournament) {
 											kData.points++;
+											instance.getGameManager().getMain().tourney.put(d.getName(), kData.points);
+										}
 
 										// kClass.totalTokens += 1;
 										kClass.totalKills++;
@@ -319,8 +336,10 @@ public abstract class BaseClass {
 										kClass.totalExp += 29;
 
 										// If tournament mode is on, give 1 point for kill:
-										if (instance.getGameManager().getMain().tournament == true)
+										if (instance.getGameManager().getMain().tournament) {
 											kData.points++;
+											instance.getGameManager().getMain().tourney.put(d.getName(), kData.points);
+										}
 
 										// kClass.totalTokens += 1;
 										kClass.totalKills++;
@@ -376,8 +395,10 @@ public abstract class BaseClass {
 										kClass.totalExp += 29;
 
 										// If tournament mode is on, give 1 point for kill:
-										if (instance.getGameManager().getMain().tournament == true)
+										if (instance.getGameManager().getMain().tournament) {
 											kData.points++;
+											instance.getGameManager().getMain().tourney.put(d.getName(), kData.points);
+										}
 
 										// kClass.totalTokens += 1;
 										kClass.totalKills++;
@@ -552,8 +573,10 @@ public abstract class BaseClass {
 									kClass.totalExp += 29;
 
 									// If tournament mode is on, give 1 point for kill:
-									if (instance.getGameManager().getMain().tournament == true)
+									if (instance.getGameManager().getMain().tournament) {
 										kData.points++;
+										instance.getGameManager().getMain().tourney.put(d.getName(), kData.points);
+									}
 
 									// kClass.totalTokens += 1;
 									kClass.totalKills++;
@@ -619,8 +642,10 @@ public abstract class BaseClass {
 										kClass.totalExp += 29;
 
 										// If tournament mode is on, give 1 point for kill:
-										if (instance.getGameManager().getMain().tournament == true)
+										if (instance.getGameManager().getMain().tournament) {
 											kData.points++;
+											instance.getGameManager().getMain().tourney.put(d.getName(), kData.points);
+										}
 
 										// kClass.totalTokens += 1;
 										kClass.totalKills++;
@@ -728,6 +753,13 @@ public abstract class BaseClass {
 
 						if (data != null) {
 							data.losses += 1;
+							int classID = pClass.getType().getID();
+							ClassDetails details = data.playerClasses.get(classID);
+							if (details == null) {
+								details = new ClassDetails();
+								data.playerClasses.put(classID, details);
+							}
+							details.playGame();
 						}
 						if (killer != null) {
 							String msg = instance.getGameManager().getMain().color("&4&lELIMINATED &e" + p.getName());
@@ -1869,6 +1901,13 @@ public abstract class BaseClass {
 
 					if (data != null) {
 						data.losses += 1;
+						ClassType type = baseClass2.getType();
+						ClassDetails details = data.playerClasses.get(type.getID());
+						if (details == null) {
+							details = new ClassDetails();
+							data.playerClasses.put(type.getID(), details);
+						}
+						details.gamesPlayed++;
 						data.winstreak = 0;
 					}
 					if (killer != null) {
@@ -2235,6 +2274,7 @@ public abstract class BaseClass {
 		PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
 		if (d != null) {
 			if (instance.classes.containsKey(d)) {
+				PlayerData data2 = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
 				BaseClass baseClass3 = instance.classes.get(d);
 				// For first blood:
 				if (instance.firstBlood == null) {
@@ -2244,23 +2284,20 @@ public abstract class BaseClass {
 							+ baseClass3.getType().getTag() + " &edrew first blood!"));
 					TellAll("");
 					baseClass3.totalTokens += 10;
-					
-					//if (data != null)
-						//if (instance.getGameManager().getMain().tournament)
-							//instance.givePointsAgain(d, data, 2);
+					if (instance.getGameManager().getMain().tournament) {
+						data2.points += 2;
+						instance.getGameManager().getMain().tourney.put(d.getName(), data2.points);
+					}
 				}
-				PlayerData data2 = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
 
 				if (data2 != null) {
-					//if (instance.getGameManager().getMain().tournament == true)
-						//instance.givePointsAgain(d, data, 1);
 					data2.kills += 1;
 					data2.exp += 29;
 					baseClass3.totalExp += 29;
-					if (instance.getGameManager().getMain().tournament == true)
+					if (instance.getGameManager().getMain().tournament) {
 						data2.points++;
-					if (instance.getGameManager().getMain().tournament)
-						data2.points++;
+						instance.getGameManager().getMain().tourney.put(d.getName(), data2.points);
+					}
 
 					d.playSound(d.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
 
@@ -2287,13 +2324,10 @@ public abstract class BaseClass {
 						.color("&r&l(!) &rYou got a kill and now you can switch your wool color if you'd like!"));
 
 			} else if (baseClass.getType() == ClassType.Hunter) {
-				if (!(d.getInventory().contains(Material.FEATHER))) {
+				if (!hunterDash) {
 					d.sendMessage(instance.getGameManager().getMain()
 							.color("&r&l(!) &rYour &r&lDash &rhas been regenerated for getting a kill!"));
-					d.getInventory()
-							.addItem(ItemHelper.setDetails(new ItemStack(Material.FEATHER),
-									instance.getGameManager().getMain().color("&b&lDash"),
-									instance.getGameManager().getMain().color("&7A quick escape or attack")));
+					hunterDash = true;
 				}
 			} else if (baseClass.getType() == ClassType.Present) {
 				d.sendMessage(instance.getGameManager().getMain().color(
