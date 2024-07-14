@@ -109,19 +109,24 @@ public class FishingUpgradesGUI implements InventoryProvider {
                         ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
                                 main.color("&e1000 Tokens"),
                                 main.color("&aClick to purchase")), e -> {
-                            if (data.tokens >= 1000) {
-                                data.tokens -= 1000;
-                                data.lure = 1;
-                                data.lureLevel++;
-                                player.sendMessage(main.color("&2&l(!) &rPurchased &aLure II"));
-                                main.getDataManager().saveData(data);
-                                addLure(player, data.lureLevel);
-                                if (main.getGameManager().GetInstanceOfPlayer(player) == null)
-                                    main.LobbyBoard(player);
-                                new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
+                            if (level > 0) {
+                                if (data.tokens >= 1000) {
+                                    data.tokens -= 1000;
+                                    data.lure = 1;
+                                    data.lureLevel++;
+                                    player.sendMessage(main.color("&2&l(!) &rPurchased &aLure II"));
+                                    main.getDataManager().saveData(data);
+                                    addLure(player, data.lureLevel);
+                                    if (main.getGameManager().GetInstanceOfPlayer(player) == null)
+                                        main.LobbyBoard(player);
+                                    new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
+                                } else {
+                                    player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
+                                            + ChatColor.RESET + "You don't have enough tokens to purchase this");
+                                }
                             } else {
                                 player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-                                        + ChatColor.RESET + "You don't have enough tokens to purchase this");
+                                        + ChatColor.RESET + "You must purchase the previous level first");
                             }
                         }));
             }
@@ -135,19 +140,24 @@ public class FishingUpgradesGUI implements InventoryProvider {
                         ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
                                 main.color("&e1500 Tokens"),
                                 main.color("&aClick to purchase")), e -> {
-                            if (data.tokens >= 1500) {
-                                data.tokens -= 1500;
-                                data.lure = 1;
-                                data.lureLevel++;
-                                player.sendMessage(main.color("&2&l(!) &rPurchased &aLure III"));
-                                main.getDataManager().saveData(data);
-                                addLure(player, data.lureLevel);
-                                if (main.getGameManager().GetInstanceOfPlayer(player) == null)
-                                    main.LobbyBoard(player);
-                                new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
+                            if (level > 1) {
+                                if (data.tokens >= 1500) {
+                                    data.tokens -= 1500;
+                                    data.lure = 1;
+                                    data.lureLevel++;
+                                    player.sendMessage(main.color("&2&l(!) &rPurchased &aLure III"));
+                                    main.getDataManager().saveData(data);
+                                    addLure(player, data.lureLevel);
+                                    if (main.getGameManager().GetInstanceOfPlayer(player) == null)
+                                        main.LobbyBoard(player);
+                                    new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
+                                } else {
+                                    player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
+                                            + ChatColor.RESET + "You don't have enough tokens to purchase this");
+                                }
                             } else {
                                 player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-                                        + ChatColor.RESET + "You don't have enough tokens to purchase this");
+                                        + ChatColor.RESET + "You must purchase the previous level first");
                             }
                         }));
             }

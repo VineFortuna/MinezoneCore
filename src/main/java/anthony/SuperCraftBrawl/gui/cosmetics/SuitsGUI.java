@@ -134,7 +134,7 @@ public class SuitsGUI implements InventoryProvider {
         contents.set(1,3,ClickableItem.of(
                 pirateHead,
                 e -> {
-                    if (data.rewardLevel >= 5) {
+                    if (data.rewardLevel >= 7) {
                         if (!(main.po.containsKey(player))) {
                             main.po.put(player, true);
                             player.getInventory().setHelmet(pirateHead);

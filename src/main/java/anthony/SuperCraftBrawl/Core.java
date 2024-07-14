@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import anthony.SuperCraftBrawl.Game.*;
+import anthony.SuperCraftBrawl.fishing.FishRarity;
 import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
@@ -1530,16 +1531,22 @@ public class Core extends JavaPlugin implements Listener {
 
 	}
 	
-	public int getTotalFish(Player player) {
+	public int getTotalFish(Player player, FishRarity... rarity) {
 		PlayerData data = this.getDataManager().getPlayerData(player);
 		int totalFished = 0;
 		for (FishType type : FishType.values()) {
-			FishingDetails details = data.playerFishing.get(type.getId());
-			if (details != null) {
-				totalFished++;
+			if (rarity == null || Arrays.asList(rarity).contains(type.getRarity())) {
+				FishingDetails details = data.playerFishing.get(type.getId());
+				if (details != null) {
+					totalFished++;
+				}
 			}
 		}
 		return totalFished;
+	}
+	
+	public int getTotalFish(Player player) {
+		return getTotalFish(player, null);
 	}
 
 	public void LobbyScoreboard(Player player) {

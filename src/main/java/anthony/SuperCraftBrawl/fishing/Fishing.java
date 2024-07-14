@@ -80,7 +80,7 @@ public class Fishing implements Listener {
                 p.sendMessage(main.color("&2&l|| &7" + fish.getDesc()));
                 p.sendMessage(main.color("&2&l||"));
                 p.sendMessage(main.color("&2&l=============================================="));
-                if (main.getTotalFish(p) == FishType.values().length-1) {
+                if (main.getTotalFish(p) == FishType.values().length) {
                     p.playSound(p.getLocation(), Sound.FIREWORK_TWINKLE, 1, 1);
                     p.sendMessage(main.color("&3&l(!) &rCongratulations! You caught everything!"));
                 }
@@ -88,10 +88,19 @@ public class Fishing implements Listener {
             if (fish == FishType.CRATE) {
                 p.sendMessage(main.color("&3&l(!) &rYou have found &e1 Mystery Chest!"));
                 data.mysteryChests++;
+            } else if (fish == FishType.EXP) {
+                int r = rand.nextInt(35) + 11;
+                data.exp += r;
+                p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + r + " EXP!"));
+                if (data.exp >= 2500) {
+                    data.level++;
+                    data.exp -= 2500;
+                    p.sendMessage("Level upgraded to " + data.level + "!");
+                }
             } else if (fish == FishType.TOKENS) {
                 int r = rand.nextInt(25) + 11;
-                p.sendMessage(main.color("&3&l(!) &rYou have found &e" + r + " Tokens!"));
                 data.tokens += r;
+                p.sendMessage(main.color("&3&l(!) &rYou have found &e" + r + " Tokens!"));
                 if (main.getGameManager().GetInstanceOfPlayer(p) == null)
                     main.LobbyBoard(p);
             }
