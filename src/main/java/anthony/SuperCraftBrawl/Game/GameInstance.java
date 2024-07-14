@@ -2040,6 +2040,8 @@ public class GameInstance {
 	}
 
 	public boolean RemovePlayer(Player player) {
+		player.setAllowFlight(false);
+		player.setAllowFlight(true);
 		BaseClass baseClass = this.classes.remove(player);
 		this.playerPosition.remove(player);
 		if (this.spectators.contains(player)) {
