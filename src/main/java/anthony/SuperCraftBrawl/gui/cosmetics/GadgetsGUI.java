@@ -10,7 +10,9 @@ import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -57,6 +59,14 @@ public class GadgetsGUI implements InventoryProvider {
         paintballList.add("");
         paintballList.add(ChatColor.RESET + "You have " + ChatColor.YELLOW + data.paintball + ChatColor.RESET + " Paintballs");
         ItemStack paintball = ItemHelper.create(Material.GOLD_BARDING, ChatColor.YELLOW.toString() + ChatColor.BOLD + "Paintball Gun", paintballList);
+    
+        List<String> fishingrodList = new ArrayList<>();
+        fishingrodList.add(ChatColor.DARK_GRAY + "Let's go fishing!");
+        ItemStack fishingrod = ItemHelper.create(Material.FISHING_ROD, ChatColor.DARK_AQUA.toString() + ChatColor.BOLD + "Fishing Rod", fishingrodList);
+        ItemHelper.setUnbreakable(fishingrod);
+        if (data.lure == 1 && data.lureLevel > 0) {
+            ItemHelper.addEnchant(fishingrod, Enchantment.LURE, data.lureLevel);
+        }
 
         // Setting Items
         contents.fillRect(1,1, 7,7, ClickableItem.of(
@@ -132,6 +142,21 @@ public class GadgetsGUI implements InventoryProvider {
                                 + "You do not have enough melons!");
                     }
                     inv.close(player);
+                }));
+        contents.set(1, 4, ClickableItem.of(
+                fishingrod,
+                e -> {
+                    if (!(player.getInventory().contains(fishingrod))) {
+                        player.getInventory().setItem(5, fishingrod);
+                        player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                + "You have equipped " + ChatColor.DARK_AQUA + ChatColor.BOLD + "Fishing Rod");
+                        inv.close(player);
+                    } else if (player.getInventory().contains(fishingrod)) {
+                        player.getInventory().remove(fishingrod);
+                        player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                + "You have unequipped " + ChatColor.DARK_AQUA + ChatColor.BOLD + "Fishing Rod");
+                        inv.close(player);
+                    }
                 }));
     }
 

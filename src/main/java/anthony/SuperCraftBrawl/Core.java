@@ -4,22 +4,19 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import anthony.SuperCraftBrawl.Game.*;
+import anthony.SuperCraftBrawl.fishing.FishRarity;
+import anthony.SuperCraftBrawl.fishing.FishType;
+import anthony.SuperCraftBrawl.fishing.Fishing;
+import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
+import org.bukkit.*;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -27,6 +24,8 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,28 +34,21 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 
-import anthony.SuperCraftBrawl.Game.ActionBarManager;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameManager;
-import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.commands.Commands;
 import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
-import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
-import anthony.SuperCraftBrawl.gui.DonorClassesGUI;
-import anthony.SuperCraftBrawl.gui.FreeClassesGUI;
-import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
-import anthony.SuperCraftBrawl.gui.StatsGUI;
 import anthony.SuperCraftBrawl.leaderboards.KillsBoard;
 import anthony.SuperCraftBrawl.npcs.NPCManager;
 import anthony.SuperCraftBrawl.packets.PacketMain;
@@ -100,12 +92,17 @@ public class Core extends JavaPlugin implements Listener {
 	public NPCManager npcManager;
 	public ActiveGamesGUI ag;
 	public boolean tournament = false;
+	public boolean tourneyreset = false;
+	public boolean tournamentend = false;
+	public Map<String, Integer> tourney = new HashMap<>();
 	public HashMap<Player, Boolean> ao = new HashMap<>();
 	public HashMap<Player, Boolean> so = new HashMap<>();
+	public HashMap<Player, Boolean> po = new HashMap<>();
 	public Parkour p;
 	// public AntiCheat cheat;
 	public Leaderboard lb;
 	public KillsBoard kb;
+	public Fishing fishing;
 	private ArrayList<String> msg;
 	public Map<Player, Player> wagers = new HashMap<Player, Player>();
 
@@ -317,6 +314,7 @@ public class Core extends JavaPlugin implements Listener {
 		msg.add(color("&a&lReminder to thank the Staff of &e&l&oMINEZONE"));
 		msg.add(color("&cSheep kit is probably the best!"));
 		msg.add(color("&dSubscribe to &e&l&oMINEZONE &don &cYou&fTube&d!"));
+		msg.add(color("&3astro is &b&l20% &3better than you"));
 
 		getLogger().info("(!) You have enabled Minezone-Core");
 		// lobbyWorld = getServer().createWorld(new WorldCreator("lobby"));
@@ -345,6 +343,7 @@ public class Core extends JavaPlugin implements Listener {
 		ag = new ActiveGamesGUI(this);
 		p = new Parkour(this);
 		lb = new Leaderboard(this);
+		fishing = new Fishing(this);
 		//kb = new KillsBoard(this);
 		// swManager = new anthony.skywars.GameManager(this);
 		// abilityManager = new anthony.skywars.AbilityManager(this);
@@ -847,7 +846,7 @@ public class Core extends JavaPlugin implements Listener {
 			player.sendMessage("" + ChatColor.WHITE + ChatColor.BOLD + "(!) " + ChatColor.AQUA
 					+ "Need help? Go to our Discord Server for Help!");
 			player.sendMessage(
-					"- " + ChatColor.RED + ChatColor.BOLD + "Discord: " + ChatColor.GREEN + "discord.gg/B9eHKg7");
+					"- " + ChatColor.RED + ChatColor.BOLD + "Discord: " + ChatColor.GREEN + "discord.gg/FSZpmY9FZB");
 		}
 
 		if (cmd.getName().equalsIgnoreCase("classes") && sender instanceof Player) {
@@ -1231,22 +1230,179 @@ public class Core extends JavaPlugin implements Listener {
 		if (cmd.getName().equalsIgnoreCase("activegames"))
 			new ActiveGamesGUI(this).inv.open(player);
 
-		if (cmd.getName().equalsIgnoreCase("tournamentmodetoggle")) {
+		if (cmd.getName().equalsIgnoreCase("tournament")) {
 			if (player.hasPermission("scb.toggleTournament")) {
-				if (tournament == true) {
-					tournament = false;
-					player.sendMessage(color("&e&l(!) &eTournament mode disabled!"));
-					for (Player onlinePlayers : Bukkit.getOnlinePlayers())
-						LobbyBoard(onlinePlayers);
-				} else {
-					tournament = true;
-					player.sendMessage(color("&e&l(!) &eTournament mode now enabled!"));
-					for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
-						PlayerData data = this.getDataManager().getPlayerData(onlinePlayers);
-						data.points = 0;
-						LobbyBoard(onlinePlayers);
+				if (args.length != 1) {
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
+							+ ChatColor.GREEN + "/tournament <toggle/reset/clear/end>");
+				} else if (args[0].equalsIgnoreCase("toggle")) {
+					if (tournament) {
+						tournament = false;
+						player.sendMessage(color("&e&l(!) &eTournament mode disabled!"));
+						for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
+							LobbyBoard(onlinePlayers);
+							onlinePlayers.getInventory().setItem(6, null);
+						}
+					} else {
+						tournament = true;
+						player.sendMessage(color("&e&l(!) &eTournament mode now enabled!"));
+						for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
+							PlayerData data = this.getDataManager().getPlayerData(onlinePlayers);
+							LobbyBoard(onlinePlayers);
+							ItemStack tournament = ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGYzOTk3YzQzMDkxNjk0ZmMyZmI3NmM4ODNhNzZjY2U4OWYwMjI3ZTVjOWYxZGZlIn19fQ==");
+							onlinePlayers.getInventory().setItem(6, ItemHelper.setDetails(tournament, "" + ChatColor.GRAY + "Tournament"));
+							tourney.put(onlinePlayers.getName(), data.points);
+						}
 					}
+				} else if (args[0].equalsIgnoreCase("reset")) {
+					player.sendMessage(color("&e&l(!) &eResetting points!"));
+					tourneyreset = true;
+					for (String s : tourney.keySet()) {
+						if (Bukkit.getOfflinePlayer(s).isOnline()) {
+							Player p = Bukkit.getPlayer(s);
+							PlayerData data = this.getDataManager().getPlayerData(p);
+							data.points = 0;
+							LobbyBoard(p);
+							this.getDataManager().saveData(data);
+						}
+						tourney.put(s, 0);
+					}
+				} else if (args[0].equalsIgnoreCase("clear")) {
+					player.sendMessage(color("&e&l(!) &eRemoving all participants!"));
+					for (Player p : Bukkit.getOnlinePlayers()) {
+						LobbyBoard(p);
+						p.getInventory().setItem(6, null);
+					}
+					tourney.clear();
+				} else if (args[0].equalsIgnoreCase("end")) {
+					if (!tournament) {
+						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Tournament mode is not enabled");
+						return false;
+					}
+					Bukkit.broadcastMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
+							+ ChatColor.RESET + "Ending tournament");
+					// Hide tournament stats
+					for (Player p : Bukkit.getOnlinePlayers()) {
+						p.getInventory().setItem(6, null);
+					}
+					// Shoot fireworks
+					Location newLoc = LobbyLoc();
+					BukkitRunnable runnable = new BukkitRunnable() {
+						int sec = 0;
+						@Override
+						public void run() {
+							if (sec == 4) {
+								this.cancel();
+							} else {
+								Firework fw = (Firework) newLoc.getWorld().spawnEntity(newLoc, EntityType.FIREWORK);
+								FireworkMeta fwm = fw.getFireworkMeta();
+								fwm.setPower(1);
+								
+								Color c = null;
+								if (sec == 0)
+									c = Color.BLUE;
+								else if (sec == 1)
+									c = Color.LIME;
+								else if (sec == 2)
+									c = Color.GREEN;
+								else
+									c = Color.YELLOW;
+								fwm.addEffect(FireworkEffect.builder().withColor(c).with(FireworkEffect.Type.BALL_LARGE).flicker(true).build());
+								fw.setFireworkMeta(fwm);
+							}
+							sec++;
+						}
+						
+					};
+					runnable.runTaskTimer(this, 0, 20);
+					
+					sortTourney();
+					ArrayList<String> names = new ArrayList<>(tourney.keySet());
+					
+					new BukkitRunnable() {
+						int size = Math.min(tourney.keySet().size(), 5);
+                        @Override
+                        public void run() {
+                            for (Player p : Bukkit.getOnlinePlayers()) {
+								if (size == 1) {
+									p.sendTitle(color("&6And the winner is..."), "");
+								} else {
+									p.sendTitle(color("&aPlacing #" + size), "");
+								}
+								String name = names.get(size-1);
+                                new BukkitRunnable() {
+                                    @Override
+                                    public void run() {
+                                        p.sendTitle(color("&a" + name),
+                                                color("&a" + tourney.get(name) + " points"));
+                                    }
+                                }.runTaskLater(plugin, 50);
+                            }
+							size--;
+							if (size == 0)
+								this.cancel();
+                        }
+                    }.runTaskTimer(plugin, 50, 150);
+					
+					// Display scores
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+							tournamentend = true;
+							String winnerName = names.get(0);
+							if (Bukkit.getOfflinePlayer(winnerName).isOnline()) {
+								Player winner = Bukkit.getPlayer(winnerName);
+								Firework fw = (Firework) winner.getWorld().spawnEntity(winner.getLocation(), EntityType.FIREWORK);
+								FireworkMeta fwm = fw.getFireworkMeta();
+								fwm.setPower(1);
+								fwm.addEffect(FireworkEffect.builder().withColor(Color.ORANGE).with(FireworkEffect.Type.STAR).flicker(true).build());
+								fw.setFireworkMeta(fwm);
+							}
+                            for (Player p : Bukkit.getOnlinePlayers()) {
+								ItemStack tournament = ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGYzOTk3YzQzMDkxNjk0ZmMyZmI3NmM4ODNhNzZjY2U4OWYwMjI3ZTVjOWYxZGZlIn19fQ==");
+								p.getInventory().setItem(6, ItemHelper.setDetails(tournament, "" + ChatColor.GRAY + "Tournament"));
+								p.playSound(p.getLocation(), Sound.FIREWORK_TWINKLE2, 1, 0);
+                                p.sendMessage(color("&aTournament Scores:"));
+                                int count = 1;
+                                int placement = 0;
+                                for (String s : tourney.keySet()) {
+                                    if (s.equals(p.getName())) {
+                                        p.sendMessage(color("&a#" + count + " &e" + s + "&a - " + tourney.get(s)));
+                                        placement = count;
+                                    } else
+                                        p.sendMessage(color("&a#" + count + " " + s + " - " + tourney.get(s)));
+                                    count++;
+                                }
+                                p.sendMessage(color("&eYou placed #" + placement));
+								new BukkitRunnable() {
+									@Override
+									public void run() {
+										new TournamentGUI(plugin).inv.open(player);
+									}
+								}.runTaskLater(plugin, 100);
+                            }
+							new BukkitRunnable() {
+								@Override
+								public void run() {
+									player.sendMessage(color("&e&l(!) &eTournament mode disabled!"));
+									tournament = false;
+									tourneyreset = false;
+									tournamentend = false;
+									for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
+										LobbyBoard(onlinePlayers);
+										onlinePlayers.getInventory().setItem(6, null);
+									}
+								}
+							}.runTaskLater(plugin, 600);
+                        }
+                    }.runTaskLater(plugin, 150*Math.min(tourney.keySet().size(), 5)-50);
+					
+				} else {
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
+							+ ChatColor.GREEN + "/tournament <toggle/reset/clear/end>");
 				}
+			} else {
+				player.sendMessage(color("&r&l(!) &rYou need the rank &c&lOWNER &rto use this command!"));
 			}
 		}
 
@@ -1268,6 +1424,43 @@ public class Core extends JavaPlugin implements Listener {
 				}
 			} else {
 				player.sendMessage(color("&r&l(!) &rYou need the rank &c&lOWNER &rto use this command!"));
+			}
+		}
+		
+		if (cmd.getName().equalsIgnoreCase("setpoints") && sender instanceof Player) {
+			if (player.hasPermission("scb.setpoints")) {
+				if (args.length < 2) {
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
+							+ ChatColor.GREEN + "/setpoints <player> <amount>");
+				} else {
+					Player target = Bukkit.getServer().getPlayerExact(args[0]);
+					try {
+						int num = Integer.parseInt(args[1]);
+						
+						PlayerData data = this.getDataManager().getPlayerData(target);
+						if (target != null) {
+							data.points = num;
+							
+							player.sendMessage(
+									"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You gave " + ChatColor.GREEN
+											+ target.getName() + ChatColor.RESET + " " + num + " Tokens!");
+							target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given "
+									+ num + " Tokens!");
+							if (this.getGameManager().GetInstanceOfPlayer(player) == null)
+								LobbyBoard(target);
+							this.getDataManager().saveData(data);
+						} else {
+							player.sendMessage(
+									"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Please specify a player!");
+						}
+					} catch (Exception e) {
+						player.sendMessage(
+								"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Please enter a number!");
+					}
+				}
+			} else {
+				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank " + ChatColor.RED
+						+ ChatColor.BOLD + "OWNER" + ChatColor.RESET + "to use this command!");
 			}
 		}
 
@@ -1344,6 +1537,24 @@ public class Core extends JavaPlugin implements Listener {
 		return false;
 
 	}
+	
+	public int getTotalFish(Player player, FishRarity... rarity) {
+		PlayerData data = this.getDataManager().getPlayerData(player);
+		int totalFished = 0;
+		for (FishType type : FishType.values()) {
+			if (rarity == null || Arrays.asList(rarity).contains(type.getRarity())) {
+				FishingDetails details = data.playerFishing.get(type.getId());
+				if (details != null) {
+					totalFished++;
+				}
+			}
+		}
+		return totalFished;
+	}
+	
+	public int getTotalFish(Player player) {
+		return getTotalFish(player, null);
+	}
 
 	public void LobbyScoreboard(Player player) {
 		LobbyBoard(player);
@@ -1388,21 +1599,33 @@ public class Core extends JavaPlugin implements Listener {
 		Player p = e.getPlayer();
 		String pName = p.getName();
 		p.setGameMode(GameMode.ADVENTURE);
+		// Tournament data
+		if (tournament) {
+			PlayerData data = this.getDataManager().getPlayerData(p);
+			if (tourneyreset) {
+				if (!tourney.containsKey(p.getName())) {
+					data.points = 0;
+				} else {
+					data.points = tourney.get(p.getName());
+				}
+			}
+			tourney.put(p.getName(), data.points);
+		}
 		// For tab organization.
 		p.setScoreboard(lobbyScoreBoard);
 		sendScoreboardUpdate(p);
 		//this.packetMain.injectPlayer(p);
 		// Message to send the server on join
-		e.setJoinMessage("" + ChatColor.BOLD + "[" + ChatColor.GREEN + ChatColor.BOLD + "+" + ChatColor.RESET
-				+ ChatColor.BOLD + "] " + ChatColor.RESET + getRankManager().getRank(p).getTagWithSpace() + ""
-				+ ChatColor.AQUA + pName + ChatColor.GREEN + " connected");
 		String rank = getRankManager().getRank(p).getTagWithSpace();
-
+		e.setJoinMessage("" + ChatColor.BOLD + "[" + ChatColor.GREEN + ChatColor.BOLD + "+" + ChatColor.RESET
+				+ ChatColor.BOLD + "] " + ChatColor.RESET + rank + ""
+				+ ChatColor.AQUA + pName + ChatColor.GREEN + " connected");
+		
 		ItemStack cookie = new ItemStack(Material.COOKIE, 1);
 		Location loc = new Location(lobbyWorld, 144.584, 106, 663.454);
 		Item item = getServer().getWorlds().get(0).dropItemNaturally(loc, cookie);
 		item.setVelocity(item.getVelocity().zero()); // Make the item stationary
-		item.setPickupDelay(Integer.MAX_VALUE); // Set pickup delay to a large value
+		item.setPickupDelay(Integer.MAX_VALUE); // Set pickup delay to a large
 
 		if (rank.length() >= 16) {
 			String s = rank.substring(0, 9);
@@ -1521,6 +1744,17 @@ public class Core extends JavaPlugin implements Listener {
 	public Location hologramLoc(Player player) {
 		return new Location(lobbyWorld, 288.557, 114, 2362.646);
 	}
+	
+	public static <K, V extends Comparable<? super V>> Map<K, V> sortMapByValueDescending(Map<K, V> map) {
+		return map.entrySet()
+				.stream()
+				.sorted(Map.Entry.<K, V>comparingByValue().reversed())
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+	}
+	
+	public void sortTourney() {
+		tourney = sortMapByValueDescending(tourney);
+	}
 
 	@EventHandler
 	public void join(PlayerJoinEvent event) {
@@ -1637,11 +1871,12 @@ public class Core extends JavaPlugin implements Listener {
 				ItemHelper.setDetails(new ItemStack(Material.COMPASS), "" + ChatColor.GRAY + "Game Selector"));
 		player.getInventory().setItem(4,
 				ItemHelper.setDetails(new ItemStack(Material.CHEST), "" + ChatColor.GRAY + "Cosmetics"));
-		ItemStack stats = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
-		SkullMeta statsMeta = (SkullMeta) stats.getItemMeta();
-		statsMeta.setOwner(player.getName());
-		stats.setItemMeta(statsMeta);
+		ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
 		player.getInventory().setItem(7, ItemHelper.setDetails(stats, "" + ChatColor.GRAY + "Profile"));
+		if (tournament) {
+			ItemStack tournament = ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGYzOTk3YzQzMDkxNjk0ZmMyZmI3NmM4ODNhNzZjY2U4OWYwMjI3ZTVjOWYxZGZlIn19fQ==");
+			player.getInventory().setItem(6, ItemHelper.setDetails(tournament, "" + ChatColor.GRAY + "Tournament"));
+		}
 		player.setAllowFlight(true);
 	}
 
@@ -1677,6 +1912,20 @@ public class Core extends JavaPlugin implements Listener {
 			return false;
 		return true;
 	}
+	
+	public String progressBar(int progress, int nextLevel, int segments) {
+		String str = "";
+		str += this.color("&8[");
+		double frac = (double) progress/nextLevel;
+		for (int i = 0; i < segments; i++) {
+			if (i < Math.floor(frac*segments))
+				str += this.color("&a|");
+			else
+				str += this.color("&7|");
+		}
+		str += this.color("&8] &7(" + progress + "/" + nextLevel + ")");
+		return str;
+	}
 
 	public void SendToFactions(Player player) {
 		Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -1697,6 +1946,11 @@ public class Core extends JavaPlugin implements Listener {
 	public void onDisable() {
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
 		DataOutputStream out = new DataOutputStream(b);
+		
+		for (GameInstance instance : gameManager.gameMap.values()) {
+			for (Map.Entry<Player, WinEffects> entry : instance.effects.entrySet())
+				entry.getValue().removeWinEffects();
+		}
 
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			p.kickPlayer(color("&c&lSERVER IS RESTARTING\n&e\n" + msg.get(new Random().nextInt(msg.size()))));

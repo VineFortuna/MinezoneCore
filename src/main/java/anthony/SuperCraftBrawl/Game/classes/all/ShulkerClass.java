@@ -48,7 +48,7 @@ public class ShulkerClass extends BaseClass {
 		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzY2NDA1MzBkOThkYjkzNGZjNWI5NTVlYTIzYzExYzgwYzRmZGFkMDYxMDAxZThhMjkxM2UzODM5MGRmNjlhNiJ9fX0=";
 		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
 		
-		playerEquip.setHelmet(playerskull);
+		playerEquip.setHelmet(getHelmet(playerskull));
 		playerEquip.setChestplate(makePurple(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 		playerEquip.setLeggings(makePurple(new ItemStack(Material.LEATHER_LEGGINGS)));

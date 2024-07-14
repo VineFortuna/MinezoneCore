@@ -78,8 +78,8 @@ public class GameSelectorGUI implements InventoryProvider {
 								"&eClassic",
 								"&7Choose a class, kill everyone",
 								"",
-								"&e&nLeft click&r&e to choose a map",
-								"&e&nRight click&r&e to join a random map"),
+								"&e&nLeft Click&r&e to choose a map",
+								"&e&nRight Click&r&e to join a random map"),
 						e -> {
 							// If item was Left-clicked opens GUI to choose map
 							if (e.isLeftClick()) {
@@ -97,8 +97,8 @@ public class GameSelectorGUI implements InventoryProvider {
 								"&eDuels",
 								"&71v1 someone until death",
 								"",
-								"&e&nLeft click&r&e to choose a map",
-								"&e&nRight click&r&e to join a random map"),
+								"&e&nLeft Click&r&e to choose a map",
+								"&e&nRight Click&r&e to join a random map"),
 						e -> {
 							// If item was Left-clicked opens GUI to choose map
 							if (e.isLeftClick()) {
@@ -116,8 +116,8 @@ public class GameSelectorGUI implements InventoryProvider {
 								"&eFrenzy",
 								"&7Random classes, big maps",
 								"",
-								"&e&nLeft click&r&e to choose a map",
-								"&e&nRight click&r&e to join a random map"),
+								"&e&nLeft Click&r&e to choose a map",
+								"&e&nRight Click&r&e to join a random map"),
 						e -> {
 							// If item was Left-clicked opens GUI to choose map
 							if (e.isLeftClick()) {

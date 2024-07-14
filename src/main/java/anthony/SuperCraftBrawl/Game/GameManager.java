@@ -13,6 +13,7 @@ import anthony.SuperCraftBrawl.Game.projectile.ProjectileManager;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
@@ -39,7 +40,6 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.painting.PaintingBreakEvent;
 import org.bukkit.event.player.*;
-import org.bukkit.event.player.PlayerFishEvent.State;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
@@ -244,7 +244,8 @@ public class GameManager implements Listener, PluginMessageListener {
 					}
 				} else {
 					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You cannot teleport there!");
-					player.getInventory().addItem(new ItemStack(Material.ENDER_PEARL));
+					player.getInventory().addItem(ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL),
+							"" + ChatColor.RED + ChatColor.BOLD + "Teleporter"));
 				}
 			}
 	}
@@ -396,7 +397,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	private HashMap<Player, BukkitRunnable> borderRunnables = new HashMap<>();
-
+	
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent e) {
 		Player player = e.getPlayer();
@@ -613,11 +614,6 @@ public class GameManager implements Listener, PluginMessageListener {
 							}
 						}
 					}
-				} else if (item.getType() == Material.WATER_BUCKET && (event.getAction() == Action.RIGHT_CLICK_AIR
-						|| event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-					player.getInventory().clear(player.getInventory().getHeldItemSlot());
-					player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 1000, 1));
-					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 125, 1));
 				}
 			}
 		}
@@ -634,6 +630,15 @@ public class GameManager implements Listener, PluginMessageListener {
 		Player player = event.getPlayer();
 		GameInstance gameInstance = GetInstanceOfPlayer(player);
 		gameInstance.classes.get(player).onPlayerMove(event);
+	}
+	
+	@EventHandler
+	public void onFish(PlayerFishEvent event) {
+		Player player = event.getPlayer();
+		GameInstance gameInstance = GetInstanceOfPlayer(player);
+		if (gameInstance != null) {
+			gameInstance.classes.get(player).onFish(event);
+		}
 	}
 
 	@EventHandler
@@ -661,6 +666,13 @@ public class GameManager implements Listener, PluginMessageListener {
 		if (entities.contains(entity.getEntityType())) {
 			entity.getDrops().clear();
 			entity.setDroppedExp(0);
+		}
+	}
+	
+	@EventHandler
+	public void onHookHit(EntityDamageByEntityEvent event) {
+		if (event.getDamager() instanceof FishHook) {
+			event.setCancelled(true);
 		}
 	}
 
@@ -770,7 +782,8 @@ public class GameManager implements Listener, PluginMessageListener {
 									.color("&9&l(!) &rYou used an extra life and now rewarded with &e1 Bonus Level"));
 							data.level += 1;
 							data.challenge3 = 1;
-							player.sendMessage(getMain().color("&9&l(!) &rYou are now level &e" + data.level));
+							player.sendMessage(instance.getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
+							player.sendMessage("You are now Level: " + data.level + "!");
 						}
 					}
 					BaseClass baseClass = instance.classes.get(player);
@@ -791,7 +804,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	@EventHandler
+	/*@EventHandler
 	public void onFish(PlayerFishEvent e) {
 		if (boosterCooldown.useAndResetCooldown()) {
 			if (e.getState() == State.IN_GROUND) {
@@ -799,7 +812,7 @@ public class GameManager implements Listener, PluginMessageListener {
 						new Vector(e.getPlayer().getVelocity().getX(), 2.5, e.getPlayer().getVelocity().getY()));
 			}
 		}
-	}
+	}*/
 
 	@EventHandler
 	public void cosmeticMelon(PlayerInteractEvent e) {
@@ -1331,6 +1344,21 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (instance != null) {
 				BaseClass baseClass = instance.classes.get(player);
 				baseClass.ProjectileHit(event);
+			}
+		}
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void ProjectileHit(ProjectileHitEvent event) {
+		if (event.getEntity() instanceof FishHook) {
+			if (event.getEntity().getShooter() instanceof Player) {
+				Player player = (Player) event.getEntity().getShooter();
+				GameInstance instance = this.GetInstanceOfPlayer(player);
+				if (instance != null) {
+					event.getEntity().setBounce(true);
+					BaseClass baseClass = instance.classes.get(player);
+					baseClass.ProjectileHit(event);
+				}
 			}
 		}
 	}
@@ -2115,6 +2143,14 @@ public class GameManager implements Listener, PluginMessageListener {
 			case COMPASS:
 				if (i != null) {
 					if (i.state == GameState.WAITING) {
+						PlayerData data = main.getDataManager().getPlayerData(player);
+						for (ClassType type : ClassType.values()) {
+							ClassDetails details = data.playerClasses.get(type.getID());
+							if (details == null) {
+								details = new ClassDetails();
+								data.playerClasses.put(type.getID(), details);
+							}
+						}
 						(new ClassSelectorGUI(this.main)).inv.open(player);
 					} else if (((BaseClass) i.classes.get(player)).getLives() <= 0) {
 						(new SpectatorGUI(this.main)).inv.open(player);
@@ -2177,6 +2213,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									// Customizing Zombie
 									customizeMob(zombie, player);
 									customizeZombie(zombie);
+									zombie.setTarget(i.getNearestPlayer(player, 100, 100, 100));
 
 									// If ClassType == Summoner
 									if (i.classes.get(player).getType() == ClassType.Summoner) {
@@ -2186,6 +2223,7 @@ public class GameManager implements Listener, PluginMessageListener {
 										// Customizing Second Zombie
 										customizeMob(zombie2, player);
 										customizeZombie(zombie2);
+										zombie2.setTarget(i.getNearestPlayer(player, 100, 100, 100));
 									}
 								}
 
@@ -2216,6 +2254,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									// Customizing Skeleton
 									customizeMob(skeleton, player);
 									customizeSkeleton(skeleton);
+									skeleton.setTarget(i.getNearestPlayer(player, 100, 100, 100));
 
 									// If ClassType == Summoner
 									if (i.classes.get(player).getType() == ClassType.Summoner) {
@@ -2225,6 +2264,7 @@ public class GameManager implements Listener, PluginMessageListener {
 										// Customizing Second Skeleton
 										customizeMob(skeleton2, player);
 										customizeSkeleton(skeleton2);
+										skeleton2.setTarget(i.getNearestPlayer(player, 100, 100, 100));
 									}
 								}
 							}, ItemHelper.createMonsterEgg(EntityType.SKELETON, 1));
@@ -2252,6 +2292,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									Witch witch = (Witch) player.getWorld().spawnCreature(hitLoc, EntityType.WITCH);
 									// Customizing Witch
 									customizeMob(witch, player);
+									witch.setTarget(i.getNearestPlayer(player, 100, 100, 100));
 								}
 
 							}, ItemHelper.createMonsterEgg(EntityType.WITCH, 1));
@@ -2281,6 +2322,8 @@ public class GameManager implements Listener, PluginMessageListener {
 									// Customizing Creeper
 									customizeMob(creeper, player);
 									customizeCreeper(creeper);
+									creeper.setTarget(i.getNearestPlayer(player, 100, 100, 100));
+									
 
 									// If ClassType == Summoner
 									// Setting to Charged Creeper
@@ -2382,7 +2425,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	private void customizeCreeper(Creeper creeper) {
-		creeper.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999, 1, false, false));
+		creeper.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999, 0, false, false));
 	}
 
 	private void customizeMob(Creature mob, Player player) {

@@ -241,6 +241,9 @@ public class ItemHelper {
 	public static ItemStack createSkullTexture(String textureUrl, String displayName) {
 		return setDetails(createSkullTexture(textureUrl), displayName);
 	}
+	public static ItemStack createSkullTexture(String textureUrl, String displayName, String... lore) {
+		return setDetails(createSkullTexture(textureUrl), displayName, lore);
+	}
 
 	public static ItemStack createDye(DyeColor color) {
 		Dye dye = new Dye();

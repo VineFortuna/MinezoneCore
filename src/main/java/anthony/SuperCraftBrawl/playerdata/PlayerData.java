@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.ranks.Rank;
+import org.bukkit.entity.Fish;
 
 public class PlayerData {
 	public UUID playerUUID;
@@ -18,9 +19,11 @@ public class PlayerData {
 			bonusTokens = 0, bonusLevels = 0, paintball = 0, santaoutfit, elf, gingerbreadman, killMsgs = 0,
 			challenge1 = 0, challenge2 = 0, challenge3 = 0, goldApple = 0, glowstone = 0, redstone = 0, web = 0,
 			bottleEXP = 0, broomWinEffect = 0, enderDragonEffect = 0, santaEffect = 0, fireParticlesEffect = 0,
-			challenge100 = 0, challenge101 = 0, challenge102 = 0, challenge103 = 0, matchMvps = 0, fly = 0;
+			fishRainEffect = 0, challenge100 = 0, challenge101 = 0, challenge102 = 0, challenge103 = 0, matchMvps = 0,
+			fly = 0, totalcaught = 0, caught = 0, rewardLevel = 0, lureLevel = 0, lure = 0;
 
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
+	public HashMap<Integer, FishingDetails> playerFishing = new HashMap<>();
 	public ArrayList<Integer> customIntegers = new ArrayList<>();
 
 	public PlayerData(UUID playerUUID, String playerName, String playerIP, int roleID, int tokens, int wins, int kills,
@@ -29,8 +32,9 @@ public class PlayerData {
 			int bestTime, int magicbroom, int points, int withersk, int bonusTokens, int bonusLevels, int paintball,
 			int santaoutfit, int elf, int gingerbreadman, int killMsgs, int challenge1, int challenge2, int challenge3,
 			int goldApple, int glowstone, int redstone, int web, int bottleEXP, int broomWWinEffect,
-			int enderDragonEffect, int santaEffect, int fireParticlesEffect, int challenge100, int challenge101,
-			int challenge102, int challenge103, int matchMvps, int fly) {
+			int enderDragonEffect, int santaEffect, int fireParticlesEffect, int fishRainEffect, int challenge100,
+			int challenge101, int challenge102, int challenge103, int matchMvps, int fly, int totalcaught, int caught,
+			int rewardLevel, int lureLevel, int lure) {
 		this(playerUUID, playerName, playerIP);
 		this.roleID = roleID;
 		this.tokens = tokens;
@@ -76,12 +80,18 @@ public class PlayerData {
 		this.enderDragonEffect = enderDragonEffect;
 		this.santaEffect = santaEffect;
 		this.fireParticlesEffect = fireParticlesEffect;
+		this.fishRainEffect = fishRainEffect;
 		this.challenge100 = challenge100;
 		this.challenge101 = challenge101;
 		this.challenge102 = challenge102;
 		this.challenge103 = challenge103;
 		this.matchMvps = matchMvps;
 		this.fly = fly;
+		this.totalcaught = totalcaught;
+		this.caught = caught;
+		this.rewardLevel = rewardLevel;
+		this.lureLevel = lureLevel;
+		this.lure = lure;
 	}
 
 	public boolean isPurchased(ClassType type) {

@@ -1,19 +1,23 @@
 package anthony.SuperCraftBrawl.Game;
 
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.all.DarkSethBlingClass;
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class WinEffects {
@@ -22,6 +26,8 @@ public class WinEffects {
 	private GameInstance i;
 	private EnderDragon dragon;
 	private boolean defaultEffect = false;
+	private boolean rainEffect = false;
+	private ArrayList<Item> fish = new ArrayList<>();
 
 	public WinEffects(Player player, GameInstance i) {
 		this.player = player;
@@ -42,6 +48,8 @@ public class WinEffects {
 						fireParticlesEffect();
 					else if (data.broomWinEffect == 1)
 						magicBroomEffect();
+					else if (data.fishRainEffect == 1)
+						fishRainEffect();
 					else
 						defaultEffect();
 				} else
@@ -97,6 +105,52 @@ public class WinEffects {
 	private void fireParticlesEffect() {
 
 	}
+	public Location getItemRainLoc() {
+		Random rand = new Random();
+		int attempts = 0;
+		Location respawnLoc = i.GetRespawnLoc();
+		while (true) {
+			Location loc = respawnLoc.clone().add(rand.nextFloat() * 50 - 25, 35, rand.nextFloat() * 50 - 25);
+			Location loc2 = loc.clone();
+			while (true) {
+				loc2.setY(loc2.getY() - 1);
+				Material mat = loc2.getBlock().getType();
+				if (mat.isSolid()) {
+					return loc;
+				}
+				if (loc2.getY() < 40) // Too low down without finding block
+					break;
+			}
+			if (attempts > 100)
+				return respawnLoc.add(0, 35, 0);
+			attempts++;
+		}
+	}
+	private void fishRainEffect() {
+		this.rainEffect = true;
+		if (player.getWorld() == i.getMapWorld()) {
+			World w = player.getWorld();
+			w.setStorm(true);
+			w.setThundering(true);
+			BukkitRunnable runnable = new BukkitRunnable() {
+				int rep = 0;
+				Random rand = new Random();
+				@Override
+				public void run() {
+					if (rep == 240) {
+						this.cancel();
+					} else {
+						int chance = rand.nextInt(4);
+						Item i = player.getWorld().dropItem(getItemRainLoc(),
+								new ItemStack(Material.RAW_FISH, 1, (short) chance));
+						fish.add(i);
+					}
+					rep++;
+				}
+			};
+			runnable.runTaskTimer(i.getGameManager().getMain(), 0, 1);
+		}
+	}
 
 	private void defaultEffect() {
 		this.defaultEffect = true;
@@ -117,7 +171,7 @@ public class WinEffects {
 
 							Color c = null;
 							Random r = new Random();
-							int chance = r.nextInt(3);
+							int chance = r.nextInt(4);
 
 							if (chance == 0)
 								c = Color.BLUE;
@@ -145,7 +199,15 @@ public class WinEffects {
 	public void removeWinEffects() {
 		if (this.dragon != null && !(this.dragon.isDead())) {
 			this.dragon.remove();
-		} else if (this.defaultEffect == true)
+		} else if (this.defaultEffect) {
 			this.defaultEffect = false;
+		} else if (this.rainEffect) {
+			player.getWorld().setStorm(false);
+			player.getWorld().setThundering(false);
+			for (Item i : fish) {
+				i.remove();
+			}
+			this.rainEffect = false;
+		}
 	}
 }

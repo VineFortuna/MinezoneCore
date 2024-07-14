@@ -53,6 +53,7 @@ public class GameInstance {
 	public List<Player> players;
 	public List<Player> spectators;
 	public Location recentDrop = null;
+	public int lastSpawn = -1;
 	public HashMap<Player, BaseClass> classes;
 	public HashMap<Player, BaseClass> oldClasses;
 	public HashMap<Player, BaseClass> allClasses; // Keep track of all players' BaseClass, even ones that left game
@@ -182,6 +183,7 @@ public class GameInstance {
 				player.setAllowFlight(true);
 				player.teleport(GetSpecLoc());
 				gameManager.getMain().board.get(player).delete();
+				player.sendMessage("Scoreboard");
 				setGameScore(player);
 				player.setDisplayName(player.getName() + " " + ChatColor.RESET + ChatColor.GRAY + ChatColor.ITALIC
 						+ "Spectator" + ChatColor.RESET);
@@ -530,7 +532,14 @@ public class GameInstance {
 		if (mapInstance.spawnPos.size() == 0)
 			return GetLobbyLoc().add(new Vector(42, 2, 2.5));
 		else {
-			Vector spawnPos = mapInstance.spawnPos.get(random.nextInt(mapInstance.spawnPos.size()));
+			int rand = random.nextInt(mapInstance.spawnPos.size());
+			if (lastSpawn >= 0) {
+				while (rand == lastSpawn) {
+					rand = random.nextInt(mapInstance.spawnPos.size());
+				}
+			}
+			lastSpawn = rand;
+			Vector spawnPos = mapInstance.spawnPos.get(rand);
 			return new Location(mapWorld, spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
 		}
 	}
@@ -1170,7 +1179,6 @@ public class GameInstance {
 	}
 
 	public void PlayerDeath(Player player) {
-		this.blindness = 0;
 		if (this.gameType == GameType.FRENZY)
 			rerandomizeClass(player);
 		final BaseClass baseClass = this.classes.get(player);
@@ -1482,6 +1490,7 @@ public class GameInstance {
 
 			if (data != null) {
 				data.points += points;
+				getGameManager().getMain().tourney.put(player.getName(), data.points);
 			}
 		}
 	}
@@ -1529,14 +1538,21 @@ public class GameInstance {
 	}
 
 	public void WinGame(List<Player> winners) {
-		// playerPosition.add(winner);
 		PlayerData data3 = null;
 		checkForMatchMvp();
 		for (Player winner : winners) {
 			data3 = gameManager.getMain().getDataManager().getPlayerData(winner);
 			winnerList.add(winner);
+			playerPosition.add(winner);
 			if (data3 != null) {
 				BaseClass bc = classes.get(winner);
+				int classID = bc.getType().getID();
+				ClassDetails details = data3.playerClasses.get(classID);
+				if (details == null) {
+					details = new ClassDetails();
+					data3.playerClasses.put(classID, details);
+				}
+				details.winGame();
 				if (data3.challenge1 == 0) {
 					if (bc != null) {
 						if (bc.getType() == ClassType.Pig) {
@@ -1545,14 +1561,14 @@ public class GameInstance {
 											+ " &rand have now unlocked the " + ClassType.Notch.getTag()
 											+ " &rclass!"));
 							data3.challenge1 = 1;
-							int classID = 29;
-							ClassDetails details = data3.playerClasses.get(classID);
+							classID = 29;
+							ClassDetails notchdetails = data3.playerClasses.get(classID);
 
-							if (details == null) {
-								details = new ClassDetails();
-								data3.playerClasses.put(classID, details);
+							if (notchdetails == null) {
+								notchdetails = new ClassDetails();
+								data3.playerClasses.put(classID, notchdetails);
 							}
-							details.setPurchased();
+							notchdetails.setPurchased();
 						}
 					}
 				}
@@ -1595,6 +1611,7 @@ public class GameInstance {
 			givePoints(2, 7);
 			givePoints(3, 5);
 			givePoints(4, 1);
+			getGameManager().getMain().sortTourney();
 		}
 
 		for (Player winner : winners) {
@@ -2038,8 +2055,16 @@ public class GameInstance {
 				if (baseClass != null) {
 					baseClass.score.getScoreboard().resetScores(baseClass.score.getEntry());
 					PlayerData data = this.gameManager.getMain().getDataManager().getPlayerData(player);
-					if (this.state != GameState.ENDED && this.state != GameState.WAITING && data != null)
+					if (this.state != GameState.ENDED && this.state != GameState.WAITING && data != null) {
 						data.losses++;
+						ClassType type = baseClass.getType();
+						ClassDetails details = data.playerClasses.get(type.getID());
+						if (details == null) {
+							details = new ClassDetails();
+							data.playerClasses.put(type.getID(), details);
+						}
+						details.playGame();
+					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -2233,6 +2258,21 @@ public class GameInstance {
 			return true;
 		}
 		return false;
+	}
+	
+	public Player getNearestPlayer(Player player, double x, double y, double z) {
+		for (Entity target : player.getNearbyEntities(x, y, z)) {
+			if (target instanceof Player) {
+				if (this.duosMap != null) {
+					if (!this.team.get(target).equals(this.team.get(player))) {
+						return (Player) target;
+					}
+				} else {
+					return (Player) target;
+				}
+			}
+		}
+		return null;
 	}
 
 	public boolean hasPlayerMovedPosition(Player player) {

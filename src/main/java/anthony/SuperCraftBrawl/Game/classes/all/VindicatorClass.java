@@ -42,9 +42,9 @@ public class VindicatorClass extends BaseClass {
     @Override
     public void SetArmour(EntityEquipment playerEquip) {
         String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGFlZWQ5ZDhlZDE3NjllNzdlM2NmZTExZGMxNzk2NjhlZDBkYjFkZTZjZTI5ZjFjOGUwZDVmZTVlNjU3M2I2MCJ9fX0=";
-        ItemStack skull = ItemHelper.createSkullTexture(texture, "");
-        
-        playerEquip.setHelmet(skull);
+        ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
+    
+        playerEquip.setHelmet(getHelmet(playerskull));
         playerEquip.setChestplate(makePink(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
                 Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
         playerEquip.setLeggings(makePink(new ItemStack(Material.LEATHER_LEGGINGS)));
@@ -78,7 +78,7 @@ public class VindicatorClass extends BaseClass {
                 getActionBarManager().setActionBar(player, "vindication.cooldown", msg, 2);
             }
         }
-        if (gameTicks % 5 == 0) {
+        if (gameTicks % 2 == 0) {
             if (!player.hasPotionEffect(PotionEffectType.SPEED) && player.getGameMode() != GameMode.SPECTATOR &&
                     !player.getNearbyEntities(8, 8, 8).isEmpty()) {
                 for (Entity nearby : player.getNearbyEntities(8, 8, 8)) {
@@ -100,6 +100,7 @@ public class VindicatorClass extends BaseClass {
                 if (effect.getType().equals(PotionEffectType.SPEED) && effect.getAmplifier() == 2) {
                     player.removePotionEffect(PotionEffectType.SPEED);
                     player.removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
+                    player.removePotionEffect(PotionEffectType.WEAKNESS);
                     player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 160, 1));
                     player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rYou lost your energy"));
                 }

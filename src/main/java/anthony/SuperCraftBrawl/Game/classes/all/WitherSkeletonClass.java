@@ -53,8 +53,8 @@ public class WitherSkeletonClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		ItemStack witherHelmet = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.WITHER.ordinal());
-		playerEquip.setHelmet(witherHelmet);
+		ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.WITHER.ordinal());
+		playerEquip.setHelmet(getHelmet(playerskull));
 		playerEquip.setChestplate(makeBlack(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 		playerEquip.setLeggings(makeBlack(new ItemStack(Material.LEATHER_LEGGINGS)));

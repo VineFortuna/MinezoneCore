@@ -1,19 +1,19 @@
 package anthony.SuperCraftBrawl;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import me.itzzmic.minezone.api.PunishAPI;
+import net.minecraft.server.v1_8_R3.EntityFishingHook;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.block.ContainerBlock;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Snowball;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -32,6 +32,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Door;
 import org.bukkit.material.Skull;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -169,7 +170,8 @@ public class PlayerListener implements Listener {
 	public void armorStand(EntityDamageByEntityEvent e) {
 		if (e.getDamager() instanceof Player)
 			if (e.getEntity() instanceof ArmorStand)
-				e.setCancelled(true);
+				if (((Player) e.getDamager()).getPlayer().getGameMode() != GameMode.CREATIVE)
+					e.setCancelled(true);
 	}
 
 	@EventHandler(priority = EventPriority.NORMAL)
@@ -182,11 +184,11 @@ public class PlayerListener implements Listener {
 	public void tokenClassGUI(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
 		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
-
 		if (e.getItem() != null && e.getItem().getType() == Material.ENCHANTED_BOOK) {
 			e.setCancelled(true);
-			if (i == null)
+			if (i == null) {
 				new ClassSelectorGUI(main).inv.open(player);
+			}
 		}
 	}
 
@@ -233,11 +235,17 @@ public class PlayerListener implements Listener {
 		ItemStack item = e.getItem();
 
 		if (item != null) {
-			if (item.getType() == Material.SKULL_ITEM)
-				new StatsGUI(main).inv.open(player);
-			else if (item.getType() == Material.NETHER_STAR)
+			if (item.getType() == Material.SKULL_ITEM) {
+				if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+					if (item.getItemMeta().getDisplayName().contains("Profile"))
+						new StatsGUI(main).inv.open(player);
+					else if (item.getItemMeta().getDisplayName().contains("Tournament"))
+						new TournamentGUI(main).inv.open(player);
+				}
+			} else if (item.getType() == Material.NETHER_STAR) {
 				if (player.getWorld() == main.getLobbyWorld())
 					new ChallengesGUI(main).inv.open(player);
+			}
 		}
 	}
 
@@ -245,12 +253,21 @@ public class PlayerListener implements Listener {
 	public void containerInteract(PlayerInteractEvent e) {
 		List<Material> list = new ArrayList<>(Arrays.asList(Material.FURNACE, Material.HOPPER, Material.ANVIL,
 				Material.ENCHANTMENT_TABLE, Material.ANVIL, Material.WORKBENCH, Material.BREWING_STAND,
-				Material.TRAPPED_CHEST, Material.ENDER_CHEST, Material.BEACON));
+				Material.TRAPPED_CHEST, Material.ENDER_CHEST, Material.BEACON, Material.DISPENSER, Material.DROPPER,
+				Material.CHEST));
 		if (e.getAction() == Action.RIGHT_CLICK_BLOCK && list.contains(e.getClickedBlock().getType())) {
 			Player player = e.getPlayer();
-
 			if (!player.isOp())
 				e.setCancelled(true);
+		}
+	}
+	
+	@EventHandler
+	public void playerRightClick(PlayerInteractEntityEvent e) {
+		if (main.getGameManager().GetInstanceOfPlayer(e.getPlayer()) == null
+				&& e.getRightClicked() instanceof Player) {
+			Player target = ((Player) e.getRightClicked()).getPlayer();
+			new StatsGUI(main, target).inv.open(e.getPlayer());
 		}
 	}
 
@@ -274,10 +291,10 @@ public class PlayerListener implements Listener {
 		} else {
 			// Chat filter
 			List<String> filteredWords = new ArrayList<>(Arrays.asList(
-					"nibba", "nigga", "nigger", "porn", "pornhub", "cum", "nexly",
-					"fuck you", "fuckyou", "fuck", "shit", "sh!t", "bitch", "pussy", "fucker",
+					"nibba", "nigga", "niggas", "nigger", "niggers", "porn", "pornhub",
+					"cum", "fuck you", "fuckyou", "fuck", "bitch", "pussy", "fucker",
 					"motherfucker", "celestepvp", "celeste", "kys", "pu$$y", "fag", "faggot",
-					"bitchass", "cunt", "retard", "asshole", "penis", "fucker", "twat", "cock", "ass"));
+					"bitchass", "cunt", "retard", "penis", "fucker", "twat", "cock"));
 			PlayerData data = main.getDataManager().getPlayerData(event.getPlayer());
 			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
 			String message = event.getMessage();
@@ -416,6 +433,12 @@ public class PlayerListener implements Listener {
 				}
 			}
 		}
+	}
+	
+	@EventHandler
+	public void onHookHit(EntityDamageByEntityEvent event) {
+		if (event.getDamager() instanceof FishHook)
+			event.setCancelled(true);
 	}
 
 	@EventHandler

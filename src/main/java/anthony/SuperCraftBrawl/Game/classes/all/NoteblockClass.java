@@ -45,7 +45,7 @@ public class NoteblockClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		playerEquip.setHelmet(new ItemStack(Material.NOTE_BLOCK));
+		playerEquip.setHelmet(getHelmet(new ItemStack(Material.NOTE_BLOCK)));
 		playerEquip.setChestplate(makeGreen(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 2)));
 		playerEquip.setLeggings(makeGreen(new ItemStack(Material.LEATHER_LEGGINGS)));

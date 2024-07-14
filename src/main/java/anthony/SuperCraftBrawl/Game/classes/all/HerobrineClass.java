@@ -53,8 +53,8 @@ public class HerobrineClass extends BaseClass {
 		player.getInventory().setBoots(air);
 		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTM1YmRkN2VmZjExYzg3ZDUyYTExM2MyZWZiNGNhNDU3NzVlNTY3MzVkYzRiMzhkN2ZhMWRiNzA4NDU4In19fQ==";
 		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-
-		playerEquip.setHelmet(playerskull);
+		
+		playerEquip.setHelmet(getHelmet(playerskull));
 		playerEquip.setChestplate(new ItemStack(Material.AIR));
 		playerEquip.setLeggings(new ItemStack(Material.AIR));
 		playerEquip.setBoots(new ItemStack(Material.AIR));

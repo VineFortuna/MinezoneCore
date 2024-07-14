@@ -37,7 +37,7 @@ public class SteveClass extends BaseClass {
 	private int kb = 1;
 	private int sharp = 1;
 	private int fortune = 0;
-	// private int blind = 0;
+	//private int blind = 0;
 
 	public SteveClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -53,7 +53,7 @@ public class SteveClass extends BaseClass {
 
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
-		playerEquip.setHelmet(new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal()));
+		playerEquip.setHelmet(getHelmet(new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal())));
 		playerEquip.setChestplate(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 3));
 		playerEquip.setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
