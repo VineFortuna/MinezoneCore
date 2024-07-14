@@ -45,7 +45,7 @@ public class WinEffectsGUI implements InventoryProvider {
 		
 		
 		// Setting Items
-		contents.fillRect(1,1, 7,7, ClickableItem.of(
+		contents.fillRect(1, 1, 7, 7, ClickableItem.of(
 				lockedCosmetic,
 				e -> {
 				
@@ -56,12 +56,12 @@ public class WinEffectsGUI implements InventoryProvider {
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.WHEAT), main.color("&cMagic Broom"),
 							"", main.color("&rFly around the map with this"), main.color("&rwhen you win!"), "",
 							"" + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN" + ChatColor.RESET + "+ exclusive!"), e -> {
-								resetWinEffects(data);
-								data.broomWinEffect = 1;
-								inv.close(player);
-								player.sendMessage(main.color("&e&l(!) &rYou have enabled &eMagic Broom &rwin effect"));
-							}));
-
+						resetWinEffects(data);
+						data.broomWinEffect = 1;
+						inv.close(player);
+						player.sendMessage(main.color("&e&l(!) &rYou have enabled &eMagic Broom &rwin effect"));
+					}));
+			
 			contents.set(1, 4,
 					ClickableItem.of(
 							ItemHelper
@@ -80,37 +80,40 @@ public class WinEffectsGUI implements InventoryProvider {
 			
 			String santaTexture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19";
 			ItemStack santa = ItemHelper.createSkullTexture(santaTexture);
-
+			
 			contents.set(1, 3,
 					ClickableItem.of(ItemHelper.setDetails(santa, main.color("&cSanta Claus Effect"), "",
 							main.color("&rBecome old Saint Nick himself"), main.color("&rand ride along!"), "",
 							"" + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN" + ChatColor.RESET + "+ exclusive!"), e -> {
-								resetWinEffects(data);
-								data.santaEffect = 1;
-								inv.close(player);
-								player.sendMessage(main.color("&e&l(!) &rYou have enabled &eSanta Claus &rwin effect"));
-							}));
-			if (data.rewardLevel >= 3) {
-				contents.set(1, 5,
-						ClickableItem.of(
-								ItemHelper
-										.setDetails(new ItemStack(Material.RAW_FISH), main.color("&cFish Rain"), "",
-												main.color("&rIt's raining fish"),
-												"", main.color("&aFishing reward!")),
-								e -> {
+						resetWinEffects(data);
+						data.santaEffect = 1;
+						inv.close(player);
+						player.sendMessage(main.color("&e&l(!) &rYou have enabled &eSanta Claus &rwin effect"));
+					}));
+			contents.set(1, 5,
+					ClickableItem.of(
+							ItemHelper
+									.setDetails(new ItemStack(Material.RAW_FISH), main.color("&cFish Rain"), "",
+											main.color("&rIt's raining fish"),
+											"", main.color("&aFishing reward!")),
+							e -> {
+								if (data.rewardLevel >= 4) {
 									resetWinEffects(data);
 									data.fishRainEffect = 1;
 									inv.close(player);
 									player.sendMessage(main.color("&e&l(!) &rYou have enabled &eFish Rain &rwin effect"));
-								}));
-			}
-
+								} else {
+									player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
+											+ "You have not unlocked this cosmetic yet!");
+								}
+							}));
+			
 			contents.set(1, 1, ClickableItem.of(ItemHelper.setDetails(playerskull, main.color("&cDefault Effect"), "",
 					main.color("&rFireworks shoot up when winning"), main.color("&ra game!")), e -> {
-						resetWinEffects(data);
-						inv.close(player);
-						player.sendMessage(main.color("&e&l(!) &rYou have enabled &eDefault &rwin effect"));
-					}));
+				resetWinEffects(data);
+				inv.close(player);
+				player.sendMessage(main.color("&e&l(!) &rYou have enabled &eDefault &rwin effect"));
+			}));
 		}
 	}
 
