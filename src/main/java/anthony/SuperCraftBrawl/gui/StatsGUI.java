@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.fishing.FishRarity;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -73,6 +74,7 @@ public class StatsGUI implements InventoryProvider {
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FEATHER), "&cComing soon..."), e-> {}));*/
 			contents.set(2, 4,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
+							main.color("&e&lSCB Stats"),
 							"" + ChatColor.RESET + ChatColor.GREEN + "Wins: " + ChatColor.RESET + data.wins,
 							"" + ChatColor.RESET + ChatColor.GREEN + "Winstreak: " + ChatColor.RESET + data.winstreak,
 							"" + ChatColor.RESET + ChatColor.GREEN + "Flawless Wins: " + ChatColor.RESET
@@ -82,10 +84,13 @@ public class StatsGUI implements InventoryProvider {
 							"", "" + ChatColor.RESET + ChatColor.GREEN + "Kills: " + ChatColor.RESET + data.kills,
 							"" + ChatColor.RESET + ChatColor.GREEN + "Deaths: " + ChatColor.RESET + data.deaths), e -> {
 							}));
-			String tournamentTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGYzOTk3YzQzMDkxNjk0ZmMyZmI3NmM4ODNhNzZjY2U4OWYwMjI3ZTVjOWYxZGZlIn19fQ==";
-			/*contents.set(2, 6,
-					ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(tournamentTexture),
-							main.color("&cComing soon...")), e-> {}));*/
+			contents.set(2, 6,
+					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
+							main.color("&e&lFishing Stats"),
+							main.color("&aCaught: &r" + data.totalcaught),
+							main.color("&aUnique Caught: &r" + main.getTotalFish(player)),
+							main.color("&aTreasure Caught: &r" + main.getTotalFish(player, FishRarity.TREASURE))), e -> {
+					}));
 			String fishingTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTk2YTQ4ZGNkYWY0MThmMjJjZDE4NjdjMWViMGFlMjgyYzI4NGI2Nzk5MDZiNzk3ODFkOGQyYjJlZWJhMjEwMiJ9fX0=";
 			contents.set(4, 0,
 					ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(fishingTexture),

@@ -110,7 +110,7 @@ public class WinEffects {
 		int attempts = 0;
 		Location respawnLoc = i.GetRespawnLoc();
 		while (true) {
-			Location loc = respawnLoc.clone().add(rand.nextFloat() * 50 - 25, 25, rand.nextFloat() * 50 - 25);
+			Location loc = respawnLoc.clone().add(rand.nextFloat() * 50 - 25, 35, rand.nextFloat() * 50 - 25);
 			Location loc2 = loc.clone();
 			while (true) {
 				loc2.setY(loc2.getY() - 1);
@@ -122,7 +122,7 @@ public class WinEffects {
 					break;
 			}
 			if (attempts > 100)
-				return respawnLoc.add(0, 25, 0);
+				return respawnLoc.add(0, 35, 0);
 			attempts++;
 		}
 	}
@@ -134,18 +134,21 @@ public class WinEffects {
 			w.setThundering(true);
 			BukkitRunnable runnable = new BukkitRunnable() {
 				int rep = 0;
+				Random rand = new Random();
 				@Override
 				public void run() {
-					if (rep == 120) {
+					if (rep == 240) {
 						this.cancel();
 					} else {
-						Item i = player.getWorld().dropItem(getItemRainLoc(), new ItemStack(Material.RAW_FISH));
+						int chance = rand.nextInt(4);
+						Item i = player.getWorld().dropItem(getItemRainLoc(),
+								new ItemStack(Material.RAW_FISH, 1, (short) chance));
 						fish.add(i);
 					}
 					rep++;
 				}
 			};
-			runnable.runTaskTimer(i.getGameManager().getMain(), 0, 2);
+			runnable.runTaskTimer(i.getGameManager().getMain(), 0, 1);
 		}
 	}
 
