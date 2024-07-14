@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.gui;
 import anthony.SuperCraftBrawl.fishing.FishRarity;
 import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
+import fr.minuskube.inv.content.*;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -16,10 +17,9 @@ import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
-import fr.minuskube.inv.content.InventoryContents;
-import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class FishingGUI implements InventoryProvider {
@@ -29,7 +29,7 @@ public class FishingGUI implements InventoryProvider {
     private Player target;
     
     public FishingGUI(Core main, SmartInventory parent) {
-        inv = SmartInventory.builder().id("myInventory").provider(this).size(6, 9)
+        inv = SmartInventory.builder().id("myInventory").provider(this).size(5, 9)
                 .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Fishing").parent(parent).build();
         this.main = main;
     }
@@ -43,19 +43,20 @@ public class FishingGUI implements InventoryProvider {
     
     @Override
     public void init(Player player, InventoryContents contents) {
+        Pagination pagination = contents.pagination();
+        
         PlayerData data = main.getDataManager().getPlayerData(player);
         if (this.target != null)
             data = main.getDataManager().getPlayerData(target);
         
-        contents.fillRow(0, ClickableItem.of(ItemHelper.setDetails(
-                new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
-        contents.fillRow(5, ClickableItem.of(ItemHelper.setDetails(
+        contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(
                 new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
         
         
-        int a = 1;
-        int b = 0;
+        
+        ClickableItem[] items = new ClickableItem[FishType.values().length];
     
+        int i = 0;
         for (FishType type : FishType.values()) {
             FishingDetails details = data.playerFishing.get(type.getId());
             ItemStack item = ItemHelper.setDetails(ItemHelper.createDye(DyeColor.GRAY, 1), main.color("&c???"));
@@ -65,19 +66,12 @@ public class FishingGUI implements InventoryProvider {
                 ItemHelper.setDetails(item, item.getItemMeta().getDisplayName(),
                         item.getItemMeta().getLore(), "", main.color("&7Times caught: " + details.timesCaught));
             }
-    
-            contents.set(a, b,
-                    ClickableItem.of(item,
-                            e -> {
-                            }));
-        
-            b++;
-        
-            if (b > 8) {
-                a++;
-                b = 0;
-            }
+            items[i] = ClickableItem.empty(item);
+            i++;
         }
+        
+        pagination.setItems(items);
+        pagination.setItemsPerPage(21);
         
         Location fishingLoc = new Location(main.getLobbyWorld(), 303.500, 91.0, 526.500, 144.4F, 0.0F);
     
@@ -102,19 +96,19 @@ public class FishingGUI implements InventoryProvider {
                     }
                 }));
         
-        contents.set(5, 8, ClickableItem.of(
+        contents.set(4, 8, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
                     inv.getParent().get().open(player);
                 }));
-        contents.set(5, 3, ClickableItem.of(
+        contents.set(4, 3, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.EMERALD), ChatColor.GRAY + "Rewards"), e -> {
                     new FishingRewardsGUI(main, inv).inv.open(player);
                 }));
-        contents.set(5, 5, ClickableItem.of(
+        contents.set(4, 5, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.ANVIL), ChatColor.GRAY + "Upgrades"), e -> {
                     new FishingUpgradesGUI(main, inv).inv.open(player);
                 }));
-        contents.set(5, 0, ClickableItem.of(
+        contents.set(4, 0, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.PAPER), ChatColor.GRAY + "Chance Breakdown",
                         main.color("&eTotal chance:"),
                         main.color("&e- Junk " + FishRarity.JUNK.getChance() + "%"),
@@ -129,6 +123,25 @@ public class FishingGUI implements InventoryProvider {
                         main.color("&e- Mythic " + FishRarity.MYTHIC.getChance() + "%"),
                         main.color("&e- Legendary " + FishRarity.LEGENDARY.getChance() + "%")), e -> {
                 }));
+        if (!pagination.isFirst()) {
+            contents.set(2, 0, ClickableItem.of(
+                    ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Previous Page"),
+                    e -> inv.open(player, pagination.previous().getPage())));
+        }
+        if (!pagination.isLast()) {
+            contents.set(2, 8, ClickableItem.of(
+                    ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Next Page"),
+                    e -> inv.open(player, pagination.next().getPage())));
+        }
+    
+        SlotIterator iter = contents.newIterator(SlotIterator.Type.HORIZONTAL, SlotPos.of(1, 0));
+        iter.blacklist(1, 0);
+        iter.blacklist(2, 0);
+        iter.blacklist(3, 0);
+        iter.blacklist(1, 8);
+        iter.blacklist(2, 8);
+        iter.blacklist(3, 8);
+        pagination.addToIterator(iter);
     }
     
     @Override
