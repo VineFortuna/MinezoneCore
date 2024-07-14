@@ -47,7 +47,8 @@ public class WolfClass extends BaseClass {
 
 	@Override
 	public ClassType getType() {
-		return null;
+		//return ClassType.Wolf;
+		return ClassType.Zombie;
 	}
 
 	public ItemStack makeGray(ItemStack armour) {

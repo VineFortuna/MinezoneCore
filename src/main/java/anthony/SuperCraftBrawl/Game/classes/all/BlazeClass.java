@@ -52,9 +52,9 @@ public class BlazeClass extends BaseClass {
 	@Override
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjU5Njk4MmMzZGJhN2Y2NzRjZmI5M2RkMzllMTcxM2E4ZWMxMjk5MDQ3M2FjYmZkODVhMThmZDkwOTE4ZGE0MSJ9fX0=";
-		ItemStack skull = ItemHelper.createSkullTexture(texture, "");
+		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
 		
-		playerEquip.setHelmet(skull);
+		playerEquip.setHelmet(getHelmet(playerskull));
 		playerEquip.setChestplate(makeGreen(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 		playerEquip.setLeggings(makeGreen(new ItemStack(Material.LEATHER_LEGGINGS)));
@@ -110,6 +110,7 @@ public class BlazeClass extends BaseClass {
 		player.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rYou spawned &6&lBlaze Army"));
 		Blaze b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
 		b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
+		b.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
 		blazes.add(b);
 
 		if (yaw > 45 && yaw <= 135) {
@@ -117,33 +118,39 @@ public class BlazeClass extends BaseClass {
 					player.getLocation().getZ() + 1);
 			b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
 			b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
+			b.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
 			blazes.add(b);
 			loc = new Location(player.getWorld(), player.getLocation().getX(), player.getLocation().getY(),
 					player.getLocation().getZ() - 1);
 			b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
 			b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
+			b.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
 			blazes.add(b);
 		} else if (yaw <= -45 && yaw > -135) {
 			loc = new Location(player.getWorld(), player.getLocation().getX(), player.getLocation().getY(),
 					player.getLocation().getZ() + 1);
 			b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
 			b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
+			b.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
 			blazes.add(b);
 			loc = new Location(player.getWorld(), player.getLocation().getX(), player.getLocation().getY(),
 					player.getLocation().getZ() - 1);
 			b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
 			b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
+			b.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
 			blazes.add(b);
 		} else {
 			loc = new Location(player.getWorld(), player.getLocation().getX() + 1, player.getLocation().getY(),
 					player.getLocation().getZ());
 			b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
 			b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
+			b.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
 			blazes.add(b);
 			loc = new Location(player.getWorld(), player.getLocation().getX() - 1, player.getLocation().getY(),
 					player.getLocation().getZ());
 			b = (Blaze) player.getWorld().spawnCreature(loc, EntityType.BLAZE);
 			b.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
+			b.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
 			blazes.add(b);
 		}
 

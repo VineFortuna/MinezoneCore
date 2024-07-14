@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.fishing.FishRarity;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -42,6 +43,8 @@ public class StatsGUI implements InventoryProvider {
 		if (this.target != null)
 			data = main.getDataManager().getPlayerData(target);
 		
+		contents.fillRow(0, ClickableItem.of(ItemHelper.setDetails(
+				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 		contents.fillRow(4, ClickableItem.of(ItemHelper.setDetails(
 				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 		
@@ -67,8 +70,11 @@ public class StatsGUI implements InventoryProvider {
 							Arrays.asList(main.color("&aRank: &r" + data.getRank().getTag()),
 									main.color("&aLevel: &r" + data.level),
 									main.color("&aMatches Played: &r" + (data.wins + data.losses)))), e-> {}));
+			/*contents.set(2, 2,
+					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FEATHER), "&cComing soon..."), e-> {}));*/
 			contents.set(2, 4,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
+							main.color("&e&lSCB Stats"),
 							"" + ChatColor.RESET + ChatColor.GREEN + "Wins: " + ChatColor.RESET + data.wins,
 							"" + ChatColor.RESET + ChatColor.GREEN + "Winstreak: " + ChatColor.RESET + data.winstreak,
 							"" + ChatColor.RESET + ChatColor.GREEN + "Flawless Wins: " + ChatColor.RESET
@@ -78,6 +84,23 @@ public class StatsGUI implements InventoryProvider {
 							"", "" + ChatColor.RESET + ChatColor.GREEN + "Kills: " + ChatColor.RESET + data.kills,
 							"" + ChatColor.RESET + ChatColor.GREEN + "Deaths: " + ChatColor.RESET + data.deaths), e -> {
 							}));
+			contents.set(2, 6,
+					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
+							main.color("&e&lFishing Stats"),
+							main.color("&aCaught: &r" + data.totalcaught),
+							main.color("&aUnique Caught: &r" + main.getTotalFish(player)),
+							main.color("&aTreasure Caught: &r" + main.getTotalFish(player, FishRarity.TREASURE))), e -> {
+					}));
+			String fishingTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTk2YTQ4ZGNkYWY0MThmMjJjZDE4NjdjMWViMGFlMjgyYzI4NGI2Nzk5MDZiNzk3ODFkOGQyYjJlZWJhMjEwMiJ9fX0=";
+			contents.set(4, 0,
+					ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(fishingTexture),
+							main.color("&eFishing")), e-> {
+						if (target != null)
+							new FishingGUI(main, target, inv).inv.open(player);
+						else
+							new FishingGUI(main, inv).inv.open(player);
+					}));
+			
 		}
 	}
 

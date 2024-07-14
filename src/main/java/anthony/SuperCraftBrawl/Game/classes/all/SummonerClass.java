@@ -47,7 +47,7 @@ public class SummonerClass extends BaseClass {
 	public void SetArmour(EntityEquipment playerEquip) {
 		// Head (helmet)
 		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTA2ODZhMGQ5MzliYzlhY2YxY2UxZjY2OGQ0MDg0ZTdlNjRkNjE1NTUzZmIxYzM2ZjUxMjdiNDFjOGNiNzkxMSJ9fX0=";
-		ItemStack playerHead = ItemHelper.createSkullTexture(texture, "&5Summoner Head");
+		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "&5Summoner Head");
 		
 		// Chestplate
 		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.PURPLE, "&5Summoner's Chestplate");
@@ -61,7 +61,7 @@ public class SummonerClass extends BaseClass {
 		boots.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 		
 		// Setting armor
-		playerEquip.setHelmet(playerHead);
+		playerEquip.setHelmet(getHelmet(playerskull));
 		playerEquip.setChestplate(chestplate);
 		playerEquip.setLeggings(leggings);
 		playerEquip.setBoots(boots);
@@ -200,6 +200,7 @@ public class SummonerClass extends BaseClass {
 //							EntityDamageEvent damageEvent = new EntityDamageEvent(player, DamageCause.PROJECTILE, 2.0);
 //							instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 //							player.damage(2.0);
+							en.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
 						}
 						
 					}, new ItemStack(Material.MONSTER_EGG));
@@ -225,6 +226,7 @@ public class SummonerClass extends BaseClass {
 							en.setCustomNameVisible(true);
 							// Setting to Charged Creeper
 							en.setPowered(true);
+							en.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
 						}
 						
 					}, new ItemStack(Material.MONSTER_EGG));
@@ -267,6 +269,7 @@ public class SummonerClass extends BaseClass {
 							
 							equipment.setHelmet(helmet);
 							equipment.setChestplate(chestplate);
+							en.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
 						}
 						
 					}, new ItemStack(Material.MONSTER_EGG));

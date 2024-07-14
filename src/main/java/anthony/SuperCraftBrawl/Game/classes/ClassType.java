@@ -29,9 +29,9 @@ public enum ClassType {
 	ZombiePigman(51, 0, 3), Witch(13, 0, 5), ZombieVillager(50, 0, 10), Ice(54, 0, 15), Vampire(53, 800, 0),
 	Bee(55, 425, 0), Jeb(56, 0, 20), Hunter(57, 500, 0), FlintAndSteel(58, 0, 0), WitherSk(59, 1500, 0),
 	Shulker(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30), LargeFern(64, 0, 0),
-	Vindicator(65, 0, Rank.VIP), Fade(66, 0, Rank.VIP);
+	Vindicator(65, 0, Rank.VIP), Fade(66, 0, Rank.VIP), Fisherman(67, 0, 0);
 
-	// Wolf(63, 0, 35)/* , Guardian(63, 0, 30) */;
+	// Wolf(67, 0, 35)/* , Guardian(68, 0, 30) */;
 
 	private int id;
 	private int tokenCost = 0;
@@ -201,6 +201,8 @@ public enum ClassType {
 			return new LargeFernClass(instance, player);
 		case Vindicator:
 			return new VindicatorClass(instance, player);
+		case Fisherman:
+			return new FishermanClass(instance, player);
 // 		case Wolf:
 // 			return new WolfClass(instance, player);
 //		case Guardian:
@@ -342,6 +344,8 @@ public enum ClassType {
 			return new ItemStack(Material.DOUBLE_PLANT, 1, (short) 3);
 		case Vindicator:
 			return new ItemStack(Material.IRON_AXE);
+		case Fisherman:
+			return new ItemStack(Material.FISHING_ROD);
 // 		case Wolf:
 // 			return new ItemStack(Material.BONE);
 // 		case Guardian:
@@ -366,7 +370,7 @@ public enum ClassType {
 		case Firework:
 			return "Shoot colorful fireworks and inflict different effects!";
 		case Shulker:
-			return "You want me? I want you baby, my sugar boo, Im levitating";
+			return "You want me? I want you baby, my sugar boo, I'm levitating";
 		case WitherSk:
 			return "Shoot your withering blasts at other players!";
 		case Rabbit:
@@ -374,7 +378,7 @@ public enum ClassType {
 		case FlintAndSteel:
 			return "Combo your flint & steel for a special reward";
 		case Hunter:
-			return "Damage your enemies to gain Blood Lust to get special enchants!";
+			return "Damage your enemies to gain Blood Lust to get special potions!";
 		case Jeb:
 			return "Notch vs. Jeb, who wins?";
 		case Bee:
@@ -385,10 +389,8 @@ public enum ClassType {
 			return "Use your bow to poison your enemies!";
 		case ZombiePigman:
 			return "Summon your brothers to help you fight your enemies while you smack them with your Gold Sword!";
-		// case WitherSk:
-		// return "A very powerful character ready to dominate";
 		case ZombieVillager:
-			return "A poisonous creature..";
+			return "A poisonous creature...";
 		case Villager:
 			return "Toss your potatoes to confuse your enemies";
 		case MagmaCube:
@@ -404,7 +406,7 @@ public enum ClassType {
 		case Dweller:
 			return "Beware the Dweller of SCB!";
 		case Star:
-			return "Born in 1964 Jeffrey.. Jeffrey Besos";
+			return "Born in 1964 Jeffrey... Jeffrey Besos";
 		case Wizard:
 			return "A Wizard with different spells!";
 		case Present:
@@ -424,7 +426,7 @@ public enum ClassType {
 		case Wither:
 			return "Utilize your explosive skulls to defeat your enemies!";
 		case Notch:
-			return "The owner of Minecraft..";
+			return "The owner of Minecraft...";
 		case Blaze:
 			return "ITS A BLAZE LOL!";
 		case Steve:
@@ -466,7 +468,7 @@ public enum ClassType {
 		case Slime:
 			return "Throw sticky grenades and attack enemies!";
 		case ButterGolem:
-			return "Once a proud member of the Sky Army, the ButterGolem now stands as a relic of a bygone era..";
+			return "Once a proud member of the Sky Army, the ButterGolem now stands as a relic of a bygone era...";
 		case Bat:
 			return "Dance around your opponents with SUPER high jumps!";
 		case SethBling:
@@ -474,7 +476,7 @@ public enum ClassType {
 		case Melon:
 			return "The Owner of the server in the game?!";
 		case BabyCow:
-			return "moo.. MOO!!";
+			return "moo... MOO!!";
 		case Herobrine:
 			return "Use your Diamond of Despair to play tricks on your opponents!";
 		case Pig:
@@ -483,16 +485,17 @@ public enum ClassType {
 			return "??????";
 		case Vindicator:
 			return "Vindicate yourself in front of your enemies";
+		case Fisherman:
+			return "Let's go fishing!";
 //		case Wolf:
 //			return "Have your brothers defend you from enemies!";
 //		case Guardian:
 //			return "Guard thyself and thy family (or something idk)";
 //		case Fluxty:
-//			return: "We cannot have HATERS in the community.. So use your Wood Axe to kick em all out!";
+//			return: "We cannot have HATERS in the community... So use your Wood Axe to kick em all out!";
 //		case Snowman:
 //			return "This is a Snowman, not a SnowGolem. Get it right pleb!";
 		}
-
 		return null;
 	}
 
@@ -531,9 +534,6 @@ public enum ClassType {
 			return "" + ChatColor.BLACK + ChatColor.BOLD + ChatColor.ITALIC + "Fade" + ChatColor.RESET;
 		case Cloud:
 			return "" + ChatColor.GRAY + ChatColor.ITALIC + "Cloud" + ChatColor.RESET;
-		// case Wolf:
-		// return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Wolf"
-		// + ChatColor.RESET;
 		// case Guardian:
 		// return "" + ChatColor.GRAY + ChatColor.BOLD + "Guardian" + ChatColor.RESET;
 
@@ -660,6 +660,8 @@ public enum ClassType {
 			return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + "LargeFern" + ChatColor.RESET;
 		case Vindicator:
 			return "" + ChatColor.GRAY + "Vindicator" + ChatColor.RESET;
+		case Fisherman:
+			return "" + ChatColor.DARK_AQUA  + ChatColor.ITALIC + "Fisherman" + ChatColor.RESET;
 // 		case Wolf:
 // 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Wolf" + ChatColor.RESET;
 // 		case Guardian:
