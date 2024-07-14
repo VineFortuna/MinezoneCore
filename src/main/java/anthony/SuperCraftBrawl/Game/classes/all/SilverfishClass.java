@@ -47,8 +47,8 @@ public class SilverfishClass extends BaseClass {
 	public void SetArmour(EntityEquipment playerEquip) {
 		// Head (helmet)
 		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGE5MWRhYjgzOTFhZjVmZGE1NGFjZDJjMGIxOGZiZDgxOWI4NjVlMWE4ZjFkNjIzODEzZmE3NjFlOTI0NTQwIn19fQ==";
-		ItemStack skull = ItemHelper.createSkullTexture(texture, "");
-		playerEquip.setHelmet(skull);
+		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
+		playerEquip.setHelmet(getHelmet(playerskull));
 
 		// Chestplate
 		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.GRAY, "&7Silverfish Chestplate");
@@ -459,6 +459,7 @@ public class SilverfishClass extends BaseClass {
 
 			// Customizing Creeper
 			customizeSilverfish(silverfish, player);
+			silverfish.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
 		}
 
 		public void despawnSilverfish() {

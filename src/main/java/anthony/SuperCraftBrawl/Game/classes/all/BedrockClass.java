@@ -73,7 +73,7 @@ public class BedrockClass extends BaseClass {
 		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 
 		// Setting Armor
-		playerEquip.setHelmet(playerHead);
+		playerEquip.setHelmet(getHelmet(playerHead));
 		playerEquip.setChestplate(chestplate);
 		playerEquip.setLeggings(leggings);
 		playerEquip.setBoots(boots);

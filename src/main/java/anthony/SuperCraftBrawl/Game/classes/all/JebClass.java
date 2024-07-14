@@ -52,8 +52,8 @@ public class JebClass extends BaseClass {
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texure = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDJlN2Y3OTdlOTJhOTk1NmU5MTUxYjM1YmJhZWMwMTIzNjVhOTAyY2U4OTc5MGRhYjVhNDc3ODliZWQ5NzE5MCJ9fX0=";
 		ItemStack playerskull = ItemHelper.createSkullTexture(texure, "");
-
-		playerEquip.setHelmet(playerskull);
+		
+		playerEquip.setHelmet(getHelmet(playerskull));
 		playerEquip.setChestplate(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4));
 		playerEquip.setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
