@@ -80,8 +80,9 @@ public class FishermanClass extends BaseClass {
         playerEquip.setChestplate(makeBrown(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
                 Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
         playerEquip.setLeggings(makeBrown(new ItemStack(Material.LEATHER_LEGGINGS)));
-        playerEquip.setBoots(makeBrown(
-                ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+        playerEquip.setBoots(makeBrown(ItemHelper.addEnchant(ItemHelper.addEnchant(
+                new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4),
+                Enchantment.DEPTH_STRIDER, 1)));
     }
     
     @Override
@@ -169,9 +170,9 @@ public class FishermanClass extends BaseClass {
             if (instance.duosMap != null)
                 if (instance.team.get(p).equals(instance.team.get(player)))
                     return;
-            if (hits < 5) {
+            if (hits < 4) {
                 hits++;
-                if (hits == 5) {
+                if (hits == 4) {
                     player.sendMessage(instance.getGameManager().getMain()
                             .color("&2&l(!) &rYour bucket is full of fish. Bring out the whole ocean!"));
                     player.getInventory().setItem(1, waterbucket);
@@ -188,10 +189,10 @@ public class FishermanClass extends BaseClass {
         if (item != null && event.getAction().toString().contains("RIGHT_CLICK")) {
             if (item.isSimilar(bucket)) {
                 player.sendMessage(instance.getGameManager().getMain()
-                        .color("&c&l(!) &rCollect " + (5 - hits) + " more fish!"));
+                        .color("&c&l(!) &rCollect " + (4 - hits) + " more fish!"));
             } else if (item.isSimilar(waterbucket)) {
                 Random r = new Random();
-                for (int i = 1; i <= 5; i++) {
+                for (int i = 1; i <= 4; i++) {
                     int chance = r.nextInt(4) + 1;
                     if (chance == 1)
                         player.getInventory().addItem(flyingFish);

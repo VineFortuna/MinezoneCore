@@ -70,7 +70,7 @@ public class BedrockClass extends BaseClass {
 
 		// Boots
 		ItemStack boots = ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.BLACK, "&0Bedrock Boots");
-		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
+		boots.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
 
 		// Setting Armor
 		playerEquip.setHelmet(getHelmet(playerHead));

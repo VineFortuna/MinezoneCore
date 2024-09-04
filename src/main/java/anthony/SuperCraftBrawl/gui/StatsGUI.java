@@ -2,6 +2,8 @@ package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.fishing.FishRarity;
+import anthony.SuperCraftBrawl.fishing.FishType;
+import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -84,12 +86,23 @@ public class StatsGUI implements InventoryProvider {
 							"", "" + ChatColor.RESET + ChatColor.GREEN + "Kills: " + ChatColor.RESET + data.kills,
 							"" + ChatColor.RESET + ChatColor.GREEN + "Deaths: " + ChatColor.RESET + data.deaths), e -> {
 							}));
+			
+			int treasure = 0;
+			for (FishType type : FishType.values()) {
+				if (type.getRarity() == FishRarity.TREASURE) {
+					FishingDetails details = data.playerFishing.get(type.getId());
+					if (details != null && details.timesCaught > 0) {
+						treasure += details.timesCaught;
+					}
+				}
+			}
+			
 			contents.set(2, 6,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
 							main.color("&e&lFishing Stats"),
 							main.color("&aCaught: &r" + data.totalcaught),
 							main.color("&aUnique Caught: &r" + main.getTotalFish(player)),
-							main.color("&aTreasure Caught: &r" + main.getTotalFish(player, FishRarity.TREASURE))), e -> {
+							main.color("&aTreasure Caught: &r" + treasure)), e -> {
 					}));
 			String fishingTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTk2YTQ4ZGNkYWY0MThmMjJjZDE4NjdjMWViMGFlMjgyYzI4NGI2Nzk5MDZiNzk3ODFkOGQyYjJlZWJhMjEwMiJ9fX0=";
 			contents.set(4, 0,
