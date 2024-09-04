@@ -98,9 +98,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 				if (instance2 != null) {
 					if (player.hasPermission("scb.startGame")) {
 						if (instance2.state == GameState.WAITING && instance2.players.size() >= 2) {
-							instance2.TellAll(
-									main.color("&2&l(!) &rGame has been force started by &e" + player.getName()));
-							instance2.ticksTilStart = 0;
+							instance2.getGameSettings().forceStartGame();
 						} else if (instance2.state == GameState.WAITING)
 							player.sendMessage(main.color("&c&l(!) &rNot enough players to start!"));
 						else if (instance2.state == GameState.STARTED)
@@ -505,7 +503,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 			PlayerData data = main.getDataManager().getPlayerData(player);
 			if (data != null && data.votes == 1) {
 				if (i != null && i.state == GameState.WAITING) {
-					i.totalVotes--;
+					i.totalStartVotes--;
 					data.votes = 0;
 				}
 			}
