@@ -11,7 +11,9 @@ import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,6 +23,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Random;
 
 @SuppressWarnings("deprecation")
@@ -38,6 +41,7 @@ public class Fishing implements Listener {
     private final int legendary = FishRarity.LEGENDARY.getChance();
     private final int junk = FishRarity.JUNK.getChance();
     private final int treasure = FishRarity.TREASURE.getChance();
+    private HashMap<Player, Integer> caughtRecent = new HashMap<>();
     
     public Fishing(Core main) {
         this.main = main;
@@ -101,15 +105,24 @@ public class Fishing implements Listener {
                 int r = rand.nextInt(25) + 11;
                 data.tokens += r;
                 p.sendMessage(main.color("&3&l(!) &rYou have found &e" + r + " Tokens!"));
-                if (main.getGameManager().GetInstanceOfPlayer(p) == null)
-                    main.LobbyBoard(p);
             }
             reward(p, fish.getRarity());
             data.totalcaught++;
             data.caught++;
             details.addCaught(1);
             main.getDataManager().saveData(data);
+            
+            if (caughtRecent.containsKey(p))
+                caughtRecent.put(p, caughtRecent.get(p) + 1);
+            else
+                caughtRecent.put(p, 1);
+            
+            if (data.friendship == 1)
+                friendship(p, data.friendshipLevel);
+            
             removeFish(i);
+            if (main.getGameManager().GetInstanceOfPlayer(p) == null)
+                main.LobbyBoard(p);
         }
     }
     
@@ -186,6 +199,54 @@ public class Fishing implements Listener {
                 
         }
         particles(p, rarity);
+    }
+    
+    public void friendship(Player p, int level) {
+        int radius = 0, times = 0, exp = 0;
+        switch (level) {
+            case 1:
+                radius = 4;
+                times = 5;
+                exp = 10;
+                break;
+            case 2:
+                radius = 6;
+                times = 5;
+                exp = 10;
+                break;
+            case 3:
+                radius = 6;
+                times = 3;
+                exp = 10;
+                break;
+            case 4:
+                radius = 6;
+                times = 3;
+                exp = 15;
+                break;
+        }
+        if (caughtRecent.get(p) % times == 0) {
+            for (int t = 0; t < 2 * Math.PI * radius; t += 3) {
+                p.playEffect(p.getLocation().add(radius * Math.cos(t), 0,
+                        radius * Math.sin((t))), Effect.HAPPY_VILLAGER, 1);
+            }
+            boolean found = false;
+            for (Entity e : p.getNearbyEntities(radius, radius, radius)) {
+                if (e instanceof Player) {
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                PlayerData data = main.getDataManager().getPlayerData(p);
+                data.exp += exp;
+                if (data.exp >= 2500) {
+                    data.level++;
+                    data.exp -= 2500;
+                    p.sendMessage("Level upgraded to " + data.level + "!");
+                }
+            }
+        }
     }
     
     public void particles(Player p, FishRarity r) {
