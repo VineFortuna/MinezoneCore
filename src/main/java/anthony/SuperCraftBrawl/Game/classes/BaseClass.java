@@ -106,6 +106,7 @@ public abstract class BaseClass {
 	public Timer fadeAbility = new Timer();
 	public Timer summon = new Timer();
 	public Timer fishing = new Timer();
+	public Timer alexBrewingStand = new Timer();
 	public boolean bedrockInvincibility = false;
 	public boolean hunterDash = true;
 

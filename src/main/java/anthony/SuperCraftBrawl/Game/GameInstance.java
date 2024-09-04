@@ -42,6 +42,7 @@ public class GameInstance {
 
 	// Variables
 	private final GameManager gameManager;
+	private GameSettings gameSettings;
 	public Objective livesObjective;
 	public GameType gameType;
 	private final Random random = new Random();
@@ -66,12 +67,11 @@ public class GameInstance {
 	public BukkitRunnable gameStartTime;
 	public int ticksTilStart = 30;
 	List<BukkitRunnable> runnables = new ArrayList<>();
-	public int totalVotes = 0;
+	public int totalStartVotes = 0;
+	public int totalTimeOfDayVotes = 0;
 	public int blindness = 0;
-	public ItemStack paper = ItemHelper.setDetails(new ItemStack(Material.PAPER),
-			"" + ChatColor.YELLOW + ChatColor.BOLD + "Ready");
-	public ItemStack paper2 = ItemHelper.setDetails(new ItemStack(Material.PAPER),
-			"" + ChatColor.YELLOW + ChatColor.BOLD + "Unready");
+	public ItemStack votePaper = ItemHelper.setDetails(new ItemStack(Material.PAPER),
+			"" + ChatColor.YELLOW + ChatColor.BOLD + "Vote");
 	public int alivePlayers = 0;
 	public int aliveTeams = 0;
 	public Sign s;
@@ -90,6 +90,7 @@ public class GameInstance {
 	// Constructors:
 	public GameInstance(GameManager gameManager, Maps map) {
 		this.gameManager = gameManager;
+		this.gameSettings = new GameSettings(this);
 		this.map = map;
 		this.state = GameState.WAITING; // Default game state
 		this.gameType = map.GetInstance().gameType;
@@ -123,7 +124,11 @@ public class GameInstance {
 	}
 
 	public GameManager getGameManager() {
-		return gameManager;
+		return this.gameManager;
+	}
+
+	public GameSettings getGameSettings() {
+		return this.gameSettings;
 	}
 
 	public Maps getMap() {
@@ -135,7 +140,7 @@ public class GameInstance {
 	}
 
 	public World getMapWorld() {
-		return mapWorld;
+		return this.mapWorld;
 	}
 
 	public void setSign(Sign s) {
@@ -397,8 +402,8 @@ public class GameInstance {
 						}
 					} else if (ticks == 30) {
 						for (Player gamePlayer : players) {
-							if (!(gamePlayer.getInventory().contains(paper)))
-								gamePlayer.getInventory().addItem(paper);
+							if (!(gamePlayer.getInventory().contains(votePaper)))
+								gamePlayer.getInventory().addItem(votePaper);
 						}
 
 						String mapName = "";
@@ -474,20 +479,8 @@ public class GameInstance {
 								board.updateLine(8, " " + ticksTilStart + "s");
 								board.updateLine(7, "" + ChatColor.RESET + ChatColor.BOLD + "Starting In:");
 								if (players.size() >= 2)
-									if (!(player.getInventory().contains(paper))
-											&& !(player.getInventory().contains(paper2)))
-										player.getInventory().addItem(paper);
-							}
-						}
-					}
-
-					for (Player gamePlayer : players) {
-						if (ticks <= 60) {
-							if (totalVotes == players.size()) {
-								this.cancel();
-								StartGame();
-								gamePlayer.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-										+ ChatColor.RESET + "Game is now starting");
+									if (!(player.getInventory().contains(votePaper)))
+										player.getInventory().addItem(votePaper);
 							}
 						}
 					}
@@ -659,7 +652,7 @@ public class GameInstance {
 				}
 			}
 		}
-		totalVotes = 0;
+		totalStartVotes = 0;
 		startLightningDropsTimer();
 		for (Player player : players) {
 			player.getInventory().clear();
@@ -2112,7 +2105,7 @@ public class GameInstance {
 							TellAll("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
 									+ "Game start cancelled, not enough players!");
 							for (Player gamePlayer : this.players) {
-								this.totalVotes = 0;
+								this.totalStartVotes = 0;
 								PlayerData data = this.gameManager.getMain().getDataManager().getPlayerData(gamePlayer);
 								if (data != null && data.votes == 1)
 									data.votes = 0;
@@ -2153,7 +2146,7 @@ public class GameInstance {
 							TellAll(getGameManager().getMain()
 									.color("&c&l(!) &rGame start cancelled. Not enough players!"));
 							for (Player gamePlayer : this.players) {
-								this.totalVotes = 0;
+								this.totalStartVotes = 0;
 								PlayerData data = this.gameManager.getMain().getDataManager().getPlayerData(gamePlayer);
 								if (data != null && data.votes == 1)
 									data.votes = 0;
@@ -2259,7 +2252,7 @@ public class GameInstance {
 		}
 		return false;
 	}
-	
+
 	public Player getNearestPlayer(Player player, double x, double y, double z) {
 		for (Entity target : player.getNearbyEntities(x, y, z)) {
 			if (target instanceof Player) {
