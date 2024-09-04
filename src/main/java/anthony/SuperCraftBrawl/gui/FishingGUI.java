@@ -123,14 +123,16 @@ public class FishingGUI implements InventoryProvider {
                         main.color("&e- Mythic " + FishRarity.MYTHIC.getChance() + "%"),
                         main.color("&e- Legendary " + FishRarity.LEGENDARY.getChance() + "%")), e -> {
                 }));
+        
+        String next = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTliZjMyOTJlMTI2YTEwNWI1NGViYTcxM2FhMWIxNTJkNTQxYTFkODkzODgyOWM1NjM2NGQxNzhlZDIyYmYifX19";
+        String prev = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ==";
+        
         if (!pagination.isFirst()) {
-            contents.set(2, 0, ClickableItem.of(
-                    ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Previous Page"),
+            contents.set(2, 0, ClickableItem.of(ItemHelper.createSkullTexture(prev, ChatColor.GRAY + "Previous Page"),
                     e -> inv.open(player, pagination.previous().getPage())));
         }
         if (!pagination.isLast()) {
-            contents.set(2, 8, ClickableItem.of(
-                    ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Next Page"),
+            contents.set(2, 8, ClickableItem.of(ItemHelper.createSkullTexture(next, ChatColor.GRAY + "Next Page"),
                     e -> inv.open(player, pagination.next().getPage())));
         }
     
