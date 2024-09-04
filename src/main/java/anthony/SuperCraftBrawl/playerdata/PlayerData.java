@@ -20,7 +20,8 @@ public class PlayerData {
 			challenge1 = 0, challenge2 = 0, challenge3 = 0, goldApple = 0, glowstone = 0, redstone = 0, web = 0,
 			bottleEXP = 0, broomWinEffect = 0, enderDragonEffect = 0, santaEffect = 0, fireParticlesEffect = 0,
 			fishRainEffect = 0, challenge100 = 0, challenge101 = 0, challenge102 = 0, challenge103 = 0, matchMvps = 0,
-			fly = 0, totalcaught = 0, caught = 0, rewardLevel = 0, lureLevel = 0, lure = 0;
+			fly = 0, totalcaught = 0, caught = 0, rewardLevel = 0, lureLevel = 0, lure = 0, friendshipLevel = 0,
+			friendship = 0;
 
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
 	public HashMap<Integer, FishingDetails> playerFishing = new HashMap<>();
@@ -34,7 +35,7 @@ public class PlayerData {
 			int goldApple, int glowstone, int redstone, int web, int bottleEXP, int broomWWinEffect,
 			int enderDragonEffect, int santaEffect, int fireParticlesEffect, int fishRainEffect, int challenge100,
 			int challenge101, int challenge102, int challenge103, int matchMvps, int fly, int totalcaught, int caught,
-			int rewardLevel, int lureLevel, int lure) {
+			int rewardLevel, int lureLevel, int lure, int friendshipLevel, int friendship) {
 		this(playerUUID, playerName, playerIP);
 		this.roleID = roleID;
 		this.tokens = tokens;
@@ -92,6 +93,8 @@ public class PlayerData {
 		this.rewardLevel = rewardLevel;
 		this.lureLevel = lureLevel;
 		this.lure = lure;
+		this.friendshipLevel = friendshipLevel;
+		this.friendship = friendship;
 	}
 
 	public boolean isPurchased(ClassType type) {
