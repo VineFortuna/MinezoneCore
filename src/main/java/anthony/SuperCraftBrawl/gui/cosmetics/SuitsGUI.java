@@ -1,6 +1,6 @@
 package anthony.SuperCraftBrawl.gui.cosmetics;
 
-import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.Core; 
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;

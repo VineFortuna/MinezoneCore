@@ -734,34 +734,10 @@ public class GameManager implements Listener, PluginMessageListener {
 		ItemStack item = event.getItem();
 		Player player = event.getPlayer();
 		GameInstance instance = this.GetInstanceOfPlayer(player);
-		PlayerData data = main.getDataManager().getPlayerData(player);
 
-		if (instance != null) {
-			if (instance.state == GameState.WAITING && instance.players.size() >= 2) {
-				if (item != null && item.getType() == Material.PAPER && (event.getAction() == Action.RIGHT_CLICK_AIR
-						|| event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-					if (data.votes == 0) {
-						instance.totalVotes++;
-						data.votes = 1;
-						instance.TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-								+ ChatColor.YELLOW + player.getName() + ChatColor.YELLOW + ChatColor.BOLD + " is Ready "
-								+ ChatColor.RED + "(" + ChatColor.GREEN + instance.totalVotes + "/"
-								+ instance.players.size() + ChatColor.RED + ")");
-						player.getInventory().remove(Material.PAPER);
-						player.getInventory().addItem(instance.paper2);
-					} else if (data.votes == 1) {
-						instance.totalVotes--;
-						data.votes = 0;
-						instance.TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-								+ ChatColor.YELLOW + player.getName() + ChatColor.RED + ChatColor.BOLD
-								+ " is no longer Ready " + ChatColor.RED + "(" + ChatColor.GREEN + instance.totalVotes
-								+ "/" + instance.players.size() + ChatColor.RED + ")");
-						player.getInventory().remove(Material.PAPER);
-						player.getInventory().addItem(instance.paper);
-					}
-				}
-			}
-		}
+		if (instance != null)
+			if (item != null && item.getType() == Material.PAPER)
+				new VoteGameSettingsGUI(main).inv.open(player);
 	}
 
 	@EventHandler
@@ -1918,7 +1894,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 		if (data.votes == 1) {
 			if (instance != null) {
-				instance.totalVotes--;
+				instance.totalStartVotes--;
 				data.votes = 0;
 			}
 		}
