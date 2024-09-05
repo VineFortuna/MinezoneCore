@@ -81,6 +81,23 @@ public class GameManager implements Listener, PluginMessageListener {
 		this.main.getServer().getPluginManager().registerEvents(this, main);
 		this.projManager = new ProjectileManager(this);
 	}
+	
+	/*
+	 * This function handles removing players from start votes if they
+	 * leave the server or the game lobby
+	 */
+	public void removeFromStartVotes(Player player) {
+		GameInstance game = this.GetInstanceOfPlayer(player);
+		
+		if (game != null && game.getGameSettings() != null) {
+			GameSettings gs = game.getGameSettings();
+			
+			if (gs.startVotes.contains(player)) {
+				gs.totalStartVotes--;
+				gs.startVotes.remove(player);
+			}
+		}
+	}
 
 	@EventHandler
 	public void Target(EntityTargetLivingEntityEvent event) {
@@ -1889,17 +1906,9 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	public boolean RemovePlayerFromAll(Player player) {
-		PlayerData data = main.getDataManager().getPlayerData(player);
 		GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
-
-		if (data.votes == 1) {
-			if (instance != null) {
-				instance.totalStartVotes--;
-				data.votes = 0;
-			}
-		}
-
 		boolean found = false;
+		removeFromStartVotes(player);
 
 		if (instance != null) {
 			if (instance.getMap() != null) {
