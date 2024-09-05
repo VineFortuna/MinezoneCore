@@ -475,10 +475,9 @@ public class Core extends JavaPlugin implements Listener {
 		Player player = (Player) sender;
 
 		if (cmd.getName().equalsIgnoreCase("sh")) {
-			if (args.length == 0) {
-				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-						+ ChatColor.GREEN + "/sh <message>");
-			} else {
+			if (args.length == 0)
+				player.sendMessage(color("&c&l(!) &rIncorrect usage! Try doing: &e/sh <message>"));
+			else {
 				staffhelp = "";
 
 				for (int i = 0; i < args.length; i++) {
@@ -501,11 +500,9 @@ public class Core extends JavaPlugin implements Listener {
 		} else if (cmd.getName().equalsIgnoreCase("shr")) {
 			if (player.hasPermission("scb.staffhelpreply")) {
 				if (args.length == 0) {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-							+ ChatColor.GREEN + "/shr <player> <message>");
+					player.sendMessage(color("&c&l(!) &rIncorrect usage! Try doing: &e/shr <player> <message>"));
 				} else if (args.length == 1) {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-							+ ChatColor.GREEN + "/shr <player> <message>");
+					player.sendMessage(color("&c&l(!) &rIncorrect usage! Try doing: &e/shr <player> <message>"));
 				} else {
 					Player target = Bukkit.getServer().getPlayerExact(args[0]);
 					staffhelpReply = "";
@@ -1607,21 +1604,21 @@ public class Core extends JavaPlugin implements Listener {
 		String pName = p.getName();
 		p.setGameMode(GameMode.ADVENTURE);
 		// Tournament data
-		if (tournament) {
+		if (this.tournament) {
 			PlayerData data = this.getDataManager().getPlayerData(p);
-			if (tourneyreset) {
-				if (!tourney.containsKey(p.getName())) {
+			if (this.tourneyreset) {
+				if (!this.tourney.containsKey(p.getName())) {
 					data.points = 0;
 				} else {
-					data.points = tourney.get(p.getName());
+					data.points = this.tourney.get(p.getName());
 				}
 			}
-			tourney.put(p.getName(), data.points);
+			this.tourney.put(p.getName(), data.points);
 		}
 		// For tab organization.
-		p.setScoreboard(lobbyScoreBoard);
+		p.setScoreboard(this.lobbyScoreBoard);
 		sendScoreboardUpdate(p);
-		// this.packetMain.injectPlayer(p);
+
 		// Message to send the server on join
 		String rank = getRankManager().getRank(p).getTagWithSpace();
 		e.setJoinMessage(
