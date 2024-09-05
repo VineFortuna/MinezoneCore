@@ -1676,9 +1676,28 @@ public class Core extends JavaPlugin implements Listener {
 				p.sendMessage("");
 				p.sendMessage("----------------------------------------------");
 				p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
-				p.sendTitle(color("&e&lFISHING"), color("&eVersion " + Version.FISHING.getVersion() + " available now!"));
+				p.sendTitle(color("&e&lFISHING"),
+						color("&eVersion " + Version.FISHING.getVersion() + " available now!"));
 			}
 		}.runTaskLater(this, 80); // 80 ticks = 4 seconds (20 ticks per second)
+
+		new BukkitRunnable() {
+			@Override
+			public void run() { // Runs after 4 seconds
+				p.sendMessage("----------------------------------------------");
+				p.sendMessage("");
+				p.sendMessage("" + ChatColor.AQUA + ChatColor.BOLD + "             Super Craft Blocks");
+				p.sendMessage("");
+				p.sendMessage(color("&7  Welcome to Super Craft Blocks! A custom suite of"));
+				p.sendMessage(color("" + ChatColor.AQUA + "  Class PvP &7based gamemodes hosted exclusively on"));
+				p.sendMessage("                    " + ChatColor.AQUA + ChatColor.UNDERLINE + "minezone.club");
+				p.sendMessage("");
+				if (p.hasPermission("scb.bonusTokens"))
+					p.sendMessage(color("&c&l>> &rThanks for being a VIP / CAPTAIN Supporter!"));
+				
+				p.sendMessage("----------------------------------------------");
+			}
+		}.runTaskLater(this, 400); // 400 ticks = 20 seconds (20 ticks per second)
 	}
 
 	public Map<Player, EntityArmorStand> msHologram = new HashMap<Player, EntityArmorStand>();
