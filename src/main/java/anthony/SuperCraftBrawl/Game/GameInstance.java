@@ -67,8 +67,6 @@ public class GameInstance {
 	public BukkitRunnable gameStartTime;
 	public int ticksTilStart = 30;
 	List<BukkitRunnable> runnables = new ArrayList<>();
-	public int totalStartVotes = 0;
-	public int totalTimeOfDayVotes = 0;
 	public int blindness = 0;
 	public ItemStack votePaper = ItemHelper.setDetails(new ItemStack(Material.PAPER),
 			"" + ChatColor.YELLOW + ChatColor.BOLD + "Vote");
@@ -147,6 +145,10 @@ public class GameInstance {
 		this.s = s;
 	}
 
+	/*
+	 * This function initializes the world of the game map when a player joins. If
+	 * the map doesn't exist in the files, it'll create a brand new void world
+	 */
 	public void InitialiseMap() {
 		WorldCreator w = null;
 		if (map != null)
@@ -156,6 +158,7 @@ public class GameInstance {
 		w.generator(new VoidGenerator());
 		mapWorld = Bukkit.getServer().createWorld(w);
 		mapWorld.setAutoSave(false);
+		mapWorld.setTime(13000);
 	}
 
 	public Location GetLobbyLoc() {
@@ -169,6 +172,10 @@ public class GameInstance {
 		return new Location(mapWorld, v.getX(), v.getY(), v.getZ());
 	}
 
+	/*
+	 * This function checks if the game is still able to take players if game lobby
+	 * isn't full
+	 */
 	public boolean isOpen() {
 		return state == GameState.WAITING && this.players.size() < gameType.getMaxPlayers();
 	}
@@ -449,7 +456,7 @@ public class GameInstance {
 
 					else if (ticks == 18) {
 						Random rand = new Random();
-						int chance = rand.nextInt(2);
+						int chance = rand.nextInt(3);
 
 						if (chance == 0) {
 							TellAll("" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "Tip" + ChatColor.DARK_GREEN
@@ -493,28 +500,10 @@ public class GameInstance {
 	}
 
 	/*
-	 * public void spawnLoc() { // Initially spawn all the players, at different
-	 * locations than GetRespawnLoc() MapInstance mi = null; int size = 0;
-	 * 
-	 * if (map != null) mi = this.map.GetInstance(); else mi =
-	 * this.duosMap.GetInstance();
-	 * 
-	 * size = 0; Vector spawnPos = null; boolean morePlayers = false; // If there's
-	 * more players than spawn points, when set true it will spawn them // at a
-	 * random loc then
-	 * 
-	 * for (Player gamePlayer : this.players) { if (morePlayers) { spawnPos =
-	 * mi.spawnPos.get(random.nextInt(mi.spawnPos.size())); gamePlayer .teleport(new
-	 * Location(this.getMapWorld(), spawnPos.getX(), spawnPos.getY(),
-	 * spawnPos.getZ())); } else { spawnPos = mi.spawnPos.get(size); gamePlayer
-	 * .teleport(new Location(this.getMapWorld(), spawnPos.getX(), spawnPos.getY(),
-	 * spawnPos.getZ())); size++;
-	 * 
-	 * if (size >= this.players.size() - 1) morePlayers = true; } } }
+	 * This function gets a random spawn location on the map and returns it, which a
+	 * player will spawn at
 	 */
-
 	public Location GetRespawnLoc() {
-		// Respawn location for each map
 		MapInstance mapInstance = null;
 
 		if (map != null)
@@ -537,8 +526,11 @@ public class GameInstance {
 		}
 	}
 
+	/*
+	 * This function gets the Spectator location of the map for people wanting to
+	 * Spectate or when a player dies
+	 */
 	public Location GetSpecLoc() {
-		// This is the spectator location for each map
 		MapInstance mapInstance = null;
 
 		if (map != null)
@@ -551,56 +543,11 @@ public class GameInstance {
 	}
 
 	public double boundsX, boundsZ;
-	public BukkitRunnable moveBar;
-	public int resetBoundsX = 0;
-	public int resetBoundsZ = 0;
-	public int barrierTicks = 0;
 
 	/*
-	 * public void moveBarrier() { if (moveBar == null) { moveBar = new
-	 * BukkitRunnable() {
-	 * 
-	 * @Override public void run() { if (state == GameState.ENDED) { MapInstance
-	 * instance = map.GetInstance(); if (resetBoundsX != 0) instance.boundsX =
-	 * resetBoundsX + instance.boundsX; if (resetBoundsZ != 0) instance.boundsZ =
-	 * resetBoundsZ + instance.boundsZ; moveBar = null; this.cancel(); }
-	 * 
-	 * if (barrierTicks == 600) { for (Player gamePlayer : players) { int minutes =
-	 * (barrierTicks / 120); gamePlayer.sendTitle(
-	 * gameManager.getMain().color("&9Barrier will begin moving in &r" + minutes +
-	 * "m"), ""); gamePlayer.sendMessage(
-	 * gameManager.getMain().color("&9Barrier will begin moving in &r" + minutes +
-	 * "m")); String msg =
-	 * getManager().getMain().color("&9&l(!) &eBarrier will begin moving in &r");
-	 * PacketPlayOutChat packet = new PacketPlayOutChat(
-	 * ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2); CraftPlayer craft
-	 * = (CraftPlayer) gamePlayer;
-	 * craft.getHandle().playerConnection.sendPacket(packet); } } else if
-	 * (barrierTicks == 840) { for (Player gamePlayer : players) { int seconds =
-	 * (barrierTicks + 20) - 800; gamePlayer.sendTitle(
-	 * gameManager.getMain().color("&9Barrier will begin moving in &r" + seconds +
-	 * "s"), ""); gamePlayer.sendMessage(
-	 * gameManager.getMain().color("&9Barrier will begin moving in &r" + seconds +
-	 * "s")); } } else if (barrierTicks == 900) { for (Player gamePlayer : players)
-	 * { gamePlayer.sendTitle(gameManager.getMain().
-	 * color("&9Barrier moving is now active!"), "");
-	 * gamePlayer.sendMessage(gameManager.getMain().
-	 * color("&9Barrier moving is now active!")); MapInstance mapInstance =
-	 * map.GetInstance(); mapInstance.boundsX -= 3; resetBoundsX += 3;
-	 * mapInstance.boundsZ -= 3; resetBoundsZ += 3; } } else if (barrierTicks ==
-	 * 915) { for (Player gamePlayer : players) { barrierTicks = 480; int seconds =
-	 * (barrierTicks / 60); // isInBounds(gamePlayer.getLocation());
-	 * gamePlayer.sendTitle(gameManager.getMain().
-	 * color("&9Barrier has been moved &r3 blocks"),
-	 * gameManager.getMain().color("&eNext barrier move will be in &r2m"));
-	 * gamePlayer.sendMessage(gameManager.getMain().
-	 * color("&9Barrier has been moved &r3 blocks"));
-	 * gamePlayer.sendMessage(gameManager.getMain().
-	 * color("&eNext barrier move will be in &r2m")); } }
-	 * 
-	 * barrierTicks++; } }; moveBar.runTaskTimer(gameManager.getMain(), 0, 20); } }
+	 * This function checks if a player is inside the boundaries of the map. If not,
+	 * they'll start taking damage then eventually die if not returned
 	 */
-
 	public boolean isInBounds(Location loc) {
 		MapInstance mapInstance = null;
 
@@ -620,20 +567,19 @@ public class GameInstance {
 		return true;
 	}
 
+	/*
+	 * This function starts the game once the countdown finishes or game is force
+	 * started
+	 */
 	public void StartGame() {
+		// This updates the sign in the lobby to show map is in progress
 		if (s != null) {
 			s.setLine(0, getGameManager().getMain().color("&2In Progress"));
 			s.setLine(3, "" + ChatColor.BLACK + ChatColor.UNDERLINE + "Spectate");
 			s.update();
 		}
+
 		for (Player gamePlayer : players) {
-			PlayerData data = gameManager.getMain().getDataManager().getPlayerData(gamePlayer);
-
-			if (data != null) {
-				data.votes = 0;
-				gamePlayer.setLevel(data.level);
-			}
-
 			if (this.duosMap != null) {
 				if (!(this.team.containsKey(gamePlayer))) {
 					if (redTeam.size() == 1 || redTeam.isEmpty()) {
@@ -652,14 +598,7 @@ public class GameInstance {
 				}
 			}
 		}
-		totalStartVotes = 0;
-		startLightningDropsTimer();
-		for (Player player : players) {
-			player.getInventory().clear();
-			player.teleport(GetRespawnLoc());
-			player.setFireTicks(0);
-		}
-		// GetRespawnLoc(); // Spawn all players in game
+		startLightningDropsTimer(); // Loot drops will start spawning every 45 seconds
 		TellAll("" + ChatColor.BOLD + "===============================");
 		TellAll("" + ChatColor.BOLD + "||");
 		TellAll("" + ChatColor.BOLD + "||");
@@ -681,18 +620,6 @@ public class GameInstance {
 		TellAll("" + ChatColor.BOLD + "===============================");
 		state = GameState.STARTED;
 		LoadClasses();
-		// gameManager.getMain().getNPCManager().updateRandomNpc();
-
-		for (Player player2 : players) {
-			BaseClass bc = this.classes.get(player2);
-
-			if (bc != null) {
-				if (bc.getType() == ClassType.Melon)
-					player2.getInventory().setItem(2, this.getItemToDrop());
-				else
-					player2.getInventory().addItem(this.getItemToDrop());
-			}
-		}
 
 		GameScoreboard();
 		alivePlayers = players.size();
@@ -712,9 +639,47 @@ public class GameInstance {
 			}
 		}
 
-		for (Player player : players)
-			player.setGameMode(GameMode.ADVENTURE);
+		for (Player player : players) {
+			player.teleport(GetRespawnLoc());
+			player.setFireTicks(0);
+			BaseClass bc = this.classes.get(player);
 
+			if (bc != null) {
+				if (bc.getType() == ClassType.Melon)
+					player.getInventory().setItem(2, this.getItemToDrop());
+				else
+					player.getInventory().addItem(this.getItemToDrop());
+			}
+			player.setGameMode(GameMode.ADVENTURE);
+		}
+
+		gameTicks();
+
+		/*
+		 * This runnable will run 1 second later due to a Minecraft bug adding the
+		 * players' class name next to their gamertag above their head
+		 */
+		BukkitRunnable r = new BukkitRunnable() {
+
+			@Override
+			public void run() {
+				for (Player gamePlayer : players)
+					sendScoreboardUpdate(gamePlayer);
+			}
+
+		};
+		r.runTaskLater(getGameManager().getMain(), 20);
+	}
+
+	/*
+	 * This function will run through each tick of the game.
+	 * 
+	 * Every minute, the game time will update on the scoreboard
+	 * 
+	 * Every tick, if there are arrows on the ground that players shot it will
+	 * remove them
+	 */
+	private void gameTicks() {
 		BukkitRunnable runnable = new BukkitRunnable() {
 
 			@Override
@@ -751,24 +716,6 @@ public class GameInstance {
 		};
 		runnable.runTaskTimer(gameManager.getMain(), 0, 1);
 		runnables.add(runnable);
-
-		BukkitRunnable r = new BukkitRunnable() {
-
-			@Override
-			public void run() {
-				for (Player gamePlayer : players)
-					sendScoreboardUpdate(gamePlayer);
-			}
-
-		};
-		r.runTaskLater(getGameManager().getMain(), 20);
-	}
-
-	private String shortenString(String msg, int length) {
-		if (msg.length() <= length)
-			return msg;
-		else
-			return msg.substring(0, length);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1952,11 +1899,17 @@ public class GameInstance {
 		}
 	}
 
+	/*
+	 * This function will load the players' class based on what they selected. If
+	 * not selected, it will select a random class. However if game is frenzy, it
+	 * will randomly select every players' class
+	 */
 	private void LoadClasses() {
 		Random rand = new Random(); // for random class;
 		int attempts = 0;
 
 		for (Player player : players) {
+			player.getInventory().clear();
 			PlayerData playerData = gameManager.getMain().getDataManager().getPlayerData(player);
 			ClassType selectedClass = gameType != GameType.FRENZY ? classSelection.get(player) : null;
 			if (selectedClass == null) {
@@ -2024,32 +1977,41 @@ public class GameInstance {
 			spectator.sendMessage(msg);
 	}
 
+	// Checks if this game has this player in parameter
 	public boolean HasPlayer(Player player) {
 		return players.contains(player);
 	}
 
+	// Checks if this game has this Spectator in parameter
 	public boolean HasSpectator(Player spectator) {
 		return spectators.contains(spectator);
 	}
 
+	/*
+	 * This function removes a player from the game
+	 * 
+	 * @param Player that is being removed
+	 * 
+	 * @returns True if successful
+	 */
+
+	// UPDATE TO TAKE IN ACCOUNT FOR DUOS
 	public boolean RemovePlayer(Player player) {
-		player.setAllowFlight(false);
-		player.setAllowFlight(true);
 		BaseClass baseClass = this.classes.remove(player);
+		PlayerData data = this.gameManager.getMain().getDataManager().getPlayerData(player);
+		
+		player.setAllowFlight(false); // Resets double jump both lines
+		player.setAllowFlight(true);
 		this.playerPosition.remove(player);
-		if (this.spectators.contains(player)) {
-			this.spectators.remove(player);
-			player.setDisplayName("" + player.getName());
-			return true;
-		}
+		removeSpectator(player);
+
 		if (this.players.remove(player)) {
 			player.setDisplayName("" + player.getName());
 			try {
 				if (baseClass != null) {
 					baseClass.score.getScoreboard().resetScores(baseClass.score.getEntry());
-					PlayerData data = this.gameManager.getMain().getDataManager().getPlayerData(player);
 					if (this.state != GameState.ENDED && this.state != GameState.WAITING && data != null) {
-						data.losses++;
+						data.losses++; // If game is started and a player leaves, add a loss to their stats
 						ClassType type = baseClass.getType();
 						ClassDetails details = data.playerClasses.get(type.getID());
 						if (details == null) {
@@ -2062,28 +2024,12 @@ public class GameInstance {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			if (this.duosMap != null) {
-				if (this.redTeam.contains(player)) {
-					this.redTeam.remove(player);
-				} else if (this.blueTeam.contains(player)) {
-					this.blueTeam.remove(player);
-				} else if (this.blackTeam.contains(player)) {
-					this.blackTeam.remove(player);
-				}
-				this.team.remove(player);
-			}
-			if (this.state == GameState.WAITING)
+
+			removeFromDuos(player);
+
+			if (this.state == GameState.WAITING) {
 				if (this.map != null) {
-					for (Player gamePlayer : this.players) {
-						FastBoard board = this.boards.get(gamePlayer);
-						board.updateLine(5, " "
-								+ (((this.map.GetInstance()).gameType == GameType.FRENZY) ? ("" + ChatColor.RESET
-										+ this.players.size() + "/" + this.gameType.getMaxPlayers()) : "")
-								+ (((this.map.GetInstance()).gameType == GameType.CLASSIC) ? ("" + ChatColor.RESET
-										+ this.players.size() + "/" + this.gameType.getMaxPlayers()) : "")
-								+ (((this.map.GetInstance()).gameType == GameType.DUEL) ? ("" + ChatColor.RESET
-										+ this.players.size() + "/" + this.gameType.getMaxPlayers()) : ""));
-					}
+					updateCountOnBoard();
 					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + player.getName()
 							+ ChatColor.RED + " left " + ChatColor.RED + "(" + ChatColor.GREEN + (
 
@@ -2097,123 +2043,43 @@ public class GameInstance {
 									? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
 									: "")
 							+ ChatColor.RED + ")");
-					if (this.players.size() < 2) {
+
+					if (checkIfMinPlayers() && this.gameStartTime != null) {
 						this.state = GameState.WAITING;
-						if (this.gameStartTime != null) {
-							this.gameStartTime.cancel();
-							this.gameStartTime = null;
-							TellAll("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ "Game start cancelled, not enough players!");
-							for (Player gamePlayer : this.players) {
-								this.totalStartVotes = 0;
-								PlayerData data = this.gameManager.getMain().getDataManager().getPlayerData(gamePlayer);
-								if (data != null && data.votes == 1)
-									data.votes = 0;
-								if (gamePlayer.getInventory().contains(Material.PAPER))
-									gamePlayer.getInventory().remove(Material.PAPER);
-								FastBoard board = this.boards.get(gamePlayer);
-								board.updateLine(5, " " + (
+						this.gameStartTime.cancel();
+						this.gameStartTime = null;
+						TellAll(color("&c&l(!) &rGame start cancelled, not enough players!"));
 
-								((this.map.GetInstance()).gameType == GameType.FRENZY) ? (
+						for (Player gamePlayer : this.players) {
+							this.gameSettings = new GameSettings(this); // To reset all variables
+							if (gamePlayer.getInventory().contains(Material.PAPER))
+								gamePlayer.getInventory().remove(Material.PAPER); // Takes away Voting paper
 
-								"" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers()) : "")
-										+ (((this.map.GetInstance()).gameType == GameType.CLASSIC) ? (
-
-										"" + ChatColor.RESET + this.players.size() + "/"
-												+ this.gameType.getMaxPlayers()) : "")
-										+ (((this.map.GetInstance()).gameType == GameType.DUEL) ? (
-
-										"" + ChatColor.RESET + this.players.size() + "/"
-												+ this.gameType.getMaxPlayers()) : ""));
-								board.updateLine(7, "" + ChatColor.BOLD + "Status:");
-								board.updateLine(8, "" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
-							}
-						}
-					}
-				} else {
-					for (Player gamePlayer : this.players) {
-						FastBoard board = this.boards.get(gamePlayer);
-						board.updateLine(5, " " + this.players.size() + "/6");
-					}
-					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + player.getName()
-							+ ChatColor.RED + " left " + ChatColor.RED + "(" + ChatColor.GREEN + this.players.size()
-							+ "/6" + ChatColor.RED + ")");
-					if (this.players.size() < 2) {
-						this.state = GameState.WAITING;
-						if (this.gameStartTime != null) {
-							this.gameStartTime.cancel();
-							this.gameStartTime = null;
-							TellAll(getGameManager().getMain()
-									.color("&c&l(!) &rGame start cancelled. Not enough players!"));
-							for (Player gamePlayer : this.players) {
-								this.totalStartVotes = 0;
-								PlayerData data = this.gameManager.getMain().getDataManager().getPlayerData(gamePlayer);
-								if (data != null && data.votes == 1)
-									data.votes = 0;
-								if (gamePlayer.getInventory().contains(Material.PAPER))
-									gamePlayer.getInventory().remove(Material.PAPER);
-								FastBoard board = this.boards.get(gamePlayer);
-								board.updateLine(5, " " + this.players.size() + "/6");
-								board.updateLine(7, "" + ChatColor.BOLD + "Status:");
-								board.updateLine(8, "" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
-							}
+							FastBoard board = this.boards.get(gamePlayer);
+							updateCountOnBoard();
+							board.updateLine(7, "" + ChatColor.BOLD + "Status:");
+							board.updateLine(8, "" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
 						}
 					}
 				}
-			if (this.state == GameState.STARTED) {
-				PlayerData data = this.gameManager.getMain().getDataManager().getPlayerData(player);
-				if (data.withersk != 3)
-					data.withersk = 0;
-				List<String> aliveTeam = new ArrayList<>();
-				if (this.map != null) {
-					int alivePlayers = 0;
-					Player alivePlayer = null;
-					List<Player> lastAlive = new ArrayList<>();
-					for (Map.Entry<Player, BaseClass> entry : this.classes.entrySet()) {
-						if (((BaseClass) entry.getValue()).getLives() > 0) {
-							alivePlayers++;
-							alivePlayer = entry.getKey();
-							lastAlive.add(alivePlayer);
-						}
-					}
-					if (alivePlayers == 1 && alivePlayer != null && lastAlive.size() == 1) {
-						WinGame(lastAlive);
-					} else if (alivePlayers <= 0) {
-						EndGame();
-					}
-				} else {
-					this.teamsAlive = 0;
-					for (Map.Entry<Player, BaseClass> entry : this.classes.entrySet()) {
-						if (((BaseClass) entry.getValue()).getLives() > 0
-								&& !aliveTeam.contains(this.team.get(entry.getKey()))) {
-							aliveTeam.add(this.team.get(entry.getKey()));
-							this.teamsAlive++;
-						}
-					}
-					if (this.teamsAlive == 1) {
-						if (aliveTeam.contains("Red")) {
-							WinGame(this.redTeam);
-						} else if (aliveTeam.contains("Blue")) {
-							WinGame(this.blueTeam);
-						} else if (aliveTeam.contains("Black")) {
-							WinGame(this.blackTeam);
-						}
-					} else if (this.teamsAlive == 0) {
-						EndGame();
-					}
-				}
-				TellAll("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.GREEN + player.getName()
-						+ ChatColor.RESET + ChatColor.RED + " has left the game!");
+			} else if (this.state == GameState.STARTED) {
+				if (this.map != null) // Checks if game is solos not duos
+					checkIfGameOver();
+
+				TellAll(color("&2&l(!) &e" + player.getName() + " &chas left the game!"));
 				try {
-					baseClass.score.getScoreboard().resetScores(baseClass.score.getEntry());
+					baseClass.score.getScoreboard().resetScores(baseClass.score.getEntry()); // Gets rid of the player
+																								// on the game board
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				SetLobbyScoreboard(player);
-				RemovePlayer(player);
+				SetLobbyScoreboard(player); // Sets the main lobby board to player
+				RemovePlayer(player); // Recursion to make sure player is removed from the arraylist
 			}
+
 			getGameManager().getMain().ResetPlayer(player);
-			if (this.s != null) {
+
+			if (this.s != null) { // This updates the game sign of the map in the lobby to new player count
 				if (this.map != null) {
 					this.s.setLine(2, getGameManager().getMain().color("&0Players: " + this.players.size() + "/"
 							+ (getMap().GetInstance()).gameType.getMaxPlayers()));
@@ -2224,8 +2090,209 @@ public class GameInstance {
 			}
 			return true;
 		}
+
 		return false;
 	}
+
+	/*
+	 * This function checks if the game is over when a player is removed from the
+	 * game. So if only 1 player left standing after a player leaves
+	 */
+	private void checkIfGameOver() {
+		int alivePlayers = 0;
+		Player alivePlayer = null;
+		List<Player> lastAlive = new ArrayList<>();
+		for (Map.Entry<Player, BaseClass> entry : this.classes.entrySet()) {
+			if (((BaseClass) entry.getValue()).getLives() > 0) {
+				alivePlayers++;
+				alivePlayer = entry.getKey();
+				lastAlive.add(alivePlayer);
+			}
+		}
+
+		if (alivePlayers == 1 && alivePlayer != null && lastAlive.size() == 1)
+			WinGame(lastAlive);
+		else if (alivePlayers <= 0)
+			EndGame();
+	}
+
+	/*
+	 * This function checks if the game doesn't have the minimum players to start
+	 */
+	public boolean checkIfMinPlayers() {
+		if (this.players.size() < 2)
+			return true;
+		return false;
+	}
+
+	/*
+	 * This function updates the board when a player joins/leaves lobby to the new
+	 * player count
+	 */
+	private void updateCountOnBoard() {
+		for (Player gamePlayer : this.players) {
+			FastBoard board = this.boards.get(gamePlayer);
+			board.updateLine(5,
+					" " + (((this.map.GetInstance()).gameType == GameType.FRENZY)
+							? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
+							: "")
+							+ (((this.map.GetInstance()).gameType == GameType.CLASSIC)
+									? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
+									: "")
+							+ (((this.map.GetInstance()).gameType == GameType.DUEL)
+									? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
+									: ""));
+		}
+	}
+
+	/*
+	 * This function removes a player from their Duos team if Duos is being played
+	 * 
+	 * @param Player to be removed
+	 */
+	private void removeFromDuos(Player player) {
+		if (this.duosMap != null) {
+			if (this.redTeam.contains(player)) {
+				this.redTeam.remove(player);
+			} else if (this.blueTeam.contains(player)) {
+				this.blueTeam.remove(player);
+			} else if (this.blackTeam.contains(player)) {
+				this.blackTeam.remove(player);
+			}
+			this.team.remove(player);
+		}
+	}
+
+	/*
+	 * This function removes a player from the game if they are spectating
+	 * 
+	 * @param Spectator to be removed
+	 */
+	private void removeSpectator(Player spec) {
+		if (this.spectators.contains(spec)) {
+			this.spectators.remove(spec);
+			spec.setDisplayName("" + spec.getName());
+		}
+	}
+
+	/*
+	 * public boolean RemovePlayer(Player player) { player.setAllowFlight(false);
+	 * player.setAllowFlight(true); BaseClass baseClass =
+	 * this.classes.remove(player); this.playerPosition.remove(player); if
+	 * (this.spectators.contains(player)) { this.spectators.remove(player);
+	 * player.setDisplayName("" + player.getName()); return true; } if
+	 * (this.players.remove(player)) { player.setDisplayName("" + player.getName());
+	 * try { if (baseClass != null) {
+	 * baseClass.score.getScoreboard().resetScores(baseClass.score.getEntry());
+	 * PlayerData data =
+	 * this.gameManager.getMain().getDataManager().getPlayerData(player); if
+	 * (this.state != GameState.ENDED && this.state != GameState.WAITING && data !=
+	 * null) { data.losses++; ClassType type = baseClass.getType(); ClassDetails
+	 * details = data.playerClasses.get(type.getID()); if (details == null) {
+	 * details = new ClassDetails(); data.playerClasses.put(type.getID(), details);
+	 * } details.playGame(); } } } catch (Exception e) { e.printStackTrace(); } if
+	 * (this.duosMap != null) { if (this.redTeam.contains(player)) {
+	 * this.redTeam.remove(player); } else if (this.blueTeam.contains(player)) {
+	 * this.blueTeam.remove(player); } else if (this.blackTeam.contains(player)) {
+	 * this.blackTeam.remove(player); } this.team.remove(player); } if (this.state
+	 * == GameState.WAITING) if (this.map != null) { for (Player gamePlayer :
+	 * this.players) { FastBoard board = this.boards.get(gamePlayer);
+	 * board.updateLine(5, " " + (((this.map.GetInstance()).gameType ==
+	 * GameType.FRENZY) ? ("" + ChatColor.RESET + this.players.size() + "/" +
+	 * this.gameType.getMaxPlayers()) : "") + (((this.map.GetInstance()).gameType ==
+	 * GameType.CLASSIC) ? ("" + ChatColor.RESET + this.players.size() + "/" +
+	 * this.gameType.getMaxPlayers()) : "") + (((this.map.GetInstance()).gameType ==
+	 * GameType.DUEL) ? ("" + ChatColor.RESET + this.players.size() + "/" +
+	 * this.gameType.getMaxPlayers()) : "")); } TellAll("" + ChatColor.DARK_GREEN +
+	 * ChatColor.BOLD + "(!) " + ChatColor.RESET + player.getName() + ChatColor.RED
+	 * + " left " + ChatColor.RED + "(" + ChatColor.GREEN + (
+	 * 
+	 * ((this.map.GetInstance()).gameType == GameType.FRENZY) ? ("" +
+	 * ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
+	 * : "") + (((this.map.GetInstance()).gameType == GameType.CLASSIC) ? ("" +
+	 * ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
+	 * : "") + (((this.map.GetInstance()).gameType == GameType.DUEL) ? ("" +
+	 * ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
+	 * : "") + ChatColor.RED + ")"); if (this.players.size() < 2) { this.state =
+	 * GameState.WAITING; if (this.gameStartTime != null) {
+	 * this.gameStartTime.cancel(); this.gameStartTime = null; TellAll("" +
+	 * ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET +
+	 * "Game start cancelled, not enough players!"); for (Player gamePlayer :
+	 * this.players) { this.gameSettings = new GameSettings(this); // To reset all
+	 * variables
+	 * 
+	 * PlayerData data =
+	 * this.gameManager.getMain().getDataManager().getPlayerData(gamePlayer); if
+	 * (data != null && data.votes == 1) data.votes = 0; if
+	 * (gamePlayer.getInventory().contains(Material.PAPER))
+	 * gamePlayer.getInventory().remove(Material.PAPER); FastBoard board =
+	 * this.boards.get(gamePlayer); board.updateLine(5, " " + (
+	 * 
+	 * ((this.map.GetInstance()).gameType == GameType.FRENZY) ? (
+	 * 
+	 * "" + ChatColor.RESET + this.players.size() + "/" +
+	 * this.gameType.getMaxPlayers()) : "") + (((this.map.GetInstance()).gameType ==
+	 * GameType.CLASSIC) ? (
+	 * 
+	 * "" + ChatColor.RESET + this.players.size() + "/" +
+	 * this.gameType.getMaxPlayers()) : "") + (((this.map.GetInstance()).gameType ==
+	 * GameType.DUEL) ? (
+	 * 
+	 * "" + ChatColor.RESET + this.players.size() + "/" +
+	 * this.gameType.getMaxPlayers()) : "")); board.updateLine(7, "" +
+	 * ChatColor.BOLD + "Status:"); board.updateLine(8, "" + ChatColor.RESET +
+	 * ChatColor.ITALIC + " Waiting.."); } } } } else { for (Player gamePlayer :
+	 * this.players) { FastBoard board = this.boards.get(gamePlayer);
+	 * board.updateLine(5, " " + this.players.size() + "/6"); } TellAll("" +
+	 * ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET +
+	 * player.getName() + ChatColor.RED + " left " + ChatColor.RED + "(" +
+	 * ChatColor.GREEN + this.players.size() + "/6" + ChatColor.RED + ")"); if
+	 * (this.players.size() < 2) { this.state = GameState.WAITING; if
+	 * (this.gameStartTime != null) { this.gameStartTime.cancel();
+	 * this.gameStartTime = null; TellAll(getGameManager().getMain()
+	 * .color("&c&l(!) &rGame start cancelled. Not enough players!")); for (Player
+	 * gamePlayer : this.players) { this.gameSettings = new GameSettings(this); //
+	 * To reset all variables
+	 * 
+	 * PlayerData data =
+	 * this.gameManager.getMain().getDataManager().getPlayerData(gamePlayer); if
+	 * (data != null && data.votes == 1) data.votes = 0; if
+	 * (gamePlayer.getInventory().contains(Material.PAPER))
+	 * gamePlayer.getInventory().remove(Material.PAPER); FastBoard board =
+	 * this.boards.get(gamePlayer); board.updateLine(5, " " + this.players.size() +
+	 * "/6"); board.updateLine(7, "" + ChatColor.BOLD + "Status:");
+	 * board.updateLine(8, "" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
+	 * } } } } if (this.state == GameState.STARTED) { PlayerData data =
+	 * this.gameManager.getMain().getDataManager().getPlayerData(player); if
+	 * (data.withersk != 3) data.withersk = 0; List<String> aliveTeam = new
+	 * ArrayList<>(); if (this.map != null) { int alivePlayers = 0; Player
+	 * alivePlayer = null; List<Player> lastAlive = new ArrayList<>(); for
+	 * (Map.Entry<Player, BaseClass> entry : this.classes.entrySet()) { if
+	 * (((BaseClass) entry.getValue()).getLives() > 0) { alivePlayers++; alivePlayer
+	 * = entry.getKey(); lastAlive.add(alivePlayer); } } if (alivePlayers == 1 &&
+	 * alivePlayer != null && lastAlive.size() == 1) { WinGame(lastAlive); } else if
+	 * (alivePlayers <= 0) { EndGame(); } } else { this.teamsAlive = 0; for
+	 * (Map.Entry<Player, BaseClass> entry : this.classes.entrySet()) { if
+	 * (((BaseClass) entry.getValue()).getLives() > 0 &&
+	 * !aliveTeam.contains(this.team.get(entry.getKey()))) {
+	 * aliveTeam.add(this.team.get(entry.getKey())); this.teamsAlive++; } } if
+	 * (this.teamsAlive == 1) { if (aliveTeam.contains("Red")) {
+	 * WinGame(this.redTeam); } else if (aliveTeam.contains("Blue")) {
+	 * WinGame(this.blueTeam); } else if (aliveTeam.contains("Black")) {
+	 * WinGame(this.blackTeam); } } else if (this.teamsAlive == 0) { EndGame(); } }
+	 * TellAll("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.GREEN +
+	 * player.getName() + ChatColor.RESET + ChatColor.RED + " has left the game!");
+	 * try {
+	 * baseClass.score.getScoreboard().resetScores(baseClass.score.getEntry()); }
+	 * catch (Exception e) { e.printStackTrace(); } SetLobbyScoreboard(player);
+	 * RemovePlayer(player); } getGameManager().getMain().ResetPlayer(player); if
+	 * (this.s != null) { if (this.map != null) { this.s.setLine(2,
+	 * getGameManager().getMain().color("&0Players: " + this.players.size() + "/" +
+	 * (getMap().GetInstance()).gameType.getMaxPlayers())); } else {
+	 * this.s.setLine(2, getGameManager().getMain().color("&0Players: " +
+	 * this.players.size() + "/6")); } this.s.update(); } return true; } return
+	 * false; }
+	 */
 
 	public boolean PlayerInteract(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
@@ -2301,5 +2368,9 @@ public class GameInstance {
 
 	public List<Player> getWinnerList() {
 		return winnerList;
+	}
+
+	public String color(String c) {
+		return ChatColor.translateAlternateColorCodes('&', c);
 	}
 }
