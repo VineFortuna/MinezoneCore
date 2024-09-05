@@ -30,31 +30,20 @@ public class ActiveGamesGUI implements InventoryProvider {
 
 	@Override
 	public void init(Player player, InventoryContents contents) {
-		int count = 0;
-		int i = 0;
-
-
-
-
+		int y = 0;
+		int x = 0;
+		
 		for (Entry<Maps, GameInstance> entry : main.getGameManager().gameMap.entrySet()) {
 			String mapName = entry.getValue().getMap().toString();
 
 			// Checking gameType to set due item
 			GameType gameType = entry.getValue().gameType;
 			ItemStack displayItem = null;
-
-			if (gameType == GameType.CLASSIC) {
-				//displayItem = ItemHelper.createSkullHeadPlayer(1, player.getName());
-				displayItem = new ItemStack(Material.REDSTONE_BLOCK);
-			} else if (gameType == GameType.DUEL) {
-				displayItem = new ItemStack(Material.IRON_SWORD);
-			} else if (gameType == GameType.FRENZY) {
-				displayItem = new ItemStack(Material.TNT);
-			}
+			checkGameType(gameType, displayItem);
 
 			if (entry.getValue().state == GameState.WAITING) {
 				if (entry.getValue().gameStartTime != null) {
-					contents.set(count, i, ClickableItem.of(ItemHelper.setDetails(displayItem,
+					contents.set(y, x, ClickableItem.of(ItemHelper.setDetails(displayItem,
 							"&e&l" + mapName,
 							"&rStarting In: &e" + entry.getValue().ticksTilStart + "s",
 							"&rPlayers: &e" + entry.getValue().players.size() + "/" + entry.getValue().gameType.getMaxPlayers(),
@@ -64,7 +53,7 @@ public class ActiveGamesGUI implements InventoryProvider {
 						inv.close(player);
 					}));
 				} else {
-					contents.set(count, i, ClickableItem.of(ItemHelper.setDetails(displayItem,
+					contents.set(y, x, ClickableItem.of(ItemHelper.setDetails(displayItem,
 							"&e&l" + mapName,
 							"&eWaiting for Players",
 							"&rPlayers: &e" + entry.getValue().players.size() + "/" + entry.getValue().gameType.getMaxPlayers(),
@@ -76,7 +65,7 @@ public class ActiveGamesGUI implements InventoryProvider {
 				}
 			} else if (entry.getValue().state == GameState.STARTED) {
 				String state = "In Progress";
-				contents.set(count, i, ClickableItem.of(ItemHelper.setDetails(ItemHelper.setGlowing(displayItem, true),
+				contents.set(y, x, ClickableItem.of(ItemHelper.setDetails(ItemHelper.setGlowing(displayItem, true),
 						"&e&l" + mapName,
 						"&a" + state,
 						"&rPlayers: &e" + entry.getValue().players.size() + "/" + entry.getValue().gameType.getMaxPlayers(),
@@ -87,12 +76,33 @@ public class ActiveGamesGUI implements InventoryProvider {
 					inv.close(player);
 				}));
 			}
-			if (i > 8) {
-				count++;
-				i = 0;
+			if (x > 8) {
+				y++;
+				x = 0;
 			}
-			i++;
+			x++;
 		}
+	}
+	
+	/**
+	 * This method changes the type of ItemStack to a predefined item depending on the game type:
+	 * - `GameType.CLASSIC` will set the item to a REDSTONE_BLOCK.
+	 * - `GameType.DUEL` will set the item to an IRON_SWORD.
+	 * - `GameType.FRENZY` will set the item to TNT.
+	 * 
+	 * @param gameType The type of game for which the ItemStack needs to be adjusted
+	 * @param item The ItemStack to be modified
+	 * @return The modified ItemStack corresponding to the game type
+	 */
+	private ItemStack checkGameType(GameType gameType, ItemStack item) {
+	    if (gameType == GameType.CLASSIC)
+	        item = new ItemStack(Material.REDSTONE_BLOCK);
+	    else if (gameType == GameType.DUEL)
+	        item = new ItemStack(Material.IRON_SWORD);
+	    else if (gameType == GameType.FRENZY)
+	        item = new ItemStack(Material.TNT);
+	    
+	    return item;
 	}
 
 	@Override
