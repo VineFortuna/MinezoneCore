@@ -13,7 +13,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -30,7 +29,6 @@ import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.gui.GameStatsGUI;
-import anthony.SuperCraftBrawl.gui.ShopCWGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
@@ -44,12 +42,17 @@ public class Commands implements CommandExecutor, TabCompleter {
 		this.main = main;
 	}
 
-	public void removeArmor(Player player) {
+	private void removeArmor(Player player) {
 		ItemStack air = new ItemStack(Material.AIR, 1);
 		player.getInventory().setHelmet(air);
 		player.getInventory().setChestplate(air);
 		player.getInventory().setLeggings(air);
 		player.getInventory().setBoots(air);
+	}
+
+	private void resetDoubleJump(Player player) {
+		player.setAllowFlight(false);
+		player.setAllowFlight(true);
 	}
 
 	@SuppressWarnings("unused")
@@ -58,6 +61,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 		Player player = (Player) sender;
 
 		if (sender instanceof Player) {
+			GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+
 			switch (cmd.getName().toLowerCase()) {
 			case "purchases":
 				if (args.length > 0) {
@@ -91,20 +96,18 @@ public class Commands implements CommandExecutor, TabCompleter {
 							player.sendMessage("Not enough arguments");
 
 					}
-				} else {
+				} else
 					player.sendMessage("Not enough arguments!");
-				}
+
 				break;
 			case "startgame":
-				GameInstance instance2 = main.getGameManager().GetInstanceOfPlayer(player);
-
-				if (instance2 != null) {
+				if (game != null) {
 					if (player.hasPermission("scb.startGame")) {
-						if (instance2.state == GameState.WAITING && instance2.players.size() >= 2) {
-							instance2.getGameSettings().forceStartGame();
-						} else if (instance2.state == GameState.WAITING)
+						if (game.state == GameState.WAITING && game.players.size() >= 2)
+							game.getGameSettings().forceStartGame();
+						else if (game.state == GameState.WAITING)
 							player.sendMessage(main.color("&c&l(!) &rNot enough players to start!"));
-						else if (instance2.state == GameState.STARTED)
+						else if (game.state == GameState.STARTED)
 							sender.sendMessage(main.color("&c&l(!) &rGame is already in progress!"));
 					} else
 						player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
@@ -114,21 +117,19 @@ public class Commands implements CommandExecutor, TabCompleter {
 				break;
 
 			case "fly":
-				instance2 = main.getGameManager().GetInstanceOfPlayer(player);
+				game = main.getGameManager().GetInstanceOfPlayer(player);
 				PlayerData flyData = main.getDataManager().getPlayerData(player);
 
-				if (instance2 == null) {
+				if (game == null) {
 					if (player.hasPermission("scb.fly")) {
 						if (flyData != null) {
 							if (flyData.fly == 0) {
 								player.sendMessage(main.color("&e&l(!) &rYou have enabled flight!"));
-								player.setAllowFlight(false);
-								player.setAllowFlight(true);
+								resetDoubleJump(player);
 								flyData.fly = 1;
 							} else {
 								player.sendMessage(main.color("&e&l(!) &rYou have disabled flight!"));
-								player.setAllowFlight(false);
-								player.setAllowFlight(true);
+								resetDoubleJump(player);
 								flyData.fly = 0;
 							}
 							main.getDataManager().saveData(flyData); // Save even when server restarts
@@ -144,13 +145,12 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "setlives":
 				if (args.length >= 2) {
 					Player target = Bukkit.getServer().getPlayerExact(args[0]);
-
 					int num = 0;
+
 					try {
 						num = Integer.parseInt(args[1]);
 					} catch (NumberFormatException ex) {
-						player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-								+ ChatColor.RESET + "Please specify the number of lives!");
+						player.sendMessage(main.color("&r&l(!) &rPlease specify number of lives"));
 						return false;
 					}
 
@@ -160,23 +160,18 @@ public class Commands implements CommandExecutor, TabCompleter {
 							if (i.state == GameState.STARTED) {
 								BaseClass baseClass2 = i.classes.get(target);
 								baseClass2.lives = num;
-								player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-										+ ChatColor.RESET + "You have set " + ChatColor.YELLOW + target.getName()
-										+ ChatColor.RESET + "'s lives to " + ChatColor.YELLOW + num);
+								player.sendMessage(main
+										.color("&2&l(!) &rYou set &e" + target.getName() + "&r's lives to &e" + num));
 								baseClass2.score.setScore(baseClass2.lives);
 							} else
-								player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-										+ ChatColor.RESET + "Game must be started in order to use this!");
+								player.sendMessage(main.color("&c&l(!) &rGame must be started to use!"));
 						} else
-							player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-									+ ChatColor.RESET + "This player is not in a game!");
+							player.sendMessage(main.color("&c&l(!) &rThis player is not in a game!"));
 					} else
-						player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-								+ ChatColor.RESET + "Please specify a player!");
+						player.sendMessage(main.color("&c&l(!) &rPlease specify a player!"));
 				} else
-					player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "Incorrect usage! Try doing: " + ChatColor.RESET + ChatColor.GREEN
-							+ "/setlives <player> <lives>");
+					player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/setlives <player> <num>"));
+
 				break;
 
 			case "gamestats":
@@ -219,33 +214,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 					if (map != null)
 						main.getGameManager().JoinMap(player, map);
 					else
-						player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-								+ "This map does not exist! Use " + ChatColor.YELLOW + "/maplist " + ChatColor.RESET
-								+ "for a list of playable maps");
+						player.sendMessage(
+								main.color("&c&l(!) &rThis map does not exist! Use &e/maplist &rfor a list of maps"));
 				} else
-					player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "Incorrect usage! Try doing: " + ChatColor.RESET + ChatColor.GREEN + "/join <mapname>");
+					player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/join <map>"));
 
-				return true;
-
-			case "shop":
-				if (player.hasPermission("scb.shop")) {
-					new ShopCWGUI(main).inv.open(player);
-				}
-
-			case "cw":
-				if (args.length > 0) {
-					String map = args[0];
-
-					for (anthony.CrystalWars.game.Maps maps : anthony.CrystalWars.game.Maps.values()) {
-						if (maps.toString().equalsIgnoreCase(map)) {
-							main.getCwManager().JoinGame(player, maps);
-							return true;
-						}
-					}
-
-					player.sendMessage(main.color("&c&l(!) &rThis map does not exist!"));
-				}
 				return true;
 
 			case "spectate":
@@ -264,14 +237,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 						if (map != null)
 							main.getGameManager().SpectatorJoinMap(player, map);
 						else
-							player.sendMessage(
-									ChatColor.BOLD + "(!) " + ChatColor.RESET + "This map does not exist! Use "
-											+ ChatColor.YELLOW + "/maplist " + ChatColor.RESET + "for a list of maps");
-					} else {
-						player.sendMessage("" + ChatColor.WHITE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-								+ "Incorrect usage! Try doing: " + ChatColor.RESET + ChatColor.GREEN
-								+ "/spectate <mapname>");
-					}
+							player.sendMessage(main
+									.color("&c&l(!) &rThis map does not exist! Use &e/maplist &rfor a list of maps"));
+					} else
+						player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/spectate <map>"));
 				}
 				return true;
 
@@ -302,7 +271,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 								}
 
 								if (donor == null || sender.hasPermission("scb." + donor.toString().toLowerCase())) {
-									GameInstance game = main.getGameManager().GetInstanceOfPlayer((Player) sender);
 									if (game != null) {
 										if (game.state == GameState.WAITING) {
 											if (game.gameType == GameType.FRENZY) {
@@ -405,27 +373,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 		return true;
 	}
 
-	private ItemStack enchantments(ItemStack item, Enchantment ench, int level) {
-		item.addUnsafeEnchantment(ench, level);
-		return item;
-	}
-
-	private Material testMaterial(String st) {
-		try {
-			return Material.getMaterial(st.toUpperCase());
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
-	private Enchantment testEnchant(String st) {
-		try {
-			return Enchantment.getByName(st.toUpperCase());
-		} catch (Exception e) {
-			return null;
-		}
-	}
-
 	public void leaveGame(Player player) {
 		GameInstance i = main.getGameManager().GetInstanceOfSpectator(player);
 		// anthony.CrystalWars.game.GameInstance i2 =
@@ -448,17 +395,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 			main.LobbyItems(player);
 			player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 					+ "You have left your game");
-			PlayerData data = main.getDataManager().getPlayerData(player);
-			/*if (data != null && data.votes == 1) {
-				if (i != null && i.state == GameState.WAITING) {
-					i.totalStartVotes--;
-					data.votes = 0;
-				}
-			}*/
-			
+
 			if (i != null && i.getGameSettings() != null) {
 				GameSettings gs = i.getGameSettings();
-				
+
 				if (gs.startVotes.contains(player)) {
 					gs.totalStartVotes--;
 					gs.startVotes.remove(player);
@@ -467,6 +407,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 			for (PotionEffect type : player.getActivePotionEffects())
 				player.removePotionEffect(type.getType());
+
 			main.sendScoreboardUpdate(player);
 			player.setGameMode(GameMode.ADVENTURE);
 			removeArmor(player);
@@ -486,21 +427,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 			main.LobbyItems(player);
 			i.spectators.remove(player);
 			player.setDisplayName("" + player.getName());
-		} /*
-			 * else if (i2 != null && main.getCwManager().removePlayer(player)) {
-			 * main.ResetPlayer(player); player.setGameMode(GameMode.ADVENTURE);
-			 * main.LobbyBoard(player); player.getInventory().clear();
-			 * main.LobbyItems(player); player.sendMessage("" + ChatColor.RESET +
-			 * ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET +
-			 * "You have left your game");
-			 * 
-			 * for (PotionEffect type : player.getActivePotionEffects())
-			 * player.removePotionEffect(type.getType()); main.sendScoreboardUpdate(player);
-			 * player.setGameMode(GameMode.ADVENTURE); removeArmor(player); }
-			 */ else {
-			player.sendMessage("" + ChatColor.RESET + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-					+ "You are not in a game!");
-		}
+		} else
+			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
 	}
 
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String commandLabel, String[] args) {
@@ -509,9 +437,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 			List<String> f = Lists.newArrayList();
 			if (args.length == 1) {
 				for (Maps s : a) {
-					if (s.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
+					if (s.getName().toLowerCase().startsWith(args[0].toLowerCase()))
 						f.add(s.getName());
-					}
 				}
 				return f;
 			}
@@ -520,9 +447,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 			List<String> f = Lists.newArrayList();
 			if (args.length == 1) {
 				for (ClassType s : a) {
-					if (s.name().toLowerCase().startsWith(args[0].toLowerCase())) {
+					if (s.name().toLowerCase().startsWith(args[0].toLowerCase()))
 						f.add(s.name());
-					}
 				}
 				return f;
 			}
