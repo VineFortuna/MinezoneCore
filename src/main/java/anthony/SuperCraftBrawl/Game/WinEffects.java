@@ -1,21 +1,15 @@
 package anthony.SuperCraftBrawl.Game;
 
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.all.DarkSethBlingClass;
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -60,6 +54,7 @@ public class WinEffects {
 
 	// ALL WIN EFFECTS:
 
+	//This spawns an Ender Dragon at the player & makes the player ride it
 	private void enderDragonEffect() {
 		this.dragon = (EnderDragon) this.player.getWorld().spawnEntity(this.player.getLocation(),
 				EntityType.ENDER_DRAGON);
@@ -103,8 +98,9 @@ public class WinEffects {
 	}
 
 	private void fireParticlesEffect() {
-
+		
 	}
+	
 	public Location getItemRainLoc() {
 		Random rand = new Random();
 		int attempts = 0;

@@ -25,8 +25,6 @@ import java.util.UUID;
 
 public class ItemHelper {
 	public static ItemStack setDetails(ItemStack item, String name, String...lore) {
-//		return setDetails(item, name, lore == null || (lore.length == 1 && lore[0].isEmpty()) ? null : Arrays.asList((lore)));
-
 		List<String> coloredLore = new ArrayList<>();
 
 		if (lore != null) {
