@@ -1718,8 +1718,7 @@ public class Core extends JavaPlugin implements Listener {
 			}
 			player.sendPluginMessage(this, "BungeeCord", b.toByteArray());
 		}, 10L);
-		PlayerData data = this.getDataManager().getPlayerData(player);
-		GameInstance instance = this.getGameManager().GetInstanceOfPlayer(player);
+		GameInstance game = this.getGameManager().GetInstanceOfPlayer(player);
 		PunishAPI pu = PunishAPI.get();
 
 		String IP = e.getPlayer().getAddress().getAddress().toString();
@@ -1735,13 +1734,8 @@ public class Core extends JavaPlugin implements Listener {
 			e.setQuitMessage(null);
 			return;
 		}
-
-		if (data.votes == 1) {
-			if (instance != null) {
-				instance.totalStartVotes--;
-				data.votes = 0;
-			}
-		}
+		
+		getGameManager().removeFromStartVotes(player);
 
 		e.setQuitMessage("" + ChatColor.BOLD + "[" + ChatColor.RED + ChatColor.BOLD + "-" + ChatColor.RESET
 				+ ChatColor.BOLD + "] " + ChatColor.RESET + getRankManager().getRank(player).getTagWithSpace()

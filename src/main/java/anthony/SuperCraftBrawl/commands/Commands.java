@@ -1,19 +1,10 @@
 package anthony.SuperCraftBrawl.commands;
 
-import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Game.GameType;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.map.Maps;
-import anthony.SuperCraftBrawl.fishing.FishType;
-import anthony.SuperCraftBrawl.gui.GameStatsGUI;
-import anthony.SuperCraftBrawl.gui.ShopCWGUI;
-import anthony.SuperCraftBrawl.playerdata.ClassDetails;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import anthony.SuperCraftBrawl.ranks.Rank;
-import com.google.common.collect.Lists;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Random;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -27,10 +18,22 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Random;
+import com.google.common.collect.Lists;
+
+import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameSettings;
+import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.Game.GameType;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.fishing.FishType;
+import anthony.SuperCraftBrawl.gui.GameStatsGUI;
+import anthony.SuperCraftBrawl.gui.ShopCWGUI;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.ranks.Rank;
 
 public class Commands implements CommandExecutor, TabCompleter {
 
@@ -196,33 +199,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 				return true;
 
-			/*case "fav":
-				if (args.length > 0) {
-					String className = args[0];
-
-					for (ClassType type : ClassType.values()) {
-						if (className != null && className.equalsIgnoreCase(type.toString())) {
-							PlayerData playerData = main.getDataManager().getPlayerData(player);
-
-							if (playerData != null) {
-								if (!playerData.customIntegers.contains(type.getID())) {
-									playerData.customIntegers.add(type.getID());
-									player.sendMessage(main.color("&2&l(!) &rNew favorite class! " + type.getTag()));
-									main.getDataManager().saveData(playerData);
-								} else
-									player.sendMessage(main.color("&c&l(!) &rThis class is already added to favorites!"));
-							}
-							return true;
-						}
-					}
-					player.sendMessage(main.color(
-							"&c&l(!) &rThis class does not exist! Use &e/classes &rfor a list of playable classes"));
-				} else
-					player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "Incorrect usage! Try doing: " + ChatColor.RESET + ChatColor.GREEN + "/fav <classname>");
-
-				return true;*/
-
 			case "join":
 				if (args.length > 0) {
 					String mapName = args[0];
@@ -251,34 +227,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 							+ "Incorrect usage! Try doing: " + ChatColor.RESET + ChatColor.GREEN + "/join <mapname>");
 
 				return true;
-
-			/*
-			 * case "wager": if (args.length > 0) { GameInstance i5 =
-			 * main.getGameManager().GetInstanceOfPlayer(player); String accept = args[0];
-			 * 
-			 * if (accept.equalsIgnoreCase("accept")) { if (main.wagers.containsKey(player))
-			 * { Player other = main.wagers.get(player);
-			 * 
-			 * for (Maps map : Maps.values()) { if (map != null &&
-			 * map.toString().contains("Duel")) { main.getGameManager().JoinMap(player,
-			 * map); main.getGameManager().JoinMap(other, map);
-			 * player.sendMessage(main.color("&2&l(!) &rMatch found on &r&l" +
-			 * map.toString()));
-			 * 
-			 * return true; } }
-			 * 
-			 * player.sendMessage(
-			 * main.color("&c&l(!) &rAll wager maps are full! Please try again later.")); }
-			 * else {
-			 * player.sendMessage(main.color("&c&l(!) &rYou do not have any wager requests!"
-			 * )); } } else if (accept.equalsIgnoreCase("list")) {
-			 * player.sendMessage(main.color("&e&l(!) &rWagers list of commands:"));
-			 * player.sendMessage(main.color("     &e- /wager accept"));
-			 * player.sendMessage(main.color("     &e- /wager deny")); } else
-			 * player.sendMessage(main
-			 * .color("&c&l(!) &rIncorrect usage! Try doing: &e/wager list &rfor a list of commands"
-			 * )); } return true;
-			 */
 
 			case "shop":
 				if (player.hasPermission("scb.shop")) {
@@ -501,10 +449,19 @@ public class Commands implements CommandExecutor, TabCompleter {
 			player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 					+ "You have left your game");
 			PlayerData data = main.getDataManager().getPlayerData(player);
-			if (data != null && data.votes == 1) {
+			/*if (data != null && data.votes == 1) {
 				if (i != null && i.state == GameState.WAITING) {
 					i.totalStartVotes--;
 					data.votes = 0;
+				}
+			}*/
+			
+			if (i != null && i.getGameSettings() != null) {
+				GameSettings gs = i.getGameSettings();
+				
+				if (gs.startVotes.contains(player)) {
+					gs.totalStartVotes--;
+					gs.startVotes.remove(player);
 				}
 			}
 
