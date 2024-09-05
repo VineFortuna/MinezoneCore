@@ -74,6 +74,7 @@ public class Core extends JavaPlugin implements Listener {
 
 	private ActionBarManager actionBarManager;
 	public GameManager gameManager;
+	public Version version;
 	public FreeClassesGUI inventoryGUI;
 	public anthony.CrystalWars.game.GameManager gm;
 	public DonorClassesGUI donorGUI;
@@ -142,6 +143,10 @@ public class Core extends JavaPlugin implements Listener {
 
 	public PlayerDataManager getDataManager() {
 		return dataManager;
+	}
+
+	public Version getVersion() {
+		return this.version;
 	}
 
 	public Leaderboard getLeaderboard() {
@@ -872,7 +877,7 @@ public class Core extends JavaPlugin implements Listener {
 		if (cmd.getName().equalsIgnoreCase("scb") && sender instanceof Player) {
 			player.sendMessage("" + ChatColor.GREEN + ChatColor.BOLD + "[SUPER CRAFT BLOCKS]");
 			player.sendMessage("" + ChatColor.GREEN + "Custom coded plugin by: VineFortuna & CowNecromancer");
-			player.sendMessage("" + ChatColor.GREEN + "Version: 1.0");
+			player.sendMessage("" + ChatColor.GREEN + "Version: " + Version.SCB.getVersion());
 			player.sendMessage("" + ChatColor.GREEN + "Type " + ChatColor.WHITE + "/scbhelp " + ChatColor.GREEN
 					+ "for more information");
 		}
@@ -1671,6 +1676,7 @@ public class Core extends JavaPlugin implements Listener {
 				p.sendMessage("");
 				p.sendMessage("----------------------------------------------");
 				p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
+				p.sendTitle(color("&e&lFISHING"), color("&eVersion " + Version.FISHING.getVersion() + " available now!"));
 			}
 		}.runTaskLater(this, 80); // 80 ticks = 4 seconds (20 ticks per second)
 	}
