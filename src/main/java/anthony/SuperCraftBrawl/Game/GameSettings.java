@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import net.md_5.bungee.api.ChatColor;
 
 public class GameSettings {
@@ -27,6 +28,9 @@ public class GameSettings {
 		this.gameTypeVotes = new ArrayList<Player>();
 	}
 
+	/**
+	 * This function sets the time of day in game
+	 */
 	public void setTimeOfDay() {
 		game.getMapWorld().setTime(13000);
 	}
@@ -54,6 +58,49 @@ public class GameSettings {
 			
 			game.TellAll(color("&2&l(!) &rThe game mode has been set to &e&l" + game.gameType.toString()));
 		}
+	}
+	
+	public void handleVoteGameStart(Player player, GameInstance game) {
+		GameSettings gs = null;
+
+		if (game != null && game.getGameSettings() != null) {
+			gs = game.getGameSettings();
+			if (!(gs.startVotes.contains(player))) {
+				gs.totalStartVotes++;
+				gs.startVotes.add(player);
+				updateGameStartVoteStatus(player, game, ChatColor.GREEN);
+			} else {
+				gs.totalStartVotes--;
+				gs.startVotes.remove(player);
+				updateGameStartVoteStatus(player, game, ChatColor.RED);
+			}
+		}
+	}
+
+	public void handleVoteGameType(Player player, GameInstance game) {
+		GameSettings gs = null;
+		
+		if (game != null && game.getGameSettings() != null) {
+			gs = game.getGameSettings();
+			if (!(gs.gameTypeVotes.contains(player))) {
+				gs.totalGameTypeVotes++;
+				gs.gameTypeVotes.add(player);
+			} else {
+				gs.totalGameTypeVotes--;
+				gs.gameTypeVotes.remove(player);
+			}
+		}
+	}
+
+	public void updateGameStartVoteStatus(Player player, GameInstance game, ChatColor color) {
+		String status = color + (color == ChatColor.GREEN ? " is Ready " : " is no longer Ready ");
+		String message = ChatColor.DARK_GREEN + ChatColor.BOLD.toString() + "(!) " + ChatColor.RESET + ChatColor.YELLOW
+				+ player.getName() + ChatColor.BOLD + status + ChatColor.RED + "(" + ChatColor.GREEN
+				+ game.getGameSettings().totalStartVotes + "/" + game.players.size() + ChatColor.RED + ")";
+		game.TellAll(message);
+
+		if (game.getGameSettings().totalStartVotes == game.players.size())
+			game.getGameSettings().forceStartGame();
 	}
 
 	private String color(String c) {
