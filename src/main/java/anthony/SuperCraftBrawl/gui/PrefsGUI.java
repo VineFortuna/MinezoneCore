@@ -17,18 +17,12 @@ public class PrefsGUI implements InventoryProvider {
 
 	public Core main;
 	public SmartInventory inv;
-	private RankManager rm;
 
 	public PrefsGUI(Core main) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(5, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Preferences").build();
 		this.main = main;
 	}
-
-	public RankManager getRankManager() {
-		return rm;
-	}
-
 	@Override
 	public void init(Player player, InventoryContents contents) {
 		PlayerData data = main.getDataManager().getPlayerData(player);
@@ -47,11 +41,11 @@ public class PrefsGUI implements InventoryProvider {
 		}));
 
 		if (data != null) {
-			if (data.cwm == 0) {
+			if (data.cwm == 0)
 				line = main.color("&c&lDISABLED");
-			} else {
+			else
 				line = main.color("&a&lENABLED");
-			}
+			
 			contents.set(2, 2, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
 					main.color("&eCustom Win Messages"), "", line), e -> {
 						if (player.hasPermission("scb.customWin")) {
@@ -70,11 +64,11 @@ public class PrefsGUI implements InventoryProvider {
 						}
 						inv.close(player);
 					}));
-			if (data.pm == 1) {
+			if (data.pm == 1)
 				line = main.color("&c&lDISABLED");
-			} else {
+			else
 				line = main.color("&a&lENABLED");
-			}
+			
 			contents.set(2, 6,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.PAPER),
 							main.color("&ePrivate Messages"), "", line),
@@ -91,11 +85,11 @@ public class PrefsGUI implements InventoryProvider {
 								inv.close(player);
 							}));
 
-			if (data.killMsgs == 0) {
+			if (data.killMsgs == 0)
 				line = main.color("&c&lDISABLED");
-			} else {
+			else
 				line = main.color("&a&lENABLED");
-			}
+			
 			contents.set(2, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
 					main.color("&eCustom Kill Messages"), "", line), e -> {
 						if (player.hasPermission("scb.customKillMsgs")) {
