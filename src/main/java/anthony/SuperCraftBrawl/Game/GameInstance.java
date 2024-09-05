@@ -99,7 +99,7 @@ public class GameInstance {
 		classes = new HashMap<>();
 		oldClasses = new HashMap<>();
 		allClasses = new HashMap<>();
-		InitialiseMap();
+		initialiseMap();
 	}
 
 	public GameInstance(GameManager gameManager, DuosMaps map) {
@@ -114,12 +114,11 @@ public class GameInstance {
 		classes = new HashMap<>();
 		oldClasses = new HashMap<>();
 		allClasses = new HashMap<>();
-		team = new HashMap<Player, String>();
-		redTeam = new ArrayList<Player>();
-		blueTeam = new ArrayList<Player>();
-		blackTeam = new ArrayList<Player>();
-		InitialiseMap();
+		initializeTeams();
+		initialiseMap();
 	}
+
+	// GETTER METHODS:
 
 	public GameManager getGameManager() {
 		return this.gameManager;
@@ -146,10 +145,20 @@ public class GameInstance {
 	}
 
 	/*
+	 * This function initializes the teams if game is Duos
+	 */
+	private void initializeTeams() {
+		team = new HashMap<Player, String>();
+		redTeam = new ArrayList<Player>();
+		blueTeam = new ArrayList<Player>();
+		blackTeam = new ArrayList<Player>();
+	}
+
+	/*
 	 * This function initializes the world of the game map when a player joins. If
 	 * the map doesn't exist in the files, it'll create a brand new void world
 	 */
-	public void InitialiseMap() {
+	public void initialiseMap() {
 		WorldCreator w = null;
 		if (map != null)
 			w = new WorldCreator(map.GetInstance().worldName).environment(World.Environment.NORMAL);
@@ -161,15 +170,20 @@ public class GameInstance {
 		mapWorld.setTime(13000);
 	}
 
+	/**
+	 * Retrieves the location of the game lobby for the current map.
+	 * 
+	 * @return The Location of the game lobby.
+	 */
 	public Location GetLobbyLoc() {
-		MapInstance mapInstance = null;
-		if (map != null)
-			mapInstance = map.GetInstance();
-		else
-			mapInstance = duosMap.GetInstance();
-		Vector v = mapInstance.lobbyLoc;
+		// Obtain the MapInstance based on the current map or duosMap
+		MapInstance mapInstance = (map != null) ? map.GetInstance() : duosMap.GetInstance();
 
-		return new Location(mapWorld, v.getX(), v.getY(), v.getZ());
+		// Extract the Vector representing the lobby location
+		Vector lobbyVector = mapInstance.lobbyLoc;
+
+		// Create and return a new Location object with the specified coordinates
+		return new Location(mapWorld, lobbyVector.getX(), lobbyVector.getY(), lobbyVector.getZ());
 	}
 
 	/*
@@ -180,10 +194,22 @@ public class GameInstance {
 		return state == GameState.WAITING && this.players.size() < gameType.getMaxPlayers();
 	}
 
+	/**
+	 * Sends player to the game lobby location
+	 * 
+	 * @param Player to be teleported
+	 */
 	public void SendPlayerToMap(Player player) {
 		player.teleport(GetLobbyLoc());
 	}
 
+	/**
+	 * This function adds a spectator to the game if the game is in progress
+	 * 
+	 * @param Player to be added as Spectator
+	 * 
+	 * @return If success, or already in a game, or if the game is not started
+	 */
 	public GameReason AddSpectator(Player player) {
 		if (state == GameState.STARTED) {
 			if (!players.contains(player)) {
@@ -194,11 +220,10 @@ public class GameInstance {
 				player.getInventory().clear();
 				player.setAllowFlight(true);
 				player.teleport(GetSpecLoc());
-				gameManager.getMain().board.get(player).delete();
-				player.sendMessage("Scoreboard");
-				setGameScore(player);
 				player.setDisplayName(player.getName() + " " + ChatColor.RESET + ChatColor.GRAY + ChatColor.ITALIC
 						+ "Spectator" + ChatColor.RESET);
+				gameManager.getMain().board.get(player).delete();
+				setGameScore(player);
 				return GameReason.SPECTATOR;
 			} else
 				return GameReason.ALREADY_IN;
@@ -206,6 +231,11 @@ public class GameInstance {
 			return GameReason.FAIL;
 	}
 
+	/**
+	 * This function sets the waiting lobby scoreboard when a player joins the game
+	 * 
+	 * @param Player to give scoreboard
+	 */
 	public void SetWaitingScoreboard(Player player) {
 		FastBoard board = new FastBoard(player);
 		boards.put(player, board);
@@ -246,6 +276,7 @@ public class GameInstance {
 
 	}
 
+	// Removes armor from player
 	public void removeArmor(Player player) {
 		player.getInventory().setHelmet(new ItemStack(Material.AIR, 1));
 		player.getInventory().setChestplate(new ItemStack(Material.AIR, 1));
@@ -253,45 +284,48 @@ public class GameInstance {
 		player.getInventory().setBoots(new ItemStack(Material.AIR, 1));
 	}
 
-	public GameReason AddPlayer(Player player) {
+	// Resets player's double jump
+	private void resetDoubleJump(Player player) {
 		player.setAllowFlight(false);
 		player.setAllowFlight(true);
-		if (state == GameState.WAITING) {
-			if (!players.contains(player)) {
-				if (this.map != null) {
-					if (gameType == GameType.DUEL && players.size() >= 2) {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is full!");
-						return GameReason.FULL;
-					}
-					if (!(player.hasPermission("scb.bypassFull"))) {
-						if (gameType == GameType.CLASSIC && players.size() >= 5) {
-							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is full!");
-							return GameReason.FULL;
-						}
-					}
-					players.add(player);
-					player.sendMessage(
-							this.gameManager.getMain().color("&2&l(!) &rYou have joined &r&l" + map.toString()));
-				} else if (this.duosMap != null) {
-					if (players.size() >= 6) {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is full!");
-						return GameReason.FULL;
-					}
-					players.add(player);
-					player.sendMessage(
-							this.gameManager.getMain().color("&2&l(!) &rYou have joined &r&l" + duosMap.toString()));
-					player.sendMessage(this.gameManager.getMain().color("&2&l(!) &rSelect a team in your 2nd slot!"));
-				}
+	}
 
+	/**
+	 * This function adds a player to the game if they're in the main lobby and not
+	 * in any other game, either spectating or playing
+	 * 
+	 * @param Player to be added to game
+	 * 
+	 * @return If success adding to game, if game is full, already playing a game or
+	 *         if game is already in progress
+	 */
+	@SuppressWarnings("deprecation")
+	public GameReason AddPlayer(Player player) {
+		if (this.state == GameState.WAITING) {
+			if (!this.players.contains(player)) {
+				if (isLobbyFull(player))
+					return GameReason.FULL;
+
+				players.add(player);
+				player.sendMessage(color("&2&l(!) &rYou have joined &r&l" + map.toString()));
+				if (this.gameType == GameType.FRENZY)
+					player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + map.toString(),
+							"" + ChatColor.GREEN + "Your class will be randomly selected!");
+				else
+					player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + map.toString(),
+							"" + ChatColor.GREEN + "Choose your class!");
+
+				resetDoubleJump(player);
+				removeArmor(player);
 				for (Player gamePlayer : players) {
-					if (gamePlayer.getWorld() != mapWorld) {
+					if (gamePlayer.getWorld() != getMapWorld()) {
 						SendPlayerToMap(gamePlayer);
-						CheckForGameStart(gamePlayer);
+						CheckForGameStart();
 						SetWaitingScoreboard(gamePlayer);
 					}
 
 					if (gamePlayer != player) {
-						if (map != null) {
+						if (this.getMap() != null) { // Update player count on board for Solos
 							boards.get(gamePlayer)
 									.updateLine(5, " "
 											+ (map.GetInstance().gameType == GameType.FRENZY
@@ -311,48 +345,125 @@ public class GameInstance {
 											+ (map.GetInstance().gameType == GameType.FRENZY
 													? "" + ChatColor.GRAY + ChatColor.ITALIC + " (frenzy)"
 													: ""));
-						} else
+						} else // Update player count on board for Duos
 							boards.get(gamePlayer).updateLine(5, " " + ChatColor.RESET + players.size() + "/6");
 					}
-					removeArmor(player);
 
-					if (map != null) {
-						gamePlayer.sendMessage(
-								"" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + player.getName()
-										+ ChatColor.GREEN + " joined " + ChatColor.RED + "(" + ChatColor.GREEN
-										+ (map.GetInstance().gameType == GameType.FRENZY
-												? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
-												: "")
-										+ (map.GetInstance().gameType == GameType.CLASSIC
-												? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
-												: "")
-										+ (map.GetInstance().gameType == GameType.DUEL
-												? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
-												: "")
-										+ ChatColor.RED + ")");
-						if (gameType == GameType.FRENZY) {
-							player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + map.toString(),
-									"" + ChatColor.GREEN + "Your class will be randomly selected!");
-						} else {
-							player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + map.toString(),
-									"" + ChatColor.GREEN + "Choose your class!");
-						}
-					} else {
-						player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + duosMap.toString(),
-								"" + ChatColor.GREEN + "Choose your class!");
-						gamePlayer.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-								+ player.getName() + ChatColor.GREEN + " joined " + ChatColor.RED + "("
-								+ ChatColor.GREEN + players.size() + "/6" + ChatColor.RED + ")");
-					}
-
+					gamePlayer.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ player.getName() + ChatColor.GREEN + " joined " + ChatColor.RED + "(" + ChatColor.GREEN
+							+ (map.GetInstance().gameType == GameType.FRENZY
+									? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
+									: "")
+							+ (map.GetInstance().gameType == GameType.CLASSIC
+									? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
+									: "")
+							+ (map.GetInstance().gameType == GameType.DUEL
+									? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
+									: "")
+							+ ChatColor.RED + ")");
 				}
+
 				return GameReason.SUCCESS;
 			} else
 				return GameReason.ALREADY_IN;
-
 		} else
 			return GameReason.ALREADYPLAYING;
 	}
+
+	/**
+	 * Checks if the game lobby is full based on the game type and player
+	 * permissions.
+	 * 
+	 * @param player The player whose permission to join a full game is being
+	 *               checked.
+	 * @return True if the lobby is full and the player is not permitted to join;
+	 *         false otherwise.
+	 */
+	private boolean isLobbyFull(Player player) {
+		if (this.map != null) {
+			if (this.gameType == GameType.DUEL && players.size() >= 2) {
+				player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is full!");
+				return true;
+			}
+
+			if (!(player.hasPermission("scb.bypassFull")) && gameType == GameType.CLASSIC && players.size() >= 5) {
+				player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is full!");
+				return true;
+			}
+
+			return false;
+		} else {
+			if (players.size() >= 6) {
+				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is full!");
+				return true;
+			}
+			players.add(player);
+			player.sendMessage(this.gameManager.getMain().color("&2&l(!) &rYou have joined &r&l" + duosMap.toString()));
+			player.sendMessage(this.gameManager.getMain().color("&2&l(!) &rSelect a team in your 2nd slot!"));
+			return false;
+		}
+	}
+
+	/*
+	 * public GameReason AddPlayer(Player player) { player.setAllowFlight(false);
+	 * player.setAllowFlight(true); if (state == GameState.WAITING) { if
+	 * (!players.contains(player)) { if (this.map != null) { if (gameType ==
+	 * GameType.DUEL && players.size() >= 2) { player.sendMessage("" +
+	 * ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is full!"); return
+	 * GameReason.FULL; } if (!(player.hasPermission("scb.bypassFull"))) { if
+	 * (gameType == GameType.CLASSIC && players.size() >= 5) { player.sendMessage(""
+	 * + ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is full!"); return
+	 * GameReason.FULL; } } players.add(player); player.sendMessage(
+	 * this.gameManager.getMain().color("&2&l(!) &rYou have joined &r&l" +
+	 * map.toString())); } else if (this.duosMap != null) { if (players.size() >= 6)
+	 * { player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET +
+	 * "This game is full!"); return GameReason.FULL; } players.add(player);
+	 * player.sendMessage(
+	 * this.gameManager.getMain().color("&2&l(!) &rYou have joined &r&l" +
+	 * duosMap.toString())); player.sendMessage(this.gameManager.getMain().
+	 * color("&2&l(!) &rSelect a team in your 2nd slot!")); }
+	 * 
+	 * for (Player gamePlayer : players) { if (gamePlayer.getWorld() != mapWorld) {
+	 * SendPlayerToMap(gamePlayer); CheckForGameStart(gamePlayer);
+	 * SetWaitingScoreboard(gamePlayer); }
+	 * 
+	 * if (gamePlayer != player) { if (map != null) { boards.get(gamePlayer)
+	 * .updateLine(5, " " + (map.GetInstance().gameType == GameType.FRENZY ? "" +
+	 * ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers() : "") +
+	 * (map.GetInstance().gameType == GameType.CLASSIC ? "" + ChatColor.RESET +
+	 * players.size() + "/" + gameType.getMaxPlayers() : "") +
+	 * (map.GetInstance().gameType == GameType.DUEL ? "" + ChatColor.RESET +
+	 * players.size() + "/" + gameType.getMaxPlayers() : ""));
+	 * boards.get(gamePlayer) .updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD +
+	 * map.toString() + (map.GetInstance().gameType == GameType.FRENZY ? "" +
+	 * ChatColor.GRAY + ChatColor.ITALIC + " (frenzy)" : "")); } else
+	 * boards.get(gamePlayer).updateLine(5, " " + ChatColor.RESET + players.size() +
+	 * "/6"); } removeArmor(player);
+	 * 
+	 * if (map != null) { gamePlayer.sendMessage( "" + ChatColor.DARK_GREEN +
+	 * ChatColor.BOLD + "(!) " + ChatColor.RESET + player.getName() +
+	 * ChatColor.GREEN + " joined " + ChatColor.RED + "(" + ChatColor.GREEN +
+	 * (map.GetInstance().gameType == GameType.FRENZY ? "" + ChatColor.RESET +
+	 * players.size() + "/" + gameType.getMaxPlayers() : "") +
+	 * (map.GetInstance().gameType == GameType.CLASSIC ? "" + ChatColor.RESET +
+	 * players.size() + "/" + gameType.getMaxPlayers() : "") +
+	 * (map.GetInstance().gameType == GameType.DUEL ? "" + ChatColor.RESET +
+	 * players.size() + "/" + gameType.getMaxPlayers() : "") + ChatColor.RED + ")");
+	 * if (gameType == GameType.FRENZY) { player.sendTitle("" + ChatColor.YELLOW +
+	 * ChatColor.BOLD + map.toString(), "" + ChatColor.GREEN +
+	 * "Your class will be randomly selected!"); } else { player.sendTitle("" +
+	 * ChatColor.YELLOW + ChatColor.BOLD + map.toString(), "" + ChatColor.GREEN +
+	 * "Choose your class!"); } } else { player.sendTitle("" + ChatColor.YELLOW +
+	 * ChatColor.BOLD + duosMap.toString(), "" + ChatColor.GREEN +
+	 * "Choose your class!"); gamePlayer.sendMessage("" + ChatColor.DARK_GREEN +
+	 * ChatColor.BOLD + "(!) " + ChatColor.RESET + player.getName() +
+	 * ChatColor.GREEN + " joined " + ChatColor.RED + "(" + ChatColor.GREEN +
+	 * players.size() + "/6" + ChatColor.RED + ")"); }
+	 * 
+	 * } return GameReason.SUCCESS; } else return GameReason.ALREADY_IN;
+	 * 
+	 * } else return GameReason.ALREADYPLAYING; }
+	 */
 
 	public FastBoard board;
 
@@ -369,23 +480,31 @@ public class GameInstance {
 		}
 	}
 
-	public void CheckForGameStart(Player player) {
+	/**
+	 * This function checks if there's the minimum required players to start the
+	 * game countdown timer
+	 * 
+	 * @param
+	 */
+	public void CheckForGameStart() {
 		if (map != null) {
 			if (players.size() == 2)
-				StartGameTimer(player);
+				StartGameTimer();
 		} else {
 			if (players.size() == 2)
-				StartGameTimer(player);
+				StartGameTimer();
 		}
 	}
 
+	// If game is not tournament mode, regular 30 second countdown. If tournament
+	// mode, 60 seconds
 	public int getSecondsUntilStart() {
 		if (gameManager.getMain().tournament == false)
 			return ticksTilStart = 30;
 		return ticksTilStart = 60;
 	}
 
-	public void StartGameTimer(Player player) {
+	public void StartGameTimer() {
 		if (gameStartTime == null) {
 			ticksTilStart = getSecondsUntilStart();
 			gameStartTime = new BukkitRunnable() {
@@ -446,7 +565,8 @@ public class GameInstance {
 						for (Player player : players)
 							player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1);
 					} else if (ticks == 25 || ticks == 20 || ticks == 15 || ticks == 10)
-						player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1);
+						for (Player player : players)
+							player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1);
 					else if (ticks == 5 || ticks == 4 || ticks == 3 || ticks == 2) {
 						for (Player player : players)
 							player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1);
@@ -475,20 +595,32 @@ public class GameInstance {
 							player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 1);
 					}
 
-					for (Player player : players)
+					for (Player player : players) {
 						player.setLevel(ticks);
-					if (ticks <= 5 && ticks >= 1)
-						player.sendTitle("" + ChatColor.GREEN + ticks, "");
+						if (ticks <= 5 && ticks >= 1)
+							player.sendTitle("" + ChatColor.GREEN + ticks, "");
+					}
+
 					if (ticks <= 60 && ticks >= 1) {
 						if (players.size() >= 2) {
 							for (Player player : players) {
 								FastBoard board = boards.get(player);
 								board.updateLine(8, " " + ticksTilStart + "s");
 								board.updateLine(7, "" + ChatColor.RESET + ChatColor.BOLD + "Starting In:");
-								if (players.size() >= 2)
+								if (players.size() >= 2 && ticks > 3)
 									if (!(player.getInventory().contains(votePaper)))
 										player.getInventory().addItem(votePaper);
 							}
+						}
+					}
+
+					if (ticks == 3) {
+						getGameSettings().changeGameType();
+						
+						for (Player player : players) {
+							player.closeInventory();
+							if (player.getInventory().contains(votePaper))
+								player.getInventory().removeItem(votePaper);
 						}
 					}
 
@@ -990,7 +1122,6 @@ public class GameInstance {
 	private Scoreboard c;
 	private Score time;
 	private Objective o;
-	private BukkitRunnable eventRunnable;
 
 	public void GameScoreboard() {
 		try {
@@ -998,11 +1129,19 @@ public class GameInstance {
 			c = m.getNewScoreboard();
 
 			if (map != null)
-				o = c.registerNewObjective("" + ChatColor.BOLD + map.toString(), "");
+				o = c.registerNewObjective(color("&e&l" + this.map.toString()), "");
 			else
-				o = c.registerNewObjective("" + ChatColor.BOLD + duosMap.toString(), "");
+				o = c.registerNewObjective(color("&e&l" + this.duosMap.toString()), "");
 			livesObjective = o;
 			o.setDisplaySlot(DisplaySlot.SIDEBAR);
+			Score game = o.getScore(color("&r&lGame:"));
+			game.setScore(50);
+			Score gameType = o.getScore(" " + ChatColor.RESET + ChatColor.ITALIC + this.gameType.getName());
+			gameType.setScore(49);
+			Score blank = o.getScore("" + ChatColor.RESET + ChatColor.ITALIC + "    ");
+			blank.setScore(48);
+			Score playersLine = o.getScore(color("&r&lPlayers:"));
+			playersLine.setScore(47);
 
 			for (Player player : players) {
 				BaseClass playerClass = classes.get(player);
@@ -1011,29 +1150,29 @@ public class GameInstance {
 				if (map != null) {
 					if (data != null) {
 						if (data.blue == 1) {
-							Score livesScore = o.getScore(truncateString(
+							Score livesScore = o.getScore(truncateString("" + 
 									playerClass.getType().getTag() + " " + ChatColor.BLUE + player.getName() + "", 38));
 							livesScore.setScore(5);
 							playerClass.score = livesScore;
 						} else if (data.red == 1) {
-							Score livesScore = o.getScore(truncateString(
+							Score livesScore = o.getScore(truncateString("" + 
 									playerClass.getType().getTag() + " " + ChatColor.RED + player.getName() + "", 38));
 							livesScore.setScore(5);
 							playerClass.score = livesScore;
 						} else if (data.green == 1) {
-							Score livesScore = o.getScore(truncateString(
+							Score livesScore = o.getScore(truncateString("" + 
 									playerClass.getType().getTag() + " " + ChatColor.GREEN + player.getName() + "",
 									38));
 							livesScore.setScore(5);
 							playerClass.score = livesScore;
 						} else if (data.yellow == 1) {
-							Score livesScore = o.getScore(truncateString(
+							Score livesScore = o.getScore(truncateString("" + 
 									playerClass.getType().getTag() + " " + ChatColor.YELLOW + player.getName() + "",
 									38));
 							livesScore.setScore(5);
 							playerClass.score = livesScore;
 						} else {
-							Score livesScore = o.getScore(truncateString(
+							Score livesScore = o.getScore(truncateString("" + 
 									playerClass.getType().getTag() + " " + ChatColor.WHITE + player.getName() + "",
 									38));
 							livesScore.setScore(5);
@@ -1073,7 +1212,6 @@ public class GameInstance {
 		player.setScoreboard(c); // For joining spectators
 	}
 
-	public int aliveGamePlayers = 0;
 	public int teamsAlive = 0;
 
 	public void CheckForWin() {
@@ -1121,6 +1259,7 @@ public class GameInstance {
 	public void PlayerDeath(Player player) {
 		if (this.gameType == GameType.FRENZY)
 			rerandomizeClass(player);
+
 		final BaseClass baseClass = this.classes.get(player);
 		if (baseClass != null)
 			try {
@@ -1177,6 +1316,7 @@ public class GameInstance {
 									}
 									baseClass.isDead = false;
 								}
+
 								cancel();
 							} else if (this.ticks <= 3 && GameInstance.this.state == GameState.STARTED) {
 								player.sendTitle("", "" + ChatColor.RED + this.ticks);
@@ -1209,6 +1349,7 @@ public class GameInstance {
 					player.spigot().setCollidesWithEntities(false);
 					player.setAllowFlight(false);
 					player.setAllowFlight(true);
+
 					ItemStack spec = ItemHelper.setDetails(new ItemStack(Material.COMPASS),
 							"" + ChatColor.GREEN + "Spectate a Player",
 							new String[] { ChatColor.GRAY + "Click to Spectate a specific player!" });
@@ -1223,11 +1364,14 @@ public class GameInstance {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+
 					CheckForWin();
 				} else {
 					player.getInventory().clear();
 				}
-			} catch (Exception e) {
+			} catch (
+
+			Exception e) {
 				e.printStackTrace();
 			}
 	}
@@ -1874,7 +2018,7 @@ public class GameInstance {
 			oldClasses.put(player, oldBaseClass);
 
 			Score newScore = livesObjective
-					.getScore(truncateString(classType.getTag() + " " + ChatColor.WHITE + player.getName() + "", 40));
+					.getScore(truncateString("" + classType.getTag() + " " + ChatColor.WHITE + player.getName() + "", 40));
 			newBaseClass.lives = oldBaseClass.lives;
 			newBaseClass.tokens = oldBaseClass.tokens;
 			newBaseClass.score = newScore;
@@ -1999,7 +2143,7 @@ public class GameInstance {
 	public boolean RemovePlayer(Player player) {
 		BaseClass baseClass = this.classes.remove(player);
 		PlayerData data = this.gameManager.getMain().getDataManager().getPlayerData(player);
-		
+
 		player.setAllowFlight(false); // Resets double jump both lines
 		player.setAllowFlight(true);
 		this.playerPosition.remove(player);

@@ -1644,6 +1644,14 @@ public class Core extends JavaPlugin implements Listener {
 		p.getInventory().setChestplate(new ItemStack(Material.AIR, 1));
 		p.getInventory().setLeggings(new ItemStack(Material.AIR, 1));
 		p.getInventory().setBoots(new ItemStack(Material.AIR, 1));
+		chatAnnouncementOnJoin(p);
+
+		for (PotionEffect type : p.getActivePotionEffects()) // Resets players potion effects
+			p.removePotionEffect(type.getType());
+	}
+
+	@SuppressWarnings("deprecation")
+	private void chatAnnouncementOnJoin(Player p) {
 		p.sendMessage("----------------------------------------------");
 		p.sendMessage("");
 		p.sendMessage("");
@@ -1654,8 +1662,20 @@ public class Core extends JavaPlugin implements Listener {
 		p.sendMessage("----------------------------------------------");
 		p.sendTitle("" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.UNDERLINE + "MINEZONE",
 				color("&2&lNEW &e&lFISHING &2&lLOBBY ACTIVITY!"));
-		for (PotionEffect type : p.getActivePotionEffects())
-			p.removePotionEffect(type.getType());
+
+		new BukkitRunnable() {
+			@Override
+			public void run() { // Runs after 4 seconds
+				p.sendMessage("----------------------------------------------");
+				p.sendMessage("");
+				p.sendMessage(color("          &2&lNEW &e&lFISHING &2&lLOBBY ACTIVITY"));
+				p.sendMessage("" + "     Try out fishing to get some amazing rewards");
+				p.sendMessage("" + "     by clicking your Profile in your 8th slot!");
+				p.sendMessage("");
+				p.sendMessage("----------------------------------------------");
+				p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
+			}
+		}.runTaskLater(this, 80); // 80 ticks = 4 seconds (20 ticks per second)
 	}
 
 	public Map<Player, EntityArmorStand> msHologram = new HashMap<Player, EntityArmorStand>();
@@ -1734,7 +1754,7 @@ public class Core extends JavaPlugin implements Listener {
 			e.setQuitMessage(null);
 			return;
 		}
-		
+
 		getGameManager().removeFromStartVotes(player);
 
 		e.setQuitMessage("" + ChatColor.BOLD + "[" + ChatColor.RED + ChatColor.BOLD + "-" + ChatColor.RESET

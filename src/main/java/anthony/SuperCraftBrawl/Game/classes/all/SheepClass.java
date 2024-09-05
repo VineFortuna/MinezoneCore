@@ -94,7 +94,7 @@ public class SheepClass extends BaseClass {
 		if (bc.getLives() > 0 && bc.getLives() != 5) {
 			bc.score.getScoreboard().resetScores(bc.score.getEntry());
 			Score newScore = instance.livesObjective.getScore(instance
-					.truncateString("" + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
+					.truncateString(" " + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 		}
@@ -250,7 +250,7 @@ public class SheepClass extends BaseClass {
 			player.setDisplayName(
 					"" + player.getName() + " " + ChatColor.RED + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.RED
+			Score newScore = instance.livesObjective.getScore(instance.truncateString(" " + ChatColor.RED
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
@@ -267,7 +267,7 @@ public class SheepClass extends BaseClass {
 			player.setDisplayName(
 					"" + player.getName() + " " + ChatColor.BLUE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.BLUE
+			Score newScore = instance.livesObjective.getScore(instance.truncateString(" " + ChatColor.BLUE
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
@@ -284,7 +284,7 @@ public class SheepClass extends BaseClass {
 			player.setDisplayName(
 					"" + player.getName() + " " + ChatColor.BLUE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.BLACK
+			Score newScore = instance.livesObjective.getScore(instance.truncateString(" " + ChatColor.BLACK
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
@@ -302,7 +302,7 @@ public class SheepClass extends BaseClass {
 			player.setDisplayName(
 					"" + player.getName() + " " + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.DARK_PURPLE
+			Score newScore = instance.livesObjective.getScore(instance.truncateString(" " + ChatColor.DARK_PURPLE
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
@@ -319,7 +319,7 @@ public class SheepClass extends BaseClass {
 			player.setDisplayName(
 					"" + player.getName() + " " + ChatColor.DARK_GREEN + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.DARK_GREEN
+			Score newScore = instance.livesObjective.getScore(instance.truncateString(" " + ChatColor.DARK_GREEN
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
@@ -337,7 +337,7 @@ public class SheepClass extends BaseClass {
 			player.setDisplayName(
 					"" + player.getName() + " " + ChatColor.GRAY + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.GRAY
+			Score newScore = instance.livesObjective.getScore(instance.truncateString(" " + ChatColor.GRAY
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
@@ -354,7 +354,7 @@ public class SheepClass extends BaseClass {
 			player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou were given &d&lPINK WOOL"));
 			player.setDisplayName(instance.getGameManager().getMain().color("" + player.getName() + " &9&lSheep&r"));
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.LIGHT_PURPLE
+			Score newScore = instance.livesObjective.getScore(instance.truncateString(" " + ChatColor.LIGHT_PURPLE
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
@@ -372,7 +372,7 @@ public class SheepClass extends BaseClass {
 			player.setDisplayName(
 					"" + player.getName() + " " + ChatColor.GREEN + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.GREEN
+			Score newScore = instance.livesObjective.getScore(instance.truncateString(" " + ChatColor.GREEN
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
