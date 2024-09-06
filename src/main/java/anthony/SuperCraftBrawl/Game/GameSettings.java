@@ -66,6 +66,7 @@ public class GameSettings {
 	public void forceStartGame() {
 		if (game.gameStartTime != null) {
 			if (game.ticksTilStart <= 60) {
+				checkOtherSettings(); //Set other settings too if enough votes
 				game.TellAll(color("&2&l(!) &rGame is now starting"));
 				game.gameStartTime.cancel();
 				game.StartGame();
@@ -136,7 +137,7 @@ public class GameSettings {
 
 		if (game != null && game.getGameSettings() != null) {
 			gs = game.getGameSettings();
-			if (!(gs.gameTypeVotes.contains(player))) {
+			if (!(gs.lightningVotes.contains(player))) {
 				gs.lightningDropSec++;
 				gs.lightningVotes.add(player);
 			} else {
@@ -155,6 +156,15 @@ public class GameSettings {
 
 		if (game.getGameSettings().totalStartVotes == game.players.size())
 			game.getGameSettings().forceStartGame();
+	}
+	
+	/**
+	 * This function makes sure if the game is force started to check for votes
+	 * on the other game settings
+	 */
+	private void checkOtherSettings() {
+		changeGameType();
+		increaseLightningRate();
 	}
 
 	private String color(String c) {
