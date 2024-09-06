@@ -40,7 +40,6 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -50,7 +49,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
@@ -1674,7 +1672,8 @@ public class Core extends JavaPlugin implements Listener {
 				p.sendMessage("                    " + ChatColor.AQUA + ChatColor.UNDERLINE + "minezone.club");
 				p.sendMessage("");
 				if (p.hasPermission("scb.bonusTokens"))
-					p.sendMessage(color("&c&l>> &rThanks for being a VIP / CAPTAIN Supporter!"));
+					p.sendMessage(color("&c&l>> &rThanks for being a " + Rank.VIP.getTag() + "&r / " +
+							Rank.CAPTAIN.getTag() + "&r Supporter!"));
 
 				p.sendMessage("----------------------------------------------");
 			}
