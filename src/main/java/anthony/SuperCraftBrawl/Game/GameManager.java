@@ -1926,6 +1926,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			instance.getGameSettings().removeFromStartVotes(player);
 			instance.getGameSettings().removeFromLightningVotes(player);
 			instance.getGameSettings().removeFromGameTypeVotes(player);
+			instance.getGameSettings().removeFromTimeVotes(player);
 		}
 
 		return found;
