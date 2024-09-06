@@ -1612,7 +1612,7 @@ public class Core extends JavaPlugin implements Listener {
 	@EventHandler
 	public void joinEvent(PlayerJoinEvent e) {
 		Player player = e.getPlayer(); // Gets the player that joined
-		PlayerData data = this.getDataManager().getPlayerData(player); //Gets the player data from database
+		PlayerData data = this.getDataManager().getPlayerData(player); // Gets the player data from database
 		String name = player.getName();
 
 		getListener().resetDoubleJump(player);
@@ -1622,15 +1622,15 @@ public class Core extends JavaPlugin implements Listener {
 		getListener().setPlayerOnTablist(player);
 		sendScoreboardUpdate(player); // This sets the rank next to player name above their head
 		chatAnnouncementOnJoin(player);
-		LobbyBoard(player); //Gives the lobby scoreboard to player
+		LobbyBoard(player); // Gives the lobby scoreboard to player
 
 		// For join message:
-		String rank = getRankManager().getRank(player).getTagWithSpace(); //Gets the player's rank
+		String rank = getRankManager().getRank(player).getTagWithSpace(); // Gets the player's rank
 		e.setJoinMessage(color("&r&l[&a&l+&r&l] &r" + rank + "&b" + name + "&a connected"));
-		
+
 		if (data != null)
-			player.setLevel(data.level); //Indication what the player's level is
-		
+			player.setLevel(data.level); // Indication what the player's level is
+
 		player.setHealth(20);
 		player.setFoodLevel(20);
 	}
@@ -1676,8 +1676,8 @@ public class Core extends JavaPlugin implements Listener {
 				p.sendMessage("                    " + ChatColor.AQUA + ChatColor.UNDERLINE + "minezone.club");
 				p.sendMessage("");
 				if (p.hasPermission("scb.bonusTokens"))
-					p.sendMessage(color("&c&l>> &rThanks for being a " + Rank.VIP.getTag() + "&r / " +
-							Rank.CAPTAIN.getTag() + "&r Supporter!"));
+					p.sendMessage(color("&c&l>> &rThanks for being a " + Rank.VIP.getTag() + "&r / "
+							+ Rank.CAPTAIN.getTag() + "&r Supporter!"));
 
 				p.sendMessage("----------------------------------------------");
 			}
@@ -1761,7 +1761,11 @@ public class Core extends JavaPlugin implements Listener {
 			return;
 		}
 
-		getGameManager().removeFromStartVotes(player);
+		if (game != null && game.getGameSettings() != null) {
+			game.getGameSettings().removeFromStartVotes(player);
+			game.getGameSettings().removeFromGameTypeVotes(player);
+			game.getGameSettings().removeFromLightningVotes(player);
+		}
 
 		e.setQuitMessage("" + ChatColor.BOLD + "[" + ChatColor.RED + ChatColor.BOLD + "-" + ChatColor.RESET
 				+ ChatColor.BOLD + "] " + ChatColor.RESET + getRankManager().getRank(player).getTagWithSpace()
