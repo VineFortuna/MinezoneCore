@@ -32,6 +32,8 @@ import java.util.UUID;
 public class BeeClass extends BaseClass {
 
 	private BukkitRunnable weak;
+	private int cooldownSec;
+	private int cooldownDuration = 20000;
 
 	public BeeClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -54,7 +56,7 @@ public class BeeClass extends BaseClass {
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1NGIyMTdmMjBmNWNmZjE0YWI0NGRkMjhhMWU5M2VmM2EyYTJiZGQzMjU2ZTlmOWYzMzk0NmU3MDEwYTc3OCJ9fX0=";
 		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
+
 		playerEquip.setHelmet(getHelmet(playerskull));
 		playerEquip.setChestplate(makeYellow(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 3)));
@@ -65,11 +67,16 @@ public class BeeClass extends BaseClass {
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.GLOWSTONE_DUST),
-						instance.getGameManager().getMain().color("&eNectar"), "",
-						instance.getGameManager().getMain().color("&7Right click to gain energy")),
-				Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 1);
+		ItemStack item = ItemHelper
+				.addEnchant(
+						ItemHelper
+								.addEnchant(
+										ItemHelper.setDetails(new ItemStack(Material.GLOWSTONE_DUST),
+												instance.getGameManager().getMain().color("&eNectar"), "",
+												instance.getGameManager().getMain()
+														.color("&7Right click to gain energy")),
+										Enchantment.DAMAGE_ALL, 3),
+						Enchantment.KNOCKBACK, 1);
 
 		return item;
 	}
@@ -87,7 +94,8 @@ public class BeeClass extends BaseClass {
 				instance.getGameManager().getMain().color("&7Right click to get nutrients"));
 		playerInv.setItem(1, pollen);
 		playerInv.setItem(2,
-				ItemHelper.setDetails(new ItemStack(Material.STICK), instance.getGameManager().getMain().color("&eStinger"),
+				ItemHelper.setDetails(new ItemStack(Material.STICK),
+						instance.getGameManager().getMain().color("&eStinger"),
 						instance.getGameManager().getMain().color("&7Hit a player with this to give poison!")));
 	}
 
@@ -96,6 +104,10 @@ public class BeeClass extends BaseClass {
 		if (instance.state == GameState.ENDED || player.getGameMode() == GameMode.SPECTATOR)
 			if (weak != null)
 				weak.cancel();
+
+		// For cooldown Action Bar "Nectar" item
+		this.cooldownSec = (this.cooldownDuration - bee.getTime()) / 1000 + 1;
+		cooldownActionBar(this.cooldownSec, this.cooldownDuration, bee, ClassType.Bee, "nectar.cooldown", "Nectar");
 	}
 
 	@Override

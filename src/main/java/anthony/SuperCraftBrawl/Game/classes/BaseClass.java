@@ -197,12 +197,12 @@ public abstract class BaseClass {
 	 * @param cooldownName which is the name of the cooldown
 	 * @param itemName which is the name of the item on cooldown
 	 */
-	public void cooldownActionBar(int cooldownSec, ClassType type, String cooldownName, String itemName) {
+	public void cooldownActionBar(int cooldownSec, int duration, Timer cooldown, ClassType type, String cooldownName, String itemName) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == type) {
 			if (instance.classes.get(player).getLives() > 0) {
-				cooldownSec = (10000 - alexBrewingStand.getTime()) / 1000 + 1;
+				cooldownSec = (duration - cooldown.getTime()) / 1000 + 1;
 
-				if (alexBrewingStand.getTime() < 10000) {
+				if (cooldown.getTime() < duration) {
 					String msg = instance.getGameManager().getMain()
 							.color("&e" + itemName + " &rcooldown: &e" + cooldownSec + "s");
 					getActionBarManager().setActionBar(player, cooldownName, msg, 2);
