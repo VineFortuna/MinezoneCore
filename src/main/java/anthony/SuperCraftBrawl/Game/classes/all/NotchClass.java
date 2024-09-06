@@ -1,15 +1,11 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.Random;
-
-import org.bukkit.ChatColor;
-import org.bukkit.Color;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.SkullType;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -18,20 +14,14 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 import xyz.xenondevs.particle.ParticleEffect;
 import xyz.xenondevs.particle.data.texture.BlockTexture;
+
+import java.util.Random;
 
 public class NotchClass extends BaseClass {
 
@@ -79,7 +69,7 @@ public class NotchClass extends BaseClass {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Notch
 				&& instance.classes.get(player).getLives() > 0) {
 			this.cooldownSec = (10000 - notch.getTime()) / 1000 + 1;
-
+			
 			if (notch.getTime() < 10000) {
 				String msg = instance.getGameManager().getMain()
 						.color("&0Collape X-Axis &rregenerates in: &e" + this.cooldownSec + "s");
@@ -87,9 +77,15 @@ public class NotchClass extends BaseClass {
 			} else {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &0Collape X-Axis");
 				getActionBarManager().setActionBar(player, "notch.cooldown", msg, 2);
-			}
-			if (notch.getTime() == 10000 && player.getInventory().getItem(1).getType() == Material.DIRT) {
-				player.getInventory().getItem(1).setType(Material.GRASS);
+				
+				if (player.getGameMode() != GameMode.SPECTATOR && player.getInventory().contains(Material.DIRT)) {
+					player.getInventory().remove(Material.DIRT);
+					player.getInventory()
+							.addItem(ItemHelper.setDetails(new ItemStack(Material.GRASS),
+									"" + ChatColor.BLACK + "Collapse X-Axis", "",
+									instance.getGameManager().getMain().color("&7Pull enemies when aiming at them!"),
+									instance.getGameManager().getMain().color("   &rRange: &e20 blocks")));
+				}
 			}
 		}
 	}
