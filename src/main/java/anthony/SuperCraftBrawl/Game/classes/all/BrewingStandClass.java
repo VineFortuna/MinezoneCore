@@ -31,6 +31,7 @@ import net.md_5.bungee.api.ChatColor;
 public class BrewingStandClass extends BaseClass {
 
 	private int cooldownSec;
+	private int cooldownDuration = 10000;
 
 	public BrewingStandClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -79,8 +80,9 @@ public class BrewingStandClass extends BaseClass {
 	@Override
 	public void Tick(int gameTicks) {
 		checkIfEmpty();
-		this.cooldownSec = (10000 - alexBrewingStand.getTime()) / 1000 + 1;
-		cooldownActionBar(this.cooldownSec, ClassType.BrewingStand, "brewingStand.cooldown", "Brewing Stand");
+		this.cooldownSec = (this.cooldownDuration - alexBrewingStand.getTime()) / 1000 + 1;
+		cooldownActionBar(this.cooldownSec, this.cooldownDuration, alexBrewingStand, ClassType.BrewingStand,
+				"brewingStand.cooldown", "Brewing Stand");
 	}
 
 	/*
@@ -125,6 +127,10 @@ public class BrewingStandClass extends BaseClass {
 		}
 	}
 
+	/**
+	 * This function gives a potion to the player depending on how much blaze powder
+	 * they have in their inventory 8th slot
+	 */
 	private void potionsToGive() {
 		ItemStack blazePowder = player.getInventory().getItem(8);
 		ItemStack potion = null;
@@ -177,11 +183,11 @@ public class BrewingStandClass extends BaseClass {
 			pot.apply(potion);
 			player.getInventory().setItem(1, potion);
 			player.getInventory().setItem(8,
-					ItemHelper.setDetails(new ItemStack(Material.BARRIER), ChatColor.RED + "No potion item yet!"));
+					ItemHelper.setDetails(new ItemStack(Material.BARRIER), ChatColor.RED + "No blaze powder yet!"));
 		}
 	}
 
-	/*
+	/**
 	 * When a person with Alex class hits a player, they will receive Brewing items
 	 * but a random item from a pool of different items
 	 */
