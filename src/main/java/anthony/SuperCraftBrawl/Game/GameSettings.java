@@ -166,6 +166,51 @@ public class GameSettings {
 		changeGameType();
 		increaseLightningRate();
 	}
+	
+	/*
+	 * This function handles removing players from start votes if they
+	 * leave the server or the game lobby
+	 */
+	public void removeFromStartVotes(Player player) {
+		if (game != null && game.getGameSettings() != null) {
+			GameSettings gs = game.getGameSettings();
+			
+			if (gs.startVotes.contains(player)) {
+				gs.totalStartVotes--;
+				gs.startVotes.remove(player);
+			}
+		}
+	}
+	
+	/*
+	 * This function handles removing players from start votes if they
+	 * leave the server or the game lobby
+	 */
+	public void removeFromGameTypeVotes(Player player) {
+		if (game != null && game.getGameSettings() != null) {
+			GameSettings gs = game.getGameSettings();
+			
+			if (gs.gameTypeVotes.contains(player)) {
+				gs.totalGameTypeVotes--;
+				gs.gameTypeVotes.remove(player);
+			}
+		}
+	}
+	
+	/*
+	 * This function handles removing players from start votes if they
+	 * leave the server or the game lobby
+	 */
+	public void removeFromLightningVotes(Player player) {
+		if (game != null && game.getGameSettings() != null) {
+			GameSettings gs = game.getGameSettings();
+			
+			if (gs.lightningVotes.contains(player)) {
+				gs.lightningDropSec--;
+				gs.lightningVotes.remove(player);
+			}
+		}
+	}
 
 	private String color(String c) {
 		return ChatColor.translateAlternateColorCodes('&', c);
