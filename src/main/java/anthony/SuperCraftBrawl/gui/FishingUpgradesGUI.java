@@ -12,7 +12,6 @@ import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -135,7 +134,9 @@ public class FishingUpgradesGUI implements InventoryProvider {
         } else {
             contents.set(1, 2, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.LIME.getData()),
-                            main.color("&aPurchased")), e -> {
+                            main.color("&aPurchased"),
+                            "",
+                            main.color("&7Lure III")), e -> {
                     }));
         }
         
@@ -246,7 +247,9 @@ public class FishingUpgradesGUI implements InventoryProvider {
         } else {
             contents.set(1, 6, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.LIME.getData()),
-                            main.color("&aPurchased")), e -> {
+                            main.color("&aPurchased"),
+                            "",
+                            main.color("&7Receive 15 EXP for every 3 fish caught within 6 blocks of another player")), e -> {
                     }));
         }
         contents.set(2, 8, ClickableItem.of(
