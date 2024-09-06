@@ -1614,6 +1614,7 @@ public class Core extends JavaPlugin implements Listener {
 	@EventHandler
 	public void joinEvent(PlayerJoinEvent e) {
 		Player player = e.getPlayer(); // Gets the player that joined
+		PlayerData data = this.getDataManager().getPlayerData(player); //Gets the player data from database
 		String name = player.getName();
 
 		getListener().resetDoubleJump(player);
@@ -1627,6 +1628,9 @@ public class Core extends JavaPlugin implements Listener {
 		// For join message:
 		String rank = getRankManager().getRank(player).getTagWithSpace(); //Gets the player's rank
 		e.setJoinMessage(color("&r&l[&a&l+&r&l] &r" + rank + "&b" + name + "&a connected"));
+		
+		if (data != null)
+			player.setLevel(data.level); //Indication what the player's level is
 	}
 
 	@SuppressWarnings("deprecation")
