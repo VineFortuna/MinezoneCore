@@ -1,21 +1,35 @@
 package anthony.SuperCraftBrawl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import anthony.SuperCraftBrawl.Game.*;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.Cooldown;
+import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.commands.Commands;
+import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.fishing.FishRarity;
 import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.leaderboards.FishingBoard;
+import anthony.SuperCraftBrawl.leaderboards.KillsBoard;
+import anthony.SuperCraftBrawl.npcs.NPCManager;
+import anthony.SuperCraftBrawl.packets.PacketMain;
+import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
+import anthony.SuperCraftBrawl.practice.BowPractice;
+import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.SuperCraftBrawl.ranks.RankManager;
+import anthony.parkour.Parkour;
+import fr.mrmicky.fastboard.FastBoard;
+import me.itzzmic.minezone.api.PunishAPI;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.minecraft.server.v1_8_R3.*;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.*;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
@@ -35,38 +49,20 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import anthony.SuperCraftBrawl.Game.map.Maps;
-import anthony.SuperCraftBrawl.commands.Commands;
-import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
-import anthony.SuperCraftBrawl.leaderboards.KillsBoard;
-import anthony.SuperCraftBrawl.npcs.NPCManager;
-import anthony.SuperCraftBrawl.packets.PacketMain;
-import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
-import anthony.SuperCraftBrawl.practice.BowPractice;
-import anthony.SuperCraftBrawl.ranks.Rank;
-import anthony.SuperCraftBrawl.ranks.RankManager;
-import anthony.parkour.Parkour;
-import fr.mrmicky.fastboard.FastBoard;
-import me.itzzmic.minezone.api.PunishAPI;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.ChatComponentText;
-import net.minecraft.server.v1_8_R3.EntityArmorStand;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerListHeaderFooter;
-import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
-import net.minecraft.server.v1_8_R3.WorldServer;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class Core extends JavaPlugin implements Listener {
 
@@ -102,6 +98,7 @@ public class Core extends JavaPlugin implements Listener {
 	public Parkour p;
 	// public AntiCheat cheat;
 	public Leaderboard lb;
+	public FishingBoard fb;
 	public KillsBoard kb;
 	public Fishing fishing;
 	private ArrayList<String> msg;
@@ -151,6 +148,10 @@ public class Core extends JavaPlugin implements Listener {
 
 	public Leaderboard getLeaderboard() {
 		return lb;
+	}
+	
+	public FishingBoard getFishingLeaderboard() {
+		return fb;
 	}
 
 	public KillsBoard getKillsLeaderboard() {
@@ -348,6 +349,7 @@ public class Core extends JavaPlugin implements Listener {
 		ag = new ActiveGamesGUI(this);
 		p = new Parkour(this);
 		lb = new Leaderboard(this);
+		fb = new FishingBoard(this);
 		fishing = new Fishing(this);
 		// kb = new KillsBoard(this);
 		// swManager = new anthony.skywars.GameManager(this);
@@ -2008,6 +2010,7 @@ public class Core extends JavaPlugin implements Listener {
 		}
 
 		getLeaderboard().close();
+		getFishingLeaderboard().close();
 		Bukkit.getMessenger().unregisterOutgoingPluginChannel(plugin);
 		Bukkit.getMessenger().unregisterIncomingPluginChannel(this, "BungeeCord");
 		getLogger().info("(!) You have disabled Minezone-Core");
