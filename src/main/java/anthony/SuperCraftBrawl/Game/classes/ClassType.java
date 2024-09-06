@@ -29,7 +29,7 @@ public enum ClassType {
 	ZombiePigman(51, 0, 3), Witch(13, 0, 5), ZombieVillager(50, 0, 10), Ice(54, 0, 15), Vampire(53, 800, 0),
 	Bee(55, 425, 0), Jeb(56, 0, 20), Hunter(57, 500, 0), FlintAndSteel(58, 0, 0), WitherSk(59, 1500, 0),
 	Shulker(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30), LargeFern(64, 0, 0),
-	Vindicator(65, 0, Rank.VIP), Fade(66, 0, Rank.VIP), Fisherman(67, 0, 0), Alex(68, 125, 0);
+	Vindicator(65, 0, Rank.VIP), Fade(66, 0, Rank.VIP), Fisherman(67, 0, 0), BrewingStand(68, 125, 0);
 
 	// Wolf(67, 0, 35)/* , Guardian(68, 0, 30) */;
 
@@ -79,8 +79,8 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new Cactus(instance, player);
-		case Alex:
-			return new AlexClass(instance, player);
+		case BrewingStand:
+			return new BrewingStandClass(instance, player);
 		case Fade:
 			return new FadeClass(instance, player);
 		case Cloud:
@@ -221,7 +221,7 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new ItemStack(Material.CACTUS);
-		case Alex:
+		case BrewingStand:
 			return new ItemStack(Material.BREWING_STAND_ITEM);
 		case Fade:
 			return new ItemStack(Material.STRING);
@@ -367,7 +367,7 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return "A pricklyyy living thing, made up of thornws & blood..";
-		case Alex:
+		case BrewingStand:
 			return "Hit players to obtain Brewing items to get epic potions!";
 		case Fade:
 			return "Fade out of existence from your opponents briefly!";
@@ -536,8 +536,8 @@ public enum ClassType {
 		switch (this) {
 		case Bat:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bat" + ChatColor.RESET;
-		case Alex:
-			return "" + ChatColor.GRAY + "Alex" + ChatColor.RESET;
+		case BrewingStand:
+			return color("&e&lBrewingStand&r");
 		case Fade:
 			return "" + ChatColor.BLACK + ChatColor.BOLD + ChatColor.ITALIC + "Fade" + ChatColor.RESET;
 		case Cloud:
