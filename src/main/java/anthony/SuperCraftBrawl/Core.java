@@ -1594,7 +1594,8 @@ public class Core extends JavaPlugin implements Listener {
 			String rank = this.getRankManager().getRank(player).getTagWithSpace();
 
 			if (rank.length() >= 16) {
-				String s = rank.substring(0, 9) + " ";
+				String s = "";
+				s = rank.substring(0, 9) + " ";
 				team.setPrefix(s);
 				continue;
 			}
@@ -1637,12 +1638,15 @@ public class Core extends JavaPlugin implements Listener {
 		Item item = getServer().getWorlds().get(0).dropItemNaturally(loc, cookie);
 		item.setVelocity(item.getVelocity().zero()); // Make the item stationary
 		item.setPickupDelay(Integer.MAX_VALUE); // Set pickup delay to a large
-
+			
 		if (rank.length() >= 16) {
 			String s = rank.substring(0, 9);
 			p.setPlayerListName("" + s + " " + ChatColor.RESET + p.getName());
 		} else
 			p.setPlayerListName("" + rank + ChatColor.RESET + p.getName());
+		
+		if (getRankManager().getRank(p) == Rank.DEFAULT)
+			p.setPlayerListName("" + rank + ChatColor.GRAY + p.getName());
 
 		p.getInventory().setHelmet(new ItemStack(Material.AIR, 1));
 		p.getInventory().setChestplate(new ItemStack(Material.AIR, 1));
