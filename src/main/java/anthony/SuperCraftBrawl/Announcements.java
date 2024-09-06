@@ -23,7 +23,5 @@ public enum Announcements {
 	public static String color(String c) {
 		return ChatColor.translateAlternateColorCodes('&', c);
 	}
-	
-	
 
 }
