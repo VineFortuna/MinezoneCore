@@ -149,7 +149,7 @@ public class Core extends JavaPlugin implements Listener {
 	public Leaderboard getLeaderboard() {
 		return lb;
 	}
-	
+
 	public FishingBoard getFishingLeaderboard() {
 		return fb;
 	}
@@ -1605,57 +1605,28 @@ public class Core extends JavaPlugin implements Listener {
 
 	public Map<Player, Holograms> holograms = new HashMap<Player, Holograms>();
 
+	/**
+	 * This function handles when a player joins the server
+	 * 
+	 * @param e
+	 */
 	@SuppressWarnings("deprecation")
 	@EventHandler
-	public void PlayerJoin(PlayerJoinEvent e) {
-		Player p = e.getPlayer();
-		String pName = p.getName();
-		p.setGameMode(GameMode.ADVENTURE);
-		// Tournament data
-		if (this.tournament) {
-			PlayerData data = this.getDataManager().getPlayerData(p);
-			if (this.tourneyreset) {
-				if (!this.tourney.containsKey(p.getName())) {
-					data.points = 0;
-				} else {
-					data.points = this.tourney.get(p.getName());
-				}
-			}
-			this.tourney.put(p.getName(), data.points);
-		}
-		// For tab organization.
-		p.setScoreboard(this.lobbyScoreBoard);
-		sendScoreboardUpdate(p);
+	public void joinEvent(PlayerJoinEvent e) {
+		Player player = e.getPlayer(); // Gets the player that joined
+		String name = player.getName();
 
-		// Message to send the server on join
-		String rank = getRankManager().getRank(p).getTagWithSpace();
-		e.setJoinMessage(
-				"" + ChatColor.BOLD + "[" + ChatColor.GREEN + ChatColor.BOLD + "+" + ChatColor.RESET + ChatColor.BOLD
-						+ "] " + ChatColor.RESET + rank + "" + ChatColor.AQUA + pName + ChatColor.GREEN + " connected");
+		getListener().resetDoubleJump(player);
+		getListener().resetArmor(player);
+		getListener().resetPotionEffects(player);
+		getListener().checkIfTournament(player);
+		getListener().setPlayerOnTablist(player);
+		sendScoreboardUpdate(player); // This sets the rank next to player name above their head
+		chatAnnouncementOnJoin(player);
 
-		ItemStack cookie = new ItemStack(Material.COOKIE, 1);
-		Location loc = new Location(lobbyWorld, 144.584, 106, 663.454);
-		Item item = getServer().getWorlds().get(0).dropItemNaturally(loc, cookie);
-		item.setVelocity(item.getVelocity().zero()); // Make the item stationary
-		item.setPickupDelay(Integer.MAX_VALUE); // Set pickup delay to a large
-			
-		if (rank.length() >= 16) {
-			String s = rank.substring(0, 9);
-			p.setPlayerListName("" + s + " " + ChatColor.RESET + p.getName());
-		} else
-			p.setPlayerListName("" + rank + ChatColor.RESET + p.getName());
-		
-		if (getRankManager().getRank(p) == Rank.DEFAULT)
-			p.setPlayerListName("" + rank + ChatColor.GRAY + p.getName());
-
-		p.getInventory().setHelmet(new ItemStack(Material.AIR, 1));
-		p.getInventory().setChestplate(new ItemStack(Material.AIR, 1));
-		p.getInventory().setLeggings(new ItemStack(Material.AIR, 1));
-		p.getInventory().setBoots(new ItemStack(Material.AIR, 1));
-		chatAnnouncementOnJoin(p);
-
-		for (PotionEffect type : p.getActivePotionEffects()) // Resets players potion effects
-			p.removePotionEffect(type.getType());
+		// For join message:
+		String rank = getRankManager().getRank(player).getTagWithSpace(); //Gets the player's rank
+		e.setJoinMessage(color("&r&l[&a&l+&r&l] &r" + rank + "&b" + name + "&a connected"));
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1689,7 +1660,7 @@ public class Core extends JavaPlugin implements Listener {
 
 		new BukkitRunnable() {
 			@Override
-			public void run() { // Runs after 4 seconds
+			public void run() { // Runs after 20 seconds
 				p.sendMessage("----------------------------------------------");
 				p.sendMessage("");
 				p.sendMessage("" + ChatColor.AQUA + ChatColor.BOLD + "             Super Craft Blocks");
@@ -1700,7 +1671,7 @@ public class Core extends JavaPlugin implements Listener {
 				p.sendMessage("");
 				if (p.hasPermission("scb.bonusTokens"))
 					p.sendMessage(color("&c&l>> &rThanks for being a VIP / CAPTAIN Supporter!"));
-				
+
 				p.sendMessage("----------------------------------------------");
 			}
 		}.runTaskLater(this, 400); // 400 ticks = 20 seconds (20 ticks per second)
