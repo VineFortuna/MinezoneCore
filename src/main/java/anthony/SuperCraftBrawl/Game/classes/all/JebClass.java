@@ -56,7 +56,9 @@ public class JebClass extends BaseClass {
 		jeb.startTime = System.currentTimeMillis() - 100000;
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
-				ItemHelper.setDetails(new ItemStack(Material.STONE, 1), "" + ChatColor.GRAY + "Jeb's Call"));
+				ItemHelper.setDetails(new ItemStack(Material.STONE, 1), "" + ChatColor.GRAY + "Jeb's Call", "",
+						instance.getGameManager().getMain().color("&7Push enemies when aiming at them!"),
+						instance.getGameManager().getMain().color("   &rRange: &e25 blocks")));
 	}
 
 	@Override
@@ -74,7 +76,11 @@ public class JebClass extends BaseClass {
 				getActionBarManager().setActionBar(player, "jeb.cooldown", msg, 2);
 			}
 			if (jeb.getTime() == 10000) {
-				player.getInventory().getItem(1).setDurability((short) 0);
+				player.getInventory().remove(Material.STONE);
+				player.getInventory().setItem(1,
+						ItemHelper.setDetails(new ItemStack(Material.STONE, 1), "" + ChatColor.GRAY + "Jeb's Call", "",
+						instance.getGameManager().getMain().color("&7Push enemies when aiming at them!"),
+						instance.getGameManager().getMain().color("   &rRange: &e25 blocks")));
 			}
 		}
 	}
