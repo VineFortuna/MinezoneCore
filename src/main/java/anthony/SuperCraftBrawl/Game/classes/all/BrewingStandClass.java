@@ -65,7 +65,7 @@ public class BrewingStandClass extends BaseClass {
 	 */
 	@Override
 	public void SetItems(Inventory playerInv) {
-		this.used = false; //Reset each life Brewing Stand usage
+		this.used = false; // Reset each life Brewing Stand usage
 		alexBrewingStand.startTime = System.currentTimeMillis() - 100000; // To reset cooldown each life
 		playerInv.setItem(0, getAttackWeapon());
 		playerInv.setItem(1,
@@ -120,8 +120,8 @@ public class BrewingStandClass extends BaseClass {
 					this.alexBrewingStand.restart();
 					this.used = true;
 					player.sendMessage(color("&r&l(!) &rBrewing potion..."));
-					player.getInventory().setItem(8,
-							ItemHelper.setDetails(new ItemStack(Material.BARRIER), ChatColor.RED + "No blaze powder yet!"));
+					player.getInventory().setItem(8, ItemHelper.setDetails(new ItemStack(Material.BARRIER),
+							ChatColor.RED + "No blaze powder yet!"));
 					new BukkitRunnable() {
 						@Override
 						public void run() {
@@ -170,11 +170,11 @@ public class BrewingStandClass extends BaseClass {
 				potion.setItemMeta(meta);
 			} else if (amount == 4) {
 				potion = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-						instance.getGameManager().getMain().color("&bRegen II &7(5 sec)"));
+						instance.getGameManager().getMain().color("&bRegen III &7(5 sec)"));
 				pot.setSplash(true);
 				PotionMeta meta = (PotionMeta) potion.getItemMeta();
 				pot.setType(PotionType.REGEN);
-				meta.addCustomEffect(new PotionEffect(PotionEffectType.REGENERATION, 110, 1), true);
+				meta.addCustomEffect(new PotionEffect(PotionEffectType.REGENERATION, 110, 2), true);
 				potion.setItemMeta(meta);
 			} else if (amount == 5) {
 				potion = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
@@ -188,7 +188,7 @@ public class BrewingStandClass extends BaseClass {
 
 			pot.apply(potion);
 			player.getInventory().setItem(1, potion);
-			this.used = false; //Reset Brewing Stand usage
+			this.used = false; // Reset Brewing Stand usage
 		}
 	}
 
@@ -248,8 +248,11 @@ public class BrewingStandClass extends BaseClass {
 	}
 
 	private ItemStack getBrewingStand() {
-		ItemStack brewingStand = ItemHelper.setDetails(new ItemStack(Material.BREWING_STAND_ITEM), "Brewing Stand", "",
-				"Hit players to obtain Brewing items", "then right click to get a potion");
+		ItemStack brewingStand = ItemHelper.setDetails(new ItemStack(Material.BREWING_STAND_ITEM),
+				color("&eBrewing Stand"), "", color("&rHit players to obtain Brewing items"),
+				color("&rthen right click to get a potion"), "", color("&7 - 1 Powder: &eSlowness II (15 sec)"),
+				color("&7 - 2 Powder: &eJump IV (20 sec"), color("&7 - 3 Powder: &eSpeed II (20 sec)"),
+				color("&7 - 4 Powder: &eRegen III (5 sec)"), color("&7 - 5 Powder: &eStrength I (5 sec)"));
 		return brewingStand;
 	}
 
