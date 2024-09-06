@@ -48,18 +48,20 @@ public class GameSettings {
 			}
 		}
 	}
-	
+
 	public void changeGameType() {
 		if (game != null) {
-			if (game.gameType == GameType.CLASSIC)
-				game.gameType = GameType.FRENZY;
-			else
-				game.gameType = GameType.CLASSIC;
-			
-			game.TellAll(color("&2&l(!) &rThe game mode has been set to &e&l" + game.gameType.toString()));
+			if (this.totalGameTypeVotes == game.players.size()) {
+				if (game.gameType == GameType.CLASSIC)
+					game.gameType = GameType.FRENZY;
+				else
+					game.gameType = GameType.CLASSIC;
+
+				game.TellAll(color("&2&l(!) &rThe game mode has been set to &e&l" + game.gameType.toString()));
+			}
 		}
 	}
-	
+
 	public void handleVoteGameStart(Player player, GameInstance game) {
 		GameSettings gs = null;
 
@@ -79,7 +81,7 @@ public class GameSettings {
 
 	public void handleVoteGameType(Player player, GameInstance game) {
 		GameSettings gs = null;
-		
+
 		if (game != null && game.getGameSettings() != null) {
 			gs = game.getGameSettings();
 			if (!(gs.gameTypeVotes.contains(player))) {
