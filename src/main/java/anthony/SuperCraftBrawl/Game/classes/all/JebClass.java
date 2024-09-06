@@ -85,7 +85,7 @@ public class JebClass extends BaseClass {
 				getActionBarManager().setActionBar(player, "jeb.cooldown", msg, 2);
 			}
 			if (jeb.getTime() == 10000) {
-				player.getInventory().getItem(1).setDurability((short) 5);
+				player.getInventory().getItem(1).setDurability((short) 0);
 			}
 		}
 	}
@@ -106,7 +106,7 @@ public class JebClass extends BaseClass {
 							+ " more seconds gosh damn");
 				} else {
 					jeb.restart();
-					player.getInventory().getItem(1).setDurability((short) 0);
+					player.getInventory().getItem(1).setDurability((short) 5);
 					int range = 25;
 					Location endLoc = player.getEyeLocation();
 					BlockIterator b = new BlockIterator(player.getEyeLocation(), 0, range);
