@@ -1765,6 +1765,7 @@ public class Core extends JavaPlugin implements Listener {
 			game.getGameSettings().removeFromStartVotes(player);
 			game.getGameSettings().removeFromGameTypeVotes(player);
 			game.getGameSettings().removeFromLightningVotes(player);
+			game.getGameSettings().removeFromTimeVotes(player);
 		}
 
 		e.setQuitMessage("" + ChatColor.BOLD + "[" + ChatColor.RED + ChatColor.BOLD + "-" + ChatColor.RESET
