@@ -14,18 +14,40 @@ public class GameSettings {
 	public int totalStartVotes;
 	public int totalTimeVotes;
 	public int totalGameTypeVotes;
+	public int lightningDropSec;
 	public List<Player> startVotes;
 	public List<Player> timeVotes;
 	public List<Player> gameTypeVotes;
+	public List<Player> lightningVotes;
 
 	public GameSettings(GameInstance game) {
 		this.game = game;
 		this.totalStartVotes = 0;
 		this.totalTimeVotes = 0;
 		this.totalGameTypeVotes = 0;
+		this.lightningDropSec = 0;
 		this.startVotes = new ArrayList<Player>();
 		this.timeVotes = new ArrayList<Player>();
 		this.gameTypeVotes = new ArrayList<Player>();
+		this.lightningVotes = new ArrayList<Player>();
+	}
+
+	// GETTER METHODS:
+
+	public int getTotalStartVotes() {
+		return this.totalStartVotes;
+	}
+
+	public int getTotalTimeVotes() {
+		return this.totalTimeVotes;
+	}
+
+	public int getTotalGameTypeVotes() {
+		return this.totalGameTypeVotes;
+	}
+
+	public int getLightningVotes() {
+		return this.lightningDropSec;
 	}
 
 	/**
@@ -62,6 +84,19 @@ public class GameSettings {
 		}
 	}
 
+	/**
+	 * This function increases the lightning drop spawn rate on the map to 2x
+	 * the speed if the votes are equal to the player size
+	 */
+	public void increaseLightningRate() {
+		if (game != null) {
+			if (getLightningVotes() == game.players.size()) {
+				this.lightningDropSec /= 2;
+				game.TellAll(color("&2&l(!) &rLoot drops spawn rate is now &e&l2x"));
+			}
+		}
+	}
+
 	public void handleVoteGameStart(Player player, GameInstance game) {
 		GameSettings gs = null;
 
@@ -90,6 +125,21 @@ public class GameSettings {
 			} else {
 				gs.totalGameTypeVotes--;
 				gs.gameTypeVotes.remove(player);
+			}
+		}
+	}
+	
+	public void handleLightningRate(Player player, GameInstance game) {
+		GameSettings gs = null;
+
+		if (game != null && game.getGameSettings() != null) {
+			gs = game.getGameSettings();
+			if (!(gs.gameTypeVotes.contains(player))) {
+				gs.lightningDropSec++;
+				gs.lightningVotes.add(player);
+			} else {
+				gs.lightningDropSec--;
+				gs.lightningVotes.remove(player);
 			}
 		}
 	}
