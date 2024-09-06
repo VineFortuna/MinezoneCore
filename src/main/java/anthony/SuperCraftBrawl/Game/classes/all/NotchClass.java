@@ -120,45 +120,43 @@ public class NotchClass extends BaseClass {
 			}
 		} else if (item.getType() == Material.GRASS
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			if (notch.getTime() < 10000) {
-				notch.restart();
-				item.setType(Material.DIRT);
-				int range = 25;
-				Location endLoc = player.getEyeLocation();
-				BlockIterator b = new BlockIterator(player.getEyeLocation(), 0, range);
+			notch.restart();
+			item.setType(Material.DIRT);
+			int range = 25;
+			Location endLoc = player.getEyeLocation();
+			BlockIterator b = new BlockIterator(player.getEyeLocation(), 0, range);
+			
+			while (b.hasNext()) {
+				Block block = b.next();
+				endLoc = block.getLocation();
 				
-				while (b.hasNext()) {
-					Block block = b.next();
-					endLoc = block.getLocation();
+				if (block.getType().isSolid())
+					break;
+			}
+			
+			Vector dir = player.getEyeLocation().getDirection();
+			double maxDist = endLoc.distance(player.getEyeLocation());
+			
+			for (double t = 1; t < maxDist; t += 0.5) {
+				ParticleEffect.BLOCK_CRACK.display(player.getEyeLocation().add(dir.clone().multiply(t)), 0.0F, 0.0F,
+						0.0F, 0.0F, 1, new BlockTexture(Material.GRASS));
+			}
+			
+			for (Player p : instance.players) {
+				if (p != player) {
+					Vector d = p.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
+					double dist = d.dot(dir);
 					
-					if (block.getType().isSolid())
-						break;
-				}
-				
-				Vector dir = player.getEyeLocation().getDirection();
-				double maxDist = endLoc.distance(player.getEyeLocation());
-				
-				for (double t = 1; t < maxDist; t += 0.5) {
-					ParticleEffect.BLOCK_CRACK.display(player.getEyeLocation().add(dir.clone().multiply(t)), 0.0F, 0.0F,
-							0.0F, 0.0F, 1, new BlockTexture(Material.GRASS));
-				}
-				
-				for (Player p : instance.players) {
-					if (p != player) {
-						Vector d = p.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
-						double dist = d.dot(dir);
+					if (dist < maxDist) {
+						Location closest = player.getEyeLocation().add(dir.clone().multiply(dist));
 						
-						if (dist < maxDist) {
-							Location closest = player.getEyeLocation().add(dir.clone().multiply(dist));
-							
-							if (closest.distanceSquared(p.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
-								if (instance.duosMap != null) {
-									if (!(instance.team.get(p).equals(instance.team.get(player)))) {
-										p.setVelocity(dir.clone().multiply(-dist / 3.5));
-									}
-								} else {
+						if (closest.distanceSquared(p.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
+							if (instance.duosMap != null) {
+								if (!(instance.team.get(p).equals(instance.team.get(player)))) {
 									p.setVelocity(dir.clone().multiply(-dist / 3.5));
 								}
+							} else {
+								p.setVelocity(dir.clone().multiply(-dist / 3.5));
 							}
 						}
 					}
