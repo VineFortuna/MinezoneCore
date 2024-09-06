@@ -27,7 +27,7 @@ public class GameSettings {
 		this.totalTimeVotes = 0;
 		this.totalGameTypeVotes = 0;
 		this.lightningDropSec = 0;
-		this.dropTimer = 30; //Default lightning drop time
+		this.dropTimer = 30; // Default lightning drop time
 		this.startVotes = new ArrayList<Player>();
 		this.timeVotes = new ArrayList<Player>();
 		this.gameTypeVotes = new ArrayList<Player>();
@@ -56,7 +56,15 @@ public class GameSettings {
 	 * This function sets the time of day in game
 	 */
 	public void setTimeOfDay() {
-		game.getMapWorld().setTime(13000);
+		if (game != null) {
+			if (game.getMapWorld().getTime() == 13000) {
+				game.TellAll(color("&2&l(!) &rThe time has been set to to &c&lNight"));
+				game.getMapWorld().setTime(18000);
+			} else {
+				game.TellAll(color("&2&l(!) &rThe time has been set to to &e&lDay"));
+				game.getMapWorld().setTime(13000);
+			}
+		}
 	}
 
 	/*
@@ -66,7 +74,7 @@ public class GameSettings {
 	public void forceStartGame() {
 		if (game.gameStartTime != null) {
 			if (game.ticksTilStart <= 60) {
-				checkOtherSettings(); //Set other settings too if enough votes
+				checkOtherSettings(); // Set other settings too if enough votes
 				game.TellAll(color("&2&l(!) &rGame is now starting"));
 				game.gameStartTime.cancel();
 				game.StartGame();
@@ -88,8 +96,8 @@ public class GameSettings {
 	}
 
 	/**
-	 * This function increases the lightning drop spawn rate on the map to 2x
-	 * the speed if the votes are equal to the player size
+	 * This function increases the lightning drop spawn rate on the map to 2x the
+	 * speed if the votes are equal to the player size
 	 */
 	public void increaseLightningRate() {
 		if (game != null) {
@@ -131,7 +139,7 @@ public class GameSettings {
 			}
 		}
 	}
-	
+
 	public void handleLightningRate(Player player, GameInstance game) {
 		GameSettings gs = null;
 
@@ -147,6 +155,21 @@ public class GameSettings {
 		}
 	}
 
+	public void handleVoteTime(Player player, GameInstance game) {
+		GameSettings gs = null;
+
+		if (game != null && game.getGameSettings() != null) {
+			gs = game.getGameSettings();
+			if (!(gs.timeVotes.contains(player))) {
+				gs.totalTimeVotes++;
+				gs.timeVotes.add(player);
+			} else {
+				gs.totalTimeVotes--;
+				gs.timeVotes.remove(player);
+			}
+		}
+	}
+
 	public void updateGameStartVoteStatus(Player player, GameInstance game, ChatColor color) {
 		String status = color + (color == ChatColor.GREEN ? " is Ready " : " is no longer Ready ");
 		String message = ChatColor.DARK_GREEN + ChatColor.BOLD.toString() + "(!) " + ChatColor.RESET + ChatColor.YELLOW
@@ -157,57 +180,73 @@ public class GameSettings {
 		if (game.getGameSettings().totalStartVotes == game.players.size())
 			game.getGameSettings().forceStartGame();
 	}
-	
+
 	/**
-	 * This function makes sure if the game is force started to check for votes
-	 * on the other game settings
+	 * This function makes sure if the game is force started to check for votes on
+	 * the other game settings
 	 */
 	private void checkOtherSettings() {
 		changeGameType();
 		increaseLightningRate();
+		setTimeOfDay();
 	}
-	
+
 	/*
-	 * This function handles removing players from start votes if they
-	 * leave the server or the game lobby
+	 * This function handles removing players from start votes if they leave the
+	 * server or the game lobby
 	 */
 	public void removeFromStartVotes(Player player) {
 		if (game != null && game.getGameSettings() != null) {
 			GameSettings gs = game.getGameSettings();
-			
+
 			if (gs.startVotes.contains(player)) {
 				gs.totalStartVotes--;
 				gs.startVotes.remove(player);
 			}
 		}
 	}
-	
+
 	/*
-	 * This function handles removing players from start votes if they
-	 * leave the server or the game lobby
+	 * This function handles removing players from start votes if they leave the
+	 * server or the game lobby
 	 */
 	public void removeFromGameTypeVotes(Player player) {
 		if (game != null && game.getGameSettings() != null) {
 			GameSettings gs = game.getGameSettings();
-			
+
 			if (gs.gameTypeVotes.contains(player)) {
 				gs.totalGameTypeVotes--;
 				gs.gameTypeVotes.remove(player);
 			}
 		}
 	}
-	
+
 	/*
-	 * This function handles removing players from start votes if they
-	 * leave the server or the game lobby
+	 * This function handles removing players from start votes if they leave the
+	 * server or the game lobby
 	 */
 	public void removeFromLightningVotes(Player player) {
 		if (game != null && game.getGameSettings() != null) {
 			GameSettings gs = game.getGameSettings();
-			
+
 			if (gs.lightningVotes.contains(player)) {
 				gs.lightningDropSec--;
 				gs.lightningVotes.remove(player);
+			}
+		}
+	}
+
+	/*
+	 * This function handles removing players from start votes if they leave the
+	 * server or the game lobby
+	 */
+	public void removeFromTimeVotes(Player player) {
+		if (game != null && game.getGameSettings() != null) {
+			GameSettings gs = game.getGameSettings();
+
+			if (gs.timeVotes.contains(player)) {
+				gs.totalTimeVotes--;
+				gs.timeVotes.remove(player);
 			}
 		}
 	}

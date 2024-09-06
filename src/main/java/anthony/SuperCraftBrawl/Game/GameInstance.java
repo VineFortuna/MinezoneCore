@@ -617,6 +617,7 @@ public class GameInstance {
 					if (ticks == 3) {
 						getGameSettings().changeGameType();
 						getGameSettings().increaseLightningRate();
+						getGameSettings().setTimeOfDay();
 
 						for (Player player : players) {
 							player.closeInventory();

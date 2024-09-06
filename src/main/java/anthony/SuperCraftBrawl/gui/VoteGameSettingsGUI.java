@@ -23,7 +23,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 
 	public VoteGameSettingsGUI(Core main) {
 		this.main = main;
-		this.inv = SmartInventory.builder().id("voteGameSettings").provider(this).size(5, 9)
+		this.inv = SmartInventory.builder().id("voteGameSettings").provider(this).size(4, 9)
 				.title(ChatColor.DARK_GRAY.toString() + ChatColor.BOLD + "Vote").build();
 	}
 
@@ -74,12 +74,21 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 	 * @param game     The current game instance in which the player is involved.
 	 */
 	private void addVoteTimeButton(InventoryContents contents, Player player, GameInstance game) {
+		String timeSetting = "";
+		if (game.getMapWorld().getTime() == 13000)
+			timeSetting = "Night";
+		else
+			timeSetting = "Day";
+
 		ItemStack voteTime = ItemHelper.setDetails(new ItemStack(Material.WATCH),
-				ChatColor.YELLOW + "Time of Day -> Night", "", "" + ChatColor.RED + "NOT AVAILABLE");
+				ChatColor.YELLOW + "Time Of Day -> " + timeSetting, "",
+				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().totalTimeVotes : "0") + "/"
+						+ (game != null ? game.players.size() : "0") + ")");
 		contents.set(1, 5, ClickableItem.of(voteTime, event -> {
 			if (event.getWhoClicked() instanceof Player) {
-				// Player clickingPlayer = (Player) event.getWhoClicked();
-				// inv.close(clickingPlayer);
+				Player clickingPlayer = (Player) event.getWhoClicked();
+				inv.close(clickingPlayer);
+				game.getGameSettings().handleVoteTime(player, game);
 			}
 		}));
 	}
@@ -93,10 +102,10 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 	 */
 	private void addVoteGameTypeButton(InventoryContents contents, Player player, PlayerData data, GameInstance game) {
 		ItemStack voteGameType = ItemHelper.setDetails(new ItemStack(Material.TNT),
-				ChatColor.YELLOW + "Vote Game Type -> Frenzy", "",
+				ChatColor.YELLOW + "Vote Game Type -> " + game.gameType.getName(), "",
 				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().totalGameTypeVotes : "0") + "/"
 						+ (game != null ? game.players.size() : "0") + ")");
-		contents.set(2, 4, ClickableItem.of(voteGameType, event -> {
+		contents.set(3, 5, ClickableItem.of(voteGameType, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
 				inv.close(clickingPlayer);
@@ -117,7 +126,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 				ChatColor.YELLOW + "Lightning Drop Rate -> 2x", "",
 				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().getLightningVotes() : "0") + "/"
 						+ (game != null ? game.players.size() : "0") + ")");
-		contents.set(3, 4, ClickableItem.of(lightningRate, event -> {
+		contents.set(3, 3, ClickableItem.of(lightningRate, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
 				inv.close(clickingPlayer);
