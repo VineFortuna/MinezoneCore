@@ -908,7 +908,7 @@ public class GameInstance {
 	 * DarkSethBling, it tells them the location the item spawned
 	 */
 	public void startLightningDropsTimer() {
-		int seconds = getGameSettings().getLightningVotes(); // The amount of seconds till lightning drops spawn on map
+		int seconds = getGameSettings().dropTimer; // The amount of seconds till lightning drops spawn on map
 
 		BukkitRunnable runnable = new BukkitRunnable() {
 			@Override

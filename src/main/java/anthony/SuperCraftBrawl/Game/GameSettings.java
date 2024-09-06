@@ -15,6 +15,7 @@ public class GameSettings {
 	public int totalTimeVotes;
 	public int totalGameTypeVotes;
 	public int lightningDropSec;
+	public int dropTimer;
 	public List<Player> startVotes;
 	public List<Player> timeVotes;
 	public List<Player> gameTypeVotes;
@@ -26,6 +27,7 @@ public class GameSettings {
 		this.totalTimeVotes = 0;
 		this.totalGameTypeVotes = 0;
 		this.lightningDropSec = 0;
+		this.dropTimer = 30; //Default lightning drop time
 		this.startVotes = new ArrayList<Player>();
 		this.timeVotes = new ArrayList<Player>();
 		this.gameTypeVotes = new ArrayList<Player>();
@@ -91,7 +93,7 @@ public class GameSettings {
 	public void increaseLightningRate() {
 		if (game != null) {
 			if (getLightningVotes() == game.players.size()) {
-				this.lightningDropSec /= 2;
+				this.dropTimer /= 2;
 				game.TellAll(color("&2&l(!) &rLoot drops spawn rate is now &e&l2x"));
 			}
 		}
