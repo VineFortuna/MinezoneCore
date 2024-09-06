@@ -96,12 +96,15 @@ public class StatsGUI implements InventoryProvider {
 					}
 				}
 			}
+			int uniqueCaught = main.getTotalFish(player);
+			if (target != null)
+				uniqueCaught = main.getTotalFish(target);
 			
 			contents.set(2, 6,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
 							main.color("&e&lFishing Stats"),
 							main.color("&aCaught: &r" + data.totalcaught),
-							main.color("&aUnique Caught: &r" + main.getTotalFish(player)),
+							main.color("&aUnique Caught: &r" + uniqueCaught),
 							main.color("&aTreasure Caught: &r" + treasure)), e -> {
 					}));
 			String fishingTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTk2YTQ4ZGNkYWY0MThmMjJjZDE4NjdjMWViMGFlMjgyYzI4NGI2Nzk5MDZiNzk3ODFkOGQyYjJlZWJhMjEwMiJ9fX0=";

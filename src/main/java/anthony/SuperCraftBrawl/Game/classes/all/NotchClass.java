@@ -88,6 +88,9 @@ public class NotchClass extends BaseClass {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &0Collape X-Axis");
 				getActionBarManager().setActionBar(player, "notch.cooldown", msg, 2);
 			}
+			if (notch.getTime() == 10000 && player.getInventory().getItem(1).getType() == Material.DIRT) {
+				player.getInventory().getItem(1).setType(Material.GRASS);
+			}
 		}
 	}
 
@@ -100,7 +103,7 @@ public class NotchClass extends BaseClass {
 			Random r = new Random();
 			int chance = r.nextInt(100);
 
-			if (chance >= 0 && chance <= 85) {
+			if (chance <= 85) {
 				player.getInventory()
 						.addItem(ItemHelper.setDetails(new ItemStack(Material.GRASS),
 								"" + ChatColor.BLACK + "Collapse X-Axis", "",
@@ -118,40 +121,36 @@ public class NotchClass extends BaseClass {
 		} else if (item.getType() == Material.GRASS
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 			if (notch.getTime() < 10000) {
-				int seconds = (10000 - notch.getTime()) / 1000 + 1;
-				event.setCancelled(true);
-				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-						+ "Bro... You're still on cooldown for " + ChatColor.YELLOW + seconds + " more seconds ");
-			} else {
 				notch.restart();
+				item.setType(Material.DIRT);
 				int range = 25;
 				Location endLoc = player.getEyeLocation();
 				BlockIterator b = new BlockIterator(player.getEyeLocation(), 0, range);
-
+				
 				while (b.hasNext()) {
 					Block block = b.next();
 					endLoc = block.getLocation();
-
+					
 					if (block.getType().isSolid())
 						break;
 				}
-
+				
 				Vector dir = player.getEyeLocation().getDirection();
 				double maxDist = endLoc.distance(player.getEyeLocation());
-
+				
 				for (double t = 1; t < maxDist; t += 0.5) {
 					ParticleEffect.BLOCK_CRACK.display(player.getEyeLocation().add(dir.clone().multiply(t)), 0.0F, 0.0F,
 							0.0F, 0.0F, 1, new BlockTexture(Material.GRASS));
 				}
-
+				
 				for (Player p : instance.players) {
 					if (p != player) {
 						Vector d = p.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
 						double dist = d.dot(dir);
-
+						
 						if (dist < maxDist) {
 							Location closest = player.getEyeLocation().add(dir.clone().multiply(dist));
-
+							
 							if (closest.distanceSquared(p.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
 								if (instance.duosMap != null) {
 									if (!(instance.team.get(p).equals(instance.team.get(player)))) {
@@ -165,6 +164,12 @@ public class NotchClass extends BaseClass {
 					}
 				}
 			}
+		} else if (item.getType() == Material.DIRT
+				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+			int seconds = (10000 - notch.getTime()) / 1000 + 1;
+			event.setCancelled(true);
+			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+					+ "Bro... You're still on cooldown for " + ChatColor.YELLOW + seconds + " more seconds ");
 		} else if (item.getType() == Material.NETHER_STAR
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 			if (!(player.isOnGround())) {
