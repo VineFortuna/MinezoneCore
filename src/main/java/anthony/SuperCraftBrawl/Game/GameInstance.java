@@ -616,7 +616,8 @@ public class GameInstance {
 
 					if (ticks == 3) {
 						getGameSettings().changeGameType();
-						
+						getGameSettings().increaseLightningRate();
+
 						for (Player player : players) {
 							player.closeInventory();
 							if (player.getInventory().contains(votePaper))
@@ -907,6 +908,8 @@ public class GameInstance {
 	 * DarkSethBling, it tells them the location the item spawned
 	 */
 	public void startLightningDropsTimer() {
+		int seconds = getGameSettings().getLightningVotes(); // The amount of seconds till lightning drops spawn on map
+
 		BukkitRunnable runnable = new BukkitRunnable() {
 			@Override
 			public void run() {
@@ -938,7 +941,7 @@ public class GameInstance {
 				}
 			}
 		};
-		runnable.runTaskTimer(gameManager.getMain(), 20 * 30, 20 * 30);
+		runnable.runTaskTimer(gameManager.getMain(), 20 * seconds, 20 * seconds);
 		runnables.add(runnable);
 	}
 
@@ -1150,30 +1153,31 @@ public class GameInstance {
 				if (map != null) {
 					if (data != null) {
 						if (data.blue == 1) {
-							Score livesScore = o.getScore(truncateString("" + 
-									playerClass.getType().getTag() + " " + ChatColor.BLUE + player.getName() + "", 38));
+							Score livesScore = o.getScore(truncateString(
+									"" + playerClass.getType().getTag() + " " + ChatColor.BLUE + player.getName() + "",
+									38));
 							livesScore.setScore(5);
 							playerClass.score = livesScore;
 						} else if (data.red == 1) {
-							Score livesScore = o.getScore(truncateString("" + 
-									playerClass.getType().getTag() + " " + ChatColor.RED + player.getName() + "", 38));
+							Score livesScore = o.getScore(truncateString(
+									"" + playerClass.getType().getTag() + " " + ChatColor.RED + player.getName() + "",
+									38));
 							livesScore.setScore(5);
 							playerClass.score = livesScore;
 						} else if (data.green == 1) {
-							Score livesScore = o.getScore(truncateString("" + 
-									playerClass.getType().getTag() + " " + ChatColor.GREEN + player.getName() + "",
+							Score livesScore = o.getScore(truncateString(
+									"" + playerClass.getType().getTag() + " " + ChatColor.GREEN + player.getName() + "",
 									38));
 							livesScore.setScore(5);
 							playerClass.score = livesScore;
 						} else if (data.yellow == 1) {
-							Score livesScore = o.getScore(truncateString("" + 
-									playerClass.getType().getTag() + " " + ChatColor.YELLOW + player.getName() + "",
-									38));
+							Score livesScore = o.getScore(truncateString("" + playerClass.getType().getTag() + " "
+									+ ChatColor.YELLOW + player.getName() + "", 38));
 							livesScore.setScore(5);
 							playerClass.score = livesScore;
 						} else {
-							Score livesScore = o.getScore(truncateString("" + 
-									playerClass.getType().getTag() + " " + ChatColor.WHITE + player.getName() + "",
+							Score livesScore = o.getScore(truncateString(
+									"" + playerClass.getType().getTag() + " " + ChatColor.WHITE + player.getName() + "",
 									38));
 							livesScore.setScore(5);
 							playerClass.score = livesScore;
@@ -2017,8 +2021,8 @@ public class GameInstance {
 			BaseClass oldBaseClass = classes.get(player);
 			oldClasses.put(player, oldBaseClass);
 
-			Score newScore = livesObjective
-					.getScore(truncateString("" + classType.getTag() + " " + ChatColor.WHITE + player.getName() + "", 40));
+			Score newScore = livesObjective.getScore(
+					truncateString("" + classType.getTag() + " " + ChatColor.WHITE + player.getName() + "", 40));
 			newBaseClass.lives = oldBaseClass.lives;
 			newBaseClass.tokens = oldBaseClass.tokens;
 			newBaseClass.score = newScore;

@@ -32,6 +32,7 @@ public class BrewingStandClass extends BaseClass {
 
 	private int cooldownSec;
 	private int cooldownDuration = 10000;
+	private boolean used = false;
 
 	public BrewingStandClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -64,6 +65,7 @@ public class BrewingStandClass extends BaseClass {
 	 */
 	@Override
 	public void SetItems(Inventory playerInv) {
+		this.used = false; //Reset each life Brewing Stand usage
 		alexBrewingStand.startTime = System.currentTimeMillis() - 100000; // To reset cooldown each life
 		playerInv.setItem(0, getAttackWeapon());
 		playerInv.setItem(1,
@@ -114,14 +116,19 @@ public class BrewingStandClass extends BaseClass {
 					if (player.getInventory().getItem(8).getType() == Material.BARRIER)
 						return;
 
-					alexBrewingStand.restart();
+					ItemStack blazePowder = player.getInventory().getItem(8);
+					this.alexBrewingStand.restart();
+					this.used = true;
 					player.sendMessage(color("&r&l(!) &rBrewing potion..."));
+					player.getInventory().setItem(8,
+							ItemHelper.setDetails(new ItemStack(Material.BARRIER), ChatColor.RED + "No blaze powder yet!"));
 					new BukkitRunnable() {
 						@Override
 						public void run() {
-							potionsToGive();
+							if (used)
+								potionsToGive(blazePowder);
 						}
-					}.runTaskLater(instance.getGameManager().getMain(), 100L);
+					}.runTaskLater(instance.getGameManager().getMain(), 80L);
 				}
 			}
 		}
@@ -131,8 +138,7 @@ public class BrewingStandClass extends BaseClass {
 	 * This function gives a potion to the player depending on how much blaze powder
 	 * they have in their inventory 8th slot
 	 */
-	private void potionsToGive() {
-		ItemStack blazePowder = player.getInventory().getItem(8);
+	private void potionsToGive(ItemStack blazePowder) {
 		ItemStack potion = null;
 		Potion pot = new Potion(1);
 		int amount = blazePowder.getAmount();
@@ -182,8 +188,7 @@ public class BrewingStandClass extends BaseClass {
 
 			pot.apply(potion);
 			player.getInventory().setItem(1, potion);
-			player.getInventory().setItem(8,
-					ItemHelper.setDetails(new ItemStack(Material.BARRIER), ChatColor.RED + "No blaze powder yet!"));
+			this.used = false; //Reset Brewing Stand usage
 		}
 	}
 
@@ -206,7 +211,7 @@ public class BrewingStandClass extends BaseClass {
 			Random r = new Random();
 			int chance = r.nextInt(100);
 
-			if (chance >= 0 && chance < 50) {
+			if (chance >= 0 && chance < 70) {
 				ItemStack slot9 = player.getInventory().getItem(8);
 				ItemStack slot2 = player.getInventory().getItem(1);
 

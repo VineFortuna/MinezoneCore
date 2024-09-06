@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameSettings;
 import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
@@ -22,7 +23,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 
 	public VoteGameSettingsGUI(Core main) {
 		this.main = main;
-		this.inv = SmartInventory.builder().id("voteGameSettings").provider(this).size(3, 9)
+		this.inv = SmartInventory.builder().id("voteGameSettings").provider(this).size(5, 9)
 				.title(ChatColor.DARK_GRAY.toString() + ChatColor.BOLD + "Vote").build();
 	}
 
@@ -38,7 +39,10 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 		if (game != null && game.state == GameState.WAITING && game.players.size() >= 2) {
 			addVoteGameStartButton(contents, player, game);
 			addVoteTimeButton(contents, player, game);
-			addVoteGameTypeButton(contents, player, data, game);
+			addLightningRateButton(contents, player, game);
+
+			if (game.gameType != GameType.DUEL) // Don't let players change game mode if duels
+				addVoteGameTypeButton(contents, player, data, game);
 		}
 	}
 
@@ -46,8 +50,8 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 	 * Adds a "Vote for Game Start" item to the specified inventory.
 	 * 
 	 * @param contents The inventory contents where the item will be added.
-	 * @param player The player who is interacting with the inventory.
-	 * @param game The current game instance in which the player is involved.
+	 * @param player   The player who is interacting with the inventory.
+	 * @param game     The current game instance in which the player is involved.
 	 */
 	private void addVoteGameStartButton(InventoryContents contents, Player player, GameInstance game) {
 		ItemStack voteGameStart = ItemHelper.setDetails(new ItemStack(Material.BEACON), ChatColor.YELLOW + "Game Start",
@@ -66,17 +70,16 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 	 * Adds a "Vote for Time of Day" item to the specified inventory.
 	 * 
 	 * @param contents The inventory contents where the item will be added.
-	 * @param player The player who is interacting with the inventory.
-	 * @param game The current game instance in which the player is involved.
+	 * @param player   The player who is interacting with the inventory.
+	 * @param game     The current game instance in which the player is involved.
 	 */
 	private void addVoteTimeButton(InventoryContents contents, Player player, GameInstance game) {
 		ItemStack voteTime = ItemHelper.setDetails(new ItemStack(Material.WATCH),
-				ChatColor.YELLOW + "Time of Day -> Night", "",
-				"" + ChatColor.RED + "NOT AVAILABLE");
+				ChatColor.YELLOW + "Time of Day -> Night", "", "" + ChatColor.RED + "NOT AVAILABLE");
 		contents.set(1, 5, ClickableItem.of(voteTime, event -> {
 			if (event.getWhoClicked() instanceof Player) {
-				//Player clickingPlayer = (Player) event.getWhoClicked();
-				//inv.close(clickingPlayer);
+				// Player clickingPlayer = (Player) event.getWhoClicked();
+				// inv.close(clickingPlayer);
 			}
 		}));
 	}
@@ -85,8 +88,8 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 	 * Adds a "Vote for Game Type" item to the specified inventory.
 	 * 
 	 * @param contents The inventory contents where the item will be added.
-	 * @param player The player who is interacting with the inventory.
-	 * @param game The current game instance in which the player is involved.
+	 * @param player   The player who is interacting with the inventory.
+	 * @param game     The current game instance in which the player is involved.
 	 */
 	private void addVoteGameTypeButton(InventoryContents contents, Player player, PlayerData data, GameInstance game) {
 		ItemStack voteGameType = ItemHelper.setDetails(new ItemStack(Material.TNT),
@@ -98,6 +101,27 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 				Player clickingPlayer = (Player) event.getWhoClicked();
 				inv.close(clickingPlayer);
 				game.getGameSettings().handleVoteGameType(player, game);
+			}
+		}));
+	}
+
+	/**
+	 * Adds a "Lightning Drop Rate" item to the specified inventory.
+	 * 
+	 * @param contents The inventory contents where the item will be added.
+	 * @param player   The player who is interacting with the inventory.
+	 * @param game     The current game instance in which the player is involved.
+	 */
+	private void addLightningRateButton(InventoryContents contents, Player player, GameInstance game) {
+		ItemStack lightningRate = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR),
+				ChatColor.YELLOW + "Lightning Drop Rate -> 2x", "",
+				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().getLightningVotes() : "0") + "/"
+						+ (game != null ? game.players.size() : "0") + ")");
+		contents.set(3, 4, ClickableItem.of(lightningRate, event -> {
+			if (event.getWhoClicked() instanceof Player) {
+				Player clickingPlayer = (Player) event.getWhoClicked();
+				inv.close(clickingPlayer);
+				game.getGameSettings().handleLightningRate(player, game);
 			}
 		}));
 	}
