@@ -23,6 +23,7 @@ public class FishingBoard {
     private HashMap<UUID, Rank> RoleID;
     private ArrayList<UUID> lead;
     private ArrayList<String> lead2;
+    private ArrayList<Entity> entities;
     private ResultSet set;
     private Connection c;
     private int i;
@@ -34,6 +35,7 @@ public class FishingBoard {
         caught = new HashMap<>();
         lead = new ArrayList<>();
         lead2 = new ArrayList<>();
+        entities = new ArrayList<>();
         c = main.getDatabaseManager().getConnection();
         Bukkit.getScheduler().runTaskTimerAsynchronously(main, () -> {
             caught.clear();
@@ -84,10 +86,9 @@ public class FishingBoard {
     }
     
     public void close() {
-        for (Entity e : main.getLobbyWorld().getEntities()) {
-            if (e instanceof ArmorStand) {
-                e.remove();
-            }
+        for (Entity e : entities) {
+            entities.remove(e);
+            e.remove();
         }
         caught.clear();
         lead.clear();
@@ -96,12 +97,12 @@ public class FishingBoard {
     }
     
     public void caughtBoard() throws SQLException {
-        for (Entity entity : main.getLobbyWorld().getEntities()) {
-            if (entity.getType() == EntityType.ARMOR_STAND) {
-                ArmorStand st = (ArmorStand) entity;
-                
-                if (!(st.getItemInHand().getType() == Material.CHEST))
-                    entity.remove();
+        for (Entity entity : entities) {
+            ArmorStand st = (ArmorStand) entity;
+    
+            if (!(st.getItemInHand().getType() == Material.CHEST)) {
+                entities.remove(entity);
+                entity.remove();
             }
         }
         
@@ -111,6 +112,7 @@ public class FishingBoard {
         stand.setGravity(false);
         stand.setCustomNameVisible(true);
         stand.setCustomName(main.color("&e&l<==&nFISHING LEADERBOARD&r&e&l==>"));
+        entities.add(stand);
         
         int count = 1;
         loc.setY(loc.getY() - 0.4);
@@ -132,9 +134,10 @@ public class FishingBoard {
     }
     
     public void updateBoard() throws SQLException {
-        for (Entity e : main.getLobbyWorld().getEntities())
-            if (e instanceof ArmorStand)
-                e.remove();
+        for (Entity e : entities) {
+            entities.remove(e);
+            e.remove();
+        }
         
         Location loc = new Location(main.getLobbyWorld(), 305.575, 92.5, 531.328);
         ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
@@ -142,6 +145,7 @@ public class FishingBoard {
         stand.setGravity(false);
         stand.setCustomNameVisible(true);
         stand.setCustomName(main.color("&e&l<==&nFISHING LEADERBOARD&r&e&l==>"));
+        entities.add(stand);
         int count = 1;
         loc.setY(loc.getY() - 0.4);
         
@@ -156,6 +160,7 @@ public class FishingBoard {
             stand.setCustomNameVisible(true);
             stand.setCustomName(
                     main.color("&b#" + count + ":" + " &e" + name + " &r- " + win));
+            entities.add(stand);
             
             count++;
         }
