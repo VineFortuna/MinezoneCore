@@ -87,9 +87,9 @@ public class FishingBoard {
     
     public void close() {
         for (Entity e : entities) {
-            entities.remove(e);
             e.remove();
         }
+        entities.clear();
         caught.clear();
         lead.clear();
         c = null;
@@ -135,9 +135,9 @@ public class FishingBoard {
     
     public void updateBoard() throws SQLException {
         for (Entity e : entities) {
-            entities.remove(e);
             e.remove();
         }
+        entities.clear();
         
         Location loc = new Location(main.getLobbyWorld(), 305.575, 92.5, 531.328);
         ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
