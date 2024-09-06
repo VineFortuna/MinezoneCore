@@ -1622,6 +1622,7 @@ public class Core extends JavaPlugin implements Listener {
 		getListener().setPlayerOnTablist(player);
 		sendScoreboardUpdate(player); // This sets the rank next to player name above their head
 		chatAnnouncementOnJoin(player);
+		LobbyBoard(player); //Gives the lobby scoreboard to player
 
 		// For join message:
 		String rank = getRankManager().getRank(player).getTagWithSpace(); //Gets the player's rank
@@ -1629,6 +1630,9 @@ public class Core extends JavaPlugin implements Listener {
 		
 		if (data != null)
 			player.setLevel(data.level); //Indication what the player's level is
+		
+		player.setHealth(20);
+		player.setFoodLevel(20);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1775,42 +1779,6 @@ public class Core extends JavaPlugin implements Listener {
 
 	public void sortTourney() {
 		tourney = sortMapByValueDescending(tourney);
-	}
-
-	@EventHandler
-	public void join(PlayerJoinEvent event) {
-		Player player = event.getPlayer();
-		PlayerData data = this.getDataManager().getPlayerData(player);
-
-		if (data != null)
-			player.setLevel(data.level);
-
-		Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
-			ByteArrayOutputStream b = new ByteArrayOutputStream();
-			DataOutputStream out = new DataOutputStream(b);
-
-			try {
-				out.writeUTF("PlayerCount");
-				out.writeUTF("scb-1");
-			} catch (Exception exc) {
-				exc.printStackTrace();
-			}
-			player.sendPluginMessage(this, "BungeeCord", b.toByteArray());
-			b = new ByteArrayOutputStream();
-			out = new DataOutputStream(b);
-
-			try {
-				out.writeUTF("PlayerCount");
-				out.writeUTF("scb-2");
-			} catch (Exception exc) {
-				exc.printStackTrace();
-			}
-			player.sendPluginMessage(this, "BungeeCord", b.toByteArray());
-		}, 10L);
-		player.setGameMode(GameMode.ADVENTURE);
-		LobbyBoard(player);
-		player.setHealth(20);
-		player.setFoodLevel(20);
 	}
 
 	public Location LobbyLoc() {
