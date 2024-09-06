@@ -28,11 +28,11 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import net.md_5.bungee.api.ChatColor;
 
-public class AlexClass extends BaseClass {
+public class BrewingStandClass extends BaseClass {
 
 	private int cooldownSec;
 
-	public AlexClass(GameInstance instance, Player player) {
+	public BrewingStandClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.15;
 	}
@@ -79,20 +79,8 @@ public class AlexClass extends BaseClass {
 	@Override
 	public void Tick(int gameTicks) {
 		checkIfEmpty();
-
-		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Alex
-				&& instance.classes.get(player).getLives() > 0) {
-			this.cooldownSec = (10000 - alexBrewingStand.getTime()) / 1000 + 1;
-
-			if (alexBrewingStand.getTime() < 10000) {
-				String msg = instance.getGameManager().getMain()
-						.color("&a&lBrewing Stand cooldown: &e" + cooldownSec + "s");
-				getActionBarManager().setActionBar(player, "brewingStand.cooldown", msg, 2);
-			} else {
-				String msg = instance.getGameManager().getMain().color("&rYou can use &eBrewing Stand");
-				getActionBarManager().setActionBar(player, "brewingStand.cooldown", msg, 2);
-			}
-		}
+		this.cooldownSec = (10000 - alexBrewingStand.getTime()) / 1000 + 1;
+		cooldownActionBar(this.cooldownSec, ClassType.BrewingStand, "brewingStand.cooldown", "Brewing Stand");
 	}
 
 	/*
@@ -123,7 +111,7 @@ public class AlexClass extends BaseClass {
 				} else {
 					if (player.getInventory().getItem(8).getType() == Material.BARRIER)
 						return;
-					
+
 					alexBrewingStand.restart();
 					player.sendMessage(color("&r&l(!) &rBrewing potion..."));
 					new BukkitRunnable() {
@@ -230,7 +218,7 @@ public class AlexClass extends BaseClass {
 
 	@Override
 	public ClassType getType() {
-		return ClassType.Alex;
+		return ClassType.BrewingStand;
 	}
 
 	@Override
