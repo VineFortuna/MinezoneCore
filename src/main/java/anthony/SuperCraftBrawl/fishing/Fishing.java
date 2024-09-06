@@ -1,25 +1,19 @@
 package anthony.SuperCraftBrawl.fishing;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.playerdata.ClassDetails;
-import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.EnumParticle;
-import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
-import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.Effect;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.server.PluginDisableEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -226,13 +220,13 @@ public class Fishing implements Listener {
                 break;
         }
         if (caughtRecent.get(p) % times == 0) {
-            for (int t = 0; t < 2 * Math.PI * radius; t += 3) {
+            for (int t = 0; t < 2 * Math.PI * radius; t += 2) {
                 p.playEffect(p.getLocation().add(radius * Math.cos(t), 0,
                         radius * Math.sin((t))), Effect.HAPPY_VILLAGER, 1);
             }
             boolean found = false;
             for (Entity e : p.getNearbyEntities(radius, radius, radius)) {
-                if (e instanceof Player) {
+                if (e instanceof Player && e != p) {
                     found = true;
                     break;
                 }
@@ -240,6 +234,7 @@ public class Fishing implements Listener {
             if (found) {
                 PlayerData data = main.getDataManager().getPlayerData(p);
                 data.exp += exp;
+                p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + exp + " EXP!"));
                 if (data.exp >= 2500) {
                     data.level++;
                     data.exp -= 2500;
