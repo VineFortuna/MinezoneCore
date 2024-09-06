@@ -6,7 +6,9 @@ import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.ranks.Rank;
 import me.itzzmic.minezone.api.PunishAPI;
+import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.EntityFishingHook;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
@@ -32,6 +34,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Door;
 import org.bukkit.material.Skull;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -46,6 +49,70 @@ public class PlayerListener implements Listener {
 	public PlayerListener(Core main) {
 		this.main = main;
 		this.main.getServer().getPluginManager().registerEvents(this, main);
+	}
+	
+	/**
+	 * This function just resets player double jump & sets gamemode to Adventure
+	 * @param player to be reset
+	 */
+	public void resetDoubleJump(Player p) {
+		p.setAllowFlight(false);
+		p.setAllowFlight(true);
+		p.setGameMode(GameMode.ADVENTURE);
+	}
+	
+	/**
+	 * This function resets the armor of a player
+	 * @param p which is Player to remove armor
+	 */
+	public void resetArmor(Player p) {
+		p.getInventory().setHelmet(new ItemStack(Material.AIR, 1));
+		p.getInventory().setChestplate(new ItemStack(Material.AIR, 1));
+		p.getInventory().setLeggings(new ItemStack(Material.AIR, 1));
+		p.getInventory().setBoots(new ItemStack(Material.AIR, 1));
+	}
+	
+	/**
+	 * This function resets the Player's potion effects if any is active
+	 * @param p which is Player to remove effects
+	 */
+	public void resetPotionEffects(Player p) {
+		for (PotionEffect type : p.getActivePotionEffects()) //Loop through all active effects
+			p.removePotionEffect(type.getType());
+	}
+	
+	/**
+	 * This function sets the player's rank on the tablist to the left of their name
+	 * @param p which is Player to set rank on tablist
+	 */
+	public void setPlayerOnTablist(Player p) {
+		String rank = main.getRankManager().getRank(p).getTagWithSpace(); //Gets the player's rank
+		
+		if (rank.length() >= 16) {
+			String s = rank.substring(0, 9);
+			p.setPlayerListName("" + s + " " + ChatColor.RESET + p.getName());
+		} else
+			p.setPlayerListName("" + rank + ChatColor.RESET + p.getName());
+
+		if (main.getRankManager().getRank(p) == Rank.DEFAULT)
+			p.setPlayerListName("" + rank + ChatColor.GRAY + p.getName());
+	}
+	
+	/**
+	 * This function checks if tournament mode is active on Player Join
+	 * @param p which is Player to add to the tournament
+	 */
+	public void checkIfTournament(Player p) {
+		if (main.tournament) {
+			PlayerData data = main.getDataManager().getPlayerData(p);
+			if (main.tourneyreset) {
+				if (!main.tourney.containsKey(p.getName()))
+					data.points = 0;
+				else
+					data.points = main.tourney.get(p.getName());
+			}
+			main.tourney.put(p.getName(), data.points);
+		}
 	}
 
 	@EventHandler
