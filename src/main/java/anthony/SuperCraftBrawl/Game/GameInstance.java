@@ -1131,10 +1131,10 @@ public class GameInstance {
 			ScoreboardManager m = Bukkit.getScoreboardManager();
 			c = m.getNewScoreboard();
 
-			if (map != null)
-				o = c.registerNewObjective(color("&e&l" + this.map.toString()), "");
+			if (this.map != null)
+				o = c.registerNewObjective("" + ChatColor.BOLD + this.map.toString(), "");
 			else
-				o = c.registerNewObjective(color("&e&l" + this.duosMap.toString()), "");
+				o = c.registerNewObjective("" + ChatColor.BOLD + this.duosMap.toString(), "");
 			livesObjective = o;
 			o.setDisplaySlot(DisplaySlot.SIDEBAR);
 			Score game = o.getScore(color("&r&lGame:"));
