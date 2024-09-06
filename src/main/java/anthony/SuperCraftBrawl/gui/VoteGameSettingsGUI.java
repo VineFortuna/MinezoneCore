@@ -101,8 +101,15 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 	 * @param game     The current game instance in which the player is involved.
 	 */
 	private void addVoteGameTypeButton(InventoryContents contents, Player player, PlayerData data, GameInstance game) {
+		GameType type = null;
+		
+		if (game.gameType == GameType.CLASSIC)
+			type = GameType.FRENZY;
+		else
+			type = GameType.CLASSIC;
+		
 		ItemStack voteGameType = ItemHelper.setDetails(new ItemStack(Material.TNT),
-				ChatColor.YELLOW + "Vote Game Type -> " + game.gameType.getName(), "",
+				ChatColor.YELLOW + "Vote Game Type -> " + type.getName(), "",
 				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().totalGameTypeVotes : "0") + "/"
 						+ (game != null ? game.players.size() : "0") + ")");
 		contents.set(3, 5, ClickableItem.of(voteGameType, event -> {
