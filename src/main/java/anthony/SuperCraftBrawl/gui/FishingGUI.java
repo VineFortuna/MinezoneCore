@@ -1,26 +1,25 @@
 package anthony.SuperCraftBrawl.gui;
 
+import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.fishing.FishRarity;
 import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import fr.minuskube.inv.ClickableItem;
+import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.*;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import anthony.SuperCraftBrawl.ranks.Rank;
-import fr.minuskube.inv.ClickableItem;
-import fr.minuskube.inv.SmartInventory;
-import net.md_5.bungee.api.ChatColor;
-
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class FishingGUI implements InventoryProvider {
     
@@ -84,12 +83,27 @@ public class FishingGUI implements InventoryProvider {
                     }));
         }
     
+        PlayerData finalData = data;
         contents.set(0, 8,
                 ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
                         main.color("&aGo Fishing!")), e -> {
                     if (main.getGameManager().GetInstanceOfPlayer(player) == null) {
                         player.teleport(fishingLoc);
                         player.sendMessage(main.color("&3&l(!) &rGrab a rod and go fishing!"));
+                        
+                        List<String> fishingrodList = new ArrayList<>();
+                        fishingrodList.add(ChatColor.DARK_GRAY + "Let's go fishing!");
+                        ItemStack fishingrod = ItemHelper.create(Material.FISHING_ROD, ChatColor.DARK_AQUA.toString() + ChatColor.BOLD + "Fishing Rod", fishingrodList);
+                        ItemHelper.setUnbreakable(fishingrod);
+                        if (finalData.lure == 1 && finalData.lureLevel > 0) {
+                            ItemHelper.addEnchant(fishingrod, Enchantment.LURE, finalData.lureLevel);
+                        }
+                        if (!(player.getInventory().contains(fishingrod))) {
+                            player.getInventory().setItem(5, fishingrod);
+                            player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                    + "You have equipped " + ChatColor.DARK_AQUA + ChatColor.BOLD + "Fishing Rod");
+                            inv.close(player);
+                        }
                     } else {
                         player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
                                 + ChatColor.RESET + "You are in a game");
