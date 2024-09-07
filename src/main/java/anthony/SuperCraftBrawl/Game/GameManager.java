@@ -82,6 +82,14 @@ public class GameManager implements Listener, PluginMessageListener {
 		this.projManager = new ProjectileManager(this);
 	}
 
+	// GETTERS:
+
+	public ProjectileManager getProjManager() {
+		return projManager;
+	}
+
+	// EVENTS:
+
 	@EventHandler
 	public void Target(EntityTargetLivingEntityEvent event) {
 		if (event.getTarget() instanceof Player) {
@@ -125,22 +133,6 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	/*
-	 * @EventHandler public void throwTnt(PlayerInteractEvent event) { ItemStack
-	 * item = event.getItem(); Player player = event.getPlayer();
-	 * 
-	 * if (item != null && item.getType() == Material.TNT) { if (event.getAction()
-	 * == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-	 * TNTPrimed tnt = (TNTPrimed) player.getWorld().spawn(player.getEyeLocation(),
-	 * TNTPrimed.class);
-	 * tnt.setVelocity(player.getEyeLocation().getDirection().multiply(1));
-	 * tnt.setFuseTicks(30); int amount =
-	 * player.getInventory().getItemInHand().getAmount(); amount--; if (amount == 0)
-	 * { player.getInventory().removeItem(new ItemStack[] { new
-	 * ItemStack(Material.TNT) }); } else
-	 * player.getInventory().getItemInHand().setAmount(amount); } } }
-	 */
-
 	@EventHandler
 	public void onTestEntityDamage(EntityDamageEvent event) {
 		if (event.getEntity() instanceof Player) {
@@ -151,7 +143,8 @@ public class GameManager implements Listener, PluginMessageListener {
 
 			if (instance != null) {
 				if (instance.state == GameState.STARTED) {
-					if (instance.classes.containsKey(player) && instance.classes.get(player).fadeAbilityActive == true) {
+					if (instance.classes.containsKey(player)
+							&& instance.classes.get(player).fadeAbilityActive == true) {
 						event.setCancelled(true);
 					}
 					if (instance.classes.containsKey(player) && instance.classes.get(player).getLives() <= 0)
@@ -172,10 +165,6 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	public ProjectileManager getProjManager() {
-		return projManager;
-	}
-
 	@EventHandler
 	public void OnPlayerInteract(PlayerInteractEvent event) {
 		for (Entry<Maps, GameInstance> game : gameMap.entrySet()) {
@@ -188,6 +177,12 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
+	/**
+	 * This function handles damage done in Duos to make sure you can't hit your
+	 * teammates, so then cancel the damage event
+	 * 
+	 * @param event
+	 */
 	@EventHandler
 	public void teamDamage(EntityDamageByEntityEvent event) {
 		if (event.getEntity() instanceof Player) {
@@ -242,14 +237,21 @@ public class GameManager implements Listener, PluginMessageListener {
 							}
 						}
 					}
-				} else {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You cannot teleport there!");
-					player.getInventory().addItem(ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL),
-							"" + ChatColor.RED + ChatColor.BOLD + "Teleporter"));
+				} else { // If player teleports outside map boundaries, don't teleport & give back pearl
+					player.sendMessage(getMain().color("&c&l(!) &rYou cannot teleport there!"));
+					ItemStack pearl = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL),
+							getMain().color("&c&lTeleporter"));
+					player.getInventory().addItem(pearl); // Adds an additional pearl to player's inventory
 				}
 			}
 	}
 
+	/**
+	 * This function gets the number of active games running, used for Active Games
+	 * GUI
+	 * 
+	 * @return num of games in progress
+	 */
 	public int getNumOfGames() {
 		int num = 0;
 		for (Entry<Maps, GameInstance> entry : gameMap.entrySet()) {
@@ -260,6 +262,11 @@ public class GameManager implements Listener, PluginMessageListener {
 		return num;
 	}
 
+	/**
+	 * This function gets the number of active 'Frenzy' games in progress
+	 * 
+	 * @return num of Frenzy games in progress
+	 */
 	public int getNumOfGamesFrenzy() {
 		int num = 0;
 		for (Entry<Maps, GameInstance> entry : gameMap.entrySet()) {
@@ -270,6 +277,11 @@ public class GameManager implements Listener, PluginMessageListener {
 		return num;
 	}
 
+	/**
+	 * This function gets the number of active 'Classic' games in progress
+	 * 
+	 * @return num of Classic games in progress
+	 */
 	public int getNumOfGamesNormal() {
 		int num = 0;
 		for (Entry<Maps, GameInstance> entry : gameMap.entrySet()) {
@@ -280,6 +292,11 @@ public class GameManager implements Listener, PluginMessageListener {
 		return num;
 	}
 
+	/**
+	 * This function gets the number of active 'Duel' games in progress
+	 * 
+	 * @return num of Duel games in progress
+	 */
 	public int getNumOfGamesDuel() {
 		int num = 0;
 		for (Entry<Maps, GameInstance> entry : gameMap.entrySet()) {
@@ -292,28 +309,28 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	public String mapName = "";
 
+	/**
+	 * This function gets the number of active games whether its in Waiting Lobby or
+	 * In Progress. This is used for Active Games GUI for players to join/spectate
+	 * 
+	 * @return num of active games
+	 */
 	public int getActiveGames() {
-		int count = 0;
+		int num = 0;
 		for (Entry<Maps, GameInstance> games : gameMap.entrySet()) {
 			if (games.getValue().state == GameState.WAITING || games.getValue().state == GameState.STARTED) {
-				count++;
+				num++;
 				mapName = games.getValue().getMap().toString();
 			}
 		}
-		return count;
+		return num;
 	}
 
-	public String getActiveMapName() {
-		String mapName = "";
-		for (Entry<Maps, GameInstance> games : gameMap.entrySet()) {
-			if (games.getValue().state == GameState.WAITING || games.getValue().state == GameState.STARTED) {
-				mapName = games.getValue().getMap().toString();
-			}
-		}
-
-		return mapName;
-	}
-
+	/**
+	 * This function cancels mob burning from fire/day time
+	 * 
+	 * @param event
+	 */
 	@EventHandler
 	public void MobBurn(EntityCombustEvent event) {
 		if (event.getEntityType() == EntityType.ZOMBIE || event.getEntityType() == EntityType.SKELETON)
@@ -324,14 +341,21 @@ public class GameManager implements Listener, PluginMessageListener {
 	public List<Material> pMat = new ArrayList<Material>();
 	public BukkitRunnable pRunnable;
 
+	/**
+	 * This function handles when a player right clicks a chest in their inventory
+	 * and detects if name is "Present". This is used for Christmas updates for 2
+	 * free game loot drops
+	 * 
+	 * @param e which is the Player interaction event with items
+	 */
 	@EventHandler
 	public void present(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
 		ItemStack item = e.getItem();
-		GameInstance instance = this.GetInstanceOfPlayer(player);
+		GameInstance game = this.GetInstanceOfPlayer(player);
 
-		if (instance != null) {
-			if (instance.state == GameState.STARTED) {
+		if (game != null) {
+			if (game.state == GameState.STARTED) {
 				if (item != null) {
 					if (item.getType() == Material.TRAPPED_CHEST
 							&& (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK)) {
@@ -345,8 +369,8 @@ public class GameManager implements Listener, PluginMessageListener {
 								else
 									item.setAmount(amount);
 							}
-							player.getInventory().addItem(instance.getItemToDrop());
-							player.getInventory().addItem(instance.getItemToDrop());
+							player.getInventory().addItem(game.getItemToDrop());
+							player.getInventory().addItem(game.getItemToDrop());
 							player.sendMessage(
 									main.color("&r(&c&l!&r&l) &c&lMerry Christmas! &rYou received 2 items!"));
 						}
@@ -357,57 +381,17 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	@EventHandler
-	public void easterEgg(PlayerInteractEvent event) {
-		Player player = event.getPlayer();
-		ItemStack item = event.getItem();
-		GameInstance instance = this.GetInstanceOfPlayer(player);
-
-		if (instance != null) {
-			if (instance.state == GameState.STARTED) {
-				if (item != null) {
-					if (item.getType() == Material.EGG && (event.getAction() == Action.RIGHT_CLICK_AIR
-							|| event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-						ItemMeta meta = item.getItemMeta();
-
-						if (meta.getDisplayName().contains("Easter")) {
-							Random r = new Random();
-							int chance = r.nextInt(100);
-							player.getInventory().clear(player.getInventory().getHeldItemSlot());
-
-							if (chance >= 0 && chance < 30) {
-								player.sendMessage(getMain().color("&2&l(!) &rYour Easter gift is: &r&lExtra Life"));
-								player.getInventory()
-										.addItem(ItemHelper.setDetails(new ItemStack(Material.PRISMARINE_SHARD),
-												"" + ChatColor.RESET + ChatColor.BOLD + "Extra Life"));
-							} else if (chance >= 30 && chance < 65) {
-								player.sendMessage(getMain().color("&2&l(!) &rYour Easter gift is: &c&lBomb"));
-								player.getInventory().addItem(ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-										"" + ChatColor.RED + ChatColor.BOLD + "Bomb"));
-							} else {
-								player.sendMessage(getMain().color("&2&l(!) &rYour Easter gift is: &0&lMagic Broom"));
-								player.getInventory().addItem(ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4),
-										this.getMain().color("&0&lBroom")));
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
 	private HashMap<Player, BukkitRunnable> borderRunnables = new HashMap<>();
-	
+
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent e) {
 		Player player = e.getPlayer();
 		GameInstance instance = this.GetInstanceOfPlayer(player);
 
-		if (player.getWorld() == main.getLobbyWorld()) {
-			if (e.getPlayer().getLocation().getY() < 0) {
+		if (player.getWorld() == main.getLobbyWorld()) // If player is below Y = 50, teleport them back to lobby
+			if (e.getPlayer().getLocation().getY() < 0)
 				main.SendPlayerToHub(player);
-			}
-		}
+
 		if (instance != null) {
 			if (instance.state == GameState.STARTED) {
 				if (e.getPlayer().getLocation().getY() < 50 && e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
@@ -480,17 +464,7 @@ public class GameManager implements Listener, PluginMessageListener {
 					player.teleport(instance.GetSpecLoc());
 				}
 			}
-		} /*
-			 * else { anthony.CrystalWars.game.GameInstance i =
-			 * main.gm.getInstanceOfPlayer(player);
-			 * 
-			 * if (i != null) { anthony.CrystalWars.game.GameState state = i.getState(); if
-			 * (state == anthony.CrystalWars.game.GameState.IN_PROGRESS) { if
-			 * (player.getLocation().getY() < 50 && player.getGameMode() !=
-			 * GameMode.SPECTATOR) { EntityDamageEvent damageEvent = new
-			 * EntityDamageEvent(player, DamageCause.VOID, 1000);
-			 * main.getServer().getPluginManager().callEvent(damageEvent); } } } }
-			 */
+		}
 	}
 
 	public boolean chestCanOpen = false;
@@ -606,7 +580,8 @@ public class GameManager implements Listener, PluginMessageListener {
 										@SuppressWarnings("deprecation")
 										EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID,
 												damage);
-										i.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+										i.getGameManager().getMain().getServer().getPluginManager()
+												.callEvent(damageEvent);
 										p.damage(damage, player);
 									}
 									p.setVelocity(new Vector(0, 1, 0).multiply(height));
@@ -631,7 +606,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		GameInstance gameInstance = GetInstanceOfPlayer(player);
 		gameInstance.classes.get(player).onPlayerMove(event);
 	}
-	
+
 	@EventHandler
 	public void onFish(PlayerFishEvent event) {
 		Player player = event.getPlayer();
@@ -660,15 +635,15 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	@EventHandler
 	public void EntityDeathEvent(EntityDeathEvent entity) {
-		List<EntityType> entities = new ArrayList<>(Arrays.asList(EntityType.ZOMBIE, EntityType.SKELETON,
-				EntityType.CREEPER, EntityType.PIG_ZOMBIE, EntityType.MAGMA_CUBE, EntityType.SILVERFISH,
-				EntityType.WITCH));
+		List<EntityType> entities = new ArrayList<>(
+				Arrays.asList(EntityType.ZOMBIE, EntityType.SKELETON, EntityType.CREEPER, EntityType.PIG_ZOMBIE,
+						EntityType.MAGMA_CUBE, EntityType.SILVERFISH, EntityType.WITCH));
 		if (entities.contains(entity.getEntityType())) {
 			entity.getDrops().clear();
 			entity.setDroppedExp(0);
 		}
 	}
-	
+
 	@EventHandler
 	public void onHookHit(EntityDamageByEntityEvent event) {
 		if (event.getDamager() instanceof FishHook) {
@@ -780,15 +755,13 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	/*@EventHandler
-	public void onFish(PlayerFishEvent e) {
-		if (boosterCooldown.useAndResetCooldown()) {
-			if (e.getState() == State.IN_GROUND) {
-				e.getPlayer().setVelocity(
-						new Vector(e.getPlayer().getVelocity().getX(), 2.5, e.getPlayer().getVelocity().getY()));
-			}
-		}
-	}*/
+	/*
+	 * @EventHandler public void onFish(PlayerFishEvent e) { if
+	 * (boosterCooldown.useAndResetCooldown()) { if (e.getState() ==
+	 * State.IN_GROUND) { e.getPlayer().setVelocity( new
+	 * Vector(e.getPlayer().getVelocity().getX(), 2.5,
+	 * e.getPlayer().getVelocity().getY())); } } }
+	 */
 
 	@EventHandler
 	public void cosmeticMelon(PlayerInteractEvent e) {
@@ -836,19 +809,19 @@ public class GameManager implements Listener, PluginMessageListener {
 		Player player = (Player) e.getWhoClicked();
 		GameInstance instance = this.GetInstanceOfPlayer(player);
 
-		//if (instance != null) {
-			/*
-			 * if (e.getCurrentItem().getType() == Material.COAL) { e.setCancelled(true); }
-			 * else if (e.getCurrentItem().getType() == Material.IRON_INGOT) {
-			 * e.setCancelled(true); } else if (e.getCurrentItem().getType() ==
-			 * Material.GOLD_INGOT) { e.setCancelled(true); } else if
-			 * (e.getCurrentItem().getType() == Material.DIAMOND) { e.setCancelled(true); }
-			 */
-			if (!(player.isOp()))
-				e.setCancelled(true);
-		//}
+		// if (instance != null) {
+		/*
+		 * if (e.getCurrentItem().getType() == Material.COAL) { e.setCancelled(true); }
+		 * else if (e.getCurrentItem().getType() == Material.IRON_INGOT) {
+		 * e.setCancelled(true); } else if (e.getCurrentItem().getType() ==
+		 * Material.GOLD_INGOT) { e.setCancelled(true); } else if
+		 * (e.getCurrentItem().getType() == Material.DIAMOND) { e.setCancelled(true); }
+		 */
+		if (!(player.isOp()))
+			e.setCancelled(true);
+		// }
 	}
-	
+
 	@EventHandler
 	public void onPlayerDropItem(PlayerDropItemEvent e) {
 		e.setCancelled(true);
@@ -952,7 +925,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		Player player = e.getPlayer();
 		ItemStack item = e.getItem();
 		GameInstance instance = this.GetInstanceOfPlayer(player);
-		
+
 		if (instance != null && instance.state == GameState.STARTED) {
 			BaseClass bc = instance.classes.get(player);
 			if (item != null && item.getType() == Material.MILK_BUCKET) {
@@ -960,15 +933,14 @@ public class GameManager implements Listener, PluginMessageListener {
 					// Remove bad effects only: poison, wither, slowness, weakness, blindness,
 					// nausea
 					for (PotionEffect pe : player.getActivePotionEffects())
-						if (pe.getType().equals(PotionEffectType.POISON)
-								|| pe.getType().equals(PotionEffectType.SLOW)
+						if (pe.getType().equals(PotionEffectType.POISON) || pe.getType().equals(PotionEffectType.SLOW)
 								|| pe.getType().equals(PotionEffectType.SLOW_DIGGING)
 								|| pe.getType().equals(PotionEffectType.BLINDNESS)
 								|| pe.getType().equals(PotionEffectType.WEAKNESS)
 								|| pe.getType().equals(PotionEffectType.WITHER)
 								|| pe.getType().equals(PotionEffectType.CONFUSION)
 								|| pe.getType().equals(PotionEffectType.HUNGER)) {
-							
+
 							player.removePotionEffect(pe.getType());
 						}
 					// Remove fire by setting fire ticks to 0
@@ -1150,7 +1122,8 @@ public class GameManager implements Listener, PluginMessageListener {
 									event.setCancelled(true);
 									return;
 								}
-								if (instance.classes.containsKey(damager) && instance.classes.get(damager).fadeAbilityActive == true) {
+								if (instance.classes.containsKey(damager)
+										&& instance.classes.get(damager).fadeAbilityActive == true) {
 									event.setCancelled(true);
 								}
 							}
@@ -1287,9 +1260,8 @@ public class GameManager implements Listener, PluginMessageListener {
 					}
 					instance.PlayerDeath(player);
 					return;
-				} else
-					if (instance.classes.containsKey(player))
-						instance.classes.get(player).TakeDamage(event);
+				} else if (instance.classes.containsKey(player))
+					instance.classes.get(player).TakeDamage(event);
 			}
 		}
 	}
@@ -1323,7 +1295,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			}
 		}
 	}
-	
+
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void ProjectileHit(ProjectileHitEvent event) {
 		if (event.getEntity() instanceof FishHook) {
@@ -1922,7 +1894,7 @@ public class GameManager implements Listener, PluginMessageListener {
 				for (DuosMaps maps : toRemove)
 					gameMap2.remove(maps);
 			}
-			
+
 			instance.getGameSettings().removeFromStartVotes(player);
 			instance.getGameSettings().removeFromLightningVotes(player);
 			instance.getGameSettings().removeFromGameTypeVotes(player);
@@ -2295,7 +2267,6 @@ public class GameManager implements Listener, PluginMessageListener {
 									customizeMob(creeper, player);
 									customizeCreeper(creeper);
 									creeper.setTarget(i.getNearestPlayer(player, 100, 100, 100));
-									
 
 									// If ClassType == Summoner
 									// Setting to Charged Creeper
@@ -2314,7 +2285,8 @@ public class GameManager implements Listener, PluginMessageListener {
 				break;
 
 			case NETHER_STAR:
-				if (i != null && i.state == GameState.STARTED && meta != null && meta.getDisplayName().contains("Bounty")) {
+				if (i != null && i.state == GameState.STARTED && meta != null
+						&& meta.getDisplayName().contains("Bounty")) {
 					int amount = item.getAmount();
 					if (amount > 0) {
 						if (amount == 1) {

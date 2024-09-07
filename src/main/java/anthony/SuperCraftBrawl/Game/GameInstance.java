@@ -231,51 +231,6 @@ public class GameInstance {
 			return GameReason.FAIL;
 	}
 
-	/**
-	 * This function sets the waiting lobby scoreboard when a player joins the game
-	 * 
-	 * @param Player to give scoreboard
-	 */
-	public void SetWaitingScoreboard(Player player) {
-		FastBoard board = new FastBoard(player);
-		boards.put(player, board);
-
-		if (map != null) {
-			board.updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD + map
-					+ (map.GetInstance().gameType == GameType.FRENZY
-							? "" + ChatColor.GRAY + ChatColor.ITALIC + " (frenzy)"
-							: ""));
-			board.updateLines("", "" + ChatColor.RESET + ChatColor.BOLD + "Class:", " " + ChatColor.RESET + "Random",
-					"", "" + ChatColor.RESET + ChatColor.BOLD + "Players:",
-					" " + ChatColor.RESET
-							+ (map.GetInstance().gameType == GameType.FRENZY
-									? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
-									: "")
-							+ (map.GetInstance().gameType == GameType.CLASSIC
-									? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
-									: "")
-							+ (map.GetInstance().gameType == GameType.DUEL
-									? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
-									: ""),
-					"", "" + ChatColor.RESET + ChatColor.BOLD + "Status:",
-					"" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
-
-			boards.get(player)
-					.updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD + map.toString()
-							+ (map.GetInstance().gameType == GameType.FRENZY
-									? "" + ChatColor.GRAY + ChatColor.ITALIC + " (frenzy)"
-									: ""));
-		} else {
-			board.updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD + duosMap.toString());
-			board.updateLines("", "" + ChatColor.RESET + ChatColor.BOLD + "Class:", " " + ChatColor.RESET + "Random",
-					"", "" + ChatColor.RESET + ChatColor.BOLD + "Players:",
-					" " + ChatColor.RESET + players.size() + "/6", "",
-					"" + ChatColor.RESET + ChatColor.BOLD + "Status:",
-					"" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
-		}
-
-	}
-
 	// Removes armor from player
 	public void removeArmor(Player player) {
 		player.getInventory().setHelmet(new ItemStack(Material.AIR, 1));
@@ -301,6 +256,8 @@ public class GameInstance {
 	 */
 	@SuppressWarnings("deprecation")
 	public GameReason AddPlayer(Player player) {
+		anthony.SuperCraftBrawl.ScoreboardManager boardManager = getGameManager().getMain().getScoreboardManager();
+
 		if (this.state == GameState.WAITING) {
 			if (!this.players.contains(player)) {
 				if (isLobbyFull(player))
@@ -321,30 +278,12 @@ public class GameInstance {
 					if (gamePlayer.getWorld() != getMapWorld()) {
 						SendPlayerToMap(gamePlayer);
 						CheckForGameStart();
-						SetWaitingScoreboard(gamePlayer);
+						boardManager.waitingLobbyBoard(player, this);
 					}
 
 					if (gamePlayer != player) {
 						if (this.getMap() != null) { // Update player count on board for Solos
-							boards.get(gamePlayer)
-									.updateLine(5, " "
-											+ (map.GetInstance().gameType == GameType.FRENZY
-													? "" + ChatColor.RESET + players.size() + "/"
-															+ gameType.getMaxPlayers()
-													: "")
-											+ (map.GetInstance().gameType == GameType.CLASSIC
-													? "" + ChatColor.RESET + players.size() + "/"
-															+ gameType.getMaxPlayers()
-													: "")
-											+ (map.GetInstance().gameType == GameType.DUEL
-													? "" + ChatColor.RESET + players.size() + "/"
-															+ gameType.getMaxPlayers()
-													: ""));
-							boards.get(gamePlayer)
-									.updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD + map.toString()
-											+ (map.GetInstance().gameType == GameType.FRENZY
-													? "" + ChatColor.GRAY + ChatColor.ITALIC + " (frenzy)"
-													: ""));
+							boardManager.updatePlayerCountBoard(gamePlayer, this);
 						} else // Update player count on board for Duos
 							boards.get(gamePlayer).updateLine(5, " " + ChatColor.RESET + players.size() + "/6");
 					}
@@ -1138,14 +1077,6 @@ public class GameInstance {
 				o = c.registerNewObjective("" + ChatColor.BOLD + this.duosMap.toString(), "");
 			livesObjective = o;
 			o.setDisplaySlot(DisplaySlot.SIDEBAR);
-			Score game = o.getScore(color("&r&lGame:"));
-			game.setScore(50);
-			Score gameType = o.getScore(" " + ChatColor.RESET + ChatColor.ITALIC + this.gameType.getName());
-			gameType.setScore(49);
-			Score blank = o.getScore("" + ChatColor.RESET + ChatColor.ITALIC + "    ");
-			blank.setScore(48);
-			Score playersLine = o.getScore(color("&r&lPlayers:"));
-			playersLine.setScore(47);
 
 			for (Player player : players) {
 				BaseClass playerClass = classes.get(player);
@@ -1194,6 +1125,8 @@ public class GameInstance {
 				}
 				Score line = o.getScore("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "--------------------");
 				line.setScore(0);
+				Score game = o.getScore(color("&r&lMode: &r&o" + this.gameType.getName()));
+				game.setScore(0);
 				time = o.getScore("" + ChatColor.YELLOW + "Game Time: " + ChatColor.RESET + gameTime + "m");
 				time.setScore(0);
 				player.setScoreboard(c);
@@ -1339,13 +1272,6 @@ public class GameInstance {
 				if (baseClass.getLives() == 0) {
 					this.playerPosition.add(player);
 					if (this.players.size() > 2) {
-						if (this.map != null) {
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ "You are now spectating on " + ChatColor.GREEN + this.map.toString());
-						} else {
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ "You are now spectating on " + ChatColor.GREEN + this.duosMap.toString());
-						}
 						player.sendTitle("" + ChatColor.RED + "You have died!",
 								"" + ChatColor.RESET + "You are now a Spectator");
 						player.teleport(GetSpecLoc());
