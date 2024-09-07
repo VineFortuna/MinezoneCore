@@ -390,7 +390,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		else if (main.getGameManager().RemovePlayerFromAll(player)) {
 			main.ResetPlayer(player);
 			player.setGameMode(GameMode.ADVENTURE);
-			main.LobbyBoard(player);
+			main.getScoreboardManager().lobbyBoard(player);
 			player.getInventory().clear();
 			main.LobbyItems(player);
 			player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -422,7 +422,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 					+ "You have left " + mapName);
 			main.ResetPlayer(player);
 			player.setGameMode(GameMode.ADVENTURE);
-			main.LobbyBoard(player);
+			main.getScoreboardManager().lobbyBoard(player);
 			player.getInventory().clear();
 			main.LobbyItems(player);
 			i.spectators.remove(player);
