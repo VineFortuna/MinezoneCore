@@ -494,8 +494,6 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	}
 
-	private Cooldown boosterCooldown = new Cooldown(0), shurikenCooldown = new Cooldown(3000);
-
 	@EventHandler
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
@@ -773,23 +771,21 @@ public class GameManager implements Listener, PluginMessageListener {
 		if ((player.getWorld() == main.getLobbyWorld()) || (i != null && i.state == GameState.WAITING)) {
 			if (item != null && item.getType() == Material.MELON) {
 				if (player.getGameMode() != GameMode.SPECTATOR) {
-					if (shurikenCooldown.useAndResetCooldown()) {
-						if (data.melon > 0) {
-							data.melon--;
-							main.getDataManager().saveData(data);
-							String msg = main.color("&9&l(!) &rYou have &e" + data.melon + " melons");
-							PacketPlayOutChat packet = new PacketPlayOutChat(
-									ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
-							CraftPlayer craft = (CraftPlayer) player;
-							craft.getHandle().playerConnection.sendPacket(packet);
-							player.playSound(player.getLocation(), Sound.EAT, 2, 1);
-							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 110, 3));
-							player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 110, 3));
-							if (data.melon == 0)
-								player.getInventory().clear(player.getInventory().getHeldItemSlot());
-						}
-						e.setCancelled(true);
+					if (data.melon > 0) {
+						data.melon--;
+						main.getDataManager().saveData(data);
+						String msg = main.color("&9&l(!) &rYou have &e" + data.melon + " melons");
+						PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
+								(byte) 2);
+						CraftPlayer craft = (CraftPlayer) player;
+						craft.getHandle().playerConnection.sendPacket(packet);
+						player.playSound(player.getLocation(), Sound.EAT, 2, 1);
+						player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 110, 3));
+						player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 110, 3));
+						if (data.melon == 0)
+							player.getInventory().clear(player.getInventory().getHeldItemSlot());
 					}
+					e.setCancelled(true);
 				}
 			}
 		}

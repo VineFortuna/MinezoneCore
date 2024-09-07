@@ -1,14 +1,56 @@
 package anthony.SuperCraftBrawl.Game;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.World;
+import org.bukkit.WorldCreator;
+import org.bukkit.block.Sign;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Score;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.ScoreboardManager;
+import org.bukkit.scoreboard.Team;
+import org.bukkit.util.Vector;
+
+import anthony.SuperCraftBrawl.Holograms;
+import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.PlayerListener;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.all.DarkSethBlingClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
-import anthony.SuperCraftBrawl.Holograms;
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
@@ -17,26 +59,6 @@ import fr.mrmicky.fastboard.FastBoard;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.*;
-import org.bukkit.block.Sign;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.*;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemFlag;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.Potion;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionType;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.*;
-import org.bukkit.util.Vector;
-
-import java.util.*;
-import java.util.Map.Entry;
 
 public class GameInstance {
 
@@ -231,20 +253,6 @@ public class GameInstance {
 			return GameReason.FAIL;
 	}
 
-	// Removes armor from player
-	public void removeArmor(Player player) {
-		player.getInventory().setHelmet(new ItemStack(Material.AIR, 1));
-		player.getInventory().setChestplate(new ItemStack(Material.AIR, 1));
-		player.getInventory().setLeggings(new ItemStack(Material.AIR, 1));
-		player.getInventory().setBoots(new ItemStack(Material.AIR, 1));
-	}
-
-	// Resets player's double jump
-	private void resetDoubleJump(Player player) {
-		player.setAllowFlight(false);
-		player.setAllowFlight(true);
-	}
-
 	/**
 	 * This function adds a player to the game if they're in the main lobby and not
 	 * in any other game, either spectating or playing
@@ -257,6 +265,7 @@ public class GameInstance {
 	@SuppressWarnings("deprecation")
 	public GameReason AddPlayer(Player player) {
 		anthony.SuperCraftBrawl.ScoreboardManager boardManager = getGameManager().getMain().getScoreboardManager();
+		PlayerListener listener = getGameManager().getMain().getListener();
 
 		if (this.state == GameState.WAITING) {
 			if (!this.players.contains(player)) {
@@ -272,8 +281,8 @@ public class GameInstance {
 					player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + map.toString(),
 							"" + ChatColor.GREEN + "Choose your class!");
 
-				resetDoubleJump(player);
-				removeArmor(player);
+				listener.resetDoubleJump(player);
+				listener.resetArmor(player);
 				for (Player gamePlayer : players) {
 					if (gamePlayer.getWorld() != getMapWorld()) {
 						SendPlayerToMap(gamePlayer);
@@ -343,67 +352,6 @@ public class GameInstance {
 		}
 	}
 
-	/*
-	 * public GameReason AddPlayer(Player player) { player.setAllowFlight(false);
-	 * player.setAllowFlight(true); if (state == GameState.WAITING) { if
-	 * (!players.contains(player)) { if (this.map != null) { if (gameType ==
-	 * GameType.DUEL && players.size() >= 2) { player.sendMessage("" +
-	 * ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is full!"); return
-	 * GameReason.FULL; } if (!(player.hasPermission("scb.bypassFull"))) { if
-	 * (gameType == GameType.CLASSIC && players.size() >= 5) { player.sendMessage(""
-	 * + ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is full!"); return
-	 * GameReason.FULL; } } players.add(player); player.sendMessage(
-	 * this.gameManager.getMain().color("&2&l(!) &rYou have joined &r&l" +
-	 * map.toString())); } else if (this.duosMap != null) { if (players.size() >= 6)
-	 * { player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET +
-	 * "This game is full!"); return GameReason.FULL; } players.add(player);
-	 * player.sendMessage(
-	 * this.gameManager.getMain().color("&2&l(!) &rYou have joined &r&l" +
-	 * duosMap.toString())); player.sendMessage(this.gameManager.getMain().
-	 * color("&2&l(!) &rSelect a team in your 2nd slot!")); }
-	 * 
-	 * for (Player gamePlayer : players) { if (gamePlayer.getWorld() != mapWorld) {
-	 * SendPlayerToMap(gamePlayer); CheckForGameStart(gamePlayer);
-	 * SetWaitingScoreboard(gamePlayer); }
-	 * 
-	 * if (gamePlayer != player) { if (map != null) { boards.get(gamePlayer)
-	 * .updateLine(5, " " + (map.GetInstance().gameType == GameType.FRENZY ? "" +
-	 * ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers() : "") +
-	 * (map.GetInstance().gameType == GameType.CLASSIC ? "" + ChatColor.RESET +
-	 * players.size() + "/" + gameType.getMaxPlayers() : "") +
-	 * (map.GetInstance().gameType == GameType.DUEL ? "" + ChatColor.RESET +
-	 * players.size() + "/" + gameType.getMaxPlayers() : ""));
-	 * boards.get(gamePlayer) .updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD +
-	 * map.toString() + (map.GetInstance().gameType == GameType.FRENZY ? "" +
-	 * ChatColor.GRAY + ChatColor.ITALIC + " (frenzy)" : "")); } else
-	 * boards.get(gamePlayer).updateLine(5, " " + ChatColor.RESET + players.size() +
-	 * "/6"); } removeArmor(player);
-	 * 
-	 * if (map != null) { gamePlayer.sendMessage( "" + ChatColor.DARK_GREEN +
-	 * ChatColor.BOLD + "(!) " + ChatColor.RESET + player.getName() +
-	 * ChatColor.GREEN + " joined " + ChatColor.RED + "(" + ChatColor.GREEN +
-	 * (map.GetInstance().gameType == GameType.FRENZY ? "" + ChatColor.RESET +
-	 * players.size() + "/" + gameType.getMaxPlayers() : "") +
-	 * (map.GetInstance().gameType == GameType.CLASSIC ? "" + ChatColor.RESET +
-	 * players.size() + "/" + gameType.getMaxPlayers() : "") +
-	 * (map.GetInstance().gameType == GameType.DUEL ? "" + ChatColor.RESET +
-	 * players.size() + "/" + gameType.getMaxPlayers() : "") + ChatColor.RED + ")");
-	 * if (gameType == GameType.FRENZY) { player.sendTitle("" + ChatColor.YELLOW +
-	 * ChatColor.BOLD + map.toString(), "" + ChatColor.GREEN +
-	 * "Your class will be randomly selected!"); } else { player.sendTitle("" +
-	 * ChatColor.YELLOW + ChatColor.BOLD + map.toString(), "" + ChatColor.GREEN +
-	 * "Choose your class!"); } } else { player.sendTitle("" + ChatColor.YELLOW +
-	 * ChatColor.BOLD + duosMap.toString(), "" + ChatColor.GREEN +
-	 * "Choose your class!"); gamePlayer.sendMessage("" + ChatColor.DARK_GREEN +
-	 * ChatColor.BOLD + "(!) " + ChatColor.RESET + player.getName() +
-	 * ChatColor.GREEN + " joined " + ChatColor.RED + "(" + ChatColor.GREEN +
-	 * players.size() + "/6" + ChatColor.RED + ")"); }
-	 * 
-	 * } return GameReason.SUCCESS; } else return GameReason.ALREADY_IN;
-	 * 
-	 * } else return GameReason.ALREADYPLAYING; }
-	 */
-
 	public FastBoard board;
 
 	public void setClass(Player player, ClassType type) {
@@ -426,7 +374,7 @@ public class GameInstance {
 	 * @param
 	 */
 	public void CheckForGameStart() {
-		if (map != null) {
+		if (getMap() != null) {
 			if (players.size() == 2)
 				StartGameTimer();
 		} else {
@@ -640,18 +588,7 @@ public class GameInstance {
 		return true;
 	}
 
-	/*
-	 * This function starts the game once the countdown finishes or game is force
-	 * started
-	 */
-	public void StartGame() {
-		// This updates the sign in the lobby to show map is in progress
-		if (s != null) {
-			s.setLine(0, getGameManager().getMain().color("&2In Progress"));
-			s.setLine(3, "" + ChatColor.BLACK + ChatColor.UNDERLINE + "Spectate");
-			s.update();
-		}
-
+	private void setTeams() {
 		for (Player gamePlayer : players) {
 			if (this.duosMap != null) {
 				if (!(this.team.containsKey(gamePlayer))) {
@@ -671,31 +608,9 @@ public class GameInstance {
 				}
 			}
 		}
-		startLightningDropsTimer(); // Loot drops will start spawning every 45 seconds
-		TellAll("" + ChatColor.BOLD + "===============================");
-		TellAll("" + ChatColor.BOLD + "||");
-		TellAll("" + ChatColor.BOLD + "||");
-		TellAll("" + ChatColor.BOLD + "||");
-		TellAll("" + ChatColor.BOLD + "|| " + "        " + ChatColor.YELLOW + ChatColor.BOLD + "  GAME STARTED");
-		if (gameType == GameType.DUEL) {
-			String playersInGame = "";
-			for (Player gamePlayer : players) {
-				playersInGame += gamePlayer.getName() + "";
-				if (!players.isEmpty())
-					playersInGame += ", ";
-			}
-			TellAll("" + ChatColor.BOLD + "|| " + "    " + ChatColor.RED + ChatColor.BOLD + " Players: "
-					+ ChatColor.RESET + playersInGame);
-		}
-		TellAll("" + ChatColor.BOLD + "||");
-		TellAll("" + ChatColor.BOLD + "||");
-		TellAll("" + ChatColor.BOLD + "||");
-		TellAll("" + ChatColor.BOLD + "===============================");
-		state = GameState.STARTED;
-		LoadClasses();
+	}
 
-		GameScoreboard();
-		alivePlayers = players.size();
+	private void addAliveTeams() {
 		if (redTeam != null) {
 			if (redTeam.size() > 0) {
 				aliveTeams++;
@@ -711,8 +626,17 @@ public class GameInstance {
 				aliveTeams++;
 			}
 		}
+	}
 
-		for (Player player : players) {
+	private void addAlivePlayers() {
+		alivePlayers = players.size();
+	}
+
+	/**
+	 * This function gives a random loot drop to all players when game starts
+	 */
+	private void giveLootDrop() {
+		for (Player player : this.players) {
 			player.teleport(GetRespawnLoc());
 			player.setFireTicks(0);
 			BaseClass bc = this.classes.get(player);
@@ -723,9 +647,48 @@ public class GameInstance {
 				else
 					player.getInventory().addItem(this.getItemToDrop());
 			}
+
 			player.setGameMode(GameMode.ADVENTURE);
 		}
+	}
 
+	/*
+	 * This function starts the game once the countdown finishes or game is force
+	 * started
+	 */
+	public void StartGame() {
+		// This updates the sign in the lobby to show map is in progress
+		if (s != null) {
+			s.setLine(0, getGameManager().getMain().color("&2In Progress"));
+			s.setLine(3, "" + ChatColor.BLACK + ChatColor.UNDERLINE + "Spectate");
+			s.update();
+		}
+
+		setTeams(); // Sets teams if mode is Duos
+		startLightningDropsTimer(); // Loot drops will start spawning every 45 seconds
+
+		TellAll("" + ChatColor.BOLD + "============================");
+		TellAll("" + ChatColor.BOLD + "||");
+		TellAll("" + ChatColor.BOLD + "|| " + "        " + ChatColor.YELLOW + ChatColor.BOLD + "  GAME STARTED");
+		if (this.gameType == GameType.DUEL) {
+			String playersInGame = "";
+			for (Player gamePlayer : players) {
+				playersInGame += gamePlayer.getName() + "";
+				if (!this.players.isEmpty())
+					playersInGame += ", ";
+			}
+			TellAll("" + ChatColor.BOLD + "|| " + "    " + ChatColor.RED + ChatColor.BOLD + " Players: "
+					+ ChatColor.RESET + playersInGame);
+		}
+		TellAll("" + ChatColor.BOLD + "||");
+		TellAll("" + ChatColor.BOLD + "============================");
+		this.state = GameState.STARTED; // Sets game state to 'Started'
+
+		LoadClasses();
+		GameScoreboard();
+		addAlivePlayers();
+		addAliveTeams();
+		giveLootDrop();
 		gameTicks();
 
 		/*
@@ -791,6 +754,12 @@ public class GameInstance {
 		runnables.add(runnable);
 	}
 
+	/**
+	 * This function sets the player's class name next to their name above their
+	 * head for other players to see each other's class
+	 * 
+	 * @param player
+	 */
 	@SuppressWarnings("deprecation")
 	public void sendScoreboardUpdate(Player player) {
 		// Organized tab list
@@ -822,10 +791,17 @@ public class GameInstance {
 		}
 	}
 
+	/**
+	 * This function gets a random location on the map which loot drops will spawn
+	 * at every 30 seconds
+	 * 
+	 * @return random location on the map
+	 */
 	public Location getItemSpawnLoc() {
 		Random rand = new Random();
 		int attempts = 0;
 		Location respawnLoc = GetRespawnLoc();
+
 		while (true) {
 			Location loc = respawnLoc.clone().add(rand.nextFloat() * 50 - 25, 10, rand.nextFloat() * 50 - 25);
 			while (true) {
@@ -873,8 +849,8 @@ public class GameInstance {
 							DarkSethBlingClass d = (DarkSethBlingClass) bc;
 
 							if (d.usedTp == false) {
-								gamePlayer.sendMessage(getGameManager().getMain()
-										.color("&2&l(!) &eAn item just spawned at &e&l" + x + ", " + y + ", " + z));
+								gamePlayer.sendMessage(
+										color("&2&l(!) &eAn item just spawned at &e&l" + x + ", " + y + ", " + z));
 							}
 						}
 					}
@@ -886,11 +862,9 @@ public class GameInstance {
 	}
 
 	public ItemStack getItemToDrop() {
-
-		// Slowness Pot
+		// Slowness Potion
 		ItemStack slownessPot = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				"" + ChatColor.RED + ChatColor.BOLD + "Slowness");
-
+				color("&rSlowness II &7(15 sec)"));
 		Potion potionSlow = new Potion(3);
 		potionSlow.setType(PotionType.SLOWNESS);
 		potionSlow.setSplash(true);
@@ -900,9 +874,7 @@ public class GameInstance {
 		potionSlow.apply(slownessPot);
 
 		// Health Pot
-		ItemStack healthPot = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				"" + ChatColor.YELLOW + ChatColor.BOLD + "Instant Heal");
-
+		ItemStack healthPot = ItemHelper.setDetails(new ItemStack(Material.POTION, 1), color("&eInstant Heal"));
 		Potion potionHeal = new Potion(1);
 		potionHeal.setType(PotionType.INSTANT_HEAL);
 		potionHeal.setSplash(true);
@@ -912,9 +884,7 @@ public class GameInstance {
 		potionHeal.apply(healthPot);
 
 		// Speed Pot
-		ItemStack speedPot = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				"" + ChatColor.GREEN + ChatColor.BOLD + "Speed Pot");
-
+		ItemStack speedPot = ItemHelper.setDetails(new ItemStack(Material.POTION, 1), color("&aSpeed II &7(30 sec)"));
 		Potion potionSpeed = new Potion(1);
 		potionSpeed.setType(PotionType.SPEED);
 		potionSpeed.setSplash(true);
@@ -925,8 +895,7 @@ public class GameInstance {
 
 		// Fire Res Pot
 		ItemStack fireRes = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				"" + ChatColor.RED + ChatColor.BOLD + "Fire Resistance");
-
+				color("&cFire Resistance I &7(30 sec)"));
 		Potion potionFireRes = new Potion(1);
 		potionFireRes.setType(PotionType.FIRE_RESISTANCE);
 		potionFireRes.setSplash(true);
@@ -936,9 +905,7 @@ public class GameInstance {
 		potionFireRes.apply(fireRes);
 
 		// Bomb
-		ItemStack bomb = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				getGameManager().getMain().color("&4&lBomb"));
-
+		ItemStack bomb = ItemHelper.setDetails(new ItemStack(Material.POTION, 1), color("&4&lBomb"));
 		Potion pot100 = new Potion(1);
 		pot100.setType(PotionType.INSTANT_DAMAGE);
 		pot100.setSplash(true);
@@ -948,52 +915,44 @@ public class GameInstance {
 		pot100.apply(bomb);
 
 		// Brooms
-		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4),
-				this.getGameManager().getMain().color("&0&lBroom"));
+		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4), color("&0&lBroom"));
 
 		// Hammer
 		ItemStack hammer = ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD, 1, (short) 250),
-						"" + ChatColor.YELLOW + ChatColor.BOLD + "HAMMER", ChatColor.YELLOW + ""),
+				ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD, 1, (short) 250), color("&e&lHAMMER")),
 				Enchantment.KNOCKBACK, 10);
 		hammer.getDurability();
 
 		// Bazooka
 		ItemStack bazooka = ItemHelper.setDetails(new ItemStack(Material.DIAMOND_HOE, 3, (short) 250),
-				"" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Bazooka", ChatColor.YELLOW + "");
+				color("&5Bazooka"));
 		bazooka.getDurability();
 
 		// Extra Life
-		ItemStack extraLife = ItemHelper.setDetails(new ItemStack(Material.PRISMARINE_SHARD),
-				"" + ChatColor.RESET + ChatColor.BOLD + "Extra Life");
+		ItemStack extraLife = ItemHelper.setDetails(new ItemStack(Material.PRISMARINE_SHARD), color("&r&lExtra Life"));
 
 		// Ender Pearl
-		ItemStack pearl = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL),
-				"" + ChatColor.RED + ChatColor.BOLD + "Teleporter");
+		ItemStack pearl = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL), color("&c&lTeleporter"));
 
 		// Slowballs
-		ItemStack slowballs = ItemHelper.setDetails(new ItemStack(Material.SNOW_BALL, 8),
-				"" + ChatColor.RED + ChatColor.BOLD + "Slowballs");
+		ItemStack slowballs = ItemHelper.setDetails(new ItemStack(Material.SNOW_BALL, 8), color("&cSlowballs"));
 
 		// Mini Shield
-		ItemStack miniShield = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				"" + ChatColor.YELLOW + "Mini-Shield Potion");
+		ItemStack miniShield = ItemHelper.setDetails(new ItemStack(Material.POTION, 1), color("&eMini-Shield Potion"));
 
 		// Bounty
-		ItemStack bounty = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR, 1),
-				"" + ChatColor.YELLOW + "Bounty");
+		ItemStack bounty = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR, 1), color("&aBounty"));
 
 		// Blooper
-		ItemStack blooper = ItemHelper.setDetails(new ItemStack(Material.RABBIT_FOOT),
-				gameManager.getMain().color("&6&lBlooper"));
+		ItemStack blooper = ItemHelper.setDetails(new ItemStack(Material.RABBIT_FOOT), color("&6&lBlooper"));
 
 		// Nuke
-		ItemStack nuke = ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.TNT, 3),
-				this.getGameManager().getMain().color("&4&lNuke")), Enchantment.DAMAGE_ALL, 1);
+		ItemStack nuke = ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.TNT, 3), color("&4&lNuke")),
+				Enchantment.DAMAGE_ALL, 1);
 
 		// Instagib
 		ItemStack instagib = ItemHelper.setDetails(new ItemStack(Material.GOLD_HOE, 5, (short) 250),
-				"" + ChatColor.GREEN + ChatColor.ITALIC + "Instagib", ChatColor.YELLOW + "");
+				color("&a&oInstagib"));
 		instagib.getDurability();
 
 		// Zombie Egg
@@ -1437,7 +1396,7 @@ public class GameInstance {
 						for (PotionEffect type : player.getActivePotionEffects())
 							player.removePotionEffect(type.getType());
 
-						removeArmor(player);
+						gameManager.getMain().getListener().resetArmor(player);
 						gameManager.getMain().LobbyItems(player);
 					}
 
