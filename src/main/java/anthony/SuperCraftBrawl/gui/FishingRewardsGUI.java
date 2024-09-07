@@ -113,7 +113,7 @@ public class FishingRewardsGUI implements InventoryProvider {
                                         break;
                                 }
                                 if (main.getGameManager().GetInstanceOfPlayer(player) == null)
-                                    main.LobbyBoard(player);
+                                	main.getScoreboardManager().lobbyBoard(player);
                                 main.getDataManager().saveData(data);
                                 new FishingRewardsGUI(main, inv.getParent().get()).inv.open(player);
                             } else {
@@ -150,7 +150,7 @@ public class FishingRewardsGUI implements InventoryProvider {
                                 }
                             }
                             if (main.getGameManager().GetInstanceOfPlayer(player) == null)
-                                main.LobbyBoard(player);
+                            	main.getScoreboardManager().lobbyBoard(player);
                             main.getDataManager().saveData(data);
                         } else {
                             player.sendMessage(main.color("&c&l(!) &rGo fish some more!"));

@@ -68,6 +68,7 @@ public class Core extends JavaPlugin implements Listener {
 
 	private ActionBarManager actionBarManager;
 	public GameManager gameManager;
+	public ScoreboardManager scoreboardManager;
 	public Version version;
 	public FreeClassesGUI inventoryGUI;
 	public anthony.CrystalWars.game.GameManager gm;
@@ -121,15 +122,19 @@ public class Core extends JavaPlugin implements Listener {
 	// Getters:
 
 	public ActionBarManager getActionBarManager() {
-		return actionBarManager;
+		return this.actionBarManager;
+	}
+	
+	public ScoreboardManager getScoreboardManager() {
+		return this.scoreboardManager;
 	}
 
 	public long getCurrentTick() {
-		return tickCounter;
+		return this.tickCounter;
 	}
 
 	public Parkour getParkour() {
-		return p;
+		return this.p;
 	}
 
 	public anthony.CrystalWars.game.GameManager getCwManager() {
@@ -334,6 +339,7 @@ public class Core extends JavaPlugin implements Listener {
 		listener = new PlayerListener(this);
 		// smmmanager = new SmmManager(this);
 		gameManager = new GameManager(this);
+		scoreboardManager = new ScoreboardManager(this);
 		commands = new Commands(this);
 		// cmd = new anthony.skywars.commands.Commands(this);
 		djManager = new DoubleJumpManager(this);
@@ -610,7 +616,7 @@ public class Core extends JavaPlugin implements Listener {
 								data.level = num;
 								player.sendMessage(color("&2&l(!) &rYou set your level to &e" + num + "!"));
 								if (this.getGameManager().GetInstanceOfPlayer(player) == null)
-									LobbyBoard(player);
+									getScoreboardManager().lobbyBoard(player);
 								this.getDataManager().saveData(data);
 							}
 						} else {
@@ -932,7 +938,7 @@ public class Core extends JavaPlugin implements Listener {
 						player.sendMessage("Level upgraded to " + data.level + "!");
 					}
 					if (this.getGameManager().GetInstanceOfPlayer(player) == null)
-						LobbyBoard(player);
+						getScoreboardManager().lobbyBoard(player);
 					this.getDataManager().saveData(data);
 				}
 			}
@@ -1096,7 +1102,7 @@ public class Core extends JavaPlugin implements Listener {
 								target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given "
 										+ num + " Tokens!");
 								if (this.getGameManager().GetInstanceOfPlayer(player) == null)
-									LobbyBoard(target);
+									getScoreboardManager().lobbyBoard(target);
 								this.getDataManager().saveData(data);
 							} else {
 								player.sendMessage(
@@ -1242,7 +1248,7 @@ public class Core extends JavaPlugin implements Listener {
 						tournament = false;
 						player.sendMessage(color("&e&l(!) &eTournament mode disabled!"));
 						for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
-							LobbyBoard(onlinePlayers);
+							getScoreboardManager().lobbyBoard(onlinePlayers);
 							onlinePlayers.getInventory().setItem(6, null);
 						}
 					} else {
@@ -1250,7 +1256,7 @@ public class Core extends JavaPlugin implements Listener {
 						player.sendMessage(color("&e&l(!) &eTournament mode now enabled!"));
 						for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
 							PlayerData data = this.getDataManager().getPlayerData(onlinePlayers);
-							LobbyBoard(onlinePlayers);
+							getScoreboardManager().lobbyBoard(onlinePlayers);
 							ItemStack tournament = ItemHelper.createSkullTexture(
 									"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGYzOTk3YzQzMDkxNjk0ZmMyZmI3NmM4ODNhNzZjY2U4OWYwMjI3ZTVjOWYxZGZlIn19fQ==");
 							onlinePlayers.getInventory().setItem(6,
@@ -1266,7 +1272,7 @@ public class Core extends JavaPlugin implements Listener {
 							Player p = Bukkit.getPlayer(s);
 							PlayerData data = this.getDataManager().getPlayerData(p);
 							data.points = 0;
-							LobbyBoard(p);
+							getScoreboardManager().lobbyBoard(p);
 							this.getDataManager().saveData(data);
 						}
 						tourney.put(s, 0);
@@ -1274,7 +1280,7 @@ public class Core extends JavaPlugin implements Listener {
 				} else if (args[0].equalsIgnoreCase("clear")) {
 					player.sendMessage(color("&e&l(!) &eRemoving all participants!"));
 					for (Player p : Bukkit.getOnlinePlayers()) {
-						LobbyBoard(p);
+						getScoreboardManager().lobbyBoard(p);
 						p.getInventory().setItem(6, null);
 					}
 					tourney.clear();
@@ -1400,7 +1406,7 @@ public class Core extends JavaPlugin implements Listener {
 									tourneyreset = false;
 									tournamentend = false;
 									for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
-										LobbyBoard(onlinePlayers);
+										getScoreboardManager().lobbyBoard(onlinePlayers);
 										onlinePlayers.getInventory().setItem(6, null);
 									}
 								}
@@ -1457,7 +1463,7 @@ public class Core extends JavaPlugin implements Listener {
 							target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + num
 									+ " Tokens!");
 							if (this.getGameManager().GetInstanceOfPlayer(player) == null)
-								LobbyBoard(target);
+								getScoreboardManager().lobbyBoard(target);
 							this.getDataManager().saveData(data);
 						} else {
 							player.sendMessage(
@@ -1565,10 +1571,6 @@ public class Core extends JavaPlugin implements Listener {
 		return getTotalFish(player, null);
 	}
 
-	public void LobbyScoreboard(Player player) {
-		LobbyBoard(player);
-	}
-
 	@SuppressWarnings("deprecation")
 	public void sendScoreboardUpdate(Player player) {
 		// Organized tab list
@@ -1622,7 +1624,7 @@ public class Core extends JavaPlugin implements Listener {
 		getListener().setPlayerOnTablist(player);
 		sendScoreboardUpdate(player); // This sets the rank next to player name above their head
 		chatAnnouncementOnJoin(player);
-		LobbyBoard(player); // Gives the lobby scoreboard to player
+		getScoreboardManager().lobbyBoard(player); // Gives the lobby scoreboard to player
 
 		// For join message:
 		String rank = getRankManager().getRank(player).getTagWithSpace(); // Gets the player's rank
@@ -1797,55 +1799,6 @@ public class Core extends JavaPlugin implements Listener {
 		return new Location(lobbyWorld, 189.495, 115, 629.438, -0, 1);
 		// else
 		// return new Location(lobbyWorld, 0.478, 51, 0.550);
-	}
-
-	public HashMap<Player, FastBoard> board = new HashMap<>();
-
-	public void LobbyBoard(Player player) {
-		FastBoard board = new FastBoard(player);
-		PlayerData data = this.getDataManager().getPlayerData(player);
-		this.board.put(player, board);
-
-		if (this.getCommands() == null) {
-			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + "MINEZONE");
-			if (data != null) {
-				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						"" + ChatColor.RESET + ChatColor.BOLD + "Server: " + ChatColor.GRAY + "Lobby-1", "",
-						"" + ChatColor.RESET + ChatColor.BOLD + "Gems: " + ChatColor.GRAY + "0", "",
-						"" + ChatColor.RESET + ChatColor.BOLD + "Rank: " + getRankManager().getRank(player).getTag(),
-						"", "" + ChatColor.RESET + ChatColor.BOLD + "Level: " + ChatColor.GRAY + data.level,
-						"" + ChatColor.DARK_GRAY + "[" + ChatColor.GRAY + data.exp + "/2500 EXP" + ChatColor.DARK_GRAY
-								+ "]",
-						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						"" + ChatColor.AQUA + "minezone.club");
-			}
-			return;
-		}
-
-		if (tournament == false) {
-			String gameServer = "SUPER CRAFT BLOCKS";
-			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + gameServer);
-			if (data != null) {
-				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						"" + ChatColor.RESET + ChatColor.BOLD + "Tokens: " + ChatColor.GRAY + data.tokens, "",
-						"" + ChatColor.RESET + ChatColor.BOLD + "Rank: " + getRankManager().getRank(player).getTag(),
-						"", "" + ChatColor.RESET + ChatColor.BOLD + "Level: " + ChatColor.GRAY + data.level,
-						"" + ChatColor.DARK_GRAY + "[" + ChatColor.GRAY + data.exp + "/2500 EXP" + ChatColor.DARK_GRAY
-								+ "]",
-						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						"" + ChatColor.AQUA + "minezone.club");
-			}
-		} else {
-			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + "MINEZONE");
-			if (data != null) {
-				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						"" + ChatColor.WHITE + ChatColor.BOLD + "Tokens: " + ChatColor.GRAY + data.tokens, "",
-						"" + ChatColor.WHITE + ChatColor.BOLD + "Rank: " + getRankManager().getRank(player).getTag(),
-						"", "" + ChatColor.WHITE + ChatColor.BOLD + "Points: " + ChatColor.GRAY + data.points,
-						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						"" + ChatColor.AQUA + "minezone.club");
-			}
-		}
 	}
 
 	public World getLobbyWorld() {

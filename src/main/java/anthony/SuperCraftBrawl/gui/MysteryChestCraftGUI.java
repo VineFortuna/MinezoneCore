@@ -53,7 +53,7 @@ public class MysteryChestCraftGUI implements InventoryProvider {
 							main.color("&e&lConfirm")), e -> {
 								data.tokens -= 100;
 								data.mysteryChests++;
-								main.LobbyBoard(player);
+								main.getScoreboardManager().lobbyBoard(player);
 								player.sendMessage(main.color("&9&l(!) &rSuccessfully purchased &e1 Mystery Chest!"));
 								inv.close(player);
 							}));

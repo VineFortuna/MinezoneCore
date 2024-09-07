@@ -206,7 +206,7 @@ public class MysteryChestsGUI implements InventoryProvider {
 						if (data.tokens >= 100) {
 							data.tokens -= 100;
 							data.mysteryChests++;
-							main.LobbyBoard(player);
+							main.getScoreboardManager().lobbyBoard(player);
 							player.sendMessage(main.color("&9&l(!) &rYou crafted &e1 MysteryChest!"));
 							hologram(player);
 						} else
