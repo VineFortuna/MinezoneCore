@@ -80,7 +80,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                             main.getDataManager().saveData(data);
                             addLure(player, data.lureLevel);
                             if (main.getGameManager().GetInstanceOfPlayer(player) == null)
-                                main.LobbyBoard(player);
+                            	main.getScoreboardManager().lobbyBoard(player);
                             new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
                         } else {
                             player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
@@ -102,7 +102,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                             main.getDataManager().saveData(data);
                             addLure(player, data.lureLevel);
                             if (main.getGameManager().GetInstanceOfPlayer(player) == null)
-                                main.LobbyBoard(player);
+                            	main.getScoreboardManager().lobbyBoard(player);
                             new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
                         } else {
                             player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
@@ -124,7 +124,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                             main.getDataManager().saveData(data);
                             addLure(player, data.lureLevel);
                             if (main.getGameManager().GetInstanceOfPlayer(player) == null)
-                                main.LobbyBoard(player);
+                            	main.getScoreboardManager().lobbyBoard(player);
                             new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
                         } else {
                             player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
@@ -174,7 +174,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                             player.sendMessage(main.color("&2&l(!) &rPurchased &aCrew's Bounty I"));
                             main.getDataManager().saveData(data);
                             if (main.getGameManager().GetInstanceOfPlayer(player) == null)
-                                main.LobbyBoard(player);
+                            	main.getScoreboardManager().lobbyBoard(player);
                             new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
                         } else {
                             player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
@@ -195,7 +195,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                             player.sendMessage(main.color("&2&l(!) &rPurchased &aCrew's Bounty II"));
                             main.getDataManager().saveData(data);
                             if (main.getGameManager().GetInstanceOfPlayer(player) == null)
-                                main.LobbyBoard(player);
+                            	main.getScoreboardManager().lobbyBoard(player);
                             new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
                         } else {
                             player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
@@ -216,7 +216,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                             player.sendMessage(main.color("&2&l(!) &rPurchased &aCrew's Bounty III"));
                             main.getDataManager().saveData(data);
                             if (main.getGameManager().GetInstanceOfPlayer(player) == null)
-                                main.LobbyBoard(player);
+                            	main.getScoreboardManager().lobbyBoard(player);
                             new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
                         } else {
                             player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
@@ -237,7 +237,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                             player.sendMessage(main.color("&2&l(!) &rPurchased &aCrew's Bounty IV"));
                             main.getDataManager().saveData(data);
                             if (main.getGameManager().GetInstanceOfPlayer(player) == null)
-                                main.LobbyBoard(player);
+                            	main.getScoreboardManager().lobbyBoard(player);
                             new FishingUpgradesGUI(main, inv.getParent().get()).inv.open(player);
                         } else {
                             player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "

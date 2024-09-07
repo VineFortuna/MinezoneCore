@@ -222,7 +222,7 @@ public class GameInstance {
 				player.teleport(GetSpecLoc());
 				player.setDisplayName(player.getName() + " " + ChatColor.RESET + ChatColor.GRAY + ChatColor.ITALIC
 						+ "Spectator" + ChatColor.RESET);
-				gameManager.getMain().board.get(player).delete();
+				gameManager.getMain().getScoreboardManager().playersLobbyBoard.get(player).delete();
 				setGameScore(player);
 				return GameReason.SPECTATOR;
 			} else
@@ -1471,7 +1471,7 @@ public class GameInstance {
 
 					for (Player spectator : spectators) {
 						if (spectator.getWorld() == getMapWorld()) {
-							gameManager.getMain().LobbyBoard(spectator);
+							gameManager.getMain().getScoreboardManager().lobbyBoard(spectator);
 							gameManager.getMain().LobbyItems(spectator);
 							gameManager.getMain().SendPlayerToHub(spectator);
 							spectator.setGameMode(GameMode.ADVENTURE);
@@ -1542,7 +1542,7 @@ public class GameInstance {
 	}
 
 	public void SetLobbyScoreboard(Player player) {
-		gameManager.getMain().LobbyBoard(player);
+		gameManager.getMain().getScoreboardManager().lobbyBoard(player);
 		gameManager.getMain().gameStats.put(player, this);
 		TextComponent message = new TextComponent(getGameManager().getMain()
 				.color("&2&l(!) &eThe match stats have been recorded. &e&lClick here to view!"));
