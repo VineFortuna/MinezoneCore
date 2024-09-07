@@ -1,12 +1,14 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.lang.reflect.Field;
-import java.util.UUID;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -15,20 +17,8 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 
 public class OcelotClass extends BaseClass {
 
@@ -120,7 +110,7 @@ public class OcelotClass extends BaseClass {
 							.color("&r&l(!) &rYou attacked all players with &7&lPurr Attack"));
 					for (Player gamePlayer : instance.players) {
 						gamePlayer.playSound(gamePlayer.getLocation(), Sound.CAT_MEOW, 1, 1);
-						if (player != gamePlayer) {
+						if (player != gamePlayer && gamePlayer.getGameMode() != GameMode.SPECTATOR) {
 							gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 110, 2));
 							gamePlayer.sendMessage(instance.getGameManager().getMain()
 									.color("&r&l(!) &rYou were attacked by &7&lPurr Attack"));
