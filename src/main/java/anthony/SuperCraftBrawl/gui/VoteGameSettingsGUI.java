@@ -75,7 +75,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 	 */
 	private void addVoteTimeButton(InventoryContents contents, Player player, GameInstance game) {
 		String timeSetting = "";
-		if (game.getMapWorld().getTime() == 13000)
+		if (game.getMapWorld().getTime() == 1000)
 			timeSetting = "Night";
 		else
 			timeSetting = "Day";

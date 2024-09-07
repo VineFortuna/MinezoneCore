@@ -167,7 +167,7 @@ public class GameInstance {
 		w.generator(new VoidGenerator());
 		mapWorld = Bukkit.getServer().createWorld(w);
 		mapWorld.setAutoSave(false);
-		mapWorld.setTime(13000);
+		mapWorld.setTime(1000);
 	}
 
 	/**
@@ -1125,9 +1125,9 @@ public class GameInstance {
 				}
 				Score line = o.getScore("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "--------------------");
 				line.setScore(0);
-				Score game = o.getScore(color("&r&lMode: &r&o" + this.gameType.getName()));
+				Score game = o.getScore(color("&eGame Mode: &r&o" + this.gameType.getName()));
 				game.setScore(0);
-				time = o.getScore("" + ChatColor.YELLOW + "Game Time: " + ChatColor.RESET + gameTime + "m");
+				time = o.getScore(color("&eGame Time: &r" + gameTime + "m"));
 				time.setScore(0);
 				player.setScoreboard(c);
 			}
