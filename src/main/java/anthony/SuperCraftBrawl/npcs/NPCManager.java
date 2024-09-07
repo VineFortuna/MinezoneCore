@@ -168,7 +168,7 @@ public class NPCManager implements Listener {
 
 				if (data != null) {
 					data.tokens += 300;
-					main.LobbyBoard(player);
+					main.getScoreboardManager().lobbyBoard(player);
 					main.SendPlayerToHub(player);
 				}
 			}

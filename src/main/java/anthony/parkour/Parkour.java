@@ -215,7 +215,7 @@ public class Parkour implements Listener {
 					main.getParkour().players.remove(player);
 					main.ResetPlayer(player);
 					main.LobbyItems(player);
-					main.LobbyBoard(player);
+					main.getScoreboardManager().lobbyBoard(player);
 					player.teleport(start);
 					player.sendMessage(main.color("&r&l(!) &rYou have left parkour mode"));
 					player.setAllowFlight(true);

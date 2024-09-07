@@ -69,7 +69,8 @@ public class ClassRewardsGUI implements InventoryProvider {
                                     main.color("&d&l(!) &rYou have earned &a100 Tokens!"));
                             data.tokens += 100;
                             if (main.getGameManager().GetInstanceOfPlayer(player) == null)
-                                main.LobbyBoard(player);
+                            	main.getScoreboardManager().lobbyBoard(player);
+                            
                             details.hasUpdated = true;
                             main.getDataManager().saveData(data);
                             player.closeInventory();

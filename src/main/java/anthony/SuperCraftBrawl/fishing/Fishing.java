@@ -116,7 +116,7 @@ public class Fishing implements Listener {
             
             removeFish(i);
             if (main.getGameManager().GetInstanceOfPlayer(p) == null)
-                main.LobbyBoard(p);
+            	main.getScoreboardManager().lobbyBoard(p);
         }
     }
     
