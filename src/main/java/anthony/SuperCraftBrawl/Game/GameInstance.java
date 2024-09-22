@@ -1,28 +1,27 @@
 package anthony.SuperCraftBrawl.Game;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.all.DarkSethBlingClass;
+import anthony.SuperCraftBrawl.Game.map.DuosMaps;
+import anthony.SuperCraftBrawl.Game.map.MapInstance;
+import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.Holograms;
+import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.PlayerListener;
+import anthony.SuperCraftBrawl.Timer;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
+import fr.mrmicky.fastboard.FastBoard;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.*;
 import org.bukkit.block.Sign;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -33,32 +32,11 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Objective;
-import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
-import org.bukkit.scoreboard.Team;
+import org.bukkit.scoreboard.*;
 import org.bukkit.util.Vector;
 
-import anthony.SuperCraftBrawl.Holograms;
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.PlayerListener;
-import anthony.SuperCraftBrawl.Timer;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.all.DarkSethBlingClass;
-import anthony.SuperCraftBrawl.Game.map.DuosMaps;
-import anthony.SuperCraftBrawl.Game.map.MapInstance;
-import anthony.SuperCraftBrawl.Game.map.Maps;
-import anthony.SuperCraftBrawl.playerdata.ClassDetails;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import anthony.SuperCraftBrawl.ranks.Rank;
-import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
-import fr.mrmicky.fastboard.FastBoard;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class GameInstance {
 
@@ -219,7 +197,7 @@ public class GameInstance {
 	/**
 	 * Sends player to the game lobby location
 	 * 
-	 * @param Player to be teleported
+	 * @param player to be teleported
 	 */
 	public void SendPlayerToMap(Player player) {
 		player.teleport(GetLobbyLoc());
@@ -228,7 +206,7 @@ public class GameInstance {
 	/**
 	 * This function adds a spectator to the game if the game is in progress
 	 * 
-	 * @param Player to be added as Spectator
+	 * @param player to be added as Spectator
 	 * 
 	 * @return If success, or already in a game, or if the game is not started
 	 */
@@ -257,7 +235,7 @@ public class GameInstance {
 	 * This function adds a player to the game if they're in the main lobby and not
 	 * in any other game, either spectating or playing
 	 * 
-	 * @param Player to be added to game
+	 * @param player to be added to game
 	 * 
 	 * @return If success adding to game, if game is full, already playing a game or
 	 *         if game is already in progress
@@ -2355,14 +2333,17 @@ public class GameInstance {
 	}
 
 	public Player getNearestPlayer(Player player, double x, double y, double z) {
-		for (Entity target : player.getNearbyEntities(x, y, z)) {
-			if (target instanceof Player) {
-				if (this.duosMap != null) {
-					if (!this.team.get(target).equals(this.team.get(player))) {
-						return (Player) target;
+		for (Entity e : player.getNearbyEntities(x, y, z)) {
+			if (e instanceof Player) {
+				Player target = (Player) e;
+				if (target.getGameMode() != GameMode.SPECTATOR) {
+					if (this.duosMap != null) {
+						if (!this.team.get(target).equals(this.team.get(player))) {
+							return target;
+						}
+					} else {
+						return target;
 					}
-				} else {
-					return (Player) target;
 				}
 			}
 		}

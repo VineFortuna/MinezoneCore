@@ -3,20 +3,17 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.ItemHelper;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -97,20 +94,22 @@ public class SquidClass extends BaseClass {
 				for (Entity e : player.getWorld().getNearbyEntities(player.getLocation(), 10D, 10D, 10D)) {
 					if (e instanceof Player && !e.equals(player)) {
 						Player p = (Player) e;
-						p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 75, 0));
-						Location playerLocation = p.getEyeLocation();
-						double radius = 2.0;
-						int particleCount = 20;
-
-						for (int i = 0; i < particleCount; i++) {
-							double angle = 2 * Math.PI * i / particleCount;
-							double x = radius * Math.cos(angle);
-							double z = radius * Math.sin(angle);
-
-							Location particleLoc = playerLocation.clone().add(x, 0, z);
-
-							p.getWorld().spigot().playEffect(particleLoc, Effect.SMOKE, 0, 0, 0, 0, 0, 0, 1, 30);
-							player.getWorld().spigot().playEffect(particleLoc, Effect.SMOKE, 0, 0, 0, 0, 0, 0, 1, 30);
+						if (p.getGameMode() != GameMode.SPECTATOR) {
+							p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 75, 0));
+							Location playerLocation = p.getEyeLocation();
+							double radius = 2.0;
+							int particleCount = 20;
+							
+							for (int i = 0; i < particleCount; i++) {
+								double angle = 2 * Math.PI * i / particleCount;
+								double x = radius * Math.cos(angle);
+								double z = radius * Math.sin(angle);
+								
+								Location particleLoc = playerLocation.clone().add(x, 0, z);
+								
+								p.getWorld().spigot().playEffect(particleLoc, Effect.SMOKE, 0, 0, 0, 0, 0, 0, 1, 30);
+								player.getWorld().spigot().playEffect(particleLoc, Effect.SMOKE, 0, 0, 0, 0, 0, 0, 1, 30);
+							}
 						}
 					}
 				}
