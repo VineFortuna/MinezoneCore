@@ -631,22 +631,31 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
+	/**
+	 * This function gets rid of loot drops & exp that certain mobs can drop
+	 * 
+	 * @param entity to remove loot drops/exp from
+	 */
 	@EventHandler
 	public void EntityDeathEvent(EntityDeathEvent entity) {
 		List<EntityType> entities = new ArrayList<>(
 				Arrays.asList(EntityType.ZOMBIE, EntityType.SKELETON, EntityType.CREEPER, EntityType.PIG_ZOMBIE,
-						EntityType.MAGMA_CUBE, EntityType.SILVERFISH, EntityType.WITCH));
+						EntityType.MAGMA_CUBE, EntityType.SILVERFISH, EntityType.WITCH, EntityType.CHICKEN));
 		if (entities.contains(entity.getEntityType())) {
 			entity.getDrops().clear();
 			entity.setDroppedExp(0);
 		}
 	}
 
+	/**
+	 * This function disables fishing rods hitting players
+	 * 
+	 * @param event
+	 */
 	@EventHandler
 	public void onHookHit(EntityDamageByEntityEvent event) {
-		if (event.getDamager() instanceof FishHook) {
+		if (event.getDamager() instanceof FishHook)
 			event.setCancelled(true);
-		}
 	}
 
 	@EventHandler
@@ -673,8 +682,8 @@ public class GameManager implements Listener, PluginMessageListener {
 								target.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 200, 2, true));
 							else
 								target.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 1, true));
-							player.sendMessage(main.color("&6&l(!) &rYou blooped &e" + target.getName()));
-							target.sendMessage(main.color("&6&l(!) &rYou were blooped by &e" + player.getName()));
+							player.sendMessage(main.color("&2&l(!) &rYou blooped &e" + target.getName()));
+							target.sendMessage(main.color("&2&l(!) &rYou were blooped by &e" + player.getName()));
 							player.playSound(player.getLocation(), Sound.SLIME_ATTACK, 2, 1);
 							target.playSound(target.getLocation(), Sound.SLIME_ATTACK, 2, 1);
 							amount--;
@@ -689,7 +698,7 @@ public class GameManager implements Listener, PluginMessageListener {
 						}
 					}
 				}
-				player.sendMessage(main.color("&6&l(!) &rYou tried blooping a Spectator"));
+				player.sendMessage(main.color("&c&l(!) &rYou tried blooping a Spectator"));
 			}
 		}
 	}
@@ -706,9 +715,9 @@ public class GameManager implements Listener, PluginMessageListener {
 	public void votePaper(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		Player player = event.getPlayer();
-		GameInstance instance = this.GetInstanceOfPlayer(player);
+		GameInstance game = this.GetInstanceOfPlayer(player);
 
-		if (instance != null)
+		if (game != null)
 			if (item != null && item.getType() == Material.PAPER)
 				new VoteGameSettingsGUI(main).inv.open(player);
 	}
@@ -753,14 +762,6 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	/*
-	 * @EventHandler public void onFish(PlayerFishEvent e) { if
-	 * (boosterCooldown.useAndResetCooldown()) { if (e.getState() ==
-	 * State.IN_GROUND) { e.getPlayer().setVelocity( new
-	 * Vector(e.getPlayer().getVelocity().getX(), 2.5,
-	 * e.getPlayer().getVelocity().getY())); } } }
-	 */
-
 	@EventHandler
 	public void cosmeticMelon(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
@@ -800,24 +801,24 @@ public class GameManager implements Listener, PluginMessageListener {
 				event.setCancelled(true);
 	}
 
+	/**
+	 * This function disables players from moving items in their inventory
+	 * 
+	 * @param e
+	 */
 	@EventHandler
 	public void onInv(InventoryClickEvent e) {
 		Player player = (Player) e.getWhoClicked();
-		GameInstance instance = this.GetInstanceOfPlayer(player);
 
-		// if (instance != null) {
-		/*
-		 * if (e.getCurrentItem().getType() == Material.COAL) { e.setCancelled(true); }
-		 * else if (e.getCurrentItem().getType() == Material.IRON_INGOT) {
-		 * e.setCancelled(true); } else if (e.getCurrentItem().getType() ==
-		 * Material.GOLD_INGOT) { e.setCancelled(true); } else if
-		 * (e.getCurrentItem().getType() == Material.DIAMOND) { e.setCancelled(true); }
-		 */
 		if (!(player.isOp()))
 			e.setCancelled(true);
-		// }
 	}
 
+	/**
+	 * This function disables players from dropping items
+	 * 
+	 * @param e
+	 */
 	@EventHandler
 	public void onPlayerDropItem(PlayerDropItemEvent e) {
 		e.setCancelled(true);
@@ -1008,14 +1009,21 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	}
 
+	/**
+	 * This function cancels item pickup if the item is a projectile thrown by a
+	 * player in game
+	 * 
+	 * @param event
+	 */
 	@EventHandler
 	public void OnPickupItem(PlayerPickupItemEvent event) {
 		Item item = event.getItem();
-		if (projManager.isProjectile(item)) {
+
+		if (projManager.isProjectile(item))
 			event.setCancelled(true);
-		}
 	}
 
+	// Disables portals usage
 	@EventHandler
 	public void onPortal(EntityPortalEvent event) {
 		event.setCancelled(true);
@@ -1073,10 +1081,8 @@ public class GameManager implements Listener, PluginMessageListener {
 		if (maps.size() > 0) {
 			Maps map = maps.get(new Random().nextInt(maps.size()));
 			this.JoinMap(player, map);
-		} else {
-			player.sendMessage(
-					"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "All games are full! Please try again later");
-		}
+		} else
+			player.sendMessage(main.color("&c&l(!) &rAll games are full! Try again later"));
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1262,6 +1268,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
+	// Disables painting breaking
 	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onPaintingBreak(PaintingBreakEvent event) {
@@ -1338,7 +1345,6 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	@EventHandler
 	public void onSignChange2(SignChangeEvent e) {
-		Sign s = (Sign) e.getBlock().getState();
 		for (Maps map : Maps.values()) {
 			if (e.getLine(0).equalsIgnoreCase(map.toString())) {
 				e.setLine(0, main.color("&2Lobby"));
@@ -1399,20 +1405,42 @@ public class GameManager implements Listener, PluginMessageListener {
 
 			break;
 		case ALREADY_IN:
-
-			player.sendMessage(
-					"" + ChatColor.WHITE + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You are already in a map!");
-
+			player.sendMessage(main.color("&c&l(!) &rYou are already in a map!"));
 			break;
 
 		case IN_ANOTHER:
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You are already in a game!");
+			player.sendMessage(main.color("&c&l(!) &rYou are already in a game!"));
 			break;
 
 		case ALREADYPLAYING:
-			player.sendMessage(
-					"" + ChatColor.WHITE + ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is already playing!");
+			player.sendMessage(main.color("&c&l(!) &rThis game is already playing!"));
 			break;
+		}
+	}
+
+	private void waitingLobbyItems(Player player, GameInstance game) {
+		if (player.getWorld() != main.getLobbyWorld()) {
+			player.getInventory().clear();
+
+			// ITEMS:
+			ItemStack leaveItem = ItemHelper.setDetails(new ItemStack(Material.BARRIER), main.color("&cLeave Game"), "",
+					main.color("&7Click to leave your game"));
+			ItemStack classItem = ItemHelper.setDetails(new ItemStack(Material.COMPASS), main.color("&7Class Selector"),
+					"", main.color("&7Click to choose a class!"));
+			ItemStack cosmetics = ItemHelper.setDetails(new ItemStack(Material.CHEST), main.color("&7Cosmetics"));
+
+			ItemStack stats = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
+			SkullMeta statsMeta = (SkullMeta) stats.getItemMeta();
+			statsMeta.setOwner(player.getName());
+			stats.setItemMeta(statsMeta);
+
+			if (game.gameType != GameType.FRENZY) {
+				player.getInventory().setItem(0, classItem);
+			}
+
+			player.getInventory().setItem(7, ItemHelper.setDetails(stats, main.color("&7Profile")));
+			player.getInventory().setItem(4, cosmetics);
+			player.getInventory().setItem(8, leaveItem);
 		}
 	}
 
@@ -1436,54 +1464,28 @@ public class GameManager implements Listener, PluginMessageListener {
 				s.update();
 			}
 		}
+
 		switch (result) {
 		case SUCCESS:
 			if (instance.gameType == GameType.FRENZY) {
-				player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-						+ "You have joined a Frenzy game, your class will be randomly selected each life");
+				player.sendMessage(main.color(
+						"&2&l(!) &rYou have joined a Frenzy game, your class will be randomly selected each life"));
 			}
 
 			player.setGameMode(GameMode.ADVENTURE);
-			player.setAllowFlight(true);
-
-			if (player.getWorld() != main.getLobbyWorld()) {
-				player.getInventory().clear();
-				if (instance.gameType != GameType.FRENZY) {
-					ItemStack classItem = ItemHelper.setDetails(new ItemStack(Material.COMPASS),
-							"" + ChatColor.GREEN + ChatColor.BOLD + "Class Selector",
-							ChatColor.GRAY + "Click to choose a class!");
-					player.getInventory().setItem(0, classItem);
-				}
-
-				ItemStack stats = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
-				SkullMeta statsMeta = (SkullMeta) stats.getItemMeta();
-				statsMeta.setOwner(player.getName());
-				stats.setItemMeta(statsMeta);
-
-				player.getInventory().setItem(7,
-						ItemHelper.setDetails(stats, "" + ChatColor.RESET + ChatColor.BOLD + "Profile"));
-				player.getInventory().setItem(4,
-						ItemHelper.setDetails(new ItemStack(Material.CHEST), "" + ChatColor.GRAY + "Cosmetics"));
-
-				ItemStack leaveItem = ItemHelper.setDetails(new ItemStack(Material.BARRIER),
-						"" + ChatColor.RED + ChatColor.BOLD + "Leave Game",
-						ChatColor.GRAY + "Click to leave your game");
-				player.getInventory().setItem(8, leaveItem);
-			}
-
+			main.getListener().resetDoubleJump(player);
+			waitingLobbyItems(player, instance);
 			break;
 		case ALREADY_IN:
-			player.sendMessage(
-					"" + ChatColor.WHITE + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You are already in a map!");
+			player.sendMessage(main.color("&c&l(!) &rYou are already in a map!"));
 			break;
 
 		case IN_ANOTHER:
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You are already in a game!");
+			player.sendMessage(main.color("&c&l(!) &rYou are already in a game!"));
 			break;
 
 		case ALREADYPLAYING:
-			player.sendMessage(
-					"" + ChatColor.WHITE + ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is already playing!");
+			player.sendMessage(main.color("&c&l(!) &rThis game is already playing!"));
 			break;
 		}
 	}
@@ -1514,8 +1516,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		GameInstance instance = null;
 
 		if (GetInstanceOfPlayer(player) != null) {
-			player.sendMessage("" + ChatColor.WHITE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-					+ "You have to leave your game to Spectate");
+			player.sendMessage(main.color("&c&l(!) &rYou have to leave your game to Spectate"));
 			return GameReason.IN_ANOTHER;
 		}
 
@@ -1549,12 +1550,11 @@ public class GameManager implements Listener, PluginMessageListener {
 			break;
 
 		case ALREADY_IN:
-			player.sendMessage("" + ChatColor.WHITE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-					+ "You have to leave your game to Spectate");
+			player.sendMessage(main.color("&c&l(!) &rYou have to leave your game to Spectate"));
 			break;
 
 		case FAIL:
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is not playing!");
+			player.sendMessage(main.color("&c&l(!) &rThis game is not playing!"));
 			break;
 		}
 	}
@@ -1614,6 +1614,10 @@ public class GameManager implements Listener, PluginMessageListener {
 		return reason;
 	}
 
+	/**
+	 * This function disables weather from changing
+	 * @param event
+	 */
 	@EventHandler
 	public void onWeatherChange(WeatherChangeEvent event) {
 		event.setCancelled(true);
@@ -1790,43 +1794,6 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	@EventHandler
-	public void onExplode(EntityExplodeEvent event) {
-		/*
-		 * Random r = new Random(); Vector v = new Vector(); v.setY(0.6);
-		 * v.setZ(r.nextDouble());
-		 * 
-		 * for (Block b : event.blockList()) { if (b.getType().equals(Material.AIR)) {
-		 * return; }
-		 * 
-		 * BlockState saved = b.getState(); b.setType(Material.AIR);
-		 * 
-		 * FallingBlock fb =
-		 * Bukkit.getWorld("village").spawnFallingBlock(saved.getLocation(),
-		 * saved.getType(), saved.getData().getData()); fb.setVelocity(v); }
-		 */
-	}
-
-	/*
-	 * @EventHandler public void onDmg(EntityDamageEvent event) { Player player =
-	 * (Player) event.getEntity();
-	 * 
-	 * if (player instanceof Player) { GameInstance i =
-	 * this.GetInstanceOfPlayer(player); BaseClass bc = i.classes.get(player);
-	 * 
-	 * if (i != null && i.state == GameState.STARTED) { if (bc != null) { if
-	 * (bc.bedrockInvincibility) { event.setCancelled(true); } } } } }
-	 * 
-	 * @EventHandler public void onDmg(EntityDamageByEntityEvent event) { Player
-	 * player = (Player) event.getDamager();
-	 * 
-	 * if (player instanceof Player) { GameInstance i =
-	 * this.GetInstanceOfPlayer(player); BaseClass bc = i.classes.get(player);
-	 * 
-	 * if (i != null && i.state == GameState.STARTED) { if (bc != null) { if
-	 * (bc.bedrockInvincibility) { event.setCancelled(true); } } } } }
-	 */
-
 	public GameInstance GetInstanceOfPlayer(Player player) {
 		for (Entry<Maps, GameInstance> games : gameMap.entrySet())
 			if (games.getValue().HasPlayer(player))
@@ -1848,12 +1815,12 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	public GameInstance getInstanceOfMap(Maps map) {
-		return gameMap.get(map);
+		return this.gameMap.get(map);
 	}
 
 	public void RemovePlayerFromMap(Player player, Maps map, Player player2) {
-		if (gameMap.containsKey(map))
-			gameMap.get(map).RemovePlayer(player);
+		if (this.gameMap.containsKey(map))
+			this.gameMap.get(map).RemovePlayer(player);
 	}
 
 	public boolean RemovePlayerFromAll(Player player) {
@@ -1900,14 +1867,20 @@ public class GameManager implements Listener, PluginMessageListener {
 		return found;
 	}
 
+	//When a match is over it'll remove the game from the active games
 	public void RemoveMap(Maps maps) {
 		gameMap.remove(maps);
 	}
 
+	//When a match is over it'll remove the game from the active games
 	public void RemoveDuosMap(DuosMaps maps) {
 		gameMap2.remove(maps);
 	}
 
+	/**
+	 * This function handles spawn protection so players cant get damaged
+	 * @param event
+	 */
 	@EventHandler
 	public void spawnProtection(EntityDamageByEntityEvent event) {
 		if (event.getEntity() instanceof Player) {
@@ -2005,6 +1978,11 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
+	/**
+	 * This function spawns Spawn Protection particles around the player
+	 * @param player
+	 * @param i
+	 */
 	private void spawnProtParticles(Player player, GameInstance i) {
 		int durationTicks = 5 * 20; // 5 seconds in ticks
 		double radius = 1.0;
