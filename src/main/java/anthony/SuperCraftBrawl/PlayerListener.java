@@ -199,9 +199,12 @@ public class PlayerListener implements Listener {
             Player target = (Player) event.getRightClicked();
             
             if (player != null && target != null) {
-            	GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
+            	GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+            	GameInstance spectating = main.getGameManager().GetInstanceOfSpectator(player);
             	
-            	if (i != null && i.state == GameState.STARTED)
+            	if (game != null && game.state == GameState.STARTED)
+            		return;
+            	if (spectating != null)
             		return;
             	
             	new StatsGUI(main, target).inv.open(player);

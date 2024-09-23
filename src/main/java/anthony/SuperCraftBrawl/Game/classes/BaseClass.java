@@ -192,12 +192,14 @@ public abstract class BaseClass {
 	/**
 	 * This function displays an Action Bar for cooldowns of each class
 	 * 
-	 * @param cooldownSec which is calculated in each class to display the seconds of cooldown
-	 * @param type which is the class the player is playing
+	 * @param cooldownSec  which is calculated in each class to display the seconds
+	 *                     of cooldown
+	 * @param type         which is the class the player is playing
 	 * @param cooldownName which is the name of the cooldown
-	 * @param itemName which is the name of the item on cooldown
+	 * @param itemName     which is the name of the item on cooldown
 	 */
-	public void cooldownActionBar(int cooldownSec, int duration, Timer cooldown, ClassType type, String cooldownName, String itemName) {
+	public void cooldownActionBar(int cooldownSec, int duration, Timer cooldown, ClassType type, String cooldownName,
+			String itemName) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == type) {
 			if (instance.classes.get(player).getLives() > 0) {
 				cooldownSec = (duration - cooldown.getTime()) / 1000 + 1;
@@ -1486,7 +1488,7 @@ public abstract class BaseClass {
 					if (damager instanceof Player) {
 						Player d = (Player) damager;
 
-						if (instance.classes.containsKey(player)) {
+						if (instance.classes.containsKey(d)) {
 							baseClass = instance.classes.get(d);
 							PlayerData killerData = instance.getGameManager().getMain().getDataManager()
 									.getPlayerData(d);
@@ -1494,7 +1496,6 @@ public abstract class BaseClass {
 								if (instance.gameType == GameType.FRENZY) {
 									BaseClass bc = instance.oldClasses.get(p);
 									if (lives > 0) {
-
 										if (killerData != null && killerData.killMsgs == 1) {
 											this.giveStats(d, p);
 											TellAll(instance.getGameManager().getMain()
@@ -1623,7 +1624,7 @@ public abstract class BaseClass {
 						if (a.getShooter() instanceof Player && a.getShooter() != null) {
 							Player shooter = (Player) a.getShooter();
 
-							if (instance.classes.containsKey(player)) {
+							if (instance.classes.containsKey(shooter)) {
 								baseClass = instance.classes.get(shooter);
 								PlayerData killerData = instance.getGameManager().getMain().getDataManager()
 										.getPlayerData(shooter);
@@ -2293,6 +2294,482 @@ public abstract class BaseClass {
 
 	}
 
+	private boolean foundDeath = false;
+
+	private void checkRegularKill(Player p, Player killer, BaseClass pClass) {
+		if (foundDeath)
+			return;
+
+		BaseClass kClass = null;
+		PlayerData kData = null;
+
+		if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
+			EntityDamageByEntityEvent entityDamageEvent = (EntityDamageByEntityEvent) p.getLastDamageCause();
+			Entity damager = entityDamageEvent.getDamager();
+
+			if (damager instanceof Player) {
+				Player d = (Player) damager;
+
+				if (instance.classes.containsKey(d)) {
+					kClass = instance.classes.get(d);
+					kData = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
+
+					if (d != p || killer != p) {
+						if (kData != null && kData.killMsgs == 1) {
+							giveStats(d, p);
+							TellAll(instance.getGameManager().getMain()
+									.color("&2&l(!) " + getPlayerRank(p) + "&r" + p.getPlayer().getName() + " "
+											+ pClass.getType().getTag() + " &cwas not strong enough to encounter "
+											+ getPlayerRank(d) + "&r" + d.getName() + " " + kClass.getType().getTag()));
+							healthPots(d);
+						} else {
+							giveStats(d, p);
+							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+									+ getPlayerRank(p) + p.getPlayer().getName() + " "
+									+ /* baseClass2.getType().getTag() */pClass.getType().getTag() + ChatColor.RED
+									+ " was killed by " + ChatColor.WHITE + getPlayerRank(d) + d.getName() + " "
+									+ kClass.getType().getTag());
+							healthPots(d);
+						}
+						p.teleport(d);
+					} else {
+						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
+								+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
+								+ " committed suicide");
+						p.teleport(instance.GetSpecLoc());
+					}
+				} else {
+					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
+							+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED + " died");
+					p.teleport(instance.GetSpecLoc());
+				}
+			} else if (damager instanceof Zombie) {
+				TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
+						+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
+						+ " was killed by a " + ChatColor.YELLOW + "zombie");
+			} else if (damager instanceof Skeleton) {
+				TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
+						+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
+						+ " was shot to death by a " + ChatColor.YELLOW + "skeleton");
+			} else if (damager instanceof Arrow) {
+				Arrow a = (Arrow) damager;
+
+				if (a.getShooter() instanceof Player && a.getShooter() != null) {
+					Player shooter = (Player) a.getShooter();
+
+					if (instance.classes.containsKey(shooter)) {
+						kClass = instance.classes.get(shooter);
+						kData = instance.getGameManager().getMain().getDataManager().getPlayerData(shooter);
+
+						if (shooter != p || killer != p) {
+							if (kData != null && kData.killMsgs == 1) {
+								giveStats(shooter, p);
+								TellAll(instance.getGameManager().getMain()
+										.color("&2&l(!) " + getPlayerRank(p) + "&r" + p.getPlayer().getName() + " "
+												+ pClass.getType().getTag() + " &cwas not strong enough to encounter "
+												+ getPlayerRank(shooter) + "&r" + shooter.getName() + " "
+												+ kClass.getType().getTag()));
+								healthPots(shooter);
+							} else {
+								giveStats(shooter, p);
+								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+										+ getPlayerRank(p) + p.getPlayer().getName() + " "
+										+ /* baseClass2.getType().getTag() */pClass.getType().getTag() + ChatColor.RED
+										+ " was killed by " + ChatColor.WHITE + getPlayerRank(shooter)
+										+ shooter.getName() + " " + kClass.getType().getTag());
+								healthPots(shooter);
+							}
+							p.teleport(shooter);
+						}
+					} else {
+						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
+								+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
+								+ " committed suicide");
+						p.teleport(instance.GetSpecLoc());
+					}
+				} else {
+					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
+							+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED + " died");
+					p.teleport(instance.GetSpecLoc());
+				}
+			} else {
+				TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
+						+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
+						+ " just died SO badly");
+				p.teleport(instance.GetSpecLoc());
+			}
+		} else if (killer != null && instance.classes.get(killer) != null) {
+			kData = instance.getGameManager().getMain().getDataManager().getPlayerData(killer);
+			kClass = instance.classes.get(killer);
+
+			if (killer != p) {
+				if (kData != null && kData.killMsgs == 1) {
+					this.giveStats(killer, p);
+					TellAll(instance.getGameManager().getMain()
+							.color("&2&l(!) " + getPlayerRank(p) + "&r" + p.getPlayer().getName() + " "
+									+ pClass.getType().getTag() + " &cwas not strong enough to encounter "
+									+ getPlayerRank(killer) + "&r" + killer.getName() + " "
+									+ kClass.getType().getTag()));
+					this.healthPots(killer);
+				} else {
+					this.giveStats(killer, p);
+					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
+							+ p.getPlayer().getName() + " "
+							+ /* baseClass2.getType().getTag() */pClass.getType().getTag() + ChatColor.RED
+							+ " was killed by " + ChatColor.WHITE + getPlayerRank(killer) + killer.getName() + " "
+							+ kClass.getType().getTag());
+					this.healthPots(killer);
+				}
+				p.teleport(killer);
+			} else {
+				TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
+						+ p.getPlayer().getName() + " " + /* baseClass2.getType().getTag() */pClass.getType().getTag()
+						+ ChatColor.RED + " committed suicide");
+				p.teleport(instance.GetSpecLoc());
+			}
+
+			this.foundDeath = true;
+		}
+	}
+
+	private void checkWitherKill(Player p, Player killer, BaseClass pClass, BaseClass kClass) {
+		if (foundDeath)
+			return;
+
+		if (p.getLastDamageCause() != null && p.getLastDamageCause().getCause() != null
+				&& p.getLastDamageCause().getCause() == DamageCause.WITHER) {
+			if (killer == null) {
+				TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
+						+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED + " withered away");
+				p.teleport(instance.GetSpecLoc());
+			} else {
+				this.giveStats(killer, p);
+				TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
+						+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
+						+ " was withered by " + ChatColor.WHITE + getPlayerRank(killer) + killer.getName() + " "
+						+ kClass.getType().getTag());
+				p.teleport(instance.GetSpecLoc());
+				healthPots(killer);
+			}
+
+			this.foundDeath = true;
+		}
+	}
+
+	private void checkMagicKill(Player p, BaseClass pClass) {
+		if (foundDeath)
+			return;
+
+		if (p.getLastDamageCause() != null && p.getLastDamageCause().getCause() != null
+				&& p.getLastDamageCause().getCause() == DamageCause.MAGIC) {
+			TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
+					+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
+					+ " was murdered via the dark arts");
+			p.teleport(instance.GetSpecLoc());
+			this.foundDeath = true;
+		}
+	}
+
+	private void checkVoidKill(Player p, Player killer, BaseClass pClass, PlayerData pData) {
+		if (foundDeath)
+			return;
+
+		BaseClass kClass = null;
+		PlayerData kData = null;
+
+		if (p.getLocation().getY() <= 50) {
+			if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
+				EntityDamageByEntityEvent entityDamageEvent = (EntityDamageByEntityEvent) p.getLastDamageCause();
+				Entity damager = entityDamageEvent.getDamager();
+
+				if (damager instanceof Player && damager != null) {
+					Player d = (Player) damager;
+					if (instance.classes.containsKey(d)) { // Verify they're still in the same game
+						kClass = instance.classes.get(d);
+						kData = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
+
+						if (kData != null && kData.killMsgs == 1) { // If they have custom kill msgs enabled
+							this.giveStats(d, p);
+							TellAll(instance.getGameManager().getMain()
+									.color("&2&l(!) &cHello? AND GOODBYE TO " + getPlayerRank(p) + ChatColor.WHITE
+											+ p.getPlayer().getName() + " " + pClass.getType().getTag()
+											+ " &cAND ANYONE ELSE STANDING IN " + getPlayerRank(d) + ChatColor.WHITE
+											+ d.getName() + " " + kClass.getType().getTag() + "'s &cWAY!"));
+						} else {
+							this.giveStats(d, p);
+							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+									+ getPlayerRank(p) + p.getPlayer().getName() + " " + pClass.getType().getTag()
+									+ ChatColor.RED + " was doomed to fall by " + ChatColor.WHITE + getPlayerRank(d)
+									+ d.getName() + " " + kClass.getType().getTag());
+						}
+						p.teleport(d.getLocation());
+					} else {
+						Random r = new Random();
+						int chance = r.nextInt(2);
+
+						if (pData != null && pData.killMsgs == 1) {
+							if (chance == 0) {
+								TellAll(instance.getGameManager().getMain()
+										.color("&2&l(!) "
+												+ instance.getGameManager().getMain().getRankManager().getRank(player)
+														.getTagWithSpace()
+												+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
+												+ " &csaid NO THANK YOU and took the easy way out"));
+							} else {
+								TellAll(instance.getGameManager().getMain()
+										.color("&2&l(!) "
+												+ instance.getGameManager().getMain().getRankManager().getRank(player)
+														.getTagWithSpace()
+												+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
+												+ " &cwalked off the edge.."));
+							}
+						} else {
+							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+									+ instance.getGameManager().getMain().getRankManager().getRank(player)
+											.getTagWithSpace()
+									+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
+									+ " fell into the void");
+						}
+						p.teleport(instance.GetSpecLoc());
+					}
+
+				} else if (damager instanceof Arrow) {
+					Arrow a = (Arrow) damager;
+
+					if (a.getShooter() instanceof Player && a.getShooter() != null) {
+						Player d = (Player) a.getShooter();
+
+						if (instance.classes.containsKey(d)) {
+							kClass = instance.classes.get(d);
+							kData = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
+
+							if (kData != null && kData.killMsgs == 1) {
+								this.giveStats(d, p);
+								TellAll(instance.getGameManager().getMain()
+										.color("&2&l(!) &cHello? AND GOODBYE TO " + getPlayerRank(p) + ChatColor.WHITE
+												+ p.getPlayer().getName() + " " + pClass.getType().getTag()
+												+ " &cAND ANYONE ELSE STANDING IN " + getPlayerRank(d) + ChatColor.WHITE
+												+ d.getName() + " " + kClass.getType().getTag() + "'s &cWAY!"));
+							} else {
+								this.giveStats(d, p);
+								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+										+ getPlayerRank(p) + p.getPlayer().getName() + " " + pClass.getType().getTag()
+										+ ChatColor.RED + " was doomed to fall by " + ChatColor.WHITE + getPlayerRank(d)
+										+ d.getName() + " " + kClass.getType().getTag());
+							}
+						} else {
+							Random r = new Random();
+							int chance = r.nextInt(2);
+
+							if (pData != null && pData.killMsgs == 1) {
+								if (chance == 0) {
+									TellAll(instance.getGameManager().getMain()
+											.color("&2&l(!) "
+													+ instance.getGameManager().getMain().getRankManager()
+															.getRank(player).getTagWithSpace()
+													+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
+													+ " &csaid NO THANK YOU and took the easy way out"));
+								} else {
+									TellAll(instance.getGameManager().getMain().color("&2&l(!) "
+											+ instance.getGameManager().getMain().getRankManager().getRank(player)
+													.getTagWithSpace()
+											+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
+											+ " &cwalked off the edge.."));
+								}
+							} else {
+								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+										+ instance.getGameManager().getMain().getRankManager().getRank(player)
+												.getTagWithSpace()
+										+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
+										+ " fell into the void");
+							}
+							p.teleport(instance.GetSpecLoc());
+						}
+					} else {
+						Random r = new Random();
+						int chance = r.nextInt(2);
+
+						if (pData != null && pData.killMsgs == 1) {
+							if (chance == 0) {
+								TellAll(instance.getGameManager().getMain()
+										.color("&2&l(!) "
+												+ instance.getGameManager().getMain().getRankManager().getRank(player)
+														.getTagWithSpace()
+												+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
+												+ " &csaid NO THANK YOU and took the easy way out"));
+							} else {
+								TellAll(instance.getGameManager().getMain()
+										.color("&2&l(!) "
+												+ instance.getGameManager().getMain().getRankManager().getRank(player)
+														.getTagWithSpace()
+												+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
+												+ " &cwalked off the edge.."));
+							}
+						} else {
+							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+									+ instance.getGameManager().getMain().getRankManager().getRank(player)
+											.getTagWithSpace()
+									+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
+									+ " fell into the void");
+						}
+						p.teleport(instance.GetSpecLoc());
+					}
+				} else {
+					Random r = new Random();
+					int chance = r.nextInt(2);
+
+					if (pData != null && pData.killMsgs == 1) {
+						if (chance == 0) {
+							TellAll(instance.getGameManager().getMain().color("&2&l(!) "
+									+ instance.getGameManager().getMain().getRankManager().getRank(player)
+											.getTagWithSpace()
+									+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
+									+ " &csaid NO THANK YOU and took the easy way out"));
+						} else {
+							TellAll(instance.getGameManager().getMain()
+									.color("&2&l(!) "
+											+ instance.getGameManager().getMain().getRankManager().getRank(player)
+													.getTagWithSpace()
+											+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
+											+ " &cwalked off the edge.."));
+						}
+					} else {
+						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+								+ instance.getGameManager().getMain().getRankManager().getRank(player).getTagWithSpace()
+								+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
+								+ " fell into the void");
+					}
+					p.teleport(instance.GetSpecLoc());
+				}
+			} else if (killer != null && instance.classes.containsKey(killer)) {
+				kData = instance.getGameManager().getMain().getDataManager().getPlayerData(killer);
+				kClass = instance.classes.get(killer);
+
+				if (killer != p) {
+					if (kData != null && kData.killMsgs == 1) {
+						this.giveStats(killer, p);
+						TellAll(instance.getGameManager().getMain()
+								.color("&2&l(!) " + getPlayerRank(p) + "&r" + p.getPlayer().getName() + " "
+										+ pClass.getType().getTag() + " &cwas not strong enough to encounter "
+										+ getPlayerRank(killer) + "&r" + killer.getName() + " "
+										+ kClass.getType().getTag()));
+					} else {
+						this.giveStats(killer, p);
+						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
+								+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
+								+ " was killed by " + ChatColor.WHITE + getPlayerRank(killer) + killer.getName() + " "
+								+ kClass.getType().getTag());
+					}
+					p.teleport(killer);
+				} else {
+					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
+							+ p.getPlayer().getName() + " "
+							+ /* baseClass2.getType().getTag() */pClass.getType().getTag() + ChatColor.RED
+							+ " committed suicide");
+					p.teleport(instance.GetSpecLoc());
+				}
+			} else {
+				Random r = new Random();
+				int chance = r.nextInt(2);
+
+				if (pData != null && pData.killMsgs == 1) {
+					if (chance == 0) {
+						TellAll(instance.getGameManager().getMain()
+								.color("&2&l(!) "
+										+ instance.getGameManager().getMain().getRankManager().getRank(player)
+												.getTagWithSpace()
+										+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
+										+ " &csaid NO THANK YOU and took the easy way out"));
+					} else {
+						TellAll(instance.getGameManager().getMain()
+								.color("&2&l(!) "
+										+ instance.getGameManager().getMain().getRankManager().getRank(player)
+												.getTagWithSpace()
+										+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
+										+ " &cwalked off the edge.."));
+					}
+				} else {
+					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ instance.getGameManager().getMain().getRankManager().getRank(player).getTagWithSpace()
+							+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
+							+ " fell into the void");
+				}
+				p.teleport(instance.GetSpecLoc());
+			}
+
+			this.foundDeath = true;
+		}
+	}
+
+	// This function removes any mobs that the player who died has spawned
+	private void removeMobs(Player p) {
+		for (Entity en : p.getWorld().getEntities())
+			if (!(en instanceof Player))
+				if (en.getName().contains(p.getName()))
+					en.remove();
+	}
+
+	private void deathParticles(PlayerData pData, Player p) {
+		Location pLocation = p.getLocation();
+		List<Item> deathParticles = new ArrayList<>();
+		Material mat = Material.INK_SACK;
+
+		// Particles
+		if (pData != null && p.hasPermission("scb.deathParticles")) {
+			if (pData.goldApple == 1)
+				mat = Material.GOLDEN_APPLE;
+			else if (pData.glowstone == 1)
+				mat = Material.GLOWSTONE_DUST;
+			else if (pData.redstone == 1)
+				mat = Material.REDSTONE;
+			else if (pData.web == 1)
+				mat = Material.WEB;
+			else if (pData.bottleEXP == 1)
+				mat = Material.EXP_BOTTLE;
+		}
+
+		ItemStack particleItem;
+
+		if (mat == Material.INK_SACK)
+			particleItem = new ItemStack(Material.INK_SACK, 1, (short) 15);
+		else
+			particleItem = new ItemStack(mat);
+
+		// Spawn the particles in a circle around the player
+		for (int i = 0; i < 10; i++) {
+			double angle = i * Math.PI / 5;
+			double x = pLocation.getX() + Math.cos(angle) * 0.5;
+			double y = pLocation.getY() + 1.5;
+			double z = pLocation.getZ() + Math.sin(angle) * 0.5;
+
+			Item particle = pLocation.getWorld().dropItem(new Location(pLocation.getWorld(), x, y, z), particleItem);
+			particle.setPickupDelay(Integer.MAX_VALUE);
+			deathParticles.add(particle);
+		}
+
+		// Schedule a task to remove the particles after 5 seconds
+		Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
+			for (Item particle : deathParticles) {
+				particle.remove();
+			}
+		}, 5 * 20);
+	}
+
+	private void enderDragonCrystal(BaseClass pClass, Player killer, Player p) {
+		if (pClass != null) {
+			if (pClass.getType() == ClassType.Enderdragon) {
+				if (killer != null) {
+					Location pLoc = p.getLocation();
+					EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc, EntityType.ENDER_CRYSTAL);
+					HealTask task = new HealTask(killer, crystal, instance.getGameManager().getMain());
+					BukkitTask bukkit = Bukkit.getScheduler()
+							.runTaskTimerAsynchronously(instance.getGameManager().getMain(), task, 0, 20L);
+					task.set(bukkit);
+				}
+			}
+		}
+	}
+
 	// Giving health potions on kill
 	protected void healthPots(Player d) {
 		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
@@ -2366,6 +2843,12 @@ public abstract class BaseClass {
 					d.sendMessage(instance.getGameManager().getMain()
 							.color("&r&l(!) &rYour &r&lDash &rhas been regenerated for getting a kill!"));
 					hunterDash = true;
+					ItemStack dash = ItemHelper.addEnchant(
+							ItemHelper.setDetails(new ItemStack(Material.FEATHER),
+									instance.getGameManager().getMain().color("&b&lDash"),
+									instance.getGameManager().getMain().color("&7A quick escape or attack")),
+							Enchantment.PROTECTION_ENVIRONMENTAL, 1);
+					player.getInventory().setItem(1, dash);
 				}
 			} else if (baseClass.getType() == ClassType.Present) {
 				d.sendMessage(instance.getGameManager().getMain().color(
