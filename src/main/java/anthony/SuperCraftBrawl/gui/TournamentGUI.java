@@ -1,8 +1,6 @@
 package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
@@ -15,11 +13,9 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Map.Entry;
 
 public class TournamentGUI implements InventoryProvider {
     
@@ -89,7 +85,10 @@ public class TournamentGUI implements InventoryProvider {
             ItemStack stats = ItemHelper.createSkullHeadPlayer(1, p.getName());
             
             PlayerData data = main.getDataManager().getOffPlayerData(p);
-            String rank = data.getRank().getTagWithSpace();
+            String rank = "";
+            if (data.getRank() != null) {
+                rank = data.getRank().getTagWithSpace();
+            };
             
             contents.set(y, x,
                     ClickableItem.of(
