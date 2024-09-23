@@ -234,10 +234,8 @@ public class WitherSkeletonClass extends BaseClass {
 					p.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 100, 1));
 					Firework fw = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
 					FireworkMeta fwm = fw.getFireworkMeta();
-
 					fwm.setPower(1);
 					fwm.addEffect(FireworkEffect.builder().withColor(Color.LIME).flicker(true).build());
-
 					fw.setFireworkMeta(fwm);
 
 					for (Player gamePlayer : instance.players)
