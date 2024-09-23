@@ -8,6 +8,7 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -49,7 +50,7 @@ public class BrewingStandClass extends BaseClass {
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDI0MjRhY2RjNmUwOWEyMTJiNWM3N2MyYzFkOWFiZGNkNDMzZDM4NjVkZWQzMzk1OGE1N2Y0MjA0ZWYzMjc4YSJ9fX0=";
 		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
+
 		playerEquip.setHelmet(getHelmet(playerskull));
 		playerEquip.setChestplate(makeYellowArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
@@ -186,6 +187,8 @@ public class BrewingStandClass extends BaseClass {
 
 			pot.apply(potion);
 			player.getInventory().setItem(1, potion);
+			player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 10);
+			player.sendMessage(color("&2&l(!) &rYou brewed a " + potion.getItemMeta().getDisplayName()) + " &rpotion!");
 			this.used = false; // Reset Brewing Stand usage
 		}
 	}
@@ -206,20 +209,15 @@ public class BrewingStandClass extends BaseClass {
 				if (instance.team.get(p).equals(instance.team.get(player)))
 					return;
 
-			Random r = new Random();
-			int chance = r.nextInt(100);
+			ItemStack slot9 = player.getInventory().getItem(8);
+			ItemStack slot2 = player.getInventory().getItem(1);
 
-			if (chance >= 0 && chance < 70) {
-				ItemStack slot9 = player.getInventory().getItem(8);
-				ItemStack slot2 = player.getInventory().getItem(1);
-
-				if (slot2.getType() == Material.BARRIER) {
-					if (slot9 != null && slot9.getType() == Material.BARRIER) {
-						player.getInventory().setItem(8, new ItemStack(Material.BLAZE_POWDER));
-					} else {
-						if (slot9.getAmount() < 5)
-							player.getInventory().addItem(new ItemStack(Material.BLAZE_POWDER));
-					}
+			if (slot2.getType() == Material.BARRIER) {
+				if (slot9 != null && slot9.getType() == Material.BARRIER) {
+					player.getInventory().setItem(8, new ItemStack(Material.BLAZE_POWDER));
+				} else {
+					if (slot9.getAmount() < 5)
+						player.getInventory().addItem(new ItemStack(Material.BLAZE_POWDER));
 				}
 			}
 		}

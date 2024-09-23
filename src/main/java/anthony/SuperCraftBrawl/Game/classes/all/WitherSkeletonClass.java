@@ -220,12 +220,12 @@ public class WitherSkeletonClass extends BaseClass {
 					int chance = r.nextInt(100);
 					double dmg = 5.0;
 
-					if (chance >= 0 && chance < 10)
+					if (chance >= 0 && chance < 2)
 						dmg = 18.0;
 					else if (chance >= 10 && chance <= 50)
-						dmg = 11.0;
-					else
 						dmg = 10.0;
+					else
+						dmg = 8.0;
 
 					@SuppressWarnings("deprecation")
 					EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.WITHER, dmg);

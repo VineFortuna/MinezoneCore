@@ -1782,9 +1782,10 @@ public class GameManager implements Listener, PluginMessageListener {
 					Player p = (Player) e;
 
 					if (p.getGameMode() != GameMode.SPECTATOR) {
-						EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.PROJECTILE, 15.0);
+						@SuppressWarnings("deprecation")
+						EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.PROJECTILE, 8.0);
 						getMain().getServer().getPluginManager().callEvent(damageEvent);
-						p.damage(15.0, e);
+						p.damage(8.0, e);
 					}
 				}
 			}
