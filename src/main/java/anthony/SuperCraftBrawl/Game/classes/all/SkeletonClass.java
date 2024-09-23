@@ -113,7 +113,7 @@ public class SkeletonClass extends BaseClass {
             double modifiedDamage = event.getDamage() * arrowVelocity;
             
             if (modifiedDamage >= 10) //Nerf arrow damage when fully charged
-            	modifiedDamage = 8.05;
+            	modifiedDamage = 7.50;
 
             event.setDamage(modifiedDamage);
         }
