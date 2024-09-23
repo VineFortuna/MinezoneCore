@@ -158,8 +158,6 @@ public class AnvilClass extends BaseClass {
 		double heightRatio = currentHeight / maxHeight;
 		double maxDamage = 19.0D;
 		double damage = maxDamage * heightRatio;
-		System.out.println("Height Ratio: " + heightRatio);
-		System.out.println("Calculated Damage: " + damage);
 		return Math.min(damage, maxDamage);
 	}
 

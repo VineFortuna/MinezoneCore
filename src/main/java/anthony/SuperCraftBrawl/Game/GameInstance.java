@@ -83,7 +83,7 @@ public class GameInstance {
 													// before end
 	public List<Player> playerPosition = new ArrayList<>();
 	public HashMap<Player, FastBoard> boards = new HashMap();
-	private final HashMap<Player, ClassType> classSelection = new HashMap<>();
+	public final HashMap<Player, ClassType> classSelection = new HashMap<>();
 	public HashMap<Player, Timer> cooldowns = new HashMap<Player, Timer>();
 	private final List<Player> winnerList;
 	public BukkitRunnable gameStartTime;
@@ -666,24 +666,17 @@ public class GameInstance {
 
 		setTeams(); // Sets teams if mode is Duos
 		startLightningDropsTimer(); // Loot drops will start spawning every 45 seconds
-
-		TellAll("" + ChatColor.BOLD + "============================");
-		TellAll("" + ChatColor.BOLD + "||");
-		TellAll("" + ChatColor.BOLD + "|| " + "        " + ChatColor.YELLOW + ChatColor.BOLD + "  GAME STARTED");
-		if (this.gameType == GameType.DUEL) {
-			String playersInGame = "";
-			for (Player gamePlayer : players) {
-				playersInGame += gamePlayer.getName() + "";
-				if (!this.players.isEmpty())
-					playersInGame += ", ";
-			}
-			TellAll("" + ChatColor.BOLD + "|| " + "    " + ChatColor.RED + ChatColor.BOLD + " Players: "
-					+ ChatColor.RESET + playersInGame);
-		}
-		TellAll("" + ChatColor.BOLD + "||");
-		TellAll("" + ChatColor.BOLD + "============================");
+		
+		TellAll(color("&e&l----------------------------------------"));
+		TellAll("" + ChatColor.AQUA + ChatColor.BOLD + "             Super Craft Blocks");
+		TellAll("");
+		TellAll(color("&r  5 lives each with different classes & unique"));
+		TellAll(color("&r    abilities. Look out for lightning drops as"));
+		TellAll(color("&r       they can spawn useful powerups."));
+		TellAll(color("&r                   Good Luck!"));
+		TellAll(color("&e&l----------------------------------------"));
+		
 		this.state = GameState.STARTED; // Sets game state to 'Started'
-
 		LoadClasses();
 		GameScoreboard();
 		addAlivePlayers();

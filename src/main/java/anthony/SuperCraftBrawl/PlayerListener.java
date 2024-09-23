@@ -1,21 +1,25 @@
 package anthony.SuperCraftBrawl;
 
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.gui.*;
-import anthony.SuperCraftBrawl.playerdata.ClassDetails;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import anthony.SuperCraftBrawl.ranks.Rank;
-import me.itzzmic.minezone.api.PunishAPI;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.EntityFishingHook;
+import java.util.ArrayList; 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+
 import org.apache.commons.lang3.StringUtils;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.DyeColor;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
-import org.bukkit.block.ContainerBlock;
-import org.bukkit.entity.*;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftArmorStand;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.FishHook;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Snowball;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -29,26 +33,46 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Door;
-import org.bukkit.material.Skull;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.ScoreboardManager;
+import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.gui.ChallengesGUI;
+import anthony.SuperCraftBrawl.gui.ClassSelectorGUI;
+import anthony.SuperCraftBrawl.gui.CosmeticsGUI;
+import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
+import anthony.SuperCraftBrawl.gui.PrefsGUI;
+import anthony.SuperCraftBrawl.gui.StatsGUI;
+import anthony.SuperCraftBrawl.gui.TournamentGUI;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.ranks.Rank;
+import me.itzzmic.minezone.api.PunishAPI;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.EntityArmorStand;
 
 public class PlayerListener implements Listener {
 
 	private final Core main;
+	public ScoreboardManager scoreManager = Bukkit.getScoreboardManager();
+	public Scoreboard c;
 
 	public PlayerListener(Core main) {
 		this.main = main;
 		this.main.getServer().getPluginManager().registerEvents(this, main);
+		this.c = scoreManager.getNewScoreboard();
 	}
 	
 	/**
@@ -85,6 +109,7 @@ public class PlayerListener implements Listener {
 	 * This function sets the player's rank on the tablist to the left of their name
 	 * @param p which is Player to set rank on tablist
 	 */
+	@SuppressWarnings("deprecation")
 	public void setPlayerOnTablist(Player p) {
 		String rank = main.getRankManager().getRank(p).getTagWithSpace(); //Gets the player's rank
 		
@@ -96,6 +121,21 @@ public class PlayerListener implements Listener {
 
 		if (main.getRankManager().getRank(p) == Rank.DEFAULT)
 			p.setPlayerListName("" + rank + ChatColor.GRAY + p.getName());
+		
+		/*Team captain = c.registerNewTeam("b_captain");
+		captain.setPrefix(Rank.CAPTAIN.getTagWithSpace());
+		Team owner = c.registerNewTeam("a_owner");
+		owner.setPrefix(Rank.OWNER.getTagWithSpace());
+		
+		if (main.getRankManager().getRank(p) == Rank.CAPTAIN)
+			captain.addPlayer(p);
+		else if (main.getRankManager().getRank(p) == Rank.OWNER)
+			owner.addPlayer(p);
+		
+		p.setScoreboard(c);
+		
+		if (main.getTabManager() != null)
+			main.getTabManager().setPlayerTeam(p);*/
 	}
 	
 	/**
@@ -115,6 +155,8 @@ public class PlayerListener implements Listener {
 		}
 	}
 
+	//EVENTS:
+	
 	@EventHandler
 	public void OnPlayerJoin(PlayerJoinEvent event) {
 		event.getPlayer().teleport(main.GetHubLoc());
