@@ -51,7 +51,7 @@ public class MagmaCubeClass extends BaseClass {
 	public void SetArmour(EntityEquipment playerEquip) {
 		String texure = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGFhNmM0NWIyY2Y3OTc1Yjk1ZmJjY2U0ZWQ5YjA2NDZhYzAwY2I5Y2M5ZjY2ZGM1YzI0ZTgxZDJjOTFlZTdjMSJ9fX0=";
 		ItemStack playerskull = ItemHelper.createSkullTexture(texure, "");
-		
+
 		playerEquip.setHelmet(getHelmet(playerskull));
 		playerEquip.setChestplate(makeBlack(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
 				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
@@ -63,8 +63,8 @@ public class MagmaCubeClass extends BaseClass {
 	@Override
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper.addEnchant(
-				ItemHelper.addEnchant(new ItemStack(Material.WOOD_SWORD),
-				Enchantment.KNOCKBACK, 1), Enchantment.DURABILITY, 999999);
+				ItemHelper.addEnchant(new ItemStack(Material.WOOD_SWORD), Enchantment.KNOCKBACK, 1),
+				Enchantment.DURABILITY, 999999);
 		return item;
 	}
 
@@ -99,8 +99,8 @@ public class MagmaCubeClass extends BaseClass {
 				if (en.getName().contains(player.getName()))
 					en.remove();
 		playerInv.setItem(0, this.getAttackWeapon());
-		playerInv.setItem(1, ItemHelper.createMonsterEgg(EntityType.MAGMA_CUBE, 7,
-		instance.getGameManager().getMain().color("&e&lMagmaCube Pokeball")));
+		playerInv.setItem(1, ItemHelper.createMonsterEgg(EntityType.MAGMA_CUBE, 5,
+				instance.getGameManager().getMain().color("&e&lMagmaCube Pokeball")));
 	}
 
 	@Override
@@ -136,7 +136,7 @@ public class MagmaCubeClass extends BaseClass {
 									player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
 									MagmaCube en = (MagmaCube) player.getWorld().spawnCreature(hitLoc,
 											EntityType.MAGMA_CUBE);
-									en.setSize(4);
+									en.setSize(3);
 									en.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW
 											+ "MagmaCube");
 								}

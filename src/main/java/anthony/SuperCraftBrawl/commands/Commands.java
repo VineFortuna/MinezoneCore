@@ -103,7 +103,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "startgame":
 				if (game != null) {
 					if (player.hasPermission("scb.startGame")) {
-						if (game.state == GameState.WAITING && game.players.size() >= 2)
+						if (game.state == GameState.WAITING && game.players.size() >= 1)
 							game.getGameSettings().forceStartGame();
 						else if (game.state == GameState.WAITING)
 							player.sendMessage(main.color("&c&l(!) &rNot enough players to start!"));

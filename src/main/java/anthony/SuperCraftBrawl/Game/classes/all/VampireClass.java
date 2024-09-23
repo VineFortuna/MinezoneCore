@@ -93,6 +93,7 @@ public class VampireClass extends BaseClass {
 							return;
 
 					p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 80, 1));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 80, 1));
 					this.hitPlayer = true;
 				}
 			}
