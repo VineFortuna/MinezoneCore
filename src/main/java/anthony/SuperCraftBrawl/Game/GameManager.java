@@ -1599,9 +1599,10 @@ public class GameManager implements Listener, PluginMessageListener {
 	public GameReason AddPlayerToMap(Player player, Maps map) {
 		GameInstance instance = null;
 
-		if (GetInstanceOfPlayer(player) != null) {
+		if (GetInstanceOfPlayer(player) != null || getMain().getParkour().hasPlayer(player)) {
 			return GameReason.IN_ANOTHER;
 		}
+		
 		if (gameMap.containsKey(map))
 			instance = gameMap.get(map);
 		else {
