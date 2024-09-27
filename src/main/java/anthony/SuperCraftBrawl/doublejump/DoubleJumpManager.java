@@ -99,7 +99,9 @@ public class DoubleJumpManager implements Listener {
 					if (player.getWorld() == main.getLobbyWorld()) {
 						forwardsFactor = 1.0;
 						player.playSound(player.getLocation(), Sound.CHICKEN_EGG_POP, 1, 1);
-					}
+					} else
+						player.playSound(player.getLocation(), Sound.GHAST_FIREBALL, 1, 10);
+					
 					Vector forwards = player.getLocation().getDirection().setY(0);
 					double forwardsStrength = forwards.length();
 					forwards.normalize().multiply(forwardsFactor + forwardsStrength / 5.0D);

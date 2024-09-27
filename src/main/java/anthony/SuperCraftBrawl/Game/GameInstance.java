@@ -336,7 +336,7 @@ public class GameInstance {
 		classSelection.put(player, type);
 		if (gameType != GameType.FRENZY) {
 			board = boards.get(player);
-			board.updateLine(2, " " + type.getTag());
+			board.updateLine(5, " " + type.getTag());
 
 			if (player.hasPermission("scb.chat"))
 				player.setDisplayName("" + player.getName() + " " + type.getTag());
@@ -470,8 +470,8 @@ public class GameInstance {
 						if (players.size() >= 2) {
 							for (Player player : players) {
 								FastBoard board = boards.get(player);
-								board.updateLine(8, " " + ticksTilStart + "s");
-								board.updateLine(7, "" + ChatColor.RESET + ChatColor.BOLD + "Starting In:");
+								board.updateLine(11, " " + ChatColor.GRAY + ticksTilStart + "s");
+								board.updateLine(10, "" + ChatColor.RESET + ChatColor.BOLD + "Starting In:");
 								if (players.size() >= 2 && ticks > 3)
 									if (!(player.getInventory().contains(votePaper)))
 										player.getInventory().addItem(votePaper);
@@ -1610,7 +1610,7 @@ public class GameInstance {
 					if (data != null) {
 						data.wins += 1;
 						data.flawlessWins += 1;
-						data.winstreak += 1;
+						//data.winstreak += 1;
 						data.exp += 133;
 					}
 					baseClass.totalExp += 133;
@@ -1670,6 +1670,9 @@ public class GameInstance {
 				data.wins += 1;
 				data.winstreak += 1;
 				data.exp += 113;
+				
+				if (data.winstreak >= data.bestWinstreak)
+					data.bestWinstreak = data.winstreak;
 
 				if (data.exp >= 2500) {
 					data.level++;
@@ -2062,8 +2065,8 @@ public class GameInstance {
 
 							FastBoard board = this.boards.get(gamePlayer);
 							updateCountOnBoard();
-							board.updateLine(7, "" + ChatColor.BOLD + "Status:");
-							board.updateLine(8, "" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
+							board.updateLine(10, "" + ChatColor.BOLD + "Status:");
+							board.updateLine(11, "" + ChatColor.GRAY + ChatColor.ITALIC + " Waiting..");
 						}
 					}
 				}
@@ -2072,6 +2075,7 @@ public class GameInstance {
 					checkIfGameOver();
 
 				TellAll(color("&2&l(!) &e" + player.getName() + " &chas left the game!"));
+				data.winstreak = 0;
 				try {
 					baseClass.score.getScoreboard().resetScores(baseClass.score.getEntry()); // Gets rid of the player
 																								// on the game board
@@ -2137,7 +2141,7 @@ public class GameInstance {
 	private void updateCountOnBoard() {
 		for (Player gamePlayer : this.players) {
 			FastBoard board = this.boards.get(gamePlayer);
-			board.updateLine(5,
+			board.updateLine(8,
 					" " + (((this.map.GetInstance()).gameType == GameType.FRENZY)
 							? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
 							: "")

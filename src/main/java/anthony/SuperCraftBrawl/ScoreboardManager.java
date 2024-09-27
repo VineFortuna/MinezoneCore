@@ -81,30 +81,24 @@ public class ScoreboardManager {
 		game.boards.put(player, board);
 
 		if (game.getMap() != null) {
-			board.updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD + game.getMap()
-					+ (game.getMap().GetInstance().gameType == GameType.FRENZY
-							? "" + ChatColor.GRAY + ChatColor.ITALIC + " (frenzy)"
-							: ""));
-			board.updateLines("", "" + ChatColor.RESET + ChatColor.BOLD + "Class:", " " + ChatColor.RESET + "Random",
-					"", "" + ChatColor.RESET + ChatColor.BOLD + "Players:",
-					" " + ChatColor.RESET
+			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + game.getMap());
+			board.updateLines("", "" + ChatColor.BOLD + "Game Mode:", " " + ChatColor.GRAY + game.gameType.getName(),
+					"", "" + ChatColor.RESET + ChatColor.BOLD + "Class:", " " + ChatColor.GRAY + "Random", "",
+					"" + ChatColor.RESET + ChatColor.BOLD + "Players:",
+					" " + ChatColor.GRAY
 							+ (game.getMap().GetInstance().gameType == GameType.FRENZY
-									? "" + ChatColor.RESET + game.players.size() + "/" + game.gameType.getMaxPlayers()
+									? "" + ChatColor.GRAY + game.players.size() + "/" + game.gameType.getMaxPlayers()
 									: "")
 							+ (game.getMap().GetInstance().gameType == GameType.CLASSIC
-									? "" + ChatColor.RESET + game.players.size() + "/" + game.gameType.getMaxPlayers()
+									? "" + ChatColor.GRAY + game.players.size() + "/" + game.gameType.getMaxPlayers()
 									: "")
 							+ (game.getMap().GetInstance().gameType == GameType.DUEL
-									? "" + ChatColor.RESET + game.players.size() + "/" + game.gameType.getMaxPlayers()
+									? "" + ChatColor.GRAY + game.players.size() + "/" + game.gameType.getMaxPlayers()
 									: ""),
 					"", "" + ChatColor.RESET + ChatColor.BOLD + "Status:",
-					"" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
+					"" + ChatColor.RESET + ChatColor.GRAY + ChatColor.ITALIC + " Waiting..");
 
-			game.boards.get(player)
-					.updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD + game.getMap().toString()
-							+ (game.getMap().GetInstance().gameType == GameType.FRENZY
-									? "" + ChatColor.GRAY + ChatColor.ITALIC + " (frenzy)"
-									: ""));
+			game.boards.get(player).updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + game.getMap().toString());
 		} else {
 			board.updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD + game.duosMap.toString());
 			board.updateLines("", "" + ChatColor.RESET + ChatColor.BOLD + "Class:", " " + ChatColor.RESET + "Random",
@@ -121,10 +115,11 @@ public class ScoreboardManager {
 			int playerSize = game.players.size();
 			int maxSize = game.gameType.getMaxPlayers();
 
-			game.boards.get(player).updateLine(5,
-					" " + (gameType == GameType.FRENZY ? "" + ChatColor.RESET + playerSize + "/" + maxSize : "")
-							+ (gameType == GameType.CLASSIC ? "" + ChatColor.RESET + playerSize + "/" + maxSize : "")
-							+ (gameType == GameType.DUEL ? "" + ChatColor.RESET + playerSize + "/" + maxSize : ""));
+			game.boards.get(player).updateLine(8,
+					" " + ChatColor.GRAY
+							+ (gameType == GameType.FRENZY ? "" + ChatColor.GRAY + playerSize + "/" + maxSize : "")
+							+ (gameType == GameType.CLASSIC ? "" + ChatColor.GRAY + playerSize + "/" + maxSize : "")
+							+ (gameType == GameType.DUEL ? "" + ChatColor.GRAY + playerSize + "/" + maxSize : ""));
 		}
 	}
 }

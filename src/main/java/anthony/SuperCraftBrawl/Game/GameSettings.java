@@ -93,7 +93,14 @@ public class GameSettings {
 					game.gameType = GameType.CLASSIC;
 
 				game.TellAll(color("&2&l(!) &rThe game mode has been set to &e&l" + game.gameType.toString()));
+				updateModeOnBoard();
 			}
+		}
+	}
+	
+	private void updateModeOnBoard() {
+		for (Player gamePlayer : game.players) {
+			game.boards.get(gamePlayer).updateLine(2, " " + ChatColor.GRAY + game.gameType.getName());
 		}
 	}
 

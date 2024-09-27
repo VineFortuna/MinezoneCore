@@ -332,7 +332,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 									sender.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD
 											+ "(!) " + ChatColor.RESET + "You have selected to go a Random class");
 									main.getGameManager().playerSelectClass((Player) sender, classType);
-									instance20.board.updateLine(2, " " + "Random");
+									instance20.board.updateLine(5, " " + ChatColor.GRAY + "Random");
 									((Player) sender).setDisplayName("" + sender.getName());
 									return true;
 								}

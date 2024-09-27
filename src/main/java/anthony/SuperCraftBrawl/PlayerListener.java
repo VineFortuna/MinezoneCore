@@ -35,6 +35,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -137,6 +138,27 @@ public class PlayerListener implements Listener {
 		if (main.getTabManager() != null)
 			main.getTabManager().setPlayerTeam(p);*/
 	}
+	
+	//Clicking leaderboard settings in lobby
+	@EventHandler
+    public void onPlayerInteract(PlayerInteractAtEntityEvent event) {
+        if (!(event.getRightClicked() instanceof ArmorStand)) {
+            return; // Only proceed if it's an ArmorStand
+        }
+
+        ArmorStand armorStand = (ArmorStand) event.getRightClicked();
+        Player player = event.getPlayer();
+
+        if (armorStand.getCustomName() != null) {
+            if (armorStand.getCustomName().equals("Leaderboard Settings")) {
+                player.sendMessage("You clicked on the Leaderboard Settings!");
+            }
+
+            if (armorStand.getCustomName().equals("Click to change settings")) {
+                player.sendMessage("You clicked to change settings!");
+            }
+        }
+    }
 	
 	/**
 	 * This function checks if tournament mode is active on Player Join

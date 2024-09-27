@@ -85,7 +85,7 @@ public class ClassSelectorGUI implements InventoryProvider {
 								GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
 
 								if (instance != null && instance.state == GameState.WAITING) {
-									instance.boards.get(player).updateLine(2, " " + "Random Fav");
+									instance.boards.get(player).updateLine(5, " " + ChatColor.GRAY + "Random Fav");
 									instance.favClassSelection.add(player);
 									if (instance.classSelection.containsKey(player)) {
 										instance.classSelection.remove(player);

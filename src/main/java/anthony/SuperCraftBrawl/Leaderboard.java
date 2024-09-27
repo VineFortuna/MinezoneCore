@@ -6,18 +6,18 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
 
 import anthony.SuperCraftBrawl.ranks.Rank;
+import net.md_5.bungee.api.ChatColor;
 
 public class Leaderboard {
 	private Core main;
@@ -25,19 +25,21 @@ public class Leaderboard {
 	private HashMap<UUID, Rank> RoleID;
 	private ArrayList<UUID> lead;
 	private ArrayList<String> lead2;
+	private List<ArmorStand> toRemove;
 	private ResultSet set;
 	private Connection c;
 	private int i;
 
 	public Leaderboard(Core main) {
 		this.main = main;
-		i = 0;
-		RoleID = new HashMap<>();
-		wins = new HashMap<>();
-		lead = new ArrayList<>();
-		lead2 = new ArrayList<>();
-		c = main.getDatabaseManager().getConnection();
 		Bukkit.getScheduler().runTaskTimerAsynchronously(main, () -> {
+			i = 0;
+			RoleID = new HashMap<>();
+			wins = new HashMap<>();
+			lead = new ArrayList<>();
+			lead2 = new ArrayList<>();
+			toRemove = new ArrayList<>();
+			c = main.getDatabaseManager().getConnection();
 			wins.clear();
 			lead.clear();
 			RoleID.clear();
@@ -86,11 +88,11 @@ public class Leaderboard {
 	}
 
 	public void close() {
-		for (Entity e : main.getLobbyWorld().getEntities()) {
-			if (e instanceof ArmorStand) {
-				e.remove();
-			}
+		for (ArmorStand stand : toRemove) {
+			stand.remove();
 		}
+		
+		toRemove.clear();
 		wins.clear();
 		lead.clear();
 		c = null;
@@ -98,21 +100,18 @@ public class Leaderboard {
 	}
 
 	public void winsBoard() throws SQLException {
-		for (Entity entity : main.getLobbyWorld().getEntities()) {
-			if (entity.getType() == EntityType.ARMOR_STAND) {
-				ArmorStand st = (ArmorStand) entity;
-
-				if (!(st.getItemInHand().getType() == Material.CHEST))
-					entity.remove();
-			}
+		for (ArmorStand stand : toRemove) {
+			stand.remove();
 		}
-
-		Location loc = new Location(main.getLobbyWorld(), 189.519, 106.5, 678.471);
+		
+		toRemove.clear();
+		Location loc = new Location(main.getLobbyWorld(), 185.440, 106.5, 686.993);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
 		stand.setCustomNameVisible(true);
-		stand.setCustomName(main.color("&e&l<==&nSCB LIFETIME WINS&r&e&l==>"));
+		stand.setCustomName("" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Wins");
+		toRemove.add(stand);
 
 		int count = 1;
 		loc.setY(loc.getY() - 0.4);
@@ -126,24 +125,27 @@ public class Leaderboard {
 			stand.setVisible(false);
 			stand.setGravity(false);
 			stand.setCustomNameVisible(true);
-			stand.setCustomName(
-					main.color("&b#" + count + ":" + " &e" + name + " &r- " + win));
+			stand.setCustomName(main.color("&b#" + count + ":" + " &e" + name + " &r- " + win));
+			toRemove.add(stand);
 
 			count++;
 		}
 	}
 
 	public void updateBoard() throws SQLException {
-		for (Entity e : main.getLobbyWorld().getEntities())
-			if (e instanceof ArmorStand)
-				e.remove();
-
-		Location loc = new Location(main.getLobbyWorld(), 189.519, 106.5, 678.471);
+		for (ArmorStand stand : toRemove) {
+			stand.remove();
+		}
+		
+		toRemove.clear();
+		Location loc = new Location(main.getLobbyWorld(), 185.440, 106.5, 686.993);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
 		stand.setCustomNameVisible(true);
-		stand.setCustomName(main.color("&e&l<==&nSCB LIFETIME WINS&r&e&l==>"));
+		stand.setCustomName("" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Wins");
+		toRemove.add(stand);
+		
 		int count = 1;
 		loc.setY(loc.getY() - 0.4);
 
@@ -156,8 +158,8 @@ public class Leaderboard {
 			stand.setVisible(false);
 			stand.setGravity(false);
 			stand.setCustomNameVisible(true);
-			stand.setCustomName(
-					main.color("&b#" + count + ":" + " &e" + name + " &r- " + win));
+			stand.setCustomName(main.color("&b#" + count + ":" + " &e" + name + " &r- " + win));
+			toRemove.add(stand);
 
 			count++;
 		}
