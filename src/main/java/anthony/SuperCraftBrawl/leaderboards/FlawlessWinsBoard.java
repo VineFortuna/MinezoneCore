@@ -18,38 +18,46 @@ import org.bukkit.entity.EntityType;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.ranks.Rank;
+import net.md_5.bungee.api.ChatColor;
 
-public class FishingBoard {
+public class FlawlessWinsBoard {
 	private Core main;
-	private HashMap<UUID, Integer> caught;
+	private HashMap<UUID, Integer> flawlessWins;
 	private HashMap<UUID, Rank> RoleID;
 	private ArrayList<UUID> lead;
 	private ArrayList<String> lead2;
-	private ArrayList<Entity> entities;
-	private List<ArmorStand> toRemove;
 	private ResultSet set;
 	private Connection c;
 	private int i;
+	private List<ArmorStand> toRemove;
 
-	public FishingBoard(Core main) {
+	public FlawlessWinsBoard(Core main) {
 		this.main = main;
+		Bukkit.getScheduler().runTaskTimerAsynchronously(main, () -> {
+			for (Entity e : main.getLobbyWorld().getEntities()) {
+				if (e instanceof ArmorStand) {
+					e.remove();
+				}
+			}
+		}, 0, 	(20 * 60) - 1);
+		
+
 		Bukkit.getScheduler().runTaskTimerAsynchronously(main, () -> {
 			i = 0;
 			RoleID = new HashMap<>();
-			caught = new HashMap<>();
+			flawlessWins = new HashMap<>();
 			lead = new ArrayList<>();
 			lead2 = new ArrayList<>();
-			entities = new ArrayList<>();
-			toRemove = new ArrayList<>();
+			toRemove = new ArrayList<ArmorStand>();
 			c = main.getDatabaseManager().getConnection();
-			caught.clear();
+			flawlessWins.clear();
 			lead.clear();
 			RoleID.clear();
 			try {
 				Statement s = c.createStatement();
 				int a = 0;
 				set = s.executeQuery(
-						"SELECT UUID, LastPlayerName, TotalCaught, RoleID FROM PlayerData ORDER BY TotalCaught DESC");
+						"SELECT UUID, LastPlayerName, FlawlessWins, RoleID FROM PlayerData ORDER BY FlawlessWins DESC");
 				while (set.next()) {
 					if (a == 10) {
 						break;
@@ -62,14 +70,14 @@ public class FishingBoard {
 					a++;
 					lead.add(id);
 					lead2.add(name);
-					caught.put(id, set.getInt("TotalCaught"));
+					flawlessWins.put(id, set.getInt("FlawlessWins"));
 					RoleID.put(id, Rank.getRankFromID(set.getInt("RoleID")));
 				}
 				if (i == 0) {
 					i = 1;
 					Bukkit.getScheduler().runTask(main, () -> {
 						try {
-							caughtBoard();
+							winstreakBoard();
 						} catch (SQLException e) {
 							e.printStackTrace();
 						}
@@ -91,33 +99,30 @@ public class FishingBoard {
 	}
 
 	public void close() {
-		for (Entity e : entities) {
-			e.remove();
+		for (ArmorStand stand : toRemove) {
+			stand.remove();
 		}
-		entities.clear();
-		caught.clear();
+
+		toRemove.clear();
+		flawlessWins.clear();
 		lead.clear();
 		c = null;
 		RoleID.clear();
 	}
 
-	public void caughtBoard() throws SQLException {
-		for (Entity entity : entities) {
-			ArmorStand st = (ArmorStand) entity;
-
-			if (!(st.getItemInHand().getType() == Material.CHEST)) {
-				entities.remove(entity);
-				entity.remove();
-			}
+	public void winstreakBoard() throws SQLException {
+		for (ArmorStand stand : toRemove) {
+			stand.remove();
 		}
 
-		Location loc = new Location(main.getLobbyWorld(), 305.575, 92.5, 531.328);
+		toRemove.clear();
+		Location loc = new Location(main.getLobbyWorld(), 194.515, 106.5, 686.987);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
 		stand.setCustomNameVisible(true);
-		stand.setCustomName(main.color("&e&l<==&nFISHING LEADERBOARD&r&e&l==>"));
-		entities.add(stand);
+		stand.setCustomName("" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Flawless Wins");
+		toRemove.add(stand);
 
 		int count = 1;
 		loc.setY(loc.getY() - 0.4);
@@ -126,30 +131,31 @@ public class FishingBoard {
 			loc.setY(loc.getY() - 0.24);
 			String name = lead2.get(count - 1);
 
-			Integer win = caught.get(id);
+			Integer win = flawlessWins.get(id);
 			stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 			stand.setVisible(false);
 			stand.setGravity(false);
 			stand.setCustomNameVisible(true);
 			stand.setCustomName(main.color("&b#" + count + ":" + " &e" + name + " &r- " + win));
+			toRemove.add(stand);
 
 			count++;
 		}
 	}
 
 	public void updateBoard() throws SQLException {
-		for (Entity e : entities) {
-			e.remove();
+		for (ArmorStand stand : toRemove) {
+			stand.remove();
 		}
-		entities.clear();
 
-		Location loc = new Location(main.getLobbyWorld(), 305.575, 92.5, 531.328);
+		toRemove.clear();
+		Location loc = new Location(main.getLobbyWorld(), 194.515, 106.5, 686.987);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
 		stand.setCustomNameVisible(true);
-		stand.setCustomName(main.color("&e&l<==&nFISHING LEADERBOARD&r&e&l==>"));
-		entities.add(stand);
+		stand.setCustomName("" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Flawless Wins");
+		toRemove.add(stand);
 		int count = 1;
 		loc.setY(loc.getY() - 0.4);
 
@@ -157,13 +163,13 @@ public class FishingBoard {
 			loc.setY(loc.getY() - 0.24);
 			String name = lead2.get(count - 1);
 
-			Integer win = caught.get(id);
+			Integer win = flawlessWins.get(id);
 			stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 			stand.setVisible(false);
 			stand.setGravity(false);
 			stand.setCustomNameVisible(true);
 			stand.setCustomName(main.color("&b#" + count + ":" + " &e" + name + " &r- " + win));
-			entities.add(stand);
+			toRemove.add(stand);
 
 			count++;
 		}
