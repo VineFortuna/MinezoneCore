@@ -4,13 +4,8 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.ItemHelper;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -25,17 +20,14 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 public class CloudClass extends BaseClass {
 
@@ -253,10 +245,10 @@ public class CloudClass extends BaseClass {
 
 	@Override
 	public void Tick(int gameTicks) {
-		stormCloud();
 		// Cooldown stuff:
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Cloud
 				&& instance.classes.get(player).getLives() > 0) {
+			stormCloud();
 			this.cooldownSec = (20000 - cloud.getTime()) / 1000 + 1;
 
 			if (cloud.getTime() < 20000) {
