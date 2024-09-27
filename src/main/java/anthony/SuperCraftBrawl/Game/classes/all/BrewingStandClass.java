@@ -98,6 +98,15 @@ public class BrewingStandClass extends BaseClass {
 					ItemHelper.setDetails(new ItemStack(Material.BARRIER), ChatColor.RED + "No potion item yet!"));
 		}
 	}
+	
+	private boolean checkIfDead(Player player) {
+		if (player.getGameMode() == GameMode.SPECTATOR)
+			return true;
+		else if (instance.classes.get(player) != null && instance.classes.get(player).getLives() <= 0)
+			return true;
+		
+		return false;
+	}
 
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
@@ -124,6 +133,9 @@ public class BrewingStandClass extends BaseClass {
 					new BukkitRunnable() {
 						@Override
 						public void run() {
+							if (checkIfDead(player))
+								cancel();
+							
 							if (used)
 								potionsToGive(blazePowder);
 						}
