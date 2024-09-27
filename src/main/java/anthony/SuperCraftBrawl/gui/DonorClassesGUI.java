@@ -1,13 +1,9 @@
 package anthony.SuperCraftBrawl.gui;
 
-import anthony.SuperCraftBrawl.playerdata.ClassDetails;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import fr.minuskube.inv.ClickableItem;
@@ -15,6 +11,9 @@ import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class DonorClassesGUI implements InventoryProvider {
 
@@ -43,7 +42,7 @@ public class DonorClassesGUI implements InventoryProvider {
 			if (type.getMinRank() == Rank.VIP) {
 				
 				ClassDetails details = data.playerClasses.get(type.getID());
-				int played = details.gamesPlayed;
+				int played = details.gamesPlayed + details.gamesWon;
 				int nextLevel = 50;
 				if (played > 50)
 					nextLevel = 100;
