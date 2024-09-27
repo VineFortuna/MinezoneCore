@@ -66,8 +66,11 @@ import anthony.SuperCraftBrawl.gui.FreeClassesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
 import anthony.SuperCraftBrawl.gui.StatsGUI;
 import anthony.SuperCraftBrawl.gui.TournamentGUI;
+import anthony.SuperCraftBrawl.leaderboards.BoardSettings;
 import anthony.SuperCraftBrawl.leaderboards.FishingBoard;
+import anthony.SuperCraftBrawl.leaderboards.FlawlessWinsBoard;
 import anthony.SuperCraftBrawl.leaderboards.KillsBoard;
+import anthony.SuperCraftBrawl.leaderboards.WinstreakBoard;
 import anthony.SuperCraftBrawl.npcs.NPCManager;
 import anthony.SuperCraftBrawl.packets.PacketMain;
 import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
@@ -127,6 +130,9 @@ public class Core extends JavaPlugin implements Listener {
 	public Leaderboard lb;
 	public FishingBoard fb;
 	public KillsBoard kb;
+	public BoardSettings boardSettings;
+	public WinstreakBoard streakBoard;
+	public FlawlessWinsBoard flawlessWinsBoard;
 	public Fishing fishing;
 	private ArrayList<String> msg;
 	public Map<Player, Player> wagers = new HashMap<Player, Player>();
@@ -152,11 +158,11 @@ public class Core extends JavaPlugin implements Listener {
 	public ActionBarManager getActionBarManager() {
 		return this.actionBarManager;
 	}
-	
+
 	public ScoreboardManager getScoreboardManager() {
 		return this.scoreboardManager;
 	}
-	
+
 	public TablistManager getTabManager() {
 		return this.tabManager;
 	}
@@ -171,6 +177,18 @@ public class Core extends JavaPlugin implements Listener {
 
 	public anthony.CrystalWars.game.GameManager getCwManager() {
 		return gm;
+	}
+	
+	public FlawlessWinsBoard getFlawlessWinsBoard() {
+		return this.flawlessWinsBoard;
+	}
+	
+	public BoardSettings getBoardSettings() {
+		return this.boardSettings;
+	}
+	
+	public WinstreakBoard getWinstreakBoard() { 
+		return this.streakBoard;
 	}
 
 	public PlayerDataManager getDataManager() {
@@ -386,7 +404,11 @@ public class Core extends JavaPlugin implements Listener {
 		ag = new ActiveGamesGUI(this);
 		p = new Parkour(this);
 		lb = new Leaderboard(this);
+		kb = new KillsBoard(this);
 		fb = new FishingBoard(this);
+		boardSettings = new BoardSettings(this);
+		streakBoard = new WinstreakBoard(this); 
+		flawlessWinsBoard = new FlawlessWinsBoard(this);
 		fishing = new Fishing(this);
 		// kb = new KillsBoard(this);
 		// swManager = new anthony.skywars.GameManager(this);
@@ -400,7 +422,7 @@ public class Core extends JavaPlugin implements Listener {
 
 		if (this.getCommands() != null) {
 			String[] commandTypes = { "join", "fav", "fly", "shop", "leave", "cw", "l", "players", "class", "spectate",
-					"startgame", "gamestats", "setlives", "purchases", "mainworld", "kit" };
+					"startgame", "gamestats", "setlives", "purchases", "kit" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -1512,6 +1534,18 @@ public class Core extends JavaPlugin implements Listener {
 			}
 		}
 
+		if (cmd.getName().equalsIgnoreCase("mainworld")) {
+			player.sendMessage("Test0");
+			player.sendMessage("Test0");
+			World minecadeLobby = getServer().createWorld(new WorldCreator("MinecadeLobby"));
+			
+			if (minecadeLobby != null)
+				player.teleport(minecadeLobby.getSpawnLocation());
+			
+			player.sendMessage("Test1");
+			player.sendMessage("Test2");
+		}
+
 		if (cmd.getName().equalsIgnoreCase("stats")) {
 			GameInstance i = this.getGameManager().GetInstanceOfPlayer(player);
 
@@ -1658,6 +1692,7 @@ public class Core extends JavaPlugin implements Listener {
 		sendScoreboardUpdate(player); // This sets the rank next to player name above their head
 		chatAnnouncementOnJoin(player);
 		getScoreboardManager().lobbyBoard(player); // Gives the lobby scoreboard to player
+		//getKillsLeaderboard().killsBoard(player); //Shows kills leaderboard to player
 
 		// For join message:
 		String rank = getRankManager().getRank(player).getTagWithSpace(); // Gets the player's rank
