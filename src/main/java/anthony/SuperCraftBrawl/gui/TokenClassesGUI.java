@@ -71,7 +71,6 @@ public class TokenClassesGUI implements InventoryProvider {
 												player.sendMessage(main
 														.color("&2&l(!) &rAdded new favorite class: " + type.getTag()));
 												main.getDataManager().saveData(data);
-												inv.close(player);
 											}
 										} else if (e.isLeftClick()) {
 											main.getGameManager().playerSelectClass(player, type);

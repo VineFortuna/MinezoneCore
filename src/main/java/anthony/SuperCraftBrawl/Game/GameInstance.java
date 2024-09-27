@@ -2060,8 +2060,10 @@ public class GameInstance {
 
 						for (Player gamePlayer : this.players) {
 							this.gameSettings = new GameSettings(this); // To reset all variables
-							if (gamePlayer.getInventory().contains(Material.PAPER))
-								gamePlayer.getInventory().remove(Material.PAPER); // Takes away Voting paper
+							if (gamePlayer.getInventory().contains(Material.PAPER)) {
+								gamePlayer.closeInventory();
+								gamePlayer.getInventory().remove(Material.PAPER);
+							}
 
 							FastBoard board = this.boards.get(gamePlayer);
 							updateCountOnBoard();

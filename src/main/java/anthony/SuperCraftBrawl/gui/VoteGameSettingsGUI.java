@@ -60,7 +60,6 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 		contents.set(1, 3, ClickableItem.of(voteGameStart, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
-				inv.close(clickingPlayer);
 				game.getGameSettings().handleVoteGameStart(clickingPlayer, game);
 			}
 		}));
@@ -87,7 +86,6 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 		contents.set(1, 5, ClickableItem.of(voteTime, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
-				inv.close(clickingPlayer);
 				game.getGameSettings().handleVoteTime(player, game);
 			}
 		}));
@@ -115,7 +113,6 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 		contents.set(3, 5, ClickableItem.of(voteGameType, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
-				inv.close(clickingPlayer);
 				game.getGameSettings().handleVoteGameType(player, game);
 			}
 		}));
@@ -136,7 +133,6 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 		contents.set(3, 3, ClickableItem.of(lightningRate, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
-				inv.close(clickingPlayer);
 				game.getGameSettings().handleLightningRate(player, game);
 			}
 		}));
