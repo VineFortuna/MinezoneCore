@@ -76,7 +76,7 @@ public class PresentClass extends BaseClass {
 				ItemHelper.setDetails(new ItemStack(Material.ENDER_CHEST, 1),
 						"" + ChatColor.RESET + ChatColor.ITALIC + "Mythical Gift", "",
 						"" + ChatColor.RESET + ChatColor.YELLOW + "Steals another player's effect or double jump!"));
-		playerInv.setItem(3, new ItemStack(Material.ARROW));
+		playerInv.setItem(35, new ItemStack(Material.ARROW));
 	}
 
 	@Override

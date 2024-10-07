@@ -76,7 +76,7 @@ public class BlazeClass extends BaseClass {
 						Enchantment.DURABILITY, 1000));
 		playerInv.setItem(2, ItemHelper.setDetails(new ItemStack(Material.MOB_SPAWNER),
 				instance.getGameManager().getMain().color("&6&lBlaze Army &7(Right Click)")));
-		playerInv.setItem(3, new ItemStack(Material.ARROW));
+		playerInv.setItem(35, new ItemStack(Material.ARROW));
 	}
 
 	@Override

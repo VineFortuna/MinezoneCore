@@ -76,7 +76,7 @@ public class WitherClass extends BaseClass {
 		playerInv.setItem(1,
 				ItemHelper.addEnchant(ItemHelper.addEnchant(new ItemStack(Material.BOW), Enchantment.DURABILITY, 1000),
 						Enchantment.ARROW_INFINITE, 1));
-		playerInv.setItem(2, new ItemStack(Material.ARROW));
+		playerInv.setItem(35, new ItemStack(Material.ARROW));
 		count = 0;
 	}
 

@@ -84,7 +84,7 @@ public class FireworkClass extends BaseClass {
 										instance.getGameManager().getMain().color("   &r5 sec Slowness III"),
 										instance.getGameManager().getMain().color("   &r10 sec Weakness II")),
 								Enchantment.ARROW_INFINITE, 1), Enchantment.DURABILITY, 1000));
-		playerInv.setItem(2, new ItemStack(Material.ARROW));
+		playerInv.setItem(35, new ItemStack(Material.ARROW));
 
 		msg = instance.getGameManager().getMain().color("&9&l(!) &eYou can use &c&lFirework Bow");
 		getActionBarManager().setActionBar(player, "firework.cooldown", msg, 2);

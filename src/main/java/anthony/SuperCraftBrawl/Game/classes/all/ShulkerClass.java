@@ -101,7 +101,7 @@ public class ShulkerClass extends BaseClass {
 										instance.getGameManager().getMain()
 												.color("&7Levitate your opponents by shooting them!")),
 								Enchantment.ARROW_INFINITE, 1), Enchantment.DURABILITY, 1000));
-		playerInv.setItem(2, new ItemStack(Material.ARROW));
+		playerInv.setItem(35, new ItemStack(Material.ARROW));
 	}
 
 	@Override
