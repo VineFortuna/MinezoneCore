@@ -70,15 +70,15 @@ public class SkeletonClass extends BaseClass {
 	@Override
 	public void SetItems(Inventory playerInv) {
 		skeleAttack.startTime = System.currentTimeMillis() - 100000;
-		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv
-				.setItem(1,
+				.setItem(0,
 						ItemHelper.addEnchant(ItemHelper.addEnchant(
 								ItemHelper.setDetails(new ItemStack(Material.BONE), "", "",
 										instance.getGameManager().getMain()
 												.color("&7Right click to shoot an Attack Arrow!")),
 								Enchantment.DAMAGE_ALL, 2), Enchantment.KNOCKBACK, 1));
-		playerInv.setItem(2, new ItemStack(Material.ARROW));
+		playerInv.setItem(1, this.getAttackWeapon());
+		playerInv.setItem(35, new ItemStack(Material.ARROW));
 	}
 
 	@Override
