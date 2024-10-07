@@ -280,7 +280,7 @@ public class WitherSkeletonClass extends BaseClass {
 
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, this.bow);
-		playerInv.setItem(2, new ItemStack(Material.ARROW));
+		playerInv.setItem(35, new ItemStack(Material.ARROW));
 	}
 
 	private void abilityMsg() {
