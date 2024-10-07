@@ -63,10 +63,6 @@ public class GhastClass extends BaseClass {
 				getActionBarManager().setActionBar(player, "fireball.cooldown", msg, 2);
 				if (gameTicks % 20 == 0) {
 					this.cooldown--;
-
-					if (this.cooldown <= 0) {
-						player.getInventory().addItem(new ItemStack(Material.ARROW));
-					}
 				}
 			}
 			if (this.cooldown <= 0) {
@@ -84,8 +80,11 @@ public class GhastClass extends BaseClass {
 			for (Player gamePlayer : Bukkit.getOnlinePlayers()) // Play Ghast sound when shoot arrows
 				gamePlayer.playSound(player.getLocation(), Sound.GHAST_SCREAM, 1, 1);
 
-			if (this.cooldown == 0)
+			if (this.cooldown == 0) {
 				this.cooldown = 2;
+			} else if (this.cooldown > 0) {
+				event.setCancelled(true);
+			}
 		}
 	}
 
@@ -93,14 +92,17 @@ public class GhastClass extends BaseClass {
 	public void SetItems(Inventory playerInv) {
 		this.cooldown = 0;
 		playerInv.setItem(0,
-				ItemHelper.addEnchant(ItemHelper.addEnchant(
-						ItemHelper.addEnchant(new ItemStack(Material.BOW), Enchantment.ARROW_FIRE, 1),
-						Enchantment.DURABILITY, 10000), Enchantment.ARROW_KNOCKBACK, 1));
-		playerInv.setItem(1,
 				ItemHelper.addEnchant(
 						ItemHelper.addEnchant(new ItemStack(Material.GHAST_TEAR), Enchantment.DAMAGE_ALL, 2),
 						Enchantment.KNOCKBACK, 1));
-		playerInv.setItem(2, new ItemStack(Material.ARROW));
+
+		ItemStack bow = new ItemStack(Material.BOW);
+		bow.addUnsafeEnchantment(Enchantment.ARROW_FIRE, 1);
+		bow.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
+		bow.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
+		bow.addUnsafeEnchantment(Enchantment.DURABILITY, 10000);
+		playerInv.setItem(1, bow);
+		playerInv.setItem(35, new ItemStack(Material.ARROW));
 	}
 
 	@Override
