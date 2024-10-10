@@ -28,7 +28,7 @@ public class SethBlingClass extends BaseClass {
 				"FF4E4A",
 				"4193FF",
 				"9A562B",
-				8,
+				6,
 				"SethBling"
 		);
 	}

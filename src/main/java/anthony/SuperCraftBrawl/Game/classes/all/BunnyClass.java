@@ -28,7 +28,7 @@ public class BunnyClass extends BaseClass {
 				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzRiMTJkZDJkOTljNDdlMTkxM2M0YjFkNGQ5ZmFmNjlhZDYxZTk1YWUyN2NkNGU5ZjlmZTVlMzBhNjM0M2ExNiJ9fX0=",
 				"A39595",
-				8,
+				6,
 				"Bunny"
 		);
 	}

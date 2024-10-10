@@ -31,7 +31,7 @@ public class ZombiePigmanClass extends BaseClass {
 				"FF9999",
 				"6E4021",
 				"FF9999",
-				8,
+				6,
 				"ZombiePigman"
 		);
 	}
