@@ -61,6 +61,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
 				game.getGameSettings().handleVoteGameStart(clickingPlayer, game);
+				inv.close(player);
 			}
 		}));
 	}
