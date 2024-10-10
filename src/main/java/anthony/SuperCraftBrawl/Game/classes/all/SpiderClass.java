@@ -30,7 +30,7 @@ public class SpiderClass extends BaseClass {
 				"4C453B",
 				"5C0000",
 				"4C453B",
-				8,
+				6,
 				"Spider"
 		);
 	}

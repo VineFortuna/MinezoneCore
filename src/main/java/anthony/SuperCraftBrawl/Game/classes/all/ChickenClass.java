@@ -30,7 +30,7 @@ public class ChickenClass extends BaseClass {
 				"FFFFFF",
 				"FFFFFF",
 				"FF7F10",
-				8,
+				6,
 				"Chicken"
 		);
 	}

@@ -34,7 +34,7 @@ public class JebClass extends BaseClass {
 				"543727",
 				"D6C374",
 				"543727",
-				8,
+				6,
 				"Jeb"
 		);
 	}

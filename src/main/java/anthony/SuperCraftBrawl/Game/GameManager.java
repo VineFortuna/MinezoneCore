@@ -4,8 +4,7 @@ import anthony.util.ChatColorHelper;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import anthony.SuperCraftBrawl.Game.classes.all.SoundManager;
+import anthony.util.SoundManager;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -680,7 +679,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		if (item != null && item.getType() == Material.RABBIT_FOOT
 				&& event.getAction().toString().contains("RIGHT_CLICK")) {
 			ItemMeta meta = item.getItemMeta();
-			if (meta.getDisplayName().contains("Blooper")) {
+			if (meta.getDisplayName().toLowerCase().contains("blooper")) {
 				int amount = item.getAmount();
 				for (int x = 0; x < 100; x++) {
 					int index = (int) (Math.random() * i.players.size());

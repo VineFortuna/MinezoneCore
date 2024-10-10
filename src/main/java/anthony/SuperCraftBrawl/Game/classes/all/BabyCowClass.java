@@ -33,7 +33,7 @@ public class BabyCowClass extends BaseClass {
 				"CC0104",
 				"CC0104",
 				"292929",
-				8,
+				6,
 				"BabyCow"
 		);
 	}

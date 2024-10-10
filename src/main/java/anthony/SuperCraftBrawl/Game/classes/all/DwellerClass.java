@@ -28,7 +28,7 @@ public class DwellerClass extends BaseClass {
 				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTAyNzVlMmJmN2Q2N2JlNzA4Yzc5ZDJhMDE5MjI0ODI2YjcwNzJkZjA1Mjk0ODFkNzUwYWIxOTRlZGYxODRhIn19fQ==",
 				"A3A3A3",
-				8,
+				6,
 				"Dweller"
 		);
 	}
