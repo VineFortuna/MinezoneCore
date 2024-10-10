@@ -135,6 +135,12 @@ public class FadeClass extends BaseClass {
 						gamePlayer.showPlayer(player);
 					this.cancel();
 				}
+				
+				if (checkIfDead(player, instance)) {
+					fadeAbilityActive = false;
+					this.cancel();
+				}
+				
 				if (ticks == 0) {
 					player.getInventory().setHelmet(new ItemStack(Material.AIR));
 				} else if (ticks == 1) {

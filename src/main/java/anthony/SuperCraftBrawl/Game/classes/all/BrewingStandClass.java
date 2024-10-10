@@ -33,6 +33,7 @@ public class BrewingStandClass extends BaseClass {
 	private int cooldownSec;
 	private int cooldownDuration = 10000;
 	private boolean used = false;
+	private BukkitRunnable runnable;
 
 	public BrewingStandClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -84,6 +85,10 @@ public class BrewingStandClass extends BaseClass {
 		this.cooldownSec = (this.cooldownDuration - alexBrewingStand.getTime()) / 1000 + 1;
 		cooldownActionBar(this.cooldownSec, this.cooldownDuration, alexBrewingStand, ClassType.BrewingStand,
 				"brewingStand.cooldown", "Brewing Stand");
+		
+		if (checkIfDead(player)) {
+			runnable.cancel();
+		}
 	}
 
 	/*
@@ -130,7 +135,8 @@ public class BrewingStandClass extends BaseClass {
 					player.sendMessage(color("&r&l(!) &rBrewing potion..."));
 					player.getInventory().setItem(8, ItemHelper.setDetails(new ItemStack(Material.BARRIER),
 							ChatColor.RED + "No blaze powder yet!"));
-					new BukkitRunnable() {
+					
+					runnable = new BukkitRunnable() {
 						@Override
 						public void run() {
 							if (checkIfDead(player))
@@ -139,7 +145,8 @@ public class BrewingStandClass extends BaseClass {
 							if (used)
 								potionsToGive(blazePowder);
 						}
-					}.runTaskLater(instance.getGameManager().getMain(), 80L);
+					};
+					runnable.runTaskLater(instance.getGameManager().getMain(), 80L);
 				}
 			}
 		}
@@ -200,7 +207,7 @@ public class BrewingStandClass extends BaseClass {
 			pot.apply(potion);
 			player.getInventory().setItem(1, potion);
 			player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 10);
-			player.sendMessage(color("&2&l(!) &rYou brewed a " + potion.getItemMeta().getDisplayName()) + " &rpotion!");
+			player.sendMessage(color("&2&l(!) &rYou brewed a " + potion.getItemMeta().getDisplayName() + " &rpotion!"));
 			this.used = false; // Reset Brewing Stand usage
 		}
 	}

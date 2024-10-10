@@ -188,6 +188,15 @@ public abstract class BaseClass {
 	public void LoadArmor(Player player) {
 		SetArmour(player.getEquipment());
 	}
+	
+	public boolean checkIfDead(Player player, GameInstance i) {
+		if (player.getGameMode() == GameMode.SPECTATOR)
+			return true;
+		else if (i.classes.get(player) != null && i.classes.get(player).getLives() <= 0)
+			return true;
+		
+		return false;
+	}
 
 	/**
 	 * This function displays an Action Bar for cooldowns of each class
