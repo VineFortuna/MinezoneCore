@@ -7,7 +7,7 @@ import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.Holograms;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.PlayerListener;
 import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
@@ -26,10 +26,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
@@ -353,10 +350,10 @@ public class GameInstance {
 	 */
 	public void CheckForGameStart() {
 		if (getMap() != null) {
-			if (players.size() == 1)
+			if (players.size() == 2)
 				StartGameTimer();
 		} else {
-			if (players.size() == 1)
+			if (players.size() == 2)
 				StartGameTimer();
 		}
 	}
@@ -834,118 +831,106 @@ public class GameInstance {
 
 	public ItemStack getItemToDrop() {
 		// Slowness Potion
-		ItemStack slownessPot = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				color("&rSlowness II &7(15 sec)"));
-		Potion potionSlow = new Potion(3);
-		potionSlow.setType(PotionType.SLOWNESS);
-		potionSlow.setSplash(true);
-		PotionMeta meta3 = (PotionMeta) slownessPot.getItemMeta();
-		meta3.addCustomEffect(new PotionEffect(PotionEffectType.SLOW, 300, 1, true, true), true);
-		slownessPot.setItemMeta(meta3);
-		potionSlow.apply(slownessPot);
+		ItemStack slownessPot = ItemHelper.createPotionItem(PotionType.SLOWNESS, 1, 15, true, true, true);
+		ItemHelper.setDetails(slownessPot, "&3&lSLOWNESS II &7(15 sec)");
 
 		// Health Pot
-		ItemStack healthPot = ItemHelper.setDetails(new ItemStack(Material.POTION, 1), color("&eInstant Heal"));
-		Potion potionHeal = new Potion(1);
-		potionHeal.setType(PotionType.INSTANT_HEAL);
-		potionHeal.setSplash(true);
-		PotionMeta potMeta = (PotionMeta) healthPot.getItemMeta();
-		potMeta.addCustomEffect(new PotionEffect(PotionEffectType.HEAL, 0, 1), true);
-		healthPot.setItemMeta(potMeta);
-		potionHeal.apply(healthPot);
+		ItemStack healthPot = ItemHelper.createPotionItem(PotionType.INSTANT_HEAL, 1, 0, true, true, true);
+		ItemHelper.setDetails(healthPot, "&c&lHEALING II");
 
 		// Speed Pot
-		ItemStack speedPot = ItemHelper.setDetails(new ItemStack(Material.POTION, 1), color("&aSpeed II &7(30 sec)"));
-		Potion potionSpeed = new Potion(1);
-		potionSpeed.setType(PotionType.SPEED);
-		potionSpeed.setSplash(true);
-		PotionMeta speedMeta = (PotionMeta) speedPot.getItemMeta();
-		speedMeta.addCustomEffect(new PotionEffect(PotionEffectType.SPEED, 600, 1, true, true), true);
-		speedPot.setItemMeta(speedMeta);
-		potionSpeed.apply(speedPot);
+		ItemStack speedPot = ItemHelper.createPotionItem(PotionType.SPEED, 1, 30, true, true, true);
+		ItemHelper.setDetails(speedPot, "&9&lSPEED II &7(30 sec)");
 
 		// Fire Res Pot
-		ItemStack fireRes = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				color("&cFire Resistance I &7(30 sec)"));
-		Potion potionFireRes = new Potion(1);
-		potionFireRes.setType(PotionType.FIRE_RESISTANCE);
-		potionFireRes.setSplash(true);
-		PotionMeta meta2 = (PotionMeta) fireRes.getItemMeta();
-		meta2.addCustomEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 600, 0, true, true), true);
-		fireRes.setItemMeta(meta2);
-		potionFireRes.apply(fireRes);
+		ItemStack fireRes = ItemHelper.createPotionItem(PotionType.FIRE_RESISTANCE, 0, 30, true, true, true);
+		ItemHelper.setDetails(fireRes, "&6&lFIRE RES &7(30 sec)");
 
 		// Bomb
-		ItemStack bomb = ItemHelper.setDetails(new ItemStack(Material.POTION, 1), color("&4&lBomb"));
-		Potion pot100 = new Potion(1);
-		pot100.setType(PotionType.INSTANT_DAMAGE);
-		pot100.setSplash(true);
-		PotionMeta meta = (PotionMeta) bomb.getItemMeta();
-		meta.addCustomEffect(new PotionEffect(PotionEffectType.HARM, 100, 1000), true);
-		bomb.setItemMeta(meta);
-		pot100.apply(bomb);
+		ItemStack bomb = ItemHelper.createPotionItem(PotionType.INSTANT_DAMAGE, 1000, 0, true, true, true);
+		ItemHelper.setDetails(bomb,
+				"&4&lBOMB",
+				"&7Be careful!",
+				"&7Instantly kills... anyone"
+		);
 
 		// Brooms
-		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4), color("&0&lBroom"));
+		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4),
+				"&5&lBROOM",
+				"&7Sents you up and save you from the void"
+		);
 
 		// Hammer
-		ItemStack hammer = ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD, 1, (short) 250), color("&e&lHAMMER")),
-				Enchantment.KNOCKBACK, 10);
-		hammer.getDurability();
-
-		// Bazooka
-		ItemStack bazooka = ItemHelper.setDetails(new ItemStack(Material.DIAMOND_HOE, 3, (short) 250),
-				color("&5Bazooka"));
-		bazooka.getDurability();
+		ItemStack hammer = ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD, 1, (short) 250), "&d&lHAMMER");
+		hammer.addUnsafeEnchantment(Enchantment.KNOCKBACK, 10);
 
 		// Extra Life
-		ItemStack extraLife = ItemHelper.setDetails(new ItemStack(Material.PRISMARINE_SHARD), color("&r&lExtra Life"));
+		ItemStack extraLife = ItemHelper.setDetails(new ItemStack(Material.PRISMARINE_SHARD), "&3&lEXTRA LIFE");
 
 		// Ender Pearl
-		ItemStack pearl = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL), color("&c&lTeleporter"));
+		ItemStack pearl = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL), "&5&lENDER PEARL");
 
 		// Slowballs
-		ItemStack slowballs = ItemHelper.setDetails(new ItemStack(Material.SNOW_BALL, 8), color("&cSlowballs"));
+		ItemStack slowballs = ItemHelper.setDetails(new ItemStack(Material.SNOW_BALL, 8),
+				"&f&lSLOWBALLS",
+				"&7Give Slowness 1 for 3s to an enemy"
+		);
 
 		// Mini Shield
-		ItemStack miniShield = ItemHelper.setDetails(new ItemStack(Material.POTION, 1), color("&eMini-Shield Potion"));
+		ItemStack miniShield = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
+				"&9&lMINI-SHIELD",
+				"&7Absorption 1"
+		);
 
 		// Bounty
-		ItemStack bounty = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR, 1), color("&aBounty"));
+		ItemStack bounty = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR, 1),
+				"&a&lBOUNTY",
+				"&7Set a bounty on a random player",
+				"&7Kill them to claim extra tokens"
+		);
 
 		// Blooper
-		ItemStack blooper = ItemHelper.setDetails(new ItemStack(Material.RABBIT_FOOT), color("&6&lBlooper"));
+		ItemStack blooper = ItemHelper.setDetails(new ItemStack(Material.RABBIT_FOOT),
+				"&e&lBLOOPER",
+				"&7Give Blindness or Nausea to an enemy"
+		);
 
 		// Nuke
-		ItemStack nuke = ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.TNT, 3), color("&4&lNuke")),
-				Enchantment.DAMAGE_ALL, 1);
+		ItemStack nuke = ItemHelper.setDetails(new ItemStack(Material.TNT, 3),
+				"&4&lNUKE",
+				"&7Spawn TNTs where you're looking"
+		);
+		ItemHelper.setGlowing(nuke, true);
 
 		// Instagib
-		ItemStack instagib = ItemHelper.setDetails(new ItemStack(Material.GOLD_HOE, 5, (short) 250),
-				color("&a&oInstagib"));
-		instagib.getDurability();
+		ItemStack instagib = ItemHelper.setDetails(new ItemStack(Material.GOLD_HOE, 5, (short) 250), "&e&lINSTAGIB");
+
+		// Bazooka
+		ItemStack bazooka = ItemHelper.setDetails(new ItemStack(Material.DIAMOND_HOE, 3, (short) 250), "&b&lBAZOOKA");
 
 		// Zombie Egg
-		ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&r&oZombie Pokeball");
+		ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
 
 		// Witch Egg
-		ItemStack witchEgg = ItemHelper.createMonsterEgg(EntityType.WITCH, 1, "&r&oWitch Pokeball");
+		ItemStack witchEgg = ItemHelper.createMonsterEgg(EntityType.WITCH, 1, "&5&lWITCH POKEBALL");
 
 		// Skeleton Egg
-		ItemStack skeletonEgg = ItemHelper.createMonsterEgg(EntityType.SKELETON, 1, "&r&oSkeleton Pokeball");
+		ItemStack skeletonEgg = ItemHelper.createMonsterEgg(EntityType.SKELETON, 1, "&7&lSKELETON POKEBALL");
 
 		// Creeper Egg
-		ItemStack creeperEgg = ItemHelper.createMonsterEgg(EntityType.CREEPER, 1, "&r&oCreeper Pokeball");
+		ItemStack creeperEgg = ItemHelper.createMonsterEgg(EntityType.CREEPER, 1, "&a&lCREEPER POKEBALL");
 
 		// Milk Bucket
-		ItemStack milk = ItemHelper.create(Material.MILK_BUCKET);
+		ItemStack milk = ItemHelper.setDetails(new ItemStack(Material.MILK_BUCKET),
+				"&f&lMILK",
+				"&7Removes fire and all negative effects"
+		);
 
 		// Golden Apple
-		ItemStack goldenApple = ItemHelper.create(Material.GOLDEN_APPLE);
+		ItemStack goldenApple = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE), "&6&lGOLDEN APPLE");
 
 		// Notch Apple
-		ItemStack notchApple = ItemHelper.create(Material.GOLDEN_APPLE, "&0&lNotch Apple");
+		ItemStack notchApple = ItemHelper.create(Material.GOLDEN_APPLE, "&d&lNOTCH APPLE");
 		notchApple.setDurability((short) 1);
 
 		allItemDrops.add(slownessPot);

@@ -1,7 +1,7 @@
 package anthony.SuperCraftBrawl.Game.classes;
 
 import anthony.SuperCraftBrawl.Game.classes.all.*;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -186,7 +186,7 @@ public enum ClassType {
 		case Horse:
 			return new HorseClass(instance, player);
 		case Melon:
-			return new SatermelonClass(instance, player);
+			return new MelonClass(instance, player);
 		case ButterBro:
 			return new ButterBroClass(instance, player);
 		case Squid:
