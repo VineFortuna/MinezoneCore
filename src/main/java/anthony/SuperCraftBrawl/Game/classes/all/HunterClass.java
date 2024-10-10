@@ -34,6 +34,13 @@ public class HunterClass extends BaseClass {
 	public HunterClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.2;
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGI0YWNjM2YyNmU1NGI5MDA0MWZlOTVjNGU2MmI4ZTdiNjNhZWVmN2E5ZmMzOWNkOWJjN2U4ZWI5MWEzMzQ3MCJ9fX0=",
+				"F0FBFB",
+				8,
+				"Hunter"
+		);
 	}
 
 	@Override
@@ -41,24 +48,10 @@ public class HunterClass extends BaseClass {
 		return ClassType.Hunter;
 	}
 
-	public ItemStack makeRed(ItemStack armour) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(Color.RED);
-		armour.setItemMeta(lm);
-		return armour;
-	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGI2NmZjNDkyMDI5ZmNmMDMxMTZkOGZlYWZjNjRhOWM3NGQ4MTE4ZmZlN2RlODMxNGUzZWY1ZjY4YzEwYjMifX19";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(makeRed(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeRed(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeRed(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override

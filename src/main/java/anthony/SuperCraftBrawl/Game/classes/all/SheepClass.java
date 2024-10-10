@@ -30,6 +30,15 @@ public class SheepClass extends BaseClass {
 	public SheepClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.15;
+		createArmor(
+				null,
+				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTIyYWIwNTA4OTAwNjRlMjhhOWY0MDFiMmZjYjgyOThlODI0OWMzYTlmOWI2MGVkZmEwMDc4YzRiMDI1YjllMyJ9fX0=",
+				"FFFFFF",
+				"FFFFFF",
+				"B59984",
+				8,
+				"Sheep"
+		);
 	}
 
 	public ItemStack setArmour(ItemStack armour, Color c) {
@@ -40,14 +49,8 @@ public class SheepClass extends BaseClass {
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTIyYWIwNTA4OTAwNjRlMjhhOWY0MDFiMmZjYjgyOThlODI0OWMzYTlmOWI2MGVkZmEwMDc4YzRiMDI1YjllMyJ9fX0=";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(setArmour(new ItemStack(Material.LEATHER_CHESTPLATE), Color.WHITE));
-		playerEquip.setLeggings(setArmour(new ItemStack(Material.LEATHER_LEGGINGS), Color.WHITE));
-		playerEquip.setBoots(setArmour(new ItemStack(Material.LEATHER_BOOTS), Color.WHITE));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	public ItemStack getStartWool() {

@@ -94,7 +94,7 @@ public enum ClassType {
 		case Rabbit:
 			return new RabbitClass(instance, player);
 		case FlintAndSteel:
-			return new FlindAndSteelClass(instance, player);
+			return new FlintAndSteelClass(instance, player);
 		case Hunter:
 			return new HunterClass(instance, player);
 		case Jeb:

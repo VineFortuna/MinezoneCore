@@ -308,6 +308,22 @@ public class ItemHelper {
 		return leatherArmor;
 	}
 
+	public static ItemStack createColoredArmor(Material armorPiece, String hexCode) {
+		ItemStack leatherArmor = new ItemStack(armorPiece);
+		LeatherArmorMeta leatherArmorMeta = (LeatherArmorMeta) leatherArmor.getItemMeta();
+
+		if (hexCode != null) {
+			Color color = hexToColor(hexCode);
+
+			if (color != null) {
+				leatherArmorMeta.setColor(color);
+				leatherArmor.setItemMeta(leatherArmorMeta);
+			}
+		}
+
+		return leatherArmor;
+	}
+
 	public static ItemStack createPotionItem(PotionType potionType, int amplifier, int durationSeconds, boolean splashable, boolean particles, boolean ambientParticles) {
 		ItemStack potionItem = new ItemStack(Material.POTION);
 
@@ -431,6 +447,30 @@ public class ItemHelper {
 
 		public int getColorCode() {
 			return colorCode;
+		}
+	}
+
+	// Convert hex code to Color
+	private static Color hexToColor(String hexCode) {
+		try {
+			// Remove # if present
+			if (hexCode.startsWith("#")) {
+				hexCode = hexCode.substring(1);
+			}
+
+			// Parse hexadecimal to integer
+			int rgb = Integer.parseInt(hexCode, 16);
+
+			// Extract individual color components
+			int r = (rgb >> 16) & 0xFF;
+			int g = (rgb >> 8) & 0xFF;
+			int b = rgb & 0xFF;
+
+			return Color.fromRGB(r, g, b);
+		} catch (NumberFormatException e) {
+			// Handle invalid hex code
+			e.printStackTrace();
+			return null;
 		}
 	}
 }

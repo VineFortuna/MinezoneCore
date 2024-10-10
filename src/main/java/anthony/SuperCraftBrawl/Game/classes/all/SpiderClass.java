@@ -24,26 +24,19 @@ public class SpiderClass extends BaseClass {
 
 	public SpiderClass(GameInstance instance, Player player) {
 		super(instance, player);
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzg3YTk2YThjMjNiODNiMzJhNzNkZjA1MWY2Yjg0YzJlZjI0ZDI1YmE0MTkwZGJlNzRmMTExMzg2MjliNWFlZiJ9fX0=",
+				"4C453B",
+				"5C0000",
+				"4C453B",
+				8,
+				"Spider"
+		);
 	}
-
-	public ItemStack makePurple(ItemStack armour) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(Color.RED);
-		armour.setItemMeta(lm);
-		return armour;
-	}
-
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDQyZGM4MWZlZDdhYzdjMmJkNTI0MmQ0N2QyMDRiMDQxNzM4ZWViYjA0MjNmODMxNWVmOGNmZWYxOTNmMjA2YSJ9fX0=";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(makePurple(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makePurple(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makePurple(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override

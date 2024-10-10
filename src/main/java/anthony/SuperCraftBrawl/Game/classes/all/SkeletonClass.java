@@ -28,23 +28,18 @@ public class SkeletonClass extends BaseClass {
 	public SkeletonClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.1;
-	}
-
-	public ItemStack makeGray(ItemStack armour) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(Color.GRAY);
-		armour.setItemMeta(lm);
-		return armour;
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjI3OTVjM2M2ZjM2ZDY3ZGVjZjlhMzE5NWUxMjgwNDBiZWM1MjI2YjA1NWYyYjE2ZDQ2ZmExOWE5MTgwZTAyMyJ9fX0=",
+				"D6D6D6",
+				8,
+				"Skeleton"
+		);
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		playerEquip.setHelmet(getHelmet(new ItemStack(Material.SKULL_ITEM)));
-		playerEquip.setChestplate(makeGray(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeGray(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeGray(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override

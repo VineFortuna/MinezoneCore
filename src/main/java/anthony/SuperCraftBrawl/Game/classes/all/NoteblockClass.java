@@ -29,6 +29,13 @@ public class NoteblockClass extends BaseClass {
 
 	public NoteblockClass(GameInstance instance, Player player) {
 		super(instance, player);
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNGNlZWI3N2Q0ZDI1NzI0YTljYWYyYzdjZGYyZDg4Mzk5YjE0MTdjNmI5ZmY1MjEzNjU5YjY1M2JlNDM3NmUzIn19fQ==",
+				"82533B",
+				8,
+				"Noteblock"
+		);
 	}
 
 	@Override
@@ -36,21 +43,9 @@ public class NoteblockClass extends BaseClass {
 		return ClassType.Noteblock;
 	}
 
-	public ItemStack makeGreen(ItemStack armor) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armor.getItemMeta();
-		lm.setColor(Color.ORANGE);
-		armor.setItemMeta(lm);
-		return armor;
-	}
-
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		playerEquip.setHelmet(getHelmet(new ItemStack(Material.NOTE_BLOCK)));
-		playerEquip.setChestplate(makeGreen(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 2)));
-		playerEquip.setLeggings(makeGreen(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeGreen(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 3)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 		player.removePotionEffect(PotionEffectType.SPEED);
 		player.removePotionEffect(PotionEffectType.JUMP);
 		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));

@@ -41,27 +41,18 @@ public class WitchClass extends BaseClass {
 	public WitchClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.2;
-	}
-
-	public ItemStack makePurple(ItemStack armour) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(Color.PURPLE);
-		armour.setItemMeta(lm);
-		return armour;
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjBlMTNkMTg0NzRmYzk0ZWQ1NWFlYjcwNjk1NjZlNDY4N2Q3NzNkYWMxNmY0YzNmODcyMmZjOTViZjlmMmRmYSJ9fX0=",
+				"47236B",
+				8,
+				"Witch"
+		);
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjBlMTNkMTg0NzRmYzk0ZWQ1NWFlYjcwNjk1NjZlNDY4N2Q3NzNkYWMxNmY0YzNmODcyMmZjOTViZjlmMmRmYSJ9fX0=";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(makePurple(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makePurple(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makePurple(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override
@@ -186,6 +177,7 @@ public class WitchClass extends BaseClass {
 		Random rand = new Random();
 		int randomNum = rand.nextInt(itemList.length);
 		playerInv.setItem(1, new ItemStack(itemList[randomNum]));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
 	}
 
 	@Override

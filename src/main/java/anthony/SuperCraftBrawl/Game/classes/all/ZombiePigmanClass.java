@@ -25,31 +25,26 @@ public class ZombiePigmanClass extends BaseClass {
 
 	public ZombiePigmanClass(GameInstance instance, Player player) {
 		super(instance, player);
+		createArmor(
+				null,
+				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWY5OGEzY2ZkZjhjMTNlZTY2MzQxNDBmOTQ1YjcxZDJlNDg4ZmY0ODVlMTBjMzNhZTI1ODIxZDgyZDg0OGE3MyJ9fX0=",
+				"FF9999",
+				"6E4021",
+				"FF9999",
+				8,
+				"ZombiePigman"
+		);
 	}
 
 	@Override
 	public ClassType getType() {
 		return ClassType.ZombiePigman;
-	}
 
-	public ItemStack makeGreen(ItemStack armor) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armor.getItemMeta();
-		lm.setColor(Color.GREEN);
-		armor.setItemMeta(lm);
-		return armor;
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWY5OGEzY2ZkZjhjMTNlZTY2MzQxNDBmOTQ1YjcxZDJlNDg4ZmY0ODVlMTBjMzNhZTI1ODIxZDgyZDg0OGE3MyJ9fX0=";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(makeGreen(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeGreen(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeGreen(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override

@@ -35,6 +35,15 @@ public class BlazeClass extends BaseClass {
 
 	public BlazeClass(GameInstance instance, Player player) {
 		super(instance, player);
+		createArmor(
+				null,
+				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjU5Njk4MmMzZGJhN2Y2NzRjZmI5M2RkMzllMTcxM2E4ZWMxMjk5MDQ3M2FjYmZkODVhMThmZDkwOTE4ZGE0MSJ9fX0=",
+				"FC9513",
+				"FCAA00",
+				"FCBF00",
+				8,
+				"Blaze"
+		);
 	}
 
 	@Override
@@ -42,24 +51,9 @@ public class BlazeClass extends BaseClass {
 		return ClassType.Blaze;
 	}
 
-	public ItemStack makeGreen(ItemStack armor) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armor.getItemMeta();
-		lm.setColor(Color.ORANGE);
-		armor.setItemMeta(lm);
-		return armor;
-	}
-
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjU5Njk4MmMzZGJhN2Y2NzRjZmI5M2RkMzllMTcxM2E4ZWMxMjk5MDQ3M2FjYmZkODVhMThmZDkwOTE4ZGE0MSJ9fX0=";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(makeGreen(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeGreen(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeGreen(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override

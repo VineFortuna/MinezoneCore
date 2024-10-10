@@ -32,6 +32,15 @@ public class BeeClass extends BaseClass {
 	public BeeClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.4;
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1NGIyMTdmMjBmNWNmZjE0YWI0NGRkMjhhMWU5M2VmM2EyYTJiZGQzMjU2ZTlmOWYzMzk0NmU3MDEwYTc3OCJ9fX0=",
+				"FFB526",
+				"451309",
+				"FFB526",
+				8,
+				"Bee"
+		);
 	}
 
 	@Override
@@ -39,24 +48,9 @@ public class BeeClass extends BaseClass {
 		return ClassType.Bee;
 	}
 
-	public ItemStack makeYellow(ItemStack armour) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(Color.YELLOW);
-		armour.setItemMeta(lm);
-		return armour;
-	}
-
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1NGIyMTdmMjBmNWNmZjE0YWI0NGRkMjhhMWU5M2VmM2EyYTJiZGQzMjU2ZTlmOWYzMzk0NmU3MDEwYTc3OCJ9fX0=";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(makeYellow(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 3)));
-		playerEquip.setLeggings(makeYellow(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeYellow(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 2)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override

@@ -1147,7 +1147,7 @@ public class GameInstance {
 								if (!GameInstance.this.players.contains(player)) {
 									GameInstance.this.getGameManager().getMain().ResetPlayer(player);
 								} else {
-									baseClass.LoadPlayer();
+									baseClass.loadPlayer();
 									if (GameInstance.this.gameType == GameType.FRENZY) {
 										player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "Respawned",
 												"" + ChatColor.RESET + "Your new class for this life is "
@@ -1954,7 +1954,7 @@ public class GameInstance {
 			player.setFoodLevel(20);
 			player.setGameMode(GameMode.ADVENTURE);
 			player.setAllowFlight(true);
-			baseClass.LoadPlayer();
+			baseClass.loadPlayer();
 		}
 	}
 

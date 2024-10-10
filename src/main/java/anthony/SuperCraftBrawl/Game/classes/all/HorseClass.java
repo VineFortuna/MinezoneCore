@@ -55,6 +55,16 @@ public class HorseClass extends BaseClass {
 		super(instance, player);
 		baseVerticalJump = 1.1;
 
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDJlYjk2N2FiOTRmZGQ0MWE2MzI1ZjEyNzdkNmRjMDE5MjI2ZTVjZjM0OTc3ZWVlNjk1OTdmYWZjZjVlIn19fQ",
+				"4E321B",
+				"4E321B",
+				"300E06",
+				8,
+				"Horse"
+		);
+
 		treatsItemsList.add(goldenCarrotTreat);
 		treatsItemsList.add(goldenAppleTreat);
 		goldenEnchantedAppleTreat.setDurability((short) 1);
@@ -64,27 +74,8 @@ public class HorseClass extends BaseClass {
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		// Head (helmet)
-		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDJlYjk2N2FiOTRmZGQ0MWE2MzI1ZjEyNzdkNmRjMDE5MjI2ZTVjZjM0OTc3ZWVlNjk1OTdmYWZjZjVlIn19fQ==";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "&6Horse Head");
-
-		// Chestplate
-		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.ORANGE, "&6Horse Chestplate");
-		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
-
-		// Leggings
-		ItemStack leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, Color.ORANGE, "&6Horse Leggings");
-
-		// Boots
-		ItemStack boots = ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.ORANGE, "&6Horse Boots");
-		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
-
-		// Setting Armor
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(chestplate);
-		playerEquip.setLeggings(leggings);
-		playerEquip.setBoots(boots);
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override
