@@ -1,6 +1,6 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import anthony.SuperCraftBrawl.ChatColorHelper;
+import anthony.util.ChatColorHelper;
 import anthony.SuperCraftBrawl.Game.classes.Ability;
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -13,7 +13,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;

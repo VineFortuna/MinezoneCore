@@ -1,17 +1,16 @@
 package anthony.SuperCraftBrawl.Game;
 
-import anthony.SuperCraftBrawl.ChatColorHelper;
+import anthony.util.ChatColorHelper;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileManager;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -622,7 +621,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 		if (item != null) {
 			if (item.getType() == Material.POTION) {
-				if (meta.getDisplayName().contains("Mini-Shield Potion")) {
+				if (meta.getDisplayName().toLowerCase().contains("mini-shield")) {
 					player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 1000, 0));
 					event.setCancelled(true);
 					player.getInventory().clear(player.getInventory().getHeldItemSlot());
@@ -639,8 +638,20 @@ public class GameManager implements Listener, PluginMessageListener {
 	@EventHandler
 	public void EntityDeathEvent(EntityDeathEvent entity) {
 		List<EntityType> entities = new ArrayList<>(
-				Arrays.asList(EntityType.ZOMBIE, EntityType.SKELETON, EntityType.CREEPER, EntityType.PIG_ZOMBIE,
-						EntityType.MAGMA_CUBE, EntityType.SILVERFISH, EntityType.WITCH, EntityType.CHICKEN));
+				Arrays.asList(
+						EntityType.ZOMBIE,
+						EntityType.SKELETON,
+						EntityType.CREEPER,
+						EntityType.PIG_ZOMBIE,
+						EntityType.MAGMA_CUBE,
+						EntityType.SILVERFISH,
+						EntityType.WITCH,
+						EntityType.CHICKEN,
+						EntityType.BLAZE,
+						EntityType.PIG,
+						EntityType.MUSHROOM_COW,
+						EntityType.COW
+				));
 		if (entities.contains(entity.getEntityType())) {
 			entity.getDrops().clear();
 			entity.setDroppedExp(0);
@@ -700,14 +711,6 @@ public class GameManager implements Listener, PluginMessageListener {
 				}
 				player.sendMessage(main.color("&c&l(!) &rYou tried blooping a Spectator"));
 			}
-		}
-	}
-
-	@EventHandler
-	public void entityDeath(EntityDeathEvent entity) {
-		if (entity.getEntityType() == EntityType.ZOMBIE || entity.getEntityType() == EntityType.SKELETON) {
-			entity.getDrops().clear();
-			entity.setDroppedExp(0);
 		}
 	}
 
@@ -2112,7 +2115,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			case MONSTER_EGG:
 				if (i != null && i.state == GameState.STARTED) {
 					// Zombie Monster Egg
-					if (meta.getDisplayName().contains("Zombie") && !(meta.getDisplayName().contains("Pigman"))) {
+					if (meta.getDisplayName().toLowerCase().contains("zombie") && !(meta.getDisplayName().toLowerCase().contains("pigman"))) {
 						int amount = item.getAmount();
 
 						if (amount > 0) {
@@ -2152,7 +2155,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									player.getLocation().getDirection().multiply(2.0D));
 						}
 						// Skeleton Monster Egg
-					} else if (meta.getDisplayName().contains("Skeleton")) {
+					} else if (meta.getDisplayName().toLowerCase().contains("skeleton")) {
 						int amount = item.getAmount();
 
 						if (amount > 0) {
@@ -2192,7 +2195,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									player.getLocation().getDirection().multiply(2.0D));
 						}
 						// Witch Monster Egg
-					} else if (meta.getDisplayName().contains("Witch Pokeball")) {
+					} else if (meta.getDisplayName().toLowerCase().contains("witch")) {
 						int amount = item.getAmount();
 
 						if (amount > 0) {
@@ -2220,7 +2223,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									player.getLocation().getDirection().multiply(2.0D));
 						}
 						// Creeper Monster Egg
-					} else if (meta.getDisplayName().contains("Creeper")) {
+					} else if (meta.getDisplayName().toLowerCase().contains("creeper")) {
 						int amount = item.getAmount();
 
 						if (amount > 0) {
@@ -2262,7 +2265,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 			case NETHER_STAR:
 				if (i != null && i.state == GameState.STARTED && meta != null
-						&& meta.getDisplayName().contains("Bounty")) {
+						&& meta.getDisplayName().toLowerCase().contains("bounty")) {
 					int amount = item.getAmount();
 					if (amount > 0) {
 						if (amount == 1) {

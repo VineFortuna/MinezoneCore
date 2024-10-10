@@ -1,16 +1,14 @@
 package anthony.SuperCraftBrawl.gui.cosmetics;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
-import fr.minuskube.inv.content.SlotIterator;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.DyeColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 

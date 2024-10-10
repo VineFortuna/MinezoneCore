@@ -1,7 +1,7 @@
 package anthony.SuperCraftBrawl.gui.cosmetics;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -51,7 +51,7 @@ public class LobbyOutfitsGUI implements InventoryProvider {
                 suits,
                 e -> {
                     inv.close(player);
-                    new SuitsGUI(main).inv.open(player);
+                    new SuitsGUI(main, inv).inv.open(player);
                 }));
     }
 
