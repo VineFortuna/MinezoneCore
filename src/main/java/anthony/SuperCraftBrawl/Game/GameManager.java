@@ -833,7 +833,9 @@ public class GameManager implements Listener, PluginMessageListener {
 		if (instance != null && instance.state == GameState.STARTED) {
 			BaseClass bc = instance.classes.get(player);
 			if (item != null && item.getType() == Material.DIAMOND_HOE) {
-				if (player.getGameMode() != GameMode.SPECTATOR) {
+				ItemMeta meta = item.getItemMeta();
+				
+				if (meta.getDisplayName().contains("Bazooka") && player.getGameMode() != GameMode.SPECTATOR) {
 					if (bc != null) {
 						if (bc.bazooka.getTime() < 3000) {
 							int seconds = (3000 - bc.bazooka.getTime()) / 1000 + 1;
@@ -1602,7 +1604,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		if (GetInstanceOfPlayer(player) != null || getMain().getParkour().hasPlayer(player)) {
 			return GameReason.IN_ANOTHER;
 		}
-		
+
 		if (gameMap.containsKey(map))
 			instance = gameMap.get(map);
 		else {
@@ -1617,6 +1619,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	/**
 	 * This function disables weather from changing
+	 * 
 	 * @param event
 	 */
 	@EventHandler
@@ -1869,18 +1872,19 @@ public class GameManager implements Listener, PluginMessageListener {
 		return found;
 	}
 
-	//When a match is over it'll remove the game from the active games
+	// When a match is over it'll remove the game from the active games
 	public void RemoveMap(Maps maps) {
 		gameMap.remove(maps);
 	}
 
-	//When a match is over it'll remove the game from the active games
+	// When a match is over it'll remove the game from the active games
 	public void RemoveDuosMap(DuosMaps maps) {
 		gameMap2.remove(maps);
 	}
 
 	/**
 	 * This function handles spawn protection so players cant get damaged
+	 * 
 	 * @param event
 	 */
 	@EventHandler
@@ -1982,6 +1986,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	/**
 	 * This function spawns Spawn Protection particles around the player
+	 * 
 	 * @param player
 	 * @param i
 	 */
