@@ -36,7 +36,7 @@ public class VampireClass extends BaseClass {
 				"1A1A1A",
 				"B20B14",
 				"B20B14",
-				8,
+				6,
 				"Vampire"
 		);
 	}

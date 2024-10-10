@@ -45,7 +45,7 @@ public class SteveClass extends BaseClass {
 				"00ADAD",
 				"4A4191",
 				"686868",
-				8,
+				6,
 				"Steve"
 		);
 	}

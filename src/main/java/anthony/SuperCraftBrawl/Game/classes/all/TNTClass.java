@@ -34,7 +34,7 @@ public class TNTClass extends BaseClass {
 				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzhlNjk2M2QwMTI0NWNjOWU1ZGJlNGFlNWQ2YTRmNDdlYTdmNzhkYmQ0MGQxNGExZGZhMTg5OGU1YjA2ZDU1MCJ9fX0=",
 				"B83816",
-				8,
+				6,
 				"Tnt"
 		);
 	}

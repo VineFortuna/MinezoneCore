@@ -32,7 +32,7 @@ public class StarClass extends BaseClass {
 				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTMzNTM1ZjA1OGY4ZDY1ZjMwNTU3YzdjNDY2NjkxMWNjYWMzZDI4NmI1ZTgzMDllMmIzNjM2Y2Y2Mjc1NmM3In19fQ==",
 				"000000",
-				8,
+				6,
 				"Star"
 		);
 	}

@@ -41,7 +41,7 @@ public class BlazeClass extends BaseClass {
 				"FC9513",
 				"FCAA00",
 				"FCBF00",
-				8,
+				6,
 				"Blaze"
 		);
 	}

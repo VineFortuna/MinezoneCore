@@ -40,7 +40,7 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 				"999999",
 				"404040",
 				"404040",
-				8,
+				6,
 				"DarkSethBling"
 		);
 	}

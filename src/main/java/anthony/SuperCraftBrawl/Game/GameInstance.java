@@ -832,7 +832,7 @@ public class GameInstance {
 	public ItemStack getItemToDrop() {
 		// Slowness Potion
 		ItemStack slownessPot = ItemHelper.createPotionItem(PotionType.SLOWNESS, 1, 15, true, true, true);
-		ItemHelper.setDetails(slownessPot, "&3&lSLOWNESS II &7(15 sec)");
+		ItemHelper.setDetails(slownessPot, "&7&lSLOWNESS II &7(15 sec)");
 
 		// Health Pot
 		ItemStack healthPot = ItemHelper.createPotionItem(PotionType.INSTANT_HEAL, 1, 0, true, true, true);
@@ -844,7 +844,7 @@ public class GameInstance {
 
 		// Fire Res Pot
 		ItemStack fireRes = ItemHelper.createPotionItem(PotionType.FIRE_RESISTANCE, 0, 30, true, true, true);
-		ItemHelper.setDetails(fireRes, "&6&lFIRE RES &7(30 sec)");
+		ItemHelper.setDetails(fireRes, "&6&lFIRE RESISTANCE &7(30 sec)");
 
 		// Bomb
 		ItemStack bomb = ItemHelper.createPotionItem(PotionType.INSTANT_DAMAGE, 1000, 0, true, true, true);
@@ -857,7 +857,7 @@ public class GameInstance {
 		// Brooms
 		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4),
 				"&5&lBROOM",
-				"&7Sents you up and save you from the void"
+				"&7Sends you up and save you from the void"
 		);
 
 		// Hammer

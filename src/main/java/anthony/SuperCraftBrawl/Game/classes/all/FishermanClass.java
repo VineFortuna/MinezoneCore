@@ -63,7 +63,7 @@ public class FishermanClass extends BaseClass {
                 "6E504B",
                 "8F4020",
                 "452518",
-                8,
+                6,
                 "Fisherman"
         );
 
