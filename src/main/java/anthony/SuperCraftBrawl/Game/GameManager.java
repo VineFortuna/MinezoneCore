@@ -553,7 +553,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 					for (Player p : i.players) {
 						p.playSound(p.getLocation(), Sound.EXPLODE, 1, 2);
-						if (p != player) {
+						if (p != player && i.classes.containsKey(p) && i.classes.get(player).getLives() > 0) {
 							Vector d = p.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
 							double dist = d.dot(dir);
 
@@ -834,7 +834,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			BaseClass bc = instance.classes.get(player);
 			if (item != null && item.getType() == Material.DIAMOND_HOE) {
 				ItemMeta meta = item.getItemMeta();
-				
+
 				if (meta.getDisplayName().contains("Bazooka") && player.getGameMode() != GameMode.SPECTATOR) {
 					if (bc != null) {
 						if (bc.bazooka.getTime() < 3000) {
