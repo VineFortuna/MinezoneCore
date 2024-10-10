@@ -29,30 +29,18 @@ public class HerobrineClass extends BaseClass {
 	public HerobrineClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.1;
-	}
-
-	public ItemStack makeGray(ItemStack armour) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(Color.GRAY);
-		armour.setItemMeta(lm);
-		return armour;
+		createArmor(
+				null,
+				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTM1YmRkN2VmZjExYzg3ZDUyYTExM2MyZWZiNGNhNDU3NzVlNTY3MzVkYzRiMzhkN2ZhMWRiNzA4NDU4In19fQ==",
+				null,
+				8,
+				"Herobrine"
+		);
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		ItemStack air = new ItemStack(Material.AIR, 1);
-		player.getInventory().setHelmet(air);
-		player.getInventory().setChestplate(air);
-		player.getInventory().setLeggings(air);
-		player.getInventory().setBoots(air);
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTM1YmRkN2VmZjExYzg3ZDUyYTExM2MyZWZiNGNhNDU3NzVlNTY3MzVkYzRiMzhkN2ZhMWRiNzA4NDU4In19fQ==";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(new ItemStack(Material.AIR));
-		playerEquip.setLeggings(new ItemStack(Material.AIR));
-		playerEquip.setBoots(new ItemStack(Material.AIR));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 1));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override
@@ -63,6 +51,7 @@ public class HerobrineClass extends BaseClass {
 				ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
 						"" + ChatColor.RESET + ChatColor.BOLD + "Diamond of Despair", "",
 						instance.getGameManager().getMain().color("&7Right click to send effects on enemies!")));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 1));
 	}
 
 	@Override

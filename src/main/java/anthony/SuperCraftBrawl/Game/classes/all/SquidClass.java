@@ -24,27 +24,19 @@ public class SquidClass extends BaseClass {
 	public SquidClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.1;
-	}
-
-	public ItemStack makePurple(ItemStack armour) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(Color.PURPLE);
-		armour.setItemMeta(lm);
-		return armour;
+		createArmor(
+				null,
+				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDA4YTljODYzNDkyMTVjYjk0NjM2YWFmYzViYzY2NDRlODI5YTI4MzczYzU0NWZmZGNhOWZlZWQ1OTRiZjNhIn19fQ==",
+				"516575",
+				8,
+				"Squid"
+		);
+		playerHead.addUnsafeEnchantment(Enchantment.DEPTH_STRIDER, 3);
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDA4YTljODYzNDkyMTVjYjk0NjM2YWFmYzViYzY2NDRlODI5YTI4MzczYzU0NWZmZGNhOWZlZWQ1OTRiZjNhIn19fQ==";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(makePurple(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makePurple(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makePurple(ItemHelper.addEnchant(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4),
-				Enchantment.DEPTH_STRIDER, 3)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override

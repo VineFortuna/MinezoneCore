@@ -47,6 +47,13 @@ public class BedrockClass extends BaseClass {
 		super(instance, player);
 		this.blockList = new ArrayList<>();
 		this.blockList2 = new ArrayList<>();
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmZjY2ZlNTA5NmEzMzViOWFiNzhhYjRmNzc4YWU0OTlmNGNjYWI0ZTJjOTVmYTM0OTIyN2ZkMDYwNzU5YmFhZiJ9fX0=",
+				"404040",
+				8,
+				"Bedrock"
+		);
 	}
 
 	@Override
@@ -55,26 +62,8 @@ public class BedrockClass extends BaseClass {
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		// Head (helmet)
-		ItemStack playerHead = ItemHelper.create(Material.BEDROCK, "&0Bedrock Head");
-
-		// Chestplate
-		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.BLACK, "&0Bedrock Chestplate");
-		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
-
-		// Leggings
-		ItemStack leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, Color.BLACK,"&0Bedrock Leggings");
-
-		// Boots
-		ItemStack boots = ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.BLACK, "&0Bedrock Boots");
-		boots.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
-
-		// Setting Armor
-		playerEquip.setHelmet(getHelmet(playerHead));
-		playerEquip.setChestplate(chestplate);
-		playerEquip.setLeggings(leggings);
-		playerEquip.setBoots(boots);
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	public void modifyArmorDuringInvincibility() {

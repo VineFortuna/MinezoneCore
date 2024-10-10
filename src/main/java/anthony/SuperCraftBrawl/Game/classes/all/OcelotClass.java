@@ -26,6 +26,13 @@ public class OcelotClass extends BaseClass {
 
 	public OcelotClass(GameInstance instance, Player player) {
 		super(instance, player);
+		createArmor(
+				null,
+				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjU0ODM1MTlhYmY1MjM0MGNmM2FkOTNlNTE3NTY4YWQyNzZhZWFhMTg1OGZlMzNjNzdkOTM1M2Q5NzYwZDkwNSJ9fX0=",
+				"FFD95C",
+				8,
+				"Ocelot"
+		);
 	}
 
 	@Override
@@ -33,24 +40,9 @@ public class OcelotClass extends BaseClass {
 		return ClassType.Ocelot;
 	}
 
-	public ItemStack makeYellow(ItemStack armor) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armor.getItemMeta();
-		lm.setColor(Color.YELLOW);
-		armor.setItemMeta(lm);
-		return armor;
-	}
-
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjU0ODM1MTlhYmY1MjM0MGNmM2FkOTNlNTE3NTY4YWQyNzZhZWFhMTg1OGZlMzNjNzdkOTM1M2Q5NzYwZDkwNSJ9fX0=";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(makeYellow(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeYellow(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeYellow(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
 
 	}
@@ -90,6 +82,7 @@ public class OcelotClass extends BaseClass {
 						instance.getGameManager().getMain().color("&7&lPurr Attack"), "",
 						"" + ChatColor.RESET + "Right click to effect players with:",
 						instance.getGameManager().getMain().color("   &r10 sec Slowness II")));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
 	}
 
 	@Override

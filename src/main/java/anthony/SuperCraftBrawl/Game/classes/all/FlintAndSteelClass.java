@@ -16,10 +16,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class FlindAndSteelClass extends BaseClass {
+public class FlintAndSteelClass extends BaseClass {
 
 	private BukkitRunnable r;
 	private boolean isUsed = false;
@@ -30,9 +29,18 @@ public class FlindAndSteelClass extends BaseClass {
 	private ItemStack steel = ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.IRON_INGOT),
 			instance.getGameManager().getMain().color("&b&lSteel")), Enchantment.KNOCKBACK, 2);
 
-	public FlindAndSteelClass(GameInstance instance, Player player) {
+	public FlintAndSteelClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.1;
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTNlOTdmYWI0NzUzYjc1YmE1YjBjMDM4YmVkMzc3YjE2MmJhMjhiN2E1ZTI5MGFiZmQwMThhNTU4MWFjNTM4OCJ9fX0=",
+				"F7F7F7",
+				"303030",
+				"303030",
+				8,
+				"Flint&Steel"
+		);
 	}
 
 	@Override
@@ -40,24 +48,9 @@ public class FlindAndSteelClass extends BaseClass {
 		return ClassType.FlintAndSteel;
 	}
 
-	public ItemStack makeBlack(ItemStack armor) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armor.getItemMeta();
-		lm.setColor(Color.BLACK);
-		armor.setItemMeta(lm);
-		return armor;
-	}
-
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWJhZGJjNDA5OWU1YjZiNGE3ZDA4NjVlODhhMThiNjFiMjYzZGI3YTc1NmYyNzI0ZTc3YjQzZTIwMGM5MTAxOCJ9fX0=";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(makeBlack(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeBlack(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeBlack(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override

@@ -33,25 +33,20 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 		this.baseVerticalJump = 1.5D;
 		instance.getGameManager().getMain().getServer().getPluginManager().registerEvents(this,
 				(Plugin) instance.getGameManager().getMain());
+
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWE3MDVkYzkzYWIzYjIyNDUxNmI4YWZiMjMwNTI5MWIyODU1ZWIyMzVjZThlNGVkNDY2NjQyODBhYmRhIn19fQ==",
+				"999999",
+				"404040",
+				"404040",
+				8,
+				"DarkSethBling"
+		);
 	}
 
-	public ItemStack makeNavy(ItemStack armour) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(Color.NAVY);
-		armour.setItemMeta((ItemMeta) lm);
-		return armour;
-	}
-
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I4NmI4MjE1YjM2MTBlYWE2NDhjMjNjNGEyMGFkNjc1OWYyNTFlZjg1NDc2ODI5ZGQ2ZDE4NDI4MjNiMTEzIn19fQ==";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(makeNavy(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeNavy(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeNavy(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	public void SetItems(Inventory playerInv) {

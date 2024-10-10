@@ -27,6 +27,13 @@ public class PresentClass extends BaseClass {
 
 	public PresentClass(GameInstance instance, Player player) {
 		super(instance, player);
+		createArmor(
+				Material.CHEST,
+				null,
+				"AF7B34",
+				8,
+				"Present"
+		);
 	}
 
 	@Override
@@ -34,21 +41,9 @@ public class PresentClass extends BaseClass {
 		return ClassType.Present;
 	}
 
-	public ItemStack makeGreen(ItemStack armor) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armor.getItemMeta();
-		lm.setColor(Color.ORANGE);
-		armor.setItemMeta(lm);
-		return armor;
-	}
-
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		playerEquip.setHelmet(getHelmet(new ItemStack(Material.CHEST)));
-		playerEquip.setChestplate(makeGreen(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeGreen(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeGreen(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override
@@ -127,7 +122,7 @@ public class PresentClass extends BaseClass {
 								BaseClass bc = instance.classes.get(hit);
 
 								if (bc != null) {
-									bc.LoadArmor(player);
+									bc.loadArmor(player);
 									player.sendMessage(instance.getGameManager().getMain()
 											.color("&e&l(!) &rYou stole &e" + hit.getName() + "'s &rarmor"));
 								}
