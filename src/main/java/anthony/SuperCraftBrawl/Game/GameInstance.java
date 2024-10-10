@@ -644,7 +644,7 @@ public class GameInstance {
 
 		setTeams(); // Sets teams if mode is Duos
 		startLightningDropsTimer(); // Loot drops will start spawning every 45 seconds
-		
+
 		TellAll(color("&e&l----------------------------------------"));
 		TellAll("" + ChatColor.AQUA + ChatColor.BOLD + "             Super Craft Blocks");
 		TellAll("");
@@ -653,7 +653,7 @@ public class GameInstance {
 		TellAll(color("&r       they can spawn useful powerups."));
 		TellAll(color("&r                   Good Luck!"));
 		TellAll(color("&e&l----------------------------------------"));
-		
+
 		this.state = GameState.STARTED; // Sets game state to 'Started'
 		LoadClasses();
 		GameScoreboard();
@@ -1164,9 +1164,8 @@ public class GameInstance {
 								} else {
 									baseClass.LoadPlayer();
 									if (GameInstance.this.gameType == GameType.FRENZY) {
-										player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "Respawned",
-												"" + ChatColor.RESET + "Your new class for this life is "
-														+ baseClass.getType().getTag());
+										player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "New Class:",
+												"" + baseClass.getType().getTag());
 										new BukkitRunnable() { // Get rid of title after 1.5 seconds
 											@Override
 											public void run() {
@@ -1610,7 +1609,7 @@ public class GameInstance {
 					if (data != null) {
 						data.wins += 1;
 						data.flawlessWins += 1;
-						//data.winstreak += 1;
+						// data.winstreak += 1;
 						data.exp += 133;
 					}
 					baseClass.totalExp += 133;
@@ -1670,7 +1669,7 @@ public class GameInstance {
 				data.wins += 1;
 				data.winstreak += 1;
 				data.exp += 113;
-				
+
 				if (data.winstreak >= data.bestWinstreak)
 					data.bestWinstreak = data.winstreak;
 
