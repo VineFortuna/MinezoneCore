@@ -44,7 +44,7 @@ public class FireworkClass extends BaseClass {
 				"C00000",
 				"FFFFFF",
 				"C00000",
-				8,
+				6,
 				"Firework"
 		);
 	}

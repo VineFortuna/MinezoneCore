@@ -61,7 +61,7 @@ public class HorseClass extends BaseClass {
 				"4E321B",
 				"4E321B",
 				"300E06",
-				8,
+				6,
 				"Horse"
 		);
 

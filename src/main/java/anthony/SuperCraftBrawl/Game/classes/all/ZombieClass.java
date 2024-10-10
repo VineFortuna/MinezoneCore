@@ -37,7 +37,7 @@ public class ZombieClass extends BaseClass {
 				"00ADAD",
 				"4A4191",
 				"686868",
-				8,
+				6,
 				"Zombie"
 		);
 	}

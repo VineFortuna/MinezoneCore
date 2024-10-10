@@ -30,7 +30,7 @@ public class VindicatorClass extends BaseClass {
                 "695D52",
                 "266163",
                 "474038",
-                8,
+                6,
                 "Vindicator"
         );
     }

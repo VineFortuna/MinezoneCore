@@ -37,7 +37,7 @@ public class NinjaClass extends BaseClass {
 				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODc1ZGZlZTI5ZTMxNjY4M2VhZWE3MGNlMzc2MzIyYWFhZGViNmVjY2I1ZTk5ZGVhMjY3MmY3NDQ1ZGQ4MWMzIn19fQ==",
 				"424242",
-				8,
+				6,
 				"Ninja"
 		);
 	}

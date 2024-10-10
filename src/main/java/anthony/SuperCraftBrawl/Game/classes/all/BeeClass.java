@@ -38,7 +38,7 @@ public class BeeClass extends BaseClass {
 				"FFB526",
 				"451309",
 				"FFB526",
-				8,
+				6,
 				"Bee"
 		);
 	}

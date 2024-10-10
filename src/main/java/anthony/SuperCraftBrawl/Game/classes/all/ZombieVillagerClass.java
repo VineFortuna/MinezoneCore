@@ -28,7 +28,7 @@ public class ZombieVillagerClass extends BaseClass {
 				"7F5E58",
 				"7F5E58",
 				"4D6929",
-				8,
+				6,
 				"ZombieVillager"
 		);
 	}

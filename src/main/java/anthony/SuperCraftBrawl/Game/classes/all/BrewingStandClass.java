@@ -41,7 +41,7 @@ public class BrewingStandClass extends BaseClass {
 				"FFB81A",
 				"FFA236",
 				"756B6D",
-				8,
+				6,
 				"BrewingStand"
 		);
 	}

@@ -34,7 +34,7 @@ public class IrongolemClass extends BaseClass {
 				"F5E3D4",
 				"F5E3D4",
 				"968173",
-				8,
+				6,
 				"IronGolem"
 		);
 	}

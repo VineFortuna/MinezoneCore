@@ -38,7 +38,7 @@ public class FlintAndSteelClass extends BaseClass {
 				"F7F7F7",
 				"303030",
 				"303030",
-				8,
+				6,
 				"Flint&Steel"
 		);
 	}

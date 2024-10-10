@@ -36,7 +36,7 @@ public class SheepClass extends BaseClass {
 				"FFFFFF",
 				"FFFFFF",
 				"B59984",
-				8,
+				6,
 				"Sheep"
 		);
 	}

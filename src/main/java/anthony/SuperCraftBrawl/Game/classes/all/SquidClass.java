@@ -28,7 +28,7 @@ public class SquidClass extends BaseClass {
 				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDA4YTljODYzNDkyMTVjYjk0NjM2YWFmYzViYzY2NDRlODI5YTI4MzczYzU0NWZmZGNhOWZlZWQ1OTRiZjNhIn19fQ==",
 				"516575",
-				8,
+				6,
 				"Squid"
 		);
 		playerHead.addUnsafeEnchantment(Enchantment.DEPTH_STRIDER, 3);

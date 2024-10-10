@@ -41,7 +41,7 @@ public class WizardClass extends BaseClass {
 				"C178E8",
 				"C178E8",
 				"965905",
-				8,
+				6,
 				"Wizard"
 		);
 	}

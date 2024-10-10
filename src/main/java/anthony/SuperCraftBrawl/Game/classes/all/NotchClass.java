@@ -36,7 +36,7 @@ public class NotchClass extends BaseClass {
 				"744832",
 				"8E8E8E",
 				"262626",
-				8,
+				6,
 				"Notch"
 		);
 	}

@@ -57,7 +57,7 @@ public class CloudClass extends BaseClass {
 				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDQ4Mjg3NzM3MTU0NDZlNDczZjVhMTY0OTMzYTVkODgyM2RmYjg1OGFmOTA0OTAxMzVjNDE3ZWZlMTY1OTgxZCJ9fX0=",
 				"AECBFF",
-				8,
+				6,
 				"Cloud"
 		);
 	}

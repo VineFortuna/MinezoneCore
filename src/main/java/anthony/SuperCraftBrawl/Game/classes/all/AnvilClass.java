@@ -39,7 +39,7 @@ public class AnvilClass extends BaseClass {
 				Material.IRON_BLOCK,
 				null,
 				"373638",
-				8,
+				6,
 				"Anvil"
 		);
 	}

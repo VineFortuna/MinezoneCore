@@ -31,7 +31,7 @@ public class PresentClass extends BaseClass {
 				Material.CHEST,
 				null,
 				"AF7B34",
-				8,
+				6,
 				"Present"
 		);
 	}
