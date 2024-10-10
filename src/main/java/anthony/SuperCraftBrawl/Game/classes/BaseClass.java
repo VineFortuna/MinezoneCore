@@ -111,6 +111,12 @@ public abstract class BaseClass {
 	public int coalAmt = 0; // For Steve Class
 	public int diaAmt = 0; // For Steve Class
 
+	// Armor fields
+	protected ItemStack playerHead;
+	protected ItemStack chestplate;
+	protected ItemStack leggings;
+	protected ItemStack boots;
+
 	public Player bountyTarget = null;
 
 	// This would also take in a SuperClass.
@@ -133,7 +139,7 @@ public abstract class BaseClass {
 
 	public abstract ClassType getType();
 
-	public abstract void SetArmour(EntityEquipment playerEquip);
+	public abstract void setArmor(EntityEquipment playerEquip);
 
 	public abstract ItemStack getAttackWeapon();
 
@@ -176,14 +182,35 @@ public abstract class BaseClass {
 	public void GameEnd() {
 	} // To override
 
-	public void LoadPlayer() {
+	/**
+	 * Equip class armor and custom head.
+	 *
+	 */
+	protected void setArmorNew(EntityEquipment entityEquipment) {
+		if (playerHead != null) {
+			entityEquipment.setHelmet(getHelmet(playerHead));
+		}
+
+		if (chestplate != null) {
+			entityEquipment.setChestplate(chestplate);
+		}
+
+		if (leggings != null) {
+			entityEquipment.setLeggings(leggings);
+		}
+		if (boots != null) {
+			entityEquipment.setBoots(boots);
+		}
+	}
+
+	public void loadPlayer() {
 		Inventory inv = player.getInventory();
-		SetArmour(player.getEquipment());
+		setArmor(player.getEquipment());
 		SetItems(inv);
 	}
 
-	public void LoadArmor(Player player) {
-		SetArmour(player.getEquipment());
+	public void loadArmor(Player player) {
+		setArmor(player.getEquipment());
 	}
 
 	/**
@@ -2870,5 +2897,63 @@ public abstract class BaseClass {
 
 		for (Player spectator : instance.spectators)
 			spectator.sendMessage(msg);
+	}
+
+	/**
+	 * Create the armor and custom head of the class.
+	 * Includes Custom Head Texture, Armor Color and Protection Level.
+	 * To call in the subclass constructor.
+	 *
+	 */
+	protected void createArmor(Material blockMaterial, String textureUrl, String hexCodeChestplate, String hexCodeLeggings, String hexCodeBoots,  int protectionLevel, String className) {
+		// Head (helmet)
+		if (blockMaterial != null) {
+			playerHead = ItemHelper.setDetails(new ItemStack(
+					blockMaterial),
+					"&r&f" + className + " Head"
+			);
+		} else if (textureUrl != null) {
+			playerHead = ItemHelper.setDetails(
+					ItemHelper.createSkullTexture(textureUrl),
+					"&r&f" + className + " Head"
+			);
+		}
+
+		playerHead.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protectionLevel);
+
+		// Chestplate
+		if (hexCodeChestplate != null) {
+			chestplate = ItemHelper.setDetails(ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE,
+							hexCodeChestplate),
+					"&r" + className + " Chestplate"
+			);
+		}
+
+		// Leggings
+		if (hexCodeLeggings != null) {
+			leggings = ItemHelper.setDetails(ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS,
+							hexCodeLeggings),
+					"&r" + className + " Leggings"
+			);
+		}
+
+		// Boots
+		if (hexCodeBoots != null) {
+			boots = ItemHelper.setDetails(ItemHelper.createColoredArmor(Material.LEATHER_BOOTS,
+							hexCodeBoots),
+					"&r" + className + " Boots"
+			);
+		}
+	}
+
+	/**
+	 * Create the armor and custom head of the class.
+	 * Includes Custom Head Texture, Armor Color and Protection Level.
+	 * Single Color for full armor.
+	 * To call in the subclass constructor.
+	 *
+	 */
+	protected void createArmor (Material blockMaterial, String textureUrl, String hexCodeAllArmor, int protectionLevel, String className) {
+		createArmor(blockMaterial, textureUrl, hexCodeAllArmor, hexCodeAllArmor, hexCodeAllArmor, protectionLevel, className);
 	}
 }

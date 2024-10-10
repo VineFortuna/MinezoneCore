@@ -4,6 +4,8 @@ import anthony.util.ChatColorHelper;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.Cooldown;
+import anthony.SuperCraftBrawl.Game.classes.all.SoundManager;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -1038,27 +1040,29 @@ public class GameManager implements Listener, PluginMessageListener {
 			Snowball snowball = (Snowball) event.getDamager();
 			if (snowball.getShooter() instanceof Player) {
 				Player shooter = (Player) snowball.getShooter();
-				Player hitPlayer = (Player) event.getEntity();
-				GameInstance i = this.GetInstanceOfPlayer(hitPlayer);
+				if (event.getEntity() instanceof Player) {
+					Player hitPlayer = (Player) event.getEntity();
+					GameInstance i = this.GetInstanceOfPlayer(hitPlayer);
 
-				if (i != null) {
-					if (i.duosMap != null) {
-						if (!(i.team.get(shooter).equals(i.team.get(hitPlayer)))) {
+					if (i != null) {
+						if (i.duosMap != null) {
+							if (!(i.team.get(shooter).equals(i.team.get(hitPlayer)))) {
+								if (i.classes.get(shooter).getType() == ClassType.SnowGolem)
+									hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness
+									// 3 -
+									// Snowgolem
+								else
+									hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 0)); // Slowness
+								// 1
+							}
+						} else {
 							if (i.classes.get(shooter).getType() == ClassType.SnowGolem)
-								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness
-																												// 3 -
-																												// Snowgolem
+								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness 3
+								// -
+								// Snowgolem
 							else
-								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 0)); // Slowness
-																												// 1
+								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 0)); // Slowness 1
 						}
-					} else {
-						if (i.classes.get(shooter).getType() == ClassType.SnowGolem)
-							hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness 3
-																											// -
-																											// Snowgolem
-						else
-							hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 0)); // Slowness 1
 					}
 				}
 			}
@@ -1731,6 +1735,9 @@ public class GameManager implements Listener, PluginMessageListener {
 					tnt.setFuseTicks(50);
 					tnt = player.getWorld().spawn(loc.add(1, 1, 1), TNTPrimed.class);
 					tnt.setFuseTicks(50);
+
+					// Playing Sound
+					SoundManager.playSoundToAllGamePlayersFromALocation(i, loc, Sound.FUSE, 1, 1);
 				}
 			}
 		}
