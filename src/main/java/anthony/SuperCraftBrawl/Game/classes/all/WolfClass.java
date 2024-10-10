@@ -55,7 +55,7 @@ public class WolfClass extends BaseClass {
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
+	public void setArmor(EntityEquipment playerEquip) {
 		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjE5Y2MwNDdhM2ExYzJhNmZjZjVlMjNkNzk4OTUwOTQ5ZjBlYTc2YTU1Mzc3MDJjODBlNTQ1NDA5ZjBiODc0NiJ9fX0=";
 		ItemStack skull = ItemHelper.createSkullTexture(texture);
 		SkullMeta meta = (SkullMeta) skull.getItemMeta();

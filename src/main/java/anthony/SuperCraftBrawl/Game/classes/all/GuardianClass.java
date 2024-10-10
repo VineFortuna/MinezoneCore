@@ -37,7 +37,7 @@ public class GuardianClass extends BaseClass {
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
+	public void setArmor(EntityEquipment playerEquip) {
 		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTU2YjM3NzgzODYxZTZhNDRkNTM3ZTMyZDg2NTUzNzMxYWU0MzM3OTExNWRiMzRjMjY2ZTUyZmEzY2FiIn19fQ==";
 		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
 		

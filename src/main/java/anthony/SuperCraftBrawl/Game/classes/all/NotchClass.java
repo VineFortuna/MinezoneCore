@@ -30,26 +30,20 @@ public class NotchClass extends BaseClass {
 	public NotchClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.0;
-	}
-
-	public ItemStack makeGray(ItemStack armour) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(Color.GRAY);
-		armour.setItemMeta(lm);
-		return armour;
+		createArmor(
+				null,
+				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTlkNDhkYWMyMDI1NDQ1Y2NlZjhiYzJiYWY1NjZlZDlmZWMyM2Q5MWZkNWQyMmNiN2I5YmE2MzIyYjI5ZiJ9fX0=",
+				"744832",
+				"8E8E8E",
+				"262626",
+				8,
+				"Notch"
+		);
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTlkNDhkYWMyMDI1NDQ1Y2NlZjhiYzJiYWY1NjZlZDlmZWMyM2Q5MWZkNWQyMmNiN2I5YmE2MzIyYjI5ZiJ9fX0=";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4));
-		playerEquip.setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-		playerEquip.setBoots(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override

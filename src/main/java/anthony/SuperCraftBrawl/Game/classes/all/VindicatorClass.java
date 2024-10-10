@@ -24,26 +24,20 @@ public class VindicatorClass extends BaseClass {
     
     public VindicatorClass(GameInstance instance, Player player) {
         super(instance, player);
-    }
-    
-    public ItemStack makePink(ItemStack armour) {
-        LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-        lm.setColor(Color.BLACK);
-        armour.setItemMeta(lm);
-        return armour;
+        createArmor(
+                null,
+                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGFlZWQ5ZDhlZDE3NjllNzdlM2NmZTExZGMxNzk2NjhlZDBkYjFkZTZjZTI5ZjFjOGUwZDVmZTVlNjU3M2I2MCJ9fX0=",
+                "695D52",
+                "266163",
+                "474038",
+                8,
+                "Vindicator"
+        );
     }
     
     @Override
-    public void SetArmour(EntityEquipment playerEquip) {
-        String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGFlZWQ5ZDhlZDE3NjllNzdlM2NmZTExZGMxNzk2NjhlZDBkYjFkZTZjZTI5ZjFjOGUwZDVmZTVlNjU3M2I2MCJ9fX0=";
-        ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-    
-        playerEquip.setHelmet(getHelmet(playerskull));
-        playerEquip.setChestplate(makePink(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-                Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-        playerEquip.setLeggings(makePink(new ItemStack(Material.LEATHER_LEGGINGS)));
-        playerEquip.setBoots(makePink(
-                ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+    public void setArmor(EntityEquipment playerEquip) {
+        setArmorNew(playerEquip);
     }
     
     @Override

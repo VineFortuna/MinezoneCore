@@ -24,6 +24,13 @@ public class DwellerClass extends BaseClass {
 
 	public DwellerClass(GameInstance instance, Player player) {
 		super(instance, player);
+		createArmor(
+				null,
+				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTAyNzVlMmJmN2Q2N2JlNzA4Yzc5ZDJhMDE5MjI0ODI2YjcwNzJkZjA1Mjk0ODFkNzUwYWIxOTRlZGYxODRhIn19fQ==",
+				"A3A3A3",
+				8,
+				"Dweller"
+		);
 	}
 
 	@Override
@@ -31,24 +38,11 @@ public class DwellerClass extends BaseClass {
 		return ClassType.Dweller;
 	}
 
-	public ItemStack makeGray(ItemStack armour) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(Color.GRAY);
-		armour.setItemMeta(lm);
-		return armour;
-	}
+
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTAyNzVlMmJmN2Q2N2JlNzA4Yzc5ZDJhMDE5MjI0ODI2YjcwNzJkZjA1Mjk0ODFkNzUwYWIxOTRlZGYxODRhIn19fQ==";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(makeGray(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeGray(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeGray(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override
