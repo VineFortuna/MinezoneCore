@@ -121,8 +121,8 @@ public class GrimReaperClass extends BaseClass {
 						@Override
 						public void run() {
 							center = player.getLocation();
-							if (counter >= 5 || checkIfDead(player)) {
-								cancel(); // Stop the task after 5 seconds or if player dies/leaves
+							if (counter >= 3 || checkIfDead(player)) {
+								cancel(); // Stop the task after 3 seconds or if player dies/leaves
 								return;
 							}
 
@@ -139,7 +139,7 @@ public class GrimReaperClass extends BaseClass {
 							}
 
 							// Check for players in the radius and apply poison
-							for (Player nearbyPlayer : Bukkit.getOnlinePlayers()) {
+							for (Player nearbyPlayer : instance.players) {
 								if (nearbyPlayer != player && nearbyPlayer.getLocation().distance(center) <= radius) {
 									nearbyPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 5 * 20, 3));
 									nearbyPlayer
