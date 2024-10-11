@@ -116,7 +116,7 @@ public class VindicatorClass extends BaseClass {
                     player.removePotionEffect(PotionEffectType.SPEED);
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 2));
                 player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 100, 0));
-                player.playSound(player.getLocation(), Sound.VILLAGER_HAGGLE, 1, 1);
+                player.getWorld().playSound(player.getLocation(), Sound.VILLAGER_HAGGLE, 1, 1);
                 player.getWorld().playEffect(player.getLocation().add(0, 1.5, 0), Effect.VILLAGER_THUNDERCLOUD, 1);
                 player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rYou gained a sudden burst of energy. Chase down your enemies!"));
             }
