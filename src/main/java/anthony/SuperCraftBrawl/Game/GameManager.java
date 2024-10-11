@@ -1,20 +1,20 @@
 package anthony.SuperCraftBrawl.Game;
 
-import anthony.util.ChatColorHelper;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.util.SoundManager;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileManager;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.util.ChatColorHelper;
+import anthony.util.ItemHelper;
+import anthony.util.SoundManager;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.ChatColor;
@@ -731,6 +731,7 @@ public class GameManager implements Listener, PluginMessageListener {
 						if (data.challenge3 == 0) {
 							player.sendMessage(getMain()
 									.color("&9&l(!) &rYou used an extra life and now rewarded with &e1 Bonus Level"));
+							player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 0);
 							data.level += 1;
 							data.challenge3 = 1;
 							player.sendMessage(instance.getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
