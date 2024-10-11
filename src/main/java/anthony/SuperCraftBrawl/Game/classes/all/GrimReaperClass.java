@@ -20,7 +20,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class GrimReaperClass extends BaseClass {
 
-	private int cooldownSec = 0, cooldownDuration = 10000;
+	private int cooldownSec = 0, cooldownDuration = 15000;
 
 	public GrimReaperClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -99,8 +99,8 @@ public class GrimReaperClass extends BaseClass {
 		if (item != null && item.getType() == Material.REDSTONE
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 			if (player.getGameMode() != GameMode.SPECTATOR) {
-				if (grimReaper.getTime() < 10000) {
-					int seconds = (10000 - grimReaper.getTime()) / 1000 + 1;
+				if (grimReaper.getTime() < 15000) {
+					int seconds = (15000 - grimReaper.getTime()) / 1000 + 1;
 					event.setCancelled(true);
 					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
 							+ "Your Spirit Shackles is on cooldown for " + ChatColor.YELLOW + seconds + "s");

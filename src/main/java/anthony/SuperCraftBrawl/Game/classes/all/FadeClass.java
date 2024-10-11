@@ -4,6 +4,7 @@ import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -113,6 +114,7 @@ public class FadeClass extends BaseClass {
 	 * time
 	 */
 	private void doFadeAbility() {
+		playSoundToGamePlayers(Sound.PORTAL_TRAVEL);
 		player.sendMessage(
 				instance.getGameManager().getMain().color("&r&l(!) &rYou are now fading out of existence..."));
 		player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 180, 0));
@@ -166,10 +168,17 @@ public class FadeClass extends BaseClass {
 				setArmor(player.getEquipment());
 				player.sendMessage(
 						instance.getGameManager().getMain().color("&r&l(!) &rYou are now visible to all players"));
+				playSoundToGamePlayers(Sound.ENDERMAN_TELEPORT);
 				fadeAbilityActive = false;
 			}
 		};
 		r.runTaskLater(instance.getGameManager().getMain(), 20 * 8);
+	}
+	
+	private void playSoundToGamePlayers(Sound sound) {
+		for (Player gamePlayer : instance.players) {
+			gamePlayer.playSound(player.getLocation(), sound, 1, 1);
+		}
 	}
 
 }
