@@ -731,7 +731,6 @@ public class GameManager implements Listener, PluginMessageListener {
 						if (data.challenge3 == 0) {
 							player.sendMessage(getMain()
 									.color("&9&l(!) &rYou used an extra life and now rewarded with &e1 Bonus Level"));
-							player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 0);
 							data.level += 1;
 							data.challenge3 = 1;
 							player.sendMessage(instance.getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
@@ -744,6 +743,7 @@ public class GameManager implements Listener, PluginMessageListener {
 					baseClass.score.setScore(baseClass.lives);
 					baseClass.TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 							+ ChatColor.YELLOW + player.getName() + ChatColor.RESET + " used an extra life!");
+					player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 0);
 					if (amount > 0) {
 						amount--;
 						if (amount == 0)
