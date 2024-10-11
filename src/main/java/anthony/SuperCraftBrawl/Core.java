@@ -1,30 +1,36 @@
 package anthony.SuperCraftBrawl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
+import anthony.SuperCraftBrawl.Game.*;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.Cooldown;
+import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.commands.Commands;
+import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
+import anthony.SuperCraftBrawl.fishing.FishRarity;
+import anthony.SuperCraftBrawl.fishing.FishType;
+import anthony.SuperCraftBrawl.fishing.Fishing;
+import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.leaderboards.*;
+import anthony.SuperCraftBrawl.npcs.NPCManager;
+import anthony.SuperCraftBrawl.packets.PacketMain;
+import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
+import anthony.SuperCraftBrawl.playerdata.FishingDetails;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
+import anthony.SuperCraftBrawl.practice.BowPractice;
+import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.SuperCraftBrawl.ranks.RankManager;
+import anthony.SuperCraftBrawl.tablist.TablistManager;
+import anthony.parkour.Parkour;
 import anthony.util.ItemHelper;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
+import me.itzzmic.minezone.api.PunishAPI;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.WorldCreator;
+import org.bukkit.*;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -48,50 +54,13 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 import org.bukkit.util.Vector;
 
-import anthony.SuperCraftBrawl.Game.ActionBarManager;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameManager;
-import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Game.WinEffects;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import anthony.SuperCraftBrawl.Game.map.Maps;
-import anthony.SuperCraftBrawl.commands.Commands;
-import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
-import anthony.SuperCraftBrawl.fishing.FishRarity;
-import anthony.SuperCraftBrawl.fishing.FishType;
-import anthony.SuperCraftBrawl.fishing.Fishing;
-import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
-import anthony.SuperCraftBrawl.gui.DonorClassesGUI;
-import anthony.SuperCraftBrawl.gui.FreeClassesGUI;
-import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
-import anthony.SuperCraftBrawl.gui.StatsGUI;
-import anthony.SuperCraftBrawl.gui.TournamentGUI;
-import anthony.SuperCraftBrawl.leaderboards.BoardSettings;
-import anthony.SuperCraftBrawl.leaderboards.FishingBoard;
-import anthony.SuperCraftBrawl.leaderboards.FlawlessWinsBoard;
-import anthony.SuperCraftBrawl.leaderboards.KillsBoard;
-import anthony.SuperCraftBrawl.leaderboards.WinstreakBoard;
-import anthony.SuperCraftBrawl.npcs.NPCManager;
-import anthony.SuperCraftBrawl.packets.PacketMain;
-import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
-import anthony.SuperCraftBrawl.playerdata.FishingDetails;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
-import anthony.SuperCraftBrawl.practice.BowPractice;
-import anthony.SuperCraftBrawl.ranks.Rank;
-import anthony.SuperCraftBrawl.ranks.RankManager;
-import anthony.SuperCraftBrawl.tablist.TablistManager;
-import anthony.parkour.Parkour;
-import me.itzzmic.minezone.api.PunishAPI;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.minecraft.server.v1_8_R3.ChatComponentText;
-import net.minecraft.server.v1_8_R3.EntityArmorStand;
-import net.minecraft.server.v1_8_R3.PacketPlayOutPlayerListHeaderFooter;
-import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
-import net.minecraft.server.v1_8_R3.WorldServer;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class Core extends JavaPlugin implements Listener {
 
@@ -1315,8 +1284,8 @@ public class Core extends JavaPlugin implements Listener {
 							getScoreboardManager().lobbyBoard(onlinePlayers);
 							ItemStack tournament = ItemHelper.createSkullTexture(
 									"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGYzOTk3YzQzMDkxNjk0ZmMyZmI3NmM4ODNhNzZjY2U4OWYwMjI3ZTVjOWYxZGZlIn19fQ==");
-							onlinePlayers.getInventory().setItem(6,
-									ItemHelper.setDetails(tournament, "" + ChatColor.GRAY + "Tournament"));
+							onlinePlayers.getInventory().setItem(2,
+									ItemHelper.setDetails(tournament, "&7>&f>&6&lTournament&f<&7<"));
 							tourney.put(onlinePlayers.getName(), data.points);
 						}
 					}
