@@ -44,8 +44,9 @@ public class GrimReaperClass extends BaseClass {
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.REDSTONE),
 						"" + ChatColor.RED + ChatColor.BOLD + "Spirit Shackles", "",
-						"" + ChatColor.RESET + "Right-click to give slowness & blindness",
-						"" + ChatColor.RESET + "to enemies within 10 blocks"));
+						"" + ChatColor.RESET + "Right-click to receieve strength & give",
+						"" + ChatColor.RESET + "Slowness & Blindness to enemies in a",
+						"" + ChatColor.RESET + "10 block radius"));
 		playerInv.setItem(2, zombieEgg);
 		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
 	}
@@ -84,8 +85,8 @@ public class GrimReaperClass extends BaseClass {
 
 		return false;
 	}
-	
-	//This function plays a wolf growl when Grim Reaper's ability is used
+
+	// This function plays a wolf growl when Grim Reaper's ability is used
 	private void playAngrySound() {
 		for (Player gamePlayer : instance.players) {
 			gamePlayer.playSound(player.getLocation(), Sound.WOLF_GROWL, 1.0f, 1.0f);
@@ -167,10 +168,12 @@ public class GrimReaperClass extends BaseClass {
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(
-				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_HOE),
-						"" + ChatColor.RED + ChatColor.BOLD + "Scythe"), Enchantment.DAMAGE_ALL, 3),
-				Enchantment.KNOCKBACK, 1);
+		ItemStack item = ItemHelper
+				.addEnchant(ItemHelper.addEnchant(
+						ItemHelper.setDetails(new ItemStack(Material.DIAMOND_HOE),
+								"" + ChatColor.RED + ChatColor.BOLD + "Scythe", "",
+								"" + ChatColor.RESET + "Getting kills regens your Zombie Pokeball"),
+						Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 1);
 		return item;
 	}
 
