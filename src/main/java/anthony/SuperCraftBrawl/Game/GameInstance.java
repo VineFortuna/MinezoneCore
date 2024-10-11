@@ -882,7 +882,7 @@ public class GameInstance {
 
 		// Brooms
 		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4), "&5&lBROOM",
-				"&7Sends you up and save you from the void");
+				"&7Sends you up and saves you from the void");
 
 		// Hammer
 		ItemStack hammer = ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD, 1, (short) 250), "&d&lHAMMER");
