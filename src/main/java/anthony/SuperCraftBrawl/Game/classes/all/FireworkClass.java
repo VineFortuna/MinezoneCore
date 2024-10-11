@@ -3,7 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -38,6 +38,15 @@ public class FireworkClass extends BaseClass {
 	public FireworkClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.17;
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzAyZjQ4ZjM0ZDIyZGVkNzQwNGY3NmU4YTEzMmFmNWQ3OTE5YzhkY2Q1MWRmNmU3YTg1ZGRmYWM4NWFiIn19fQ==",
+				"C00000",
+				"FFFFFF",
+				"C00000",
+				6,
+				"Firework"
+		);
 	}
 
 	@Override
@@ -45,24 +54,9 @@ public class FireworkClass extends BaseClass {
 		return ClassType.Firework;
 	}
 
-	public ItemStack makeWhite(ItemStack armour) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(Color.WHITE);
-		armour.setItemMeta(lm);
-		return armour;
-	}
-
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzAyZjQ4ZjM0ZDIyZGVkNzQwNGY3NmU4YTEzMmFmNWQ3OTE5YzhkY2Q1MWRmNmU3YTg1ZGRmYWM4NWFiIn19fQ==";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(makeWhite(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeWhite(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeWhite(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override
@@ -84,7 +78,7 @@ public class FireworkClass extends BaseClass {
 										instance.getGameManager().getMain().color("   &r5 sec Slowness III"),
 										instance.getGameManager().getMain().color("   &r10 sec Weakness II")),
 								Enchantment.ARROW_INFINITE, 1), Enchantment.DURABILITY, 1000));
-		playerInv.setItem(2, new ItemStack(Material.ARROW));
+		playerInv.setItem(35, new ItemStack(Material.ARROW));
 
 		msg = instance.getGameManager().getMain().color("&9&l(!) &eYou can use &c&lFirework Bow");
 		getActionBarManager().setActionBar(player, "firework.cooldown", msg, 2);

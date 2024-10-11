@@ -1,7 +1,7 @@
 package anthony.SuperCraftBrawl.fishing;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;

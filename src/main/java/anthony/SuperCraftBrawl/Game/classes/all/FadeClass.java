@@ -15,7 +15,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
@@ -30,6 +30,13 @@ public class FadeClass extends BaseClass {
 	public FadeClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.15;
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTQ3MTlmMjFjNWRmYzFjZDgyYWExM2M4N2NjZjhkNDY1MmVjOWUzMjliYjY5ZjM0MDllYmE2NTExYzlkZmMwMyJ9fX0=",
+				"16161A",
+				6,
+				"Fade"
+		);
 	}
 
 	@Override
@@ -38,21 +45,8 @@ public class FadeClass extends BaseClass {
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		ItemStack head = new ItemStack(Material.WOOL, 1, DyeColor.BLACK.getData());
-
-		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.BLACK);
-		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
-
-		ItemStack leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, Color.BLACK);
-
-		ItemStack boots = ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.BLACK);
-		boots.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
-
-		playerEquip.setHelmet(getHelmet(head));
-		playerEquip.setChestplate(chestplate);
-		playerEquip.setLeggings(leggings);
-		playerEquip.setBoots(boots);
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override
@@ -169,7 +163,7 @@ public class FadeClass extends BaseClass {
 			public void run() {
 				for (Player gamePlayer : instance.players)
 					gamePlayer.showPlayer(player);
-				SetArmour(player.getEquipment());
+				setArmor(player.getEquipment());
 				player.sendMessage(
 						instance.getGameManager().getMain().color("&r&l(!) &rYou are now visible to all players"));
 				fadeAbilityActive = false;

@@ -5,9 +5,7 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import anthony.SuperCraftBrawl.ItemHelper;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
+import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
@@ -20,36 +18,26 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.SkullMeta;
-
-import java.lang.reflect.Field;
-import java.util.UUID;
 
 public class ChickenClass extends BaseClass {
 
 	public ChickenClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.2;
-	}
-
-	public ItemStack makeYellow(ItemStack armour) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(Color.YELLOW);
-		armour.setItemMeta(lm);
-		return armour;
+		createArmor(
+				null,
+				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDg5ZmVmMmVmNGY4MWVlYzZkMDdiYWVmNmM0YWVhNzRlNDQyZGNlNzJhMDFkZTk2NGViY2JhYzhhOGQ4MmM3NyJ9fX0=",
+				"FFFFFF",
+				"FFFFFF",
+				"FF7F10",
+				6,
+				"Chicken"
+		);
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDg5ZmVmMmVmNGY4MWVlYzZkMDdiYWVmNmM0YWVhNzRlNDQyZGNlNzJhMDFkZTk2NGViY2JhYzhhOGQ4MmM3NyJ9fX0=";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(makeYellow(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeYellow(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeYellow(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	public ItemStack getEggs() {

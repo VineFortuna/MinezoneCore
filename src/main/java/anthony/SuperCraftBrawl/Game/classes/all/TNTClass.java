@@ -3,15 +3,11 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.SkullType;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -34,23 +30,18 @@ public class TNTClass extends BaseClass {
 	public TNTClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.1;
-	}
-
-	public ItemStack makeRed(ItemStack armour) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(Color.RED);
-		armour.setItemMeta(lm);
-		return armour;
+		createArmor(
+				null,
+				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzhlNjk2M2QwMTI0NWNjOWU1ZGJlNGFlNWQ2YTRmNDdlYTdmNzhkYmQ0MGQxNGExZGZhMTg5OGU1YjA2ZDU1MCJ9fX0=",
+				"B83816",
+				6,
+				"Tnt"
+		);
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		playerEquip.setHelmet(getHelmet(new ItemStack(Material.TNT)));
-		playerEquip.setChestplate(makeRed(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeRed(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeRed(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	public ItemStack getTNT() {

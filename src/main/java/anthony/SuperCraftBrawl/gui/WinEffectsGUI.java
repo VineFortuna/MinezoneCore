@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;

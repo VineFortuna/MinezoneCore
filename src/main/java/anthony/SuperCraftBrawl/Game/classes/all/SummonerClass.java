@@ -1,20 +1,17 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import anthony.SuperCraftBrawl.ChatColorHelper;
+import anthony.util.ChatColorHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
@@ -36,6 +33,13 @@ public class SummonerClass extends BaseClass {
 	
 	public SummonerClass(GameInstance instance, Player player) {
 		super(instance, player);
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTA2ODZhMGQ5MzliYzlhY2YxY2UxZjY2OGQ0MDg0ZTdlNjRkNjE1NTUzZmIxYzM2ZjUxMjdiNDFjOGNiNzkxMSJ9fX0=",
+				"482B56",
+				6,
+				"Summoner"
+		);
 	}
 	
 	@Override
@@ -44,27 +48,8 @@ public class SummonerClass extends BaseClass {
 	}
 	
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		// Head (helmet)
-		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTA2ODZhMGQ5MzliYzlhY2YxY2UxZjY2OGQ0MDg0ZTdlNjRkNjE1NTUzZmIxYzM2ZjUxMjdiNDFjOGNiNzkxMSJ9fX0=";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "&5Summoner Head");
-		
-		// Chestplate
-		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.PURPLE, "&5Summoner's Chestplate");
-		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
-		
-		// Leggings
-		ItemStack leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, Color.PURPLE, "&5Summoner Leggings");
-		
-		// Boots
-		ItemStack boots = ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.PURPLE, "&5Summoner Boots");
-		boots.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
-		
-		// Setting armor
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(chestplate);
-		playerEquip.setLeggings(leggings);
-		playerEquip.setBoots(boots);
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 	
 	@Override

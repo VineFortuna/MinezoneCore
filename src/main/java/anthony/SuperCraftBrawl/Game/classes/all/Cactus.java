@@ -10,7 +10,7 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
@@ -22,18 +22,19 @@ public class Cactus extends BaseClass {
 
 	public Cactus(GameInstance instance, Player player) {
 		super(instance, player);
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmY1ODViNDFjYTVhMWI0YWMyNmY1NTY3NjBlZDExMzA3Yzk0ZjhmOGExYWRlNjE1YmQxMmNlMDc0ZjQ3OTMifX19",
+				"10761D",
+				6,
+				"Cactus"
+		);
+		playerHead.addUnsafeEnchantment(Enchantment.THORNS, 1);
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		playerEquip.setHelmet(getHelmet(new ItemStack(Material.CACTUS)));
-		playerEquip.setChestplate(ItemHelper.addEnchant(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE), Enchantment.THORNS, 1),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4));
-		playerEquip.setLeggings(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_LEGGINGS), Enchantment.THORNS, 1));
-		playerEquip.setBoots(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4));
-
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	public ItemStack getCactus() {

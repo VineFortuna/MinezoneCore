@@ -3,16 +3,11 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.ItemHelper;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
+import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -24,13 +19,10 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.lang.reflect.Field;
 import java.util.Random;
-import java.util.UUID;
 
 public class WizardClass extends BaseClass {
 
@@ -43,6 +35,15 @@ public class WizardClass extends BaseClass {
 	public WizardClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.3;
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODM4NTY0ZTI4YWJhOTgzMDFkYmRhNWZhZmQ4NmQxZGE0ZTJlYWVlZjEyZWE5NGRjZjQ0MGI4ODNlNTU5MzExYyJ9fX0=",
+				"C178E8",
+				"C178E8",
+				"965905",
+				6,
+				"Wizard"
+		);
 	}
 
 	@Override
@@ -50,25 +51,9 @@ public class WizardClass extends BaseClass {
 		return ClassType.Wizard;
 	}
 
-	public ItemStack makeGreen(ItemStack armor) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armor.getItemMeta();
-		lm.setColor(Color.RED);
-		armor.setItemMeta(lm);
-		return armor;
-	}
-
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODM4NTY0ZTI4YWJhOTgzMDFkYmRhNWZhZmQ4NmQxZGE0ZTJlYWVlZjEyZWE5NGRjZjQ0MGI4ODNlNTU5MzExYyJ9fX0=";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(makeGreen(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeGreen(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeGreen(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override

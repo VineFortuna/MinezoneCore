@@ -1,8 +1,7 @@
 package anthony.SuperCraftBrawl.gui.cosmetics;
 
 import anthony.SuperCraftBrawl.Core; 
-import anthony.SuperCraftBrawl.ItemHelper;
-import anthony.SuperCraftBrawl.fishing.FishType;
+import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -10,7 +9,6 @@ import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -20,12 +18,13 @@ public class SuitsGUI implements InventoryProvider {
     public Core main;
     public SmartInventory inv;
 
-    public SuitsGUI(Core main) {
+    public SuitsGUI(Core main, SmartInventory parent) {
         inv = SmartInventory.builder()
                 .id("myInventory")
                 .provider(this)
-                .size(6, 9)
+                .size(3, 9)
                 .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Suits")
+                .parent(parent)
                 .build();
         this.main = main;
     }
@@ -35,8 +34,6 @@ public class SuitsGUI implements InventoryProvider {
         PlayerData data = main.getDataManager().getPlayerData(player);
 
         // Icon Items
-        ItemStack lockedCosmetic = ItemHelper.createDye(DyeColor.GRAY, 1, ChatColor.GRAY + "&&&&&&&");
-
             // Santa Outfit
         String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19";
         ItemStack santaHead = ItemHelper.createSkullTexture(texture, ChatColor.RED.toString() + ChatColor.BOLD + "Santa Outfit");
@@ -48,15 +45,7 @@ public class SuitsGUI implements InventoryProvider {
         ItemStack pirateHead = ItemHelper.createSkullTexture(texture, "&3&lPirate Outfit", "", "&aFishing reward!");
 
         // Setting Items
-        contents.fillRect(1,1, 7,7, ClickableItem.of(
-                lockedCosmetic,
-                e -> {
-
-                }));
-
-
-
-
+        contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 
             // Astronaut Outfit
         contents.set(1,1,ClickableItem.of(
@@ -161,6 +150,12 @@ public class SuitsGUI implements InventoryProvider {
                     }
                     inv.close(player);
                 }));
+
+        contents.set(2, 8, ClickableItem.of(
+                ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
+                    inv.getParent().get().open(player);
+                }
+        ));
     }
 
     @Override

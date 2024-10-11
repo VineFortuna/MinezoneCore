@@ -3,7 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -28,27 +28,20 @@ public class JebClass extends BaseClass {
 	public JebClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.0;
-	}
-
-	public ItemStack makeGray(ItemStack armour) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(Color.GRAY);
-		armour.setItemMeta(lm);
-		return armour;
+		createArmor(
+				null,
+				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDJlN2Y3OTdlOTJhOTk1NmU5MTUxYjM1YmJhZWMwMTIzNjVhOTAyY2U4OTc5MGRhYjVhNDc3ODliZWQ5NzE5MCJ9fX0=",
+				"543727",
+				"D6C374",
+				"543727",
+				6,
+				"Jeb"
+		);
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texure = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDJlN2Y3OTdlOTJhOTk1NmU5MTUxYjM1YmJhZWMwMTIzNjVhOTAyY2U4OTc5MGRhYjVhNDc3ODliZWQ5NzE5MCJ9fX0=";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texure, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4));
-		playerEquip.setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
-		playerEquip.setBoots(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override
@@ -59,6 +52,7 @@ public class JebClass extends BaseClass {
 				ItemHelper.setDetails(new ItemStack(Material.STONE, 1), "" + ChatColor.GRAY + "Jeb's Call", "",
 						instance.getGameManager().getMain().color("&7Push enemies when aiming at them!"),
 						instance.getGameManager().getMain().color("   &rRange: &e25 blocks")));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
 	}
 
 	@Override
