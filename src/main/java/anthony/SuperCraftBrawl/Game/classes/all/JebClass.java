@@ -4,7 +4,10 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
-import org.bukkit.*;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -13,7 +16,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
@@ -71,10 +73,9 @@ public class JebClass extends BaseClass {
 			}
 			if (jeb.getTime() == 10000) {
 				player.getInventory().remove(Material.STONE);
-				player.getInventory().setItem(1,
-						ItemHelper.setDetails(new ItemStack(Material.STONE, 1), "" + ChatColor.GRAY + "Jeb's Call", "",
-						instance.getGameManager().getMain().color("&7Push enemies when aiming at them!"),
-						instance.getGameManager().getMain().color("   &rRange: &e25 blocks")));
+				if (player.getInventory().getItem(1).getType() == Material.STONE) {
+					player.getInventory().getItem(1).setDurability((short) 5);
+				}
 			}
 		}
 	}
