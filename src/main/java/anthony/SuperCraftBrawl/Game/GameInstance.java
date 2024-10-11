@@ -2320,7 +2320,8 @@ public class GameInstance {
 		for (Entity e : player.getNearbyEntities(x, y, z)) {
 			if (e instanceof Player) {
 				Player target = (Player) e;
-				if (target.getGameMode() != GameMode.SPECTATOR) {
+				BaseClass baseClass = classes.get(target);
+				if (!baseClass.checkIfDead(target, this)) {
 					if (this.duosMap != null) {
 						if (!this.team.get(target).equals(this.team.get(player))) {
 							return target;
