@@ -92,6 +92,13 @@ public class GrimReaperClass extends BaseClass {
 
 		return false;
 	}
+	
+	//This function plays a wolf growl when Grim Reaper's ability is used
+	private void playAngrySound() {
+		for (Player gamePlayer : instance.players) {
+			gamePlayer.playSound(player.getLocation(), Sound.WOLF_GROWL, 1.0f, 1.0f);
+		}
+	}
 
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
@@ -106,8 +113,8 @@ public class GrimReaperClass extends BaseClass {
 							+ "Your Spirit Shackles is on cooldown for " + ChatColor.YELLOW + seconds + "s");
 				} else {
 					grimReaper.restart();
+					playAngrySound();
 					player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 4 * 20, 0));
-					player.playSound(player.getLocation(), Sound.WOLF_GROWL, 1.0f, 1.0f);
 
 					// Circle radius and the height fix to ensure the particles are on the ground
 					int radius = 10;
