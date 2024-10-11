@@ -1,8 +1,8 @@
 package anthony.SuperCraftBrawl.gui.cosmetics;
 
-import anthony.SuperCraftBrawl.Core; 
-import anthony.util.ItemHelper;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -123,7 +123,7 @@ public class SuitsGUI implements InventoryProvider {
         contents.set(1,3,ClickableItem.of(
                 pirateHead,
                 e -> {
-                    if (data.rewardLevel >= 7) {
+                    if (data.rewardLevel >= 6) {
                         if (!(main.po.containsKey(player))) {
                             main.po.put(player, true);
                             player.getInventory().setHelmet(pirateHead);
