@@ -1,12 +1,11 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Effect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -15,16 +14,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.util.ItemHelper;
-import net.md_5.bungee.api.ChatColor;
 
 public class GrimReaperClass extends BaseClass {
 
@@ -36,7 +28,7 @@ public class GrimReaperClass extends BaseClass {
 
 		createArmor(null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWJiZWE3MTljNTlmODAzZmY4NjQwNWI5M2M2NTA3ODg0NWRiMTY2OWFlMTA0NDQ3ZDhhMGU1MDBjZmNhZTllNCJ9fX0=",
-				"303030", 6, "GrimReaper");
+				"141419", 6, "GrimReaper");
 	}
 
 	@Override
