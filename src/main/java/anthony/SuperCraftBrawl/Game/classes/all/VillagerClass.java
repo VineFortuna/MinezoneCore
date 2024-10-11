@@ -3,12 +3,9 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
-import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import anthony.util.ItemHelper;
-import net.md_5.bungee.api.ChatColor;
 import anthony.SuperCraftBrawl.gui.VillagerAbilityGUI;
-import org.bukkit.*;
+import anthony.util.ItemHelper;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -88,7 +85,7 @@ public class VillagerClass extends BaseClass {
 		ItemStack weapon = ItemHelper.setDetails(new ItemStack(Material.EMERALD),
 				"&aTrade Ability",
 				"&fHit enemies to gain emeralds",
-				"&fTrade emeralds into items");
+				"&fTrade emeralds for items");
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
 		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
 		this.weapon = weapon;
