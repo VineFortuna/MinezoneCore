@@ -27,17 +27,14 @@ public class FadeClass extends BaseClass {
 	private ItemStack string = ItemHelper.setDetails(new ItemStack(Material.STRING),
 			"" + ChatColor.RESET + "Fade Ability");
 	private int cooldownSec = 0;
+	private BukkitRunnable r;
 
 	public FadeClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.15;
-		createArmor(
-				null,
+		createArmor(null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTQ3MTlmMjFjNWRmYzFjZDgyYWExM2M4N2NjZjhkNDY1MmVjOWUzMjliYjY5ZjM0MDllYmE2NTExYzlkZmMwMyJ9fX0=",
-				"16161A",
-				6,
-				"Fade"
-		);
+				"16161A", 6, "Fade");
 	}
 
 	@Override
@@ -77,6 +74,12 @@ public class FadeClass extends BaseClass {
 				String msg = instance.getGameManager().getMain().color("&rYou can use Fade Ability");
 				getActionBarManager().setActionBar(player, "slimeball.cooldown", msg, 2);
 			}
+		}
+
+		if (r != null && checkIfDead(player, instance)) {
+			r.cancel();
+			r = null;
+			fadeAbilityActive = false;
 		}
 	}
 
@@ -120,7 +123,7 @@ public class FadeClass extends BaseClass {
 		player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 180, 0));
 		fadeAbilityActive = true;
 
-		BukkitRunnable r = new BukkitRunnable() {
+		r = new BukkitRunnable() {
 			int ticks = 0;
 
 			@Override
@@ -130,13 +133,15 @@ public class FadeClass extends BaseClass {
 					for (Player gamePlayer : instance.players)
 						gamePlayer.showPlayer(player);
 					this.cancel();
+					r = null;
 				}
-				
+
 				if (checkIfDead(player, instance)) {
 					fadeAbilityActive = false;
 					this.cancel();
+					r = null;
 				}
-				
+
 				if (ticks == 0) {
 					player.getInventory().setHelmet(new ItemStack(Material.AIR));
 				} else if (ticks == 1) {
@@ -147,9 +152,10 @@ public class FadeClass extends BaseClass {
 					player.getInventory().setBoots(new ItemStack(Material.AIR));
 					for (Player gamePlayer : instance.players)
 						gamePlayer.hidePlayer(player);
-					
-					finishAbility();
+
 					this.cancel();
+					r = null;
+					finishAbility();
 				}
 
 				ticks++;
@@ -159,7 +165,7 @@ public class FadeClass extends BaseClass {
 	}
 
 	private void finishAbility() {
-		BukkitRunnable r = new BukkitRunnable() {
+		r = new BukkitRunnable() {
 
 			@Override
 			public void run() {
@@ -174,7 +180,7 @@ public class FadeClass extends BaseClass {
 		};
 		r.runTaskLater(instance.getGameManager().getMain(), 20 * 8);
 	}
-	
+
 	private void playSoundToGamePlayers(Sound sound) {
 		for (Player gamePlayer : instance.players) {
 			gamePlayer.playSound(player.getLocation(), sound, 1, 1);
