@@ -165,9 +165,6 @@ public enum Maps {
 							new Vector(112.468, 152, -588.591),
 							new Vector(99.516, 145, -586.557),
 							new Vector(111.502, 150, -557.542),
-							new Vector(96.431, 148, -551.543),
-							new Vector(92.484, 151, -523.467),
-							new Vector(81.435, 148, -539.514))
 					.setLobbyLoc(new Vector(106.496, 152, -620.492))
 					.setSpecLoc(new Vector(98.559, 155.27324, -561.960))
 					.setBounds(new Vector(99.500, 163, -553.500), 35, 50)
