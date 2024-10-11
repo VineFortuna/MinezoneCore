@@ -3,8 +3,8 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.gui.CraftableItemsGUI;
+import anthony.util.ItemHelper;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
@@ -22,10 +22,9 @@ import java.util.Random;
 
 public class SteveClass extends BaseClass {
 
-	private ItemStack stonePick = ItemHelper.addEnchant(
+	private ItemStack stonePick = ItemHelper.setUnbreakable(
 			ItemHelper.setDetails(new ItemStack(Material.STONE_PICKAXE),
-					instance.getGameManager().getMain().color("&rStone Pickaxe &7(Right Click)")),
-			Enchantment.DURABILITY, 10000);
+					instance.getGameManager().getMain().color("&rStone Pickaxe &7(Right Click)")));
 	private ItemStack gold = new ItemStack(Material.GOLD_INGOT, goldAmt);
 	private ItemStack coal = new ItemStack(Material.COAL, coalAmt);
 	private ItemStack diamond = new ItemStack(Material.DIAMOND, diaAmt);

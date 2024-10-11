@@ -1,5 +1,10 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
@@ -9,12 +14,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-
-import anthony.util.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -44,10 +43,9 @@ public class Cactus extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		playerInv.setItem(0, ItemHelper.addEnchant(
+		playerInv.setItem(0, ItemHelper.setUnbreakable(
 				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.WOOD_SWORD),
-						"" + ChatColor.GREEN + ChatColor.BOLD + "Spikey Sword"), Enchantment.DAMAGE_ALL, 1),
-				Enchantment.DURABILITY, 10000));
+						"" + ChatColor.GREEN + ChatColor.BOLD + "Spikey Sword"), Enchantment.DAMAGE_ALL, 1)));
 		ItemStack cactus = getCactus();
 		playerInv.setItem(1, cactus);
 	}
