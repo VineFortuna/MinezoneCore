@@ -141,9 +141,12 @@ public class GrimReaperClass extends BaseClass {
 							// Check for players in the radius and apply poison
 							for (Player nearbyPlayer : instance.players) {
 								if (nearbyPlayer != player && nearbyPlayer.getLocation().distance(center) <= radius) {
-									nearbyPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 5 * 20, 3));
-									nearbyPlayer
-											.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 5 * 20, 1));
+									if (checkIfDead(nearbyPlayer, instance) == false) {
+										nearbyPlayer
+												.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 5 * 20, 3));
+										nearbyPlayer.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 30, 1));
+										flickeringBlindness(nearbyPlayer);
+									}
 								}
 							}
 
@@ -152,6 +155,18 @@ public class GrimReaperClass extends BaseClass {
 					}.runTaskTimer(instance.getGameManager().getMain(), 0, 20); // Runs every second for 5 seconds
 				}
 			}
+		}
+	}
+
+	private void flickeringBlindness(Player gamePlayer) {
+		for (int i = 0; i < 3; i++) {
+			Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new Runnable() {
+				@Override
+				public void run() {
+					if (gamePlayer.getGameMode() != GameMode.SPECTATOR)
+						gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 30, 1));
+				}
+			}, 30);
 		}
 	}
 

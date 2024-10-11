@@ -76,10 +76,18 @@ public class FadeClass extends BaseClass {
 			}
 		}
 
-		if (r != null && checkIfDead(player, instance)) {
-			r.cancel();
-			r = null;
-			fadeAbilityActive = false;
+		if (r != null) {
+			if (player.getGameMode() == GameMode.SPECTATOR) {
+				r.cancel();
+				r = null;
+				fadeAbilityActive = false;
+				for (Player gamePlayer : instance.players)
+					gamePlayer.showPlayer(player);
+			} else if (checkIfDead(player, instance)) {
+				r.cancel();
+				r = null;
+				fadeAbilityActive = false;
+			}
 		}
 	}
 
