@@ -1,7 +1,10 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ItemHelper;
 import org.bukkit.ChatColor;
-import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -14,12 +17,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
-
-import anthony.util.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
 
 public class SkeletonClass extends BaseClass {
 
@@ -123,11 +120,11 @@ public class SkeletonClass extends BaseClass {
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper
-				.addEnchant(ItemHelper.addEnchant(ItemHelper.addEnchant(
+		ItemStack item = ItemHelper.setUnbreakable(ItemHelper
+				.addEnchant(ItemHelper.addEnchant(
 						ItemHelper.setDetails(new ItemStack(Material.BOW), ChatColor.GRAY + "Skeleton Bow",
 								ChatColor.GRAY + "", ChatColor.YELLOW + "Snipe your enemies with this!"),
-						Enchantment.ARROW_INFINITE, 1), Enchantment.DURABILITY, 10000), Enchantment.ARROW_KNOCKBACK, 1);
+						Enchantment.ARROW_INFINITE, 1), Enchantment.ARROW_KNOCKBACK, 1));
 		return item;
 	}
 
