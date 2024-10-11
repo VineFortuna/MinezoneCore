@@ -7,13 +7,13 @@ import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.Holograms;
-import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.PlayerListener;
 import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
+import anthony.util.ItemHelper;
 import fr.mrmicky.fastboard.FastBoard;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -1539,7 +1539,8 @@ public class GameInstance {
 			givePoints(1, 10);
 			givePoints(2, 7);
 			givePoints(3, 5);
-			givePoints(4, 1);
+			givePoints(4, 3);
+			givePoints(5, 1);
 			getGameManager().getMain().sortTourney();
 		}
 
