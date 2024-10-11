@@ -1274,7 +1274,7 @@ public class Core extends JavaPlugin implements Listener {
 						player.sendMessage(color("&e&l(!) &eTournament mode disabled!"));
 						for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
 							getScoreboardManager().lobbyBoard(onlinePlayers);
-							onlinePlayers.getInventory().setItem(6, null);
+							onlinePlayers.getInventory().setItem(2, null);
 						}
 					} else {
 						tournament = true;
@@ -1306,7 +1306,7 @@ public class Core extends JavaPlugin implements Listener {
 					player.sendMessage(color("&e&l(!) &eRemoving all participants!"));
 					for (Player p : Bukkit.getOnlinePlayers()) {
 						getScoreboardManager().lobbyBoard(p);
-						p.getInventory().setItem(6, null);
+						p.getInventory().setItem(2, null);
 					}
 					tourney.clear();
 				} else if (args[0].equalsIgnoreCase("end")) {
