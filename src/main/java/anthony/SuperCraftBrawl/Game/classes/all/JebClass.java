@@ -71,7 +71,7 @@ public class JebClass extends BaseClass {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &7Jeb's Call");
 				getActionBarManager().setActionBar(player, "jeb.cooldown", msg, 2);
 			}
-			if (jeb.getTime() == 10000) {
+			if (jeb.getTime() == 10000 && !checkIfDead(player, instance)) {
 				if (player.getInventory().getItem(1).getType() == Material.STONE) {
 					player.getInventory().getItem(1).setDurability((short) 0);
 				}
