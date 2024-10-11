@@ -1,6 +1,6 @@
 package anthony.SuperCraftBrawl.Game;
 
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;

@@ -2,7 +2,6 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -15,13 +14,11 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,32 +33,18 @@ public class SnowGolemClass extends BaseClass {
 	public SnowGolemClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.1;
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjU2MzdhY2FkYWY3Nzc1OGFiYzdkMjQyZDRiODVmY2MyMGNhODM1NDU4MWI5MzNjMDE1Y2Y4NDVhYWFkMzQ4NSJ9fX0=",
+				"FFFFFF",
+				6,
+				"SnowGolem"
+		);
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		// Head (helmet)
-		ItemStack playerskull = ItemHelper.createSkullHeadPlayer(1, "SnowGolem", ChatColor.WHITE + "SnowGolem Head");
-
-		// Chestplate
-		ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.WHITE,
-				ChatColor.WHITE + "SnowGolem's Chestplate");
-		chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
-
-		// Leggings
-		ItemStack leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, Color.WHITE,
-				ChatColor.WHITE + "SnowGolem's Leggings");
-
-		// Boots
-		ItemStack boots = ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.WHITE,
-				ChatColor.WHITE + "SnowGolem's Boots");
-		boots.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
-
-		// Setting armor
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(chestplate);
-		playerEquip.setLeggings(leggings);
-		playerEquip.setBoots(boots);
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override
@@ -239,7 +222,7 @@ public class SnowGolemClass extends BaseClass {
 											if (gamePlayer.getGameMode() != GameMode.SPECTATOR)
 												gamePlayer.getInventory().setHelmet(new ItemStack(Material.PUMPKIN));
 										} else if (ticks == 0) {
-											baseClass.LoadArmor(gamePlayer);
+											baseClass.loadArmor(gamePlayer);
 											this.cancel();
 										}
 

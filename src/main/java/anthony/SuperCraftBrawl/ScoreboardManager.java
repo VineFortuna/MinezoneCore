@@ -83,7 +83,7 @@ public class ScoreboardManager {
 		if (game.getMap() != null) {
 			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + game.getMap());
 			board.updateLines("", "" + ChatColor.BOLD + "Game Mode:", " " + ChatColor.GRAY + game.gameType.getName(),
-					"", "" + ChatColor.RESET + ChatColor.BOLD + "Class:", " " + ChatColor.GRAY + "Random", "",
+					"", "" + ChatColor.RESET + ChatColor.BOLD + "Class:", " " + ChatColor.GOLD + "Random", "",
 					"" + ChatColor.RESET + ChatColor.BOLD + "Players:",
 					" " + ChatColor.GRAY
 							+ (game.getMap().GetInstance().gameType == GameType.FRENZY
@@ -101,7 +101,7 @@ public class ScoreboardManager {
 			game.boards.get(player).updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + game.getMap().toString());
 		} else {
 			board.updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD + game.duosMap.toString());
-			board.updateLines("", "" + ChatColor.RESET + ChatColor.BOLD + "Class:", " " + ChatColor.RESET + "Random",
+			board.updateLines("", "" + ChatColor.RESET + ChatColor.BOLD + "Class:", " " + ChatColor.GOLD + "Random",
 					"", "" + ChatColor.RESET + ChatColor.BOLD + "Players:",
 					" " + ChatColor.RESET + game.players.size() + "/6", "",
 					"" + ChatColor.RESET + ChatColor.BOLD + "Status:",

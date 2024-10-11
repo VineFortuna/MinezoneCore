@@ -11,8 +11,10 @@ commands:
       description: Minecade lobby
    shop:
       description: Shop command
+   leave:
+      description: Leave game command
    l:
-      description: Leave command
+      description: Leave game command
    cw:
       description: Crystal wars
    players:
@@ -23,10 +25,10 @@ commands:
       description: Stats after a game
    fly:
       description: Fly command
+   f:
+      description: Fly command
    list:
       description: List of online players
-   leave:
-      description: Leave the game you are currently in
    tournament:
       description: Tournament mode
    class:
@@ -142,6 +144,8 @@ commands:
       description: Skywars command
    kit:
       description: Kit command for SkyWars
+   items:
+      description: Get all SCB Item Drops
       
 permissions:
    scb.admin:
@@ -165,6 +169,7 @@ permissions:
          scb.gms: true
          scb.gmsp: true
          scb.gma: true
+         scb.items: true
    scb.moderator:
       description: Moderator perms
       children:

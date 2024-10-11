@@ -1,11 +1,11 @@
 package anthony.SuperCraftBrawl.gui;
 
-import anthony.SuperCraftBrawl.ChatColorHelper;
+import anthony.util.ChatColorHelper;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.Core;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;

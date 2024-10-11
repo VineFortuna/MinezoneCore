@@ -5,7 +5,7 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
@@ -57,6 +57,17 @@ public class FishermanClass extends BaseClass {
     
     public FishermanClass(GameInstance instance, Player player) {
         super(instance, player);
+        createArmor(
+                null,
+                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWY1ZDM4MTlhNjVkYjc5YzQ1ZmQwMDE0MWMwODgyZTQ3YWQyMzRjMGU1Zjg5OTJiZjRhZjE4Y2VkMGUxZWNkYyJ9fX0=",
+                "6E504B",
+                "8F4020",
+                "452518",
+                6,
+                "Fisherman"
+        );
+
+        playerHead.addUnsafeEnchantment(Enchantment.DEPTH_STRIDER, 1);
     }
     
     @Override
@@ -64,25 +75,9 @@ public class FishermanClass extends BaseClass {
         return ClassType.Fisherman;
     }
     
-    public ItemStack makeBrown(ItemStack armour) {
-        LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-        lm.setColor(Color.GREEN);
-        armour.setItemMeta(lm);
-        return armour;
-    }
-    
     @Override
-    public void SetArmour(EntityEquipment playerEquip) {
-        String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWY1ZDM4MTlhNjVkYjc5YzQ1ZmQwMDE0MWMwODgyZTQ3YWQyMzRjMGU1Zjg5OTJiZjRhZjE4Y2VkMGUxZWNkYyJ9fX0=";
-        ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-    
-        playerEquip.setHelmet(getHelmet(playerskull));
-        playerEquip.setChestplate(makeBrown(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-                Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-        playerEquip.setLeggings(makeBrown(new ItemStack(Material.LEATHER_LEGGINGS)));
-        playerEquip.setBoots(makeBrown(ItemHelper.addEnchant(ItemHelper.addEnchant(
-                new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4),
-                Enchantment.DEPTH_STRIDER, 1)));
+    public void setArmor(EntityEquipment playerEquip) {
+        setArmorNew(playerEquip);
     }
     
     @Override

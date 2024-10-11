@@ -1,4 +1,4 @@
-package anthony.SuperCraftBrawl;
+package anthony.util;
 
 import net.md_5.bungee.api.ChatColor;
 

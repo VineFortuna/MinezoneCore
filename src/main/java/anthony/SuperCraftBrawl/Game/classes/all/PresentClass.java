@@ -5,7 +5,7 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
@@ -27,6 +27,13 @@ public class PresentClass extends BaseClass {
 
 	public PresentClass(GameInstance instance, Player player) {
 		super(instance, player);
+		createArmor(
+				Material.CHEST,
+				null,
+				"AF7B34",
+				6,
+				"Present"
+		);
 	}
 
 	@Override
@@ -34,21 +41,9 @@ public class PresentClass extends BaseClass {
 		return ClassType.Present;
 	}
 
-	public ItemStack makeGreen(ItemStack armor) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armor.getItemMeta();
-		lm.setColor(Color.ORANGE);
-		armor.setItemMeta(lm);
-		return armor;
-	}
-
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		playerEquip.setHelmet(getHelmet(new ItemStack(Material.CHEST)));
-		playerEquip.setChestplate(makeGreen(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeGreen(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeGreen(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override
@@ -76,7 +71,7 @@ public class PresentClass extends BaseClass {
 				ItemHelper.setDetails(new ItemStack(Material.ENDER_CHEST, 1),
 						"" + ChatColor.RESET + ChatColor.ITALIC + "Mythical Gift", "",
 						"" + ChatColor.RESET + ChatColor.YELLOW + "Steals another player's effect or double jump!"));
-		playerInv.setItem(3, new ItemStack(Material.ARROW));
+		playerInv.setItem(35, new ItemStack(Material.ARROW));
 	}
 
 	@Override
@@ -127,7 +122,7 @@ public class PresentClass extends BaseClass {
 								BaseClass bc = instance.classes.get(hit);
 
 								if (bc != null) {
-									bc.LoadArmor(player);
+									bc.loadArmor(player);
 									player.sendMessage(instance.getGameManager().getMain()
 											.color("&e&l(!) &rYou stole &e" + hit.getName() + "'s &rarmor"));
 								}

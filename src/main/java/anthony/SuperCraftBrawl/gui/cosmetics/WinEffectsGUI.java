@@ -1,28 +1,30 @@
 package anthony.SuperCraftBrawl.gui.cosmetics;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.SkullType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 
 public class WinEffectsGUI implements InventoryProvider {
 
 	public Core main;
 	public SmartInventory inv;
 
-	public WinEffectsGUI(Core main) {
-		inv = SmartInventory.builder().id("myInventory").provider(this).size(6, 9)
-				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Win Effects").build();
+	public WinEffectsGUI(Core main, SmartInventory parent) {
+		inv = SmartInventory.builder()
+				.id("myInventory")
+				.provider(this)
+				.size(3, 9)
+				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Win Effects")
+				.parent(parent)
+				.build();
 		this.main = main;
 	}
 
@@ -41,15 +43,9 @@ public class WinEffectsGUI implements InventoryProvider {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 		
 		// Icons Items
-		ItemStack lockedCosmetic = ItemHelper.createDye(DyeColor.GRAY, 1, ChatColor.GRAY + "&&&&&&&");
-		
-		
+
 		// Setting Items
-		contents.fillRect(1, 1, 7, 7, ClickableItem.of(
-				lockedCosmetic,
-				e -> {
-				
-				}));
+		contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 		
 		if (data != null) {
 			contents.set(1, 2,
@@ -114,6 +110,12 @@ public class WinEffectsGUI implements InventoryProvider {
 				inv.close(player);
 				player.sendMessage(main.color("&e&l(!) &rYou have enabled &eDefault &rwin effect"));
 			}));
+
+			contents.set(2, 8, ClickableItem.of(
+					ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
+						inv.getParent().get().open(player);
+					}
+			));
 		}
 	}
 

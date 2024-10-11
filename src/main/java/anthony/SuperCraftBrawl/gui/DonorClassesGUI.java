@@ -2,7 +2,7 @@ package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
@@ -95,7 +95,7 @@ public class DonorClassesGUI implements InventoryProvider {
 									} else {
 										player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD
 												+ "(!) " + ChatColor.RESET
-												+ "Stop tryna cheat the systemmmmm!! You need a rank to use this class");
+												+ "You need a rank to use this class");
 										inv.close(player);
 									}
 								}));

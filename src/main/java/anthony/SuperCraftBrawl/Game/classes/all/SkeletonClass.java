@@ -5,7 +5,6 @@ import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
@@ -17,12 +16,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 
 public class SkeletonClass extends BaseClass {
 
@@ -31,23 +28,18 @@ public class SkeletonClass extends BaseClass {
 	public SkeletonClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.1;
-	}
-
-	public ItemStack makeGray(ItemStack armour) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(Color.GRAY);
-		armour.setItemMeta(lm);
-		return armour;
+		createArmor(
+				null,
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjI3OTVjM2M2ZjM2ZDY3ZGVjZjlhMzE5NWUxMjgwNDBiZWM1MjI2YjA1NWYyYjE2ZDQ2ZmExOWE5MTgwZTAyMyJ9fX0=",
+				"D6D6D6",
+				6,
+				"Skeleton"
+		);
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		playerEquip.setHelmet(getHelmet(new ItemStack(Material.SKULL_ITEM)));
-		playerEquip.setChestplate(makeGray(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeGray(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeGray(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override
@@ -70,15 +62,15 @@ public class SkeletonClass extends BaseClass {
 	@Override
 	public void SetItems(Inventory playerInv) {
 		skeleAttack.startTime = System.currentTimeMillis() - 100000;
-		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv
-				.setItem(1,
+				.setItem(0,
 						ItemHelper.addEnchant(ItemHelper.addEnchant(
 								ItemHelper.setDetails(new ItemStack(Material.BONE), "", "",
 										instance.getGameManager().getMain()
 												.color("&7Right click to shoot an Attack Arrow!")),
 								Enchantment.DAMAGE_ALL, 2), Enchantment.KNOCKBACK, 1));
-		playerInv.setItem(2, new ItemStack(Material.ARROW));
+		playerInv.setItem(1, this.getAttackWeapon());
+		playerInv.setItem(35, new ItemStack(Material.ARROW));
 	}
 
 	@Override
