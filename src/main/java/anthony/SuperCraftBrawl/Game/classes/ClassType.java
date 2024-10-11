@@ -370,9 +370,9 @@ public enum ClassType {
 	public String getClassDesc() {
 		switch (this) {
 		case Cactus:
-			return "A pricklyyy living thing, made up of thornws & blood..";
+			return "A pricklyyy living thing, made up of thorns & blood..";
 		case GrimReaper:
-			return "No text yet";
+			return "Harvest souls with deadly precision, wielding dark powers..";
 		case BrewingStand:
 			return "Hit players to obtain Brewing items to get epic potions!";
 		case Fade:
@@ -543,7 +543,7 @@ public enum ClassType {
 		case Bat:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bat" + ChatColor.RESET;
 		case GrimReaper:
-			return color("&c&lGrimReaper&r");
+			return color("&0&l&oGrimReaper&r");
 		case BrewingStand:
 			return color("&e&lBrewingStand&r");
 		case Fade:

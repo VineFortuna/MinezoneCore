@@ -10,7 +10,7 @@
 		<maven.compiler.target>8</maven.compiler.target>
 	</properties>
 	<build>
-		<directory>C:\Users\natan\OneDrive\Documentos\Natan\Minezone\Test Server\plugins</directory>
+		<directory>C:\Users\antho\OneDrive\Desktop\TheArchive-Core\target</directory>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

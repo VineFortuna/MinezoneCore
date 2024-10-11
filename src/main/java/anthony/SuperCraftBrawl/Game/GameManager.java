@@ -639,20 +639,9 @@ public class GameManager implements Listener, PluginMessageListener {
 	@EventHandler
 	public void EntityDeathEvent(EntityDeathEvent entity) {
 		List<EntityType> entities = new ArrayList<>(
-				Arrays.asList(
-						EntityType.ZOMBIE,
-						EntityType.SKELETON,
-						EntityType.CREEPER,
-						EntityType.PIG_ZOMBIE,
-						EntityType.MAGMA_CUBE,
-						EntityType.SILVERFISH,
-						EntityType.WITCH,
-						EntityType.CHICKEN,
-						EntityType.BLAZE,
-						EntityType.PIG,
-						EntityType.MUSHROOM_COW,
-						EntityType.COW
-				));
+				Arrays.asList(EntityType.ZOMBIE, EntityType.SKELETON, EntityType.CREEPER, EntityType.PIG_ZOMBIE,
+						EntityType.MAGMA_CUBE, EntityType.SILVERFISH, EntityType.WITCH, EntityType.CHICKEN,
+						EntityType.BLAZE, EntityType.PIG, EntityType.MUSHROOM_COW, EntityType.COW));
 		if (entities.contains(entity.getEntityType())) {
 			entity.getDrops().clear();
 			entity.setDroppedExp(0);
@@ -839,14 +828,13 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (item != null && item.getType() == Material.DIAMOND_HOE) {
 				ItemMeta meta = item.getItemMeta();
 
-				if (meta.getDisplayName().contains("Bazooka") && player.getGameMode() != GameMode.SPECTATOR) {
+				if (meta.getDisplayName().contains("BAZOOKA") && player.getGameMode() != GameMode.SPECTATOR) {
 					if (bc != null) {
 						if (bc.bazooka.getTime() < 3000) {
 							int seconds = (3000 - bc.bazooka.getTime()) / 1000 + 1;
 							e.setCancelled(true);
 							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ "Your Bazooka is still regenerating for " + ChatColor.YELLOW + seconds
-									+ " more seconds ");
+									+ "Your Bazooka is still regenerating for " + ChatColor.YELLOW + seconds + "s");
 						} else {
 							bc.bazooka.restart();
 							item.setAmount(item.getAmount() - 1);
@@ -1050,19 +1038,21 @@ public class GameManager implements Listener, PluginMessageListener {
 							if (!(i.team.get(shooter).equals(i.team.get(hitPlayer)))) {
 								if (i.classes.get(shooter).getType() == ClassType.SnowGolem)
 									hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness
-									// 3 -
-									// Snowgolem
+								// 3 -
+								// Snowgolem
 								else
 									hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 0)); // Slowness
 								// 1
 							}
 						} else {
 							if (i.classes.get(shooter).getType() == ClassType.SnowGolem)
-								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness 3
-								// -
-								// Snowgolem
+								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness
+																												// 3
+							// -
+							// Snowgolem
 							else
-								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 0)); // Slowness 1
+								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 0)); // Slowness
+																												// 1
 						}
 					}
 				}
@@ -2126,7 +2116,8 @@ public class GameManager implements Listener, PluginMessageListener {
 			case MONSTER_EGG:
 				if (i != null && i.state == GameState.STARTED) {
 					// Zombie Monster Egg
-					if (meta.getDisplayName().toLowerCase().contains("zombie") && !(meta.getDisplayName().toLowerCase().contains("pigman"))) {
+					if (meta.getDisplayName().toLowerCase().contains("zombie")
+							&& !(meta.getDisplayName().toLowerCase().contains("pigman"))) {
 						int amount = item.getAmount();
 
 						if (amount > 0) {

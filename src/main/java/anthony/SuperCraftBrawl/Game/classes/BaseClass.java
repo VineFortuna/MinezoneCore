@@ -103,6 +103,7 @@ public abstract class BaseClass {
 	public Timer fadeAbility = new Timer();
 	public Timer summon = new Timer();
 	public Timer fishing = new Timer();
+	public Timer grimReaper = new Timer();
 	public Timer alexBrewingStand = new Timer();
 	public boolean bedrockInvincibility = false;
 	public boolean hunterDash = true;
@@ -2896,6 +2897,9 @@ public abstract class BaseClass {
 				d.sendMessage(instance.getGameManager().getMain()
 						.color("&2&l(!) &rYou got a kill and gained an extra &2Butter Ball"));
 				d.getInventory().addItem(item);
+			} else if (baseClass.getType() == ClassType.GrimReaper) {
+				ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
+				d.getInventory().setItem(2, zombieEgg);
 			}
 		}
 	}
