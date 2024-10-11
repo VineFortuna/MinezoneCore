@@ -543,7 +543,7 @@ public enum ClassType {
 		case Bat:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bat" + ChatColor.RESET;
 		case GrimReaper:
-			return color("&0&l&oGrimReaper&r");
+			return color("&8&l&oGrimReaper&r");
 		case BrewingStand:
 			return color("&e&lBrewingStand&r");
 		case Fade:
