@@ -76,7 +76,7 @@ public class NotchClass extends BaseClass {
 				
 				if (player.getInventory().contains(Material.DIRT) && !checkIfDead(player, instance)) {
 					int i = player.getInventory().first(Material.DIRT);
-					player.getInventory().getItem(i).setType(Material.DIRT);
+					player.getInventory().getItem(i).setType(Material.GRASS);
 				}
 			}
 		}
