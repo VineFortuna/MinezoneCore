@@ -4,7 +4,10 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
-import org.bukkit.*;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -13,7 +16,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
@@ -72,13 +74,10 @@ public class NotchClass extends BaseClass {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &0Collape X-Axis");
 				getActionBarManager().setActionBar(player, "notch.cooldown", msg, 2);
 				
-				if (player.getGameMode() != GameMode.SPECTATOR && player.getInventory().contains(Material.DIRT)) {
+				if (player.getInventory().contains(Material.DIRT) && !checkIfDead(player, instance)) {
 					player.getInventory().remove(Material.DIRT);
-					player.getInventory()
-							.addItem(ItemHelper.setDetails(new ItemStack(Material.GRASS),
-									"" + ChatColor.BLACK + "Collapse X-Axis", "",
-									instance.getGameManager().getMain().color("&7Pull enemies when aiming at them!"),
-									instance.getGameManager().getMain().color("   &rRange: &e20 blocks")));
+					int i = player.getInventory().first(Material.DIRT);
+					player.getInventory().getItem(i).setType(Material.DIRT);
 				}
 			}
 		}
