@@ -495,6 +495,36 @@ public class GameInstance {
 		}
 	}
 
+	public void initialSpawn() {
+		MapInstance mapInstance = null;
+
+		if (map != null)
+			mapInstance = map.GetInstance();
+		else
+			mapInstance = duosMap.GetInstance();
+
+		int count = 0;
+		int size = mapInstance.spawnPos.size();
+
+		if (size == 0) { //If no spawn locations are set
+			for (Player gamePlayer : players) {
+				gamePlayer.teleport(new Location(getMapWorld(), 42, 2, 2.5));
+			}
+		} else {
+			for (Player gamePlayer : players) {
+				double x = mapInstance.spawnPos.get(count).getX();
+				double y = mapInstance.spawnPos.get(count).getY();
+				double z = mapInstance.spawnPos.get(count).getZ();
+
+				gamePlayer.teleport(new Location(getMapWorld(), x, y, z));
+				count++;
+
+				if (count >= mapInstance.spawnPos.size())
+					count = 0;
+			}
+		}
+	}
+
 	/*
 	 * This function gets a random spawn location on the map and returns it, which a
 	 * player will spawn at
@@ -612,7 +642,6 @@ public class GameInstance {
 	 */
 	private void giveLootDrop() {
 		for (Player player : this.players) {
-			player.teleport(GetRespawnLoc());
 			player.setFireTicks(0);
 			BaseClass bc = this.classes.get(player);
 
@@ -657,6 +686,7 @@ public class GameInstance {
 		addAlivePlayers();
 		addAliveTeams();
 		giveLootDrop();
+		initialSpawn();
 		gameTicks();
 
 		/*
@@ -848,17 +878,11 @@ public class GameInstance {
 
 		// Bomb
 		ItemStack bomb = ItemHelper.createPotionItem(PotionType.INSTANT_DAMAGE, 1000, 0, true, true, true);
-		ItemHelper.setDetails(bomb,
-				"&4&lBOMB",
-				"&7Be careful!",
-				"&7Instantly kills... anyone"
-		);
+		ItemHelper.setDetails(bomb, "&4&lBOMB", "&7Be careful!", "&7Instantly kills... anyone");
 
 		// Brooms
-		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4),
-				"&5&lBROOM",
-				"&7Sends you up and save you from the void"
-		);
+		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4), "&5&lBROOM",
+				"&7Sends you up and save you from the void");
 
 		// Hammer
 		ItemStack hammer = ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD, 1, (short) 250), "&d&lHAMMER");
@@ -871,35 +895,24 @@ public class GameInstance {
 		ItemStack pearl = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL), "&5&lENDER PEARL");
 
 		// Slowballs
-		ItemStack slowballs = ItemHelper.setDetails(new ItemStack(Material.SNOW_BALL, 8),
-				"&f&lSLOWBALLS",
-				"&7Give Slowness 1 for 3s to an enemy"
-		);
+		ItemStack slowballs = ItemHelper.setDetails(new ItemStack(Material.SNOW_BALL, 8), "&f&lSLOWBALLS",
+				"&7Give Slowness 1 for 3s to an enemy");
 
 		// Mini Shield
-		ItemStack miniShield = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				"&9&lMINI-SHIELD",
-				"&7Absorption 1"
-		);
+		ItemStack miniShield = ItemHelper.setDetails(new ItemStack(Material.POTION, 1), "&9&lMINI-SHIELD",
+				"&7Absorption 1");
 
 		// Bounty
-		ItemStack bounty = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR, 1),
-				"&a&lBOUNTY",
-				"&7Set a bounty on a random player",
-				"&7Kill them to claim extra tokens"
-		);
+		ItemStack bounty = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR, 1), "&a&lBOUNTY",
+				"&7Set a bounty on a random player", "&7Kill them to claim extra tokens");
 
 		// Blooper
-		ItemStack blooper = ItemHelper.setDetails(new ItemStack(Material.RABBIT_FOOT),
-				"&e&lBLOOPER",
-				"&7Give Blindness or Nausea to an enemy"
-		);
+		ItemStack blooper = ItemHelper.setDetails(new ItemStack(Material.RABBIT_FOOT), "&e&lBLOOPER",
+				"&7Give Blindness or Nausea to an enemy");
 
 		// Nuke
-		ItemStack nuke = ItemHelper.setDetails(new ItemStack(Material.TNT, 3),
-				"&4&lNUKE",
-				"&7Spawn TNTs where you're looking"
-		);
+		ItemStack nuke = ItemHelper.setDetails(new ItemStack(Material.TNT, 3), "&4&lNUKE",
+				"&7Spawn TNTs where you're looking");
 		ItemHelper.setGlowing(nuke, true);
 
 		// Instagib
@@ -921,10 +934,8 @@ public class GameInstance {
 		ItemStack creeperEgg = ItemHelper.createMonsterEgg(EntityType.CREEPER, 1, "&a&lCREEPER POKEBALL");
 
 		// Milk Bucket
-		ItemStack milk = ItemHelper.setDetails(new ItemStack(Material.MILK_BUCKET),
-				"&f&lMILK",
-				"&7Removes fire and all negative effects"
-		);
+		ItemStack milk = ItemHelper.setDetails(new ItemStack(Material.MILK_BUCKET), "&f&lMILK",
+				"&7Removes fire and all negative effects");
 
 		// Golden Apple
 		ItemStack goldenApple = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE), "&6&lGOLDEN APPLE");
