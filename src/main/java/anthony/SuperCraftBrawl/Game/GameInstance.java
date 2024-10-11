@@ -506,7 +506,7 @@ public class GameInstance {
 		int count = 0;
 		int size = mapInstance.spawnPos.size();
 
-		if (size == 0) { //If no spawn locations are set
+		if (size == 0) { // If no spawn locations are set
 			for (Player gamePlayer : players) {
 				gamePlayer.teleport(new Location(getMapWorld(), 42, 2, 2.5));
 			}
@@ -1704,30 +1704,24 @@ public class GameInstance {
 					if (data.cwm == 1) {
 						customFlawWinMsg(winnerList.get(0));
 					} else {
-						Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-								+ winnerList.get(0).getName() + ChatColor.WHITE + " just " + ChatColor.BOLD
-								+ "FLAWLESSLY " + ChatColor.RESET + "won on " + ChatColor.BOLD + ChatColor.WHITE
-								+ ChatColor.YELLOW + ChatColor.BOLD + map.toString());
+						Bukkit.broadcastMessage(color("&2&l(!) &e" + winnerList.get(0).getName()
+								+ " &rjust &r&lFLAWLESSLY &rwon on &b&l" + map.toString()));
 					}
 				} else {
-					Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-							+ winnerList.get(0).getName() + ChatColor.WHITE + " just " + ChatColor.BOLD + "FLAWLESSLY "
-							+ ChatColor.RESET + "won on " + ChatColor.BOLD + ChatColor.WHITE + ChatColor.YELLOW
-							+ ChatColor.BOLD + map.toString());
+					Bukkit.broadcastMessage(color("&2&l(!) &e" + winnerList.get(0).getName()
+							+ " &rjust &r&lFLAWLESSLY &rwon on &b&l" + map.toString()));
 				}
 			} else {
 				if (winnerList.get(0).hasPermission("scb.customWin")) {
 					if (data.cwm == 1) {
 						customWinMsg(winnerList.get(0));
 					} else {
-						Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-								+ winnerList.get(0).getName() + ChatColor.WHITE + " just won on " + ChatColor.BOLD
-								+ ChatColor.WHITE + ChatColor.YELLOW + ChatColor.BOLD + map.toString());
+						Bukkit.broadcastMessage(color(
+								"&2&l(!) &e" + winnerList.get(0).getName() + " &rjust won on &b&l" + map.toString()));
 					}
 				} else {
-					Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-							+ winnerList.get(0).getName() + ChatColor.WHITE + " just won on " + ChatColor.BOLD
-							+ ChatColor.WHITE + ChatColor.YELLOW + ChatColor.BOLD + map.toString());
+					Bukkit.broadcastMessage(
+							color("&2&l(!) &e" + winnerList.get(0).getName() + " &rjust won on &b&l" + map.toString()));
 				}
 			}
 		} else {
@@ -1793,17 +1787,14 @@ public class GameInstance {
 
 		if (map != null) {
 			if (chance == 0) {
-				Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-						+ winner.getName() + ChatColor.WHITE + " got a Victory Royale on " + ChatColor.BOLD
-						+ ChatColor.WHITE + ChatColor.YELLOW + ChatColor.BOLD + map.toString());
+				Bukkit.broadcastMessage(
+						color("&2&l(!) &e" + winner.getName() + " &rgot a Victory Royale on &b&l" + map.toString()));
 			} else if (chance == 1) {
-				Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-						+ winner.getName() + ChatColor.WHITE + " just showed the entire lobby who's boss on "
-						+ ChatColor.BOLD + ChatColor.WHITE + ChatColor.YELLOW + ChatColor.BOLD + map.toString());
+				Bukkit.broadcastMessage(color("&2&l(!) &e" + winner.getName()
+						+ " &rjust showed the entire lobby who's boss on &b&l" + map.toString()));
 			} else if (chance == 2) {
-				Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-						+ winner.getName() + ChatColor.WHITE + " just won on " + ChatColor.BOLD + ChatColor.WHITE
-						+ ChatColor.YELLOW + ChatColor.BOLD + map.toString());
+				Bukkit.broadcastMessage(
+						color("&2&l(!) &e" + winner.getName() + " &rjust won on &b&l" + map.toString()));
 			}
 		} else {
 			if (chance == 0) {
@@ -1829,21 +1820,19 @@ public class GameInstance {
 
 		if (map != null) {
 			if (chance == 0) {
-				Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-						+ winner.getName() + ChatColor.WHITE + " just " + ChatColor.BOLD + "ABSOLUTELY DESTROYED "
-						+ ChatColor.RESET + "everyone on " + ChatColor.BOLD + ChatColor.WHITE + ChatColor.YELLOW
-						+ ChatColor.BOLD + map.toString());
+				Bukkit.broadcastMessage(color("&2&l(!) &e" + winner.getName()
+						+ " &rjust &r&lABSOLUTELY DESTROYED &ron &b&l" + map.toString()));
+
 			} else if (chance == 1) {
-				Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-						+ winner.getName() + ChatColor.WHITE + " just " + ChatColor.BOLD + "FLAWLESSLY "
-						+ ChatColor.RESET + "won on " + ChatColor.BOLD + ChatColor.WHITE + ChatColor.YELLOW
-						+ ChatColor.BOLD + map.toString());
+				Bukkit.broadcastMessage(
+						color("&2&l(!) &e" + winner.getName() + " &rjust &r&lFLAWLESSLY &ron &b&l" + map.toString()));
 			} else if (chance == 2) {
-				Bukkit.broadcastMessage(this.getGameManager().getMain().color("&r&l(!) &rThe game on &e&l"
-						+ map.toString() + " &rwas too easy for " + tag + "&e" + winner.getName()));
+				Bukkit.broadcastMessage(color(
+						"&2&l(!) &rThe game on &b&l" + map.toString() + "&rwas too easy for &e" + winner.getName()));
+
 			} else if (chance == 3) {
-				Bukkit.broadcastMessage(this.getGameManager().getMain().color("&r&l(!) &rGet out of the way for " + tag
-						+ "&e" + winner.getName() + ". &rHe &r&lDOMINATED &ron &e&l" + map.toString()));
+				Bukkit.broadcastMessage(color("&2&l(!) &rGet &r&lOUTTA THE WAY &rfor &e" + winner.getName()
+						+ "&r. He dominated on &b&l" + map.toString()));
 			}
 		} else {
 			if (chance == 0) {
