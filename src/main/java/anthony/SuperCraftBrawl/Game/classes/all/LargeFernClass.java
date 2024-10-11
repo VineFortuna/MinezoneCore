@@ -7,27 +7,20 @@ import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.CooldownNatowski;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import anthony.SuperCraftBrawl.ItemHelper;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
+import anthony.util.ItemHelper;
+import anthony.util.SoundManager;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import java.lang.reflect.Field;
-import java.util.UUID;
 
 public class LargeFernClass extends BaseClass {
 
@@ -43,6 +36,13 @@ public class LargeFernClass extends BaseClass {
 
     public LargeFernClass(GameInstance instance, Player player) {
         super(instance, player);
+        createArmor(
+                null,
+                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDQxNTczYmYyZTAyNzBiYjYyMDNkMmI3NjRkZDdkMGNiYmM1ZDdiMWJhNmNkY2NjOWFmNWZmNDc0MzRhMGViNCJ9fX0=",
+                "285F3F",
+                6,
+                "LargeFern"
+        );
     }
 
     @Override
@@ -51,27 +51,8 @@ public class LargeFernClass extends BaseClass {
     }
 
     @Override
-    public void SetArmour(EntityEquipment playerEquip) {
-        // Head (helmet)
-        String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDQxNTczYmYyZTAyNzBiYjYyMDNkMmI3NjRkZDdkMGNiYmM1ZDdiMWJhNmNkY2NjOWFmNWZmNDc0MzRhMGViNCJ9fX0=";
-        ItemStack playerskull = ItemHelper.createSkullTexture(texture, "&2Large Fern Head");
-
-        // Chestplate
-        ItemStack chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, Color.GREEN, "&2Large Fern Chestplate");
-        chestplate.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
-
-        // Leggings
-        ItemStack leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, Color.GREEN, "&2Large Fern Leggings");
-
-        // Boots
-        ItemStack boots = ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, Color.GREEN, "&2Large Fern Boots");
-        boots.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 4);
-
-        // Setting Armor
-        playerEquip.setHelmet(getHelmet(playerskull));;
-        playerEquip.setChestplate(chestplate);
-        playerEquip.setLeggings(leggings);
-        playerEquip.setBoots(boots);
+    public void setArmor(EntityEquipment playerEquip) {
+        setArmorNew(playerEquip);
     }
 
     @Override
@@ -440,7 +421,7 @@ public class LargeFernClass extends BaseClass {
                 // Removing Regeneration
                 player.removePotionEffect(transfernRegeneration.getType());
                 // Setting Armor back
-                SetArmour(player.getEquipment());
+                setArmor(player.getEquipment());
                 // Removing Fern block
                 if (fernLocation != null)
                     fernLocation.getBlock().setType(Material.AIR);

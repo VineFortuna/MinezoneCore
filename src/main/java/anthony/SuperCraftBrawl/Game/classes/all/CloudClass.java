@@ -3,7 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
@@ -53,6 +53,13 @@ public class CloudClass extends BaseClass {
 	public CloudClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.3;
+		createArmor(
+				null,
+				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDQ4Mjg3NzM3MTU0NDZlNDczZjVhMTY0OTMzYTVkODgyM2RmYjg1OGFmOTA0OTAxMzVjNDE3ZWZlMTY1OTgxZCJ9fX0=",
+				"AECBFF",
+				6,
+				"Cloud"
+		);
 	}
 
 	@Override
@@ -60,25 +67,9 @@ public class CloudClass extends BaseClass {
 		return ClassType.Cloud;
 	}
 
-	public ItemStack makeGray(ItemStack armor) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armor.getItemMeta();
-		lm.setColor(Color.GRAY);
-		armor.setItemMeta(lm);
-		return armor;
-	}
-
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDQ4Mjg3NzM3MTU0NDZlNDczZjVhMTY0OTMzYTVkODgyM2RmYjg1OGFmOTA0OTAxMzVjNDE3ZWZlMTY1OTgxZCJ9fX0=";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-		
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(makeGray(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeGray(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeGray(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 1));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override
@@ -287,6 +278,7 @@ public class CloudClass extends BaseClass {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, this.wool);
 		forcesOfNature();
+		player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 1));
 	}
 
 	@Override

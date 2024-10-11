@@ -14,6 +14,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import anthony.util.ItemHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -421,8 +422,8 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null) {
-			String[] commandTypes = { "join", "fav", "fly", "shop", "leave", "cw", "l", "players", "class", "spectate",
-					"startgame", "gamestats", "setlives", "purchases", "kit" };
+			String[] commandTypes = { "join", "fav", "fly", "f", "shop", "leave", "l", "cw", "players", "class", "spectate",
+					"startgame", "gamestats", "setlives", "purchases", "kit", "items" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -1876,22 +1877,25 @@ public class Core extends JavaPlugin implements Listener {
 	public void LobbyItems(Player player) {
 		if (this.getCommands() != null) {
 			player.getInventory().setItem(1,
-					ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER), "" + ChatColor.GRAY + "Quick Join"));
+					ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER), "&b>&3>&f&lQuick Join&3<&b<"));
 			player.getInventory().setItem(3,
-					ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), "" + ChatColor.GRAY + "Class Menu"));
+					ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), "&9>&1>&f&lClasses&1<&9<"));
 			player.getInventory().setItem(8,
-					ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), "" + ChatColor.GRAY + "Challenges"));
+					ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), "&e>&6>&f&lChallenges&6<&e<"));
 		}
 		player.getInventory().setItem(0,
-				ItemHelper.setDetails(new ItemStack(Material.COMPASS), "" + ChatColor.GRAY + "Game Selector"));
+				ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&a>&2>&f&lGame Selector&2<&a<"));
 		player.getInventory().setItem(4,
-				ItemHelper.setDetails(new ItemStack(Material.CHEST), "" + ChatColor.GRAY + "Cosmetics"));
+				ItemHelper.setDetails(new ItemStack(Material.CHEST), "&d>&5>&f&lCosmetics&5<&d<"));
 		ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
-		player.getInventory().setItem(7, ItemHelper.setDetails(stats, "" + ChatColor.GRAY + "Profile"));
+		player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&c>&4>&fProfile&4<&c<"));
+
+		player.getInventory().setItem(5, getFishingRod(player));
+
 		if (tournament) {
 			ItemStack tournament = ItemHelper.createSkullTexture(
 					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGYzOTk3YzQzMDkxNjk0ZmMyZmI3NmM4ODNhNzZjY2U4OWYwMjI3ZTVjOWYxZGZlIn19fQ==");
-			player.getInventory().setItem(6, ItemHelper.setDetails(tournament, "" + ChatColor.GRAY + "Tournament"));
+			player.getInventory().setItem(2, ItemHelper.setDetails(tournament, "&7>&f>&6&lTournament&f<&7<"));
 		}
 		player.setAllowFlight(true);
 	}
@@ -1989,5 +1993,22 @@ public class Core extends JavaPlugin implements Listener {
 		for (World world : Bukkit.getWorlds()) {
 			Bukkit.unloadWorld(world, false);
 		}
+	}
+
+	public ItemStack getFishingRod(Player player) {
+		PlayerData data = getDataManager().getPlayerData(player);
+
+		ItemStack fishingRod = ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
+				"&3&lGo Fishing!",
+				"&fAnywhere with water",
+				"&fFish for junk, fish and treasure",
+				"&fEarn unique rewards"
+		);
+		ItemHelper.setUnbreakable(fishingRod);
+		if (data.lure == 1 && data.lureLevel > 0) {
+			ItemHelper.addEnchant(fishingRod, Enchantment.LURE, data.lureLevel);
+		}
+
+		return fishingRod;
 	}
 }
