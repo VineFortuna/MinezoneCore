@@ -1,16 +1,13 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameManager;
-import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
@@ -20,9 +17,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
-
-import java.util.Random;
 
 public class VindicatorClass extends BaseClass {
     
@@ -30,26 +24,20 @@ public class VindicatorClass extends BaseClass {
     
     public VindicatorClass(GameInstance instance, Player player) {
         super(instance, player);
-    }
-    
-    public ItemStack makePink(ItemStack armour) {
-        LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-        lm.setColor(Color.BLACK);
-        armour.setItemMeta(lm);
-        return armour;
+        createArmor(
+                null,
+                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGFlZWQ5ZDhlZDE3NjllNzdlM2NmZTExZGMxNzk2NjhlZDBkYjFkZTZjZTI5ZjFjOGUwZDVmZTVlNjU3M2I2MCJ9fX0=",
+                "695D52",
+                "266163",
+                "474038",
+                6,
+                "Vindicator"
+        );
     }
     
     @Override
-    public void SetArmour(EntityEquipment playerEquip) {
-        String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGFlZWQ5ZDhlZDE3NjllNzdlM2NmZTExZGMxNzk2NjhlZDBkYjFkZTZjZTI5ZjFjOGUwZDVmZTVlNjU3M2I2MCJ9fX0=";
-        ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-    
-        playerEquip.setHelmet(getHelmet(playerskull));
-        playerEquip.setChestplate(makePink(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-                Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-        playerEquip.setLeggings(makePink(new ItemStack(Material.LEATHER_LEGGINGS)));
-        playerEquip.setBoots(makePink(
-                ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+    public void setArmor(EntityEquipment playerEquip) {
+        setArmorNew(playerEquip);
     }
     
     @Override

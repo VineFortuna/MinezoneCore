@@ -1,18 +1,15 @@
 package anthony.SuperCraftBrawl.gui.cosmetics;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.ItemHelper;
+import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -23,12 +20,13 @@ public class GadgetsGUI implements InventoryProvider {
     public Core main;
     public SmartInventory inv;
 
-    public GadgetsGUI(Core main) {
+    public GadgetsGUI(Core main, SmartInventory parent) {
         inv = SmartInventory.builder()
                 .id("myInventory")
                 .provider(this)
-                .size(6, 9)
+                .size(3, 9)
                 .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Gadgets")
+                .parent(parent)
                 .build();
         this.main = main;
     }
@@ -38,8 +36,6 @@ public class GadgetsGUI implements InventoryProvider {
         PlayerData data = main.getDataManager().getPlayerData(player);
 
         // Icon Items
-        ItemStack lockedCosmetic = ItemHelper.createDye(DyeColor.GRAY, 1, ChatColor.GRAY + "&&&&&&&");
-
             // Broom
         List<String> broomList = new ArrayList<>();
         broomList.add(ChatColor.DARK_GRAY + "Fly around like a Witch!");
@@ -59,21 +55,12 @@ public class GadgetsGUI implements InventoryProvider {
         paintballList.add("");
         paintballList.add(ChatColor.RESET + "You have " + ChatColor.YELLOW + data.paintball + ChatColor.RESET + " Paintballs");
         ItemStack paintball = ItemHelper.create(Material.GOLD_BARDING, ChatColor.YELLOW.toString() + ChatColor.BOLD + "Paintball Gun", paintballList);
-    
-        List<String> fishingrodList = new ArrayList<>();
-        fishingrodList.add(ChatColor.DARK_GRAY + "Let's go fishing!");
-        ItemStack fishingrod = ItemHelper.create(Material.FISHING_ROD, ChatColor.DARK_AQUA.toString() + ChatColor.BOLD + "Fishing Rod", fishingrodList);
-        ItemHelper.setUnbreakable(fishingrod);
-        if (data.lure == 1 && data.lureLevel > 0) {
-            ItemHelper.addEnchant(fishingrod, Enchantment.LURE, data.lureLevel);
-        }
+
+            // Fishing
+        ItemStack fishingRod = main.getFishingRod(player);
 
         // Setting Items
-        contents.fillRect(1,1, 7,7, ClickableItem.of(
-                lockedCosmetic,
-                e -> {
-
-                }));
+        contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 
             // Broom Gadget
         contents.set(1, 1, ClickableItem.of(
@@ -143,21 +130,28 @@ public class GadgetsGUI implements InventoryProvider {
                     }
                     inv.close(player);
                 }));
+            // Fishing Rod
         contents.set(1, 4, ClickableItem.of(
-                fishingrod,
+                fishingRod,
                 e -> {
-                    if (!(player.getInventory().contains(fishingrod))) {
-                        player.getInventory().setItem(5, fishingrod);
+                    if (!(player.getInventory().contains(fishingRod))) {
+                        player.getInventory().setItem(5, fishingRod);
                         player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
                                 + "You have equipped " + ChatColor.DARK_AQUA + ChatColor.BOLD + "Fishing Rod");
                         inv.close(player);
-                    } else if (player.getInventory().contains(fishingrod)) {
-                        player.getInventory().remove(fishingrod);
+                    } else if (player.getInventory().contains(fishingRod)) {
+                        player.getInventory().remove(fishingRod);
                         player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
                                 + "You have unequipped " + ChatColor.DARK_AQUA + ChatColor.BOLD + "Fishing Rod");
                         inv.close(player);
                     }
                 }));
+
+        contents.set(2, 8, ClickableItem.of(
+                ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
+                    inv.getParent().get().open(player);
+                }
+        ));
     }
 
     @Override
