@@ -7,7 +7,9 @@ import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.*;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -19,7 +21,6 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 public class ZombiePigmanClass extends BaseClass {
 
@@ -49,9 +50,8 @@ public class ZombiePigmanClass extends BaseClass {
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(
-				ItemHelper.addEnchant(new ItemStack(Material.GOLD_SWORD), Enchantment.KNOCKBACK, 2),
-				Enchantment.DURABILITY, 1000);
+		ItemStack item = ItemHelper.setUnbreakable(ItemHelper.addEnchant(
+				new ItemStack(Material.GOLD_SWORD), Enchantment.KNOCKBACK, 2));
 		return item;
 	}
 

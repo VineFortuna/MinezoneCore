@@ -75,7 +75,6 @@ public class NotchClass extends BaseClass {
 				getActionBarManager().setActionBar(player, "notch.cooldown", msg, 2);
 				
 				if (player.getInventory().contains(Material.DIRT) && !checkIfDead(player, instance)) {
-					player.getInventory().remove(Material.DIRT);
 					int i = player.getInventory().first(Material.DIRT);
 					player.getInventory().getItem(i).setType(Material.DIRT);
 				}
@@ -197,10 +196,9 @@ public class NotchClass extends BaseClass {
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(
+		ItemStack item = ItemHelper.setUnbreakable(
 				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.STONE_SWORD),
-						"" + ChatColor.BLACK + ChatColor.BOLD + "Notch's Sword"), Enchantment.KNOCKBACK, 1),
-				Enchantment.DURABILITY, 10000);
+						"" + ChatColor.BLACK + ChatColor.BOLD + "Notch's Sword"), Enchantment.KNOCKBACK, 1));
 		return item;
 	}
 }
