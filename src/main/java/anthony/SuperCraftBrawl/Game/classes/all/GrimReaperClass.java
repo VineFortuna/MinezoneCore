@@ -6,7 +6,9 @@ import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -18,59 +20,76 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import anthony.SuperCraftBrawl.ItemHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 
 public class GrimReaperClass extends BaseClass {
 
+	private int cooldownSec = 0, cooldownDuration = 10000;
+
 	public GrimReaperClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.6;
-	}
+		baseVerticalJump = 1.2;
 
-	public ItemStack makeRed(ItemStack armour) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(Color.RED);
-		armour.setItemMeta(lm);
-		return armour;
+		createArmor(null,
+				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWJiZWE3MTljNTlmODAzZmY4NjQwNWI5M2M2NTA3ODg0NWRiMTY2OWFlMTA0NDQ3ZDhhMGU1MDBjZmNhZTllNCJ9fX0=",
+				"303030", 6, "GrimReaper");
 	}
 
 	@Override
-	public void SetArmour(EntityEquipment playerEquip) {
-		String texture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzY4OGU2MTY0MmEwYjY4NjQzZjRiYTM2OTJmZTIwNjYyMmI0ZDlhN2QzOTY1YmEwYmUxMzI5YzIxMzJkIn19fQ==";
-		ItemStack playerskull = ItemHelper.createSkullTexture(texture, "");
-
-		playerEquip.setHelmet(getHelmet(playerskull));
-		playerEquip.setChestplate(makeRed(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
-		playerEquip.setLeggings(makeRed(new ItemStack(Material.LEATHER_LEGGINGS)));
-		playerEquip.setBoots(makeRed(
-				ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
+	public void setArmor(EntityEquipment playerEquip) {
+		setArmorNew(playerEquip);
 	}
 
 	@Override
 	public void SetItems(Inventory playerInv) {
+		ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
+
 		playerInv.setItem(0, getAttackWeapon());
-		playerInv.setItem(1, new ItemStack(Material.REDSTONE));
+		playerInv.setItem(1,
+				ItemHelper.setDetails(new ItemStack(Material.REDSTONE),
+						"" + ChatColor.RED + ChatColor.BOLD + "Spirit Shackles", "",
+						"" + ChatColor.RESET + "Right-click to give slowness & blindness",
+						"" + ChatColor.RESET + "to enemies within 10 blocks"));
+		playerInv.setItem(2, zombieEgg);
 		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
 	}
 
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void Tick(int gameTicks) {
+		this.cooldownSec = (this.cooldownDuration - grimReaper.getTime()) / 1000 + 1;
+		cooldownActionBar(this.cooldownSec, this.cooldownDuration, grimReaper, ClassType.GrimReaper,
+				"grimReaper.cooldown", "Spirit Shackles");
+
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
 			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
+
+		if (player.getInventory().getItem(2) == null || player.getInventory().getItem(2).getType() == Material.AIR) {
+			if (checkIfSameClass(player) && checkIfDead(player) == false) {
+				player.getInventory().setItem(2, new ItemStack(Material.BARRIER));
+			}
+		}
 	}
-	
+
+	// This function checks if the player's class is still GrimReaper, like for
+	// frenzy when your class changes
+	private boolean checkIfSameClass(Player player) {
+		if (instance.classes.get(player) != null && instance.classes.get(player).getType() == ClassType.GrimReaper)
+			return true;
+
+		return false;
+	}
+
 	private boolean checkIfDead(Player player) {
 		if (player.getGameMode() == GameMode.SPECTATOR)
 			return true;
 		else if (instance.classes.get(player) != null && instance.classes.get(player).getLives() <= 0)
 			return true;
-		
+
 		return false;
 	}
 
@@ -80,47 +99,60 @@ public class GrimReaperClass extends BaseClass {
 		if (item != null && item.getType() == Material.REDSTONE
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 			if (player.getGameMode() != GameMode.SPECTATOR) {
-				Location center = player.getLocation();
+				if (grimReaper.getTime() < 10000) {
+					int seconds = (10000 - grimReaper.getTime()) / 1000 + 1;
+					event.setCancelled(true);
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "Your Spirit Shackles is on cooldown for " + ChatColor.YELLOW + seconds + "s");
+				} else {
+					grimReaper.restart();
+					player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 4 * 20, 0));
+					player.playSound(player.getLocation(), Sound.WOLF_GROWL, 1.0f, 1.0f);
 
-	            // Circle radius and the height fix to ensure the particles are on the ground
-	            int radius = 10;
-	            double heightOffset = 0.1;
+					// Circle radius and the height fix to ensure the particles are on the ground
+					int radius = 10;
+					double heightOffset = 0.1;
 
-	            // Create the circle and display particles
-	            new BukkitRunnable() {
-	                int counter = 0;
+					// Create the circle and display particles
+					new BukkitRunnable() {
+						int counter = 0;
+						Location center = player.getLocation();
 
-	                @Override
-	                public void run() {
-	                    if (counter >= 5 || checkIfDead(player)) {
-	                        cancel(); // Stop the task after 5 seconds or if player dies/leaves
-	                        return;
-	                    }
+						@Override
+						public void run() {
+							center = player.getLocation();
+							if (counter >= 5 || checkIfDead(player)) {
+								cancel(); // Stop the task after 5 seconds or if player dies/leaves
+								return;
+							}
 
-	                    // Spawn particles inside the entire circle
-	                    for (int i = 0; i < 100; i++) { // Increase this number for denser particles
-	                        double angle = Math.random() * 2 * Math.PI; // Random angle
-	                        double distance = Math.random() * radius; // Random distance within the radius
+							// Spawn particles inside the entire circle
+							for (int i = 0; i < 100; i++) { // Increase this number for denser particles
+								double angle = Math.random() * 2 * Math.PI; // Random angle
+								double distance = Math.random() * radius; // Random distance within the radius
 
-	                        double x = distance * Math.cos(angle);
-	                        double z = distance * Math.sin(angle);
+								double x = distance * Math.cos(angle);
+								double z = distance * Math.sin(angle);
 
-	                        Location particleLocation = center.clone().add(x, heightOffset, z);
-	                        player.getWorld().playEffect(particleLocation, Effect.SMOKE, 0);
-	                    }
+								Location particleLocation = center.clone().add(x, heightOffset, z);
+								player.getWorld().playEffect(particleLocation, Effect.SMOKE, 0);
+							}
 
-	                    // Check for players in the radius and apply poison
-	                    for (Player nearbyPlayer : Bukkit.getOnlinePlayers()) {
-	                        if (nearbyPlayer != player && nearbyPlayer.getLocation().distance(center) <= radius) {
-	                            nearbyPlayer.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 5 * 20, 1));
-	                        }
-	                    }
+							// Check for players in the radius and apply poison
+							for (Player nearbyPlayer : Bukkit.getOnlinePlayers()) {
+								if (nearbyPlayer != player && nearbyPlayer.getLocation().distance(center) <= radius) {
+									nearbyPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 5 * 20, 3));
+									nearbyPlayer
+											.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 5 * 20, 1));
+								}
+							}
 
-	                    counter++;
-	                }
-	            }.runTaskTimer(instance.getGameManager().getMain(), 0, 20); // Runs every second for 5 seconds
-	        }
-	    }
+							counter++;
+						}
+					}.runTaskTimer(instance.getGameManager().getMain(), 0, 20); // Runs every second for 5 seconds
+				}
+			}
+		}
 	}
 
 	@Override
