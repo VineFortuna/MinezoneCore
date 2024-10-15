@@ -350,10 +350,10 @@ public class GameInstance {
 	 */
 	public void CheckForGameStart() {
 		if (getMap() != null) {
-			if (players.size() == 2)
+			if (players.size() == 1)
 				StartGameTimer();
 		} else {
-			if (players.size() == 2)
+			if (players.size() == 1)
 				StartGameTimer();
 		}
 	}
@@ -2316,23 +2316,29 @@ public class GameInstance {
 		return false;
 	}
 
-	public Player getNearestPlayer(Player player, double x, double y, double z) {
-		for (Entity e : player.getNearbyEntities(x, y, z)) {
-			if (e instanceof Player) {
-				Player target = (Player) e;
-				BaseClass baseClass = classes.get(target);
-				if (!baseClass.checkIfDead(target, this)) {
-					if (this.duosMap != null) {
-						if (!this.team.get(target).equals(this.team.get(player))) {
-							return target;
+	public Player getNearestPlayer(Player player, double distance) {
+		Player target = null;
+		double closestDistance = distance;
+		for (Player p : this.players) {
+			BaseClass baseClass = classes.get(p);
+			if (!baseClass.checkIfDead(p, this)) {
+				if (this.duosMap != null) {
+					if (!this.team.get(p).equals(this.team.get(player))) {
+						if (target == null) {
+							if (p.getLocation().distance(player.getLocation()) <= distance) {
+								target = p;
+								closestDistance = p.getLocation().distance(player.getLocation());
+							} else {
+								if (p.getLocation().distance(player.getLocation()) < closestDistance) {
+									target = p;
+								}
+							}
 						}
-					} else {
-						return target;
 					}
 				}
 			}
 		}
-		return null;
+		return target;
 	}
 
 	public boolean hasPlayerMovedPosition(Player player) {
@@ -2360,6 +2366,11 @@ public class GameInstance {
 		}
 
 		return false;
+	}
+	
+	public void clearLastPosition(Player player) {
+		UUID playerId = player.getUniqueId();
+		lastKnownLocations.remove(playerId);
 	}
 
 	public List<ItemStack> getAllItemDrops() {

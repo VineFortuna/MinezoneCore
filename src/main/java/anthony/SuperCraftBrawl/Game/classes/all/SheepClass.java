@@ -5,7 +5,9 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.*;
+import org.bukkit.DyeColor;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -15,7 +17,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Score;
@@ -39,13 +40,6 @@ public class SheepClass extends BaseClass {
 				6,
 				"Sheep"
 		);
-	}
-
-	public ItemStack setArmour(ItemStack armour, Color c) {
-		LeatherArmorMeta lm = (LeatherArmorMeta) armour.getItemMeta();
-		lm.setColor(c);
-		armour.setItemMeta(lm);
-		return armour;
 	}
 
 	@Override
@@ -92,11 +86,12 @@ public class SheepClass extends BaseClass {
 		if (bc.getLives() > 0 && bc.getLives() != 5) {
 			bc.score.getScoreboard().resetScores(bc.score.getEntry());
 			Score newScore = instance.livesObjective.getScore(instance
-					.truncateString(" " + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
+					.truncateString("" + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 		}
-
+		resetArmor();
+		
 		ItemStack whiteWool = getStartWool();
 		playerInv.setItem(0, whiteWool);
 		ItemStack enchanter = getStartEnchanter();
@@ -199,7 +194,7 @@ public class SheepClass extends BaseClass {
 		ItemStack item4 = ItemHelper
 				.addEnchant(ItemHelper.addEnchant(
 						ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, DyeColor.PURPLE.getData()),
-								"" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Purple Wool"),
+								"" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Purple Wool"),
 						Enchantment.KNOCKBACK, 6), Enchantment.DAMAGE_ALL, 4);
 
 		ItemStack item5 = ItemHelper
@@ -234,152 +229,114 @@ public class SheepClass extends BaseClass {
 		BaseClass bc2 = instance.classes.get(player);
 		bc2.score.getScoreboard().resetScores(bc2.score.getEntry());
 		player.playSound(player.getLocation(), Sound.SHEEP_IDLE, 1, 1);
-
-		if (itemList[randomNum] == item3) {
-			player.getInventory()
-					.setChestplate(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-							Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.RED));
-			player.getInventory().setLeggings(setArmour(new ItemStack(Material.LEATHER_LEGGINGS), Color.RED));
-			player.getInventory().setBoots(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS),
-					Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.RED));
-
+		
+		String color = "FFFFFF";
+		if (itemList[randomNum] == item3) { // RED
+			color = "FF0000";
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.RED
 					+ ChatColor.BOLD + "RED WOOL");
 			player.setDisplayName(
 					"" + player.getName() + " " + ChatColor.RED + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString(" " + ChatColor.RED
+			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.RED
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
-		} else if (itemList[randomNum] == item) {
-			player.getInventory()
-					.setChestplate(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-							Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.BLUE));
-			player.getInventory().setLeggings(setArmour(new ItemStack(Material.LEATHER_LEGGINGS), Color.BLUE));
-			player.getInventory().setBoots(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS),
-					Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.BLUE));
-
+		} else if (itemList[randomNum] == item) { // BLUE
+			color = "FF";
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.BLUE
 					+ ChatColor.BOLD + "BLUE WOOL");
 			player.setDisplayName(
 					"" + player.getName() + " " + ChatColor.BLUE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString(" " + ChatColor.BLUE
+			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.BLUE
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
-		} else if (itemList[randomNum] == item7) {
-			player.getInventory()
-					.setChestplate(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-							Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.BLACK));
-			player.getInventory().setLeggings(setArmour(new ItemStack(Material.LEATHER_LEGGINGS), Color.BLACK));
-			player.getInventory().setBoots(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS),
-					Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.BLACK));
-
+		} else if (itemList[randomNum] == item7) { // BLACK
+			color = "0";
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.BLACK
 					+ ChatColor.BOLD + "BLACK WOOL");
 			player.setDisplayName(
 					"" + player.getName() + " " + ChatColor.BLUE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString(" " + ChatColor.BLACK
+			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.BLACK
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 			black = true;
-		} else if (itemList[randomNum] == item4) {
-			player.getInventory()
-					.setChestplate(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-							Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.PURPLE));
-			player.getInventory().setLeggings(setArmour(new ItemStack(Material.LEATHER_LEGGINGS), Color.PURPLE));
-			player.getInventory().setBoots(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS),
-					Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.PURPLE));
-
+		} else if (itemList[randomNum] == item4) { // PURPLE
+			color = "800080";
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given "
-					+ ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "PURPLE WOOL");
+					+ ChatColor.DARK_PURPLE + ChatColor.BOLD + "PURPLE WOOL");
 			player.setDisplayName(
 					"" + player.getName() + " " + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString(" " + ChatColor.DARK_PURPLE
+			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.DARK_PURPLE
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
-		} else if (itemList[randomNum] == item5) {
-			player.getInventory()
-					.setChestplate(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-							Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.GREEN));
-			player.getInventory().setLeggings(setArmour(new ItemStack(Material.LEATHER_LEGGINGS), Color.GREEN));
-			player.getInventory().setBoots(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS),
-					Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.GREEN));
-
+		} else if (itemList[randomNum] == item5) { // GREEN
+			color = "8000";
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.DARK_GREEN
 					+ ChatColor.BOLD + "GREEN WOOL");
-			player.setDisplayName(
-					"" + player.getName() + " " + ChatColor.DARK_GREEN + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString(" " + ChatColor.DARK_GREEN
+			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.DARK_GREEN
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 			green = true;
-		} else if (itemList[randomNum] == item6) {
-			player.getInventory()
-					.setChestplate(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-							Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.GRAY));
-			player.getInventory().setLeggings(setArmour(new ItemStack(Material.LEATHER_LEGGINGS), Color.GRAY));
-			player.getInventory().setBoots(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS),
-					Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.GRAY));
-
+		} else if (itemList[randomNum] == item6) { // GRAY
+			color = "808080";
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.GRAY
 					+ ChatColor.BOLD + "GRAY WOOL");
 			player.setDisplayName(
 					"" + player.getName() + " " + ChatColor.GRAY + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString(" " + ChatColor.GRAY
+			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.GRAY
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 			gray = true;
-		} else if (itemList[randomNum] == pinkWool) {
-			player.getInventory()
-					.setChestplate(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-							Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.fromRGB(255, 105, 180)));
-			player.getInventory()
-					.setLeggings(setArmour(new ItemStack(Material.LEATHER_LEGGINGS), Color.fromRGB(255, 105, 180)));
-			player.getInventory().setBoots(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS),
-					Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.fromRGB(255, 105, 180)));
-
+		} else if (itemList[randomNum] == pinkWool) { // PINK
+			color = "FF69B4";
 			player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou were given &d&lPINK WOOL"));
 			player.setDisplayName(instance.getGameManager().getMain().color("" + player.getName() + " &9&lSheep&r"));
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString(" " + ChatColor.LIGHT_PURPLE
+			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.LIGHT_PURPLE
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 			pink = true;
 		} else if (itemList[randomNum] == limeWool) {
-			player.getInventory()
-					.setChestplate(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_CHESTPLATE),
-							Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.LIME));
-			player.getInventory().setLeggings(setArmour(new ItemStack(Material.LEATHER_LEGGINGS), Color.LIME));
-			player.getInventory().setBoots(setArmour(ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS),
-					Enchantment.PROTECTION_ENVIRONMENTAL, 4), Color.LIME));
-
+			color = "FF00";
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.GREEN
 					+ ChatColor.BOLD + "LIME WOOL");
 			player.setDisplayName(
 					"" + player.getName() + " " + ChatColor.GREEN + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
-			Score newScore = instance.livesObjective.getScore(instance.truncateString(" " + ChatColor.GREEN
+			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.GREEN
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 			lime = true;
 		}
+		chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, color, "&rSheep Chestplate");
+		leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, color, "&rSheep Leggings");
+		player.getInventory().setChestplate(chestplate);
+		player.getInventory().setLeggings(leggings);
 
 		player.getInventory().setItem(0, new ItemStack(itemList[randomNum]));
 	}
-
+	
+	public void resetArmor() {
+		String color = "FFFFFF";
+		chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, color, "&rSheep Chestplate");
+		leggings = ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, color, "&rSheep Leggings");
+		player.getInventory().setChestplate(chestplate);
+		player.getInventory().setLeggings(leggings);
+	}
+	
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();

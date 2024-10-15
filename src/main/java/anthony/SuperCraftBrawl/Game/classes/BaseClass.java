@@ -2873,18 +2873,24 @@ public abstract class BaseClass {
 			chestplate = ItemHelper.setDetails(
 					ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, hexCodeChestplate),
 					"&r" + className + " Chestplate");
+		} else {
+			chestplate = ItemHelper.create(Material.AIR);
 		}
 
 		// Leggings
 		if (hexCodeLeggings != null) {
 			leggings = ItemHelper.setDetails(ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, hexCodeLeggings),
 					"&r" + className + " Leggings");
+		} else {
+			leggings = ItemHelper.create(Material.AIR);
 		}
 
 		// Boots
 		if (hexCodeBoots != null) {
 			boots = ItemHelper.setDetails(ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, hexCodeBoots),
 					"&r" + className + " Boots");
+		} else {
+			boots = ItemHelper.create(Material.AIR);
 		}
 	}
 
@@ -2898,5 +2904,9 @@ public abstract class BaseClass {
 			String className) {
 		createArmor(blockMaterial, textureUrl, hexCodeAllArmor, hexCodeAllArmor, hexCodeAllArmor, protectionLevel,
 				className);
+	}
+	
+	public void resetHead() {
+		player.getEquipment().setHelmet(playerHead);
 	}
 }

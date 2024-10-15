@@ -85,12 +85,10 @@ public class SkeletonClass extends BaseClass {
 				} else {
 					skeleAttack.restart();
 					player.launchProjectile(Arrow.class);
+					player.getWorld().playSound(player.getLocation(), Sound.SKELETON_HURT, 1, 1);
 				}
 				event.setCancelled(true);
 			}
-
-			for (Player worldPlayer : player.getWorld().getPlayers())
-				worldPlayer.playSound(player.getLocation(), Sound.SKELETON_HURT, 1, 1);
 		}
 	}
 	
