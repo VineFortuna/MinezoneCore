@@ -5,7 +5,6 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -63,10 +62,8 @@ public class GhastClass extends BaseClass {
 		Entity e = event.getEntity();
 
 		if (e instanceof Arrow) {
-			for (Player gamePlayer : Bukkit.getOnlinePlayers()) // Play Ghast sound when shoot arrows
-				gamePlayer.playSound(player.getLocation(), Sound.GHAST_SCREAM, 1, 1);
-
 			if (this.cooldown == 0) {
+				player.getWorld().playSound(player.getLocation(), Sound.GHAST_SCREAM, 1, 1);
 				this.cooldown = 2;
 			} else if (this.cooldown > 0) {
 				event.setCancelled(true);

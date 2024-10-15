@@ -614,7 +614,7 @@ public class Core extends JavaPlugin implements Listener {
 		}
 
 		if (cmd.getName().equalsIgnoreCase("hub")) {
-			Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+			/*Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 
 			ByteArrayOutputStream b = new ByteArrayOutputStream();
 			DataOutputStream out = new DataOutputStream(b);
@@ -626,7 +626,17 @@ public class Core extends JavaPlugin implements Listener {
 			} catch (Exception ex) {
 				player.sendMessage(color("&c&l(!) &rThere was a problem connecting to &elobby-1"));
 			}
-			player.sendPluginMessage(this, "BungeeCord", b.toByteArray());
+			player.sendPluginMessage(this, "BungeeCord", b.toByteArray());*/
+			if (this.getGameManager().GetInstanceOfPlayer(player) != null ||
+					this.getGameManager().GetInstanceOfSpectator(player) != null) {
+				this.getCommands().leaveGame(player);
+			} else if (this.getParkour().hasPlayer(player)) {
+				this.getParkour().removePlayer(player);
+				this.ResetPlayer(player);
+			} else {
+				this.ResetPlayer(player);
+			}
+			player.sendMessage(this.color("&l(!) Sending you to the Hub"));
 		}
 
 		if (cmd.getName().equalsIgnoreCase("setlevel")) {
