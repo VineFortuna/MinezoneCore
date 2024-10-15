@@ -18,7 +18,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -215,9 +214,10 @@ public class FishermanClass extends BaseClass {
                 remove = true;
                 int duration = 0;
                 for (PotionEffect effect : player.getActivePotionEffects()) {
-                    if (effect.getType() == PotionEffectType.SPEED) {
+                    if (effect.getType().equals(PotionEffectType.SPEED)) {
                         duration = effect.getDuration();
                         player.removePotionEffect(PotionEffectType.SPEED);
+                        break;
                     }
                 }
                 player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 5 * 20 + duration, 0));

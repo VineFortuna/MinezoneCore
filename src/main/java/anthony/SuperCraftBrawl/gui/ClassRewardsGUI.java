@@ -2,9 +2,9 @@ package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -24,7 +24,7 @@ public class ClassRewardsGUI implements InventoryProvider {
     
     public ClassRewardsGUI(Core main, ClassType type, SmartInventory parent) {
         inv = SmartInventory.builder().id("myInventory").provider(this).size(1, 9)
-                .title(String.valueOf(ChatColor.DARK_GRAY) + ChatColor.BOLD + "Class Rewards").parent(parent).build();
+                .title(main.color("&8&l" + type.name() + " Mastery")).parent(parent).build();
         this.main = main;
         this.type = type;
     }

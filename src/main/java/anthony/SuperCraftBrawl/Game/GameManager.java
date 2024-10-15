@@ -2139,7 +2139,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									// Customizing Zombie
 									customizeMob(zombie, player);
 									customizeZombie(zombie);
-									zombie.setTarget(i.getNearestPlayer(player, 100, 100, 100));
+									zombie.setTarget(i.getNearestPlayer(player, 150));
 
 									// If ClassType == Summoner
 									if (i.classes.get(player).getType() == ClassType.Summoner) {
@@ -2149,7 +2149,7 @@ public class GameManager implements Listener, PluginMessageListener {
 										// Customizing Second Zombie
 										customizeMob(zombie2, player);
 										customizeZombie(zombie2);
-										zombie2.setTarget(i.getNearestPlayer(player, 100, 100, 100));
+										zombie2.setTarget(i.getNearestPlayer(player, 150));
 									}
 								}
 
@@ -2180,7 +2180,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									// Customizing Skeleton
 									customizeMob(skeleton, player);
 									customizeSkeleton(skeleton);
-									skeleton.setTarget(i.getNearestPlayer(player, 100, 100, 100));
+									skeleton.setTarget(i.getNearestPlayer(player, 150));
 
 									// If ClassType == Summoner
 									if (i.classes.get(player).getType() == ClassType.Summoner) {
@@ -2190,7 +2190,7 @@ public class GameManager implements Listener, PluginMessageListener {
 										// Customizing Second Skeleton
 										customizeMob(skeleton2, player);
 										customizeSkeleton(skeleton2);
-										skeleton2.setTarget(i.getNearestPlayer(player, 100, 100, 100));
+										skeleton2.setTarget(i.getNearestPlayer(player, 150));
 									}
 								}
 							}, ItemHelper.createMonsterEgg(EntityType.SKELETON, 1));
@@ -2218,7 +2218,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									Witch witch = (Witch) player.getWorld().spawnCreature(hitLoc, EntityType.WITCH);
 									// Customizing Witch
 									customizeMob(witch, player);
-									witch.setTarget(i.getNearestPlayer(player, 100, 100, 100));
+									witch.setTarget(i.getNearestPlayer(player, 150));
 								}
 
 							}, ItemHelper.createMonsterEgg(EntityType.WITCH, 1));
@@ -2248,7 +2248,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									// Customizing Creeper
 									customizeMob(creeper, player);
 									customizeCreeper(creeper);
-									creeper.setTarget(i.getNearestPlayer(player, 100, 100, 100));
+									creeper.setTarget(i.getNearestPlayer(player, 150));
 
 									// If ClassType == Summoner
 									// Setting to Charged Creeper
@@ -2269,36 +2269,40 @@ public class GameManager implements Listener, PluginMessageListener {
 			case NETHER_STAR:
 				if (i != null && i.state == GameState.STARTED && meta != null
 						&& meta.getDisplayName().toLowerCase().contains("bounty")) {
-					int amount = item.getAmount();
-					if (amount > 0) {
-						if (amount == 1) {
-							player.getInventory().clear(player.getInventory().getHeldItemSlot());
-						} else {
-							amount--;
-							item.setAmount(amount);
-						}
-						if (i.classes.containsKey(player)) {
-							BaseClass bc = i.classes.get(player);
-							if (bc != null)
-								while (true) {
-									Random random = new Random();
-									int index = random.nextInt(i.players.size());
-									Player target = i.players.get(index);
-									if (target != null && target != player && i.classes.containsKey(target)
-											&& ((BaseClass) i.classes.get(target)).getLives() > 0) {
-										bc.bountyTarget = target;
-										player.sendMessage(this.main.color("&2&l(!) &e&lBOUNTY SET! &rKill &e"
-												+ target.getName() + " &rfor 25 Token award!"));
-										target.sendMessage(
-												this.main.color("&2&l(!) &e&lBOUNTY SET! &rYou are being targeted!"));
-										player.sendTitle(this.main.color("&e&lBOUNTY"),
-												this.main.color("&rYou are targetting &e" + target.getName()));
-										target.sendTitle(this.main.color("&e&lBOUNTY"),
-												this.main.color("&rYou are being targetted!"));
-										break;
+					if (i.alivePlayers > 1) {
+						int amount = item.getAmount();
+						if (amount > 0) {
+							if (amount == 1) {
+								player.getInventory().clear(player.getInventory().getHeldItemSlot());
+							} else {
+								amount--;
+								item.setAmount(amount);
+							}
+							if (i.classes.containsKey(player)) {
+								BaseClass bc = i.classes.get(player);
+								if (bc != null)
+									while (true) {
+										Random random = new Random();
+										int index = random.nextInt(i.players.size());
+										Player target = i.players.get(index);
+										if (target != null && target != player && i.classes.containsKey(target)
+												&& ((BaseClass) i.classes.get(target)).getLives() > 0) {
+											bc.bountyTarget = target;
+											player.sendMessage(this.main.color("&2&l(!) &e&lBOUNTY SET! &rKill &e"
+													+ target.getName() + " &rfor 25 Token award!"));
+											target.sendMessage(
+													this.main.color("&2&l(!) &e&lBOUNTY SET! &rYou are being targeted!"));
+											player.sendTitle(this.main.color("&e&lBOUNTY"),
+													this.main.color("&rYou are targetting &e" + target.getName()));
+											target.sendTitle(this.main.color("&e&lBOUNTY"),
+													this.main.color("&rYou are being targetted!"));
+											break;
+										}
 									}
-								}
+							}
 						}
+					} else {
+						player.sendMessage(this.main.color("&2&l(!) &rNo players found!"));
 					}
 				}
 				break;
