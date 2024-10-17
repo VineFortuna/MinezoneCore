@@ -2134,7 +2134,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									// Customizing Zombie
 									customizeMob(zombie, player);
 									customizeZombie(zombie);
-									zombie.setTarget(i.getNearestPlayer(player, 150));
+									zombie.setTarget(i.getNearestPlayer(player, zombie, 150));
 
 									// If ClassType == Summoner
 									if (i.classes.get(player).getType() == ClassType.Summoner) {
@@ -2144,7 +2144,7 @@ public class GameManager implements Listener, PluginMessageListener {
 										// Customizing Second Zombie
 										customizeMob(zombie2, player);
 										customizeZombie(zombie2);
-										zombie2.setTarget(i.getNearestPlayer(player, 150));
+										zombie2.setTarget(i.getNearestPlayer(player, zombie2, 150));
 									}
 								}
 
@@ -2175,7 +2175,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									// Customizing Skeleton
 									customizeMob(skeleton, player);
 									customizeSkeleton(skeleton);
-									skeleton.setTarget(i.getNearestPlayer(player, 150));
+									skeleton.setTarget(i.getNearestPlayer(player, skeleton, 150));
 
 									// If ClassType == Summoner
 									if (i.classes.get(player).getType() == ClassType.Summoner) {
@@ -2185,7 +2185,7 @@ public class GameManager implements Listener, PluginMessageListener {
 										// Customizing Second Skeleton
 										customizeMob(skeleton2, player);
 										customizeSkeleton(skeleton2);
-										skeleton2.setTarget(i.getNearestPlayer(player, 150));
+										skeleton2.setTarget(i.getNearestPlayer(player, skeleton2, 150));
 									}
 								}
 							}, ItemHelper.createMonsterEgg(EntityType.SKELETON, 1));
@@ -2213,7 +2213,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									Witch witch = (Witch) player.getWorld().spawnCreature(hitLoc, EntityType.WITCH);
 									// Customizing Witch
 									customizeMob(witch, player);
-									witch.setTarget(i.getNearestPlayer(player, 150));
+									witch.setTarget(i.getNearestPlayer(player, witch, 150));
 								}
 
 							}, ItemHelper.createMonsterEgg(EntityType.WITCH, 1));
@@ -2243,7 +2243,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									// Customizing Creeper
 									customizeMob(creeper, player);
 									customizeCreeper(creeper);
-									creeper.setTarget(i.getNearestPlayer(player, 150));
+									creeper.setTarget(i.getNearestPlayer(player, creeper, 150));
 
 									// If ClassType == Summoner
 									// Setting to Charged Creeper

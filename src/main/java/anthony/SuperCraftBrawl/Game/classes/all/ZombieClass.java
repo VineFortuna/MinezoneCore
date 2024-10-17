@@ -107,7 +107,7 @@ public class ZombieClass extends BaseClass {
 				Zombie zombie = (Zombie) player.getWorld().spawnCreature(player.getLocation(), EntityType.ZOMBIE);
 				zombie.setBaby(true);
 				zombie.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Baby Zombie");
-				zombie.setTarget(instance.getNearestPlayer(player, 150));
+				zombie.setTarget(instance.getNearestPlayer(player, zombie, 150));
 			}
 			player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rSpawning army of &eBaby Zombies!"));
 			player.playSound(player.getLocation(), Sound.ZOMBIE_HURT, 1, 1);

@@ -1825,11 +1825,11 @@ public class GameInstance {
 						color("&2&l(!) &e" + winner.getName() + " &rjust &r&lFLAWLESSLY &ron &b&l" + map.toString()));
 			} else if (chance == 2) {
 				Bukkit.broadcastMessage(color(
-						"&2&l(!) &rThe game on &b&l" + map.toString() + "&rwas too easy for &e" + winner.getName()));
+						"&2&l(!) &rThe game on &b&l" + map.toString() + " &rwas too easy for &e" + winner.getName()));
 
 			} else if (chance == 3) {
 				Bukkit.broadcastMessage(color("&2&l(!) &rGet &r&lOUTTA THE WAY &rfor &e" + winner.getName()
-						+ "&r. He dominated on &b&l" + map.toString()));
+						+ "&r. They dominated on &b&l" + map.toString()));
 			}
 		} else {
 			if (chance == 0) {
@@ -1846,7 +1846,7 @@ public class GameInstance {
 						+ duosMap.toString() + " &rwas too easy for " + tag + "&e" + winner.getName()));
 			} else if (chance == 3) {
 				Bukkit.broadcastMessage(this.getGameManager().getMain().color("&r&l(!) &rGet out of the way for " + tag
-						+ "&e" + winner.getName() + ". &rHe &r&lDOMINATED &ron &e&l" + duosMap.toString()));
+						+ "&e" + winner.getName() + ". &rThey &r&lDOMINATED &ron &e&l" + duosMap.toString()));
 			}
 		}
 	}
@@ -2313,7 +2313,7 @@ public class GameInstance {
 		return false;
 	}
 
-	public Player getNearestPlayer(Player player, double distance) {
+	public Player getNearestPlayer(Player player, LivingEntity entity, double distance) {
 		Player target = null;
 		double closestDistance = distance;
 		for (Player p : this.players) {
@@ -2322,11 +2322,11 @@ public class GameInstance {
 				if (this.duosMap != null) {
 					if (!this.team.get(p).equals(this.team.get(player))) {
 						if (target == null) {
-							if (p.getLocation().distance(player.getLocation()) <= distance) {
+							if (p.getLocation().distance(entity.getLocation()) <= distance) {
 								target = p;
-								closestDistance = p.getLocation().distance(player.getLocation());
+								closestDistance = p.getLocation().distance(entity.getLocation());
 							} else {
-								if (p.getLocation().distance(player.getLocation()) < closestDistance) {
+								if (p.getLocation().distance(entity.getLocation()) < closestDistance) {
 									target = p;
 								}
 							}

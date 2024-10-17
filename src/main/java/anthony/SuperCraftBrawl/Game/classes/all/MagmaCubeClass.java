@@ -124,7 +124,7 @@ public class MagmaCubeClass extends BaseClass {
 									en.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW
 											+ "MagmaCube");
 									Monster cube = (Monster) en;
-									cube.setTarget(instance.getNearestPlayer(player, 150));
+									cube.setTarget(instance.getNearestPlayer(player, cube, 150));
 								}
 
 							}, ItemHelper.createMonsterEgg(EntityType.MAGMA_CUBE, 1));

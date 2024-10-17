@@ -184,7 +184,7 @@ public class SummonerClass extends BaseClass {
 //							EntityDamageEvent damageEvent = new EntityDamageEvent(player, DamageCause.PROJECTILE, 2.0);
 //							instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 //							player.damage(2.0);
-							en.setTarget(instance.getNearestPlayer(player, 150));
+							en.setTarget(instance.getNearestPlayer(player, en, 150));
 						}
 						
 					}, new ItemStack(Material.MONSTER_EGG));
@@ -210,7 +210,7 @@ public class SummonerClass extends BaseClass {
 							en.setCustomNameVisible(true);
 							// Setting to Charged Creeper
 							en.setPowered(true);
-							en.setTarget(instance.getNearestPlayer(player, 150));
+							en.setTarget(instance.getNearestPlayer(player, en, 150));
 						}
 						
 					}, new ItemStack(Material.MONSTER_EGG));
@@ -253,7 +253,7 @@ public class SummonerClass extends BaseClass {
 							
 							equipment.setHelmet(helmet);
 							equipment.setChestplate(chestplate);
-							en.setTarget(instance.getNearestPlayer(player, 150));
+							en.setTarget(instance.getNearestPlayer(player, en, 150));
 						}
 						
 					}, new ItemStack(Material.MONSTER_EGG));
