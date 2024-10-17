@@ -636,7 +636,7 @@ public class Core extends JavaPlugin implements Listener {
 			} else {
 				this.ResetPlayer(player);
 			}
-			player.sendMessage(this.color("&l(!) Sending you to the Hub"));
+			player.sendMessage(this.color("&r&l(!) &rSending you to the Hub"));
 		}
 
 		if (cmd.getName().equalsIgnoreCase("setlevel")) {
