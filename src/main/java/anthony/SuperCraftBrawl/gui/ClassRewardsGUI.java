@@ -210,7 +210,7 @@ public class ClassRewardsGUI implements InventoryProvider {
             case Ninja:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjg1MzIxNWU0ZTM5NDZmMjAwNmRmYmVhNjFjOTIzY2U3MzQyYjEzZjIzZmE3ZjM1ZjJhNDBlODQ1M2VhYzdlNSJ9fX0=");
             case TNT:
-                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjhlNmJkZmFlNmI3MWRkMmExNTc4NTExZjk4N2Q1OTJjMGJhY2I4Yzc5M2M2YWJkMDU4YzdhZjU4NzJkZDQxYyJ9fX0=");
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQzNzUzY2QxZjRjNDkyM2ZlOWM3ZmZiNWZjZTExNGYzYWI5ODBjNzU2NDQ2NDYxZDNiNDczMzIyZGE4ZDE0YiJ9fX0=");
             case Chicken:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjg2YzcxYjMxMGVjZmQ1Y2E4MGNmMTM2NGJhYzdmMjUxOWM3MjYwZjI5M2E4OGVkNzY2MzA0ZDAzOWY2YmU4NSJ9fX0=");
             case Witch:
