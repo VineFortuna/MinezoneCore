@@ -968,10 +968,7 @@ public class GameInstance {
 		allItemDrops.add(goldenApple);
 		allItemDrops.add(notchApple);
 
-		List<ItemStack> items = Arrays.asList(new ItemStack(Material.GOLDEN_APPLE),
-
-				ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE, 1, (short) 1),
-						"" + ChatColor.BLACK + ChatColor.BOLD + "Notch Apple"),
+		List<ItemStack> items = Arrays.asList(notchApple,
 				slownessPot, bazooka, bazooka, healthPot, speedPot, slownessPot, slownessPot, speedPot, bazooka,
 				goldenApple, hammer, healthPot, extraLife, healthPot, milk, milk, milk, blooper, blooper, blooper,
 				blooper, nuke, nuke, nuke, nuke, nuke, bomb, pearl, pearl, miniShield, miniShield, slowballs, slowballs,

@@ -237,7 +237,7 @@ public class GameManager implements Listener, PluginMessageListener {
 							}
 						}
 					}
-				} else { // If player teleports outside map boundaries, don't teleport & give back pearl
+				} else if (!instance.isInBounds(event.getTo())){ // If player teleports outside map boundaries, don't teleport & give back pearl
 					player.sendMessage(getMain().color("&c&l(!) &rYou cannot teleport there!"));
 					ItemStack pearl = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL),
 							getMain().color("&c&lTeleporter"));
@@ -743,7 +743,7 @@ public class GameManager implements Listener, PluginMessageListener {
 					baseClass.score.setScore(baseClass.lives);
 					baseClass.TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 							+ ChatColor.YELLOW + player.getName() + ChatColor.RESET + " used an extra life!");
-					player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 0);
+					player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 2);
 					if (amount > 0) {
 						amount--;
 						if (amount == 0)
@@ -1239,6 +1239,16 @@ public class GameManager implements Listener, PluginMessageListener {
 								}
 							}
 						}
+					} else if (damageEvent.getDamager() instanceof FishHook) {
+						FishHook damager = (FishHook) damageEvent.getDamager();
+						if (damager.getShooter() instanceof Player) {
+							Player p = (Player) damager.getShooter();
+							BaseClass bc = instance.classes.get(p);
+							if (bc.getType() == ClassType.Fisherman) {
+								//damager.setBounce(true);
+								event.setCancelled(true);
+							}
+						}
 					}
 				}
 
@@ -1294,21 +1304,6 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (instance != null) {
 				BaseClass baseClass = instance.classes.get(player);
 				baseClass.ProjectileHit(event);
-			}
-		}
-	}
-
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void ProjectileHit(ProjectileHitEvent event) {
-		if (event.getEntity() instanceof FishHook) {
-			if (event.getEntity().getShooter() instanceof Player) {
-				Player player = (Player) event.getEntity().getShooter();
-				GameInstance instance = this.GetInstanceOfPlayer(player);
-				if (instance != null) {
-					event.getEntity().setBounce(true);
-					BaseClass baseClass = instance.classes.get(player);
-					baseClass.ProjectileHit(event);
-				}
 			}
 		}
 	}
