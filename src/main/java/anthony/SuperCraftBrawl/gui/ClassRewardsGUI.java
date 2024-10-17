@@ -130,7 +130,7 @@ public class ClassRewardsGUI implements InventoryProvider {
             case FlintAndSteel:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTAwZjYwNzI4NDZhMjhmOWNkZDE5YmIwY2E2MTQyMDljZWI1MWZiYzI4Mzc2ZmM4ZTU4M2JkMThjYzk1N2ZkOSJ9fX0=");
             case Hunter:
-                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzk1NzEyYjZlMWIzOGY5MmUyMWE1MmZiNzlhZjUzM2I3M2JiNWRkNWNiZGFmOTJlZTY0YjkzYWFhN2M0NjRkIn19fQ==");
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTMwMGJiNThlZjFhYjZjYzljMGNmNWUzZDYwZTJmZWJiZTZjNDMxZTNkNmJmM2M2ZGIzY2Y4MjQ3OTFmZjkxNCJ9fX0=");
             case Jeb:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDNhMmYzN2Y3YjBmMjY2MzljNmYzZGMxZTI3YjI0NGM0NzAzNzk3NjY3NjRlZmM3MTQzNjk3YThlMTViNiJ9fX0=");
             case Bee:
