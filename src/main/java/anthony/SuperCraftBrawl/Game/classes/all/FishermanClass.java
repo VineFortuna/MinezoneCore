@@ -8,7 +8,10 @@ import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.FishHook;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -92,17 +95,34 @@ public class FishermanClass extends BaseClass {
     
     @Override
     public void onFish(PlayerFishEvent event) {
-        if (event.getState() == PlayerFishEvent.State.IN_GROUND) {
-            if (fishing.getTime() < 5000) {
-                int seconds = (5000 - fishing.getTime()) / 1000 + 1;
-                player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                        + "Your Fishing Rod is still regenerating for " + ChatColor.YELLOW + seconds
-                        + " more seconds ");
+        if (event.getState() == PlayerFishEvent.State.FAILED_ATTEMPT ||
+                event.getState() == PlayerFishEvent.State.IN_GROUND) {
+            FishHook hook = event.getHook();
+            Block block = hook.getLocation().getBlock();
+            boolean grapple = false;
+            if (block.getType() != Material.AIR) {
+                grapple = true;
             } else {
-                Location d = event.getHook().getLocation();
-                Vector v = d.toVector().subtract(player.getLocation().toVector()).normalize();
-                player.setVelocity(v.multiply(2.5).add(new Vector(0, 1, 0)));
-                fishing.restart();
+                for (BlockFace face : BlockFace.values()) {
+                    Block adjacentBlock = block.getRelative(face);
+                    if (adjacentBlock.getType() != Material.AIR) {
+                        grapple = true;
+                        break;
+                    }
+                }
+            }
+            if (grapple) {
+                if (fishing.getTime() < 5000) {
+                    int seconds = (5000 - fishing.getTime()) / 1000 + 1;
+                    player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                            + "Your Fishing Rod is still regenerating for " + ChatColor.YELLOW + seconds
+                            + " more seconds ");
+                } else {
+                    Location d = event.getHook().getLocation();
+                    Vector v = d.toVector().subtract(player.getLocation().toVector()).normalize();
+                    player.setVelocity(v.multiply(2.5).add(new Vector(0, 1, 0)));
+                    fishing.restart();
+                }
             }
         }
     }
@@ -129,7 +149,7 @@ public class FishermanClass extends BaseClass {
                     Location loc = fish.getLocation();
                     for (Player p : instance.players) {
                         if (p.getGameMode() != GameMode.SPECTATOR
-                                && p != player && p.getLocation().distance(fish.getLocation()) <= 1.5) {
+                                && p != player && p.getLocation().distance(fish.getLocation()) <= 2) {
                             nearby = true;
                             p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 3 * 20, 0));
                         }
@@ -264,10 +284,10 @@ public class FishermanClass extends BaseClass {
                             public void run() {
                                 puffer.add(fish);
                                 player.getWorld().playEffect(fish.getLocation().add(0, 0.5, 0), Effect.VILLAGER_THUNDERCLOUD, 1);
-                                player.playSound(fish.getLocation(), Sound.FIRE_IGNITE, 1, 1);
+                                player.getWorld().playSound(fish.getLocation(), Sound.FIRE_IGNITE, 1, 1);
                             }
                         };
-                        r.runTaskLater(instance.getGameManager().getMain(), 20);
+                        r.runTaskLater(instance.getGameManager().getMain(), 15);
                         r = new BukkitRunnable() {
                             @Override
                             public void run() {
