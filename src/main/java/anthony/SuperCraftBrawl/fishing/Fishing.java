@@ -93,7 +93,8 @@ public class Fishing implements Listener {
                 if (data.exp >= 2500) {
                     data.level++;
                     data.exp -= 2500;
-                    p.sendMessage("Level upgraded to " + data.level + "!");
+                    p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
+                    p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "!"));
                 }
             } else if (fish == FishType.TOKENS) {
                 int r = rand.nextInt(25) + 11;
@@ -247,7 +248,8 @@ public class Fishing implements Listener {
                 if (data.exp >= 2500) {
                     data.level++;
                     data.exp -= 2500;
-                    p.sendMessage("Level upgraded to " + data.level + "!");
+                    p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
+                    p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "!"));
                 }
             }
         }
