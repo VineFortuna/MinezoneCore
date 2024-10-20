@@ -251,6 +251,7 @@ public class GenericModeGUI implements InventoryProvider {
 		String clickMessage = (game == null || game.state == GameState.WAITING) ? "&r&nClick to join!" : "&r&nClick to spectate!";
 
 		if (game == null) {
+			ItemHelper.setGlowing(displayItem, false);
 			return ItemHelper.setDetails(displayItem, mapName, mapGameplay, mapSize, playersInfo, "", clickMessage);
 		}
 
@@ -263,9 +264,9 @@ public class GenericModeGUI implements InventoryProvider {
 						"&eWaiting for players";
 				return ItemHelper.setDetails(displayItem, mapName, mapGameplay, mapSize, waitingTime, playersInfo, "", clickMessage);
 			case STARTED:
-				String spectatorsInfo = "&rSpectators: &e" + game.spectators.size();
 				String gameTime = "&rGame Time: &e" + game.gameTime + "m";
-				return ItemHelper.setDetails(displayItem, mapName, mapGameplay, mapSize, "&aIn Progress", playersInfo, spectatorsInfo, gameTime, "", clickMessage);
+				String spectatorsInfo = "&rSpectators: &e" + game.spectators.size();
+				return ItemHelper.setDetails(displayItem, mapName, mapGameplay, mapSize, "&aIn Progress", playersInfo, gameTime, spectatorsInfo, "", clickMessage);
 			default:
 				return null;
 		}
@@ -300,8 +301,19 @@ public class GenericModeGUI implements InventoryProvider {
 		else if (e.isRightClick()) {
 			if (randomMap == null) {
 				randomizeMap();
+
+				if (randomMap == null) {
+					return;
+				}
 			}
-			handleMapClick(player, randomMap, main.gameManager.getInstanceOfMap(randomMap));
+
+			GameInstance game = main.getGameManager().getInstanceOfMap(randomMap);
+
+			if (game == null) {
+				return;
+			}
+
+			handleMapClick(player, randomMap, game);
 		}
 	}
 
