@@ -981,7 +981,7 @@ public enum Maps {
 					)
 					.setLobbyLoc(new Vector(5121.535, 168, 627.535))
 					.setSpecLoc(new Vector(5122.500, 156, 687.500))
-					.setBounds(new Vector(5122.500, 156, 687.500), 40, 40)
+					.setBounds(new Vector(5120.500, 156, 693.500), 37, 37)
 					.setSignLoc(new Vector(175.503, 107, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
