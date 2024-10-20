@@ -1,21 +1,5 @@
 package anthony.SuperCraftBrawl.commands;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Random;
-
-import org.bukkit.*;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-
-import com.google.common.collect.Lists;
-
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameSettings;
@@ -29,6 +13,20 @@ import anthony.SuperCraftBrawl.gui.GameStatsGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
+import com.google.common.collect.Lists;
+import org.bukkit.*;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Random;
 
 public class Commands implements CommandExecutor, TabCompleter {
 
@@ -277,10 +275,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void gameStatsCommand(String [] args, Player player) {
-		if (args.length == 0) {
-			return;
-		}
-
 		if (!main.gameStats.containsKey(player)) {
 			player.sendMessage(main.color("&c&l(!) &rThis game's stats have expired"));
 			return;

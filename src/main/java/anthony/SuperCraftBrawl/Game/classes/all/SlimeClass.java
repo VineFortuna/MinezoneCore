@@ -1,12 +1,13 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.Color;
-import org.bukkit.Effect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.enchantments.Enchantment;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
+import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.util.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -15,15 +16,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
-
-import anthony.util.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
-import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import net.md_5.bungee.api.ChatColor;
 
 public class SlimeClass extends BaseClass {
 
@@ -146,10 +138,9 @@ public class SlimeClass extends BaseClass {
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(
+		ItemStack item = ItemHelper.setUnbreakable(
 				ItemHelper.setDetails(new ItemStack(Material.WOOD_SWORD),
-						"" + ChatColor.RESET + ChatColor.GREEN + ChatColor.BOLD + "Gooey Sword"),
-				Enchantment.DURABILITY, 10000);
+						"" + ChatColor.RESET + ChatColor.GREEN + ChatColor.BOLD + "Gooey Sword"));
 		return item;
 	}
 }

@@ -9,7 +9,10 @@ import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
-import org.bukkit.*;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -430,7 +433,7 @@ public class LargeFernClass extends BaseClass {
 
                 standingStillTime = 0;
                 isTransferned = false;
-
+                instance.clearLastPosition(player);
                 this.cancel();
             }
 

@@ -5,7 +5,6 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
-import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -17,7 +16,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -134,8 +132,9 @@ public class PotatoClass extends BaseClass {
 						
 						@Override
 						public void run() {
-							player.getInventory().setItem(0, ItemHelper.addEnchant(new ItemStack(Material.POTATO_ITEM),
-									Enchantment.DAMAGE_ALL, sharpness));
+							player.getInventory().setItem(0, ItemHelper.addEnchant(ItemHelper.addEnchant(
+									new ItemStack(Material.POTATO_ITEM), Enchantment.DAMAGE_ALL, sharpness),
+									Enchantment.KNOCKBACK, 2));
 							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 4 - sharpness));
 						}
 					}.runTaskLater(instance.getGameManager().getMain(), 1);
@@ -156,10 +155,10 @@ public class PotatoClass extends BaseClass {
 						public void run() {
 							player.getInventory()
 									.setItem(0,
-											ItemHelper.addEnchant(
+											ItemHelper.addEnchant(ItemHelper.addEnchant(
 													ItemHelper.addEnchant(new ItemStack(Material.BAKED_POTATO),
 															Enchantment.DAMAGE_ALL, sharpness),
-													Enchantment.FIRE_ASPECT, 1));
+													Enchantment.FIRE_ASPECT, 1), Enchantment.KNOCKBACK, 1));
 							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 4 - sharpness));
 						}
 					}.runTaskLater(instance.getGameManager().getMain(), 1);
@@ -180,9 +179,9 @@ public class PotatoClass extends BaseClass {
 						public void run() {
 							player.getInventory()
 									.setItem(0,
-											ItemHelper.addEnchant(
+											ItemHelper.addEnchant(ItemHelper.addEnchant(
 													new ItemStack(Material.POISONOUS_POTATO),
-													Enchantment.DAMAGE_ALL, sharpness));
+													Enchantment.DAMAGE_ALL, sharpness), Enchantment.KNOCKBACK, 1));
 							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 4 - sharpness));
 						}
 					}.runTaskLater(instance.getGameManager().getMain(), 1);

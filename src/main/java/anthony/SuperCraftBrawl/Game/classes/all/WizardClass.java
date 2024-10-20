@@ -5,7 +5,6 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -18,7 +17,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -68,7 +66,7 @@ public class WizardClass extends BaseClass {
 			this.cooldownSec = (3000 - wizard.getTime()) / 1000 + 1;
 
 			if (wizard.getTime() < 3000) {
-				String msg = "" + ChatColor.RESET + ChatColor.RED + ChatColor.BOLD + "Fireballs " + ChatColor.RESET
+				String msg = "" + ChatColor.RESET + ChatColor.RED + ChatColor.BOLD + "Fireballs" + ChatColor.RESET
 						+ " regenerates in: " + ChatColor.YELLOW + cooldownSec + "s";
 				getActionBarManager().setActionBar(player, "wizard.cooldown", msg, 2);
 			} else {

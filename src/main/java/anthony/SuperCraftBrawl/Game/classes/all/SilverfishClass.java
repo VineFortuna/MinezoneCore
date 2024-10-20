@@ -1,10 +1,12 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.*;
-import java.util.function.Consumer;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ChatColorHelper;
+import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -14,17 +16,15 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-
-import anthony.util.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
-
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.function.Consumer;
 
 public class SilverfishClass extends BaseClass {
 	private ItemStack weapon;
@@ -440,7 +440,7 @@ public class SilverfishClass extends BaseClass {
 
 			// Customizing Creeper
 			customizeSilverfish(silverfish, player);
-			silverfish.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
+			silverfish.setTarget(instance.getNearestPlayer(player, silverfish, 150));
 		}
 
 		public void despawnSilverfish() {

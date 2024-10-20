@@ -5,7 +5,6 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -17,7 +16,6 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
@@ -78,31 +76,31 @@ public class HunterClass extends BaseClass {
 		Random rand = new Random();
 		int chance = rand.nextInt(100);
 		int chance2 = rand.nextInt(2);
-
+		
 		if (chance >= 0) {
 			if (event.getEntity() instanceof Player) {
 				Player p = (Player) event.getEntity();
 				if (instance.duosMap != null)
 					if (instance.team.get(p).equals(instance.team.get(player)))
 						return;
-
+				
 				if (instance.getGameManager().spawnProt.containsKey(p)
 						|| instance.getGameManager().spawnProt.containsKey(player))
 					return;
-
+				
 				BaseClass bc = instance.classes.get(player);
 				if (bc != null && bc.getLives() <= 0)
 					return;
-
+				
 				count++;
 				player.getInventory().setItem(8,
 						ItemHelper.setDetails(new ItemStack(Material.REDSTONE, count),
 								instance.getGameManager().getMain().color("&c&lBlood Lust"), "",
 								instance.getGameManager().getMain().color("&7Get 8 of this to get an OP potion!")));
-
+				
 				if (count >= 8) {
 					player.getInventory().remove(Material.REDSTONE);
-
+					
 					if (chance2 == 0) {
 						player.sendMessage(instance.getGameManager().getMain()
 								.color("&2&l(!) &rYour 8 Blood Lust rewarded you with a Strength I potion"));
