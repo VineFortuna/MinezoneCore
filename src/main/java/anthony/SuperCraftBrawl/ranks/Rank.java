@@ -77,7 +77,7 @@ public enum Rank {
      * Obtainable: Admin, leadership or Staff Manager Promotion/selection
      * Job: Director of their subsection (Community Management, Appeals, QA ect) (Overseers)
      */
-    BUILDER(14, color("&2&lBUILDER&r")),
+    BUILDER(14, color("&2&lBUILDER")),
     /*toh
      * Builder:
      * Obtainable: Application

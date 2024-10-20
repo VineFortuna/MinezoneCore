@@ -13,7 +13,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -86,7 +85,7 @@ public class SquidClass extends BaseClass {
 				for (Entity e : player.getWorld().getNearbyEntities(player.getLocation(), 10D, 10D, 10D)) {
 					if (e instanceof Player && !e.equals(player)) {
 						Player p = (Player) e;
-						if (p.getGameMode() != GameMode.SPECTATOR) {
+						if (!checkIfDead(p, instance)) {
 							p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 75, 0));
 							Location playerLocation = p.getEyeLocation();
 							double radius = 2.0;
