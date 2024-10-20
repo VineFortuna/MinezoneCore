@@ -11,7 +11,7 @@ import anthony.SuperCraftBrawl.Game.GameType;
 public class MapInstance {
 	public String worldName;
 	public GameType gameType = GameType.CLASSIC;
-	public MapType mapType;
+	public MapSource mapSource;
 	public Game two_vs_two = Game.FREE_FOR_ALL;
 	public List<Vector> spawnPos = new ArrayList<>();
 	public Vector lobbyLoc = new Vector(0, 100, 0);
@@ -25,8 +25,8 @@ public class MapInstance {
 		this.worldName = worldName;
 	}
 	
-	public MapInstance setMapType(MapType mapType) {
-		this.mapType = mapType;
+	public MapInstance setSource(MapSource mapSource) {
+		this.mapSource = mapSource;
 		return this;
 	}
 

@@ -222,7 +222,7 @@ public class Core extends JavaPlugin implements Listener {
 							if (i.state == GameState.WAITING) {
 								s.setLine(2, this.color("&0Players: " + i.players.size() + "/"
 										+ i.getMap().GetInstance().gameType.getMaxPlayers()));
-								s.setLine(3, this.color("&0" + i.ticksTilStart + "s"));
+								s.setLine(3, this.color("&0" + i.timeToStartSeconds + "s"));
 								s.update();
 							} else if (i.state == GameState.STARTED) {
 								player.sendMessage(this.color(
