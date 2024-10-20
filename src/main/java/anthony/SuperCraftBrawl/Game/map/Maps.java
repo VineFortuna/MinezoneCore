@@ -1018,7 +1018,7 @@ public enum Maps {
 
 	PaintBoard(
 			"PaintBoard",
-			new Gameplay[]{Gameplay.VOIDY, Gameplay.FLAT},
+			new Gameplay[]{Gameplay.FLAT},
 			Size.SMALL,
 			Category.CURATED,
 			new ItemStack(Material.WOOD, 1, (short) 3), // Jungle Wood
@@ -1264,7 +1264,7 @@ public enum Maps {
 
 	MushroomCastle(
 			"MushroomCastle",
-			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
+			new Gameplay[]{Gameplay.ELEVATED},
 			Size.SMALL,
 			Category.VAULTED,
 			new ItemStack(Material.WOOL, 1, (short) 14), // Red Woolnew ItemStack()
