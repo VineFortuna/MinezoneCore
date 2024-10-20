@@ -5,15 +5,12 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Color;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -43,14 +40,14 @@ public class EnderdragonClass extends BaseClass {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL, 5),
 				"" + ChatColor.BLACK + ChatColor.BOLD + "Teleporters"));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
 	}
 
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void Tick(int gameTicks) {
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.WEAKNESS)))
-			player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
 
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Enderdragon
 				&& instance.classes.get(player).getLives() > 0) {
@@ -93,7 +90,7 @@ public class EnderdragonClass extends BaseClass {
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(new ItemStack(Material.STONE_SWORD), Enchantment.DURABILITY, 1000);
+		ItemStack item = ItemHelper.setUnbreakable(new ItemStack(Material.STONE_SWORD));
 		return item;
 	}
 

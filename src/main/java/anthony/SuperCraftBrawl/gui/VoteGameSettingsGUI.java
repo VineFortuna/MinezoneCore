@@ -1,11 +1,11 @@
 package anthony.SuperCraftBrawl.gui;
 
-import anthony.util.ItemHelper;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
-import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -60,6 +60,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
 				game.getGameSettings().handleVoteGameStart(clickingPlayer, game);
+				inv.close(player);
 			}
 		}));
 	}
@@ -86,6 +87,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
 				game.getGameSettings().handleVoteTime(player, game);
+				inv.open(player);
 			}
 		}));
 	}
@@ -113,6 +115,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
 				game.getGameSettings().handleVoteGameType(player, game);
+				inv.open(player);
 			}
 		}));
 	}
@@ -133,6 +136,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
 				game.getGameSettings().handleLightningRate(player, game);
+				inv.open(player);
 			}
 		}));
 	}

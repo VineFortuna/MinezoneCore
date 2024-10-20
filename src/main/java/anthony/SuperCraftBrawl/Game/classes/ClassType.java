@@ -29,7 +29,7 @@ public enum ClassType {
 	ZombiePigman(51, 0, 3), Witch(13, 0, 5), ZombieVillager(50, 0, 10), Ice(54, 0, 15), Vampire(53, 800, 0),
 	Bee(55, 425, 0), Jeb(56, 0, 20), Hunter(57, 500, 0), FlintAndSteel(58, 0, 0), WitherSk(59, 1500, 0),
 	Shulker(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30), LargeFern(64, 0, 0),
-	Vindicator(65, 0, Rank.VIP), Fade(66, 0, Rank.VIP), Fisherman(67, 0, 0), BrewingStand(68, 125, 0);
+	Vindicator(65, 0, Rank.VIP), Fade(66, 0, Rank.VIP), Fisherman(67, 0, 0), BrewingStand(68, 125, 0), GrimReaper(69, 0, 0);
 
 	// Wolf(67, 0, 35)/* , Guardian(68, 0, 30) */;
 
@@ -79,6 +79,8 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new Cactus(instance, player);
+		case GrimReaper:
+			return new GrimReaperClass(instance, player);
 		case BrewingStand:
 			return new BrewingStandClass(instance, player);
 		case Fade:
@@ -221,6 +223,8 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new ItemStack(Material.CACTUS);
+		case GrimReaper:
+			return new ItemStack(Material.DIAMOND_HOE);
 		case BrewingStand:
 			return new ItemStack(Material.BREWING_STAND_ITEM);
 		case Fade:
@@ -366,7 +370,9 @@ public enum ClassType {
 	public String getClassDesc() {
 		switch (this) {
 		case Cactus:
-			return "A pricklyyy living thing, made up of thornws & blood..";
+			return "A pricklyyy living thing, made up of thorns & blood..";
+		case GrimReaper:
+			return "Harvest souls with deadly precision, wielding dark powers..";
 		case BrewingStand:
 			return "Hit players to obtain Brewing items to get epic potions!";
 		case Fade:
@@ -536,6 +542,8 @@ public enum ClassType {
 		switch (this) {
 		case Bat:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bat" + ChatColor.RESET;
+		case GrimReaper:
+			return color("&8&l&oGrimReaper&r");
 		case BrewingStand:
 			return color("&e&lBrewingStand&r");
 		case Fade:
