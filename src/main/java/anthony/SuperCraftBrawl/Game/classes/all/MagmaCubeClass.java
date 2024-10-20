@@ -11,7 +11,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.MagmaCube;
+import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
@@ -123,8 +126,7 @@ public class MagmaCubeClass extends BaseClass {
 									en.setSize(3);
 									en.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW
 											+ "MagmaCube");
-									Monster cube = (Monster) en;
-									cube.setTarget(instance.getNearestPlayer(player, cube, 150));
+									en.setCustomNameVisible(true);
 								}
 
 							}, ItemHelper.createMonsterEgg(EntityType.MAGMA_CUBE, 1));
