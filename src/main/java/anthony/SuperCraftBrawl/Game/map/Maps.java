@@ -12,6 +12,13 @@ import java.util.stream.Collectors;
 
 public enum Maps {
 
+	// &e&lJungleBoogie
+	//&o&9Voidy&7, &dElevated&7, &bFlat&7, &6Indoor
+	//&aSmall&7, &eMedium&7, &cLarge&7, &4Huge
+	//&7Starting In: &e25s
+	//&7Players: &e2/4
+	//&7&nClick to join!
+
 	// CLASSIC
 	NightDragon(
 			"NightDragon",
