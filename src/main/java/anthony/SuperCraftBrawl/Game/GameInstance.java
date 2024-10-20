@@ -352,10 +352,10 @@ public class GameInstance {
 	 */
 	public void CheckForGameStart() {
 		if (getMap() != null) {
-			if (players.size() == 1)
+			if (players.size() == 2)
 				StartGameTimer();
 		} else {
-			if (players.size() == 1)
+			if (players.size() == 2)
 				StartGameTimer();
 		}
 	}
