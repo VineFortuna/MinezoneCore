@@ -93,7 +93,8 @@ public class Fishing implements Listener {
                 if (data.exp >= 2500) {
                     data.level++;
                     data.exp -= 2500;
-                    p.sendMessage("Level upgraded to " + data.level + "!");
+                    p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
+                    p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "!"));
                 }
             } else if (fish == FishType.TOKENS) {
                 int r = rand.nextInt(25) + 11;
@@ -180,10 +181,19 @@ public class Fishing implements Listener {
                 p.playSound(p.getLocation(), Sound.ZOMBIE_PIG_HURT, 1, 0);
                 break;
             case COMMON:
+                p.playSound(p.getLocation(), Sound.ORB_PICKUP, 1, 0);
+                break;
             case RARE:
+                p.playSound(p.getLocation(), Sound.ORB_PICKUP, 1, 1);
+                break;
             case EPIC:
+                p.playSound(p.getLocation(), Sound.ORB_PICKUP, 1, 2);
+                break;
             case MYTHIC:
+                p.playSound(p.getLocation(), Sound.ORB_PICKUP, 1, 3);
+                break;
             case LEGENDARY:
+                p.playSound(p.getLocation(), Sound.ORB_PICKUP, 1, 4);
                 break;
             case TREASURE:
                 p.playSound(p.getLocation(), Sound.FIREWORK_TWINKLE2, 1, 0);
@@ -220,7 +230,7 @@ public class Fishing implements Listener {
                 break;
         }
         if (caughtRecent.get(p) % times == 0) {
-            for (int t = 0; t < 2 * Math.PI * radius; t += 2) {
+            for (int t = 0; t < 2 * Math.PI * radius; t += 1) {
                 p.playEffect(p.getLocation().add(radius * Math.cos(t), 0,
                         radius * Math.sin((t))), Effect.HAPPY_VILLAGER, 1);
             }
@@ -238,7 +248,8 @@ public class Fishing implements Listener {
                 if (data.exp >= 2500) {
                     data.level++;
                     data.exp -= 2500;
-                    p.sendMessage("Level upgraded to " + data.level + "!");
+                    p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
+                    p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "!"));
                 }
             }
         }

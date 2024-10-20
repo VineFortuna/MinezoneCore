@@ -4,7 +4,10 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
-import org.bukkit.*;
+import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -13,7 +16,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
@@ -72,13 +74,9 @@ public class NotchClass extends BaseClass {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &0Collape X-Axis");
 				getActionBarManager().setActionBar(player, "notch.cooldown", msg, 2);
 				
-				if (player.getGameMode() != GameMode.SPECTATOR && player.getInventory().contains(Material.DIRT)) {
-					player.getInventory().remove(Material.DIRT);
-					player.getInventory()
-							.addItem(ItemHelper.setDetails(new ItemStack(Material.GRASS),
-									"" + ChatColor.BLACK + "Collapse X-Axis", "",
-									instance.getGameManager().getMain().color("&7Pull enemies when aiming at them!"),
-									instance.getGameManager().getMain().color("   &rRange: &e20 blocks")));
+				if (player.getInventory().contains(Material.DIRT) && !checkIfDead(player, instance)) {
+					int i = player.getInventory().first(Material.DIRT);
+					player.getInventory().getItem(i).setType(Material.GRASS);
 				}
 			}
 		}
@@ -169,7 +167,7 @@ public class NotchClass extends BaseClass {
 			Player gamePlayer = null;
 			boolean check = false;
 
-			while (check == false) {
+			while (!check) {
 				gamePlayer = instance.players.get(random.nextInt(instance.players.size()));
 
 				if (gamePlayer != player && gamePlayer.getGameMode() != GameMode.SPECTATOR)
@@ -198,10 +196,9 @@ public class NotchClass extends BaseClass {
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(
+		ItemStack item = ItemHelper.setUnbreakable(
 				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.STONE_SWORD),
-						"" + ChatColor.BLACK + ChatColor.BOLD + "Notch's Sword"), Enchantment.KNOCKBACK, 1),
-				Enchantment.DURABILITY, 10000);
+						"" + ChatColor.BLACK + ChatColor.BOLD + "Notch's Sword"), Enchantment.KNOCKBACK, 1));
 		return item;
 	}
 }
