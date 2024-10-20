@@ -32,26 +32,27 @@ import java.util.Random;
 
 public class FishermanClass extends BaseClass {
     
-    private int cooldownSec;
+    private int cooldownSec = 0, cooldownDuration = 8000;
     private int hits;
     private ArrayList<Item> puffer = new ArrayList<>();
     
     private ItemStack flyingFish = ItemHelper.setDetails(new ItemStack(Material.RAW_FISH),
-            "&b&lFlying Fish",
+            "&a&lFlying Fish",
             "&7Launch at enemies to fishslap them");
     
     private ItemStack pufferFish = ItemHelper.setDetails(new ItemStack(Material.RAW_FISH, 1, (short) 3),
-            "&4&lTactical Fish",
-            "&7Explodes when approached by a player, inflicting Poison for 3 seconds",
-            "&7Lifespan of 45 seconds");
+            "&e&lTactical Fish",
+            "&7Explodes when approached by a player",
+            "&7Inflicts Poison for 4 seconds",
+            "&7Detonates after 15 seconds");
     
     private ItemStack speedFish = ItemHelper.setDetails(new ItemStack(Material.RAW_FISH, 1, (short) 2),
-            "&a&lTricky Fish",
+            "&b&lTricky Fish",
             "&7Swim away with Speed for 5 seconds");
     
     private ItemStack healFish = ItemHelper.setDetails(new ItemStack(Material.COOKED_FISH, 1, (short) 1),
             "&d&lHealing Fish",
-            "&7Eat to gain 1.5 hearts");
+            "&7Eat to gain 1 heart");
     
     private ItemStack bucket = ItemHelper.setDetails(new ItemStack(Material.BUCKET, 1), "&7Bucket");
     
@@ -84,7 +85,11 @@ public class FishermanClass extends BaseClass {
     
     @Override
     public ItemStack getAttackWeapon() {
-        return ItemHelper.setUnbreakable(ItemHelper.addEnchant(ItemHelper.addEnchant(new ItemStack(Material.FISHING_ROD), Enchantment.DAMAGE_ALL, 3),
+        return ItemHelper.setUnbreakable(ItemHelper.addEnchant(
+                ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
+                        instance.getGameManager().getMain().color("&bFishing Rod"),
+                                instance.getGameManager().getMain().color("&7Grapples to" +
+                                        "the block its attached to")), Enchantment.DAMAGE_ALL, 3),
                 Enchantment.KNOCKBACK, 1));
     }
     
@@ -95,32 +100,34 @@ public class FishermanClass extends BaseClass {
     
     @Override
     public void onFish(PlayerFishEvent event) {
-        if (event.getState() == PlayerFishEvent.State.FAILED_ATTEMPT ||
-                event.getState() == PlayerFishEvent.State.IN_GROUND) {
-            FishHook hook = event.getHook();
-            Block block = hook.getLocation().getBlock();
-            boolean grapple = false;
-            if (block.getType() != Material.AIR) {
-                grapple = true;
-            } else {
-                for (BlockFace face : BlockFace.values()) {
-                    Block adjacentBlock = block.getRelative(face);
-                    if (adjacentBlock.getType() != Material.AIR) {
-                        grapple = true;
-                        break;
+        if (fishing.getTime() < this.cooldownDuration) {
+            int seconds = (this.cooldownDuration - fishing.getTime()) / 1000 + 1;
+            player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                    + "Your Fishing Rod is still regenerating for " + ChatColor.YELLOW + seconds
+                    + " more seconds ");
+            event.setCancelled(true);
+        } else {
+            if (event.getState() == PlayerFishEvent.State.FAILED_ATTEMPT ||
+                    event.getState() == PlayerFishEvent.State.IN_GROUND) {
+                FishHook hook = event.getHook();
+                Block block = hook.getLocation().getBlock();
+                boolean grapple = false;
+                if (block.getType() != Material.AIR) {
+                    grapple = true;
+                } else {
+                    for (BlockFace face : BlockFace.values()) {
+                        Block adjacentBlock = block.getRelative(face);
+                        if (adjacentBlock.getType() != Material.AIR) {
+                            grapple = true;
+                            break;
+                        }
                     }
                 }
-            }
-            if (grapple) {
-                if (fishing.getTime() < 5000) {
-                    int seconds = (5000 - fishing.getTime()) / 1000 + 1;
-                    player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                            + "Your Fishing Rod is still regenerating for " + ChatColor.YELLOW + seconds
-                            + " more seconds ");
-                } else {
+                if (grapple) {
                     Location d = event.getHook().getLocation();
                     Vector v = d.toVector().subtract(player.getLocation().toVector()).normalize();
-                    player.setVelocity(v.multiply(2.5).add(new Vector(0, 1, 0)));
+                    player.setVelocity(v.multiply(2).add(new Vector(0, 1, 0)));
+                    player.getWorld().playSound(player.getLocation(), Sound.BAT_TAKEOFF, 1, 10);
                     fishing.restart();
                 }
             }
@@ -139,7 +146,7 @@ public class FishermanClass extends BaseClass {
     public void Tick(int gameTicks) {
         if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Fisherman
                 && instance.classes.get(player).getLives() > 0) {
-            this.cooldownSec = (5000 - fishing.getTime()) / 1000 + 1;
+            this.cooldownSec = (cooldownDuration - fishing.getTime()) / 1000 + 1;
             
             if (gameTicks % 10 == 0) {
                 Iterator<Item> it= puffer.iterator();
@@ -148,28 +155,28 @@ public class FishermanClass extends BaseClass {
                     boolean nearby = false;
                     Location loc = fish.getLocation();
                     for (Player p : instance.players) {
-                        if (p.getGameMode() != GameMode.SPECTATOR
-                                && p != player && p.getLocation().distance(fish.getLocation()) <= 2) {
+                        if (!checkIfDead(p, instance) &&
+                                p != player && p.getLocation().distance(fish.getLocation()) <= 2) {
                             nearby = true;
-                            p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 3 * 20, 0));
+                            EntityDamageEvent damageEvent = new EntityDamageEvent(p,
+                                    EntityDamageEvent.DamageCause.VOID, 4);
+                            instance.getGameManager().getMain().getServer().getPluginManager()
+                                    .callEvent(damageEvent);
+                            p.damage(4, player);
+                            p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 4 * 20, 0));
                         }
                     }
                     if (nearby) {
-                        player.getWorld().createExplosion(loc.getX(), loc.getY(), loc.getZ(), 1, false, false);
+                        player.getWorld().playSound(loc, Sound.EXPLODE, 1, 1);
+                        player.getWorld().playEffect(loc, Effect.EXPLOSION_LARGE, 1);
                         player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
                         fish.remove();
                         puffer.remove(fish);
                     }
                 }
             }
-            if (fishing.getTime() < 5000) {
-                String msg = instance.getGameManager().getMain()
-                        .color("&2Fishing Rod &rregenerates in: &e" + this.cooldownSec + "s");
-                getActionBarManager().setActionBar(player, "fishing.cooldown", msg, 2);
-            } else {
-                String msg = instance.getGameManager().getMain().color("&rYou can use &2Fishing Rod");
-                getActionBarManager().setActionBar(player, "fishing.cooldown", msg, 2);
-            }
+            cooldownActionBar(this.cooldownSec, this.cooldownDuration, fishing, ClassType.Fisherman,
+                    "fisherman.cooldown", "Fishing Rod");
         }
     }
     
@@ -178,7 +185,7 @@ public class FishermanClass extends BaseClass {
         BaseClass bc = instance.classes.get(player);
         if (bc != null && bc.getLives() <= 0)
             return;
-    
+        
         if (event.getEntity() instanceof Player) {
             Player p = (Player) event.getEntity();
             if (instance.duosMap != null)
@@ -186,6 +193,7 @@ public class FishermanClass extends BaseClass {
                     return;
             if (hits < 4) {
                 hits++;
+                player.getInventory().getItem(1).setAmount(hits);
                 if (hits == 4) {
                     player.sendMessage(instance.getGameManager().getMain()
                             .color("&2&l(!) &rYour bucket is full of fish. Bring out the whole ocean!"));
@@ -221,7 +229,7 @@ public class FishermanClass extends BaseClass {
                 player.playSound(player.getLocation(), Sound.SPLASH2, 1, 1);
                 hits = 0;
             } else if (item.isSimilar(healFish)) {
-                double heal = Math.min(3, player.getMaxHealth() - player.getHealth());
+                double heal = Math.min(2, player.getMaxHealth() - player.getHealth());
                 if (heal > 0) {
                     player.setHealth(player.getHealth() + heal);
                     player.playSound(player.getLocation(), Sound.EAT, 1, 1);

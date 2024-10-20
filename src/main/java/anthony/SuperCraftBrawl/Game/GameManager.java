@@ -239,9 +239,9 @@ public class GameManager implements Listener, PluginMessageListener {
 					}
 				} else if (!instance.isInBounds(event.getTo())){ // If player teleports outside map boundaries, don't teleport & give back pearl
 					player.sendMessage(getMain().color("&c&l(!) &rYou cannot teleport there!"));
-					ItemStack pearl = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL),
-							getMain().color("&c&lTeleporter"));
-					player.getInventory().addItem(pearl); // Adds an additional pearl to player's inventory
+					/*ItemStack pearl = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL),
+							getMain().color("&5&lENDER PEARL"));
+					player.getInventory().addItem(pearl); // Adds an additional pearl to player's inventory*/
 				}
 			}
 	}
