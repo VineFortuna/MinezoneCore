@@ -1,6 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>anthony.SuperCraftBrawl</groupId>
 	<artifactId>TheArchive-Core</artifactId>
@@ -10,12 +8,10 @@
 		<maven.compiler.target>8</maven.compiler.target>
 	</properties>
 	<build>
-		<directory>C:\Users\natan\OneDrive\Documentos\Natan\Minezone\Test Server\plugins</directory>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
@@ -37,6 +33,7 @@
 					<relocations>
 						<relocation>
 							<pattern>fr.mrmicky.fastboard</pattern>
+							<!-- Replace with the package of your plugin ! -->
 							<shadedPattern>com.yourpackage.fastboard</shadedPattern>
 						</relocation>
 					</relocations>
@@ -59,7 +56,7 @@
 		</repository>
 		<repository>
 			<id>jitpack.io</id>
-			<url>https://jitpack.io/</url>
+			<url>https://jitpack.io</url>
 		</repository>
 		<repository>
 			<id>dmulloy2-repo</id>
@@ -67,6 +64,12 @@
 		</repository>
 	</repositories>
 	<dependencies>
+		<!-- Run the following commands in root: -->
+		<!-- 
+			mvn install:install-file -Dfile="lib/spigot-1.8.8.jar" -DgroupId="org.bukkit.nms" -DartifactId=bukkit-nms -Dversion="1.0" -Dpackaging=jar -B
+			mvn install:install-file -Dfile="lib/MinezoneAuth.jar" -DgroupId="me.itzzmic.auth" -DartifactId=SCBAuth -Dversion="1.5" -Dpackaging=jar -B
+			mvn install:install-file -Dfile="lib/PunishSystem.jar" -DgroupId="me.itzzmic.minezone" -DartifactId=PunishSystem -Dversion="1.9" -Dpackaging=jar -B
+		 -->
 		<dependency>
 			<groupId>org.bukkit.nms</groupId>
 			<artifactId>bukkit-nms</artifactId>

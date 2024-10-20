@@ -1,6 +1,10 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.Color;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -8,15 +12,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
-import anthony.util.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
 
 public class BatClass extends BaseClass {
 
@@ -39,11 +36,7 @@ public class BatClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		playerInv.setItem(0,
-				ItemHelper.addEnchant(ItemHelper.addEnchant(ItemHelper.addEnchant(
-						ItemHelper.setDetails(new ItemStack(Material.SHEARS), ChatColor.GREEN + "Shears",
-								ChatColor.GRAY + "Beat your enemies to peices!", ChatColor.YELLOW + ""),
-						Enchantment.KNOCKBACK, 1), Enchantment.DAMAGE_ALL, 3), Enchantment.DURABILITY, 10000));
+		playerInv.setItem(0, this.getAttackWeapon());
 		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
 		player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 999999999, 1));
 		player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 1));
@@ -78,10 +71,10 @@ public class BatClass extends BaseClass {
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(ItemHelper.addEnchant(ItemHelper.addEnchant(
+		ItemStack item = ItemHelper.setUnbreakable(ItemHelper.addEnchant(ItemHelper.addEnchant(
 				ItemHelper.setDetails(new ItemStack(Material.SHEARS), ChatColor.GREEN + "Shears",
-						ChatColor.GRAY + "Beat your enemies to peices!", ChatColor.YELLOW + ""),
-				Enchantment.KNOCKBACK, 1), Enchantment.DAMAGE_ALL, 4), Enchantment.DURABILITY, 10000);
+						ChatColor.GRAY + "Beat your enemies to pieces!", ChatColor.YELLOW + ""),
+				Enchantment.KNOCKBACK, 1), Enchantment.DAMAGE_ALL, 3));
 		return item;
 	}
 
