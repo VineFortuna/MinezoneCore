@@ -62,7 +62,7 @@ public class GameInstance {
 	public HashMap<Player, Timer> cooldowns = new HashMap<Player, Timer>();
 	private final List<Player> winnerList;
 	public BukkitRunnable gameStartTime;
-	public int ticksTilStart = 30;
+	public int timeToStartSeconds = 30;
 	List<BukkitRunnable> runnables = new ArrayList<>();
 	public int blindness = 0;
 	public ItemStack votePaper = ItemHelper.setDetails(new ItemStack(Material.PAPER),
@@ -362,22 +362,22 @@ public class GameInstance {
 	// mode, 60 seconds
 	public int getSecondsUntilStart() {
 		if (gameManager.getMain().tournament == false)
-			return ticksTilStart = 30;
-		return ticksTilStart = 60;
+			return timeToStartSeconds = 30;
+		return timeToStartSeconds = 60;
 	}
 
 	public void StartGameTimer() {
 		if (gameStartTime == null) {
-			ticksTilStart = getSecondsUntilStart();
+			timeToStartSeconds = getSecondsUntilStart();
 			gameStartTime = new BukkitRunnable() {
 
 				@Override
 				public void run() {
 					if (s != null) {
-						s.setLine(3, getGameManager().getMain().color("&0" + ticksTilStart + "s"));
+						s.setLine(3, getGameManager().getMain().color("&0" + timeToStartSeconds + "s"));
 						s.update();
 					}
-					int ticks = ticksTilStart;
+					int ticks = timeToStartSeconds;
 					if (ticks == 0) {
 						StartGame();
 						GameScoreboard();
@@ -467,7 +467,7 @@ public class GameInstance {
 						if (players.size() >= 2) {
 							for (Player player : players) {
 								FastBoard board = boards.get(player);
-								board.updateLine(11, " " + ChatColor.GRAY + ticksTilStart + "s");
+								board.updateLine(11, " " + ChatColor.GRAY + timeToStartSeconds + "s");
 								board.updateLine(10, "" + ChatColor.RESET + ChatColor.BOLD + "Starting In:");
 								if (players.size() >= 2 && ticks > 3)
 									if (!(player.getInventory().contains(votePaper)))
@@ -488,7 +488,7 @@ public class GameInstance {
 						}
 					}
 
-					ticksTilStart--;
+					timeToStartSeconds--;
 				}
 			};
 			gameStartTime.runTaskTimer(gameManager.getMain(), 0, 20);
