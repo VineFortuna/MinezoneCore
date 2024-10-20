@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import net.md_5.bungee.api.ChatColor;
 
 public class GameSettings {
@@ -75,7 +74,7 @@ public class GameSettings {
 	 */
 	public void forceStartGame() {
 		if (game.gameStartTime != null) {
-			if (game.ticksTilStart <= 60) {
+			if (game.timeToStartSeconds <= 60) {
 				checkOtherSettings(); // Set other settings too if enough votes
 				game.TellAll(color("&2&l(!) &rGame is now starting"));
 				game.gameStartTime.cancel();

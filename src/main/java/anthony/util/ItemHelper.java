@@ -1,6 +1,5 @@
 package anthony.util;
 
-import anthony.util.ChatColorHelper;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import org.bukkit.Color;
@@ -419,6 +418,25 @@ public class ItemHelper {
 
 	public static boolean isType(ItemStack item, Material mat) {
 		return !isAirOrNull(item) && item.getType() == mat;
+	}
+
+	public static ItemStack getNextPageItem() {
+		return ItemHelper.createSkullTexture(
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTliZjMyOTJlMTI2YTEwNWI1NGViYTcxM2FhMWIxNTJkNTQxYTFkODkzODgyOWM1NjM2NGQxNzhlZDIyYmYifX19",
+				"&7Next Page"
+		);
+	}
+	public static ItemStack getPreviousPageItem() {
+		return ItemHelper.createSkullTexture(
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ==",
+				"&7Previous Page"
+		);
+	}
+	public static ItemStack getGoBackItem() {
+		return ItemHelper.setDetails(new ItemStack(Material.ARROW), "&7Go back");
+	}
+	public static ItemStack getGlassFiller() {
+		return ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " ");
 	}
 
 	public enum StainedClayColor {

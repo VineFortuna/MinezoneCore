@@ -1373,7 +1373,7 @@ public class GameManager implements Listener, PluginMessageListener {
 				Sign s = (Sign) b.getState();
 				instance.setSign(s);
 				s.setLine(2, main.color("&0Players: " + instance.players.size() + "/6"));
-				s.setLine(3, main.color("&0" + instance.ticksTilStart + "s"));
+				s.setLine(3, main.color("&0" + instance.timeToStartSeconds + "s"));
 				s.update();
 			}
 		}
@@ -1466,7 +1466,7 @@ public class GameManager implements Listener, PluginMessageListener {
 				instance.setSign(s);
 				s.setLine(2, main.color("&0Players: " + instance.players.size() + "/"
 						+ instance.getMap().GetInstance().gameType.getMaxPlayers()));
-				s.setLine(3, main.color("&0" + instance.ticksTilStart + "s"));
+				s.setLine(3, main.color("&0" + instance.timeToStartSeconds + "s"));
 				s.update();
 			}
 		}
