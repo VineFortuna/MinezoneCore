@@ -7,13 +7,13 @@ import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.Holograms;
-import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.PlayerListener;
 import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
+import anthony.util.ItemHelper;
 import fr.mrmicky.fastboard.FastBoard;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -350,10 +350,10 @@ public class GameInstance {
 	 */
 	public void CheckForGameStart() {
 		if (getMap() != null) {
-			if (players.size() == 2)
+			if (players.size() == 1)
 				StartGameTimer();
 		} else {
-			if (players.size() == 2)
+			if (players.size() == 1)
 				StartGameTimer();
 		}
 	}
@@ -495,6 +495,36 @@ public class GameInstance {
 		}
 	}
 
+	public void initialSpawn() {
+		MapInstance mapInstance = null;
+
+		if (map != null)
+			mapInstance = map.GetInstance();
+		else
+			mapInstance = duosMap.GetInstance();
+
+		int count = 0;
+		int size = mapInstance.spawnPos.size();
+
+		if (size == 0) { // If no spawn locations are set
+			for (Player gamePlayer : players) {
+				gamePlayer.teleport(new Location(getMapWorld(), 42, 2, 2.5));
+			}
+		} else {
+			for (Player gamePlayer : players) {
+				double x = mapInstance.spawnPos.get(count).getX();
+				double y = mapInstance.spawnPos.get(count).getY();
+				double z = mapInstance.spawnPos.get(count).getZ();
+
+				gamePlayer.teleport(new Location(getMapWorld(), x, y, z));
+				count++;
+
+				if (count >= mapInstance.spawnPos.size())
+					count = 0;
+			}
+		}
+	}
+
 	/*
 	 * This function gets a random spawn location on the map and returns it, which a
 	 * player will spawn at
@@ -612,7 +642,6 @@ public class GameInstance {
 	 */
 	private void giveLootDrop() {
 		for (Player player : this.players) {
-			player.teleport(GetRespawnLoc());
 			player.setFireTicks(0);
 			BaseClass bc = this.classes.get(player);
 
@@ -641,7 +670,7 @@ public class GameInstance {
 
 		setTeams(); // Sets teams if mode is Duos
 		startLightningDropsTimer(); // Loot drops will start spawning every 45 seconds
-		
+
 		TellAll(color("&e&l----------------------------------------"));
 		TellAll("" + ChatColor.AQUA + ChatColor.BOLD + "             Super Craft Blocks");
 		TellAll("");
@@ -650,13 +679,14 @@ public class GameInstance {
 		TellAll(color("&r       they can spawn useful powerups."));
 		TellAll(color("&r                   Good Luck!"));
 		TellAll(color("&e&l----------------------------------------"));
-		
+
 		this.state = GameState.STARTED; // Sets game state to 'Started'
 		LoadClasses();
 		GameScoreboard();
 		addAlivePlayers();
 		addAliveTeams();
 		giveLootDrop();
+		initialSpawn();
 		gameTicks();
 
 		/*
@@ -848,17 +878,11 @@ public class GameInstance {
 
 		// Bomb
 		ItemStack bomb = ItemHelper.createPotionItem(PotionType.INSTANT_DAMAGE, 1000, 0, true, true, true);
-		ItemHelper.setDetails(bomb,
-				"&4&lBOMB",
-				"&7Be careful!",
-				"&7Instantly kills... anyone"
-		);
+		ItemHelper.setDetails(bomb, "&4&lBOMB", "&7Be careful!", "&7Instantly kills... anyone");
 
 		// Brooms
-		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4),
-				"&5&lBROOM",
-				"&7Sends you up and save you from the void"
-		);
+		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4), "&5&lBROOM",
+				"&7Sends you up and saves you from the void");
 
 		// Hammer
 		ItemStack hammer = ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD, 1, (short) 250), "&d&lHAMMER");
@@ -871,35 +895,24 @@ public class GameInstance {
 		ItemStack pearl = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL), "&5&lENDER PEARL");
 
 		// Slowballs
-		ItemStack slowballs = ItemHelper.setDetails(new ItemStack(Material.SNOW_BALL, 8),
-				"&f&lSLOWBALLS",
-				"&7Give Slowness 1 for 3s to an enemy"
-		);
+		ItemStack slowballs = ItemHelper.setDetails(new ItemStack(Material.SNOW_BALL, 8), "&f&lSLOWBALLS",
+				"&7Give Slowness 1 for 3s to an enemy");
 
 		// Mini Shield
-		ItemStack miniShield = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				"&9&lMINI-SHIELD",
-				"&7Absorption 1"
-		);
+		ItemStack miniShield = ItemHelper.setDetails(new ItemStack(Material.POTION, 1), "&9&lMINI-SHIELD",
+				"&7Absorption 1");
 
 		// Bounty
-		ItemStack bounty = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR, 1),
-				"&a&lBOUNTY",
-				"&7Set a bounty on a random player",
-				"&7Kill them to claim extra tokens"
-		);
+		ItemStack bounty = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR, 1), "&a&lBOUNTY",
+				"&7Set a bounty on a random player", "&7Kill them to claim extra tokens");
 
 		// Blooper
-		ItemStack blooper = ItemHelper.setDetails(new ItemStack(Material.RABBIT_FOOT),
-				"&e&lBLOOPER",
-				"&7Give Blindness or Nausea to an enemy"
-		);
+		ItemStack blooper = ItemHelper.setDetails(new ItemStack(Material.RABBIT_FOOT), "&e&lBLOOPER",
+				"&7Give Blindness or Nausea to an enemy");
 
 		// Nuke
-		ItemStack nuke = ItemHelper.setDetails(new ItemStack(Material.TNT, 3),
-				"&4&lNUKE",
-				"&7Spawn TNTs where you're looking"
-		);
+		ItemStack nuke = ItemHelper.setDetails(new ItemStack(Material.TNT, 3), "&4&lNUKE",
+				"&7Spawn TNTs where you're looking");
 		ItemHelper.setGlowing(nuke, true);
 
 		// Instagib
@@ -921,10 +934,8 @@ public class GameInstance {
 		ItemStack creeperEgg = ItemHelper.createMonsterEgg(EntityType.CREEPER, 1, "&a&lCREEPER POKEBALL");
 
 		// Milk Bucket
-		ItemStack milk = ItemHelper.setDetails(new ItemStack(Material.MILK_BUCKET),
-				"&f&lMILK",
-				"&7Removes fire and all negative effects"
-		);
+		ItemStack milk = ItemHelper.setDetails(new ItemStack(Material.MILK_BUCKET), "&f&lMILK",
+				"&7Removes fire and all negative effects");
 
 		// Golden Apple
 		ItemStack goldenApple = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE), "&6&lGOLDEN APPLE");
@@ -957,10 +968,7 @@ public class GameInstance {
 		allItemDrops.add(goldenApple);
 		allItemDrops.add(notchApple);
 
-		List<ItemStack> items = Arrays.asList(new ItemStack(Material.GOLDEN_APPLE),
-
-				ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE, 1, (short) 1),
-						"" + ChatColor.BLACK + ChatColor.BOLD + "Notch Apple"),
+		List<ItemStack> items = Arrays.asList(notchApple,
 				slownessPot, bazooka, bazooka, healthPot, speedPot, slownessPot, slownessPot, speedPot, bazooka,
 				goldenApple, hammer, healthPot, extraLife, healthPot, milk, milk, milk, blooper, blooper, blooper,
 				blooper, nuke, nuke, nuke, nuke, nuke, bomb, pearl, pearl, miniShield, miniShield, slowballs, slowballs,
@@ -1149,9 +1157,8 @@ public class GameInstance {
 								} else {
 									baseClass.loadPlayer();
 									if (GameInstance.this.gameType == GameType.FRENZY) {
-										player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "Respawned",
-												"" + ChatColor.RESET + "Your new class for this life is "
-														+ baseClass.getType().getTag());
+										player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "New Class:",
+												"" + baseClass.getType().getTag());
 										new BukkitRunnable() { // Get rid of title after 1.5 seconds
 											@Override
 											public void run() {
@@ -1540,7 +1547,8 @@ public class GameInstance {
 			givePoints(1, 10);
 			givePoints(2, 7);
 			givePoints(3, 5);
-			givePoints(4, 1);
+			givePoints(4, 3);
+			givePoints(5, 1);
 			getGameManager().getMain().sortTourney();
 		}
 
@@ -1595,7 +1603,7 @@ public class GameInstance {
 					if (data != null) {
 						data.wins += 1;
 						data.flawlessWins += 1;
-						//data.winstreak += 1;
+						// data.winstreak += 1;
 						data.exp += 133;
 					}
 					baseClass.totalExp += 133;
@@ -1655,7 +1663,7 @@ public class GameInstance {
 				data.wins += 1;
 				data.winstreak += 1;
 				data.exp += 113;
-				
+
 				if (data.winstreak >= data.bestWinstreak)
 					data.bestWinstreak = data.winstreak;
 
@@ -1693,30 +1701,24 @@ public class GameInstance {
 					if (data.cwm == 1) {
 						customFlawWinMsg(winnerList.get(0));
 					} else {
-						Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-								+ winnerList.get(0).getName() + ChatColor.WHITE + " just " + ChatColor.BOLD
-								+ "FLAWLESSLY " + ChatColor.RESET + "won on " + ChatColor.BOLD + ChatColor.WHITE
-								+ ChatColor.YELLOW + ChatColor.BOLD + map.toString());
+						Bukkit.broadcastMessage(color("&2&l(!) &e" + winnerList.get(0).getName()
+								+ " &rjust &r&lFLAWLESSLY &rwon on &b&l" + map.toString()));
 					}
 				} else {
-					Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-							+ winnerList.get(0).getName() + ChatColor.WHITE + " just " + ChatColor.BOLD + "FLAWLESSLY "
-							+ ChatColor.RESET + "won on " + ChatColor.BOLD + ChatColor.WHITE + ChatColor.YELLOW
-							+ ChatColor.BOLD + map.toString());
+					Bukkit.broadcastMessage(color("&2&l(!) &e" + winnerList.get(0).getName()
+							+ " &rjust &r&lFLAWLESSLY &rwon on &b&l" + map.toString()));
 				}
 			} else {
 				if (winnerList.get(0).hasPermission("scb.customWin")) {
 					if (data.cwm == 1) {
 						customWinMsg(winnerList.get(0));
 					} else {
-						Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-								+ winnerList.get(0).getName() + ChatColor.WHITE + " just won on " + ChatColor.BOLD
-								+ ChatColor.WHITE + ChatColor.YELLOW + ChatColor.BOLD + map.toString());
+						Bukkit.broadcastMessage(color(
+								"&2&l(!) &e" + winnerList.get(0).getName() + " &rjust won on &b&l" + map.toString()));
 					}
 				} else {
-					Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-							+ winnerList.get(0).getName() + ChatColor.WHITE + " just won on " + ChatColor.BOLD
-							+ ChatColor.WHITE + ChatColor.YELLOW + ChatColor.BOLD + map.toString());
+					Bukkit.broadcastMessage(
+							color("&2&l(!) &e" + winnerList.get(0).getName() + " &rjust won on &b&l" + map.toString()));
 				}
 			}
 		} else {
@@ -1782,17 +1784,14 @@ public class GameInstance {
 
 		if (map != null) {
 			if (chance == 0) {
-				Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-						+ winner.getName() + ChatColor.WHITE + " got a Victory Royale on " + ChatColor.BOLD
-						+ ChatColor.WHITE + ChatColor.YELLOW + ChatColor.BOLD + map.toString());
+				Bukkit.broadcastMessage(
+						color("&2&l(!) &e" + winner.getName() + " &rgot a Victory Royale on &b&l" + map.toString()));
 			} else if (chance == 1) {
-				Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-						+ winner.getName() + ChatColor.WHITE + " just showed the entire lobby who's boss on "
-						+ ChatColor.BOLD + ChatColor.WHITE + ChatColor.YELLOW + ChatColor.BOLD + map.toString());
+				Bukkit.broadcastMessage(color("&2&l(!) &e" + winner.getName()
+						+ " &rjust showed the entire lobby who's boss on &b&l" + map.toString()));
 			} else if (chance == 2) {
-				Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-						+ winner.getName() + ChatColor.WHITE + " just won on " + ChatColor.BOLD + ChatColor.WHITE
-						+ ChatColor.YELLOW + ChatColor.BOLD + map.toString());
+				Bukkit.broadcastMessage(
+						color("&2&l(!) &e" + winner.getName() + " &rjust won on &b&l" + map.toString()));
 			}
 		} else {
 			if (chance == 0) {
@@ -1818,21 +1817,19 @@ public class GameInstance {
 
 		if (map != null) {
 			if (chance == 0) {
-				Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-						+ winner.getName() + ChatColor.WHITE + " just " + ChatColor.BOLD + "ABSOLUTELY DESTROYED "
-						+ ChatColor.RESET + "everyone on " + ChatColor.BOLD + ChatColor.WHITE + ChatColor.YELLOW
-						+ ChatColor.BOLD + map.toString());
+				Bukkit.broadcastMessage(color("&2&l(!) &e" + winner.getName()
+						+ " &rjust &r&lABSOLUTELY DESTROYED &ron &b&l" + map.toString()));
+
 			} else if (chance == 1) {
-				Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + tag + ChatColor.YELLOW
-						+ winner.getName() + ChatColor.WHITE + " just " + ChatColor.BOLD + "FLAWLESSLY "
-						+ ChatColor.RESET + "won on " + ChatColor.BOLD + ChatColor.WHITE + ChatColor.YELLOW
-						+ ChatColor.BOLD + map.toString());
+				Bukkit.broadcastMessage(
+						color("&2&l(!) &e" + winner.getName() + " &rjust &r&lFLAWLESSLY &ron &b&l" + map.toString()));
 			} else if (chance == 2) {
-				Bukkit.broadcastMessage(this.getGameManager().getMain().color("&r&l(!) &rThe game on &e&l"
-						+ map.toString() + " &rwas too easy for " + tag + "&e" + winner.getName()));
+				Bukkit.broadcastMessage(color(
+						"&2&l(!) &rThe game on &b&l" + map.toString() + " &rwas too easy for &e" + winner.getName()));
+
 			} else if (chance == 3) {
-				Bukkit.broadcastMessage(this.getGameManager().getMain().color("&r&l(!) &rGet out of the way for " + tag
-						+ "&e" + winner.getName() + ". &rHe &r&lDOMINATED &ron &e&l" + map.toString()));
+				Bukkit.broadcastMessage(color("&2&l(!) &rGet &r&lOUTTA THE WAY &rfor &e" + winner.getName()
+						+ "&r. They dominated on &b&l" + map.toString()));
 			}
 		} else {
 			if (chance == 0) {
@@ -1849,7 +1846,7 @@ public class GameInstance {
 						+ duosMap.toString() + " &rwas too easy for " + tag + "&e" + winner.getName()));
 			} else if (chance == 3) {
 				Bukkit.broadcastMessage(this.getGameManager().getMain().color("&r&l(!) &rGet out of the way for " + tag
-						+ "&e" + winner.getName() + ". &rHe &r&lDOMINATED &ron &e&l" + duosMap.toString()));
+						+ "&e" + winner.getName() + ". &rThey &r&lDOMINATED &ron &e&l" + duosMap.toString()));
 			}
 		}
 	}
@@ -2316,22 +2313,29 @@ public class GameInstance {
 		return false;
 	}
 
-	public Player getNearestPlayer(Player player, double x, double y, double z) {
-		for (Entity e : player.getNearbyEntities(x, y, z)) {
-			if (e instanceof Player) {
-				Player target = (Player) e;
-				if (target.getGameMode() != GameMode.SPECTATOR) {
-					if (this.duosMap != null) {
-						if (!this.team.get(target).equals(this.team.get(player))) {
-							return target;
+	public Player getNearestPlayer(Player player, LivingEntity entity, double distance) {
+		Player target = null;
+		double closestDistance = distance;
+		for (Player p : this.players) {
+			BaseClass baseClass = classes.get(p);
+			if (!baseClass.checkIfDead(p, this)) {
+				if (this.duosMap != null) {
+					if (!this.team.get(p).equals(this.team.get(player))) {
+						if (target == null) {
+							if (p.getLocation().distance(entity.getLocation()) <= distance) {
+								target = p;
+								closestDistance = p.getLocation().distance(entity.getLocation());
+							} else {
+								if (p.getLocation().distance(entity.getLocation()) < closestDistance) {
+									target = p;
+								}
+							}
 						}
-					} else {
-						return target;
 					}
 				}
 			}
 		}
-		return null;
+		return target;
 	}
 
 	public boolean hasPlayerMovedPosition(Player player) {
@@ -2359,6 +2363,11 @@ public class GameInstance {
 		}
 
 		return false;
+	}
+	
+	public void clearLastPosition(Player player) {
+		UUID playerId = player.getUniqueId();
+		lastKnownLocations.remove(playerId);
 	}
 
 	public List<ItemStack> getAllItemDrops() {
