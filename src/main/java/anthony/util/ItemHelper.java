@@ -2,9 +2,6 @@ package anthony.util;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
-import org.bukkit.Material;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
@@ -320,6 +317,20 @@ public class ItemHelper {
 			}
 		}
 
+		return leatherArmor;
+	}
+	
+	public static ItemStack createColoredArmor(Material armorPiece, String hexCode, String displayName) {
+		ItemStack leatherArmor = new ItemStack(armorPiece);
+		
+		if (hexCode != null) {
+			Color color = hexToColor(hexCode);
+			
+			if (color != null) {
+				leatherArmor = createColoredArmor(armorPiece, color, displayName);
+			}
+		}
+		
 		return leatherArmor;
 	}
 

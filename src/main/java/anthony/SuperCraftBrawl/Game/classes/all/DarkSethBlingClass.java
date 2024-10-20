@@ -4,11 +4,8 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
-import java.util.ArrayList;
-import java.util.Random;
 import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.lang.WordUtils;
-import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -19,9 +16,10 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.plugin.Plugin;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 public class DarkSethBlingClass extends BaseClass implements Listener {
 	
@@ -55,10 +53,10 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.COMMAND),
 						"" + ChatColor.RED + ChatColor.BOLD + "Item Stealer",
-						new String[] { "", ChatColor.GRAY + "Steal an item from one of your opponents" }));
+						"", ChatColor.GRAY + "Steal an item from one of your opponents"));
 		this.teleporterItem = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR),
 				"" + ChatColor.RED + ChatColor.BOLD + "Item Teleporter",
-				new String[] { "", ChatColor.GRAY + "Teleport to a recent lightning drop" });
+				"", ChatColor.GRAY + "Teleport to a recent lightning drop");
 		playerInv.setItem(2, this.teleporterItem);
 	}
 
@@ -99,13 +97,13 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 					return;
 				}
 				i = rand.nextInt(slots.size());
-				ItemStack skeppy = playerInventory.getItem(((Integer) slots.get(i)).intValue());
-				playerInventory.clear(((Integer) slots.get(i)).intValue());
+				ItemStack skeppy = playerInventory.getItem(slots.get(i));
+				playerInventory.clear(slots.get(i));
 				slots.clear();
 				String displayName = skeppy.getItemMeta().getDisplayName();
 				if (displayName == null)
 					displayName = WordUtils.capitalizeFully(skeppy.getType().name().replace('_', ' '));
-				this.player.getInventory().addItem(new ItemStack[] { skeppy });
+				this.player.getInventory().addItem(skeppy);
 				this.player.sendMessage(
 						this.instance.getGameManager().getMain().color("&2&l(!) &rYou were given a &e" + displayName));
 				target.sendMessage(this.instance.getGameManager().getMain().color("&2&l(!) &rWhoops! Your &e"
