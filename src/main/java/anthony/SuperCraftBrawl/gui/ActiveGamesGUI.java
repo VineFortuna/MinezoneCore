@@ -56,7 +56,7 @@ public class ActiveGamesGUI implements InventoryProvider {
 				if (entry.getValue().gameStartTime != null) {
 					contents.set(count, i, ClickableItem.of(ItemHelper.setDetails(displayItem,
 							"&e&l" + mapName,
-							"&rStarting In: &e" + entry.getValue().ticksTilStart + "s",
+							"&rStarting In: &e" + entry.getValue().timeToStartSeconds + "s",
 							"&rPlayers: &e" + entry.getValue().players.size() + "/" + entry.getValue().gameType.getMaxPlayers(),
 							"",
 							"&r&nClick to join!"), e -> {
