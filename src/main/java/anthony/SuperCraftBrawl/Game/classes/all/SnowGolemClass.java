@@ -1,5 +1,10 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -13,12 +18,6 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import anthony.util.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -219,10 +218,14 @@ public class SnowGolemClass extends BaseClass {
 									@Override
 									public void run() {
 										if (ticks == pumpkinDuration) {
-											if (gamePlayer.getGameMode() != GameMode.SPECTATOR)
+											if (!checkIfDead(gamePlayer, instance))
 												gamePlayer.getInventory().setHelmet(new ItemStack(Material.PUMPKIN));
 										} else if (ticks == 0) {
-											baseClass.loadArmor(gamePlayer);
+											if (baseClass.getType() == ClassType.Fade && baseClass.fadeAbilityActive) {
+												gamePlayer.getEquipment().setHelmet(ItemHelper.create(Material.AIR));
+											} else {
+												baseClass.resetHead();
+											}
 											this.cancel();
 										}
 
