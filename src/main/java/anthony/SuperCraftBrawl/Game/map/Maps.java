@@ -97,6 +97,15 @@ public enum Maps {
 			.setBounds(new Vector(-1249, 142, 976.499), 60, 65).setSignLoc(new Vector(173.550, 107, 673.700))
 			.setMapType(MapType.BODIL40).setGameType(GameType.FRENZY)),
 
+	WitchesBrew("WitchesBrew",
+			new MapInstance("witchesbrew")
+					.setSpawnPos(new Vector(-1347.494, 157, 982.477), new Vector(-1346.491, 154, 967.477),
+							new Vector(-1331.459, 151, 972.467), new Vector(-1318.470, 150, 961.640),
+							new Vector(-1310.490, 162, 978.463), new Vector(-1315.387, 153, 993.508))
+					.setLobbyLoc(new Vector(-1390.467, 185, 978.483)).setSpecLoc(new Vector(-1328.500, 170, 981.500))
+					.setBounds(new Vector(-1328.500, 170, 981.500), 40, 100).setMapType(MapType.COMMUNITY)
+					.setSignLoc(new Vector(178.468, 107, 673.700))),
+
 	Stronghold("Stronghold",
 			new MapInstance("stronghold")
 					.setSpawnPos(new Vector(112.468, 152, -588.591), new Vector(99.516, 145, -586.557),

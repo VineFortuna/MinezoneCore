@@ -148,16 +148,16 @@ public class Core extends JavaPlugin implements Listener {
 	public anthony.CrystalWars.game.GameManager getCwManager() {
 		return gm;
 	}
-	
+
 	public FlawlessWinsBoard getFlawlessWinsBoard() {
 		return this.flawlessWinsBoard;
 	}
-	
+
 	public BoardSettings getBoardSettings() {
 		return this.boardSettings;
 	}
-	
-	public WinstreakBoard getWinstreakBoard() { 
+
+	public WinstreakBoard getWinstreakBoard() {
 		return this.streakBoard;
 	}
 
@@ -377,7 +377,7 @@ public class Core extends JavaPlugin implements Listener {
 		kb = new KillsBoard(this);
 		fb = new FishingBoard(this);
 		boardSettings = new BoardSettings(this);
-		streakBoard = new WinstreakBoard(this); 
+		streakBoard = new WinstreakBoard(this);
 		flawlessWinsBoard = new FlawlessWinsBoard(this);
 		fishing = new Fishing(this);
 		// kb = new KillsBoard(this);
@@ -391,8 +391,8 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null) {
-			String[] commandTypes = { "join", "fav", "fly", "f", "shop", "leave", "l", "cw", "players", "class", "spectate",
-					"startgame", "gamestats", "setlives", "purchases", "kit", "items" };
+			String[] commandTypes = { "join", "fav", "fly", "f", "shop", "leave", "l", "cw", "players", "class",
+					"spectate", "startgame", "gamestats", "setlives", "purchases", "kit", "items" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -1508,10 +1508,10 @@ public class Core extends JavaPlugin implements Listener {
 			player.sendMessage("Test0");
 			player.sendMessage("Test0");
 			World minecadeLobby = getServer().createWorld(new WorldCreator("MinecadeLobby"));
-			
+
 			if (minecadeLobby != null)
 				player.teleport(minecadeLobby.getSpawnLocation());
-			
+
 			player.sendMessage("Test1");
 			player.sendMessage("Test2");
 		}
@@ -1662,7 +1662,7 @@ public class Core extends JavaPlugin implements Listener {
 		sendScoreboardUpdate(player); // This sets the rank next to player name above their head
 		chatAnnouncementOnJoin(player);
 		getScoreboardManager().lobbyBoard(player); // Gives the lobby scoreboard to player
-		//getKillsLeaderboard().killsBoard(player); //Shows kills leaderboard to player
+		// getKillsLeaderboard().killsBoard(player); //Shows kills leaderboard to player
 
 		// For join message:
 		String rank = getRankManager().getRank(player).getTagWithSpace(); // Gets the player's rank
@@ -1967,15 +1967,13 @@ public class Core extends JavaPlugin implements Listener {
 	public ItemStack getFishingRod(Player player) {
 		PlayerData data = getDataManager().getPlayerData(player);
 
-		ItemStack fishingRod = ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
-				"&3&lGo Fishing!",
-				"&fAnywhere with water",
-				"&fFish for junk, fish and treasure",
-				"&fEarn unique rewards"
-		);
+		ItemStack fishingRod = ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD), "&3&lGo Fishing!",
+				"&fAnywhere with water", "&fFish for junk, fish and treasure", "&fEarn unique rewards");
 		ItemHelper.setUnbreakable(fishingRod);
-		if (data.lure == 1 && data.lureLevel > 0) {
-			ItemHelper.addEnchant(fishingRod, Enchantment.LURE, data.lureLevel);
+		if (data != null) {
+			if (data.lure == 1 && data.lureLevel > 0) {
+				ItemHelper.addEnchant(fishingRod, Enchantment.LURE, data.lureLevel);
+			}
 		}
 
 		return fishingRod;
