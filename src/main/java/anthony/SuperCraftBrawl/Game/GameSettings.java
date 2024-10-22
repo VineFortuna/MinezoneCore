@@ -72,15 +72,19 @@ public class GameSettings {
 	 * This function starts the game if the command /startgame is used or if
 	 * everyone in the waiting lobby votes to start
 	 */
-	public void forceStartGame() {
-		if (game.gameStartTime != null) {
-			if (game.timeToStartSeconds <= 60) {
-				checkOtherSettings(); // Set other settings too if enough votes
-				game.TellAll(color("&2&l(!) &rGame is now starting"));
-				game.gameStartTime.cancel();
-				game.StartGame();
+	public void forceStartGame(boolean startGameCommand) {
+		if (!startGameCommand) {
+			if (game.gameStartTime == null && game.timeToStartSeconds > 60) {
+				return;
 			}
 		}
+		checkOtherSettings(); // Set other settings too if enough votes
+		game.TellAll(color("&2&l(!) &rGame is now starting"));
+		if (game.gameStartTime != null) {
+			game.gameStartTime.cancel();
+		}
+
+		game.StartGame();
 	}
 
 	public void changeGameType() {
@@ -186,7 +190,7 @@ public class GameSettings {
 		game.TellAll(message);
 
 		if (game.getGameSettings().totalStartVotes == game.players.size())
-			game.getGameSettings().forceStartGame();
+			game.getGameSettings().forceStartGame(false);
 	}
 
 	/**
