@@ -65,26 +65,9 @@ public class GenericModeGUI implements InventoryProvider {
 		this.main = main;
 	}
 
-	/**
-	 *
-	 * Creates a Comparator to sort games by wanted order. Order: 1. Waiting Games
-	 * (Lobby with at least a player on it) a. Number of players b. Map name 2.
-	 * Started Games (Spectate) a. Map Name 3. Lobby Games (Lobby with 0 players on
-	 * it) a. Map Name
-	 *
-	 */
 	@Override
 	public void init(Player player, InventoryContents contents) {
 		Pagination pagination = contents.pagination();
-
-		// Sorting Order
-		// Category (Curated, Casual, Vaulted)
-		// Size (Small, Medium, Large, Huge)
-		// Gameplay (Voidy, Flat, Elevated, Indoor, Underground)
-		// GameState (Waiting, Empty, Full)
-		// A-Z
-
-//		List<Maps> allMaps = Arrays.asList(Maps.values());
 
 		if (maps == null) {
 			maps = Maps.filterMaps(gamemode, Maps.Category.CURATED, null, null);
@@ -99,45 +82,6 @@ public class GenericModeGUI implements InventoryProvider {
 			items[i] = ClickableItem.of(getMapItem(map, gameInstance), event -> handleMapClick(player, map, gameInstance));
 			i++;
 		}
-
-		pagination.setItems(items);
-		pagination.setItemsPerPage(28);
-
-//		// Sorting the filtered maps
-//		List<Maps> sortedMaps = new ArrayList<>(filteredMaps);
-//		sortedMaps.sort(getComparator());
-//
-//		// Looping through filtered and sorted map list and Setting items in inventory
-//		for (Maps map : sortedMaps) {
-//			GameInstance gameInstance = main.getGameManager().getInstanceOfMap(map);
-//
-//			// Checking game playersSize to set due item
-//			if (gameInstance != null) {
-//				int playersSize = gameInstance.players.size();
-//
-//				// If it
-//				if (playersSize >= gamemode.getMaxPlayers()) {
-//					displayItem = new ItemStack(Material.STAINED_CLAY, 1, DyeColor.RED.getData());
-//				} else {
-//					displayItem = new ItemStack(new ItemStack(Material.STAINED_CLAY, 1, DyeColor.YELLOW.getData()));
-//				}
-//			}
-//
-//			contents.set(rows, column, ClickableItem.of(
-//					getMapItem(map, gameInstance),
-//					e -> {
-//						handleMapClick(player, map, gameInstance);
-//						inv.close(player);
-//					})
-//			);
-//
-//			column++;
-//
-//			if (column > 8) {
-//				rows++;
-//				column = 0;
-//			}
-//		}
 
 		// Setting Buttons
 		// Glass Filler
@@ -167,14 +111,11 @@ public class GenericModeGUI implements InventoryProvider {
 		}));
 
 		// Maps
+		pagination.setItems(items);
+		pagination.setItemsPerPage(28);
 		SlotIterator iterator = contents.newIterator(SlotIterator.Type.HORIZONTAL, SlotPos.of(1, 1));
 		iterator.allowOverride(false);
 		pagination.addToIterator(iterator);
-	}
-
-	@Override
-	public void update(Player player, InventoryContents contents) {
-
 	}
 
 	private void updateMaps(Player player) {
@@ -435,44 +376,10 @@ public class GenericModeGUI implements InventoryProvider {
 		previousRandomMap = randomMap;
 	}
 
-	private Comparator<? super Maps> getComparator() {
-		// Comparator to sort maps through gameInstances and gameState
-		Comparator<Maps> gameComparator = (map1, map2) -> {
-			GameInstance gameInstance1 = main.getGameManager().getInstanceOfMap(map1);
-			GameInstance gameInstance2 = main.getGameManager().getInstanceOfMap(map2);
-
-			// If both maps have gameInstances, compare gameState then number of players
-			if (gameInstance1 != null && gameInstance2 != null) {
-				int gameStateComparison = Integer.compare(gameInstance1.state == GameState.WAITING ? 0 : 1,
-						gameInstance2.state == GameState.WAITING ? 0 : 1);
-				// If gameState is different, return the result of comparison between gameStates
-				if (gameStateComparison != 0) {
-					return gameStateComparison;
-				}
-				// If gameState is the same, compare by number of players
-				return Integer.compare(gameInstance1.players.size(), gameInstance2.players.size());
-
-			} else if (gameInstance1 != null) {
-				// map1 has a gameInstance, so it comes first
-				return -1;
-			} else if (gameInstance2 != null) {
-				// map2 has a gameInstance, so it comes first
-				return 1;
-			} else {
-				// Lobby with 0 players maps
-				// Sorting by name
-				return map1.name().compareTo(map2.name());
-			}
-		};
-
-		return gameComparator;
-	}
-
 	private enum Sorter {
 		ALPHABETICAL,
 		SIZE,
-		GAMEPLAY,
-		STATE;
+		GAMEPLAY;
 
 		@Override
 		public String toString() {
@@ -483,10 +390,13 @@ public class GenericModeGUI implements InventoryProvider {
 					return "Size";
 				case GAMEPLAY:
 					return "Gameplay";
-				case STATE:
-					return "State";
 			}
 			return "Unknown Sort";
 		}
+	}
+
+	@Override
+	public void update(Player player, InventoryContents contents) {
+
 	}
 }

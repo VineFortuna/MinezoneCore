@@ -358,7 +358,7 @@ public enum Maps {
 	),
 
 	TheEnd("TheEnd",
-			new Gameplay[]{Gameplay.VOIDY},
+			new Gameplay[]{Gameplay.FLAT},
 			Size.MEDIUM,
 			Category.CURATED,
 			new ItemStack(Material.ENDER_STONE),
@@ -404,7 +404,7 @@ public enum Maps {
 
 	Tropical(
 			"Tropical",
-			new Gameplay[]{Gameplay.FLAT},
+			new Gameplay[]{Gameplay.FLAT, Gameplay.ELEVATED},
 			Size.MEDIUM,
 			Category.CURATED,
 			new ItemStack(Material.SAND),
@@ -736,7 +736,7 @@ public enum Maps {
 
 	Limbo(
 			"Limbo",
-			new Gameplay[]{Gameplay.VOIDY},
+			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
 			Size.MEDIUM,
 			Category.CURATED,
 			new ItemStack(Material.WEB),
@@ -1102,7 +1102,7 @@ public enum Maps {
 
 	NetherFortress(
 			"NetherFortress",
-			new Gameplay[]{Gameplay.VOIDY,Gameplay.FLAT, Gameplay.UNDERGROUND},
+			new Gameplay[]{Gameplay.FLAT, Gameplay.UNDERGROUND},
 			Size.MEDIUM,
 			Category.CURATED,
 			new ItemStack(Material.NETHER_BRICK),
