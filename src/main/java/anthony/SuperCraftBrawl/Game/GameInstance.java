@@ -164,8 +164,10 @@ public class GameInstance {
 		w.generator(new VoidGenerator());
 		mapWorld = Bukkit.getServer().createWorld(w);
 		mapWorld.setAutoSave(false);
-		mapWorld.setTime(1000);
-	}
+		
+		if (getMap() != Maps.WitchesBrew)
+			mapWorld.setTime(1000);
+	}	
 
 	/**
 	 * Retrieves the location of the game lobby for the current map.
@@ -1783,7 +1785,6 @@ public class GameInstance {
 	private void customWinMsg(Player winner) {
 		Random rand = new Random();
 		int chance = rand.nextInt(3);
-		String tag = gameManager.getMain().getRankManager().getRank(winner).getTagWithSpace();
 
 		if (map != null) {
 			if (chance == 0) {
@@ -1828,7 +1829,7 @@ public class GameInstance {
 						color("&2&l(!) &e" + winner.getName() + " &rjust &r&lFLAWLESSLY &ron &b&l" + map.toString()));
 			} else if (chance == 2) {
 				Bukkit.broadcastMessage(color(
-						"&2&l(!) &rThe game on &b&l" + map.toString() + "&rwas too easy for &e" + winner.getName()));
+						"&2&l(!) &rThe game on &b&l" + map.toString() + " &rwas too easy for &e" + winner.getName()));
 
 			} else if (chance == 3) {
 				Bukkit.broadcastMessage(color("&2&l(!) &rGet &r&lOUTTA THE WAY &rfor &e" + winner.getName()
