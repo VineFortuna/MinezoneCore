@@ -174,13 +174,16 @@ public class FadeClass extends BaseClass {
 
 			@Override
 			public void run() {
-				for (Player gamePlayer : instance.players)
-					gamePlayer.showPlayer(player);
-				setArmor(player.getEquipment());
-				player.sendMessage(
-						instance.getGameManager().getMain().color("&r&l(!) &rYou are now visible to all players"));
-				playSoundToGamePlayers(Sound.ENDERMAN_TELEPORT);
-				fadeAbilityActive = false;
+				if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Fade
+						&& instance.classes.get(player).getLives() > 0) {
+					for (Player gamePlayer : instance.players)
+						gamePlayer.showPlayer(player);
+					setArmor(player.getEquipment());
+					player.sendMessage(
+							instance.getGameManager().getMain().color("&r&l(!) &rYou are now visible to all players"));
+					playSoundToGamePlayers(Sound.ENDERMAN_TELEPORT);
+					fadeAbilityActive = false;
+				}
 			}
 		};
 		r.runTaskLater(instance.getGameManager().getMain(), 20 * 8);

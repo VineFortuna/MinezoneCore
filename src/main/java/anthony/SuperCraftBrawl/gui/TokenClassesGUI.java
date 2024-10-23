@@ -2,9 +2,9 @@ package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -13,6 +13,8 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
 
 public class TokenClassesGUI implements InventoryProvider {
 
@@ -47,9 +49,7 @@ public class TokenClassesGUI implements InventoryProvider {
 				
 				contents.set(a, b,
 						ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true),
-								type.getTag(), type.buildDescription(), "",
-								data.isPurchased(type) ? "" + ChatColor.YELLOW + ChatColor.BOLD + "Purchased"
-										: "" + ChatColor.RESET + type.getTokenCost() + ChatColor.YELLOW + " tokens",
+								type.getTag(), costDescription(player, type),
 								"",
 										"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
 												+ ChatColor.YELLOW + " to choose a class",
@@ -109,5 +109,20 @@ public class TokenClassesGUI implements InventoryProvider {
 	@Override
 	public void update(Player player, InventoryContents contents) {
 
+	}
+	
+	public List<String> costDescription(Player player, ClassType type) {
+		PlayerData data = main.getDataManager().getPlayerData(player);
+		List<String> desc = type.buildDescription();
+		desc.add("");
+		if (data != null) {
+			if (data.isPurchased(type)) {
+				desc.add(main.color("&e&lPurchased"));
+				desc.add(main.color("&e" + type.getTokenCost() + " Tokens"));
+			} else {
+				desc.add(main.tokenCostString(player, type.getTokenCost()));
+			}
+		}
+		return desc;
 	}
 }

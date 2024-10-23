@@ -87,7 +87,7 @@ public class Fishing implements Listener {
                 p.sendMessage(main.color("&3&l(!) &rYou have found &e1 Mystery Chest!"));
                 data.mysteryChests++;
             } else if (fish == FishType.EXP) {
-                int r = rand.nextInt(35) + 11;
+                int r = rand.nextInt(40) + 11;
                 data.exp += r;
                 p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + r + " EXP!"));
                 if (data.exp >= 2500) {
@@ -97,7 +97,7 @@ public class Fishing implements Listener {
                     p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "!"));
                 }
             } else if (fish == FishType.TOKENS) {
-                int r = rand.nextInt(25) + 11;
+                int r = rand.nextInt(35) + 11;
                 data.tokens += r;
                 p.sendMessage(main.color("&3&l(!) &rYou have found &e" + r + " Tokens!"));
             }

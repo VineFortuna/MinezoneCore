@@ -249,6 +249,28 @@ public enum Maps {
 					.setSignLoc(new Vector(173.550, 107, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
+	
+	WitchesBrew(
+			"WitchesBrew",
+			new Gameplay[]{Gameplay.VOIDY},
+			Size.SMALL,
+			Category.HOLIDAY,
+			new ItemStack(Material.SLIME_BLOCK), // Slime Block
+			new MapInstance(
+					"witchesbrew")
+					.setSpawnPos(new Vector(-1347.494, 157, 982.477),
+							new Vector(-1346.491, 154, 967.477),
+							new Vector(-1331.459, 151, 972.467),
+							new Vector(-1318.470, 150, 961.640),
+							new Vector(-1310.490, 162, 978.463),
+							new Vector(-1315.387, 153, 993.508)
+					)
+					.setLobbyLoc(new Vector(-1390.467, 185, 978.483))
+					.setSpecLoc(new Vector(-1328.500, 170, 981.500))
+					.setBounds(new Vector(-1328.500, 170, 981.500), 40, 100)
+					.setSignLoc(new Vector(178.468, 107, 673.700))
+					.setSource(MapSource.COMMUNITY)
+	),
 
 	Stronghold(
 			"Stronghold",
@@ -833,8 +855,8 @@ public enum Maps {
 					.setSource(MapSource.MINECADE)
 	),
 
-	FoundTemple(
-			"FoundTemple",
+	LostTemple(
+			"LostTemple",
 			new Gameplay[]{Gameplay.FLAT},
 			Size.LARGE,
 			Category.VAULTED,
