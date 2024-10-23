@@ -1203,14 +1203,12 @@ public class Core extends JavaPlugin implements Listener {
 					}
 
 					String nick = "";
-					if (args[0].matches("^[a-zA-Z0-9_]*$")) {
-					} else {
+					if (!args[0].matches("^[a-zA-Z0-9_]*$")) {
 						player.sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
 								+ "Please enter a name with only alphanumeric characters!");
 						return true;
 					}
-					if (Bukkit.getPlayerExact(args[0]) == null) {
-					} else {
+					if (Bukkit.getPlayer(args[0]) != null) {
 						player.sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
 								+ "You cannot name yourself as another player!");
 						return true;
@@ -1493,11 +1491,10 @@ public class Core extends JavaPlugin implements Listener {
 						if (target != null) {
 							data.points = num;
 
-							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You gave "
-									+ ChatColor.GREEN + target.getName() + ChatColor.RESET + " " + num + " Tokens!");
-							target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + num
-									+ " Tokens!");
-							if (this.getGameManager().GetInstanceOfPlayer(player) == null)
+							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You set "
+									+ ChatColor.GREEN + target.getName() + ChatColor.RESET + "'s points to " + num);
+							target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Your points were set to " + num);
+							if (tournament && this.getGameManager().GetInstanceOfPlayer(player) == null)
 								getScoreboardManager().lobbyBoard(target);
 							this.getDataManager().saveData(data);
 						} else {
@@ -1512,18 +1509,6 @@ public class Core extends JavaPlugin implements Listener {
 				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank " + ChatColor.RED
 						+ ChatColor.BOLD + "OWNER" + ChatColor.RESET + "to use this command!");
 			}
-		}
-
-		if (cmd.getName().equalsIgnoreCase("mainworld")) {
-			player.sendMessage("Test0");
-			player.sendMessage("Test0");
-			World minecadeLobby = getServer().createWorld(new WorldCreator("MinecadeLobby"));
-			
-			if (minecadeLobby != null)
-				player.teleport(minecadeLobby.getSpawnLocation());
-			
-			player.sendMessage("Test1");
-			player.sendMessage("Test2");
 		}
 
 		if (cmd.getName().equalsIgnoreCase("stats")) {
@@ -1616,6 +1601,10 @@ public class Core extends JavaPlugin implements Listener {
 
 	public int getTotalFish(Player player) {
 		return getTotalFish(player, null);
+	}
+	
+	public boolean hasAllFish(Player player) {
+		return getTotalFish(player) == FishType.values().length;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1984,10 +1973,24 @@ public class Core extends JavaPlugin implements Listener {
 				"&fEarn unique rewards"
 		);
 		ItemHelper.setUnbreakable(fishingRod);
-		if (data.lure == 1 && data.lureLevel > 0) {
-			ItemHelper.addEnchant(fishingRod, Enchantment.LURE, data.lureLevel);
+		if (data != null) {
+			if (data.lure == 1 && data.lureLevel > 0) {
+				ItemHelper.addEnchant(fishingRod, Enchantment.LURE, data.lureLevel);
+			}
 		}
 
 		return fishingRod;
+	}
+	
+	public String tokenCostString(Player player, int cost) {
+		PlayerData data = this.getDataManager().getPlayerData(player);
+		if (data != null) {
+			if (data.tokens >= cost) {
+				return this.color("&a" + cost + " Tokens");
+			} else {
+				return this.color("&c" + cost + " Tokens");
+			}
+		}
+		return this.color("&cInvalid");
 	}
 }

@@ -828,8 +828,9 @@ public class GameManager implements Listener, PluginMessageListener {
 			BaseClass bc = instance.classes.get(player);
 			if (item != null && item.getType() == Material.DIAMOND_HOE) {
 				ItemMeta meta = item.getItemMeta();
-
-				if (meta.getDisplayName().contains("BAZOOKA") && player.getGameMode() != GameMode.SPECTATOR) {
+				
+				if (meta.getDisplayName().toLowerCase().contains("bazooka") &&
+						player.getGameMode() != GameMode.SPECTATOR) {
 					if (bc != null) {
 						if (bc.bazooka.getTime() < 3000) {
 							int seconds = (3000 - bc.bazooka.getTime()) / 1000 + 1;
