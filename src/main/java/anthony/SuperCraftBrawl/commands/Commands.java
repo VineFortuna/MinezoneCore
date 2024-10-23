@@ -13,6 +13,7 @@ import anthony.SuperCraftBrawl.gui.GameStatsGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.util.ChatColorHelper;
 import com.google.common.collect.Lists;
 import org.bukkit.*;
 import org.bukkit.command.Command;
@@ -308,12 +309,71 @@ public class Commands implements CommandExecutor, TabCompleter {
             return;
         }
 
-        int count = 0;
-        for (int i = 0; i < Maps.values().length; i++) {
-            count++;
+        // Send the message to the player
+        player.sendMessage(ChatColorHelper.color(createMapsString()));
+
+//        player.sendMessage("" + net.md_5.bungee.api.ChatColor.BOLD + "(!) " + net.md_5.bungee.api.ChatColor.RESET + "There are " + net.md_5.bungee.api.ChatColor.YELLOW + count
+//                + net.md_5.bungee.api.ChatColor.RESET + " available maps to play");
+    }
+
+    private String createMapsString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        String HEADERCOLOR = "&e&l";
+
+        stringBuilder.append("&f&l----------------------------------------");
+        stringBuilder.append(HEADERCOLOR).append("CURATED MAPS:\n");
+
+        // Get Classic maps for Curated category
+        appendMaps(GameType.CLASSIC, Maps.Category.CURATED, stringBuilder);
+
+        // Get Duels maps for Curated category
+        appendMaps(GameType.DUEL, Maps.Category.CURATED, stringBuilder);
+
+        // Now for Casual Maps section
+        stringBuilder.append(HEADERCOLOR).append(" \nCASUAL MAPS:\n");
+
+        // Get Classic maps for Casual category
+        appendMaps(GameType.CLASSIC, Maps.Category.CASUAL, stringBuilder);
+
+        // Get Duels maps for Casual category
+        appendMaps(GameType.DUEL, Maps.Category.CASUAL, stringBuilder);
+
+        // Now for Vaulted Maps section
+        stringBuilder.append(HEADERCOLOR).append(" \nVAULTED MAPS:\n");
+
+        // Get Classic maps for Vaulted category
+        appendMaps(GameType.CLASSIC, Maps.Category.VAULTED, stringBuilder);
+
+        // Get Duels maps for Vaulted category
+        appendMaps(GameType.DUEL, Maps.Category.VAULTED, stringBuilder);
+
+        stringBuilder.append("&f&l----------------------------------------");
+
+        return stringBuilder.toString();
+    }
+
+    private void appendMaps(GameType gameMode, Maps.Category category, StringBuilder stringBuilder) {
+        List<Maps> maps = Maps.filterMaps(gameMode, category, null, null);
+        Maps.sortMaps(maps, Maps.Sorter.ALPHABETICAL);
+
+        appendColorAndComma(stringBuilder, maps, gameMode);
+    }
+
+    private void appendColorAndComma(StringBuilder stringBuilder, List<Maps> mapsList, GameType gameMode) {
+        String color = "";
+
+        if (gameMode == GameType.CLASSIC) {
+            color = "&a";
+        } else if (gameMode == GameType.DUEL) color = "&b";
+
+        for (int i = 0; i < mapsList.size(); i++) {
+            stringBuilder.append(color).append(mapsList.get(i).getName());
+
+            if (i < mapsList.size() - 1) {
+                stringBuilder.append("&7, ");
+            }
         }
-        player.sendMessage("" + net.md_5.bungee.api.ChatColor.BOLD + "(!) " + net.md_5.bungee.api.ChatColor.RESET + "There are " + net.md_5.bungee.api.ChatColor.YELLOW + count
-                + net.md_5.bungee.api.ChatColor.RESET + " available maps to play");
+        stringBuilder.append("\n"); // Newline after each map group
     }
 
     private void joinCommand(String[] args, Player player) {
