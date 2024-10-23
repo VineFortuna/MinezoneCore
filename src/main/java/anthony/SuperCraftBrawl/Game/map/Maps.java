@@ -41,7 +41,7 @@ public enum Maps {
 			"Village",
 			new Gameplay[]{Gameplay.FLAT},
 			Size.MEDIUM,
-			Category.CASUAL,
+			Category.CURATED,
 			new ItemStack(Material.GRASS),
 			new MapInstance(
 					"village")
@@ -624,7 +624,7 @@ public enum Maps {
 							new Vector(391.550, 144, 266.455),
 							new Vector(417.400, 139, 240.400)
 					)
-					.setLobbyLoc(new Vector(392.484, 175, 320.476))
+					.setLobbyLoc(new Vector(394.500, 173, 322.500))
 					.setSpecLoc(new Vector(392.500, 150, 260.500))
 					.setBounds(new Vector(392.500, 167, 260.500), 40, 40)
 					.setSignLoc(new Vector(168.300, 107, 667.580))

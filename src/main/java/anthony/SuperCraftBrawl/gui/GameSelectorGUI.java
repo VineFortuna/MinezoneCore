@@ -9,8 +9,10 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 
+import anthony.util.SoundManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -75,6 +77,7 @@ public class GameSelectorGUI implements InventoryProvider {
 						e -> {
 							// If item was Left-clicked opens GUI to choose map
 							if (e.isLeftClick()) {
+								SoundManager.playSoundToSinglePlayer(player, Sound.CLICK, 0.5f, 15);
 								new ClassicModeGUI(main, inv).inv.open(player);
 							// If item was Right-clicked join random game
 							} else if (e.isRightClick()) {
@@ -94,6 +97,7 @@ public class GameSelectorGUI implements InventoryProvider {
 						e -> {
 							// If item was Left-clicked opens GUI to choose map
 							if (e.isLeftClick()) {
+								SoundManager.playSoundToSinglePlayer(player, Sound.CLICK, 0.5f, 15);
 								new DuelsModeGUI(main, inv).inv.open(player);
 							// If item was Right-clicked join random game
 							} else if (e.isRightClick()) {

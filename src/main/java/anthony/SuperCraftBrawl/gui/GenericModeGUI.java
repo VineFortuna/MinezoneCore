@@ -7,12 +7,15 @@ import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.util.ItemHelper;
+import anthony.util.SoundManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.*;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
@@ -91,9 +94,15 @@ public class GenericModeGUI implements InventoryProvider {
 		contents.fillBorders(ClickableItem.of(ItemHelper.getGlassFiller(), e-> {}));
 
 		// Previous Page
-		if (!pagination.isFirst()) {contents.set(2, 0, ClickableItem.of(ItemHelper.getPreviousPageItem(), e -> inv.open(player, pagination.previous().getPage())));}
+		if (!pagination.isFirst()) {contents.set(2, 0, ClickableItem.of(ItemHelper.getPreviousPageItem(), e -> {
+			SoundManager.playSoundToSinglePlayer(player, Sound.CLICK, 0.5f, 15);
+			inv.open(player, pagination.previous().getPage());
+		}));}
 		// Next Page
-		if (!pagination.isLast()) {contents.set(2, 8, ClickableItem.of(ItemHelper.getNextPageItem(), e -> inv.open(player, pagination.next().getPage())));}
+		if (!pagination.isLast()) {contents.set(2, 8, ClickableItem.of(ItemHelper.getNextPageItem(), e -> {
+			SoundManager.playSoundToSinglePlayer(player, Sound.CLICK, 0.5f, 15);
+			inv.open(player, pagination.next().getPage());
+		}));}
 
 		// Randomizer
 		setItem(contents, 0, 4, getRandomizerItem(), e -> handleRandomizerClick(e, player));
@@ -109,6 +118,7 @@ public class GenericModeGUI implements InventoryProvider {
 
 		// Setting "Go Back" Button
 		contents.set(totalRows - 1, totalColumns - 1, ClickableItem.of(ItemHelper.getGoBackItem(), e -> {
+			SoundManager.playSoundToSinglePlayer(player, Sound.CLICK, 0.5f, 15);
 			inv.close(player);
 			if (inv.getParent().isPresent()) {inv.getParent().get().open(player);}
 		}));
@@ -120,6 +130,7 @@ public class GenericModeGUI implements InventoryProvider {
 	}
 
 	private void updateMaps(Player player) {
+		SoundManager.playSoundToSinglePlayer(player, Sound.CLICK, 0.5f, 15);
 		maps = Maps.filterMaps(gamemode, currentCategory, currentSize, currentGameplay);
 		if (maps == null) {
 			System.out.println("No maps found.");
@@ -156,14 +167,39 @@ public class GenericModeGUI implements InventoryProvider {
 		String currentCategoryString = currentCategory == null ? "All" : currentCategory.toString();
 		String nextCategoryString = nextCategory == null ? "All" : nextCategory.toString();
 
-		return ItemHelper.setDetails(
-				new ItemStack(Material.HOPPER),
+		Material material = null;
+
+		if (currentCategory == null) {
+			material = Material.RECORD_9;
+		} else {
+			switch (currentCategory) {
+				case CURATED:
+					material = Material.RECORD_4;
+					break;
+				case CASUAL:
+					material = Material.RECORD_12;
+					break;
+				case VAULTED:
+					material = Material.RECORD_11;
+					break;
+				case HOLIDAY:
+					material = Material.RECORD_7;
+					break;
+			}
+		}
+
+		ItemStack item = ItemHelper.setDetails(
+				new ItemStack(material),
 				"&6Showing: &a" + currentCategoryString,
 				"&7Show different map categories",
 				"",
 				"&7Next: &a" + nextCategoryString,
 				"&eLeft click to cycle"
 		);
+		
+		item.getItemMeta().addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+		
+		return item;
 	}
 
 	private ItemStack getSorterItem() {
@@ -171,7 +207,7 @@ public class GenericModeGUI implements InventoryProvider {
 		String nexSorterString = nextSorter.toString();
 
 		return ItemHelper.setDetails(
-				new ItemStack(Material.TRIPWIRE_HOOK),
+				new ItemStack(Material.HOPPER_MINECART),
 				"&6Sorted by: &a" + currentSorterString,
 				"&7Sort specific maps",
 				"",
@@ -271,10 +307,6 @@ public class GenericModeGUI implements InventoryProvider {
 			}
 
 			GameInstance game = main.getGameManager().getInstanceOfMap(randomMap);
-
-			if (game == null) {
-				return;
-			}
 
 			handleMapClick(player, randomMap, game);
 		}
