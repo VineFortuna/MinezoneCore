@@ -471,7 +471,7 @@ public class GameInstance {
 								FastBoard board = boards.get(player);
 								board.updateLine(11, " " + ChatColor.GRAY + timeToStartSeconds + "s");
 								board.updateLine(10, "" + ChatColor.RESET + ChatColor.BOLD + "Starting In:");
-								if (players.size() >= 2 && ticks > 3)
+								if (players.size() >= 2 && ticks > 5)
 									if (!(player.getInventory().contains(votePaper)))
 										player.getInventory().addItem(votePaper);
 							}
