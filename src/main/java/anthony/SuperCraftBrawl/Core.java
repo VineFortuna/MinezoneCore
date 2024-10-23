@@ -391,7 +391,7 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null) {
-			String[] commandTypes = { "join", "fav", "fly", "f", "shop", "leave", "l", "cw", "players", "class", "spectate",
+			String[] commandTypes = { "maps", "join", "fav", "fly", "f", "shop", "leave", "l", "cw", "players", "class", "spectate",
 					"startgame", "gamestats", "setlives", "purchases", "kit", "items" };
 
 			for (String command : commandTypes) {
@@ -945,15 +945,6 @@ public class Core extends JavaPlugin implements Listener {
 				count++;
 			}
 			player.sendMessage(list);
-		}
-
-		if (cmd.getName().equalsIgnoreCase("maps")) {
-			int count = 0;
-			for (int i = 0; i < Maps.values().length; i++) {
-				count++;
-			}
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "There are " + ChatColor.YELLOW + count
-					+ ChatColor.RESET + " available maps to play");
 		}
 
 		if (cmd.getName().equalsIgnoreCase("exp")) {
@@ -1856,7 +1847,7 @@ public class Core extends JavaPlugin implements Listener {
 		player.getInventory().setItem(4,
 				ItemHelper.setDetails(new ItemStack(Material.CHEST), "&d>&5>&f&lCosmetics&5<&d<"));
 		ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
-		player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&c>&4>&fProfile&4<&c<"));
+		player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&c>&4>&f&lProfile&4<&c<"));
 
 		player.getInventory().setItem(5, getFishingRod(player));
 

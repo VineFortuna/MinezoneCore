@@ -56,7 +56,7 @@ public class GameSettings {
 	 */
 	public void setTimeOfDay() {
 		if (game != null) {
-			if (this.totalTimeVotes == game.players.size()) {
+			if (this.totalTimeVotes >= game.players.size() / 2 + 1) {
 				if (game.getMapWorld().getTime() == 1000) {
 					game.TellAll(color("&2&l(!) &rThe time has been set to to &c&lNight"));
 					game.getMapWorld().setTime(18000);
@@ -89,7 +89,7 @@ public class GameSettings {
 
 	public void changeGameType() {
 		if (game != null) {
-			if (this.totalGameTypeVotes == game.players.size()) {
+			if (this.totalGameTypeVotes >= game.players.size() / 2 + 1) {
 				if (game.gameType == GameType.CLASSIC)
 					game.gameType = GameType.FRENZY;
 				else
@@ -113,7 +113,7 @@ public class GameSettings {
 	 */
 	public void increaseLightningRate() {
 		if (game != null) {
-			if (getLightningVotes() == game.players.size()) {
+			if (getLightningVotes() >= game.players.size() / 2 + 1) {
 				this.dropTimer /= 2;
 				game.TellAll(color("&2&l(!) &rLoot drops spawn rate is now &e&l2x"));
 			}

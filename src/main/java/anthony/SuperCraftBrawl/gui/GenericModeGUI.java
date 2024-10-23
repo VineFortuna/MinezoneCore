@@ -42,9 +42,9 @@ public class GenericModeGUI implements InventoryProvider {
 	private Maps.Size currentSize = null;
 	private Maps.Size nextSize = Maps.Size.SMALL;
 
-	Sorter[] sorters = {Sorter.ALPHABETICAL, Sorter.SIZE, Sorter.GAMEPLAY};
-	private Sorter currentSorter = Sorter.ALPHABETICAL;
-	private Sorter nextSorter = Sorter.SIZE;
+	Maps.Sorter[] sorters = {Maps.Sorter.ALPHABETICAL, Maps.Sorter.SIZE, Maps.Sorter.GAMEPLAY};
+	private Maps.Sorter currentSorter = Maps.Sorter.ALPHABETICAL;
+	private Maps.Sorter nextSorter = Maps.Sorter.SIZE;
 
 	public int totalRows;
 	public int totalColumns;
@@ -71,7 +71,7 @@ public class GenericModeGUI implements InventoryProvider {
 
 		if (maps == null) {
 			maps = Maps.filterMaps(gamemode, Maps.Category.CURATED, null, null);
-			sortMaps(maps, currentSorter);
+			Maps.sortMaps(maps, currentSorter);
 		}
 
 		ClickableItem[] items = new ClickableItem[maps.size()];
@@ -82,6 +82,9 @@ public class GenericModeGUI implements InventoryProvider {
 			items[i] = ClickableItem.of(getMapItem(map, gameInstance), event -> handleMapClick(player, map, gameInstance));
 			i++;
 		}
+
+		pagination.setItems(items);
+		pagination.setItemsPerPage(28);
 
 		// Setting Buttons
 		// Glass Filler
@@ -111,8 +114,6 @@ public class GenericModeGUI implements InventoryProvider {
 		}));
 
 		// Maps
-		pagination.setItems(items);
-		pagination.setItemsPerPage(28);
 		SlotIterator iterator = contents.newIterator(SlotIterator.Type.HORIZONTAL, SlotPos.of(1, 1));
 		iterator.allowOverride(false);
 		pagination.addToIterator(iterator);
@@ -124,46 +125,8 @@ public class GenericModeGUI implements InventoryProvider {
 			System.out.println("No maps found.");
 			return;
 		}
-		sortMaps(maps, currentSorter);
+		Maps.sortMaps(maps, currentSorter);
 		inv.open(player);
-	}
-
-	private void sortMaps(List<Maps> maps, Sorter sorter) {
-		Comparator<Maps> sortByName = Comparator.comparing(Maps::getName);
-		Comparator<Maps> sortBySize = Comparator.comparing(Maps::getSize);
-		Comparator<Maps> sortByGameplay = (map1, map2) -> {
-			Maps.Gameplay[] gameplay1 = map1.getGameplay();  // Assume getGameplay() returns an array
-			Maps.Gameplay[] gameplay2 = map2.getGameplay();
-
-			// Compare each gameplay type one by one, using the natural order of enums
-			for (int i = 0; i < Math.min(gameplay1.length, gameplay2.length); i++) {
-				int comparison = gameplay1[i].compareTo(gameplay2[i]);
-				if (comparison != 0) {
-					return comparison; // If a difference is found, return the comparison result
-				}
-			}
-
-			// If all compared types are equal, compare by the size of the arrays (maps with fewer types come first)
-			return Integer.compare(gameplay1.length, gameplay2.length);
-		};
-
-		Comparator<Maps> comparator;
-
-		switch (sorter) {
-			case ALPHABETICAL:
-				comparator = sortByName;
-				break;
-			case SIZE:
-				comparator = sortBySize;
-				break;
-			case GAMEPLAY:
-				comparator = sortByGameplay;
-				break;
-			default:
-				comparator = Comparator.naturalOrder();
-		}
-
-		maps.sort(comparator.thenComparing(sortByName));
 	}
 
 	private void setItem(InventoryContents contents, int row, int column, ItemStack itemStack, Consumer<InventoryClickEvent> clickHandler) {
@@ -386,25 +349,6 @@ public class GenericModeGUI implements InventoryProvider {
 		randomMap = availableMaps.get(randomInt);
 
 		previousRandomMap = randomMap;
-	}
-
-	private enum Sorter {
-		ALPHABETICAL,
-		SIZE,
-		GAMEPLAY;
-
-		@Override
-		public String toString() {
-			switch (this) {
-				case ALPHABETICAL:
-					return "A-Z";
-				case SIZE:
-					return "Size";
-				case GAMEPLAY:
-					return "Gameplay";
-			}
-			return "Unknown Sort";
-		}
 	}
 
 	@Override
