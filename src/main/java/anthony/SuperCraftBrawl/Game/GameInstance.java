@@ -363,7 +363,7 @@ public class GameInstance {
 	// If game is not tournament mode, regular 30 second countdown. If tournament
 	// mode, 60 seconds
 	public int getSecondsUntilStart() {
-		if (gameManager.getMain().tournament == false)
+		if (!gameManager.getMain().tournament)
 			return timeToStartSeconds = 30;
 		return timeToStartSeconds = 60;
 	}
@@ -386,7 +386,7 @@ public class GameInstance {
 						gameStartTime = null;
 						this.cancel();
 					} else if (ticks == 60) {
-						if (gameManager.getMain().tournament == true) {
+						if (gameManager.getMain().tournament) {
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 									+ "The game is now starting..");
 						}
@@ -1202,8 +1202,12 @@ public class GameInstance {
 
 								cancel();
 							} else if (this.ticks <= 3 && GameInstance.this.state == GameState.STARTED) {
-								player.sendTitle("", "" + ChatColor.RED + this.ticks);
-								player.setGameMode(GameMode.SPECTATOR);
+								if (!players.contains(player)) {
+									cancel();
+								} else {
+									player.sendTitle("", "" + ChatColor.RED + this.ticks);
+									player.setGameMode(GameMode.SPECTATOR);
+								}
 							}
 						this.ticks--;
 					}
@@ -1716,7 +1720,7 @@ public class GameInstance {
 		if (map != null) {
 			if (baseClass.getLives() >= 5) {
 				if (data != null) {
-					if (getGameManager().getMain().tournament == true) {
+					if (getGameManager().getMain().tournament) {
 						data.points += 5;
 					}
 				}
@@ -1758,7 +1762,7 @@ public class GameInstance {
 			}
 			if (baseClass.getLives() >= 5) {
 				if (data != null) {
-					if (getGameManager().getMain().tournament == true) {
+					if (getGameManager().getMain().tournament) {
 						data.points += 5;
 					}
 				}
@@ -1950,10 +1954,13 @@ public class GameInstance {
 									&& playerData.playerClasses.get(classType.getID()).purchased
 									|| classType.getTokenCost() == 0) {
 								if (playerData.level >= classType.getLevel()) {
-									if (donor == null
-											|| player.hasPermission("scb." + donor.toString().toLowerCase())) {
-										selectedClass = classType;
-										break;
+									if (classType == ClassType.Fisherman &&
+											this.getGameManager().getMain().hasAllFish(player)) {
+										if (donor == null
+												|| player.hasPermission("scb." + donor.toString().toLowerCase())) {
+											selectedClass = classType;
+											break;
+										}
 									}
 								}
 							}
