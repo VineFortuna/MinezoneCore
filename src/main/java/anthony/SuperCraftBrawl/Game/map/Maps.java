@@ -7,17 +7,11 @@ import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public enum Maps {
-
-	// &e&lJungleBoogie
-	//&o&9Voidy&7, &dElevated&7, &bFlat&7, &6Indoor
-	//&aSmall&7, &eMedium&7, &cLarge&7, &4Huge
-	//&7Starting In: &e25s
-	//&7Players: &e2/4
-	//&7&nClick to join!
 
 	// CLASSIC
 	NightDragon(
@@ -1665,9 +1659,42 @@ public enum Maps {
 		return filteredMaps;
 	}
 
-	public static List<Maps> filterMapsTwo(GameType gamemode) {
-//		filterMaps();
-		return null;
+	public static void sortMaps(List<Maps> maps, Sorter sorter) {
+		Comparator<Maps> sortByName = Comparator.comparing(Maps::getName);
+		Comparator<Maps> sortBySize = Comparator.comparing(Maps::getSize);
+		Comparator<Maps> sortByGameplay = (map1, map2) -> {
+			Maps.Gameplay[] gameplay1 = map1.getGameplay();  // Assume getGameplay() returns an array
+			Maps.Gameplay[] gameplay2 = map2.getGameplay();
+
+			// Compare each gameplay type one by one, using the natural order of enums
+			for (int i = 0; i < Math.min(gameplay1.length, gameplay2.length); i++) {
+				int comparison = gameplay1[i].compareTo(gameplay2[i]);
+				if (comparison != 0) {
+					return comparison; // If a difference is found, return the comparison result
+				}
+			}
+
+			// If all compared types are equal, compare by the size of the arrays (maps with fewer types come first)
+			return Integer.compare(gameplay1.length, gameplay2.length);
+		};
+
+		Comparator<Maps> comparator;
+
+		switch (sorter) {
+			case ALPHABETICAL:
+				comparator = sortByName;
+				break;
+			case SIZE:
+				comparator = sortBySize;
+				break;
+			case GAMEPLAY:
+				comparator = sortByGameplay;
+				break;
+			default:
+				comparator = Comparator.naturalOrder();
+		}
+
+		maps.sort(comparator.thenComparing(sortByName));
 	}
 
 	public String getName() {
@@ -1764,6 +1791,25 @@ public enum Maps {
 					return "Holiday";
 			}
 			return "Unknown Map " + this.getClass();
+		}
+	}
+
+	public enum Sorter {
+		ALPHABETICAL,
+		SIZE,
+		GAMEPLAY;
+
+		@Override
+		public String toString() {
+			switch (this) {
+				case ALPHABETICAL:
+					return "A-Z";
+				case SIZE:
+					return "Size";
+				case GAMEPLAY:
+					return "Gameplay";
+			}
+			return "Unknown Sort";
 		}
 	}
 }

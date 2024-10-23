@@ -478,7 +478,7 @@ public class GameInstance {
 						}
 					}
 
-					if (ticks == 3) {
+					if (ticks == 5) {
 						getGameSettings().changeGameType();
 						getGameSettings().increaseLightningRate();
 						getGameSettings().setTimeOfDay();
