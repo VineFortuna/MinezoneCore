@@ -11,8 +11,10 @@ import anthony.util.SoundManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.*;
+import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemFlag;
@@ -188,6 +190,8 @@ public class GenericModeGUI implements InventoryProvider {
 			}
 		}
 
+
+
 		ItemStack item = ItemHelper.setDetails(
 				new ItemStack(material),
 				"&6Showing: &a" + currentCategoryString,
@@ -196,8 +200,8 @@ public class GenericModeGUI implements InventoryProvider {
 				"&7Next: &a" + nextCategoryString,
 				"&eLeft click to cycle"
 		);
-		
-		item.getItemMeta().addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+
+		hideDiscInformation(item);
 		
 		return item;
 	}
@@ -381,6 +385,29 @@ public class GenericModeGUI implements InventoryProvider {
 		randomMap = availableMaps.get(randomInt);
 
 		previousRandomMap = randomMap;
+	}
+
+	private void hideDiscInformation(org.bukkit.inventory.ItemStack item) {
+		// Convert the Bukkit ItemStack to NMS ItemStack
+		net.minecraft.server.v1_8_R3.ItemStack nmsItem = CraftItemStack.asNMSCopy(item);
+
+		// Check if the item already has NBT data (tag)
+		NBTTagCompound tag;
+		if (!nmsItem.hasTag()) {
+			tag = new NBTTagCompound();  // Create a new tag if none exists
+		} else {
+			tag = nmsItem.getTag();  // Get the existing tag
+		}
+
+		// Set the HideFlags tag to 32 (which hides the song info)
+		tag.setInt("HideFlags", 32);
+
+		// Apply the modified tag back to the NMS ItemStack
+		nmsItem.setTag(tag);
+
+		// Convert back to Bukkit ItemStack and set the meta back
+		org.bukkit.inventory.ItemStack updatedItem = CraftItemStack.asBukkitCopy(nmsItem);
+		item.setItemMeta(updatedItem.getItemMeta());  // Update the original item with the new meta
 	}
 
 	@Override
