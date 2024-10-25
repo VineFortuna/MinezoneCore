@@ -1,14 +1,13 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import anthony.util.ChatColorHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -185,7 +184,7 @@ public class SummonerClass extends BaseClass {
 //							EntityDamageEvent damageEvent = new EntityDamageEvent(player, DamageCause.PROJECTILE, 2.0);
 //							instance.getManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 //							player.damage(2.0);
-							en.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
+							en.setTarget(instance.getNearestPlayer(player, en, 150));
 						}
 						
 					}, new ItemStack(Material.MONSTER_EGG));
@@ -211,7 +210,7 @@ public class SummonerClass extends BaseClass {
 							en.setCustomNameVisible(true);
 							// Setting to Charged Creeper
 							en.setPowered(true);
-							en.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
+							en.setTarget(instance.getNearestPlayer(player, en, 150));
 						}
 						
 					}, new ItemStack(Material.MONSTER_EGG));
@@ -254,7 +253,7 @@ public class SummonerClass extends BaseClass {
 							
 							equipment.setHelmet(helmet);
 							equipment.setChestplate(chestplate);
-							en.setTarget(instance.getNearestPlayer(player, 100, 100, 100));
+							en.setTarget(instance.getNearestPlayer(player, en, 150));
 						}
 						
 					}, new ItemStack(Material.MONSTER_EGG));

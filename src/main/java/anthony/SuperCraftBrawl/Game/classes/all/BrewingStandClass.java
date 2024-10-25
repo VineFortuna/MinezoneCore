@@ -5,7 +5,6 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -18,7 +17,6 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
@@ -219,10 +217,10 @@ public class BrewingStandClass extends BaseClass {
 			if (instance.duosMap != null)
 				if (instance.team.get(p).equals(instance.team.get(player)))
 					return;
-
+			
 			ItemStack slot9 = player.getInventory().getItem(8);
 			ItemStack slot2 = player.getInventory().getItem(1);
-
+			
 			if (slot2.getType() == Material.BARRIER) {
 				if (slot9 != null && slot9.getType() == Material.BARRIER) {
 					player.getInventory().setItem(8, new ItemStack(Material.BLAZE_POWDER));

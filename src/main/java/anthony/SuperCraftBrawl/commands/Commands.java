@@ -1,21 +1,5 @@
 package anthony.SuperCraftBrawl.commands;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Random;
-
-import org.bukkit.*;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-
-import com.google.common.collect.Lists;
-
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameSettings;
@@ -29,591 +13,681 @@ import anthony.SuperCraftBrawl.gui.GameStatsGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.util.ChatColorHelper;
+import com.google.common.collect.Lists;
+import org.bukkit.*;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Random;
 
 public class Commands implements CommandExecutor, TabCompleter {
 
-	private final Core main;
-	public List<Player> players;
+    private final Core main;
+    public List<Player> players;
 
-	public Commands(Core main) {
-		this.main = main;
-	}
+    public Commands(Core main) {
+        this.main = main;
+    }
 
-	@SuppressWarnings("unused")
-	@Override
-	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (sender instanceof Player) {
-			Player player = (Player) sender;
+    @SuppressWarnings("unused")
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
 
-			switch (cmd.getName().toLowerCase()) {
-				case "purchases":
-					purchaseCommand(args, player);
-					break;
+            switch (cmd.getName().toLowerCase()) {
+                case "purchases":
+                    purchaseCommand(args, player);
+                    break;
 
-				case "startgame":
-					startGameCommand(player);
-					break;
+                case "startgame":
+                    startGameCommand(player);
+                    break;
 
-				case "fly":
-				case "f":
-					flyCommand(player);
-					break;
+                case "fly":
+                case "f":
+                    flyCommand(player);
+                    break;
 
-				case "items":
-					itemsCommand(args, player);
-					break;
+                case "items":
+                    itemsCommand(args, player);
+                    break;
 
-				case "setlives":
-					setLivesCommand(args, player);
-					break;
+                case "setlives":
+                    setLivesCommand(args, player);
+                    break;
 
-				case "gamestats":
-					gameStatsCommand(args, player);
-					break;
+                case "gamestats":
+                    gameStatsCommand(args, player);
+                    break;
 
-				case "join":
-					joinCommand(args, player);
-					break;
+                case "maps":
+                    mapsCommand(args, player);
 
-				case "spectate":
-					spectateCommand(args, player);
-					break;
+                case "join":
+                    joinCommand(args, player);
+                    break;
 
-				case "class":
-					classCommand(args, player);
-					break;
+                case "spectate":
+                    spectateCommand(args, player);
+                    break;
 
-				case "leave":
-				case "l":
-					this.leaveGame(player);
-					break;
+                case "class":
+                    classCommand(args, player);
+                    break;
 
-				case "players":
-					playersCommand(player);
-					break;
-			}
-		} else sender.sendMessage("Hey! You can't use this in the terminal!");
-		return true;
-	}
+                case "leave":
+                case "l":
+                    this.leaveGame(player);
+                    break;
 
-	private void purchaseCommand(String[] args, Player player) {
-		if (args.length == 0) {
-			player.sendMessage("Not enough arguments!");
-			return;
-		}
+                case "players":
+                    playersCommand(player);
+                    break;
+            }
+        } else sender.sendMessage("Hey! You can't use this in the terminal!");
+        return true;
+    }
 
-		switch (args[0].toLowerCase()) {
-			case "get":
-				purchaseGetCommand(player);
-				break;
-			case "buy":
-				if (args.length == 1) {
-					player.sendMessage("Not enough arguments");
-					return;
-				}
+    private void purchaseCommand(String[] args, Player player) {
+        if (args.length == 0) {
+            player.sendMessage("Not enough arguments!");
+            return;
+        }
 
-				purchaseBuyCommand(args, player);
-				break;
-		}
-	}
+        switch (args[0].toLowerCase()) {
+            case "get":
+                purchaseGetCommand(player);
+                break;
+            case "buy":
+                if (args.length == 1) {
+                    player.sendMessage("Not enough arguments");
+                    return;
+                }
 
-	private void purchaseGetCommand(Player player) {
-		PlayerData data = main.getDataManager().getPlayerData(player);
-		player.sendMessage("Listing purchases...");
+                purchaseBuyCommand(args, player);
+                break;
+        }
+    }
 
-		int size = 0;
-		for (Entry<Integer, ClassDetails> entry : data.playerClasses.entrySet()) {
-			player.sendMessage(" - " + entry.getKey() + ": " + entry.getValue().toString());
-			size++;
-		}
+    private void purchaseGetCommand(Player player) {
+        PlayerData data = main.getDataManager().getPlayerData(player);
+        player.sendMessage("Listing purchases...");
 
-		if (size == 0) {player.sendMessage("You have no Class Stats");}
-	}
+        int size = 0;
+        for (Entry<Integer, ClassDetails> entry : data.playerClasses.entrySet()) {
+            player.sendMessage(" - " + entry.getKey() + ": " + entry.getValue().toString());
+            size++;
+        }
 
-	private void purchaseBuyCommand(String [] args, Player player) {
-		int classID = Integer.parseInt(args[1]);
-		PlayerData playerData = main.getDataManager().getPlayerData(player);
-		ClassDetails details = playerData.playerClasses.get(classID);
+        if (size == 0) {
+            player.sendMessage("You have no Class Stats");
+        }
+    }
 
-		if (details == null) {
-			details = new ClassDetails();
-			playerData.playerClasses.put(classID, details);
-		}
-		details.setPurchased();
-		player.sendMessage("Class Purchased!");
-	}
+    private void purchaseBuyCommand(String[] args, Player player) {
+        int classID = Integer.parseInt(args[1]);
+        PlayerData playerData = main.getDataManager().getPlayerData(player);
+        ClassDetails details = playerData.playerClasses.get(classID);
 
-	private void startGameCommand(Player player) {
-		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+        if (details == null) {
+            details = new ClassDetails();
+            playerData.playerClasses.put(classID, details);
+        }
+        details.setPurchased();
+        player.sendMessage("Class Purchased!");
+    }
 
-		if (game == null) {
-			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
-			return;
-		}
+    private void startGameCommand(Player player) {
+        GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 
-		if (!player.hasPermission("scb.startGame")) {
-			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
-			return;
-		}
+        if (game == null) {
+            player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
+            return;
+        }
 
-		if (game.state != GameState.WAITING) {
-			if (game.state == GameState.STARTED) player.sendMessage(main.color("&c&l(!) &rGame is already in progress!"));
-			else if (game.state == GameState.ENDED) player.sendMessage(main.color("&c&l(!) &rGame has already ended!"));
-			return;
-		}
+        if (!player.hasPermission("scb.startGame")) {
+            player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+            return;
+        }
 
-		if (game.players.size() < 1) {
-			player.sendMessage(main.color("&c&l(!) &rNot enough players to start!"));
-			return;
-		}
+        if (game.state != GameState.WAITING) {
+            if (game.state == GameState.STARTED)
+                player.sendMessage(main.color("&c&l(!) &rGame is already in progress!"));
+            else if (game.state == GameState.ENDED) player.sendMessage(main.color("&c&l(!) &rGame has already ended!"));
+            return;
+        }
 
-		game.getGameSettings().forceStartGame();
-	}
+        if (game.players.size() == 0) {
+            player.sendMessage(main.color("&c&l(!) &rNot enough players to start!"));
+            return;
+        }
 
-	private void flyCommand(Player player) {
-		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
-		PlayerData flyData = main.getDataManager().getPlayerData(player);
+        game.getGameSettings().forceStartGame(true);
+    }
 
-		if (game != null) {
-			player.sendMessage(main.color("&c&l(!) &rYou cannot use this in game!"));
-			return;
-		}
+    private void flyCommand(Player player) {
+        GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+        PlayerData flyData = main.getDataManager().getPlayerData(player);
 
-		if (!player.hasPermission("scb.fly")) {
-			player.sendMessage(main.color("&c&l(!) &rYou need the rank &9&lCAPTAIN &rto use this command!"));
-			return;
-		}
+        if (game != null) {
+            player.sendMessage(main.color("&c&l(!) &rYou cannot use this in game!"));
+            return;
+        }
 
-		if (flyData != null) {
-			resetDoubleJump(player);
-			if (flyData.fly == 0) {
-				player.sendMessage(main.color("&e&l(!) &rYou have enabled flight!"));
-				flyData.fly = 1;
-			} else {
-				player.sendMessage(main.color("&e&l(!) &rYou have disabled flight!"));
-				flyData.fly = 0;
-			}
-			main.getDataManager().saveData(flyData); // Save even when server restarts
-		}
-	}
+        if (!player.hasPermission("scb.fly")) {
+            player.sendMessage(main.color("&c&l(!) &rYou need the rank &9&lCAPTAIN &rto use this command!"));
+            return;
+        }
 
-	private void itemsCommand(String [] args, Player player) {
-		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+        if (flyData != null) {
+            resetDoubleJump(player);
+            if (flyData.fly == 0) {
+                player.sendMessage(main.color("&e&l(!) &rYou have enabled flight!"));
+                flyData.fly = 1;
+            } else {
+                player.sendMessage(main.color("&e&l(!) &rYou have disabled flight!"));
+                flyData.fly = 0;
+            }
+            main.getDataManager().saveData(flyData); // Save even when server restarts
+        }
+    }
 
-		if (args.length != 0) {
-			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/items"));
-			return;
-		}
+    private void itemsCommand(String[] args, Player player) {
+        GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 
-		if (game == null) {
-			player.sendMessage(main.color("&c&l(!) &rYou are not in a game"));
-			return;
-		}
+        if (args.length != 0) {
+            player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/items"));
+            return;
+        }
 
-		if (!player.hasPermission("scb.items")) {
-			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
-			return;
-		}
+        if (game == null) {
+            player.sendMessage(main.color("&c&l(!) &rYou are not in a game"));
+            return;
+        }
 
-		for (ItemStack itemStack : game.allItemDrops) {
-			player.getInventory().addItem(itemStack);
-		}
-	}
+        if (!player.hasPermission("scb.items")) {
+            player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+            return;
+        }
 
-	private void setLivesCommand(String [] args, Player player) {
-		if (args.length < 2) {
-			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/setlives <player> <num>"));
-			return;
-		}
+        for (ItemStack itemStack : game.allItemDrops) {
+            player.getInventory().addItem(itemStack);
+        }
+    }
 
-		int num;
+    private void setLivesCommand(String[] args, Player player) {
+        if (args.length < 2) {
+            player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/setlives <player> <num>"));
+            return;
+        }
 
-		try {
-			num = Integer.parseInt(args[1]);
-		} catch (NumberFormatException ex) {
-			player.sendMessage(main.color("&r&l(!) &rPlease specify number of lives"));
-			return;
-		}
+        int num;
 
-		if (num <= 0) {
-			player.sendMessage(main.color("&c&l(!) &rNumber of lives must be greater than zero!"));
-			return;
-		}
+        try {
+            num = Integer.parseInt(args[1]);
+        } catch (NumberFormatException ex) {
+            player.sendMessage(main.color("&r&l(!) &rPlease specify number of lives"));
+            return;
+        }
 
-		Player target = Bukkit.getServer().getPlayerExact(args[0]);
+        if (num <= 0) {
+            player.sendMessage(main.color("&c&l(!) &rNumber of lives must be greater than zero!"));
+            return;
+        }
 
-		if (target == null) {
-			player.sendMessage(main.color("&c&l(!) &rPlease specify a player!"));
-			return;
-		}
+        Player target = Bukkit.getServer().getPlayerExact(args[0]);
 
-		GameInstance game = main.getGameManager().GetInstanceOfPlayer(target);
+        if (target == null) {
+            player.sendMessage(main.color("&c&l(!) &rPlease specify a player!"));
+            return;
+        }
 
-		if (game == null) {
-			player.sendMessage(main.color("&c&l(!) &rThis player is not in a game!"));
-			return;
-		}
+        GameInstance game = main.getGameManager().GetInstanceOfPlayer(target);
 
-		if (game.state != GameState.STARTED) {
-			player.sendMessage(main.color("&c&l(!) &rGame must be started to use!"));
-			return;
-		}
+        if (game == null) {
+            player.sendMessage(main.color("&c&l(!) &rThis player is not in a game!"));
+            return;
+        }
 
-		BaseClass baseClass = game.classes.get(target);
+        if (game.state != GameState.STARTED) {
+            player.sendMessage(main.color("&c&l(!) &rGame must be started to use!"));
+            return;
+        }
 
-		if (baseClass == null) {
-			player.sendMessage(main.color("&c&l(!) &rTarget player doesn't have a class assigned."));
-			return;
-		}
+        BaseClass baseClass = game.classes.get(target);
 
-		if (!player.hasPermission("scb.setlives")) {
-			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
-			return;
-		}
+        if (baseClass == null) {
+            player.sendMessage(main.color("&c&l(!) &rTarget player doesn't have a class assigned."));
+            return;
+        }
 
-		baseClass.lives = num;
-		player.sendMessage(main.color("&2&l(!) &rYou set &e" + target.getName() + "&r's lives to &e" + num));
-		baseClass.score.setScore(baseClass.lives);
-	}
+        if (!player.hasPermission("scb.setlives")) {
+            player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+            return;
+        }
+
+        baseClass.lives = num;
+        player.sendMessage(main.color("&2&l(!) &rYou set &e" + target.getName() + "&r's lives to &e" + num));
+        baseClass.score.setScore(baseClass.lives);
+    }
 
 	private void gameStatsCommand(String [] args, Player player) {
-		if (args.length == 0) {
-			return;
-		}
-
 		if (!main.gameStats.containsKey(player)) {
 			player.sendMessage(main.color("&c&l(!) &rThis game's stats have expired"));
 			return;
 		}
 
-		if (main.gameStats.get(player) == null) {
-			return;
-		}
+        if (main.gameStats.get(player) == null) {
+            return;
+        }
 
-		if (main.gameStats.get(player).HasPlayer(player)) {
-			return;
-		}
+        if (main.gameStats.get(player).HasPlayer(player)) {
+            return;
+        }
 
-		try {
-			new GameStatsGUI(main, main.gameStats.get(player)).inv.open(player);
-		} catch (NullPointerException ex) {
-			player.sendMessage(main.color(
-					"&c&l(!) &rThis game's stats cannot be viewed. Did a player leave early?"));
-		}
-	}
+        try {
+            new GameStatsGUI(main, main.gameStats.get(player)).inv.open(player);
+        } catch (NullPointerException ex) {
+            player.sendMessage(main.color(
+                    "&c&l(!) &rThis game's stats cannot be viewed. Did a player leave early?"));
+        }
+    }
 
-	private void joinCommand(String [] args, Player player) {
-		if (args.length == 0) {
-			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/join <map>"));
-			return;
-		}
+    private void mapsCommand(String[] args, Player player) {
+        if (args.length != 0) {
+            player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/maps"));
+            return;
+        }
 
-		String mapName = args[0];
-		GameInstance gameSpectator = main.getGameManager().GetInstanceOfSpectator(player);
+        // Send the message to the player
+        player.sendMessage(ChatColorHelper.color(createMapsString()));
 
-		if (gameSpectator != null) {
-			player.sendMessage(main.color("&c&l(!) &rYou are currently spectating a game!"));
-			return;
-		}
+//        player.sendMessage("" + net.md_5.bungee.api.ChatColor.BOLD + "(!) " + net.md_5.bungee.api.ChatColor.RESET + "There are " + net.md_5.bungee.api.ChatColor.YELLOW + count
+//                + net.md_5.bungee.api.ChatColor.RESET + " available maps to play");
+    }
 
-		Maps map = null;
+    private String createMapsString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        String HEADERCOLOR = "&e&l";
 
-		for (Maps maps : Maps.values()) {
-			if (maps.toString().equalsIgnoreCase(mapName)) {
-				map = maps;
-				break;
-			}
-		}
+        stringBuilder.append("&f&l----------------------------------------");
+        stringBuilder.append(HEADERCOLOR).append("CURATED MAPS:\n");
 
-		if (map == null) {
-			player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maplist &rfor a list of maps"));
-			return;
-		}
+        // Get Classic maps for Curated category
+        appendMaps(GameType.CLASSIC, Maps.Category.CURATED, stringBuilder);
 
-		main.getGameManager().JoinMap(player, map);
-	}
+        // Get Duels maps for Curated category
+        appendMaps(GameType.DUEL, Maps.Category.CURATED, stringBuilder);
 
-	private void spectateCommand(String [] args, Player player) {
-		if (args.length == 0) {
-			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/spectate <map>"));
-			return;
-		}
+        // Now for Casual Maps section
+        stringBuilder.append(HEADERCOLOR).append(" \nCASUAL MAPS:\n");
 
-		String mapName = args[0];
-		Maps map = null;
+        // Get Classic maps for Casual category
+        appendMaps(GameType.CLASSIC, Maps.Category.CASUAL, stringBuilder);
 
-		for (Maps maps : Maps.values()) {
-			if (maps.toString().equalsIgnoreCase(mapName)) {
-				map = maps;
-				break;
-			}
-		}
+        // Get Duels maps for Casual category
+        appendMaps(GameType.DUEL, Maps.Category.CASUAL, stringBuilder);
 
-		if (map == null) {
-			player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maplist &rfor a list of maps"));
-			return;
-		}
+        // Now for Vaulted Maps section
+        stringBuilder.append(HEADERCOLOR).append(" \nVAULTED MAPS:\n");
 
-		main.getGameManager().SpectatorJoinMap(player, map);
-	}
+        // Get Classic maps for Vaulted category
+        appendMaps(GameType.CLASSIC, Maps.Category.VAULTED, stringBuilder);
 
-	private void playersCommand(Player player) {
-		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+        // Get Duels maps for Vaulted category
+        appendMaps(GameType.DUEL, Maps.Category.VAULTED, stringBuilder);
 
-		if (game == null) {
-			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
-			return;
-		}
+        stringBuilder.append("&f&l----------------------------------------");
 
-		String players = "";
-		for (Player gamePlayer : game.players) {
-			if (!players.isEmpty()) {
-				players += ", ";
-			}
+        return stringBuilder.toString();
+    }
 
-			players += gamePlayer.getName() + "";
-		}
+    private void appendMaps(GameType gameMode, Maps.Category category, StringBuilder stringBuilder) {
+        List<Maps> maps = Maps.filterMaps(gameMode, category, null, null);
+        Maps.sortMaps(maps, Maps.Sorter.ALPHABETICAL);
 
-		player.sendMessage(main.color("&l(!) &aPlayers in your game (" + game.players.size() + "): "));
-		player.sendMessage(main.color("l--> " + players));
-	}
+        appendColorAndComma(stringBuilder, maps, gameMode);
+    }
 
-	private void classCommand(String[] args, Player player) {
-		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
-		PlayerData playerData = main.getDataManager().getPlayerData(player);
+    private void appendColorAndComma(StringBuilder stringBuilder, List<Maps> mapsList, GameType gameMode) {
+        String color = "";
 
-		if (args.length == 0) {
-			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/class <classname>"));
-			return;
-		}
+        if (gameMode == GameType.CLASSIC) {
+            color = "&a";
+        } else if (gameMode == GameType.DUEL) color = "&b";
 
-		String className = args[0];
-		if (className.equalsIgnoreCase("random")) {
-			selectRandomClass(player, playerData);
-			player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
-			return;
-		}
+        for (int i = 0; i < mapsList.size(); i++) {
+            stringBuilder.append(color).append(mapsList.get(i).getName());
 
-		ClassType selectedClassType = getClassType(className);
-		if (selectedClassType == null) {
-			player.sendMessage(main.color("&c&l(!) &rThis class does not exist! Use &e/classes &rfor a list of playable classes"));
-			return;
-		}
+            if (i < mapsList.size() - 1) {
+                stringBuilder.append("&7, ");
+            }
+        }
+        stringBuilder.append("\n"); // Newline after each map group
+    }
 
-		handleClassSelection(player, game, playerData, selectedClassType);
-	}
+    private void joinCommand(String[] args, Player player) {
+        if (args.length == 0) {
+            player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/join <map>"));
+            return;
+        }
 
-	private void handleClassSelection(Player player, GameInstance game, PlayerData playerData, ClassType type) {
-		ClassDetails classDetails = playerData.playerClasses.get(type.getID());
+        String mapName = args[0];
+        GameInstance gameSpectator = main.getGameManager().GetInstanceOfSpectator(player);
 
-		if (!isClassUnlocked(player, classDetails, type) ||
-			!isLevelUnlocked(player, playerData, type) ||
-			!isFishermanClassUnlocked(player, type) ||
-			!isRankRequirementMet(player, type) ||
-			!isPlayerInGame(player, game) ||
-			!isGameStateWaiting(game, player) ||
-			!isFrenzyGameType(game, player)) {
-			return;
-		}
+        if (gameSpectator != null) {
+            player.sendMessage(main.color("&c&l(!) &rYou are currently spectating a game!"));
+            return;
+        }
 
-		displayClassSelectionMessage(player, type);
-		main.getGameManager().playerSelectClass(player, type);
-		player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
-	}
+        Maps map = null;
 
-	private void displayClassSelectionMessage(Player player, ClassType type) {
-		player.sendMessage(main.color("&2&l=============================================="));
-		player.sendMessage(main.color("&2&l|| "));
-		player.sendMessage(main.color("&2&l|| "));
-		player.sendMessage(main.color("&2&l|| " + "&e&lSelected Class: " + type.getTag()));
-		player.sendMessage(main.color("&2&l|| " + "&e&lClass Desc: &e" + type.getClassDesc()));
-		player.sendMessage(main.color("&2&l|| "));
-		player.sendMessage(main.color("&2&l|| "));
-		player.sendMessage(main.color("&2&l=============================================="));
-	}
+        for (Maps maps : Maps.values()) {
+            if (maps.toString().equalsIgnoreCase(mapName)) {
+                map = maps;
+                break;
+            }
+        }
 
-	private void selectRandomClass(Player player, PlayerData playerData) {
-		Random random = new Random();
-		ClassType classType = ClassType.values()[random.nextInt(ClassType.values().length)];
+        if (map == null) {
+            player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maplist &rfor a list of maps"));
+            return;
+        }
 
-		if (playerData.playerClasses.get(classType.getID()) != null
-			&& playerData.playerClasses.get(classType.getID()).purchased
-			|| classType.getTokenCost() == 0
-		) {
-			Rank donor = classType.getMinRank();
+        main.getGameManager().JoinMap(player, map);
+    }
 
-			if (donor == null || player.hasPermission("scb." + donor.toString().toLowerCase())) {
-				player.sendMessage(main.color("&2&l(!) " + "&eYou have selected to go a &lRandom class"));
-				main.getGameManager().playerSelectClass(player, classType);
-				GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
-				game.board.updateLine(5, main.color("&6 Random"));
-				player.setDisplayName(player.getName());
-			}
-		}
-	}
+    private void spectateCommand(String[] args, Player player) {
+        if (args.length == 0) {
+            player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/spectate <map>"));
+            return;
+        }
 
-	private boolean isRankRequirementMet(Player player, ClassType type) {
-		Rank donor = type.getMinRank();
-		if (donor != null && !player.hasPermission("scb." + donor.toString().toLowerCase())) {
-			player.sendMessage(main.color("&c&l(!) &rYou need a rank to use this class."));
-			return false;
-		}
-		return true;
-	}
+        String mapName = args[0];
+        Maps map = null;
 
-	private boolean isLevelUnlocked(Player player, PlayerData playerData, ClassType type) {
-		// Level Classes
-		if (type.getLevel() > 0 && playerData.level < type.getLevel()) {
-			player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
-			return false;
-		}
-		return true;
-	}
+        for (Maps maps : Maps.values()) {
+            if (maps.toString().equalsIgnoreCase(mapName)) {
+                map = maps;
+                break;
+            }
+        }
 
-	private boolean isFishermanClassUnlocked(Player player, ClassType type) {
-		if (type == ClassType.Fisherman && main.getTotalFish(player) < FishType.values().length && !player.isOp()) {
-			player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
-			return false;
-		}
-		return true;
-	}
+        if (map == null) {
+            player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maplist &rfor a list of maps"));
+            return;
+        }
 
-	private boolean isClassUnlocked(Player player, ClassDetails classDetails, ClassType type) {
-		boolean isPurchased = classDetails != null && classDetails.purchased;
+        main.getGameManager().SpectatorJoinMap(player, map);
+    }
 
-		if (!isPurchased && type.getTokenCost() != 0) {
-			player.sendMessage(main.color("&c&l(!) &rYou do not have this class unlocked"));
-			return false;
-		}
-		return true;
-	}
+    private void playersCommand(Player player) {
+        GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 
-	private boolean isFrenzyGameType(GameInstance game, Player player) {
-		if (game.gameType == GameType.FRENZY) {
-			player.sendMessage(main.color("&c&l(!) &rYou cannot select a class in a Frenzy game!"));
-			return false;
-		}
-		return true;
-	}
+        if (game == null) {
+            player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
+            return;
+        }
 
-	private ClassType getClassType(String className) {
-		for (ClassType type : ClassType.values()) {
-			if (className.equalsIgnoreCase(type.toString())) {
-				return type;
-			}
-		}
-		return null;
-	}
+        String players = "";
+        for (Player gamePlayer : game.players) {
+            if (!players.isEmpty()) {
+                players += ", ";
+            }
 
-	public void leaveGame(Player player) {
-		GameInstance game = main.getGameManager().GetInstanceOfSpectator(player);
-		// anthony.CrystalWars.game.GameInstance i2 =
-		// main.getCwManager().getInstanceOfPlayer(player);
-		player.spigot().setCollidesWithEntities(true);
-		player.setAllowFlight(false);
-		player.setAllowFlight(true);
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			player.showPlayer(p);
-			p.showPlayer(player);
-		}
+            players += gamePlayer.getName() + "";
+        }
 
-		if (game != null && game.state == GameState.ENDED)
-			return;
-		else if (main.getGameManager().RemovePlayerFromAll(player)) {
-			main.ResetPlayer(player);
-			player.setGameMode(GameMode.ADVENTURE);
-			main.getScoreboardManager().lobbyBoard(player);
-			player.getInventory().clear();
-			main.LobbyItems(player);
-			player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-					+ "You have left your game");
+        player.sendMessage(main.color("&l(!) &aPlayers in your game (" + game.players.size() + "): "));
+        player.sendMessage(main.color("l--> " + players));
+    }
 
-			if (game != null && game.getGameSettings() != null) {
-				GameSettings gs = game.getGameSettings();
+    private void classCommand(String[] args, Player player) {
+        GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+        PlayerData playerData = main.getDataManager().getPlayerData(player);
 
-				if (gs.startVotes.contains(player)) {
-					gs.totalStartVotes--;
-					gs.startVotes.remove(player);
-				}
-			}
+        if (args.length == 0) {
+            player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/class <classname>"));
+            return;
+        }
 
-			for (PotionEffect type : player.getActivePotionEffects())
-				player.removePotionEffect(type.getType());
+        String className = args[0];
+        if (className.equalsIgnoreCase("random")) {
+            selectRandomClass(player, playerData);
+            player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
+            return;
+        }
 
-			main.sendScoreboardUpdate(player);
-			player.setGameMode(GameMode.ADVENTURE);
-			removeArmor(player);
-		} else if (game != null && game.spectators.contains(player)) {
-			String mapName = "";
-			if (game.duosMap != null)
-				mapName = game.duosMap.toString();
-			else
-				mapName = game.getMap().toString();
+        ClassType selectedClassType = getClassType(className);
+        if (selectedClassType == null) {
+            player.sendMessage(main.color("&c&l(!) &rThis class does not exist! Use &e/classes &rfor a list of playable classes"));
+            return;
+        }
 
-			player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-					+ "You have left " + mapName);
-			main.ResetPlayer(player);
-			player.setGameMode(GameMode.ADVENTURE);
-			main.getScoreboardManager().lobbyBoard(player);
-			player.getInventory().clear();
-			main.LobbyItems(player);
-			game.spectators.remove(player);
-			player.setDisplayName("" + player.getName());
-		} else
-			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
-	}
+        handleClassSelection(player, game, playerData, selectedClassType);
+    }
 
-	public List<String> onTabComplete(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-		if (cmd.getName().equalsIgnoreCase("join")) {
-			List<Maps> a = Arrays.asList(Maps.values());
-			List<String> f = Lists.newArrayList();
-			if (args.length == 1) {
-				for (Maps s : a) {
-					if (s.getName().toLowerCase().startsWith(args[0].toLowerCase()))
-						f.add(s.getName());
-				}
-				return f;
-			}
-		} else if (cmd.getName().equalsIgnoreCase("class")) {
-			List<ClassType> a = Arrays.asList(ClassType.values());
-			List<String> f = Lists.newArrayList();
-			if (args.length == 1) {
-				for (ClassType s : a) {
-					if (s.name().toLowerCase().startsWith(args[0].toLowerCase()))
-						f.add(s.name());
-				}
-				return f;
-			}
-		}
-		return null;
-	}
+    private void handleClassSelection(Player player, GameInstance game, PlayerData playerData, ClassType type) {
+        ClassDetails classDetails = playerData.playerClasses.get(type.getID());
 
-	private boolean isGameStateWaiting(GameInstance game, Player player) {
-		if (game.state != GameState.WAITING) {
-			player.sendMessage(main.color("&c&l(!) &rYou cannot select a class while in a game!"));
-			return false;
-		}
-		return true;
-	}
+        if (!isClassUnlocked(player, classDetails, type) ||
+                !isLevelUnlocked(player, playerData, type) ||
+                !isFishermanClassUnlocked(player, type) ||
+                !isRankRequirementMet(player, type) ||
+                !isPlayerInGame(player, game) ||
+                !isGameStateWaiting(game, player) ||
+                !isFrenzyGameType(game, player)) {
+            return;
+        }
 
-	private boolean isPlayerInGame(Player player, GameInstance game) {
-		if (game == null) {
-			player.sendMessage(main.color("&c&l(!) &rYou have to be in a game to select a class!"));
-			return false;
-		}
-		return true;
-	}
+        displayClassSelectionMessage(player, type);
+        main.getGameManager().playerSelectClass(player, type);
+        player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
+    }
 
-	private void removeArmor(Player player) {
-		ItemStack air = new ItemStack(Material.AIR, 1);
-		player.getInventory().setHelmet(air);
-		player.getInventory().setChestplate(air);
-		player.getInventory().setLeggings(air);
-		player.getInventory().setBoots(air);
-	}
+    private void displayClassSelectionMessage(Player player, ClassType type) {
+        player.sendMessage(main.color("&2&l=============================================="));
+        player.sendMessage(main.color("&2&l|| "));
+        player.sendMessage(main.color("&2&l|| "));
+        player.sendMessage(main.color("&2&l|| " + "&e&lSelected Class: " + type.getTag()));
+        player.sendMessage(main.color("&2&l|| " + "&e&lClass Desc: &e" + type.getClassDesc()));
+        player.sendMessage(main.color("&2&l|| "));
+        player.sendMessage(main.color("&2&l|| "));
+        player.sendMessage(main.color("&2&l=============================================="));
+    }
 
-	private void resetDoubleJump(Player player) {
-		player.setAllowFlight(false);
-		player.setAllowFlight(true);
-	}
+    private void selectRandomClass(Player player, PlayerData playerData) {
+        Random random = new Random();
+        ClassType classType = ClassType.values()[random.nextInt(ClassType.values().length)];
+
+        if (playerData.playerClasses.get(classType.getID()) != null
+                && playerData.playerClasses.get(classType.getID()).purchased
+                || classType.getTokenCost() == 0
+        ) {
+            Rank donor = classType.getMinRank();
+
+            if (donor == null || player.hasPermission("scb." + donor.toString().toLowerCase())) {
+                player.sendMessage(main.color("&2&l(!) " + "&eYou have selected to go a &lRandom class"));
+                main.getGameManager().playerSelectClass(player, classType);
+                GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+                game.board.updateLine(5, main.color("&6 Random"));
+                player.setDisplayName(player.getName());
+            }
+        }
+    }
+
+    private boolean isRankRequirementMet(Player player, ClassType type) {
+        Rank donor = type.getMinRank();
+        if (donor != null && !player.hasPermission("scb." + donor.toString().toLowerCase())) {
+            player.sendMessage(main.color("&c&l(!) &rYou need a rank to use this class."));
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isLevelUnlocked(Player player, PlayerData playerData, ClassType type) {
+        // Level Classes
+        if (type.getLevel() > 0 && playerData.level < type.getLevel()) {
+            player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isFishermanClassUnlocked(Player player, ClassType type) {
+        if (type == ClassType.Fisherman && main.getTotalFish(player) < FishType.values().length && !player.isOp()) {
+            player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isClassUnlocked(Player player, ClassDetails classDetails, ClassType type) {
+        boolean isPurchased = classDetails != null && classDetails.purchased;
+
+        if (!isPurchased && type.getTokenCost() != 0) {
+            player.sendMessage(main.color("&c&l(!) &rYou do not have this class unlocked"));
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isFrenzyGameType(GameInstance game, Player player) {
+        if (game.gameType == GameType.FRENZY) {
+            player.sendMessage(main.color("&c&l(!) &rYou cannot select a class in a Frenzy game!"));
+            return false;
+        }
+        return true;
+    }
+
+    private ClassType getClassType(String className) {
+        for (ClassType type : ClassType.values()) {
+            if (className.equalsIgnoreCase(type.toString())) {
+                return type;
+            }
+        }
+        return null;
+    }
+
+    public void leaveGame(Player player) {
+        GameInstance game = main.getGameManager().GetInstanceOfSpectator(player);
+        // anthony.CrystalWars.game.GameInstance i2 =
+        // main.getCwManager().getInstanceOfPlayer(player);
+        player.spigot().setCollidesWithEntities(true);
+        player.setAllowFlight(false);
+        player.setAllowFlight(true);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            player.showPlayer(p);
+            p.showPlayer(player);
+        }
+
+        if (game != null && game.state == GameState.ENDED)
+            return;
+        else if (main.getGameManager().RemovePlayerFromAll(player)) {
+            main.ResetPlayer(player);
+            player.setGameMode(GameMode.ADVENTURE);
+            main.getScoreboardManager().lobbyBoard(player);
+            player.getInventory().clear();
+            main.LobbyItems(player);
+            player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                    + "You have left your game");
+
+            if (game != null && game.getGameSettings() != null) {
+                GameSettings gs = game.getGameSettings();
+
+                if (gs.startVotes.contains(player)) {
+                    gs.totalStartVotes--;
+                    gs.startVotes.remove(player);
+                }
+            }
+
+            for (PotionEffect type : player.getActivePotionEffects())
+                player.removePotionEffect(type.getType());
+
+            main.sendScoreboardUpdate(player);
+            player.setGameMode(GameMode.ADVENTURE);
+            removeArmor(player);
+        } else if (game != null && game.spectators.contains(player)) {
+            String mapName = "";
+            if (game.duosMap != null)
+                mapName = game.duosMap.toString();
+            else
+                mapName = game.getMap().toString();
+
+            player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                    + "You have left " + mapName);
+            main.ResetPlayer(player);
+            player.setGameMode(GameMode.ADVENTURE);
+            main.getScoreboardManager().lobbyBoard(player);
+            player.getInventory().clear();
+            main.LobbyItems(player);
+            game.spectators.remove(player);
+            player.setDisplayName("" + player.getName());
+        } else
+            player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
+    }
+
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+        if (cmd.getName().equalsIgnoreCase("join")) {
+            List<Maps> maps = Arrays.asList(Maps.values());
+            List<String> mapsString = Lists.newArrayList();
+            if (args.length == 1) {
+                for (Maps map : maps) {
+                    if (map.getName().toLowerCase().startsWith(args[0].toLowerCase()))
+                        mapsString.add(map.getName());
+                }
+                return mapsString;
+            }
+        } else if (cmd.getName().equalsIgnoreCase("class")) {
+            List<ClassType> a = Arrays.asList(ClassType.values());
+            List<String> f = Lists.newArrayList();
+            if (args.length == 1) {
+                for (ClassType s : a) {
+                    if (s.name().toLowerCase().startsWith(args[0].toLowerCase()))
+                        f.add(s.name());
+                }
+                return f;
+            }
+        }
+        return null;
+    }
+
+    private boolean isGameStateWaiting(GameInstance game, Player player) {
+        if (game.state != GameState.WAITING) {
+            player.sendMessage(main.color("&c&l(!) &rYou cannot select a class while in a game!"));
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isPlayerInGame(Player player, GameInstance game) {
+        if (game == null) {
+            player.sendMessage(main.color("&c&l(!) &rYou have to be in a game to select a class!"));
+            return false;
+        }
+        return true;
+    }
+
+    private void removeArmor(Player player) {
+        ItemStack air = new ItemStack(Material.AIR, 1);
+        player.getInventory().setHelmet(air);
+        player.getInventory().setChestplate(air);
+        player.getInventory().setLeggings(air);
+        player.getInventory().setBoots(air);
+    }
+
+    private void resetDoubleJump(Player player) {
+        player.setAllowFlight(false);
+        player.setAllowFlight(true);
+    }
 }
