@@ -1,11 +1,12 @@
 package anthony.SuperCraftBrawl.gui;
 
-import anthony.util.ItemHelper;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
-import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.util.ItemHelper;
+import anthony.util.SoundManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -59,7 +60,9 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 		contents.set(1, 3, ClickableItem.of(voteGameStart, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
+				SoundManager.playSoundSuccessfulHitToSinglePlayer(player);
 				game.getGameSettings().handleVoteGameStart(clickingPlayer, game);
+				inv.close(player);
 			}
 		}));
 	}
@@ -84,8 +87,9 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 						+ (game != null ? game.players.size() : "0") + ")");
 		contents.set(1, 5, ClickableItem.of(voteTime, event -> {
 			if (event.getWhoClicked() instanceof Player) {
-				Player clickingPlayer = (Player) event.getWhoClicked();
+				SoundManager.playSoundSuccessfulHitToSinglePlayer(player);
 				game.getGameSettings().handleVoteTime(player, game);
+				inv.open(player);
 			}
 		}));
 	}
@@ -111,8 +115,9 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 						+ (game != null ? game.players.size() : "0") + ")");
 		contents.set(3, 5, ClickableItem.of(voteGameType, event -> {
 			if (event.getWhoClicked() instanceof Player) {
-				Player clickingPlayer = (Player) event.getWhoClicked();
+				SoundManager.playSoundSuccessfulHitToSinglePlayer(player);
 				game.getGameSettings().handleVoteGameType(player, game);
+				inv.open(player);
 			}
 		}));
 	}
@@ -131,8 +136,9 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 						+ (game != null ? game.players.size() : "0") + ")");
 		contents.set(3, 3, ClickableItem.of(lightningRate, event -> {
 			if (event.getWhoClicked() instanceof Player) {
-				Player clickingPlayer = (Player) event.getWhoClicked();
+				SoundManager.playSoundSuccessfulHitToSinglePlayer(player);
 				game.getGameSettings().handleLightningRate(player, game);
+				inv.open(player);
 			}
 		}));
 	}

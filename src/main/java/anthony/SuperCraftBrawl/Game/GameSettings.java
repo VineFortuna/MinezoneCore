@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import net.md_5.bungee.api.ChatColor;
 
 public class GameSettings {
@@ -57,7 +56,7 @@ public class GameSettings {
 	 */
 	public void setTimeOfDay() {
 		if (game != null) {
-			if (this.totalTimeVotes == game.players.size()) {
+			if (this.totalTimeVotes >= game.players.size() / 2 + 1) {
 				if (game.getMapWorld().getTime() == 1000) {
 					game.TellAll(color("&2&l(!) &rThe time has been set to to &c&lNight"));
 					game.getMapWorld().setTime(18000);
@@ -73,20 +72,24 @@ public class GameSettings {
 	 * This function starts the game if the command /startgame is used or if
 	 * everyone in the waiting lobby votes to start
 	 */
-	public void forceStartGame() {
-		if (game.gameStartTime != null) {
-			if (game.ticksTilStart <= 60) {
-				checkOtherSettings(); // Set other settings too if enough votes
-				game.TellAll(color("&2&l(!) &rGame is now starting"));
-				game.gameStartTime.cancel();
-				game.StartGame();
+	public void forceStartGame(boolean startGameCommand) {
+		if (!startGameCommand) {
+			if (game.gameStartTime == null && game.timeToStartSeconds > 60) {
+				return;
 			}
 		}
+		checkOtherSettings(); // Set other settings too if enough votes
+		game.TellAll(color("&2&l(!) &rGame is now starting"));
+		if (game.gameStartTime != null) {
+			game.gameStartTime.cancel();
+		}
+
+		game.StartGame();
 	}
 
 	public void changeGameType() {
 		if (game != null) {
-			if (this.totalGameTypeVotes == game.players.size()) {
+			if (this.totalGameTypeVotes >= game.players.size() / 2 + 1) {
 				if (game.gameType == GameType.CLASSIC)
 					game.gameType = GameType.FRENZY;
 				else
@@ -110,7 +113,7 @@ public class GameSettings {
 	 */
 	public void increaseLightningRate() {
 		if (game != null) {
-			if (getLightningVotes() == game.players.size()) {
+			if (getLightningVotes() >= game.players.size() / 2 + 1) {
 				this.dropTimer /= 2;
 				game.TellAll(color("&2&l(!) &rLoot drops spawn rate is now &e&l2x"));
 			}
@@ -187,7 +190,7 @@ public class GameSettings {
 		game.TellAll(message);
 
 		if (game.getGameSettings().totalStartVotes == game.players.size())
-			game.getGameSettings().forceStartGame();
+			game.getGameSettings().forceStartGame(false);
 	}
 
 	/**
