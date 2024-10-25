@@ -70,10 +70,12 @@ public class JebClass extends BaseClass {
 			} else {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &7Jeb's Call");
 				getActionBarManager().setActionBar(player, "jeb.cooldown", msg, 2);
-			}
-			if (jeb.getTime() == 10000 && !checkIfDead(player, instance)) {
-				if (player.getInventory().getItem(1).getType() == Material.STONE) {
-					player.getInventory().getItem(1).setDurability((short) 0);
+				
+				if (player.getInventory().contains(Material.STONE) && !checkIfDead(player, instance)) {
+					int i = player.getInventory().first(Material.STONE);
+					if (player.getInventory().getItem(i).getDurability() != (short) 0) {
+						player.getInventory().getItem(i).setDurability((short) 0);
+					}
 				}
 			}
 		}

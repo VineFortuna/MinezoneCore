@@ -172,7 +172,7 @@ public abstract class BaseClass {
 	 */
 	protected void setArmorNew(EntityEquipment entityEquipment) {
 		if (playerHead != null) {
-			entityEquipment.setHelmet(getHelmet(playerHead));
+			entityEquipment.setHelmet(playerHead);
 		}
 
 		if (chestplate != null) {
@@ -889,7 +889,7 @@ public abstract class BaseClass {
 								pData.level++;
 								pData.exp -= 2500;
 								p.sendMessage(instance.getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
-								p.sendMessage("You are now Level: " + pData.level + "!");
+								p.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou are now Level " + pData.level + "!"));
 							}
 						}
 						/*
@@ -2835,7 +2835,7 @@ public abstract class BaseClass {
 						ChatColor.GREEN + "Butter Balls",
 						ChatColor.YELLOW + "Right click to throw DEADLY butter balls!");
 				d.sendMessage(instance.getGameManager().getMain()
-						.color("&2&l(!) &rYou got a kill and gained an extra &2Butter Ball"));
+						.color("&2&l(!) &rYou got a kill and gained an extra &aButter Ball"));
 				d.getInventory().addItem(item);
 			} else if (baseClass.getType() == ClassType.GrimReaper) {
 				ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
@@ -2861,11 +2861,11 @@ public abstract class BaseClass {
 			String hexCodeLeggings, String hexCodeBoots, int protectionLevel, String className) {
 		// Head (helmet)
 		if (blockMaterial != null) {
-			playerHead = ItemHelper.setDetails(new ItemStack(blockMaterial), "&r&f" + className + " Head");
+			playerHead = new ItemStack(blockMaterial);
 		} else if (textureUrl != null) {
-			playerHead = ItemHelper.setDetails(ItemHelper.createSkullTexture(textureUrl), "&r&f" + className + " Head");
+			playerHead = ItemHelper.createSkullTexture(textureUrl);
 		}
-
+		playerHead = ItemHelper.setDetails(getHelmet(playerHead), "&r&f" + className + " Head");
 		playerHead.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protectionLevel);
 
 		// Chestplate
@@ -2873,18 +2873,24 @@ public abstract class BaseClass {
 			chestplate = ItemHelper.setDetails(
 					ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, hexCodeChestplate),
 					"&r" + className + " Chestplate");
+		} else {
+			chestplate = ItemHelper.create(Material.AIR);
 		}
 
 		// Leggings
 		if (hexCodeLeggings != null) {
 			leggings = ItemHelper.setDetails(ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, hexCodeLeggings),
 					"&r" + className + " Leggings");
+		} else {
+			leggings = ItemHelper.create(Material.AIR);
 		}
 
 		// Boots
 		if (hexCodeBoots != null) {
 			boots = ItemHelper.setDetails(ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, hexCodeBoots),
 					"&r" + className + " Boots");
+		} else {
+			boots = ItemHelper.create(Material.AIR);
 		}
 	}
 
@@ -2898,5 +2904,9 @@ public abstract class BaseClass {
 			String className) {
 		createArmor(blockMaterial, textureUrl, hexCodeAllArmor, hexCodeAllArmor, hexCodeAllArmor, protectionLevel,
 				className);
+	}
+
+	public void resetHead() {
+		player.getEquipment().setHelmet(playerHead);
 	}
 }

@@ -1,8 +1,8 @@
 package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -70,7 +70,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
                             main.color("&7Lure I"),
                             "",
-                            main.color("&e500 Tokens"),
+                            main.tokenCostString(player, 500),
                             main.color("&aClick to purchase")), e -> {
                         if (data.tokens >= 500) {
                             data.tokens -= 500;
@@ -92,7 +92,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
                             main.color("&7Lure II"),
                             "",
-                            main.color("&e1000 Tokens"),
+                            main.tokenCostString(player, 1000),
                             main.color("&aClick to purchase")), e -> {
                         if (data.tokens >= 1000) {
                             data.tokens -= 1000;
@@ -114,7 +114,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
                             main.color("&7Lure III"),
                             "",
-                            main.color("&e1500 Tokens"),
+                            main.tokenCostString(player, 1500),
                             main.color("&aClick to purchase")), e -> {
                         if (data.tokens >= 1500) {
                             data.tokens -= 1500;
@@ -135,7 +135,6 @@ public class FishingUpgradesGUI implements InventoryProvider {
             contents.set(1, 2, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.LIME.getData()),
                             main.color("&aPurchased"),
-                            "",
                             main.color("&7Lure III")), e -> {
                     }));
         }
@@ -163,9 +162,10 @@ public class FishingUpgradesGUI implements InventoryProvider {
         if (data.friendshipLevel == 0) {
             contents.set(1, 6, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
-                            main.color("&7Receive 10 EXP for every 5 fish caught within 4 blocks of another player"),
+                            main.color("&7Receive 10 EXP for every 5 fish caught "),
+                            main.color("&7within 4 blocks of another player"),
                             "",
-                            main.color("&e200 Tokens"),
+                            main.tokenCostString(player, 200),
                             main.color("&aClick to purchase")), e -> {
                         if (data.tokens >= 200) {
                             data.tokens -= 200;
@@ -184,9 +184,10 @@ public class FishingUpgradesGUI implements InventoryProvider {
         } else if (data.friendshipLevel == 1) {
             contents.set(1, 6, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
-                            main.color("&7Receive 10 EXP for every 5 fish caught within 6 blocks of another player"),
+                            main.color("&7Receive 10 EXP for every 5 fish caught "),
+                            main.color("&7within 6 blocks of another player"),
                             "",
-                            main.color("&e400 Tokens"),
+                            main.tokenCostString(player, 400),
                             main.color("&aClick to purchase")), e -> {
                         if (data.tokens >= 400) {
                             data.tokens -= 400;
@@ -205,9 +206,10 @@ public class FishingUpgradesGUI implements InventoryProvider {
         } else if (data.friendshipLevel == 2) {
             contents.set(1, 6, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
-                            main.color("&7Receive 10 EXP for every 3 fish caught within 6 blocks of another player"),
+                            main.color("&7Receive 10 EXP for every 3 fish caught "),
+                            main.color("&7within 6 blocks of another player"),
                             "",
-                            main.color("&e600 Tokens"),
+                            main.tokenCostString(player, 600),
                             main.color("&aClick to purchase")), e -> {
                         if (data.tokens >= 600) {
                             data.tokens -= 600;
@@ -226,9 +228,10 @@ public class FishingUpgradesGUI implements InventoryProvider {
         } else if (data.friendshipLevel == 3) {
             contents.set(1, 6, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
-                            main.color("&7Receive 15 EXP for every 3 fish caught within 6 blocks of another player"),
+                            main.color("&7Receive 15 EXP for every 3 fish caught "),
+                            main.color("&7within 6 blocks of another player"),
                             "",
-                            main.color("&e800 Tokens"),
+                            main.tokenCostString(player, 800),
                             main.color("&aClick to purchase")), e -> {
                         if (data.tokens >= 800) {
                             data.tokens -= 800;
@@ -248,8 +251,8 @@ public class FishingUpgradesGUI implements InventoryProvider {
             contents.set(1, 6, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.LIME.getData()),
                             main.color("&aPurchased"),
-                            "",
-                            main.color("&7Receive 15 EXP for every 3 fish caught within 6 blocks of another player")), e -> {
+                            main.color("&7Receive 15 EXP for every 3 fish caught "),
+                            main.color("&7within 6 blocks of another player")), e -> {
                     }));
         }
         contents.set(2, 8, ClickableItem.of(
