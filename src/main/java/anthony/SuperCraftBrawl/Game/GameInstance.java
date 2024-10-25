@@ -1954,7 +1954,7 @@ public class GameInstance {
 									&& playerData.playerClasses.get(classType.getID()).purchased
 									|| classType.getTokenCost() == 0) {
 								if (playerData.level >= classType.getLevel()) {
-									if (classType == ClassType.Fisherman &&
+									if (classType != ClassType.Fisherman ||
 											this.getGameManager().getMain().hasAllFish(player)) {
 										if (donor == null
 												|| player.hasPermission("scb." + donor.toString().toLowerCase())) {
