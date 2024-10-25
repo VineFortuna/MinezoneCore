@@ -167,7 +167,7 @@ public class NotchClass extends BaseClass {
 			Player gamePlayer = null;
 			boolean check = false;
 
-			while (check == false) {
+			while (!check) {
 				gamePlayer = instance.players.get(random.nextInt(instance.players.size()));
 
 				if (gamePlayer != player && gamePlayer.getGameMode() != GameMode.SPECTATOR)
