@@ -1,7 +1,10 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import org.bukkit.Color;
-import org.bukkit.DyeColor;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -16,12 +19,6 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import anthony.util.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
-
 public class FadeClass extends BaseClass {
 
 	private ItemStack string = ItemHelper.setDetails(new ItemStack(Material.STRING),
@@ -32,9 +29,13 @@ public class FadeClass extends BaseClass {
 	public FadeClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.15;
-		createArmor(null,
+		createArmor(
+				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTQ3MTlmMjFjNWRmYzFjZDgyYWExM2M4N2NjZjhkNDY1MmVjOWUzMjliYjY5ZjM0MDllYmE2NTExYzlkZmMwMyJ9fX0=",
-				"16161A", 6, "Fade");
+				"16161A",
+				6,
+				"Fade"
+		);
 	}
 
 	@Override
@@ -69,10 +70,10 @@ public class FadeClass extends BaseClass {
 			if (fadeAbility.getTime() < 25000) {
 				String msg = instance.getGameManager().getMain()
 						.color("&rFade Ability regenerates in: &e" + cooldownSec + "s");
-				getActionBarManager().setActionBar(player, "slimeball.cooldown", msg, 2);
+				getActionBarManager().setActionBar(player, "fade.cooldown", msg, 2);
 			} else {
 				String msg = instance.getGameManager().getMain().color("&rYou can use Fade Ability");
-				getActionBarManager().setActionBar(player, "slimeball.cooldown", msg, 2);
+				getActionBarManager().setActionBar(player, "fade.cooldown", msg, 2);
 			}
 		}
 
@@ -177,13 +178,16 @@ public class FadeClass extends BaseClass {
 
 			@Override
 			public void run() {
-				for (Player gamePlayer : instance.players)
-					gamePlayer.showPlayer(player);
-				setArmor(player.getEquipment());
-				player.sendMessage(
-						instance.getGameManager().getMain().color("&r&l(!) &rYou are now visible to all players"));
-				playSoundToGamePlayers(Sound.ENDERMAN_TELEPORT);
-				fadeAbilityActive = false;
+				if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Fade
+						&& instance.classes.get(player).getLives() > 0) {
+					for (Player gamePlayer : instance.players)
+						gamePlayer.showPlayer(player);
+					setArmor(player.getEquipment());
+					player.sendMessage(
+							instance.getGameManager().getMain().color("&r&l(!) &rYou are now visible to all players"));
+					playSoundToGamePlayers(Sound.ENDERMAN_TELEPORT);
+					fadeAbilityActive = false;
+				}
 			}
 		};
 		r.runTaskLater(instance.getGameManager().getMain(), 20 * 8);

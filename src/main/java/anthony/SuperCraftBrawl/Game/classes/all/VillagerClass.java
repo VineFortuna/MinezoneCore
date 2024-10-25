@@ -56,15 +56,15 @@ public class VillagerClass extends BaseClass {
 			if (instance.duosMap != null)
 				if (instance.team.get(p).equals(instance.team.get(player)))
 					return;
-
+			
 			if (instance.getGameManager().spawnProt.containsKey(p)
 					|| instance.getGameManager().spawnProt.containsKey(player))
 				return;
-
+			
 			BaseClass bc = instance.classes.get(player);
 			if (bc != null && bc.getLives() <= 0)
 				return;
-
+			
 			emeraldsCount++;
 			weapon.setAmount(emeraldsCount);
 			player.getInventory().setItem(0, weapon);

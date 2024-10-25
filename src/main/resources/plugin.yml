@@ -7,8 +7,6 @@ commands:
       usage: /join [map name]
    hub:
       description: Hub command
-   mainworld:
-      description: Minecade lobby
    shop:
       description: Shop command
    leave:

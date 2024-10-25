@@ -152,12 +152,12 @@ public class Core extends JavaPlugin implements Listener {
 	public FlawlessWinsBoard getFlawlessWinsBoard() {
 		return this.flawlessWinsBoard;
 	}
-
+	
 	public BoardSettings getBoardSettings() {
 		return this.boardSettings;
 	}
-
-	public WinstreakBoard getWinstreakBoard() {
+	
+	public WinstreakBoard getWinstreakBoard() { 
 		return this.streakBoard;
 	}
 
@@ -222,7 +222,7 @@ public class Core extends JavaPlugin implements Listener {
 							if (i.state == GameState.WAITING) {
 								s.setLine(2, this.color("&0Players: " + i.players.size() + "/"
 										+ i.getMap().GetInstance().gameType.getMaxPlayers()));
-								s.setLine(3, this.color("&0" + i.ticksTilStart + "s"));
+								s.setLine(3, this.color("&0" + i.timeToStartSeconds + "s"));
 								s.update();
 							} else if (i.state == GameState.STARTED) {
 								player.sendMessage(this.color(
@@ -391,8 +391,8 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null) {
-			String[] commandTypes = { "join", "fav", "fly", "f", "shop", "leave", "l", "cw", "players", "class",
-					"spectate", "startgame", "gamestats", "setlives", "purchases", "kit", "items" };
+			String[] commandTypes = { "maps", "join", "fav", "fly", "f", "shop", "leave", "l", "cw", "players", "class", "spectate",
+					"startgame", "gamestats", "setlives", "purchases", "kit", "items" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -614,7 +614,7 @@ public class Core extends JavaPlugin implements Listener {
 		}
 
 		if (cmd.getName().equalsIgnoreCase("hub")) {
-			Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+			/*Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 
 			ByteArrayOutputStream b = new ByteArrayOutputStream();
 			DataOutputStream out = new DataOutputStream(b);
@@ -626,7 +626,17 @@ public class Core extends JavaPlugin implements Listener {
 			} catch (Exception ex) {
 				player.sendMessage(color("&c&l(!) &rThere was a problem connecting to &elobby-1"));
 			}
-			player.sendPluginMessage(this, "BungeeCord", b.toByteArray());
+			player.sendPluginMessage(this, "BungeeCord", b.toByteArray());*/
+			if (this.getGameManager().GetInstanceOfPlayer(player) != null ||
+					this.getGameManager().GetInstanceOfSpectator(player) != null) {
+				this.getCommands().leaveGame(player);
+			} else if (this.getParkour().hasPlayer(player)) {
+				this.getParkour().removePlayer(player);
+				this.ResetPlayer(player);
+			} else {
+				this.ResetPlayer(player);
+			}
+			player.sendMessage(this.color("&r&l(!) &rSending you to the Hub"));
 		}
 
 		if (cmd.getName().equalsIgnoreCase("setlevel")) {
@@ -937,15 +947,6 @@ public class Core extends JavaPlugin implements Listener {
 			player.sendMessage(list);
 		}
 
-		if (cmd.getName().equalsIgnoreCase("maps")) {
-			int count = 0;
-			for (int i = 0; i < Maps.values().length; i++) {
-				count++;
-			}
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "There are " + ChatColor.YELLOW + count
-					+ ChatColor.RESET + " available maps to play");
-		}
-
 		if (cmd.getName().equalsIgnoreCase("exp")) {
 			if (player.hasPermission("scb.exp")) {
 				if (args.length == 0) {
@@ -1193,14 +1194,12 @@ public class Core extends JavaPlugin implements Listener {
 					}
 
 					String nick = "";
-					if (args[0].matches("^[a-zA-Z0-9_]*$")) {
-					} else {
+					if (!args[0].matches("^[a-zA-Z0-9_]*$")) {
 						player.sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
 								+ "Please enter a name with only alphanumeric characters!");
 						return true;
 					}
-					if (Bukkit.getPlayerExact(args[0]) == null) {
-					} else {
+					if (Bukkit.getPlayer(args[0]) != null) {
 						player.sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
 								+ "You cannot name yourself as another player!");
 						return true;
@@ -1483,11 +1482,10 @@ public class Core extends JavaPlugin implements Listener {
 						if (target != null) {
 							data.points = num;
 
-							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You gave "
-									+ ChatColor.GREEN + target.getName() + ChatColor.RESET + " " + num + " Tokens!");
-							target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + num
-									+ " Tokens!");
-							if (this.getGameManager().GetInstanceOfPlayer(player) == null)
+							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You set "
+									+ ChatColor.GREEN + target.getName() + ChatColor.RESET + "'s points to " + num);
+							target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Your points were set to " + num);
+							if (tournament && this.getGameManager().GetInstanceOfPlayer(player) == null)
 								getScoreboardManager().lobbyBoard(target);
 							this.getDataManager().saveData(data);
 						} else {
@@ -1502,18 +1500,6 @@ public class Core extends JavaPlugin implements Listener {
 				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank " + ChatColor.RED
 						+ ChatColor.BOLD + "OWNER" + ChatColor.RESET + "to use this command!");
 			}
-		}
-
-		if (cmd.getName().equalsIgnoreCase("mainworld")) {
-			player.sendMessage("Test0");
-			player.sendMessage("Test0");
-			World minecadeLobby = getServer().createWorld(new WorldCreator("MinecadeLobby"));
-
-			if (minecadeLobby != null)
-				player.teleport(minecadeLobby.getSpawnLocation());
-
-			player.sendMessage("Test1");
-			player.sendMessage("Test2");
 		}
 
 		if (cmd.getName().equalsIgnoreCase("stats")) {
@@ -1606,6 +1592,10 @@ public class Core extends JavaPlugin implements Listener {
 
 	public int getTotalFish(Player player) {
 		return getTotalFish(player, null);
+	}
+
+	public boolean hasAllFish(Player player) {
+		return getTotalFish(player) == FishType.values().length;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1857,7 +1847,7 @@ public class Core extends JavaPlugin implements Listener {
 		player.getInventory().setItem(4,
 				ItemHelper.setDetails(new ItemStack(Material.CHEST), "&d>&5>&f&lCosmetics&5<&d<"));
 		ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
-		player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&c>&4>&fProfile&4<&c<"));
+		player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&c>&4>&f&lProfile&4<&c<"));
 
 		player.getInventory().setItem(5, getFishingRod(player));
 
@@ -1967,8 +1957,12 @@ public class Core extends JavaPlugin implements Listener {
 	public ItemStack getFishingRod(Player player) {
 		PlayerData data = getDataManager().getPlayerData(player);
 
-		ItemStack fishingRod = ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD), "&3&lGo Fishing!",
-				"&fAnywhere with water", "&fFish for junk, fish and treasure", "&fEarn unique rewards");
+		ItemStack fishingRod = ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
+				"&3&lGo Fishing!",
+				"&fAnywhere with water",
+				"&fFish for junk, fish and treasure",
+				"&fEarn unique rewards"
+		);
 		ItemHelper.setUnbreakable(fishingRod);
 		if (data != null) {
 			if (data.lure == 1 && data.lureLevel > 0) {
@@ -1977,5 +1971,17 @@ public class Core extends JavaPlugin implements Listener {
 		}
 
 		return fishingRod;
+	}
+
+	public String tokenCostString(Player player, int cost) {
+		PlayerData data = this.getDataManager().getPlayerData(player);
+		if (data != null) {
+			if (data.tokens >= cost) {
+				return this.color("&a" + cost + " Tokens");
+			} else {
+				return this.color("&c" + cost + " Tokens");
+			}
+		}
+		return this.color("&cInvalid");
 	}
 }

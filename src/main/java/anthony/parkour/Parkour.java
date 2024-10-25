@@ -186,6 +186,19 @@ public class Parkour implements Listener {
 		Material material = player.getLocation().getBlock().getType();
 		return material == Material.LAVA || material == Material.STATIONARY_LAVA;
 	}
+	
+	public void removePlayer(Player player) {
+		Location start = players.get(player).getInstance().spawnLoc.toLocation(player.getWorld());
+		this.time.remove(player);
+		this.runnables.remove(player);
+		main.getParkour().players.remove(player);
+		main.ResetPlayer(player);
+		main.LobbyItems(player);
+		main.getScoreboardManager().lobbyBoard(player);
+		player.teleport(start);
+		player.sendMessage(main.color("&r&l(!) &rYou have left parkour mode"));
+		player.setAllowFlight(true);
+	}
 
 	@EventHandler
 	public void interact(PlayerInteractEvent event) {
@@ -209,17 +222,7 @@ public class Parkour implements Listener {
 					player.sendMessage(main.color("&e&l(!) &rSent back to start"));
 					break;
 				case BARRIER:
-					Location start = players.get(player).getInstance().spawnLoc.toLocation(player.getWorld());
-					this.time.remove(player);
-					this.runnables.remove(player);
-					main.getParkour().players.remove(player);
-					main.ResetPlayer(player);
-					main.LobbyItems(player);
-					main.getScoreboardManager().lobbyBoard(player);
-					player.teleport(start);
-					player.sendMessage(main.color("&r&l(!) &rYou have left parkour mode"));
-					player.setAllowFlight(true);
-					break;
+					removePlayer(player);
 				}
 			}
 		}
