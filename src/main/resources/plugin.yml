@@ -7,6 +7,8 @@ commands:
       usage: /join [map name]
    hub:
       description: Hub command
+   mainworld:
+      description: Minecade lobby
    shop:
       description: Shop command
    leave:
@@ -52,6 +54,8 @@ commands:
       description: Online players command!
    purchases:
       description: Purchases command!
+   maps:
+      description: Maps command!
    seen:
       description: Seen command
    ignite:
@@ -64,7 +68,6 @@ commands:
       description: Ranks command
    spectate:
       description: Spectate command
-   maps:
    maplist:
       description: Displays list of SCB Maps
    socials:

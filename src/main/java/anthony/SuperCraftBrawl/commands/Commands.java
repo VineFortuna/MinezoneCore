@@ -74,6 +74,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                 case "maplist":
                 case "maps":
                     mapsCommand(args, player);
+                    break;
 
                 case "join":
                     joinCommand(args, player);
@@ -415,7 +416,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         }
 
         if (map == null) {
-            player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maplist &rfor a list of maps"));
+            player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maps &rfor a list of maps"));
             return;
         }
 
@@ -439,7 +440,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         }
 
         if (map == null) {
-            player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maplist &rfor a list of maps"));
+            player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maps &rfor a list of maps"));
             return;
         }
 
