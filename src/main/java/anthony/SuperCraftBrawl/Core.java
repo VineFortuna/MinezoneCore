@@ -931,21 +931,6 @@ public class Core extends JavaPlugin implements Listener {
 			player.sendMessage("" + ChatColor.WHITE + "/spectate -> " + ChatColor.GREEN + "Spectate a game");
 			player.sendMessage("" + ChatColor.WHITE + "/maplist -> " + ChatColor.GREEN + "List of all available maps");
 		}
-		if (cmd.getName().equalsIgnoreCase("maplist") && sender instanceof Player) {
-			String list = "";
-			int count = 1;
-
-			player.sendMessage(
-					"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "The following maps are available to play:");
-			for (Maps map : Maps.values()) {
-				list += "" + ChatColor.YELLOW + map.toString() + ChatColor.RESET;
-				if (count < Maps.values().length) {
-					list += ", ";
-				}
-				count++;
-			}
-			player.sendMessage(list);
-		}
 
 		if (cmd.getName().equalsIgnoreCase("exp")) {
 			if (player.hasPermission("scb.exp")) {
