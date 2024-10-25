@@ -20,7 +20,6 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -68,7 +67,7 @@ public class FireworkClass extends BaseClass {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv
 				.setItem(1,
-						ItemHelper.addEnchant(ItemHelper.addEnchant(
+						ItemHelper.setUnbreakable(ItemHelper.addEnchant(
 								ItemHelper.setDetails(new ItemStack(Material.BOW),
 										"" + ChatColor.RED + ChatColor.BOLD + "Firework Bow", "",
 										instance.getGameManager().getMain()
@@ -77,7 +76,7 @@ public class FireworkClass extends BaseClass {
 										instance.getGameManager().getMain().color("   &r5 sec Blindness II"),
 										instance.getGameManager().getMain().color("   &r5 sec Slowness III"),
 										instance.getGameManager().getMain().color("   &r10 sec Weakness II")),
-								Enchantment.ARROW_INFINITE, 1), Enchantment.DURABILITY, 1000));
+								Enchantment.ARROW_INFINITE, 1)));
 		playerInv.setItem(35, new ItemStack(Material.ARROW));
 
 		msg = instance.getGameManager().getMain().color("&9&l(!) &eYou can use &c&lFirework Bow");

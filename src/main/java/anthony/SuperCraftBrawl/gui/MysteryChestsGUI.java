@@ -1,12 +1,19 @@
 package anthony.SuperCraftBrawl.gui;
 
-import java.util.Random;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import anthony.SuperCraftBrawl.Animation;
+import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.util.ItemHelper;
+import fr.minuskube.inv.ClickableItem;
+import fr.minuskube.inv.SmartInventory;
+import fr.minuskube.inv.content.InventoryContents;
+import fr.minuskube.inv.content.InventoryProvider;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.EntityArmorStand;
+import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
+import net.minecraft.server.v1_8_R3.WorldServer;
+import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.ArmorStand;
@@ -17,19 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import anthony.SuperCraftBrawl.Animation;
-import anthony.util.ItemHelper;
-import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import fr.minuskube.inv.ClickableItem;
-import fr.minuskube.inv.SmartInventory;
-import fr.minuskube.inv.content.InventoryContents;
-import fr.minuskube.inv.content.InventoryProvider;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.EntityArmorStand;
-import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
-import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
-import net.minecraft.server.v1_8_R3.WorldServer;
+import java.util.Random;
 
 public class MysteryChestsGUI implements InventoryProvider {
 
@@ -75,7 +70,7 @@ public class MysteryChestsGUI implements InventoryProvider {
 										Random r = new Random();
 										int chance = r.nextInt(100);
 										
-										if (chance >= 0 && chance <= 5) {
+										if (chance <= 5) {
 											if (data.astronaut == 0) {
 												data.astronaut = 1;
 												player.sendMessage(
@@ -89,14 +84,14 @@ public class MysteryChestsGUI implements InventoryProvider {
 														main.color("&eAstronaut Outfit"));
 												data.tokens += 25;
 											}
-											Location newLoc = new Location(player.getWorld(), loc.getX() + 0.5,
+											Location newLoc = new Location(loc.getWorld(), loc.getX() + 0.5,
 													loc.getY() + 1, loc.getZ() + 0.5);
 											helper(newLoc);
 											helper(newLoc);
 											helper(newLoc);
 											helper(newLoc);
 											helper(newLoc);
-										} else if (chance > 5 && chance <= 20) {
+										} else if (chance <= 20) {
 											if (data.santaoutfit == 0) {
 												data.santaoutfit = 1;
 												player.sendMessage(main.color("&9&l(!) &rYou unlocked &c&lSanta Outfit!"));
@@ -109,7 +104,7 @@ public class MysteryChestsGUI implements InventoryProvider {
 														main.color("&c&lSanta Outfit"));
 												data.tokens += 50;
 											}
-											Location newLoc = new Location(player.getWorld(), loc.getX() + 0.5,
+											Location newLoc = new Location(loc.getWorld(), loc.getX() + 0.5,
 													loc.getY() + 1, loc.getZ() + 0.5);
 											Firework fw = (Firework) newLoc.getWorld().spawnEntity(newLoc,
 													EntityType.FIREWORK);
@@ -120,11 +115,11 @@ public class MysteryChestsGUI implements InventoryProvider {
 													FireworkEffect.builder().withColor(Color.RED).flicker(true).build());
 											
 											fw.setFireworkMeta(fwm);
-										} else if (chance > 20 && chance <= 40) {
+										} else if (chance <= 40) {
 											data.melon += 14;
 											player.sendMessage(main.color("&9&l(!) &rYou unlocked &e14 Melons!"));
 											player.sendTitle(main.color("&e&lUNLOCKED"), main.color("&e14 Melons"));
-											Location newLoc = new Location(player.getWorld(), loc.getX() + 0.5,
+											Location newLoc = new Location(loc.getWorld(), loc.getX() + 0.5,
 													loc.getY() + 1, loc.getZ() + 0.5);
 											Firework fw = (Firework) newLoc.getWorld().spawnEntity(newLoc,
 													EntityType.FIREWORK);
@@ -135,11 +130,11 @@ public class MysteryChestsGUI implements InventoryProvider {
 													FireworkEffect.builder().withColor(Color.LIME).flicker(true).build());
 											
 											fw.setFireworkMeta(fwm);
-										} else if (chance > 40 && chance <= 60) {
+										} else if (chance <= 60) {
 											data.melon += 20;
 											player.sendMessage(main.color("&9&l(!) &rYou unlocked &e20 Melons!"));
 											player.sendTitle(main.color("&e&lUNLOCKED"), main.color("&e20 Melons"));
-											Location newLoc = new Location(player.getWorld(), loc.getX() + 0.5,
+											Location newLoc = new Location(loc.getWorld(), loc.getX() + 0.5,
 													loc.getY() + 1, loc.getZ() + 0.5);
 											Firework fw = (Firework) newLoc.getWorld().spawnEntity(newLoc,
 													EntityType.FIREWORK);
@@ -154,7 +149,7 @@ public class MysteryChestsGUI implements InventoryProvider {
 											data.paintball += 23;
 											player.sendMessage(main.color("&9&l(!) &rYou unlocked &e23 Paintballs!"));
 											player.sendTitle(main.color("&e&lUNLOCKED"), main.color("&e23 Paintballs"));
-											Location newLoc = new Location(player.getWorld(), loc.getX() + 0.5,
+											Location newLoc = new Location(loc.getWorld(), loc.getX() + 0.5,
 													loc.getY() + 1, loc.getZ() + 0.5);
 											Firework fw = (Firework) newLoc.getWorld().spawnEntity(newLoc,
 													EntityType.FIREWORK);
@@ -169,7 +164,7 @@ public class MysteryChestsGUI implements InventoryProvider {
 											data.paintball += 17;
 											player.sendMessage(main.color("&9&l(!) &rYou unlocked &e17 Paintballs!"));
 											player.sendTitle(main.color("&e&lUNLOCKED"), main.color("&e17 Paintballs"));
-											Location newLoc = new Location(player.getWorld(), loc.getX() + 0.5,
+											Location newLoc = new Location(loc.getWorld(), loc.getX() + 0.5,
 													loc.getY() + 1, loc.getZ() + 0.5);
 											Firework fw = (Firework) newLoc.getWorld().spawnEntity(newLoc,
 													EntityType.FIREWORK);

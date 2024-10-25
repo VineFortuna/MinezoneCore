@@ -2,15 +2,12 @@ package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.util.ItemHelper;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -81,19 +78,12 @@ public class TournamentGUI implements InventoryProvider {
         int x = 1, y = 1;
     
         for (String s : main.tourney.keySet()) {
-            OfflinePlayer p = Bukkit.getOfflinePlayer(s);
-            ItemStack stats = ItemHelper.createSkullHeadPlayer(1, p.getName());
-            
-            PlayerData data = main.getDataManager().getOffPlayerData(p);
-            String rank = "";
-            if (data.getRank() != null) {
-                rank = data.getRank().getTagWithSpace();
-            };
+            ItemStack stats = ItemHelper.createSkullHeadPlayer(1, s);
             
             contents.set(y, x,
                     ClickableItem.of(
-                            ItemHelper.setDetails(stats, main.color("&ePlayer: " + rank + "&r" + p.getName()),
-                                    main.color("&ePoints: &r" + data.points)),
+                            ItemHelper.setDetails(stats, main.color("&ePlayer: &r" + s),
+                                    main.color("&ePoints: &r" + main.tourney.get(s))),
                             e -> {
                             }));
     

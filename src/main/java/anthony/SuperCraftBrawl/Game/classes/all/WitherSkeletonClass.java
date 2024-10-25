@@ -18,7 +18,6 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -175,14 +174,13 @@ public class WitherSkeletonClass extends BaseClass {
 						player.getInventory().remove(Material.BOW);
 						player.getInventory()
 								.addItem(
-										ItemHelper
-												.addEnchant(
-														ItemHelper.addEnchant(
+										ItemHelper.setUnbreakable(
+												ItemHelper
+														.addEnchant(
 																ItemHelper.setDetails(new ItemStack(Material.BOW),
 																		instance.getGameManager().getMain()
 																				.color("&7&lWitherSk Bow")),
-																Enchantment.DURABILITY, 1000),
-														Enchantment.ARROW_INFINITE, 1));
+																Enchantment.ARROW_INFINITE, 1)));
 						String msg = instance.getGameManager().getMain()
 								.color("&9&l(!) &eYou can now use &7&lWither's Bow");
 						getActionBarManager().setActionBar(player, "wither.skeleton.cooldown", msg, 2);

@@ -1,11 +1,11 @@
 package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.fishing.FishRarity;
 import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.*;
@@ -34,7 +34,7 @@ public class FishingGUI implements InventoryProvider {
     }
     
     public FishingGUI(Core main, Player target, SmartInventory parent) {
-        inv = SmartInventory.builder().id("myInventory").provider(this).size(6, 9)
+        inv = SmartInventory.builder().id("myInventory").provider(this).size(5, 9)
                 .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Fishing").parent(parent).build();
         this.main = main;
         this.target = target;
