@@ -70,8 +70,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                 case "gamestats":
                     gameStatsCommand(args, player);
                     break;
-
-                case "maplist":
+                    
                 case "maps":
                     mapsCommand(args, player);
                     break;
