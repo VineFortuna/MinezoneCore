@@ -134,7 +134,7 @@ public class PotatoClass extends BaseClass {
 						public void run() {
 							player.getInventory().setItem(0, ItemHelper.addEnchant(ItemHelper.addEnchant(
 									new ItemStack(Material.POTATO_ITEM), Enchantment.DAMAGE_ALL, sharpness),
-									Enchantment.KNOCKBACK, 2));
+									Enchantment.KNOCKBACK, 1));
 							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 4 - sharpness));
 						}
 					}.runTaskLater(instance.getGameManager().getMain(), 1);
