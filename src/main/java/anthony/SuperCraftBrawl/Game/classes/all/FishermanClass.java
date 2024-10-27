@@ -54,7 +54,7 @@ public class FishermanClass extends BaseClass {
             "&d&lHealing Fish",
             "&7Eat to gain 1 heart");
     
-    private ItemStack bucket = ItemHelper.setDetails(new ItemStack(Material.BUCKET, 1), "&7Bucket");
+    private ItemStack bucket = ItemHelper.setDetails(new ItemStack(Material.BUCKET, 4), "&rBucket");
     
     private ItemStack waterbucket = ItemHelper.setDetails(new ItemStack(Material.WATER_BUCKET, 1), "&3Fish Bucket &7(Right Click)");
     
@@ -88,8 +88,8 @@ public class FishermanClass extends BaseClass {
         return ItemHelper.setUnbreakable(ItemHelper.addEnchant(
                 ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
                         instance.getGameManager().getMain().color("&bFishing Rod"),
-                                instance.getGameManager().getMain().color("&7Grapples to" +
-                                        "the block its attached to")), Enchantment.DAMAGE_ALL, 3),
+                                instance.getGameManager().getMain().color("&7Hook onto" +
+                                        " a block to grapple towards it")), Enchantment.DAMAGE_ALL, 3),
                 Enchantment.KNOCKBACK, 1));
     }
     
@@ -103,7 +103,7 @@ public class FishermanClass extends BaseClass {
         if (fishing.getTime() < this.cooldownDuration) {
             int seconds = (this.cooldownDuration - fishing.getTime()) / 1000 + 1;
             player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                    + "Your Fishing Rod is still regenerating for " + ChatColor.YELLOW + seconds
+                    + "Your Grappling Hook is still regenerating for " + ChatColor.YELLOW + seconds
                     + " more seconds ");
             event.setCancelled(true);
         } else {
@@ -126,7 +126,7 @@ public class FishermanClass extends BaseClass {
                 if (grapple) {
                     Location d = event.getHook().getLocation();
                     Vector v = d.toVector().subtract(player.getLocation().toVector()).normalize();
-                    player.setVelocity(v.multiply(2).add(new Vector(0, 1, 0)));
+                    player.setVelocity(v.multiply(2).add(new Vector(0, 0.5, 0)));
                     player.getWorld().playSound(player.getLocation(), Sound.BAT_TAKEOFF, 1, 10);
                     fishing.restart();
                 }
@@ -176,7 +176,7 @@ public class FishermanClass extends BaseClass {
                 }
             }
             cooldownActionBar(this.cooldownSec, this.cooldownDuration, fishing, ClassType.Fisherman,
-                    "fisherman.cooldown", "Fishing Rod");
+                    "fisherman.cooldown", "Grappling Hook");
         }
     }
     
@@ -193,7 +193,7 @@ public class FishermanClass extends BaseClass {
                     return;
             if (hits < 4) {
                 hits++;
-                player.getInventory().getItem(1).setAmount(hits);
+                player.getInventory().getItem(1).setAmount(4 - hits);
                 if (hits == 4) {
                     player.sendMessage(instance.getGameManager().getMain()
                             .color("&2&l(!) &rYour bucket is full of fish. Bring out the whole ocean!"));

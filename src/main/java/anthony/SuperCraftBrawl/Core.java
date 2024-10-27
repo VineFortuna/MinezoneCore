@@ -929,7 +929,7 @@ public class Core extends JavaPlugin implements Listener {
 			player.sendMessage("" + ChatColor.WHITE + "/classes -> " + ChatColor.GREEN + "Lists all available classes");
 			player.sendMessage("" + ChatColor.WHITE + "/class -> " + ChatColor.GREEN + "Choose a class");
 			player.sendMessage("" + ChatColor.WHITE + "/spectate -> " + ChatColor.GREEN + "Spectate a game");
-			player.sendMessage("" + ChatColor.WHITE + "/maplist -> " + ChatColor.GREEN + "List of all available maps");
+			player.sendMessage("" + ChatColor.WHITE + "/maps -> " + ChatColor.GREEN + "List of all available maps");
 		}
 
 		if (cmd.getName().equalsIgnoreCase("exp")) {
