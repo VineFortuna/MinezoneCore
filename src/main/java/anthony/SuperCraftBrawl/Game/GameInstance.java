@@ -2348,18 +2348,16 @@ public class GameInstance {
 		Player target = null;
 		double closestDistance = distance;
 		for (Player p : this.players) {
-			BaseClass baseClass = classes.get(p);
-			if (!baseClass.checkIfDead(p, this)) {
-				if (this.duosMap != null) {
-					if (!this.team.get(p).equals(this.team.get(player))) {
-						if (target == null) {
-							if (p.getLocation().distance(entity.getLocation()) <= distance) {
+			if (p != player) {
+				BaseClass baseClass = classes.get(p);
+				if (!baseClass.checkIfDead(p, this)) {
+					if (target == null) {
+						if (p.getLocation().distance(entity.getLocation()) <= distance) {
+							target = p;
+							closestDistance = p.getLocation().distance(entity.getLocation());
+						} else {
+							if (p.getLocation().distance(entity.getLocation()) < closestDistance) {
 								target = p;
-								closestDistance = p.getLocation().distance(entity.getLocation());
-							} else {
-								if (p.getLocation().distance(entity.getLocation()) < closestDistance) {
-									target = p;
-								}
 							}
 						}
 					}
