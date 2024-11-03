@@ -2355,10 +2355,10 @@ public class GameInstance {
 						if (p.getLocation().distance(entity.getLocation()) <= distance) {
 							target = p;
 							closestDistance = p.getLocation().distance(entity.getLocation());
-						} else {
-							if (p.getLocation().distance(entity.getLocation()) < closestDistance) {
-								target = p;
-							}
+						}
+					} else {
+						if (p.getLocation().distance(entity.getLocation()) < closestDistance) {
+							target = p;
 						}
 					}
 				}
