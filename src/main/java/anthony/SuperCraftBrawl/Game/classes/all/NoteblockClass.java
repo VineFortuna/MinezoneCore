@@ -127,8 +127,6 @@ public class NoteblockClass extends BaseClass {
 		}
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
 			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 0));
-		/*if (!(player.getActivePotionEffects().contains(PotionEffectType.DAMAGE_RESISTANCE)) && res)
-			player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));*/
 	}
 	
 
@@ -143,13 +141,6 @@ public class NoteblockClass extends BaseClass {
 			else if (item.getType() == Material.NOTE_BLOCK) {
 				playNote(player.getInventory().getHeldItemSlot());
 			} else if (item.getType() == Material.BUCKET) {
-				/*player.getInventory().setItem(0,
-						ItemHelper.addEnchant(new ItemStack(Material.REDSTONE), Enchantment.DAMAGE_ALL, 2));
-				player.removePotionEffect(PotionEffectType.SPEED);
-				player.removePotionEffect(PotionEffectType.JUMP);
-				player.removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
-				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
-				player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 0));*/
 				player.sendMessage(
 						instance.getGameManager().getMain().color("&r&l(!) &rYou have reset all of your work. Rip :("));
 				clearNotes();
