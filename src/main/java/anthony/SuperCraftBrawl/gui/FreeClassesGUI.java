@@ -1,21 +1,20 @@
 package anthony.SuperCraftBrawl.gui;
 
-import anthony.SuperCraftBrawl.fishing.FishType;
-import anthony.SuperCraftBrawl.playerdata.ClassDetails;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.fishing.FishType;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class FreeClassesGUI implements InventoryProvider {
 
@@ -47,10 +46,18 @@ public class FreeClassesGUI implements InventoryProvider {
 				
 				ClassDetails details = data.playerClasses.get(type.getID());
 				int played = details.gamesPlayed + details.gamesWon;
-				int nextLevel = 50;
-				if (played > 50)
+				int nextLevel = 10;
+				
+				if (played > 75)
 					nextLevel = 100;
-
+				else if (played > 50)
+					nextLevel = 75;
+				else if (played > 25)
+					nextLevel = 50;
+				else if (played > 10)
+					nextLevel = 25;
+				
+				
 				if (item == null)
 					item = new ItemStack(Material.WOOD);
 				contents.set(a, b,
