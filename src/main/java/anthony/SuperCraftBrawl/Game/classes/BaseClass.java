@@ -236,7 +236,7 @@ public abstract class BaseClass {
 	public ItemStack getHelmet(ItemStack helmet) {
 		PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(player);
 		ClassDetails details = data.playerClasses.get(this.getType().getID());
-		if (details != null && details.reward2)
+		if (details != null && details.reward5)
 			return ClassRewardsGUI.headReward(this.getType());
 		return helmet;
 	}

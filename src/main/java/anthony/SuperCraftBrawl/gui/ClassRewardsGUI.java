@@ -45,7 +45,7 @@ public class ClassRewardsGUI implements InventoryProvider {
         Fourth Reward [75] 75 tokens & 150 xp
         Fifth Reward [100] Alternative Head.*/
         
-        ItemStack tokens1 = ItemHelper.setDetails(new ItemStack(Material.EMERALD), main.color("&e&l10 Tokens & 20 EXP"));
+        ItemStack tokens1 = ItemHelper.setDetails(new ItemStack(Material.GOLD_PLATE), main.color("&e&l10 Tokens & 20 EXP"));
         if (played < 10) {
             ItemHelper.setLore(tokens1, Arrays.asList("", main.progressBar(played, 10, 25)));
         } else {
@@ -56,7 +56,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                 ItemHelper.setLore(tokens1, Arrays.asList("", main.color("&eClick to claim reward")));
             }
         }
-        ItemStack tokens2 = ItemHelper.setDetails(new ItemStack(Material.EMERALD), main.color("&e&l25 Tokens & 50 EXP"));
+        ItemStack tokens2 = ItemHelper.setDetails(new ItemStack(Material.GOLD_NUGGET), main.color("&e&l25 Tokens & 50 EXP"));
         if (played < 25) {
             ItemHelper.setLore(tokens2, Arrays.asList("", main.progressBar(played, 25, 25)));
         } else {
@@ -67,9 +67,9 @@ public class ClassRewardsGUI implements InventoryProvider {
                 ItemHelper.setLore(tokens2, Arrays.asList("", main.color("&eClick to claim reward")));
             }
         }
-        ItemStack tokens3 = ItemHelper.setDetails(new ItemStack(Material.EMERALD), main.color("&e&l50 Tokens & 100 EXP"));
+        ItemStack tokens3 = ItemHelper.setDetails(new ItemStack(Material.GOLD_INGOT), main.color("&e&l50 Tokens & 100 EXP"));
         if (played < 50) {
-            ItemHelper.setLore(tokens1, Arrays.asList("", main.progressBar(played, 50, 25)));
+            ItemHelper.setLore(tokens3, Arrays.asList("", main.progressBar(played, 50, 25)));
         } else {
             if (details.reward3) {
                 ItemHelper.setLore(tokens3, Arrays.asList("", main.color("&a&lCLAIMED")));
@@ -78,13 +78,13 @@ public class ClassRewardsGUI implements InventoryProvider {
                 ItemHelper.setLore(tokens3, Arrays.asList("", main.color("&eClick to claim reward")));
             }
         }
-        ItemStack tokens4 = ItemHelper.setDetails(new ItemStack(Material.EMERALD), main.color("&e&l75 Tokens & 150 EXP"));
+        ItemStack tokens4 = ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK), main.color("&e&l75 Tokens & 150 EXP"));
         if (played < 75) {
             ItemHelper.setLore(tokens4, Arrays.asList("", main.progressBar(played, 75, 25)));
         } else {
             if (details.reward4) {
                 ItemHelper.setLore(tokens4, Arrays.asList("", main.color("&a&lCLAIMED")));
-                ItemHelper.setGlowing(tokens1, true);
+                ItemHelper.setGlowing(tokens4, true);
             } else {
                 ItemHelper.setLore(tokens4, Arrays.asList("", main.color("&eClick to claim reward")));
             }
@@ -102,7 +102,7 @@ public class ClassRewardsGUI implements InventoryProvider {
             }
         }
         
-        contents.set(1, 0,
+        contents.set(1, 1,
                 ClickableItem.of(tokens1, e -> {
                     if (played >= 10) {
                         if (!details.reward1) {
@@ -124,7 +124,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                         }
                     }
                     }));
-        contents.set(1, 1,
+        contents.set(1, 2,
                 ClickableItem.of(tokens2, e -> {
                     if (played >= 25) {
                         if (!details.reward2) {
@@ -146,7 +146,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                         }
                     }
                 }));
-        contents.set(1, 2,
+        contents.set(1, 3,
                 ClickableItem.of(tokens3, e -> {
                     if (played >= 50) {
                         if (!details.reward3) {
@@ -168,7 +168,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                         }
                     }
                 }));
-        contents.set(1, 3,
+        contents.set(1, 4,
                 ClickableItem.of(tokens4, e -> {
                     if (played >= 75) {
                         if (!details.reward4) {
@@ -190,7 +190,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                         }
                     }
                 }));
-        contents.set(1, 4,
+        contents.set(1, 5,
                 ClickableItem.of(head, e -> {
                     if (played >= 100) {
                         if (!details.reward5) {
@@ -211,7 +211,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                 ItemHelper.setDetails(new ItemStack(Material.PAPER), "&aWhen using this class:",
                         "&a- Match played: +1 point", "&a- Match won: +1 point"), e -> {
                 }));
-        contents.set(1, 8, ClickableItem.of(
+        contents.set(2, 8, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
                     inv.getParent().get().open(player);
                 }));

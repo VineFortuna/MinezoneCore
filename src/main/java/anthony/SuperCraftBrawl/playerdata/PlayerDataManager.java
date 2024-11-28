@@ -1,15 +1,6 @@
 package anthony.SuperCraftBrawl.playerdata;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
+import anthony.SuperCraftBrawl.Core;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,7 +10,13 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.permissions.PermissionAttachment;
 
-import anthony.SuperCraftBrawl.Core;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.UUID;
 
 public class PlayerDataManager implements Listener {
 
@@ -177,8 +174,11 @@ public class PlayerDataManager implements Listener {
 			int gamesWon = classSet.getInt("GamesWon");
 			boolean reward1 = classSet.getInt("Reward1") == 1;
 			boolean reward2 = classSet.getInt("Reward2") == 1;
+			boolean reward3 = classSet.getInt("Reward3") == 1;
+			boolean reward4 = classSet.getInt("Reward4") == 1;
+			boolean reward5 = classSet.getInt("Reward5") == 1;
 			data.playerClasses.put(classID,
-					new ClassDetails(purchased, timePurchased, gamesPlayed, gamesWon, reward1, reward2));
+					new ClassDetails(purchased, timePurchased, gamesPlayed, gamesWon, reward1, reward2, reward3, reward4, reward5));
 		}
 		classSet.close();
 
