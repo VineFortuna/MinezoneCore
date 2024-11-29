@@ -32,17 +32,16 @@ public class GameStatsGUI implements InventoryProvider {
 	private BaseClass matchMvp() {
 		BaseClass matchMvp = null;
 		for (Entry<Player, BaseClass> entry : i.allClasses.entrySet()) {
-			if (entry.getKey() != null) {
+			if (entry.getKey() != null && entry.getValue() != null) {
 				if (matchMvp == null || entry.getValue().totalKills > matchMvp.totalKills)
 					matchMvp = entry.getValue();
 				else if (entry.getValue().totalKills == matchMvp.totalKills) {
-					if (i.getWinnerList().contains(entry.getKey()) ||
-							entry.getValue().totalDeaths < matchMvp.totalDeaths)
+					if (i.getWinnerList().contains(entry.getKey()) || entry.getValue().totalDeaths < matchMvp.totalDeaths)
 						matchMvp = entry.getValue();
 				}
 			}
 		}
-		if (matchMvp.totalKills == 0)
+		if (matchMvp != null && matchMvp.totalKills == 0)
 			matchMvp = null;
 		
 		return matchMvp;
@@ -54,7 +53,7 @@ public class GameStatsGUI implements InventoryProvider {
 		
 		if (i != null) {
 			for (Entry<Player, BaseClass> entry : i.allClasses.entrySet()) {
-				if (entry.getKey() != null) {
+				if (entry.getKey() != null && entry.getKey().isOnline()) {
 					ItemStack stats = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
 					SkullMeta statsMeta = (SkullMeta) stats.getItemMeta();
 					statsMeta.setOwner(entry.getKey().getName());
