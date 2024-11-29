@@ -171,24 +171,27 @@ public class NoteblockClass extends BaseClass {
 		if (!verifySong()) {
 			incorrectSong();
 		} else {
-			player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, count);
 			count++;
 			switch (count) {
 				case 1:
 					player.getInventory().setItem(slot, ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, (short) 5),
 							instance.getGameManager().getMain().color("&e&lFirst Note")));
+					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1);
 					break;
 				case 2:
 					player.getInventory().setItem(slot, ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, (short) 14),
 							instance.getGameManager().getMain().color("&e&lSecond Note")));
+					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1.2f);
 					break;
 				case 3:
 					player.getInventory().setItem(slot, ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, (short) 11),
 							instance.getGameManager().getMain().color("&e&lThird Note")));
+					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1.5f);
 					break;
 				case 4:
 					player.getInventory().setItem(slot, ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, (short) 1),
 							instance.getGameManager().getMain().color("&e&lFourth Note")));
+					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 2);
 					break;
 			}
 		}
