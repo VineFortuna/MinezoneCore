@@ -45,13 +45,13 @@ public class DonorClassesGUI implements InventoryProvider {
 				int played = details.gamesPlayed + details.gamesWon;
 				int nextLevel = 10;
 				
-				if (played > 75)
+				if (played >= 75)
 					nextLevel = 100;
-				else if (played > 50)
+				else if (played >= 50)
 					nextLevel = 75;
-				else if (played > 25)
+				else if (played >= 25)
 					nextLevel = 50;
-				else if (played > 10)
+				else if (played >= 10)
 					nextLevel = 25;
 				
 				contents.set(a, b,

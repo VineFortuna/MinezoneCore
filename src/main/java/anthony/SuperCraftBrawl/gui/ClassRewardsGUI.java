@@ -11,6 +11,7 @@ import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -118,8 +119,8 @@ public class ClassRewardsGUI implements InventoryProvider {
                             }
                             if (main.getGameManager().GetInstanceOfPlayer(player) == null)
                                 main.getScoreboardManager().lobbyBoard(player);
+                            player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
                             details.hasUpdated = true;
-                            main.getDataManager().saveData(data);
                             player.closeInventory();
                         }
                     }
@@ -140,8 +141,8 @@ public class ClassRewardsGUI implements InventoryProvider {
                             }
                             if (main.getGameManager().GetInstanceOfPlayer(player) == null)
                                 main.getScoreboardManager().lobbyBoard(player);
+                            player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
                             details.hasUpdated = true;
-                            main.getDataManager().saveData(data);
                             player.closeInventory();
                         }
                     }
@@ -162,8 +163,8 @@ public class ClassRewardsGUI implements InventoryProvider {
                             }
                             if (main.getGameManager().GetInstanceOfPlayer(player) == null)
                                 main.getScoreboardManager().lobbyBoard(player);
+                            player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
                             details.hasUpdated = true;
-                            main.getDataManager().saveData(data);
                             player.closeInventory();
                         }
                     }
@@ -184,8 +185,8 @@ public class ClassRewardsGUI implements InventoryProvider {
                             }
                             if (main.getGameManager().GetInstanceOfPlayer(player) == null)
                                 main.getScoreboardManager().lobbyBoard(player);
+                            player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
                             details.hasUpdated = true;
-                            main.getDataManager().saveData(data);
                             player.closeInventory();
                         }
                     }
@@ -202,8 +203,8 @@ public class ClassRewardsGUI implements InventoryProvider {
                             player.sendMessage(
                                     main.color("&2&l(!) &rDisabled alternate head for " + type.getTag()));
                         }
+                        player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 2);
                         details.hasUpdated = true;
-                        main.getDataManager().saveData(data);
                         player.closeInventory();
                     }
                 }));
