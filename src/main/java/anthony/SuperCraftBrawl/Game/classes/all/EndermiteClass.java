@@ -37,7 +37,7 @@ public class EndermiteClass extends BaseClass {
     private List<Endermite> endermites = new ArrayList<>();
     private int summonCooldownSec;
     private ItemStack enderSwap = ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER),
-            instance.getGameManager().getMain().color("&5&lEnder Swap"),
+            instance.getGameManager().getMain().color("&5&lEnder &0Swap"),
             instance.getGameManager().getMain().color("&7Shoot at your Endermite to swap places with it!"),
             instance.getGameManager().getMain().color("   &rRange: &e25 blocks"));
     
@@ -83,7 +83,8 @@ public class EndermiteClass extends BaseClass {
             if (e instanceof Endermite)
                 if (e.getName().contains(player.getName()))
                     e.remove();
-        
+    
+        swarmSummon.startTime = System.currentTimeMillis() - 100000;
         endermites.clear();
         
         playerInv.setItem(0, this.getAttackWeapon());
@@ -101,9 +102,9 @@ public class EndermiteClass extends BaseClass {
             if (!(player.getInventory().contains(this.enderSwap)))
                 player.getInventory().setItem(1, this.enderSwap);
     
-            this.summonCooldownSec = (20000 - endermiteSummon.getTime()) / 1000 + 1;
+            this.summonCooldownSec = (20000 - swarmSummon.getTime()) / 1000 + 1;
             
-            if (endermiteSummon.getTime() < 20000) {
+            if (swarmSummon.getTime() < 20000) {
                 String msg = instance.getGameManager().getMain()
                         .color("&5&lSwarm Summon &rin: &e" + this.summonCooldownSec + "s");
                 getActionBarManager().setActionBar(player, "swarm.cooldown", msg, 2);
@@ -167,7 +168,7 @@ public class EndermiteClass extends BaseClass {
                     Location targetLoc = nearestEndermite.getLocation();
     
                     // Swap player and Endermite locations
-                    player.playSound(playerLoc, Sound.ENDERMAN_TELEPORT, 1, 0);
+                    player.playSound(playerLoc, Sound.ENDERMAN_TELEPORT, 0.5f, 0);
                     player.teleport(targetLoc);
                     nearestEndermite.teleport(playerLoc);
     
@@ -178,8 +179,8 @@ public class EndermiteClass extends BaseClass {
                 }
                 event.setCancelled(true);
             } else if (item.getType() == Material.ENDER_PORTAL_FRAME) {
-                if (endermiteSummon.getTime() < 20000) {
-                    int seconds = (20000 - endermiteSummon.getTime()) / 1000 + 1;
+                if (swarmSummon.getTime() < 20000) {
+                    int seconds = (20000 - swarmSummon.getTime()) / 1000 + 1;
                     event.setCancelled(true);
                     player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
                             + "Swarm Summon is still on cooldown for " + ChatColor.YELLOW + seconds + " more seconds ");
@@ -196,7 +197,7 @@ public class EndermiteClass extends BaseClass {
                         }
                         player.getWorld().playSound(player.getLocation(), Sound.ENDERMAN_SCREAM, 1, 0);
                         player.getWorld().playEffect(player.getLocation().add(0, 2, 0), Effect.ENDER_SIGNAL, 0);
-                        endermiteSummon.restart();
+                        swarmSummon.restart();
                     } else {
                         player.sendMessage(instance.getGameManager().getMain()
                                 .color("&c&l(!) &rYou do not have any Endermites to summon!"));

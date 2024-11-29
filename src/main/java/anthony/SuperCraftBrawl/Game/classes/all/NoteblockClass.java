@@ -108,8 +108,8 @@ public class NoteblockClass extends BaseClass {
 		player.getInventory().setItem(2, ItemHelper.setDetails(b, instance.getGameManager().getMain().color("&eB")));
 		player.getInventory().setItem(3, ItemHelper.setDetails(c, instance.getGameManager().getMain().color("&eC")));
 		player.getInventory().setItem(4, ItemHelper.setDetails(d, instance.getGameManager().getMain().color("&eD")));
-		player.getInventory().setItem(5, ItemHelper.setDetails(new ItemStack(Material.BUCKET),
-				instance.getGameManager().getMain().color("&2&lErase Your Work")));
+		/*player.getInventory().setItem(5, ItemHelper.setDetails(new ItemStack(Material.BUCKET),
+				instance.getGameManager().getMain().color("&2&lErase Your Work")));*/
 	}
 	
 	public void Tick(int gameTicks) {
@@ -140,16 +140,17 @@ public class NoteblockClass extends BaseClass {
 			}
 			else if (item.getType() == Material.NOTE_BLOCK) {
 				playNote(player.getInventory().getHeldItemSlot());
-			} else if (item.getType() == Material.BUCKET) {
+			} /*else if (item.getType() == Material.BUCKET) {
 				player.sendMessage(
 						instance.getGameManager().getMain().color("&r&l(!) &rYou have reset all of your work. Rip :("));
 				clearNotes();
-			}
+			}*/
 		}
 	}
 
 	private void incorrectSong() {
 		player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rWow, you're not that good are you?"));
+		player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 0);
 		clearNotes();
 	}
 	
@@ -176,22 +177,22 @@ public class NoteblockClass extends BaseClass {
 				case 1:
 					player.getInventory().setItem(slot, ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, (short) 5),
 							instance.getGameManager().getMain().color("&e&lFirst Note")));
-					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1);
+					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1.0f);
 					break;
 				case 2:
 					player.getInventory().setItem(slot, ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, (short) 14),
 							instance.getGameManager().getMain().color("&e&lSecond Note")));
-					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1.2f);
+					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1.1225f);
 					break;
 				case 3:
 					player.getInventory().setItem(slot, ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, (short) 11),
 							instance.getGameManager().getMain().color("&e&lThird Note")));
-					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1.5f);
+					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1.2599f);
 					break;
 				case 4:
 					player.getInventory().setItem(slot, ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, (short) 1),
 							instance.getGameManager().getMain().color("&e&lFourth Note")));
-					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 2);
+					player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1.3348f);
 					break;
 			}
 		}
