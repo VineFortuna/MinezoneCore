@@ -88,6 +88,7 @@ public abstract class BaseClass {
 	public Timer fishing = new Timer();
 	public Timer grimReaper = new Timer();
 	public Timer alexBrewingStand = new Timer();
+	public Timer endermiteSummon = new Timer();
 	public boolean bedrockInvincibility = false;
 	public boolean hunterDash = true;
 
@@ -2840,6 +2841,11 @@ public abstract class BaseClass {
 			} else if (baseClass.getType() == ClassType.GrimReaper) {
 				ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
 				d.getInventory().setItem(2, zombieEgg);
+			} else if (baseClass.getType() == ClassType.Endermite) {
+				d.getInventory().addItem(ItemHelper.createMonsterEgg(EntityType.ENDERMITE, 1,
+						instance.getGameManager().getMain().color("&5&lEndermite Pokeball")));
+				d.sendMessage(instance.getGameManager().getMain()
+						.color("&2&l(!) &rYou got a kill and gained an extra &5&lEndermite Pokeball"));
 			}
 		}
 	}
