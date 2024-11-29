@@ -640,8 +640,8 @@ public class GameManager implements Listener, PluginMessageListener {
 	public void EntityDeathEvent(EntityDeathEvent entity) {
 		List<EntityType> entities = new ArrayList<>(
 				Arrays.asList(EntityType.ZOMBIE, EntityType.SKELETON, EntityType.CREEPER, EntityType.PIG_ZOMBIE,
-						EntityType.MAGMA_CUBE, EntityType.SILVERFISH, EntityType.WITCH, EntityType.CHICKEN,
-						EntityType.BLAZE, EntityType.PIG, EntityType.MUSHROOM_COW, EntityType.COW));
+						EntityType.MAGMA_CUBE, EntityType.SILVERFISH, EntityType.WITCH, EntityType.ENDERMITE,
+						EntityType.CHICKEN, EntityType.BLAZE, EntityType.PIG, EntityType.MUSHROOM_COW, EntityType.COW));
 		if (entities.contains(entity.getEntityType())) {
 			entity.getDrops().clear();
 			entity.setDroppedExp(0);
@@ -2375,6 +2375,8 @@ public class GameManager implements Listener, PluginMessageListener {
 			return "Witch";
 		case SILVERFISH:
 			return "Silverfish";
+		case ENDERMITE:
+			return "Endermite";
 		}
 		return null;
 	}
