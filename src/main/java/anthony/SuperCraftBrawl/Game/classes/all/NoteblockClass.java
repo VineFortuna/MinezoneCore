@@ -5,26 +5,26 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.List;
 
 public class NoteblockClass extends BaseClass {
-
-	private boolean aNote = false, bNote = false, cNote = false, dNote = false;
+	
+	private boolean sharp = false, fire = false, knock = false, speed = false, res = false;
 	private ItemStack redstone = new ItemStack(Material.REDSTONE);
-	private HashMap<Integer, String> notes = new HashMap<>();
+	private String notes = "";
+	private final List<String> songs = Arrays.asList("ABD", "ACB", "BCD", "DAC", "CADB");
 	int count = 0;
 
 	public NoteblockClass(GameInstance instance, Player player) {
@@ -69,17 +69,21 @@ public class NoteblockClass extends BaseClass {
 		player.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  D, A, C: Speed II");
 		player.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  C, A, D, B: Resistance I");
 		player.sendMessage("" + ChatColor.BOLD + "||");
-		player.sendMessage("" + ChatColor.BOLD + "||");
 		player.sendMessage("" + ChatColor.BOLD + "===============================");
 	}
 
 	@Override
 	public void SetItems(Inventory playerInv) {
+		sharp = false;
+		fire = false;
+		knock = false;
+		speed = false;
+		res = false;
 		player.getInventory()
 				.setItem(0,
 						ItemHelper
 								.addEnchant(
-										ItemHelper.setDetails(new ItemStack(Material.REDSTONE),
+										ItemHelper.setDetails(redstone,
 												instance.getGameManager().getMain()
 														.color("&rRedstone Dust &7(Right Click)")),
 										Enchantment.DAMAGE_ALL, 2));
@@ -107,89 +111,110 @@ public class NoteblockClass extends BaseClass {
 		player.getInventory().setItem(5, ItemHelper.setDetails(new ItemStack(Material.BUCKET),
 				instance.getGameManager().getMain().color("&2&lErase Your Work")));
 	}
+	
+	public void Tick(int gameTicks) {
+		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Noteblock
+				&& instance.classes.get(player).getLives() > 0) {
+			String msg = instance.getGameManager().getMain()
+					.color("&rNotes played: &e&l" + notes);
+			getActionBarManager().setActionBar(player, "noteblock.notes", msg, 2);
+		}
+		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)) && !res) {
+			if (speed)
+				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+			else
+				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
+		}
+		if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
+			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 0));
+	}
+	
 
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
-
-		if (item != null && item.getType() == Material.REDSTONE
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			noteList(player); // Shows the notes to the player when right clicking melee
+		
+		if (item != null && event.getAction().toString().contains("RIGHT_CLICK")) {
+			if (item.getType() == Material.REDSTONE) {
+				noteList(player); // Shows the notes to the player when right clicking melee
+			}
+			else if (item.getType() == Material.NOTE_BLOCK) {
+				playNote(player.getInventory().getHeldItemSlot());
+			} else if (item.getType() == Material.BUCKET) {
+				player.sendMessage(
+						instance.getGameManager().getMain().color("&r&l(!) &rYou have reset all of your work. Rip :("));
+				clearNotes();
+			}
 		}
-		if (item != null && item.getType() == Material.NOTE_BLOCK && player.getInventory().getHeldItemSlot() == 1
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			aNote = true;
-			notes.put(count, "A");
-			count++;
-		} else if (item != null && item.getType() == Material.NOTE_BLOCK && player.getInventory().getHeldItemSlot() == 2
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			bNote = true;
-			notes.put(count, "B");
-			count++;
-		} else if (item != null && item.getType() == Material.NOTE_BLOCK && player.getInventory().getHeldItemSlot() == 3
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			cNote = true;
-			notes.put(count, "C");
-			count++;
-		} else if (item != null && item.getType() == Material.NOTE_BLOCK && player.getInventory().getHeldItemSlot() == 4
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			dNote = true;
-			notes.put(count, "D");
-			count++;
-		} else if (item != null && item.getType() == Material.BUCKET
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			aNote = false;
-			bNote = false;
-			cNote = false;
-			dNote = false;
-			notes.remove(0);
-			notes.remove(1);
-			notes.remove(2);
-			notes.remove(3);
-			count = 0;
-			player.getInventory().setItem(0,
-					ItemHelper.addEnchant(new ItemStack(Material.REDSTONE), Enchantment.DAMAGE_ALL, 2));
-			player.removePotionEffect(PotionEffectType.SPEED);
-			player.removePotionEffect(PotionEffectType.JUMP);
-			player.removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
-			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
-			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 0));
-			player.sendMessage(
-					instance.getGameManager().getMain().color("&r&l(!) &rYou have reset all of your work. Rip :("));
-			noteItems();
-		}
+	}
 
-		if (notes.get(0).equals("A")) {
-			player.getInventory().setItem(1, ItemHelper.setDetails(new ItemStack(Material.WOOL),
-					instance.getGameManager().getMain().color("&e&lFirst Note")));
-			if (notes.get(1).equals("B")) {
-				player.getInventory().setItem(2, ItemHelper.setDetails(new ItemStack(Material.WOOL),
-						instance.getGameManager().getMain().color("&e&lSecond Note")));
-				if (notes.get(2).equals("D")) {
-					player.getInventory().setItem(3, ItemHelper.setDetails(new ItemStack(Material.WOOL),
+	private void incorrectSong() {
+		player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rWow, you're not that good are you?"));
+		clearNotes();
+	}
+	
+	public void playNote(int slot) {
+		switch (slot) {
+			case 1:
+				notes += "A";
+				break;
+			case 2:
+				notes += "B";
+				break;
+			case 3:
+				notes += "C";
+				break;
+			case 4:
+				notes += "D";
+				break;
+		}
+		if (!verifySong()) {
+			incorrectSong();
+		} else {
+			player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, count);
+			count++;
+			switch (count) {
+				case 1:
+					player.getInventory().setItem(slot, ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, (short) 5),
+							instance.getGameManager().getMain().color("&e&lFirst Note")));
+					break;
+				case 2:
+					player.getInventory().setItem(slot, ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, (short) 14),
+							instance.getGameManager().getMain().color("&e&lSecond Note")));
+					break;
+				case 3:
+					player.getInventory().setItem(slot, ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, (short) 11),
 							instance.getGameManager().getMain().color("&e&lThird Note")));
+					break;
+				case 4:
+					player.getInventory().setItem(slot, ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, (short) 1),
+							instance.getGameManager().getMain().color("&e&lFourth Note")));
+					break;
+			}
+		}
+		
+		for (int i = 0; i < songs.size(); i++) {
+			if (songs.get(i).equals(notes)) {
+				giveReward(i);
+				clearNotes();
+				break;
+			}
+		}
+	}
+	
+	public void giveReward(int i) {
+		switch (i) {
+			case 0:
+				if (!sharp) {
 					player.getInventory().setItem(0, ItemHelper.addEnchant(redstone, Enchantment.DAMAGE_ALL, 3));
 					player.sendMessage(instance.getGameManager().getMain()
 							.color("&r&l(!) &rYour song skills rewarded you with &eSharpness 3 &ron your weapon"));
-					noteItems();
-					aNote = false;
-					bNote = false;
-					cNote = false;
-					dNote = false;
-					notes.remove(0);
-					notes.remove(1);
-					notes.remove(2);
-					notes.remove(3);
-					count = 0;
-				} else {
-					incorrectSong();
-				}
-			} else if (notes.get(1).equals("C")) {
-				player.getInventory().setItem(3, ItemHelper.setDetails(new ItemStack(Material.WOOL),
-						instance.getGameManager().getMain().color("&e&lSecond Note")));
-				if (notes.get(2).equals("B")) {
-					player.getInventory().setItem(3, ItemHelper.setDetails(new ItemStack(Material.WOOL),
-							instance.getGameManager().getMain().color("&e&lThird Note")));
+					sharp = true;
+				} else
+					player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou played this song already!"));
+				break;
+			case 1:
+				if (!fire) {
 					player.getInventory().setItem(0, ItemHelper.addEnchant(redstone, Enchantment.FIRE_ASPECT, 1));
 					if (!(redstone.containsEnchantment(Enchantment.DAMAGE_ALL)))
 						player.getInventory().setItem(0,
@@ -197,142 +222,66 @@ public class NoteblockClass extends BaseClass {
 										Enchantment.DAMAGE_ALL, 2));
 					player.sendMessage(instance.getGameManager().getMain()
 							.color("&r&l(!) &rYour song skills rewarded you with &eFire Aspect 1 &ron your weapon"));
-					noteItems();
-					aNote = false;
-					bNote = false;
-					cNote = false;
-					dNote = false;
-					notes.remove(0);
-					notes.remove(1);
-					notes.remove(2);
-					notes.remove(3);
-					count = 0;
-				} else {
-					incorrectSong();
-				}
-			} else if (notes.get(1).equals("D")) {
-				player.getInventory().setItem(4, ItemHelper.setDetails(new ItemStack(Material.WOOL),
-						instance.getGameManager().getMain().color("&e&lSecond Note")));
-				if (notes.get(2).equals("B")) {
-					incorrectSong();
-				} else {
-					incorrectSong();
-				}
-			}
-		} else if (notes.get(0).equals("B")) {
-			player.getInventory().setItem(2, ItemHelper.setDetails(new ItemStack(Material.WOOL),
-					instance.getGameManager().getMain().color("&e&lFirst Note")));
-			if (notes.get(1).equals("C")) {
-				player.getInventory().setItem(3, ItemHelper.setDetails(new ItemStack(Material.WOOL),
-						instance.getGameManager().getMain().color("&e&lSecond Note")));
-				if (notes.get(2).equals("D")) {
-					player.getInventory().setItem(4, ItemHelper.setDetails(new ItemStack(Material.WOOL),
-							instance.getGameManager().getMain().color("&e&lThird Note")));
+					fire = true;
+				} else
+					player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou played this song already!"));
+				break;
+			case 2:
+				if (!knock) {
 					player.getInventory().setItem(0, ItemHelper.addEnchant(redstone, Enchantment.KNOCKBACK, 2));
 					if (!(redstone.containsEnchantment(Enchantment.DAMAGE_ALL)))
 						player.getInventory().setItem(0, ItemHelper.addEnchant(
 								ItemHelper.addEnchant(redstone, Enchantment.DAMAGE_ALL, 2), Enchantment.DAMAGE_ALL, 2));
 					player.sendMessage(instance.getGameManager().getMain()
 							.color("&r&l(!) &rYour song skills rewarded you with &eKnockback 2 &ron your weapon"));
-					noteItems();
-					aNote = false;
-					bNote = false;
-					cNote = false;
-					dNote = false;
-					notes.remove(0);
-					notes.remove(1);
-					notes.remove(2);
-					notes.remove(3);
-					count = 0;
-				} else {
-					incorrectSong();
-				}
-			} else {
-				incorrectSong();
-			}
-		} else if (notes.get(0).equals("C")) {
-			player.getInventory().setItem(3, ItemHelper.setDetails(new ItemStack(Material.WOOL),
-					instance.getGameManager().getMain().color("&e&lFirst Note")));
-			if (notes.get(1).equals("A")) {
-				player.getInventory().setItem(1, ItemHelper.setDetails(new ItemStack(Material.WOOL),
-						instance.getGameManager().getMain().color("&e&lSecond Note")));
-				if (notes.get(2).equals("D")) {
-					player.getInventory().setItem(4, ItemHelper.setDetails(new ItemStack(Material.WOOL),
-							instance.getGameManager().getMain().color("&e&lThird Note")));
-					if (notes.get(3).equals("B")) {
-						player.getInventory().setItem(2, ItemHelper.setDetails(new ItemStack(Material.WOOL),
-								instance.getGameManager().getMain().color("&e&lFourth Note")));
-						player.removePotionEffect(PotionEffectType.SPEED);
-						player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
-						player.sendMessage(instance.getGameManager().getMain().color(
-								"&r&l(!) &rYour song skills rewarded you with Resistance 1&r, but unfortunately you had to give up your Speed effect for it"));
-						aNote = false;
-						bNote = false;
-						cNote = false;
-						dNote = false;
-						notes.remove(0);
-						notes.remove(1);
-						notes.remove(2);
-						notes.remove(3);
-						count = 0;
-						noteItems();
-					} else {
-						incorrectSong();
-					}
-				} else {
-					incorrectSong();
-				}
-			} else {
-				incorrectSong();
-			}
-		} else if (notes.get(0).equals("D")) {
-			player.getInventory().setItem(4, ItemHelper.setDetails(new ItemStack(Material.WOOL),
-					instance.getGameManager().getMain().color("&e&lFirst Note")));
-			if (notes.get(1).equals("A")) {
-				player.getInventory().setItem(1, ItemHelper.setDetails(new ItemStack(Material.WOOL),
-						instance.getGameManager().getMain().color("&e&lSecond Note")));
-				if (notes.get(2).equals("C")) {
-					player.getInventory().setItem(3, ItemHelper.setDetails(new ItemStack(Material.WOOL),
-							instance.getGameManager().getMain().color("&e&lThird Note")));
-					aNote = false;
-					bNote = false;
-					cNote = false;
-					dNote = false;
-					notes.remove(0);
-					notes.remove(1);
-					notes.remove(2);
-					notes.remove(3);
-					count = 0;
-					noteItems();
+					knock = true;
+				} else
+					player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou played this song already!"));
+				break;
+			case 3:
+				if (!speed) {
 					player.removePotionEffect(PotionEffectType.SPEED);
 					if (player.hasPotionEffect(PotionEffectType.DAMAGE_RESISTANCE)) {
 						player.removePotionEffect(PotionEffectType.DAMAGE_RESISTANCE);
 						player.sendMessage(instance.getGameManager().getMain().color(
 								"&r&l(!) &rYour song skills rewarded you with &eSpeed 2&r, but unfortunately you had to give up Resistance 1 for it"));
+						res = false;
 					} else {
 						player.sendMessage(instance.getGameManager().getMain()
 								.color("&r&l(!) &rYour song skills rewarded you with &eSpeed 2"));
 					}
 					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
-				} else {
-					incorrectSong();
-				}
-			} else {
-				incorrectSong();
-			}
+					
+				} else
+					player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou played this song already!"));
+				break;
+			case 4:
+				if (!res) {
+					player.removePotionEffect(PotionEffectType.SPEED);
+					player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
+					player.sendMessage(instance.getGameManager().getMain().color(
+							"&r&l(!) &rYour song skills rewarded you with &eResistance 1&r, but unfortunately you had to give up your Speed effect for it"));
+					speed = false;
+					res = true;
+				} else
+					player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou played this song already!"));
+				break;
 		}
 	}
-
-	private void incorrectSong() {
-		player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rWow, you're not that good are you?"));
-		aNote = false;
-		bNote = false;
-		cNote = false;
-		dNote = false;
-		notes.remove(0);
-		notes.remove(1);
-		notes.remove(2);
-		notes.remove(3);
+	
+	public boolean verifySong() {
+		for (String song : songs) {
+			if (notes.length() <= song.length()) {
+				if (song.substring(0, notes.length()).equals(notes)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public void clearNotes() {
+		notes = "";
 		count = 0;
 		noteItems();
 	}
