@@ -28,6 +28,7 @@ public class WizardClass extends BaseClass {
 	private boolean fireball = false;
 	private int fireballs = 3;
 	private boolean blindness = false;
+	private boolean speedyjumpy = false;
 	private int cooldownSec;
 
 	public WizardClass(GameInstance instance, Player player) {
@@ -63,7 +64,15 @@ public class WizardClass extends BaseClass {
 	public void Tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Wizard
 				&& instance.classes.get(player).getLives() > 0) {
+			if (speedyjumpy) {
+				if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
+					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+				if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
+					player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 0));
+			}
+			
 			this.cooldownSec = (3000 - wizard.getTime()) / 1000 + 1;
+			
 
 			if (wizard.getTime() < 3000) {
 				String msg = "" + ChatColor.RESET + ChatColor.RED + ChatColor.BOLD + "Fireballs" + ChatColor.RESET
@@ -88,6 +97,7 @@ public class WizardClass extends BaseClass {
 		clicked = false; // To reset each life
 		fireball = false;
 		blindness = false;
+		speedyjumpy = false;
 		fireballs = 3;
 		playerInv.setItem(0, ItemHelper.setDetails(new ItemStack(Material.STICK),
 				"" + ChatColor.RESET + "Magic Wand " + ChatColor.GRAY + "(Right Click)"));
@@ -181,8 +191,6 @@ public class WizardClass extends BaseClass {
 									}
 								}
 							}
-							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
-							player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 0));
 							player.getInventory()
 									.setItem(0,
 											ItemHelper
@@ -192,6 +200,7 @@ public class WizardClass extends BaseClass {
 																			"" + ChatColor.RESET + "Magic Wand"),
 																	Enchantment.DAMAGE_ALL, 3),
 															Enchantment.KNOCKBACK, 1));
+							speedyjumpy = true;
 							player.sendMessage(instance.getGameManager().getMain()
 									.color("&e&l(!) &rI cast spell.. Speedy speedy jumpy jumpy!"));
 						}

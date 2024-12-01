@@ -29,9 +29,13 @@ public class FadeClass extends BaseClass {
 	public FadeClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.15;
-		createArmor(null,
+		createArmor(
+				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTQ3MTlmMjFjNWRmYzFjZDgyYWExM2M4N2NjZjhkNDY1MmVjOWUzMjliYjY5ZjM0MDllYmE2NTExYzlkZmMwMyJ9fX0=",
-				"16161A", 6, "Fade");
+				"16161A",
+				6,
+				"Fade"
+		);
 	}
 
 	@Override

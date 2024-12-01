@@ -3,17 +3,13 @@ package anthony.SuperCraftBrawl.fishing;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Effect;
-import org.bukkit.Sound;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
+import org.bukkit.*;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.inventory.meta.FireworkMeta;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -81,6 +77,12 @@ public class Fishing implements Listener {
                 if (main.getTotalFish(p) == FishType.values().length) {
                     p.playSound(p.getLocation(), Sound.FIREWORK_TWINKLE, 1, 1);
                     p.sendMessage(main.color("&3&l(!) &rCongratulations! You caught everything!"));
+                    Firework fw = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
+                    FireworkMeta fwm = fw.getFireworkMeta();
+                    fwm.setPower(1);
+                    fwm.addEffect(FireworkEffect.builder().withColor(Color.AQUA).with(FireworkEffect.Type.BALL_LARGE)
+                            .flicker(true).build());
+                    fw.setFireworkMeta(fwm);
                 }
             }
             if (fish == FishType.CRATE) {

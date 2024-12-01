@@ -148,7 +148,7 @@ public class Core extends JavaPlugin implements Listener {
 	public anthony.CrystalWars.game.GameManager getCwManager() {
 		return gm;
 	}
-	
+
 	public FlawlessWinsBoard getFlawlessWinsBoard() {
 		return this.flawlessWinsBoard;
 	}
@@ -377,7 +377,7 @@ public class Core extends JavaPlugin implements Listener {
 		kb = new KillsBoard(this);
 		fb = new FishingBoard(this);
 		boardSettings = new BoardSettings(this);
-		streakBoard = new WinstreakBoard(this); 
+		streakBoard = new WinstreakBoard(this);
 		flawlessWinsBoard = new FlawlessWinsBoard(this);
 		fishing = new Fishing(this);
 		// kb = new KillsBoard(this);
@@ -929,22 +929,7 @@ public class Core extends JavaPlugin implements Listener {
 			player.sendMessage("" + ChatColor.WHITE + "/classes -> " + ChatColor.GREEN + "Lists all available classes");
 			player.sendMessage("" + ChatColor.WHITE + "/class -> " + ChatColor.GREEN + "Choose a class");
 			player.sendMessage("" + ChatColor.WHITE + "/spectate -> " + ChatColor.GREEN + "Spectate a game");
-			player.sendMessage("" + ChatColor.WHITE + "/maplist -> " + ChatColor.GREEN + "List of all available maps");
-		}
-		if (cmd.getName().equalsIgnoreCase("maplist") && sender instanceof Player) {
-			String list = "";
-			int count = 1;
-
-			player.sendMessage(
-					"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "The following maps are available to play:");
-			for (Maps map : Maps.values()) {
-				list += "" + ChatColor.YELLOW + map.toString() + ChatColor.RESET;
-				if (count < Maps.values().length) {
-					list += ", ";
-				}
-				count++;
-			}
-			player.sendMessage(list);
+			player.sendMessage("" + ChatColor.WHITE + "/maps -> " + ChatColor.GREEN + "List of all available maps");
 		}
 
 		if (cmd.getName().equalsIgnoreCase("exp")) {
@@ -1593,7 +1578,7 @@ public class Core extends JavaPlugin implements Listener {
 	public int getTotalFish(Player player) {
 		return getTotalFish(player, null);
 	}
-	
+
 	public boolean hasAllFish(Player player) {
 		return getTotalFish(player) == FishType.values().length;
 	}
@@ -1652,7 +1637,7 @@ public class Core extends JavaPlugin implements Listener {
 		sendScoreboardUpdate(player); // This sets the rank next to player name above their head
 		chatAnnouncementOnJoin(player);
 		getScoreboardManager().lobbyBoard(player); // Gives the lobby scoreboard to player
-		//getKillsLeaderboard().killsBoard(player); //Shows kills leaderboard to player
+		// getKillsLeaderboard().killsBoard(player); //Shows kills leaderboard to player
 
 		// For join message:
 		String rank = getRankManager().getRank(player).getTagWithSpace(); // Gets the player's rank
@@ -1972,7 +1957,7 @@ public class Core extends JavaPlugin implements Listener {
 
 		return fishingRod;
 	}
-	
+
 	public String tokenCostString(Player player, int cost) {
 		PlayerData data = this.getDataManager().getPlayerData(player);
 		if (data != null) {

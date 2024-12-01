@@ -828,7 +828,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			BaseClass bc = instance.classes.get(player);
 			if (item != null && item.getType() == Material.DIAMOND_HOE) {
 				ItemMeta meta = item.getItemMeta();
-				
+
 				if (meta.getDisplayName().toLowerCase().contains("bazooka") &&
 						player.getGameMode() != GameMode.SPECTATOR) {
 					if (bc != null) {
@@ -1612,7 +1612,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	/**
 	 * This function disables weather from changing
-	 * 
+	 *
 	 * @param event
 	 */
 	@EventHandler
@@ -1880,7 +1880,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	/**
 	 * This function handles spawn protection so players cant get damaged
-	 * 
+	 *
 	 * @param event
 	 */
 	@EventHandler
@@ -1982,7 +1982,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	/**
 	 * This function spawns Spawn Protection particles around the player
-	 * 
+	 *
 	 * @param player
 	 * @param i
 	 */
