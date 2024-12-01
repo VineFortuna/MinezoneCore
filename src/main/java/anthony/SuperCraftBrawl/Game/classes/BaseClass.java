@@ -2905,7 +2905,7 @@ public abstract class BaseClass {
 		createArmor(blockMaterial, textureUrl, hexCodeAllArmor, hexCodeAllArmor, hexCodeAllArmor, protectionLevel,
 				className);
 	}
-	
+
 	public void resetHead() {
 		player.getEquipment().setHelmet(playerHead);
 	}
