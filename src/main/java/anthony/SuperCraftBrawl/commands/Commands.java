@@ -24,6 +24,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
@@ -69,9 +70,10 @@ public class Commands implements CommandExecutor, TabCompleter {
                 case "gamestats":
                     gameStatsCommand(args, player);
                     break;
-
+                    
                 case "maps":
                     mapsCommand(args, player);
+                    break;
 
                 case "join":
                     joinCommand(args, player);
@@ -311,17 +313,30 @@ public class Commands implements CommandExecutor, TabCompleter {
 
         // Send the message to the player
         player.sendMessage(ChatColorHelper.color(createMapsString()));
-
-//        player.sendMessage("" + net.md_5.bungee.api.ChatColor.BOLD + "(!) " + net.md_5.bungee.api.ChatColor.RESET + "There are " + net.md_5.bungee.api.ChatColor.YELLOW + count
-//                + net.md_5.bungee.api.ChatColor.RESET + " available maps to play");
     }
 
     private String createMapsString() {
         StringBuilder stringBuilder = new StringBuilder();
         String HEADERCOLOR = "&e&l";
 
+        List<Maps> classicCuratedMaps = Maps.filterMaps(GameType.CLASSIC, Maps.Category.CURATED, null, null);
+        List<Maps> duelCuratedMaps = Maps.filterMaps(GameType.DUEL, Maps.Category.CURATED, null, null);
+        List<Maps> curatedMaps = new ArrayList<>(classicCuratedMaps);
+        curatedMaps.addAll(duelCuratedMaps);
+
+        List<Maps> classicCasualMaps = Maps.filterMaps(GameType.CLASSIC, Maps.Category.CASUAL, null, null);
+        List<Maps> duelCasualMaps = Maps.filterMaps(GameType.DUEL, Maps.Category.CASUAL, null, null);
+        List<Maps> casualMaps = new ArrayList<>(classicCasualMaps);
+        casualMaps.addAll(duelCasualMaps);
+
+        List<Maps> classicVaultedMaps = Maps.filterMaps(GameType.CLASSIC, Maps.Category.VAULTED, null, null);
+        List<Maps> duelVaultedMaps = Maps.filterMaps(GameType.DUEL, Maps.Category.VAULTED, null, null);
+        List<Maps> vaultedMaps = new ArrayList<>(classicVaultedMaps);
+        vaultedMaps.addAll(duelVaultedMaps);
+
+
         stringBuilder.append("&f&l----------------------------------------");
-        stringBuilder.append(HEADERCOLOR).append("CURATED MAPS:\n");
+        stringBuilder.append(HEADERCOLOR).append("\nCURATED MAPS: (").append(curatedMaps.size()).append(")\n");
 
         // Get Classic maps for Curated category
         appendMaps(GameType.CLASSIC, Maps.Category.CURATED, stringBuilder);
@@ -330,7 +345,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         appendMaps(GameType.DUEL, Maps.Category.CURATED, stringBuilder);
 
         // Now for Casual Maps section
-        stringBuilder.append(HEADERCOLOR).append(" \nCASUAL MAPS:\n");
+        stringBuilder.append(HEADERCOLOR).append(" \nCASUAL MAPS: (").append(casualMaps.size()).append(")\n");
 
         // Get Classic maps for Casual category
         appendMaps(GameType.CLASSIC, Maps.Category.CASUAL, stringBuilder);
@@ -339,7 +354,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         appendMaps(GameType.DUEL, Maps.Category.CASUAL, stringBuilder);
 
         // Now for Vaulted Maps section
-        stringBuilder.append(HEADERCOLOR).append(" \nVAULTED MAPS:\n");
+        stringBuilder.append(HEADERCOLOR).append(" \nVAULTED MAPS: (").append(vaultedMaps.size()).append(")\n");
 
         // Get Classic maps for Vaulted category
         appendMaps(GameType.CLASSIC, Maps.Category.VAULTED, stringBuilder);
@@ -400,7 +415,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         }
 
         if (map == null) {
-            player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maplist &rfor a list of maps"));
+            player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maps &rfor a list of maps"));
             return;
         }
 
@@ -424,7 +439,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         }
 
         if (map == null) {
-            player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maplist &rfor a list of maps"));
+            player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maps &rfor a list of maps"));
             return;
         }
 
