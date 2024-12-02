@@ -37,7 +37,6 @@ public class GameCosmeticsGUI implements InventoryProvider {
 		contents.fill(ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 
 		contents.set(1, 2, ClickableItem.of(winEffects, e -> {
-			inv.close(player);
 
 			if (player.hasPermission("scb.winEffects"))
 				new WinEffectsGUI(main, inv).inv.open(player);
@@ -47,7 +46,6 @@ public class GameCosmeticsGUI implements InventoryProvider {
 		}));
 
 		contents.set(1, 6, ClickableItem.of(deathEffects, e -> {
-			inv.close(player);
 			new DeathEffectsGUI(main, inv).inv.open(player);
 		}));
 
