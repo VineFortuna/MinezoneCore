@@ -1,16 +1,15 @@
 package anthony.SuperCraftBrawl.Game.classes;
 
+import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.all.*;
+import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.ranks.Rank;
-import net.md_5.bungee.api.ChatColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +29,7 @@ public enum ClassType {
 	Bee(55, 425, 0), Jeb(56, 0, 20), Hunter(57, 500, 0), FlintAndSteel(58, 0, 0), WitherSk(59, 1500, 0),
 	Shulker(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30), LargeFern(64, 0, 0),
 	Vindicator(65, 0, Rank.VIP), Fade(66, 0, Rank.VIP), Fisherman(67, 0, 0), BrewingStand(68, 125, 0),
-	GrimReaper(69, 0, 0), Elf(70, 0, 0);
+	GrimReaper(69, 0, 0), Elf(70, 0, 0), Endermite(71, 0, 0);
 
 	// Wolf(67, 0, 35)/* , Guardian(68, 0, 30) */;
 
@@ -210,6 +209,8 @@ public enum ClassType {
 			return new VindicatorClass(instance, player);
 		case Fisherman:
 			return new FishermanClass(instance, player);
+		case Endermite:
+			return new EndermiteClass(instance, player);
 // 		case Wolf:
 // 			return new WolfClass(instance, player);
 //		case Guardian:
@@ -359,6 +360,8 @@ public enum ClassType {
 			return new ItemStack(Material.IRON_AXE);
 		case Fisherman:
 			return new ItemStack(Material.FISHING_ROD);
+		case Endermite:
+			return new ItemStack(Material.ENDER_STONE);
 // 		case Wolf:
 // 			return new ItemStack(Material.BONE);
 // 		case Guardian:
@@ -506,6 +509,8 @@ public enum ClassType {
 			return "Vindicate yourself in front of your enemies";
 		case Fisherman:
 			return "Let's go fishing!";
+		case Endermite:
+			return "Unleash chaos as you swap places with your swarm of Endermites";
 //		case Wolf:
 //			return "Have your brothers defend you from enemies!";
 //		case Guardian:
@@ -687,6 +692,8 @@ public enum ClassType {
 			return "" + ChatColor.GRAY + "Vindicator" + ChatColor.RESET;
 		case Fisherman:
 			return "" + ChatColor.DARK_AQUA + ChatColor.ITALIC + "Fisherman" + ChatColor.RESET;
+		case Endermite:
+			return "" + ChatColor.DARK_PURPLE + "Endermite" + ChatColor.RESET;
 // 		case Wolf:
 // 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Wolf" + ChatColor.RESET;
 // 		case Guardian:
