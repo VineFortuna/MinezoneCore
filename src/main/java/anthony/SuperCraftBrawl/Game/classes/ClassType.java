@@ -1,15 +1,16 @@
 package anthony.SuperCraftBrawl.Game.classes;
 
-import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.all.*;
-import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ItemHelper;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.ranks.Rank;
+import net.md_5.bungee.api.ChatColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +29,8 @@ public enum ClassType {
 	ZombiePigman(51, 0, 3), Witch(13, 0, 5), ZombieVillager(50, 0, 10), Ice(54, 0, 15), Vampire(53, 800, 0),
 	Bee(55, 425, 0), Jeb(56, 0, 20), Hunter(57, 500, 0), FlintAndSteel(58, 0, 0), WitherSk(59, 1500, 0),
 	Shulker(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30), LargeFern(64, 0, 0),
-	Vindicator(65, 0, Rank.VIP), Fade(66, 0, Rank.VIP), Fisherman(67, 0, 0), BrewingStand(68, 125, 0), GrimReaper(69, 0, 0),
-	Endermite(70, 0, 0);
+	Vindicator(65, 0, Rank.VIP), Fade(66, 0, Rank.VIP), Fisherman(67, 0, 0), BrewingStand(68, 125, 0),
+	GrimReaper(69, 0, 0), Elf(70, 0, 0);
 
 	// Wolf(67, 0, 35)/* , Guardian(68, 0, 30) */;
 
@@ -79,6 +80,8 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new Cactus(instance, player);
+		case Elf:
+			return new ElfClass(instance, player);
 		case GrimReaper:
 			return new GrimReaperClass(instance, player);
 		case BrewingStand:
@@ -207,8 +210,6 @@ public enum ClassType {
 			return new VindicatorClass(instance, player);
 		case Fisherman:
 			return new FishermanClass(instance, player);
-		case Endermite:
-			return new EndermiteClass(instance, player);
 // 		case Wolf:
 // 			return new WolfClass(instance, player);
 //		case Guardian:
@@ -225,6 +226,8 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new ItemStack(Material.CACTUS);
+		case Elf:
+			return new ItemStack(Material.CAKE);
 		case GrimReaper:
 			return new ItemStack(Material.DIAMOND_HOE);
 		case BrewingStand:
@@ -356,8 +359,6 @@ public enum ClassType {
 			return new ItemStack(Material.IRON_AXE);
 		case Fisherman:
 			return new ItemStack(Material.FISHING_ROD);
-		case Endermite:
-			return new ItemStack(Material.ENDER_STONE);
 // 		case Wolf:
 // 			return new ItemStack(Material.BONE);
 // 		case Guardian:
@@ -375,6 +376,8 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return "A pricklyyy living thing, made up of thorns & blood..";
+		case Elf:
+			return "Santa's lil helper here to deliver";
 		case GrimReaper:
 			return "Harvest souls with deadly precision, wielding dark powers..";
 		case BrewingStand:
@@ -503,8 +506,6 @@ public enum ClassType {
 			return "Vindicate yourself in front of your enemies";
 		case Fisherman:
 			return "Let's go fishing!";
-		case Endermite:
-			return "Unleash chaos as you swap places with your swarm of Endermites";
 //		case Wolf:
 //			return "Have your brothers defend you from enemies!";
 //		case Guardian:
@@ -548,6 +549,8 @@ public enum ClassType {
 		switch (this) {
 		case Bat:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bat" + ChatColor.RESET;
+		case Elf:
+			return color("&2&lElf&r");
 		case GrimReaper:
 			return color("&8&l&oGrimReaper&r");
 		case BrewingStand:
@@ -677,15 +680,13 @@ public enum ClassType {
 		case ButterBro:
 			return "" + ChatColor.YELLOW + ChatColor.BOLD + "ButterBro" + ChatColor.RESET;
 		case Pig:
-			return "" + ChatColor.LIGHT_PURPLE + ChatColor.ITALIC + "Pig" + ChatColor.RESET;
+			return "" + ChatColor.BLUE + ChatColor.ITALIC + "Pig" + ChatColor.RESET;
 		case LargeFern:
 			return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + "LargeFern" + ChatColor.RESET;
 		case Vindicator:
 			return "" + ChatColor.GRAY + "Vindicator" + ChatColor.RESET;
 		case Fisherman:
-			return "" + ChatColor.DARK_AQUA  + ChatColor.ITALIC + "Fisherman" + ChatColor.RESET;
-		case Endermite:
-			return "" + ChatColor.DARK_PURPLE + "Endermite";
+			return "" + ChatColor.DARK_AQUA + ChatColor.ITALIC + "Fisherman" + ChatColor.RESET;
 // 		case Wolf:
 // 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Wolf" + ChatColor.RESET;
 // 		case Guardian:
