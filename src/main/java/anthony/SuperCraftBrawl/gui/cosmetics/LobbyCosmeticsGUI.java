@@ -40,14 +40,12 @@ public class LobbyCosmeticsGUI implements InventoryProvider {
         contents.set(1, 2, ClickableItem.of(
                 gadgets,
                 e -> {
-                    inv.close(player);
                     new GadgetsGUI(main, inv).inv.open(player);
                 }));
 
         contents.set(1, 6, ClickableItem.of(
                 lobbyOutfits,
                 e -> {
-                    inv.close(player);
                     new SuitsGUI(main, inv).inv.open(player);
                 }));
 

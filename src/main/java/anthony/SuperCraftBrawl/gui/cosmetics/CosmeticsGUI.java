@@ -1,17 +1,16 @@
 package anthony.SuperCraftBrawl.gui.cosmetics;
 
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.ranks.RankManager;
+import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class CosmeticsGUI implements InventoryProvider {
 
@@ -50,14 +49,12 @@ public class CosmeticsGUI implements InventoryProvider {
 		contents.set(1, 2, ClickableItem.of(
 				lobby,
 				e -> {
-					inv.close(player);
 					new LobbyCosmeticsGUI(main, inv).inv.open(player);
 				}));
 
 		contents.set(1, 6, ClickableItem.of(
 				ingame,
 				e -> {
-					inv.close(player);
 					new GameCosmeticsGUI(main, inv).inv.open(player);
 				}));
 	}
