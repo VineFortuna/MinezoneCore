@@ -6,13 +6,7 @@ import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
-import net.md_5.bungee.api.ChatColor;
-
-import org.bukkit.Effect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -63,7 +57,7 @@ public class ElfClass extends BaseClass {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Elf
 				&& instance.classes.get(player).getLives() > 0) {
 			if (this.isUsed) {
-				String msg = instance.getGameManager().getMain().color("&cYou used your &2&lElf' Cake &cthis life!");
+				String msg = instance.getGameManager().getMain().color("&cYou used your &2&lElf's Cake &cthis life!");
 				getActionBarManager().setActionBar(player, "elfCake", msg, 2);
 			} else {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &2&lElf's Cake");
@@ -107,7 +101,7 @@ public class ElfClass extends BaseClass {
 													new PotionEffect(PotionEffectType.CONFUSION, 190, 2));
 											gamePlayer.setVelocity(new Vector(0, 0.6, 0).multiply(1.0D));
 										}
-									} else {
+									} else if (gamePlayer != player) {
 										EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
 												DamageCause.VOID, 5.5);
 										instance.getGameManager().getMain().getServer().getPluginManager()
@@ -119,6 +113,7 @@ public class ElfClass extends BaseClass {
 									}
 								}
 								for (Player gamePlayer : instance.players) {
+									gamePlayer.playSound(hitLoc, Sound.EXPLODE, 2, 1);
 									gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_LARGE, 1);
 								}
 							}
@@ -182,10 +177,8 @@ public class ElfClass extends BaseClass {
 	}
 
 	public ItemStack getSugarBombs() {
-		ItemStack item = ItemHelper.setUnbreakable(ItemHelper.addEnchant(ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.SUGAR, 7), instance.color("&cSugar Bombs"), "",
-						instance.color("&7Aim at other players to explode"), instance.color("them & give nausea!")),
-				Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 1));
+		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.SUGAR, 7), instance.color("&cSugar Bombs"), "",
+						instance.color("&7Aim at other players to explode"), instance.color("&7them & give nausea!"));
 		return item;
 	}
 
