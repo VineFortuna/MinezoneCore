@@ -685,7 +685,7 @@ public enum ClassType {
 		case ButterBro:
 			return "" + ChatColor.YELLOW + ChatColor.BOLD + "ButterBro" + ChatColor.RESET;
 		case Pig:
-			return "" + ChatColor.BLUE + ChatColor.ITALIC + "Pig" + ChatColor.RESET;
+			return "" + ChatColor.LIGHT_PURPLE + ChatColor.ITALIC + "Pig" + ChatColor.RESET;
 		case LargeFern:
 			return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + "LargeFern" + ChatColor.RESET;
 		case Vindicator:
