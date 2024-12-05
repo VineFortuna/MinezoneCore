@@ -1,16 +1,15 @@
 package anthony.SuperCraftBrawl.Game.classes;
 
+import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.all.*;
+import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.ranks.Rank;
-import net.md_5.bungee.api.ChatColor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -697,7 +696,7 @@ public enum ClassType {
 		case ButterBro:
 			return "" + ChatColor.YELLOW + ChatColor.BOLD + "ButterBro" + ChatColor.RESET;
 		case Pig:
-			return "" + ChatColor.BLUE + ChatColor.ITALIC + "Pig" + ChatColor.RESET;
+			return "" + ChatColor.LIGHT_PURPLE + ChatColor.ITALIC + "Pig" + ChatColor.RESET;
 		case LargeFern:
 			return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + "LargeFern" + ChatColor.RESET;
 		case Vindicator:
