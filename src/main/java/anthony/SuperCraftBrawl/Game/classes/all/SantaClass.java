@@ -1,19 +1,18 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ItemHelper;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Horse;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
@@ -23,11 +22,8 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.util.ItemHelper;
-import net.md_5.bungee.api.ChatColor;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SantaClass extends BaseClass {
 
@@ -82,6 +78,8 @@ public class SantaClass extends BaseClass {
 					// Spawn a horse
 					Horse horse = (Horse) player.getWorld().spawnEntity(player.getLocation(), EntityType.HORSE);
 					horse.setTamed(true); // Tame the horse
+					horse.setAdult();
+					horse.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Reindeer");
 					horse.setOwner(player); // Set the player as the owner
 					horse.getInventory().setSaddle(new ItemStack(Material.SADDLE)); // Add a saddle
 
@@ -110,6 +108,7 @@ public class SantaClass extends BaseClass {
 				} else if (this.cookieUses == 1) {
 					player.playSound(player.getLocation(), Sound.EAT, 1, 1);
 					player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
+					player.removePotionEffect(PotionEffectType.SLOW);
 					player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 1));
 					player.sendMessage(instance.color("&2&l(!) &c&lHO HO HO! &rDat cookie was delicious"));
 					player.sendMessage(instance.color("&2&l(!) &rYou were given &eResistance 1 & Slow 2"));
@@ -117,6 +116,7 @@ public class SantaClass extends BaseClass {
 				} else if (this.cookieUses == 2) {
 					player.playSound(player.getLocation(), Sound.EAT, 1, 1);
 					player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 3));
+					player.removePotionEffect(PotionEffectType.SLOW);
 					player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 2));
 					player.sendMessage(instance.color("&2&l(!) &c&lHO HO HO! &rDat cookie was delicious"));
 					player.sendMessage(instance.color("&2&l(!) &rYou were given &eJump 4 & Slow 3"));

@@ -1,23 +1,13 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
-import anthony.util.SoundManager;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Color;
-import org.bukkit.Effect;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -29,11 +19,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class GingerBreadManClass extends BaseClass {
 
@@ -112,20 +98,20 @@ public class GingerBreadManClass extends BaseClass {
 														.callEvent(damageEvent);
 												gamePlayer.damage(5.0, player);
 												gamePlayer.addPotionEffect(
-														new PotionEffect(PotionEffectType.BLINDNESS, 140, 1));
+														new PotionEffect(PotionEffectType.BLINDNESS, 4 * 20, 1));
 
 												Vector v = direction;
 												v.setY(1.0);
 												gamePlayer.setVelocity(v);
 											}
-										} else {
+										} else if (gamePlayer != player){
 											EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
 													DamageCause.PROJECTILE, 5.0);
 											instance.getGameManager().getMain().getServer().getPluginManager()
 													.callEvent(damageEvent);
 											gamePlayer.damage(5.0, player);
 											gamePlayer.addPotionEffect(
-													new PotionEffect(PotionEffectType.BLINDNESS, 140, 1));
+													new PotionEffect(PotionEffectType.BLINDNESS, 4 * 20, 1));
 
 											Vector v = direction;
 											v.setY(1.0);
@@ -141,7 +127,7 @@ public class GingerBreadManClass extends BaseClass {
 
 							}
 
-						}, new ItemStack(this.chocChips.getType()));
+						}, new ItemStack(this.chocChips));
 						instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 								player.getLocation().getDirection().multiply(2.0D));
 					}
