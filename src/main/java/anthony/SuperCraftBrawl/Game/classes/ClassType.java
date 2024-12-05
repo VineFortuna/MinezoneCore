@@ -30,7 +30,7 @@ public enum ClassType {
 	Bee(55, 425, 0), Jeb(56, 0, 20), Hunter(57, 500, 0), FlintAndSteel(58, 0, 0), WitherSk(59, 1500, 0),
 	Shulker(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30), LargeFern(64, 0, 0),
 	Vindicator(65, 0, Rank.VIP), Fade(66, 0, Rank.VIP), Fisherman(67, 0, 0), BrewingStand(68, 125, 0),
-	GrimReaper(69, 0, 0), Elf(70, 0, 0);
+	GrimReaper(69, 0, 0), Elf(70, 0, 0), GingerBreadMan(71, 0, 0), Santa(72, 0, 0);
 
 	// Wolf(67, 0, 35)/* , Guardian(68, 0, 30) */;
 
@@ -80,6 +80,10 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new Cactus(instance, player);
+		case Santa:
+			return new SantaClass(instance, player);
+		case GingerBreadMan:
+			return new GingerBreadManClass(instance, player);
 		case Elf:
 			return new ElfClass(instance, player);
 		case GrimReaper:
@@ -226,6 +230,11 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new ItemStack(Material.CACTUS);
+		case Santa:
+			return ItemHelper.createSkullTexture(
+					"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19");
+		case GingerBreadMan:
+			return new ItemStack(Material.COOKIE);
 		case Elf:
 			return new ItemStack(Material.CAKE);
 		case GrimReaper:
@@ -376,6 +385,10 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return "A pricklyyy living thing, made up of thorns & blood..";
+		case Santa:
+			return "HO HO HO! MERRRRRRYYYY CHRISTMASSSSS";
+		case GingerBreadMan:
+			return "DO YOU KNOW? THE GINGERBREADMAN!?!?!";
 		case Elf:
 			return "Santa's lil helper here to deliver";
 		case GrimReaper:
@@ -549,6 +562,10 @@ public enum ClassType {
 		switch (this) {
 		case Bat:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bat" + ChatColor.RESET;
+		case Santa:
+			return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "Santa" + ChatColor.RESET;
+		case GingerBreadMan:
+			return color("&6GingerBread&0Man&r");
 		case Elf:
 			return color("&2&lElf&r");
 		case GrimReaper:

@@ -34,9 +34,12 @@ public class ElfClass extends BaseClass {
 		super(instance, player);
 		baseVerticalJump = 1.15;
 		createArmor(null,
-				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWU5OWRlZWY5MTlkYjY2YWMyYmQyOGQ2MzAyNzU2Y2NkNTdjN2Y4YjEyYjlkY2E4ZjQxYzNlMGEwNGFjMWNjIn19fQ==",
-				null, 6, "Bat");
+				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGRlNjkzZjEyYjY4MjJmYWQ1ZTZmMjgzYzU1YzM4NWJmZjI1NDhhZTRiMWIyOTQzYWQwNWI1N2VmNWQzOTNiYiJ9fX0=",
+				"228B22", 6, "Elf");
 	}
+
+	/// give @p
+	/// minecraft:player_head[profile={id:[I;982818694,-8431021,-1622977160,467924422],properties:[{name:"textures",value:"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGRlNjkzZjEyYjY4MjJmYWQ1ZTZmMjgzYzU1YzM4NWJmZjI1NDhhZTRiMWIyOTQzYWQwNWI1N2VmNWQzOTNiYiJ9fX0="}]},minecraft:lore=['{"text":"https://namemc.com/skin/e6798efd441cd32b"}']]
 
 	@Override
 	public void setArmor(EntityEquipment playerEquip) {
@@ -46,7 +49,8 @@ public class ElfClass extends BaseClass {
 	@Override
 	public void SetItems(Inventory playerInv) {
 		this.isUsed = false;
-		playerInv.setItem(0, this.getAttackWeapon());
+		playerInv.setItem(0, getAttackWeapon());
+		playerInv.setItem(1, getSugarBombs());
 		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
 	}
 
@@ -99,8 +103,9 @@ public class ElfClass extends BaseClass {
 											instance.getGameManager().getMain().getServer().getPluginManager()
 													.callEvent(damageEvent);
 											gamePlayer.damage(5.5, player);
-											player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 150, 2));
-											gamePlayer.setVelocity(new Vector(0, 1, 0).multiply(1.0D));
+											gamePlayer.addPotionEffect(
+													new PotionEffect(PotionEffectType.CONFUSION, 190, 2));
+											gamePlayer.setVelocity(new Vector(0, 0.6, 0).multiply(1.0D));
 										}
 									} else {
 										EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
@@ -108,8 +113,9 @@ public class ElfClass extends BaseClass {
 										instance.getGameManager().getMain().getServer().getPluginManager()
 												.callEvent(damageEvent);
 										gamePlayer.damage(5.5, player);
-										player.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 150, 2));
-										gamePlayer.setVelocity(new Vector(0, 1, 0).multiply(1.0D));
+										gamePlayer
+												.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 190, 2));
+										gamePlayer.setVelocity(new Vector(0, 0.6, 0).multiply(1.0D));
 									}
 								}
 								for (Player gamePlayer : instance.players) {
@@ -121,6 +127,33 @@ public class ElfClass extends BaseClass {
 					}, new ItemStack(Material.SUGAR));
 					instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 							player.getLocation().getDirection().multiply(2.0D));
+				}
+			}
+		} else if (item != null && item.getType() == Material.CAKE
+				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+			if (player.getGameMode() != GameMode.SPECTATOR) {
+				if (this.isUsed == false) {
+					double health = player.getHealth();
+
+					if (health >= 19.5) {
+						player.sendMessage(instance.color("&c&l(!) &rProbably should save that when you need health!"));
+						return;
+					}
+
+					if (health >= 10.0) {
+						player.setHealth(20.0);
+					} else {
+						health += 10.0;
+						player.setHealth(health);
+					}
+
+					player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 110, 0));
+
+					for (Player gamePlayer : instance.players) {
+						gamePlayer.playSound(player.getLocation(), Sound.EAT, 2, 2);
+					}
+
+					this.isUsed = true;
 				}
 			}
 		}
