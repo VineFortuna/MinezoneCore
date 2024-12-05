@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public enum Maps {
-
+	
 	// CLASSIC
 	NightDragon(
 			"NightDragon",
@@ -36,7 +36,7 @@ public enum Maps {
 					.setSignLoc(new Vector(203.500, 107, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	Village(
 			"Village",
 			new Gameplay[]{Gameplay.FLAT},
@@ -59,7 +59,7 @@ public enum Maps {
 					.setSignLoc(new Vector(195.544, 106, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	FloorIsLava(
 			"FloorIsLava",
 			new Gameplay[]{Gameplay.FLAT},
@@ -82,7 +82,7 @@ public enum Maps {
 					.setBounds(new Vector(-1218.500, 141, 1007.500), 40, 80)
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	Burrows(
 			"Burrows",
 			new Gameplay[]{Gameplay.UNDERGROUND},
@@ -105,7 +105,7 @@ public enum Maps {
 					.setBounds(new Vector(-1270.500, 143, 1036.500), 35, 32)
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	CandyOverdose(
 			"CandyOverdose",
 			new Gameplay[]{Gameplay.ELEVATED},
@@ -128,7 +128,7 @@ public enum Maps {
 					.setBounds(new Vector(-1296.500, 149, 1081.500), 42, 40)
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	NorthernSeas(
 			"NorthernSeas",
 			new Gameplay[]{Gameplay.VOIDY},
@@ -151,7 +151,7 @@ public enum Maps {
 					.setSignLoc(new Vector(203.500, 108, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	CandyLand(
 			"CandyLand",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
@@ -174,7 +174,7 @@ public enum Maps {
 					.setSignLoc(new Vector(205.536, 107, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	HauntedMansion(
 			"HauntedMansion",
 			new Gameplay[]{Gameplay.INDOOR},
@@ -197,7 +197,7 @@ public enum Maps {
 					.setSignLoc(new Vector(175.503, 108, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	CliffSide(
 			"CliffSide",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
@@ -220,7 +220,7 @@ public enum Maps {
 					.setSignLoc(new Vector(177.495, 106, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	JungleRiver(
 			"JungleRiver",
 			new Gameplay[]{Gameplay.ELEVATED},
@@ -265,7 +265,7 @@ public enum Maps {
 					.setSignLoc(new Vector(178.468, 107, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	Stronghold(
 			"Stronghold",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.FLAT},
@@ -288,7 +288,7 @@ public enum Maps {
 					.setSignLoc(new Vector(209.700, 107, 667.472))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	Icefall(
 			"Icefall",
 			new Gameplay[]{Gameplay.VOIDY},
@@ -311,7 +311,7 @@ public enum Maps {
 					.setSignLoc(new Vector(41.554, 117, 3.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	Marooned(
 			"Marooned",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.FLAT},
@@ -334,7 +334,7 @@ public enum Maps {
 					.setSignLoc(new Vector(175.503, 106, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	Orbital(
 			"Orbital",
 			new Gameplay[]{Gameplay.VOIDY},
@@ -358,7 +358,7 @@ public enum Maps {
 					.setSource(MapSource.MINECADE)
 					.setGameType(GameType.DUEL)
 	),
-
+	
 	SandTemple("SandTemple",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.FLAT},
 			Size.SMALL,
@@ -379,7 +379,7 @@ public enum Maps {
 					.setSource(MapSource.COMMUNITY)
 					.setGameType(GameType.DUEL)
 	),
-
+	
 	TheEnd("TheEnd",
 			new Gameplay[]{Gameplay.FLAT},
 			Size.MEDIUM,
@@ -401,7 +401,7 @@ public enum Maps {
 					.setSignLoc(new Vector(209.700, 107, 668.489))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	BlossomHill(
 			"BlossomHill",
 			new Gameplay[]{Gameplay.UNDERGROUND},
@@ -424,7 +424,7 @@ public enum Maps {
 					.setSignLoc(new Vector(176.481, 106, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	Tropical(
 			"Tropical",
 			new Gameplay[]{Gameplay.FLAT, Gameplay.ELEVATED},
@@ -447,7 +447,7 @@ public enum Maps {
 					.setSignLoc(new Vector(200.504, 106, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	Waterfall(
 			"Waterfall",
 			new Gameplay[]{Gameplay.FLAT},
@@ -470,7 +470,7 @@ public enum Maps {
 					.setSignLoc(new Vector(177.495, 107, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	Canyon(
 			"Canyon",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.FLAT},
@@ -487,13 +487,13 @@ public enum Maps {
 							new Vector(247.400, 149, 178.459),
 							new Vector(261.354, 151, 153.999)
 					)
-					.setLobbyLoc(new Vector(248.500, 155, 165.500))
+					.setLobbyLoc(new Vector(194.500, 151, 169.500))
 					.setSpecLoc(new Vector(248.500, 155, 165.500))
-					.setBounds(new Vector(248.500, 155, 165.500), 100, 100)
+					.setBounds(new Vector(260.500, 155, 167.500), 50, 50)
 					.setSignLoc(new Vector(178.466, 106, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	TheCraftOf87(
 			"TheCraftOf87",
 			new Gameplay[]{Gameplay.INDOOR},
@@ -516,7 +516,7 @@ public enum Maps {
 					.setSignLoc(new Vector(178.466, 107, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	Citadel(
 			"Citadel",
 			new Gameplay[]{Gameplay.FLAT, Gameplay.ELEVATED},
@@ -539,7 +539,7 @@ public enum Maps {
 					.setSignLoc(new Vector(178.466, 106, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	HighIslands(
 			"HighIslands",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
@@ -562,7 +562,7 @@ public enum Maps {
 					.setSignLoc(new Vector(178.466, 106, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	Gateway(
 			"Gateway",
 			new Gameplay[]{Gameplay.FLAT},
@@ -586,7 +586,7 @@ public enum Maps {
 					.setSource(MapSource.MINECADE)
 					.setGameType(GameType.DUEL)
 	),
-
+	
 	PaintBoardOG(
 			"PaintBoardOG",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.FLAT},
@@ -608,7 +608,7 @@ public enum Maps {
 					.setSignLoc(new Vector(168.300, 106, 669.556))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	SimpleLand(
 			"SimpleLand",
 			new Gameplay[]{Gameplay.VOIDY},
@@ -630,7 +630,7 @@ public enum Maps {
 					.setSignLoc(new Vector(168.300, 107, 667.580))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	Pokemob(
 			"Pokemob",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.FLAT},
@@ -653,7 +653,7 @@ public enum Maps {
 					.setSignLoc(new Vector(192.516, 106, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	Revenge(
 			"Revenge",
 			new Gameplay[]{Gameplay.FLAT, Gameplay.ELEVATED},
@@ -676,7 +676,7 @@ public enum Maps {
 					.setSignLoc(new Vector(183.513, 106, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	Atronach(
 			"Atronach",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.FLAT},
@@ -699,7 +699,7 @@ public enum Maps {
 					.setSignLoc(new Vector(184.568, 106, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	SnowGlobe(
 			"SnowGlobe",
 			new Gameplay[]{Gameplay.INDOOR},
@@ -724,7 +724,7 @@ public enum Maps {
 					.setBounds(new Vector(55.500, 174, -57.500), 58, 58)
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	Elven(
 			"Elven",
 			new Gameplay[]{Gameplay.ELEVATED},
@@ -756,7 +756,7 @@ public enum Maps {
 					.setSignLoc(new Vector(182.542, 107, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	Limbo(
 			"Limbo",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
@@ -779,7 +779,7 @@ public enum Maps {
 					.setSignLoc(new Vector(183.513, 107, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	Treehouse(
 			"Treehouse",
 			new Gameplay[]{Gameplay.ELEVATED},
@@ -802,7 +802,7 @@ public enum Maps {
 					.setSignLoc(new Vector(183.513, 108, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	Frigid(
 			"Frigid",
 			new Gameplay[]{Gameplay.ELEVATED},
@@ -825,7 +825,7 @@ public enum Maps {
 					.setSignLoc(new Vector(184.568, 107, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	DragonsDescent(
 			"DragonsDescent",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.FLAT},
@@ -848,7 +848,7 @@ public enum Maps {
 					.setSignLoc(new Vector(204.530, 107, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	LostTemple(
 			"LostTemple",
 			new Gameplay[]{Gameplay.FLAT},
@@ -871,7 +871,7 @@ public enum Maps {
 					.setSignLoc(new Vector(182.542, 106, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	Crescent(
 			"Crescent",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
@@ -895,7 +895,7 @@ public enum Maps {
 					.setSignLoc(new Vector(-48.507, 128, -28.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	WaterShrine(
 			"WaterShrine",
 			new Gameplay[]{Gameplay.UNDERGROUND},
@@ -917,7 +917,7 @@ public enum Maps {
 					.setSource(MapSource.COMMUNITY)
 					.setGameType(GameType.DUEL)
 	),
-
+	
 	Monolith(
 			"Monolith",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
@@ -940,7 +940,7 @@ public enum Maps {
 					.setSignLoc(new Vector(193.487, 108, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	JungleBoogie(
 			"JungleBoogie",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
@@ -963,7 +963,7 @@ public enum Maps {
 					.setSignLoc(new Vector(203.500, 106, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	TiltedTowers(
 			"TiltedTowers",
 			new Gameplay[]{Gameplay.FLAT, Gameplay.ELEVATED},
@@ -985,7 +985,7 @@ public enum Maps {
 					.setSignLoc(new Vector(184.568, 108, 673.700))
 					.setSource(MapSource.OTHER)
 	),
-
+	
 	BeachBowl(
 			"BeachBowl",
 			new Gameplay[]{Gameplay.FLAT, Gameplay.UNDERGROUND},
@@ -1008,7 +1008,7 @@ public enum Maps {
 					.setSignLoc(new Vector(175.503, 107, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	FungiForest(
 			"FungiForest",
 			new Gameplay[]{Gameplay.ELEVATED},
@@ -1031,7 +1031,7 @@ public enum Maps {
 					.setSignLoc(new Vector(205.536, 106, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	PaintBoard(
 			"PaintBoard",
 			new Gameplay[]{Gameplay.FLAT},
@@ -1053,7 +1053,7 @@ public enum Maps {
 					.setSource(MapSource.COMMUNITY)
 					.setGameType(GameType.DUEL)
 	),
-
+	
 	Multiverse(
 			"Multiverse",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
@@ -1076,7 +1076,7 @@ public enum Maps {
 					.setSignLoc(new Vector(193.487, 106, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	CommCollab(
 			"CommCollab",
 			new Gameplay[]{Gameplay.INDOOR},
@@ -1099,7 +1099,7 @@ public enum Maps {
 					.setSignLoc(new Vector(177.495, 108, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	Apex(
 			"Apex",
 			new Gameplay[]{Gameplay.VOIDY},
@@ -1122,7 +1122,7 @@ public enum Maps {
 					.setSignLoc(new Vector(194.555, 108, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	NetherFortress(
 			"NetherFortress",
 			new Gameplay[]{Gameplay.FLAT, Gameplay.UNDERGROUND},
@@ -1145,7 +1145,7 @@ public enum Maps {
 					.setSignLoc(new Vector(209.700, 106, 668.489))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	Plains(
 			"Plains",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.FLAT},
@@ -1165,7 +1165,7 @@ public enum Maps {
 					.setSource(MapSource.COMMUNITY)
 					.setGameType(GameType.DUEL)
 	),
-
+	
 	SandStorm(
 			"SandStorm",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.FLAT},
@@ -1185,7 +1185,7 @@ public enum Maps {
 					.setSource(MapSource.COMMUNITY)
 					.setGameType(GameType.DUEL)
 	),
-
+	
 	Clockwork(
 			"Clockwork",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
@@ -1208,7 +1208,7 @@ public enum Maps {
 					.setSignLoc(new Vector(204.530, 108, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	PileOfBodies(
 			"PileOfBodies",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.FLAT},
@@ -1231,7 +1231,7 @@ public enum Maps {
 					.setSignLoc(new Vector(201.537, 107, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	Aperature(
 			"Aperature",
 			new Gameplay[]{Gameplay.VOIDY},
@@ -1254,7 +1254,7 @@ public enum Maps {
 					.setSignLoc(new Vector(195.544, 107, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	Mushroom(
 			"Mushroom",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.FLAT},
@@ -1277,7 +1277,7 @@ public enum Maps {
 					.setSignLoc(new Vector(209.700, 107, 670.454))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	MushroomCastle(
 			"MushroomCastle",
 			new Gameplay[]{Gameplay.ELEVATED},
@@ -1298,7 +1298,7 @@ public enum Maps {
 					.setSource(MapSource.MINECADE)
 					.setGameType(GameType.DUEL)
 	),
-
+	
 	/*
 	 * Archfield("Archfield", new MapInstance("archfield") .setSpawnPos(new
 	 * Vector(4918.457, 146, 773.510), new Vector(4928.979, 145, 778.960), new
@@ -1307,7 +1307,7 @@ public enum Maps {
 	 * 738.447)).setSpecLoc(new Vector(4928.500, 161, 784.500)) .setBounds(new
 	 * Vector(4928.470, 161, 788.485), 32, 33)),
 	 */
-
+	
 	NetherCastle(
 			"NetherCastle",
 			new Gameplay[]{Gameplay.ELEVATED},
@@ -1329,7 +1329,7 @@ public enum Maps {
 					.setBounds(new Vector(4956.479, 149, 738.454), 50, 50)
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	CherryGrove(
 			"CherryGrove",
 			new Gameplay[]{Gameplay.ELEVATED},
@@ -1351,7 +1351,7 @@ public enum Maps {
 					.setSignLoc(new Vector(200.504, 108, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	Mountain(
 			"Mountain",
 			new Gameplay[]{Gameplay.ELEVATED},
@@ -1373,7 +1373,7 @@ public enum Maps {
 					.setSignLoc(new Vector(200.504, 107, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	Mansion(
 			"Mansion",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
@@ -1395,7 +1395,7 @@ public enum Maps {
 					.setSignLoc(new Vector(204.530, 106, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	TempleOfMars(
 			"TempleOfMars",
 			new Gameplay[]{Gameplay.VOIDY},
@@ -1416,7 +1416,7 @@ public enum Maps {
 					.setBounds(new Vector(4930.428, 160, 772.552), 60, 40)
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	ColdWar(
 			"ColdWar",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.FLAT},
@@ -1438,7 +1438,7 @@ public enum Maps {
 					.setSignLoc(new Vector(199.535, 106, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	WinterWorld(
 			"WinterWorld",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
@@ -1460,7 +1460,7 @@ public enum Maps {
 					.setSignLoc(new Vector(14.700, 149, -1.548))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	Winter(
 			"Winter",
 			new Gameplay[]{Gameplay.FLAT, Gameplay.ELEVATED},
@@ -1482,7 +1482,7 @@ public enum Maps {
 					.setSignLoc(new Vector(173.550, 106, 673.700))
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	BarnYard(
 			"BarnYard",
 			new Gameplay[]{Gameplay.FLAT, Gameplay.ELEVATED},
@@ -1505,7 +1505,7 @@ public enum Maps {
 					.setSignLoc(new Vector(193.487, 107, 673.700))
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	YinYang(
 			"YinYang",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.FLAT},
@@ -1527,7 +1527,7 @@ public enum Maps {
 					.setBounds(new Vector(4925.490, 189, 558.485), 45, 42)
 					.setSource(MapSource.MINECADE)
 	),
-
+	
 	SantasWorkshop(
 			"SantasWorkshop",
 			new Gameplay[]{Gameplay.INDOOR, Gameplay.FLAT},
@@ -1552,7 +1552,7 @@ public enum Maps {
 					.setBounds(new Vector(55, 74, -43), 100, 100)
 					.setSource(MapSource.COMMUNITY)
 	),
-
+	
 	Slither(
 			"Slither",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
@@ -1592,7 +1592,7 @@ public enum Maps {
 //				  .setSpecLoc(new Vector(-1248.500, 168, 963.500))
 //				  .setBounds(new Vector(-1239.549, 162, 960.644), 67, 65)
 //	);
-
+	
 	private final String name;
 	private final Gameplay[] gameplay;
 	private final Size size;
@@ -1600,7 +1600,7 @@ public enum Maps {
 	private final ItemStack displayItem;
 	private final MapInstance instance;
 	private final GameType gamemode;
-
+	
 	Maps(String name, Gameplay[] gameplay, Size size, Category category, ItemStack displayItem, MapInstance instance)  {
 		this.name = name;
 		this.gameplay = gameplay;
@@ -1608,13 +1608,13 @@ public enum Maps {
 		this.category = category;
 		this.displayItem = displayItem;
 		this.instance = instance;
-
+		
 		this.gamemode = instance.gameType;
 	}
-
+	
 	public static List<Maps> getGameType(GameType type) {
 		List<Maps> maps = new ArrayList<>();
-
+		
 		for (Maps map : Maps.values()) {
 			if (map.GetInstance().gameType == type) {
 				maps.add(map);
@@ -1622,15 +1622,15 @@ public enum Maps {
 		}
 		return maps;
 	}
-
+	
 	public static List<Maps> filterMaps(GameType gamemode, Category category, Size size, Gameplay gameplay) {
 		List<Maps> allMaps = Arrays.asList(Maps.values());
-
+		
 		// Filter by Gamemode
 		List<Maps> filteredMaps = allMaps.stream()
 				.filter(map -> map.getGamemode() == gamemode)
 				.collect(Collectors.toList());
-
+		
 		// Filter by Type
 		if (category == null) {
 			filteredMaps = filteredMaps.stream()
@@ -1641,31 +1641,31 @@ public enum Maps {
 					.filter(map -> map.getCategory() == category)
 					.collect(Collectors.toList());
 		}
-
+		
 		// Filter by Size
 		if (size != null) {
 			filteredMaps = filteredMaps.stream()
 					.filter(map -> map.getSize() == size)
 					.collect(Collectors.toList());
 		}
-
+		
 		// Filter by Gameplay
 		if (gameplay != null) {
 			filteredMaps = filteredMaps.stream()
 					.filter(map -> Arrays.stream(map.getGameplay()).anyMatch(g -> g == gameplay))
 					.collect(Collectors.toList());
 		}
-
+		
 		return filteredMaps;
 	}
-
+	
 	public static void sortMaps(List<Maps> maps, Sorter sorter) {
 		Comparator<Maps> sortByName = Comparator.comparing(Maps::getName);
 		Comparator<Maps> sortBySize = Comparator.comparing(Maps::getSize);
 		Comparator<Maps> sortByGameplay = (map1, map2) -> {
 			Maps.Gameplay[] gameplay1 = map1.getGameplay();  // Assume getGameplay() returns an array
 			Maps.Gameplay[] gameplay2 = map2.getGameplay();
-
+			
 			// Compare each gameplay type one by one, using the natural order of enums
 			for (int i = 0; i < Math.min(gameplay1.length, gameplay2.length); i++) {
 				int comparison = gameplay1[i].compareTo(gameplay2[i]);
@@ -1673,13 +1673,13 @@ public enum Maps {
 					return comparison; // If a difference is found, return the comparison result
 				}
 			}
-
+			
 			// If all compared types are equal, compare by the size of the arrays (maps with fewer types come first)
 			return Integer.compare(gameplay1.length, gameplay2.length);
 		};
-
+		
 		Comparator<Maps> comparator;
-
+		
 		switch (sorter) {
 			case ALPHABETICAL:
 				comparator = sortByName;
@@ -1693,45 +1693,45 @@ public enum Maps {
 			default:
 				comparator = Comparator.naturalOrder();
 		}
-
+		
 		maps.sort(comparator.thenComparing(sortByName));
 	}
-
+	
 	public String getName() {
 		return name;
 	}
-
+	
 	public Gameplay[] getGameplay() {
 		return gameplay;
 	}
-
+	
 	public Size getSize() {
 		return size;
 	}
-
+	
 	public Category getCategory() {
 		return category;
 	}
-
+	
 	public ItemStack getDisplayItem() {
 		return displayItem;
 	}
-
+	
 	public MapInstance GetInstance() {
 		return instance;
 	}
-
+	
 	public GameType getGamemode() {
 		return gamemode;
 	}
-
+	
 	public enum Gameplay {
 		VOIDY,
 		FLAT,
 		ELEVATED,
 		UNDERGROUND,
 		INDOOR;
-
+		
 		@Override
 		public String toString() {
 			switch (this) {
@@ -1749,13 +1749,13 @@ public enum Maps {
 			return "Unknown Gameplay";
 		}
 	}
-
+	
 	public enum Size {
 		SMALL,
 		MEDIUM,
 		LARGE,
 		HUGE;
-
+		
 		@Override
 		public String toString() {
 			switch (this) {
@@ -1771,13 +1771,13 @@ public enum Maps {
 			return "Unknown Size";
 		}
 	}
-
+	
 	public enum Category {
 		CURATED,
 		CASUAL,
 		VAULTED,
 		HOLIDAY;
-
+		
 		@Override
 		public String toString() {
 			switch (this) {
@@ -1793,12 +1793,12 @@ public enum Maps {
 			return "Unknown Map " + this.getClass();
 		}
 	}
-
+	
 	public enum Sorter {
 		ALPHABETICAL,
 		SIZE,
 		GAMEPLAY;
-
+		
 		@Override
 		public String toString() {
 			switch (this) {
