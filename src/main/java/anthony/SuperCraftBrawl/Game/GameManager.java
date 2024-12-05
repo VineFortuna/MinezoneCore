@@ -923,6 +923,13 @@ public class GameManager implements Listener, PluginMessageListener {
 			BaseClass bc = instance.classes.get(player);
 			if (item != null && item.getType() == Material.MILK_BUCKET) {
 				if (player.getGameMode() != GameMode.SPECTATOR) {
+					
+					ItemMeta meta = item.getItemMeta();
+					
+					if (meta != null && meta.getDisplayName().contains("Santa's Milk")) {
+						return;
+					}
+					
 					// Remove bad effects only: poison, wither, slowness, weakness, blindness,
 					// nausea
 					for (PotionEffect pe : player.getActivePotionEffects())
