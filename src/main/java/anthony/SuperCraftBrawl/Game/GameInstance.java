@@ -868,7 +868,7 @@ public class GameInstance {
 	private void createItemDrops() {
 		// Slowness Potion
 		ItemStack slownessPot = ItemHelper.createPotionItem(PotionType.SLOWNESS, 1, 15, true, true, true);
-		ItemHelper.setDetails(slownessPot, "&7&lSLOWNESS II &7(15 sec)");
+		ItemHelper.setDetails(slownessPot, "&8&lSLOWNESS II &7(15 sec)");
 
 		// Health Pot
 		ItemStack healthPot = ItemHelper.createPotionItem(PotionType.INSTANT_HEAL, 1, 0, true, true, true);
