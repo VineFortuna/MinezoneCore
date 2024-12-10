@@ -1,23 +1,21 @@
 package anthony.SuperCraftBrawl.leaderboards;
 
+import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.ranks.Rank;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-
-import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.ranks.Rank;
 
 public class FishingBoard {
 	private Core main;
@@ -25,8 +23,7 @@ public class FishingBoard {
 	private HashMap<UUID, Rank> RoleID;
 	private ArrayList<UUID> lead;
 	private ArrayList<String> lead2;
-	private ArrayList<Entity> entities;
-	private List<ArmorStand> toRemove;
+	private ArrayList<ArmorStand> toRemove;
 	private ResultSet set;
 	private Connection c;
 	private int i;
@@ -39,7 +36,6 @@ public class FishingBoard {
 			caught = new HashMap<>();
 			lead = new ArrayList<>();
 			lead2 = new ArrayList<>();
-			entities = new ArrayList<>();
 			toRemove = new ArrayList<>();
 			c = main.getDatabaseManager().getConnection();
 			caught.clear();
@@ -91,10 +87,11 @@ public class FishingBoard {
 	}
 
 	public void close() {
-		for (Entity e : entities) {
+		for (Entity e : toRemove) {
 			e.remove();
 		}
-		entities.clear();
+		
+		toRemove.clear();
 		caught.clear();
 		lead.clear();
 		c = null;
@@ -102,22 +99,18 @@ public class FishingBoard {
 	}
 
 	public void caughtBoard() throws SQLException {
-		for (Entity entity : entities) {
-			ArmorStand st = (ArmorStand) entity;
-
-			if (!(st.getItemInHand().getType() == Material.CHEST)) {
-				entities.remove(entity);
-				entity.remove();
-			}
+		for (ArmorStand stand : toRemove) {
+			stand.remove();
 		}
-
+		
+		toRemove.clear();
 		Location loc = new Location(main.getLobbyWorld(), 305.575, 92.5, 531.328);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
 		stand.setCustomNameVisible(true);
-		stand.setCustomName(main.color("&e&l<==&nFISHING LEADERBOARD&r&e&l==>"));
-		entities.add(stand);
+		stand.setCustomName("" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Caught");
+		toRemove.add(stand);
 
 		int count = 1;
 		loc.setY(loc.getY() - 0.4);
@@ -138,18 +131,18 @@ public class FishingBoard {
 	}
 
 	public void updateBoard() throws SQLException {
-		for (Entity e : entities) {
-			e.remove();
+		for (ArmorStand stand : toRemove) {
+			stand.remove();
 		}
-		entities.clear();
-
+		
+		toRemove.clear();
 		Location loc = new Location(main.getLobbyWorld(), 305.575, 92.5, 531.328);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
 		stand.setCustomNameVisible(true);
-		stand.setCustomName(main.color("&e&l<==&nFISHING LEADERBOARD&r&e&l==>"));
-		entities.add(stand);
+		stand.setCustomName("" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Caught");
+		toRemove.add(stand);
 		int count = 1;
 		loc.setY(loc.getY() - 0.4);
 
@@ -163,7 +156,7 @@ public class FishingBoard {
 			stand.setGravity(false);
 			stand.setCustomNameVisible(true);
 			stand.setCustomName(main.color("&b#" + count + ":" + " &e" + name + " &r- " + win));
-			entities.add(stand);
+			toRemove.add(stand);
 
 			count++;
 		}
