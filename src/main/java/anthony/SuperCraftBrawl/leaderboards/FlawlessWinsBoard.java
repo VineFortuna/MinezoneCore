@@ -1,5 +1,14 @@
 package anthony.SuperCraftBrawl.leaderboards;
 
+import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.ranks.Rank;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,17 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-
-import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.ranks.Rank;
-import net.md_5.bungee.api.ChatColor;
 
 public class FlawlessWinsBoard {
 	private Core main;
@@ -116,7 +114,7 @@ public class FlawlessWinsBoard {
 		}
 
 		toRemove.clear();
-		Location loc = new Location(main.getLobbyWorld(), 194.515, 106.5, 686.987);
+		Location loc = new Location(main.getLobbyWorld(), 194.5, 106.5, 686.5);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
@@ -149,7 +147,7 @@ public class FlawlessWinsBoard {
 		}
 
 		toRemove.clear();
-		Location loc = new Location(main.getLobbyWorld(), 194.515, 106.5, 686.987);
+		Location loc = new Location(main.getLobbyWorld(), 194.5, 106.5, 686.5);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
