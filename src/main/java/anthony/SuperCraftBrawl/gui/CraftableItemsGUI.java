@@ -1,18 +1,18 @@
 package anthony.SuperCraftBrawl.gui;
 
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-
-import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 public class CraftableItemsGUI implements InventoryProvider {
 
@@ -52,6 +52,7 @@ public class CraftableItemsGUI implements InventoryProvider {
 									player.sendMessage("Successfully crafted " + ChatColor.RESET + ChatColor.BLACK
 											+ ChatColor.BOLD + "Coal Block");
 									player.getInventory().remove(coal);
+									player.playSound(player.getLocation(), Sound.ANVIL_USE, 1, 0);
 									bc.coalAmt = 0;
 								} else {
 									player.sendMessage("Use your other coal first before crafting a new one!");
@@ -89,6 +90,7 @@ public class CraftableItemsGUI implements InventoryProvider {
 									player.sendMessage("Successfully crafted " + ChatColor.RESET + ChatColor.GOLD
 											+ ChatColor.BOLD + "Gold Block");
 									player.getInventory().remove(goldIngot);
+									player.playSound(player.getLocation(), Sound.ANVIL_USE, 1, 0);
 									bc.goldAmt = 0;
 								} else {
 									player.sendMessage("Use your other gold first before crafting a new one!");
@@ -108,6 +110,7 @@ public class CraftableItemsGUI implements InventoryProvider {
 									player.sendMessage("Successfully crafted " + ChatColor.RESET + ChatColor.AQUA
 											+ ChatColor.BOLD + "Diamond Block");
 									player.getInventory().remove(diamond);
+									player.playSound(player.getLocation(), Sound.ANVIL_USE, 1, 0);
 									bc.diaAmt = 0;
 								} else {
 									player.sendMessage("Use your other diamond first before crafting a new one!");
