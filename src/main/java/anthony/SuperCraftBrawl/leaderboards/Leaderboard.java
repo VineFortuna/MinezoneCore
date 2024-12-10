@@ -6,7 +6,6 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
 import java.sql.Connection;
@@ -18,9 +17,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-public class KillsBoard {
+public class Leaderboard {
 	private Core main;
-	private HashMap<UUID, Integer> flawlessWins;
+	private HashMap<UUID, Integer> wins;
 	private HashMap<UUID, Rank> RoleID;
 	private ArrayList<UUID> lead;
 	private ArrayList<String> lead2;
@@ -29,36 +28,24 @@ public class KillsBoard {
 	private int i;
 	private List<ArmorStand> toRemove;
 
-	public KillsBoard(Core main) {
+	public Leaderboard(Core main) {
 		this.main = main;
-
-		Bukkit.getScheduler().runTaskLater(main, new Runnable() {
-			@Override
-			public void run() {
-				for (Entity e : main.getLobbyWorld().getEntities()) {
-					if (e instanceof ArmorStand) {
-						e.remove();
-					}
-				}
-			}
-		}, (20 * 60) - 1);
-
 		Bukkit.getScheduler().runTaskTimerAsynchronously(main, () -> {
 			i = 0;
 			RoleID = new HashMap<>();
-			flawlessWins = new HashMap<>();
+			wins = new HashMap<>();
 			lead = new ArrayList<>();
 			lead2 = new ArrayList<>();
-			toRemove = new ArrayList<ArmorStand>();
+			toRemove = new ArrayList<>();
 			c = main.getDatabaseManager().getConnection();
-			flawlessWins.clear();
+			wins.clear();
 			lead.clear();
 			RoleID.clear();
 			try {
 				Statement s = c.createStatement();
 				int a = 0;
 				set = s.executeQuery(
-						"SELECT UUID, LastPlayerName, Kills, RoleID FROM PlayerData ORDER BY Kills DESC");
+						"SELECT UUID, LastPlayerName, Wins, RoleID FROM PlayerData ORDER BY Wins DESC");
 				while (set.next()) {
 					if (a == 10) {
 						break;
@@ -71,14 +58,14 @@ public class KillsBoard {
 					a++;
 					lead.add(id);
 					lead2.add(name);
-					flawlessWins.put(id, set.getInt("Kills"));
+					wins.put(id, set.getInt("Wins"));
 					RoleID.put(id, Rank.getRankFromID(set.getInt("RoleID")));
 				}
 				if (i == 0) {
 					i = 1;
 					Bukkit.getScheduler().runTask(main, () -> {
 						try {
-							winstreakBoard();
+							winsBoard();
 						} catch (SQLException e) {
 							e.printStackTrace();
 						}
@@ -103,26 +90,26 @@ public class KillsBoard {
 		for (ArmorStand stand : toRemove) {
 			stand.remove();
 		}
-
+		
 		toRemove.clear();
-		flawlessWins.clear();
+		wins.clear();
 		lead.clear();
 		c = null;
 		RoleID.clear();
 	}
 
-	public void winstreakBoard() throws SQLException {
+	public void winsBoard() throws SQLException {
 		for (ArmorStand stand : toRemove) {
 			stand.remove();
 		}
-
+		
 		toRemove.clear();
-		Location loc = new Location(main.getLobbyWorld(), 194.5, 106.5, 697.5);
+		Location loc = new Location(main.getLobbyWorld(), 184.5, 106.5, 686.5);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
 		stand.setCustomNameVisible(true);
-		stand.setCustomName("" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Kills");
+		stand.setCustomName("" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Wins");
 		toRemove.add(stand);
 
 		int count = 1;
@@ -132,7 +119,7 @@ public class KillsBoard {
 			loc.setY(loc.getY() - 0.24);
 			String name = lead2.get(count - 1);
 
-			Integer win = flawlessWins.get(id);
+			Integer win = wins.get(id);
 			stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 			stand.setVisible(false);
 			stand.setGravity(false);
@@ -148,15 +135,16 @@ public class KillsBoard {
 		for (ArmorStand stand : toRemove) {
 			stand.remove();
 		}
-
+		
 		toRemove.clear();
-		Location loc = new Location(main.getLobbyWorld(), 194.5, 106.5, 697.5);
+		Location loc = new Location(main.getLobbyWorld(), 184.5, 106.5, 686.5);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
 		stand.setCustomNameVisible(true);
-		stand.setCustomName("" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Kills");
+		stand.setCustomName("" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Wins");
 		toRemove.add(stand);
+		
 		int count = 1;
 		loc.setY(loc.getY() - 0.4);
 
@@ -164,7 +152,7 @@ public class KillsBoard {
 			loc.setY(loc.getY() - 0.24);
 			String name = lead2.get(count - 1);
 
-			Integer win = flawlessWins.get(id);
+			Integer win = wins.get(id);
 			stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 			stand.setVisible(false);
 			stand.setGravity(false);

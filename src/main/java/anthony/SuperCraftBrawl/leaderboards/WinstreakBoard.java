@@ -1,5 +1,13 @@
 package anthony.SuperCraftBrawl.leaderboards;
 
+import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.ranks.Rank;
+import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.EntityType;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,17 +16,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-
-import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.ranks.Rank;
-import net.md_5.bungee.api.ChatColor;
 
 public class WinstreakBoard {
 	private Core main;
@@ -107,7 +104,7 @@ public class WinstreakBoard {
 		}
 		
 		toRemove.clear();
-		Location loc = new Location(main.getLobbyWorld(), 185.509, 106.5, 697.996);
+		Location loc = new Location(main.getLobbyWorld(), 184.5, 106.5, 697.5);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
@@ -140,13 +137,14 @@ public class WinstreakBoard {
 		}
 		
 		toRemove.clear();
-		Location loc = new Location(main.getLobbyWorld(), 185.509, 106.5, 697.996);
+		Location loc = new Location(main.getLobbyWorld(), 184.5, 106.5, 697.5);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
 		stand.setCustomNameVisible(true);
 		stand.setCustomName("" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.UNDERLINE + "Best Winstreak");
 		toRemove.add(stand);
+		
 		int count = 1;
 		loc.setY(loc.getY() - 0.4);
 
