@@ -295,10 +295,6 @@ public class Commands implements CommandExecutor, TabCompleter {
             return;
         }
 
-        if (main.gameStats.get(player).HasPlayer(player)) {
-            return;
-        }
-
         try {
             new GameStatsGUI(main, main.gameStats.get(player)).inv.open(player);
         } catch (NullPointerException ex) {
