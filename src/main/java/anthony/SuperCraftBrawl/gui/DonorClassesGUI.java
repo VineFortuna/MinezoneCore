@@ -2,10 +2,10 @@ package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -43,9 +43,16 @@ public class DonorClassesGUI implements InventoryProvider {
 				
 				ClassDetails details = data.playerClasses.get(type.getID());
 				int played = details.gamesPlayed + details.gamesWon;
-				int nextLevel = 50;
-				if (played > 50)
+				int nextLevel = 10;
+				
+				if (played >= 75)
 					nextLevel = 100;
+				else if (played >= 50)
+					nextLevel = 75;
+				else if (played >= 25)
+					nextLevel = 50;
+				else if (played >= 10)
+					nextLevel = 25;
 				
 				contents.set(a, b,
 						ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true),

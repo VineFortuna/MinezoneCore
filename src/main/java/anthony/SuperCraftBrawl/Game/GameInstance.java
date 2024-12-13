@@ -166,7 +166,9 @@ public class GameInstance {
 		w.generator(new VoidGenerator());
 		mapWorld = Bukkit.getServer().createWorld(w);
 		mapWorld.setAutoSave(false);
-		mapWorld.setTime(1000);
+
+		if (getMap() != Maps.WitchesBrew)
+			mapWorld.setTime(1000);
 	}
 
 	/**
@@ -1809,7 +1811,6 @@ public class GameInstance {
 	private void customWinMsg(Player winner) {
 		Random rand = new Random();
 		int chance = rand.nextInt(3);
-		String tag = gameManager.getMain().getRankManager().getRank(winner).getTagWithSpace();
 
 		if (map != null) {
 			if (chance == 0) {
@@ -2349,19 +2350,17 @@ public class GameInstance {
 		Player target = null;
 		double closestDistance = distance;
 		for (Player p : this.players) {
-			BaseClass baseClass = classes.get(p);
-			if (!baseClass.checkIfDead(p, this)) {
-				if (this.duosMap != null) {
-					if (!this.team.get(p).equals(this.team.get(player))) {
-						if (target == null) {
-							if (p.getLocation().distance(entity.getLocation()) <= distance) {
-								target = p;
-								closestDistance = p.getLocation().distance(entity.getLocation());
-							} else {
-								if (p.getLocation().distance(entity.getLocation()) < closestDistance) {
-									target = p;
-								}
-							}
+			if (p != player) {
+				BaseClass baseClass = classes.get(p);
+				if (!baseClass.checkIfDead(p, this)) {
+					if (target == null) {
+						if (p.getLocation().distance(entity.getLocation()) <= distance) {
+							target = p;
+							closestDistance = p.getLocation().distance(entity.getLocation());
+						}
+					} else {
+						if (p.getLocation().distance(entity.getLocation()) < closestDistance) {
+							target = p;
 						}
 					}
 				}
