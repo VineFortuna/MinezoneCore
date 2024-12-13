@@ -284,17 +284,28 @@ public class Commands implements CommandExecutor, TabCompleter {
     }
 
 	private void gameStatsCommand(String [] args, Player player) {
+        GameInstance currentGame = main.getGameManager().GetInstanceOfPlayer(player);
+        
+        // Player is in a game
+        if (currentGame != null && currentGame.state == GameState.STARTED) {
+            player.sendMessage(main.color("&c&l(!) &rYou cannot use this in a game!"));
+            return;
+        }
+        
         GameInstance i = main.gameStats.get(player);
+        // No stats available
         if (i == null) {
             player.sendMessage(main.color("&c&l(!) &rThis game's stats have expired or are unavailable."));
             return;
         }
         
+        // Game in progress
         if (i.state != GameState.ENDED) {
-            player.sendMessage(main.color("&c&l(!) &rThis game is still ongoing. No stats available."));
+            player.sendMessage(main.color("&c&l(!) &rThis game is still in progress. No stats available."));
             return;
         }
-
+        
+        // Open stats
         try {
             new GameStatsGUI(main, main.gameStats.get(player)).inv.open(player);
         } catch (NullPointerException ex) {

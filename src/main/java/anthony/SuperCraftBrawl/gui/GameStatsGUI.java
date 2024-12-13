@@ -53,13 +53,14 @@ public class GameStatsGUI implements InventoryProvider {
 		
 		if (i != null) {
 			for (Entry<Player, BaseClass> entry : i.allClasses.entrySet()) {
-				if (entry.getKey() != null && entry.getKey().isOnline()) {
+				if (entry.getKey() != null) {
 					ItemStack stats = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
 					SkullMeta statsMeta = (SkullMeta) stats.getItemMeta();
 					statsMeta.setOwner(entry.getKey().getName());
 					stats.setItemMeta(statsMeta);
 					
-					String rank = main.getRankManager().getRank(entry.getKey()).getTagWithSpace();
+					String rank = entry.getKey().isOnline() ? main.getRankManager().getRank(entry.getKey()).getTagWithSpace() :
+							"";
 					
 					if (matchMvp() != null && matchMvp() == entry.getValue()) {
 						contents.set(y, x,
@@ -108,9 +109,7 @@ public class GameStatsGUI implements InventoryProvider {
 	}
 
 	private boolean isFirstBlood(Player gamePlayer, GameInstance i) {
-		if (i.firstBlood == gamePlayer)
-			return true;
-		return false;
+		return i.firstBlood == gamePlayer;
 	}
 
 	@Override
