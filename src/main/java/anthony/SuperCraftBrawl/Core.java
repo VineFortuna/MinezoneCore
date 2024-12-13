@@ -1691,8 +1691,8 @@ public class Core extends JavaPlugin implements Listener {
 				p.sendMessage("                    " + ChatColor.AQUA + ChatColor.UNDERLINE + "minezone.club");
 				p.sendMessage("");
 				if (p.hasPermission("scb.bonusTokens"))
-					p.sendMessage(color("&c&l>> &rThanks for being a " + Rank.VIP.getTag() + "&r / "
-							+ Rank.CAPTAIN.getTag() + "&r Supporter!"));
+					p.sendMessage(color("&c&l>> &rThanks for being a " + (getRankManager().getRank(p) == Rank.VIP ?
+				Rank.VIP.getTag() : Rank.CAPTAIN.getTag()) + "&r Supporter!"));
 
 				p.sendMessage("----------------------------------------------");
 			}

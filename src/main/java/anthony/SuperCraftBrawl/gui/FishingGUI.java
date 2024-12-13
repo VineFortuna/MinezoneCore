@@ -13,13 +13,10 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class FishingGUI implements InventoryProvider {
     
@@ -86,27 +83,22 @@ public class FishingGUI implements InventoryProvider {
         PlayerData finalData = data;
         contents.set(0, 8,
                 ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
-                        main.color("&aGo Fishing!")), e -> {
-                    if (main.getGameManager().GetInstanceOfPlayer(player) == null) {
+                        main.color("&aGo Fishing!"), main.color("&7Instantly travel to the pond and cast your line"),
+                        "", main.color("&eClick to teleport")), e -> {
+                    
+                    if (main.getGameManager().GetInstanceOfPlayer(player) == null &&
+                            main.getGameManager().GetInstanceOfSpectator(player) == null) {
                         player.teleport(fishingLoc);
                         player.sendMessage(main.color("&3&l(!) &rGrab a rod and go fishing!"));
                         
-                        List<String> fishingrodList = new ArrayList<>();
-                        fishingrodList.add(ChatColor.DARK_GRAY + "Let's go fishing!");
-                        ItemStack fishingrod = ItemHelper.create(Material.FISHING_ROD, ChatColor.DARK_AQUA.toString() + ChatColor.BOLD + "Fishing Rod", fishingrodList);
-                        ItemHelper.setUnbreakable(fishingrod);
-                        if (finalData.lure == 1 && finalData.lureLevel > 0) {
-                            ItemHelper.addEnchant(fishingrod, Enchantment.LURE, finalData.lureLevel);
-                        }
-                        if (!(player.getInventory().contains(fishingrod))) {
-                            player.getInventory().setItem(5, fishingrod);
+                        if (!(player.getInventory().contains(main.getFishingRod(player)))) {
+                            player.getInventory().setItem(5, main.getFishingRod(player));
                             player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
                                     + "You have equipped " + ChatColor.DARK_AQUA + ChatColor.BOLD + "Fishing Rod");
                             inv.close(player);
                         }
                     } else {
-                        player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-                                + ChatColor.RESET + "You are in a game");
+                        player.sendMessage(main.color("&c&l(!) &rYou cannot do this while in a game!"));
                     }
                 }));
         
@@ -115,11 +107,13 @@ public class FishingGUI implements InventoryProvider {
                     inv.getParent().get().open(player);
                 }));
         contents.set(4, 3, ClickableItem.of(
-                ItemHelper.setDetails(new ItemStack(Material.EMERALD), ChatColor.GRAY + "Rewards"), e -> {
+                ItemHelper.setDetails(new ItemStack(Material.EMERALD), ChatColor.GRAY + "Rewards",
+                        "", main.color("&eClick to view rewards")), e -> {
                     new FishingRewardsGUI(main, inv).inv.open(player);
                 }));
         contents.set(4, 5, ClickableItem.of(
-                ItemHelper.setDetails(new ItemStack(Material.ANVIL), ChatColor.GRAY + "Upgrades"), e -> {
+                ItemHelper.setDetails(new ItemStack(Material.ANVIL), ChatColor.GRAY + "Upgrades",
+                        "", main.color("&eClick to view upgrades")), e -> {
                     new FishingUpgradesGUI(main, inv).inv.open(player);
                 }));
         contents.set(4, 0, ClickableItem.of(
