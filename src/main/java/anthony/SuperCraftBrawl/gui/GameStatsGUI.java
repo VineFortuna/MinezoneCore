@@ -53,7 +53,7 @@ public class GameStatsGUI implements InventoryProvider {
 		
 		if (i != null) {
 			for (Entry<Player, BaseClass> entry : i.allClasses.entrySet()) {
-				if (entry.getKey() != null) {
+				if (entry.getKey() != null && entry.getKey().isOnline()) {
 					ItemStack stats = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
 					SkullMeta statsMeta = (SkullMeta) stats.getItemMeta();
 					statsMeta.setOwner(entry.getKey().getName());
