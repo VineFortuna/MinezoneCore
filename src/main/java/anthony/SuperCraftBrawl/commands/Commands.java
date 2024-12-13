@@ -307,7 +307,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         
         // Open stats
         try {
-            new GameStatsGUI(main, main.gameStats.get(player)).inv.open(player);
+            new GameStatsGUI(main, i).inv.open(player);
         } catch (NullPointerException ex) {
             player.sendMessage(main.color(
                     "&c&l(!) &rThis game's stats cannot be viewed. Did a player leave early?"));
