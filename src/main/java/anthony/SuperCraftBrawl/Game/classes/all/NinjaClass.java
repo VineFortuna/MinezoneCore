@@ -8,7 +8,9 @@ import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.*;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -17,7 +19,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.util.Vector;
 
 public class NinjaClass extends BaseClass {
@@ -55,7 +56,7 @@ public class NinjaClass extends BaseClass {
 	@Override
 	public void DoDamage(EntityDamageByEntityEvent event) {
 		if (player.getItemInHand() != null && player.getItemInHand().getType() == Material.GHAST_TEAR) {
-			if (player.getLocation().distanceSquared(event.getEntity().getLocation()) > 1.0)
+			if (player.getLocation().distanceSquared(event.getEntity().getLocation()) > 1.25)
 				event.setCancelled(true);
 			else {
 				for (Player gamePlayer : instance.players)
@@ -77,7 +78,7 @@ public class NinjaClass extends BaseClass {
 								ItemHelper.setDetails(new ItemStack(Material.GHAST_TEAR), ChatColor.GRAY + "Wakizashi",
 										"",
 										"" + ChatColor.RESET + ChatColor.GRAY
-												+ "Only does damage if 1 block away from enemies"),
+												+ "Only does damage if 1.25 blocks away from enemies"),
 								Enchantment.DAMAGE_ALL, 8));
 		ItemStack shuriken = getShuriken();
 		shuriken.setAmount(5);

@@ -1095,8 +1095,11 @@ public class GameInstance {
 	}
 
 	private void setGameScore(Player player) {
-		player.sendMessage("Setting scoreboard");
-		player.setScoreboard(c); // For joining spectators
+		try {
+			player.setScoreboard(c); // For joining spectators
+		} catch(Exception e) {
+			player.sendMessage(e.getMessage());
+		}
 	}
 
 	public int teamsAlive = 0;

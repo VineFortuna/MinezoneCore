@@ -100,8 +100,8 @@ public class FishermanClass extends BaseClass {
     
     @Override
     public void onFish(PlayerFishEvent event) {
-        if (fishing.getTime() < this.cooldownDuration) {
-            int seconds = (this.cooldownDuration - fishing.getTime()) / 1000 + 1;
+        if (grapplingHook.getTime() < this.cooldownDuration) {
+            int seconds = (this.cooldownDuration - grapplingHook.getTime()) / 1000 + 1;
             player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
                     + "Your Grappling Hook is still regenerating for " + ChatColor.YELLOW + seconds
                     + " more seconds ");
@@ -128,7 +128,7 @@ public class FishermanClass extends BaseClass {
                     Vector v = d.toVector().subtract(player.getLocation().toVector()).normalize();
                     player.setVelocity(v.multiply(2).add(new Vector(0, 0.75, 0)));
                     player.getWorld().playSound(player.getLocation(), Sound.BAT_TAKEOFF, 1, 10);
-                    fishing.restart();
+                    grapplingHook.restart();
                 }
             }
         }
@@ -137,7 +137,7 @@ public class FishermanClass extends BaseClass {
     @Override
     public void SetItems(Inventory playerInv) {
         hits = 0;
-        fishing.startTime = System.currentTimeMillis() - 100000;
+        grapplingHook.startTime = System.currentTimeMillis() - 100000;
         playerInv.setItem(0, this.getAttackWeapon());
         playerInv.setItem(1, bucket);
     }
@@ -146,7 +146,7 @@ public class FishermanClass extends BaseClass {
     public void Tick(int gameTicks) {
         if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Fisherman
                 && instance.classes.get(player).getLives() > 0) {
-            this.cooldownSec = (cooldownDuration - fishing.getTime()) / 1000 + 1;
+            this.cooldownSec = (cooldownDuration - grapplingHook.getTime()) / 1000 + 1;
             
             if (gameTicks % 10 == 0) {
                 Iterator<Item> it= puffer.iterator();
@@ -175,7 +175,7 @@ public class FishermanClass extends BaseClass {
                     }
                 }
             }
-            cooldownActionBar(this.cooldownSec, this.cooldownDuration, fishing, ClassType.Fisherman,
+            cooldownActionBar(this.cooldownSec, this.cooldownDuration, grapplingHook, ClassType.Fisherman,
                     "fisherman.cooldown", "Grappling Hook");
         }
     }
