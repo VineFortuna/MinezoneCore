@@ -641,7 +641,8 @@ public class GameManager implements Listener, PluginMessageListener {
 		List<EntityType> entities = new ArrayList<>(
 				Arrays.asList(EntityType.ZOMBIE, EntityType.SKELETON, EntityType.CREEPER, EntityType.PIG_ZOMBIE,
 						EntityType.MAGMA_CUBE, EntityType.SILVERFISH, EntityType.WITCH, EntityType.ENDERMITE,
-						EntityType.CHICKEN, EntityType.BLAZE, EntityType.PIG, EntityType.MUSHROOM_COW, EntityType.COW));
+						EntityType.CHICKEN, EntityType.BLAZE, EntityType.PIG, EntityType.MUSHROOM_COW, EntityType.COW,
+						EntityType.WOLF));
 		if (entities.contains(entity.getEntityType())) {
 			entity.getDrops().clear();
 			entity.setDroppedExp(0);
@@ -701,6 +702,30 @@ public class GameManager implements Listener, PluginMessageListener {
 				}
 				player.sendMessage(main.color("&c&l(!) &rYou tried blooping a Spectator"));
 			}
+		}
+	}
+	
+	@EventHandler
+	public void onWolfInteract(PlayerInteractEntityEvent event) {
+		if (event.getRightClicked() instanceof Wolf) {
+			event.setCancelled(true);
+			ItemStack i = event.getPlayer().getItemInHand();
+			if (i.getType() == Material.BONE)
+				event.getPlayer().setItemInHand(i);
+		}
+	}
+	
+	@EventHandler
+	public void onWolfFeed(EntityRegainHealthEvent event) {
+		if (event.getEntity() instanceof Wolf) {
+			event.setCancelled(true);
+		}
+	}
+	
+	@EventHandler
+	public void onWolfTame(EntityTameEvent event) {
+		if (event.getEntity() instanceof Wolf) {
+			event.setCancelled(true);
 		}
 	}
 
@@ -2384,6 +2409,8 @@ public class GameManager implements Listener, PluginMessageListener {
 			return "Silverfish";
 		case ENDERMITE:
 			return "Endermite";
+		case WOLF:
+			return "Wolf";
 		}
 		return null;
 	}
