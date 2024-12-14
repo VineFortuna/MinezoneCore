@@ -85,10 +85,11 @@ public abstract class BaseClass {
 	public Timer vindication = new Timer();
 	public Timer fadeAbility = new Timer();
 	public Timer summon = new Timer();
-	public Timer fishing = new Timer();
+	public Timer grapplingHook = new Timer();
 	public Timer grimReaper = new Timer();
 	public Timer alexBrewingStand = new Timer();
 	public Timer swarmSummon = new Timer();
+	public Timer wolf = new Timer();
 	public boolean bedrockInvincibility = false;
 	public boolean hunterDash = true;
 
