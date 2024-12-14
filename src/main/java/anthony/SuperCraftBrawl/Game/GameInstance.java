@@ -772,18 +772,18 @@ public class GameInstance {
 				teamName.append(Rank.values().length);
 			else
 				teamName.append(r.getTabListIndex());
-
+			
 			teamName.append("_").append(r);
-
+			
 			Scoreboard board = pl.getScoreboard();
 			Team team = board.getTeam(teamName.toString());
 			if (team == null) {
 				team = board.registerNewTeam(teamName.toString());
 				team.addPlayer(player);
 			}
-
+			
 			String className = this.classes.get(player).getType().getTag() + " " + ChatColor.RESET;
-
+			
 			if (className.length() >= 8) {
 				String s = className.substring(0, 8) + " " + ChatColor.RESET;
 				team.setPrefix(s);
@@ -792,7 +792,7 @@ public class GameInstance {
 			team.setPrefix(className);
 		}
 	}
-
+	
 	/**
 	 * This function gets a random location on the map which loot drops will spawn
 	 * at every 30 seconds
@@ -1013,23 +1013,23 @@ public class GameInstance {
 	private Scoreboard c;
 	private Score time;
 	private Objective o;
-
+	
 	public void GameScoreboard() {
 		try {
 			ScoreboardManager m = Bukkit.getScoreboardManager();
 			c = m.getNewScoreboard();
-
+			
 			if (this.map != null)
 				o = c.registerNewObjective("" + ChatColor.BOLD + this.map.toString(), "");
 			else
 				o = c.registerNewObjective("" + ChatColor.BOLD + this.duosMap.toString(), "");
 			livesObjective = o;
 			o.setDisplaySlot(DisplaySlot.SIDEBAR);
-
+			
 			for (Player player : players) {
 				BaseClass playerClass = classes.get(player);
 				PlayerData data = gameManager.getMain().getDataManager().getPlayerData(player);
-
+				
 				if (map != null) {
 					if (data != null) {
 						if (data.blue == 1) {
@@ -1083,7 +1083,8 @@ public class GameInstance {
 			e.printStackTrace();
 		}
 	}
-
+	
+	
 	private void boardColor(Objective o, Player player, ChatColor c) {
 		BaseClass bc = classes.get(player);
 
@@ -1095,11 +1096,8 @@ public class GameInstance {
 	}
 
 	private void setGameScore(Player player) {
-		try {
-			player.setScoreboard(c); // For joining spectators
-		} catch(Exception e) {
-			player.sendMessage(e.getMessage());
-		}
+		player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard()); // Reset to default
+		player.setScoreboard(c); // For joining spectators
 	}
 
 	public int teamsAlive = 0;
