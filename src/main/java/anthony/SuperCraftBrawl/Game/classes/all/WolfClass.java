@@ -9,7 +9,10 @@ import org.bukkit.Effect;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Wolf;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -81,15 +84,15 @@ public class WolfClass extends BaseClass {
 	public void Tick(int gameTicks) {
 		if (used && player.isOnGround()) {
 			used = false;
-			List<Entity> nearby = player.getNearbyEntities(1.5D, 0.5D, 1.5D);
+			List<Entity> nearby = player.getNearbyEntities(2D, 1D, 2D);
 			for (Entity entity : nearby) {
-				if (entity instanceof LivingEntity) {
-					LivingEntity target = (LivingEntity) entity;
-					if (target != player && !target.getCustomName().contains(player.getName())) {
+				if (entity instanceof Player) {
+					Player target = (Player) entity;
+					if (target != player) {
 						target.setVelocity((new Vector(0, 1, 0)).multiply(0.5D));
 						EntityDamageEvent damageEvent = new EntityDamageEvent(target,
-								EntityDamageEvent.DamageCause.MAGIC, 3);
-						target.damage(3, player);
+								EntityDamageEvent.DamageCause.MAGIC, 6);
+						target.damage(6, player);
 					}
 				}
 			}
