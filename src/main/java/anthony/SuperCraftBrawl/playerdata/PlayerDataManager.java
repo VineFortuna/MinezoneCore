@@ -155,6 +155,18 @@ public class PlayerDataManager implements Listener {
 			int friendshipLevel = set.getInt("FriendshipLevel");
 			int friendship = set.getInt("Friendship");
 			int bestWinstreak = set.getInt("BestWinstreak");
+			int december15 = set.getInt("December15");
+			int december16 = set.getInt("December16");
+			int december17 = set.getInt("December17");
+			int december18 = set.getInt("December18");
+			int december19 = set.getInt("December19");
+			int december20 = set.getInt("December20");
+			int december21 = set.getInt("December21");
+			int december22 = set.getInt("December22");
+			int december23 = set.getInt("December23");
+			int december24 = set.getInt("December24");
+			int december25 = set.getInt("December25");
+			int snowParticles = set.getInt("SnowParticles");
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
 					exp, level, bestTime, magicbroom, points, withersk, bonusTokens, bonusLevels, paintball,
@@ -162,7 +174,8 @@ public class PlayerDataManager implements Listener {
 					glowstone, redstone, web, bottleEXP, broomWinEffect, enderDragonEffect, santaEffect,
 					fireParticlesEffect, fishRainEffect, challenge100, challenge101, challenge102, challenge103,
 					matchMvps, fly, totalcaught, caught, rewardLevel, lureLevel, lure, friendshipLevel, friendship,
-					bestWinstreak);
+					bestWinstreak, december15, december16, december17, december18, december19, december20, december21,
+					december22, december23, december24, december25, snowParticles);
 		}
 		set.close();
 		stmt.close();
@@ -242,12 +255,16 @@ public class PlayerDataManager implements Listener {
 				+ ", BestTime = " + data.bestTime + ", Exp = " + data.exp + ", Winstreak = " + data.winstreak
 				+ ", GingerBreadMan = " + data.gingerbreadman + ", Elf = " + data.elf + ", Challenge1 = "
 				+ data.challenge1 + ", Challenge2 = " + data.challenge2 + ", Challenge3 = " + data.challenge3
-				+ ", KillMsgs = " + data.killMsgs + ", Level = " + data.level + ", Deaths = " + data.deaths
-				+ ", Paintball = " + data.paintball + ", Wins = " + data.wins + ", TotalCaught = " + data.totalcaught
-				+ ", Caught = " + data.caught + ", RewardLevel = " + data.rewardLevel + ", LureLevel = "
-				+ data.lureLevel + ", Lure = " + data.lure + ", FriendshipLevel = " + data.friendshipLevel
-				+ ", Friendship = " + data.friendship + ", FishRainEffect = " + data.fishRainEffect + " WHERE UUID = '"
-				+ data.playerUUID.toString() + "';");
+				+ data.december15 + ", December15 = " + data.december16 + ", December16 = " + data.december17
+				+ ", December17 = " + data.december18 + ", December18 = " + data.december19 + ", December19 = "
+				+ data.december20 + ", December20 = " + data.december21 + ", December21 = " + data.december22
+				+ ", December22 = " + data.december23 + ", December23 = " + data.december24 + ", December24 = "
+				+ ", SnowParticles = " + data.snowParticles + data.december25 + ", December25 = " + ", KillMsgs = "
+				+ data.killMsgs + ", Level = " + data.level + ", Deaths = " + data.deaths + ", Paintball = "
+				+ data.paintball + ", Wins = " + data.wins + ", TotalCaught = " + data.totalcaught + ", Caught = "
+				+ data.caught + ", RewardLevel = " + data.rewardLevel + ", LureLevel = " + data.lureLevel + ", Lure = "
+				+ data.lure + ", FriendshipLevel = " + data.friendshipLevel + ", Friendship = " + data.friendship
+				+ ", FishRainEffect = " + data.fishRainEffect + " WHERE UUID = '" + data.playerUUID.toString() + "';");
 		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon,"
 				+ "Reward1, Reward2) VALUES ";
 		int index = 0;
