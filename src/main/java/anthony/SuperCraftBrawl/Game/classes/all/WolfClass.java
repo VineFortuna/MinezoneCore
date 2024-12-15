@@ -58,7 +58,7 @@ public class WolfClass extends BaseClass {
 	@Override
 	public ItemStack getAttackWeapon() {
 		ItemStack bone = ItemHelper.addEnchant(
-				ItemHelper.addEnchant(new ItemStack(Material.BONE), Enchantment.DAMAGE_ALL, 4), Enchantment.KNOCKBACK,
+				ItemHelper.addEnchant(new ItemStack(Material.BONE), Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK,
 				1);
 		if (instance.classes.containsKey(player)) {
 			BaseClass bc = instance.classes.get(player);
@@ -66,7 +66,7 @@ public class WolfClass extends BaseClass {
 			if (bc != null) {
 				if (bc.getLives() == 1) {
 					bone = ItemHelper.addEnchant(
-							ItemHelper.addEnchant(new ItemStack(Material.BONE), Enchantment.DAMAGE_ALL, 5),
+							ItemHelper.addEnchant(new ItemStack(Material.BONE), Enchantment.DAMAGE_ALL, 4),
 							Enchantment.KNOCKBACK, 2);
 				}
 
@@ -96,8 +96,12 @@ public class WolfClass extends BaseClass {
 					}
 				}
 			}
-			player.playSound(player.getLocation(), Sound.FALL_SMALL, 1, 0);
-			this.player.playEffect(this.player.getLocation(), Effect.TILE_BREAK, 1);
+			player.getWorld().playSound(player.getLocation(), Sound.ZOMBIE_METAL, 1, 0);
+			int radius = 1;
+			for (int t = 0; t < 2 * Math.PI * radius; t += 1) {
+				player.getWorld().playEffect(player.getLocation().add(radius * Math.cos(t), 0,
+						radius * Math.sin((t))), Effect.CRIT, 1);
+			}
 		}
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Wolf
 				&& instance.classes.get(player).getLives() > 0) {
@@ -141,6 +145,7 @@ public class WolfClass extends BaseClass {
 								"" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Wolf Army");
 						wolf.setBreed(false);
 						wolf.setTarget(instance.getNearestPlayer(player, wolf, 150));
+                        wolf.setAngry(false);
 						this.wolves.add(wolf);
 					}
 					player.getWorld().playSound(player.getLocation(), Sound.WOLF_HOWL, 1, 0);

@@ -1170,7 +1170,7 @@ public enum Maps {
 			"SandStorm",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.FLAT},
 			Size.SMALL,
-			Category.CASUAL,
+			Category.CURATED,
 			new ItemStack(Material.SAND),
 			new MapInstance(
 					"sandstorm")

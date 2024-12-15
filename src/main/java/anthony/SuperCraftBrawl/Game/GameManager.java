@@ -518,53 +518,57 @@ public class GameManager implements Listener, PluginMessageListener {
 		ItemStack item = event.getItem();
 		Player player = event.getPlayer();
 		GameInstance i = this.GetInstanceOfPlayer(player);
-
+		
 		if (i != null) {
-			if (item != null) {
-				if (item.getType() == Material.GOLD_HOE && (event.getAction() == Action.RIGHT_CLICK_AIR
+			if (item != null && item.getType() == Material.GOLD_HOE && (event.getAction() == Action.RIGHT_CLICK_AIR
 						|| event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+				ItemMeta meta = item.getItemMeta();
+				if (meta.getDisplayName().toLowerCase().contains("instagib") && player.getGameMode() != GameMode.SPECTATOR) {
 					int amount = item.getAmount();
 					if (amount > 0) {
 						amount--;
 						if (amount == 0)
 							player.getInventory().clear(player.getInventory().getHeldItemSlot());
-						else
+						else {
 							item.setAmount(amount);
+							int dur = item.getType().getMaxDurability();
+							item.setDurability((short) (item.getDurability() + dur / 5));
+						}
 					}
-
+					
 					int range = 30;
 					Location endLoc = player.getEyeLocation();
 					BlockIterator b = new BlockIterator(player.getEyeLocation(), 0, range);
-
+					
 					while (b.hasNext()) {
 						Block block = b.next();
 						endLoc = block.getLocation();
-
+						
 						if (block.getType().isSolid())
 							break;
 					}
-
+					
 					Vector dir = player.getEyeLocation().getDirection();
 					double maxDist = endLoc.distance(player.getEyeLocation());
-
+					
 					for (double t = 1; t < maxDist; t += 0.5) {
 						ParticleEffect.EXPLOSION_LARGE.display(player.getEyeLocation().add(dir.clone().multiply(t)));
 					}
-
+					
 					for (Player p : i.players) {
 						p.playSound(p.getLocation(), Sound.EXPLODE, 1, 2);
 						if (p != player && i.classes.containsKey(p) && i.classes.get(player).getLives() > 0) {
 							Vector d = p.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
 							double dist = d.dot(dir);
-
+							
 							if (dist < maxDist) {
 								Location closest = player.getEyeLocation().add(dir.clone().multiply(dist));
-
+								
 								if (closest.distanceSquared(p.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
 									Random r = new Random();
 									double damage = 2.0 + (r.nextDouble() * (6.0 - 2.0));
 									double height = 0.2 + (r.nextDouble() * (1.5 - 0.2));
-
+									
 									if (i.duosMap != null) {
 										if (!(i.team.get(p).equals(i.team.get(player)))) {
 											@SuppressWarnings("deprecation")
@@ -863,17 +867,24 @@ public class GameManager implements Listener, PluginMessageListener {
 							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
 									+ "Your Bazooka is still regenerating for " + ChatColor.YELLOW + seconds + "s");
 						} else {
+							int amount = item.getAmount();
+							if (amount > 0) {
+								amount--;
+								if (amount == 0)
+									player.getInventory().clear(player.getInventory().getHeldItemSlot());
+								else {
+									item.setAmount(amount);
+									int dur = item.getType().getMaxDurability();
+									item.setDurability((short) (item.getDurability() + dur / 3));
+								}
+							}
 							bc.bazooka.restart();
-							item.setAmount(item.getAmount() - 1);
-
-							if (item.getAmount() == 0)
-								player.getInventory().clear(player.getInventory().getHeldItemSlot());
 							ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
 								@Override
 								public void onHit(Player hit) {
 									if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
 										Location hitLoc = this.getBaseProj().getEntity().getLocation();
-
+										
 										for (Player gamePlayer : this.getNearby(3.0)) {
 											if (instance.duosMap != null) {
 												if (!(instance.team.get(gamePlayer)
@@ -897,9 +908,9 @@ public class GameManager implements Listener, PluginMessageListener {
 											gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_HUGE, 1);
 										}
 									}
-
+									
 								}
-
+								
 							}, new ItemStack(Material.TNT));
 							instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
