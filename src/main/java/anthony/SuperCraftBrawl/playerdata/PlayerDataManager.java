@@ -167,6 +167,9 @@ public class PlayerDataManager implements Listener {
 			int december24 = set.getInt("December24");
 			int december25 = set.getInt("December25");
 			int snowParticles = set.getInt("SnowParticles");
+			int snowballDeathEffect = set.getInt("SnowballDeathEffect");
+			int elfCosmetic = set.getInt("ElfCosmetic");
+
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
 					exp, level, bestTime, magicbroom, points, withersk, bonusTokens, bonusLevels, paintball,
@@ -175,7 +178,7 @@ public class PlayerDataManager implements Listener {
 					fireParticlesEffect, fishRainEffect, challenge100, challenge101, challenge102, challenge103,
 					matchMvps, fly, totalcaught, caught, rewardLevel, lureLevel, lure, friendshipLevel, friendship,
 					bestWinstreak, december15, december16, december17, december18, december19, december20, december21,
-					december22, december23, december24, december25, snowParticles);
+					december22, december23, december24, december25, snowParticles, snowballDeathEffect, elfCosmetic);
 		}
 		set.close();
 		stmt.close();
@@ -253,13 +256,14 @@ public class PlayerDataManager implements Listener {
 				+ ", AstronautCosmetic = " + data.astronaut + ", SantaOutfit = " + data.santaoutfit
 				+ ", BestWinstreak = " + data.bestWinstreak + ", BroomWinEffect = " + data.broomWinEffect
 				+ ", BestTime = " + data.bestTime + ", Exp = " + data.exp + ", Winstreak = " + data.winstreak
+				+ ", ElfCosmetic = " + data.elfCosmetic + ", SnowballDeathEffect = " + data.snowballDeathEffect
 				+ ", GingerBreadMan = " + data.gingerbreadman + ", Elf = " + data.elf + ", Challenge1 = "
 				+ data.challenge1 + ", Challenge2 = " + data.challenge2 + ", Challenge3 = " + data.challenge3
-				+ data.december15 + ", December15 = " + data.december16 + ", December16 = " + data.december17
-				+ ", December17 = " + data.december18 + ", December18 = " + data.december19 + ", December19 = "
-				+ data.december20 + ", December20 = " + data.december21 + ", December21 = " + data.december22
-				+ ", December22 = " + data.december23 + ", December23 = " + data.december24 + ", December24 = "
-				+ ", SnowParticles = " + data.snowParticles + data.december25 + ", December25 = " + ", KillMsgs = "
+				+ ", December15 = " + data.december15 + ", December16 = " + data.december16 + ", December17 = "
+				+ data.december17 + ", December18 = " + data.december18 + ", December19 = " + data.december19
+				+ ", December20 = " + data.december20 + ", December21 = " + data.december21 + ", December22 = "
+				+ data.december22 + ", December23 = " + data.december23 + ", December24 = " + data.december24
+				+ ", SnowParticles = " + data.snowParticles + ", December25 = " + data.december25 + ", KillMsgs = "
 				+ data.killMsgs + ", Level = " + data.level + ", Deaths = " + data.deaths + ", Paintball = "
 				+ data.paintball + ", Wins = " + data.wins + ", TotalCaught = " + data.totalcaught + ", Caught = "
 				+ data.caught + ", RewardLevel = " + data.rewardLevel + ", LureLevel = " + data.lureLevel + ", Lure = "

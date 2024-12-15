@@ -49,6 +49,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Door;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
@@ -81,6 +82,8 @@ public class PlayerListener implements Listener {
 	public Scoreboard c;
 	public List<Player> snowParticlePlayers = new ArrayList<Player>();
 	public List<Player> snowmanPetPlayers = new ArrayList<Player>();
+	public List<Player> candyCaneSwirlPlayers = new ArrayList<Player>();
+	public List<Player> elfCosmeticPlayers = new ArrayList<Player>();
 
 	public PlayerListener(Core main) {
 		this.main = main;
@@ -233,9 +236,13 @@ public class PlayerListener implements Listener {
 
 	@EventHandler
 	public void onEnderChestInteract(PlayerInteractEvent event) {
-		if (event.getClickedBlock() != null)
-			if (event.getClickedBlock().getType() == Material.ENDER_CHEST)
+		if (event.getClickedBlock() != null) {
+			if (event.getClickedBlock().getType() == Material.ENDER_CHEST
+					&& event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+				event.setCancelled(true);
 				new ChristmasRewardsGUI(main).inv.open(event.getPlayer());
+			}
+		}
 	}
 
 	@EventHandler
@@ -269,24 +276,80 @@ public class PlayerListener implements Listener {
 	public void snowmanPet(Player player) {
 		if (this.snowmanPetPlayers.contains(player)) {
 			// Spawn a Snowman near the player
-	        Location spawnLoc = player.getLocation().add(1, 0, 1);
-	        Snowman snowman = player.getWorld().spawn(spawnLoc, Snowman.class);
+			Location spawnLoc = player.getLocation().add(1, 0, 1);
+			Snowman snowman = player.getWorld().spawn(spawnLoc, Snowman.class);
 
-	        // Schedule a repeating task to "follow" the player by teleporting
-	        Bukkit.getScheduler().runTaskTimer(main, () -> {
-	            if (!player.isOnline() || !snowman.isValid()) return;
-	            
-	            Location playerLoc = player.getLocation();
-	            double distance = playerLoc.distance(snowman.getLocation());
+			// Schedule a repeating task to "follow" the player by teleporting
+			Bukkit.getScheduler().runTaskTimer(main, () -> {
+				if (!player.isOnline() || !snowman.isValid())
+					return;
 
-	            // If the snowman is too far, teleport it closer to the player
-	            if (distance > 3) {
-	                // Teleport the snowman about 1.5 blocks behind the player
-	                Location behindPlayer = playerLoc.clone().add(playerLoc.getDirection().multiply(-1.5));
-	                behindPlayer.setY(playerLoc.getWorld().getHighestBlockYAt(behindPlayer));
-	                snowman.teleport(behindPlayer);
-	            }
-	        }, 20L, 20L); // Checks every second
+				Location playerLoc = player.getLocation();
+				double distance = playerLoc.distance(snowman.getLocation());
+
+				// If the snowman is too far, teleport it closer to the player
+				if (distance > 3) {
+					// Teleport the snowman about 1.5 blocks behind the player
+					Location behindPlayer = playerLoc.clone().add(playerLoc.getDirection().multiply(-1.5));
+					behindPlayer.setY(playerLoc.getWorld().getHighestBlockYAt(behindPlayer));
+					snowman.teleport(behindPlayer);
+				}
+			}, 20L, 20L); // Checks every second
+		}
+	}
+
+	// Angle used to rotate the swirl; we store it as a field so it persists across
+	// movements
+	private double angle = 0;
+
+	@EventHandler
+	public void candyCaneSwirlCosmetic(Player player) {
+		if (this.candyCaneSwirlPlayers.contains(player)) {
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					// Check if player is still in the arraylist
+					if (!candyCaneSwirlPlayers.contains(player)) {
+						this.cancel();
+						return;
+					}
+
+					angle += Math.PI / 16; // adjust for speed of rotation
+
+					// Set the radius of the swirl and the vertical height
+					double radius = 1.0;
+					double height = 1.0; // how high around the player the swirl appears
+
+					// Calculate the positions for red and white particles in a circle
+					double xRed = radius * Math.cos(angle);
+					double zRed = radius * Math.sin(angle);
+
+					double xWhite = radius * Math.cos(angle + Math.PI); // Opposite side for a striped effect
+					double zWhite = radius * Math.sin(angle + Math.PI);
+
+					// Get player location
+					Location baseLoc = player.getLocation();
+
+					// Red particle (REDSTONE)
+					sendParticleToAll(EnumParticle.REDSTONE, baseLoc.getX() + xRed, baseLoc.getY() + height,
+							baseLoc.getZ() + zRed, 0.1f, 0.1f, 0.1f, 0f, 5);
+
+					// White particle (CLOUD)
+					sendParticleToAll(EnumParticle.SNOW_SHOVEL, baseLoc.getX() + xWhite, baseLoc.getY() + height,
+							baseLoc.getZ() + zWhite, 0.1f, 0.1f, 0.1f, 0f, 5);
+				}
+			}.runTaskTimer(main, 0L, 1L); // Run every 20 ticks (1 second), adjust as needed
+		}
+	}
+
+	// Sends the particle packet to all online players so everyone sees the swirl
+	private void sendParticleToAll(EnumParticle particle, double x, double y, double z, float offsetX, float offsetY,
+			float offsetZ, float speed, int count) {
+		PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particle, false, // long distance
+				(float) x, (float) y, (float) z, offsetX, offsetY, offsetZ, speed, count);
+
+		for (Player online : Bukkit.getOnlinePlayers()) {
+			((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
 		}
 	}
 
