@@ -7,6 +7,7 @@ import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
+import org.apache.commons.lang.WordUtils;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -93,10 +94,13 @@ public class PresentClass extends BaseClass {
 								BaseClass bc = instance.classes.get(hit);
 
 								if (bc != null) {
+									String displayName = bc.getAttackWeapon().getItemMeta().getDisplayName();
+									if (displayName == null)
+										displayName = WordUtils.capitalizeFully(bc.getAttackWeapon().getType().name().replace('_', ' '));
 									player.getInventory().setItem(0, bc.getAttackWeapon());
 									player.sendMessage(instance.getGameManager().getMain()
 											.color("&e&l(!) &rYou stole &e" + hit.getName() + "'s &rattack weapon: &e"
-													+ bc.getAttackWeapon().getType().toString()));
+													+ displayName));
 								}
 							}
 						}, new ItemStack(Material.CHEST));

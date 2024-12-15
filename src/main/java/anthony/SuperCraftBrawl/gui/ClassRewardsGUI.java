@@ -121,6 +121,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                                 main.getScoreboardManager().lobbyBoard(player);
                             player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
                             details.hasUpdated = true;
+                            main.getDataManager().saveData(data);
                             player.closeInventory();
                         }
                     }
@@ -143,6 +144,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                                 main.getScoreboardManager().lobbyBoard(player);
                             player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
                             details.hasUpdated = true;
+                            main.getDataManager().saveData(data);
                             player.closeInventory();
                         }
                     }
@@ -165,6 +167,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                                 main.getScoreboardManager().lobbyBoard(player);
                             player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
                             details.hasUpdated = true;
+                            main.getDataManager().saveData(data);
                             player.closeInventory();
                         }
                     }
@@ -187,6 +190,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                                 main.getScoreboardManager().lobbyBoard(player);
                             player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
                             details.hasUpdated = true;
+                            main.getDataManager().saveData(data);
                             player.closeInventory();
                         }
                     }
@@ -205,6 +209,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                         }
                         player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 2);
                         details.hasUpdated = true;
+                        main.getDataManager().saveData(data);
                         player.closeInventory();
                     }
                 }));
@@ -355,9 +360,9 @@ public class ClassRewardsGUI implements InventoryProvider {
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTNhNzI4YWQ4ZDMxNDg2YTdmOWFhZDIwMGVkYjM3M2VhODAzZDFmYzVmZDQzMjFiMmUyYTk3MTM0ODIzNDQ0MyJ9fX0=");
             case Endermite:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTczMDEyN2UzYWM3Njc3MTIyNDIyZGYwMDI4ZDllNzM2OGJkMTU3NzM4YzhjM2NkZGVjYzUwMmU4OTZiZTAxYyJ9fX0=");
-//            case Wolf:
-//                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjBjN2Y4ODUzMjZiYTA5NDljMzE2Njk2ZDE5ZDUzMDgyYjk5NGU5YjQ4Y2FkNjY3MzU1OGRkNmM1YmNhYjQ5In19fQ==");
+            case Wolf:
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWFhODQ2MTFjOGM4OTU4MzM2ZjY0ZDU4ZGMyMDljN2FiOTU4ZGRkOTlkMmY1ODc2ZGFkNzI2M2Y3MGVjZWIyNyJ9fX0=");
         }
-        return ItemHelper.create(Material.SKULL_ITEM);
+        return ItemHelper.create(Material.AIR);
     }
 }
