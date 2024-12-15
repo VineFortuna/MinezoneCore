@@ -21,7 +21,9 @@ public class PlayerData {
 			bottleEXP = 0, broomWinEffect = 0, enderDragonEffect = 0, santaEffect = 0, fireParticlesEffect = 0,
 			fishRainEffect = 0, challenge100 = 0, challenge101 = 0, challenge102 = 0, challenge103 = 0, matchMvps = 0,
 			fly = 0, totalcaught = 0, caught = 0, rewardLevel = 0, lureLevel = 0, lure = 0, friendshipLevel = 0,
-			friendship = 0, bestWinstreak = 0;
+			friendship = 0, bestWinstreak = 0, december15 = 0, december16 = 0, december17 = 0, december18 = 0,
+			december19 = 0, december20 = 0, december21 = 0, december22 = 0, december23 = 0, december24 = 0,
+			december25 = 0, snowParticles = 0;
 
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
 	public HashMap<Integer, FishingDetails> playerFishing = new HashMap<>();
@@ -35,7 +37,9 @@ public class PlayerData {
 			int goldApple, int glowstone, int redstone, int web, int bottleEXP, int broomWWinEffect,
 			int enderDragonEffect, int santaEffect, int fireParticlesEffect, int fishRainEffect, int challenge100,
 			int challenge101, int challenge102, int challenge103, int matchMvps, int fly, int totalcaught, int caught,
-			int rewardLevel, int lureLevel, int lure, int friendshipLevel, int friendship, int bestWinstreak) {
+			int rewardLevel, int lureLevel, int lure, int friendshipLevel, int friendship, int bestWinstreak,
+			int december15, int december16, int december17, int december18, int december19, int december20,
+			int december21, int december22, int december23, int december24, int december25, int snowParticles) {
 		this(playerUUID, playerName, playerIP);
 		this.roleID = roleID;
 		this.tokens = tokens;
@@ -96,6 +100,18 @@ public class PlayerData {
 		this.friendshipLevel = friendshipLevel;
 		this.friendship = friendship;
 		this.bestWinstreak = bestWinstreak;
+		this.december15 = december15;
+		this.december16 = december16;
+		this.december17 = december17;
+		this.december18 = december18;
+		this.december19 = december19;
+		this.december20 = december20;
+		this.december21 = december21;
+		this.december22 = december22;
+		this.december23 = december23;
+		this.december24 = december24;
+		this.december25 = december25;
+		this.snowParticles = snowParticles;
 	}
 
 	public boolean isPurchased(ClassType type) {
