@@ -17,145 +17,179 @@ import java.util.List;
 
 public class GadgetsGUI implements InventoryProvider {
 
-    public Core main;
-    public SmartInventory inv;
+	public Core main;
+	public SmartInventory inv;
 
-    public GadgetsGUI(Core main, SmartInventory parent) {
-        inv = SmartInventory.builder()
-                .id("myInventory")
-                .provider(this)
-                .size(3, 9)
-                .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Gadgets")
-                .parent(parent)
-                .build();
-        this.main = main;
-    }
+	public GadgetsGUI(Core main, SmartInventory parent) {
+		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
+				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Gadgets").parent(parent).build();
+		this.main = main;
+	}
 
-    @Override
-    public void init(Player player, InventoryContents contents) {
-        PlayerData data = main.getDataManager().getPlayerData(player);
+	@Override
+	public void init(Player player, InventoryContents contents) {
+		PlayerData data = main.getDataManager().getPlayerData(player);
 
-        // Icon Items
-            // Broom
-        List<String> broomList = new ArrayList<>();
-        broomList.add(ChatColor.DARK_GRAY + "Fly around like a Witch!");
-        ItemStack broom = ItemHelper.create(Material.WHEAT, ChatColor.DARK_GREEN.toString() + ChatColor.BOLD + "Magic Broom", broomList);
+		// Icon Items
+		// Broom
+		List<String> broomList = new ArrayList<>();
+		broomList.add(ChatColor.DARK_GRAY + "Fly around like a Witch!");
+		ItemStack broom = ItemHelper.create(Material.WHEAT,
+				ChatColor.DARK_GREEN.toString() + ChatColor.BOLD + "Magic Broom", broomList);
 
-            // Melon
-        List<String> melonList = new ArrayList<>();
-        melonList.add(ChatColor.DARK_GRAY + "A delicious melon that gives you...");
-        melonList.add(ChatColor.DARK_GRAY + "                  Superpowers!");
-        melonList.add("");
-        melonList.add(ChatColor.RESET + "You have " + ChatColor.YELLOW + data.melon + ChatColor.RESET + " Melons");
-        ItemStack melon = ItemHelper.create(Material.MELON, ChatColor.YELLOW.toString() + ChatColor.BOLD + "Melons", melonList);
+		// Melon
+		List<String> melonList = new ArrayList<>();
+		melonList.add(ChatColor.DARK_GRAY + "A delicious melon that gives you...");
+		melonList.add(ChatColor.DARK_GRAY + "                  Superpowers!");
+		melonList.add("");
+		melonList.add(ChatColor.RESET + "You have " + ChatColor.YELLOW + data.melon + ChatColor.RESET + " Melons");
+		ItemStack melon = ItemHelper.create(Material.MELON, ChatColor.YELLOW.toString() + ChatColor.BOLD + "Melons",
+				melonList);
 
-            // Paintball
-        List<String> paintballList = new ArrayList<>();
-        paintballList.add(ChatColor.DARK_GRAY + "Shoot paintballs as you want");
-        paintballList.add("");
-        paintballList.add(ChatColor.RESET + "You have " + ChatColor.YELLOW + data.paintball + ChatColor.RESET + " Paintballs");
-        ItemStack paintball = ItemHelper.create(Material.GOLD_BARDING, ChatColor.YELLOW.toString() + ChatColor.BOLD + "Paintball Gun", paintballList);
+		// Paintball
+		List<String> paintballList = new ArrayList<>();
+		paintballList.add(ChatColor.DARK_GRAY + "Shoot paintballs as you want");
+		paintballList.add("");
+		paintballList.add(
+				ChatColor.RESET + "You have " + ChatColor.YELLOW + data.paintball + ChatColor.RESET + " Paintballs");
+		ItemStack paintball = ItemHelper.create(Material.GOLD_BARDING,
+				ChatColor.YELLOW.toString() + ChatColor.BOLD + "Paintball Gun", paintballList);
 
-            // Fishing
-        ItemStack fishingRod = main.getFishingRod(player);
+		// Fishing
+		ItemStack fishingRod = main.getFishingRod(player);
 
-        // Setting Items
-        contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
+		List<String> snow = new ArrayList<>();
+		snow.add(ChatColor.DARK_GRAY + "Snow Particles");
+		snow.add("");
+		snow.add(main.color("&e&lUNLOCKED"));
+		ItemStack snowball = ItemHelper.create(Material.SNOW_BALL,
+				ChatColor.YELLOW.toString() + ChatColor.BOLD + "Christmas Particles", snow);
+		
+		List<String> snowman = new ArrayList<>();
+		snow.add(ChatColor.DARK_GRAY + "Snowman Pet");
+		snow.add("");
+		snow.add(main.color("&e&lUNLOCKED"));
+		ItemStack snowmanPet = ItemHelper.create(Material.MONSTER_EGG,
+				ChatColor.YELLOW.toString() + ChatColor.BOLD + "Snowman Pet", snowman);
 
-            // Broom Gadget
-        contents.set(1, 1, ClickableItem.of(
-                broom,
-                e -> {
-                    if (player.hasPermission("scb.wheat")) {
-                        if (!(player.getInventory().contains(broom))) {
-                            player.getInventory().setItem(5, broom);
-                            player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                    + "You have equipped " + ChatColor.DARK_GREEN + ChatColor.BOLD + "Magic Broom");
-                            inv.close(player);
-                        } else if (player.getInventory().contains(broom)) {
-                            player.getInventory().remove(broom);
-                            player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                    + "You have unequipped " + ChatColor.DARK_GREEN + ChatColor.BOLD + "Magic Broom");
-                            inv.close(player);
-                        }
-                    } else {
-                        player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + "You need the rank " + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN " + ChatColor.RESET
-                                + "to use this item!");
-                    }
-                }));
+		// Setting Items
+		contents.fillBorders(ClickableItem
+				.of(ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e -> {
+				}));
 
-            // Paintball Gadget
-        contents.set(1, 2, ClickableItem.of(
-                paintball,
-                e -> {
-                    if (data.paintball > 0) {
-                        if (!(player.getInventory().contains(Material.GOLD_BARDING))) {
-                            ItemStack p = ItemHelper.setDetails(new ItemStack(Material.GOLD_BARDING, data.paintball),
-                                    "" + ChatColor.RESET + ChatColor.GREEN + "Paintball Gun", "",
-                                    "" + ChatColor.RESET + ChatColor.GRAY + "Right click to shoot a paintball!");
-                            player.getInventory().setItem(5, p);
-                            player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                    + "You have equipped " + ChatColor.GREEN + "Paintball Gun");
-                        } else {
-                            player.getInventory().remove(Material.GOLD_BARDING);
-                            player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                    + "You have unequipped " + ChatColor.GREEN + "Paintball Gun");
-                        }
-                    } else {
-                        player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + "You do not have enough paintballs!");
-                    }
-                    inv.close(player);
-                }));
+		// Broom Gadget
+		contents.set(1, 1, ClickableItem.of(broom, e -> {
+			if (player.hasPermission("scb.wheat")) {
+				if (!(player.getInventory().contains(broom))) {
+					player.getInventory().setItem(5, broom);
+					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "You have equipped " + ChatColor.DARK_GREEN + ChatColor.BOLD + "Magic Broom");
+					inv.close(player);
+				} else if (player.getInventory().contains(broom)) {
+					player.getInventory().remove(broom);
+					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "You have unequipped " + ChatColor.DARK_GREEN + ChatColor.BOLD + "Magic Broom");
+					inv.close(player);
+				}
+			} else {
+				player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
+						+ ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN " + ChatColor.RESET + "to use this item!");
+			}
+		}));
 
-            // Melon Gadget
-        contents.set(1, 3, ClickableItem.of(
-                melon,
-                e -> {
-                    if (data.melon > 0) {
-                        if (!(player.getInventory().contains(melon))) {
-                            player.getInventory().setItem(5, melon);
-                            player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                    + "You have equipped " + ChatColor.YELLOW + "Melons");
-                            inv.close(player);
-                        } else if (player.getInventory().contains(melon)) {
-                            player.getInventory().remove(melon);
-                            player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                    + "You have unequipped " + ChatColor.YELLOW + "Melons");
-                        }
-                    } else {
-                        player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + "You do not have enough melons!");
-                    }
-                    inv.close(player);
-                }));
-            // Fishing Rod
-        contents.set(1, 4, ClickableItem.of(
-                fishingRod,
-                e -> {
-                    if (!(player.getInventory().contains(fishingRod))) {
-                        player.getInventory().setItem(5, fishingRod);
-                        player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + "You have equipped " + ChatColor.DARK_AQUA + ChatColor.BOLD + "Fishing Rod");
-                        inv.close(player);
-                    } else if (player.getInventory().contains(fishingRod)) {
-                        player.getInventory().remove(fishingRod);
-                        player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + "You have unequipped " + ChatColor.DARK_AQUA + ChatColor.BOLD + "Fishing Rod");
-                        inv.close(player);
-                    }
-                }));
+		// Paintball Gadget
+		contents.set(1, 2, ClickableItem.of(paintball, e -> {
+			if (data.paintball > 0) {
+				if (!(player.getInventory().contains(Material.GOLD_BARDING))) {
+					ItemStack p = ItemHelper.setDetails(new ItemStack(Material.GOLD_BARDING, data.paintball),
+							"" + ChatColor.RESET + ChatColor.GREEN + "Paintball Gun", "",
+							"" + ChatColor.RESET + ChatColor.GRAY + "Right click to shoot a paintball!");
+					player.getInventory().setItem(5, p);
+					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "You have equipped " + ChatColor.GREEN + "Paintball Gun");
+				} else {
+					player.getInventory().remove(Material.GOLD_BARDING);
+					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "You have unequipped " + ChatColor.GREEN + "Paintball Gun");
+				}
+			} else {
+				player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
+						+ "You do not have enough paintballs!");
+			}
+			inv.close(player);
+		}));
 
-        contents.set(2, 8, ClickableItem.of(
-                ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
-                    inv.getParent().get().open(player);
-                }
-        ));
-    }
+		// Melon Gadget
+		contents.set(1, 3, ClickableItem.of(melon, e -> {
+			if (data.melon > 0) {
+				if (!(player.getInventory().contains(melon))) {
+					player.getInventory().setItem(5, melon);
+					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "You have equipped " + ChatColor.YELLOW + "Melons");
+					inv.close(player);
+				} else if (player.getInventory().contains(melon)) {
+					player.getInventory().remove(melon);
+					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "You have unequipped " + ChatColor.YELLOW + "Melons");
+				}
+			} else {
+				player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
+						+ "You do not have enough melons!");
+			}
+			inv.close(player);
+		}));
+		// Fishing Rod
+		contents.set(1, 4, ClickableItem.of(fishingRod, e -> {
+			if (!(player.getInventory().contains(fishingRod))) {
+				player.getInventory().setItem(5, fishingRod);
+				player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+						+ "You have equipped " + ChatColor.DARK_AQUA + ChatColor.BOLD + "Fishing Rod");
+				inv.close(player);
+			} else if (player.getInventory().contains(fishingRod)) {
+				player.getInventory().remove(fishingRod);
+				player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+						+ "You have unequipped " + ChatColor.DARK_AQUA + ChatColor.BOLD + "Fishing Rod");
+				inv.close(player);
+			}
+		}));
 
-    @Override
-    public void update(Player player, InventoryContents contents) {
+		contents.set(1, 5, ClickableItem.of(snowball, e -> {
+			if (data.snowParticles == 1) {
+				if (!(main.getListener().snowParticlePlayers.contains(player))) {
+					player.sendMessage(main.color("&r&l(!) &rYou equipped &eSnow Particles &rgadget"));
+					main.getListener().snowParticlePlayers.add(player);
+				} else {
+					player.sendMessage(main.color("&r&l(!) &rYou removed &eSnow Particles &rgadget"));
+					main.getListener().snowParticlePlayers.remove(player);
+				}
+			} else {
+				player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this gadget yet!"));
+			}
+		}));
+		
+		contents.set(1, 6, ClickableItem.of(snowmanPet, e -> {
+			//if (data.snowParticles == 1) {
+				if (!(main.getListener().snowmanPetPlayers.contains(player))) {
+					player.sendMessage(main.color("&r&l(!) &rYou equipped &eSnowman &rpet"));
+					main.getListener().snowmanPetPlayers.add(player);
+					main.getListener().snowmanPet(player);
+				} else {
+					player.sendMessage(main.color("&r&l(!) &rYou removed &eSnowman &rpet"));
+					main.getListener().snowmanPetPlayers.remove(player);
+				}
+			//} else {
+				//player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this gadget yet!"));
+			//}
+		}));
 
-    }
+		contents.set(2, 8, ClickableItem
+				.of(ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
+					inv.getParent().get().open(player);
+				}));
+	}
+
+	@Override
+	public void update(Player player, InventoryContents contents) {
+
+	}
 }
