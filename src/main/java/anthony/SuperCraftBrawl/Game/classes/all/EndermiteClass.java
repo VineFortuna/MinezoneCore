@@ -36,8 +36,8 @@ public class EndermiteClass extends BaseClass {
     
     private List<Endermite> endermites = new ArrayList<>();
     private int summonCooldownSec;
-    private ItemStack enderSwap = ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER),
-            instance.getGameManager().getMain().color("&5&lEnder &0Swap"),
+    private ItemStack enderSwap = ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER, 10),
+            instance.getGameManager().getMain().color("&5&lPhase &0Shifter"),
             instance.getGameManager().getMain().color("&7Shoot at your Endermite to swap places with it!"),
             instance.getGameManager().getMain().color("   &rRange: &e25 blocks"));
     
@@ -88,9 +88,9 @@ public class EndermiteClass extends BaseClass {
         endermites.clear();
         
         playerInv.setItem(0, this.getAttackWeapon());
-        playerInv.setItem(1, enderSwap);
-        playerInv.setItem(2, ItemHelper.setDetails(new ItemStack(Material.ENDER_PORTAL_FRAME),
+        playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.ENDER_PORTAL_FRAME),
                 instance.getGameManager().getMain().color("&5&lSwarm Summon")));
+        playerInv.setItem(2, enderSwap);
         playerInv.setItem(3, ItemHelper.createMonsterEgg(EntityType.ENDERMITE, 6,
                 instance.getGameManager().getMain().color("&5&lEndermite Pokeball")));
     }
@@ -99,8 +99,8 @@ public class EndermiteClass extends BaseClass {
     public void Tick(int gameTicks) {
         if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Endermite
                 && instance.classes.get(player).getLives() > 0) {
-            if (!(player.getInventory().contains(this.enderSwap)))
-                player.getInventory().setItem(1, this.enderSwap);
+            /*if (!(player.getInventory().contains(this.enderSwap)))
+                player.getInventory().setItem(1, this.enderSwap);*/
     
             this.summonCooldownSec = (20000 - swarmSummon.getTime()) / 1000 + 1;
             
@@ -120,6 +120,7 @@ public class EndermiteClass extends BaseClass {
         ItemStack item = event.getItem();
         if (item != null && event.getAction().name().contains("RIGHT_CLICK")) {
             if (item.getType() == Material.EYE_OF_ENDER) {
+                event.setCancelled(true);
                 int range = 25;
                 Location playerEyeLoc = player.getEyeLocation();
                 Vector dir = playerEyeLoc.getDirection();
@@ -177,7 +178,12 @@ public class EndermiteClass extends BaseClass {
                     player.sendMessage(instance.getGameManager().getMain()
                             .color("&2&l(!) &rYou and your Endermite teleported to each other's location"));
                 }
-                event.setCancelled(true);
+                int amount = item.getAmount();
+                amount--;
+                if (amount == 0)
+                    player.getInventory().clear(player.getInventory().getHeldItemSlot());
+                else
+                    player.getItemInHand().setAmount(amount);
             } else if (item.getType() == Material.ENDER_PORTAL_FRAME) {
                 if (swarmSummon.getTime() < 20000) {
                     int seconds = (20000 - swarmSummon.getTime()) / 1000 + 1;
