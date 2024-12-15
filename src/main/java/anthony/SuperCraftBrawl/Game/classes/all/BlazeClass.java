@@ -161,6 +161,7 @@ public class BlazeClass extends BaseClass {
 			if (player.getGameMode() != GameMode.SPECTATOR) {
 				Location loc = player.getLocation();
 				player.getInventory().clear(player.getInventory().getHeldItemSlot());
+				player.playSound(player.getLocation(), Sound.FIZZ, 0.8f, 0);
 				float yaw = loc.getYaw();
 				spawnBlazes(loc, yaw);
 			}

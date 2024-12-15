@@ -941,10 +941,10 @@ public class GameInstance {
 		ItemHelper.setGlowing(nuke, true);
 
 		// Instagib
-		ItemStack instagib = ItemHelper.setDetails(new ItemStack(Material.GOLD_HOE, 5, (short) 250), "&e&lINSTAGIB");
+		ItemStack instagib = ItemHelper.setDetails(new ItemStack(Material.GOLD_HOE, 5, (short) 1), "&e&lINSTAGIB");
 
 		// Bazooka
-		ItemStack bazooka = ItemHelper.setDetails(new ItemStack(Material.DIAMOND_HOE, 3, (short) 250), "&b&lBAZOOKA");
+		ItemStack bazooka = ItemHelper.setDetails(new ItemStack(Material.DIAMOND_HOE, 3, (short) 1), "&b&lBAZOOKA");
 
 		// Zombie Egg
 		ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
