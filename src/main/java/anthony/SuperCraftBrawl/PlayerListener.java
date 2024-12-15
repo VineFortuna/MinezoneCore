@@ -256,7 +256,7 @@ public class PlayerListener implements Listener {
 
 	        // Schedule a repeating task to "follow" the player by teleporting
 	        Bukkit.getScheduler().runTaskTimer(main, () -> {
-	            if (!player.isOnline() || !snowman.isValid()) return;
+	            if (!player.isOnline() || !snowman.isValid() || player.getWorld() != snowman.getWorld()) return;
 	            
 	            Location playerLoc = player.getLocation();
 	            double distance = playerLoc.distance(snowman.getLocation());
