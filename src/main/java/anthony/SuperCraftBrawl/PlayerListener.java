@@ -1,29 +1,27 @@
 package anthony.SuperCraftBrawl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.gui.christmas.ChristmasRewardsGUI;
+import anthony.SuperCraftBrawl.gui.cosmetics.CosmeticsGUI;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.util.PathfinderGoalFollowPlayer;
+import anthony.util.PathfinderHelper;
+import me.itzzmic.minezone.api.PunishAPI;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.EntityInsentient;
+import net.minecraft.server.v1_8_R3.EntityLiving;
+import net.minecraft.server.v1_8_R3.EnumParticle;
+import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 import org.apache.commons.lang3.StringUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.DyeColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.FishHook;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Snowball;
-import org.bukkit.entity.Snowman;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -37,14 +35,7 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Door;
@@ -52,27 +43,10 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
-import com.comphenix.protocol.wrappers.EnumWrappers.Particle;
-
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.gui.ChallengesGUI;
-import anthony.SuperCraftBrawl.gui.ClassSelectorGUI;
-import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
-import anthony.SuperCraftBrawl.gui.PrefsGUI;
-import anthony.SuperCraftBrawl.gui.StatsGUI;
-import anthony.SuperCraftBrawl.gui.TournamentGUI;
-import anthony.SuperCraftBrawl.gui.christmas.ChristmasRewardsGUI;
-import anthony.SuperCraftBrawl.gui.cosmetics.CosmeticsGUI;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import anthony.SuperCraftBrawl.ranks.Rank;
-import me.itzzmic.minezone.api.PunishAPI;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.EntityInsentient;
-import net.minecraft.server.v1_8_R3.EnumParticle;
-import net.minecraft.server.v1_8_R3.NavigationAbstract;
-import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 public class PlayerListener implements Listener {
 
@@ -91,7 +65,7 @@ public class PlayerListener implements Listener {
 	/**
 	 * This function just resets player double jump & sets gamemode to Adventure
 	 * 
-	 * @param player to be reset
+	 * @param p to be reset
 	 */
 	public void resetDoubleJump(Player p) {
 		p.setAllowFlight(false);
@@ -271,6 +245,14 @@ public class PlayerListener implements Listener {
 			// Spawn a Snowman near the player
 	        Location spawnLoc = player.getLocation().add(1, 0, 1);
 	        Snowman snowman = player.getWorld().spawn(spawnLoc, Snowman.class);
+			
+			// Convert the player to NMS EntityLiving
+			EntityLiving targetPlayer = (EntityLiving) ((CraftLivingEntity) player).getHandle();
+			
+			// Add follow behavior to the mob
+			PathfinderHelper.clearPathfinderGoals(snowman);
+			PathfinderHelper.addPathfinderGoal(snowman, 1, new PathfinderGoalFollowPlayer(
+					(EntityInsentient) ((CraftLivingEntity) snowman).getHandle(), targetPlayer, 1.75, 3.0, 4.0));
 
 	        // Schedule a repeating task to "follow" the player by teleporting
 	        Bukkit.getScheduler().runTaskTimer(main, () -> {
@@ -280,10 +262,10 @@ public class PlayerListener implements Listener {
 	            double distance = playerLoc.distance(snowman.getLocation());
 
 	            // If the snowman is too far, teleport it closer to the player
-	            if (distance > 3) {
-	                // Teleport the snowman about 1.5 blocks behind the player
-	                Location behindPlayer = playerLoc.clone().add(playerLoc.getDirection().multiply(-1.5));
-	                behindPlayer.setY(playerLoc.getWorld().getHighestBlockYAt(behindPlayer));
+	            if (distance > 15) {
+	                // Teleport the snowman about 2 blocks behind the player
+	                Location behindPlayer = playerLoc.clone().add(playerLoc.getDirection().multiply(-2));
+	                behindPlayer.setY(Math.min(playerLoc.getWorld().getHighestBlockYAt(behindPlayer), playerLoc.getY()+10));
 	                snowman.teleport(behindPlayer);
 	            }
 	        }, 20L, 20L); // Checks every second
