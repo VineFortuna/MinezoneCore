@@ -163,24 +163,26 @@ public class NotchClass extends BaseClass {
 						instance.getGameManager().getMain().color("&c&l(!) &rYou need to be on the ground to use this!"));
 				return;
 			}
-			Random random = new Random();
-			Player gamePlayer = null;
-			boolean check = false;
-
-			while (!check) {
-				gamePlayer = instance.players.get(random.nextInt(instance.players.size()));
-
-				if (gamePlayer != player && gamePlayer.getGameMode() != GameMode.SPECTATOR)
-					if (instance.classes.containsKey(gamePlayer) && instance.classes.get(gamePlayer).getLives() > 0)
-						check = true;
+			if (instance.alivePlayers > 1) {
+				Random random = new Random();
+				Player gamePlayer = null;
+				boolean check = false;
+				
+				while (!check) {
+					gamePlayer = instance.players.get(random.nextInt(instance.players.size()));
+					
+					if (gamePlayer != player && gamePlayer.getGameMode() != GameMode.SPECTATOR)
+						if (instance.classes.containsKey(gamePlayer) && instance.classes.get(gamePlayer).getLives() > 0)
+							check = true;
+				}
+				
+				gamePlayer.teleport(player);
+				gamePlayer.sendMessage(
+						instance.getGameManager().getMain().color("&2&l(!) &rYou got teleported to &e" + player.getName()));
+				player.sendMessage(instance.getGameManager().getMain()
+						.color("&2&l(!) &rYou teleported &e" + gamePlayer.getName() + "&r to you!"));
+				player.getInventory().clear(player.getInventory().getHeldItemSlot());
 			}
-
-			gamePlayer.teleport(player);
-			gamePlayer.sendMessage(
-					instance.getGameManager().getMain().color("&2&l(!) &rYou got teleported to &e" + player.getName()));
-			player.sendMessage(instance.getGameManager().getMain()
-					.color("&2&l(!) &rYou teleported &e" + gamePlayer.getName() + "&r to you!"));
-			player.getInventory().clear(player.getInventory().getHeldItemSlot());
 		}
 	}
 
