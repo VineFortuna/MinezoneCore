@@ -1,8 +1,8 @@
 package anthony.SuperCraftBrawl.gui.cosmetics;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -42,7 +42,7 @@ public class DeathEffectsGUI implements InventoryProvider {
 		ItemStack redstone = ItemHelper.create(Material.REDSTONE, org.bukkit.ChatColor.YELLOW + "Redstone");
 		ItemStack cobweb = ItemHelper.create(Material.WEB, org.bukkit.ChatColor.YELLOW + "Cobweb");
 		ItemStack expBottle = ItemHelper.create(Material.EXP_BOTTLE, org.bukkit.ChatColor.YELLOW + "Exp Bottle");
-		ItemStack snowball = ItemHelper.create(Material.EXP_BOTTLE, org.bukkit.ChatColor.YELLOW + "Snowball");
+		ItemStack snowball = ItemHelper.create(Material.SNOW_BALL, org.bukkit.ChatColor.YELLOW + "Snowball");
 
 		// Setting Items
 		contents.fillBorders(ClickableItem
@@ -111,6 +111,14 @@ public class DeathEffectsGUI implements InventoryProvider {
 			}));
 			contents.set(1, 6, ClickableItem.of(snowball, e -> {
 				player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this yet!"));
+				/*if (data.snowballDeathEffect == 0) {
+					this.resetData(data);
+					data.snowballDeathEffect = 1;
+					player.sendMessage(main.color("&9&l(!) &rYou have enabled &eSnowball Death Particle"));
+				} else {
+					this.resetData(data);
+					player.sendMessage(main.color("&9&l(!) &rYou have disabled &eSnowball Death Particle"));
+				}*/
 			}));
 
 			contents.set(2, 8, ClickableItem

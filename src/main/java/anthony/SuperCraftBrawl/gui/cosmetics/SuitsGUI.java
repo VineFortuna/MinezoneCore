@@ -8,24 +8,18 @@ import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
-
-import java.lang.reflect.Field;
-import java.util.UUID;
-
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.SkullMeta;
-
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 
 public class SuitsGUI implements InventoryProvider {
 
 	public Core main;
 	public SmartInventory inv;
+	
+	private static final String ELF_TEXTURE = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWQwZmJjN2E2YWQ4M2U5MjRkYjZjYTBjYTM0N2RjZjVmMmY0MzRmMzQ3NDJmODMyOTYwYTA0MDZmYmRiYjE4NyJ9fX0=";
 
 	public SuitsGUI(Core main, SmartInventory parent) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
@@ -49,6 +43,8 @@ public class SuitsGUI implements InventoryProvider {
 
 		texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjlhYzgwNGEyYzVhOGVhNTdlZjY5NjU3YWI2NDM0N2QxZWQzNmIzNGNhNzBhMjE4ZjZhNjNkNWI2YWEyZmU5ZiJ9fX0=";
 		ItemStack pirateHead = ItemHelper.createSkullTexture(texture, "&3&lPirate Outfit", "", "&aFishing reward!");
+		
+		ItemStack elfHead = ItemHelper.createSkullTexture(ELF_TEXTURE, "&aElf Outfit");
 
 		// Setting Items
 		contents.fillBorders(ClickableItem
@@ -151,19 +147,26 @@ public class SuitsGUI implements InventoryProvider {
 			inv.close(player);
 		}));
 
-		contents.set(1, 8, ClickableItem.of(getCustomSkull(ELF_TEXTURE), e -> {
+		contents.set(1, 4, ClickableItem.of(elfHead, e -> {
 			if (data.elfCosmetic == 1) {
 				if (!(main.getListener().elfCosmeticPlayers.contains(player))) {
-					player.sendMessage(main.color("&r&l(!) &rYou equipped &eElf &gadget"));
+					player.sendMessage(main.color("&r&l(!) &rYou have equipped &aElf Outfit"));
 					main.getListener().elfCosmeticPlayers.add(player);
-					equipElfSet(player);
+					ItemStack chest = getDyedArmor(Material.LEATHER_CHESTPLATE, Color.GREEN, ChatColor.GREEN + "Elf Outfit");
+					ItemStack legs = getDyedArmor(Material.LEATHER_LEGGINGS, Color.RED, ChatColor.GREEN + "Elf Outfit");
+					ItemStack boots = getDyedArmor(Material.LEATHER_BOOTS, Color.GREEN, ChatColor.GREEN + "Elf Outfit");
+					
+					player.getInventory().setHelmet(elfHead);
+					player.getInventory().setChestplate(chest);
+					player.getInventory().setLeggings(legs);
+					player.getInventory().setBoots(boots);
 				} else {
-					player.sendMessage(main.color("&r&l(!) &rYou removed &eElf &gadget"));
+					player.sendMessage(main.color("&r&l(!) &rYou have unequipped &aElf Outfit"));
 					main.getListener().elfCosmeticPlayers.remove(player);
 					main.getListener().resetArmor(player);
 				}
 			} else {
-				player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this gadget yet!"));
+				player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this cosmetic yet!"));
 			}
 		}));
 
@@ -173,22 +176,6 @@ public class SuitsGUI implements InventoryProvider {
 				}));
 	}
 
-	private static final String ELF_TEXTURE = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWQwZmJjN2E2YWQ4M2U5MjRkYjZjYTBjYTM0N2RjZjVmMmY0MzRmMzQ3NDJmODMyOTYwYTA0MDZmYmRiYjE4NyJ9fX0=";
-
-	private void equipElfSet(Player player) {
-		// Give the player the Elf head
-		ItemStack elfHead = getCustomSkull(ELF_TEXTURE);
-		// Give dyed leather armor
-		ItemStack chest = getDyedArmor(Material.LEATHER_CHESTPLATE, Color.GREEN, ChatColor.GREEN + "Elf Tunic");
-		ItemStack legs = getDyedArmor(Material.LEATHER_LEGGINGS, Color.RED, ChatColor.RED + "Elf Pants");
-		ItemStack boots = getDyedArmor(Material.LEATHER_BOOTS, Color.GREEN, ChatColor.GREEN + "Elf Boots");
-
-		player.getInventory().setHelmet(elfHead);
-		player.getInventory().setChestplate(chest);
-		player.getInventory().setLeggings(legs);
-		player.getInventory().setBoots(boots);
-	}
-
 	private ItemStack getDyedArmor(Material material, Color color, String name) {
 		ItemStack item = new ItemStack(material);
 		LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
@@ -196,31 +183,6 @@ public class SuitsGUI implements InventoryProvider {
 		meta.setDisplayName(name);
 		item.setItemMeta(meta);
 		return item;
-	}
-
-	/**
-	 * Creates a custom player head with the given base64 texture. Works on 1.8
-	 * using reflection and GameProfile.
-	 */
-	private ItemStack getCustomSkull(String base64) {
-		ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
-		SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-
-		// Create a fake profile with the given texture
-		GameProfile profile = new GameProfile(UUID.randomUUID(), null);
-		profile.getProperties().put("textures", new Property("textures", base64));
-
-		try {
-			Field profileField = skullMeta.getClass().getDeclaredField("profile");
-			profileField.setAccessible(true);
-			profileField.set(skullMeta, profile);
-		} catch (NoSuchFieldException | IllegalAccessException e) {
-			e.printStackTrace();
-		}
-
-		skullMeta.setDisplayName(ChatColor.GREEN + "Elf Head");
-		skull.setItemMeta(skullMeta);
-		return skull;
 	}
 
 	@Override
