@@ -152,6 +152,21 @@ public class PlayerDataManager implements Listener {
 			int friendshipLevel = set.getInt("FriendshipLevel");
 			int friendship = set.getInt("Friendship");
 			int bestWinstreak = set.getInt("BestWinstreak");
+			int december15 = set.getInt("December15");
+			int december16 = set.getInt("December16");
+			int december17 = set.getInt("December17");
+			int december18 = set.getInt("December18");
+			int december19 = set.getInt("December19");
+			int december20 = set.getInt("December20");
+			int december21 = set.getInt("December21");
+			int december22 = set.getInt("December22");
+			int december23 = set.getInt("December23");
+			int december24 = set.getInt("December24");
+			int december25 = set.getInt("December25");
+			int snowParticles = set.getInt("SnowParticles");
+			int snowballDeathEffect = set.getInt("SnowballDeathEffect");
+			int elfCosmetic = set.getInt("ElfCosmetic");
+
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
 					exp, level, bestTime, magicbroom, points, withersk, bonusTokens, bonusLevels, paintball,
@@ -159,7 +174,8 @@ public class PlayerDataManager implements Listener {
 					glowstone, redstone, web, bottleEXP, broomWinEffect, enderDragonEffect, santaEffect,
 					fireParticlesEffect, fishRainEffect, challenge100, challenge101, challenge102, challenge103,
 					matchMvps, fly, totalcaught, caught, rewardLevel, lureLevel, lure, friendshipLevel, friendship,
-					bestWinstreak);
+					bestWinstreak, december15, december16, december17, december18, december19, december20, december21,
+					december22, december23, december24, december25, snowParticles, snowballDeathEffect, elfCosmetic);
 		}
 		set.close();
 		stmt.close();
@@ -240,14 +256,19 @@ public class PlayerDataManager implements Listener {
 				+ ", AstronautCosmetic = " + data.astronaut + ", SantaOutfit = " + data.santaoutfit
 				+ ", BestWinstreak = " + data.bestWinstreak + ", BroomWinEffect = " + data.broomWinEffect
 				+ ", BestTime = " + data.bestTime + ", Exp = " + data.exp + ", Winstreak = " + data.winstreak
+				+ ", ElfCosmetic = " + data.elfCosmetic + ", SnowballDeathEffect = " + data.snowballDeathEffect
 				+ ", GingerBreadMan = " + data.gingerbreadman + ", Elf = " + data.elf + ", Challenge1 = "
 				+ data.challenge1 + ", Challenge2 = " + data.challenge2 + ", Challenge3 = " + data.challenge3
-				+ ", KillMsgs = " + data.killMsgs + ", Level = " + data.level + ", Deaths = " + data.deaths
-				+ ", Paintball = " + data.paintball + ", Wins = " + data.wins + ", TotalCaught = " + data.totalcaught
-				+ ", Caught = " + data.caught + ", RewardLevel = " + data.rewardLevel + ", LureLevel = "
-				+ data.lureLevel + ", Lure = " + data.lure + ", FriendshipLevel = " + data.friendshipLevel
-				+ ", Friendship = " + data.friendship + ", FishRainEffect = " + data.fishRainEffect + " WHERE UUID = '"
-				+ data.playerUUID.toString() + "';");
+				+ ", December15 = " + data.december15 + ", December16 = " + data.december16 + ", December17 = "
+				+ data.december17 + ", December18 = " + data.december18 + ", December19 = " + data.december19
+				+ ", December20 = " + data.december20 + ", December21 = " + data.december21 + ", December22 = "
+				+ data.december22 + ", December23 = " + data.december23 + ", December24 = " + data.december24
+				+ ", SnowParticles = " + data.snowParticles + ", December25 = " + data.december25 + ", KillMsgs = "
+				+ data.killMsgs + ", Level = " + data.level + ", Deaths = " + data.deaths + ", Paintball = "
+				+ data.paintball + ", Wins = " + data.wins + ", TotalCaught = " + data.totalcaught + ", Caught = "
+				+ data.caught + ", RewardLevel = " + data.rewardLevel + ", LureLevel = " + data.lureLevel + ", Lure = "
+				+ data.lure + ", FriendshipLevel = " + data.friendshipLevel + ", Friendship = " + data.friendship
+				+ ", FishRainEffect = " + data.fishRainEffect + " WHERE UUID = '" + data.playerUUID.toString() + "';");
 		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon,"
 				+ "Reward1, Reward2) VALUES ";
 		int index = 0;
