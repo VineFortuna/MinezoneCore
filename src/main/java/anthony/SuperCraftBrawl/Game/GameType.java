@@ -1,7 +1,7 @@
 package anthony.SuperCraftBrawl.Game;
 
 public enum GameType {
-	CLASSIC("Classic", 5), FRENZY("Frenzy", 100), DUEL("Duel", 2);
+	CLASSIC("Classic", 5), FRENZY("Frenzy", 100), DUEL("Duel", 2), GUNGAME("Gun Game", 5);
 	
 	private String name;
 	private int maxPlayers;
