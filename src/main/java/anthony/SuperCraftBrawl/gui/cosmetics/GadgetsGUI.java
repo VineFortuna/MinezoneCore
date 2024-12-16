@@ -1,29 +1,26 @@
 package anthony.SuperCraftBrawl.gui.cosmetics;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.bukkit.Color;
-import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.SkullMeta;
-
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
-
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Color;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.inventory.meta.SkullMeta;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class GadgetsGUI implements InventoryProvider {
 
@@ -73,17 +70,13 @@ public class GadgetsGUI implements InventoryProvider {
 				main.color("&r&lSnow Particles"), snow);
 
 		List<String> snowman = new ArrayList<>();
-		snow.add(ChatColor.DARK_GRAY + "Snowman Pet");
-		snow.add("");
-		snow.add(main.color("&e&lUNLOCKED"));
 		ItemStack snowmanPet = ItemHelper.create(Material.MONSTER_EGG,
 				ChatColor.YELLOW.toString() + ChatColor.BOLD + "Snowman Pet", snowman);
 
 		
 		List<String> candyCaneSwirl = new ArrayList<>();
-		candyCaneSwirl.add(main.color("&c&lCandy &r&lCane &c&lSwirl"));
-		ItemStack candyCane = ItemHelper.createSkullTexture(
-				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWM4M2E0MmU4MmNkNmE3MGUyMTZkOWE4YzJmZjZmMWU1ZTViMjU2Y2VhM2I4Y2QyMjU0NzIzOTNhYTNlY2E1YSJ9fX0=");
+		String candyCaneTexture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWM4M2E0MmU4MmNkNmE3MGUyMTZkOWE4YzJmZjZmMWU1ZTViMjU2Y2VhM2I4Y2QyMjU0NzIzOTNhYTNlY2E1YSJ9fX0=";
+		ItemStack candyCane = ItemHelper.createSkullTexture(candyCaneTexture, main.color("&c&lCandy &r&lCane &c&lSwirl"));
 
 		// Setting Items
 		contents.fillBorders(ClickableItem
