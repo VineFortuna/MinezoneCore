@@ -21,24 +21,14 @@ public class BoardSettings {
 		Bukkit.getScheduler().runTaskLater(main, new Runnable() {
             @Override
             public void run() {
-            	Location loc = new Location(main.getLobbyWorld(), 189.500, 106, 703.513);
+            	Location loc = new Location(main.getLobbyWorld(), 189.518, 105, 676.499);
 
         		ArmorStand settingsStand = (ArmorStand) main.getLobbyWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
-        		settingsStand.setCustomName("Leaderboard Settings");
+        		settingsStand.setCustomName(main.color("&c&lChristmas Rewards"));
         		settingsStand.setCustomNameVisible(true);
         		settingsStand.setGravity(false);
         		settingsStand.setVisible(false);
         		settingsStand.setBasePlate(false);
-
-        		// Create the "Click to change settings" line slightly below
-        		Location secondLineLocation = loc.clone().subtract(0, 0.5, 0); // Adjust the y-axis for line spacing
-        		ArmorStand clickToChangeStand = (ArmorStand) secondLineLocation.getWorld().spawnEntity(secondLineLocation,
-        				EntityType.ARMOR_STAND);
-        		clickToChangeStand.setCustomName("Click to change settings");
-        		clickToChangeStand.setCustomNameVisible(true);
-        		clickToChangeStand.setGravity(false);
-        		clickToChangeStand.setVisible(false);
-        		clickToChangeStand.setBasePlate(false);
             }
         }, 100L);
 	}
