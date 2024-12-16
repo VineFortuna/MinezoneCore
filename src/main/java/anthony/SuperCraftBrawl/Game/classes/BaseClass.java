@@ -104,6 +104,8 @@ public abstract class BaseClass {
 	protected ItemStack boots;
 
 	public Player bountyTarget = null;
+	
+	public int gunGamePos = 0;
 
 	// This would also take in a SuperClass.
 	public BaseClass(GameInstance instance, Player player) {
@@ -741,7 +743,7 @@ public abstract class BaseClass {
 									+ ChatColor.RED + " just died SO badly");
 						}
 					} else if (DamageCause.VOID != null) {
-						if (instance.gameType == GameType.FRENZY) {
+						if (instance.gameType == GameType.FRENZY || instance.gameType == GameType.GUNGAME) {
 							if (lives > 0) {
 								BaseClass bc = instance.oldClasses.get(p);
 								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -768,7 +770,7 @@ public abstract class BaseClass {
 							p.getPlayer().setFireTicks(0);
 						}
 					} else if (DamageCause.SUICIDE != null) {
-						if (instance.gameType == GameType.FRENZY) {
+						if (instance.gameType == GameType.FRENZY || instance.gameType == GameType.GUNGAME) {
 							BaseClass bc = instance.oldClasses.get(player);
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 									+ getPlayerRank(p) + p.getPlayer().getName() + " "
@@ -1084,7 +1086,9 @@ public abstract class BaseClass {
 
 	public void Death(PlayerDeathEvent e) {
 		if (player.getName() != null && lives > 0) {
-			lives--;
+			if(instance.gameType != GameType.GUNGAME) {
+				lives--;
+			}
 			score.setScore(lives);
 
 			Player killer = player.getKiller();
@@ -1327,7 +1331,7 @@ public abstract class BaseClass {
 						PlayerData killerData = instance.getGameManager().getMain().getDataManager()
 								.getPlayerData(killer);
 						if (killer != p) {
-							if (instance.gameType == GameType.FRENZY) {
+							if (instance.gameType == GameType.FRENZY || instance.gameType == GameType.GUNGAME) {
 								BaseClass bc = instance.oldClasses.get(p);
 								if (lives > 0) {
 
@@ -1399,7 +1403,7 @@ public abstract class BaseClass {
 								p.teleport(killer);
 							}
 						} else {
-							if (instance.gameType == GameType.FRENZY) {
+							if (instance.gameType == GameType.FRENZY || instance.gameType == GameType.GUNGAME) {
 								if (lives > 0) {
 									BaseClass bc = instance.oldClasses.get(p);
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1485,7 +1489,7 @@ public abstract class BaseClass {
 							PlayerData killerData = instance.getGameManager().getMain().getDataManager()
 									.getPlayerData(d);
 							if (d != p || killer != p) {
-								if (instance.gameType == GameType.FRENZY) {
+								if (instance.gameType == GameType.FRENZY || instance.gameType == GameType.GUNGAME) {
 									BaseClass bc = instance.oldClasses.get(p);
 									if (lives > 0) {
 										if (killerData != null && killerData.killMsgs == 1) {
@@ -1566,7 +1570,7 @@ public abstract class BaseClass {
 									p.teleport(d);
 								}
 							} else {
-								if (instance.gameType == GameType.FRENZY) {
+								if (instance.gameType == GameType.FRENZY || instance.gameType == GameType.GUNGAME) {
 									if (lives > 0) {
 										BaseClass bc = instance.oldClasses.get(p);
 										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1617,7 +1621,7 @@ public abstract class BaseClass {
 								PlayerData killerData = instance.getGameManager().getMain().getDataManager()
 										.getPlayerData(shooter);
 								if (shooter != p || killer != p) {
-									if (instance.gameType == GameType.FRENZY) {
+									if (instance.gameType == GameType.FRENZY  || instance.gameType == GameType.GUNGAME) {
 										BaseClass bc = instance.oldClasses.get(p);
 										if (lives > 0) {
 
@@ -1697,7 +1701,7 @@ public abstract class BaseClass {
 									}
 								}
 							} else {
-								if (instance.gameType == GameType.FRENZY) {
+								if (instance.gameType == GameType.FRENZY || instance.gameType == GameType.GUNGAME) {
 									if (lives > 0) {
 										BaseClass bc = instance.oldClasses.get(p);
 										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1741,7 +1745,7 @@ public abstract class BaseClass {
 				} else if (killer != null) {
 					PlayerData killerData = instance.getGameManager().getMain().getDataManager().getPlayerData(killer);
 					if (killer != p) {
-						if (instance.gameType == GameType.FRENZY) {
+						if (instance.gameType == GameType.FRENZY || instance.gameType == GameType.GUNGAME) {
 							BaseClass bc = instance.oldClasses.get(p);
 							if (lives > 0) {
 								if (killerData != null && killerData.killMsgs == 1) {
@@ -1818,7 +1822,7 @@ public abstract class BaseClass {
 							p.teleport(killer);
 						}
 					} else {
-						if (instance.gameType == GameType.FRENZY) {
+						if (instance.gameType == GameType.FRENZY || instance.gameType == GameType.GUNGAME) {
 							if (lives > 0) {
 								BaseClass bc = instance.oldClasses.get(p);
 								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1847,7 +1851,7 @@ public abstract class BaseClass {
 						// }
 					}
 				} else if (DamageCause.VOID != null) {
-					if (instance.gameType == GameType.FRENZY) {
+					if (instance.gameType == GameType.FRENZY || instance.gameType == GameType.GUNGAME) {
 						if (lives > 0) {
 							BaseClass bc = instance.oldClasses.get(p);
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1874,7 +1878,7 @@ public abstract class BaseClass {
 						p.getPlayer().setFireTicks(0);
 					}
 				} else if (DamageCause.SUICIDE != null) {
-					if (instance.gameType == GameType.FRENZY) {
+					if (instance.gameType == GameType.FRENZY || instance.gameType == GameType.GUNGAME) {
 						BaseClass bc = instance.oldClasses.get(player);
 						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 								+ p.getPlayer().getName() + " "
@@ -1944,7 +1948,7 @@ public abstract class BaseClass {
 					if (data2.withersk != 3)
 						data2.withersk = 0;
 
-					if (instance.gameType == GameType.FRENZY) {
+					if (instance.gameType == GameType.FRENZY || instance.gameType == GameType.GUNGAME) {
 						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 								+ p.getPlayer().getName() + " " + baseClass2.getType().getTag() + ChatColor.RED
 								+ " has been eliminated!");

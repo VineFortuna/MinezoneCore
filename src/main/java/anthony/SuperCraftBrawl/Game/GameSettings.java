@@ -1,11 +1,10 @@
 package anthony.SuperCraftBrawl.Game;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 
-import net.md_5.bungee.api.ChatColor;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GameSettings {
 
@@ -95,7 +94,7 @@ public class GameSettings {
 				else
 					game.gameType = GameType.CLASSIC;
 
-				game.TellAll(color("&2&l(!) &rThe game mode has been set to &e&l" + game.gameType.toString()));
+				game.TellAll(color("&2&l(!) &rThe game mode has been set to &e&l" + game.gameType.getName()));
 				updateModeOnBoard();
 			}
 		}

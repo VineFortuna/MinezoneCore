@@ -82,6 +82,7 @@ public class GameInstance {
 	public List<ItemStack> allItemDrops = new ArrayList<>();
 	public List<ItemStack> items = new ArrayList<>();
 	public List<Player> favClassSelection = new ArrayList<>();
+	public List<ClassType> classList = generateClassList();
 
 	// Constructors:
 	public GameInstance(GameManager gameManager, Maps map) {
@@ -89,7 +90,8 @@ public class GameInstance {
 		this.gameSettings = new GameSettings(this);
 		this.map = map;
 		this.state = GameState.WAITING; // Default game state
-		this.gameType = map.GetInstance().gameType;
+//		this.gameType = map.GetInstance().gameType;
+		this.gameType = GameType.GUNGAME;
 		this.players = new ArrayList<Player>();
 		this.winnerList = new ArrayList<Player>();
 		this.spectators = new ArrayList<Player>();
@@ -335,7 +337,7 @@ public class GameInstance {
 
 	public void setClass(Player player, ClassType type) {
 		classSelection.put(player, type);
-		if (gameType != GameType.FRENZY) {
+		if (gameType != GameType.FRENZY && gameType != GameType.GUNGAME) {
 			board = boards.get(player);
 			board.updateLine(5, " " + type.getTag());
 
@@ -683,6 +685,13 @@ public class GameInstance {
 		TellAll(color("&r       they can spawn useful powerups."));
 		TellAll(color("&r                   Good Luck!"));
 		TellAll(color("&e&l----------------------------------------"));
+		
+		if (this.gameType == GameType.GUNGAME) {
+			TellAll(color("&e&l----------------------------------------"));
+			TellAll("" + ChatColor.AQUA + ChatColor.BOLD + "             Class Lineup");
+			TellAll(Arrays.toString(this.classList.toArray()));
+			TellAll(color("&e&l----------------------------------------"));
+		}
 
 		this.state = GameState.STARTED; // Sets game state to 'Started'
 		LoadClasses();
@@ -1147,8 +1156,11 @@ public class GameInstance {
 	public void PlayerDeath(Player player) {
 		if (this.gameType == GameType.FRENZY)
 			rerandomizeClass(player);
-
+		else if (this.gameType == GameType.GUNGAME)
+			nextClass(player);
+		
 		final BaseClass baseClass = this.classes.get(player);
+		
 		if (baseClass != null)
 			try {
 				player.getInventory().clear();
@@ -1183,7 +1195,8 @@ public class GameInstance {
 									GameInstance.this.getGameManager().getMain().ResetPlayer(player);
 								} else {
 									baseClass.loadPlayer();
-									if (GameInstance.this.gameType == GameType.FRENZY) {
+									if (GameInstance.this.gameType == GameType.FRENZY ||
+											GameInstance.this.gameType == GameType.GUNGAME) {
 										player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "New Class:",
 												"" + baseClass.getType().getTag());
 										new BukkitRunnable() { // Get rid of title after 1.5 seconds
@@ -1919,6 +1932,45 @@ public class GameInstance {
 				player.setDisplayName("" + player.getName() + " " + classType.getTag() + ChatColor.GRAY);
 		}
 	}
+	
+	private void nextClass(Player player) {
+		BaseClass baseClass = classes.get(player);
+		
+		if (baseClass.gunGamePos < classList.size()) {
+			baseClass.gunGamePos++;
+			ClassType classType = classList.get(baseClass.gunGamePos);
+			BaseClass newBaseClass = classType.GetClassInstance(this, player);
+			BaseClass oldBaseClass = classes.get(player);
+			oldClasses.put(player, oldBaseClass);
+			
+			Score newScore = livesObjective.getScore(
+					truncateString("" + classType.getTag() + " " + ChatColor.WHITE + player.getName() + "", 40));
+			newBaseClass.lives = oldBaseClass.lives;
+			newBaseClass.tokens = oldBaseClass.tokens;
+			newBaseClass.score = newScore;
+			newBaseClass.totalTokens = oldBaseClass.totalTokens;
+			newBaseClass.totalExp = oldBaseClass.totalExp;
+			newBaseClass.totalKills = oldBaseClass.totalKills;
+			newBaseClass.bountyTarget = oldBaseClass.bountyTarget;
+			newBaseClass.gunGamePos = oldBaseClass.gunGamePos;
+			
+			oldBaseClass.score.getScoreboard().resetScores(oldBaseClass.score.getEntry());
+			
+			classes.put(player, newBaseClass);
+			allClasses.put(player, newBaseClass);
+			sendScoreboardUpdate(player);
+			
+			player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+					+ "Your class has been set to " + classType.getTag());
+			
+			if (player.hasPermission("scb.chat"))
+				player.setDisplayName("" + player.getName() + " " + classType.getTag());
+			else
+				player.setDisplayName("" + player.getName() + " " + classType.getTag() + ChatColor.GRAY);
+		} else {
+			player.sendMessage("game over");
+		}
+	}
 
 	/*
 	 * This function will load the players' class based on what they selected. If
@@ -1933,6 +1985,10 @@ public class GameInstance {
 			player.getInventory().clear();
 			PlayerData playerData = gameManager.getMain().getDataManager().getPlayerData(player);
 			ClassType selectedClass = gameType != GameType.FRENZY ? classSelection.get(player) : null;
+			
+			if (gameType == GameType.GUNGAME)
+				selectedClass = classList.get(0);
+			
 			if (selectedClass == null) {
 				if (this.favClassSelection.contains(player)) {
 					if (playerData != null) {
@@ -2400,6 +2456,17 @@ public class GameInstance {
 	public void clearLastPosition(Player player) {
 		UUID playerId = player.getUniqueId();
 		lastKnownLocations.remove(playerId);
+	}
+	
+	public List<ClassType> generateClassList() {
+		List<ClassType> classes = new ArrayList<>();
+		Random rand = new Random();
+		int r;
+		for (int i = 0; i < 5; i++) {
+			ClassType classType = ClassType.values()[random.nextInt(ClassType.values().length)];
+			classes.add(classType);
+		}
+		return classes;
 	}
 
 	public List<ItemStack> getAllItemDrops() {

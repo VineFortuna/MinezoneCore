@@ -96,7 +96,7 @@ public class WolfClass extends BaseClass {
 					}
 				}
 			}
-			player.getWorld().playSound(player.getLocation(), Sound.ZOMBIE_METAL, 1, 0);
+			player.getWorld().playSound(player.getLocation(), Sound.ITEM_BREAK, 1, 0);
 			int radius = 1;
 			for (int t = 0; t < 2 * Math.PI * radius; t += 1) {
 				player.getWorld().playEffect(player.getLocation().add(radius * Math.cos(t), 0,
