@@ -1,24 +1,27 @@
 package anthony.SuperCraftBrawl;
 
-import java.util.ArrayList; 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.gui.christmas.ChristmasRewardsGUI;
+import anthony.SuperCraftBrawl.gui.cosmetics.CosmeticsGUI;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.util.PathfinderGoalFollowPlayer;
+import anthony.util.PathfinderHelper;
+import me.itzzmic.minezone.api.PunishAPI;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.EntityInsentient;
+import net.minecraft.server.v1_8_R3.EntityLiving;
+import net.minecraft.server.v1_8_R3.EnumParticle;
+import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 import org.apache.commons.lang3.StringUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.DyeColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.FishHook;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Snowball;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -32,58 +35,50 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Door;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.gui.ChallengesGUI;
-import anthony.SuperCraftBrawl.gui.ClassSelectorGUI;
-import anthony.SuperCraftBrawl.gui.cosmetics.CosmeticsGUI;
-import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
-import anthony.SuperCraftBrawl.gui.PrefsGUI;
-import anthony.SuperCraftBrawl.gui.StatsGUI;
-import anthony.SuperCraftBrawl.gui.TournamentGUI;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import anthony.SuperCraftBrawl.ranks.Rank;
-import me.itzzmic.minezone.api.PunishAPI;
-import net.md_5.bungee.api.ChatColor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 public class PlayerListener implements Listener {
 
 	private final Core main;
 	public ScoreboardManager scoreManager = Bukkit.getScoreboardManager();
 	public Scoreboard c;
+	public List<Player> snowParticlePlayers = new ArrayList<Player>();
+	public List<Player> snowmanPetPlayers = new ArrayList<Player>();
+	public List<Player> candyCaneSwirlPlayers = new ArrayList<Player>();
+	public List<Player> elfCosmeticPlayers = new ArrayList<Player>();
 
 	public PlayerListener(Core main) {
 		this.main = main;
 		this.main.getServer().getPluginManager().registerEvents(this, main);
 		this.c = scoreManager.getNewScoreboard();
 	}
-	
+
 	/**
 	 * This function just resets player double jump & sets gamemode to Adventure
-	 * @param player to be reset
+	 * 
+	 * @param p to be reset
 	 */
 	public void resetDoubleJump(Player p) {
 		p.setAllowFlight(false);
 		p.setAllowFlight(true);
 		p.setGameMode(GameMode.ADVENTURE);
 	}
-	
+
 	/**
 	 * This function resets the armor of a player
+	 * 
 	 * @param p which is Player to remove armor
 	 */
 	public void resetArmor(Player p) {
@@ -92,24 +87,26 @@ public class PlayerListener implements Listener {
 		p.getInventory().setLeggings(new ItemStack(Material.AIR, 1));
 		p.getInventory().setBoots(new ItemStack(Material.AIR, 1));
 	}
-	
+
 	/**
 	 * This function resets the Player's potion effects if any is active
+	 * 
 	 * @param p which is Player to remove effects
 	 */
 	public void resetPotionEffects(Player p) {
-		for (PotionEffect type : p.getActivePotionEffects()) //Loop through all active effects
+		for (PotionEffect type : p.getActivePotionEffects()) // Loop through all active effects
 			p.removePotionEffect(type.getType());
 	}
-	
+
 	/**
 	 * This function sets the player's rank on the tablist to the left of their name
+	 * 
 	 * @param p which is Player to set rank on tablist
 	 */
 	@SuppressWarnings("deprecation")
 	public void setPlayerOnTablist(Player p) {
-		String rank = main.getRankManager().getRank(p).getTagWithSpace(); //Gets the player's rank
-		
+		String rank = main.getRankManager().getRank(p).getTagWithSpace(); // Gets the player's rank
+
 		if (rank.length() >= 16) {
 			String s = rank.substring(0, 9);
 			p.setPlayerListName("" + s + " " + ChatColor.RESET + p.getName());
@@ -118,46 +115,45 @@ public class PlayerListener implements Listener {
 
 		if (main.getRankManager().getRank(p) == Rank.DEFAULT)
 			p.setPlayerListName("" + rank + ChatColor.GRAY + p.getName());
-		
-		/*Team captain = c.registerNewTeam("b_captain");
-		captain.setPrefix(Rank.CAPTAIN.getTagWithSpace());
-		Team owner = c.registerNewTeam("a_owner");
-		owner.setPrefix(Rank.OWNER.getTagWithSpace());
-		
-		if (main.getRankManager().getRank(p) == Rank.CAPTAIN)
-			captain.addPlayer(p);
-		else if (main.getRankManager().getRank(p) == Rank.OWNER)
-			owner.addPlayer(p);
-		
-		p.setScoreboard(c);
-		
-		if (main.getTabManager() != null)
-			main.getTabManager().setPlayerTeam(p);*/
+
+		/*
+		 * Team captain = c.registerNewTeam("b_captain");
+		 * captain.setPrefix(Rank.CAPTAIN.getTagWithSpace()); Team owner =
+		 * c.registerNewTeam("a_owner"); owner.setPrefix(Rank.OWNER.getTagWithSpace());
+		 * 
+		 * if (main.getRankManager().getRank(p) == Rank.CAPTAIN) captain.addPlayer(p);
+		 * else if (main.getRankManager().getRank(p) == Rank.OWNER) owner.addPlayer(p);
+		 * 
+		 * p.setScoreboard(c);
+		 * 
+		 * if (main.getTabManager() != null) main.getTabManager().setPlayerTeam(p);
+		 */
 	}
-	
-	//Clicking leaderboard settings in lobby
+
+	// Clicking leaderboard settings in lobby
 	@EventHandler
-    public void onPlayerInteract(PlayerInteractAtEntityEvent event) {
-        if (!(event.getRightClicked() instanceof ArmorStand)) {
-            return; // Only proceed if it's an ArmorStand
-        }
+	public void onPlayerInteract(PlayerInteractAtEntityEvent event) {
+		if (!(event.getRightClicked() instanceof ArmorStand)) {
+			return; // Only proceed if it's an ArmorStand
+		}
 
-        ArmorStand armorStand = (ArmorStand) event.getRightClicked();
-        Player player = event.getPlayer();
+		ArmorStand armorStand = (ArmorStand) event.getRightClicked();
+		Player player = event.getPlayer();
 
-        if (armorStand.getCustomName() != null) {
-            if (armorStand.getCustomName().equals("Leaderboard Settings")) {
-                player.sendMessage("You clicked on the Leaderboard Settings!");
-            }
+		if (armorStand.getCustomName() != null) {
+			if (armorStand.getCustomName().equals("Leaderboard Settings")) {
+				player.sendMessage("You clicked on the Leaderboard Settings!");
+			}
 
-            if (armorStand.getCustomName().equals("Click to change settings")) {
-                player.sendMessage("You clicked to change settings!");
-            }
-        }
-    }
-	
+			if (armorStand.getCustomName().equals("Click to change settings")) {
+				player.sendMessage("You clicked to change settings!");
+			}
+		}
+	}
+
 	/**
 	 * This function checks if tournament mode is active on Player Join
+	 * 
 	 * @param p which is Player to add to the tournament
 	 */
 	public void checkIfTournament(Player p) {
@@ -173,8 +169,8 @@ public class PlayerListener implements Listener {
 		}
 	}
 
-	//EVENTS:
-	
+	// EVENTS:
+
 	@EventHandler
 	public void OnPlayerJoin(PlayerJoinEvent event) {
 		event.getPlayer().teleport(main.GetHubLoc());
@@ -191,15 +187,17 @@ public class PlayerListener implements Listener {
 	public void OnPlayerQuit(PlayerQuitEvent event) {
 		Player player = event.getPlayer();
 		GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
-		//anthony.CrystalWars.game.GameInstance i = main.getCwManager().getInstanceOfPlayer(player);
-		//anthony.skywars.GameInstance i2 = main.getSWManager().getInstanceOfPlayer(player);
+		// anthony.CrystalWars.game.GameInstance i =
+		// main.getCwManager().getInstanceOfPlayer(player);
+		// anthony.skywars.GameInstance i2 =
+		// main.getSWManager().getInstanceOfPlayer(player);
 
 		if (instance != null)
 			main.getGameManager().RemovePlayerFromAll(player);
-		//else if (i != null)
-			//main.getCwManager().removePlayer(player);
-		//else if (i2 != null)
-			//main.getSWManager().removePlayer(player);
+		// else if (i != null)
+		// main.getCwManager().removePlayer(player);
+		// else if (i2 != null)
+		// main.getSWManager().removePlayer(player);
 	}
 
 	@EventHandler
@@ -209,31 +207,158 @@ public class PlayerListener implements Listener {
 		else
 			e.setCancelled(false);
 	}
-	
+
 	@EventHandler
-    public void onPlayerInteract(PlayerInteractEntityEvent event) {
-        if (event.getRightClicked() instanceof Player) {
-            Player player = event.getPlayer();
-            Player target = (Player) event.getRightClicked();
-            
-            if (player != null && target != null) {
-            	GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
-            	GameInstance spectating = main.getGameManager().GetInstanceOfSpectator(player);
-            	
-            	if (game != null && game.state == GameState.STARTED)
-            		return;
-            	if (spectating != null)
-            		return;
-            	
-            	new StatsGUI(main, target).inv.open(player);
-            }
-        }
-    }
+	public void onEnderChestInteract(PlayerInteractEvent event) {
+		if (event.getClickedBlock() != null) {
+			if (event.getClickedBlock().getType() == Material.ENDER_CHEST
+					&& event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+				event.setCancelled(true);
+				new ChristmasRewardsGUI(main).inv.open(event.getPlayer());
+			}
+		}
+	}
+
+	@EventHandler
+	public void onPlayerMove(PlayerMoveEvent event) {
+		Player player = event.getPlayer();
+
+		if (this.snowParticlePlayers.contains(player)) {
+			Location loc = player.getLocation().add(0, 0.2, 0);
+
+			// Particle Settings
+			EnumParticle particleType = EnumParticle.CLOUD; // Example: CLOUD looks like a snow effect
+			boolean longDistance = false;
+			float offsetX = 0.3f;
+			float offsetY = 0.3f;
+			float offsetZ = 0.3f;
+			float speed = 0f;
+			int count = 5;
+
+			PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particleType, // The EnumParticle type
+					longDistance, // Long distance rendering
+					(float) loc.getX(), (float) loc.getY(), (float) loc.getZ(), offsetX, offsetY, offsetZ, speed,
+					count);
+
+			// Send the packet to all online players, so everyone can see the trail
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				((CraftPlayer) onlinePlayer).getHandle().playerConnection.sendPacket(packet);
+			}
+		}
+	}
+
+	public void snowmanPet(Player player) {
+		if (this.snowmanPetPlayers.contains(player)) {
+			// Spawn a Snowman near the player
+			Location spawnLoc = player.getLocation().add(1, 0, 1);
+			Snowman snowman = player.getWorld().spawn(spawnLoc, Snowman.class);
+			
+			// Convert the player to NMS EntityLiving
+			EntityLiving targetPlayer = (EntityLiving) ((CraftLivingEntity) player).getHandle();
+			
+			// Add follow behavior to the mob
+			PathfinderHelper.clearPathfinderGoals(snowman);
+			PathfinderHelper.addPathfinderGoal(snowman, 1, new PathfinderGoalFollowPlayer(
+					(EntityInsentient) ((CraftLivingEntity) snowman).getHandle(), targetPlayer, 1.75, 3.0, 4.0));
+			
+			// Schedule a repeating task to "follow" the player by teleporting
+			Bukkit.getScheduler().runTaskTimer(main, () -> {
+				if (!player.isOnline() || !snowman.isValid() || player.getWorld() != snowman.getWorld()) return;
+				
+				Location playerLoc = player.getLocation();
+				double distance = playerLoc.distance(snowman.getLocation());
+				
+				// If the snowman is too far, teleport it closer to the player
+				if (distance > 15) {
+					// Teleport the snowman about 2 blocks behind the player
+					Location behindPlayer = playerLoc.clone().add(playerLoc.getDirection().multiply(-2));
+					behindPlayer.setY(Math.min(playerLoc.getWorld().getHighestBlockYAt(behindPlayer), playerLoc.getY()+10));
+					snowman.teleport(behindPlayer);
+				}
+			}, 20L, 20L); // Checks every second
+		}
+	}
+
+	// Angle used to rotate the swirl; we store it as a field so it persists across
+	// movements
+	private double angle = 0;
+
+	@EventHandler
+	public void candyCaneSwirlCosmetic(Player player) {
+		if (this.candyCaneSwirlPlayers.contains(player)) {
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					// Check if player is still in the arraylist
+					if (!candyCaneSwirlPlayers.contains(player)) {
+						this.cancel();
+						return;
+					}
+
+					angle += Math.PI / 16; // adjust for speed of rotation
+
+					// Set the radius of the swirl and the vertical height
+					double radius = 1.0;
+					double height = 1.0; // how high around the player the swirl appears
+
+					// Calculate the positions for red and white particles in a circle
+					double xRed = radius * Math.cos(angle);
+					double zRed = radius * Math.sin(angle);
+
+					double xWhite = radius * Math.cos(angle + Math.PI); // Opposite side for a striped effect
+					double zWhite = radius * Math.sin(angle + Math.PI);
+
+					// Get player location
+					Location baseLoc = player.getLocation();
+
+					// Red particle (REDSTONE)
+					sendParticleToAll(EnumParticle.REDSTONE, baseLoc.getX() + xRed, baseLoc.getY() + height,
+							baseLoc.getZ() + zRed, 0.1f, 0.1f, 0.1f, 0f, 5);
+
+					// White particle (CLOUD)
+					sendParticleToAll(EnumParticle.SNOW_SHOVEL, baseLoc.getX() + xWhite, baseLoc.getY() + height,
+							baseLoc.getZ() + zWhite, 0.1f, 0.1f, 0.1f, 0f, 5);
+				}
+			}.runTaskTimer(main, 0L, 1L); // Run every 20 ticks (1 second), adjust as needed
+		}
+	}
+
+	// Sends the particle packet to all online players so everyone sees the swirl
+	private void sendParticleToAll(EnumParticle particle, double x, double y, double z, float offsetX, float offsetY,
+			float offsetZ, float speed, int count) {
+		PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particle, false, // long distance
+				(float) x, (float) y, (float) z, offsetX, offsetY, offsetZ, speed, count);
+		
+		for (Player online : Bukkit.getOnlinePlayers()) {
+			((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
+		}
+	}
+
+	@EventHandler
+	public void onPlayerInteract(PlayerInteractEntityEvent event) {
+		if (event.getRightClicked() instanceof Player) {
+			Player player = event.getPlayer();
+			Player target = (Player) event.getRightClicked();
+
+			if (player != null && target != null) {
+				GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+				GameInstance spectating = main.getGameManager().GetInstanceOfSpectator(player);
+
+				if (game != null && game.state == GameState.STARTED)
+					return;
+				if (spectating != null)
+					return;
+
+				new StatsGUI(main, target).inv.open(player);
+			}
+		}
+	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockBreak(BlockBreakEvent event) {
 		Player player = event.getPlayer();
-		//anthony.CrystalWars.game.GameInstance i = main.getCwManager().getInstanceOfPlayer(player);
+		// anthony.CrystalWars.game.GameInstance i =
+		// main.getCwManager().getInstanceOfPlayer(player);
 		Block b = event.getBlock();
 
 //		if (i != null) {
@@ -246,10 +371,10 @@ public class PlayerListener implements Listener {
 //				player.sendMessage(main.color("&c&l(!) &rYou can only destroy blocks placed by players!"));
 //			}
 //		} else {
-			if (player.isOp())
-				event.setCancelled(false);
-			else
-				event.setCancelled(true);
+		if (player.isOp())
+			event.setCancelled(false);
+		else
+			event.setCancelled(true);
 //		}
 //		i = null;
 //		anthony.skywars.GameInstance i2 = main.getSWManager().getInstanceOfPlayer(player);
@@ -266,26 +391,22 @@ public class PlayerListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBlockPlace(BlockPlaceEvent event) {
 		Player player = event.getPlayer();
-		/* anthony.CrystalWars.game.GameInstance i = main.getCwManager().getInstanceOfPlayer(player);
+		/*
+		 * anthony.CrystalWars.game.GameInstance i =
+		 * main.getCwManager().getInstanceOfPlayer(player);
+		 * 
+		 * if (i != null) { if (i.getState() == GameState.IN_PROGRESS) {
+		 * event.setCancelled(false);
+		 * i.blocksPlaced.add(event.getBlockPlaced().getLocation().toVector()); return;
+		 * } } i = null;
+		 * 
+		 * anthony.skywars.GameInstance i2 =
+		 * main.getSWManager().getInstanceOfPlayer(player);
+		 * 
+		 * if (i2 != null) { if (i2.getState() == anthony.skywars.GameState.STARTED) {
+		 * event.setCancelled(false); return; } }
+		 */
 
-		if (i != null) {
-			if (i.getState() == GameState.IN_PROGRESS) {
-				event.setCancelled(false);
-				i.blocksPlaced.add(event.getBlockPlaced().getLocation().toVector());
-				return;
-			}
-		}
-		i = null;
-
-		anthony.skywars.GameInstance i2 = main.getSWManager().getInstanceOfPlayer(player);
-
-		if (i2 != null) {
-			if (i2.getState() == anthony.skywars.GameState.STARTED) {
-				event.setCancelled(false);
-				return;
-			}
-		} */
-		
 		if (!(player.isOp()))
 			event.setCancelled(true);
 	}
@@ -295,7 +416,7 @@ public class PlayerListener implements Listener {
 		if (e.getCause() == EntityDamageEvent.DamageCause.FALL)
 			e.setCancelled(true);
 	}
-	
+
 	@EventHandler
 	public void armorStand(EntityDamageByEntityEvent e) {
 		if (e.getDamager() instanceof Player)
@@ -381,21 +502,20 @@ public class PlayerListener implements Listener {
 
 	@EventHandler
 	public void containerInteract(PlayerInteractEvent e) {
-		List<Material> list = new ArrayList<>(Arrays.asList(Material.FURNACE, Material.HOPPER, Material.ANVIL,
-				Material.ENCHANTMENT_TABLE, Material.ANVIL, Material.WORKBENCH, Material.BREWING_STAND,
-				Material.TRAPPED_CHEST, Material.ENDER_CHEST, Material.BEACON, Material.DISPENSER, Material.DROPPER,
-				Material.CHEST));
+		List<Material> list = new ArrayList<>(
+				Arrays.asList(Material.FURNACE, Material.HOPPER, Material.ANVIL, Material.ENCHANTMENT_TABLE,
+						Material.ANVIL, Material.WORKBENCH, Material.BREWING_STAND, Material.TRAPPED_CHEST,
+						Material.ENDER_CHEST, Material.BEACON, Material.DISPENSER, Material.DROPPER, Material.CHEST));
 		if (e.getAction() == Action.RIGHT_CLICK_BLOCK && list.contains(e.getClickedBlock().getType())) {
 			Player player = e.getPlayer();
 			if (!player.isOp())
 				e.setCancelled(true);
 		}
 	}
-	
+
 	@EventHandler
 	public void playerRightClick(PlayerInteractEntityEvent e) {
-		if (main.getGameManager().GetInstanceOfPlayer(e.getPlayer()) == null
-				&& e.getRightClicked() instanceof Player) {
+		if (main.getGameManager().GetInstanceOfPlayer(e.getPlayer()) == null && e.getRightClicked() instanceof Player) {
 			Player target = ((Player) e.getRightClicked()).getPlayer();
 			new StatsGUI(main, target).inv.open(e.getPlayer());
 		}
@@ -420,26 +540,25 @@ public class PlayerListener implements Listener {
 			}
 		} else {
 			// Chat filter
-			List<String> filteredWords = new ArrayList<>(Arrays.asList(
-					"nibba", "nigga", "niggas", "nigger", "niggers", "porn", "pornhub",
-					"cum", "fuck you", "fuckyou", "fuck", "bitch", "pussy", "fucker",
-					"motherfucker", "celestepvp", "celeste", "kys", "pu$$y", "fag", "faggot",
-					"bitchass", "cunt", "retard", "penis", "fucker", "twat", "cock"));
+			List<String> filteredWords = new ArrayList<>(Arrays.asList("nibba", "nigga", "niggas", "nigger", "niggers",
+					"porn", "pornhub", "cum", "fuck you", "fuckyou", "fuck", "bitch", "pussy", "fucker", "motherfucker",
+					"celestepvp", "celeste", "kys", "pu$$y", "fag", "faggot", "bitchass", "cunt", "retard", "penis",
+					"fucker", "twat", "cock"));
 			PlayerData data = main.getDataManager().getPlayerData(event.getPlayer());
 			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
 			String message = event.getMessage();
-			
+
 //			if (event.getPlayer().hasPermission("scb.chat"))
 //				message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
 //						+ ChatColor.YELLOW + "] " + tag + event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
 //			else
 //				message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
 //						+ ChatColor.YELLOW + "] " + tag + ChatColor.GRAY + event.getPlayer().getDisplayName() + ": ";
-			
+
 			event.setFormat(ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
-							+ ChatColor.YELLOW + "] " + tag); // This part will always be included
+					+ ChatColor.YELLOW + "] " + tag); // This part will always be included
 			String displayName = event.getPlayer().getDisplayName(); // Base display name
-			
+
 			if (data.blue == 1)
 				displayName = ChatColor.BLUE + displayName;
 			else if (data.red == 1)
@@ -448,14 +567,14 @@ public class PlayerListener implements Listener {
 				displayName = ChatColor.GREEN + displayName;
 			else if (data.yellow == 1)
 				displayName = ChatColor.YELLOW + displayName;
-			
+
 			if (event.getPlayer().hasPermission("scb.chat"))
 				event.setFormat(event.getFormat() + displayName + ChatColor.RESET + ": ");
 			else {
 				displayName = ChatColor.GRAY + displayName;
 				event.setFormat(event.getFormat() + displayName + ": ");
 			}
-			
+
 			String tempmsg = "";
 			for (String msgWord : message.split(" ")) { // Loop through each word and check if it is a banned word
 				if (filteredWords.contains(msgWord.toLowerCase())) {
@@ -503,7 +622,7 @@ public class PlayerListener implements Listener {
 				event.getPlayer().sendMessage(muteMsg);
 				return;
 			}
-				Bukkit.broadcastMessage(event.getFormat() + event.getMessage());
+			Bukkit.broadcastMessage(event.getFormat() + event.getMessage());
 //			if (censored) {
 //				//if (api.isPlayerAuthed(event.getPlayer()))
 //					Bukkit.broadcastMessage(message);
@@ -545,7 +664,7 @@ public class PlayerListener implements Listener {
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 				if ((player.getWorld() == main.getLobbyWorld())
 						|| (i != null && i.state == anthony.SuperCraftBrawl.Game.GameState.WAITING)) {
-					
+
 					if (data != null) {
 						if (data.paintball > 0) {
 							player.launchProjectile(Snowball.class);
@@ -564,7 +683,7 @@ public class PlayerListener implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler
 	public void onHookHit(EntityDamageByEntityEvent event) {
 		if (event.getDamager() instanceof FishHook)
