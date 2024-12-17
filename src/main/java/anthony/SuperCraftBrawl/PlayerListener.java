@@ -542,8 +542,8 @@ public class PlayerListener implements Listener {
 			// Chat filter
 			List<String> filteredWords = new ArrayList<>(Arrays.asList("nibba", "nigga", "niggas", "nigger", "niggers",
 					"porn", "pornhub", "cum", "fuck you", "fuckyou", "fuck", "bitch", "pussy", "fucker", "motherfucker",
-					"celestepvp", "celeste", "kys", "pu$$y", "fag", "faggot", "bitchass", "cunt", "retard", "penis",
-					"fucker", "twat", "cock"));
+					"kys", "pu$$y", "fag", "faggot", "bitchass", "cunt", "retard", "penis",
+					"fucker", "twat", "cock", "dick", "cumming", "fuckass", "vagina", "fuckers"));
 			PlayerData data = main.getDataManager().getPlayerData(event.getPlayer());
 			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
 			String message = event.getMessage();

@@ -90,8 +90,8 @@ public class GameInstance {
 		this.gameSettings = new GameSettings(this);
 		this.map = map;
 		this.state = GameState.WAITING; // Default game state
-//		this.gameType = map.GetInstance().gameType;
-		this.gameType = GameType.GUNGAME;
+		this.gameType = map.GetInstance().gameType;
+//		this.gameType = GameType.GUNGAME;
 		this.players = new ArrayList<Player>();
 		this.winnerList = new ArrayList<Player>();
 		this.spectators = new ArrayList<Player>();
