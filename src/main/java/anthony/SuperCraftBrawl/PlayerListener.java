@@ -223,7 +223,7 @@ public class PlayerListener implements Listener {
 	public void onPlayerMove(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
 
-		if (this.snowParticlePlayers.contains(player)) {
+		if (this.snowParticlePlayers.contains(player) && player.getWorld() == main.getLobbyWorld()) {
 			Location loc = player.getLocation().add(0, 0.2, 0);
 
 			// Particle Settings
@@ -252,27 +252,29 @@ public class PlayerListener implements Listener {
 			// Spawn a Snowman near the player
 			Location spawnLoc = player.getLocation().add(1, 0, 1);
 			Snowman snowman = player.getWorld().spawn(spawnLoc, Snowman.class);
-			
+
 			// Convert the player to NMS EntityLiving
 			EntityLiving targetPlayer = (EntityLiving) ((CraftLivingEntity) player).getHandle();
-			
+
 			// Add follow behavior to the mob
 			PathfinderHelper.clearPathfinderGoals(snowman);
 			PathfinderHelper.addPathfinderGoal(snowman, 1, new PathfinderGoalFollowPlayer(
 					(EntityInsentient) ((CraftLivingEntity) snowman).getHandle(), targetPlayer, 1.75, 3.0, 4.0));
-			
+
 			// Schedule a repeating task to "follow" the player by teleporting
 			Bukkit.getScheduler().runTaskTimer(main, () -> {
-				if (!player.isOnline() || !snowman.isValid() || player.getWorld() != snowman.getWorld()) return;
-				
+				if (!player.isOnline() || !snowman.isValid() || player.getWorld() != snowman.getWorld())
+					return;
+
 				Location playerLoc = player.getLocation();
 				double distance = playerLoc.distance(snowman.getLocation());
-				
+
 				// If the snowman is too far, teleport it closer to the player
 				if (distance > 15) {
 					// Teleport the snowman about 2 blocks behind the player
 					Location behindPlayer = playerLoc.clone().add(playerLoc.getDirection().multiply(-2));
-					behindPlayer.setY(Math.min(playerLoc.getWorld().getHighestBlockYAt(behindPlayer), playerLoc.getY()+10));
+					behindPlayer.setY(
+							Math.min(playerLoc.getWorld().getHighestBlockYAt(behindPlayer), playerLoc.getY() + 10));
 					snowman.teleport(behindPlayer);
 				}
 			}, 20L, 20L); // Checks every second
@@ -328,7 +330,7 @@ public class PlayerListener implements Listener {
 			float offsetZ, float speed, int count) {
 		PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particle, false, // long distance
 				(float) x, (float) y, (float) z, offsetX, offsetY, offsetZ, speed, count);
-		
+
 		for (Player online : Bukkit.getOnlinePlayers()) {
 			((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
 		}
