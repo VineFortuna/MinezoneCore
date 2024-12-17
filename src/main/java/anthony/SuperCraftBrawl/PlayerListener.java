@@ -250,7 +250,6 @@ public class PlayerListener implements Listener {
 	public void snowmanPet(Player player) {
 		if (this.snowmanPetPlayers.contains(player)) {
 			// Spawn a Snowman near the player
-<<<<<<< HEAD
 			Location spawnLoc = player.getLocation().add(1, 0, 1);
 			Snowman snowman = player.getWorld().spawn(spawnLoc, Snowman.class);
 
