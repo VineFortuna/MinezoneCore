@@ -177,13 +177,13 @@ public class EndermiteClass extends BaseClass {
     
                     player.sendMessage(instance.getGameManager().getMain()
                             .color("&2&l(!) &rYou and your Endermite teleported to each other's location"));
+                    int amount = item.getAmount();
+                    amount--;
+                    if (amount == 0)
+                        player.getInventory().clear(player.getInventory().getHeldItemSlot());
+                    else
+                        player.getItemInHand().setAmount(amount);
                 }
-                int amount = item.getAmount();
-                amount--;
-                if (amount == 0)
-                    player.getInventory().clear(player.getInventory().getHeldItemSlot());
-                else
-                    player.getItemInHand().setAmount(amount);
             } else if (item.getType() == Material.ENDER_PORTAL_FRAME) {
                 if (swarmSummon.getTime() < 20000) {
                     int seconds = (20000 - swarmSummon.getTime()) / 1000 + 1;
