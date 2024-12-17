@@ -90,7 +90,7 @@ public class NoteblockClass extends BaseClass {
 		redstone.removeEnchantment(Enchantment.DAMAGE_ALL);
 		redstone.removeEnchantment(Enchantment.KNOCKBACK);
 		redstone.removeEnchantment(Enchantment.FIRE_ASPECT);
-		noteItems();
+		clearNotes();
 	}
 
 	private void noteItems() {
