@@ -38,7 +38,6 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
@@ -1644,9 +1643,20 @@ public class Core extends JavaPlugin implements Listener {
 		String rank = getRankManager().getRank(player).getTagWithSpace(); // Gets the player's rank
 		e.setJoinMessage(color("&r&l[&a&l+&r&l] &r" + rank + "&b" + name + "&a connected"));
 
-		if (data != null)
+		if (data != null) {
 			player.setLevel(data.level); // Indication what the player's level is
-
+			boolean update = false;
+			if (data.december18 == -1 && data.snowmanPet == 0) {
+				data.snowmanPet = 1;
+				update = true;
+			}
+			if (data.december19 == -1 && data.candycaneParticles == 0) {
+				data.candycaneParticles = 1;
+				update = true;
+			}
+			if (update)
+				this.getDataManager().saveData(data);
+		}
 		player.setHealth(20);
 		player.setFoodLevel(20);
 	}
