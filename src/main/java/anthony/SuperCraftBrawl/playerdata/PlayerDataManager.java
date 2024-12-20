@@ -1,15 +1,6 @@
 package anthony.SuperCraftBrawl.playerdata;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
+import anthony.SuperCraftBrawl.Core;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,7 +10,13 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.permissions.PermissionAttachment;
 
-import anthony.SuperCraftBrawl.Core;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.UUID;
 
 public class PlayerDataManager implements Listener {
 
@@ -169,6 +166,8 @@ public class PlayerDataManager implements Listener {
 			int snowParticles = set.getInt("SnowParticles");
 			int snowballDeathEffect = set.getInt("SnowballDeathEffect");
 			int elfCosmetic = set.getInt("ElfCosmetic");
+			int snowmanPet = set.getInt("SnowmanPet");
+			int candycaneParticles = set.getInt("CandyCaneParticles");
 
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
@@ -178,7 +177,8 @@ public class PlayerDataManager implements Listener {
 					fireParticlesEffect, fishRainEffect, challenge100, challenge101, challenge102, challenge103,
 					matchMvps, fly, totalcaught, caught, rewardLevel, lureLevel, lure, friendshipLevel, friendship,
 					bestWinstreak, december15, december16, december17, december18, december19, december20, december21,
-					december22, december23, december24, december25, snowParticles, snowballDeathEffect, elfCosmetic);
+					december22, december23, december24, december25, snowParticles, snowballDeathEffect, elfCosmetic,
+					snowmanPet, candycaneParticles);
 		}
 		set.close();
 		stmt.close();
@@ -257,6 +257,7 @@ public class PlayerDataManager implements Listener {
 				+ ", BestWinstreak = " + data.bestWinstreak + ", BroomWinEffect = " + data.broomWinEffect
 				+ ", BestTime = " + data.bestTime + ", Exp = " + data.exp + ", Winstreak = " + data.winstreak
 				+ ", ElfCosmetic = " + data.elfCosmetic + ", SnowballDeathEffect = " + data.snowballDeathEffect
+				+ ", SnowmanPet = " + data.snowmanPet + ", CandyCaneParticles = " + data.candycaneParticles
 				+ ", GingerBreadMan = " + data.gingerbreadman + ", Elf = " + data.elf + ", Challenge1 = "
 				+ data.challenge1 + ", Challenge2 = " + data.challenge2 + ", Challenge3 = " + data.challenge3
 				+ ", December15 = " + data.december15 + ", December16 = " + data.december16 + ", December17 = "
