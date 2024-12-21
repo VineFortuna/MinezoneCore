@@ -9,7 +9,6 @@ import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.time.LocalDate;
@@ -31,14 +30,10 @@ public class ChristmasRewardsGUI implements InventoryProvider {
 	@Override
 	public void init(Player player, InventoryContents contents) {
 		PlayerData data = main.getDataManager().getPlayerData(player);
-		Material mat = Material.ENDER_CHEST;
 		String claim;
 
 		if (data != null) {
 			checkDay(data);
-			
-			if (data.december15 == 1)
-				mat = Material.CHEST;
 			
 			if (data.december15 == -1)
 				claim = main.color("&a&lCLAIMED");
@@ -60,10 +55,6 @@ public class ChristmasRewardsGUI implements InventoryProvider {
 				}
 				
 			}));
-			
-			mat = Material.ENDER_CHEST;
-			if (data.december16 == 1)
-				mat = Material.CHEST;
 			
 			if (data.december16 == -1)
 				claim = main.color("&a&lCLAIMED");
@@ -87,10 +78,6 @@ public class ChristmasRewardsGUI implements InventoryProvider {
 								}
 							}));
 			
-			mat = Material.ENDER_CHEST;
-			if (data.december17 == 1)
-				mat = Material.CHEST;
-			
 			if (data.december17 == -1)
 				claim = main.color("&a&lCLAIMED");
 			else
@@ -113,9 +100,6 @@ public class ChristmasRewardsGUI implements InventoryProvider {
 								}
 							}));
 			
-			mat = Material.ENDER_CHEST;
-			if (data.december18 == 1)
-				mat = Material.CHEST;
 			if (data.december18 == -1)
 				claim = main.color("&a&lCLAIMED");
 			else
@@ -130,6 +114,7 @@ public class ChristmasRewardsGUI implements InventoryProvider {
 											player.sendMessage(
 													main.color("&c&l(&r&l!&c&l) &rYou were given &eSnowman &rpet!"));
 											data.december18 = -1;
+											data.snowmanPet = 1;
 										} else if (data.december18 == 0) {
 											player.sendMessage(
 													main.color("&c&l(!) &rWait until &eDecember 18 &rto open this!"));
@@ -137,10 +122,6 @@ public class ChristmasRewardsGUI implements InventoryProvider {
 											player.sendMessage(main.color("&c&l(!) &rYou already claimed this gift!"));
 										}
 									}));
-			
-			mat = Material.ENDER_CHEST;
-			if (data.december19 == 1)
-				mat = Material.CHEST;
 			
 			if (data.december19 == -1)
 				claim = main.color("&a&lCLAIMED");
@@ -156,6 +137,7 @@ public class ChristmasRewardsGUI implements InventoryProvider {
 											player.sendMessage(main.color(
 													"&c&l(&r&l!&c&l) &rYou were given &eCandy Cane Swirl &rcosmetic!"));
 											data.december19 = -1;
+											data.candycaneParticles = 1;
 										} else if (data.december19 == 0) {
 											player.sendMessage(
 													main.color("&c&l(!) &rWait until &eDecember 19 &rto open this!"));
@@ -163,10 +145,6 @@ public class ChristmasRewardsGUI implements InventoryProvider {
 											player.sendMessage(main.color("&c&l(!) &rYou already claimed this gift!"));
 										}
 									}));
-			
-			mat = Material.ENDER_CHEST;
-			if (data.december20 == 1)
-				mat = Material.CHEST;
 			
 			if (data.december20 == -1)
 				claim = main.color("&a&lCLAIMED");
@@ -190,10 +168,6 @@ public class ChristmasRewardsGUI implements InventoryProvider {
 											player.sendMessage(main.color("&c&l(!) &rYou already claimed this gift!"));
 										}
 									}));
-			
-			mat = Material.ENDER_CHEST;
-			if (data.december21 == 1)
-				mat = Material.CHEST;
 			
 			if (data.december21 == -1)
 				claim = main.color("&a&lCLAIMED");
@@ -226,10 +200,6 @@ public class ChristmasRewardsGUI implements InventoryProvider {
 										}
 									}));
 			
-			mat = Material.ENDER_CHEST;
-			if (data.december22 == 1)
-				mat = Material.CHEST;
-			
 			if (data.december22 == -1)
 				claim = main.color("&a&lCLAIMED");
 			else
@@ -251,10 +221,6 @@ public class ChristmasRewardsGUI implements InventoryProvider {
 									player.sendMessage(main.color("&c&l(!) &rYou already claimed this gift!"));
 								}
 							}));
-			
-			mat = Material.ENDER_CHEST;
-			if (data.december23 == 1)
-				mat = Material.CHEST;
 			
 			if (data.december23 == -1)
 				claim = main.color("&a&lCLAIMED");

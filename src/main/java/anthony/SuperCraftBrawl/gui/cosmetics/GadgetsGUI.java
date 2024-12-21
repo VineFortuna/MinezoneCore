@@ -174,33 +174,33 @@ public class GadgetsGUI implements InventoryProvider {
 		}));
 
 		contents.set(1, 6, ClickableItem.of(snowmanPet, e -> {
-			// if (data.snowParticles == 1) {
-			/*if (!(main.getListener().snowmanPetPlayers.contains(player))) {
-				player.sendMessage(main.color("&r&l(!) &rYou equipped &eSnowman &rpet"));
-				main.getListener().snowmanPetPlayers.add(player);
-				main.getListener().snowmanPet(player);
+			if (data.snowmanPet == 1) {
+				if (!(main.getListener().snowmanPetPlayers.contains(player))) {
+					player.sendMessage(main.color("&r&l(!) &rYou equipped &eSnowman &rpet"));
+					main.getListener().snowmanPetPlayers.add(player);
+					main.getListener().snowmanPet(player);
+				} else {
+					player.sendMessage(main.color("&r&l(!) &rYou removed &eSnowman &rpet"));
+					main.getListener().snowmanPetPlayers.remove(player);
+				}
 			} else {
-				player.sendMessage(main.color("&r&l(!) &rYou removed &eSnowman &rpet"));
-				main.getListener().snowmanPetPlayers.remove(player);
-			}*/
-			// } else {
-			player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this gadget yet!"));
-			// }
+				player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this gadget yet!"));
+			}
 		}));
 
 		contents.set(1, 7, ClickableItem.of(candyCane, e -> {
-			// if (data.snowParticles == 1) {
-			/*if (!(main.getListener().candyCaneSwirlPlayers.contains(player))) {
-				player.sendMessage(main.color("&r&l(!) &rYou equipped &eCandy Cane Swirl &gadget"));
-				main.getListener().candyCaneSwirlPlayers.add(player);
-				main.getListener().candyCaneSwirlCosmetic(player);
+			if (data.candycaneParticles == 1) {
+				if (!(main.getListener().candyCaneSwirlPlayers.contains(player))) {
+					player.sendMessage(main.color("&r&l(!) &rYou equipped &eCandy Cane Swirl &rgadget"));
+					main.getListener().candyCaneSwirlPlayers.add(player);
+					main.getListener().candyCaneSwirlCosmetic(player);
+				} else {
+					player.sendMessage(main.color("&r&l(!) &rYou removed &eCandy Cane Swirl &rgadget"));
+					main.getListener().candyCaneSwirlPlayers.remove(player);
+				}
 			} else {
-				player.sendMessage(main.color("&r&l(!) &rYou removed &eCandy Cane Swirl &gadget"));
-				main.getListener().candyCaneSwirlPlayers.remove(player);
-			}*/
-			// } else {
-			player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this gadget yet!"));
-			// }
+				player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this gadget yet!"));
+			}
 		}));
 
 		contents.set(2, 8, ClickableItem

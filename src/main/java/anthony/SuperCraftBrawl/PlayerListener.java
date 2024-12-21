@@ -252,6 +252,7 @@ public class PlayerListener implements Listener {
 			// Spawn a Snowman near the player
 			Location spawnLoc = player.getLocation().add(1, 0, 1);
 			Snowman snowman = player.getWorld().spawn(spawnLoc, Snowman.class);
+			snowman.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Snowman Pet");
 			
 			// Convert the player to NMS EntityLiving
 			EntityLiving targetPlayer = (EntityLiving) ((CraftLivingEntity) player).getHandle();
@@ -272,8 +273,10 @@ public class PlayerListener implements Listener {
 				if (distance > 15) {
 					// Teleport the snowman about 2 blocks behind the player
 					Location behindPlayer = playerLoc.clone().add(playerLoc.getDirection().multiply(-2));
-					behindPlayer.setY(Math.min(playerLoc.getWorld().getHighestBlockYAt(behindPlayer), playerLoc.getY()+10));
+					behindPlayer.setY(Math.min(playerLoc.getWorld().getHighestBlockYAt(behindPlayer), playerLoc.getY() + 10));
 					snowman.teleport(behindPlayer);
+				} else if (!this.snowmanPetPlayers.contains(player)) {
+					snowman.remove();
 				}
 			}, 20L, 20L); // Checks every second
 		}

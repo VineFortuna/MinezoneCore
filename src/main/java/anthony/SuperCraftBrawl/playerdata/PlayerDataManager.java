@@ -166,6 +166,8 @@ public class PlayerDataManager implements Listener {
 			int snowParticles = set.getInt("SnowParticles");
 			int snowballDeathEffect = set.getInt("SnowballDeathEffect");
 			int elfCosmetic = set.getInt("ElfCosmetic");
+			int snowmanPet = set.getInt("SnowmanPet");
+			int candycaneParticles = set.getInt("CandyCaneParticles");
 
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
@@ -175,7 +177,8 @@ public class PlayerDataManager implements Listener {
 					fireParticlesEffect, fishRainEffect, challenge100, challenge101, challenge102, challenge103,
 					matchMvps, fly, totalcaught, caught, rewardLevel, lureLevel, lure, friendshipLevel, friendship,
 					bestWinstreak, december15, december16, december17, december18, december19, december20, december21,
-					december22, december23, december24, december25, snowParticles, snowballDeathEffect, elfCosmetic);
+					december22, december23, december24, december25, snowParticles, snowballDeathEffect, elfCosmetic,
+					snowmanPet, candycaneParticles);
 		}
 		set.close();
 		stmt.close();
@@ -257,6 +260,7 @@ public class PlayerDataManager implements Listener {
 				+ ", BestWinstreak = " + data.bestWinstreak + ", BroomWinEffect = " + data.broomWinEffect
 				+ ", BestTime = " + data.bestTime + ", Exp = " + data.exp + ", Winstreak = " + data.winstreak
 				+ ", ElfCosmetic = " + data.elfCosmetic + ", SnowballDeathEffect = " + data.snowballDeathEffect
+				+ ", SnowmanPet = " + data.snowmanPet + ", CandyCaneParticles = " + data.candycaneParticles
 				+ ", GingerBreadMan = " + data.gingerbreadman + ", Elf = " + data.elf + ", Challenge1 = "
 				+ data.challenge1 + ", Challenge2 = " + data.challenge2 + ", Challenge3 = " + data.challenge3
 				+ ", December15 = " + data.december15 + ", December16 = " + data.december16 + ", December17 = "
