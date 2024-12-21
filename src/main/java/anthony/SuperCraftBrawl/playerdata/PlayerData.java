@@ -1,12 +1,11 @@
 package anthony.SuperCraftBrawl.playerdata;
 
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.ranks.Rank;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
-
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.ranks.Rank;
-import org.bukkit.entity.Fish;
 
 public class PlayerData {
 	public UUID playerUUID;
@@ -23,7 +22,8 @@ public class PlayerData {
 			fly = 0, totalcaught = 0, caught = 0, rewardLevel = 0, lureLevel = 0, lure = 0, friendshipLevel = 0,
 			friendship = 0, bestWinstreak = 0, december15 = 0, december16 = 0, december17 = 0, december18 = 0,
 			december19 = 0, december20 = 0, december21 = 0, december22 = 0, december23 = 0, december24 = 0,
-			december25 = 0, snowParticles = 0, snowballDeathEffect = 0, elfCosmetic = 0;;
+			december25 = 0, snowParticles = 0, snowballDeathEffect = 0, elfCosmetic = 0, snowmanPet = 0,
+			candycaneParticles = 0;
 
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
 	public HashMap<Integer, FishingDetails> playerFishing = new HashMap<>();
@@ -40,7 +40,7 @@ public class PlayerData {
 			int rewardLevel, int lureLevel, int lure, int friendshipLevel, int friendship, int bestWinstreak,
 			int december15, int december16, int december17, int december18, int december19, int december20,
 			int december21, int december22, int december23, int december24, int december25, int snowParticles,
-			int snowballDeathEffect, int elfCosmetic) {
+			int snowballDeathEffect, int elfCosmetic, int snowmanPet, int candycaneParticles) {
 		this(playerUUID, playerName, playerIP);
 		this.roleID = roleID;
 		this.tokens = tokens;
@@ -115,6 +115,8 @@ public class PlayerData {
 		this.snowParticles = snowParticles;
 		this.snowballDeathEffect = snowballDeathEffect;
 		this.elfCosmetic = elfCosmetic;
+		this.snowmanPet = snowmanPet;
+		this.candycaneParticles = candycaneParticles;
 	}
 
 	public boolean isPurchased(ClassType type) {
