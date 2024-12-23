@@ -28,7 +28,8 @@ import java.util.List;
 public class WolfClass extends BaseClass {
 
 	private boolean used = false;
-	private List<Wolf> wolves = new ArrayList<Wolf>();
+	private List<Wolf> wolves = new ArrayList<>();
+	private List<Player> hitPlayers = new ArrayList<>();
 	private int cooldownSec;
 
 	public WolfClass(GameInstance instance, Player player) {
@@ -82,25 +83,32 @@ public class WolfClass extends BaseClass {
 	
 	@Override
 	public void Tick(int gameTicks) {
-		if (used && player.isOnGround()) {
-			used = false;
-			List<Entity> nearby = player.getNearbyEntities(2D, 1D, 2D);
-			for (Entity entity : nearby) {
-				if (entity instanceof Player) {
-					Player target = (Player) entity;
-					if (target != player) {
-						target.setVelocity((new Vector(0, 1, 0)).multiply(0.5D));
-						EntityDamageEvent damageEvent = new EntityDamageEvent(target,
-								EntityDamageEvent.DamageCause.MAGIC, 6);
-						target.damage(6, player);
+		if (used) {
+			if (!player.isOnGround()) {
+				List<Entity> nearby = player.getNearbyEntities(1D, 1D, 1D);
+				for (Entity entity : nearby) {
+					if (entity instanceof Player) {
+						Player target = (Player) entity;
+						if (target != player && !hitPlayers.contains(target)) {
+							
+							target.setVelocity((new Vector(0, 1, 0)).multiply(0.5D));
+							EntityDamageEvent damageEvent = new EntityDamageEvent(target,
+									EntityDamageEvent.DamageCause.MAGIC, 6);
+							target.damage(6, player);
+							player.getWorld().playSound(player.getLocation(), Sound.ITEM_BREAK, 1, 0);
+							hitPlayers.add(target);
+							
+							int radius = 1;
+							for (int t = 0; t < 2 * Math.PI * radius; t += 1) {
+								player.getWorld().playEffect(player.getLocation().add(radius * Math.cos(t), 0,
+										radius * Math.sin((t))), Effect.CRIT, 1);
+							}
+						}
 					}
 				}
-			}
-			player.getWorld().playSound(player.getLocation(), Sound.ITEM_BREAK, 1, 0);
-			int radius = 1;
-			for (int t = 0; t < 2 * Math.PI * radius; t += 1) {
-				player.getWorld().playEffect(player.getLocation().add(radius * Math.cos(t), 0,
-						radius * Math.sin((t))), Effect.CRIT, 1);
+			} else {
+				used = false;
+				hitPlayers.clear();
 			}
 		}
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Wolf
@@ -122,6 +130,7 @@ public class WolfClass extends BaseClass {
 	public void SetItems(Inventory playerInv) {
 		wolf.startTime = System.currentTimeMillis() - 100000;
 		wolves.clear();
+		hitPlayers.clear();
 
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.RAW_BEEF),
