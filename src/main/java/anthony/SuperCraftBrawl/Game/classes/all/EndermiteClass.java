@@ -121,6 +121,14 @@ public class EndermiteClass extends BaseClass {
         if (item != null && event.getAction().name().contains("RIGHT_CLICK")) {
             if (item.getType() == Material.EYE_OF_ENDER) {
                 event.setCancelled(true);
+                
+                int amount = item.getAmount();
+                amount--;
+                if (amount == 0)
+                    player.getInventory().clear(player.getInventory().getHeldItemSlot());
+                else
+                    player.getItemInHand().setAmount(amount);
+                
                 int range = 25;
                 Location playerEyeLoc = player.getEyeLocation();
                 Vector dir = playerEyeLoc.getDirection();
@@ -142,49 +150,38 @@ public class EndermiteClass extends BaseClass {
     
                 for (double t = 1; t < maxDist; t += 0.5) {
                     ParticleEffect.BLOCK_CRACK.display(player.getEyeLocation().add(dir.clone().multiply(t)), 0.0F,
-                            0.0F, 0.0F, 0.0F, 1, new BlockTexture(Material.PORTAL), player);
+                            0.0F, 0.0F, 0.0F, 1, new BlockTexture(Material.PORTAL));
                 }
     
-                // Initialize variables for the nearest Endermite
-                Endermite nearestEndermite = null;
-                double nearestDistanceSquared = Double.MAX_VALUE;
+                for (Endermite e : endermites) {
+                    Vector d = e.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
+                    double dist = d.dot(dir);
     
-                for (Endermite target : endermites) {
-                    Vector toTarget = target.getLocation().add(0, 1, 0).subtract(playerEyeLoc).toVector();
-                    double distAlongBeam = toTarget.dot(dir);
+                    if (dist < maxDist) {
+                        Location closest = player.getEyeLocation().add(dir.clone().multiply(dist));
+    
+                        if (closest.distanceSquared(e.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
+                            if (instance.isInBounds(e.getLocation())) {
+                                Location playerLoc = player.getLocation();
+                                Location targetLoc = e.getLocation();
         
-                    if (distAlongBeam > 0 && distAlongBeam < maxDist) {
-                        Location closestPoint = playerEyeLoc.add(dir.clone().multiply(distAlongBeam));
-                        double distanceSquared = closestPoint.distanceSquared(target.getLocation().add(0, 1, 0));
-            
-                        if (distanceSquared <= 1.5 * 1.5 && distanceSquared < nearestDistanceSquared) {
-                            nearestEndermite = target;
-                            nearestDistanceSquared = distanceSquared;
+                                // Swap player and Endermite locations
+                                player.playSound(playerLoc, Sound.ENDERMAN_TELEPORT, 0.5f, 0);
+                                player.teleport(targetLoc);
+                                player.getWorld().playEffect(playerLoc.add(0, 1, 0), Effect.PORTAL, 1);
+                                e.teleport(playerLoc);
+        
+                                e.setTarget(instance.getNearestPlayer(player, e, 150));
+        
+                                player.sendMessage(instance.getGameManager().getMain()
+                                        .color("&2&l(!) &rYou and your Endermite teleported to each other's location"));
+                                break;
+                            }
                         }
                     }
                 }
-                // Teleportation logic if a valid Endermite is found
-                if (nearestEndermite != null && instance.isInBounds(nearestEndermite.getLocation())) {
-                    Location playerLoc = player.getLocation();
-                    Location targetLoc = nearestEndermite.getLocation();
-    
-                    // Swap player and Endermite locations
-                    player.playSound(playerLoc, Sound.ENDERMAN_TELEPORT, 0.5f, 0);
-                    player.teleport(targetLoc);
-                    nearestEndermite.teleport(playerLoc);
-    
-                    nearestEndermite.setTarget(instance.getNearestPlayer(player, nearestEndermite, 150));
-    
-                    player.sendMessage(instance.getGameManager().getMain()
-                            .color("&2&l(!) &rYou and your Endermite teleported to each other's location"));
-                    int amount = item.getAmount();
-                    amount--;
-                    if (amount == 0)
-                        player.getInventory().clear(player.getInventory().getHeldItemSlot());
-                    else
-                        player.getItemInHand().setAmount(amount);
-                }
             } else if (item.getType() == Material.ENDER_PORTAL_FRAME) {
+                event.setCancelled(true);
                 if (swarmSummon.getTime() < 20000) {
                     int seconds = (20000 - swarmSummon.getTime()) / 1000 + 1;
                     event.setCancelled(true);

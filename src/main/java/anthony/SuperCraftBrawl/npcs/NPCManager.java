@@ -7,7 +7,6 @@ import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import net.jitse.npclib.NPCLib;
 import net.jitse.npclib.api.NPC;
 import net.jitse.npclib.api.events.NPCInteractEvent;
-import net.jitse.npclib.api.skin.MineSkinFetcher;
 import net.jitse.npclib.api.skin.Skin;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -18,8 +17,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.util.Arrays;
 
 public class NPCManager implements Listener {
@@ -28,7 +25,7 @@ public class NPCManager implements Listener {
 	private NPCLib npcLib;
 
 	// NPCS HERE:
-	private NPC scb, skywars, scbDuos, parkour, scbModes, socialMedia;
+	private NPC fishing, scbModes, socialMedia;
 
 	public NPCManager(Core main) {
 		this.main = main;
@@ -44,19 +41,7 @@ public class NPCManager implements Listener {
 		Skin skin2 = new Skin(
 				"ewogICJ0aW1lc3RhbXAiIDogMTYzOTc5ODIxNjM4OCwKICAicHJvZmlsZUlkIiA6ICI1NWEyZTcyZTAxNjE0Yzg1YjE5MWEwYjIyN2ZmNzU4YSIsCiAgInByb2ZpbGVOYW1lIiA6ICJTZXRoQmxpbmciLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWEzZTg3OTcxYTZmYjhlM2Q5NzZjN2RhYjYzMjU3MmVlMjAwZDI4MmE0NGVkYTVkMGEyYTNjNDE1MjQ2NGQyZiIKICAgIH0sCiAgICAiQ0FQRSIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTc5MTI3OTBmZjE2NGI5MzE5NmYwOGJhNzFkMGU2MjEyOTMwNDc3NmQwZjM0NzMzNGY4YTZlYWU1MDlmOGE1NiIKICAgIH0KICB9Cn0=",
 				"tSB+tKhVQKKut1lm4VETD1l/ulDTI40F2f//L3d6pMZP2LGRp/B8BNbvqYjWdzY80aqw9t2zlvkAGQGFLOF1QPlCoA+OgG9kSS+OP7CZhM3fzTLjpIVyQQtKxCTJuh664Oj4JuzgfEYq/Yc7emUj7/asazPlNvgpY0BbS0pxXrhiN47UoNYjkxoBuyOX+uIkhmRzO+bQH1rRrMMdY6CYgubyz6QJXNJqg4zBgeRaUZHbtxlpy6FRcQPrvteacznCyfFa/cpkbbVLMPD9NQxCuB4bt29ygfVAgcO6+o5O/1JMJfA3yKpp0xuayZ6ILgIRzIBPP1943IAmegspjH8cs08Hhu7G9HuP7fyhvE3e8jMGzhhoeFmB4nZXDJxzT5ALsHjhzEzZFs3VazdiiaJy+7GwkqxQD6Y5NNUrMuHhvLo3nK9vs0kLjS/aQhBl4CkRIaqA3fJoE/ctpniJ5KVyaoSrF5YOn3QFp4qUg9JFr0KU7Ld3L2bcPwSFEIU7V3nIi7Kza9yx2JDOXOzmApfdDz1pYRB/g3D7WdVk1rRb/xPVUTlAjss4b9ijLhIHhcKGQyNl2dXPiIVnlx+FmJACnR40YZExLXEiFeutfUw1T8IP/Qqkg5158sKfqRPLwhvCqAjjqbDYtscPrNB1ApQCHTaL+UepPei+TFeHproVUHU=");
-		MineSkinFetcher.fetchSkinFromIdAsync(skinId, skin -> {
-			scb = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "SUPER CRAFT BLOCKS",
-					main.color("&7Click to connect!"),
-					"" + ChatColor.AQUA + GameManager.playercount.getOrDefault("scb-1", 0) + " Players"));
-			scb.setLocation(new Location(main.getLobbyWorld(), 0.474, 51, 7.559, -179, -2));
-			scb.setSkin(skin);
-			scb.create();
-
-			scbDuos = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "SUPER CRAFT BLOCKS",
-					main.color("&7&lDuos"), main.color("&7Click to connect!")));
-			scbDuos.setLocation(new Location(main.getLobbyWorld(), 186.462, 113, 649.534, 179, -0));
-			scbDuos.setSkin(skin2);
-			scbDuos.create();
+//		MineSkinFetcher.fetchSkinFromIdAsync(skinId, skin -> {
 
 			scbModes = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "JOIN GAME", "",
 					main.color("&7Click to join a SCB game")));
@@ -70,23 +55,18 @@ public class NPCManager implements Listener {
 			socialMedia.setSkin(skin2);
 			socialMedia.create();
 
-			parkour = npcLib.createNPC(
-					Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + ChatColor.UNDERLINE + "PARKOUR FINISH",
-							main.color("&7Click to claim reward!")));
-			parkour.setLocation(new Location(main.getLobbyWorld(), 126.562, 115, 632.989, 179, -0));
-			parkour.setSkin(skin);
-			parkour.create();
-
-			skywars = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "SKYWARS",
-					main.color("&7Click to connect!"), "" + ChatColor.AQUA + "0 Players"));
-			skywars.setLocation(new Location(main.getLobbyWorld(), 10.570, 51, 0.519, 90, -2));
-			skywars.setSkin(skin);
-			skywars.create();
+			fishing = npcLib.createNPC(
+					Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "FISHING", "",
+							main.color("&7Click to go fishing!")));
+			fishing.setLocation(new Location(main.getLobbyWorld(), 186.506, 113, 649.530, 179, -0));
+			fishing.setSkin(skin2);
+			fishing.create();
 
 			// FIX IT SO THIS UPDATES EVERY 10 SECONDS
-		});
+		//}
+		//);
 
-		update();
+		//update();
 		// }
 	}
 
@@ -98,10 +78,10 @@ public class NPCManager implements Listener {
 
 			@Override
 			public void run() {
-				scb.setText(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "SUPER CRAFT BLOCKS",
-						main.color("&7Click to connect!"), "" + ChatColor.AQUA + scbCount + " Players"));
-				skywars.setText(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "SKYWARS",
-						main.color("&7Click to connect!"), "" + ChatColor.AQUA + skywarsCount + " Players"));
+//				scb.setText(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "SUPER CRAFT BLOCKS",
+//						main.color("&7Click to connect!"), "" + ChatColor.AQUA + scbCount + " Players"));
+//				skywars.setText(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "SKYWARS",
+//						main.color("&7Click to connect!"), "" + ChatColor.AQUA + skywarsCount + " Players"));
 			}
 
 		};
@@ -112,49 +92,50 @@ public class NPCManager implements Listener {
 	public void onNPCInteract(NPCInteractEvent e) {
 		Player player = e.getWhoClicked();
 		// Detect when players hit NPC and do something
-		if (e.getNPC() == scb) {
-			Bukkit.getMessenger().registerOutgoingPluginChannel(main, "BungeeCord");
-
-			ByteArrayOutputStream b = new ByteArrayOutputStream();
-			DataOutputStream out = new DataOutputStream(b);
-
-			try {
-				out.writeUTF("Connect");
-				out.writeUTF("scb-1");
-				player.sendMessage(main.color("&e&l(!) &rConnecting to &escb-1"));
-			} catch (Exception ex) {
-				player.sendMessage(main.color("&c&l(!) &rThere was a problem connecting to &escb-1"));
-			}
-			player.sendPluginMessage(main, "BungeeCord", b.toByteArray());
-		} else if (e.getNPC() == skywars) {
-			Bukkit.getMessenger().registerOutgoingPluginChannel(main, "BungeeCord");
-
-			ByteArrayOutputStream b = new ByteArrayOutputStream();
-			DataOutputStream out = new DataOutputStream(b);
-
-			try {
-				out.writeUTF("Connect");
-				out.writeUTF("sw-1");
-				player.sendMessage(main.color("&e&l(!) &rConnecting to &esw-1"));
-			} catch (Exception ex) {
-				player.sendMessage(main.color("&c&l(!) &rThere was a problem connecting to &esw-1"));
-			}
-			player.sendPluginMessage(main, "BungeeCord", b.toByteArray());
-		} else if (e.getNPC() == scbDuos) {
-			Bukkit.getMessenger().registerOutgoingPluginChannel(main, "BungeeCord");
-
-			ByteArrayOutputStream b = new ByteArrayOutputStream();
-			DataOutputStream out = new DataOutputStream(b);
-
-			try {
-				out.writeUTF("Connect");
-				out.writeUTF("scb-2");
-				player.sendMessage(main.color("&e&l(!) &rConnecting to &escb-2"));
-			} catch (Exception ex) {
-				player.sendMessage(main.color("&c&l(!) &rThere was a problem connecting to &escb-2"));
-			}
-			player.sendPluginMessage(main, "BungeeCord", b.toByteArray());
-		} else if (e.getNPC() == parkour) {
+//		if (e.getNPC() == scb) {
+//			Bukkit.getMessenger().registerOutgoingPluginChannel(main, "BungeeCord");
+//
+//			ByteArrayOutputStream b = new ByteArrayOutputStream();
+//			DataOutputStream out = new DataOutputStream(b);
+//
+//			try {
+//				out.writeUTF("Connect");
+//				out.writeUTF("scb-1");
+//				player.sendMessage(main.color("&e&l(!) &rConnecting to &escb-1"));
+//			} catch (Exception ex) {
+//				player.sendMessage(main.color("&c&l(!) &rThere was a problem connecting to &escb-1"));
+//			}
+//			player.sendPluginMessage(main, "BungeeCord", b.toByteArray());
+//		} else if (e.getNPC() == skywars) {
+//			Bukkit.getMessenger().registerOutgoingPluginChannel(main, "BungeeCord");
+//
+//			ByteArrayOutputStream b = new ByteArrayOutputStream();
+//			DataOutputStream out = new DataOutputStream(b);
+//
+//			try {
+//				out.writeUTF("Connect");
+//				out.writeUTF("sw-1");
+//				player.sendMessage(main.color("&e&l(!) &rConnecting to &esw-1"));
+//			} catch (Exception ex) {
+//				player.sendMessage(main.color("&c&l(!) &rThere was a problem connecting to &esw-1"));
+//			}
+//			player.sendPluginMessage(main, "BungeeCord", b.toByteArray());
+//		} else if (e.getNPC() == scbDuos) {
+//			Bukkit.getMessenger().registerOutgoingPluginChannel(main, "BungeeCord");
+//
+//			ByteArrayOutputStream b = new ByteArrayOutputStream();
+//			DataOutputStream out = new DataOutputStream(b);
+//
+//			try {
+//				out.writeUTF("Connect");
+//				out.writeUTF("scb-2");
+//				player.sendMessage(main.color("&e&l(!) &rConnecting to &escb-2"));
+//			} catch (Exception ex) {
+//				player.sendMessage(main.color("&c&l(!) &rThere was a problem connecting to &escb-2"));
+//			}
+//			player.sendPluginMessage(main, "BungeeCord", b.toByteArray());
+//		} else
+			if (e.getNPC() == fishing) {
 			if (main.p.hasPlayer(player)) {
 				player.sendMessage(main.color("&r&l(!) &rHere is your reward: &e300 Tokens"));
 				player.sendMessage(main.color("&r&l(!) &rTime Taken: &e" + main.p.time.get(player)));
@@ -192,14 +173,11 @@ public class NPCManager implements Listener {
 		// Spawn npcs when player joins server
 		// if (main.lobbyWorld.getName().equals("lobbies")) {
 		Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(main, () -> {
-			Bukkit.getScheduler().runTask(main, () -> scb.show(e.getPlayer()));
-			Bukkit.getScheduler().runTask(main, () -> skywars.show(e.getPlayer()));
-			Bukkit.getScheduler().runTask(main, () -> scbDuos.show(e.getPlayer()));
-			Bukkit.getScheduler().runTask(main, () -> parkour.show(e.getPlayer()));
+			Bukkit.getScheduler().runTask(main, () -> fishing.show(e.getPlayer()));
 			Bukkit.getScheduler().runTask(main, () -> scbModes.show(e.getPlayer()));
 			Bukkit.getScheduler().runTask(main, () -> socialMedia.show(e.getPlayer()));
 		}, 20L);
-		// }
+		//}
 	}
 
 	/*
