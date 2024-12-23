@@ -79,6 +79,9 @@ public class NoteblockClass extends BaseClass {
 		knock = false;
 		speed = false;
 		res = false;
+		redstone.removeEnchantment(Enchantment.DAMAGE_ALL);
+		redstone.removeEnchantment(Enchantment.KNOCKBACK);
+		redstone.removeEnchantment(Enchantment.FIRE_ASPECT);
 		player.getInventory()
 				.setItem(0,
 						ItemHelper
@@ -87,9 +90,6 @@ public class NoteblockClass extends BaseClass {
 												instance.getGameManager().getMain()
 														.color("&rRedstone Dust &7(Right Click)")),
 										Enchantment.DAMAGE_ALL, 2));
-		redstone.removeEnchantment(Enchantment.DAMAGE_ALL);
-		redstone.removeEnchantment(Enchantment.KNOCKBACK);
-		redstone.removeEnchantment(Enchantment.FIRE_ASPECT);
 		clearNotes();
 	}
 
