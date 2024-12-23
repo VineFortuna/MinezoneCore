@@ -2329,13 +2329,15 @@ public class GameManager implements Listener, PluginMessageListener {
 												&& ((BaseClass) i.classes.get(target)).getLives() > 0) {
 											bc.bountyTarget = target;
 											player.sendMessage(this.main.color("&2&l(!) &e&lBOUNTY SET! &rKill &e"
-													+ target.getName() + " &rfor 25 Token award!"));
+													+ target.getName() + " &rfor 25 Token reward!"));
 											target.sendMessage(
 													this.main.color("&2&l(!) &e&lBOUNTY SET! &rYou are being targeted!"));
 											player.sendTitle(this.main.color("&e&lBOUNTY"),
 													this.main.color("&rYou are targetting &e" + target.getName()));
 											target.sendTitle(this.main.color("&e&lBOUNTY"),
 													this.main.color("&rYou are being targetted!"));
+											player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 1);
+											target.playSound(target.getLocation(), Sound.WITHER_SPAWN, 1, 0);
 											break;
 										}
 									}

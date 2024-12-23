@@ -2133,7 +2133,8 @@ public class GameInstance {
 						for (Player gamePlayer : this.players) {
 							this.gameSettings = new GameSettings(this); // To reset all variables
 							if (gamePlayer.getInventory().contains(Material.PAPER)) {
-								gamePlayer.closeInventory();
+								if (gamePlayer.getOpenInventory() != null)
+									gamePlayer.closeInventory();
 								gamePlayer.getInventory().remove(Material.PAPER);
 							}
 

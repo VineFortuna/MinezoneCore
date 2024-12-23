@@ -52,7 +52,7 @@ public class CraftableItemsGUI implements InventoryProvider {
 									player.sendMessage("Successfully crafted " + ChatColor.RESET + ChatColor.BLACK
 											+ ChatColor.BOLD + "Coal Block");
 									player.getInventory().remove(coal);
-									player.playSound(player.getLocation(), Sound.ANVIL_USE, 1, 0);
+									player.playSound(player.getLocation(), Sound.ANVIL_USE, 0.8f, 0);
 									bc.coalAmt = 0;
 								} else {
 									player.sendMessage("Use your other coal first before crafting a new one!");
@@ -90,7 +90,7 @@ public class CraftableItemsGUI implements InventoryProvider {
 									player.sendMessage("Successfully crafted " + ChatColor.RESET + ChatColor.GOLD
 											+ ChatColor.BOLD + "Gold Block");
 									player.getInventory().remove(goldIngot);
-									player.playSound(player.getLocation(), Sound.ANVIL_USE, 1, 0);
+									player.playSound(player.getLocation(), Sound.ANVIL_USE, 0.8f, 0);
 									bc.goldAmt = 0;
 								} else {
 									player.sendMessage("Use your other gold first before crafting a new one!");
@@ -110,7 +110,7 @@ public class CraftableItemsGUI implements InventoryProvider {
 									player.sendMessage("Successfully crafted " + ChatColor.RESET + ChatColor.AQUA
 											+ ChatColor.BOLD + "Diamond Block");
 									player.getInventory().remove(diamond);
-									player.playSound(player.getLocation(), Sound.ANVIL_USE, 1, 0);
+									player.playSound(player.getLocation(), Sound.ANVIL_USE, 0.8f, 0);
 									bc.diaAmt = 0;
 								} else {
 									player.sendMessage("Use your other diamond first before crafting a new one!");

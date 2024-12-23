@@ -126,7 +126,7 @@ public class FadeClass extends BaseClass {
 	 * time
 	 */
 	private void doFadeAbility() {
-		playSoundToGamePlayers(Sound.PORTAL_TRAVEL);
+		player.getWorld().playSound(player.getLocation(), Sound.PORTAL_TRAVEL, 1, 1);
 		player.sendMessage(
 				instance.getGameManager().getMain().color("&r&l(!) &rYou are now fading out of existence..."));
 		player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 180, 0));
@@ -180,23 +180,16 @@ public class FadeClass extends BaseClass {
 			public void run() {
 				if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Fade
 						&& instance.classes.get(player).getLives() > 0) {
-					for (Player gamePlayer : instance.players)
-						gamePlayer.showPlayer(player);
 					setArmor(player.getEquipment());
 					player.sendMessage(
 							instance.getGameManager().getMain().color("&r&l(!) &rYou are now visible to all players"));
-					playSoundToGamePlayers(Sound.ENDERMAN_TELEPORT);
-					fadeAbilityActive = false;
+					player.getWorld().playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1, 1);
 				}
+				for (Player gamePlayer : instance.players)
+					gamePlayer.showPlayer(player);
+				fadeAbilityActive = false;
 			}
 		};
 		r.runTaskLater(instance.getGameManager().getMain(), 20 * 8);
 	}
-
-	private void playSoundToGamePlayers(Sound sound) {
-		for (Player gamePlayer : instance.players) {
-			gamePlayer.playSound(player.getLocation(), sound, 1, 1);
-		}
-	}
-
 }
