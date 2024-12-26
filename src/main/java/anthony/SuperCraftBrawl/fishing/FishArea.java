@@ -1,4 +1,4 @@
-package anthony.SuperCraftBrawl.Game.map;
+package anthony.SuperCraftBrawl.fishing;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
