@@ -253,27 +253,29 @@ public class PlayerListener implements Listener {
 			Location spawnLoc = player.getLocation().add(1, 0, 1);
 			Snowman snowman = player.getWorld().spawn(spawnLoc, Snowman.class);
 			snowman.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Snowman Pet");
-			
+
 			// Convert the player to NMS EntityLiving
 			EntityLiving targetPlayer = (EntityLiving) ((CraftLivingEntity) player).getHandle();
-			
+
 			// Add follow behavior to the mob
 			PathfinderHelper.clearPathfinderGoals(snowman);
 			PathfinderHelper.addPathfinderGoal(snowman, 1, new PathfinderGoalFollowPlayer(
 					(EntityInsentient) ((CraftLivingEntity) snowman).getHandle(), targetPlayer, 1.75, 3.0, 4.0));
-			
+
 			// Schedule a repeating task to "follow" the player by teleporting
 			Bukkit.getScheduler().runTaskTimer(main, () -> {
-				if (!player.isOnline() || !snowman.isValid() || player.getWorld() != snowman.getWorld()) return;
-				
+				if (!player.isOnline() || !snowman.isValid() || player.getWorld() != snowman.getWorld())
+					return;
+
 				Location playerLoc = player.getLocation();
 				double distance = playerLoc.distance(snowman.getLocation());
-				
+
 				// If the snowman is too far, teleport it closer to the player
 				if (distance > 15) {
 					// Teleport the snowman about 2 blocks behind the player
 					Location behindPlayer = playerLoc.clone().add(playerLoc.getDirection().multiply(-2));
-					behindPlayer.setY(Math.min(playerLoc.getWorld().getHighestBlockYAt(behindPlayer), playerLoc.getY() + 10));
+					behindPlayer.setY(
+							Math.min(playerLoc.getWorld().getHighestBlockYAt(behindPlayer), playerLoc.getY() + 10));
 					snowman.teleport(behindPlayer);
 				} else if (!this.snowmanPetPlayers.contains(player)) {
 					snowman.remove();
@@ -289,40 +291,42 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void candyCaneSwirlCosmetic(Player player) {
 		if (this.candyCaneSwirlPlayers.contains(player)) {
-			new BukkitRunnable() {
-				@Override
-				public void run() {
-					// Check if player is still in the arraylist
-					if (!candyCaneSwirlPlayers.contains(player)) {
-						this.cancel();
-						return;
+			if (player.getWorld() == main.getLobbyWorld()) {
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						// Check if player is still in the arraylist
+						if (!candyCaneSwirlPlayers.contains(player) || player.getWorld() != main.getLobbyWorld()) {
+							this.cancel();
+							return;
+						}
+
+						angle += Math.PI / 16; // adjust for speed of rotation
+
+						// Set the radius of the swirl and the vertical height
+						double radius = 1.0;
+						double height = 1.0; // how high around the player the swirl appears
+
+						// Calculate the positions for red and white particles in a circle
+						double xRed = radius * Math.cos(angle);
+						double zRed = radius * Math.sin(angle);
+
+						double xWhite = radius * Math.cos(angle + Math.PI); // Opposite side for a striped effect
+						double zWhite = radius * Math.sin(angle + Math.PI);
+
+						// Get player location
+						Location baseLoc = player.getLocation();
+
+						// Red particle (REDSTONE)
+						sendParticleToAll(EnumParticle.REDSTONE, baseLoc.getX() + xRed, baseLoc.getY() + height,
+								baseLoc.getZ() + zRed, 0.1f, 0.1f, 0.1f, 0f, 5);
+
+						// White particle (CLOUD)
+						sendParticleToAll(EnumParticle.SNOW_SHOVEL, baseLoc.getX() + xWhite, baseLoc.getY() + height,
+								baseLoc.getZ() + zWhite, 0.1f, 0.1f, 0.1f, 0f, 5);
 					}
-
-					angle += Math.PI / 16; // adjust for speed of rotation
-
-					// Set the radius of the swirl and the vertical height
-					double radius = 1.0;
-					double height = 1.0; // how high around the player the swirl appears
-
-					// Calculate the positions for red and white particles in a circle
-					double xRed = radius * Math.cos(angle);
-					double zRed = radius * Math.sin(angle);
-
-					double xWhite = radius * Math.cos(angle + Math.PI); // Opposite side for a striped effect
-					double zWhite = radius * Math.sin(angle + Math.PI);
-
-					// Get player location
-					Location baseLoc = player.getLocation();
-
-					// Red particle (REDSTONE)
-					sendParticleToAll(EnumParticle.REDSTONE, baseLoc.getX() + xRed, baseLoc.getY() + height,
-							baseLoc.getZ() + zRed, 0.1f, 0.1f, 0.1f, 0f, 5);
-
-					// White particle (CLOUD)
-					sendParticleToAll(EnumParticle.SNOW_SHOVEL, baseLoc.getX() + xWhite, baseLoc.getY() + height,
-							baseLoc.getZ() + zWhite, 0.1f, 0.1f, 0.1f, 0f, 5);
-				}
-			}.runTaskTimer(main, 0L, 1L); // Run every 20 ticks (1 second), adjust as needed
+				}.runTaskTimer(main, 0L, 1L); // Run every 20 ticks (1 second), adjust as needed
+			}
 		}
 	}
 
@@ -331,7 +335,7 @@ public class PlayerListener implements Listener {
 			float offsetZ, float speed, int count) {
 		PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particle, false, // long distance
 				(float) x, (float) y, (float) z, offsetX, offsetY, offsetZ, speed, count);
-		
+
 		for (Player online : Bukkit.getOnlinePlayers()) {
 			((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
 		}
