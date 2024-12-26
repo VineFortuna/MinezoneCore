@@ -43,6 +43,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -245,6 +246,38 @@ public class PlayerListener implements Listener {
 				((CraftPlayer) onlinePlayer).getHandle().playerConnection.sendPacket(packet);
 			}
 		}
+	}
+	
+	@EventHandler
+	public void onJumpPadStep(PlayerMoveEvent event) {
+		Player player = event.getPlayer();
+		// Lobby jump pad
+		if (player.getWorld() == main.getLobbyWorld()) {
+			Location location = player.getLocation();
+			
+			// Check if the block below the player is a gold block
+			if (player.isOnGround() && location.getBlock().getType() == Material.GOLD_PLATE) {
+				// Check if the player is facing south
+				float yaw = location.getYaw();
+				if (isFacingSouth(yaw)) {
+					// Set the boost direction to south
+					Vector direction = new Vector(0, 1.25, 3); // Current facing direction
+					
+					// Apply the velocity to the player
+					player.setVelocity(direction);
+					
+					player.getWorld().playSound(location, Sound.BAT_TAKEOFF, 1, 5);
+				}
+			}
+		}
+	}
+	
+	private boolean isFacingSouth(float yaw) {
+		// Normalize yaw to 0-360 degrees
+		yaw = (yaw % 360 + 360) % 360;
+		
+		// Check if yaw is within the range for south direction
+		return (yaw >= 337.5 || yaw <= 22.5);
 	}
 
 	public void snowmanPet(Player player) {
