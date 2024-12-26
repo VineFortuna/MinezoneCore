@@ -277,146 +277,36 @@ public class ChristmasRewardsGUI implements InventoryProvider {
 	}
 
 	private void checkDay(PlayerData data) {
-		if (checkRewards() == 15 && data.december15 != -1) {
+		if (checkRewards() >= 15 && data.december15 != -1) {
 			data.december15 = 1;
-		} else if (checkRewards() == 16) {
-			if (data.december15 != -1)
-				data.december15 = 1;
+		} else if (checkRewards() >= 16) {
 			if (data.december16 != -1)
 				data.december16 = 1;
-		} else if (checkRewards() == 17) {
-			if (data.december15 != -1)
-				data.december15 = 1;
-			if (data.december16 != -1)
-				data.december16 = 1;
+		} else if (checkRewards() >= 17) {
 			if (data.december17 != -1)
 				data.december17 = 1;
-		} else if (checkRewards() == 18) {
-			if (data.december15 != -1)
-				data.december15 = 1;
-			if (data.december16 != -1)
-				data.december16 = 1;
-			if (data.december17 != -1)
-				data.december17 = 1;
+		} else if (checkRewards() >= 18) {
 			if (data.december18 != -1)
 				data.december18 = 1;
-		} else if (checkRewards() == 19) {
-			if (data.december15 != -1)
-				data.december15 = 1;
-			if (data.december16 != -1)
-				data.december16 = 1;
-			if (data.december17 != -1)
-				data.december17 = 1;
-			if (data.december18 != -1)
-				data.december18 = 1;
+		} else if (checkRewards() >= 19) {
 			if (data.december19 != -1)
 				data.december19 = 1;
-		} else if (checkRewards() == 20) {
-			if (data.december15 != -1)
-				data.december15 = 1;
-			if (data.december16 != -1)
-				data.december16 = 1;
-			if (data.december17 != -1)
-				data.december17 = 1;
-			if (data.december18 != -1)
-				data.december18 = 1;
-			if (data.december19 != -1)
-				data.december19 = 1;
+		} else if (checkRewards() >= 20) {
 			if (data.december20 != -1)
 				data.december20 = 1;
-		} else if (checkRewards() == 21) {
-			if (data.december15 != -1)
-				data.december15 = 1;
-			if (data.december16 != -1)
-				data.december16 = 1;
-			if (data.december17 != -1)
-				data.december17 = 1;
-			if (data.december18 != -1)
-				data.december18 = 1;
-			if (data.december19 != -1)
-				data.december19 = 1;
-			if (data.december20 != -1)
-				data.december20 = 1;
+		} else if (checkRewards() >= 21) {
 			if (data.december21 != -1)
 				data.december21 = 1;
-		} else if (checkRewards() == 22) {
-			if (data.december15 != -1)
-				data.december15 = 1;
-			if (data.december16 != -1)
-				data.december16 = 1;
-			if (data.december17 != -1)
-				data.december17 = 1;
-			if (data.december18 != -1)
-				data.december18 = 1;
-			if (data.december19 != -1)
-				data.december19 = 1;
-			if (data.december20 != -1)
-				data.december20 = 1;
-			if (data.december21 != -1)
-				data.december21 = 1;
+		} else if (checkRewards() >= 22) {
 			if (data.december22 != -1)
 				data.december22 = 1;
-		} else if (checkRewards() == 23) {
-			if (data.december15 != -1)
-				data.december15 = 1;
-			if (data.december16 != -1)
-				data.december16 = 1;
-			if (data.december17 != -1)
-				data.december17 = 1;
-			if (data.december18 != -1)
-				data.december18 = 1;
-			if (data.december19 != -1)
-				data.december19 = 1;
-			if (data.december20 != -1)
-				data.december20 = 1;
-			if (data.december21 != -1)
-				data.december21 = 1;
-			if (data.december22 != -1)
-				data.december22 = 1;
+		} else if (checkRewards() >= 23) {
 			if (data.december23 != -1)
 				data.december23 = 1;
-		} else if (checkRewards() == 24) {
-			if (data.december15 != -1)
-				data.december15 = 1;
-			if (data.december16 != -1)
-				data.december16 = 1;
-			if (data.december17 != -1)
-				data.december17 = 1;
-			if (data.december18 != -1)
-				data.december18 = 1;
-			if (data.december19 != -1)
-				data.december19 = 1;
-			if (data.december20 != -1)
-				data.december20 = 1;
-			if (data.december21 != -1)
-				data.december21 = 1;
-			if (data.december22 != -1)
-				data.december22 = 1;
-			if (data.december23 != -1)
-				data.december23 = 1;
+		} else if (checkRewards() >= 24) {
 			if (data.december24 != -1)
 				data.december24 = 1;
-		} else if (checkRewards() == 25) {
-			if (data.december15 != -1)
-				data.december15 = 1;
-			if (data.december16 != -1)
-				data.december16 = 1;
-			if (data.december17 != -1)
-				data.december17 = 1;
-			if (data.december18 != -1)
-				data.december18 = 1;
-			if (data.december19 != -1)
-				data.december19 = 1;
-			if (data.december20 != -1)
-				data.december20 = 1;
-			if (data.december21 != -1)
-				data.december21 = 1;
-			if (data.december22 != -1)
-				data.december22 = 1;
-			if (data.december23 != -1)
-				data.december23 = 1;
-			if (data.december24 != -1)
-				data.december24 = 1;
+		} else if (checkRewards() >= 25) {
 			if (data.december25 != -1)
 				data.december25 = 1;
 		}
