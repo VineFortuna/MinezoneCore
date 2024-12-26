@@ -29,7 +29,7 @@ public class DeathEffectsGUI implements InventoryProvider {
 		data.redstone = 0;
 		data.web = 0;
 		data.bottleEXP = 0;
-		data.snowballDeathEffect = 0;
+		data.snowball = 0;
 	}
 
 	@Override
@@ -110,15 +110,18 @@ public class DeathEffectsGUI implements InventoryProvider {
 				}
 			}));
 			contents.set(1, 6, ClickableItem.of(snowball, e -> {
-				player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this yet!"));
-				/*if (data.snowballDeathEffect == 0) {
-					this.resetData(data);
-					data.snowballDeathEffect = 1;
-					player.sendMessage(main.color("&9&l(!) &rYou have enabled &eSnowball Death Particle"));
+				if (data.snowballDeathEffect == 1) {
+					if (data.snowball == 0) {
+						this.resetData(data);
+						data.snowball = 1;
+						player.sendMessage(main.color("&9&l(!) &rYou have enabled &eSnowball Death Particle"));
+					} else {
+						this.resetData(data);
+						player.sendMessage(main.color("&9&l(!) &rYou have disabled &eSnowball Death Particle"));
+					}
 				} else {
-					this.resetData(data);
-					player.sendMessage(main.color("&9&l(!) &rYou have disabled &eSnowball Death Particle"));
-				}*/
+					player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this yet!"));
+				}
 			}));
 
 			contents.set(2, 8, ClickableItem

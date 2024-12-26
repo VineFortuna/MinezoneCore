@@ -1,74 +1,79 @@
 package anthony.SuperCraftBrawl.fishing;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.Game.map.FishArea;
 import anthony.util.ItemHelper;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public enum FishType {
     
-    COD(1, "Cod", FishRarity.COMMON),
-    SALMON(2, "Salmon", FishRarity.COMMON),
-    TROUT(3, "Trout", FishRarity.COMMON),
-    DACE(42, "Dace", FishRarity.COMMON),
-    GOBY(4, "Goby", FishRarity.COMMON),
-    BASS(5, "Bass", FishRarity.COMMON),
-    CARP(6, "Carp", FishRarity.COMMON),
-    PERCH(38, "Perch", FishRarity.COMMON),
-    URCHIN(7, "Sea Urchin", FishRarity.COMMON),
-    FROG(40, "Frog", FishRarity.COMMON),
-    PICKLES(8, "Sea Pickles", FishRarity.RARE),
-    SQUID(9, "Squid", FishRarity.RARE),
-    CLOWNFISH(10, "Clownfish", FishRarity.RARE),
-    SHRIMP(11, "Shrimp", FishRarity.RARE),
-    STARFISH(12, "Starfish", FishRarity.RARE),
-    LOBSTER(13, "Lobster", FishRarity.RARE),
-    CRAB(14, "Crab", FishRarity.RARE),
-    OARFISH(41, "Oarfish", FishRarity.RARE),
-    GOLDFISH(48, "Goldfish", FishRarity.RARE),
-    HERMITCRAB(15, "Hermit Crab", FishRarity.EPIC),
-    PUFFERFISH(16, "Pufferfish", FishRarity.EPIC),
-    GLOWSQUID(17, "Glow Squid", FishRarity.EPIC),
-    JELLYFISH(18, "Jellyfish", FishRarity.EPIC),
-    OCTOPUS(19, "Octopus", FishRarity.EPIC),
-    SNAKE(43, "Sea Snake", FishRarity.EPIC),
-    PARROTFISH(47, "Parrotfish", FishRarity.EPIC),
-    CLAM(49, "Clam", FishRarity.EPIC),
-    TURTLE(20, "Turtle", FishRarity.MYTHIC),
-    NAUTILUS(21, "Nautilus", FishRarity.MYTHIC),
-    SEAHORSE(39, "Seahorse", FishRarity.MYTHIC),
-    PIRANHA(36, "Piranha", FishRarity.MYTHIC),
-    ANGLERFISH(22, "Anglerfish", FishRarity.MYTHIC),
-    EEL(44, "Electric Eel", FishRarity.MYTHIC),
-    ANEMONE(50, "Sea Anemone", FishRarity.MYTHIC),
-    BLOBFISH(23, "Blobfish", FishRarity.LEGENDARY),
-    DOLPHIN(46, "Dolphin", FishRarity.LEGENDARY),
-    LEVIATHAN(24, "Swamp Monster", FishRarity.LEGENDARY),
-    SHARK(25, "Shark", FishRarity.LEGENDARY),
-    WHALE(26, "Whale", FishRarity.LEGENDARY),
-    LILYPAD(27, "Lilypad", FishRarity.JUNK),
-    STRING(28, "Fishing Line", FishRarity.JUNK),
-    BUCKET(29, "Bucket", FishRarity.JUNK),
-    BOTTLE(30, "Empty Bottle", FishRarity.JUNK),
-    BOOTS(31, "Old Boots", FishRarity.JUNK),
-    NAUTILUSSHELL(32, "Nautilus Shell", FishRarity.JUNK),
-    BOAT(37, "Broken Boat", FishRarity.JUNK),
-    EXP(45, "EXP Bottle", FishRarity.TREASURE),
-    TOKENS(33, "Token Sack", FishRarity.TREASURE),
-    MAP(34, "Treasure Map", FishRarity.TREASURE),
-    CRATE(35, "MysteryChest", FishRarity.TREASURE);
+    COD(1, "Cod", FishRarity.COMMON, null),
+    SALMON(2, "Salmon", FishRarity.COMMON, null),
+    TROUT(3, "Trout", FishRarity.COMMON, null),
+    DACE(42, "Dace", FishRarity.COMMON, null),
+    GOBY(4, "Goby", FishRarity.COMMON, null),
+    BASS(5, "Bass", FishRarity.COMMON, null),
+    CARP(6, "Carp", FishRarity.COMMON, null),
+    PERCH(38, "Perch", FishRarity.COMMON, null),
+    URCHIN(7, "Sea Urchin", FishRarity.COMMON, null),
+    FROG(40, "Frog", FishRarity.COMMON, null),
+    PICKLES(8, "Sea Pickles", FishRarity.RARE, null),
+    SQUID(9, "Squid", FishRarity.RARE, null),
+    CLOWNFISH(10, "Clownfish", FishRarity.RARE, null),
+    SHRIMP(11, "Shrimp", FishRarity.RARE, null),
+    STARFISH(12, "Starfish", FishRarity.RARE, null),
+    LOBSTER(13, "Lobster", FishRarity.RARE, null),
+    CRAB(14, "Crab", FishRarity.RARE, null),
+    OARFISH(41, "Oarfish", FishRarity.RARE, null),
+    GOLDFISH(48, "Goldfish", FishRarity.RARE, null),
+    HERMITCRAB(15, "Hermit Crab", FishRarity.EPIC, null),
+    PUFFERFISH(16, "Pufferfish", FishRarity.EPIC, null),
+    GLOWSQUID(17, "Glow Squid", FishRarity.EPIC, Arrays.asList(FishArea.LushCave)),
+    JELLYFISH(18, "Jellyfish", FishRarity.EPIC, null),
+    OCTOPUS(19, "Octopus", FishRarity.EPIC, null),
+    SNAKE(43, "Sea Snake", FishRarity.EPIC, null),
+    PARROTFISH(47, "Parrotfish", FishRarity.EPIC, null),
+    CLAM(49, "Clam", FishRarity.EPIC, null),
+    TURTLE(20, "Turtle", FishRarity.MYTHIC, null),
+    NAUTILUS(21, "Nautilus", FishRarity.MYTHIC, null),
+    SEAHORSE(39, "Seahorse", FishRarity.MYTHIC, null),
+    PIRANHA(36, "Piranha", FishRarity.MYTHIC, null),
+    ANGLERFISH(22, "Anglerfish", FishRarity.MYTHIC, null),
+    EEL(44, "Electric Eel", FishRarity.MYTHIC, null),
+    ANEMONE(50, "Sea Anemone", FishRarity.MYTHIC, null),
+    BLOBFISH(23, "Blobfish", FishRarity.LEGENDARY, null),
+    DOLPHIN(46, "Dolphin", FishRarity.LEGENDARY, null),
+    LEVIATHAN(24, "Swamp Monster", FishRarity.LEGENDARY, null),
+    SHARK(25, "Shark", FishRarity.LEGENDARY, null),
+    WHALE(26, "Whale", FishRarity.LEGENDARY, null),
+    LILYPAD(27, "Lilypad", FishRarity.JUNK, null),
+    STRING(28, "Fishing Line", FishRarity.JUNK, null),
+    BUCKET(29, "Bucket", FishRarity.JUNK, null),
+    BOTTLE(30, "Empty Bottle", FishRarity.JUNK, null),
+    BOOTS(31, "Old Boots", FishRarity.JUNK, null),
+    NAUTILUSSHELL(32, "Nautilus Shell", FishRarity.JUNK, null),
+    BOAT(37, "Broken Boat", FishRarity.JUNK, null),
+    EXP(45, "EXP Bottle", FishRarity.TREASURE, null),
+    TOKENS(33, "Token Sack", FishRarity.TREASURE, null),
+    MAP(34, "Treasure Map", FishRarity.TREASURE, null),
+    CRATE(35, "MysteryChest", FishRarity.TREASURE, null);
     
     private int id;
     private String name;
     private FishRarity rarity;
+    private List<FishArea> areas;
     
-    private FishType(int id, String name, FishRarity rarity) {
+    private FishType(int id, String name, FishRarity rarity, List<FishArea> areas) {
         this.id = id;
         this.name = name;
         this.rarity = rarity;
+        this.areas = areas;
     }
     
     public int getId() {
@@ -80,6 +85,7 @@ public enum FishType {
     public FishRarity getRarity() {
         return this.rarity;
     }
+    public List<FishArea> getAreas() { return this.areas; }
     public boolean isFish() {
         return this.rarity != FishRarity.JUNK && this.rarity != FishRarity.TREASURE;
     }
