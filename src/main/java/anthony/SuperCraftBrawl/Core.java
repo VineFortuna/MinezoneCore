@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl;
 import anthony.SuperCraftBrawl.Game.*;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
+import anthony.SuperCraftBrawl.Game.map.FishArea;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.commands.Commands;
 import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
@@ -893,27 +894,33 @@ public class Core extends JavaPlugin implements Listener {
 		}
 
 		if (cmd.getName().equalsIgnoreCase("classes") && sender instanceof Player) {
-			player.sendMessage(color("&r&l(!) &eThe following classes are available to play:"));
 			String dClasses = "";
 			String tClasses = "";
+			String lClasses = "";
 			String rClasses = "";
-			int count = 0;
 			for (ClassType type : ClassType.values()) {
-				if (type.getTokenCost() == 0 && type.getMinRank() != Rank.VIP)
+				if (type.getTokenCost() == 0 && type.getLevel() == 0 && type.getMinRank() != Rank.VIP)
 					dClasses += type.getTag() + " ";
 				else if (type.getTokenCost() > 0)
 					tClasses += type.getTag() + " ";
+				else if (type.getLevel() > 0)
+					lClasses += type.getTag() + " ";
 				else if (type.getMinRank() == Rank.VIP)
 					rClasses += type.getTag() + " ";
 			}
-			player.sendMessage("" + ChatColor.GRAY + ChatColor.BOLD + ChatColor.UNDERLINE + "DEFAULT CLASSES");
+			player.sendMessage(color("&f&l----------------------------------------"));
+			player.sendMessage(color("&e&lFREE CLASSES:"));
 			player.sendMessage(dClasses);
 			player.sendMessage("");
-			player.sendMessage("" + ChatColor.GRAY + ChatColor.BOLD + ChatColor.UNDERLINE + "TOKEN CLASSES");
+			player.sendMessage(color("&e&lTOKEN CLASSES:"));
 			player.sendMessage(tClasses);
 			player.sendMessage("");
-			player.sendMessage("" + ChatColor.GRAY + ChatColor.BOLD + ChatColor.UNDERLINE + "DONOR CLASSES");
+			player.sendMessage(color("&e&lLEVEL CLASSES:"));
+			player.sendMessage(lClasses);
+			player.sendMessage("");
+			player.sendMessage(color("&e&lDONOR CLASSES:"));
 			player.sendMessage(rClasses);
+			player.sendMessage(color("&f&l----------------------------------------"));
 		}
 		if (cmd.getName().equalsIgnoreCase("scb") && sender instanceof Player) {
 			player.sendMessage("" + ChatColor.GREEN + ChatColor.BOLD + "[SUPER CRAFT BLOCKS]");
@@ -1654,6 +1661,10 @@ public class Core extends JavaPlugin implements Listener {
 				data.candycaneParticles = 1;
 				update = true;
 			}
+			if (data.december23 == -1 && data.snowballDeathEffect == 0) {
+				data.snowballDeathEffect = 1;
+				update = true;
+			}
 			if (update)
 				this.getDataManager().saveData(data);
 		}
@@ -1979,5 +1990,14 @@ public class Core extends JavaPlugin implements Listener {
 			}
 		}
 		return this.color("&cInvalid");
+	}
+	
+	public FishArea getFishingArea(Location loc) {
+		for (FishArea area : FishArea.values()) {
+			if (area.isInBounds(loc)) {
+				return area;
+			}
+		}
+		return null;
 	}
 }

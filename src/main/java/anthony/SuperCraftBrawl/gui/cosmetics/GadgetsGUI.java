@@ -3,8 +3,6 @@ package anthony.SuperCraftBrawl.gui.cosmetics;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -15,12 +13,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class GadgetsGUI implements InventoryProvider {
 
@@ -209,24 +204,6 @@ public class GadgetsGUI implements InventoryProvider {
 				}));
 	}
 
-//	//give @p minecraft:player_head[profile={id:[I;-853038783,-424126035,-1902419453,-1029693902],properties:[{name:"textures",value:"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWQwZmJjN2E2YWQ4M2U5MjRkYjZjYTBjYTM0N2RjZjVmMmY0MzRmMzQ3NDJmODMyOTYwYTA0MDZmYmRiYjE4NyJ9fX0="}]},minecraft:lore=['{"text":"https://namemc.com/skin/944218dcc2d0316a"}']]
-
-	private static final String ELF_TEXTURE = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWQwZmJjN2E2YWQ4M2U5MjRkYjZjYTBjYTM0N2RjZjVmMmY0MzRmMzQ3NDJmODMyOTYwYTA0MDZmYmRiYjE4NyJ9fX0=";
-
-	private void equipElfSet(Player player) {
-		// Give the player the Elf head
-		ItemStack elfHead = getCustomSkull(ELF_TEXTURE);
-		// Give dyed leather armor
-		ItemStack chest = getDyedArmor(Material.LEATHER_CHESTPLATE, Color.GREEN, ChatColor.GREEN + "Elf Tunic");
-		ItemStack legs = getDyedArmor(Material.LEATHER_LEGGINGS, Color.RED, ChatColor.RED + "Elf Pants");
-		ItemStack boots = getDyedArmor(Material.LEATHER_BOOTS, Color.GREEN, ChatColor.GREEN + "Elf Boots");
-
-		player.getInventory().setHelmet(elfHead);
-		player.getInventory().setChestplate(chest);
-		player.getInventory().setLeggings(legs);
-		player.getInventory().setBoots(boots);
-	}
-
 	private ItemStack getDyedArmor(Material material, Color color, String name) {
 		ItemStack item = new ItemStack(material);
 		LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();
@@ -234,31 +211,6 @@ public class GadgetsGUI implements InventoryProvider {
 		meta.setDisplayName(name);
 		item.setItemMeta(meta);
 		return item;
-	}
-
-	/**
-	 * Creates a custom player head with the given base64 texture. Works on 1.8
-	 * using reflection and GameProfile.
-	 */
-	private ItemStack getCustomSkull(String base64) {
-		ItemStack skull = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
-		SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-
-		// Create a fake profile with the given texture
-		GameProfile profile = new GameProfile(UUID.randomUUID(), null);
-		profile.getProperties().put("textures", new Property("textures", base64));
-
-		try {
-			Field profileField = skullMeta.getClass().getDeclaredField("profile");
-			profileField.setAccessible(true);
-			profileField.set(skullMeta, profile);
-		} catch (NoSuchFieldException | IllegalAccessException e) {
-			e.printStackTrace();
-		}
-
-		skullMeta.setDisplayName(ChatColor.GREEN + "Elf Head");
-		skull.setItemMeta(skullMeta);
-		return skull;
 	}
 
 	@Override
