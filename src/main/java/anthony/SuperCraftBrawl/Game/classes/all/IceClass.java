@@ -1,10 +1,11 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import java.util.List;
-
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ItemHelper;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
@@ -18,18 +19,14 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
-
-import anthony.util.ItemHelper;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import xyz.xenondevs.particle.ParticleEffect;
 import xyz.xenondevs.particle.data.texture.BlockTexture;
+
+import java.util.List;
 
 public class IceClass extends BaseClass {
 
@@ -88,6 +85,9 @@ public class IceClass extends BaseClass {
 
 	@Override
 	public void Tick(int gameTicks) {
+		if (!(player.getActivePotionEffects().contains(PotionEffectType.WEAKNESS)))
+			player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
+		
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Ice
 				&& instance.classes.get(player).getLives() > 0) {
 			this.cooldownSec = (10 * 1000 - ice.getTime()) / 1000 + 1;

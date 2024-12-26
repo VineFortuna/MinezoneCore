@@ -168,6 +168,7 @@ public class PlayerDataManager implements Listener {
 			int elfCosmetic = set.getInt("ElfCosmetic");
 			int snowmanPet = set.getInt("SnowmanPet");
 			int candycaneParticles = set.getInt("CandyCaneParticles");
+			int snowball = set.getInt("Snowball");
 
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
@@ -178,7 +179,7 @@ public class PlayerDataManager implements Listener {
 					matchMvps, fly, totalcaught, caught, rewardLevel, lureLevel, lure, friendshipLevel, friendship,
 					bestWinstreak, december15, december16, december17, december18, december19, december20, december21,
 					december22, december23, december24, december25, snowParticles, snowballDeathEffect, elfCosmetic,
-					snowmanPet, candycaneParticles);
+					snowmanPet, candycaneParticles, snowball);
 		}
 		set.close();
 		stmt.close();
@@ -272,7 +273,8 @@ public class PlayerDataManager implements Listener {
 				+ data.paintball + ", Wins = " + data.wins + ", TotalCaught = " + data.totalcaught + ", Caught = "
 				+ data.caught + ", RewardLevel = " + data.rewardLevel + ", LureLevel = " + data.lureLevel + ", Lure = "
 				+ data.lure + ", FriendshipLevel = " + data.friendshipLevel + ", Friendship = " + data.friendship
-				+ ", FishRainEffect = " + data.fishRainEffect + " WHERE UUID = '" + data.playerUUID.toString() + "';");
+				+ ", FishRainEffect = " + data.fishRainEffect + ", Snowball = " + data.snowball +
+				" WHERE UUID = '" + data.playerUUID.toString() + "';");
 		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon,"
 				+ "Reward1, Reward2) VALUES ";
 		int index = 0;
@@ -284,14 +286,17 @@ public class PlayerDataManager implements Listener {
 				updateCMD += "('" + data.playerUUID.toString() + "', " + entry.getKey() + ", "
 						+ entry.getValue().timePurchased + ", " + (entry.getValue().purchased ? 1 : 0) + ", "
 						+ entry.getValue().gamesPlayed + ", " + entry.getValue().gamesWon + ", "
-						+ (entry.getValue().reward1 ? 1 : 0) + ", " + (entry.getValue().reward2 ? 1 : 0) + ")";
+						+ (entry.getValue().reward1 ? 1 : 0) + ", " + (entry.getValue().reward2 ? 1 : 0) + ", "
+						+ (entry.getValue().reward3 ? 1 : 0) + ", " + (entry.getValue().reward5 ? 1 : 0) + ", "
+						+ (entry.getValue().reward5 ? 1 : 0) + ")";
 				index++;
 			}
 		}
 
 		if (index > 0) {
 			updateCMD += " ON DUPLICATE KEY UPDATE TimePurchased = VALUES (TimePurchased), Purchased = VALUES (Purchased), GamesPlayed = VALUES (GamesPlayed),"
-					+ "GamesWon = VALUES (GamesWon), Reward1 = VALUES (Reward1), Reward2 = VALUES (Reward2);";
+					+ "GamesWon = VALUES (GamesWon), Reward1 = VALUES (Reward1), Reward2 = VALUES (Reward2)," +
+					"Reward3 = VALUES (Reward3), Reward4 = VALUES (Reward4), Reward5 = VALUES (Reward5);";
 			System.out.print("Executing " + updateCMD);
 			manager.executeUpdateCommand(updateCMD);
 		}

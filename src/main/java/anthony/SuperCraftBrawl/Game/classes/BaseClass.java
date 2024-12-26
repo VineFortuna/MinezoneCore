@@ -1133,6 +1133,8 @@ public abstract class BaseClass {
 						mat = Material.WEB;
 					else if (data2.bottleEXP == 1)
 						mat = Material.EXP_BOTTLE;
+					else if (data2.snowball == 1)
+						mat = Material.SNOW_BALL;
 				}
 
 				ItemStack particleItem;

@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.Game.map.FishArea;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.gui.christmas.ChristmasRewardsGUI;
 import anthony.SuperCraftBrawl.gui.cosmetics.CosmeticsGUI;
@@ -271,6 +272,31 @@ public class PlayerListener implements Listener {
 			}
 		}
 	}
+	
+	@EventHandler
+	public void onEnterFishingArea(PlayerMoveEvent event) {
+		Player player = event.getPlayer();
+		Location to = event.getTo();
+		
+		// Ensure the event occurs in the lobby world
+		if (player.getWorld().equals(main.getLobbyWorld())) {
+			// Ignore if the player hasn't moved to a new block
+			if (to == null || to.equals(event.getFrom())) {
+				return;
+			}
+			
+			// Check if the player is entering a fishing area
+			FishArea newArea = main.getFishingArea(to);
+			FishArea previousArea = main.getFishingArea(event.getFrom());
+			
+			if (previousArea == null && newArea != null) {
+				player.sendTitle(
+						ChatColor.GOLD + "Welcome!",
+						ChatColor.YELLOW + "You have entered " + newArea.getName());
+			}
+		}
+	}
+	
 	
 	private boolean isFacingSouth(float yaw) {
 		// Normalize yaw to 0-360 degrees
