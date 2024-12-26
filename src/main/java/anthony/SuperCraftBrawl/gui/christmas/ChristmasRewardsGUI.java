@@ -247,13 +247,14 @@ public class ChristmasRewardsGUI implements InventoryProvider {
 			contents.set(1, 0,
 					ClickableItem
 							.of(ItemHelper.createSkullTexture(getTexture(data.december24),
-											"" + ChatColor.RED + ChatColor.BOLD + "DAY 10", "", ChatColor.GRAY + "???", "", claim),
+											"" + ChatColor.RED + ChatColor.BOLD + "DAY 10", "", ChatColor.GRAY + "500 Tokens", "", claim),
 									e -> {
 										if (data.december24 == 1) {
 											player.sendMessage(main
-													.color("&c&l(&r&l!&c&l) &rYou were given &eSnowball Death Effect"));
+													.color("&c&l(&r&l!&c&l) &rYou were given &e500 Tokens"));
+											data.tokens += 500;
 											data.december24 = -1;
-											data.snowballDeathEffect = 0;
+											main.getScoreboardManager().lobbyBoard(player);
 										} else if (data.december24 == 0) {
 											player.sendMessage(
 													main.color("&c&l(!) &rWait until &eDecember 24 &rto open this!"));
