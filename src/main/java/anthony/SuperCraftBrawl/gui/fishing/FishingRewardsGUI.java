@@ -1,9 +1,9 @@
-package anthony.SuperCraftBrawl.gui;
+package anthony.SuperCraftBrawl.gui.fishing;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
