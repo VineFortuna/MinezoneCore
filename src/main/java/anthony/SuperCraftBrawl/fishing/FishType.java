@@ -1,7 +1,6 @@
 package anthony.SuperCraftBrawl.fishing;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.Game.map.FishArea;
 import anthony.util.ItemHelper;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -18,14 +17,14 @@ public enum FishType {
     TROUT(3, "Trout", FishRarity.COMMON, null),
     DACE(42, "Dace", FishRarity.COMMON, null),
     GOBY(4, "Goby", FishRarity.COMMON, null),
-    BASS(5, "Bass", FishRarity.COMMON, null),
-    CARP(6, "Carp", FishRarity.COMMON, null),
-    PERCH(38, "Perch", FishRarity.COMMON, null),
+    BASS(5, "Bass", FishRarity.COMMON, Arrays.asList(FishArea.Pond)),
+    CARP(6, "Carp", FishRarity.COMMON, Arrays.asList(FishArea.Pond)),
+    PERCH(38, "Perch", FishRarity.COMMON, Arrays.asList(FishArea.Pond)),
     URCHIN(7, "Sea Urchin", FishRarity.COMMON, null),
-    FROG(40, "Frog", FishRarity.COMMON, null),
-    PICKLES(8, "Sea Pickles", FishRarity.RARE, null),
+    FROG(40, "Frog", FishRarity.COMMON, Arrays.asList(FishArea.Pond, FishArea.LushCave, FishArea.Park)),
+    PICKLES(8, "Sea Pickles", FishRarity.RARE, Arrays.asList(FishArea.LushCave)),
     SQUID(9, "Squid", FishRarity.RARE, null),
-    CLOWNFISH(10, "Clownfish", FishRarity.RARE, null),
+    CLOWNFISH(10, "Clownfish", FishRarity.RARE, Arrays.asList(FishArea.LushCave)),
     SHRIMP(11, "Shrimp", FishRarity.RARE, null),
     STARFISH(12, "Starfish", FishRarity.RARE, null),
     LOBSTER(13, "Lobster", FishRarity.RARE, null),
@@ -43,16 +42,16 @@ public enum FishType {
     TURTLE(20, "Turtle", FishRarity.MYTHIC, null),
     NAUTILUS(21, "Nautilus", FishRarity.MYTHIC, null),
     SEAHORSE(39, "Seahorse", FishRarity.MYTHIC, null),
-    PIRANHA(36, "Piranha", FishRarity.MYTHIC, null),
+    PIRANHA(36, "Piranha", FishRarity.MYTHIC, Arrays.asList(FishArea.LushCave)),
     ANGLERFISH(22, "Anglerfish", FishRarity.MYTHIC, null),
     EEL(44, "Electric Eel", FishRarity.MYTHIC, null),
     ANEMONE(50, "Sea Anemone", FishRarity.MYTHIC, null),
     BLOBFISH(23, "Blobfish", FishRarity.LEGENDARY, null),
     DOLPHIN(46, "Dolphin", FishRarity.LEGENDARY, null),
-    LEVIATHAN(24, "Swamp Monster", FishRarity.LEGENDARY, null),
+    LEVIATHAN(24, "Swamp Monster", FishRarity.LEGENDARY, Arrays.asList(FishArea.LushCave)),
     SHARK(25, "Shark", FishRarity.LEGENDARY, null),
     WHALE(26, "Whale", FishRarity.LEGENDARY, null),
-    LILYPAD(27, "Lilypad", FishRarity.JUNK, null),
+    LILYPAD(27, "Lilypad", FishRarity.JUNK, Arrays.asList(FishArea.LushCave)),
     STRING(28, "Fishing Line", FishRarity.JUNK, null),
     BUCKET(29, "Bucket", FishRarity.JUNK, null),
     BOTTLE(30, "Empty Bottle", FishRarity.JUNK, null),
@@ -62,7 +61,7 @@ public enum FishType {
     EXP(45, "EXP Bottle", FishRarity.TREASURE, null),
     TOKENS(33, "Token Sack", FishRarity.TREASURE, null),
     MAP(34, "Treasure Map", FishRarity.TREASURE, null),
-    CRATE(35, "MysteryChest", FishRarity.TREASURE, null);
+    CRATE(35, "MysteryChest", FishRarity.TREASURE, Arrays.asList(FishArea.LushCave));
     
     private int id;
     private String name;

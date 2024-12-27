@@ -1,7 +1,6 @@
-package anthony.SuperCraftBrawl.gui;
+package anthony.SuperCraftBrawl.gui.fishing;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.Game.map.FishArea;
 import anthony.SuperCraftBrawl.fishing.FishRarity;
 import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
@@ -64,7 +63,8 @@ public class FishingGUI implements InventoryProvider {
                         item.getItemMeta().getLore(), "", main.color("&7Times caught: " + details.timesCaught));
             }
             ItemHelper.setDetails(item, item.getItemMeta().getDisplayName(),
-                    item.getItemMeta().getLore(), "", main.color("&7Found in: "), main.color(generateAreas(type)));
+                    item.getItemMeta().getLore(), main.color("&7Found in: "),
+                    main.color("&e" + generateAreas(type)));
             
             items[i] = ClickableItem.empty(item);
             i++;
@@ -160,12 +160,15 @@ public class FishingGUI implements InventoryProvider {
     
     private String generateAreas(FishType type) {
         String areas = "";
-        if (type.getAreas() == null) {
+        if (type.getAreas() == null)
             areas += "All";
-        }
         else {
-            for (FishArea area : type.getAreas()) {
-                areas += area.getName() + " ";
+            for (int i = 0; i < type.getAreas().size(); i++) {
+                areas += type.getAreas().get(i).getName();
+    
+                if (i < type.getAreas().size() - 1) {
+                    areas += "&7, &e";
+                }
             }
         }
         return areas;

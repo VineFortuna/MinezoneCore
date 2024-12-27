@@ -46,7 +46,7 @@ public class Fishing implements Listener {
             event.setExpToDrop(0);
             Player p = event.getPlayer();
             PlayerData data = main.getDataManager().getPlayerData(p);
-            FishType fish = getFish();
+            FishType fish = getFish(main.getFishingArea(event.getHook().getLocation()));
             FishingDetails details = data.playerFishing.get(fish.getId());
             
             i.getItemStack().setType(fish.getItem().getType());
@@ -54,14 +54,18 @@ public class Fishing implements Listener {
             i.getItemStack().setItemMeta(fish.getItem().getItemMeta());
             i.setPickupDelay(Integer.MAX_VALUE);
             fishItems.add(i);
+            
             if (details == null) {
                 details = new FishingDetails();
                 data.playerFishing.put(fish.getId(), details);
             }
+            
             p.sendMessage(main.color("&3&l(!) &rYou caught a "
                     + fish.getRarity().getColor() + fish.getName() + "&r!"));
             
+            // When caught for the first time
             if (details.timesCaught == 0) {
+                // Message
                 p.sendMessage(main.color("&2&l=============================================="));
                 p.sendMessage(main.color("&2&l||"));
                 if (fish.isFish()) {
@@ -74,6 +78,8 @@ public class Fishing implements Listener {
                 p.sendMessage(main.color("&2&l|| &7" + fish.getDesc()));
                 p.sendMessage(main.color("&2&l||"));
                 p.sendMessage(main.color("&2&l=============================================="));
+                
+                // Firework
                 if (main.getTotalFish(p) == FishType.values().length) {
                     p.playSound(p.getLocation(), Sound.FIREWORK_TWINKLE, 1, 1);
                     p.sendMessage(main.color("&3&l(!) &rCongratulations! You caught everything!"));
@@ -123,7 +129,7 @@ public class Fishing implements Listener {
         }
     }
     
-    public FishType getRandomFish() {
+    private FishType getRandomFish(FishArea area) {
         ArrayList<FishType> fishes = new ArrayList<>();
         FishRarity rarity;
         int r = rand.nextInt(100) + 1;
@@ -139,8 +145,14 @@ public class Fishing implements Listener {
             rarity = FishRarity.COMMON;
         }
         for (FishType t : fishTypes) {
-            if (t.getRarity() == rarity)
-                fishes.add(t);
+            if (t.getRarity() == rarity) {
+                if (area != null) {
+                    if (t.getAreas() != null && t.getAreas().contains(area))
+                        fishes.add(t);
+                } else {
+                    fishes.add(t);
+                }
+            }
         }
         return fishes.get(rand.nextInt(fishes.size()));
     }
@@ -151,7 +163,7 @@ public class Fishing implements Listener {
             i.remove();
         }
     }
-    public void removeFish(Item i) {
+    private void removeFish(Item i) {
         Bukkit.getServer().getScheduler().runTaskLater(main, new Runnable(){
             public void run() {
                 fishItems.remove(i);
@@ -159,25 +171,31 @@ public class Fishing implements Listener {
             }
         }, 80L);
     }
-    public FishType getRandomLoot(FishRarity rarity) {
+    private FishType getRandomLoot(FishRarity rarity, FishArea area) {
         ArrayList<FishType> loot = new ArrayList<>();
         for (FishType l : fishTypes) {
-            if (l.getRarity() == rarity)
-                loot.add(l);
+            if (l.getRarity() == rarity) {
+                if (area != null) {
+                    if (l.getAreas() != null && l.getAreas().contains(area))
+                        loot.add(l);
+                } else {
+                    loot.add(l);
+                }
+            }
         }
         return loot.get(rand.nextInt(loot.size()));
     }
-    public FishType getFish() {
+    public FishType getFish(FishArea area) {
         int r = rand.nextInt(100)+1;
         if (r <= treasure)
-            return getRandomLoot(FishRarity.TREASURE);
+            return getRandomLoot(FishRarity.TREASURE, area);
         else if (r <= treasure + junk)
-            return getRandomLoot(FishRarity.JUNK);
+            return getRandomLoot(FishRarity.JUNK, area);
         
-        return getRandomFish();
+        return getRandomFish(area);
     }
     
-    public void reward(Player p, FishRarity rarity) {
+    private void reward(Player p, FishRarity rarity) {
         switch (rarity) {
             case JUNK:
                 p.playSound(p.getLocation(), Sound.ZOMBIE_PIG_HURT, 1, 0);
@@ -207,7 +225,7 @@ public class Fishing implements Listener {
         particles(p, rarity);
     }
     
-    public void friendship(Player p, int level) {
+    private void friendship(Player p, int level) {
         int radius = 0, times = 0, exp = 0;
         switch (level) {
             case 1:
@@ -257,7 +275,7 @@ public class Fishing implements Listener {
         }
     }
     
-    public void particles(Player p, FishRarity r) {
+    private void particles(Player p, FishRarity r) {
         Color c;
         switch (r) {
             case COMMON:
