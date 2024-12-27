@@ -1,4 +1,4 @@
-package anthony.SuperCraftBrawl.gui;
+package anthony.SuperCraftBrawl.gui.fishing;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;

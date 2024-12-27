@@ -9,7 +9,10 @@ public enum FishArea {
     
     // CLASSIC
     Pond("Pond", new Vector(216.500, 160, 382.500), 35, 45, new ItemStack(Material.GRASS)),
-    LushCave("Lush Cave", new Vector(261.500, 105, 629.500), 35, 45, new ItemStack(Material.LEAVES));
+    LushCave("Lush Cave", new Vector(261.500, 105, 629.500), 35, 45, new ItemStack(Material.GLOWSTONE)),
+    Park("Park", new Vector(261.500, 105, 629.500), 35, 45, new ItemStack(Material.APPLE)),
+    Shores("Shores", new Vector(261.500, 105, 629.500), 35, 45, new ItemStack(Material.CLAY)),
+    Woods("Woods", new Vector(261.500, 105, 629.500), 35, 45, new ItemStack(Material.LEAVES));
     
     private final String name;
     private final Vector location;
