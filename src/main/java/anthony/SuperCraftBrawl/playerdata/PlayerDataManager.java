@@ -275,8 +275,8 @@ public class PlayerDataManager implements Listener {
 				+ data.lure + ", FriendshipLevel = " + data.friendshipLevel + ", Friendship = " + data.friendship
 				+ ", FishRainEffect = " + data.fishRainEffect + ", Snowball = " + data.snowball +
 				" WHERE UUID = '" + data.playerUUID.toString() + "';");
-		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon,"
-				+ "Reward1, Reward2) VALUES ";
+		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon, "
+				+ "Reward1, Reward2, Reward3, Reward4, Reward5) VALUES ";
 		int index = 0;
 
 		for (Entry<Integer, ClassDetails> entry : data.playerClasses.entrySet()) {
@@ -287,7 +287,7 @@ public class PlayerDataManager implements Listener {
 						+ entry.getValue().timePurchased + ", " + (entry.getValue().purchased ? 1 : 0) + ", "
 						+ entry.getValue().gamesPlayed + ", " + entry.getValue().gamesWon + ", "
 						+ (entry.getValue().reward1 ? 1 : 0) + ", " + (entry.getValue().reward2 ? 1 : 0) + ", "
-						+ (entry.getValue().reward3 ? 1 : 0) + ", " + (entry.getValue().reward5 ? 1 : 0) + ", "
+						+ (entry.getValue().reward3 ? 1 : 0) + ", " + (entry.getValue().reward4 ? 1 : 0) + ", "
 						+ (entry.getValue().reward5 ? 1 : 0) + ")";
 				index++;
 			}

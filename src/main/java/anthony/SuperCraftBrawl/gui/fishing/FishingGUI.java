@@ -55,7 +55,7 @@ public class FishingGUI implements InventoryProvider {
         int i = 0;
         for (FishType type : FishType.values()) {
             FishingDetails details = data.playerFishing.get(type.getId());
-            ItemStack item = ItemHelper.setDetails(ItemHelper.createDye(DyeColor.GRAY, 1), main.color("&c???"));
+            ItemStack item = ItemHelper.setDetails(ItemHelper.createDye(DyeColor.GRAY, 1), main.color("&c???"), "");
             
             if (details != null && details.timesCaught > 0) {
                 item = type.getItem();
@@ -63,8 +63,7 @@ public class FishingGUI implements InventoryProvider {
                         item.getItemMeta().getLore(), "", main.color("&7Times caught: " + details.timesCaught));
             }
             ItemHelper.setDetails(item, item.getItemMeta().getDisplayName(),
-                    item.getItemMeta().getLore(), main.color("&7Found in: "),
-                    main.color("&e" + generateAreas(type)));
+                    item.getItemMeta().getLore(), main.color("&7Found in: "), main.color(generateAreas(type)));
             
             items[i] = ClickableItem.empty(item);
             i++;
@@ -83,33 +82,13 @@ public class FishingGUI implements InventoryProvider {
                                     main.color("&aCaught: &r" + (data.totalcaught)))), e -> {
                     }));
         }
-    
-        PlayerData finalData = data;
-        contents.set(0, 8,
-                ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
-                        main.color("&aGo Fishing!"), main.color("&7Instantly travel to the pond and cast your line"),
-                        "", main.color("&eClick to teleport")), e -> {
-                    
-                    if (main.getGameManager().GetInstanceOfPlayer(player) == null &&
-                            main.getGameManager().GetInstanceOfSpectator(player) == null) {
-                        player.teleport(fishingLoc);
-                        player.sendMessage(main.color("&3&l(!) &rGrab a rod and go fishing!"));
-                        
-                        if (!(player.getInventory().contains(main.getFishingRod(player)))) {
-                            player.getInventory().setItem(5, main.getFishingRod(player));
-                            player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                    + "You have equipped " + ChatColor.DARK_AQUA + ChatColor.BOLD + "Fishing Rod");
-                            inv.close(player);
-                        }
-                    } else {
-                        player.sendMessage(main.color("&c&l(!) &rYou cannot do this while in a game!"));
-                    }
-                }));
         
-        contents.set(4, 8, ClickableItem.of(
-                ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
-                    inv.getParent().get().open(player);
-                }));
+        if (inv.getParent().isPresent()) {
+            contents.set(4, 8, ClickableItem.of(
+                    ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
+                        inv.getParent().get().open(player);
+                    }));
+        }
         contents.set(4, 3, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.EMERALD), ChatColor.GRAY + "Rewards",
                         "", main.color("&eClick to view rewards")), e -> {
@@ -138,6 +117,14 @@ public class FishingGUI implements InventoryProvider {
         
         String next = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTliZjMyOTJlMTI2YTEwNWI1NGViYTcxM2FhMWIxNTJkNTQxYTFkODkzODgyOWM1NjM2NGQxNzhlZDIyYmYifX19";
         String prev = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ==";
+        String warps = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDFlNzhmZjQ3NjNlOWFkMWE5OThjNzI4ZjcxZmE1ZGJiZDYxNjRhMjdjYTFmMGU0MjMyYzQxZDc0MjA4MTgwYSJ9fX0=";
+    
+        contents.set(0, 8,
+                ClickableItem.of(ItemHelper.createSkullTexture(warps,
+                        main.color("&aGo Fishing!"),
+                        main.color("&7Instantly travel to a body of water")), e -> {
+                    new FishingAreasGUI(main, inv).inv.open(player);
+                }));
         
         if (!pagination.isFirst()) {
             contents.set(2, 0, ClickableItem.of(ItemHelper.createSkullTexture(prev, ChatColor.GRAY + "Previous Page"),
@@ -159,20 +146,20 @@ public class FishingGUI implements InventoryProvider {
     }
     
     private String generateAreas(FishType type) {
-        String areas = "";
-        if (type.getAreas() == null)
-            areas += "All";
-        else {
+        StringBuilder areas = new StringBuilder();
+        if (type.getAreas() == null || type.getAreas().isEmpty()) {
+            areas.append("All");
+        } else {
             for (int i = 0; i < type.getAreas().size(); i++) {
-                areas += type.getAreas().get(i).getName();
-    
+                areas.append(type.getAreas().get(i).getName());
                 if (i < type.getAreas().size() - 1) {
-                    areas += "&7, &e";
+                    areas.append(", ");
                 }
             }
         }
-        return areas;
+        return main.color("&e" + areas);
     }
+    
     
     @Override
     public void update(Player player, InventoryContents contents) {

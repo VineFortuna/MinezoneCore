@@ -104,7 +104,7 @@ public class Leaderboard {
 		}
 		
 		toRemove.clear();
-		Location loc = new Location(main.getLobbyWorld(), 184.5, 106.5, 686.5);
+		Location loc = new Location(main.getLobbyWorld(), 185.5, 106.5, 713.5);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
@@ -137,7 +137,7 @@ public class Leaderboard {
 		}
 		
 		toRemove.clear();
-		Location loc = new Location(main.getLobbyWorld(), 184.5, 106.5, 686.5);
+		Location loc = new Location(main.getLobbyWorld(), 185.5, 106.5, 713.5);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
