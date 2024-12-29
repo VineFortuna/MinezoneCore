@@ -63,7 +63,7 @@ public class GhastClass extends BaseClass {
 
 		if (e instanceof Arrow) {
 			if (this.cooldown == 0) {
-				player.getWorld().playSound(player.getLocation(), Sound.GHAST_SCREAM, 0.5f, 1);
+				player.getWorld().playSound(player.getLocation(), Sound.GHAST_SCREAM, 0.8f, 1);
 				this.cooldown = 2;
 			} else if (this.cooldown > 0) {
 				event.setCancelled(true);

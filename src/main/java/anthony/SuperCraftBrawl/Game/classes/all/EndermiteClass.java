@@ -36,7 +36,7 @@ public class EndermiteClass extends BaseClass {
     
     private List<Endermite> endermites = new ArrayList<>();
     private int summonCooldownSec;
-    private ItemStack enderSwap = ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER, 10),
+    private ItemStack enderSwap = ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER, 8),
             instance.getGameManager().getMain().color("&5&lPhase &0Shifter"),
             instance.getGameManager().getMain().color("&7Shoot at your Endermite to swap places with it!"),
             instance.getGameManager().getMain().color("   &rRange: &e25 blocks"));
@@ -91,7 +91,7 @@ public class EndermiteClass extends BaseClass {
         playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.ENDER_PORTAL_FRAME),
                 instance.getGameManager().getMain().color("&5&lSwarm Summon")));
         playerInv.setItem(2, enderSwap);
-        playerInv.setItem(3, ItemHelper.createMonsterEgg(EntityType.ENDERMITE, 6,
+        playerInv.setItem(3, ItemHelper.createMonsterEgg(EntityType.ENDERMITE, 5,
                 instance.getGameManager().getMain().color("&5&lEndermite Pokeball")));
     }
     
