@@ -1462,24 +1462,18 @@ public class GameManager implements Listener, PluginMessageListener {
 			player.getInventory().clear();
 
 			// ITEMS:
-			ItemStack leaveItem = ItemHelper.setDetails(new ItemStack(Material.BARRIER), main.color("&cLeave Game"), "",
-					main.color("&7Click to leave your game"));
-			ItemStack classItem = ItemHelper.setDetails(new ItemStack(Material.COMPASS), main.color("&7Class Selector"),
-					"", main.color("&7Click to choose a class!"));
-			ItemStack cosmetics = ItemHelper.setDetails(new ItemStack(Material.CHEST), main.color("&7Cosmetics"));
-
-			ItemStack stats = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
-			SkullMeta statsMeta = (SkullMeta) stats.getItemMeta();
-			statsMeta.setOwner(player.getName());
-			stats.setItemMeta(statsMeta);
-
 			if (game.gameType != GameType.FRENZY) {
-				player.getInventory().setItem(0, classItem);
+				player.getInventory().setItem(0,
+						ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&9>&1>&f&lClasses&1<&9<"));
 			}
-
-			player.getInventory().setItem(7, ItemHelper.setDetails(stats, main.color("&7Profile")));
-			player.getInventory().setItem(4, cosmetics);
-			player.getInventory().setItem(8, leaveItem);
+			
+			player.getInventory().setItem(4,
+					ItemHelper.setDetails(new ItemStack(Material.CHEST), "&d>&5>&f&lCosmetics&5<&d<",
+							"", "&7Click to choose a class!"));
+			ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
+			player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&c>&4>&f&lProfile&4<&c<"));
+			player.getInventory().setItem(8, ItemHelper.setDetails(new ItemStack(Material.BARRIER), "&cLeave Game",
+					"", "&7Click to leave your game"));
 		}
 	}
 

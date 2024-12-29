@@ -16,7 +16,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 public class DwellerClass extends BaseClass {
 
@@ -92,10 +91,8 @@ public class DwellerClass extends BaseClass {
 								instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 								gamePlayer.damage(8.0, player);
 							}
-							for (Player gamePlayer : instance.players) {
-								gamePlayer.playSound(hitLoc, Sound.EXPLODE, 2, 1);
-								gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_HUGE, 1);
-							}
+							player.getWorld().playSound(hitLoc, Sound.EXPLODE, 2, 1);
+							player.getWorld().playEffect(hitLoc, Effect.EXPLOSION_HUGE, 1);
 
 						}
 
