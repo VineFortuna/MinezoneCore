@@ -1,17 +1,13 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import anthony.util.ChatColorHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
-import java.util.List;
-
 import org.bukkit.ChatColor;
-import org.bukkit.Color;
 import org.bukkit.Effect;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
@@ -24,8 +20,9 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.util.Vector;
+
+import java.util.List;
 
 public class AnvilClass extends BaseClass {
 	private boolean used = false;
@@ -64,6 +61,7 @@ public class AnvilClass extends BaseClass {
 	}
 
 	public void SetItems(Inventory playerInv) {
+		anvil.startTime = System.currentTimeMillis() - 100000;
 		this.used = false;
 		this.num = 0;
 		playerInv.setItem(0, getAttackWeapon());
@@ -81,21 +79,18 @@ public class AnvilClass extends BaseClass {
 					Player gamePlayer = (Player) entity;
 					if (gamePlayer != this.player) {
 						gamePlayer.setVelocity((new Vector(0, 1, 0)).multiply(0.5D));
-						EntityDamageEvent damageEvent = new EntityDamageEvent((Entity) gamePlayer,
+						EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
 								EntityDamageEvent.DamageCause.MAGIC, this.num);
-						gamePlayer.damage(this.num, (Entity) this.player);
+						gamePlayer.damage(this.num, this.player);
 						this.num = 0;
 					}
 				}
 			}
-			for (Player gamePlayer : this.instance.players) {
-				gamePlayer.playSound(this.player.getLocation(), Sound.ANVIL_LAND, 1.0F, 1.0F);
-				this.player.playEffect(this.player.getLocation(), Effect.TILE_BREAK, 1);
-			}
+			this.player.getWorld().playEffect(this.player.getLocation(), Effect.TILE_BREAK, 1);
 		}
 		if (this.instance.classes.containsKey(this.player)
-				&& ((BaseClass) this.instance.classes.get(this.player)).getType() == ClassType.Anvil
-				&& ((BaseClass) this.instance.classes.get(this.player)).getLives() > 0) {
+				&& this.instance.classes.get(this.player).getType() == ClassType.Anvil
+				&& this.instance.classes.get(this.player).getLives() > 0) {
 			this.cooldownSec = (this.stompAbilityCooldown - this.anvil.getTime()) / 1000 + 1;
 			if (this.anvil.getTime() < this.stompAbilityCooldown) {
 				String msg = "" + ChatColor.RESET + ChatColor.YELLOW + ChatColor.BOLD + "Goomba Stomp "
@@ -130,7 +125,7 @@ public class AnvilClass extends BaseClass {
 			this.player.sendMessage(ChatColorHelper.color("&c&l(!) &rYou cannot use this on the ground!"));
 			return;
 		}
-		int maxHeight = 20;
+		int maxHeight = 18;
 		int currentHeight = calculateFallHeight(this.player);
 		this.num = (int) calculateDamage(currentHeight, maxHeight);
 		applyStompEffects(this.player);

@@ -114,7 +114,7 @@ public class FlawlessWinsBoard {
 		}
 
 		toRemove.clear();
-		Location loc = new Location(main.getLobbyWorld(), 194.5, 106.5, 686.5);
+		Location loc = new Location(main.getLobbyWorld(), 178.5, 106.5, 709.5);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
@@ -147,7 +147,7 @@ public class FlawlessWinsBoard {
 		}
 
 		toRemove.clear();
-		Location loc = new Location(main.getLobbyWorld(), 194.5, 106.5, 686.5);
+		Location loc = new Location(main.getLobbyWorld(), 178.5, 106.5, 709.5);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);

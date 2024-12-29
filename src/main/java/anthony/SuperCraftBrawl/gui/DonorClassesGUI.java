@@ -60,7 +60,7 @@ public class DonorClassesGUI implements InventoryProvider {
 										"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
 												+ ChatColor.YELLOW + " to choose a class",
 										"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET
-												+ ChatColor.YELLOW + " to view rewards",
+												+ ChatColor.YELLOW + " to view mastery",
 										"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Shift Click" + ChatColor.RESET
 												+ ChatColor.YELLOW + " to add a favorite class",
 										"",

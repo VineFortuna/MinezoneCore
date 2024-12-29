@@ -56,11 +56,10 @@ public class NinjaClass extends BaseClass {
 	@Override
 	public void DoDamage(EntityDamageByEntityEvent event) {
 		if (player.getItemInHand() != null && player.getItemInHand().getType() == Material.GHAST_TEAR) {
-			if (player.getLocation().distanceSquared(event.getEntity().getLocation()) > 1.25)
+			if (player.getLocation().distanceSquared(event.getEntity().getLocation()) > 1.2)
 				event.setCancelled(true);
 			else {
-				for (Player gamePlayer : instance.players)
-					gamePlayer.playSound(event.getEntity().getLocation(), Sound.BAT_DEATH, 1, 2);
+				player.getWorld().playSound(event.getEntity().getLocation(), Sound.BAT_DEATH, 1, 2);
 			}
 		}
 	}
@@ -78,7 +77,7 @@ public class NinjaClass extends BaseClass {
 								ItemHelper.setDetails(new ItemStack(Material.GHAST_TEAR), ChatColor.GRAY + "Wakizashi",
 										"",
 										"" + ChatColor.RESET + ChatColor.GRAY
-												+ "Only does damage if 1.25 blocks away from enemies"),
+												+ "Only deals damage within 1.2 blocks from enemies"),
 								Enchantment.DAMAGE_ALL, 8));
 		ItemStack shuriken = getShuriken();
 		shuriken.setAmount(5);
@@ -186,6 +185,7 @@ public class NinjaClass extends BaseClass {
 						}, new ItemStack(Material.NETHER_STAR));
 						instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 								player.getLocation().getDirection().multiply(3.0D));
+						player.playSound(player.getLocation(), Sound.ITEM_BREAK, 0.6f, 3);
 					}
 					event.setCancelled(true);
 				}

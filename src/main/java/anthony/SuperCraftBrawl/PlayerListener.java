@@ -335,7 +335,12 @@ public class PlayerListener implements Listener {
 					Location behindPlayer = playerLoc.clone().add(playerLoc.getDirection().multiply(-2));
 					behindPlayer.setY(Math.min(playerLoc.getWorld().getHighestBlockYAt(behindPlayer), playerLoc.getY() + 10));
 					snowman.teleport(behindPlayer);
-				} else if (!this.snowmanPetPlayers.contains(player)) {
+				}
+				
+				if (!this.snowmanPetPlayers.contains(player)) {
+					snowman.remove();
+				} else if (!player.isOnline() || player.getWorld() != main.getLobbyWorld()) {
+					this.snowmanPetPlayers.remove(player);
 					snowman.remove();
 				}
 			}, 20L, 20L); // Checks every second

@@ -131,8 +131,10 @@ public class Fishing implements Listener {
     
     private FishType getRandomFish(FishArea area) {
         ArrayList<FishType> fishes = new ArrayList<>();
+        
         FishRarity rarity;
         int r = rand.nextInt(100) + 1;
+        
         if (r <= legendary)
             rarity = FishRarity.LEGENDARY;
         else if (r <= legendary + mythic)
@@ -141,9 +143,9 @@ public class Fishing implements Listener {
             rarity = FishRarity.EPIC;
         else if (r <= legendary + mythic + epic + rare)
             rarity = FishRarity.RARE;
-        else {
+        else
             rarity = FishRarity.COMMON;
-        }
+        
         for (FishType t : fishTypes) {
             if (t.getRarity() == rarity) {
                 if (area != null) {

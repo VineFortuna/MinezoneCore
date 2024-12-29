@@ -1,10 +1,10 @@
 package anthony.SuperCraftBrawl.gui;
 
-import anthony.util.ChatColorHelper;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.util.SoundManager;
 import anthony.SuperCraftBrawl.Game.classes.all.VillagerClass;
+import anthony.util.ChatColorHelper;
+import anthony.util.SoundManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -91,7 +91,7 @@ public class VillagerAbilityGUI implements InventoryProvider {
         } else if (type == Material.TNT) {
             return 4;
         } else if (type == Material.GOLDEN_APPLE && item.getDurability() == 0) {
-            return 12;
+            return 10;
         } else if (type == Material.GOLD_HOE) {
             return 6;
         } else if (type == Material.ENDER_PEARL) {
@@ -99,10 +99,9 @@ public class VillagerAbilityGUI implements InventoryProvider {
         } else if (type == Material.WHEAT) {
             return 8;
         } else if (item.getItemMeta().getDisplayName().toLowerCase().contains("speed")) {
-            return 6;
-        }
-        else if (type == Material.IRON_SWORD) {
-            return 15;
+            return 5;
+        } else if (type == Material.IRON_SWORD) {
+            return 12;
         } else return null;
     }
 

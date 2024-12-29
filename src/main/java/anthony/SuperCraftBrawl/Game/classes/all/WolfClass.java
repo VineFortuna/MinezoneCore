@@ -84,29 +84,28 @@ public class WolfClass extends BaseClass {
 	@Override
 	public void Tick(int gameTicks) {
 		if (used) {
-			if (!player.isOnGround()) {
-				List<Entity> nearby = player.getNearbyEntities(1D, 1D, 1D);
-				for (Entity entity : nearby) {
-					if (entity instanceof Player) {
-						Player target = (Player) entity;
-						if (target != player && !hitPlayers.contains(target)) {
-							
-							target.setVelocity((new Vector(0, 1, 0)).multiply(0.5D));
-							EntityDamageEvent damageEvent = new EntityDamageEvent(target,
-									EntityDamageEvent.DamageCause.MAGIC, 6);
-							target.damage(6, player);
-							player.getWorld().playSound(player.getLocation(), Sound.ITEM_BREAK, 1, 0);
-							hitPlayers.add(target);
-							
-							int radius = 1;
-							for (int t = 0; t < 2 * Math.PI * radius; t += 1) {
-								player.getWorld().playEffect(player.getLocation().add(radius * Math.cos(t), 0,
-										radius * Math.sin((t))), Effect.CRIT, 1);
-							}
+			List<Entity> nearby = player.getNearbyEntities(1D, 1D, 1D);
+			for (Entity entity : nearby) {
+				if (entity instanceof Player) {
+					Player target = (Player) entity;
+					if (target != player && !hitPlayers.contains(target)) {
+						
+						target.setVelocity((new Vector(0, 1, 0)).multiply(0.5D));
+						EntityDamageEvent damageEvent = new EntityDamageEvent(target,
+								EntityDamageEvent.DamageCause.MAGIC, 7);
+						target.damage(7, player);
+						player.getWorld().playSound(player.getLocation(), Sound.ITEM_BREAK, 0.8f, 0);
+						hitPlayers.add(target);
+						
+						int radius = 2;
+						for (int t = 0; t < 2 * Math.PI * radius; t += 1) {
+							player.getWorld().playEffect(player.getLocation().add(radius * Math.cos(t), 0,
+									radius * Math.sin((t))), Effect.CRIT, 1);
 						}
 					}
 				}
-			} else {
+			}
+			if (player.isOnGround()) {
 				used = false;
 				hitPlayers.clear();
 			}

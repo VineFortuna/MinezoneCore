@@ -117,7 +117,7 @@ public class KillsBoard {
 		}
 
 		toRemove.clear();
-		Location loc = new Location(main.getLobbyWorld(), 194.5, 106.5, 697.5);
+		Location loc = new Location(main.getLobbyWorld(), 194.5, 106.5, 713.5);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
@@ -150,7 +150,7 @@ public class KillsBoard {
 		}
 
 		toRemove.clear();
-		Location loc = new Location(main.getLobbyWorld(), 194.5, 106.5, 697.5);
+		Location loc = new Location(main.getLobbyWorld(), 194.5, 106.5, 713.5);
 		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 		stand.setVisible(false);
 		stand.setGravity(false);
