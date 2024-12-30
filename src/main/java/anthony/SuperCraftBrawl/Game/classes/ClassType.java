@@ -21,17 +21,18 @@ public enum ClassType {
 	ButterGolem(11, 0, Rank.VIP), DarkSethBling(12, 800, 0), SnowGolem(14, 800, 0), Bat(15, 0, Rank.VIP),
 	SethBling(16, 0, Rank.VIP), Sheep(17, 550, 0), Horse(18, 0, 0), Melon(19, 0, Rank.VIP), Rabbit(26, 0, 0),
 	Squid(20, 0, 0), Spider(21, 0, 0), BabyCow(22, 0, Rank.VIP), Herobrine(23, 0, Rank.VIP), Bunny(24, 450, 0),
-	ButterBro(25, 1200, 0), Steve(28, 1000, 0), Notch(29, 1000, 0), Pig(30, 0, 0), Blaze(31, 0, 0), Potato(32, 750, 0),
+	ButterBro(25, 1200, 0), Steve(28, 850, 0), Notch(29, 1000, 0), Pig(30, 0, 0), Blaze(31, 0, 0), Potato(32, 750, 0),
 	Wither(33, 0, 0), Ocelot(34, 250, 0), Creeper(35, 0, 0), Noteblock(36, 800, 0), EnchantTable(37, 350, 0),
 	Present(38, 0, 0), Wizard(41, 0, Rank.VIP), Star(42, 850, 0), Dweller(43, 0, 0), Zombie(44, 0, 0),
 	Silverfish(45, 0, 0), Anvil(46, 700, 0), Summoner(47, 525, 0), MagmaCube(48, 0, Rank.VIP), Villager(49, 0, 0),
 	ZombiePigman(51, 0, 3), Witch(13, 0, 5), ZombieVillager(50, 0, 10), Ice(54, 0, 15), Vampire(53, 800, 0),
 	Bee(55, 425, 0), Jeb(56, 0, 20), Hunter(57, 500, 0), FlintAndSteel(58, 0, 0), WitherSk(59, 1500, 0),
 	Shulker(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30), LargeFern(64, 0, 0),
-	Vindicator(65, 0, Rank.VIP), Fade(66, 0, Rank.VIP), Fisherman(67, 0, 0), BrewingStand(68, 125, 0),
-	GrimReaper(69, 0, 0), Elf(70, 0, 0), GingerBreadMan(71, 0, 0), Santa(72, 0, 0), Endermite(73, 0, 0), Wolf(74, 0, 0);
+	Vindicator(65, 0, Rank.VIP), Fade(66, 0, Rank.VIP), Fisherman(67, 0, 0), BrewingStand(68, 350, 0),
+	GrimReaper(69, 0, 0),  Endermite(70, 0, Rank.VIP), Wolf(71, 400, 0);
 
-	// Wolf(67, 0, 35)/* , Guardian(68, 0, 30) */;
+	/*Guardian(68, 0, 30) */;
+	/*Elf(70, 0, 0), GingerBreadMan(71, 0, 0), Santa(72, 0, 0),*/
 
 	private int id;
 	private int tokenCost = 0;
@@ -79,12 +80,12 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new Cactus(instance, player);
-		case Santa:
+		/*case Santa:
 			return new SantaClass(instance, player);
 		case GingerBreadMan:
 			return new GingerBreadManClass(instance, player);
 		case Elf:
-			return new ElfClass(instance, player);
+			return new ElfClass(instance, player);*/
 		case GrimReaper:
 			return new GrimReaperClass(instance, player);
 		case BrewingStand:
@@ -231,13 +232,13 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new ItemStack(Material.CACTUS);
-		case Santa:
+		/*case Santa:
 			return ItemHelper.createSkullTexture(
 					"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19");
 		case GingerBreadMan:
 			return new ItemStack(Material.COOKIE);
 		case Elf:
-			return new ItemStack(Material.CAKE);
+			return new ItemStack(Material.CAKE);*/
 		case GrimReaper:
 			return new ItemStack(Material.DIAMOND_HOE);
 		case BrewingStand:
@@ -370,7 +371,8 @@ public enum ClassType {
 		case Fisherman:
 			return new ItemStack(Material.FISHING_ROD);
 		case Endermite:
-			return new ItemStack(Material.ENDER_PORTAL_FRAME);
+			return ItemHelper.createSkullTexture(
+					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWJjN2I5ZDM2ZmI5MmI2YmYyOTJiZTczZDMyYzZjNWIwZWNjMjViNDQzMjNhNTQxZmFlMWYxZTY3ZTM5M2EzZSJ9fX0=");
  		case Wolf:
  			return new ItemStack(Material.BONE);
 // 		case Guardian:
@@ -388,12 +390,12 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return "A pricklyyy living thing, made up of thorns & blood..";
-		case Santa:
+		/*case Santa:
 			return "HO HO HO! MERRRRRRYYYY CHRISTMASSSSS";
 		case GingerBreadMan:
 			return "DO YOU KNOW? THE GINGERBREADMAN!?!?!";
 		case Elf:
-			return "Santa's lil helper here to deliver";
+			return "Santa's lil helper here to deliver";*/
 		case GrimReaper:
 			return "Harvest souls with deadly precision, wielding dark powers..";
 		case BrewingStand:
@@ -479,7 +481,7 @@ public enum ClassType {
 		case Spider:
 			return "Bite and poison your enemies while fighting them!";
 		case Ninja:
-			return "Ninja 2.0 (idk xD)";
+			return "Ambush your enemies with sneaky attacks and agility";
 		case TNT:
 			return "Blow up your enemies with TNT!";
 		case Chicken:
@@ -525,7 +527,7 @@ public enum ClassType {
 		case Endermite:
 			return "Unleash chaos as you swap places with your swarm of Endermites";
 		case Wolf:
-			return "Have your brothers defend you from enemies!";
+			return "Have your pack defend you from enemies!";
 //		case Guardian:
 //			return "Guard thyself and thy family (or something idk)";
 //		case Fluxty:
@@ -567,12 +569,12 @@ public enum ClassType {
 		switch (this) {
 		case Bat:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bat" + ChatColor.RESET;
-		case Santa:
+		/*case Santa:
 			return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "Santa" + ChatColor.RESET;
 		case GingerBreadMan:
 			return color("&6GingerBread&0Man&r");
 		case Elf:
-			return color("&2&lElf&r");
+			return color("&2&lElf&r");*/
 		case GrimReaper:
 			return color("&8&l&oGrimReaper&r");
 		case BrewingStand:
@@ -710,7 +712,7 @@ public enum ClassType {
 		case Fisherman:
 			return "" + ChatColor.DARK_AQUA + ChatColor.ITALIC + "Fisherman" + ChatColor.RESET;
 		case Endermite:
-			return color("&5&oEndermite");
+			return color("&5Endermite");
  		case Wolf:
  			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Wolf" + ChatColor.RESET;
 // 		case Guardian:

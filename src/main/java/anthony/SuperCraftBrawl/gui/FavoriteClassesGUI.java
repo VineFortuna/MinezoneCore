@@ -41,8 +41,8 @@ public class FavoriteClassesGUI implements InventoryProvider {
 				for (ClassType type : ClassType.values()) {
 					if (data.customIntegers.contains(type.getID())) {
 						contents.set(y, x,
-								ClickableItem.of(ItemHelper.setDetails(type.getItem(), "" + type.getTag(),
-										"" + ChatColor.GRAY + type.getClassDesc(), "",
+								ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true),
+												type.getTag(), type.buildDescription(), "",
 										"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
 												+ ChatColor.YELLOW + " to choose a class",
 										"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET

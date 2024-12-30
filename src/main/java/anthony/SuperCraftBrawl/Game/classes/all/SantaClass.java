@@ -154,7 +154,7 @@ public class SantaClass extends BaseClass {
 
 	@Override
 	public ClassType getType() {
-		return ClassType.Santa;
+		return null;
 	}
 
 	@Override

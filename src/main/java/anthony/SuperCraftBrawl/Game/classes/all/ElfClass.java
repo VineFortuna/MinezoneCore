@@ -32,8 +32,6 @@ public class ElfClass extends BaseClass {
 				"228B22", 6, "Elf");
 	}
 
-	/// give @p
-	/// minecraft:player_head[profile={id:[I;982818694,-8431021,-1622977160,467924422],properties:[{name:"textures",value:"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGRlNjkzZjEyYjY4MjJmYWQ1ZTZmMjgzYzU1YzM4NWJmZjI1NDhhZTRiMWIyOTQzYWQwNWI1N2VmNWQzOTNiYiJ9fX0="}]},minecraft:lore=['{"text":"https://namemc.com/skin/e6798efd441cd32b"}']]
 
 	@Override
 	public void setArmor(EntityEquipment playerEquip) {
@@ -54,7 +52,7 @@ public class ElfClass extends BaseClass {
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
 			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
 
-		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Elf
+		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Zombie
 				&& instance.classes.get(player).getLives() > 0) {
 			if (this.isUsed) {
 				String msg = instance.getGameManager().getMain().color("&cYou used your &2&lElf's Cake &cthis life!");
@@ -156,7 +154,7 @@ public class ElfClass extends BaseClass {
 
 	@Override
 	public ClassType getType() {
-		return ClassType.Elf;
+		return null;
 	}
 
 	@Override

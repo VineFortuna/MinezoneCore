@@ -22,8 +22,6 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 import xyz.xenondevs.particle.ParticleEffect;
@@ -35,11 +33,17 @@ import java.util.List;
 public class EndermiteClass extends BaseClass {
     
     private List<Endermite> endermites = new ArrayList<>();
-    private int summonCooldownSec;
-    private ItemStack enderSwap = ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER, 8),
+    private int swapCooldownSec;
+    private ItemStack enderSwap = ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER),
             instance.getGameManager().getMain().color("&5&lPhase &0Shifter"),
             instance.getGameManager().getMain().color("&7Shoot at your Endermite to swap places with it!"),
             instance.getGameManager().getMain().color("   &rRange: &e25 blocks"));
+    private ItemStack passive = ItemHelper.setDetails(new ItemStack(Material.INK_SACK, 1, (short) 8),
+            instance.getGameManager().getMain().color("&8&lPassive"),
+            instance.getGameManager().getMain().color("&7Click to make your Endermites attack players"));
+    private ItemStack hostile = ItemHelper.setDetails(new ItemStack(Material.INK_SACK, 1, (short) 5),
+            instance.getGameManager().getMain().color("&5&lHostile"),
+            instance.getGameManager().getMain().color("&7Click to make your Endermites stay in place"));
     
     public EndermiteClass(GameInstance instance, Player player) {
         super(instance, player);
@@ -84,14 +88,13 @@ public class EndermiteClass extends BaseClass {
                 if (e.getName().contains(player.getName()))
                     e.remove();
     
-        swarmSummon.startTime = System.currentTimeMillis() - 100000;
+        phaseShifter.startTime = System.currentTimeMillis() - 100000;
         endermites.clear();
         
         playerInv.setItem(0, this.getAttackWeapon());
-        playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.ENDER_PORTAL_FRAME),
-                instance.getGameManager().getMain().color("&5&lSwarm Summon")));
+        playerInv.setItem(1, passive);
         playerInv.setItem(2, enderSwap);
-        playerInv.setItem(3, ItemHelper.createMonsterEgg(EntityType.ENDERMITE, 5,
+        playerInv.setItem(3, ItemHelper.createMonsterEgg(EntityType.ENDERMITE, 6,
                 instance.getGameManager().getMain().color("&5&lEndermite Pokeball")));
     }
     
@@ -99,18 +102,25 @@ public class EndermiteClass extends BaseClass {
     public void Tick(int gameTicks) {
         if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Endermite
                 && instance.classes.get(player).getLives() > 0) {
-            /*if (!(player.getInventory().contains(this.enderSwap)))
-                player.getInventory().setItem(1, this.enderSwap);*/
+            if (!(player.getInventory().contains(this.enderSwap)))
+                player.getInventory().setItem(1, this.enderSwap);
     
-            this.summonCooldownSec = (20000 - swarmSummon.getTime()) / 1000 + 1;
+            this.swapCooldownSec = (8000 - phaseShifter.getTime()) / 1000 + 1;
             
-            if (swarmSummon.getTime() < 20000) {
+            if (phaseShifter.getTime() < 8000) {
                 String msg = instance.getGameManager().getMain()
-                        .color("&5&lSwarm Summon &rin: &e" + this.summonCooldownSec + "s");
+                        .color("&ePhase Shifter &rin: &e" + this.swapCooldownSec + "s");
                 getActionBarManager().setActionBar(player, "swarm.cooldown", msg, 2);
             } else {
-                String msg = instance.getGameManager().getMain().color("&rYou can use &5&lSwarm Summon");
+                String msg = instance.getGameManager().getMain().color("&rYou can use &ePhase Shifter");
                 getActionBarManager().setActionBar(player, "swarm.cooldown", msg, 2);
+            }
+
+            if (gameTicks % 20 == 0 && player.getItemInHand().isSimilar(enderSwap) && !endermites.isEmpty()) {
+                for (Endermite mite : endermites) {
+                    if (!mite.isDead())
+                        player.playEffect(mite.getLocation().add(0, 1, 0), Effect.HAPPY_VILLAGER, 1);
+                }
             }
         }
     }
@@ -121,91 +131,82 @@ public class EndermiteClass extends BaseClass {
         if (item != null && event.getAction().name().contains("RIGHT_CLICK")) {
             if (item.getType() == Material.EYE_OF_ENDER) {
                 event.setCancelled(true);
-                
-                int amount = item.getAmount();
-                amount--;
-                if (amount == 0)
-                    player.getInventory().clear(player.getInventory().getHeldItemSlot());
-                else
-                    player.getItemInHand().setAmount(amount);
-                
-                int range = 25;
-                Location playerEyeLoc = player.getEyeLocation();
-                Vector dir = playerEyeLoc.getDirection();
-    
-                Location endLoc = playerEyeLoc;
-                BlockIterator b = new BlockIterator(playerEyeLoc, 0, range);
-    
-                // Determine the farthest valid location along the beam
-                while (b.hasNext()) {
-                    Block block = b.next();
-                    endLoc = block.getLocation();
-        
-                    if (block.getType().isSolid())
-                        break;
-                }
-    
-                // Maximum distance along the beam
-                double maxDist = endLoc.distance(playerEyeLoc);
-    
-                for (double t = 1; t < maxDist; t += 0.5) {
-                    ParticleEffect.BLOCK_CRACK.display(player.getEyeLocation().add(dir.clone().multiply(t)), 0.0F,
-                            0.0F, 0.0F, 0.0F, 1, new BlockTexture(Material.PORTAL));
-                }
-    
-                for (Endermite e : endermites) {
-                    Vector d = e.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
-                    double dist = d.dot(dir);
-    
-                    if (dist < maxDist) {
-                        Location closest = player.getEyeLocation().add(dir.clone().multiply(dist));
-    
-                        if (closest.distanceSquared(e.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
-                            if (instance.isInBounds(e.getLocation())) {
-                                Location playerLoc = player.getLocation();
-                                Location targetLoc = e.getLocation();
-        
-                                // Swap player and Endermite locations
-                                player.playSound(playerLoc, Sound.ENDERMAN_TELEPORT, 0.5f, 0);
-                                player.teleport(targetLoc);
-                                player.getWorld().playEffect(playerLoc.add(0, 1, 0), Effect.PORTAL, 1);
-                                e.teleport(playerLoc);
-        
-                                e.setTarget(instance.getNearestPlayer(player, e, 150));
-        
-                                player.sendMessage(instance.getGameManager().getMain()
-                                        .color("&2&l(!) &rYou and your Endermite teleported to each other's location"));
-                                break;
-                            }
-                        }
-                    }
-                }
-            } else if (item.getType() == Material.ENDER_PORTAL_FRAME) {
-                event.setCancelled(true);
-                if (swarmSummon.getTime() < 20000) {
-                    int seconds = (20000 - swarmSummon.getTime()) / 1000 + 1;
+                if (phaseShifter.getTime() < 8000) {
+                    int seconds = (8000 - phaseShifter.getTime()) / 1000 + 1;
                     event.setCancelled(true);
-                    player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                    player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET
                             + "Swarm Summon is still on cooldown for " + ChatColor.YELLOW + seconds + " more seconds ");
                 } else {
-                    if (endermites.stream().filter(p -> !p.isDead()).toArray().length > 0) {
-                        for (Endermite endermite : endermites) {
-                            if (!endermite.isDead()) {
-                                endermite.teleport(player.getLocation().add(Math.random() - 0.5, 0, Math.random() - 0.5));
-                                endermite.setTarget(instance.getNearestPlayer(player, endermite, 150));
-                                endermite.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 10, 0));
-                            } else {
-                                endermites.remove(endermite);
+                    phaseShifter.restart();
+
+                    int range = 25;
+                    Location playerEyeLoc = player.getEyeLocation();
+                    Vector dir = playerEyeLoc.getDirection();
+
+                    Location endLoc = playerEyeLoc;
+                    BlockIterator b = new BlockIterator(playerEyeLoc, 0, range);
+
+                    // Determine the farthest valid location along the beam
+                    while (b.hasNext()) {
+                        Block block = b.next();
+                        endLoc = block.getLocation();
+
+                        if (block.getType().isSolid())
+                            break;
+                    }
+
+                    // Maximum distance along the beam
+                    double maxDist = endLoc.distance(playerEyeLoc);
+
+                    for (double t = 1; t < maxDist; t += 0.5) {
+                        ParticleEffect.BLOCK_CRACK.display(player.getEyeLocation().add(dir.clone().multiply(t)), 0.0F,
+                                0.0F, 0.0F, 0.0F, 1, new BlockTexture(Material.PORTAL));
+                    }
+
+                    for (Endermite e : endermites) {
+                        Vector d = e.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
+                        double dist = d.dot(dir);
+
+                        if (dist < maxDist) {
+                            Location closest = player.getEyeLocation().add(dir.clone().multiply(dist));
+
+                            if (closest.distanceSquared(e.getLocation().add(0, 1, 0)) <= 1.75 * 1.75) {
+                                if (instance.isInBounds(e.getLocation())) {
+                                    Location playerLoc = player.getLocation();
+                                    Location targetLoc = e.getLocation();
+
+                                    // Swap player and Endermite locations
+                                    player.playSound(playerLoc, Sound.ENDERMAN_TELEPORT, 0.5f, 0);
+                                    player.teleport(targetLoc);
+                                    player.getWorld().playEffect(playerLoc.add(0, 1, 0), Effect.PORTAL, 1);
+                                    e.teleport(playerLoc);
+
+                                    player.sendMessage(instance.getGameManager().getMain()
+                                            .color("&2&l(!) &rYou and your Endermite teleported to each other's location"));
+                                    break;
+                                }
                             }
                         }
-                        player.getWorld().playSound(player.getLocation(), Sound.ENDERMAN_SCREAM, 1, 0);
-                        player.getWorld().playEffect(player.getLocation().add(0, 2, 0), Effect.ENDER_SIGNAL, 0);
-                        swarmSummon.restart();
-                    } else {
-                        player.sendMessage(instance.getGameManager().getMain()
-                                .color("&c&l(!) &rYou do not have any Endermites to summon!"));
                     }
                 }
+            } else if (item.isSimilar(passive)) {
+                event.setCancelled(true);
+                for (Endermite mite : endermites) {
+                    if (!mite.isDead())
+                        mite.setTarget(instance.getNearestPlayer(player, mite, 150));
+                }
+                player.sendMessage(instance.getGameManager().getMain()
+                        .color("&2&l(!) &rYour Endermites will now attack other players"));
+                player.getInventory().setItemInHand(hostile);
+            } else if (item.isSimilar(hostile)) {
+                event.setCancelled(true);
+                for (Endermite mite : endermites) {
+                    if (!mite.isDead())
+                        mite.setTarget(null);
+                }
+                player.sendMessage(instance.getGameManager().getMain()
+                        .color("&2&l(!) &rYour Endermites are now passive"));
+                player.getInventory().setItemInHand(passive);
             } else if (item.getType() == Material.MONSTER_EGG) {
                 ItemMeta meta = item.getItemMeta();
         

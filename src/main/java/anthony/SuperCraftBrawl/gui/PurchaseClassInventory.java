@@ -29,7 +29,7 @@ public class PurchaseClassInventory implements InventoryProvider {
 		this.type = type;
 		this.player = player;
 		this.data = main.getDataManager().getPlayerData(player);
-		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9).title("" + ChatColor.YELLOW
+		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9).title("" + ChatColor.DARK_GRAY
 				+ ChatColor.BOLD + "Purchase " + type + "?").build();
 		ClassDetails details = data.playerClasses.get(type.getID());
 
@@ -45,7 +45,7 @@ public class PurchaseClassInventory implements InventoryProvider {
 	public void init(Player player, InventoryContents contents) {
 		contents.fill(ClickableItem.of(
 				ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, data.tokens >= type.getTokenCost()?
-						DyeColor.LIME.getData():DyeColor.RED.getData()), ""), e -> {
+						DyeColor.LIME.getData():DyeColor.RED.getData()), " "), e -> {
 				}));
 		contents.set(1, 4, ClickableItem.of(ItemHelper.setDetails(type.getItem(),
 				"" + ChatColor.RESET + "Are you sure you want to purchase?", "",
@@ -75,6 +75,10 @@ public class PurchaseClassInventory implements InventoryProvider {
 								+ ChatColor.RESET + "You don't have enough tokens to purchase " + type.getTag());
 						inv.close(player);
 					}
+				}));
+		contents.set(2, 8, ClickableItem.of(
+				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
+					new TokenClassesGUI(main).inv.open(player);
 				}));
 	}
 

@@ -88,7 +88,7 @@ public abstract class BaseClass {
 	public Timer grapplingHook = new Timer();
 	public Timer grimReaper = new Timer();
 	public Timer alexBrewingStand = new Timer();
-	public Timer swarmSummon = new Timer();
+	public Timer phaseShifter = new Timer();
 	public Timer wolf = new Timer();
 	public boolean bedrockInvincibility = false;
 	public boolean hunterDash = true;
