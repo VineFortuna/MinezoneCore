@@ -54,9 +54,10 @@ public class LevelClassesGUI implements InventoryProvider {
 					nextLevel = 50;
 				else if (played >= 10)
 					nextLevel = 25;
-				
-				contents.set(a, b, ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true),
-						type.getTag(), type.buildDescription(), "",
+
+				contents.set(a, b,
+						ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true),
+										type.getTag(), type.buildDescription(), "",
 						data.level >= type.getLevel() ? "" + ChatColor.YELLOW + ChatColor.BOLD + "Unlocked"
 								: "" + ChatColor.RED + ChatColor.BOLD + "Unlocks at: " + ChatColor.YELLOW
 										+ ChatColor.BOLD + "Level " + type.getLevel(),

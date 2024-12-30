@@ -61,8 +61,8 @@ public class FreeClassesGUI implements InventoryProvider {
 				if (item == null)
 					item = new ItemStack(Material.WOOD);
 				contents.set(a, b,
-						ClickableItem.of(ItemHelper.setDetails(new ItemStack(item), "" + type.getTag(),
-								"" + ChatColor.GRAY + type.getClassDesc(), "",
+						ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true),
+										type.getTag(), type.buildDescription(), "",
 								"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
 										+ ChatColor.YELLOW + " to choose a class",
 								"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET

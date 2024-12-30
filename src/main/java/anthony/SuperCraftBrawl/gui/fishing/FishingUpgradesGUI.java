@@ -68,7 +68,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
         if (data.lureLevel == 0) {
             contents.set(1, 2, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
-                            main.color("&7Lure I"),
+                            main.color("&eLure I"), main.color("&7Enchant your rod with Lure I"),
                             "",
                             main.tokenCostString(player, 500),
                             main.color("&aClick to purchase")), e -> {
@@ -90,7 +90,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
         } else if (data.lureLevel == 1) {
             contents.set(1, 2, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
-                            main.color("&7Lure II"),
+                            main.color("&eLure II"), main.color("&7Enchant your rod with Lure II"),
                             "",
                             main.tokenCostString(player, 1000),
                             main.color("&aClick to purchase")), e -> {
@@ -112,7 +112,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
         } else if (data.lureLevel == 2) {
             contents.set(1, 2, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
-                            main.color("&7Lure III"),
+                            main.color("&eLure III"), main.color("&7Enchant your rod with Lure III"),
                             "",
                             main.tokenCostString(player, 1500),
                             main.color("&aClick to purchase")), e -> {
@@ -134,8 +134,8 @@ public class FishingUpgradesGUI implements InventoryProvider {
         } else {
             contents.set(1, 2, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.LIME.getData()),
-                            main.color("&aPurchased"),
-                            main.color("&7Lure III")), e -> {
+                            main.color("&eLure III"), main.color("&7Enchant your rod with Lure III"), "",
+                            main.color("&aPurchased")), e -> {
                     }));
         }
         
@@ -162,6 +162,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
         if (data.friendshipLevel == 0) {
             contents.set(1, 6, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
+                            main.color("&eCrew's Bounty I"),
                             main.color("&7Receive 10 EXP for every 5 fish caught "),
                             main.color("&7within 4 blocks of another player"),
                             "",
@@ -184,6 +185,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
         } else if (data.friendshipLevel == 1) {
             contents.set(1, 6, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
+                            main.color("&eCrew's Bounty II"),
                             main.color("&7Receive 10 EXP for every 5 fish caught "),
                             main.color("&7within 6 blocks of another player"),
                             "",
@@ -206,6 +208,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
         } else if (data.friendshipLevel == 2) {
             contents.set(1, 6, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
+                            main.color("&eCrew's Bounty III"),
                             main.color("&7Receive 10 EXP for every 3 fish caught "),
                             main.color("&7within 6 blocks of another player"),
                             "",
@@ -228,6 +231,7 @@ public class FishingUpgradesGUI implements InventoryProvider {
         } else if (data.friendshipLevel == 3) {
             contents.set(1, 6, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
+                            main.color("&eCrew's Bounty IV"),
                             main.color("&7Receive 15 EXP for every 3 fish caught "),
                             main.color("&7within 6 blocks of another player"),
                             "",
@@ -250,9 +254,10 @@ public class FishingUpgradesGUI implements InventoryProvider {
         } else {
             contents.set(1, 6, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.LIME.getData()),
-                            main.color("&aPurchased"),
+                            main.color("&eCrew's Bounty IV"),
                             main.color("&7Receive 15 EXP for every 3 fish caught "),
-                            main.color("&7within 6 blocks of another player")), e -> {
+                            main.color("&7within 6 blocks of another player"),
+                            "", main.color("&aPurchased")), e -> {
                     }));
         }
         contents.set(2, 8, ClickableItem.of(
