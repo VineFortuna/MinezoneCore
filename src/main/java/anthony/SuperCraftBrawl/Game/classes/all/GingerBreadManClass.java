@@ -42,7 +42,7 @@ public class GingerBreadManClass extends BaseClass {
 
 	@Override
 	public ClassType getType() {
-		return ClassType.GingerBreadMan;
+		return null;
 	}
 
 	@Override
