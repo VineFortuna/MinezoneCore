@@ -3,9 +3,8 @@ package anthony.SuperCraftBrawl.playerdata;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.ranks.Rank;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class PlayerData {
 	public UUID playerUUID;
@@ -24,6 +23,7 @@ public class PlayerData {
 			december19 = 0, december20 = 0, december21 = 0, december22 = 0, december23 = 0, december24 = 0,
 			december25 = 0, snowParticles = 0, snowballDeathEffect = 0, elfCosmetic = 0, snowmanPet = 0,
 			candycaneParticles = 0, snowball = 0;
+	public String fishingWarps = "";
 
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
 	public HashMap<Integer, FishingDetails> playerFishing = new HashMap<>();
@@ -40,7 +40,8 @@ public class PlayerData {
 			int rewardLevel, int lureLevel, int lure, int friendshipLevel, int friendship, int bestWinstreak,
 			int december15, int december16, int december17, int december18, int december19, int december20,
 			int december21, int december22, int december23, int december24, int december25, int snowParticles,
-			int snowballDeathEffect, int elfCosmetic, int snowmanPet, int candycaneParticles, int snowball) {
+			int snowballDeathEffect, int elfCosmetic, int snowmanPet, int candycaneParticles, int snowball,
+					  String fishingWarps) {
 		this(playerUUID, playerName, playerIP);
 		this.roleID = roleID;
 		this.tokens = tokens;
@@ -118,6 +119,7 @@ public class PlayerData {
 		this.snowmanPet = snowmanPet;
 		this.candycaneParticles = candycaneParticles;
 		this.snowball = snowball;
+		this.fishingWarps = fishingWarps;
 	}
 
 	public boolean isPurchased(ClassType type) {
@@ -134,5 +136,21 @@ public class PlayerData {
 
 	public Rank getRank() {
 		return Rank.getRankFromID(roleID);
+	}
+
+	public List<Integer> getFishingWarps() {
+		if (this.fishingWarps == null || this.fishingWarps.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return Arrays.stream(this.fishingWarps.split(","))
+				.map(Integer::parseInt).collect(Collectors.toList());
+	}
+
+	public void addFishingWarp(int i) {
+		if (getFishingWarps() == null || getFishingWarps().isEmpty()) {
+			this.fishingWarps = Integer.toString(i);
+		} else if (!getFishingWarps().contains(i)) {
+			this.fishingWarps += "," + i;
+		}
 	}
 }

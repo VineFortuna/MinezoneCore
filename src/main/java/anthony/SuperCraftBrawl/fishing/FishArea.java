@@ -21,7 +21,7 @@ public enum FishArea {
             32, 15, 40,
             new Vector(245.5, 105, 637.5),
             new ItemStack(Material.GLOWSTONE)),
-    Park("Park",
+    Park("City Park",
             new Vector(98.5, 115, 955.5),
             35, 10, 45,
             new Vector(98.5, 115, 955.5),
@@ -82,6 +82,10 @@ public enum FishArea {
         if (Math.abs(centre.getZ() - loc.getZ()) > boundsZ)
             return false;
         return true;
+    }
+
+    public int getID() {
+        return ordinal();
     }
 }
 
