@@ -19,6 +19,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.List;
 
 public class StarClass extends BaseClass {
@@ -61,8 +63,9 @@ public class StarClass extends BaseClass {
 											count--;
 										} else if (player.getHealth() > 18.0 && player.getHealth() < 20.0) {
 											double p = 20.0 - player.getHealth();
+											NumberFormat fmt = new DecimalFormat("#.##");
 											player.sendMessage(instance.getGameManager().getMain().color(
-													"&e&l(!) &rJeffrey just gave you an extra " + p + " hearts!"));
+													"&e&l(!) &rJeffrey just gave you an extra " + fmt.format(p) + " hearts!"));
 											count--;
 										} else
 											player.sendMessage(instance.getGameManager().getMain()

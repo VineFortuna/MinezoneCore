@@ -28,10 +28,9 @@ public class TournamentGUI implements InventoryProvider {
     @Override
     public void init(Player player, InventoryContents contents) {
         main.sortTourney();
-        contents.fillRow(0, ClickableItem.of(ItemHelper.setDetails(
+        contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(
                 new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
-        contents.fillRow(4, ClickableItem.of(ItemHelper.setDetails(
-                new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
+
         if (main.tournamentend) {
             String goldTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGYzOTk3YzQzMDkxNjk0ZmMyZmI3NmM4ODNhNzZjY2U4OWYwMjI3ZTVjOWYxZGZlIn19fQ==";
             String silverTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTllMGExYmM2ZWIwYzZmMjcxZDMyM2ExOGUwMTQwY2U0M2Q5NTQ1OGI2YjViNmU4NDhkZjE3NDI1ZGJhOTZhZCJ9fX0=";
@@ -62,8 +61,8 @@ public class TournamentGUI implements InventoryProvider {
         }
         
         contents.set(4, 4, ClickableItem.of(
-                ItemHelper.setDetails(ItemHelper.create(Material.PAPER), main.color("&ePoints System"),
-                        Arrays.asList(main.color("&ePoints are awarded as follows:"),
+                ItemHelper.setDetails(ItemHelper.create(Material.PAPER), main.color("&e&l System"),
+                        Arrays.asList(main.color("&7Points are awarded as follows:"),
                                 main.color("&e- 1st Place: &r10"),
                                 main.color("&e- 2nd Place: &r7"),
                                 main.color("&e- 3rd Place: &r5"),
