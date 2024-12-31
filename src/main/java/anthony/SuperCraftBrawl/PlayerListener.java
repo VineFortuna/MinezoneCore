@@ -10,6 +10,7 @@ import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.PathfinderGoalFollowPlayer;
 import anthony.util.PathfinderHelper;
+import com.comphenix.protocol.PacketType;
 import me.itzzmic.minezone.api.PunishAPI;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.EntityInsentient;
@@ -290,9 +291,14 @@ public class PlayerListener implements Listener {
 			FishArea previousArea = main.getFishingArea(event.getFrom());
 			
 			if (previousArea == null && newArea != null) {
-				player.sendTitle(
-						ChatColor.GOLD + "Welcome!",
-						ChatColor.YELLOW + "You have entered " + newArea.getName());
+				PlayerData data = main.getDataManager().getPlayerData(player);
+				if (!data.getFishingWarps().contains(newArea.getID())) {
+					player.sendTitle(
+							main.color("&6" + newArea.getName()),
+							main.color("&eLocation discovered"));
+					data.addFishingWarp(newArea.getID());
+					main.getDataManager().saveData(data);
+				}
 			}
 		}
 	}
