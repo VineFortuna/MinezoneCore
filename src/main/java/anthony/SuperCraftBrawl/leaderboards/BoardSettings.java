@@ -25,7 +25,7 @@ public class BoardSettings {
 
         		ArmorStand settingsStand = (ArmorStand) main.getLobbyWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
         		settingsStand.setCustomName(main.color("&c&lChristmas Rewards"));
-        		settingsStand.setCustomNameVisible(true);
+        		settingsStand.setCustomNameVisible(false);
         		settingsStand.setGravity(false);
         		settingsStand.setVisible(false);
         		settingsStand.setBasePlate(false);

@@ -92,8 +92,8 @@ public class WolfClass extends BaseClass {
 						
 						target.setVelocity((new Vector(0, 1, 0)).multiply(0.5D));
 						EntityDamageEvent damageEvent = new EntityDamageEvent(target,
-								EntityDamageEvent.DamageCause.MAGIC, 7);
-						target.damage(7, player);
+								EntityDamageEvent.DamageCause.MAGIC, 6);
+						target.damage(6, player);
 						player.getWorld().playSound(player.getLocation(), Sound.ITEM_BREAK, 0.8f, 0);
 						hitPlayers.add(target);
 						
@@ -154,6 +154,8 @@ public class WolfClass extends BaseClass {
 						wolf.setBreed(false);
 						wolf.setTarget(instance.getNearestPlayer(player, wolf, 150));
                         wolf.setAngry(false);
+						wolf.setMaxHealth(wolf.getMaxHealth()*1.5);
+						wolf.setHealth(wolf.getMaxHealth());
 						this.wolves.add(wolf);
 					}
 					player.getWorld().playSound(player.getLocation(), Sound.WOLF_HOWL, 1, 0);
