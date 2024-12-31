@@ -17,12 +17,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class FishingGUI implements InventoryProvider {
     
     public Core main;
     public SmartInventory inv;
     private Player target;
+    private int currentInfo = 0;
     
     public FishingGUI(Core main, SmartInventory parent) {
         inv = SmartInventory.builder().id("myInventory").provider(this).size(5, 9)
@@ -118,12 +120,39 @@ public class FishingGUI implements InventoryProvider {
         String next = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTliZjMyOTJlMTI2YTEwNWI1NGViYTcxM2FhMWIxNTJkNTQxYTFkODkzODgyOWM1NjM2NGQxNzhlZDIyYmYifX19";
         String prev = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ2OWUwNmU1ZGFkZmQ4NGU1ZjNkMWMyMTA2M2YyNTUzYjJmYTk0NWVlMWQ0ZDcxNTJmZGM1NDI1YmMxMmE5In19fQ==";
         String warps = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDFlNzhmZjQ3NjNlOWFkMWE5OThjNzI4ZjcxZmE1ZGJiZDYxNjRhMjdjYTFmMGU0MjMyYzQxZDc0MjA4MTgwYSJ9fX0=";
+        String info = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzA3ZGFiMmNiZWJlYTUzOWI2NGQ1YWQyNDZmOWNjYzFmY2RhN2FhOTRiODhlNTlmYzI4Mjk4NTJmNDYwNzEifX19";
     
         contents.set(0, 8,
                 ClickableItem.of(ItemHelper.createSkullTexture(warps,
                         main.color("&aGo Fishing!"),
                         main.color("&7Instantly travel to a body of water")), e -> {
                     new FishingAreasGUI(main, inv).inv.open(player);
+                }));
+
+        List<String> infoMessages = Arrays.asList(
+                "Click me for information about fishing!",
+                "Grab your rod and go fishing in any body of water",
+                "Reel in sea creatures, junk, or even treasure",
+                "Some catches help you unlock classes faster",
+                "Each catch has a type and/or rarity",
+                "Certain catches can only be found in specific areas",
+                "You can also claim rewards and upgrade your rod",
+                "Fast travel to bodies of water using the globe",
+                "Fun fishing! Squawk!"
+        );
+
+        contents.set(0, 0,
+                ClickableItem.of(ItemHelper.createSkullTexture(info,
+                                "&c&lSquawkbuckler",
+                        "&7" + infoMessages.get(currentInfo),
+                                "&8" + (currentInfo + 1) + "/" + infoMessages.size()), e -> {
+                    if (currentInfo < infoMessages.size() - 1)
+                        currentInfo++;
+                    else
+                        currentInfo = 0;
+                    ItemHelper.setLore(player.getOpenInventory().getItem(0),
+                            Arrays.asList(main.color("&7" + infoMessages.get(currentInfo)),
+                            main.color("&8" + (currentInfo + 1) + "/" + infoMessages.size())));
                 }));
         
         if (!pagination.isFirst()) {
