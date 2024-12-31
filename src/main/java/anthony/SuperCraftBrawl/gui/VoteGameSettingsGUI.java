@@ -89,7 +89,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 			if (event.getWhoClicked() instanceof Player) {
 				SoundManager.playSoundSuccessfulHitToSinglePlayer(player);
 				game.getGameSettings().handleVoteTime(player, game);
-				inv.open(player);
+				openForAll(game);
 			}
 		}));
 	}
@@ -117,7 +117,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 			if (event.getWhoClicked() instanceof Player) {
 				SoundManager.playSoundSuccessfulHitToSinglePlayer(player);
 				game.getGameSettings().handleVoteGameType(player, game);
-				inv.open(player);
+				openForAll(game);
 			}
 		}));
 	}
@@ -138,7 +138,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 			if (event.getWhoClicked() instanceof Player) {
 				SoundManager.playSoundSuccessfulHitToSinglePlayer(player);
 				game.getGameSettings().handleLightningRate(player, game);
-				inv.open(player);
+				openForAll(game);
 			}
 		}));
 	}
@@ -146,5 +146,13 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 	@Override
 	public void update(Player player, InventoryContents contents) {
 
+	}
+
+	private void openForAll(GameInstance game) {
+		for (Player p : game.players) {
+			if (p.getOpenInventory() != null && p.getOpenInventory().getTitle().equals(inv.getTitle())) {
+				inv.open(p);
+			}
+		}
 	}
 }

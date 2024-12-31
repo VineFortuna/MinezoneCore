@@ -92,8 +92,8 @@ public class EndermiteClass extends BaseClass {
         endermites.clear();
         
         playerInv.setItem(0, this.getAttackWeapon());
-        playerInv.setItem(1, passive);
-        playerInv.setItem(2, enderSwap);
+        playerInv.setItem(1, enderSwap);
+        playerInv.setItem(2, passive);
         playerInv.setItem(3, ItemHelper.createMonsterEgg(EntityType.ENDERMITE, 6,
                 instance.getGameManager().getMain().color("&5&lEndermite Pokeball")));
     }
@@ -137,8 +137,6 @@ public class EndermiteClass extends BaseClass {
                     player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET
                             + "Swarm Summon is still on cooldown for " + ChatColor.YELLOW + seconds + " more seconds ");
                 } else {
-                    phaseShifter.restart();
-
                     int range = 25;
                     Location playerEyeLoc = player.getEyeLocation();
                     Vector dir = playerEyeLoc.getDirection();
@@ -183,6 +181,7 @@ public class EndermiteClass extends BaseClass {
 
                                     player.sendMessage(instance.getGameManager().getMain()
                                             .color("&2&l(!) &rYou and your Endermite teleported to each other's location"));
+                                    phaseShifter.restart();
                                     break;
                                 }
                             }
@@ -229,7 +228,6 @@ public class EndermiteClass extends BaseClass {
                                     "" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Endermite");
                             en.setCustomNameVisible(true);
                             player.playSound(player.getLocation(), Sound.ENDERMAN_STARE, 1, 1);
-                            en.setTarget(instance.getNearestPlayer(player, en, 150));
                             endermites.add(en);
                         }
                 

@@ -20,7 +20,7 @@ import java.util.UUID;
 
 public class KillsBoard {
 	private Core main;
-	private HashMap<UUID, Integer> flawlessWins;
+	private HashMap<UUID, Integer> kills;
 	private HashMap<UUID, Rank> RoleID;
 	private ArrayList<UUID> lead;
 	private ArrayList<String> lead2;
@@ -46,12 +46,12 @@ public class KillsBoard {
 		Bukkit.getScheduler().runTaskTimerAsynchronously(main, () -> {
 			i = 0;
 			RoleID = new HashMap<>();
-			flawlessWins = new HashMap<>();
+			kills = new HashMap<>();
 			lead = new ArrayList<>();
 			lead2 = new ArrayList<>();
 			toRemove = new ArrayList<ArmorStand>();
 			c = main.getDatabaseManager().getConnection();
-			flawlessWins.clear();
+			kills.clear();
 			lead.clear();
 			RoleID.clear();
 			try {
@@ -71,7 +71,7 @@ public class KillsBoard {
 					a++;
 					lead.add(id);
 					lead2.add(name);
-					flawlessWins.put(id, set.getInt("Kills"));
+					kills.put(id, set.getInt("Kills"));
 					RoleID.put(id, Rank.getRankFromID(set.getInt("RoleID")));
 				}
 				if (i == 0) {
@@ -105,7 +105,7 @@ public class KillsBoard {
 		}
 
 		toRemove.clear();
-		flawlessWins.clear();
+		kills.clear();
 		lead.clear();
 		c = null;
 		RoleID.clear();
@@ -132,7 +132,7 @@ public class KillsBoard {
 			loc.setY(loc.getY() - 0.24);
 			String name = lead2.get(count - 1);
 
-			Integer win = flawlessWins.get(id);
+			Integer win = kills.get(id);
 			stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 			stand.setVisible(false);
 			stand.setGravity(false);
@@ -164,7 +164,7 @@ public class KillsBoard {
 			loc.setY(loc.getY() - 0.24);
 			String name = lead2.get(count - 1);
 
-			Integer win = flawlessWins.get(id);
+			Integer win = kills.get(id);
 			stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
 			stand.setVisible(false);
 			stand.setGravity(false);
