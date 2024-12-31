@@ -44,9 +44,7 @@ public class StatsGUI implements InventoryProvider {
 		if (this.target != null)
 			data = main.getDataManager().getPlayerData(target);
 		
-		contents.fillRow(0, ClickableItem.of(ItemHelper.setDetails(
-				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
-		contents.fillRow(4, ClickableItem.of(ItemHelper.setDetails(
+		contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(
 				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 		
 		contents.set(4, 3, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.REDSTONE_COMPARATOR),
@@ -73,7 +71,7 @@ public class StatsGUI implements InventoryProvider {
 									main.color("&aMatches Played: &r" + (data.wins + data.losses)))), e-> {}));
 			/*contents.set(2, 2,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FEATHER), "&cComing soon..."), e-> {}));*/
-			contents.set(2, 4,
+			contents.set(2, 3,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
 							main.color("&e&lSCB Stats"),
 							"" + ChatColor.RESET + ChatColor.GREEN + "Wins: " + ChatColor.RESET + data.wins,
@@ -99,11 +97,11 @@ public class StatsGUI implements InventoryProvider {
 			if (target != null)
 				uniqueCaught = main.getTotalFish(target);
 			
-			contents.set(2, 6,
+			contents.set(2, 5,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
 							main.color("&e&lFishing Stats"),
 							main.color("&aCaught: &r" + data.totalcaught),
-							main.color("&aUnique Caught: &r" + uniqueCaught),
+							main.color("&aUnique Caught: &r" + uniqueCaught + "/" + FishType.values().length),
 							main.color("&aTreasure Caught: &r" + treasure)), e -> {
 					}));
 			String fishingTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTk2YTQ4ZGNkYWY0MThmMjJjZDE4NjdjMWViMGFlMjgyYzI4NGI2Nzk5MDZiNzk3ODFkOGQyYjJlZWJhMjEwMiJ9fX0=";

@@ -49,6 +49,9 @@ public class FishingRewardsGUI implements InventoryProvider {
             rewardStrings.add(main.color("&e15 Tokens or 30 EXP"));
         }
         rewardStrings.add("");
+
+        contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(
+                new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
         
         if (data != null) {
             if (data.rewardLevel < 7) {

@@ -20,7 +20,7 @@ public class FishingAreasGUI implements InventoryProvider {
     public SmartInventory inv;
     
     public FishingAreasGUI(Core main, SmartInventory parent) {
-        inv = SmartInventory.builder().id("myInventory").provider(this).size(1, 9)
+        inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
                 .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Fishing Warps").parent(parent).build();
         this.main = main;
     }
@@ -28,6 +28,9 @@ public class FishingAreasGUI implements InventoryProvider {
     @Override
     public void init(Player player, InventoryContents contents) {
         PlayerData data = main.getDataManager().getPlayerData(player);
+
+        contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(
+                new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
     
         if (data != null) {
             for (FishArea area : FishArea.values()) {

@@ -33,6 +33,9 @@ public class FishingUpgradesGUI implements InventoryProvider {
     
         String lureTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTQ1OWFmNDEzNWMxZWI3OTMyN2ExM2M3YTU5ZjFmOGE5ZWExZTE0NjViNDgwYWQ5YmU3MTQxOGI2ZjkwZGM4ZiJ9fX0=";
         String friendTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzZjYmFlNzI0NmNjMmM2ZTg4ODU4NzE5OGM3OTU5OTc5NjY2YjRmNWE0MDg4ZjI0ZTI2ZTA3NWYxNDBhZTZjMyJ9fX0=";
+
+        contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(
+                new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
         
         contents.set(1, 3, ClickableItem.of(
                 ItemHelper.createSkullTexture(lureTexture, main.color("&eLure"),

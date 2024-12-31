@@ -214,8 +214,8 @@ public class ClassRewardsGUI implements InventoryProvider {
                     }
                 }));
         contents.set(1, 7, ClickableItem.of(
-                ItemHelper.setDetails(new ItemStack(Material.PAPER), "&aWhen using this class:",
-                        "&a- Match played: +1 point", "&a- Match won: +1 point"), e -> {
+                ItemHelper.setDetails(new ItemStack(Material.PAPER), "&a&lMastery Points", "&7When using this class:",
+                        "&a- Match played: &r+1 point", "&a- Match won: &r+1 point"), e -> {
                 }));
         contents.set(2, 8, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {

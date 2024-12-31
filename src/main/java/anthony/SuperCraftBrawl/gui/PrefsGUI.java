@@ -33,10 +33,8 @@ public class PrefsGUI implements InventoryProvider {
 	public void init(Player player, InventoryContents contents) {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 		String line = "";
-		
-		contents.fillRow(0, ClickableItem.of(ItemHelper.setDetails(
-				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
-		contents.fillRow(4, ClickableItem.of(ItemHelper.setDetails(
+
+		contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(
 				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 		
 		contents.set(4, 3, ClickableItem.of(ItemHelper.setGlowing(ItemHelper.setDetails(new ItemStack(Material.REDSTONE_COMPARATOR),

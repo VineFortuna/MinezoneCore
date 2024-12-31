@@ -10,20 +10,18 @@ import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.PathfinderGoalFollowPlayer;
 import anthony.util.PathfinderHelper;
-import com.comphenix.protocol.PacketType;
 import me.itzzmic.minezone.api.PunishAPI;
 import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.EntityInsentient;
-import net.minecraft.server.v1_8_R3.EntityLiving;
-import net.minecraft.server.v1_8_R3.EnumParticle;
-import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
+import net.minecraft.server.v1_8_R3.*;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
+import org.bukkit.Material;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -291,14 +289,25 @@ public class PlayerListener implements Listener {
 			FishArea previousArea = main.getFishingArea(event.getFrom());
 			
 			if (previousArea == null && newArea != null) {
+				String msg = main.color("&3&l(!) &rEntering &e" + newArea.getName());
+				PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
+						(byte) 2);
+				CraftPlayer craft = (CraftPlayer) player;
+				craft.getHandle().playerConnection.sendPacket(packet);
 				PlayerData data = main.getDataManager().getPlayerData(player);
 				if (!data.getFishingWarps().contains(newArea.getID())) {
 					player.sendTitle(
 							main.color("&6" + newArea.getName()),
-							main.color("&eLocation discovered"));
+							main.color("&eArea discovered"));
 					data.addFishingWarp(newArea.getID());
 					main.getDataManager().saveData(data);
 				}
+			} else if (previousArea != null && newArea == null) {
+				String msg = main.color("&3&l(!) &rLeaving &e" + previousArea.getName());
+				PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
+						(byte) 2);
+				CraftPlayer craft = (CraftPlayer) player;
+				craft.getHandle().playerConnection.sendPacket(packet);
 			}
 		}
 	}
