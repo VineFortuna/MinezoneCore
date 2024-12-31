@@ -2,7 +2,7 @@ package anthony.SuperCraftBrawl;
 
 public enum Version {
 
-	SCB(2.1), FISHING(1.1);
+	SCB(2.2), FISHING(2.0);
 	
 	private double version;
 	
