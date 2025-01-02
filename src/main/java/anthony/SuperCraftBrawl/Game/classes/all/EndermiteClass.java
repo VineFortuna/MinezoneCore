@@ -116,10 +116,14 @@ public class EndermiteClass extends BaseClass {
                 getActionBarManager().setActionBar(player, "swarm.cooldown", msg, 2);
             }
 
-            if (gameTicks % 20 == 0 && player.getItemInHand().isSimilar(enderSwap) && !endermites.isEmpty()) {
+            if (gameTicks % 20 == 0 && !endermites.isEmpty()) {
                 for (Endermite mite : endermites) {
-                    if (!mite.isDead())
-                        player.playEffect(mite.getLocation().add(0, 1, 0), Effect.HAPPY_VILLAGER, 1);
+                    if (!mite.isDead()) {
+                        if (player.getItemInHand().isSimilar(enderSwap))
+                            player.playEffect(mite.getLocation().add(0, 1, 0), Effect.HAPPY_VILLAGER, 1);
+                        if (player.getInventory().contains(passive))
+                            mite.setTarget(null);
+                    }
                 }
             }
         }
@@ -227,6 +231,8 @@ public class EndermiteClass extends BaseClass {
                             en.setCustomName(
                                     "" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Endermite");
                             en.setCustomNameVisible(true);
+                            if (player.getInventory().contains(hostile))
+                                en.setTarget(instance.getNearestPlayer(player, en, 150));
                             player.playSound(player.getLocation(), Sound.ENDERMAN_STARE, 1, 1);
                             endermites.add(en);
                         }
