@@ -72,7 +72,7 @@ public class FishingAreasGUI implements InventoryProvider {
         }
         
         if (inv.getParent().isPresent()) {
-            contents.set(0, 8, ClickableItem.of(
+            contents.set(2, 8, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
                         inv.getParent().get().open(player);
                     }));

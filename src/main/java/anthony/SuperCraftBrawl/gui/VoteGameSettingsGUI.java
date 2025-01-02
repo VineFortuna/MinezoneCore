@@ -62,6 +62,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 				Player clickingPlayer = (Player) event.getWhoClicked();
 				SoundManager.playSoundSuccessfulHitToSinglePlayer(player);
 				game.getGameSettings().handleVoteGameStart(clickingPlayer, game);
+				openForAll(game);
 				inv.close(player);
 			}
 		}));
