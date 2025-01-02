@@ -1692,7 +1692,7 @@ public class Core extends JavaPlugin implements Listener {
 				p.sendMessage("");
 				p.sendMessage(color("          &2&lNEW &e&lFISHING &2&lLOBBY ACTIVITY"));
 				p.sendMessage("" + "     Try out fishing to get some amazing rewards");
-				p.sendMessage("" + "     by visiting the Fisherman in the lobby!");
+				p.sendMessage("" + "     by checking out the Fisherman in the lobby!");
 				p.sendMessage("");
 				p.sendMessage("----------------------------------------------");
 				p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
