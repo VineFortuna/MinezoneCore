@@ -8,6 +8,7 @@ import anthony.util.ItemHelper;
 import org.bukkit.ChatColor;
 import org.bukkit.Effect;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
@@ -86,7 +87,10 @@ public class AnvilClass extends BaseClass {
 					}
 				}
 			}
-			this.player.getWorld().playEffect(this.player.getLocation(), Effect.TILE_BREAK, 1);
+			for (Player gamePlayer : this.instance.players) {
+				this.player.playEffect(this.player.getLocation(), Effect.TILE_BREAK, 1);
+			}
+			player.getWorld().playSound(this.player.getLocation(), Sound.ANVIL_LAND, 1.0F, 1.0F);
 		}
 		if (this.instance.classes.containsKey(this.player)
 				&& this.instance.classes.get(this.player).getType() == ClassType.Anvil
