@@ -1237,7 +1237,6 @@ public class GameInstance {
 				player.setGameMode(GameMode.ADVENTURE);
 				if (baseClass.getLives() == 0) {
 					this.playerPosition.add(player);
-					this.spectators.add(player);
 					if (this.players.size() > 2) {
 						player.sendTitle("" + ChatColor.RED + "You have died!",
 								"" + ChatColor.RESET + "You are now a Spectator");

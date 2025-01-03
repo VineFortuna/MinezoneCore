@@ -54,14 +54,10 @@ public class GameStatsGUI implements InventoryProvider {
 		if (i != null) {
 			for (Entry<Player, BaseClass> entry : i.allClasses.entrySet()) {
 				if (entry.getKey() != null && entry.getKey().isOnline()) {
-					ItemStack stats = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
-					SkullMeta statsMeta = (SkullMeta) stats.getItemMeta();
-					statsMeta.setOwner(entry.getKey().getName());
-					stats.setItemMeta(statsMeta);
-					
-					String rank = entry.getKey().isOnline() ? main.getRankManager().getRank(entry.getKey()).getTagWithSpace() :
-							"";
-					
+					ItemStack stats = ItemHelper.createSkullHeadPlayer(1, entry.getKey().getName());
+
+					String rank = main.getRankManager().getRank(entry.getKey()).getTagWithSpace();
+
 					if (matchMvp() != null && matchMvp() == entry.getValue()) {
 						contents.set(y, x,
 								ClickableItem.of(
@@ -88,21 +84,20 @@ public class GameStatsGUI implements InventoryProvider {
 										}));
 					}
 					if (isFirstBlood(entry.getKey(), i)) {
-						statsMeta = (SkullMeta) stats.getItemMeta();
-						ItemHelper.setDetails(stats, statsMeta.getDisplayName(), statsMeta.getLore(),
+						ItemHelper.setDetails(stats, stats.getItemMeta().getDisplayName(), stats.getItemMeta().getLore(),
 								main.color("&eFirst Blood"));
 					}
-					
+
 					contents.set(y, x,
 							ClickableItem.of(stats, e -> {
 							}));
-				}
-				
-				x++;
-				
-				if (x > 8) {
-					y++;
-					x = 0;
+
+					x++;
+
+					if (x > 8) {
+						y++;
+						x = 0;
+					}
 				}
 			}
 		}

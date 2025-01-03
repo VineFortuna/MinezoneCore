@@ -30,7 +30,7 @@ public class WolfClass extends BaseClass {
 	private boolean used = false;
 	private List<Wolf> wolves = new ArrayList<>();
 	private List<Player> hitPlayers = new ArrayList<>();
-	private int cooldownSec;
+	private int biteCooldownSec, callCooldownSec;
 
 	public WolfClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -67,7 +67,8 @@ public class WolfClass extends BaseClass {
 			if (bc != null) {
 				if (bc.getLives() == 1) {
 					bone = ItemHelper.addEnchant(
-							ItemHelper.addEnchant(new ItemStack(Material.BONE), Enchantment.DAMAGE_ALL, 4),
+							ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.BONE), "&eBite"),
+									Enchantment.DAMAGE_ALL, 4),
 							Enchantment.KNOCKBACK, 2);
 				}
 
@@ -112,14 +113,14 @@ public class WolfClass extends BaseClass {
 		}
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Wolf
 				&& instance.classes.get(player).getLives() > 0) {
-			this.cooldownSec = (12000 - wolf.getTime()) / 1000 + 1;
+			this.biteCooldownSec = (12000 - wolfBite.getTime()) / 1000 + 1;
 			
-			if (wolf.getTime() < 12000) {
+			if (wolfBite.getTime() < 12000) {
 				String msg = instance.getGameManager().getMain()
-						.color("&rBite Attack regenerates in: &e" + cooldownSec + "s");
+						.color("&eBite regenerates in: &e" + biteCooldownSec + "s");
 				getActionBarManager().setActionBar(player, "wolf.cooldown", msg, 2);
 			} else {
-				String msg = instance.getGameManager().getMain().color("&rYou can use Bite Attack");
+				String msg = instance.getGameManager().getMain().color("&rYou can use &eBite");
 				getActionBarManager().setActionBar(player, "wolf.cooldown", msg, 2);
 			}
 		}
@@ -127,7 +128,7 @@ public class WolfClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		wolf.startTime = System.currentTimeMillis() - 100000;
+		wolfBite.startTime = System.currentTimeMillis() - 100000;
 		wolves.clear();
 		hitPlayers.clear();
 
@@ -162,13 +163,13 @@ public class WolfClass extends BaseClass {
 					player.getInventory().clear(1);
 				}
 			} else if (item.getType() == Material.BONE) {
-				if (wolf.getTime() < 12000) {
-					int seconds = (12000 - wolf.getTime()) / 1000 + 1;
+				if (wolfBite.getTime() < 12000) {
+					int seconds = (12000 - wolfBite.getTime()) / 1000 + 1;
 					event.setCancelled(true);
 					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
 							+ "Your Bite Attack is still regenerating for " + ChatColor.YELLOW + seconds + " more seconds ");
 				} else {
-					wolf.restart();
+					wolfBite.restart();
 					startDash();
 				}
 			}

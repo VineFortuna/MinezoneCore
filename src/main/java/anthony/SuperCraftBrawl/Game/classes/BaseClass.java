@@ -89,9 +89,11 @@ public abstract class BaseClass {
 	public Timer grimReaper = new Timer();
 	public Timer alexBrewingStand = new Timer();
 	public Timer phaseShifter = new Timer();
-	public Timer wolf = new Timer();
+	public Timer wolfBite = new Timer();
+	public Timer wolfRecall = new Timer();
 	public boolean bedrockInvincibility = false;
 	public boolean hunterDash = true;
+	public boolean wolfPackAdd = false;
 
 	public int goldAmt = 0; // For Steve Class
 	public int coalAmt = 0; // For Steve Class
@@ -2853,6 +2855,8 @@ public abstract class BaseClass {
 						instance.getGameManager().getMain().color("&5&lEndermite Pokeball")));
 				d.sendMessage(instance.getGameManager().getMain()
 						.color("&2&l(!) &rYou got a kill and gained an extra &5&lEndermite Pokeball"));
+			} else if (baseClass.getType() == ClassType.Wolf) {
+				wolfPackAdd = true;
 			}
 		}
 	}
