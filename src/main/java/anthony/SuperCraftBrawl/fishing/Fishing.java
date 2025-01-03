@@ -148,8 +148,8 @@ public class Fishing implements Listener {
         
         for (FishType t : fishTypes) {
             if (t.getRarity() == rarity) {
-                if (area != null) {
-                    if (t.getAreas() == null || t.getAreas().contains(area))
+                if (area != null && t.getAreas() != null && !t.getAreas().isEmpty()) {
+                    if (t.getAreas().contains(area))
                         fishes.add(t);
                 } else {
                     fishes.add(t);
@@ -177,8 +177,8 @@ public class Fishing implements Listener {
         ArrayList<FishType> loot = new ArrayList<>();
         for (FishType l : fishTypes) {
             if (l.getRarity() == rarity) {
-                if (area != null) {
-                    if (l.getAreas() == null || l.getAreas().contains(area))
+                if (area != null && l.getAreas() != null && !l.getAreas().isEmpty()) {
+                    if (l.getAreas().contains(area))
                         loot.add(l);
                 } else {
                     loot.add(l);

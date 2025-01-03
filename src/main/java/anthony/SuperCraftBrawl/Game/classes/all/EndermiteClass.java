@@ -104,9 +104,9 @@ public class EndermiteClass extends BaseClass {
                 && instance.classes.get(player).getLives() > 0) {
             if (!(player.getInventory().contains(this.enderSwap)))
                 player.getInventory().setItem(1, this.enderSwap);
-    
+
             this.swapCooldownSec = (8000 - phaseShifter.getTime()) / 1000 + 1;
-            
+
             if (phaseShifter.getTime() < 8000) {
                 String msg = instance.getGameManager().getMain()
                         .color("&ePhase Shifter &rin: &e" + this.swapCooldownSec + "s");
@@ -115,13 +115,14 @@ public class EndermiteClass extends BaseClass {
                 String msg = instance.getGameManager().getMain().color("&rYou can use &ePhase Shifter");
                 getActionBarManager().setActionBar(player, "swarm.cooldown", msg, 2);
             }
-
-            if (gameTicks % 10 == 0 && !endermites.isEmpty()) {
+            if (!endermites.isEmpty()) {
                 for (Endermite mite : endermites) {
                     if (!mite.isDead()) {
-                        if (player.getItemInHand().isSimilar(enderSwap))
-                            player.playEffect(mite.getLocation().add(0, 1, 0), Effect.HAPPY_VILLAGER, 1);
-                        if (player.getInventory().contains(passive))
+                        if (gameTicks % 20 == 0) {
+                            if (player.getItemInHand().isSimilar(enderSwap))
+                                player.playEffect(mite.getLocation().add(0, 1, 0), Effect.HAPPY_VILLAGER, 1);
+                        }
+                        if (player.getInventory().contains(passive) && mite.getTarget() != null)
                             mite.setTarget(null);
                     } else {
                         endermites.remove(mite);

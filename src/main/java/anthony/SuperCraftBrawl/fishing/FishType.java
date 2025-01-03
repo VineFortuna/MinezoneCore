@@ -84,7 +84,9 @@ public enum FishType {
     public FishRarity getRarity() {
         return this.rarity;
     }
-    public List<FishArea> getAreas() { return this.areas; }
+    public List<FishArea> getAreas() {
+        return this.areas;
+    }
     public boolean isFish() {
         return this.rarity != FishRarity.JUNK && this.rarity != FishRarity.TREASURE;
     }
