@@ -12,7 +12,7 @@ public enum FishArea {
     Pond(
             "Pond",
             new Vector(287, 94, 519),
-            30, 15, 42,
+            30, 15, 35,
             new Vector(302.5, 91, 527.5),
             new ItemStack(Material.GRASS)),
     LushCave(
@@ -26,11 +26,11 @@ public enum FishArea {
             32, 20, 42,
             new Vector(96.5, 113, 923.5),
             new ItemStack(Material.APPLE)),
-    Shores("Rocky Shores",
+    /*Shores("Rocky Shores",
             new Vector(46, 80, 555),
             25, 15, 35,
             new Vector(56.5, 78, 569.5),
-            new ItemStack(Material.CLAY)),
+            new ItemStack(Material.CLAY)),*/
     Woods("Woods",
             new Vector(218, 107, 586),
             12, 14, 12,
