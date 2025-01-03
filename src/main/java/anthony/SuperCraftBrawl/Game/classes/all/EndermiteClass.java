@@ -116,13 +116,15 @@ public class EndermiteClass extends BaseClass {
                 getActionBarManager().setActionBar(player, "swarm.cooldown", msg, 2);
             }
 
-            if (gameTicks % 20 == 0 && !endermites.isEmpty()) {
+            if (gameTicks % 10 == 0 && !endermites.isEmpty()) {
                 for (Endermite mite : endermites) {
                     if (!mite.isDead()) {
                         if (player.getItemInHand().isSimilar(enderSwap))
                             player.playEffect(mite.getLocation().add(0, 1, 0), Effect.HAPPY_VILLAGER, 1);
                         if (player.getInventory().contains(passive))
                             mite.setTarget(null);
+                    } else {
+                        endermites.remove(mite);
                     }
                 }
             }
