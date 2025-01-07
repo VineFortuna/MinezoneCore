@@ -656,8 +656,7 @@ public class PlayerListener implements Listener {
 			if (event.getPlayer().hasPermission("scb.chat"))
 				event.setFormat(event.getFormat() + displayName + ChatColor.RESET + ": ");
 			else {
-				displayName = ChatColor.GRAY + displayName;
-				event.setFormat(event.getFormat() + displayName + ": ");
+				event.setFormat(event.getFormat() + ChatColor.GRAY + displayName + ChatColor.RESET + ": ");
 			}
 
 			String tempmsg = "";
