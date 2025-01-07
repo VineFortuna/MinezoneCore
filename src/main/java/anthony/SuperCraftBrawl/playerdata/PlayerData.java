@@ -119,7 +119,7 @@ public class PlayerData {
 		this.snowmanPet = snowmanPet;
 		this.candycaneParticles = candycaneParticles;
 		this.snowball = snowball;
-		this.fishingWarps = fishingWarps;
+		this.fishingWarps = fishingWarps != null ? fishingWarps : "";
 	}
 
 	public boolean isPurchased(ClassType type) {
