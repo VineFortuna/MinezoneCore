@@ -101,6 +101,11 @@ public class Commands implements CommandExecutor, TabCompleter {
     }
 
     private void purchaseCommand(String[] args, Player player) {
+        if (!player.hasPermission("scb.purchases")) {
+            player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+            return;
+        }
+
         if (args.length == 0) {
             player.sendMessage("Not enough arguments!");
             return;

@@ -81,9 +81,8 @@ public class GhastClass extends BaseClass {
 
 		ItemStack bow = new ItemStack(Material.BOW);
 		bow.addUnsafeEnchantment(Enchantment.ARROW_FIRE, 1);
-		bow.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
 		bow.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
-		bow.addUnsafeEnchantment(Enchantment.DURABILITY, 10000);
+		ItemHelper.setUnbreakable(bow);
 		playerInv.setItem(1, bow);
 		playerInv.setItem(35, new ItemStack(Material.ARROW));
 	}

@@ -457,7 +457,7 @@ public class GameInstance {
 						} else if (chance == 2) {
 							TellAll("" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "Tip" + ChatColor.DARK_GREEN
 									+ "] " + ChatColor.RESET + ChatColor.LIGHT_PURPLE
-									+ "Be sure to select a class by using the sign or compass!");
+									+ "Be sure to select a class by using the compass!");
 						}
 						for (Player player : players)
 							player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 1);

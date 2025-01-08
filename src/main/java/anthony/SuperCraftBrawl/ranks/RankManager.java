@@ -16,7 +16,7 @@ public class RankManager {
 	public void setRank(Player player, Rank rank) {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 		data.roleID = rank.getRoleID();
-		updateRank(player, rank);
+		updateRank(player, data);
 	}
 	
 	public Rank getRank(Player player) {
@@ -28,8 +28,11 @@ public class RankManager {
 			return null;
 	}
 	
-	public void updateRank(Player player, Rank rank) {
-		
+	public void updateRank(Player player, PlayerData data) {
+		main.getListener().setPlayerOnTablist(player);
+		main.sendScoreboardUpdate(player); // This sets the rank next to player name above their head
+		main.getScoreboardManager().lobbyBoard(player);
+		main.getDataManager().reloadPerms(player, data);
 	}
 	
 }
