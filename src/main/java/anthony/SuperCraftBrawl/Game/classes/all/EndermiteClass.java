@@ -6,12 +6,18 @@ import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
+import anthony.util.PathfinderHelper;
 import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.EntityEndermite;
+import net.minecraft.server.v1_8_R3.EntityMonster;
+import net.minecraft.server.v1_8_R3.PathfinderGoalSelector;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEndermite;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Endermite;
 import org.bukkit.entity.Entity;
@@ -22,12 +28,16 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 import xyz.xenondevs.particle.ParticleEffect;
 import xyz.xenondevs.particle.data.texture.BlockTexture;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class EndermiteClass extends BaseClass {
@@ -93,7 +103,7 @@ public class EndermiteClass extends BaseClass {
         
         playerInv.setItem(0, this.getAttackWeapon());
         playerInv.setItem(1, enderSwap);
-        playerInv.setItem(2, passive);
+        playerInv.setItem(2, hostile);
         playerInv.setItem(3, ItemHelper.createMonsterEgg(EntityType.ENDERMITE, 6,
                 instance.getGameManager().getMain().color("&5&lEndermite Pokeball")));
     }
@@ -105,9 +115,9 @@ public class EndermiteClass extends BaseClass {
             if (!(player.getInventory().contains(this.enderSwap)))
                 player.getInventory().setItem(1, this.enderSwap);
 
-            this.swapCooldownSec = (8000 - phaseShifter.getTime()) / 1000 + 1;
+            this.swapCooldownSec = (5000 - phaseShifter.getTime()) / 1000 + 1;
 
-            if (phaseShifter.getTime() < 8000) {
+            if (phaseShifter.getTime() < 5000) {
                 String msg = instance.getGameManager().getMain()
                         .color("&ePhase Shifter &rin: &e" + this.swapCooldownSec + "s");
                 getActionBarManager().setActionBar(player, "swarm.cooldown", msg, 2);
@@ -116,16 +126,18 @@ public class EndermiteClass extends BaseClass {
                 getActionBarManager().setActionBar(player, "swarm.cooldown", msg, 2);
             }
             if (!endermites.isEmpty()) {
-                for (Endermite mite : endermites) {
+                Iterator<Endermite> iterator = endermites.iterator();
+
+                while (iterator.hasNext()) {
+                    Endermite mite = iterator.next();
                     if (!mite.isDead()) {
                         if (gameTicks % 20 == 0) {
-                            if (player.getItemInHand().isSimilar(enderSwap))
+                            if (player.getItemInHand().isSimilar(enderSwap)) {
                                 player.playEffect(mite.getLocation().add(0, 1, 0), Effect.HAPPY_VILLAGER, 1);
+                            }
                         }
-                        if (player.getInventory().contains(passive) && mite.getTarget() != null)
-                            mite.setTarget(null);
                     } else {
-                        endermites.remove(mite);
+                        iterator.remove();  // Safe removal using the iterator
                     }
                 }
             }
@@ -138,8 +150,8 @@ public class EndermiteClass extends BaseClass {
         if (item != null && event.getAction().name().contains("RIGHT_CLICK")) {
             if (item.getType() == Material.EYE_OF_ENDER) {
                 event.setCancelled(true);
-                if (phaseShifter.getTime() < 8000) {
-                    int seconds = (8000 - phaseShifter.getTime()) / 1000 + 1;
+                if (phaseShifter.getTime() < 5000) {
+                    int seconds = (5000 - phaseShifter.getTime()) / 1000 + 1;
                     event.setCancelled(true);
                     player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET
                             + "Swarm Summon is still on cooldown for " + ChatColor.YELLOW + seconds + " more seconds ");
@@ -198,8 +210,10 @@ public class EndermiteClass extends BaseClass {
             } else if (item.isSimilar(passive)) {
                 event.setCancelled(true);
                 for (Endermite mite : endermites) {
-                    if (!mite.isDead())
+                    if (!mite.isDead()) {
                         mite.setTarget(instance.getNearestPlayer(player, mite, 150));
+                        mite.removePotionEffect(PotionEffectType.SLOW);
+                    }
                 }
                 player.sendMessage(instance.getGameManager().getMain()
                         .color("&2&l(!) &rYour Endermites will now attack other players"));
@@ -207,8 +221,10 @@ public class EndermiteClass extends BaseClass {
             } else if (item.isSimilar(hostile)) {
                 event.setCancelled(true);
                 for (Endermite mite : endermites) {
-                    if (!mite.isDead())
+                    if (!mite.isDead()) {
                         mite.setTarget(null);
+                        mite.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 999999999, true, false));
+                    }
                 }
                 player.sendMessage(instance.getGameManager().getMain()
                         .color("&2&l(!) &rYour Endermites are now passive"));
@@ -234,8 +250,12 @@ public class EndermiteClass extends BaseClass {
                             en.setCustomName(
                                     "" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Endermite");
                             en.setCustomNameVisible(true);
-                            if (player.getInventory().contains(hostile))
+                            en.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0, true, false));
+                            if (player.getInventory().contains(hostile)) {
                                 en.setTarget(instance.getNearestPlayer(player, en, 150));
+                            } else if (player.getInventory().contains(passive))  {
+                                en.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 999999999, true, false));
+                            }
                             player.playSound(player.getLocation(), Sound.ENDERMAN_STARE, 1, 1);
                             endermites.add(en);
                         }

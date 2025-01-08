@@ -117,7 +117,7 @@ public class WolfClass extends BaseClass {
 			
 			if (wolfBite.getTime() < 12000) {
 				String msg = instance.getGameManager().getMain()
-						.color("&eBite regenerates in: &e" + biteCooldownSec + "s");
+						.color("&eBite &rregenerates in: &e" + biteCooldownSec + "s");
 				getActionBarManager().setActionBar(player, "wolf.cooldown", msg, 2);
 			} else {
 				String msg = instance.getGameManager().getMain().color("&rYou can use &eBite");
