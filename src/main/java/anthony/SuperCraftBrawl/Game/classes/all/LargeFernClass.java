@@ -9,10 +9,9 @@ import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -21,6 +20,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -154,10 +154,8 @@ public class LargeFernClass extends BaseClass {
                                         }
                                     }
                                 }
-                                for (Player gamePlayer : instance.players) {
-//                                    gamePlayer.playSound(hitLoc, Sound.EXPLODE, 2, 5);
-//                                    gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_LARGE, 1);
-                                }
+//                                player.getWorld().playSound(hitLoc, Sound.EXPLODE, 2, 5);
+//                                player.getWorld().playEffect(hitLoc, Effect.EXPLOSION_LARGE, 1);
                             }
                         }
                     }, new ItemStack(Material.WOOD_BUTTON));
@@ -385,7 +383,9 @@ public class LargeFernClass extends BaseClass {
             // TRANSFERN ABILITY
             if (item.equals(disguiseAbilityItem)) {
                 if (!isTransferned) {
-                    if (player.getLocation().getBlock().getType() == Material.AIR && player.isOnGround()) {
+                    if (player.getLocation().getBlock().getType() == Material.AIR &&
+                            player.getLocation().add(0, 1, 0).getBlock().getType() == Material.AIR &&
+                            player.getLocation().subtract(0, 1, 0).getBlock().getType().isSolid() && player.isOnGround()) {
                         // Setting instant when disguise ability was clicked
                         transfernAbility.use();
                         isTransferned = true;
@@ -426,8 +426,10 @@ public class LargeFernClass extends BaseClass {
                 // Setting Armor back
                 setArmor(player.getEquipment());
                 // Removing Fern block
-                if (fernLocation != null)
+                if (fernLocation != null) {
                     fernLocation.getBlock().setType(Material.AIR);
+                    fernLocation.add(0, 1, 0).getBlock().setType(Material.AIR);
+                }
                 // Sending player moving message
                 transfernAbility.sendPlayerCustomUseAbilityChatMessage("&c&l(!) &rYou moved and you are no longer a fern");
 
@@ -456,13 +458,25 @@ public class LargeFernClass extends BaseClass {
                 transfernAbility.sendPlayerCustomUseAbilityChatMessage("&d&l(!) &rYou are now a &2Large Fern");
                 // Adding regeneration
                 player.addPotionEffect(transfernRegeneration);
-                // Setting large fern on the player's location
-                fernLocation.getBlock().setType(Material.DOUBLE_PLANT);
-                fernLocation.getBlock().setData((byte) 3);
+
+                // Place the bottom part of the double fern
+                Block bottomBlock = fernLocation.getBlock();
+                bottomBlock.setType(Material.DOUBLE_PLANT);
+                bottomBlock.setData((byte) 3);  // Set to fern bottom part (byte 3 for bottom fern)
+
+                // Place the top part of the double fern
+                Block topBlock = fernLocation.clone().add(0, 1, 0).getBlock();
+                topBlock.setType(Material.DOUBLE_PLANT);
+                topBlock.setData((byte) 8);  // Set to fern top part (byte 8 for top fern)
+
+                bottomBlock.setType(Material.DOUBLE_PLANT);
+                bottomBlock.setData((byte) 3);  // Set to fern bottom part (byte 3 for bottom fern)
+
             }
     
             // Increasing standing still time on second
             standingStillTime++;
         }
     }
+
 }

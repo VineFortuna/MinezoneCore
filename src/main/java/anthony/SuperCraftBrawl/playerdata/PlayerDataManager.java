@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.playerdata;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.ranks.Rank;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,10 +11,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.permissions.PermissionAttachment;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -343,6 +341,36 @@ public class PlayerDataManager implements Listener {
 		} else {
 			manager.multiExecuteUpdateCommand(s);
 		}
+	}
+
+	public void reloadPerms(Player player, PlayerData data) {
+		player.removeAttachment(perms.get(player));
+		PermissionAttachment a = player.addAttachment(main);
+		perms.put(player, a);
+		a.setPermission("scb." + data.getRank().toString().toLowerCase(), true);
+	}
+
+	public boolean setOfflinePlayerRank(String name, Rank rank) throws SQLException {
+		String updateSql = "UPDATE PlayerData SET RoleID = '" + rank.getRoleID() + "' WHERE LastPlayerName = '" + name + "'";
+
+		Connection c = manager.getConnection();
+		Statement stmt = c.createStatement();
+		ResultSet set;
+		try {
+			set = stmt.executeQuery("SELECT * FROM PlayerData WHERE LastPlayerName = '" + name + "'");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		try {
+			set.next();
+			set.getString("UUID");
+		} catch (Exception e) {
+			return false;
+		}
+
+		manager.executeUpdateCommand(updateSql);
+		return true;
 	}
 
 }
