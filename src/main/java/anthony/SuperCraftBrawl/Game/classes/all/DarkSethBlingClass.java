@@ -72,46 +72,52 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 		if (plItem != null)
 			if (plItem.getType() == Material.COMMAND
 					&& event.getAction().toString().contains("RIGHT_CLICK")) {
-				Random rand = new Random();
-				Player target = getRandomPlayer(this.player);
-				ArrayList<Integer> slots = new ArrayList<>();
-				PlayerInventory playerInventory = target.getInventory();
-				int i;
-				for (i = 0; i < playerInventory.getSize(); i++) {
-					ItemStack playerItem = playerInventory.getItem(i);
-					if (playerItem != null && playerItem.getType() != null && playerItem.getType() != Material.AIR) {
-						for (ItemStack itemDrop : this.instance.getAllItemDrops()) {
-							if (playerItem.isSimilar(itemDrop) ||
-									(playerItem.hasItemMeta() && playerItem.getItemMeta().hasDisplayName()
-											&& playerItem.getItemMeta().getDisplayName()
-											.equals(instance.getGameManager().getMain().color("&4&lBomb")))) {
-								slots.add(i);
-								break;
+				if (instance.alivePlayers > 1) {
+					Random rand = new Random();
+					Player target = getRandomPlayer(this.player);
+					ArrayList<Integer> slots = new ArrayList<>();
+					PlayerInventory playerInventory = target.getInventory();
+					int i;
+					for (i = 0; i < playerInventory.getSize(); i++) {
+						ItemStack playerItem = playerInventory.getItem(i);
+						if (playerItem != null && playerItem.getType() != null && playerItem.getType() != Material.AIR) {
+							for (ItemStack itemDrop : this.instance.getAllItemDrops()) {
+								if (playerItem.isSimilar(itemDrop) ||
+										(playerItem.hasItemMeta() && playerItem.getItemMeta().hasDisplayName()
+												&& playerItem.getItemMeta().getDisplayName()
+												.equals(instance.getGameManager().getMain().color("&4&lBomb")))) {
+									slots.add(i);
+									break;
+								}
 							}
 						}
 					}
-				}
-				if (slots.isEmpty()) {
-					this.player.sendMessage(this.instance.getGameManager().getMain()
-							.color("&2&l(!) &rNo item was found at this player! Please try again."));
-					return;
-				}
-				i = rand.nextInt(slots.size());
-				ItemStack skeppy = playerInventory.getItem(slots.get(i));
-				playerInventory.clear(slots.get(i));
-				slots.clear();
-				String displayName = skeppy.getItemMeta().getDisplayName();
-				if (displayName == null)
-					displayName = WordUtils.capitalizeFully(skeppy.getType().name().replace('_', ' '));
-				this.player.getInventory().addItem(skeppy);
-				this.player.sendMessage(
-						this.instance.getGameManager().getMain().color("&2&l(!) &rYou were given a &e" + displayName));
-				target.sendMessage(this.instance.getGameManager().getMain().color("&2&l(!) &rWhoops! Your &e"
-						+ displayName + " &ritem was stolen by &e" + this.player.getName()));
-				if (plItem.getAmount() == 1) {
-					this.player.getInventory().clear(this.player.getInventory().getHeldItemSlot());
+					if (slots.isEmpty()) {
+						this.player.sendMessage(this.instance.getGameManager().getMain()
+								.color("&2&l(!) &rNo item was found at this player! Please try again."));
+						return;
+					}
+					i = rand.nextInt(slots.size());
+					ItemStack skeppy = playerInventory.getItem(slots.get(i));
+					playerInventory.clear(slots.get(i));
+					slots.clear();
+					String displayName = skeppy.getItemMeta().getDisplayName();
+					if (displayName == null)
+						displayName = WordUtils.capitalizeFully(skeppy.getType().name().replace('_', ' '));
+					this.player.getInventory().addItem(skeppy);
+					this.player.sendMessage(
+							this.instance.getGameManager().getMain().color("&2&l(!) &rYou were given a &e" + displayName));
+					target.sendMessage(this.instance.getGameManager().getMain().color("&2&l(!) &rWhoops! Your &e"
+							+ displayName + " &ritem was stolen by &e" + this.player.getName()));
+					if (plItem.getAmount() == 1) {
+						this.player.getInventory().clear(this.player.getInventory().getHeldItemSlot());
+					} else {
+						plItem.setAmount(plItem.getAmount() - 1);
+					}
 				} else {
-					plItem.setAmount(plItem.getAmount() - 1);
+					this.player.sendMessage(
+							this.instance.getGameManager().getMain().color("&c&l(!) &rNo players found!"));
+
 				}
 			} else if (plItem.getType() == Material.NETHER_STAR && plItem.isSimilar(this.teleporterItem)
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {

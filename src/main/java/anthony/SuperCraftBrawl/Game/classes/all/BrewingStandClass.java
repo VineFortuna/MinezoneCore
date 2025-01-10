@@ -76,7 +76,7 @@ public class BrewingStandClass extends BaseClass {
 		cooldownActionBar(this.cooldownSec, this.cooldownDuration, alexBrewingStand, ClassType.BrewingStand,
 				"brewingStand.cooldown", "Brewing Stand");
 		
-		if (checkIfDead(player)) {
+		if (checkIfDead(player) && runnable != null) {
 			runnable.cancel();
 		}
 	}

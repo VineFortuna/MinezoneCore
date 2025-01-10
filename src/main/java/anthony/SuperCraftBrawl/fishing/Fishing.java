@@ -113,7 +113,7 @@ public class Fishing implements Listener {
             data.totalcaught++;
             data.caught++;
             details.addCaught(1);
-            main.getDataManager().saveData(data);
+            //main.getDataManager().saveData(data);
             
             if (caughtRecent.containsKey(p))
                 caughtRecent.put(p, caughtRecent.get(p) + 1);

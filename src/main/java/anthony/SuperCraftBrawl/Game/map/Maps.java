@@ -619,7 +619,7 @@ public enum Maps {
 					"simpleland")
 					.setSpawnPos(
 							new Vector(373.500, 135, 270.500),
-							new Vector(374.500, 138, 245.500),
+							new Vector(375.500, 137, 245.500),
 							new Vector(392.490, 144, 244.490),
 							new Vector(391.550, 144, 266.455),
 							new Vector(417.400, 139, 240.400)

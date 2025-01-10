@@ -610,8 +610,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 
     public void leaveGame(Player player) {
         GameInstance game = main.getGameManager().GetInstanceOfSpectator(player);
-        // anthony.CrystalWars.game.GameInstance i2 =
-        // main.getCwManager().getInstanceOfPlayer(player);
         player.spigot().setCollidesWithEntities(true);
         player.setAllowFlight(false);
         player.setAllowFlight(true);
@@ -667,7 +665,7 @@ public class Commands implements CommandExecutor, TabCompleter {
     }
 
     public List<String> onTabComplete(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-        if (cmd.getName().equalsIgnoreCase("join")) {
+        if (cmd.getName().equalsIgnoreCase("join") || cmd.getName().equalsIgnoreCase("spectate")) {
             List<Maps> maps = Arrays.asList(Maps.values());
             List<String> mapsString = Lists.newArrayList();
             if (args.length == 1) {

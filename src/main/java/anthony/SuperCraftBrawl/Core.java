@@ -525,7 +525,6 @@ public class Core extends JavaPlugin implements Listener {
 								+ "'s rank was set to " + ChatColor.YELLOW + temp2);
 						target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Your rank has been set to "
 								+ ChatColor.YELLOW + temp2);
-						//target.kickPlayer("Your rank has been set to " + ChatColor.YELLOW + temp2);
 					} else {
                         boolean success;
                         try {
@@ -1177,9 +1176,9 @@ public class Core extends JavaPlugin implements Listener {
 						player.sendMessage(color("&r- &e/tp <player>"));
 						player.sendMessage(color("&r- &e/tp <X> <Y> <Z>"));
 					} else if (args.length == 3) {
-						double x = Integer.parseInt(args[0]);
-						double y = Integer.parseInt(args[1]);
-						double z = Integer.parseInt(args[2]);
+						double x = Double.parseDouble(args[0]);
+						double y = Double.parseDouble(args[1]);
+						double z = Double.parseDouble(args[2]);
 
 						player.teleport(new Location(player.getWorld(), x, y, z));
 						player.sendMessage(color("&r&l(!) &rTeleporting to &e" + x + "&r, &e" + y + "&r, &e" + z));
@@ -1607,35 +1606,41 @@ public class Core extends JavaPlugin implements Listener {
 
 	@SuppressWarnings("deprecation")
 	public void sendScoreboardUpdate(Player player) {
-		// Organized tab list
+		Rank rank = this.getRankManager().getRank(player);
+
+		// Organized tab list for all online players
 		for (Player pl : Bukkit.getOnlinePlayers()) {
+			// Build team name
 			StringBuilder teamName = new StringBuilder();
-			Rank r = gameManager.getMain().getRankManager().getRank(player);
-			if (r == null)
+			if (rank == null) {
 				teamName.append(Rank.values().length);
-			else
-				teamName.append(r.getTabListIndex());
+			} else {
+				teamName.append(rank.getTabListIndex());
+			}
+			teamName.append("_").append(rank);
 
-			teamName.append("_").append(r);
-
+			// Retrieve or create team
 			Scoreboard board = pl.getScoreboard();
 			Team team = board.getTeam(teamName.toString());
 			if (team == null) {
 				team = board.registerNewTeam(teamName.toString());
+			}
+
+			// Add player to team if not already added
+			if (!team.hasPlayer(player)) {
 				team.addPlayer(player);
 			}
 
-			String rank = this.getRankManager().getRank(player).getTagWithSpace();
-
-			if (rank.length() >= 16) {
-				String s = "";
-				s = rank.substring(0, 9) + " ";
-				team.setPrefix(s);
-				continue;
+			// Set prefix based on rank
+			String rankTag = rank.getTagWithSpace();
+			if (rankTag.length() >= 16) {
+				team.setPrefix(rankTag.substring(0, 9) + " ");
+			} else {
+				team.setPrefix(rankTag);
 			}
-			team.setPrefix(rank);
 		}
 	}
+
 
 	public Map<Player, Holograms> holograms = new HashMap<Player, Holograms>();
 
@@ -1667,6 +1672,8 @@ public class Core extends JavaPlugin implements Listener {
 
 		if (data != null) {
 			player.setLevel(data.level); // Indication what the player's level is
+
+			// Give Christmas rewards if not received
 			boolean update = false;
 			if (data.december18 == -1 && data.snowmanPet == 0) {
 				data.snowmanPet = 1;
