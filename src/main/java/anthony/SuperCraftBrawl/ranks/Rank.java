@@ -16,7 +16,7 @@ public enum Rank {
      * Job: Moderate gameplay chat and discord of the server to provide a safe place for players.
      * 
      */
-    SENIOR_MODERATOR(16,color("&9&lSR.MOD")),
+    SR_MODERATOR(16,color("&9&lSR.MOD")),
     /*
      * SrMod:
      * Obtainable: Promotion from Moderator
@@ -108,25 +108,25 @@ public enum Rank {
     public int getTabListIndex(){
         //Lower numbers will show higher up in the tab list
         switch (this){
-            case DEFAULT: return Rank.values().length;
             case OWNER: return 0;
-            case ADMIN: return 1;
-            case DIRECTOR: return 2;
-            case DEVELOPER: return 3;
-            case BUILDER: return 4;
-            case MEDIA: return 5;
-            case SUPERVISOR: return 6;
-            case SENIOR_MODERATOR: return 7;
-            case STAFF_MANAGER: return 8;
-            case SUPREME: return 9;
-            case MODERATOR: return 10;
-            case QA: return 11;
-            case CAPTAIN: return 12;
-            case VIP: return 13;
-            case PARTNER: return 14;
-            case TRAINEE: return 15;
+            case DIRECTOR: return 1;
+            case SUPERVISOR: return 2;
+            case ADMIN: return 3;
+            case DEVELOPER: return 4;
+            case BUILDER: return 5;
+            case SR_MODERATOR: return 6;
+            case STAFF_MANAGER: return 7;
+            case MODERATOR: return 8;
+            case TRAINEE: return 9;
+            case QA: return 10;
+            case MEDIA: return 11;
+            case SUPREME: return 12;
+            case CAPTAIN: return 13;
+            case VIP: return 14;
+            case PARTNER: return 15;
+            case DEFAULT:
+            default: return Rank.values().length;
         }
-        return 0;
     }
 
     public String getTagWithSpace() {
