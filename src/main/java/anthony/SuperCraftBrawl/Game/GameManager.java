@@ -130,6 +130,14 @@ public class GameManager implements Listener, PluginMessageListener {
 					event.setCancelled(true);
 				}
 			}
+		} else if (event.getTarget() instanceof Creature) {
+			Creature creature = (Creature) event.getTarget();
+			if (event.getEntity().getCustomName() != null && creature.getCustomName() != null) {
+				String ownerE = event.getEntity().getCustomName().substring(0, event.getEntity().getCustomName().indexOf("'"));
+				String ownerT = creature.getCustomName().substring(0, creature.getCustomName().indexOf("'"));
+				if (ownerE.equals(ownerT))
+					event.setCancelled(true);
+			}
 		}
 	}
 
@@ -2403,7 +2411,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		mob.setCustomNameVisible(true);
 	}
 
-	private String getMobTypeName(EntityType entityType) {
+	public String getMobTypeName(EntityType entityType) {
 		switch (entityType) {
 		case SKELETON:
 			return "Skeleton";
@@ -2419,7 +2427,9 @@ public class GameManager implements Listener, PluginMessageListener {
 			return "Endermite";
 		case WOLF:
 			return "Wolf";
+		case MAGMA_CUBE:
+			return "Magma Cube";
 		}
-		return null;
+		return "Creature";
 	}
 }
