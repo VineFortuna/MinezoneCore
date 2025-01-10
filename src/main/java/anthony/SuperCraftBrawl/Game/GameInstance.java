@@ -776,30 +776,27 @@ public class GameInstance {
 	 */
 	@SuppressWarnings("deprecation")
 	public void sendScoreboardUpdate(Player player) {
+		ClassType classType = this.classes.get(player).getType();
+
 		// Organized tab list
 		for (Player pl : Bukkit.getOnlinePlayers()) {
-			StringBuilder teamName = new StringBuilder();
-			Rank r = gameManager.getMain().getRankManager().getRank(player);
-			if (r == null)
-				teamName.append(Rank.values().length);
-			else
-				teamName.append(r.getTabListIndex());
-			
-			teamName.append("_").append(r);
-			
+			String teamName = player.getName();
+
 			Scoreboard board = pl.getScoreboard();
-			Team team = board.getTeam(teamName.toString());
+			Team team = board.getTeam(teamName);
 			if (team == null) {
-				team = board.registerNewTeam(teamName.toString());
-				team.addPlayer(player);
+				team = board.registerNewTeam(teamName);
 			}
-			
-			String className = this.classes.get(player).getType().getTag() + " " + ChatColor.RESET;
-			
-			if (className.length() >= 8) {
-				String s = className.substring(0, 8) + " " + ChatColor.RESET;
-				team.setPrefix(s);
-				continue;
+
+			// Add player to team if not already added
+			if (!team.hasEntry(player.getName())) {
+				team.addEntry(player.getName());
+			}
+
+
+			String className = classType.getTag() + " ";
+			if (className.length() > 12) {
+				className = classType.getTag().substring(0, 11) + " " + ChatColor.RESET;
 			}
 			team.setPrefix(className);
 		}

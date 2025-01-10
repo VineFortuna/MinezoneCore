@@ -30,9 +30,12 @@ public class RankManager {
 	
 	public void updateRank(Player player, PlayerData data) {
 		main.getListener().setPlayerOnTablist(player);
-		main.sendScoreboardUpdate(player); // This sets the rank next to player name above their head
-		main.getScoreboardManager().lobbyBoard(player);
 		main.getDataManager().reloadPerms(player, data);
+		main.sendScoreboardUpdate(player); // This sets the rank next to player name above their head
+		if (main.getGameManager().GetInstanceOfPlayer(player) == null &&
+				main.getGameManager().GetInstanceOfSpectator(player) == null) {
+			main.getScoreboardManager().lobbyBoard(player);
+		}
 	}
 	
 }
