@@ -24,6 +24,7 @@ import anthony.SuperCraftBrawl.ranks.RankManager;
 import anthony.SuperCraftBrawl.tablist.TablistManager;
 import anthony.parkour.Parkour;
 import anthony.util.ItemHelper;
+import com.mojang.authlib.GameProfile;
 import me.itzzmic.minezone.api.PunishAPI;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -59,6 +60,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -1604,7 +1606,6 @@ public class Core extends JavaPlugin implements Listener {
 		return getTotalFish(player) == FishType.values().length;
 	}
 
-	@SuppressWarnings("deprecation")
 	public void sendScoreboardUpdate(Player player) {
 		Rank rank = this.getRankManager().getRank(player);
 
@@ -1612,35 +1613,31 @@ public class Core extends JavaPlugin implements Listener {
 		for (Player pl : Bukkit.getOnlinePlayers()) {
 			// Build team name
 			StringBuilder teamName = new StringBuilder();
-			if (rank == null) {
-				teamName.append(Rank.values().length);
-			} else {
-				teamName.append(rank.getTabListIndex());
-			}
+			teamName.append(rank.getTabListIndex());
 			teamName.append("_").append(rank);
 
 			// Retrieve or create team
 			Scoreboard board = pl.getScoreboard();
+
 			Team team = board.getTeam(teamName.toString());
 			if (team == null) {
 				team = board.registerNewTeam(teamName.toString());
 			}
 
 			// Add player to team if not already added
-			if (!team.hasPlayer(player)) {
-				team.addPlayer(player);
+			if (!team.hasEntry(player.getName())) {
+				team.addEntry(player.getName());
 			}
 
 			// Set prefix based on rank
 			String rankTag = rank.getTagWithSpace();
-			if (rankTag.length() >= 16) {
-				team.setPrefix(rankTag.substring(0, 9) + " ");
+			if (rankTag.length() >= 12) {
+				team.setPrefix(rankTag.substring(0, 9).trim() + " " + ChatColor.RESET);
 			} else {
 				team.setPrefix(rankTag);
 			}
 		}
 	}
-
 
 	public Map<Player, Holograms> holograms = new HashMap<Player, Holograms>();
 
