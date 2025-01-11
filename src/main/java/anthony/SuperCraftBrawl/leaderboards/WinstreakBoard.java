@@ -27,7 +27,7 @@ public class WinstreakBoard extends LeaderboardBase {
 	private ResultSet set;
 	private Connection c;
 	private int i;
-	private List<ArmorStand> toRemove;
+	private List<ArmorStand>  toRemove = new ArrayList<>();
 
 	public WinstreakBoard(Core main) {
 		super(main);
