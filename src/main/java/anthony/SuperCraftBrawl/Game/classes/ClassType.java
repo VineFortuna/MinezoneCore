@@ -627,7 +627,7 @@ public enum ClassType {
 		case Dweller:
 			return "" + ChatColor.GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Dweller" + ChatColor.RESET;
 		case Star:
-			return "" + ChatColor.DARK_GRAY + "Star";
+			return "" + ChatColor.DARK_GRAY + "Star" + ChatColor.RESET;
 		case Wizard:
 			return "" + ChatColor.RED + ChatColor.BOLD + "Wizard" + ChatColor.RESET;
 		case Present:
