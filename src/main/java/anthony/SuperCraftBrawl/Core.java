@@ -618,7 +618,7 @@ public class Core extends JavaPlugin implements Listener {
 						String message = "";
 
 						for (int i = 0; i < args.length; i++) {
-							message += args[i] + " ";
+							message += args[i];
 						}
 
 						for (Player allPlayers : Bukkit.getOnlinePlayers()) {
@@ -1631,8 +1631,8 @@ public class Core extends JavaPlugin implements Listener {
 
 			// Set prefix based on rank
 			String rankTag = rank.getTagWithSpace();
-			if (rankTag.length() >= 12) {
-				team.setPrefix(rankTag.substring(0, 9).trim() + " " + ChatColor.RESET);
+			if (rankTag.length() > 12) {
+				team.setPrefix(rankTag.substring(0, 11).trim() + " " + ChatColor.RESET);
 			} else {
 				team.setPrefix(rankTag);
 			}

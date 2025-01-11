@@ -796,7 +796,7 @@ public class GameInstance {
 
 			String className = classType.getTag() + " ";
 			if (className.length() > 12) {
-				className = classType.getTag().substring(0, 11) + " " + ChatColor.RESET;
+				className = classType.getTag().substring(0, 10) + " " + ChatColor.RESET;
 			}
 			team.setPrefix(className);
 		}
