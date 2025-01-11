@@ -712,7 +712,7 @@ public enum ClassType {
 		case Fisherman:
 			return "" + ChatColor.DARK_AQUA + ChatColor.ITALIC + "Fisherman" + ChatColor.RESET;
 		case Endermite:
-			return color("&5Endermite");
+			return color("&5Endermite") + ChatColor.RESET;
  		case Wolf:
  			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Wolf" + ChatColor.RESET;
 // 		case Guardian:
