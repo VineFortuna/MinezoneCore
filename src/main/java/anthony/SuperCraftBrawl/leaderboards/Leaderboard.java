@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
@@ -26,7 +25,7 @@ public class Leaderboard extends LeaderboardBase {
 	private ArrayList<String> lead2;
 	private ResultSet set;
 	private Connection c;
-	private List<ArmorStand> toRemove;
+	private List<ArmorStand> toRemove = new ArrayList<>();
 
 	public Leaderboard(Core main) {
 		super(main);
