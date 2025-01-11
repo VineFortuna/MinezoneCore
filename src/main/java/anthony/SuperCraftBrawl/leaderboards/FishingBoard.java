@@ -24,7 +24,7 @@ public class FishingBoard extends LeaderboardBase {
 	private HashMap<UUID, Rank> RoleID;
 	private ArrayList<UUID> lead;
 	private ArrayList<String> lead2;
-	private ArrayList<ArmorStand> toRemove;
+	private ArrayList<ArmorStand>  toRemove = new ArrayList<>();
 	private ResultSet set;
 	private Connection c;
 
