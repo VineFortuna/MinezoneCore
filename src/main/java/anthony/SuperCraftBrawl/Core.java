@@ -1972,6 +1972,10 @@ public class Core extends JavaPlugin implements Listener {
 
 		getLeaderboard().close();
 		getFishingLeaderboard().close();
+		getKillsLeaderboard().close();
+		getWinstreakBoard().close();
+		getFlawlessWinsBoard().close();
+
 		Bukkit.getMessenger().unregisterOutgoingPluginChannel(plugin);
 		Bukkit.getMessenger().unregisterIncomingPluginChannel(this, "BungeeCord");
 		getLogger().info("(!) You have disabled Minezone-Core");
