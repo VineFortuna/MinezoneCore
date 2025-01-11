@@ -57,10 +57,10 @@ public class GameSettings {
 		if (game != null) {
 			if (this.totalTimeVotes >= game.players.size() / 2 + 1) {
 				if (game.getMapWorld().getTime() == 1000) {
-					game.TellAll(color("&2&l(!) &rThe time has been set to to &c&lNight"));
+					game.TellAll(color("&2&l(!) &rThe time has been set to &c&lNight"));
 					game.getMapWorld().setTime(18000);
 				} else {
-					game.TellAll(color("&2&l(!) &rThe time has been set to to &e&lDay"));
+					game.TellAll(color("&2&l(!) &rThe time has been set to &e&lDay"));
 					game.getMapWorld().setTime(1000);
 				}
 			}

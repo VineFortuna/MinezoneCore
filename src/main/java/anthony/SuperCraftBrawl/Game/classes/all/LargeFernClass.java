@@ -464,13 +464,13 @@ public class LargeFernClass extends BaseClass {
                 bottomBlock.setType(Material.DOUBLE_PLANT);
                 bottomBlock.setData((byte) 3);  // Set to fern bottom part (byte 3 for bottom fern)
 
-                // Place the top part of the double fern
+                /*// Place the top part of the double fern
                 Block topBlock = fernLocation.clone().add(0, 1, 0).getBlock();
                 topBlock.setType(Material.DOUBLE_PLANT);
                 topBlock.setData((byte) 8);  // Set to fern top part (byte 8 for top fern)
 
                 bottomBlock.setType(Material.DOUBLE_PLANT);
-                bottomBlock.setData((byte) 3);  // Set to fern bottom part (byte 3 for bottom fern)
+                bottomBlock.setData((byte) 3);  // Set to fern bottom part (byte 3 for bottom fern)*/
 
             }
     

@@ -92,7 +92,7 @@ public class WitherSkeletonClass extends BaseClass {
 				player.getInventory().setItem(0, this.getAttackWeapon()); // If some rare chance the player throws away
 																			// their melee
 
-		if (this.used == true) {
+		if (this.used) {
 			for (Entity e : instance.getMapWorld().getEntities()) {
 				if (e instanceof Arrow) {
 					Arrow a = (Arrow) e;
@@ -135,7 +135,7 @@ public class WitherSkeletonClass extends BaseClass {
 					}
 				}
 			}
-			if (gameTicks % 20 == 0) {
+			if (gameTicks % 20 == 0 && !checkIfDead(player, instance)) {
 				if (this.bow != null) {
 					if (instance.state == GameState.ENDED) {
 						player.getInventory().clear();
