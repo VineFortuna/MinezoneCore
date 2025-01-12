@@ -406,7 +406,11 @@ public class GameManager implements Listener, PluginMessageListener {
 					EntityDamageEvent damageEvent = new EntityDamageEvent(e.getPlayer(), DamageCause.VOID, 1000);
 					main.getServer().getPluginManager().callEvent(damageEvent);
 				}
-				if (!((instance.isInBounds(e.getPlayer().getLocation()) || e.getPlayer().getLocation().getY() <= 50))
+				if (instance.spectators.contains(player) && e.getPlayer().getLocation().getY() <= 50) {
+					player.teleport(instance.GetSpecLoc());
+					return;
+				}
+				if (!(instance.isInBounds(e.getPlayer().getLocation()))
 						&& e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
 					if (instance.spectators.contains(player)
 							|| (instance.classes.containsKey(player) && instance.classes.get(player).getLives() <= 0)) {
