@@ -33,7 +33,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(162.522, 151, 369.520))
 					.setSpecLoc(new Vector(211.499, 152.19487, 389.566))
 					.setBounds(new Vector(216.500, 160, 382.500), 35, 45)
-					.setSignLoc(new Vector(203.500, 107, 673.700))
+					.setSignLoc(new Vector(202.479, 107, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -56,7 +56,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(-1259.480, 130, 1008.520))
 					.setSpecLoc(new Vector(-1182.500, 147, 1016.500))
 					.setBounds(new Vector(-1182.500, 147, 1016.500), 42, 70)
-					.setSignLoc(new Vector(195.544, 106, 673.700))
+					.setSignLoc(new Vector(205.491, 107, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -78,7 +78,7 @@ public enum Maps {
 					)
 					.setLobbyLoc(new Vector(-1274.005, 132, 1006.986))
 					.setSpecLoc(new Vector(-1218.500, 141, 1007.500))
-					.setSignLoc(new Vector(176.481, 107, 673.700))
+					.setSignLoc(new Vector(177.451, 106, 690.700))
 					.setBounds(new Vector(-1218.500, 141, 1007.500), 40, 80)
 					.setSource(MapSource.COMMUNITY)
 	),
@@ -101,7 +101,7 @@ public enum Maps {
 					)
 					.setLobbyLoc(new Vector(-1268.452, 141, 1083.502))
 					.setSpecLoc(new Vector(-1270.500, 143, 1036.500))
-					.setSignLoc(new Vector(176.481, 108, 673.700))
+					.setSignLoc(new Vector(176.477, 106, 690.700))
 					.setBounds(new Vector(-1270.500, 143, 1036.500), 35, 32)
 					.setSource(MapSource.COMMUNITY)
 	),
@@ -124,7 +124,7 @@ public enum Maps {
 					)
 					.setLobbyLoc(new Vector(-1238.522, 158, 1086.494))
 					.setSpecLoc(new Vector(-1296.500, 149, 1081.500))
-					.setSignLoc(new Vector(182.555, 108, 673.700))
+					.setSignLoc(new Vector(214.454, 106, 690.700))
 					.setBounds(new Vector(-1296.500, 149, 1081.500), 42, 40)
 					.setSource(MapSource.MINECADE)
 	),
@@ -148,7 +148,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(-1239.519, 125, 890.484))
 					.setSpecLoc(new Vector(-1241.538, 162, 969.491))
 					.setBounds(new Vector(-1241.500, 165, 979.500), 60, 60)
-					.setSignLoc(new Vector(203.500, 108, 673.700))
+					.setSignLoc(new Vector(201.444, 106, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -171,7 +171,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(-1259.504, 136, 960.513))
 					.setSpecLoc(new Vector(-1264.500, 157, 1011.500))
 					.setBounds(new Vector(-1265.532, 160, 1010.443), 50, 33)
-					.setSignLoc(new Vector(205.536, 107, 673.700))
+					.setSignLoc(new Vector(202.479, 106, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -194,7 +194,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(-1143.578, 150, 961.426))
 					.setSpecLoc(new Vector(-1207.500, 138, 959.500))
 					.setBounds(new Vector(-1207.500, 138, 959.500), 100, 100)
-					.setSignLoc(new Vector(175.503, 108, 673.700))
+					.setSignLoc(new Vector(175.570, 106, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -217,7 +217,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(-1138.523, 160, 1031.516))
 					.setSpecLoc(new Vector(-1137.465, 153, 976.451))
 					.setBounds(new Vector(-1137.465, 153, 976.451), 200, 200)
-					.setSignLoc(new Vector(177.495, 106, 673.700))
+					.setSignLoc(new Vector(174.558, 106, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -240,7 +240,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(-1328.460, 122, 972.520))
 					.setSpecLoc(new Vector(-1241.064, 139.40382, 977.987))
 					.setBounds(new Vector(-1249, 142, 976.499), 60, 65)
-					.setSignLoc(new Vector(173.550, 107, 673.700))
+					.setSignLoc(new Vector(200.573, 107, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -262,7 +262,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(-1390.467, 185, 978.483))
 					.setSpecLoc(new Vector(-1328.500, 170, 981.500))
 					.setBounds(new Vector(-1328.500, 170, 981.500), 40, 100)
-					.setSignLoc(new Vector(178.468, 107, 673.700))
+					.setSignLoc(new Vector(175.570, 107, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -285,7 +285,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(106.496, 152, -620.492))
 					.setSpecLoc(new Vector(98.559, 155.27324, -561.960))
 					.setBounds(new Vector(99.500, 163, -553.500), 35, 50)
-					.setSignLoc(new Vector(209.700, 107, 667.472))
+					.setSignLoc(new Vector(204.532, 106, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -308,7 +308,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(-579.478, 115, 63.434))
 					.setSpecLoc(new Vector(-572.825, 127.77250, -10.992))
 					.setBounds(new Vector(-585.519, 129, -10.543), 60, 55)
-					.setSignLoc(new Vector(41.554, 117, 3.700))
+					.setSignLoc(new Vector(200.573, 106, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -331,7 +331,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(46.857, 108.11874, 7.306))
 					.setLobbyLoc(new Vector(61.508, 115, -77.462))
 					.setBounds(new Vector(70.500, 116, 7.500), 60, 60)
-					.setSignLoc(new Vector(175.503, 106, 673.700))
+					.setSignLoc(new Vector(176.477, 107, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -398,7 +398,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(374.503, 151, 162.511))
 					.setSpecLoc(new Vector(364.373, 161.05132, 215.139))
 					.setBounds(new Vector(373.442, 159, 218.488), 50, 40)
-					.setSignLoc(new Vector(209.700, 107, 668.489))
+					.setSignLoc(new Vector(203.540, 107, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -421,7 +421,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(268.518, 164, 160.504))
 					.setSpecLoc(new Vector(344.500, 163, 160.500))
 					.setBounds(new Vector(344.500, 163, 160.500), 40, 60)
-					.setSignLoc(new Vector(176.481, 106, 673.700))
+					.setSignLoc(new Vector(177.451, 107, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -444,7 +444,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(333.583, 90, 154.515))
 					.setSpecLoc(new Vector(403.845, 124.41554, 157.094))
 					.setBounds(new Vector(404.461, 123, 152.472), 50, 50)
-					.setSignLoc(new Vector(200.504, 106, 673.700))
+					.setSignLoc(new Vector(199.505, 107, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -467,7 +467,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(240.525, 142, 171.456))
 					.setSpecLoc(new Vector(317.500, 141, 175.500))
 					.setBounds(new Vector(317.500, 141, 175.500), 47, 40)
-					.setSignLoc(new Vector(177.495, 107, 673.700))
+					.setSignLoc(new Vector(177.451, 108, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -490,7 +490,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(194.500, 151, 169.500))
 					.setSpecLoc(new Vector(248.500, 155, 165.500))
 					.setBounds(new Vector(260.500, 155, 167.500), 50, 50)
-					.setSignLoc(new Vector(178.466, 106, 673.700))
+					.setSignLoc(new Vector(176.477, 108, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -513,7 +513,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(254.433, 150, 204.499))
 					.setSpecLoc(new Vector(251.994, 145, 119.004))
 					.setBounds(new Vector(251.994, 145, 119.004), 200, 200)
-					.setSignLoc(new Vector(178.466, 107, 673.700))
+					.setSignLoc(new Vector(175.570, 108, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -536,7 +536,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(233.481, 126, 137.495))
 					.setSpecLoc(new Vector(329.500, 121, 162.500))
 					.setBounds(new Vector(329.500, 121, 162.500), 300, 300)
-					.setSignLoc(new Vector(178.466, 106, 673.700))
+					.setSignLoc(new Vector(173.501, 108, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -559,7 +559,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(243.396, 168, 209.481))
 					.setSpecLoc(new Vector(245.500, 185, 137.500))
 					.setBounds(new Vector(245.500, 185, 137.500), 100, 50)
-					.setSignLoc(new Vector(178.466, 106, 673.700))
+					.setSignLoc(new Vector(174.558, 108, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -605,7 +605,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(380.502, 151, 301.543))
 					.setSpecLoc(new Vector(373.500, 158, 240.500))
 					.setBounds(new Vector(373.500, 158, 240.500), 50, 30)
-					.setSignLoc(new Vector(168.300, 106, 669.556))
+					.setSignLoc(new Vector(178.523, 108, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -627,7 +627,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(394.500, 173, 322.500))
 					.setSpecLoc(new Vector(392.500, 150, 260.500))
 					.setBounds(new Vector(392.500, 167, 260.500), 40, 40)
-					.setSignLoc(new Vector(168.300, 107, 667.580))
+					.setSignLoc(new Vector(178.523, 107, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -650,7 +650,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(286.560, 113, 254.505))
 					.setSpecLoc(new Vector(362.537, 117, 230.920))
 					.setBounds(new Vector(353.450, 125, 254.414), 50, 50)
-					.setSignLoc(new Vector(192.516, 106, 673.700))
+					.setSignLoc(new Vector(199.505, 106, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -673,7 +673,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(-8.435, 116, -2.488))
 					.setSpecLoc(new Vector(87.665, 146.01941, 6.043))
 					.setBounds(new Vector(83.500, 150, 3.500), 60, 60)
-					.setSignLoc(new Vector(183.513, 106, 673.700))
+					.setSignLoc(new Vector(216.451, 106, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -696,7 +696,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(57.475, 109.31250, -130.494))
 					.setSpecLoc(new Vector(59.525, 157, -64.436))
 					.setBounds(new Vector(55.500, 174, -57.500), 58, 58)
-					.setSignLoc(new Vector(184.568, 106, 673.700))
+					.setSignLoc(new Vector(214.454, 107, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -722,6 +722,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(57.475, 109.31250, -130.494))
 					.setSpecLoc(new Vector(66.578, 100, -34.391))
 					.setBounds(new Vector(55.500, 174, -57.500), 58, 58)
+					.setSignLoc(new Vector(213.577, 106, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -753,7 +754,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(-20.511, 165, -123.424))
 					.setSpecLoc(new Vector(-22.500, 254, 6.500))
 					.setBounds(new Vector(-22.500, 254, 1.500), 100, 100)
-					.setSignLoc(new Vector(182.542, 107, 673.700))
+					.setSignLoc(new Vector(215.513, 106, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -776,7 +777,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(-58.467, 159, -142.483))
 					.setSpecLoc(new Vector(39.103, 189.01158, -155.759))
 					.setBounds(new Vector(24.500, 162, -155.500), 60, 60)
-					.setSignLoc(new Vector(183.513, 107, 673.700))
+					.setSignLoc(new Vector(215.513, 107, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -799,7 +800,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(-49.531, 140, 88.486))
 					.setSpecLoc(new Vector(-53.866, 161.16555, 158.849))
 					.setBounds(new Vector(-45.518, 173, 162.461), 60, 58)
-					.setSignLoc(new Vector(183.513, 108, 673.700))
+					.setSignLoc(new Vector(173.501, 107, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -822,7 +823,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(45.440, 136, 93.448))
 					.setSpecLoc(new Vector(-18.295, 140, 92.952))
 					.setBounds(new Vector(-43.545, 146, 92.435), 70, 70)
-					.setSignLoc(new Vector(184.568, 107, 673.700))
+					.setSignLoc(new Vector(213.577, 107, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -845,7 +846,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(498.491, 151, -71.452))
 					.setSpecLoc(new Vector(525.965, 152.19487, -24.033))
 					.setBounds(new Vector(511.485, 154, -17.473), 55, 38)
-					.setSignLoc(new Vector(204.530, 107, 673.700))
+					.setSignLoc(new Vector(201.444, 107, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -868,7 +869,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(1017.507, 172, -1131.436))
 					.setSpecLoc(new Vector(1038.500, 162, -1099.500))
 					.setBounds(new Vector(1015.500, 224, -1044.500), 65, 65)
-					.setSignLoc(new Vector(182.542, 106, 673.700))
+					.setSignLoc(new Vector(204.532, 108, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -892,7 +893,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(5051.459, 129, 623.500))
 					.setSpecLoc(new Vector(5050.500, 141, 686.500))
 					.setBounds(new Vector(5052.500, 141, 696.500), 45, 45)
-					.setSignLoc(new Vector(-48.507, 128, -28.700))
+					.setSignLoc(new Vector(173.501, 106, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -960,7 +961,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(5046.492, 146, 617.470))
 					.setSpecLoc(new Vector(5038.500, 159, 679.500))
 					.setBounds(new Vector(5038.500, 159, 679.500), 35, 40)
-					.setSignLoc(new Vector(203.500, 106, 673.700))
+					.setSignLoc(new Vector(203.540, 108, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -982,7 +983,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(5107.000, 187, 670.350))
 					.setSpecLoc(new Vector(5082.000, 153, 637.000))
 					.setBounds(new Vector(5120.586, 165, 662.533), 200, 200)
-					.setSignLoc(new Vector(184.568, 108, 673.700))
+					.setSignLoc(new Vector(216.451, 107, 690.700))
 					.setSource(MapSource.OTHER)
 	),
 	
@@ -1005,7 +1006,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(5121.535, 168, 627.535))
 					.setSpecLoc(new Vector(5122.500, 156, 687.500))
 					.setBounds(new Vector(5120.500, 156, 693.500), 37, 37)
-					.setSignLoc(new Vector(175.503, 107, 673.700))
+					.setSignLoc(new Vector(172.528, 106, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -1028,7 +1029,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(5060.003, 143, 545.986))
 					.setSpecLoc(new Vector(5057.500, 144, 626.500))
 					.setBounds(new Vector(5057.418, 156, 641.470), 40, 40)
-					.setSignLoc(new Vector(205.536, 106, 673.700))
+					.setSignLoc(new Vector(202.479, 108, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -1073,7 +1074,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(5042.516, 178, 657.538))
 					.setSpecLoc(new Vector(5054.805, 187.05035, 716.117))
 					.setBounds(new Vector(5059.500, 201, 732.500), 90, 58)
-					.setSignLoc(new Vector(193.487, 106, 673.700))
+					.setSignLoc(new Vector(201.444, 108, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -1119,7 +1120,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(5035.477, 137, 597.452))
 					.setSpecLoc(new Vector(5036.585, 140.16749, 668.634))
 					.setBounds(new Vector(5038.500, 143, 676.500), 50, 45)
-					.setSignLoc(new Vector(194.555, 108, 673.700))
+					.setSignLoc(new Vector(200.573, 108, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -1142,7 +1143,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(5000.521, 157, 597.435))
 					.setSpecLoc(new Vector(5050.741, 160, 606.475))
 					.setBounds(new Vector(5052.502, 160, 610.468), 30, 45)
-					.setSignLoc(new Vector(209.700, 106, 668.489))
+					.setSignLoc(new Vector(204.532, 107, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -1205,7 +1206,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4941.517, 162, 596.499))
 					.setSpecLoc(new Vector(5001.898, 175.41397, 605.166))
 					.setBounds(new Vector(4999.434, 178, 604.478), 35, 30)
-					.setSignLoc(new Vector(204.530, 108, 673.700))
+					.setSignLoc(new Vector(198.496, 106, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -1228,7 +1229,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4946.512, 153, 631.445))
 					.setSpecLoc(new Vector(4946.051, 154.19487, 570.383))
 					.setBounds(new Vector(4947.534, 162, 548.541), 60, 60)
-					.setSignLoc(new Vector(201.537, 107, 673.700))
+					.setSignLoc(new Vector(203.540, 106, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -1251,7 +1252,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4950.502, 173, 587.524))
 					.setSpecLoc(new Vector(4947.441, 180.73035, 651.318))
 					.setBounds(new Vector(4947.520, 180, 651.493), 35, 35)
-					.setSignLoc(new Vector(195.544, 107, 673.700))
+					.setSignLoc(new Vector(206.548, 106, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -1274,7 +1275,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4906.508, 156, 853.509))
 					.setSpecLoc(new Vector(4977.357, 159.40111, 850.104))
 					.setBounds(new Vector(4972.566, 160, 847.504), 35, 60)
-					.setSignLoc(new Vector(209.700, 107, 670.454))
+					.setSignLoc(new Vector(205.491, 106, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -1325,7 +1326,7 @@ public enum Maps {
 					)
 					.setLobbyLoc(new Vector(4884.519, 146, 733.478))
 					.setSpecLoc(new Vector(4956.479, 149, 738.454))
-					.setSignLoc(new Vector(201.537, 106, 673.700))
+					.setSignLoc(new Vector(205.491, 108, 690.700))
 					.setBounds(new Vector(4956.479, 149, 738.454), 50, 50)
 					.setSource(MapSource.MINECADE)
 	),
@@ -1348,7 +1349,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4517.374, 197, 746.590))
 					.setSpecLoc(new Vector(4574.500, 193, 736.498))
 					.setBounds(new Vector(4592.500, 224, 743.500), 50, 70)
-					.setSignLoc(new Vector(200.504, 108, 673.700))
+					.setSignLoc(new Vector(199.505, 108, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -1370,7 +1371,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4819.523, 186, 788.498))
 					.setSpecLoc(new Vector(4885.436, 158, 790.454))
 					.setBounds(new Vector(4885.436, 158, 790.454), 45, 40)
-					.setSignLoc(new Vector(200.504, 107, 673.700))
+					.setSignLoc(new Vector(207.549, 106, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -1392,7 +1393,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4933.467, 151, 719.522))
 					.setSpecLoc(new Vector(4922.493, 149, 812.282))
 					.setBounds(new Vector(4932.483, 188, 811.481), 50, 60)
-					.setSignLoc(new Vector(204.530, 106, 673.700))
+					.setSignLoc(new Vector(197.604, 106, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -1413,7 +1414,7 @@ public enum Maps {
 					)
 					.setLobbyLoc(new Vector(4930.449, 163, 690.517))
 					.setSpecLoc(new Vector(4930.428, 160, 772.552))
-					.setBounds(new Vector(4930.428, 160, 772.552), 60, 40)
+					.setBounds(new Vector(4930.428, 160, 772.552), 60, 40).setSignLoc(new Vector(208.434, 106, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -1435,7 +1436,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(1002.428, 152, 626.585))
 					.setSpecLoc(new Vector(1000.500, 162, 706.500))
 					.setBounds(new Vector(1000.500, 162, 706.500), 60, 50)
-					.setSignLoc(new Vector(199.535, 106, 673.700))
+					.setSignLoc(new Vector(206.548, 107, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -1479,7 +1480,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4829.660, 155, 684.561))
 					.setSpecLoc(new Vector(4898.485, 159, 685.393))
 					.setBounds(new Vector(4897.500, 182, 686.500), 50, 50)
-					.setSignLoc(new Vector(173.550, 106, 673.700))
+					.setSignLoc(new Vector(206.548, 108, 690.700))
 					.setSource(MapSource.MINECADE)
 	),
 	
@@ -1502,7 +1503,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4714.534, 157, 685.505))
 					.setSpecLoc(new Vector(4784.510, 160, 686.470))
 					.setBounds(new Vector(4786.500, 176, 686.500), 51, 60)
-					.setSignLoc(new Vector(193.487, 107, 673.700))
+					.setSignLoc(new Vector(179.469, 106, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	),
 	
@@ -1523,7 +1524,7 @@ public enum Maps {
 					)
 					.setLobbyLoc(new Vector(4926.488, 156, 493.466))
 					.setSpecLoc(new Vector(4925.490, 150, 558.485))
-					.setSignLoc(new Vector(201.537, 108, 673.700))
+					.setSignLoc(new Vector(207.549, 107, 690.700))
 					.setBounds(new Vector(4925.490, 189, 558.485), 45, 42)
 					.setSource(MapSource.MINECADE)
 	),
@@ -1572,7 +1573,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(12.555, 184, -150.462))
 					.setSpecLoc(new Vector(97.411, 171, -152.539))
 					.setBounds(new Vector(97.411, 171, -152.539), 55, 100)
-					.setSignLoc(new Vector(174.510, 106, 673.700))
+					.setSignLoc(new Vector(174.558, 107, 690.700))
 					.setSource(MapSource.COMMUNITY)
 	);
 
