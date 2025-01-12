@@ -126,7 +126,7 @@ public class FishermanClass extends BaseClass {
                 if (grapple) {
                     Location d = event.getHook().getLocation();
                     Vector v = d.toVector().subtract(player.getLocation().toVector()).normalize();
-                    player.setVelocity(v.multiply(2.1).add(new Vector(0, 0.75, 0)));
+                    player.setVelocity(v.multiply(2).add(new Vector(0, 1, 0)));
                     player.getWorld().playSound(player.getLocation(), Sound.BAT_TAKEOFF, 1, 10);
                     grapplingHook.restart();
                 }

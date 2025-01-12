@@ -444,7 +444,7 @@ public class GameInstance {
 
 					else if (ticks == 18) {
 						Random rand = new Random();
-						int chance = rand.nextInt(3);
+						int chance = rand.nextInt(4);
 
 						if (chance == 0) {
 							TellAll("" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "Tip" + ChatColor.DARK_GREEN
@@ -458,6 +458,10 @@ public class GameInstance {
 							TellAll("" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "Tip" + ChatColor.DARK_GREEN
 									+ "] " + ChatColor.RESET + ChatColor.LIGHT_PURPLE
 									+ "Be sure to select a class by using the compass!");
+						} else {
+							TellAll("" + ChatColor.DARK_GREEN + "[" + ChatColor.GREEN + "Tip" + ChatColor.DARK_GREEN
+									+ "] " + ChatColor.RESET + ChatColor.LIGHT_PURPLE
+									+ "Use the paper to ready up or vote for game settings!");
 						}
 						for (Player player : players)
 							player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 1);
