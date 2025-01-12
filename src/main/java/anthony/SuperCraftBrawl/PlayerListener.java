@@ -366,7 +366,6 @@ public class PlayerListener implements Listener {
 	// movements
 	private double angle = 0;
 
-	@EventHandler
 	public void candyCaneSwirlCosmetic(Player player) {
 		if (this.candyCaneSwirlPlayers.contains(player)) {
 			new BukkitRunnable() {

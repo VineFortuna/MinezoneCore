@@ -77,8 +77,8 @@ public class VampireClass extends BaseClass {
 						if (instance.team.get(p).equals(instance.team.get(player)))
 							return;
 
-					p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 80, 1));
-					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 80, 1));
+					p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 4 * 20, 1));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 4 * 20, 1));
 					this.hitPlayer = true;
 				}
 			}
@@ -141,7 +141,7 @@ public class VampireClass extends BaseClass {
 	private void abilityMsg() {
 		player.sendMessage("");
 		player.sendMessage(instance.getGameManager().getMain()
-				.color("&e&lCLASS TIP> &rShoot players with your bow to infect them with Poison II for 5 seconds"));
+				.color("&e&lCLASS TIP> &rShoot players with your bow to infect them with Poison II for 4 seconds"));
 		player.sendMessage("");
 	}
 

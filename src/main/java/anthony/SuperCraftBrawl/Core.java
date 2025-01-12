@@ -40,6 +40,8 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
@@ -360,6 +362,8 @@ public class Core extends JavaPlugin implements Listener {
 		for (Player onlinePlayer : this.getServer().getOnlinePlayers())
 			this.ResetPlayer(onlinePlayer);
 
+		Bukkit.getScheduler().runTaskLater(this, this::removeOldLeaderboards, 20 * 20L);
+
 		listener = new PlayerListener(this);
 		// smmmanager = new SmmManager(this);
 		gameManager = new GameManager(this);
@@ -503,6 +507,17 @@ public class Core extends JavaPlugin implements Listener {
 			return Enchantment.getByName(st.toUpperCase());
 		} catch (Exception e) {
 			return null;
+		}
+	}
+
+	private void removeOldLeaderboards() {
+		if (lobbyWorld == null) {
+			Bukkit.getLogger().warning("Lobby world not found!");
+			return;
+		}
+
+		for (ArmorStand armorStand : lobbyWorld.getEntitiesByClass(ArmorStand.class)) {
+			armorStand.remove();
 		}
 	}
 
@@ -1975,6 +1990,7 @@ public class Core extends JavaPlugin implements Listener {
 		getKillsLeaderboard().close();
 		getWinstreakBoard().close();
 		getFlawlessWinsBoard().close();
+
 
 		Bukkit.getMessenger().unregisterOutgoingPluginChannel(plugin);
 		Bukkit.getMessenger().unregisterIncomingPluginChannel(this, "BungeeCord");

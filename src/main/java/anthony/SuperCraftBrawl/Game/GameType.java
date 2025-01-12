@@ -6,7 +6,7 @@ public enum GameType {
 	private String name;
 	private int maxPlayers;
 	
-	private GameType(String name, int maxPlayers) {
+	GameType(String name, int maxPlayers) {
 		this.name = name;
 		this.maxPlayers = maxPlayers;
 	}
