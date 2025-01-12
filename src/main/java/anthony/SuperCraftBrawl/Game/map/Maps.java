@@ -354,7 +354,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(1.490, 100, 6.498))
 					.setSpecLoc(new Vector(55.424, 113, 6.820))
 					.setBounds(new Vector(55.484, 113, 6.503), 35, 50)
-					.setSignLoc(new Vector(168.300, 106, 669.523))
+					.setSignLoc(new Vector(165.523, 106, 690.700))
 					.setSource(MapSource.MINECADE)
 					.setGameType(GameType.DUEL)
 	),
@@ -375,7 +375,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(-3.545, 144, -64.538))
 					.setSpecLoc(new Vector(-5.480, 123, 8.448))
 					.setBounds(new Vector(-5.480, 123, 8.448), 40, 30)
-					.setSignLoc(new Vector(168.300, 106, 667.580))
+					.setSignLoc(new Vector(165.523, 107, 690.700))
 					.setSource(MapSource.COMMUNITY)
 					.setGameType(GameType.DUEL)
 	),
@@ -582,7 +582,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(369.458, 115, 258.441))
 					.setSpecLoc(new Vector(372.435, 100, 188.626))
 					.setBounds(new Vector(372.483, 128, 188.497), 50, 50)
-					.setSignLoc(new Vector(168.300, 106, 670.508))
+					.setSignLoc(new Vector(164.478, 106, 690.700))
 					.setSource(MapSource.MINECADE)
 					.setGameType(GameType.DUEL)
 	),
@@ -913,7 +913,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4981.513, 154, 593.451))
 					.setSpecLoc(new Vector(5052.006, 150, 594.466))
 					.setBounds(new Vector(5052.006, 150, 594.466), 30, 35)
-					.setSignLoc(new Vector(168.300, 107, 668.496))
+					.setSignLoc(new Vector(163.517, 107, 690.700))
 					.setSource(MapSource.COMMUNITY)
 					.setGameType(GameType.DUEL)
 	),
