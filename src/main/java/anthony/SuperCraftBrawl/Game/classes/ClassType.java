@@ -642,7 +642,7 @@ public enum ClassType {
 		case Ocelot:
 			return "" + ChatColor.YELLOW + ChatColor.BOLD + "Ocelot" + ChatColor.RESET;
 		case Creeper:
-			return "" + ChatColor.YELLOW + "Creeper" + ChatColor.RESET;
+			return "" + ChatColor.GREEN + "Creeper" + ChatColor.RESET;
 		case Notch:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Notch" + ChatColor.RESET;
 		case Blaze:
