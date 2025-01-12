@@ -112,7 +112,7 @@ public class CloudClass extends BaseClass {
 				Player gamePlayer = (Player) e;
 				if (instance.classes.containsKey(gamePlayer) && instance.classes.get(gamePlayer).getLives() > 0) {
 					gamePlayer.getWorld().strikeLightningEffect(gamePlayer.getLocation());
-					gamePlayer.setFireTicks(100);
+					//gamePlayer.setFireTicks(100);
 					gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 110, 1));
 					gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 90, 0));
 					gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 160, 2));
