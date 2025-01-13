@@ -395,20 +395,24 @@ public class GameManager implements Listener, PluginMessageListener {
 	public void onPlayerMove(PlayerMoveEvent e) {
 		Player player = e.getPlayer();
 		GameInstance instance = this.GetInstanceOfPlayer(player);
+		GameInstance specInstance = this.GetInstanceOfSpectator(player);
 
 		if (player.getWorld() == main.getLobbyWorld()) // If player is below Y = 50, teleport them back to lobby
 			if (e.getPlayer().getLocation().getY() < 0)
 				main.SendPlayerToHub(player);
+
+		if (specInstance != null && e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
+			if (e.getPlayer().getLocation().getY() <= 50 || !specInstance.isInBounds(player.getLocation())) {
+				player.teleport(instance.GetSpecLoc());
+				return;
+			}
+		}
 
 		if (instance != null) {
 			if (instance.state == GameState.STARTED) {
 				if (e.getPlayer().getLocation().getY() < 50 && e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
 					EntityDamageEvent damageEvent = new EntityDamageEvent(e.getPlayer(), DamageCause.VOID, 1000);
 					main.getServer().getPluginManager().callEvent(damageEvent);
-				}
-				if (instance.spectators.contains(player) && e.getPlayer().getLocation().getY() <= 50) {
-					player.teleport(instance.GetSpecLoc());
-					return;
 				}
 				if (!(instance.isInBounds(e.getPlayer().getLocation()))
 						&& e.getPlayer().getGameMode() != GameMode.SPECTATOR) {

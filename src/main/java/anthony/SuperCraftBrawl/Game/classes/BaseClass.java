@@ -698,9 +698,34 @@ public abstract class BaseClass {
 									+ " died");
 						}
 					} else if (damager instanceof Creature) {
-						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-								+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
-								+ " was killed by a " + ChatColor.YELLOW + instance.getGameManager().getMobTypeName(damager.getType()));
+						if (damager.getCustomName() != null) {
+							String owner = ChatColor.stripColor(damager.getCustomName().substring(0, damager.getCustomName().indexOf("'")));
+							Player d = Bukkit.getPlayer(owner);
+							killer = d;
+
+							if (instance.classes.containsKey(d)) {
+								baseClassKiller = instance.classes.get(d);
+								if (d != p) {
+									this.giveStats(d, p);
+									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+											+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+											+ " was killed by " + ChatColor.RESET + d.getName() + " "
+											+ baseClassKiller.getType().getTag() + ChatColor.RED + "'s " + ChatColor.YELLOW
+											+ instance.getGameManager().getMobTypeName(damager.getType()));
+									p.teleport(d);
+								}
+							} else {
+								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+										+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+										+ " was killed by a "
+										+ ChatColor.YELLOW + instance.getGameManager().getMobTypeName(damager.getType()));
+							}
+						} else {
+							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+									+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+									+ " was killed by a "
+									+ ChatColor.YELLOW + instance.getGameManager().getMobTypeName(damager.getType()));
+						}
 					} else if (damager instanceof Arrow) {
 						Arrow a = (Arrow) damager;
 						if (a.getShooter() instanceof Player && a.getShooter() != null) {
@@ -711,40 +736,21 @@ public abstract class BaseClass {
 								PlayerData killerData = instance.getGameManager().getMain().getDataManager()
 										.getPlayerData(shooter);
 								if (shooter != p || killer != p) {
-									if (lives == 0) {
-										if (killerData != null && killerData.killMsgs == 1) {
-											this.giveStats(shooter, p);
-											TellAll(instance.getGameManager().getMain().color("&2&l(!) " + "&r"
-													+ p.getPlayer().getName() + " " + bc.getType().getTag()
-													+ " &cwas not strong enough to encounter " + "&r"
-													+ shooter.getName() + " " + baseClassKiller.getType().getTag()));
-											this.healthPots(shooter);
-										} else {
-											this.giveStats(shooter, p);
-											TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-													+ ChatColor.RESET + p.getPlayer().getName() + " "
-													+ bc.getType().getTag() + ChatColor.RED
-													+ " was killed by " + ChatColor.WHITE + shooter.getName() + " "
-													+ baseClassKiller.getType().getTag());
-											this.healthPots(shooter);
-										}
-									} else if (lives > 0) {
-										if (killerData != null && killerData.killMsgs == 1) {
-											this.giveStats(shooter, p);
-											TellAll(instance.getGameManager().getMain().color("&2&l(!) " + "&r"
-													+ p.getPlayer().getName() + " " + bc.getType().getTag()
-													+ " &cwas not strong enough to encounter " + "&r"
-													+ shooter.getName() + " " + baseClassKiller.getType().getTag()));
-											this.healthPots(shooter);
-										} else {
-											this.giveStats(shooter, p);
-											TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-													+ ChatColor.RESET + p.getPlayer().getName() + " "
-													+ bc.getType().getTag() + ChatColor.RED
-													+ " was killed by " + ChatColor.WHITE + shooter.getName() + " "
-													+ baseClassKiller.getType().getTag());
-											this.healthPots(shooter);
-										}
+									if (killerData != null && killerData.killMsgs == 1) {
+										this.giveStats(shooter, p);
+										TellAll(instance.getGameManager().getMain().color("&2&l(!) " + "&r"
+												+ p.getPlayer().getName() + " " + bc.getType().getTag()
+												+ " &cwas not strong enough to encounter " + "&r"
+												+ shooter.getName() + " " + baseClassKiller.getType().getTag()));
+										this.healthPots(shooter);
+									} else {
+										this.giveStats(shooter, p);
+										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
+												+ ChatColor.RESET + p.getPlayer().getName() + " "
+												+ bc.getType().getTag() + ChatColor.RED
+												+ " was killed by " + ChatColor.WHITE + shooter.getName() + " "
+												+ baseClassKiller.getType().getTag());
+										this.healthPots(shooter);
 									}
 									p.teleport(shooter);
 								}
@@ -779,7 +785,7 @@ public abstract class BaseClass {
 								TellAll(instance.getGameManager().getMain()
 										.color("&2&l(!) " + getPlayerRank(p) + "&r" + p.getPlayer().getName() + " "
 												+ bc.getType().getTag()
-												+ " &cwas not strong enough to encounter " + getPlayerRank(killer)
+												+ " &cwas not strong enough to encounter "
 												+ "&r" + killer.getName() + " " + baseClassKiller.getType().getTag()));
 								this.healthPots(killer);
 							} else {
@@ -1745,10 +1751,10 @@ public abstract class BaseClass {
 	// Classes such as Sheep & Hunter that when they get a kill, they one of their
 	// abilities back
 	public void classesEvent(Player d, BaseClass baseClass) {
-		if (instance.classes.containsKey(d)) {
+		if (instance.classes.containsKey(d) && !checkIfDead(player, instance)) {
 			// Sheep
 			baseClass = instance.classes.get(d);
-			if (baseClass.getType() == ClassType.Sheep && baseClass.getLives() > 0) {
+			if (baseClass.getType() == ClassType.Sheep) {
 				d.getInventory().addItem(new ItemStack(Material.ENCHANTMENT_TABLE));
 				d.sendMessage(instance.getGameManager().getMain()
 						.color("&r&l(!) &rYou got a kill and now you can switch your wool color if you'd like!"));

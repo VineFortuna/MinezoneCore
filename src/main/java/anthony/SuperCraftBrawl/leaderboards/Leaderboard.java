@@ -9,23 +9,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
+import net.minecraft.server.v1_8_R3.EntityArmorStand;
 
 public class Leaderboard extends LeaderboardBase {
 	private Core main;
 	private HashMap<UUID, Integer> wins;
-	private HashMap<UUID, Rank> RoleID;
+	private HashMap<UUID, Rank> roleID;
 	private ArrayList<UUID> lead;
 	private ArrayList<String> lead2;
 	private ResultSet set;
 	private Connection c;
-	private List<ArmorStand> toRemove = new ArrayList<>();
+	private List<Integer> entityIds = new ArrayList<>();
 
 	public Leaderboard(Core main) {
 		super(main);
@@ -34,15 +37,15 @@ public class Leaderboard extends LeaderboardBase {
 
 	@Override
 	public void asyncUpdate() throws SQLException {
-		RoleID = new HashMap<>();
+		roleID = new HashMap<>();
 		wins = new HashMap<>();
 		lead = new ArrayList<>();
 		lead2 = new ArrayList<>();
 		c = main.getDatabaseManager().getConnection();
 		wins.clear();
 		lead.clear();
-		RoleID.clear();
-		
+		roleID.clear();
+
 		Statement s = c.createStatement();
 		int a = 0;
 		set = s.executeQuery(
@@ -60,55 +63,63 @@ public class Leaderboard extends LeaderboardBase {
 			lead.add(id);
 			lead2.add(name);
 			wins.put(id, set.getInt("Wins"));
-			RoleID.put(id, Rank.getRankFromID(set.getInt("RoleID")));
+			roleID.put(id, Rank.getRankFromID(set.getInt("RoleID")));
 		}
 	}
 
 	@Override
 	public void updateLeaderboard(boolean init) {
-		for (ArmorStand stand : toRemove) {
-			stand.remove();
-		}
-		
-		toRemove.clear();
-		Location loc = new Location(main.getLobbyWorld(), 185.5, 106.5, 713.5);
-		ArmorStand stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
-		stand.setVisible(false);
-		stand.setGravity(false);
-		stand.setCustomNameVisible(true);
-		stand.setCustomName("" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Wins");
-		toRemove.add(stand);
+		removeOldLeaderboards();
 
-		int count = 1;
+		Location loc = new Location(main.getLobbyWorld(), 185.5, 106.5, 713.5);
+		sendArmorStandPacket(loc, ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Wins");
 		loc.setY(loc.getY() - 0.4);
 
+		int count = 1;
 		for (UUID id : lead) {
 			loc.setY(loc.getY() - 0.24);
 			String name = lead2.get(count - 1);
-
 			Integer win = wins.get(id);
-			stand = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
-			stand.setVisible(false);
-			stand.setGravity(false);
-			stand.setCustomNameVisible(true);
-			stand.setCustomName(main.color("&b#" + count + ":" + " &e" + name + " &r- " + win));
-			toRemove.add(stand);
-
+			sendArmorStandPacket(loc, ChatColor.AQUA + "#" + count + ": " + ChatColor.YELLOW + name + ChatColor.RESET + " - " + win);
 			count++;
 		}
 	}
-	
-	public void close() {
-		for (ArmorStand stand : toRemove) {
-			stand.remove();
+
+	private void sendArmorStandPacket(Location loc, String customName) {
+		EntityArmorStand armorStand = new EntityArmorStand(((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) loc.getWorld()).getHandle());
+		armorStand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+		armorStand.setCustomName(customName);
+		armorStand.setCustomNameVisible(true);
+		armorStand.setInvisible(true);
+		armorStand.setGravity(false);
+
+		int entityId = armorStand.getId();
+		entityIds.add(entityId);
+
+		PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(armorStand);
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 		}
-		
-		toRemove.clear();
+	}
+
+	private void removeOldLeaderboards() {
+		if (!entityIds.isEmpty()) {
+			for (int entityId : entityIds) {
+				PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(entityId);
+				for (Player player : Bukkit.getOnlinePlayers()) {
+					((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+				}
+			}
+			entityIds.clear();
+		}
+	}
+
+	@Override
+	public void close() {
+		removeOldLeaderboards();
 		wins.clear();
 		lead.clear();
 		c = null;
-		RoleID.clear();
+		roleID.clear();
 	}
-
-
 }

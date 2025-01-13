@@ -787,6 +787,7 @@ public class GameInstance {
 			String teamName = player.getName();
 
 			Scoreboard board = pl.getScoreboard();
+
 			Team team = board.getTeam(teamName);
 			if (team == null) {
 				team = board.registerNewTeam(teamName);
@@ -797,10 +798,9 @@ public class GameInstance {
 				team.addEntry(player.getName());
 			}
 
-
 			String className = classType.getTag() + " ";
 			if (className.length() > 12) {
-				className = classType.getTag().substring(0, 10) + " " + ChatColor.RESET;
+				className = classType.getTag().substring(0, 10).trim() + " " + ChatColor.RESET;
 			}
 			team.setPrefix(className);
 		}
@@ -1307,7 +1307,6 @@ public class GameInstance {
 
 	public void EndGame() {
 		state = GameState.ENDED;
-		// gameManager.getMain().getNPCManager().updateRandomNpc();
 		for (Entity en : mapWorld.getEntities())
 			if (!(en instanceof Player))
 				en.remove();
@@ -1367,20 +1366,15 @@ public class GameInstance {
 
 					for (Player spectator : spectators) {
 						if (spectator.getWorld() == getMapWorld()) {
-							gameManager.getMain().getScoreboardManager().lobbyBoard(spectator);
-							gameManager.getMain().LobbyItems(spectator);
-							gameManager.getMain().SendPlayerToHub(spectator);
-							spectator.setGameMode(GameMode.ADVENTURE);
+							SetLobbyScoreboard(spectator);
 							spectator.setAllowFlight(false);
 							spectator.setAllowFlight(true);
-							spectator.setDisplayName("" + spectator.getName());
+							spectator.setDisplayName(spectator.getName());
 							spectator.sendMessage(getGameManager().getMain().color("&2&l(!) &rThe game on &r&l"
 									+ mapName + " &rhas ended. Moving you back to spawn.."));
 							spectator.spigot().setCollidesWithEntities(true);
+							gameManager.getMain().ResetPlayer(spectator);
 
-							if (!(getGameManager().getMain().holograms.containsKey(spectator)))
-								getGameManager().getMain().holograms.put(spectator,
-										new Holograms(getGameManager().getMain(), spectator));
 							for (Player p : Bukkit.getOnlinePlayers()) {
 								p.showPlayer(spectator);
 							}
@@ -1649,9 +1643,7 @@ public class GameInstance {
 					baseClass.totalTokens += 10;
 
 					if (data != null) {
-						data.wins += 1;
 						data.flawlessWins += 1;
-						// data.winstreak += 1;
 						data.exp += 133;
 					}
 					baseClass.totalExp += 133;
@@ -1724,7 +1716,6 @@ public class GameInstance {
 			}
 		}
 		for (Player player : players) {
-			gameManager.getMain().sendScoreboardUpdate(player);
 			player.spigot().setCollidesWithEntities(true);
 			player.getInventory().clear();
 			for (PotionEffect type : player.getActivePotionEffects())
@@ -2089,7 +2080,7 @@ public class GameInstance {
 		removeSpectator(player);
 
 		if (this.players.remove(player)) {
-			player.setDisplayName("" + player.getName());
+			player.setDisplayName(player.getName());
 			try {
 				if (baseClass != null) {
 					baseClass.score.getScoreboard().resetScores(baseClass.score.getEntry());

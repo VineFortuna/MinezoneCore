@@ -24,7 +24,6 @@ import anthony.SuperCraftBrawl.ranks.RankManager;
 import anthony.SuperCraftBrawl.tablist.TablistManager;
 import anthony.parkour.Parkour;
 import anthony.util.ItemHelper;
-import com.mojang.authlib.GameProfile;
 import me.itzzmic.minezone.api.PunishAPI;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -40,8 +39,6 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
@@ -62,7 +59,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -362,7 +358,7 @@ public class Core extends JavaPlugin implements Listener {
 		for (Player onlinePlayer : this.getServer().getOnlinePlayers())
 			this.ResetPlayer(onlinePlayer);
 
-		Bukkit.getScheduler().runTaskLater(this, this::removeOldLeaderboards, 20 * 20L);
+		//Bukkit.getScheduler().runTaskLater(this, this::removeOldLeaderboards, 8 * 20L);
 
 		listener = new PlayerListener(this);
 		// smmmanager = new SmmManager(this);
@@ -507,17 +503,6 @@ public class Core extends JavaPlugin implements Listener {
 			return Enchantment.getByName(st.toUpperCase());
 		} catch (Exception e) {
 			return null;
-		}
-	}
-
-	private void removeOldLeaderboards() {
-		if (lobbyWorld == null) {
-			Bukkit.getLogger().warning("Lobby world not found!");
-			return;
-		}
-
-		for (ArmorStand armorStand : lobbyWorld.getEntitiesByClass(ArmorStand.class)) {
-			armorStand.remove();
 		}
 	}
 
@@ -1637,17 +1622,18 @@ public class Core extends JavaPlugin implements Listener {
 			Team team = board.getTeam(teamName.toString());
 			if (team == null) {
 				team = board.registerNewTeam(teamName.toString());
+				team.addEntry(player.getName());
 			}
 
 			// Add player to team if not already added
-			if (!team.hasEntry(player.getName())) {
+			/*if (!team.hasEntry(player.getName())) {
 				team.addEntry(player.getName());
-			}
+			}*/
 
 			// Set prefix based on rank
 			String rankTag = rank.getTagWithSpace();
 			if (rankTag.length() > 12) {
-				team.setPrefix(rankTag.substring(0, 11).trim() + " " + ChatColor.RESET);
+				team.setPrefix(rank.getTag().substring(0, 11).trim() + " " + ChatColor.RESET);
 			} else {
 				team.setPrefix(rankTag);
 			}
@@ -1676,7 +1662,6 @@ public class Core extends JavaPlugin implements Listener {
 		sendScoreboardUpdate(player); // This sets the rank next to player name above their head
 		chatAnnouncementOnJoin(player);
 		getScoreboardManager().lobbyBoard(player); // Gives the lobby scoreboard to player
-		// getKillsLeaderboard().killsBoard(player); //Shows kills leaderboard to player
 
 		// For join message:
 		String rank = getRankManager().getRank(player).getTagWithSpace(); // Gets the player's rank
@@ -1908,6 +1893,8 @@ public class Core extends JavaPlugin implements Listener {
 		player.setAllowFlight(true);
 		LobbyItems(player);
 		mysteryChestHologram(player);
+		updateLeaderboards();
+		sendScoreboardUpdate(player);
 
 		if (!(holograms.containsKey(player)))
 			holograms.put(player, new Holograms(this, player)); // All players' holograms
@@ -1985,12 +1972,7 @@ public class Core extends JavaPlugin implements Listener {
 			this.getDataManager().saveData(data);
 		}
 
-		getLeaderboard().close();
-		getFishingLeaderboard().close();
-		getKillsLeaderboard().close();
-		getWinstreakBoard().close();
-		getFlawlessWinsBoard().close();
-
+		closeLeaderboards();
 
 		Bukkit.getMessenger().unregisterOutgoingPluginChannel(plugin);
 		Bukkit.getMessenger().unregisterIncomingPluginChannel(this, "BungeeCord");
@@ -2038,5 +2020,20 @@ public class Core extends JavaPlugin implements Listener {
 			}
 		}
 		return null;
+	}
+
+	public void closeLeaderboards() {
+		getLeaderboard().close();
+		getFishingLeaderboard().close();
+		getKillsLeaderboard().close();
+		getWinstreakBoard().close();
+		getFlawlessWinsBoard().close();
+	}
+	public void updateLeaderboards() {
+		getLeaderboard().updateLeaderboard(true);
+		getFishingLeaderboard().updateLeaderboard(true);
+		getKillsLeaderboard().updateLeaderboard(true);
+		getWinstreakBoard().updateLeaderboard(true);
+		getFlawlessWinsBoard().updateLeaderboard(true);
 	}
 }
