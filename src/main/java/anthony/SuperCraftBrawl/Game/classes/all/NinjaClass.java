@@ -66,7 +66,7 @@ public class NinjaClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-//		ninja.startTime = 10000; //Reset cooldown
+		ninja.startTime = 10000; //Reset cooldown
 		this.regenStars = 0;
 		this.starsCooldown = 0;
 		this.usedAllStars = false;
@@ -96,11 +96,11 @@ public class NinjaClass extends BaseClass {
 	@Override
 	public void Tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getLives() > 0) {
-			if (gameTicks % 20 == 0) {
+			if (gameTicks % 20 == 0 && !checkIfDead(player, instance)) {
 				if (this.starsCooldown != 0) {
 					this.starsCooldown--;
 				} else {
-					if (this.usedAllStars == true && this.starsCooldown == 0) {
+					if (this.usedAllStars) {
 						if (this.regenStars != 5) {
 							player.getInventory().remove(this.barrier);
 							player.getInventory().addItem(getShuriken());
@@ -108,11 +108,10 @@ public class NinjaClass extends BaseClass {
 						} else {
 							this.usedAllStars = false;
 							this.regenStars = 0;
-							this.starsCooldown = 0;
-						}
+                        }
 					}
 				}
-				if (this.usedAllStars == false && player.getInventory().getItem(2) == null
+				if (!this.usedAllStars && player.getInventory().getItem(2) == null
 						|| player.getInventory().getItem(1).getType() == Material.AIR) {
 					this.usedAllStars = true;
 					player.getInventory().setItem(2, this.barrier);
@@ -159,7 +158,7 @@ public class NinjaClass extends BaseClass {
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK
 						|| event.getAction() == Action.LEFT_CLICK_AIR
 						|| event.getAction() == Action.LEFT_CLICK_BLOCK)) {
-			if (player.getGameMode() != GameMode.SPECTATOR) {
+			if (!checkIfDead(player, instance)) {
 				if (shurikenCooldown.useAndResetCooldown()) {
 					int amount = item.getAmount();
 					if (amount > 0) {
