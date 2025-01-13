@@ -26,7 +26,7 @@ public abstract class LeaderboardBase {
 				e.printStackTrace();
 			}
 
-		}, 20 * 5, 20 * 60);
+		}, 20 * 2, 20 * 60);
 	}
 
 	/**
