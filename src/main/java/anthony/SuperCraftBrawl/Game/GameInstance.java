@@ -783,10 +783,10 @@ public class GameInstance {
 		ClassType classType = this.classes.get(player).getType();
 
 		// Organized tab list
-		for (Player pl : Bukkit.getOnlinePlayers()) {
+		/*for (Player pl : players) {*/
 			String teamName = player.getName();
 
-			Scoreboard board = pl.getScoreboard();
+			Scoreboard board = o.getScoreboard();
 
 			Team team = board.getTeam(teamName);
 			if (team == null) {
@@ -803,7 +803,7 @@ public class GameInstance {
 				className = classType.getTag().substring(0, 10).trim() + " " + ChatColor.RESET;
 			}
 			team.setPrefix(className);
-		}
+		/*}*/
 	}
 	
 	/**
@@ -1366,6 +1366,7 @@ public class GameInstance {
 
 					for (Player spectator : spectators) {
 						if (spectator.getWorld() == getMapWorld()) {
+							gameManager.getMain().ResetPlayer(spectator);
 							SetLobbyScoreboard(spectator);
 							spectator.setAllowFlight(false);
 							spectator.setAllowFlight(true);
@@ -1373,7 +1374,7 @@ public class GameInstance {
 							spectator.sendMessage(getGameManager().getMain().color("&2&l(!) &rThe game on &r&l"
 									+ mapName + " &rhas ended. Moving you back to spawn.."));
 							spectator.spigot().setCollidesWithEntities(true);
-							gameManager.getMain().ResetPlayer(spectator);
+							gameManager.getMain().sendScoreboardUpdate(spectator);
 
 							for (Player p : Bukkit.getOnlinePlayers()) {
 								p.showPlayer(spectator);
@@ -1398,11 +1399,11 @@ public class GameInstance {
 						BaseClass bc = classes.get(player);
 						bc.GameEnd();
 						SetLobbyScoreboard(player);
+						gameManager.getMain().sendScoreboardUpdate(player);
 						for (PotionEffect type : player.getActivePotionEffects())
 							player.removePotionEffect(type.getType());
 
 						gameManager.getMain().getListener().resetArmor(player);
-						gameManager.getMain().LobbyItems(player);
 					}
 
 					for (BukkitRunnable runnable2 : runnables)
@@ -2152,11 +2153,12 @@ public class GameInstance {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				SetLobbyScoreboard(player); // Sets the main lobby board to player
 				RemovePlayer(player); // Recursion to make sure player is removed from the arraylist
+				SetLobbyScoreboard(player); // Sets the main lobby board to player
+				getGameManager().getMain().sendScoreboardUpdate(player);
 			}
 
-			getGameManager().getMain().ResetPlayer(player);
+			//getGameManager().getMain().ResetPlayer(player);
 
 			if (this.s != null) { // This updates the game sign of the map in the lobby to new player count
 				if (this.map != null) {

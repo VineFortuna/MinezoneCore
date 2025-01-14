@@ -71,12 +71,16 @@ public class BrewingStandClass extends BaseClass {
 	 */
 	@Override
 	public void Tick(int gameTicks) {
-		checkIfEmpty();
-		this.cooldownSec = (this.cooldownDuration - alexBrewingStand.getTime()) / 1000 + 1;
-		cooldownActionBar(this.cooldownSec, this.cooldownDuration, alexBrewingStand, ClassType.BrewingStand,
-				"brewingStand.cooldown", "Brewing Stand");
+		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.BrewingStand
+				&& instance.classes.get(player).getLives() > 0) {
+			if (!checkIfDead(player, instance))
+				checkIfEmpty();
+			this.cooldownSec = (this.cooldownDuration - alexBrewingStand.getTime()) / 1000 + 1;
+			cooldownActionBar(this.cooldownSec, this.cooldownDuration, alexBrewingStand, ClassType.BrewingStand,
+					"brewingStand.cooldown", "Brewing Stand");
+		}
 		
-		if (checkIfDead(player) && runnable != null) {
+		if (checkIfDead(player, instance) && runnable != null) {
 			runnable.cancel();
 		}
 	}
@@ -92,15 +96,6 @@ public class BrewingStandClass extends BaseClass {
 			player.getInventory().setItem(1,
 					ItemHelper.setDetails(new ItemStack(Material.BARRIER), ChatColor.RED + "No potion item yet!"));
 		}
-	}
-	
-	private boolean checkIfDead(Player player) {
-		if (player.getGameMode() == GameMode.SPECTATOR)
-			return true;
-		else if (instance.classes.get(player) != null && instance.classes.get(player).getLives() <= 0)
-			return true;
-		
-		return false;
 	}
 
 	@Override
@@ -129,7 +124,7 @@ public class BrewingStandClass extends BaseClass {
 					runnable = new BukkitRunnable() {
 						@Override
 						public void run() {
-							if (checkIfDead(player))
+							if (checkIfDead(player, instance))
 								cancel();
 							
 							if (used)

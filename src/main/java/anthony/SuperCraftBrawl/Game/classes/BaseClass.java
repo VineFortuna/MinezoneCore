@@ -370,21 +370,6 @@ public abstract class BaseClass {
 				// DEATH PARTICLES
 				deathParticles(data, p);
 
-				// END CRYSTAL
-				if (baseClassKiller != null) {
-					if (baseClassKiller.getType() == ClassType.Enderdragon) {
-						if (killer != null) {
-							Location pLoc = p.getLocation();
-							EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc,
-									EntityType.ENDER_CRYSTAL);
-							HealTask task = new HealTask(killer, crystal, instance.getGameManager().getMain());
-							BukkitTask bukkit = Bukkit.getScheduler()
-									.runTaskTimerAsynchronously(instance.getGameManager().getMain(), task, 0, 20L);
-							task.set(bukkit);
-						}
-					}
-				}
-
 				if (p.getLocation().getY() <= 50) { // VOID KILLS
 					if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
 						EntityDamageByEntityEvent entityDamageEvent = (EntityDamageByEntityEvent) p
@@ -630,6 +615,24 @@ public abstract class BaseClass {
 						p.teleport(instance.GetSpecLoc());
 						this.healthPots(killer);
 					}
+				} else if (p.getLastDamageCause() != null && p.getLastDamageCause().getCause() != null
+						&& (p.getLastDamageCause().getCause() == DamageCause.FIRE_TICK ||
+						p.getLastDamageCause().getCause() == DamageCause.FIRE ||
+						p.getLastDamageCause().getCause() == DamageCause.LAVA)) {
+					if (killer == null) {
+						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+								+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+								+ " burned to death");
+						p.teleport(instance.GetSpecLoc());
+					} else {
+						this.giveStats(killer, p);
+						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+								+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+								+ " was burned to death by " + ChatColor.WHITE + killer.getName() + " "
+								+ baseClassKiller.getType().getTag());
+						p.teleport(killer);
+						this.healthPots(killer);
+					}
 				} else if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
 					EntityDamageByEntityEvent entityDamageEvent = (EntityDamageByEntityEvent) p.getLastDamageCause();
 					Entity damager = entityDamageEvent.getDamager();
@@ -713,6 +716,11 @@ public abstract class BaseClass {
 											+ baseClassKiller.getType().getTag() + ChatColor.RED + "'s " + ChatColor.YELLOW
 											+ instance.getGameManager().getMobTypeName(damager.getType()));
 									p.teleport(d);
+								} else {
+									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+											+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+											+ " was killed by a "
+											+ ChatColor.YELLOW + instance.getGameManager().getMobTypeName(damager.getType()));
 								}
 							} else {
 								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -726,8 +734,8 @@ public abstract class BaseClass {
 									+ " was killed by a "
 									+ ChatColor.YELLOW + instance.getGameManager().getMobTypeName(damager.getType()));
 						}
-					} else if (damager instanceof Arrow) {
-						Arrow a = (Arrow) damager;
+					} else if (damager instanceof Projectile) {
+						Projectile a = (Projectile) damager;
 						if (a.getShooter() instanceof Player && a.getShooter() != null) {
 							Player shooter = (Player) a.getShooter();
 
@@ -765,6 +773,36 @@ public abstract class BaseClass {
 											+ ChatColor.RED + " committed suicide");
 								}
 								p.teleport(shooter);
+							}
+						} else if (a.getShooter() instanceof Creature && a.getShooter() != null) {
+							Creature shooter = (Creature) a.getShooter();
+							if (shooter.getCustomName() != null) {
+								String owner = ChatColor.stripColor(shooter.getCustomName().substring(0, shooter.getCustomName().indexOf("'")));
+								Player d = Bukkit.getPlayer(owner);
+								killer = d;
+
+								if (instance.classes.containsKey(d)) {
+									baseClassKiller = instance.classes.get(d);
+									if (d != p) {
+										this.giveStats(d, p);
+										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+												+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+												+ " was killed by " + ChatColor.RESET + d.getName() + " "
+												+ baseClassKiller.getType().getTag() + ChatColor.RED + "'s " + ChatColor.YELLOW
+												+ instance.getGameManager().getMobTypeName(damager.getType()));
+										p.teleport(d);
+									} else {
+										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+												+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+												+ " was killed by a "
+												+ ChatColor.YELLOW + instance.getGameManager().getMobTypeName(damager.getType()));
+									}
+								} else {
+									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+											+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+											+ " was killed by a "
+											+ ChatColor.YELLOW + instance.getGameManager().getMobTypeName(damager.getType()));
+								}
 							}
 						} else {
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -843,10 +881,9 @@ public abstract class BaseClass {
 							+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
 							+ " committed suicide");
 					p.getPlayer().setFireTicks(0);
-				} else if (killer == null && !(player.getKiller() instanceof Player) && DamageCause.LAVA != null
-						|| DamageCause.FIRE != null || DamageCause.FIRE_TICK != null) {
+				} else if (DamageCause.LAVA != null || DamageCause.FIRE != null || DamageCause.FIRE_TICK != null) {
 					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ p.getPlayer().getName() + ChatColor.RED + " just burnt to death");
+							+ p.getPlayer().getName() + ChatColor.RED + " just burned to death");
 				} else {
 					if (lives == 0) {
 						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1176,6 +1213,21 @@ public abstract class BaseClass {
 							+ lives + " lives left");
 				}
 
+				// END CRYSTAL
+				if (baseClassKiller != null) {
+					if (baseClassKiller.getType() == ClassType.Enderdragon) {
+						if (killer != null) {
+							Location pLoc = p.getLocation();
+							EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc,
+									EntityType.ENDER_CRYSTAL);
+							HealTask task = new HealTask(killer, crystal, instance.getGameManager().getMain());
+							BukkitTask bukkit = Bukkit.getScheduler()
+									.runTaskTimerAsynchronously(instance.getGameManager().getMain(), task, 0, 20L);
+							task.set(bukkit);
+						}
+					}
+				}
+
 				if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
 					EntityDamageByEntityEvent entityDamageEvent = (EntityDamageByEntityEvent) p.getLastDamageCause();
 					Entity damager = entityDamageEvent.getDamager();
@@ -1201,9 +1253,9 @@ public abstract class BaseClass {
 						baseClassKiller.classesEvent(killer, baseClassKiller);
 					}
 				}
-				EntityDamageEvent event = new EntityDamageEvent(p, DamageCause.VOID, 0);
-				p.setLastDamageCause(event);
-				Bukkit.getServer().getPluginManager().callEvent(event);
+				//EntityDamageEvent event = new EntityDamageEvent(p, DamageCause.VOID, 0);
+				p.setLastDamageCause(null);
+				//Bukkit.getServer().getPluginManager().callEvent(event);
 			}
 		}
 

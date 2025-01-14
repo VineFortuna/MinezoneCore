@@ -63,6 +63,7 @@ public class StarClass extends BaseClass {
 											count--;
 										} else if (player.getHealth() > 18.0 && player.getHealth() < 20.0) {
 											double p = 20.0 - player.getHealth();
+											player.setHealth(player.getHealth() + p);
 											NumberFormat fmt = new DecimalFormat("#.##");
 											player.sendMessage(instance.getGameManager().getMain().color(
 													"&e&l(!) &rJeffrey just gave you an extra " + fmt.format(p) + " hearts!"));
@@ -111,20 +112,15 @@ public class StarClass extends BaseClass {
 			}
 		}
 		playerInv.setItem(0, this.getAttackWeapon());
-		playerInv.setItem(1,
-				ItemHelper.setDetails(ItemHelper.createMonsterEgg(EntityType.PIG, 1),
-						instance.getGameManager().getMain().color("&e&lJeffrey Pokeball"), "",
-						instance.getGameManager().getMain().color("&7Spawn your Jeffrey to heal you!"),
-						instance.getGameManager().getMain().color("   &rMax 10 heal uses"),
-						instance.getGameManager().getMain().color("   &rHeals 2 hearts per sec")));
+		playerInv.setItem(1, jeffrey);
 	}
 
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 
-		if (item != null) {
-			if (item.getType() == Material.MONSTER_EGG) {
+		if (item != null && event.getAction().name().contains("RIGHT_CLICK")) {
+			if (item.isSimilar(jeffrey)) {
 				event.setCancelled(true);
 				Entity pig = player.getLocation().getWorld().spawnEntity(player.getLocation(), EntityType.PIG);
 				pig.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.RESET + "Jeffrey");
@@ -132,13 +128,17 @@ public class StarClass extends BaseClass {
 				player.sendMessage(instance.getGameManager().getMain().color(
 						"&e&l(!) &rYou spawned in Jeffrey! You need to be within 5 blocks of him to regenerate"));
 				isSpawned = true;
-				player.getInventory().remove(Material.MONSTER_EGG);
-			} else if (item.getType() == Material.NETHER_STAR
-					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+				player.getInventory().remove(jeffrey);
+			} else if (item.getType() == Material.NETHER_STAR) {
 				event.setCancelled(true);
-
 			}
 		}
 	}
+
+	private final ItemStack jeffrey = ItemHelper.setDetails(ItemHelper.createMonsterEgg(EntityType.PIG, 1),
+			instance.getGameManager().getMain().color("&e&lJeffrey Pokeball"), "",
+			instance.getGameManager().getMain().color("&7Spawn your Jeffrey to heal you!"),
+			instance.getGameManager().getMain().color("   &rMax 10 heal uses"),
+			instance.getGameManager().getMain().color("   &rHeals 2 hearts per sec"));
 
 }
