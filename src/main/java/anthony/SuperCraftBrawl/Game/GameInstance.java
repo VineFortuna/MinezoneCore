@@ -315,14 +315,14 @@ public class GameInstance {
 				return true;
 			}
 
-			if (!(player.hasPermission("scb.bypassFull")) && gameType == GameType.CLASSIC && players.size() >= 5) {
+			if (!(player.hasPermission("scb.bypassFull")) && gameType == GameType.CLASSIC && players.size() >= 6) {
 				player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is full!");
 				return true;
 			}
 
 			return false;
 		} else {
-			if (players.size() >= 6) {
+			if (players.size() >= 7) {
 				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is full!");
 				return true;
 			}
