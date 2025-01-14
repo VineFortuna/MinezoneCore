@@ -1608,6 +1608,7 @@ public class Core extends JavaPlugin implements Listener {
 
 	public void sendScoreboardUpdate(Player player) {
 		Rank rank = this.getRankManager().getRank(player);
+		player.setScoreboard(lobbyScoreBoard);
 
 		// Organized tab list for all online players
 		for (Player pl : Bukkit.getOnlinePlayers()) {
@@ -1617,18 +1618,17 @@ public class Core extends JavaPlugin implements Listener {
 			teamName.append("_").append(rank);
 
 			// Retrieve or create team
-			Scoreboard board = pl.getScoreboard();
+			Scoreboard board = getScoreboardManager().playersLobbyBoard.get(pl).getPlayer().getScoreboard();
 
 			Team team = board.getTeam(teamName.toString());
 			if (team == null) {
 				team = board.registerNewTeam(teamName.toString());
-				team.addEntry(player.getName());
 			}
 
 			// Add player to team if not already added
-			/*if (!team.hasEntry(player.getName())) {
+			if (!team.hasEntry(player.getName())) {
 				team.addEntry(player.getName());
-			}*/
+			}
 
 			// Set prefix based on rank
 			String rankTag = rank.getTagWithSpace();
@@ -1659,9 +1659,9 @@ public class Core extends JavaPlugin implements Listener {
 		getListener().resetPotionEffects(player);
 		getListener().checkIfTournament(player);
 		getListener().setPlayerOnTablist(player);
-		sendScoreboardUpdate(player); // This sets the rank next to player name above their head
 		chatAnnouncementOnJoin(player);
 		getScoreboardManager().lobbyBoard(player); // Gives the lobby scoreboard to player
+		sendScoreboardUpdate(player); // This sets the rank next to player name above their head
 
 		// For join message:
 		String rank = getRankManager().getRank(player).getTagWithSpace(); // Gets the player's rank
@@ -1894,6 +1894,7 @@ public class Core extends JavaPlugin implements Listener {
 		LobbyItems(player);
 		mysteryChestHologram(player);
 		updateLeaderboards();
+		getScoreboardManager().lobbyBoard(player);
 		sendScoreboardUpdate(player);
 
 		if (!(holograms.containsKey(player)))

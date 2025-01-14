@@ -622,10 +622,8 @@ public class Commands implements CommandExecutor, TabCompleter {
             return;
         else if (main.getGameManager().RemovePlayerFromAll(player)) {
             main.ResetPlayer(player);
-            player.setGameMode(GameMode.ADVENTURE);
-            main.getScoreboardManager().lobbyBoard(player);
-            player.getInventory().clear();
-            main.LobbyItems(player);
+            /*main.getScoreboardManager().lobbyBoard(player);
+            main.sendScoreboardUpdate(player);*/
             player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
                     + "You have left your game");
 
@@ -641,8 +639,7 @@ public class Commands implements CommandExecutor, TabCompleter {
             for (PotionEffect type : player.getActivePotionEffects())
                 player.removePotionEffect(type.getType());
 
-            main.sendScoreboardUpdate(player);
-            player.setGameMode(GameMode.ADVENTURE);
+            //main.sendScoreboardUpdate(player);
             removeArmor(player);
         } else if (game != null && game.spectators.contains(player)) {
             String mapName = "";
@@ -654,10 +651,8 @@ public class Commands implements CommandExecutor, TabCompleter {
             player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
                     + "You have left " + mapName);
             main.ResetPlayer(player);
-            player.setGameMode(GameMode.ADVENTURE);
             main.getScoreboardManager().lobbyBoard(player);
-            player.getInventory().clear();
-            main.LobbyItems(player);
+            main.sendScoreboardUpdate(player);
             game.spectators.remove(player);
             player.setDisplayName("" + player.getName());
         } else
