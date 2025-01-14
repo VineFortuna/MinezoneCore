@@ -401,9 +401,10 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (e.getPlayer().getLocation().getY() < 0)
 				main.SendPlayerToHub(player);
 
-		if (specInstance != null && e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
-			if (e.getPlayer().getLocation().getY() <= 50 || !specInstance.isInBounds(player.getLocation())) {
-				player.teleport(instance.GetSpecLoc());
+		if (specInstance != null && specInstance.state == GameState.STARTED &&
+				e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
+			if (e.getPlayer().getLocation().getY() < 50 || !specInstance.isInBounds(player.getLocation())) {
+				player.teleport(specInstance.GetSpecLoc());
 				return;
 			}
 		}
