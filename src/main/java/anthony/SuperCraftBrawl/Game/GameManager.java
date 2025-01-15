@@ -401,11 +401,9 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (e.getPlayer().getLocation().getY() < 0)
 				main.SendPlayerToHub(player);
 
-		if (specInstance != null && specInstance.state == GameState.STARTED &&
-				e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
+		if (specInstance != null && specInstance.state == GameState.STARTED && e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
 			if (e.getPlayer().getLocation().getY() < 50 || !specInstance.isInBounds(player.getLocation())) {
 				player.teleport(specInstance.GetSpecLoc());
-				return;
 			}
 		}
 
@@ -414,6 +412,13 @@ public class GameManager implements Listener, PluginMessageListener {
 				if (e.getPlayer().getLocation().getY() < 50 && e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
 					EntityDamageEvent damageEvent = new EntityDamageEvent(e.getPlayer(), DamageCause.VOID, 1000);
 					main.getServer().getPluginManager().callEvent(damageEvent);
+				}
+				if (e.getPlayer().getLocation().getY() < 50) {
+					if (instance.spectators.contains(player)
+							|| (instance.classes.containsKey(player) && instance.classes.get(player).getLives() <= 0)) {
+						player.teleport(instance.GetSpecLoc());
+						return;
+					}
 				}
 				if (!(instance.isInBounds(e.getPlayer().getLocation()))
 						&& e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
@@ -1681,7 +1686,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			event.setCancelled(true);
 	}
 
-	@EventHandler
+	/*@EventHandler
 	public void endCrystal(EntityDamageByEntityEvent e) {
 		if (e.getEntity().getType() == EntityType.ENDER_CRYSTAL) {
 			if (e.getDamager() instanceof Player) {
@@ -1736,7 +1741,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			}
 		}
 
-	}
+	}*/
 
 	@EventHandler
 	public void endCrystal(EntityExplodeEvent e) {

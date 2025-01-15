@@ -781,28 +781,29 @@ public class GameInstance {
 	@SuppressWarnings("deprecation")
 	public void sendScoreboardUpdate(Player player) {
 		ClassType classType = this.classes.get(player).getType();
+		if (classType == null) return;
 
 		// Organized tab list
 		/*for (Player pl : players) {*/
-			String teamName = player.getName();
+		String teamName = player.getName();
 
-			Scoreboard board = o.getScoreboard();
+		Scoreboard board = o.getScoreboard();
 
-			Team team = board.getTeam(teamName);
-			if (team == null) {
-				team = board.registerNewTeam(teamName);
-			}
+		Team team = board.getTeam(teamName);
+		if (team == null) {
+			team = board.registerNewTeam(teamName);
+		}
 
-			// Add player to team if not already added
-			if (!team.hasEntry(player.getName())) {
-				team.addEntry(player.getName());
-			}
+		// Add player to team if not already added
+		if (!team.hasEntry(player.getName())) {
+			team.addEntry(player.getName());
+		}
 
-			String className = classType.getTag() + " ";
-			if (className.length() > 12) {
-				className = classType.getTag().substring(0, 10).trim() + " " + ChatColor.RESET;
-			}
-			team.setPrefix(className);
+		String className = classType.getTag() + " ";
+		if (className.length() > 12) {
+			className = classType.getTag().substring(0, 10).trim() + " " + ChatColor.RESET;
+		}
+		team.setPrefix(className);
 		/*}*/
 	}
 	
