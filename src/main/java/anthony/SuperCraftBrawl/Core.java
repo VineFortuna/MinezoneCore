@@ -1608,6 +1608,7 @@ public class Core extends JavaPlugin implements Listener {
 
 	public void sendScoreboardUpdate(Player player) {
 		Rank rank = this.getRankManager().getRank(player);
+		if (rank == null) return;
 		player.setScoreboard(lobbyScoreBoard);
 
 		// Organized tab list for all online players
@@ -1615,7 +1616,7 @@ public class Core extends JavaPlugin implements Listener {
 			// Build team name
 			StringBuilder teamName = new StringBuilder();
 			teamName.append(rank.getTabListIndex());
-			teamName.append("_").append(rank);
+			teamName.append("_").append(rank.name());
 
 			// Retrieve or create team
 			Scoreboard board = getScoreboardManager().playersLobbyBoard.get(pl).getPlayer().getScoreboard();
