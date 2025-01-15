@@ -59,8 +59,11 @@ public class SnowGolemClass extends BaseClass {
 		ItemStack snowPlatform = ItemHelper.create(Material.SNOW_BLOCK, ChatColor.WHITE + "Snow Platform", ChatColor.GRAY + "Right click to save yourself from falling");
 
 		// Slowballs
-		ItemStack slowballs = new ItemStack(
-				ItemHelper.create(Material.SNOW_BALL, "" + ChatColor.RED + ChatColor.BOLD + "Slowballs").getType(), 5);
+		ItemStack slowballs =
+				ItemHelper.setDetails(new ItemStack(Material.SNOW_BALL, 5),
+				"&f&lSLOWBALLS",
+				"&7Give Slowness 1 for 3s to an enemy"
+		);
 
 		// Pumpkin
 		List<String> pumpkinList = new ArrayList<>();
