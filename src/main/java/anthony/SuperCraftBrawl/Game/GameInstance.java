@@ -2011,7 +2011,7 @@ public class GameInstance {
 									|| classType.getTokenCost() == 0) {
 								if (playerData.level >= classType.getLevel()) {
 									if (classType != ClassType.Fisherman ||
-											this.getGameManager().getMain().hasAllFish(player)) {
+											this.getGameManager().getMain().fishing.hasUnlockedFisherman(player)) {
 										if (donor == null
 												|| player.hasPermission("scb." + donor.toString().toLowerCase())) {
 											selectedClass = classType;

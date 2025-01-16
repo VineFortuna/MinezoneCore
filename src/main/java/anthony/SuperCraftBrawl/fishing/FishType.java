@@ -22,6 +22,7 @@ public enum FishType {
     PERCH(38, "Perch", FishRarity.COMMON, Arrays.asList(FishArea.Pond)),
     URCHIN(7, "Sea Urchin", FishRarity.COMMON, null),
     FROG(40, "Frog", FishRarity.COMMON, null),
+    SEWERFISH(53, "Sewer Fish", FishRarity.COMMON, null),
     PICKLES(8, "Sea Pickles", FishRarity.RARE, Arrays.asList(FishArea.Pond, FishArea.LushCave)),
     SQUID(9, "Squid", FishRarity.RARE, Arrays.asList(FishArea.Pond)),
     CLOWNFISH(10, "Clownfish", FishRarity.RARE, Arrays.asList(FishArea.LushCave)),
@@ -31,6 +32,8 @@ public enum FishType {
     CRAB(14, "Crab", FishRarity.RARE, Arrays.asList(FishArea.Pond)),
     OARFISH(41, "Oarfish", FishRarity.RARE, Arrays.asList(FishArea.Pond)),
     GOLDFISH(48, "Goldfish", FishRarity.RARE, Arrays.asList(FishArea.Pond, FishArea.Park)),
+    CATFISH(51, "Catfish", FishRarity.RARE, Arrays.asList(FishArea.Park, FishArea.Woods)),
+    DUCK(54, "Duck", FishRarity.RARE, Arrays.asList(FishArea.Park)),
     HERMITCRAB(15, "Hermit Crab", FishRarity.EPIC, Arrays.asList(FishArea.Pond)),
     PUFFERFISH(16, "Pufferfish", FishRarity.EPIC, Arrays.asList(FishArea.Pond)),
     GLOWSQUID(17, "Glow Squid", FishRarity.EPIC, Arrays.asList(FishArea.LushCave)),
@@ -39,6 +42,7 @@ public enum FishType {
     SNAKE(43, "Sea Snake", FishRarity.EPIC, null),
     PARROTFISH(47, "Parrotfish", FishRarity.EPIC, Arrays.asList(FishArea.Pond, FishArea.LushCave)),
     CLAM(49, "Clam", FishRarity.EPIC, Arrays.asList(FishArea.Pond, FishArea.Woods)),
+    CHROMIS(52, "Blue Green Chromis", FishRarity.EPIC, Arrays.asList(FishArea.LushCave)),
     TURTLE(20, "Turtle", FishRarity.MYTHIC, Arrays.asList(FishArea.Pond)),
     NAUTILUS(21, "Nautilus", FishRarity.MYTHIC, null),
     SEAHORSE(39, "Seahorse", FishRarity.MYTHIC, null),
@@ -46,11 +50,13 @@ public enum FishType {
     ANGLERFISH(22, "Anglerfish", FishRarity.MYTHIC, null),
     EEL(44, "Electric Eel", FishRarity.MYTHIC, Arrays.asList(FishArea.Woods)),
     ANEMONE(50, "Sea Anemone", FishRarity.MYTHIC, null),
+    GUARDIAN(55, "Guardian", FishRarity.MYTHIC, null),
     BLOBFISH(23, "Blobfish", FishRarity.LEGENDARY, null),
     DOLPHIN(46, "Dolphin", FishRarity.LEGENDARY, Arrays.asList(FishArea.Pond)),
     LEVIATHAN(24, "Swamp Monster", FishRarity.LEGENDARY, Arrays.asList(FishArea.LushCave)),
     SHARK(25, "Shark", FishRarity.LEGENDARY, Arrays.asList(FishArea.Pond)),
     WHALE(26, "Whale", FishRarity.LEGENDARY, Arrays.asList(FishArea.Pond)),
+    ELDERGUARDIAN(56, "Elder Guardian", FishRarity.LEGENDARY, null),
     LILYPAD(27, "Lilypad", FishRarity.JUNK, Arrays.asList(FishArea.LushCave)),
     STRING(28, "Fishing Line", FishRarity.JUNK, null),
     BUCKET(29, "Bucket", FishRarity.JUNK, null),
@@ -58,6 +64,7 @@ public enum FishType {
     BOOTS(31, "Old Boots", FishRarity.JUNK, Arrays.asList(FishArea.Pond, FishArea.Park, FishArea.Woods)),
     NAUTILUSSHELL(32, "Nautilus Shell", FishRarity.JUNK, null),
     BOAT(37, "Broken Boat", FishRarity.JUNK, null),
+    CLAY(57, "Lump of Clay", FishRarity.JUNK, null),
     EXP(45, "EXP Bottle", FishRarity.TREASURE, null),
     TOKENS(33, "Token Sack", FishRarity.TREASURE, null),
     MAP(34, "Treasure Map", FishRarity.TREASURE, null),
@@ -123,6 +130,9 @@ public enum FishType {
             case PERCH:
                 return ItemHelper.createSkullTexture(
                         "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWY3MTZjMWE4MGRhODVkNWU2Nzg0YzMzNmIyNTgzZDYxZGM3NmRlM2Q5OWExOTg0ZDNlNTkzNzIxZTIxMzI3In19fQ==");
+            case SEWERFISH:
+                return ItemHelper.createSkullTexture(
+                        "");
             case URCHIN:
                 return ItemHelper.createSkullTexture(
                         "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODJjZDkxNGEzMGU2NGUzMDI4MDMzMGY4ODVhODVkYzc5ODM0ZWYwN2VjZGM4ZDNhY2M0Nzg5YThiZDA5MGE3YSJ9fX0=");
@@ -150,6 +160,12 @@ public enum FishType {
             case GOLDFISH:
                 return ItemHelper.createSkullTexture(
                         "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTM1MmRmODVhMDJkN2ZhYzVkY2E3MmRmYmM2YmE4YWMwYTdmOTYyMDhiYzgwNDgyNDc3OTFlZjIyMTZmNWM5NCJ9fX0=");
+            case CATFISH:
+                return ItemHelper.createSkullTexture(
+                        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDI1ZjU0ZDNkODRkYzQ0OGQ0MWU4NjFjODVmZmNhNmVkNTUyYjA4ZjdmNjhjYjc1NmE4MzgzYjc1MDUxNzQ2ZSJ9fX0=");
+            case DUCK:
+                return ItemHelper.createSkullTexture(
+                        "");
             case LOBSTER:
                 return ItemHelper.createSkullTexture(
                         "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTNlOTA2NmVlNDljZGY3MDM3YzA4OTUyYzhmYTkzODFjNjlmYWRlNDdhMjQ5YTMwNDQ5NDkwM2Q4YjkwNTkzZCJ9fX0=");
@@ -162,6 +178,9 @@ public enum FishType {
             case CLAM:
                 return ItemHelper.createSkullTexture(
                         "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjU5YzBlOWQ4M2RiZjA0ZmJkYWE3ZWIyYmRlOGU5ZmM2Nzk5NGY4MzQyMDMwMWU1ODIyNDg2ODBmYTgxOWY2MSJ9fX0=");
+            case CHROMIS:
+                return ItemHelper.createSkullTexture(
+                        "");
             case TURTLE:
                 return ItemHelper.createSkullTexture(
                         "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMGE0MDUwZTdhYWNjNDUzOTIwMjY1OGZkYzMzOWRkMTgyZDdlMzIyZjlmYmNjNGQ1Zjk5YjU3MThhIn19fQ==");
@@ -201,6 +220,9 @@ public enum FishType {
             case EEL:
                 return ItemHelper.createSkullTexture(
                         "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTI0ZTRmNGRhNWU5YWJlOTEyMGNjNTFjOTEyZjZkMTc4MTU3NDc0MjMzMTQzMzEyNDg3OTlkMzA0NzhiMjFjOCJ9fX0=");
+            case GUARDIAN:
+                return ItemHelper.createSkullTexture(
+                        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzI4ZGI2YjA1NDIzNWU0NTFkNjY2ZmM2NDRhMDg2NjMyYzZhYjIyYzdjZDUzNTY1YWU4MjZlMWQ1Y2MwYjE3In19fQ==");
             case BLOBFISH:
                 return ItemHelper.createSkullTexture(
                         "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzI2NzdiNzk0NjYzYzkyNzNlZmM4NGY2Y2I0ZTJiMzM5MjUxZGU4NGU0NWUxZjAxZDNkNDk4MmZhN2MzZGQxNyJ9fX0=");
@@ -216,6 +238,9 @@ public enum FishType {
             case WHALE:
                 return ItemHelper.createSkullTexture(
                         "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzNhYTcxNjc2ZTgxZmI1M2EwNDBkZmRjYTNlNWI0N2Q1M2U2ZWZkNjY1ZTY5ZmI0Mzk3NzhlOGM0ZWZiMWNjIn19fQ==");
+            case ELDERGUARDIAN:
+                return ItemHelper.createSkullTexture(
+                        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDM0MGEyNjhmMjVmZDVjYzI3NmNhMTQ3YTg0NDZiMjYzMGE1NTg2N2EyMzQ5ZjdjYTEwN2MyNmViNTg5OTEifX19");
             case BOOTS:
                 return ItemHelper.create(Material.LEATHER_BOOTS);
             case BOTTLE:
@@ -231,6 +256,8 @@ public enum FishType {
                         "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODEyNmNhYzE2ZmQ4ZTQ3NTE2ZTg0NTIwY2QzOTgxYzQ1ZDcwOGY1NWQzNDU4NDk0ZDhmMDgxYzUwNWQ2ZDMwNCJ9fX0=");
             case BOAT:
                 return ItemHelper.create(Material.BOAT);
+            case CLAY:
+                return ItemHelper.create(Material.CLAY_BALL);
             case EXP:
                 return ItemHelper.create(Material.EXP_BOTTLE);
             case TOKENS:
