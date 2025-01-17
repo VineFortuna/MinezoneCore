@@ -58,8 +58,7 @@ public class BlazeClass extends BaseClass {
 		blazeRod.startTime = System.currentTimeMillis() - 100000;
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
-				ItemHelper.addEnchant(ItemHelper.addEnchant(new ItemStack(Material.BOW), Enchantment.ARROW_INFINITE, 1),
-						Enchantment.DURABILITY, 1000));
+				ItemHelper.addEnchant(ItemHelper.setUnbreakable(new ItemStack(Material.BOW)), Enchantment.ARROW_INFINITE, 1));
 		playerInv.setItem(2, ItemHelper.setDetails(new ItemStack(Material.MOB_SPAWNER),
 				instance.getGameManager().getMain().color("&6&lBlaze Army &7(Right Click)")));
 		playerInv.setItem(35, new ItemStack(Material.ARROW));
