@@ -641,7 +641,7 @@ public class PlayerListener implements Listener {
 			
 			//&6&l✧&6262 &4Owner&c anthsauce: &fLorem ipsum...
 
-			event.setFormat(ChatColor.YELLOW + "&6&l✧" + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
+			event.setFormat(ChatColor.YELLOW + main.color("&6&l✧") + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
 					+ ChatColor.YELLOW + " " + tag); // This part will always be included
 			String displayName = event.getPlayer().getDisplayName(); // Base display name
 
