@@ -1828,7 +1828,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	public void FireballDamage(EntityExplodeEvent event) {
 		if (event.getEntity() instanceof SmallFireball || event.getEntity() instanceof Fireball) {
 			event.setCancelled(true);
-			((Explosive) event).setIsIncendiary(false);
+			((Fireball) event.getEntity()).setIsIncendiary(false);
 			event.getEntity().remove();
 			event.blockList().clear();
 		} else if (event.getEntity() instanceof WitherSkull) {

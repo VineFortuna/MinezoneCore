@@ -4,13 +4,16 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameManager;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
 import anthony.SuperCraftBrawl.gui.fishing.FishingGUI;
+import anthony.util.ItemHelper;
 import net.jitse.npclib.NPCLib;
 import net.jitse.npclib.api.NPC;
 import net.jitse.npclib.api.events.NPCInteractEvent;
 import net.jitse.npclib.api.skin.Skin;
+import net.jitse.npclib.api.state.NPCSlot;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -49,6 +52,7 @@ public class NPCManager implements Listener {
 				main.color("&7Click to join a SCB game")));
 		scbModes.setLocation(new Location(main.getLobbyWorld(), 192.506, 113, 649.530, 179, -0));
 		scbModes.setSkin(sethblingSkin);
+		scbModes.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));
 		scbModes.create();
 		
 		socialMedia = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "View Social Medias", "",
@@ -62,6 +66,7 @@ public class NPCManager implements Listener {
 						main.color("&7Click to go fishing")));
 		fishing.setLocation(new Location(main.getLobbyWorld(), 186.506, 113, 649.530, -179, -0));
 		fishing.setSkin(fishermanSkin);
+		fishing.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.FISHING_ROD));
 		fishing.create();
 		
 		// FIX IT SO THIS UPDATES EVERY 10 SECONDS
