@@ -85,7 +85,7 @@ public enum Rank {
      */
     SUPREME(17, color("&5&lSUPREME")),
     
-    HUMAN_RESOURCES(18, color("&6&lHR"));
+    HR(18, color("&6&lHR"));
 	/*
 	 * Human Resources:
 	 * Job: Oversee both the community and staff, ensuring smooth operations across the board
