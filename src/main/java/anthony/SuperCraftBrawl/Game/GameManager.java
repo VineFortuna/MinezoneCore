@@ -1894,8 +1894,20 @@ public class GameManager implements Listener, PluginMessageListener {
 
 				for (Entry<Maps, GameInstance> games : gameMap.entrySet()) {
 					if (games.getValue().RemovePlayer(player)) {
-						if (games.getValue().players.size() == 0)
+						if (games.getValue().players.size() == 0) {
 							toRemove.add(games.getKey());
+							BukkitRunnable r = new BukkitRunnable() {
+								@Override
+								public void run() {
+									System.out.println("World unloaded 1");
+									if (Bukkit.unloadWorld(games.getValue().getMapWorld(), false)) {
+										System.out.println("World unloaded 2");
+										this.cancel();
+									}
+								}
+							};
+							r.runTaskTimer(getMain(), 0, 1);
+						}
 
 						found = true;
 					}
