@@ -1686,10 +1686,10 @@ public class GameManager implements Listener, PluginMessageListener {
 			event.setCancelled(true);
 	}
 
-	/*@EventHandler
+	@EventHandler
 	public void endCrystal(EntityDamageByEntityEvent e) {
 		if (e.getEntity().getType() == EntityType.ENDER_CRYSTAL) {
-			if (e.getDamager() instanceof Player) {
+			/*if (e.getDamager() instanceof Player) {
 				Player player = (Player) e.getDamager();
 
 				if (main.getCwManager() == null) {
@@ -1738,10 +1738,10 @@ public class GameManager implements Listener, PluginMessageListener {
 				}
 			} else {
 				e.setCancelled(true);
-			}
+			}*/
+			e.setCancelled(true);
 		}
-
-	}*/
+	}
 
 	@EventHandler
 	public void endCrystal(EntityExplodeEvent e) {
