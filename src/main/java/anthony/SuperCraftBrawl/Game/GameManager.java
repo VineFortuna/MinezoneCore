@@ -1686,10 +1686,10 @@ public class GameManager implements Listener, PluginMessageListener {
 			event.setCancelled(true);
 	}
 
-	/*@EventHandler
+	@EventHandler
 	public void endCrystal(EntityDamageByEntityEvent e) {
 		if (e.getEntity().getType() == EntityType.ENDER_CRYSTAL) {
-			if (e.getDamager() instanceof Player) {
+			/*if (e.getDamager() instanceof Player) {
 				Player player = (Player) e.getDamager();
 
 				if (main.getCwManager() == null) {
@@ -1738,10 +1738,10 @@ public class GameManager implements Listener, PluginMessageListener {
 				}
 			} else {
 				e.setCancelled(true);
-			}
+			}*/
+			e.setCancelled(true);
 		}
-
-	}*/
+	}
 
 	@EventHandler
 	public void endCrystal(EntityExplodeEvent e) {
@@ -1828,7 +1828,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	public void FireballDamage(EntityExplodeEvent event) {
 		if (event.getEntity() instanceof SmallFireball || event.getEntity() instanceof Fireball) {
 			event.setCancelled(true);
-			((Explosive) event).setIsIncendiary(false);
+			((Fireball) event.getEntity()).setIsIncendiary(false);
 			event.getEntity().remove();
 			event.blockList().clear();
 		} else if (event.getEntity() instanceof WitherSkull) {
@@ -1894,8 +1894,20 @@ public class GameManager implements Listener, PluginMessageListener {
 
 				for (Entry<Maps, GameInstance> games : gameMap.entrySet()) {
 					if (games.getValue().RemovePlayer(player)) {
-						if (games.getValue().players.size() == 0)
+						if (games.getValue().players.size() == 0) {
 							toRemove.add(games.getKey());
+							BukkitRunnable r = new BukkitRunnable() {
+								@Override
+								public void run() {
+									System.out.println("World unloaded 1");
+									if (Bukkit.unloadWorld(games.getValue().getMapWorld(), false)) {
+										System.out.println("World unloaded 2");
+										this.cancel();
+									}
+								}
+							};
+							r.runTaskTimer(getMain(), 0, 1);
+						}
 
 						found = true;
 					}

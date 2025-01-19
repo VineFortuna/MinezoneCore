@@ -104,16 +104,19 @@ public class FireworkClass extends BaseClass {
 
 	@Override
 	public void Tick(int gameTicks) {
-		if (gameTicks % 20 == 0)
-			if (this.cooldown > 0) {
-				this.cooldown--;
-				msg = instance.getGameManager().getMain()
-						.color("&9&l(!) &c&lFirework Bow &ecooldown: " + this.cooldown + "s");
+		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Firework
+				&& instance.classes.get(player).getLives() > 0) {
+			if (gameTicks % 20 == 0)
+				if (this.cooldown > 0) {
+					this.cooldown--;
+					msg = instance.getGameManager().getMain()
+							.color("&9&l(!) &c&lFirework Bow &ecooldown: " + this.cooldown + "s");
+					getActionBarManager().setActionBar(player, "firework.cooldown", msg, 2);
+				}
+			if (this.cooldown == 0) {
+				msg = instance.getGameManager().getMain().color("&9&l(!) &eYou can use &c&lFirework Bow");
 				getActionBarManager().setActionBar(player, "firework.cooldown", msg, 2);
 			}
-		if (this.cooldown == 0) {
-			msg = instance.getGameManager().getMain().color("&9&l(!) &eYou can use &c&lFirework Bow");
-			getActionBarManager().setActionBar(player, "firework.cooldown", msg, 2);
 		}
 	}
 
