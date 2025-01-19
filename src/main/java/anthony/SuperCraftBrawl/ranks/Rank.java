@@ -83,7 +83,13 @@ public enum Rank {
      * Obtainable: Application
      * Job: Build and design new maps
      */
-    SUPREME(17, color("&5&lSUPREME")); //UNRELEASED DONATION ROLE ;)
+    SUPREME(17, color("&5&lSUPREME")),
+    
+    HR(18, color("&6&lHR"));
+	/*
+	 * Human Resources:
+	 * Job: Oversee both the community and staff, ensuring smooth operations across the board
+	 */
 
     private final int roleID;
     private final String tag;
