@@ -1413,8 +1413,9 @@ public class GameInstance {
 					BukkitRunnable r = new BukkitRunnable() {
 						@Override
 						public void run() {
-							Bukkit.unloadWorld(mapWorld, false);
+							System.out.println("World unloaded 1");
 							if (Bukkit.unloadWorld(mapWorld, false)) {
+								System.out.println("World unloaded 2");
 								this.cancel();
 							}
 						}
