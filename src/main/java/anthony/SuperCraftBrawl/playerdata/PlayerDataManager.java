@@ -289,6 +289,7 @@ public class PlayerDataManager implements Listener {
 						+ (entry.getValue().reward3 ? 1 : 0) + ", " + (entry.getValue().reward4 ? 1 : 0) + ", "
 						+ (entry.getValue().reward5 ? 1 : 0) + ")";
 				index++;
+				entry.getValue().hasUpdated = false;
 			}
 		}
 
@@ -310,6 +311,7 @@ public class PlayerDataManager implements Listener {
 				updateCMD += "('" + data.playerUUID.toString() + "', " + entry.getKey() + ", "
 						+ entry.getValue().timesCaught + ")";
 				index++;
+				entry.getValue().hasUpdated = false;
 			}
 		}
 
