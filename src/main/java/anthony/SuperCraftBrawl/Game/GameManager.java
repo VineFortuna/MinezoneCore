@@ -1899,9 +1899,9 @@ public class GameManager implements Listener, PluginMessageListener {
 							BukkitRunnable r = new BukkitRunnable() {
 								@Override
 								public void run() {
-									System.out.println("World unloaded 1");
+									System.out.println("Unloading world");
 									if (Bukkit.unloadWorld(games.getValue().getMapWorld(), false)) {
-										System.out.println("World unloaded 2");
+										System.out.println("World " + games.getValue().getMapWorld() + " unloaded");
 										this.cancel();
 									}
 								}
