@@ -40,7 +40,7 @@ public class EnderdragonClass extends BaseClass {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL, 5),
 				"" + ChatColor.BLACK + ChatColor.BOLD + "Teleporters"));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
 	}
 
 	@SuppressWarnings("unlikely-arg-type")
