@@ -48,7 +48,7 @@ public class GrimReaperClass extends BaseClass {
 						"" + ChatColor.RESET + "Slowness & Blindness to enemies in a",
 						"" + ChatColor.RESET + "10 block radius"));
 		playerInv.setItem(2, zombieEgg);
-		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
+		//player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
 	}
 
 	@SuppressWarnings("unlikely-arg-type")
@@ -58,8 +58,8 @@ public class GrimReaperClass extends BaseClass {
 		cooldownActionBar(this.cooldownSec, this.cooldownDuration, grimReaper, ClassType.GrimReaper,
 				"grimReaper.cooldown", "Spirit Shackles");
 
-		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
-			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
+		/*if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
+			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));*/
 
 		if (player.getInventory().getItem(2) == null || player.getInventory().getItem(2).getType() == Material.AIR) {
 			if (checkIfSameClass(player) && checkIfDead(player) == false) {

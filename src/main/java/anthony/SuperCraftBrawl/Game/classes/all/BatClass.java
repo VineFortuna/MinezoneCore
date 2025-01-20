@@ -39,7 +39,7 @@ public class BatClass extends BaseClass {
 		playerInv.setItem(0, this.getAttackWeapon());
 		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
 		player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 999999999, 1));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 1));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
 	}
 
 	@SuppressWarnings("unlikely-arg-type")
@@ -50,7 +50,7 @@ public class BatClass extends BaseClass {
 		else if (!(player.getActivePotionEffects().contains(PotionEffectType.INVISIBILITY)))
 			player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 999999999, 1));
 		else if (!(player.getActivePotionEffects().contains(PotionEffectType.DAMAGE_RESISTANCE)))
-			player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
 	}
 
 	@Override
