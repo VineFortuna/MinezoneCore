@@ -93,8 +93,8 @@ public class WolfClass extends BaseClass {
 						
 						target.setVelocity((new Vector(0, 1, 0)).multiply(0.5D));
 						EntityDamageEvent damageEvent = new EntityDamageEvent(target,
-								EntityDamageEvent.DamageCause.MAGIC, 6);
-						target.damage(6, player);
+								EntityDamageEvent.DamageCause.MAGIC, 5);
+						target.damage(5, player);
 						player.getWorld().playSound(player.getLocation(), Sound.ITEM_BREAK, 0.8f, 0);
 						hitPlayers.add(target);
 						
@@ -188,7 +188,7 @@ public class WolfClass extends BaseClass {
 	private void startDash() {
 		double boosterStrength = 1.1;
 		player.getWorld().playSound(player.getLocation(), Sound.WOLF_GROWL, 1, 0);
-		Vector vel = player.getLocation().getDirection().multiply(boosterStrength).add(new Vector(0, 0.5, 0));
+		Vector vel = player.getLocation().getDirection().multiply(new Vector(boosterStrength, 0, boosterStrength)).add(new Vector(0, 0.5, 0));
 		player.setVelocity(vel);
 		used = true;
 	}

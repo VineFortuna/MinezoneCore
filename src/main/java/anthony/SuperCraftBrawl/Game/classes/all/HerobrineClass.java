@@ -33,7 +33,7 @@ public class HerobrineClass extends BaseClass {
 				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTM1YmRkN2VmZjExYzg3ZDUyYTExM2MyZWZiNGNhNDU3NzVlNTY3MzVkYzRiMzhkN2ZhMWRiNzA4NDU4In19fQ==",
 				null,
-				0,
+				6,
 				"Herobrine"
 		);
 	}
@@ -51,7 +51,7 @@ public class HerobrineClass extends BaseClass {
 				ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
 						"" + ChatColor.RESET + ChatColor.BOLD + "Diamond of Despair", "",
 						instance.getGameManager().getMain().color("&7Right click to send effects on enemies!")));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 1));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
 	}
 
 	@Override
