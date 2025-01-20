@@ -1747,7 +1747,7 @@ public class Core extends JavaPlugin implements Listener {
 	public void mysteryChestHologram(Player p) {
 		PlayerData data = this.getDataManager().getPlayerData(p);
 
-		if (!(this.msHologram.containsKey(p))) {
+		/*if (!(this.msHologram.containsKey(p))) {*/
 			if (data != null) {
 				Location loc = new Location(this.getLobbyWorld(), 194.520, 116, 641.500);
 				WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
@@ -1773,7 +1773,7 @@ public class Core extends JavaPlugin implements Listener {
 				((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
 				this.msHologram.put(p, stand);
 			}
-		}
+		/*}*/
 	}
 	
 	@EventHandler

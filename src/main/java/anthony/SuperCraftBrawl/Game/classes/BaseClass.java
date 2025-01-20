@@ -1870,7 +1870,8 @@ public abstract class BaseClass {
 			playerHead = ItemHelper.createSkullTexture(textureUrl);
 		}
 		playerHead = ItemHelper.setDetails(getHelmet(playerHead), "&r&f" + className + " Head");
-		playerHead.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protectionLevel);
+		if (protectionLevel > 0)
+			playerHead.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protectionLevel);
 
 		// Chestplate
 		if (hexCodeChestplate != null) {
