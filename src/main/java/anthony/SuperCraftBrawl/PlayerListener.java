@@ -428,10 +428,9 @@ public class PlayerListener implements Listener {
 				GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 				GameInstance spectating = main.getGameManager().GetInstanceOfSpectator(player);
 
-				if (game != null && game.state == GameState.STARTED)
+				if ((game != null && game.state == GameState.STARTED) || spectating != null) {
 					return;
-				if (spectating != null)
-					return;
+				}
 
 				new StatsGUI(main, target).inv.open(player);
 			}

@@ -170,15 +170,17 @@ public class NinjaClass extends BaseClass {
 						ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
 							@Override
 							public void onHit(Player hit) {
-								if (instance.duosMap != null)
-									if (instance.team.get(hit).equals(instance.team.get(player)))
-										return;
+								if (hit != null) {
+									if (instance.duosMap != null)
+										if (instance.team.get(hit).equals(instance.team.get(player)))
+											return;
 
-								player.playSound(hit.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
-								hit.damage(2.0, player);
-								for (Player gamePlayer : instance.players)
-									gamePlayer.playSound(hit.getLocation(), Sound.EXPLODE, 2, 1);
+									player.playSound(hit.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
+									hit.damage(2.0, player);
+									for (Player gamePlayer : instance.players)
+										gamePlayer.playSound(hit.getLocation(), Sound.EXPLODE, 2, 1);
 
+								}
 							}
 
 						}, new ItemStack(Material.NETHER_STAR));
