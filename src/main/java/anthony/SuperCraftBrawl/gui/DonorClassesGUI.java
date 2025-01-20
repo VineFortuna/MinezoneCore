@@ -69,8 +69,8 @@ public class DonorClassesGUI implements InventoryProvider {
 								e -> {
 									Rank donor = type.getMinRank();
 
-									if (donor == null
-											|| player.hasPermission("scb." + donor.toString().toLowerCase())) {
+									//if (donor == null
+											//|| player.hasPermission("scb." + donor.toString().toLowerCase())) {
 										if (e.isShiftClick()) {
 											if (data != null) {
 												data.customIntegers.add(type.getID());
@@ -99,12 +99,12 @@ public class DonorClassesGUI implements InventoryProvider {
 										} else if (e.isRightClick()) {
 											new ClassRewardsGUI(main, type, inv).inv.open(player);
 										}
-									} else {
-										player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD
+									//} else {
+										/*player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD
 												+ "(!) " + ChatColor.RESET
 												+ "You need a rank to use this class");
 										inv.close(player);
-									}
+										}*/
 								}));
 				b++;
 

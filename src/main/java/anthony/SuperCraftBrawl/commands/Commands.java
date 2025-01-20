@@ -525,8 +525,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 		ClassDetails classDetails = playerData.playerClasses.get(type.getID());
 
 		if (!isClassUnlocked(player, classDetails, type) || !isLevelUnlocked(player, playerData, type)
-				|| !isFishermanClassUnlocked(player, type) || !isRankRequirementMet(player, type)
-				|| !isPlayerInGame(player, game) || !isGameStateWaiting(game, player)
+				|| !isFishermanClassUnlocked(player, type) || /*!isRankRequirementMet(player, type)*/
+				!isPlayerInGame(player, game) || !isGameStateWaiting(game, player)
 				|| !isFrenzyGameType(game, player)) {
 			return;
 		}
