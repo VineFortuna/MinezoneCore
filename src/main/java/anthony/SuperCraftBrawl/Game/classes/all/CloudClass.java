@@ -110,7 +110,7 @@ public class CloudClass extends BaseClass {
 		for (Entity e : near) {
 			if (e instanceof Player) {
 				Player gamePlayer = (Player) e;
-				if (instance.classes.containsKey(gamePlayer) && instance.classes.get(gamePlayer).getLives() > 0) {
+				if (instance.classes.containsKey(gamePlayer) && !checkIfDead(player, instance)) {
 					gamePlayer.getWorld().strikeLightningEffect(gamePlayer.getLocation());
 					//gamePlayer.setFireTicks(100);
 					gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 110, 1));
@@ -323,7 +323,7 @@ public class CloudClass extends BaseClass {
 		if (nearestPlayer != null) {
 			nearestPlayer.getWorld().strikeLightningEffect(nearestPlayer.getLocation());
 			damageTarget(nearestPlayer, 8.0);
-			nearestPlayer.setFireTicks(80);
+			//nearestPlayer.setFireTicks(80);
 			return true; // Found player
 		}
 
