@@ -47,6 +47,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -1773,6 +1774,13 @@ public class Core extends JavaPlugin implements Listener {
 				this.msHologram.put(p, stand);
 			}
 		}
+	}
+	
+	@EventHandler
+	public void serverMotd(ServerListPingEvent p) {
+		String msg = color("                   &eMinezone &7[1.8-1.21] \n          &2&lHOME OF &c&lSUPER CRAFT BLOCKS");
+		p.setMotd(msg);
+		p.setMaxPlayers(1);
 	}
 
 	@EventHandler
