@@ -525,8 +525,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 		ClassDetails classDetails = playerData.playerClasses.get(type.getID());
 
 		if (!isClassUnlocked(player, classDetails, type) || !isLevelUnlocked(player, playerData, type)
-				|| !isFishermanClassUnlocked(player, type) || !isRankRequirementMet(player, type)
-				|| !isPlayerInGame(player, game) || !isGameStateWaiting(game, player)
+				|| !isFishermanClassUnlocked(player, type) || !isRankRequirementMet(player, type) ||
+				!isPlayerInGame(player, game) || !isGameStateWaiting(game, player)
 				|| !isFrenzyGameType(game, player)) {
 			return;
 		}
@@ -568,7 +568,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 	private boolean isRankRequirementMet(Player player, ClassType type) {
 		Rank donor = type.getMinRank();
 		if (donor != null && !player.hasPermission("scb." + donor.toString().toLowerCase())) {
-			player.sendMessage(main.color("&c&l(!) &rYou need a rank to use this class."));
+			player.sendMessage(main.color("&c&l(!) &rYou need a rank to use this class"));
 			return false;
 		}
 		return true;
