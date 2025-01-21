@@ -106,7 +106,7 @@ public abstract class BaseClass {
 	protected ItemStack boots;
 
 	public Player bountyTarget = null;
-	
+
 	public int gunGamePos = 0;
 
 	// This would also take in a SuperClass.
@@ -337,7 +337,7 @@ public abstract class BaseClass {
 
 	public void Death(PlayerDeathEvent e) {
 		if (player.getName() != null && lives > 0) {
-			if(instance.gameType != GameType.GUNGAME) {
+			if (instance.gameType != GameType.GUNGAME) {
 				lives--;
 			}
 			score.setScore(lives);
@@ -361,8 +361,9 @@ public abstract class BaseClass {
 				baseClassDead.totalDeaths++;
 				baseClassDead.eachLifeKills = 0;
 
-				BaseClass bc = (instance.gameType == GameType.FRENZY || instance.gameType == GameType.GUNGAME) ?
-						instance.oldClasses.get(p) : baseClassDead;
+				BaseClass bc = (instance.gameType == GameType.FRENZY || instance.gameType == GameType.GUNGAME)
+						? instance.oldClasses.get(p)
+						: baseClassDead;
 
 				if (baseClassDead.lives < 1)
 					bc = baseClassDead;
@@ -394,9 +395,9 @@ public abstract class BaseClass {
 								} else {
 									this.giveStats(d, p);
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ p.getPlayer().getName() + " " + bc.getType().getTag()
-											+ ChatColor.RED + " was doomed to fall by " + ChatColor.WHITE + d.getName()
-											+ " " + baseClassKiller.getType().getTag());
+											+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+											+ " was doomed to fall by " + ChatColor.WHITE + d.getName() + " "
+											+ baseClassKiller.getType().getTag());
 								}
 								p.teleport(d.getLocation());
 							} else {
@@ -418,8 +419,8 @@ public abstract class BaseClass {
 								} else {
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 
-											+ p.getPlayer().getName() + " " + bc.getType().getTag()
-											+ ChatColor.RED + " fell into the void");
+											+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+											+ " fell into the void");
 								}
 								p.teleport(instance.GetSpecLoc());
 							}
@@ -444,9 +445,9 @@ public abstract class BaseClass {
 									} else {
 										this.giveStats(d, p);
 										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-												+ p.getPlayer().getName() + " " + bc.getType().getTag()
-												+ ChatColor.RED + " was doomed to fall by " + ChatColor.WHITE
-												+ d.getName() + " " + baseClassKiller.getType().getTag());
+												+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+												+ " was doomed to fall by " + ChatColor.WHITE + d.getName() + " "
+												+ baseClassKiller.getType().getTag());
 									}
 								} else {
 									Random r = new Random();
@@ -456,20 +457,19 @@ public abstract class BaseClass {
 										if (chance == 0) {
 											TellAll(instance.getGameManager().getMain().color("&2&l(!) "
 
-													+ "&r" + p.getPlayer().getName() + " "
-													+ bc.getType().getTag()
+													+ "&r" + p.getPlayer().getName() + " " + bc.getType().getTag()
 													+ " &csaid NO THANK YOU and took the easy way out"));
 										} else {
 											TellAll(instance.getGameManager().getMain().color("&2&l(!) "
 
-													+ "&r" + p.getPlayer().getName() + " "
-													+ bc.getType().getTag() + " &cwalked off the edge.."));
+													+ "&r" + p.getPlayer().getName() + " " + bc.getType().getTag()
+													+ " &cwalked off the edge.."));
 										}
 									} else {
 										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 
-												+ p.getPlayer().getName() + " " + bc.getType().getTag()
-												+ ChatColor.RED + " fell into the void");
+												+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+												+ " fell into the void");
 									}
 									p.teleport(instance.GetSpecLoc());
 								}
@@ -492,8 +492,8 @@ public abstract class BaseClass {
 								} else {
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 
-											+ p.getPlayer().getName() + " " + bc.getType().getTag()
-											+ ChatColor.RED + " fell into the void");
+											+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+											+ " fell into the void");
 								}
 								p.teleport(instance.GetSpecLoc());
 							}
@@ -530,42 +530,42 @@ public abstract class BaseClass {
 									this.giveStats(killer, p);
 									TellAll(instance.getGameManager().getMain()
 											.color("&2&l(!) " + "&r" + p.getPlayer().getName() + " "
-													+ bc.getType().getTag()
-													+ " &cwas not strong enough to encounter " + "&r"
-													+ killer.getName() + " " + baseClassKiller.getType().getTag()));
+													+ bc.getType().getTag() + " &cwas not strong enough to encounter "
+													+ "&r" + killer.getName() + " "
+													+ baseClassKiller.getType().getTag()));
 								} else {
 									this.giveStats(killer, p);
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ p.getPlayer().getName() + " " + bc.getType().getTag()
-											+ ChatColor.RED + " was killed by " + ChatColor.WHITE + killer.getName()
-											+ " " + baseClassKiller.getType().getTag());
+											+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+											+ " was killed by " + ChatColor.WHITE + killer.getName() + " "
+											+ baseClassKiller.getType().getTag());
 								}
 							} else if (lives > 0) {
 								if (killerData != null && killerData.killMsgs == 1) {
 									this.giveStats(killer, p);
 									TellAll(instance.getGameManager().getMain()
 											.color("&2&l(!) " + "&r" + p.getPlayer().getName() + " "
-													+ bc.getType().getTag()
-													+ " &cwas not strong enough to encounter " + "&r"
-													+ killer.getName() + " " + baseClassKiller.getType().getTag()));
+													+ bc.getType().getTag() + " &cwas not strong enough to encounter "
+													+ "&r" + killer.getName() + " "
+													+ baseClassKiller.getType().getTag()));
 								} else {
 									this.giveStats(killer, p);
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ p.getPlayer().getName() + " " + bc.getType().getTag()
-											+ ChatColor.RED + " was killed by " + ChatColor.WHITE + killer.getName()
-											+ " " + baseClassKiller.getType().getTag());
+											+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+											+ " was killed by " + ChatColor.WHITE + killer.getName() + " "
+											+ baseClassKiller.getType().getTag());
 								}
 							}
 							p.teleport(killer);
 						} else {
 							if (lives > 0) {
 								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-										+ p.getPlayer().getName() + " " + bc.getType().getTag()
-										+ ChatColor.RED + " committed suicide");
+										+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+										+ " committed suicide");
 							} else {
 								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-										+ p.getPlayer().getName() + " " + bc.getType().getTag()
-										+ ChatColor.RED + " committed suicide");
+										+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+										+ " committed suicide");
 							}
 							p.teleport(killer);
 						}
@@ -616,9 +616,9 @@ public abstract class BaseClass {
 						this.healthPots(killer);
 					}
 				} else if (p.getLastDamageCause() != null && p.getLastDamageCause().getCause() != null
-						&& (p.getLastDamageCause().getCause() == DamageCause.FIRE_TICK ||
-						p.getLastDamageCause().getCause() == DamageCause.FIRE ||
-						p.getLastDamageCause().getCause() == DamageCause.LAVA)) {
+						&& (p.getLastDamageCause().getCause() == DamageCause.FIRE_TICK
+								|| p.getLastDamageCause().getCause() == DamageCause.FIRE
+								|| p.getLastDamageCause().getCause() == DamageCause.LAVA)) {
 					if (killer == null) {
 						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 								+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
@@ -651,15 +651,14 @@ public abstract class BaseClass {
 										TellAll(instance.getGameManager().getMain()
 												.color("&2&l(!) " + "&r" + p.getPlayer().getName() + " "
 														+ bc.getType().getTag()
-														+ " &cwas not strong enough to encounter " + "&r"
-														+ d.getName() + " " + baseClassKiller.getType().getTag()));
+														+ " &cwas not strong enough to encounter " + "&r" + d.getName()
+														+ " " + baseClassKiller.getType().getTag()));
 										this.healthPots(d);
 									} else {
 										this.giveStats(d, p);
-										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-												+ ChatColor.RESET + p.getPlayer().getName() + " "
-												+ bc.getType().getTag() + ChatColor.RED + " was killed by "
-												+ ChatColor.WHITE + d.getName() + " "
+										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+												+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+												+ " was killed by " + ChatColor.WHITE + d.getName() + " "
 												+ baseClassKiller.getType().getTag());
 										this.healthPots(d);
 									}
@@ -669,15 +668,14 @@ public abstract class BaseClass {
 										TellAll(instance.getGameManager().getMain()
 												.color("&2&l(!) " + "&r" + p.getPlayer().getName() + " "
 														+ bc.getType().getTag()
-														+ " &cwas not strong enough to encounter " + "&r"
-														+ d.getName() + " " + baseClassKiller.getType().getTag()));
+														+ " &cwas not strong enough to encounter " + "&r" + d.getName()
+														+ " " + baseClassKiller.getType().getTag()));
 										this.healthPots(d);
 									} else {
 										this.giveStats(d, p);
-										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-												+ ChatColor.RESET + p.getPlayer().getName() + " "
-												+ bc.getType().getTag() + ChatColor.RED + " was killed by "
-												+ ChatColor.WHITE + d.getName() + " "
+										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+												+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+												+ " was killed by " + ChatColor.WHITE + d.getName() + " "
 												+ baseClassKiller.getType().getTag());
 										this.healthPots(d);
 									}
@@ -686,23 +684,23 @@ public abstract class BaseClass {
 							} else {
 								if (lives > 0) {
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ p.getPlayer().getName() + " " + bc.getType().getTag()
-											+ ChatColor.RED + " committed suicide");
+											+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+											+ " committed suicide");
 								} else {
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ p.getPlayer().getName() + " " + bc.getType().getTag()
-											+ ChatColor.RED + " committed suicide");
+											+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+											+ " committed suicide");
 								}
 								p.teleport(d);
 							}
 						} else {
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
-									+ " died");
+									+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED + " died");
 						}
 					} else if (damager instanceof Creature) {
 						if (damager.getCustomName() != null) {
-							String owner = ChatColor.stripColor(damager.getCustomName().substring(0, damager.getCustomName().indexOf("'")));
+							String owner = ChatColor.stripColor(
+									damager.getCustomName().substring(0, damager.getCustomName().indexOf("'")));
 							Player d = Bukkit.getPlayer(owner);
 							killer = d;
 
@@ -713,26 +711,27 @@ public abstract class BaseClass {
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 											+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
 											+ " was killed by " + ChatColor.RESET + d.getName() + " "
-											+ baseClassKiller.getType().getTag() + ChatColor.RED + "'s " + ChatColor.YELLOW
+											+ baseClassKiller.getType().getTag() + ChatColor.RED + "'s "
+											+ ChatColor.YELLOW
 											+ instance.getGameManager().getMobTypeName(damager.getType()));
 									p.teleport(d);
 								} else {
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 											+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
-											+ " was killed by a "
-											+ ChatColor.YELLOW + instance.getGameManager().getMobTypeName(damager.getType()));
+											+ " was killed by a " + ChatColor.YELLOW
+											+ instance.getGameManager().getMobTypeName(damager.getType()));
 								}
 							} else {
 								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 										+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
-										+ " was killed by a "
-										+ ChatColor.YELLOW + instance.getGameManager().getMobTypeName(damager.getType()));
+										+ " was killed by a " + ChatColor.YELLOW
+										+ instance.getGameManager().getMobTypeName(damager.getType()));
 							}
 						} else {
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 									+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
-									+ " was killed by a "
-									+ ChatColor.YELLOW + instance.getGameManager().getMobTypeName(damager.getType()));
+									+ " was killed by a " + ChatColor.YELLOW
+									+ instance.getGameManager().getMobTypeName(damager.getType()));
 						}
 					} else if (damager instanceof Projectile) {
 						Projectile a = (Projectile) damager;
@@ -748,14 +747,13 @@ public abstract class BaseClass {
 										this.giveStats(shooter, p);
 										TellAll(instance.getGameManager().getMain().color("&2&l(!) " + "&r"
 												+ p.getPlayer().getName() + " " + bc.getType().getTag()
-												+ " &cwas not strong enough to encounter " + "&r"
-												+ shooter.getName() + " " + baseClassKiller.getType().getTag()));
+												+ " &cwas not strong enough to encounter " + "&r" + shooter.getName()
+												+ " " + baseClassKiller.getType().getTag()));
 										this.healthPots(shooter);
 									} else {
 										this.giveStats(shooter, p);
-										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-												+ ChatColor.RESET + p.getPlayer().getName() + " "
-												+ bc.getType().getTag() + ChatColor.RED
+										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+												+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
 												+ " was killed by " + ChatColor.WHITE + shooter.getName() + " "
 												+ baseClassKiller.getType().getTag());
 										this.healthPots(shooter);
@@ -765,19 +763,20 @@ public abstract class BaseClass {
 							} else {
 								if (lives > 0) {
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ p.getPlayer().getName() + " " + bc.getType().getTag()
-											+ ChatColor.RED + " committed suicide");
+											+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+											+ " committed suicide");
 								} else {
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ p.getPlayer().getName() + " " + bc.getType().getTag()
-											+ ChatColor.RED + " committed suicide");
+											+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+											+ " committed suicide");
 								}
 								p.teleport(shooter);
 							}
 						} else if (a.getShooter() instanceof Creature && a.getShooter() != null) {
 							Creature shooter = (Creature) a.getShooter();
 							if (shooter.getCustomName() != null) {
-								String owner = ChatColor.stripColor(shooter.getCustomName().substring(0, shooter.getCustomName().indexOf("'")));
+								String owner = ChatColor.stripColor(
+										shooter.getCustomName().substring(0, shooter.getCustomName().indexOf("'")));
 								Player d = Bukkit.getPlayer(owner);
 								killer = d;
 
@@ -788,26 +787,26 @@ public abstract class BaseClass {
 										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 												+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
 												+ " was killed by " + ChatColor.RESET + d.getName() + " "
-												+ baseClassKiller.getType().getTag() + ChatColor.RED + "'s " + ChatColor.YELLOW
+												+ baseClassKiller.getType().getTag() + ChatColor.RED + "'s "
+												+ ChatColor.YELLOW
 												+ instance.getGameManager().getMobTypeName(damager.getType()));
 										p.teleport(d);
 									} else {
 										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 												+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
-												+ " was killed by a "
-												+ ChatColor.YELLOW + instance.getGameManager().getMobTypeName(damager.getType()));
+												+ " was killed by a " + ChatColor.YELLOW
+												+ instance.getGameManager().getMobTypeName(damager.getType()));
 									}
 								} else {
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 											+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
-											+ " was killed by a "
-											+ ChatColor.YELLOW + instance.getGameManager().getMobTypeName(damager.getType()));
+											+ " was killed by a " + ChatColor.YELLOW
+											+ instance.getGameManager().getMobTypeName(damager.getType()));
 								}
 							}
 						} else {
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
-									+ " died");
+									+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED + " died");
 						}
 					} else {
 						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -822,33 +821,31 @@ public abstract class BaseClass {
 								this.giveStats(killer, p);
 								TellAll(instance.getGameManager().getMain()
 										.color("&2&l(!) " + getPlayerRank(p) + "&r" + p.getPlayer().getName() + " "
-												+ bc.getType().getTag()
-												+ " &cwas not strong enough to encounter "
+												+ bc.getType().getTag() + " &cwas not strong enough to encounter "
 												+ "&r" + killer.getName() + " " + baseClassKiller.getType().getTag()));
 								this.healthPots(killer);
 							} else {
 								this.giveStats(killer, p);
 								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-										+ p.getPlayer().getName() + " " + bc.getType().getTag()
-										+ ChatColor.RED + " was killed by " + ChatColor.WHITE + killer.getName()
-										+ " " + baseClassKiller.getType().getTag());
+										+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+										+ " was killed by " + ChatColor.WHITE + killer.getName() + " "
+										+ baseClassKiller.getType().getTag());
 								this.healthPots(killer);
 							}
 						} else if (lives > 0) {
 							if (killerData != null && killerData.killMsgs == 1) {
 								this.giveStats(killer, p);
 								TellAll(instance.getGameManager().getMain()
-										.color("&2&l(!) " + "&r" + p.getPlayer().getName() + " "
-												+ bc.getType().getTag()
+										.color("&2&l(!) " + "&r" + p.getPlayer().getName() + " " + bc.getType().getTag()
 												+ " &cwas not strong enough to encounter " + "&r" + killer.getName()
 												+ " " + baseClassKiller.getType().getTag()));
 								this.healthPots(killer);
 							} else {
 								this.giveStats(killer, p);
 								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-										+ p.getPlayer().getName() + " " + bc.getType().getTag()
-										+ ChatColor.RED + " was killed by " + ChatColor.WHITE + killer.getName()
-										+ " " + baseClassKiller.getType().getTag());
+										+ p.getPlayer().getName() + " " + bc.getType().getTag() + ChatColor.RED
+										+ " was killed by " + ChatColor.WHITE + killer.getName() + " "
+										+ baseClassKiller.getType().getTag());
 								this.healthPots(killer);
 							}
 						}
@@ -933,11 +930,11 @@ public abstract class BaseClass {
 					if (data.withersk != 3)
 						data.withersk = 0;
 
-                    TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                            + p.getPlayer().getName() + " " + baseClassDead.getType().getTag() + ChatColor.RED
-                            + " has been eliminated!");
+					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ p.getPlayer().getName() + " " + baseClassDead.getType().getTag() + ChatColor.RED
+							+ " has been eliminated!");
 
-                    if (instance.getMap() != null) {
+					if (instance.getMap() != null) {
 						PlayerData data3 = instance.getGameManager().getMain().getDataManager().getPlayerData(p);
 						p.sendMessage("" + ChatColor.BOLD + "=====================");
 						p.sendMessage("" + ChatColor.BOLD + "||");
@@ -963,8 +960,8 @@ public abstract class BaseClass {
 
 						if (baseClassDead != null && baseClassDead.totalKills >= 0) {
 							player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  "
-									+ baseClassDead.totalKills + " Kills: " + ChatColor.GREEN + (baseClassDead.totalKills * 2)
-									+ " Tokens");
+									+ baseClassDead.totalKills + " Kills: " + ChatColor.GREEN
+									+ (baseClassDead.totalKills * 2) + " Tokens");
 							data3.tokens += baseClassDead.totalKills * 2;
 							baseClassDead.totalTokens += baseClassDead.totalKills;
 						}
@@ -1253,9 +1250,9 @@ public abstract class BaseClass {
 						baseClassKiller.classesEvent(killer, baseClassKiller);
 					}
 				}
-				//EntityDamageEvent event = new EntityDamageEvent(p, DamageCause.VOID, 0);
+				// EntityDamageEvent event = new EntityDamageEvent(p, DamageCause.VOID, 0);
 				p.setLastDamageCause(null);
-				//Bukkit.getServer().getPluginManager().callEvent(event);
+				// Bukkit.getServer().getPluginManager().callEvent(event);
 			}
 		}
 
@@ -1292,10 +1289,9 @@ public abstract class BaseClass {
 						} else {
 							giveStats(d, p);
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ getPlayerRank(p) + p.getPlayer().getName() + " "
-									+ pClass.getType().getTag() + ChatColor.RED
-									+ " was killed by " + ChatColor.WHITE + getPlayerRank(d) + d.getName() + " "
-									+ kClass.getType().getTag());
+									+ getPlayerRank(p) + p.getPlayer().getName() + " " + pClass.getType().getTag()
+									+ ChatColor.RED + " was killed by " + ChatColor.WHITE + getPlayerRank(d)
+									+ d.getName() + " " + kClass.getType().getTag());
 							healthPots(d);
 						}
 						p.teleport(d);
@@ -1340,9 +1336,8 @@ public abstract class BaseClass {
 							} else {
 								giveStats(shooter, p);
 								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-										+ getPlayerRank(p) + p.getPlayer().getName() + " "
-										+ pClass.getType().getTag() + ChatColor.RED
-										+ " was killed by " + ChatColor.WHITE + getPlayerRank(shooter)
+										+ getPlayerRank(p) + p.getPlayer().getName() + " " + pClass.getType().getTag()
+										+ ChatColor.RED + " was killed by " + ChatColor.WHITE + getPlayerRank(shooter)
 										+ shooter.getName() + " " + kClass.getType().getTag());
 								healthPots(shooter);
 							}
@@ -1381,8 +1376,7 @@ public abstract class BaseClass {
 				} else {
 					this.giveStats(killer, p);
 					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-							+ p.getPlayer().getName() + " "
-							+ pClass.getType().getTag() + ChatColor.RED
+							+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
 							+ " was killed by " + ChatColor.WHITE + getPlayerRank(killer) + killer.getName() + " "
 							+ kClass.getType().getTag());
 					this.healthPots(killer);
@@ -1390,8 +1384,8 @@ public abstract class BaseClass {
 				p.teleport(killer);
 			} else {
 				TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-						+ p.getPlayer().getName() + " " + pClass.getType().getTag()
-						+ ChatColor.RED + " committed suicide");
+						+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
+						+ " committed suicide");
 				p.teleport(instance.GetSpecLoc());
 			}
 
@@ -1773,8 +1767,10 @@ public abstract class BaseClass {
 					TellAll("");
 					baseClass3.totalTokens += 10;
 					if (instance.getGameManager().getMain().tournament) {
-						data2.points += 2;
-						instance.getGameManager().getMain().tourney.put(d.getName(), data2.points);
+						if (instance.gameType != GameType.DUEL) {
+							data2.points += 2;
+							instance.getGameManager().getMain().tourney.put(d.getName(), data2.points);
+						}
 					}
 				}
 
@@ -1783,8 +1779,10 @@ public abstract class BaseClass {
 					data2.exp += 29;
 					baseClass3.totalExp += 29;
 					if (instance.getGameManager().getMain().tournament) {
-						data2.points++;
-						instance.getGameManager().getMain().tourney.put(d.getName(), data2.points);
+						if (instance.gameType != GameType.DUEL) {
+							data2.points++;
+							instance.getGameManager().getMain().tourney.put(d.getName(), data2.points);
+						}
 					}
 
 					d.playSound(d.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);

@@ -30,9 +30,9 @@ public class DonorClassesGUI implements InventoryProvider {
 	public void init(Player player, InventoryContents contents) {
 		int a = 0;
 		int b = 0;
-		
+
 		PlayerData data = main.getDataManager().getPlayerData(player);
-		
+
 		contents.set(2, 8, ClickableItem.of(
 				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
 					new ClassSelectorGUI(main).inv.open(player);
@@ -40,11 +40,11 @@ public class DonorClassesGUI implements InventoryProvider {
 
 		for (ClassType type : ClassType.values()) {
 			if (type.getMinRank() == Rank.VIP) {
-				
+
 				ClassDetails details = data.playerClasses.get(type.getID());
 				int played = details.gamesPlayed + details.gamesWon;
 				int nextLevel = 10;
-				
+
 				if (played >= 75)
 					nextLevel = 100;
 				else if (played >= 50)
@@ -53,20 +53,17 @@ public class DonorClassesGUI implements InventoryProvider {
 					nextLevel = 50;
 				else if (played >= 10)
 					nextLevel = 25;
-				
+
 				contents.set(a, b,
 						ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true),
 								type.getTag(), type.buildDescription(), "",
-										"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
-												+ ChatColor.YELLOW + " to choose a class",
-										"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET
-												+ ChatColor.YELLOW + " to view mastery",
-										"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Shift Click" + ChatColor.RESET
-												+ ChatColor.YELLOW + " to add a favorite class",
-										"",
-										main.color("&aNext reward:"),
-										main.progressBar(played, nextLevel, 25)),
-								e -> {
+								"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
+										+ ChatColor.YELLOW + " to choose a class",
+								"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET
+										+ ChatColor.YELLOW + " to view mastery",
+								"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Shift Click" + ChatColor.RESET
+										+ ChatColor.YELLOW + " to add a favorite class",
+								"", main.color("&aNext reward:"), main.progressBar(played, nextLevel, 25)), e -> {
 									Rank donor = type.getMinRank();
 
 									if (donor == null
@@ -101,8 +98,7 @@ public class DonorClassesGUI implements InventoryProvider {
 										}
 									} else {
 										player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD
-												+ "(!) " + ChatColor.RESET
-												+ "You need a rank to use this class");
+												+ "(!) " + ChatColor.RESET + "You need a rank to use this class");
 										inv.close(player);
 									}
 								}));
