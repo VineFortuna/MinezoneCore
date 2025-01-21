@@ -30,7 +30,7 @@ public class ClassDetails {
 	}
 	
 	public void winGame() {
-		gamesWon++;
+		gamesWon += 2;
 		gamesPlayed++;
 		hasUpdated = true;
 	}

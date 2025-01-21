@@ -44,7 +44,7 @@ public class SuitsGUI implements InventoryProvider {
 		texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjlhYzgwNGEyYzVhOGVhNTdlZjY5NjU3YWI2NDM0N2QxZWQzNmIzNGNhNzBhMjE4ZjZhNjNkNWI2YWEyZmU5ZiJ9fX0=";
 		ItemStack pirateHead = ItemHelper.createSkullTexture(texture, "&3&lPirate Outfit", "", "&aFishing reward!");
 		
-		ItemStack elfHead = ItemHelper.createSkullTexture(ELF_TEXTURE, "&aElf Outfit");
+		ItemStack elfHead = ItemHelper.createSkullTexture(ELF_TEXTURE, "&a&lElf Outfit", "", "&cChristmas exclusive");
 
 		// Setting Items
 		contents.fillBorders(ClickableItem
@@ -161,7 +161,8 @@ public class SuitsGUI implements InventoryProvider {
 					player.getInventory().setLeggings(legs);
 					player.getInventory().setBoots(boots);
 				} else {
-					player.sendMessage(main.color("&r&l(!) &rYou have unequipped &aElf Outfit"));
+					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "You have equipped " + ChatColor.GREEN + "Elf Outfit");
 					main.getListener().elfCosmeticPlayers.remove(player);
 					main.getListener().resetArmor(player);
 				}

@@ -84,13 +84,18 @@ public class ClassSelectorGUI implements InventoryProvider {
 								GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
 
 								if (instance != null && instance.state == GameState.WAITING) {
-									instance.boards.get(player).updateLine(5, " " + ChatColor.GRAY + "Random Fav");
-									instance.favClassSelection.add(player);
-									if (instance.classSelection.containsKey(player)) {
-										instance.classSelection.remove(player);
+									if (!data.customIntegers.isEmpty()) {
+										instance.boards.get(player).updateLine(5, " " + ChatColor.GRAY + "Random Fav");
+										instance.favClassSelection.add(player);
+										if (instance.classSelection.containsKey(player)) {
+											instance.classSelection.remove(player);
+										}
+										player.sendMessage(
+												main.color("&2&l(!) &rYou selected to go a random favorite class!"));
+									} else {
+										player.sendMessage(
+												main.color("&c&l(!) &rYou don't have any favorite classes!"));
 									}
-									player.sendMessage(
-											main.color("&2&l(!) &rYou selected to go a random favorite class!"));
 								} else {
 									new FavoriteClassesGUI(main).inv.open(player);
 								}
