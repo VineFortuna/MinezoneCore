@@ -122,7 +122,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                             player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
                             details.hasUpdated = true;
                             main.getDataManager().saveData(data);
-                            player.closeInventory();
+                            inv.open(player);
                         }
                     }
                     }));
@@ -145,7 +145,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                             player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
                             details.hasUpdated = true;
                             main.getDataManager().saveData(data);
-                            player.closeInventory();
+                            inv.open(player);
                         }
                     }
                 }));
@@ -168,7 +168,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                             player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
                             details.hasUpdated = true;
                             main.getDataManager().saveData(data);
-                            player.closeInventory();
+                            inv.open(player);
                         }
                     }
                 }));
@@ -191,7 +191,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                             player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
                             details.hasUpdated = true;
                             main.getDataManager().saveData(data);
-                            player.closeInventory();
+                            inv.open(player);
                         }
                     }
                 }));
@@ -210,12 +210,12 @@ public class ClassRewardsGUI implements InventoryProvider {
                         player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 2);
                         details.hasUpdated = true;
                         main.getDataManager().saveData(data);
-                        player.closeInventory();
+                        inv.open(player);
                     }
                 }));
         contents.set(1, 7, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.PAPER), "&a&lMastery Points", "&7When using this class:",
-                        "&a- Match played: &r+1 point", "&a- Match won: &r+1 point"), e -> {
+                        "&a- Match played: &r+1 point", "&a- Match won: &r+2 points"), e -> {
                 }));
         contents.set(2, 8, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {

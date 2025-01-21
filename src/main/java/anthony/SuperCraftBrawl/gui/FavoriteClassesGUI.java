@@ -1,5 +1,6 @@
 package anthony.SuperCraftBrawl.gui;
 
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -40,17 +41,44 @@ public class FavoriteClassesGUI implements InventoryProvider {
 			if (!(data.customIntegers.isEmpty())) {
 				for (ClassType type : ClassType.values()) {
 					if (data.customIntegers.contains(type.getID())) {
+
+						ClassDetails details = data.playerClasses.get(type.getID());
+						int played = details.gamesPlayed + details.gamesWon;
+						int nextLevel = 10;
+
+						if (played >= 75)
+							nextLevel = 100;
+						else if (played >= 50)
+							nextLevel = 75;
+						else if (played >= 25)
+							nextLevel = 50;
+						else if (played >= 10)
+							nextLevel = 25;
+
 						contents.set(y, x,
 								ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true),
 												type.getTag(), type.buildDescription(), "",
-										"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
-												+ ChatColor.YELLOW + " to choose a class",
-										"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET
-												+ ChatColor.YELLOW + " to remove a favorite class"),
+												"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
+														+ ChatColor.YELLOW + " to choose a class",
+												"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET
+														+ ChatColor.YELLOW + " to view mastery",
+												"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Shift Click" + ChatColor.RESET
+														+ ChatColor.YELLOW + " to remove a favorite class",
+												"",
+												main.color("&aNext reward:"),
+												main.progressBar(played, nextLevel, 25)),
 										e -> {
-											inv.close(player);
-
-											if (e.isLeftClick()) {
+											if (e.isShiftClick()) {
+												for (int i = 0; i < data.customIntegers.size(); i++) {
+													if (data.customIntegers.get(i) == type.getID()) {
+														data.customIntegers.remove(i);
+														player.sendMessage(main
+																.color("&2&l(!) &rRemoved from favorite classes: " + type.getTag()));
+														main.getDataManager().saveData(data);
+														inv.open(player);
+													}
+												}
+											} else if (e.isLeftClick()) {
 												main.getGameManager().playerSelectClass(player, type);
 												player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
 														+ "==============================================");
@@ -60,22 +88,15 @@ public class FavoriteClassesGUI implements InventoryProvider {
 														+ ChatColor.RESET + ChatColor.YELLOW + ChatColor.BOLD
 														+ "Selected Class: " + type.getTag());
 												player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| "
-														+ ChatColor.RESET + ChatColor.YELLOW + ChatColor.BOLD
-														+ "Class Desc: " + ChatColor.RESET + ChatColor.YELLOW
-														+ type.getClassDesc());
+														+ ChatColor.RESET + ChatColor.YELLOW + ChatColor.BOLD + "Class Desc: "
+														+ ChatColor.RESET + ChatColor.YELLOW + type.getClassDesc());
 												player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
 												player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
 												player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
 														+ "==============================================");
+												inv.close(player);
 											} else if (e.isRightClick()) {
-												for (int i = 0; i < data.customIntegers.size(); i++) {
-													if (data.customIntegers.get(i) == type.getID()) {
-														data.customIntegers.remove(i);
-														player.sendMessage(main
-																.color("&2&l(!) &rRemoved from favorite classes: " + type.getTag()));
-														main.getDataManager().saveData(data);
-													}
-												}
+												new ClassRewardsGUI(main, type, inv).inv.open(player);
 											}
 										}));
 						x++;
