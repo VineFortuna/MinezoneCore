@@ -1833,9 +1833,8 @@ public class Core extends JavaPlugin implements Listener {
 			game.getGameSettings().removeFromTimeVotes(player);
 		}
 
-		e.setQuitMessage("" + ChatColor.BOLD + "[" + ChatColor.RED + ChatColor.BOLD + "-" + ChatColor.RESET
-				+ ChatColor.BOLD + "] " + ChatColor.RESET + getRankManager().getRank(player).getTagWithSpace()
-				+ ChatColor.AQUA + player.getName() + ChatColor.RED + " disconnected");
+		e.setQuitMessage(color("&r&l[&c&l+&r&l] &r" + getRankManager().getRank(player).getTagWithSpace()
+				+ "&b" + player.getName() + "&c disconnected"));
 	}
 
 	public Location hologramLoc(Player player) {
