@@ -65,6 +65,7 @@ public enum FishType {
     FLAPJACK(62, "Flapjack Octopus", FishRarity.MYTHIC, null),
     CROCODILE(64, "Crocodile", FishRarity.MYTHIC, null),
     GUARDIAN(55, "Guardian", FishRarity.MYTHIC, null),
+    KINGSALMON(73, "King Salmon", FishRarity.MYTHIC, null),
     BLOBFISH(23, "Blobfish", FishRarity.LEGENDARY, null),
     DOLPHIN(46, "Dolphin", FishRarity.LEGENDARY, Arrays.asList(FishArea.Pond)),
     LEVIATHAN(24, "Swamp Monster", FishRarity.LEGENDARY, Arrays.asList(FishArea.LushCave)),
