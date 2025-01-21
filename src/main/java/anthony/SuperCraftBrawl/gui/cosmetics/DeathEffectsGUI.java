@@ -37,12 +37,13 @@ public class DeathEffectsGUI implements InventoryProvider {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 
 		// Icons Items
-		ItemStack goldenApple = ItemHelper.create(Material.GOLDEN_APPLE, org.bukkit.ChatColor.YELLOW + "Golden Apple");
-		ItemStack glowstone = ItemHelper.create(Material.GLOWSTONE_DUST, org.bukkit.ChatColor.YELLOW + "Glowstone");
-		ItemStack redstone = ItemHelper.create(Material.REDSTONE, org.bukkit.ChatColor.YELLOW + "Redstone");
-		ItemStack cobweb = ItemHelper.create(Material.WEB, org.bukkit.ChatColor.YELLOW + "Cobweb");
-		ItemStack expBottle = ItemHelper.create(Material.EXP_BOTTLE, org.bukkit.ChatColor.YELLOW + "Exp Bottle");
-		ItemStack snowball = ItemHelper.create(Material.SNOW_BALL, org.bukkit.ChatColor.YELLOW + "Snowball");
+		ItemStack goldenApple = ItemHelper.create(Material.GOLDEN_APPLE, ChatColor.YELLOW + "Golden Apple");
+		ItemStack glowstone = ItemHelper.create(Material.GLOWSTONE_DUST, ChatColor.YELLOW + "Glowstone");
+		ItemStack redstone = ItemHelper.create(Material.REDSTONE, ChatColor.YELLOW + "Redstone");
+		ItemStack cobweb = ItemHelper.create(Material.WEB, ChatColor.YELLOW + "Cobweb");
+		ItemStack expBottle = ItemHelper.create(Material.EXP_BOTTLE, ChatColor.YELLOW + "Exp Bottle");
+		ItemStack snowball = ItemHelper.setDetails(ItemHelper.create(Material.SNOW_BALL),
+				ChatColor.YELLOW + "Snowball", "", main.color("&cChristmas exclusive"));
 
 		// Setting Items
 		contents.fillBorders(ClickableItem

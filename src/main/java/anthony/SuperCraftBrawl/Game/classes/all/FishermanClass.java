@@ -43,7 +43,7 @@ public class FishermanClass extends BaseClass {
     private ItemStack pufferFish = ItemHelper.setDetails(new ItemStack(Material.RAW_FISH, 1, (short) 3),
             "&e&lTactical Fish",
             "&7Explodes when approached by a player",
-            "&7Inflicts Poison for 4 seconds",
+            "&7Inflicts Poison for 6 seconds",
             "&7Detonates after 15 seconds");
     
     private ItemStack speedFish = ItemHelper.setDetails(new ItemStack(Material.RAW_FISH, 1, (short) 2),
@@ -163,7 +163,7 @@ public class FishermanClass extends BaseClass {
                             instance.getGameManager().getMain().getServer().getPluginManager()
                                     .callEvent(damageEvent);
                             p.damage(4, player);
-                            p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 4 * 20, 0));
+                            p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 6 * 20, 0));
                         }
                     }
                     if (nearby) {
