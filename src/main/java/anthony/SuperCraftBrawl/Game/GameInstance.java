@@ -1987,7 +1987,7 @@ public class GameInstance {
 				selectedClass = classList.get(0);
 			
 			if (selectedClass == null) {
-				if (this.favClassSelection.contains(player)) {
+				if (this.favClassSelection.contains(player) && !playerData.customIntegers.isEmpty()) {
 					if (playerData != null) {
 						int randomIndex = rand.nextInt(playerData.customIntegers.size());
 						int randValue = playerData.customIntegers.get(randomIndex);
