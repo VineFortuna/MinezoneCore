@@ -1985,7 +1985,7 @@ public class GameManager implements Listener, PluginMessageListener {
 				}
 
 				// For spectators:
-				if (i != null && i.classes.get(k).getLives() <= 0) {
+				if (i != null && i.classes.containsKey(k) && i.classes.get(k).getLives() <= 0) {
 					event.setCancelled(true);
 				} else {
 					i = this.GetInstanceOfSpectator(k);
