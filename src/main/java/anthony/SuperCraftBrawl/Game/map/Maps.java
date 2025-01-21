@@ -762,7 +762,7 @@ public enum Maps {
 			"Limbo",
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
 			Size.MEDIUM,
-			Category.CURATED,
+			Category.CASUAL,
 			new ItemStack(Material.WEB),
 			new MapInstance(
 					"limbo")
@@ -991,7 +991,7 @@ public enum Maps {
 			"BeachBowl",
 			new Gameplay[]{Gameplay.FLAT, Gameplay.UNDERGROUND},
 			Size.MEDIUM,
-			Category.CASUAL,
+			Category.CURATED,
 			new ItemStack(Material.BOWL),
 			new MapInstance(
 					"beachbowl")

@@ -47,6 +47,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -1724,7 +1725,7 @@ public class Core extends JavaPlugin implements Listener {
 	public void mysteryChestHologram(Player p) {
 		PlayerData data = this.getDataManager().getPlayerData(p);
 
-		/*if (!(this.msHologram.containsKey(p))) {*/
+		if (!(this.msHologram.containsKey(p))) {
 			if (data != null) {
 				Location loc = new Location(this.getLobbyWorld(), 194.520, 116, 641.500);
 				WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
@@ -1750,7 +1751,14 @@ public class Core extends JavaPlugin implements Listener {
 				((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
 				this.msHologram.put(p, stand);
 			}
-		/*}*/
+		}
+	}
+	
+	@EventHandler
+	public void serverMotd(ServerListPingEvent p) {
+		String msg = color("                   &eMinezone &7[1.8-1.21] \n          &2&lHOME OF &c&lSUPER CRAFT BLOCKS");
+		p.setMotd(msg);
+		p.setMaxPlayers(1);
 	}
 
 	@EventHandler
@@ -1803,9 +1811,8 @@ public class Core extends JavaPlugin implements Listener {
 			game.getGameSettings().removeFromTimeVotes(player);
 		}
 
-		e.setQuitMessage("" + ChatColor.BOLD + "[" + ChatColor.RED + ChatColor.BOLD + "-" + ChatColor.RESET
-				+ ChatColor.BOLD + "] " + ChatColor.RESET + getRankManager().getRank(player).getTagWithSpace()
-				+ ChatColor.AQUA + player.getName() + ChatColor.RED + " disconnected");
+		e.setQuitMessage(color("&r&l[&c&l+&r&l] &r" + getRankManager().getRank(player).getTagWithSpace()
+				+ "&b" + player.getName() + "&c disconnected"));
 	}
 
 	public Location hologramLoc(Player player) {
