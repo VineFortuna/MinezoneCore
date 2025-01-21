@@ -60,18 +60,16 @@ public class GadgetsGUI implements InventoryProvider {
 		// Fishing
 		ItemStack fishingRod = main.getFishingRod(player);
 
-		List<String> snow = new ArrayList<>();
-		ItemStack snowball = ItemHelper.create(Material.SNOW_BALL,
-				main.color("&r&lSnow Particles"), snow);
+		ItemStack snowball = ItemHelper.setDetails(ItemHelper.create(Material.SNOW_BALL),
+				"&r&lSnow Particles", "", "&cChristmas exclusive");
 
-		List<String> snowman = new ArrayList<>();
-		ItemStack snowmanPet = ItemHelper.create(Material.MONSTER_EGG,
-				ChatColor.YELLOW.toString() + ChatColor.BOLD + "Snowman Pet", snowman);
+		ItemStack snowmanPet = ItemHelper.setDetails(ItemHelper.create(Material.MONSTER_EGG),
+				"&e&lSnowman Pet", "", "&cChristmas exclusive");
 
-		
-		List<String> candyCaneSwirl = new ArrayList<>();
+
 		String candyCaneTexture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWM4M2E0MmU4MmNkNmE3MGUyMTZkOWE4YzJmZjZmMWU1ZTViMjU2Y2VhM2I4Y2QyMjU0NzIzOTNhYTNlY2E1YSJ9fX0=";
-		ItemStack candyCane = ItemHelper.createSkullTexture(candyCaneTexture, main.color("&c&lCandy &r&lCane &c&lSwirl"));
+		ItemStack candyCane = ItemHelper.createSkullTexture(candyCaneTexture,
+				"&c&lCandy &r&lCane &c&lSwirl", "", "&cChristmas exclusive");
 
 		// Setting Items
 		contents.fillBorders(ClickableItem
