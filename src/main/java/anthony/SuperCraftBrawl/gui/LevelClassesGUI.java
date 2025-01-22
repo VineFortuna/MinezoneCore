@@ -85,7 +85,7 @@ public class LevelClassesGUI implements InventoryProvider {
 										main.getDataManager().saveData(data);
 									} else {
 										player.sendMessage(
-												main.color("&c&l(!) &r" + type.getTag() + " &ris already one of your favorites"));
+												main.color("&c&l(!) &r" + type.getTag() + " &ris already one of your favorites!"));
 									}
 								}
 							} else if (e.isLeftClick()) {
