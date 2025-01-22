@@ -1833,7 +1833,7 @@ public class Core extends JavaPlugin implements Listener {
 			game.getGameSettings().removeFromTimeVotes(player);
 		}
 
-		e.setQuitMessage(color("&r&l[&c&l+&r&l] &r" + getRankManager().getRank(player).getTagWithSpace()
+		e.setQuitMessage(color("&r&l[&c&l-&r&l] &r" + getRankManager().getRank(player).getTagWithSpace()
 				+ "&b" + player.getName() + "&c disconnected"));
 	}
 
