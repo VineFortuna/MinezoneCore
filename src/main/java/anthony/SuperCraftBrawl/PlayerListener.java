@@ -640,10 +640,8 @@ public class PlayerListener implements Listener {
 					+ ChatColor.YELLOW + " " + tag); // This part will always be included
 			String displayName = event.getPlayer().getDisplayName(); // Base display name
 
-			if (!data.color.isEmpty())
+			if (!data.color.isEmpty() && !data.color.equals("0"))
 				displayName = ChatColor.valueOf(data.color) + displayName;
-			else
-				displayName = ChatColor.RESET + displayName;
 
 			if (event.getPlayer().hasPermission("scb.chat"))
 				event.setFormat(event.getFormat() + displayName + ChatColor.RESET + ": ");
