@@ -43,7 +43,7 @@ public class LevelClassesGUI implements InventoryProvider {
 			if (type.getTokenCost() == 0 && type.getMinRank() != Rank.VIP && type.getLevel() > 0) {
 				
 				ClassDetails details = data.playerClasses.get(type.getID());
-				int played = details.gamesPlayed + details.gamesWon;
+				int played = details.gamesPlayed + 2 * details.gamesWon;
 				int nextLevel = 10;
 				
 				if (played >= 75)
