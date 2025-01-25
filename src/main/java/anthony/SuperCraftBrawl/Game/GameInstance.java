@@ -1029,32 +1029,15 @@ public class GameInstance {
 
 				if (map != null) {
 					if (data != null) {
-						if (data.blue == 1) {
+						if (data.color.isEmpty() || data.color.equals("0")) {
 							Score livesScore = o.getScore(truncateString(
-									"" + playerClass.getType().getTag() + " " + ChatColor.BLUE + player.getName() + "",
+									"" + playerClass.getType().getTag() + " " + ChatColor.WHITE + player.getName() + "",
 									38));
-							livesScore.setScore(5);
-							playerClass.score = livesScore;
-						} else if (data.red == 1) {
-							Score livesScore = o.getScore(truncateString(
-									"" + playerClass.getType().getTag() + " " + ChatColor.RED + player.getName() + "",
-									38));
-							livesScore.setScore(5);
-							playerClass.score = livesScore;
-						} else if (data.green == 1) {
-							Score livesScore = o.getScore(truncateString(
-									"" + playerClass.getType().getTag() + " " + ChatColor.GREEN + player.getName() + "",
-									38));
-							livesScore.setScore(5);
-							playerClass.score = livesScore;
-						} else if (data.yellow == 1) {
-							Score livesScore = o.getScore(truncateString("" + playerClass.getType().getTag() + " "
-									+ ChatColor.YELLOW + player.getName() + "", 38));
 							livesScore.setScore(5);
 							playerClass.score = livesScore;
 						} else {
 							Score livesScore = o.getScore(truncateString(
-									"" + playerClass.getType().getTag() + " " + ChatColor.WHITE + player.getName() + "",
+									"" + playerClass.getType().getTag() + " " + ChatColor.valueOf(data.color) + player.getName() + "",
 									38));
 							livesScore.setScore(5);
 							playerClass.score = livesScore;
