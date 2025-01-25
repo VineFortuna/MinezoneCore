@@ -43,7 +43,7 @@ public class FavoriteClassesGUI implements InventoryProvider {
 					if (data.customIntegers.contains(type.getID())) {
 
 						ClassDetails details = data.playerClasses.get(type.getID());
-						int played = details.gamesPlayed + details.gamesWon;
+						int played = details.gamesPlayed + 2 * details.gamesWon;
 						int nextLevel = 10;
 
 						if (played >= 75)

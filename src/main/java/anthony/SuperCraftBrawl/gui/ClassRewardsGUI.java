@@ -38,7 +38,7 @@ public class ClassRewardsGUI implements InventoryProvider {
     
         PlayerData data = main.getDataManager().getPlayerData(player);
         ClassDetails details = data.playerClasses.get(type.getID());
-        int played = details.gamesPlayed + details.gamesWon;
+        int played = details.gamesPlayed + 2 * details.gamesWon;
     
         /*First reward [10] 10 tokens & 20 xp
         Second reward [25] 25 tokens & 50 xp
