@@ -1056,7 +1056,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		i = null;
 	}
 
-	@EventHandler
+	@EventHandler (priority = EventPriority.HIGHEST)
 	public void activeGames(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
 		GameInstance i = this.GetInstanceOfPlayer(player);
@@ -1065,8 +1065,6 @@ public class GameManager implements Listener, PluginMessageListener {
 			e.setCancelled(true);
 			if (player.getWorld() == main.getLobbyWorld())
 				new ActiveGamesGUI(getMain()).inv.open(player);
-			else if (i != null)
-				e.setCancelled(true);
 		}
 
 	}
@@ -1894,19 +1892,8 @@ public class GameManager implements Listener, PluginMessageListener {
 
 				for (Entry<Maps, GameInstance> games : gameMap.entrySet()) {
 					if (games.getValue().RemovePlayer(player)) {
-						if (games.getValue().players.size() == 0) {
+						if (games.getValue().players.isEmpty()) {
 							toRemove.add(games.getKey());
-							BukkitRunnable r = new BukkitRunnable() {
-								@Override
-								public void run() {
-									System.out.println("Unloading world");
-									if (Bukkit.unloadWorld(games.getValue().getMapWorld(), false)) {
-										System.out.println("World " + games.getValue().getMapWorld() + " unloaded");
-										this.cancel();
-									}
-								}
-							};
-							r.runTaskTimer(getMain(), 0, 1);
 						}
 
 						found = true;
@@ -2335,7 +2322,7 @@ public class GameManager implements Listener, PluginMessageListener {
 				break;
 
 			case NETHER_STAR:
-				if (i != null && i.state == GameState.STARTED && meta != null
+				if (i != null && i.state == GameState.STARTED && meta != null && meta.hasDisplayName()
 						&& meta.getDisplayName().toLowerCase().contains("bounty")) {
 					if (i.alivePlayers > 1) {
 						int amount = item.getAmount();
@@ -2455,6 +2442,8 @@ public class GameManager implements Listener, PluginMessageListener {
 			return "Wolf";
 		case MAGMA_CUBE:
 			return "Magma Cube";
+		case PIG_ZOMBIE:
+			return "Zombie Pigman";
 		}
 		return "Creature";
 	}

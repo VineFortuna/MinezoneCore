@@ -78,10 +78,15 @@ public class LevelClassesGUI implements InventoryProvider {
 							}
 							if (e.isShiftClick()) {
 								if (data != null) {
-									data.customIntegers.add(type.getID());
-									player.sendMessage(main
-											.color("&2&l(!) &rAdded new favorite class: " + type.getTag()));
-									main.getDataManager().saveData(data);
+									if (!data.customIntegers.contains(type.getID())) {
+										data.customIntegers.add(type.getID());
+										player.sendMessage(
+												main.color("&2&l(!) &rAdded new favorite class: " + type.getTag()));
+										main.getDataManager().saveData(data);
+									} else {
+										player.sendMessage(
+												main.color("&c&l(!) &r" + type.getTag() + " &ris already one of your favorites!"));
+									}
 								}
 							} else if (e.isLeftClick()) {
 								main.getGameManager().playerSelectClass(player, type);
