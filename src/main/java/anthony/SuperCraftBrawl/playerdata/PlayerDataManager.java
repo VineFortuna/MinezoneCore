@@ -273,8 +273,8 @@ public class PlayerDataManager implements Listener {
 				+ data.paintball + ", Wins = " + data.wins + ", TotalCaught = " + data.totalcaught + ", Caught = "
 				+ data.caught + ", RewardLevel = " + data.rewardLevel + ", LureLevel = " + data.lureLevel + ", Lure = "
 				+ data.lure + ", FriendshipLevel = " + data.friendshipLevel + ", Friendship = " + data.friendship
-				+ ", FishRainEffect = " + data.fishRainEffect + ", Snowball = " + data.snowball  + ", Color = " + data.color
-				+ ", FishingWarps = '" + data.fishingWarps + "' WHERE UUID = '" + data.playerUUID.toString() + "';");
+				+ ", FishRainEffect = " + data.fishRainEffect + ", Snowball = " + data.snowball  + ", Color = '" + data.color
+				+ "', FishingWarps = '" + data.fishingWarps + "' WHERE UUID = '" + data.playerUUID.toString() + "';");
 		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon, "
 				+ "Reward1, Reward2, Reward3, Reward4, Reward5) VALUES ";
 		int index = 0;
