@@ -18,7 +18,7 @@ public enum ClassType {
 
 	Cactus(1, 0, 0), TNT(2, 350, 0), Enderdragon(3, 0, Rank.VIP), Skeleton(4, 0, 0), Ninja(5, 1000, 0),
 	IronGolem(6, 0, Rank.VIP), Enderman(7, 0, 0), Ghast(8, 0, Rank.VIP), Chicken(9, 400, 0), Slime(10, 0, Rank.VIP),
-	ButterGolem(11, 0, Rank.VIP), DarkSethBling(12, 800, 0), SnowGolem(14, 800, 0), Bat(15, 0, Rank.VIP),
+	PiglinBrute(11, 0, Rank.VIP), DarkSethBling(12, 800, 0), SnowGolem(14, 800, 0), Bat(15, 0, Rank.VIP),
 	SethBling(16, 0, Rank.VIP), Sheep(17, 550, 0), Horse(18, 0, 0), Melon(19, 0, Rank.VIP), Rabbit(26, 0, 0),
 	Squid(20, 0, 0), Spider(21, 0, 0), BabyCow(22, 0, Rank.VIP), Herobrine(23, 0, Rank.VIP), Bunny(24, 450, 0),
 	ButterBro(25, 1200, 0), Steve(28, 850, 0), Notch(29, 1000, 0), Pig(30, 0, 0), Blaze(31, 0, 0), Potato(32, 750, 0),
@@ -178,8 +178,8 @@ public enum ClassType {
 			return new ChickenClass(instance, player);
 		case Slime:
 			return new SlimeClass(instance, player);
-		case ButterGolem:
-			return new ButterGolemClass(instance, player);
+		case PiglinBrute:
+			return new PiglinBruteClass(instance, player);
 		case DarkSethBling:
 			return new DarkSethBlingClass(instance, player);
 		case Witch:
@@ -326,7 +326,7 @@ public enum ClassType {
 			return new ItemStack(new ItemStack(Material.GHAST_TEAR));
 		case Slime:
 			return new ItemStack(new ItemStack(Material.SLIME_BALL));
-		case ButterGolem:
+		case PiglinBrute:
 			return new ItemStack(new ItemStack(Material.GOLD_AXE));
 		case Enderdragon:
 			return new ItemStack(new ItemStack(Material.DRAGON_EGG));
@@ -504,8 +504,8 @@ public enum ClassType {
 			return "Burn down your enemies with your sorrows";
 		case Slime:
 			return "Throw sticky grenades and attack enemies!";
-		case ButterGolem:
-			return "Once a proud member of the Sky Army, the ButterGolem now stands as a relic of a bygone era...";
+		case PiglinBrute:
+			return "Knock people away... or explode them";
 		case Bat:
 			return "Dance around your opponents with SUPER high jumps!";
 		case SethBling:
@@ -651,8 +651,8 @@ public enum ClassType {
 			return "" + ChatColor.DARK_GREEN + ChatColor.BOLD + "Potato" + ChatColor.RESET;
 		case Steve:
 			return "" + ChatColor.AQUA + "Steve" + ChatColor.RESET;
-		case ButterGolem:
-			return "" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.ITALIC + "ButterGolem" + ChatColor.RESET;
+		case PiglinBrute:
+			return "" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.ITALIC + "PiglinBrute" + ChatColor.RESET;
 		case Herobrine:
 			return "" + ChatColor.GRAY + ChatColor.BOLD + "Herobrine" + ChatColor.RESET;
 		case Cactus:
