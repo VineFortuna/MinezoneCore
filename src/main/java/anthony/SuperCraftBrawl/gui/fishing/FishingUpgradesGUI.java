@@ -73,10 +73,10 @@ public class FishingUpgradesGUI implements InventoryProvider {
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
                             main.color("&eLure I"), main.color("&7Enchant your rod with Lure I"),
                             "",
-                            main.tokenCostString(player, 500),
+                            main.tokenCostString(player, 400),
                             main.color("&aClick to purchase")), e -> {
-                        if (data.tokens >= 500) {
-                            data.tokens -= 500;
+                        if (data.tokens >= 400) {
+                            data.tokens -= 400;
                             data.lure = 1;
                             data.lureLevel++;
                             player.sendMessage(main.color("&2&l(!) &rPurchased &aLure I"));
@@ -95,10 +95,10 @@ public class FishingUpgradesGUI implements InventoryProvider {
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
                             main.color("&eLure II"), main.color("&7Enchant your rod with Lure II"),
                             "",
-                            main.tokenCostString(player, 1000),
+                            main.tokenCostString(player, 800),
                             main.color("&aClick to purchase")), e -> {
-                        if (data.tokens >= 1000) {
-                            data.tokens -= 1000;
+                        if (data.tokens >= 800) {
+                            data.tokens -= 800;
                             data.lure = 1;
                             data.lureLevel++;
                             player.sendMessage(main.color("&2&l(!) &rPurchased &aLure II"));
@@ -117,10 +117,10 @@ public class FishingUpgradesGUI implements InventoryProvider {
                     ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, DyeColor.YELLOW.getData()),
                             main.color("&eLure III"), main.color("&7Enchant your rod with Lure III"),
                             "",
-                            main.tokenCostString(player, 1500),
+                            main.tokenCostString(player, 1200),
                             main.color("&aClick to purchase")), e -> {
-                        if (data.tokens >= 1500) {
-                            data.tokens -= 1500;
+                        if (data.tokens >= 1200) {
+                            data.tokens -= 1200;
                             data.lure = 1;
                             data.lureLevel++;
                             player.sendMessage(main.color("&2&l(!) &rPurchased &aLure III"));

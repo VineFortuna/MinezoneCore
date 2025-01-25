@@ -188,7 +188,7 @@ public class WolfClass extends BaseClass {
 	private void startDash() {
 		double boosterStrength = 1.1;
 		player.getWorld().playSound(player.getLocation(), Sound.WOLF_GROWL, 1, 0);
-		Vector vel = player.getLocation().getDirection().multiply(new Vector(boosterStrength, 0, boosterStrength)).add(new Vector(0, 0.5, 0));
+		Vector vel = player.getLocation().getDirection().setY(0.5).multiply(new Vector(boosterStrength, 0, boosterStrength));
 		player.setVelocity(vel);
 		used = true;
 	}
