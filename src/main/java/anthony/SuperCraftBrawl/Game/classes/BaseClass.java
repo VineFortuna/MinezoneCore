@@ -347,6 +347,7 @@ public abstract class BaseClass {
 
 			// Remove mobs spawned by the player
 			removeMobs(p);
+			resetMobTarget(p);
 
 			if (isDead) {
 				PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(p);
@@ -1668,6 +1669,24 @@ public abstract class BaseClass {
 			if (!(en instanceof Player))
 				if (en.getName().contains(p.getName()))
 					en.remove();
+	}
+
+	private void resetMobTarget(Player p) {
+		for (Creature en : p.getWorld().getEntitiesByClass(Creature.class)) {
+			if (en.getTarget() != null && en.getTarget() == p) {
+				if (getMobOwner(en) != null)
+					en.setTarget(instance.getNearestPlayer(getMobOwner(en), en, 150));
+			}
+		}
+	}
+
+	private Player getMobOwner(Creature creature) {
+		if (creature.getCustomName() != null) {
+			String owner = ChatColor.stripColor(
+					creature.getCustomName().substring(0, creature.getCustomName().indexOf("'")));
+			return Bukkit.getPlayer(owner);
+		}
+		return null;
 	}
 
 	private void deathParticles(PlayerData pData, Player p) {
