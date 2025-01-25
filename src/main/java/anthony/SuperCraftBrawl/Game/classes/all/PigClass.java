@@ -49,41 +49,44 @@ public class PigClass extends BaseClass {
 
 	@Override
 	public void Tick(int gameTicks) {
-		if (player.hasPotionEffect(PotionEffectType.SPEED)) {
-			if (!(player.getFireTicks() > 0)) {
-				if (player.getInventory().contains(this.grilledPork)) {
-					player.getInventory().remove(Material.GRILLED_PORK);
-					player.getInventory().addItem(this.pork);
-					this.speed = true;
-					this.fire = false;
+		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Pig
+				&& instance.classes.get(player).getLives() > 0) {
+			if (player.hasPotionEffect(PotionEffectType.SPEED)) {
+				if (!(player.getFireTicks() > 0)) {
+					if (player.getInventory().contains(this.grilledPork)) {
+						player.getInventory().remove(Material.GRILLED_PORK);
+						player.getInventory().addItem(this.pork);
+						this.speed = true;
+						this.fire = false;
+					}
+					if (!(player.getInventory().contains(this.pork))) {
+						player.getInventory().remove(Material.PORK);
+						player.getInventory().addItem(this.pork);
+						this.speed = true;
+						this.fire = false;
+					}
+				} else {
+					if (!(player.getInventory().contains(this.grilledPork))) {
+						player.getInventory().remove(Material.PORK);
+						player.getInventory().addItem(this.grilledPork);
+						this.fire = true;
+						this.speed = false;
+					}
 				}
-				if (!(player.getInventory().contains(this.pork))) {
+			} else if (this.speed == true && !(player.getFireTicks() > 0)) {
+				if (player.getInventory().contains(this.pork)) {
 					player.getInventory().remove(Material.PORK);
-					player.getInventory().addItem(this.pork);
-					this.speed = true;
-					this.fire = false;
-				}
-			} else {
-				if (!(player.getInventory().contains(this.grilledPork))) {
-					player.getInventory().remove(Material.PORK);
-					player.getInventory().addItem(this.grilledPork);
-					this.fire = true;
+					player.getInventory().addItem(this.getAttackWeapon());
 					this.speed = false;
 				}
-			}
-		} else if (this.speed == true && !(player.getFireTicks() > 0)) {
-			if (player.getInventory().contains(this.pork)) {
-				player.getInventory().remove(Material.PORK);
-				player.getInventory().addItem(this.getAttackWeapon());
-				this.speed = false;
-			}
-		} else if (this.fire == true) {
-			if (player.getInventory().contains(this.grilledPork)) {
-				player.getInventory().remove(Material.GRILLED_PORK);
-				player.getInventory().addItem(this.getAttackWeapon());
-				this.fire = false;
-			}
+			} else if (this.fire == true) {
+				if (player.getInventory().contains(this.grilledPork)) {
+					player.getInventory().remove(Material.GRILLED_PORK);
+					player.getInventory().addItem(this.getAttackWeapon());
+					this.fire = false;
+				}
 
+			}
 		}
 	}
 
