@@ -297,7 +297,7 @@ public class PlayerDataManager implements Listener {
 			updateCMD += " ON DUPLICATE KEY UPDATE TimePurchased = VALUES (TimePurchased), Purchased = VALUES (Purchased), GamesPlayed = VALUES (GamesPlayed),"
 					+ "GamesWon = VALUES (GamesWon), Reward1 = VALUES (Reward1), Reward2 = VALUES (Reward2)," +
 					"Reward3 = VALUES (Reward3), Reward4 = VALUES (Reward4), Reward5 = VALUES (Reward5);";
-			System.out.print("Executing " + updateCMD);
+			//System.out.print("Executing " + updateCMD);
 			manager.executeUpdateCommand(updateCMD);
 		}
 
@@ -317,7 +317,7 @@ public class PlayerDataManager implements Listener {
 
 		if (index > 0) {
 			updateCMD += " ON DUPLICATE KEY UPDATE TimesCaught = VALUES (TimesCaught);";
-			System.out.print("Executing " + updateCMD);
+			//System.out.print("Executing " + updateCMD);
 			manager.executeUpdateCommand(updateCMD);
 		}
 
@@ -338,7 +338,7 @@ public class PlayerDataManager implements Listener {
 
 		if (index > 0) {
 			updateCMD.append(" ON DUPLICATE KEY UPDATE CustomInteger = VALUES (CustomInteger);");
-			System.out.print("Executing " + updateCMD);
+			//System.out.print("Executing " + updateCMD);
 			manager.multiExecuteUpdateCommand(s, updateCMD.toString());
 		} else {
 			manager.multiExecuteUpdateCommand(s);

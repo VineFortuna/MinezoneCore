@@ -19,6 +19,7 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
@@ -824,13 +825,13 @@ public class GameInstance {
 			while (true) {
 				loc.setY(loc.getY() - 1);
 				Material mat = loc.getBlock().getType();
-				if (mat.isSolid()) {
+				if (mat.isSolid() && isNotWaterOrLava(loc.clone().add(0, 1, 0).getBlock().getType())) {
 					return loc.add(0, 1, 0);
 				}
 				if (loc.getY() < 40) // Too low down without finding block
 					break;
 			}
-			if (attempts > 500)
+			if (attempts > 100)
 				return respawnLoc;
 			attempts++;
 		}
@@ -1164,11 +1165,11 @@ public class GameInstance {
 					public void run() {
 						if (GameInstance.this.state == GameState.ENDED) {
 							cancel();
-						} else if (player.getWorld() != GameInstance.this.getMapWorld()) {
+						/*} else if (player.getWorld() != GameInstance.this.getMapWorld()) {
 							cancel();
 							player.setAllowFlight(true);
 							player.setGameMode(GameMode.ADVENTURE);
-							GameInstance.this.getGameManager().getMain().ResetPlayer(player);
+							GameInstance.this.getGameManager().getMain().ResetPlayer(player);*/
 						}
 						if (baseClass.getLives() > 0)
 							if (this.ticks == 0) {
@@ -1394,9 +1395,9 @@ public class GameInstance {
 					BukkitRunnable r = new BukkitRunnable() {
 						@Override
 						public void run() {
-							System.out.println("World unloaded 1");
+							System.out.println("Unloading world");
 							if (Bukkit.unloadWorld(mapWorld, false)) {
-								System.out.println("World unloaded 2");
+								System.out.println("World unloaded: " + mapWorld.getName());
 								this.cancel();
 							}
 						}
@@ -2441,6 +2442,13 @@ public class GameInstance {
 	public void clearLastPosition(Player player) {
 		UUID playerId = player.getUniqueId();
 		lastKnownLocations.remove(playerId);
+	}
+
+	public boolean isNotWaterOrLava(Material material) {
+		return material != Material.WATER
+				&& material != Material.STATIONARY_WATER
+				&& material != Material.LAVA
+				&& material != Material.STATIONARY_LAVA;
 	}
 
 	public List<ClassType> generateClassList() {

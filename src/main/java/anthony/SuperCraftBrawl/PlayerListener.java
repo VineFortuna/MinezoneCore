@@ -188,6 +188,10 @@ public class PlayerListener implements Listener {
 	public void OnPlayerQuit(PlayerQuitEvent event) {
 		Player player = event.getPlayer();
 		GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
+        candyCaneSwirlPlayers.remove(player);
+		snowParticlePlayers.remove(player);
+		snowmanPetPlayers.remove(player);
+		elfCosmeticPlayers.remove(player);
 		// anthony.CrystalWars.game.GameInstance i =
 		// main.getCwManager().getInstanceOfPlayer(player);
 		// anthony.skywars.GameInstance i2 =
@@ -593,14 +597,6 @@ public class PlayerListener implements Listener {
 			Player player = e.getPlayer();
 			if (!player.isOp())
 				e.setCancelled(true);
-		}
-	}
-
-	@EventHandler
-	public void playerRightClick(PlayerInteractEntityEvent e) {
-		if (main.getGameManager().GetInstanceOfPlayer(e.getPlayer()) == null && e.getRightClicked() instanceof Player) {
-			Player target = ((Player) e.getRightClicked()).getPlayer();
-			new StatsGUI(main, target).inv.open(e.getPlayer());
 		}
 	}
 
