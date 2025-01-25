@@ -41,6 +41,7 @@ public enum FishType {
     DUCK(54, "Duck", FishRarity.RARE, Arrays.asList(FishArea.Park)),
     OTTER(70, "Otter", FishRarity.RARE, Arrays.asList(FishArea.Park, FishArea.Woods)),
     MINTYGOBBLER(71, "Minty Gobbler", FishRarity.RARE, null),
+    SEAL(76, "Seal", FishRarity.RARE, null),
     HERMITCRAB(15, "Hermit Crab", FishRarity.EPIC, Arrays.asList(FishArea.Pond)),
     PUFFERFISH(16, "Pufferfish", FishRarity.EPIC, Arrays.asList(FishArea.Pond)),
     GLOWSQUID(17, "Glow Squid", FishRarity.EPIC, Arrays.asList(FishArea.LushCave)),
@@ -81,6 +82,8 @@ public enum FishType {
     NAUTILUSSHELL(32, "Nautilus Shell", FishRarity.JUNK, null),
     BOAT(37, "Broken Boat", FishRarity.JUNK, null),
     CLAY(57, "Lump of Clay", FishRarity.JUNK, null),
+    SLIMEBALL(74, "Slimeball", FishRarity.JUNK, Arrays.asList(FishArea.Sewers)),
+    BONE(75, "Bone", FishRarity.JUNK, null),
     EXP(45, "EXP Bottle", FishRarity.TREASURE, null),
     TOKENS(33, "Token Sack", FishRarity.TREASURE, null),
     MAP(34, "Treasure Map", FishRarity.TREASURE, null),
@@ -319,6 +322,10 @@ public enum FishType {
                 return ItemHelper.create(Material.BOAT);
             case CLAY:
                 return ItemHelper.create(Material.CLAY_BALL);
+            case SLIMEBALL:
+                return ItemHelper.create(Material.SLIME_BALL);
+            case BONE:
+                return ItemHelper.create(Material.BONE);
             case EXP:
                 return ItemHelper.create(Material.EXP_BOTTLE);
             case TOKENS:
