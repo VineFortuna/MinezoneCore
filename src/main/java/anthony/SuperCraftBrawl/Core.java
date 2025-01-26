@@ -397,7 +397,7 @@ public class Core extends JavaPlugin implements Listener {
 
 		if (this.getCommands() != null) {
 			String[] commandTypes = { "maps", "join", "fav", "fly", "f", "shop", "leave", "l", "cw", "players", "class", "spectate",
-					"startgame", "gamestats", "setlives", "purchases", "kit", "items" };
+					"startgame", "gamestats", "setlives", "purchases", "kit", "items", "color" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -1052,42 +1052,6 @@ public class Core extends JavaPlugin implements Listener {
 				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
 						+ "Want to help support the server? Purchase a rank at " + ChatColor.GREEN
 						+ "https://minezone.tebex.io/");
-			}
-
-			if (cmd.getName().equalsIgnoreCase("color")) {
-				List<ChatColor> blacklistedColors = Arrays.asList(
-						ChatColor.STRIKETHROUGH, ChatColor.BOLD, ChatColor.ITALIC, ChatColor.UNDERLINE);
-				PlayerData data = this.getDataManager().getPlayerData(player);
-
-				if (player.hasPermission("scb.color")) {
-					if (data != null) {
-						try {
-							if (args.length == 0) {
-								player.sendMessage(
-										"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-												+ ChatColor.GREEN + "/color {color/reset}");
-							} else if (args[0].equalsIgnoreCase("reset")) {
-								player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
-										+ ChatColor.RESET + player.getName());
-								data.color = "";
-							} else if (blacklistedColors.contains(ChatColor.valueOf(args[0].toUpperCase()))) {
-								player.sendMessage(
-										"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Not a valid chat color!");
-							} else {
-								player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
-										+ ChatColor.valueOf(args[0].toUpperCase()) + player.getName());
-								data.color = args[0].toUpperCase();
-							}
-						} catch (IllegalArgumentException e) {
-							player.sendMessage(
-									"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Not a valid chat color!");
-						}
-					}
-				} else {
-					player.sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "You need the rank " + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN " + ChatColor.RESET
-							+ "to use this command");
-				}
 			}
 
 			if (cmd.getName().equalsIgnoreCase("token") && sender instanceof Player) {
