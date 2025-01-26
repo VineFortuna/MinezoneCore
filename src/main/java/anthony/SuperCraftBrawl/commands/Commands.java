@@ -547,18 +547,26 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void colorMessage(Player player, List<ChatColor> colors) {
+		player.sendMessage(main.color("&f&l----------------------------------------"));
 		player.sendMessage(main.color("&r&l(!) &rClick on a color below to select it:"));
-		TextComponent[] colorText = new TextComponent[colors.size()];
+		TextComponent[] colorText = new TextComponent[colors.size()-1];
 		int i = 0;
 		for (ChatColor color : colors) {
-			TextComponent message = new TextComponent(WordUtils.capitalizeFully(color.name().replace('_', ' ')) + " ");
-			message.setColor(color.asBungee());
-			message.setBold(color != ChatColor.RESET);
-			message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/color " + color.name()));
-			colorText[i] = message;
-			i++;
+			if (color != ChatColor.RESET) {
+				TextComponent message = new TextComponent(WordUtils.capitalizeFully(color.name().replace('_', ' ')));
+				if (i < colorText.length)
+					message.addExtra(ChatColor.GRAY + ", ");
+				message.setColor(color.asBungee());
+				message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/color " + color.name()));
+				colorText[i] = message;
+				i++;
+			}
 		}
 		player.spigot().sendMessage(colorText);
+		TextComponent message = new TextComponent("Click here to reset color");
+		message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/color RESET"));
+		player.spigot().sendMessage(message);
+		player.sendMessage(main.color("&f&l----------------------------------------"));
 	}
 
 	private void classCommand(String[] args, Player player) {

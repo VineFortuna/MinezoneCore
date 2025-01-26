@@ -55,11 +55,14 @@ public class JebClass extends BaseClass {
 				ItemHelper.setDetails(new ItemStack(Material.STONE, 1), "" + ChatColor.GRAY + "Jeb's Call", "",
 						instance.getGameManager().getMain().color("&7Push enemies when aiming at them!"),
 						instance.getGameManager().getMain().color("   &rRange: &e25 blocks")));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
 	}
 
 	@Override
 	public void Tick(int gameTicks) {
+		if (!(player.getActivePotionEffects().contains(PotionEffectType.WEAKNESS)))
+			player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
+
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Jeb
 				&& instance.classes.get(player).getLives() > 0) {
 			this.cooldownSec = (10000 - jeb.getTime()) / 1000 + 1;
