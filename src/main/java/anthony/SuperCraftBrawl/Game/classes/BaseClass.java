@@ -347,6 +347,7 @@ public abstract class BaseClass {
 
 			// Remove mobs spawned by the player
 			removeMobs(p);
+			resetMobTarget(p);
 
 			if (isDead) {
 				PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(p);
@@ -1670,6 +1671,24 @@ public abstract class BaseClass {
 					en.remove();
 	}
 
+	private void resetMobTarget(Player p) {
+		for (Creature en : p.getWorld().getEntitiesByClass(Creature.class)) {
+			if (en.getTarget() != null && en.getTarget() == p) {
+				if (getMobOwner(en) != null)
+					en.setTarget(instance.getNearestPlayer(getMobOwner(en), en, 150));
+			}
+		}
+	}
+
+	private Player getMobOwner(Creature creature) {
+		if (creature.getCustomName() != null) {
+			String owner = ChatColor.stripColor(
+					creature.getCustomName().substring(0, creature.getCustomName().indexOf("'")));
+			return Bukkit.getPlayer(owner);
+		}
+		return null;
+	}
+
 	private void deathParticles(PlayerData pData, Player p) {
 		Location pLocation = p.getLocation();
 		List<Item> deathParticles = new ArrayList<>();
@@ -1827,12 +1846,12 @@ public abstract class BaseClass {
 				d.getInventory().addItem(ItemHelper.setDetails(new ItemStack(Material.CHEST, 1),
 						String.valueOf(ChatColor.RESET) + ChatColor.ITALIC + "Agressive Gift", "",
 						String.valueOf(ChatColor.RESET) + ChatColor.YELLOW + "Steals another player's main item"));
-			} else if (baseClass.getType() == ClassType.ButterGolem) {
+			} else if (baseClass.getType() == ClassType.PiglinBrute) {
 				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK, 1),
-						ChatColor.GREEN + "Butter Balls",
-						ChatColor.YELLOW + "Right click to throw DEADLY butter balls!");
+						ChatColor.GREEN + "Gold Balls",
+						ChatColor.YELLOW + "Right click to throw DEADLY gold balls!");
 				d.sendMessage(instance.getGameManager().getMain()
-						.color("&2&l(!) &rYou got a kill and gained an extra &aButter Ball"));
+						.color("&2&l(!) &rYou got a kill and gained an extra &aGold Ball"));
 				d.getInventory().addItem(item);
 			} else if (baseClass.getType() == ClassType.GrimReaper) {
 				ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");

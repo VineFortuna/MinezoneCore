@@ -188,6 +188,10 @@ public class PlayerListener implements Listener {
 	public void OnPlayerQuit(PlayerQuitEvent event) {
 		Player player = event.getPlayer();
 		GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
+        candyCaneSwirlPlayers.remove(player);
+		snowParticlePlayers.remove(player);
+		snowmanPetPlayers.remove(player);
+		elfCosmeticPlayers.remove(player);
 		// anthony.CrystalWars.game.GameInstance i =
 		// main.getCwManager().getInstanceOfPlayer(player);
 		// anthony.skywars.GameInstance i2 =
@@ -597,14 +601,6 @@ public class PlayerListener implements Listener {
 	}
 
 	@EventHandler
-	public void playerRightClick(PlayerInteractEntityEvent e) {
-		if (main.getGameManager().GetInstanceOfPlayer(e.getPlayer()) == null && e.getRightClicked() instanceof Player) {
-			Player target = ((Player) e.getRightClicked()).getPlayer();
-			new StatsGUI(main, target).inv.open(e.getPlayer());
-		}
-	}
-
-	@EventHandler
 	public void onFoodChange(FoodLevelChangeEvent e) {
 		e.setCancelled(true);
 	}
@@ -644,14 +640,8 @@ public class PlayerListener implements Listener {
 					+ ChatColor.YELLOW + " " + tag); // This part will always be included
 			String displayName = event.getPlayer().getDisplayName(); // Base display name
 
-			if (data.blue == 1)
-				displayName = ChatColor.BLUE + displayName;
-			else if (data.red == 1)
-				displayName = ChatColor.RED + displayName;
-			else if (data.green == 1)
-				displayName = ChatColor.GREEN + displayName;
-			else if (data.yellow == 1)
-				displayName = ChatColor.YELLOW + displayName;
+			if (!data.color.isEmpty() && !data.color.equals("0"))
+				displayName = ChatColor.valueOf(data.color) + displayName;
 
 			if (event.getPlayer().hasPermission("scb.chat"))
 				event.setFormat(event.getFormat() + displayName + ChatColor.RESET + ": ");

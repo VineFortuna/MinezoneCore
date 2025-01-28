@@ -42,7 +42,7 @@ public class TokenClassesGUI implements InventoryProvider {
 			if (type.getTokenCost() > 0) {
 				
 				ClassDetails details = data.playerClasses.get(type.getID());
-				int played = details.gamesPlayed + details.gamesWon;
+				int played = details.gamesPlayed + 2 * details.gamesWon;
 				int nextLevel = 10;
 				
 				if (played >= 75)
