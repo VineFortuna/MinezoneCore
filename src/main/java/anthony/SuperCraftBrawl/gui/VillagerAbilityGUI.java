@@ -101,7 +101,7 @@ public class VillagerAbilityGUI implements InventoryProvider {
         } else if (item.getItemMeta().getDisplayName().toLowerCase().contains("speed")) {
             return 5;
         } else if (type == Material.IRON_SWORD) {
-            return 12;
+            return 14;
         } else return null;
     }
 

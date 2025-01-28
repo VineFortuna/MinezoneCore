@@ -45,7 +45,7 @@ public class FreeClassesGUI implements InventoryProvider {
 				}
 				
 				ClassDetails details = data.playerClasses.get(type.getID());
-				int played = details.gamesPlayed + details.gamesWon;
+				int played = details.gamesPlayed + 2 * details.gamesWon;
 				int nextLevel = 10;
 				
 				if (played >= 75)
