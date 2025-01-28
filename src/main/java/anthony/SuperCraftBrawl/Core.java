@@ -1055,52 +1055,32 @@ public class Core extends JavaPlugin implements Listener {
 			}
 
 			if (cmd.getName().equalsIgnoreCase("color")) {
+				List<ChatColor> blacklistedColors = Arrays.asList(
+						ChatColor.STRIKETHROUGH, ChatColor.BOLD, ChatColor.ITALIC, ChatColor.UNDERLINE);
 				PlayerData data = this.getDataManager().getPlayerData(player);
 
 				if (player.hasPermission("scb.color")) {
 					if (data != null) {
-						if (args.length == 0) {
+						try {
+							if (args.length == 0) {
+								player.sendMessage(
+										"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
+												+ ChatColor.GREEN + "/color {color/reset}");
+							} else if (args[0].equalsIgnoreCase("reset")) {
+								player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
+										+ ChatColor.RESET + player.getName());
+								data.color = "";
+							} else if (blacklistedColors.contains(ChatColor.valueOf(args[0].toUpperCase()))) {
+								player.sendMessage(
+										"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Not a valid chat color!");
+							} else {
+								player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
+										+ ChatColor.valueOf(args[0].toUpperCase()) + player.getName());
+								data.color = args[0].toUpperCase();
+							}
+						} catch (IllegalArgumentException e) {
 							player.sendMessage(
-									"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-											+ ChatColor.GREEN + "/color blue/green/red/yellow/reset");
-						} else if (args[0].equalsIgnoreCase("blue")) {
-							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
-									+ ChatColor.BLUE + player.getName());
-							data.blue = 1;
-							data.red = 0;
-							data.green = 0;
-							data.yellow = 0;
-						} else if (args[0].equalsIgnoreCase("red")) {
-							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
-									+ ChatColor.RED + player.getName());
-							data.red = 1;
-							data.blue = 0;
-							data.green = 0;
-							data.yellow = 0;
-						} else if (args[0].equalsIgnoreCase("green")) {
-							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
-									+ ChatColor.GREEN + player.getName());
-							data.green = 1;
-							data.red = 0;
-							data.blue = 0;
-							data.yellow = 0;
-						} else if (args[0].equalsIgnoreCase("yellow")) {
-							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
-									+ ChatColor.YELLOW + player.getName());
-							data.green = 0;
-							data.red = 0;
-							data.blue = 0;
-							data.yellow = 1;
-						} else if (args[0].equalsIgnoreCase("reset")) {
-							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Reset your name color");
-							data.green = 0;
-							data.red = 0;
-							data.blue = 0;
-							data.yellow = 0;
-						} else {
-							player.sendMessage(
-									"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-											+ ChatColor.GREEN + "/color blue/green/red/yellow/reset");
+									"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Not a valid chat color!");
 						}
 					}
 				} else {

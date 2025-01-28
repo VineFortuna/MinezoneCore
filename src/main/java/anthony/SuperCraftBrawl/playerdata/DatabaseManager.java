@@ -47,7 +47,7 @@ public class DatabaseManager {
 				try {
 					Statement stmt = getConnection().createStatement();
 					stmt.execute(cmd);
-					System.out.println("NOTIFICATION>" + cmd);
+					//System.out.println("NOTIFICATION>" + cmd);
 					stmt.close();
 				} catch (SQLException e) {
 					e.printStackTrace();
@@ -69,7 +69,7 @@ public class DatabaseManager {
 					try {
 						Statement stmt = getConnection().createStatement();
 						stmt.execute(cmd);
-						System.out.println("NOTIFICATION>" + cmd);
+						//System.out.println("NOTIFICATION>" + cmd);
 						stmt.close();
 					} catch (SQLException e) {
 						e.printStackTrace();
