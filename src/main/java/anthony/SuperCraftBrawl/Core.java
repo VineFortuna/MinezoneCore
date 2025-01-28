@@ -397,7 +397,7 @@ public class Core extends JavaPlugin implements Listener {
 
 		if (this.getCommands() != null) {
 			String[] commandTypes = { "maps", "join", "fav", "fly", "f", "shop", "leave", "l", "cw", "players", "class", "spectate",
-					"startgame", "gamestats", "setlives", "purchases", "kit", "items" };
+					"startgame", "gamestats", "setlives", "lactate", "purchases", "kit", "items" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);

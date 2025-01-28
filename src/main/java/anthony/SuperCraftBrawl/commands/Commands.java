@@ -14,12 +14,17 @@ import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ChatColorHelper;
+import net.minecraft.server.v1_8_R3.EnumParticle;
+import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
+import xyz.xenondevs.particle.ParticleEffect;
+
 import com.google.common.collect.Lists;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -98,10 +103,35 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "party":
 				partyCommand(args, player);
 				break;
+
+			case "lactate":
+				lactateCommand(player);
+				break;
 			}
 		} else
 			sender.sendMessage("Hey! You can't use this in the terminal!");
 		return true;
+	}
+
+	private void lactateCommand(Player player) {
+		if (player.hasPermission("scb.lactate")) {
+			Location loc = player.getLocation();
+			loc.setY(loc.getY() + 0.7);
+			player.sendMessage(main.color("&r&l(!) &rYou have &r&lLACTATED!"));
+			player.getWorld().playSound(loc, Sound.COW_HURT, 1, 1);
+			sendParticle(player, loc, EnumParticle.SNOWBALL, 300, 0.8f, 0.0f, -0.3f, 0.0f);
+		} else {
+			player.sendMessage(main.color("&c&l(!) &rYou need the rank &5&lSUPREME &rto use this command!"));
+		}
+	}
+
+	public static void sendParticle(Player player, Location location, EnumParticle particle, int amount, float speed,
+			float offsetX, float offsetY, float offsetZ) {
+		PacketPlayOutWorldParticles particles = new PacketPlayOutWorldParticles(particle, true, (float) location.getX(),
+				(float) location.getY(), (float) location.getZ(), offsetX, offsetY, offsetZ, speed, amount);
+
+		for (Player players : Bukkit.getOnlinePlayers())
+			((CraftPlayer) players).getHandle().playerConnection.sendPacket(particles);
 	}
 
 	private void partyCommand(String[] args, Player player) {
@@ -525,8 +555,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 		ClassDetails classDetails = playerData.playerClasses.get(type.getID());
 
 		if (!isClassUnlocked(player, classDetails, type) || !isLevelUnlocked(player, playerData, type)
-				|| !isFishermanClassUnlocked(player, type) || !isRankRequirementMet(player, type) ||
-				!isPlayerInGame(player, game) || !isGameStateWaiting(game, player)
+				|| !isFishermanClassUnlocked(player, type) || !isRankRequirementMet(player, type)
+				|| !isPlayerInGame(player, game) || !isGameStateWaiting(game, player)
 				|| !isFrenzyGameType(game, player)) {
 			return;
 		}

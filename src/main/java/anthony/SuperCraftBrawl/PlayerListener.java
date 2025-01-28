@@ -667,7 +667,11 @@ public class PlayerListener implements Listener {
 					tempmsg += msgWord + " ";
 			}
 			message = tempmsg.trim();
-			event.setMessage(message);
+			
+			if (event.getPlayer().hasPermission("scb.colorChat"))
+				event.setMessage(main.color(message));
+			else
+				event.setMessage(message);
 
 //			if (censored) {
 //				if (event.getPlayer().hasPermission("scb.chat"))
