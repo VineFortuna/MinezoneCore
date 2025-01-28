@@ -167,6 +167,7 @@ public class PlayerDataManager implements Listener {
 			int snowmanPet = set.getInt("SnowmanPet");
 			int candycaneParticles = set.getInt("CandyCaneParticles");
 			int snowball = set.getInt("Snowball");
+			String color = set.getString("Color");
 			String fishingWarps = set.getString("FishingWarps");
 
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
@@ -178,7 +179,7 @@ public class PlayerDataManager implements Listener {
 					matchMvps, fly, totalcaught, caught, rewardLevel, lureLevel, lure, friendshipLevel, friendship,
 					bestWinstreak, december15, december16, december17, december18, december19, december20, december21,
 					december22, december23, december24, december25, snowParticles, snowballDeathEffect, elfCosmetic,
-					snowmanPet, candycaneParticles, snowball, fishingWarps);
+					snowmanPet, candycaneParticles, snowball, color, fishingWarps);
 		}
 		set.close();
 		stmt.close();
@@ -272,8 +273,8 @@ public class PlayerDataManager implements Listener {
 				+ data.paintball + ", Wins = " + data.wins + ", TotalCaught = " + data.totalcaught + ", Caught = "
 				+ data.caught + ", RewardLevel = " + data.rewardLevel + ", LureLevel = " + data.lureLevel + ", Lure = "
 				+ data.lure + ", FriendshipLevel = " + data.friendshipLevel + ", Friendship = " + data.friendship
-				+ ", FishRainEffect = " + data.fishRainEffect + ", Snowball = " + data.snowball
-				+ ", FishingWarps = '" + data.fishingWarps + "' WHERE UUID = '" + data.playerUUID.toString() + "';");
+				+ ", FishRainEffect = " + data.fishRainEffect + ", Snowball = " + data.snowball  + ", Color = '" + data.color
+				+ "', FishingWarps = '" + data.fishingWarps + "' WHERE UUID = '" + data.playerUUID.toString() + "';");
 		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon, "
 				+ "Reward1, Reward2, Reward3, Reward4, Reward5) VALUES ";
 		int index = 0;
@@ -297,7 +298,7 @@ public class PlayerDataManager implements Listener {
 			updateCMD += " ON DUPLICATE KEY UPDATE TimePurchased = VALUES (TimePurchased), Purchased = VALUES (Purchased), GamesPlayed = VALUES (GamesPlayed),"
 					+ "GamesWon = VALUES (GamesWon), Reward1 = VALUES (Reward1), Reward2 = VALUES (Reward2)," +
 					"Reward3 = VALUES (Reward3), Reward4 = VALUES (Reward4), Reward5 = VALUES (Reward5);";
-			System.out.print("Executing " + updateCMD);
+			//System.out.print("Executing " + updateCMD);
 			manager.executeUpdateCommand(updateCMD);
 		}
 
@@ -317,7 +318,7 @@ public class PlayerDataManager implements Listener {
 
 		if (index > 0) {
 			updateCMD += " ON DUPLICATE KEY UPDATE TimesCaught = VALUES (TimesCaught);";
-			System.out.print("Executing " + updateCMD);
+			//System.out.print("Executing " + updateCMD);
 			manager.executeUpdateCommand(updateCMD);
 		}
 
@@ -338,7 +339,7 @@ public class PlayerDataManager implements Listener {
 
 		if (index > 0) {
 			updateCMD.append(" ON DUPLICATE KEY UPDATE CustomInteger = VALUES (CustomInteger);");
-			System.out.print("Executing " + updateCMD);
+			//System.out.print("Executing " + updateCMD);
 			manager.multiExecuteUpdateCommand(s, updateCMD.toString());
 		} else {
 			manager.multiExecuteUpdateCommand(s);
