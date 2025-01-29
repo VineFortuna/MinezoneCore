@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ChatColorHelper;
@@ -29,6 +30,7 @@ import java.util.function.Consumer;
 public class SilverfishClass extends BaseClass {
 	private ItemStack weapon;
 	private ItemStack wallItem;
+	private Ability wallAbilityNatowski = new Ability("&7&lWall", 10, player);
 	private int cooldownSec = 0;
 	private int wallCooldown = 10 * 1000;
 
@@ -41,6 +43,20 @@ public class SilverfishClass extends BaseClass {
 				6,
 				"Silverfish"
 		);
+
+		// Weapon
+		weapon = ItemHelper.setDetails(new ItemStack(Material.IRON_HOE),
+				"&7Silverfish Weapon");
+		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
+		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
+
+		// Wall Ability
+		wallItem = ItemHelper.setDetails(new ItemStack(Material.SMOOTH_BRICK),
+				wallAbilityNatowski.getAbilityNameLeftRightClickMessage(),
+				"&fCreate a wall of silverfishes",
+				"&e&nLeft Click&r&7 to place a wall &ofurther",
+				"&e&nRight Click&r&7 to place a wall &ocloser");
+		wallItem.setDurability((short) 2);
 	}
 
 	@Override
@@ -68,20 +84,6 @@ public class SilverfishClass extends BaseClass {
 	@Override
 	public void SetItems(Inventory playerInv) {
 		wallAbility.startTime = System.currentTimeMillis() - 100000;
-		ItemStack weapon = ItemHelper.create(Material.IRON_HOE, ChatColorHelper.color("&7Silverfish Weapon"));
-		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
-		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
-		this.weapon = weapon;
-
-		// Wall Ability
-		ItemStack wallItem = ItemHelper.setDetails(new ItemStack(Material.SMOOTH_BRICK),
-				"&7&lWall Ability",
-				"&fCreate a wall of silverfishes",
-				"&e&nLeft Click&r&7 to place a wall &ofurther",
-				"&e&nRight Click&r&7 to place a wall &ocloser");
-		wallItem.setDurability((short) 2);
-
-		this.wallItem = wallItem;
 
 		// Settings Items
 		playerInv.setItem(0, weapon);

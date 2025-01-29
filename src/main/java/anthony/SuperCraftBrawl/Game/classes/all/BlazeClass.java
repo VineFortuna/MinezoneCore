@@ -193,6 +193,7 @@ public class BlazeClass extends BaseClass {
 		ItemStack item = ItemHelper
 				.addEnchant(ItemHelper.addEnchant(ItemHelper.addEnchant(
 						ItemHelper.setDetails(new ItemStack(Material.BLAZE_ROD), "",
+								"",
 								instance.getGameManager().getMain().color("&7Right click to shoot up"),
 								instance.getGameManager().getMain().color("&7& shoot fireballs!")),
 						Enchantment.DAMAGE_ALL, 1), Enchantment.FIRE_ASPECT, 1), Enchantment.KNOCKBACK, 2);

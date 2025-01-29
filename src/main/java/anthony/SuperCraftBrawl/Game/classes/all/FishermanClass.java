@@ -88,6 +88,7 @@ public class FishermanClass extends BaseClass {
         return ItemHelper.setUnbreakable(ItemHelper.addEnchant(
                 ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
                         instance.getGameManager().getMain().color("&bFishing Rod"),
+                                "",
                                 instance.getGameManager().getMain().color("&7Hook onto" +
                                         " a block to grapple towards it")), Enchantment.DAMAGE_ALL, 3),
                 Enchantment.KNOCKBACK, 1));

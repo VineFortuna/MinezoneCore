@@ -129,11 +129,13 @@ public abstract class BaseClass {
 
 	public abstract ClassType getType();
 
-	public abstract void setArmor(EntityEquipment playerEquip);
+	protected void setArmor(EntityEquipment playerEquip){
+		setArmorNew(playerEquip);
+	}
 
 	public abstract ItemStack getAttackWeapon();
 
-	public abstract void SetNameTag();
+	public void SetNameTag(){};
 
 	public abstract void SetItems(Inventory playerInv);
 
@@ -167,7 +169,13 @@ public abstract class BaseClass {
 	} // To override
 
 	public void Tick(int gameTicks) {
-	} // To override
+	}// To override
+
+	public boolean isPlayerAlive() {
+		return instance.classes.containsKey(player)
+				&& instance.classes.get(player).getType() == getType()
+				&& instance.classes.get(player).getLives() > 0;
+	}
 
 	public void GameEnd() {
 	} // To override
@@ -1848,7 +1856,7 @@ public abstract class BaseClass {
 						String.valueOf(ChatColor.RESET) + ChatColor.YELLOW + "Steals another player's main item"));
 			} else if (baseClass.getType() == ClassType.PiglinBrute) {
 				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK, 1),
-						ChatColor.GREEN + "Gold Balls",
+						ChatColor.YELLOW + "Gold Balls",
 						ChatColor.YELLOW + "Right click to throw DEADLY gold balls!");
 				d.sendMessage(instance.getGameManager().getMain()
 						.color("&2&l(!) &rYou got a kill and gained an extra &aGold Ball"));
