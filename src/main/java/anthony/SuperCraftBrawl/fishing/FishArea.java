@@ -35,7 +35,13 @@ public enum FishArea {
             new Vector(218, 107, 586),
             12, 14, 12,
             new Vector(204.5, 105, 582.5),
-            new ItemStack(Material.LEAVES));
+            new ItemStack(Material.LEAVES)),
+
+    Sewers("Sewers",
+            new Vector(90, 99, 832),
+            105, 9, 105,
+            new Vector(70.5, 98, 782.5),
+            new ItemStack(Material.IRON_FENCE));
     
     private final String name;
     private final Vector location;

@@ -1529,28 +1529,6 @@ public class Core extends JavaPlugin implements Listener {
 		return false;
 	}
 
-	public int getTotalFish(Player player, FishRarity... rarity) {
-		PlayerData data = this.getDataManager().getPlayerData(player);
-		int totalFished = 0;
-		for (FishType type : FishType.values()) {
-			if (rarity == null || Arrays.asList(rarity).contains(type.getRarity())) {
-				FishingDetails details = data.playerFishing.get(type.getId());
-				if (details != null) {
-					totalFished++;
-				}
-			}
-		}
-		return totalFished;
-	}
-
-	public int getTotalFish(Player player) {
-		return getTotalFish(player, null);
-	}
-
-	public boolean hasAllFish(Player player) {
-		return getTotalFish(player) == FishType.values().length;
-	}
-
 	public void sendScoreboardUpdate(Player player) {
 		Rank rank = this.getRankManager().getRank(player);
 		if (rank == null) return;
