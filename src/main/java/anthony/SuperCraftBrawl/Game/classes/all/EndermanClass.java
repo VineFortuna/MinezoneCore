@@ -51,6 +51,7 @@ public class EndermanClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
+
 		stick = ItemHelper.setDetails(new ItemStack(Material.STICK),
 				instance.getGameManager().getMain().color("&c&lBlock Pickup"), "",
 				instance.getGameManager().getMain().color("&7Right click to grab the block you're standing on"));

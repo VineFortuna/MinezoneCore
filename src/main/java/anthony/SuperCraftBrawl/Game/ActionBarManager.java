@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import anthony.SuperCraftBrawl.Game.classes.Ability;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.util.ChatColorHelper;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -13,6 +16,8 @@ import anthony.SuperCraftBrawl.Core;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+
+import javax.annotation.Nullable;
 
 public class ActionBarManager {
 
@@ -95,6 +100,43 @@ public class ActionBarManager {
 
 		public String getMessage() {
 			return message;
+		}
+	}
+
+	public static class AbilityActionBar {
+		private final BaseClass baseClass;
+		private final ActionBarManager actionBarManager;
+
+		public AbilityActionBar(BaseClass baseClass, ActionBarManager actionBarManager) {
+			this.baseClass = baseClass;
+			this.actionBarManager = actionBarManager;
+		}
+
+		public void setActionBarAbility(Player player, Ability ability1, Ability ability2) {
+			String name = ability1.getAbilityName();
+
+			if (ability2 != null) name += ability2.getAbilityName();
+
+			actionBarManager.setActionBar(player, name + baseClass, createAbilityMessage(ability1, ability2), 2);
+		}
+
+		public String createAbilityMessage(Ability ability1, @Nullable Ability ability2) {
+			String message1 = constructAbilityMessage(ability1);
+
+			if (ability2 == null) return message1;
+
+			String message2 = constructAbilityMessage(ability2);
+			return message1 + org.bukkit.ChatColor.DARK_GRAY + " ┃ " + message2;
+		}
+
+		String constructAbilityMessage(Ability ability) {
+			long remainingTime = ability.getCooldownInstance().getRemainingCooldownSeconds();
+
+			if (!ability.isReady()) {
+				return ChatColorHelper.color(ability.getAbilityName() + " &rregenerates in &e" + (remainingTime + 1) + "s");
+			} else {
+				return ChatColorHelper.color("&rYou can use " + ability.getAbilityName());
+			}
 		}
 	}
 

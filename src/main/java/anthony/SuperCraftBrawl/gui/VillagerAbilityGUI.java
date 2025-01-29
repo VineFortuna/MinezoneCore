@@ -15,7 +15,11 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
+import xyz.xenondevs.particle.ParticleEffect;
+import xyz.xenondevs.particle.data.ParticleData;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -165,7 +169,7 @@ public class VillagerAbilityGUI implements InventoryProvider {
             // Playing villager Sound to all players
             SoundManager.playSoundToAllGamePlayersFromALocation(gameInstance, player.getLocation(), Sound.VILLAGER_HAGGLE, 1, 1);
             // Spawn green particles
-            spawnTradeParticles(player);
+            spawnTradeParticlesCircle(player);
 //            spawnTradeParticlesCircle(player);
             updateTitle(player);
         }
@@ -198,8 +202,8 @@ public class VillagerAbilityGUI implements InventoryProvider {
         Location playerLocation = player.getLocation();
 
         // Define number of particles and range
-        int particleCount = 30; // Adjust based on how dense you want the particles
-        double radius = 1.5; // Adjust the radius around the player
+        int particleCount = 100; // Adjust based on how dense you want the particles
+        double radius = 1.0; // Adjust the radius around the player
 
         // Spawn particles
         for (int i = 0; i < particleCount; i++) {

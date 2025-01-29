@@ -1,11 +1,12 @@
 package anthony.SuperCraftBrawl.Game.classes;
 
+import anthony.SuperCraftBrawl.Game.ActionBarManager;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import anthony.util.ChatColorHelper;
 
 public class Ability {
-    private final String abilityName; // Name of the ability
+    private String abilityName; // Name of the ability
     private final Player player; // Player regarding that class's ability
     private ItemStack triggerItem; // Item that is clicked for the ability to be used
     private CooldownNatowski cooldown; // Cooldown of the ability (in seconds)
@@ -16,22 +17,26 @@ public class Ability {
     }
 
     public Ability(String name, Player player, ItemStack triggerItem) {
-        this.abilityName = name;
-        this.player = player;
+        this(name, player);
         this.triggerItem = triggerItem;
     }
 
-    public Ability(String name, int cooldownSeconds, Player player) {
-        this.abilityName = name;
+    public Ability(String name, double cooldownSeconds, Player player) {
+        this(name, player);
         this.cooldown = new CooldownNatowski(cooldownSeconds);
-        this.player = player;
     }
 
-    public Ability(String name, int cooldownSeconds, Player player, ItemStack triggerItem) {
-        this.abilityName = name;
+    public Ability(String name, double cooldownSeconds, Player player, ItemStack triggerItem) {
+        this(name, player, triggerItem);
         this.cooldown = new CooldownNatowski(cooldownSeconds);
-        this.player = player;
-        this.triggerItem = triggerItem;
+    }
+
+    public String getAbilityNameRightClickMessage() {
+        return abilityName + " &7(Right Click)";
+    }
+
+    public String getAbilityNameLeftRightClickMessage() {
+        return abilityName + " &7(Left/Right Click)";
     }
 
     public boolean isReady() {
@@ -40,6 +45,13 @@ public class Ability {
 
     public void use() {
         cooldown.use();
+    }
+
+    public void updateActionBar(Player player, BaseClass baseClass) {
+        ActionBarManager actionBarManager = baseClass.getActionBarManager();
+
+        ActionBarManager.AbilityActionBar abilityActionBar = new ActionBarManager.AbilityActionBar(baseClass, actionBarManager);
+        abilityActionBar.setActionBarAbility(player, this, null);
     }
 
     public void sendPlayerUseAbilityChatMessage() {
@@ -58,7 +70,7 @@ public class Ability {
         return abilityName;
     }
 
-    public long getCooldownDurationSeconds() {
+    public double getCooldownDurationSeconds() {
         return cooldown.getCooldownDurationSeconds();
     }
 

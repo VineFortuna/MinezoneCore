@@ -29,7 +29,7 @@ import java.util.Random;
 public class HorseClass extends BaseClass {
 	private ItemStack weapon;
 	private ItemStack saddle;
-	private final Ability jumpAbility = new Ability("Jump Ability", 5, player);
+	private final Ability jumpAbility = new Ability("&6&lJump", 5, player);
 	private final double jumpAbilityHeight = 1.6;
 
 	// Creating Treats
@@ -65,12 +65,20 @@ public class HorseClass extends BaseClass {
 				"Horse"
 		);
 
+		// Weapon
+		weapon = ItemHelper.create(Material.HAY_BLOCK, "&6Hay Bale");
+		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3); // Sharpness 3
+		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1); // Knockback 1
+
+		// Jump Ability
+		saddle = ItemHelper.setDetails(new ItemStack(Material.SADDLE),
+				jumpAbility.getAbilityNameRightClickMessage(),
+				"&7Right click to do a high jump!");
+
 		treatsItemsList.add(goldenCarrotTreat);
 		treatsItemsList.add(goldenAppleTreat);
 		goldenEnchantedAppleTreat.setDurability((short) 1);
 		treatsItemsList.add(goldenEnchantedAppleTreat);
-
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -79,18 +87,16 @@ public class HorseClass extends BaseClass {
 	}
 
 	@Override
+	public void Tick(int gameTicks) {
+		if (isPlayerAlive()) {
+			jumpAbility.updateActionBar(player, this);
+		}
+	}
+
+	@Override
 	public void SetItems(Inventory playerInv) {
-		// Weapon
-		ItemStack weapon = ItemHelper.create(Material.HAY_BLOCK, "&6Hay Bale");
-		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3); // Sharpness 3
-		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1); // Knockback 1
-
-		this.weapon = weapon;
-
-		// Jump Ability
-		ItemStack saddle = ItemHelper.setDetails(new ItemStack(Material.SADDLE), "&eJump Ability", "&7Right click to do a high jump!");
-
-		this.saddle = saddle;
+		// Resetting Jump Ability CD
+		jumpAbility.getCooldownInstance().reset();
 
 		// Settings Items
 		playerInv.setItem(0, weapon);
@@ -112,9 +118,7 @@ public class HorseClass extends BaseClass {
 				if (item.equals(saddle)) {
 					if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
 						// If ability is on cooldown
-						if (!jumpAbility.isReady()) {
-							jumpAbility.sendPlayerRemainingCooldownChatMessage();
-						}
+						if (!jumpAbility.isReady()) return;
 						// If ability is available
 						else {
 							// If player is not on the ground
@@ -125,14 +129,10 @@ public class HorseClass extends BaseClass {
 							else {
 								// Setting cooldown
 								jumpAbility.use();
-								// Sending return message
-								jumpAbility.sendPlayerUseAbilityChatMessage();
 								// Jump Ability logic
 								player.setVelocity(new Vector(0, jumpAbilityHeight, 0));
-
 								// Playing sound
 								SoundManager.playSoundToAllGamePlayersFromAPlayerLocation(instance, player, Sound.HORSE_ANGRY, 1, 1);
-
 							}
 						}
 					}

@@ -16,20 +16,74 @@ import java.util.List;
 
 public enum ClassType {
 
-	Cactus(1, 0, 0), TNT(2, 350, 0), Enderdragon(3, 0, Rank.VIP), Skeleton(4, 0, 0), Ninja(5, 1000, 0),
-	IronGolem(6, 0, Rank.VIP), Enderman(7, 0, 0), Ghast(8, 0, Rank.VIP), Chicken(9, 400, 0), Slime(10, 0, Rank.VIP),
-	PiglinBrute(11, 0, Rank.VIP), DarkSethBling(12, 800, 0), SnowGolem(14, 800, 0), Bat(15, 0, Rank.VIP),
-	SethBling(16, 0, Rank.VIP), Sheep(17, 550, 0), Horse(18, 0, 0), Melon(19, 0, Rank.VIP), Rabbit(26, 0, 0),
-	Squid(20, 0, 0), Spider(21, 0, 0), BabyCow(22, 0, Rank.VIP), Herobrine(23, 0, Rank.VIP), Bunny(24, 450, 0),
-	ButterBro(25, 1200, 0), Steve(28, 850, 0), Notch(29, 1000, 0), Pig(30, 0, 0), Blaze(31, 0, 0), Potato(32, 750, 0),
-	Wither(33, 0, 0), Ocelot(34, 250, 0), Creeper(35, 0, 0), Noteblock(36, 800, 0), EnchantTable(37, 350, 0),
-	Present(38, 0, 0), Wizard(41, 0, Rank.VIP), Star(42, 850, 0), Dweller(43, 0, 0), Zombie(44, 0, 0),
-	Silverfish(45, 0, 0), Anvil(46, 700, 0), Summoner(47, 525, 0), MagmaCube(48, 0, Rank.VIP), Villager(49, 0, 0),
-	ZombiePigman(51, 0, 3), Witch(13, 0, 5), ZombieVillager(50, 0, 10), Ice(54, 0, 15), Vampire(53, 800, 0),
-	Bee(55, 425, 0), Jeb(56, 0, 20), Hunter(57, 500, 0), FlintAndSteel(58, 0, 0), WitherSk(59, 1500, 0),
-	Shulker(60, 0, 25), Bedrock(61, 0, Rank.VIP), Firework(62, 0, Rank.VIP), Cloud(63, 0, 30), LargeFern(64, 0, 0),
-	Vindicator(65, 0, Rank.VIP), Fade(66, 0, Rank.VIP), Fisherman(67, 0, 0), BrewingStand(68, 350, 0),
-	GrimReaper(69, 0, 0),  Endermite(70, 0, Rank.VIP), Wolf(71, 400, 0);
+	Cactus(1, 0, 0),
+	TNT(2, 350, 0),
+	Enderdragon(3, 0, Rank.VIP),
+	Skeleton(4, 0, 0),
+	Ninja(5, 1000, 0),
+	IronGolem(6, 0, Rank.VIP),
+	Enderman(7, 0, 0),
+	Ghast(8, 0, Rank.VIP),
+	Chicken(9, 400, 0),
+	Slime(10, 0, Rank.VIP),
+	PiglinBrute(11, 0, Rank.VIP),
+	DarkSethBling(12, 800, 0),
+	SnowGolem(14, 800, 0),
+	Bat(15, 0, Rank.VIP),
+	SethBling(16, 0, Rank.VIP),
+	Sheep(17, 550, 0),
+	Horse(18, 0, 0),
+	Melon(19, 0, Rank.VIP),
+	Rabbit(26, 0, 0),
+	Squid(20, 0, 0),
+	Spider(21, 0, 0),
+	BabyCow(22, 0, Rank.VIP),
+	Herobrine(23, 0, Rank.VIP),
+	Bunny(24, 450, 0),
+	ButterBro(25, 1200, 0),
+	Steve(28, 850, 0),
+	Notch(29, 1000, 0),
+	Pig(30, 0, 0),
+	Blaze(31, 0, 0),
+	Potato(32, 750, 0),
+	Wither(33, 0, 0),
+	Ocelot(34, 250, 0),
+	Creeper(35, 0, 0),
+	Noteblock(36, 800, 0),
+	EnchantTable(37, 350, 0),
+	Present(38, 0, 0),
+	Wizard(41, 0, Rank.VIP),
+	Star(42, 850, 0),
+	Dweller(43, 0, 0),
+	Zombie(44, 0, 0),
+	Silverfish(45, 0, 0),
+	Anvil(46, 700, 0),
+	Summoner(47, 525, 0),
+	MagmaCube(48, 0, Rank.VIP),
+	Villager(49, 0, 0),
+	ZombiePigman(51, 0, 3),
+	Witch(13, 0, 5),
+	ZombieVillager(50, 0, 10),
+	Ice(54, 0, 15),
+	Vampire(53, 800, 0),
+	Bee(55, 425, 0),
+	Jeb(56, 0, 20),
+	Hunter(57, 500, 0),
+	FlintAndSteel(58, 0, 0),
+	WitherSk(59, 1500, 0),
+	Shulker(60, 0, 25),
+	Bedrock(61, 0, Rank.VIP),
+	Firework(62, 0, Rank.VIP),
+	Cloud(63, 0, 30),
+	LargeFern(64, 0, 0),
+	Vindicator(65, 0, Rank.VIP),
+	Fade(66, 0, Rank.VIP),
+	Fisherman(67, 0, 0),
+	BrewingStand(68, 350, 0),
+	GrimReaper(69, 0, 0),
+	Endermite(70, 0, Rank.VIP),
+	Wolf(71, 400, 0),
+	Parrot(72, 800, 0);
 
 	/*Guardian(68, 0, 30) */;
 	/*Elf(70, 0, 0), GingerBreadMan(71, 0, 0), Santa(72, 0, 0),*/
@@ -218,6 +272,8 @@ public enum ClassType {
 			return new EndermiteClass(instance, player);
  		case Wolf:
  			return new WolfClass(instance, player);
+		case Parrot:
+			return new ParrotClass(instance, player);
 //		case Guardian:
 //			return new GuardianClass(instance, player);
 //		case Fluxty:
@@ -375,6 +431,8 @@ public enum ClassType {
 					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWJjN2I5ZDM2ZmI5MmI2YmYyOTJiZTczZDMyYzZjNWIwZWNjMjViNDQzMjNhNTQxZmFlMWYxZTY3ZTM5M2EzZSJ9fX0=");
  		case Wolf:
  			return new ItemStack(Material.BONE);
+		case Parrot:
+			return new ItemStack(Material.FEATHER);
 // 		case Guardian:
 // 			return new ItemStack(Material.PRISMARINE_SHARD);
 //		case Snowman:
@@ -528,6 +586,8 @@ public enum ClassType {
 			return "Unleash chaos as you swap places with your swarm of Endermites";
 		case Wolf:
 			return "Have your pack defend you from enemies!";
+		case Parrot:
+			return "Regenerate health through music!";
 //		case Guardian:
 //			return "Guard thyself and thy family (or something idk)";
 //		case Fluxty:
@@ -715,6 +775,9 @@ public enum ClassType {
 			return color("&5Endermite") + ChatColor.RESET;
  		case Wolf:
  			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Wolf" + ChatColor.RESET;
+		case Parrot:
+			return "" + ChatColor.GREEN + "Parrot" + ChatColor.RESET;
+
 // 		case Guardian:
 // 			return "" + ChatColor.GRAY + ChatColor.BOLD + "Guardian" + ChatColor.RESET;
 // 		case Snowman:
