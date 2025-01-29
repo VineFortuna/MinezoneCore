@@ -65,7 +65,7 @@
 	</repositories>
 	<dependencies>
 		<!-- Run the following commands in root: -->
-		<!-- 
+		<!--
 			mvn install:install-file -Dfile="lib/spigot-1.8.8.jar" -DgroupId="org.bukkit.nms" -DartifactId=bukkit-nms -Dversion="1.0" -Dpackaging=jar -B
 			mvn install:install-file -Dfile="lib/MinezoneAuth.jar" -DgroupId="me.itzzmic.auth" -DartifactId=SCBAuth -Dversion="1.5" -Dpackaging=jar -B
 			mvn install:install-file -Dfile="lib/PunishSystem.jar" -DgroupId="me.itzzmic.minezone" -DartifactId=PunishSystem -Dversion="1.9" -Dpackaging=jar -B
@@ -74,19 +74,22 @@
 			<groupId>org.bukkit.nms</groupId>
 			<artifactId>bukkit-nms</artifactId>
 			<version>1.0</version>
-			<scope>provided</scope>
+			<scope>system</scope>
+			<systemPath>${project.basedir}\lib\spigot-1.8.8.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>me.itzzmic.auth</groupId>
 			<artifactId>SCBAuth</artifactId>
 			<version>1.5</version>
-			<scope>provided</scope>
+			<scope>system</scope>
+			<systemPath>${project.basedir}\lib\MinezoneAuth.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>me.itzzmic.minezone</groupId>
 			<artifactId>PunishSystem</artifactId>
 			<version>1.9</version>
-			<scope>provided</scope>
+			<scope>system</scope>
+			<systemPath>${project.basedir}\lib\PunishSystem.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>

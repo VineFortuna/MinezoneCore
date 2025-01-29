@@ -62,14 +62,15 @@ public class WizardClass extends BaseClass {
 
 	@Override
 	public void Tick(int gameTicks) {
+		if (speedyjumpy) {
+			if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
+				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+			if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
+				player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 0));
+		}
+
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Wizard
 				&& instance.classes.get(player).getLives() > 0) {
-			if (speedyjumpy) {
-				if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
-					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
-				if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
-					player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 0));
-			}
 			
 			this.cooldownSec = (3000 - wizard.getTime()) / 1000 + 1;
 			
@@ -94,6 +95,10 @@ public class WizardClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
+		if (speedyjumpy) {
+			player.removePotionEffect(PotionEffectType.JUMP);
+			player.removePotionEffect(PotionEffectType.SPEED);
+		}
 		clicked = false; // To reset each life
 		fireball = false;
 		blindness = false;
@@ -125,7 +130,7 @@ public class WizardClass extends BaseClass {
 		if (player.getGameMode() != GameMode.SPECTATOR) {
 			if (item != null) {
 				if (item.getType() == Material.STICK) {
-					if (clicked == false) {
+					if (!clicked) {
 						player.getInventory().remove(Material.STICK);
 						clicked = true;
 						Random r = new Random();

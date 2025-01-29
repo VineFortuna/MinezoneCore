@@ -15,12 +15,19 @@ import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ChatColorHelper;
 import com.google.common.collect.Lists;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.apache.commons.lang.WordUtils;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
@@ -97,6 +104,9 @@ public class Commands implements CommandExecutor, TabCompleter {
 				break;
 			case "party":
 				partyCommand(args, player);
+				break;
+			case "color":
+				colorCommand(args, player);
 				break;
 			}
 		} else
@@ -493,6 +503,70 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 		player.sendMessage(main.color("&l(!) &aPlayers in your game (" + game.players.size() + "): "));
 		player.sendMessage(main.color("l--> " + players));
+	}
+
+	public void colorCommand(String[] args, Player player) {
+		List<ChatColor> colors = Arrays.asList(
+				ChatColor.WHITE,
+				ChatColor.YELLOW, ChatColor.GOLD,
+				ChatColor.GREEN, ChatColor.DARK_GREEN,
+				ChatColor.AQUA, ChatColor.DARK_AQUA,
+				ChatColor.BLUE, ChatColor.DARK_BLUE,
+				ChatColor.LIGHT_PURPLE, ChatColor.DARK_PURPLE,
+				ChatColor.RED, ChatColor.DARK_RED,
+				ChatColor.GRAY, ChatColor.DARK_GRAY,
+				ChatColor.BLACK,
+				ChatColor.RESET
+		);
+
+		PlayerData data = main.getDataManager().getPlayerData(player);
+
+		if (player.hasPermission("scb.color")) {
+			if (data != null) {
+				try {
+					if (args.length == 0 || !colors.contains(ChatColor.valueOf(args[0].toUpperCase()))) {
+						colorMessage(player, colors);
+					} else if (args[0].equalsIgnoreCase("reset")) {
+						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
+								+ ChatColor.RESET + player.getName());
+						data.color = "";
+					} else {
+						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
+								+ ChatColor.valueOf(args[0].toUpperCase()) + player.getName());
+						data.color = args[0].toUpperCase();
+					}
+				} catch (IllegalArgumentException e) {
+					colorMessage(player, colors);
+				}
+			}
+		} else {
+			player.sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
+					+ "You need the rank " + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN " + ChatColor.RESET
+					+ "to use this command");
+		}
+	}
+
+	private void colorMessage(Player player, List<ChatColor> colors) {
+		player.sendMessage(main.color("&f&l----------------------------------------"));
+		player.sendMessage(main.color("&r&l(!) &rClick on a color below to select it:"));
+		TextComponent[] colorText = new TextComponent[colors.size()-1];
+		int i = 0;
+		for (ChatColor color : colors) {
+			if (color != ChatColor.RESET) {
+				TextComponent message = new TextComponent(WordUtils.capitalizeFully(color.name().replace('_', ' ')));
+				if (i < colorText.length)
+					message.addExtra(ChatColor.GRAY + ", ");
+				message.setColor(color.asBungee());
+				message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/color " + color.name()));
+				colorText[i] = message;
+				i++;
+			}
+		}
+		player.spigot().sendMessage(colorText);
+		TextComponent message = new TextComponent("Click here to reset color");
+		message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/color RESET"));
+		player.spigot().sendMessage(message);
+		player.sendMessage(main.color("&f&l----------------------------------------"));
 	}
 
 	private void classCommand(String[] args, Player player) {

@@ -81,7 +81,7 @@ public class FavoriteClassesGUI implements InventoryProvider {
 											} else if (e.isLeftClick()) {
 												main.getGameManager().playerSelectClass(player, type);
 												player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
-														+ "==============================================");
+														+ "=============================================");
 												player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
 												player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
 												player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| "
@@ -93,7 +93,7 @@ public class FavoriteClassesGUI implements InventoryProvider {
 												player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
 												player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
 												player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
-														+ "==============================================");
+														+ "=============================================");
 												inv.close(player);
 											} else if (e.isRightClick()) {
 												new ClassRewardsGUI(main, type, inv).inv.open(player);
