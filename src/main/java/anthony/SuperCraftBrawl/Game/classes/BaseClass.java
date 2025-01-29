@@ -1848,10 +1848,10 @@ public abstract class BaseClass {
 						String.valueOf(ChatColor.RESET) + ChatColor.YELLOW + "Steals another player's main item"));
 			} else if (baseClass.getType() == ClassType.PiglinBrute) {
 				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK, 1),
-						ChatColor.GREEN + "Gold Balls",
-						ChatColor.YELLOW + "Right click to throw DEADLY gold balls!");
+						"&eGold Balls",
+						"&7Right click to throw DEADLY gold balls!");
 				d.sendMessage(instance.getGameManager().getMain()
-						.color("&2&l(!) &rYou got a kill and gained an extra &aGold Ball"));
+						.color("&2&l(!) &rYou got a kill and gained an extra &eGold Ball"));
 				d.getInventory().addItem(item);
 			} else if (baseClass.getType() == ClassType.GrimReaper) {
 				ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
