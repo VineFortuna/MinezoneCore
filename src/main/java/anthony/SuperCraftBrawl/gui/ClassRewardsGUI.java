@@ -312,8 +312,8 @@ public class ClassRewardsGUI implements InventoryProvider {
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzhmNzdlZWVlZjZmZmIyZjY4MThlNTc2OTg3OTRhZTAzNTFhYjMyYmEyMzRkNjIxYzIyZmU0Y2U4ZTE1OTlkMiJ9fX0=");
             case Slime:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjU0ZjJiNGNiNmQyMWQzNTZlYzVjMGNiNmY1MTY2ZmVlMzExOWM3ZGM1OWUyMDgzOWMyMDMzMWNkMTNlNDM5ZCJ9fX0=");
-            case ButterGolem:
-                return new ItemStack(Material.GOLD_BLOCK);
+            case PiglinBrute:
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjVjYzFiZmI1NjY3MTYzYmFiNTQ1NWQ4NWRlMjU5YTg5MzRhZWJiOWJlOTdhYmQ4ZTZmNTM3YmRhMWIxNTIzMCJ9fX0=");
             case Enderdragon:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWVjM2ZmNTYzMjkwYjEzZmYzYmNjMzY4OThhZjdlYWE5ODhiNmNjMThkYzI1NDE0N2Y1ODM3NGFmZTliMjFiOSJ9fX0=");
             case Bat:
