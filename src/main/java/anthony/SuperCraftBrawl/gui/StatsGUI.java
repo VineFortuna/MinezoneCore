@@ -93,9 +93,9 @@ public class StatsGUI implements InventoryProvider {
 					}
 				}
 			}
-			int uniqueCaught = main.getTotalFish(player);
+			int uniqueCaught = main.fishing.getTotalFish(player);
 			if (target != null)
-				uniqueCaught = main.getTotalFish(target);
+				uniqueCaught = main.fishing.getTotalFish(target);
 			
 			contents.set(2, 5,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
