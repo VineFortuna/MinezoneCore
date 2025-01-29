@@ -170,7 +170,7 @@ public enum Rank {
 		else
 			msg = color("&7");
 
-		return msg += player.getName();
+		return msg += player.getDisplayName();
 	}
 
     public static Rank getRankFromName(String name) {
