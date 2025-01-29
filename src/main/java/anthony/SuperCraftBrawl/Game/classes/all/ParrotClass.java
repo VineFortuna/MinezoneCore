@@ -91,7 +91,9 @@ public class ParrotClass extends BaseClass {
         if (gameTicks % TICKS_PER_SECOND != 0) return;
 
         // Healing
-        handleHealing();
+        if (danceTargetBlock != null) {
+            handleHealing();
+        }
     }
 
     private void handleHealing() {
