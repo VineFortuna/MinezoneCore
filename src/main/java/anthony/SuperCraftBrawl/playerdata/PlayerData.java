@@ -6,6 +6,8 @@ import anthony.SuperCraftBrawl.ranks.Rank;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.bukkit.entity.Player;
+
 public class PlayerData {
 	public UUID playerUUID;
 
@@ -40,8 +42,8 @@ public class PlayerData {
 			int rewardLevel, int lureLevel, int lure, int friendshipLevel, int friendship, int bestWinstreak,
 			int december15, int december16, int december17, int december18, int december19, int december20,
 			int december21, int december22, int december23, int december24, int december25, int snowParticles,
-			int snowballDeathEffect, int elfCosmetic, int snowmanPet, int candycaneParticles, int snowball, String color,
-					  String fishingWarps) {
+			int snowballDeathEffect, int elfCosmetic, int snowmanPet, int candycaneParticles, int snowball,
+			String color, String fishingWarps) {
 		this(playerUUID, playerName, playerIP);
 		this.roleID = roleID;
 		this.tokens = tokens;
@@ -143,8 +145,7 @@ public class PlayerData {
 		if (this.fishingWarps == null || this.fishingWarps.isEmpty()) {
 			return Collections.emptyList();
 		}
-		return Arrays.stream(this.fishingWarps.split(","))
-				.map(Integer::parseInt).collect(Collectors.toList());
+		return Arrays.stream(this.fishingWarps.split(",")).map(Integer::parseInt).collect(Collectors.toList());
 	}
 
 	public void addFishingWarp(int i) {
@@ -153,5 +154,38 @@ public class PlayerData {
 		} else if (!getFishingWarps().contains(i)) {
 			this.fishingWarps += "," + i;
 		}
+	}
+
+	public String checkPlayerLevel(Player player, PlayerData data) {
+		String color = "&7";
+		String rainbowPrestige = "";
+		String[] rainbow = { "&c", "&6", "&e", "&a", "&b", "&d", "&5" };
+
+		if (data.level >= 100)
+			color = "&f";
+		if (data.level >= 200)
+			color = "&6";
+		if (data.level >= 300)
+			color = "&b";
+		if (data.level >= 400)
+			color = "&2";
+		if (data.level >= 500)
+			color = "&3";
+		if (data.level >= 600)
+			color = "&4";
+		if (data.level >= 700)
+			color = "&d";
+		if (data.level >= 800)
+			color = "&9";
+		if (data.level >= 900)
+			color = "&5";
+		if (data.level >= 1000) {
+			String[] rainbowString = ("[" + data.level + "✫]").split("");
+			for (int i = 0; i < rainbowString.length; i++) {
+				rainbowPrestige += rainbow[i] + rainbowString[i];
+			}
+		}
+
+		return color;
 	}
 }
