@@ -28,7 +28,7 @@ public class ParrotClass extends BaseClass {
     private final ItemStack weapon;
     private final ItemStack danceItem;
     private final Ability flapAbility = new Ability("&a&lFlap", 2, player);
-    private final Ability danceAbility = new Ability("&a&lDance", 12, player);
+    private final Ability danceAbility = new Ability("&a&lDance", 20, player);
     private BukkitRunnable danceRunnable;
     private Block danceTargetBlock;
 
