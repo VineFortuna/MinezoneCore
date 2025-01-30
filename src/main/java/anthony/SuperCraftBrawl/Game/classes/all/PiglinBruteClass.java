@@ -76,25 +76,21 @@ public class PiglinBruteClass extends BaseClass {
 									if (instance.duosMap != null) {
 										if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
 											EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-													DamageCause.VOID, 4.0);
+													DamageCause.PROJECTILE, 4.0);
 											instance.getGameManager().getMain().getServer().getPluginManager()
 													.callEvent(damageEvent);
-											gamePlayer.damage(5.5, player);
+											gamePlayer.damage(4.0, player);
 										}
 									} else {
 										EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-												DamageCause.VOID, 4.0);
+												DamageCause.PROJECTILE, 4.0);
 										instance.getGameManager().getMain().getServer().getPluginManager()
 												.callEvent(damageEvent);
-										gamePlayer.damage(5.5, player);
+										gamePlayer.damage(4.0, player);
 									}
 								}
-								for (Player gamePlayer : instance.players) {
-									gamePlayer.playSound(hitLoc, Sound.EXPLODE, 2, 1);
-									// gamePlayer.getWorld().createExplosion(hit.getLocation().getX(),
-									// hit.getLocation().getY(), hit.getLocation().getZ(), 3, false, false);
-									gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_HUGE, 1);
-								}
+								player.getWorld().playSound(hitLoc, Sound.EXPLODE, 2, 1);
+								player.getWorld().playEffect(hitLoc, Effect.EXPLOSION_HUGE, 1);
 
 							}
 						}

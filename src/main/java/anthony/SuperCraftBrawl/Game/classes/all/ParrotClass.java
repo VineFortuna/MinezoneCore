@@ -18,6 +18,8 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -28,13 +30,14 @@ public class ParrotClass extends BaseClass {
     private final ItemStack weapon;
     private final ItemStack danceItem;
     private final Ability flapAbility = new Ability("&a&lFlap", 2, player);
-    private final Ability danceAbility = new Ability("&a&lDance", 20, player);
+    private final Ability danceAbility = new Ability("&a&lDance", 25, player);
     private BukkitRunnable danceRunnable;
     private Block danceTargetBlock;
 
     private static final double DANCE_ABILITY_RADIUS = 8;
     private static final double DANCE_ABILITY_DURATION = 8;
     private static final double HEAL_PER_SECOND = 1.25;
+    private static final int JUMP_BOOST_AMP = 0;
 
     private static final Material[] RECORDS = {
             Material.RECORD_3, Material.RECORD_4, Material.RECORD_5, Material.RECORD_6,
@@ -81,6 +84,9 @@ public class ParrotClass extends BaseClass {
 
     @Override
     public void Tick(int gameTicks) {
+        if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
+            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, JUMP_BOOST_AMP));
+
         // ActionBar
         if (isPlayerAlive()) {
             ActionBarManager actionBarManager = this.getActionBarManager();
@@ -123,6 +129,8 @@ public class ParrotClass extends BaseClass {
 
         playerInv.setItem(0, weapon);
         playerInv.setItem(1, danceItem);
+
+        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, JUMP_BOOST_AMP));
     }
 
     @Override

@@ -82,21 +82,14 @@ public class DonorClassesGUI implements InventoryProvider {
 											}
 										} else if (e.isLeftClick()) {
 											main.getGameManager().playerSelectClass(player, type);
-											player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
-													+ "=============================================");
-											player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
-											player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
-											player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| "
-													+ ChatColor.RESET + ChatColor.YELLOW + ChatColor.BOLD
-													+ "Selected Class: " + type.getTag());
-											player.sendMessage(
-													"" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| " + ChatColor.RESET
-															+ ChatColor.YELLOW + ChatColor.BOLD + "Class Desc: "
-															+ ChatColor.RESET + ChatColor.YELLOW + type.getClassDesc());
-											player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
-											player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "|| ");
-											player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD
-													+ "=============================================");
+											player.sendMessage(main.color("&2&l============================================="));
+											player.sendMessage(main.color("&2&l|| "));
+											player.sendMessage(main.color("&2&l|| "));
+											player.sendMessage(main.color("&2&l|| " + "&e&lSelected Class: " + type.getTag()));
+											player.sendMessage(main.color("&2&l|| " + "&e&lClass Desc: &e" + type.getClassDesc()));
+											player.sendMessage(main.color("&2&l|| "));
+											player.sendMessage(main.color("&2&l|| "));
+											player.sendMessage(main.color("&2&l============================================="));
 											inv.close(player);
 										} else if (e.isRightClick()) {
 											new ClassRewardsGUI(main, type, inv).inv.open(player);
