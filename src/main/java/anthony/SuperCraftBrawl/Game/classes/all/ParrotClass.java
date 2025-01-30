@@ -37,6 +37,7 @@ public class ParrotClass extends BaseClass {
     private static final double DANCE_ABILITY_RADIUS = 8;
     private static final double DANCE_ABILITY_DURATION = 8;
     private static final double HEAL_PER_SECOND = 1.25;
+    private static final int JUMP_BOOST_AMP = 0;
 
     private static final Material[] RECORDS = {
             Material.RECORD_3, Material.RECORD_4, Material.RECORD_5, Material.RECORD_6,
@@ -84,7 +85,7 @@ public class ParrotClass extends BaseClass {
     @Override
     public void Tick(int gameTicks) {
         if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
-            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 0));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, JUMP_BOOST_AMP));
 
         // ActionBar
         if (isPlayerAlive()) {
@@ -129,7 +130,7 @@ public class ParrotClass extends BaseClass {
         playerInv.setItem(0, weapon);
         playerInv.setItem(1, danceItem);
 
-        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 0));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, JUMP_BOOST_AMP));
     }
 
     @Override
