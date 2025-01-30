@@ -1853,18 +1853,18 @@ public class Core extends JavaPlugin implements Listener {
 	public void LobbyItems(Player player) {
 		if (this.getCommands() != null) {
 			player.getInventory().setItem(1,
-					ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER), "&bActive Games &3(Right Click)"));
+					ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER), "&bActive Games &7(Right Click)"));
 			player.getInventory().setItem(3,
-					ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), "&bClasses &3(Right Click)"));
+					ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), "&bClasses &7(Right Click)"));
 			player.getInventory().setItem(8,
-					ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), "&bChallenges &3(Right Click)"));
+					ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), "&bChallenges &7(Right Click)"));
 		}
 		player.getInventory().setItem(0,
-				ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&bGame Selector &3(Right Click)"));
+				ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&bGame Selector &7(Right Click)"));
 		player.getInventory().setItem(4,
-				ItemHelper.setDetails(new ItemStack(Material.CHEST), "&bCosmetics &3(Right Click)"));
+				ItemHelper.setDetails(new ItemStack(Material.CHEST), "&bCosmetics &7(Right Click)"));
 		ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
-		player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&bProfile &3(Right Click)"));
+		player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&bProfile &7(Right Click)"));
 
 		player.getInventory().setItem(5, getFishingRod(player));
 
