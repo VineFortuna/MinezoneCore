@@ -1859,7 +1859,7 @@ public abstract class BaseClass {
 						ChatColor.YELLOW + "Gold Balls",
 						ChatColor.YELLOW + "Right click to throw DEADLY gold balls!");
 				d.sendMessage(instance.getGameManager().getMain()
-						.color("&2&l(!) &rYou got a kill and gained an extra &aGold Ball"));
+						.color("&2&l(!) &rYou got a kill and gained an extra &eGold Ball"));
 				d.getInventory().addItem(item);
 			} else if (baseClass.getType() == ClassType.GrimReaper) {
 				ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
