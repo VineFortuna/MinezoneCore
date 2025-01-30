@@ -635,14 +635,14 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void displayClassSelectionMessage(Player player, ClassType type) {
-		player.sendMessage(main.color("&2&l=============================================="));
+		player.sendMessage(main.color("&2&l============================================="));
 		player.sendMessage(main.color("&2&l|| "));
 		player.sendMessage(main.color("&2&l|| "));
 		player.sendMessage(main.color("&2&l|| " + "&e&lSelected Class: " + type.getTag()));
 		player.sendMessage(main.color("&2&l|| " + "&e&lClass Desc: &e" + type.getClassDesc()));
 		player.sendMessage(main.color("&2&l|| "));
 		player.sendMessage(main.color("&2&l|| "));
-		player.sendMessage(main.color("&2&l=============================================="));
+		player.sendMessage(main.color("&2&l============================================="));
 	}
 
 	private void selectRandomClass(Player player, PlayerData playerData) {
