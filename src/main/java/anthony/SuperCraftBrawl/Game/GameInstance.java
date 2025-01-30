@@ -6,7 +6,6 @@ import anthony.SuperCraftBrawl.Game.classes.all.DarkSethBlingClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
-import anthony.SuperCraftBrawl.Holograms;
 import anthony.SuperCraftBrawl.PlayerListener;
 import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
@@ -19,7 +18,6 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
@@ -1981,7 +1979,7 @@ public class GameInstance {
 									|| classType.getTokenCost() == 0) {
 								if (playerData.level >= classType.getLevel()) {
 									if (classType != ClassType.Fisherman
-											|| this.getGameManager().getMain().hasAllFish(player)) {
+											|| this.getGameManager().getMain().fishing.hasUnlockedFisherman(player)) {
 										if (donor == null
 												|| player.hasPermission("scb." + donor.toString().toLowerCase())) {
 											selectedClass = classType;
