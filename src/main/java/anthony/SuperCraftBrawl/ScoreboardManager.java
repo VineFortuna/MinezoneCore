@@ -42,18 +42,15 @@ public class ScoreboardManager {
 		}
 
 		if (main.tournament == false) {
-			String gameServer = "SUPER CRAFT BLOCKS";
-			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + gameServer);
+			String gameServer = "Super Craft Blocks";
+			board.updateTitle(main.color("&r&l" + gameServer));
 			if (data != null) {
 				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						"" + ChatColor.RESET + ChatColor.BOLD + "Tokens: " + ChatColor.GRAY + data.tokens, "",
-						"" + ChatColor.RESET + ChatColor.BOLD + "Rank: "
-								+ main.getRankManager().getRank(player).getTag(),
-						"", "" + ChatColor.RESET + ChatColor.BOLD + "Level: " + ChatColor.GRAY + data.level,
-						"" + ChatColor.DARK_GRAY + "[" + ChatColor.GRAY + data.exp + "/2500 EXP" + ChatColor.DARK_GRAY
-								+ "]",
-						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						"" + ChatColor.AQUA + "minezone.club");
+						main.color("&b&lTokens: &7" + data.tokens), "",
+						main.color("&b&lRank: &r" + main.getRankManager().getRank(player).getTag()), "",
+						main.color("&b&lLevel: &7" + data.checkPlayerLevel(player, data) + "✧" + data.level),
+						main.color("&7" + data.exp + "/2500 EXP"),
+						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------", main.color("&bminezone.club"));
 			}
 		} else {
 			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + "MINEZONE");
@@ -101,8 +98,8 @@ public class ScoreboardManager {
 			game.boards.get(player).updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + game.getMap().toString());
 		} else {
 			board.updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD + game.duosMap.toString());
-			board.updateLines("", "" + ChatColor.RESET + ChatColor.BOLD + "Class:", " " + ChatColor.GOLD + "Random",
-					"", "" + ChatColor.RESET + ChatColor.BOLD + "Players:",
+			board.updateLines("", "" + ChatColor.RESET + ChatColor.BOLD + "Class:", " " + ChatColor.GOLD + "Random", "",
+					"" + ChatColor.RESET + ChatColor.BOLD + "Players:",
 					" " + ChatColor.RESET + game.players.size() + "/6", "",
 					"" + ChatColor.RESET + ChatColor.BOLD + "Status:",
 					"" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
