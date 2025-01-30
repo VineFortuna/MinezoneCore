@@ -52,7 +52,7 @@ public class FishermanClass extends BaseClass {
     
     private ItemStack healFish = ItemHelper.setDetails(new ItemStack(Material.COOKED_FISH, 1, (short) 1),
             "&d&lHealing Fish",
-            "&7Eat to gain 1 heart");
+            "&7Heals &e0.5 &c❤");
     
     private ItemStack bucket = ItemHelper.setDetails(new ItemStack(Material.BUCKET, 4), "&rBucket");
     
@@ -160,10 +160,10 @@ public class FishermanClass extends BaseClass {
                                 p != player && p.getLocation().distance(fish.getLocation()) <= 2) {
                             nearby = true;
                             EntityDamageEvent damageEvent = new EntityDamageEvent(p,
-                                    EntityDamageEvent.DamageCause.VOID, 4);
+                                    EntityDamageEvent.DamageCause.VOID, 5);
                             instance.getGameManager().getMain().getServer().getPluginManager()
                                     .callEvent(damageEvent);
-                            p.damage(4, player);
+                            p.damage(5, player);
                             p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 6 * 20, 0));
                         }
                     }
@@ -230,7 +230,7 @@ public class FishermanClass extends BaseClass {
                 player.playSound(player.getLocation(), Sound.SPLASH2, 1, 1);
                 hits = 0;
             } else if (item.isSimilar(healFish)) {
-                double heal = Math.min(2, player.getMaxHealth() - player.getHealth());
+                double heal = Math.min(1, player.getMaxHealth() - player.getHealth());
                 if (heal > 0) {
                     player.setHealth(player.getHealth() + heal);
                     player.playSound(player.getLocation(), Sound.EAT, 1, 1);
