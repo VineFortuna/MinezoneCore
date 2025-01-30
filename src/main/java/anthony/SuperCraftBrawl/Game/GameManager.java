@@ -669,7 +669,7 @@ public class GameManager implements Listener, PluginMessageListener {
 				Arrays.asList(EntityType.ZOMBIE, EntityType.SKELETON, EntityType.CREEPER, EntityType.PIG_ZOMBIE,
 						EntityType.MAGMA_CUBE, EntityType.SILVERFISH, EntityType.WITCH, EntityType.ENDERMITE,
 						EntityType.CHICKEN, EntityType.BLAZE, EntityType.PIG, EntityType.MUSHROOM_COW, EntityType.COW,
-						EntityType.WOLF));
+						EntityType.WOLF, EntityType.SPIDER));
 		if (entities.contains(entity.getEntityType())) {
 			entity.getDrops().clear();
 			entity.setDroppedExp(0);
@@ -2444,6 +2444,8 @@ public class GameManager implements Listener, PluginMessageListener {
 			return "Magma Cube";
 		case PIG_ZOMBIE:
 			return "Zombie Pigman";
+		case SPIDER:
+			return "Spider";
 		}
 		return "Creature";
 	}

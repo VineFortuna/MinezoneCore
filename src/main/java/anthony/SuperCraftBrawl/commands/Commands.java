@@ -682,7 +682,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private boolean isFishermanClassUnlocked(Player player, ClassType type) {
-		if (type == ClassType.Fisherman && main.getTotalFish(player) < FishType.values().length && !player.isOp()) {
+		if (type == ClassType.Fisherman && !main.fishing.hasUnlockedFisherman(player) && !player.isOp()) {
 			player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
 			return false;
 		}
