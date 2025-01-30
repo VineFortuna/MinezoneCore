@@ -635,14 +635,14 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void displayClassSelectionMessage(Player player, ClassType type) {
-		player.sendMessage(main.color("&2&l=============================================="));
+		player.sendMessage(main.color("&2&l============================================="));
 		player.sendMessage(main.color("&2&l|| "));
 		player.sendMessage(main.color("&2&l|| "));
 		player.sendMessage(main.color("&2&l|| " + "&e&lSelected Class: " + type.getTag()));
 		player.sendMessage(main.color("&2&l|| " + "&e&lClass Desc: &e" + type.getClassDesc()));
 		player.sendMessage(main.color("&2&l|| "));
 		player.sendMessage(main.color("&2&l|| "));
-		player.sendMessage(main.color("&2&l=============================================="));
+		player.sendMessage(main.color("&2&l============================================="));
 	}
 
 	private void selectRandomClass(Player player, PlayerData playerData) {
@@ -682,7 +682,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private boolean isFishermanClassUnlocked(Player player, ClassType type) {
-		if (type == ClassType.Fisherman && main.getTotalFish(player) < FishType.values().length && !player.isOp()) {
+		if (type == ClassType.Fisherman && !main.fishing.hasUnlockedFisherman(player) && !player.isOp()) {
 			player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
 			return false;
 		}
