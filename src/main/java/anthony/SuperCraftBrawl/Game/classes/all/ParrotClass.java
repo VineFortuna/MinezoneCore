@@ -5,7 +5,6 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
 import org.bukkit.*;
@@ -149,7 +148,11 @@ public class ParrotClass extends BaseClass {
                 Block blockAbove = danceTargetBlock.getRelative(BlockFace.UP);
 
                 // Check if blocks below and above are not solid
-                if (!blockBelow.getType().isSolid() && !blockAbove.getType().isSolid()) return;
+                if (!blockBelow.getType().isSolid() && !blockAbove.getType().isSolid()) {
+                    SoundManager.playErrorSound(player);
+                    danceAbility.sendPlayerCustomUseAbilityChatMessage("&c&l(!) &rYou can't place your ability there");
+                    return;
+                }
 
                 setDanceAbility();
                 danceAbility.use();
@@ -162,7 +165,7 @@ public class ParrotClass extends BaseClass {
                 if (!flapAbility.isReady()) return;
 
                 player.setVelocity(new Vector(0, 0.8, 0));
-                SoundManager.playSoundToAllGamePlayersFromALocation(instance, player.getLocation(), Sound.BAT_TAKEOFF, 0.8f, 1.6f);
+                SoundManager.playSoundToAllFromPlayerLocation(instance, player, Sound.BAT_TAKEOFF, 0.8f, 1.6f);
 
                 flapAbility.use();
             }
