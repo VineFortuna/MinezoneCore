@@ -38,7 +38,7 @@ public class TokenClassesGUI implements InventoryProvider {
 					new ClassSelectorGUI(main).inv.open(player);
 				}));
 
-		for (ClassType type : ClassType.values()) {
+		for (ClassType type : ClassType.getAvailableClasses()) {
 			if (type.getTokenCost() > 0) {
 				
 				ClassDetails details = data.playerClasses.get(type.getID());

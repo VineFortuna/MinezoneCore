@@ -1866,7 +1866,7 @@ public class GameInstance {
 		BaseClass baseClass = classes.get(player);
 
 		if (baseClass.getLives() > 1) {
-			ClassType classType = ClassType.values()[random.nextInt(ClassType.values().length)];
+			ClassType classType = ClassType.getAvailableClasses()[random.nextInt(ClassType.getAvailableClasses().length)];
 			BaseClass newBaseClass = classType.GetClassInstance(this, player);
 			BaseClass oldBaseClass = classes.get(player);
 			oldClasses.put(player, oldBaseClass);
@@ -1959,7 +1959,7 @@ public class GameInstance {
 						int randomIndex = rand.nextInt(playerData.customIntegers.size());
 						int randValue = playerData.customIntegers.get(randomIndex);
 
-						for (ClassType type : ClassType.values()) {
+						for (ClassType type : ClassType.getAvailableClasses()) {
 							if (type.getID() == randValue) {
 								selectedClass = type;
 								break;
@@ -1967,11 +1967,11 @@ public class GameInstance {
 						}
 					}
 				} else {
-					selectedClass = ClassType.values()[rand.nextInt(ClassType.values().length)];
+					selectedClass = ClassType.getAvailableClasses()[rand.nextInt(ClassType.getAvailableClasses().length)];
 					if (gameType != GameType.FRENZY) {
 						while (attempts <= 500) {
 							attempts++;
-							ClassType classType = ClassType.values()[rand.nextInt(ClassType.values().length)];
+							ClassType classType = ClassType.getAvailableClasses()[rand.nextInt(ClassType.getAvailableClasses().length)];
 							Rank donor = classType.getMinRank();
 
 							if (playerData.playerClasses.get(classType.getID()) != null
@@ -2437,7 +2437,7 @@ public class GameInstance {
 		Random rand = new Random();
 		int r;
 		for (int i = 0; i < 5; i++) {
-			ClassType classType = ClassType.values()[random.nextInt(ClassType.values().length)];
+			ClassType classType = ClassType.getAvailableClasses()[random.nextInt(ClassType.getAvailableClasses().length)];
 			classes.add(classType);
 		}
 		return classes;

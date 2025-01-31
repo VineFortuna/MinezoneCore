@@ -39,7 +39,7 @@ public class FavoriteClassesGUI implements InventoryProvider {
 
 		if (data != null) {
 			if (!(data.customIntegers.isEmpty())) {
-				for (ClassType type : ClassType.values()) {
+				for (ClassType type : ClassType.getAvailableClasses()) {
 					if (data.customIntegers.contains(type.getID())) {
 
 						ClassDetails details = data.playerClasses.get(type.getID());

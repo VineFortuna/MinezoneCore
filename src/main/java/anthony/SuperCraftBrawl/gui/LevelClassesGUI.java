@@ -39,7 +39,7 @@ public class LevelClassesGUI implements InventoryProvider {
 		int a = 0;
 		int b = 0;
 
-		for (ClassType type : ClassType.values()) {
+		for (ClassType type : ClassType.getAvailableClasses()) {
 			if (type.getTokenCost() == 0 && type.getMinRank() != Rank.VIP && type.getLevel() > 0) {
 				
 				ClassDetails details = data.playerClasses.get(type.getID());
