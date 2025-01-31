@@ -52,6 +52,8 @@ commands:
       description: Online players command!
    purchases:
       description: Purchases command!
+   maplist:
+      description: Displays a list of SCB maps!
    maps:
       description: Displays a list of SCB maps!
    seen:
@@ -144,6 +146,8 @@ commands:
       description: Get all SCB Item Drops
    lactate:
       description: Lactate command!
+   sound:
+      description: Play a sound on your location
       
 permissions:
    scb.admin:
@@ -159,12 +163,15 @@ permissions:
          scb.give: true
          scb.purchases: true
          punish.networkban: true
-   scb.builder:
-      description: Builder perms
-      children:
-         scb.developer: true
    scb.developer:
       description: Developer perms
+      children:
+         scb.builder: true
+         scb.items: true
+         scb.sound: true
+         scb.lactate: true
+   scb.builder:
+      description: Builder perms
       children:
          scb.moderator: true
          scb.gm: true
@@ -172,7 +179,6 @@ permissions:
          scb.gms: true
          scb.gmsp: true
          scb.gma: true
-         scb.items: true
    scb.moderator:
       description: Moderator perms
       children:
