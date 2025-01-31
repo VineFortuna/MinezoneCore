@@ -35,81 +35,80 @@ public class FreeClassesGUI implements InventoryProvider {
 		
 		PlayerData data = main.getDataManager().getPlayerData(player);
 
-		for (ClassType type : ClassType.getAvailableClasses()) {
-			if (type.getTokenCost() == 0 && type.getMinRank() != Rank.VIP && type.getLevel() == 0) {
-				ItemStack item = type.getItem();
+		for (ClassType type : ClassType.sortAlphabetically(ClassType.getFreeClasses(false))) {
+			ItemStack item = type.getItem();
 
-				if (type == ClassType.Fisherman && !main.fishing.hasUnlockedFisherman(player)) {
-					continue;
-				}
-				
-				ClassDetails details = data.playerClasses.get(type.getID());
-				int played = details.gamesPlayed + 2 * details.gamesWon;
-				int nextLevel = 10;
-				
-				if (played >= 75)
-					nextLevel = 100;
-				else if (played >= 50)
-					nextLevel = 75;
-				else if (played >= 25)
-					nextLevel = 50;
-				else if (played >= 10)
-					nextLevel = 25;
-				
-				
-				if (item == null)
-					item = new ItemStack(Material.WOOD);
-				contents.set(a, b,
-						ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true),
-										type.getTag(), type.buildDescription(), "",
-								"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
-										+ ChatColor.YELLOW + " to choose a class",
-								"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET
-										+ ChatColor.YELLOW + " to view mastery",
-								"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Shift Click" + ChatColor.RESET
-										+ ChatColor.YELLOW + " to add a favorite class",
-										"",
-										main.color("&aNext reward:"),
-										main.progressBar(played, nextLevel, 25)),
-								e -> {
-									if (e.isShiftClick()) {
-										if (data != null) {
-											if (!data.customIntegers.contains(type.getID())) {
-												data.customIntegers.add(type.getID());
-												player.sendMessage(
-														main.color("&2&l(!) &rAdded new favorite class: " + type.getTag()));
-												main.getDataManager().saveData(data);
-											} else {
-												player.sendMessage(
-														main.color("&c&l(!) &r" + type.getTag() + " &ris already one of your favorites!"));
-											}
+			int fished = main.fishing.getTotalFish(player);
+			if (type == ClassType.Fisherman && fished < FishType.values().length) {
+				continue;
+			}
+
+			ClassDetails details = data.playerClasses.get(type.getID());
+			int played = details.gamesPlayed + 2 * details.gamesWon;
+			int nextLevel = 10;
+
+			if (played >= 75)
+				nextLevel = 100;
+			else if (played >= 50)
+				nextLevel = 75;
+			else if (played >= 25)
+				nextLevel = 50;
+			else if (played >= 10)
+				nextLevel = 25;
+
+
+			if (item == null)
+				item = new ItemStack(Material.WOOD);
+			contents.set(a, b,
+					ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true),
+									type.getTag(), type.buildDescription(), "",
+									"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
+											+ ChatColor.YELLOW + " to choose a class",
+									"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET
+											+ ChatColor.YELLOW + " to view mastery",
+									"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Shift Click" + ChatColor.RESET
+											+ ChatColor.YELLOW + " to add a favorite class",
+									"",
+									main.color("&aNext reward:"),
+									main.progressBar(played, nextLevel, 25)),
+							e -> {
+								if (e.isShiftClick()) {
+									if (data != null) {
+										if (!data.customIntegers.contains(type.getID())) {
+											data.customIntegers.add(type.getID());
+											player.sendMessage(
+													main.color("&2&l(!) &rAdded new favorite class: " + type.getTag()));
+											main.getDataManager().saveData(data);
+										} else {
+											player.sendMessage(
+													main.color("&c&l(!) &r" + type.getTag() + " &ris already one of your favorites!"));
 										}
-									} else if (e.isLeftClick()) {
-										main.getGameManager().playerSelectClass(player, type);
-										player.sendMessage(main.color("&2&l============================================="));
-										player.sendMessage(main.color("&2&l|| "));
-										player.sendMessage(main.color("&2&l|| "));
-										player.sendMessage(main.color("&2&l|| " + "&e&lSelected Class: " + type.getTag()));
-										player.sendMessage(main.color("&2&l|| " + "&e&lClass Desc: &e" + type.getClassDesc()));
-										player.sendMessage(main.color("&2&l|| "));
-										player.sendMessage(main.color("&2&l|| "));
-										player.sendMessage(main.color("&2&l============================================="));
-										inv.close(player);
-									} else if (e.isRightClick()) {
-										new ClassRewardsGUI(main, type, inv).inv.open(player);
 									}
-								}));
+								} else if (e.isLeftClick()) {
+									main.getGameManager().playerSelectClass(player, type);
+									player.sendMessage(main.color("&2&l============================================="));
+									player.sendMessage(main.color("&2&l|| "));
+									player.sendMessage(main.color("&2&l|| "));
+									player.sendMessage(main.color("&2&l|| " + "&e&lSelected Class: " + type.getTag()));
+									player.sendMessage(main.color("&2&l|| " + "&e&lClass Desc: &e" + type.getClassDesc()));
+									player.sendMessage(main.color("&2&l|| "));
+									player.sendMessage(main.color("&2&l|| "));
+									player.sendMessage(main.color("&2&l============================================="));
+									inv.close(player);
+								} else if (e.isRightClick()) {
+									new ClassRewardsGUI(main, type, inv).inv.open(player);
+								}
+							}));
 
-				b++;
+			b++;
 
-				if (b > 8) {
-					if (a == 0) {
-						a = 1;
-						b = 0;
-					} else if (a == 1) {
-						a = 2;
-						b = 0;
-					}
+			if (b > 8) {
+				if (a == 0) {
+					a = 1;
+					b = 0;
+				} else if (a == 1) {
+					a = 2;
+					b = 0;
 				}
 			}
 		}

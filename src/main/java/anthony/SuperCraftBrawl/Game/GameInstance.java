@@ -1123,7 +1123,7 @@ public class GameInstance {
 
 	public void PlayerDeath(Player player) {
 		if (this.gameType == GameType.FRENZY)
-			rerandomizeClass(player);
+			reRandomizeClass(player);
 		else if (this.gameType == GameType.GUNGAME)
 			nextClass(player);
 
@@ -1862,7 +1862,7 @@ public class GameInstance {
 	// public BaseClass oldBaseClass; // Public because we want to use this variable
 	// in BaseClass.java
 
-	private void rerandomizeClass(Player player) {
+	private void reRandomizeClass(Player player) {
 		BaseClass baseClass = classes.get(player);
 
 		if (baseClass.getLives() > 1) {
