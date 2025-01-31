@@ -31,7 +31,7 @@ public class ClassSelectorGUI implements InventoryProvider {
 	public void init(Player player, InventoryContents contents) {
 		boolean updated = false;
 		PlayerData data = main.getDataManager().getPlayerData(player);
-		for (ClassType type : ClassType.values()) {
+		for (ClassType type : ClassType.getAvailableClasses()) {
 			ClassDetails details = data.playerClasses.get(type.getID());
 			if (details == null) {
 				updated = true;

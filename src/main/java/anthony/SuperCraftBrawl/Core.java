@@ -918,7 +918,7 @@ public class Core extends JavaPlugin implements Listener {
 				String tClasses = "";
 				String lClasses = "";
 				String rClasses = "";
-				for (ClassType type : ClassType.values()) {
+				for (ClassType type : ClassType.getAvailableClasses()) {
 					if (type.getTokenCost() == 0 && type.getLevel() == 0 && type.getMinRank() != Rank.VIP)
 						dClasses += type.getTag() + " ";
 					else if (type.getTokenCost() > 0)
