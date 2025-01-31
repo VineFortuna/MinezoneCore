@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 public enum ClassType {
@@ -95,9 +96,9 @@ public enum ClassType {
 
 	// Holiday Classes
 	Elf(101, 0, 0, true),
-	GingerBreadMan(71, 0, 0, true),
-	Santa(72, 0, 0, true),
-	GrimReaper(102, 0, 0, true);
+	GingerBreadMan(102, 0, 0, true),
+	Santa(103, 0, 0, true),
+	GrimReaper(104, 0, 0, true);
 
 	private final int id;
 	private int tokenCost = 0;
@@ -131,194 +132,317 @@ public enum ClassType {
 		this.donor = donor;
 	}
 
-	// Get a list of available classes (non-vaulted)
-	public static ClassType[] getAvailableClasses() {
-		return Arrays.stream(values())
-				.filter(clazz -> !clazz.isVaulted())
-				.toArray(ClassType[]::new);
-	}
-
-	public int getID() {
-		return id;
-	}
-
-	public int getTokenCost() {
-		return tokenCost;
-	}
-
-	public int getLevel() {
-		return level;
-	}
-
-	public Rank getMinRank() {
-		return donor;
-	}
-
-	public boolean isVaulted() {
-		return isVaulted;
-	}
-
-	public static ClassType fromID(int id) {
-		for (ClassType ct : ClassType.getAvailableClasses()) {
-			if (ct.getID() == id) {
-				return ct;
-			}
-		}
-		return null;
-	}
-
-	public BaseClass GetClassInstance(GameInstance instance, Player player) {
+	public String getClassDesc() {
 		switch (this) {
-		case Cactus:
-			return new Cactus(instance, player);
-		case Santa:
-			return new SantaClass(instance, player);
-		case GingerBreadMan:
-			return new GingerBreadManClass(instance, player);
-		case Elf:
-			return new ElfClass(instance, player);
-		case GrimReaper:
-			return new GrimReaperClass(instance, player);
-		case BrewingStand:
-			return new BrewingStandClass(instance, player);
-		case Fade:
-			return new FadeClass(instance, player);
-		case Cloud:
-			return new CloudClass(instance, player);
-		case Firework:
-			return new FireworkClass(instance, player);
-		case Shulker:
-			return new ShulkerClass(instance, player);
-		case WitherSkeleton:
-			return new WitherSkeletonClass(instance, player);
-		case Rabbit:
-			return new RabbitClass(instance, player);
-		case FlintAndSteel:
-			return new FlintAndSteelClass(instance, player);
-		case Hunter:
-			return new HunterClass(instance, player);
-		case Jeb:
-			return new JebClass(instance, player);
-		case Bee:
-			return new BeeClass(instance, player);
-		case Ice:
-			return new IceClass(instance, player);
-		case Vampire:
-			return new VampireClass(instance, player);
-		case ZombiePigman:
-			return new ZombiePigmanClass(instance, player);
-		case Villager:
-			return new VillagerClass(instance, player);
-		case ZombieVillager:
-			return new ZombieVillagerClass(instance, player);
-		case MagmaCube:
-			return new MagmaCubeClass(instance, player);
-		case Summoner:
-			return new SummonerClass(instance, player);
-		case Anvil:
-			return new AnvilClass(instance, player);
-		case Silverfish:
-			return new SilverfishClass(instance, player);
-		case Zombie:
-			return new ZombieClass(instance, player);
-		case Dweller:
-			return new DwellerClass(instance, player);
-		case Star:
-			return new StarClass(instance, player);
-		case Wizard:
-			return new WizardClass(instance, player);
-		case Present:
-			return new PresentClass(instance, player);
-		case Bedrock:
-			return new BedrockClass(instance, player);
-		case Notch:
-			return new NotchClass(instance, player);
-		case EnchantTable:
-			return new EnchantTableClass(instance, player);
-		case Noteblock:
-			return new NoteblockClass(instance, player);
-		case Ocelot:
-			return new OcelotClass(instance, player);
-		case Creeper:
-			return new CreeperClass(instance, player);
-		case Wither:
-			return new WitherClass(instance, player);
-		case Blaze:
-			return new BlazeClass(instance, player);
-		case Potato:
-			return new PotatoClass(instance, player);
-		case Steve:
-			return new SteveClass(instance, player);
-		case Enderdragon:
-			return new EnderdragonClass(instance, player);
-		case Skeleton:
-			return new SkeletonClass(instance, player);
-		case TNT:
-			return new TNTClass(instance, player);
-		case Ninja:
-			return new NinjaClass(instance, player);
-		case IronGolem:
-			return new IrongolemClass(instance, player);
-		case Enderman:
-			return new EndermanClass(instance, player);
-		case Ghast:
-			return new GhastClass(instance, player);
-		case Herobrine:
-			return new HerobrineClass(instance, player);
-		case Chicken:
-			return new ChickenClass(instance, player);
-		case Slime:
-			return new SlimeClass(instance, player);
-		case PiglinBrute:
-			return new PiglinBruteClass(instance, player);
-		case DarkSethBling:
-			return new DarkSethBlingClass(instance, player);
-		case Witch:
-			return new WitchClass(instance, player);
-		case SnowGolem:
-			return new SnowGolemClass(instance, player);
-		case Bat:
-			return new BatClass(instance, player);
-		case SethBling:
-			return new SethBlingClass(instance, player);
-		case Sheep:
-			return new SheepClass(instance, player);
-		case Horse:
-			return new HorseClass(instance, player);
-		case Melon:
-			return new MelonClass(instance, player);
-		case ButterBro:
-			return new ButterBroClass(instance, player);
-		case Squid:
-			return new SquidClass(instance, player);
-		case Spider:
-			return new SpiderClass(instance, player);
-		case BabyCow:
-			return new BabyCowClass(instance, player);
-		case Bunny:
-			return new BunnyClass(instance, player);
-		case Pig:
-			return new PigClass(instance, player);
-		case LargeFern:
-			return new LargeFernClass(instance, player);
-		case Vindicator:
-			return new VindicatorClass(instance, player);
-		case Fisherman:
-			return new FishermanClass(instance, player);
-		case Endermite:
-			return new EndermiteClass(instance, player);
- 		case Wolf:
- 			return new WolfClass(instance, player);
-		case Parrot:
-			return new ParrotClass(instance, player);
-		case Guardian:
-			return new GuardianClass(instance, player);
+			case Cactus:
+				return "A pricklyyy living thing, made up of thorns & blood..";
+			case Santa:
+				return "HO HO HO! MERRRRRRYYYY CHRISTMASSSSS";
+			case GingerBreadMan:
+				return "DO YOU KNOW? THE GINGERBREADMAN!?!?!";
+			case Elf:
+				return "Santa's lil helper here to deliver";
+			case GrimReaper:
+				return "Harvest souls with deadly precision, wielding dark powers..";
+			case BrewingStand:
+				return "Hit players to obtain Brewing items to get epic potions!";
+			case Fade:
+				return "Fade out of existence from your opponents briefly!";
+			case Cloud:
+				return "Use your powers to send cool effects on your opponents!";
+			case Firework:
+				return "Shoot colorful fireworks and inflict different effects!";
+			case Shulker:
+				return "You want me? I want you baby, my sugar boo, I'm levitating";
+			case WitherSkeleton:
+				return "Shoot your withering blasts at other players!";
+			case Rabbit:
+				return "Hit your enemies and eventually obtain a strong weapon";
+			case FlintAndSteel:
+				return "Combo your flint & steel for a special reward";
+			case Hunter:
+				return "Damage your enemies to gain Blood Lust to get special potions!";
+			case Jeb:
+				return "Notch vs. Jeb, who wins?";
+			case Bee:
+				return "Mama taught ya to sting so use it!";
+			case Ice:
+				return "Freeze thy enemies!!";
+			case Vampire:
+				return "Use your bow to poison your enemies!";
+			case ZombiePigman:
+				return "Summon your brothers to help you fight your enemies while you smack them with your Gold Sword!";
+			case ZombieVillager:
+				return "A poisonous creature...";
+			case Villager:
+				return "Toss your potatoes to confuse your enemies";
+			case MagmaCube:
+				return "Fairly high double jump and ability to spawn 7 MagmaCube minions";
+			case Summoner:
+				return "Beware the Summoner...";
+			case Anvil:
+				return "Goomba stomp your opponents!";
+			case Silverfish:
+				return "A very annoying creature ready to eat your enemies!";
+			case Zombie:
+				return "What do I even write here";
+			case Dweller:
+				return "Beware the Dweller of SCB!";
+			case Star:
+				return "Born in 1964 Jeffrey... Jeffrey Besos";
+			case Wizard:
+				return "A Wizard with different spells!";
+			case Present:
+				return "Copy other people's item, armor, or effect/double jump!";
+			case Bedrock:
+				return "Tough to defeat am I right haha";
+			case Noteblock:
+				return "Play some songs for some awesome effects!";
+			case EnchantTable:
+				return "Get kills to get some awesome enchantments!";
+			case Ocelot:
+				return "Chase down your opponents with your high speed or Purr Attack!";
+			case Creeper:
+				return "Defeat your opponents with your explosive arsenal";
+			case Potato:
+				return "Who doesn't like potatoes?!";
+			case Wither:
+				return "Utilize your explosive skulls to defeat your enemies!";
+			case Notch:
+				return "The owner of Minecraft...";
+			case Blaze:
+				return "ITS A BLAZE LOL!";
+			case Steve:
+				return "OMG OMG GET HYPED!!!";
+			case Skeleton:
+				return "A long range shooter effective at taking down their targets";
+			case Enderdragon:
+				return "Jump higher than your opponents and teleport around!";
+			case Enderman:
+				return "Stare into the souls of your enemies whilst teleporting around them";
+			case Horse:
+				return "Nayyy!! Different effects = different powers!";
+			case Squid:
+				return "UNDA DA SEA! UNDA DA SEA!";
+			case Spider:
+				return "Bite and poison your enemies while fighting them!";
+			case Ninja:
+				return "Ambush your enemies with sneaky attacks and agility";
+			case TNT:
+				return "Blow up your enemies with TNT!";
+			case Chicken:
+				return "Bock bock backaaack! One of the best classes hehe tip";
+			case DarkSethBling:
+				return "The evil counterpart of the redstone King";
+			case Witch:
+				return "She lives in daydreams with me! (She)";
+			case Sheep:
+				return "Different colors of wool gives you different powers!";
+			case SnowGolem:
+				return "This is a SnowGolem, not a Snowman. Get it right pleb!";
+			case Bunny:
+				return "Easter Bunny is coming to town!";
+			case ButterBro:
+				return "Yo, you there Sky??";
+			case IronGolem:
+				return "Smack your enemies into the air while defending your village!";
+			case Ghast:
+				return "Burn down your enemies with your sorrows";
+			case Slime:
+				return "Throw sticky grenades and attack enemies!";
+			case PiglinBrute:
+				return "Knock people away... or explode them";
+			case Bat:
+				return "Dance around your opponents with SUPER high jumps!";
+			case SethBling:
+				return "The creator of SCB, wanna fight?!?!";
+			case Melon:
+				return "The Owner of the server in the game?!";
+			case BabyCow:
+				return "moo... MOO!!";
+			case Herobrine:
+				return "Use your Diamond of Despair to play tricks on your opponents!";
+			case Pig:
+				return "Hit and run. In your panic, you gain speed when hit";
+			case LargeFern:
+				return "??????";
+			case Vindicator:
+				return "Vindicate yourself in front of your enemies";
+			case Fisherman:
+				return "Let's go fishing!";
+			case Endermite:
+				return "Unleash chaos as you swap places with your swarm of Endermites";
+			case Wolf:
+				return "Have your pack defend you from enemies!";
+			case Parrot:
+				return "Regenerate health through music!";
+			case Guardian:
+				return "Guard thyself and thy family (or something idk)";
 //		case Fluxty:
-//			return new FluxtyClass(instance, player);
+//			return: "We cannot have HATERS in the community... So use your Wood Axe to kick em all out!";
 //		case Snowman:
-//			return new SnowmanClass(instance, player);
+//			return "This is a Snowman, not a SnowGolem. Get it right pleb!";
 		}
 		return null;
+	}
+
+	public String getTag() {
+		switch (this) {
+			case Bat:
+				return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bat" + ChatColor.RESET;
+			case Santa:
+				return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "Santa" + ChatColor.RESET;
+			case GingerBreadMan:
+				return color("&6GingerBread&0Man&r");
+			case Elf:
+				return color("&2&lElf&r");
+			case GrimReaper:
+				return color("&8&l&oGrimReaper&r");
+			case BrewingStand:
+				return "" + ChatColor.YELLOW + "BrewingStand" + ChatColor.RESET;
+			case Fade:
+				return "" + ChatColor.DARK_GRAY + ChatColor.ITALIC + "Fade" + ChatColor.RESET;
+			case Cloud:
+				return "" + ChatColor.WHITE + ChatColor.ITALIC + "Cloud" + ChatColor.RESET;
+			case Guardian:
+				return "" + ChatColor.DARK_AQUA + ChatColor.BOLD + "Guardian" + ChatColor.RESET;
+			case Firework:
+				return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "Firework" + ChatColor.RESET;
+			case Bedrock:
+				return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bedrock" + ChatColor.RESET;
+			case Shulker:
+				return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + ChatColor.ITALIC + "Shulker" + ChatColor.RESET;
+			case WitherSkeleton:
+				return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "WitherSkeleton" + ChatColor.RESET;
+			case FlintAndSteel:
+				return "" + ChatColor.DARK_GRAY + "Flint" + ChatColor.GRAY + "&" + ChatColor.WHITE + "Steel" + ChatColor.RESET;
+			case Hunter:
+				return "" + ChatColor.GOLD + ChatColor.BOLD + "Hunter" + ChatColor.RESET;
+			case Jeb:
+				return "" + ChatColor.GRAY + ChatColor.ITALIC + "Jeb" + ChatColor.RESET;
+			case Bee:
+				return "" + ChatColor.YELLOW + ChatColor.ITALIC + ChatColor.BOLD + "Bee" + ChatColor.RESET;
+			case Ice:
+				return "" + ChatColor.AQUA + ChatColor.BOLD + "Ice" + ChatColor.RESET;
+			case Vampire:
+				return "" + ChatColor.GRAY + ChatColor.BOLD + "Vampire" + ChatColor.RESET;
+			case ZombiePigman:
+				return "" + ChatColor.GREEN + ChatColor.ITALIC + "Zombie" + ChatColor.LIGHT_PURPLE + ChatColor.ITALIC + "Pigman" + ChatColor.RESET;
+			case ZombieVillager:
+				return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Zombie" + ChatColor.GRAY + ChatColor.BOLD + "Villager"
+						+ ChatColor.RESET;
+			case Villager:
+				return "" + ChatColor.GREEN + "Villager" + ChatColor.RESET;
+			case MagmaCube:
+				return "" + ChatColor.DARK_RED + ChatColor.BOLD + "MagmaCube" + ChatColor.RESET;
+			case Summoner:
+				return "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + ChatColor.ITALIC + "Summoner" + ChatColor.RESET;
+			case Anvil:
+				return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Anvil" + ChatColor.RESET;
+			case Silverfish:
+				return "" + ChatColor.GRAY + ChatColor.ITALIC + "Silverfish" + ChatColor.RESET;
+			case Zombie:
+				return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + "Zombie" + ChatColor.RESET;
+			case Dweller:
+				return "" + ChatColor.GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Dweller" + ChatColor.RESET;
+			case Star:
+				return "" + ChatColor.DARK_GRAY + "Star" + ChatColor.RESET;
+			case Wizard:
+				return "" + ChatColor.RED + ChatColor.BOLD + "Wizard" + ChatColor.RESET;
+			case Present:
+				return "" + ChatColor.GOLD + ChatColor.BOLD + "Present" + ChatColor.RESET;
+			case Wither:
+				return "" + ChatColor.DARK_GRAY + "Wither" + ChatColor.RESET;
+			case Noteblock:
+				return "" + ChatColor.GOLD + "Noteblock" + ChatColor.RESET;
+			case EnchantTable:
+				return "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Enchant" + ChatColor.RED + ChatColor.BOLD + "Table"
+						+ ChatColor.RESET;
+			case Ocelot:
+				return "" + ChatColor.YELLOW + ChatColor.BOLD + "Ocelot" + ChatColor.RESET;
+			case Creeper:
+				return "" + ChatColor.GREEN + "Creeper" + ChatColor.RESET;
+			case Notch:
+				return "" + ChatColor.DARK_AQUA + ChatColor.BOLD + "Notch" + ChatColor.RESET;
+			case Blaze:
+				return "" + ChatColor.DARK_RED + "Blaze" + ChatColor.RESET;
+			case Potato:
+				return "" + ChatColor.YELLOW + ChatColor.ITALIC + "Potato" + ChatColor.RESET;
+			case Steve:
+				return "" + ChatColor.AQUA + "Steve" + ChatColor.RESET;
+			case PiglinBrute:
+				return "" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.ITALIC + "PiglinBrute" + ChatColor.RESET;
+			case Herobrine:
+				return "" + ChatColor.AQUA + ChatColor.BOLD + ChatColor.ITALIC + "Herobrine" + ChatColor.RESET;
+			case Cactus:
+				return "" + ChatColor.DARK_GREEN + "Cactus" + ChatColor.RESET;
+			case Chicken:
+				return "" + ChatColor.YELLOW + ChatColor.BOLD + "Chicken" + ChatColor.RESET;
+			case DarkSethBling:
+				return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "DarkSethBling" + ChatColor.RESET;
+			case Enderdragon:
+				return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Ender" + ChatColor.RESET + ChatColor.DARK_GRAY + ChatColor.BOLD + "Dragon" + ChatColor.RESET;
+			case Enderman:
+				return "" + ChatColor.DARK_PURPLE + "Enderman" + ChatColor.RESET;
+			case Ghast:
+				return "" + ChatColor.WHITE + ChatColor.BOLD + ChatColor.ITALIC + "Ghast" + ChatColor.RESET;
+			case IronGolem:
+				return "" + ChatColor.GRAY + ChatColor.BOLD + ChatColor.ITALIC + "IronGolem" + ChatColor.RESET;
+			case Ninja:
+				return "" + ChatColor.BLUE + ChatColor.BOLD + "Ninja" + ChatColor.RESET;
+			case SethBling:
+				return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "SethBling" + ChatColor.RESET;
+			case Sheep:
+				return "" + ChatColor.WHITE + ChatColor.BOLD + ChatColor.ITALIC + "Sheep" + ChatColor.RESET;
+			case Skeleton:
+				return "" + ChatColor.GRAY + "Skeleton" + ChatColor.RESET;
+			case Slime:
+				return "" + ChatColor.GREEN + ChatColor.BOLD + "Slime" + ChatColor.RESET;
+			case SnowGolem:
+				return "" + ChatColor.WHITE + ChatColor.BOLD + "SnowGolem" + ChatColor.RESET;
+			case TNT:
+				return "" + ChatColor.RED + ChatColor.BOLD + "T" + ChatColor.RESET + ChatColor.BOLD + "N" + ChatColor.RESET
+						+ ChatColor.RED + ChatColor.BOLD + "T" + ChatColor.RESET;
+			case Witch:
+				return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Witch" + ChatColor.RESET;
+			case Horse:
+				return "" + ChatColor.GOLD + ChatColor.ITALIC + "Horse" + ChatColor.RESET;
+			case Melon:
+				return "" + ChatColor.YELLOW + "Melon" + ChatColor.RESET;
+			case Rabbit:
+				return "" + ChatColor.GREEN + ChatColor.ITALIC + "Rabbit" + ChatColor.RESET;
+			case Squid:
+				return "" + ChatColor.DARK_BLUE + ChatColor.ITALIC + "Squid" + ChatColor.RESET;
+			case Spider:
+				return "" + ChatColor.RED + ChatColor.ITALIC + "Spider" + ChatColor.RESET;
+			case BabyCow:
+				return "" + ChatColor.RED + ChatColor.ITALIC + ChatColor.BOLD + "BabyCow" + ChatColor.RESET;
+			case Bunny:
+				return "" + ChatColor.YELLOW + ChatColor.ITALIC + ChatColor.BOLD + "Bunny" + ChatColor.RESET;
+			case ButterBro:
+				return "" + ChatColor.YELLOW + ChatColor.BOLD + "ButterBro" + ChatColor.RESET;
+			case Pig:
+				return "" + ChatColor.LIGHT_PURPLE + "Pig" + ChatColor.RESET;
+			case LargeFern:
+				return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + ChatColor.BOLD + "LargeFern" + ChatColor.RESET;
+			case Vindicator:
+				return "" + ChatColor.GRAY + ChatColor.BOLD + "Vindicator" + ChatColor.RESET;
+			case Fisherman:
+				return "" + ChatColor.DARK_AQUA + ChatColor.ITALIC + "Fisherman" + ChatColor.RESET;
+			case Endermite:
+				return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + ChatColor.ITALIC + "Endermite" + ChatColor.RESET;
+			case Wolf:
+				return "" + ChatColor.WHITE  + ChatColor.ITALIC + "Wolf" + ChatColor.RESET;
+			case Parrot:
+				return "" + ChatColor.GREEN + "Parrot" + ChatColor.RESET;
+// 		case Snowman:
+// 			return "" + ChatColor.RESET + "Snow" + ChatColor.DARK_GREEN + "Man" + ChatColor.RESET;
+// 		case Fluxty:
+// 			return "" + ChatColor.GREEN + ChatColor.BOLD + "Fluxty" + ChatColor.RESET;
+			default:
+				break;
+		}
+		return this.toString();
 	}
 
 	public ItemStack getItem() {
@@ -368,7 +492,7 @@ public enum ClassType {
 		case Villager:
 			return new ItemStack(Material.EMERALD);
 		case DarkSethBling:
-			return new ItemStack(Material.COAL_BLOCK);
+			return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWE3MDVkYzkzYWIzYjIyNDUxNmI4YWZiMjMwNTI5MWIyODU1ZWIyMzVjZThlNGVkNDY2NjQyODBhYmRhIn19fQ==");
 		case ZombieVillager:
 			return new ItemStack(Material.ROTTEN_FLESH);
 		case MagmaCube:
@@ -426,7 +550,8 @@ public enum ClassType {
 		case Bat:
 			return new ItemStack(new ItemStack(Material.SHEARS));
 		case SethBling:
-			return new ItemStack(new ItemStack(Material.REDSTONE_BLOCK));
+			return ItemHelper.createSkullTexture(
+					"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I4NmI4MjE1YjM2MTBlYWE2NDhjMjNjNGEyMGFkNjc1OWYyNTFlZjg1NDc2ODI5ZGQ2ZDE4NDI4MjNiMTEzIn19fQ==");
 		case Melon:
 			return new ItemStack(new ItemStack(Material.MELON));
 		case BabyCow:
@@ -481,162 +606,189 @@ public enum ClassType {
 		return null;
 	}
 
-	public String getClassDesc() {
+	public BaseClass GetClassInstance(GameInstance instance, Player player) {
 		switch (this) {
-		case Cactus:
-			return "A pricklyyy living thing, made up of thorns & blood..";
-		case Santa:
-			return "HO HO HO! MERRRRRRYYYY CHRISTMASSSSS";
-		case GingerBreadMan:
-			return "DO YOU KNOW? THE GINGERBREADMAN!?!?!";
-		case Elf:
-			return "Santa's lil helper here to deliver";
-		case GrimReaper:
-			return "Harvest souls with deadly precision, wielding dark powers..";
-		case BrewingStand:
-			return "Hit players to obtain Brewing items to get epic potions!";
-		case Fade:
-			return "Fade out of existence from your opponents briefly!";
-		case Cloud:
-			return "Use your powers to send cool effects on your opponents!";
-		case Firework:
-			return "Shoot colorful fireworks and inflict different effects!";
-		case Shulker:
-			return "You want me? I want you baby, my sugar boo, I'm levitating";
-		case WitherSkeleton:
-			return "Shoot your withering blasts at other players!";
-		case Rabbit:
-			return "Hit your enemies and eventually obtain a strong weapon";
-		case FlintAndSteel:
-			return "Combo your flint & steel for a special reward";
-		case Hunter:
-			return "Damage your enemies to gain Blood Lust to get special potions!";
-		case Jeb:
-			return "Notch vs. Jeb, who wins?";
-		case Bee:
-			return "Mama taught ya to sting so use it!";
-		case Ice:
-			return "Freeze thy enemies!!";
-		case Vampire:
-			return "Use your bow to poison your enemies!";
-		case ZombiePigman:
-			return "Summon your brothers to help you fight your enemies while you smack them with your Gold Sword!";
-		case ZombieVillager:
-			return "A poisonous creature...";
-		case Villager:
-			return "Toss your potatoes to confuse your enemies";
-		case MagmaCube:
-			return "Fairly high double jump and ability to spawn 7 MagmaCube minions";
-		case Summoner:
-			return "Beware the Summoner...";
-		case Anvil:
-			return "Goomba stomp your opponents!";
-		case Silverfish:
-			return "A very annoying creature ready to eat your enemies!";
-		case Zombie:
-			return "What do I even write here";
-		case Dweller:
-			return "Beware the Dweller of SCB!";
-		case Star:
-			return "Born in 1964 Jeffrey... Jeffrey Besos";
-		case Wizard:
-			return "A Wizard with different spells!";
-		case Present:
-			return "Copy other people's item, armor, or effect/double jump!";
-		case Bedrock:
-			return "Tough to defeat am I right haha";
-		case Noteblock:
-			return "Play some songs for some awesome effects!";
-		case EnchantTable:
-			return "Get kills to get some awesome enchantments!";
-		case Ocelot:
-			return "Chase down your opponents with your high speed or Purr Attack!";
-		case Creeper:
-			return "Defeat your opponents with your explosive arsenal";
-		case Potato:
-			return "Who doesn't like potatoes?!";
-		case Wither:
-			return "Utilize your explosive skulls to defeat your enemies!";
-		case Notch:
-			return "The owner of Minecraft...";
-		case Blaze:
-			return "ITS A BLAZE LOL!";
-		case Steve:
-			return "OMG OMG GET HYPED!!!";
-		case Skeleton:
-			return "A long range shooter effective at taking down their targets";
-		case Enderdragon:
-			return "Jump higher than your opponents and teleport around!";
-		case Enderman:
-			return "Stare into the souls of your enemies whilst teleporting around them";
-		case Horse:
-			return "Nayyy!! Different effects = different powers!";
-		case Squid:
-			return "UNDA DA SEA! UNDA DA SEA!";
-		case Spider:
-			return "Bite and poison your enemies while fighting them!";
-		case Ninja:
-			return "Ambush your enemies with sneaky attacks and agility";
-		case TNT:
-			return "Blow up your enemies with TNT!";
-		case Chicken:
-			return "Bock bock backaaack! One of the best classes hehe tip";
-		case DarkSethBling:
-			return "The evil counterpart of the redstone King";
-		case Witch:
-			return "She lives in daydreams with me! (She)";
-		case Sheep:
-			return "Different colors of wool gives you different powers!";
-		case SnowGolem:
-			return "This is a SnowGolem, not a Snowman. Get it right pleb!";
-		case Bunny:
-			return "Easter Bunny is coming to town!";
-		case ButterBro:
-			return "Yo, you there Sky??";
-		case IronGolem:
-			return "Smack your enemies into the air while defending your village!";
-		case Ghast:
-			return "Burn down your enemies with your sorrows";
-		case Slime:
-			return "Throw sticky grenades and attack enemies!";
-		case PiglinBrute:
-			return "Knock people away... or explode them";
-		case Bat:
-			return "Dance around your opponents with SUPER high jumps!";
-		case SethBling:
-			return "The creator of SCB, wanna fight?!?!";
-		case Melon:
-			return "The Owner of the server in the game?!";
-		case BabyCow:
-			return "moo... MOO!!";
-		case Herobrine:
-			return "Use your Diamond of Despair to play tricks on your opponents!";
-		case Pig:
-			return "Hit and run. In your panic, you gain speed when hit";
-		case LargeFern:
-			return "??????";
-		case Vindicator:
-			return "Vindicate yourself in front of your enemies";
-		case Fisherman:
-			return "Let's go fishing!";
-		case Endermite:
-			return "Unleash chaos as you swap places with your swarm of Endermites";
-		case Wolf:
-			return "Have your pack defend you from enemies!";
-		case Parrot:
-			return "Regenerate health through music!";
-		case Guardian:
-			return "Guard thyself and thy family (or something idk)";
+			case Cactus:
+				return new Cactus(instance, player);
+			case Santa:
+				return new SantaClass(instance, player);
+			case GingerBreadMan:
+				return new GingerBreadManClass(instance, player);
+			case Elf:
+				return new ElfClass(instance, player);
+			case GrimReaper:
+				return new GrimReaperClass(instance, player);
+			case BrewingStand:
+				return new BrewingStandClass(instance, player);
+			case Fade:
+				return new FadeClass(instance, player);
+			case Cloud:
+				return new CloudClass(instance, player);
+			case Firework:
+				return new FireworkClass(instance, player);
+			case Shulker:
+				return new ShulkerClass(instance, player);
+			case WitherSkeleton:
+				return new WitherSkeletonClass(instance, player);
+			case Rabbit:
+				return new RabbitClass(instance, player);
+			case FlintAndSteel:
+				return new FlintAndSteelClass(instance, player);
+			case Hunter:
+				return new HunterClass(instance, player);
+			case Jeb:
+				return new JebClass(instance, player);
+			case Bee:
+				return new BeeClass(instance, player);
+			case Ice:
+				return new IceClass(instance, player);
+			case Vampire:
+				return new VampireClass(instance, player);
+			case ZombiePigman:
+				return new ZombiePigmanClass(instance, player);
+			case Villager:
+				return new VillagerClass(instance, player);
+			case ZombieVillager:
+				return new ZombieVillagerClass(instance, player);
+			case MagmaCube:
+				return new MagmaCubeClass(instance, player);
+			case Summoner:
+				return new SummonerClass(instance, player);
+			case Anvil:
+				return new AnvilClass(instance, player);
+			case Silverfish:
+				return new SilverfishClass(instance, player);
+			case Zombie:
+				return new ZombieClass(instance, player);
+			case Dweller:
+				return new DwellerClass(instance, player);
+			case Star:
+				return new StarClass(instance, player);
+			case Wizard:
+				return new WizardClass(instance, player);
+			case Present:
+				return new PresentClass(instance, player);
+			case Bedrock:
+				return new BedrockClass(instance, player);
+			case Notch:
+				return new NotchClass(instance, player);
+			case EnchantTable:
+				return new EnchantTableClass(instance, player);
+			case Noteblock:
+				return new NoteblockClass(instance, player);
+			case Ocelot:
+				return new OcelotClass(instance, player);
+			case Creeper:
+				return new CreeperClass(instance, player);
+			case Wither:
+				return new WitherClass(instance, player);
+			case Blaze:
+				return new BlazeClass(instance, player);
+			case Potato:
+				return new PotatoClass(instance, player);
+			case Steve:
+				return new SteveClass(instance, player);
+			case Enderdragon:
+				return new EnderdragonClass(instance, player);
+			case Skeleton:
+				return new SkeletonClass(instance, player);
+			case TNT:
+				return new TNTClass(instance, player);
+			case Ninja:
+				return new NinjaClass(instance, player);
+			case IronGolem:
+				return new IrongolemClass(instance, player);
+			case Enderman:
+				return new EndermanClass(instance, player);
+			case Ghast:
+				return new GhastClass(instance, player);
+			case Herobrine:
+				return new HerobrineClass(instance, player);
+			case Chicken:
+				return new ChickenClass(instance, player);
+			case Slime:
+				return new SlimeClass(instance, player);
+			case PiglinBrute:
+				return new PiglinBruteClass(instance, player);
+			case DarkSethBling:
+				return new DarkSethBlingClass(instance, player);
+			case Witch:
+				return new WitchClass(instance, player);
+			case SnowGolem:
+				return new SnowGolemClass(instance, player);
+			case Bat:
+				return new BatClass(instance, player);
+			case SethBling:
+				return new SethBlingClass(instance, player);
+			case Sheep:
+				return new SheepClass(instance, player);
+			case Horse:
+				return new HorseClass(instance, player);
+			case Melon:
+				return new MelonClass(instance, player);
+			case ButterBro:
+				return new ButterBroClass(instance, player);
+			case Squid:
+				return new SquidClass(instance, player);
+			case Spider:
+				return new SpiderClass(instance, player);
+			case BabyCow:
+				return new BabyCowClass(instance, player);
+			case Bunny:
+				return new BunnyClass(instance, player);
+			case Pig:
+				return new PigClass(instance, player);
+			case LargeFern:
+				return new LargeFernClass(instance, player);
+			case Vindicator:
+				return new VindicatorClass(instance, player);
+			case Fisherman:
+				return new FishermanClass(instance, player);
+			case Endermite:
+				return new EndermiteClass(instance, player);
+			case Wolf:
+				return new WolfClass(instance, player);
+			case Parrot:
+				return new ParrotClass(instance, player);
+			case Guardian:
+				return new GuardianClass(instance, player);
 //		case Fluxty:
-//			return: "We cannot have HATERS in the community... So use your Wood Axe to kick em all out!";
+//			return new FluxtyClass(instance, player);
 //		case Snowman:
-//			return "This is a Snowman, not a SnowGolem. Get it right pleb!";
+//			return new SnowmanClass(instance, player);
 		}
 		return null;
 	}
 
-	public String color(String c) {
-		return ChatColor.translateAlternateColorCodes('&', c);
+	public static ClassType[] sortAlphabetically(ClassType[] classes) {
+		Arrays.sort(classes, Comparator.comparing(ClassType::toString));
+		return classes;
+	}
+
+	public static ClassType[] getAvailableClasses() {
+		return Arrays.stream(values())
+				.filter(clazz -> !clazz.isVaulted())
+				.toArray(ClassType[]::new);
+	}
+	public static ClassType[] getFreeClasses(boolean includeVaulted) {
+		return Arrays.stream(values())
+				.filter(clazz -> (includeVaulted || !clazz.isVaulted) && clazz.tokenCost == 0 && clazz.level == 0 && clazz.donor == null)
+				.toArray(ClassType[]::new);
+	}
+	public static ClassType[] getTokenClasses(boolean includeVaulted) {
+		return Arrays.stream(values())
+				.filter(clazz -> (includeVaulted || !clazz.isVaulted) && clazz.tokenCost > 0)
+				.toArray(ClassType[]::new);
+	}
+	public static ClassType[] getLevelClasses(boolean includeVaulted) {
+		return Arrays.stream(values())
+				.filter(clazz -> (includeVaulted || !clazz.isVaulted) && clazz.level > 0)
+				.toArray(ClassType[]::new);
+	}
+	public static ClassType[] getDonorClasses(boolean includeVaulted) {
+		return Arrays.stream(values())
+				.filter(clazz -> (includeVaulted || !clazz.isVaulted) && clazz.donor != null)
+				.toArray(ClassType[]::new);
 	}
 
 	public List<String> buildDescription() {
@@ -662,162 +814,23 @@ public enum ClassType {
 		return lines;
 	}
 
-	public String getTag() {
-		switch (this) {
-		case Bat:
-			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bat" + ChatColor.RESET;
-		case Santa:
-			return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "Santa" + ChatColor.RESET;
-		case GingerBreadMan:
-			return color("&6GingerBread&0Man&r");
-		case Elf:
-			return color("&2&lElf&r");
-		case GrimReaper:
-			return color("&8&l&oGrimReaper&r");
-		case BrewingStand:
-			return "" + ChatColor.YELLOW + "BrewingStand" + ChatColor.RESET;
-		case Fade:
-			return "" + ChatColor.DARK_GRAY + ChatColor.ITALIC + "Fade" + ChatColor.RESET;
-		case Cloud:
-				return "" + ChatColor.WHITE + ChatColor.ITALIC + "Cloud" + ChatColor.RESET;
-		case Guardian:
-			 return "" + ChatColor.DARK_AQUA + ChatColor.BOLD + "Guardian" + ChatColor.RESET;
-		case Firework:
-			return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "Firework" + ChatColor.RESET;
-		case Bedrock:
-			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bedrock" + ChatColor.RESET;
-		case Shulker:
-			return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + ChatColor.ITALIC + "Shulker" + ChatColor.RESET;
-		case WitherSkeleton:
-			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "WitherSkeleton" + ChatColor.RESET;
-		case FlintAndSteel:
-			return "" + ChatColor.DARK_GRAY + "Flint" + ChatColor.GRAY + "&" + ChatColor.WHITE + "Steel" + ChatColor.RESET;
-		case Hunter:
-			return "" + ChatColor.RED + ChatColor.BOLD + "Hunter" + ChatColor.RESET;
-		case Jeb:
-			return "" + ChatColor.GRAY + ChatColor.ITALIC + "Jeb" + ChatColor.RESET;
-		case Bee:
-			return "" + ChatColor.YELLOW + ChatColor.ITALIC + ChatColor.BOLD + "Bee" + ChatColor.RESET;
-		case Ice:
-			return "" + ChatColor.AQUA + ChatColor.BOLD + "Ice" + ChatColor.RESET;
-		case Vampire:
-			return "" + ChatColor.GRAY + ChatColor.BOLD + "Vampire" + ChatColor.RESET;
-		case ZombiePigman:
-			return "" + ChatColor.GREEN + ChatColor.ITALIC + "Zombie" + ChatColor.LIGHT_PURPLE + ChatColor.ITALIC + "Pigman" + ChatColor.RESET;
-		case ZombieVillager:
-			return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Zombie" + ChatColor.GRAY + ChatColor.BOLD + "Villager"
-					+ ChatColor.RESET;
-		case Villager:
-			return "" + ChatColor.GREEN + "Villager" + ChatColor.RESET;
-		case MagmaCube:
-			return "" + ChatColor.DARK_RED + ChatColor.BOLD + "MagmaCube" + ChatColor.RESET;
-		case Summoner:
-			return "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + ChatColor.ITALIC + "Summoner" + ChatColor.RESET;
-		case Anvil:
-			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Anvil" + ChatColor.RESET;
-		case Silverfish:
-			return "" + ChatColor.GRAY + ChatColor.ITALIC + "Silverfish" + ChatColor.RESET;
-		case Zombie:
-			return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + "Zombie" + ChatColor.RESET;
-		case Dweller:
-			return "" + ChatColor.GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Dweller" + ChatColor.RESET;
-		case Star:
-			return "" + ChatColor.DARK_GRAY + "Star" + ChatColor.RESET;
-		case Wizard:
-			return "" + ChatColor.RED + ChatColor.BOLD + "Wizard" + ChatColor.RESET;
-		case Present:
-			return "" + ChatColor.GOLD + ChatColor.BOLD + "Present" + ChatColor.RESET;
-		case Wither:
-			return "" + ChatColor.DARK_GRAY + "Wither" + ChatColor.RESET;
-		case Noteblock:
-			return "" + ChatColor.GOLD + "Noteblock" + ChatColor.RESET;
-		case EnchantTable:
-			return "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Enchant" + ChatColor.RED + ChatColor.BOLD + "Table"
-					+ ChatColor.RESET;
-		case Ocelot:
-			return "" + ChatColor.YELLOW + ChatColor.BOLD + "Ocelot" + ChatColor.RESET;
-		case Creeper:
-			return "" + ChatColor.GREEN + "Creeper" + ChatColor.RESET;
-		case Notch:
-			return "" + ChatColor.DARK_AQUA + ChatColor.BOLD + "Notch" + ChatColor.RESET;
-		case Blaze:
-			return "" + ChatColor.DARK_RED + "Blaze" + ChatColor.RESET;
-		case Potato:
-			return "" + ChatColor.YELLOW + ChatColor.ITALIC + "Potato" + ChatColor.RESET;
-		case Steve:
-			return "" + ChatColor.AQUA + "Steve" + ChatColor.RESET;
-		case PiglinBrute:
-			return "" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.ITALIC + "PiglinBrute" + ChatColor.RESET;
-		case Herobrine:
-			return "" + ChatColor.AQUA + ChatColor.BOLD + ChatColor.ITALIC + "Herobrine" + ChatColor.RESET;
-		case Cactus:
-			return "" + ChatColor.DARK_GREEN + "Cactus" + ChatColor.RESET;
-		case Chicken:
-			return "" + ChatColor.YELLOW + ChatColor.BOLD + "Chicken" + ChatColor.RESET;
-		case DarkSethBling:
-			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "DarkSethBling" + ChatColor.RESET;
-		case Enderdragon:
-			return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Ender" + ChatColor.RESET + ChatColor.DARK_GRAY + ChatColor.BOLD + "Dragon" + ChatColor.RESET;
-		case Enderman:
-			return "" + ChatColor.DARK_PURPLE + ChatColor.ITALIC + "Enderman" + ChatColor.RESET;
-		case Ghast:
-			return "" + ChatColor.WHITE + ChatColor.BOLD + ChatColor.ITALIC + "Ghast" + ChatColor.RESET;
-		case IronGolem:
-			return "" + ChatColor.GRAY + ChatColor.BOLD + ChatColor.ITALIC + "IronGolem" + ChatColor.RESET;
-		case Ninja:
-			return "" + ChatColor.BLUE + ChatColor.BOLD + "Ninja" + ChatColor.RESET;
-		case SethBling:
-			return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "SethBling" + ChatColor.RESET;
-		case Sheep:
-			return "" + ChatColor.WHITE + ChatColor.BOLD + ChatColor.ITALIC + "Sheep" + ChatColor.RESET;
-		case Skeleton:
-			return "" + ChatColor.GRAY + "Skeleton" + ChatColor.RESET;
-		case Slime:
-			return "" + ChatColor.GREEN + ChatColor.BOLD + "Slime" + ChatColor.RESET;
-		case SnowGolem:
-			return "" + ChatColor.WHITE + ChatColor.BOLD + "SnowGolem" + ChatColor.RESET;
-		case TNT:
-			return "" + ChatColor.RED + ChatColor.BOLD + "T" + ChatColor.RESET + ChatColor.BOLD + "N" + ChatColor.RESET
-					+ ChatColor.RED + ChatColor.BOLD + "T" + ChatColor.RESET;
-		case Witch:
-			return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Witch" + ChatColor.RESET;
-		case Horse:
-			return "" + ChatColor.GOLD + ChatColor.ITALIC + "Horse" + ChatColor.RESET;
-		case Melon:
-			return "" + ChatColor.YELLOW + "Melon" + ChatColor.RESET;
-		case Rabbit:
-			return "" + ChatColor.GREEN + ChatColor.ITALIC + "Rabbit" + ChatColor.RESET;
-		case Squid:
-			return "" + ChatColor.DARK_BLUE + ChatColor.ITALIC + "Squid" + ChatColor.RESET;
-		case Spider:
-			return "" + ChatColor.RED + ChatColor.ITALIC + "Spider" + ChatColor.RESET;
-		case BabyCow:
-			return "" + ChatColor.RED + ChatColor.ITALIC + ChatColor.BOLD + "BabyCow" + ChatColor.RESET;
-		case Bunny:
-			return "" + ChatColor.YELLOW + ChatColor.ITALIC + ChatColor.BOLD + "Bunny" + ChatColor.RESET;
-		case ButterBro:
-			return "" + ChatColor.YELLOW + ChatColor.BOLD + "ButterBro" + ChatColor.RESET;
-		case Pig:
-			return "" + ChatColor.LIGHT_PURPLE + "Pig" + ChatColor.RESET;
-		case LargeFern:
-			return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + ChatColor.BOLD + "LargeFern" + ChatColor.RESET;
-		case Vindicator:
-			return "" + ChatColor.GRAY + ChatColor.BOLD + "Vindicator" + ChatColor.RESET;
-		case Fisherman:
-			return "" + ChatColor.DARK_AQUA + ChatColor.ITALIC + "Fisherman" + ChatColor.RESET;
-		case Endermite:
-			return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + ChatColor.ITALIC + "Endermite" + ChatColor.RESET;
- 		case Wolf:
- 			return "" + ChatColor.WHITE  + ChatColor.ITALIC + "Wolf" + ChatColor.RESET;
-		case Parrot:
-			return "" + ChatColor.GREEN + "Parrot" + ChatColor.RESET;
-// 		case Snowman:
-// 			return "" + ChatColor.RESET + "Snow" + ChatColor.DARK_GREEN + "Man" + ChatColor.RESET;
-// 		case Fluxty:
-// 			return "" + ChatColor.GREEN + ChatColor.BOLD + "Fluxty" + ChatColor.RESET;
-		default:
-			break;
-		}
-		return this.toString();
+	public String color(String c) {
+		return ChatColor.translateAlternateColorCodes('&', c);
+	}
+
+	public int getID() {
+		return id;
+	}
+	public int getTokenCost() {
+		return tokenCost;
+	}
+	public int getLevel() {
+		return level;
+	}
+	public Rank getMinRank() {
+		return donor;
+	}
+	public boolean isVaulted() {
+		return isVaulted;
 	}
 }

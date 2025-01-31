@@ -332,21 +332,21 @@ public class Core extends JavaPlugin implements Listener {
 	public void onEnable() {
 		plugin = this;
 		msg = new ArrayList<>();
-		msg.add(color("&4&lREMEMBER TO TELL ITZZMIC (I LOVE YOU)"));
-		msg.add(color("&c&lHOW DO YOU SPELL SCB AGAIN?"));
-		msg.add(color("&3ItzzMic coded this btw..."));
-		msg.add(color("&9&lAnthonyFortuna is so cool"));
-		msg.add(color("&cItzzMic wants to remind you to have a good day!"));
-		msg.add(color("&e&lTacos are really good!"));
-		msg.add(color("&cIdek what to put here"));
-		msg.add(color("&cI be sweatin since 2002 baby"));
-		msg.add(color("&3&lWho is Adwyr?"));
+//		msg.add(color("&4&lREMEMBER TO TELL ITZZMIC (I LOVE YOU)"));
+//		msg.add(color("&3ItzzMic coded this btw..."));
+//		msg.add(color("&cItzzMic wants to remind you to have a good day!"));
+//		msg.add(color("&3&lWho is Adwyr?"));
+//		msg.add(color("&9&lAnthonyFortuna is so cool"));
+//		msg.add(color("&3astro is &b&l20% &3better than you"));
+//		msg.add(color("&c&lHOW DO YOU SPELL SCB AGAIN?"));
+//		msg.add(color("&e&lTacos are really good!"));
+//		msg.add(color("&cIdek what to put here"));
+//		msg.add(color("&cI be sweatin since 2002 baby"));
+//		msg.add(color("&cSheep kit is probably the best!"));
+
 		msg.add(color("&cLove you!"));
-		msg.add(color("&4&lSEASON 2 OUT ALREADY??"));
 		msg.add(color("&a&lReminder to thank the Staff of &e&l&oMINEZONE"));
-		msg.add(color("&cSheep kit is probably the best!"));
 		msg.add(color("&dSubscribe to &e&l&oMINEZONE &don &cYou&fTube&d!"));
-		msg.add(color("&3astro is &b&l20% &3better than you"));
 
 		getLogger().info("(!) You have enabled Minezone-Core");
 		// lobbyWorld = getServer().createWorld(new WorldCreator("lobby"));
@@ -918,7 +918,7 @@ public class Core extends JavaPlugin implements Listener {
 				String tClasses = "";
 				String lClasses = "";
 				String rClasses = "";
-				for (ClassType type : ClassType.getAvailableClasses()) {
+				for (ClassType type : ClassType.sortAlphabetically(ClassType.getAvailableClasses())) {
 					if (type.getTokenCost() == 0 && type.getLevel() == 0 && type.getMinRank() != Rank.VIP)
 						dClasses += type.getTag() + " ";
 					else if (type.getTokenCost() > 0)
