@@ -647,7 +647,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 	private void selectRandomClass(Player player, PlayerData playerData) {
 		Random random = new Random();
-		ClassType classType = ClassType.values()[random.nextInt(ClassType.values().length)];
+		ClassType classType = ClassType.getAvailableClasses()[random.nextInt(ClassType.getAvailableClasses().length)];
 
 		if (playerData.playerClasses.get(classType.getID()) != null
 				&& playerData.playerClasses.get(classType.getID()).purchased || classType.getTokenCost() == 0) {
@@ -708,7 +708,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private ClassType getClassType(String className) {
-		for (ClassType type : ClassType.values()) {
+		for (ClassType type : ClassType.getAvailableClasses()) {
 			if (className.equalsIgnoreCase(type.toString())) {
 				return type;
 			}
@@ -781,7 +781,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 				return mapsString;
 			}
 		} else if (cmd.getName().equalsIgnoreCase("class")) {
-			List<ClassType> a = Arrays.asList(ClassType.values());
+			List<ClassType> a = Arrays.asList(ClassType.getAvailableClasses());
 			List<String> f = Lists.newArrayList();
 			if (args.length == 1) {
 				for (ClassType s : a) {

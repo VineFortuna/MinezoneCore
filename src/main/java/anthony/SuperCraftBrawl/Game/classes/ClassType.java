@@ -12,86 +12,112 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public enum ClassType {
 
+	// Free Classes
 	Cactus(1, 0, 0),
-	TNT(2, 350, 0),
-	Enderdragon(3, 0, Rank.VIP),
 	Skeleton(4, 0, 0),
-	Ninja(5, 1000, 0),
-	IronGolem(6, 0, Rank.VIP),
 	Enderman(7, 0, 0),
-	Ghast(8, 0, Rank.VIP),
-	Chicken(9, 400, 0),
-	Slime(10, 0, Rank.VIP),
-	PiglinBrute(11, 0, Rank.VIP),
-	DarkSethBling(12, 800, 0),
-	SnowGolem(14, 800, 0),
-	Bat(15, 0, Rank.VIP),
-	SethBling(16, 0, Rank.VIP),
-	Sheep(17, 550, 0),
 	Horse(18, 0, 0),
-	Melon(19, 0, Rank.VIP),
 	Rabbit(26, 0, 0),
 	Squid(20, 0, 0),
 	Spider(21, 0, 0),
-	BabyCow(22, 0, Rank.VIP),
-	Herobrine(23, 0, Rank.VIP),
-	Bunny(24, 450, 0),
-	ButterBro(25, 1200, 0),
-	Steve(28, 850, 0),
-	Notch(29, 1000, 0),
 	Pig(30, 0, 0),
 	Blaze(31, 0, 0),
-	Potato(32, 750, 0),
 	Wither(33, 0, 0),
-	Ocelot(34, 250, 0),
 	Creeper(35, 0, 0),
-	Noteblock(36, 800, 0),
-	EnchantTable(37, 350, 0),
-	Present(38, 0, 0),
-	Wizard(41, 0, Rank.VIP),
-	Star(42, 850, 0),
-	Dweller(43, 0, 0),
+	Present(38, 0, 0, true),
+	Dweller(43, 0, 0, true),
 	Zombie(44, 0, 0),
 	Silverfish(45, 0, 0),
+	Villager(49, 0, 0),
+	FlintAndSteel(58, 0, 0),
+	LargeFern(64, 0, 0),
+	Fisherman(67, 0, 0),
+
+	// Token Classes
+	TNT(2, 350, 0),
+	Ninja(5, 1000, 0),
+	Chicken(9, 400, 0),
+	DarkSethBling(12, 800, 0),
+	SnowGolem(14, 800, 0),
+	Sheep(17, 550, 0),
+	Bunny(24, 450, 0),
+	ButterBro(25, 1200, 0, true),
+	Steve(28, 850, 0),
+	Notch(29, 1000, 0),
+	Potato(32, 750, 0),
+	Ocelot(34, 250, 0),
+	Noteblock(36, 800, 0),
+	EnchantTable(37, 350, 0),
+	Star(42, 850, 0, true),
 	Anvil(46, 700, 0),
 	Summoner(47, 525, 0),
-	MagmaCube(48, 0, Rank.VIP),
-	Villager(49, 0, 0),
+	Vampire(53, 800, 0),
+	Bee(55, 425, 0),
+	Hunter(57, 500, 0),
+	WitherSkeleton(59, 1500, 0),
+	Wolf(71, 400, 0),
+	BrewingStand(68, 350, 0),
+	Parrot(72, 800, 0),
+
+	// Level Classes
 	ZombiePigman(51, 0, 3),
 	Witch(13, 0, 5),
 	ZombieVillager(50, 0, 10),
 	Ice(54, 0, 15),
-	Vampire(53, 800, 0),
-	Bee(55, 425, 0),
 	Jeb(56, 0, 20),
-	Hunter(57, 500, 0),
-	FlintAndSteel(58, 0, 0),
-	WitherSk(59, 1500, 0),
 	Shulker(60, 0, 25),
+	Cloud(63, 0, 30),
+	Guardian(69, 0, 30, true),
+
+	// Donor Classes
+	Enderdragon(3, 0, Rank.VIP),
+	IronGolem(6, 0, Rank.VIP),
+	Ghast(8, 0, Rank.VIP),
+	Slime(10, 0, Rank.VIP),
+	PiglinBrute(11, 0, Rank.VIP),
+	Bat(15, 0, Rank.VIP),
+	SethBling(16, 0, Rank.VIP),
+	Melon(19, 0, Rank.VIP),
+	BabyCow(22, 0, Rank.VIP),
+	Herobrine(23, 0, Rank.VIP),
+	Wizard(41, 0, Rank.VIP),
+	MagmaCube(48, 0, Rank.VIP),
 	Bedrock(61, 0, Rank.VIP),
 	Firework(62, 0, Rank.VIP),
-	Cloud(63, 0, 30),
-	LargeFern(64, 0, 0),
 	Vindicator(65, 0, Rank.VIP),
 	Fade(66, 0, Rank.VIP),
-	Fisherman(67, 0, 0),
-	BrewingStand(68, 350, 0),
-	GrimReaper(69, 0, 0),
 	Endermite(70, 0, Rank.VIP),
-	Wolf(71, 400, 0),
-	Parrot(72, 800, 0);
 
-	/*Guardian(68, 0, 30) */;
-	/*Elf(70, 0, 0), GingerBreadMan(71, 0, 0), Santa(72, 0, 0),*/
+	// Holiday Classes
+	Elf(101, 0, 0, true),
+	GingerBreadMan(71, 0, 0, true),
+	Santa(72, 0, 0, true),
+	GrimReaper(102, 0, 0, true);
 
-	private int id;
+	private final int id;
 	private int tokenCost = 0;
 	private int level = 0;
 	private Rank donor;
+	private boolean isVaulted = false;
+
+	ClassType(int id, int tokenCost, int level, boolean isVaulted) {
+		this.id = id;
+		this.tokenCost = tokenCost;
+		this.level = level;
+		this.isVaulted = isVaulted;
+	}
+
+	ClassType(int id, int tokenCost, Rank donor, boolean isVaulted) {
+		this.id = id;
+		this.tokenCost = tokenCost;
+		this.donor = donor;
+		this.isVaulted = isVaulted;
+	}
 
 	ClassType(int id, int tokenCost, int level) {
 		this.id = id;
@@ -105,8 +131,11 @@ public enum ClassType {
 		this.donor = donor;
 	}
 
-	public Rank getMinRank() {
-		return donor;
+	// Get a list of available classes (non-vaulted)
+	public static ClassType[] getAvailableClasses() {
+		return Arrays.stream(values())
+				.filter(clazz -> !clazz.isVaulted())
+				.toArray(ClassType[]::new);
 	}
 
 	public int getID() {
@@ -121,8 +150,16 @@ public enum ClassType {
 		return level;
 	}
 
+	public Rank getMinRank() {
+		return donor;
+	}
+
+	public boolean isVaulted() {
+		return isVaulted;
+	}
+
 	public static ClassType fromID(int id) {
-		for (ClassType ct : ClassType.values()) {
+		for (ClassType ct : ClassType.getAvailableClasses()) {
 			if (ct.getID() == id) {
 				return ct;
 			}
@@ -134,12 +171,12 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new Cactus(instance, player);
-		/*case Santa:
+		case Santa:
 			return new SantaClass(instance, player);
 		case GingerBreadMan:
 			return new GingerBreadManClass(instance, player);
 		case Elf:
-			return new ElfClass(instance, player);*/
+			return new ElfClass(instance, player);
 		case GrimReaper:
 			return new GrimReaperClass(instance, player);
 		case BrewingStand:
@@ -152,7 +189,7 @@ public enum ClassType {
 			return new FireworkClass(instance, player);
 		case Shulker:
 			return new ShulkerClass(instance, player);
-		case WitherSk:
+		case WitherSkeleton:
 			return new WitherSkeletonClass(instance, player);
 		case Rabbit:
 			return new RabbitClass(instance, player);
@@ -274,8 +311,8 @@ public enum ClassType {
  			return new WolfClass(instance, player);
 		case Parrot:
 			return new ParrotClass(instance, player);
-//		case Guardian:
-//			return new GuardianClass(instance, player);
+		case Guardian:
+			return new GuardianClass(instance, player);
 //		case Fluxty:
 //			return new FluxtyClass(instance, player);
 //		case Snowman:
@@ -288,13 +325,13 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new ItemStack(Material.CACTUS);
-		/*case Santa:
+		case Santa:
 			return ItemHelper.createSkullTexture(
 					"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19");
 		case GingerBreadMan:
 			return new ItemStack(Material.COOKIE);
 		case Elf:
-			return new ItemStack(Material.CAKE);*/
+			return new ItemStack(Material.CAKE);
 		case GrimReaper:
 			return new ItemStack(Material.DIAMOND_HOE);
 		case BrewingStand:
@@ -309,7 +346,7 @@ public enum ClassType {
 			return new ItemStack(Material.STAINED_CLAY, 1, (byte) DyeColor.PURPLE.getData());
 		case Dweller:
 			return new ItemStack(Material.BONE);
-		case WitherSk:
+		case WitherSkeleton:
 			return ItemHelper.createSkullHead(1, SkullType.WITHER);
 		case Rabbit:
 			return new ItemStack(Material.RABBIT_FOOT);
@@ -433,8 +470,8 @@ public enum ClassType {
  			return new ItemStack(Material.BONE);
 		case Parrot:
 			return new ItemStack(Material.FEATHER);
-// 		case Guardian:
-// 			return new ItemStack(Material.PRISMARINE_SHARD);
+ 		case Guardian:
+ 			return new ItemStack(Material.PRISMARINE_SHARD);
 //		case Snowman:
 //			return new ItemStack(Material.PUMPKIN);
 //		case Fluxty:
@@ -448,12 +485,12 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return "A pricklyyy living thing, made up of thorns & blood..";
-		/*case Santa:
+		case Santa:
 			return "HO HO HO! MERRRRRRYYYY CHRISTMASSSSS";
 		case GingerBreadMan:
 			return "DO YOU KNOW? THE GINGERBREADMAN!?!?!";
 		case Elf:
-			return "Santa's lil helper here to deliver";*/
+			return "Santa's lil helper here to deliver";
 		case GrimReaper:
 			return "Harvest souls with deadly precision, wielding dark powers..";
 		case BrewingStand:
@@ -466,7 +503,7 @@ public enum ClassType {
 			return "Shoot colorful fireworks and inflict different effects!";
 		case Shulker:
 			return "You want me? I want you baby, my sugar boo, I'm levitating";
-		case WitherSk:
+		case WitherSkeleton:
 			return "Shoot your withering blasts at other players!";
 		case Rabbit:
 			return "Hit your enemies and eventually obtain a strong weapon";
@@ -588,8 +625,8 @@ public enum ClassType {
 			return "Have your pack defend you from enemies!";
 		case Parrot:
 			return "Regenerate health through music!";
-//		case Guardian:
-//			return "Guard thyself and thy family (or something idk)";
+		case Guardian:
+			return "Guard thyself and thy family (or something idk)";
 //		case Fluxty:
 //			return: "We cannot have HATERS in the community... So use your Wood Axe to kick em all out!";
 //		case Snowman:
@@ -629,46 +666,44 @@ public enum ClassType {
 		switch (this) {
 		case Bat:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bat" + ChatColor.RESET;
-		/*case Santa:
+		case Santa:
 			return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "Santa" + ChatColor.RESET;
 		case GingerBreadMan:
 			return color("&6GingerBread&0Man&r");
 		case Elf:
-			return color("&2&lElf&r");*/
+			return color("&2&lElf&r");
 		case GrimReaper:
 			return color("&8&l&oGrimReaper&r");
 		case BrewingStand:
-			return color("&e&lBrewingStand&r");
+			return "" + ChatColor.YELLOW + "BrewingStand" + ChatColor.RESET;
 		case Fade:
-			return "" + ChatColor.BLACK + ChatColor.BOLD + ChatColor.ITALIC + "Fade" + ChatColor.RESET;
+			return "" + ChatColor.DARK_GRAY + ChatColor.ITALIC + "Fade" + ChatColor.RESET;
 		case Cloud:
-			return "" + ChatColor.GRAY + ChatColor.ITALIC + "Cloud" + ChatColor.RESET;
-		// case Guardian:
-		// return "" + ChatColor.GRAY + ChatColor.BOLD + "Guardian" + ChatColor.RESET;
-
+				return "" + ChatColor.WHITE + ChatColor.ITALIC + "Cloud" + ChatColor.RESET;
+		case Guardian:
+			 return "" + ChatColor.DARK_AQUA + ChatColor.BOLD + "Guardian" + ChatColor.RESET;
 		case Firework:
 			return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "Firework" + ChatColor.RESET;
 		case Bedrock:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bedrock" + ChatColor.RESET;
 		case Shulker:
 			return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + ChatColor.ITALIC + "Shulker" + ChatColor.RESET;
-		case WitherSk:
-			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "WitherSk" + ChatColor.RESET;
+		case WitherSkeleton:
+			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "WitherSkeleton" + ChatColor.RESET;
 		case FlintAndSteel:
-			return "" + ChatColor.DARK_GRAY + "Flint" + ChatColor.GRAY + "&" + ChatColor.WHITE + "Steel"
-					+ ChatColor.RESET;
+			return "" + ChatColor.DARK_GRAY + "Flint" + ChatColor.GRAY + "&" + ChatColor.WHITE + "Steel" + ChatColor.RESET;
 		case Hunter:
 			return "" + ChatColor.RED + ChatColor.BOLD + "Hunter" + ChatColor.RESET;
 		case Jeb:
 			return "" + ChatColor.GRAY + ChatColor.ITALIC + "Jeb" + ChatColor.RESET;
 		case Bee:
-			return "" + ChatColor.YELLOW + ChatColor.ITALIC + "Bee" + ChatColor.RESET;
+			return "" + ChatColor.YELLOW + ChatColor.ITALIC + ChatColor.BOLD + "Bee" + ChatColor.RESET;
 		case Ice:
-			return color("&b&lIce") + ChatColor.RESET;
+			return "" + ChatColor.AQUA + ChatColor.BOLD + "Ice" + ChatColor.RESET;
 		case Vampire:
 			return "" + ChatColor.GRAY + ChatColor.BOLD + "Vampire" + ChatColor.RESET;
 		case ZombiePigman:
-			return "" + ChatColor.GREEN + ChatColor.ITALIC + "ZombiePigman" + ChatColor.RESET;
+			return "" + ChatColor.GREEN + ChatColor.ITALIC + "Zombie" + ChatColor.LIGHT_PURPLE + ChatColor.ITALIC + "Pigman" + ChatColor.RESET;
 		case ZombieVillager:
 			return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Zombie" + ChatColor.GRAY + ChatColor.BOLD + "Villager"
 					+ ChatColor.RESET;
@@ -677,13 +712,13 @@ public enum ClassType {
 		case MagmaCube:
 			return "" + ChatColor.DARK_RED + ChatColor.BOLD + "MagmaCube" + ChatColor.RESET;
 		case Summoner:
-			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Summoner" + ChatColor.RESET;
+			return "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + ChatColor.ITALIC + "Summoner" + ChatColor.RESET;
 		case Anvil:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Anvil" + ChatColor.RESET;
 		case Silverfish:
 			return "" + ChatColor.GRAY + ChatColor.ITALIC + "Silverfish" + ChatColor.RESET;
 		case Zombie:
-			return "" + ChatColor.GRAY + ChatColor.ITALIC + "Zombie" + ChatColor.RESET;
+			return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + "Zombie" + ChatColor.RESET;
 		case Dweller:
 			return "" + ChatColor.GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Dweller" + ChatColor.RESET;
 		case Star:
@@ -693,9 +728,9 @@ public enum ClassType {
 		case Present:
 			return "" + ChatColor.GOLD + ChatColor.BOLD + "Present" + ChatColor.RESET;
 		case Wither:
-			return "" + ChatColor.DARK_GRAY + ChatColor.ITALIC + "Wither" + ChatColor.RESET;
+			return "" + ChatColor.DARK_GRAY + "Wither" + ChatColor.RESET;
 		case Noteblock:
-			return "" + ChatColor.YELLOW + ChatColor.ITALIC + "Noteblock" + ChatColor.RESET;
+			return "" + ChatColor.GOLD + "Noteblock" + ChatColor.RESET;
 		case EnchantTable:
 			return "" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Enchant" + ChatColor.RED + ChatColor.BOLD + "Table"
 					+ ChatColor.RESET;
@@ -704,17 +739,17 @@ public enum ClassType {
 		case Creeper:
 			return "" + ChatColor.GREEN + "Creeper" + ChatColor.RESET;
 		case Notch:
-			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Notch" + ChatColor.RESET;
+			return "" + ChatColor.DARK_AQUA + ChatColor.BOLD + "Notch" + ChatColor.RESET;
 		case Blaze:
 			return "" + ChatColor.DARK_RED + "Blaze" + ChatColor.RESET;
 		case Potato:
-			return "" + ChatColor.DARK_GREEN + ChatColor.BOLD + "Potato" + ChatColor.RESET;
+			return "" + ChatColor.YELLOW + ChatColor.ITALIC + "Potato" + ChatColor.RESET;
 		case Steve:
 			return "" + ChatColor.AQUA + "Steve" + ChatColor.RESET;
 		case PiglinBrute:
 			return "" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.ITALIC + "PiglinBrute" + ChatColor.RESET;
 		case Herobrine:
-			return "" + ChatColor.GRAY + ChatColor.BOLD + "Herobrine" + ChatColor.RESET;
+			return "" + ChatColor.AQUA + ChatColor.BOLD + ChatColor.ITALIC + "Herobrine" + ChatColor.RESET;
 		case Cactus:
 			return "" + ChatColor.DARK_GREEN + "Cactus" + ChatColor.RESET;
 		case Chicken:
@@ -722,12 +757,11 @@ public enum ClassType {
 		case DarkSethBling:
 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "DarkSethBling" + ChatColor.RESET;
 		case Enderdragon:
-			return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Ender" + ChatColor.RESET + ChatColor.DARK_GRAY
-					+ ChatColor.BOLD + "Dragon" + ChatColor.RESET;
+			return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Ender" + ChatColor.RESET + ChatColor.DARK_GRAY + ChatColor.BOLD + "Dragon" + ChatColor.RESET;
 		case Enderman:
 			return "" + ChatColor.DARK_PURPLE + ChatColor.ITALIC + "Enderman" + ChatColor.RESET;
 		case Ghast:
-			return "" + ChatColor.RESET + ChatColor.BOLD + ChatColor.ITALIC + "Ghast" + ChatColor.RESET;
+			return "" + ChatColor.WHITE + ChatColor.BOLD + ChatColor.ITALIC + "Ghast" + ChatColor.RESET;
 		case IronGolem:
 			return "" + ChatColor.GRAY + ChatColor.BOLD + ChatColor.ITALIC + "IronGolem" + ChatColor.RESET;
 		case Ninja:
@@ -735,13 +769,13 @@ public enum ClassType {
 		case SethBling:
 			return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "SethBling" + ChatColor.RESET;
 		case Sheep:
-			return "" + ChatColor.BOLD + "Sheep" + ChatColor.RESET;
+			return "" + ChatColor.WHITE + ChatColor.BOLD + ChatColor.ITALIC + "Sheep" + ChatColor.RESET;
 		case Skeleton:
-			return "" + ChatColor.GRAY + ChatColor.ITALIC + "Skeleton" + ChatColor.RESET;
+			return "" + ChatColor.GRAY + "Skeleton" + ChatColor.RESET;
 		case Slime:
 			return "" + ChatColor.GREEN + ChatColor.BOLD + "Slime" + ChatColor.RESET;
 		case SnowGolem:
-			return "" + ChatColor.RESET + ChatColor.BOLD + "SnowGolem" + ChatColor.RESET;
+			return "" + ChatColor.WHITE + ChatColor.BOLD + "SnowGolem" + ChatColor.RESET;
 		case TNT:
 			return "" + ChatColor.RED + ChatColor.BOLD + "T" + ChatColor.RESET + ChatColor.BOLD + "N" + ChatColor.RESET
 					+ ChatColor.RED + ChatColor.BOLD + "T" + ChatColor.RESET;
@@ -764,22 +798,19 @@ public enum ClassType {
 		case ButterBro:
 			return "" + ChatColor.YELLOW + ChatColor.BOLD + "ButterBro" + ChatColor.RESET;
 		case Pig:
-			return "" + ChatColor.LIGHT_PURPLE + ChatColor.ITALIC + "Pig" + ChatColor.RESET;
+			return "" + ChatColor.LIGHT_PURPLE + "Pig" + ChatColor.RESET;
 		case LargeFern:
-			return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + "LargeFern" + ChatColor.RESET;
+			return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + ChatColor.BOLD + "LargeFern" + ChatColor.RESET;
 		case Vindicator:
-			return "" + ChatColor.GRAY + "Vindicator" + ChatColor.RESET;
+			return "" + ChatColor.GRAY + ChatColor.BOLD + "Vindicator" + ChatColor.RESET;
 		case Fisherman:
 			return "" + ChatColor.DARK_AQUA + ChatColor.ITALIC + "Fisherman" + ChatColor.RESET;
 		case Endermite:
-			return color("&5Endermite") + ChatColor.RESET;
+			return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + ChatColor.ITALIC + "Endermite" + ChatColor.RESET;
  		case Wolf:
- 			return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Wolf" + ChatColor.RESET;
+ 			return "" + ChatColor.WHITE  + ChatColor.ITALIC + "Wolf" + ChatColor.RESET;
 		case Parrot:
 			return "" + ChatColor.GREEN + "Parrot" + ChatColor.RESET;
-
-// 		case Guardian:
-// 			return "" + ChatColor.GRAY + ChatColor.BOLD + "Guardian" + ChatColor.RESET;
 // 		case Snowman:
 // 			return "" + ChatColor.RESET + "Snow" + ChatColor.DARK_GREEN + "Man" + ChatColor.RESET;
 // 		case Fluxty:

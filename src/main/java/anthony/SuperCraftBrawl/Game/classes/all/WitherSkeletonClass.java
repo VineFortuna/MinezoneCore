@@ -44,7 +44,7 @@ public class WitherSkeletonClass extends BaseClass {
 
 	@Override
 	public ClassType getType() {
-		return ClassType.WitherSk;
+		return ClassType.WitherSkeleton;
 	}
 
 	@Override
@@ -87,7 +87,7 @@ public class WitherSkeletonClass extends BaseClass {
 	@Override
 	public void Tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getLives() > 0
-				&& instance.classes.get(player).getType() == ClassType.WitherSk)
+				&& instance.classes.get(player).getType() == ClassType.WitherSkeleton)
 			if (!(player.getInventory().contains(this.getAttackWeapon())))
 				player.getInventory().setItem(0, this.getAttackWeapon()); // If some rare chance the player throws away
 																			// their melee

@@ -1287,7 +1287,7 @@ public class GameManager implements Listener, PluginMessageListener {
 							}
 
 							if (bc != null && pBc != null) {
-								if (bc.getType() == ClassType.Vampire || bc.getType() == ClassType.WitherSk
+								if (bc.getType() == ClassType.Vampire || bc.getType() == ClassType.WitherSkeleton
 										|| bc.getType() == ClassType.Shulker || bc.getType() == ClassType.Firework
 										|| bc.getType() == ClassType.Skeleton) {
 									if (this.spawnProt.containsKey(p) || bc.bedrockInvincibility == true) {
@@ -2124,7 +2124,7 @@ public class GameManager implements Listener, PluginMessageListener {
 				if (i != null) {
 					if (i.state == GameState.WAITING) {
 						PlayerData data = main.getDataManager().getPlayerData(player);
-						for (ClassType type : ClassType.values()) {
+						for (ClassType type : ClassType.getAvailableClasses()) {
 							ClassDetails details = data.playerClasses.get(type.getID());
 							if (details == null) {
 								details = new ClassDetails();
