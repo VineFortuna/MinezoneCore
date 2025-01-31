@@ -159,7 +159,7 @@ public class BedrockClass extends BaseClass {
 							bc.bedrockInvincibility = true;
 
 							// Playing sound
-							SoundManager.playSoundToAllGamePlayersFromAPlayerLocation(instance, player, Sound.ZOMBIE_INFECT, 20, 1);
+							SoundManager.playSoundToAllFromPlayerLocation(instance, player, Sound.ZOMBIE_INFECT, 20, 1);
 
 							// Setting invincibility runnable
 							if (bedrock == null) {
@@ -182,7 +182,7 @@ public class BedrockClass extends BaseClass {
 											}
 
 											// Playing sound when invincibility is over
-											SoundManager.playSoundToAllGamePlayersFromAPlayerLocation(instance, player, Sound.ZOMBIE_UNFECT, 20, 1);
+											SoundManager.playSoundToAllFromPlayerLocation(instance, player, Sound.ZOMBIE_UNFECT, 20, 1);
 										} else {
 											if (!armorModified) {
 												// Modifying armor when invincibility starts
