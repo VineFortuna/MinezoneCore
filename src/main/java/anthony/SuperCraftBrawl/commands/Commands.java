@@ -77,6 +77,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 				gameStatsCommand(args, player);
 				break;
 
+			case "maplist":
 			case "maps":
 				mapsCommand(args, player);
 				break;
@@ -92,7 +93,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "class":
 				classCommand(args, player);
 				break;
-
+				
 			case "leave":
 			case "l":
 				this.leaveGame(player);
@@ -101,19 +102,78 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "players":
 				playersCommand(player);
 				break;
+
 			case "party":
 				partyCommand(args, player);
 				break;
+
 			case "color":
 				colorCommand(args, player);
 				break;
+
 			case "lactate":
 				lactateCommand(player);
+				break;
+
+			case "sound":
+				soundCommand(args, player);
 				break;
 			}
 		} else
 			sender.sendMessage("Hey! You can't use this in the terminal!");
 		return true;
+	}
+
+	private void soundCommand(String[] args, Player player) {
+		if (!player.hasPermission("scb.items")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
+		if (args.length < 1) {
+			// Display all sounds in a clickable list
+			displaySoundList(player);
+			return;
+		}
+
+		Location location = player.getLocation();
+
+		try {
+			Sound sound = Sound.valueOf(args[0].toUpperCase()); // Get the Sound enum value
+			float volume = 1.0f; // Default volume
+			float pitch = 1.0f;  // Default pitch
+
+			// Parse pitch if provided
+			if (args.length >= 2) {
+				pitch = Float.parseFloat(args[1]);
+			}
+
+			// Parse volume if provided
+			if (args.length >= 3) {
+				volume = Float.parseFloat(args[2]);
+			}
+
+			// Play the sound to everyone in the world
+			player.getWorld().playSound(location, sound, volume, pitch);
+			player.sendMessage(ChatColor.GREEN + "Played sound: " + sound.name() + " with pitch " + pitch + " and volume " + volume);
+		} catch (IllegalArgumentException e) {
+			player.sendMessage(ChatColor.RED + "Invalid sound name.");
+		}
+	}
+
+	private void displaySoundList(Player player) {
+		player.sendMessage(ChatColor.GOLD + "=== Click a Sound to Play It ===");
+
+		for (Sound sound : Sound.values()) {
+			// Create a clickable TextComponent for each sound
+			TextComponent soundMessage = new TextComponent(ChatColor.AQUA + "- " + sound.name());
+			soundMessage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sound " + sound.name()));
+
+			// Send the clickable message to the player
+			player.spigot().sendMessage(soundMessage);
+		}
+
+		player.sendMessage(ChatColor.GOLD + "=== End of Sound List ===");
 	}
 
 	private void lactateCommand(Player player) {
