@@ -43,7 +43,7 @@ public class HorseClass extends BaseClass {
 	// Golden Apple Treat
 	private ItemStack goldenAppleTreat = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE),
 			"&4&lSTRENGTH Treat",
-			"&7Eat it to get Strength 1 for 6 seconds");
+			"&7Eat it to get Strength 2 for 6 seconds");
 
 	// Enchanted Golden Apple Treat
 	private ItemStack goldenEnchantedAppleTreat = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE),
@@ -155,14 +155,9 @@ public class HorseClass extends BaseClass {
 		}
 	}
 
-	// Canceling Health Pot Giving Method
-	@Override
-	protected void healthPots(Player d) {
-	}
-
 	@Override
 	public void classesEvent(Player d, BaseClass baseClass) {
-		if (instance.classes.containsKey(d)) {
+		if (instance.classes.containsKey(d) && !checkIfDead(d, instance)) {
 				TreatGiver treatGiver = new TreatGiver(this, treatsItemsList);
 				treatGiver.giveRandomTreat(d);
 
@@ -330,7 +325,7 @@ public class HorseClass extends BaseClass {
 
 				cumulativePercentageChance += percentageChance;
 
-				// Checking witch treat was randomized
+				// Checking which treat was randomized
 				if (randomNumber <= (cumulativePercentageChance * 100 / totalPercentageChance)) {
 					// Adding randomized treat to the player inventory
 					player.getInventory().addItem(item);

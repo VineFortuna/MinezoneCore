@@ -1593,7 +1593,7 @@ public enum Maps {
 							new Vector(-17.5, 149,-145.5),
 							new Vector(-4.5, 149, -163.5)
 					)
-					.setLobbyLoc(new Vector(12.555, 184, -150.462))
+					.setLobbyLoc(new Vector(-68.5, 160, -144.5))
 					.setSpecLoc(new Vector(1.5,  159, -144.5))
 					.setBounds(new Vector(1.5,  151, -144.5), 55, 55)
 					.setSignLoc(new Vector(174.558, 107, 690.700))
