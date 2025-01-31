@@ -35,7 +35,7 @@ public class FreeClassesGUI implements InventoryProvider {
 		
 		PlayerData data = main.getDataManager().getPlayerData(player);
 
-		for (ClassType type : ClassType.values()) {
+		for (ClassType type : ClassType.getAvailableClasses()) {
 			if (type.getTokenCost() == 0 && type.getMinRank() != Rank.VIP && type.getLevel() == 0) {
 				ItemStack item = type.getItem();
 				

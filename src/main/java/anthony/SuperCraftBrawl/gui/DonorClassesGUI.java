@@ -38,7 +38,7 @@ public class DonorClassesGUI implements InventoryProvider {
 					new ClassSelectorGUI(main).inv.open(player);
 				}));
 
-		for (ClassType type : ClassType.values()) {
+		for (ClassType type : ClassType.getAvailableClasses()) {
 			if (type.getMinRank() == Rank.VIP) {
 
 				ClassDetails details = data.playerClasses.get(type.getID());
