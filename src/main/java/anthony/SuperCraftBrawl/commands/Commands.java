@@ -8,7 +8,6 @@ import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
-import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.gui.GameStatsGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -789,6 +788,16 @@ public class Commands implements CommandExecutor, TabCompleter {
 						f.add(s.name());
 				}
 				return f;
+			}
+		} else if (cmd.getName().equalsIgnoreCase("sound")) {
+			if (args.length == 1) {
+				List<String> soundNames = new ArrayList<>();
+				for (Sound sound : Sound.values()) {
+					if (sound.name().toLowerCase().startsWith(args[0].toLowerCase())) {
+						soundNames.add(sound.name());
+					}
+				}
+				return soundNames;
 			}
 		}
 		return null;

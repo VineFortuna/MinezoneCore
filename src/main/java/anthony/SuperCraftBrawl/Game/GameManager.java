@@ -1784,7 +1784,7 @@ public class GameManager implements Listener, PluginMessageListener {
 					tnt.setFuseTicks(50);
 
 					// Playing Sound
-					SoundManager.playSoundToAllGamePlayersFromALocation(i, loc, Sound.FUSE, 1, 1);
+					SoundManager.playSoundToAllFromLocation(i, loc, Sound.FUSE, 1, 1);
 				}
 			}
 		}

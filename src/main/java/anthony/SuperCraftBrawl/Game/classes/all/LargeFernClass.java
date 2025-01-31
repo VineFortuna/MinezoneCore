@@ -16,7 +16,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -354,7 +353,7 @@ public class LargeFernClass extends BaseClass {
                 event.setCancelled(true);
 
                 // Playing Shotgun Sound
-                SoundManager.playSoundToAllGamePlayersFromALocation(instance, player.getLocation(), Sound.EXPLODE, 1, 4);
+                SoundManager.playSoundToAllFromPlayerLocation(instance, player, Sound.EXPLODE, 1, 4);
             }
         
             // TRANSFERN ABILITY
