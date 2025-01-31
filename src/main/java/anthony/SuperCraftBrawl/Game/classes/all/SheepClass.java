@@ -258,7 +258,7 @@ public class SheepClass extends BaseClass {
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.BLACK
 					+ ChatColor.BOLD + "BLACK WOOL");
 			player.setDisplayName(
-					"" + player.getName() + " " + ChatColor.BLACK + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
+					"" + player.getName() + " " + ChatColor.BLUE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.BLACK
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
@@ -280,8 +280,6 @@ public class SheepClass extends BaseClass {
 			color = "8000";
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.DARK_GREEN
 					+ ChatColor.BOLD + "GREEN WOOL");
-			player.setDisplayName(
-					"" + player.getName() + " " + ChatColor.DARK_GREEN + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.DARK_GREEN
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
@@ -303,14 +301,14 @@ public class SheepClass extends BaseClass {
 		} else if (itemList[randomNum] == pinkWool) { // PINK
 			color = "FF69B4";
 			player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou were given &d&lPINK WOOL"));
-			player.setDisplayName(instance.getGameManager().getMain().color("" + player.getName() + " &d&lSheep&r"));
+			player.setDisplayName(instance.getGameManager().getMain().color("" + player.getName() + " &9&lSheep&r"));
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.LIGHT_PURPLE
 					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 			pink = true;
-		} else if (itemList[randomNum] == limeWool) { // LIME
+		} else if (itemList[randomNum] == limeWool) {
 			color = "FF00";
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.GREEN
 					+ ChatColor.BOLD + "LIME WOOL");

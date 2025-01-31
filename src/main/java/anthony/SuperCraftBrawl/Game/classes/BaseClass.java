@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.Game.classes;
 
 import anthony.SuperCraftBrawl.Game.ActionBarManager;
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.gui.ClassRewardsGUI;
@@ -1690,8 +1691,13 @@ public abstract class BaseClass {
 
 	private Player getMobOwner(Creature creature) {
 		if (creature.getCustomName() != null) {
-			String owner = ChatColor.stripColor(
-					creature.getCustomName().substring(0, creature.getCustomName().indexOf("'")));
+			String customName = ChatColor.stripColor(creature.getCustomName());
+
+			if (!customName.contains("'")) {
+				return null;
+			}
+
+			String owner = customName.substring(0, customName.indexOf("'"));
 			return Bukkit.getPlayer(owner);
 		}
 		return null;
@@ -1760,6 +1766,10 @@ public abstract class BaseClass {
 
 	// Giving health potions on kill
 	protected void healthPots(Player d) {
+		if (checkIfDead(d, instance) || instance.state == GameState.ENDED ||
+				instance.classes.get(d).getType() == ClassType.Horse)
+			return;
+
 		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
 				String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + "Health Pot");
 		Potion pot = new Potion(1);
@@ -1856,8 +1866,8 @@ public abstract class BaseClass {
 						String.valueOf(ChatColor.RESET) + ChatColor.YELLOW + "Steals another player's main item"));
 			} else if (baseClass.getType() == ClassType.PiglinBrute) {
 				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK, 1),
-						ChatColor.YELLOW + "Gold Balls",
-						ChatColor.YELLOW + "Right click to throw DEADLY gold balls!");
+						"&eGold Balls",
+						"&7Right click to throw DEADLY gold balls!");
 				d.sendMessage(instance.getGameManager().getMain()
 						.color("&2&l(!) &rYou got a kill and gained an extra &eGold Ball"));
 				d.getInventory().addItem(item);
