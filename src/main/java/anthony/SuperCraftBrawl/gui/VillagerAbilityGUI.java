@@ -15,11 +15,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.Vector;
-import xyz.xenondevs.particle.ParticleEffect;
-import xyz.xenondevs.particle.data.ParticleData;
 
-import java.awt.*;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -167,7 +163,7 @@ public class VillagerAbilityGUI implements InventoryProvider {
             // Playing successful Sound to player
             player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
             // Playing villager Sound to all players
-            SoundManager.playSoundToAllGamePlayersFromALocation(gameInstance, player.getLocation(), Sound.VILLAGER_HAGGLE, 1, 1);
+            SoundManager.playSoundToAllFromPlayerLocation(gameInstance, player, Sound.VILLAGER_HAGGLE, 1, 1);
             // Spawn green particles
             spawnTradeParticlesCircle(player);
 //            spawnTradeParticlesCircle(player);
