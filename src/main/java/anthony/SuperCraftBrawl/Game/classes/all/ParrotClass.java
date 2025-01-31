@@ -34,9 +34,11 @@ public class ParrotClass extends BaseClass {
     private BukkitRunnable danceRunnable;
     private Block danceTargetBlock;
 
+    private int armorColorCounter = 1;
+
     private static final double DANCE_ABILITY_RADIUS = 8;
-    private static final double DANCE_ABILITY_DURATION = 8;
-    private static final double HEAL_PER_SECOND = 1.25;
+    private static final double DANCE_ABILITY_DURATION = 10;
+    private static final double HEAL_PER_SECOND = 1.0 ;
     private static final int JUMP_BOOST_AMP = 0;
 
     private static final Material[] RECORDS = {
@@ -70,16 +72,17 @@ public class ParrotClass extends BaseClass {
 
         // Dance Ability
         double healingAmount = DANCE_ABILITY_DURATION * HEAL_PER_SECOND / 2;
-        String healingDisplay = (healingAmount % 1 == 0) ? String.valueOf((int) healingAmount) : String.valueOf(healingAmount);
-
-        String durationDisplay = (DANCE_ABILITY_DURATION % 1 == 0) ? String.valueOf((int) healingAmount) : String.valueOf(healingAmount);
+        String healingDisplay = ItemHelper.formatDouble(healingAmount);
+        String durationDisplay = ItemHelper.formatDouble(DANCE_ABILITY_DURATION);
+        String radiusDisplay = ItemHelper.formatDouble(DANCE_ABILITY_RADIUS);
 
         danceItem = ItemHelper.setDetails(new ItemStack(Material.JUKEBOX),
                 danceAbility.getAbilityNameRightClickMessage(),
                 "&7Place down a jukebox",
                 "&7and dance to regenerate health",
                 "",
-                "&7Heals &e" + healingDisplay + " &c❤ &7over &a" + DANCE_ABILITY_DURATION + " &7s");
+                "&7Heals &e" + healingDisplay + " &c❤ &7over &a" + durationDisplay + " &7s",
+                "&7Range: &a" + radiusDisplay + " &7blocks");
     }
 
     @Override
@@ -97,27 +100,14 @@ public class ParrotClass extends BaseClass {
         if (gameTicks % TICKS_PER_SECOND != 0) return;
 
         // Healing
-        if (danceTargetBlock != null) {
-            handleHealing();
-        }
+        handleHealing();
+
     }
 
     private void handleHealing() {
-        ChatColor color = null;
-        double distance = player.getLocation().distance(danceTargetBlock.getLocation());
-        
-        if (isDanceAbilityActive()) {
-            if (distance <= 8) {
-                color = ChatColor.YELLOW;
-            } else color = ChatColor.RED;
-        }
-        
         if (isDanceAbilityActive() && isInArea()) {
             player.setHealth(Math.min(player.getHealth() + HEAL_PER_SECOND, player.getMaxHealth()));
-            
-            String formattedDistance = String.format("%.1f", distance);
-            player.sendMessage(ChatColorHelper.color("Blocks from center: " + color + formattedDistance)); // to delete after
-            player.sendMessage(ChatColorHelper.color("&aYou were healed")); // to delete after
+            selectDanceArmor(armorColorCounter++);
         }
     }
 
@@ -152,7 +142,14 @@ public class ParrotClass extends BaseClass {
                 BlockFace blockFace = event.getBlockFace();
                 danceTargetBlock = clickedBlock.getRelative(blockFace);
 
+                // Check if block is not air
                 if (danceTargetBlock.getType() != Material.AIR) return;
+
+                Block blockBelow = danceTargetBlock.getRelative(BlockFace.DOWN);
+                Block blockAbove = danceTargetBlock.getRelative(BlockFace.UP);
+
+                // Check if blocks below and above are not solid
+                if (!blockBelow.getType().isSolid() && !blockAbove.getType().isSolid()) return;
 
                 setDanceAbility();
                 danceAbility.use();
@@ -187,7 +184,6 @@ public class ParrotClass extends BaseClass {
     private void startDanceRunnable() {
         danceRunnable = new BukkitRunnable() {
             double duration = (DANCE_ABILITY_DURATION * TICKS_PER_SECOND); // Duration Ticks
-            int armorColorCounter;
 
             @Override
             public void run() {
@@ -200,7 +196,7 @@ public class ParrotClass extends BaseClass {
                 duration--;
                 if (duration % TICKS_PER_SECOND != 0) return;
                 // Run every second
-                selectDanceArmor(++armorColorCounter);
+
             }
         };
 
@@ -234,6 +230,7 @@ public class ParrotClass extends BaseClass {
         }
 
         selectDanceArmor(5);
+        armorColorCounter = 1;
     }
 
     private void spawnParticles() {

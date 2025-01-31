@@ -502,4 +502,15 @@ public class ItemHelper {
 			return null;
 		}
 	}
+
+	/**
+	 * Format a double for display.
+	 * Converts the double to an integer if it's a whole number.
+	 *
+	 * @param value The double to be formatted.
+	 * @return A formatted string representation of the double value.
+	 */
+	public static String formatDouble(double value) {
+		return (value % 1 == 0) ? String.valueOf((int) value) : String.valueOf(value);
+	}
 }
