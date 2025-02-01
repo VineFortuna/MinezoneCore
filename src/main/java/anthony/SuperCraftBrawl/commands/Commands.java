@@ -61,7 +61,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 				break;
 
 			case "fly":
-			case "f":
 				flyCommand(player);
 				break;
 
@@ -95,7 +94,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 				break;
 				
 			case "leave":
-			case "l":
 				this.leaveGame(player);
 				break;
 

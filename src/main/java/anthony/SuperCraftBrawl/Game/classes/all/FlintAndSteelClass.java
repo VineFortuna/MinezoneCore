@@ -5,7 +5,6 @@ import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
-import org.bukkit.Color;
 import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -104,7 +103,7 @@ public class FlintAndSteelClass extends BaseClass {
 	public void expire() {
 		if (r == null) {
 			r = new BukkitRunnable() {
-				int ticks = 15;
+				int duration = 15; // In seconds
 
 				@Override
 				public void run() {
@@ -117,7 +116,7 @@ public class FlintAndSteelClass extends BaseClass {
 							this.cancel();
 						}
 					}
-					if (ticks == 0) {
+					if (duration == 0) {
 						player.sendMessage(instance.getGameManager().getMain()
 								.color("&2&l(!) &rYour &4Flint&7And&bSteel&r ran out of power!"));
 						player.getInventory().remove(Material.FLINT_AND_STEEL);
@@ -128,7 +127,7 @@ public class FlintAndSteelClass extends BaseClass {
 						cooldown();
 					}
 
-					ticks--;
+					duration--;
 				}
 
 			};

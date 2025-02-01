@@ -163,33 +163,10 @@ public class VillagerAbilityGUI implements InventoryProvider {
             // Playing successful Sound to player
             player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
             // Playing villager Sound to all players
-            SoundManager.playSoundToAllFromPlayerLocation(gameInstance, player, Sound.VILLAGER_HAGGLE, 1, 1);
+            SoundManager.playSoundToAll(player, Sound.VILLAGER_HAGGLE, 1, 1);
             // Spawn green particles
             spawnTradeParticlesCircle(player);
-//            spawnTradeParticlesCircle(player);
             updateTitle(player);
-        }
-    }
-
-    private void spawnTradeParticles(Player player) {
-        // Get player's location
-        Location playerLocation = player.getLocation();
-
-        // Define number of particles and range
-        int particleCount = 20; // Lower particle count to focus around the player
-        double height = 1.5; // Spawn particles above the player's head
-
-        // Spawn particles
-        for (int i = 0; i < particleCount; i++) {
-            // Randomize slight horizontal offset for variation, but keep it small
-            double xOffset = (Math.random() - 0.5) * 0.5; // Small random x offset
-            double zOffset = (Math.random() - 0.5) * 0.5; // Small random z offset
-
-            // Set particle position to be slightly above the player and rise up
-            Location effectLocation = playerLocation.clone().add(xOffset, height + (Math.random() * 0.5), zOffset); // Add y-axis variance to create a rising effect
-
-            // Play the effect (replace with the desired effect)
-            player.getWorld().playEffect(effectLocation, Effect.HAPPY_VILLAGER, 0);
         }
     }
 

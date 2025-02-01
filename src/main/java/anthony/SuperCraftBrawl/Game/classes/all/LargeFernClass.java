@@ -353,7 +353,7 @@ public class LargeFernClass extends BaseClass {
                 event.setCancelled(true);
 
                 // Playing Shotgun Sound
-                SoundManager.playSoundToAllFromPlayerLocation(instance, player, Sound.EXPLODE, 1, 4);
+                SoundManager.playSoundToAll(player, Sound.EXPLODE, 1, 4);
             }
         
             // TRANSFERN ABILITY
