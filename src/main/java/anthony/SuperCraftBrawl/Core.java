@@ -343,10 +343,13 @@ public class Core extends JavaPlugin implements Listener {
 //		msg.add(color("&cIdek what to put here"));
 //		msg.add(color("&cI be sweatin since 2002 baby"));
 //		msg.add(color("&cSheep kit is probably the best!"));
+//		msg.add(color("&cLove you!"));
+//		msg.add(color("&a&lReminder to thank the Staff of &e&l&oMINEZONE"));
+//		msg.add(color("&dSubscribe to &e&l&oMINEZONE &don &cYou&fTube&d!"));
 
-		msg.add(color("&cLove you!"));
-		msg.add(color("&a&lReminder to thank the Staff of &e&l&oMINEZONE"));
-		msg.add(color("&dSubscribe to &e&l&oMINEZONE &don &cYou&fTube&d!"));
+		msg.add(color("&lReminder to thank the staff"));
+		msg.add(color("&lThank you for playing, you're awesome"));
+		msg.add(color("&lShare Minezone with your friends"));
 
 		getLogger().info("(!) You have enabled Minezone-Core");
 		// lobbyWorld = getServer().createWorld(new WorldCreator("lobby"));
@@ -397,7 +400,7 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null) {
-			String[] commandTypes = { "maps", "maplist", "join", "fav", "fly", "f", "shop", "leave", "l", "cw", "players", "class",
+			String[] commandTypes = { "maps", "join", "fly", "leave", "players", "class",
 					"spectate", "startgame", "gamestats", "setlives", "lactate", "purchases", "kit", "items", "color", "sound" };
 
 			for (String command : commandTypes) {
@@ -1929,8 +1932,17 @@ public class Core extends JavaPlugin implements Listener {
 				entry.getValue().removeWinEffects();
 		}
 
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			p.kickPlayer(color("&c&lSERVER IS RESTARTING\n&e\n" + msg.get(new Random().nextInt(msg.size()))));
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			PlayerData playerData = this.getDataManager().getPlayerData(player);
+			String string;
+
+			if (playerData.getRank() == Rank.DEFAULT) {
+				string = "&lSupport us, buy a rank!";
+			} else {
+				string = msg.get(new Random().nextInt(msg.size()));
+			}
+
+			player.kickPlayer(color("&c&lSERVER IS RESTARTING\n &e\n" + string));
 		}
 		Bukkit.broadcastMessage("");
 		Bukkit.broadcastMessage(color("&4&l(!) &eServer Restarting..."));
