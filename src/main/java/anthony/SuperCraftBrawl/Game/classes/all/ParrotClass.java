@@ -45,7 +45,8 @@ public class ParrotClass extends BaseClass {
             Material.RECORD_4,
             Material.RECORD_5,
             Material.RECORD_9,
-            Material.RECORD_12
+            Material.RECORD_12,
+            Material.GREEN_RECORD
     };
 
     private static final int TICKS_PER_SECOND = 20;
