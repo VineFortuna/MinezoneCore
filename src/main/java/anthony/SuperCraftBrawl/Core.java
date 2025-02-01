@@ -332,21 +332,25 @@ public class Core extends JavaPlugin implements Listener {
 	public void onEnable() {
 		plugin = this;
 		msg = new ArrayList<>();
-		msg.add(color("&4&lREMEMBER TO TELL ITZZMIC (I LOVE YOU)"));
-		msg.add(color("&c&lHOW DO YOU SPELL SCB AGAIN?"));
-		msg.add(color("&3ItzzMic coded this btw..."));
-		msg.add(color("&9&lAnthonyFortuna is so cool"));
-		msg.add(color("&cItzzMic wants to remind you to have a good day!"));
-		msg.add(color("&e&lTacos are really good!"));
-		msg.add(color("&cIdek what to put here"));
-		msg.add(color("&cI be sweatin since 2002 baby"));
-		msg.add(color("&3&lWho is Adwyr?"));
-		msg.add(color("&cLove you!"));
-		msg.add(color("&4&lSEASON 2 OUT ALREADY??"));
-		msg.add(color("&a&lReminder to thank the Staff of &e&l&oMINEZONE"));
-		msg.add(color("&cSheep kit is probably the best!"));
-		msg.add(color("&dSubscribe to &e&l&oMINEZONE &don &cYou&fTube&d!"));
-		msg.add(color("&3astro is &b&l20% &3better than you"));
+//		msg.add(color("&4&lREMEMBER TO TELL ITZZMIC (I LOVE YOU)"));
+//		msg.add(color("&c&lHOW DO YOU SPELL SCB AGAIN?"));
+//		msg.add(color("&3ItzzMic coded this btw..."));
+//		msg.add(color("&9&lAnthonyFortuna is so cool"));
+//		msg.add(color("&cItzzMic wants to remind you to have a good day!"));
+//		msg.add(color("&e&lTacos are really good!"));
+//		msg.add(color("&cIdek what to put here"));
+//		msg.add(color("&cI be sweatin since 2002 baby"));
+//		msg.add(color("&3&lWho is Adwyr?"));
+//		msg.add(color("&cLove you!"));
+//		msg.add(color("&4&lSEASON 2 OUT ALREADY??"));
+//		msg.add(color("&a&lReminder to thank the Staff of &e&l&oMINEZONE"));
+//		msg.add(color("&cSheep kit is probably the best!"));
+//		msg.add(color("&dSubscribe to &e&l&oMINEZONE &don &cYou&fTube&d!"));
+//		msg.add(color("&3astro is &b&l20% &3better than you"));
+
+		msg.add(color("&lReminder to thank the staff"));
+		msg.add(color("&lThank you for playing, you're awesome"));
+		msg.add(color("&lShare Minezone with your friends"));
 
 		getLogger().info("(!) You have enabled Minezone-Core");
 		// lobbyWorld = getServer().createWorld(new WorldCreator("lobby"));
@@ -1912,9 +1916,19 @@ public class Core extends JavaPlugin implements Listener {
 				entry.getValue().removeWinEffects();
 		}
 
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			p.kickPlayer(color("&c&lSERVER IS RESTARTING\n&e\n" + msg.get(new Random().nextInt(msg.size()))));
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			PlayerData playerData = this.getDataManager().getPlayerData(player);
+			String string;
+
+			if (playerData.getRank() == Rank.DEFAULT) {
+				string = "&lSupport us, buy a rank!";
+			} else {
+				string = msg.get(new Random().nextInt(msg.size()));
+			}
+
+			player.kickPlayer(color("&c&lSERVER IS RESTARTING\n &e\n" + string));
 		}
+
 		Bukkit.broadcastMessage("");
 		Bukkit.broadcastMessage(color("&4&l(!) &eServer Restarting..."));
 		Bukkit.broadcastMessage("");
