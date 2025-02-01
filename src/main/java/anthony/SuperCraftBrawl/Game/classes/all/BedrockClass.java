@@ -159,19 +159,19 @@ public class BedrockClass extends BaseClass {
 							bc.bedrockInvincibility = true;
 
 							// Playing sound
-							SoundManager.playSoundToAllFromPlayerLocation(instance, player, Sound.ZOMBIE_INFECT, 20, 1);
+							SoundManager.playSoundToAll(player, Sound.ZOMBIE_INFECT, 1, 1);
 
 							// Setting invincibility runnable
 							if (bedrock == null) {
 								bedrock = new BukkitRunnable() {
 									// Setting invincibility/runnable duration
-									int ticks = invincibilityDuration;
+									int duration = invincibilityDuration;
 									boolean armorModified = false; // Flag: armor is modified
 
 									@Override
 									public void run() {
 										// When invincibility is over
-										if (ticks == 0) {
+										if (duration == 0) {
 											bedrock = null;
 											this.cancel();
 											bedrockInvincibility = false;
@@ -180,9 +180,9 @@ public class BedrockClass extends BaseClass {
 											if (armorModified) {
 												restoreOriginalArmor();
 											}
-
-											// Playing sound when invincibility is over
-											SoundManager.playSoundToAllFromPlayerLocation(instance, player, Sound.ZOMBIE_UNFECT, 20, 1);
+										} else if (duration == 1) {
+											// Playing sound 1s before invincibility is over
+											SoundManager.playSoundToAll(player, Sound.ZOMBIE_UNFECT, 1, 1);
 										} else {
 											if (!armorModified) {
 												// Modifying armor when invincibility starts
@@ -191,7 +191,7 @@ public class BedrockClass extends BaseClass {
 											}
 										}
 
-										ticks--;
+										duration--;
 									}
 								};
 								bedrock.runTaskTimer(instance.getGameManager().getMain(), 0, 20);

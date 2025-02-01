@@ -40,9 +40,11 @@ public class ParrotClass extends BaseClass {
     private static final double HEAL_PER_SECOND = 1.0 ;
     private static final int JUMP_BOOST_AMP = 0;
 
-    private static final Material[] RECORDS = {
-            Material.RECORD_3, Material.RECORD_4, Material.RECORD_5, Material.RECORD_6,
-            Material.RECORD_7, Material.RECORD_8, Material.RECORD_9, Material.RECORD_10,
+    private static final Material[] RECORDS= {
+            Material.RECORD_3,
+            Material.RECORD_4,
+            Material.RECORD_5,
+            Material.RECORD_9,
             Material.RECORD_12
     };
 
@@ -147,8 +149,8 @@ public class ParrotClass extends BaseClass {
                 Block blockBelow = danceTargetBlock.getRelative(BlockFace.DOWN);
                 Block blockAbove = danceTargetBlock.getRelative(BlockFace.UP);
 
-                // Check if blocks below and above are not solid
-                if (!blockBelow.getType().isSolid() && !blockAbove.getType().isSolid()) {
+                // Check if blocks below and above are not air
+                if (blockBelow.getType() == Material.AIR && blockAbove.getType() == Material.AIR) {
                     SoundManager.playErrorSound(player);
                     danceAbility.sendPlayerCustomUseAbilityChatMessage("&c&l(!) &rYou can't place your ability there");
                     return;
@@ -165,7 +167,7 @@ public class ParrotClass extends BaseClass {
                 if (!flapAbility.isReady()) return;
 
                 player.setVelocity(new Vector(0, 0.8, 0));
-                SoundManager.playSoundToAllFromPlayerLocation(instance, player, Sound.BAT_TAKEOFF, 0.8f, 1.6f);
+                SoundManager.playSoundToAll(player, Sound.BAT_TAKEOFF, 0.8f, 1.6f);
 
                 flapAbility.use();
             }
@@ -215,7 +217,6 @@ public class ParrotClass extends BaseClass {
         Random random = new Random();
         Material randomRecord = RECORDS[random.nextInt(RECORDS.length)];
         player.getWorld().playEffect(danceTargetBlock.getLocation(), Effect.RECORD_PLAY, randomRecord);
-        player.sendMessage(randomRecord.name()); // to delete after
     }
 
     private void cleanupDanceAbility() {

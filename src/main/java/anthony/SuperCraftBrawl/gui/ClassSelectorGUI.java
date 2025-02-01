@@ -58,7 +58,7 @@ public class ClassSelectorGUI implements InventoryProvider {
 
 		contents.set(1, 6,
 				ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.EMERALD),
-						String.valueOf(ChatColor.BLUE) + ChatColor.BOLD + "TOKEN CLASSES",
+						String.valueOf(ChatColor.GREEN) + ChatColor.BOLD + "TOKEN CLASSES",
 						ChatColor.GRAY + "You can buy these classes with coins!"), e -> {
 							new TokenClassesGUI(main).inv.open(player);
 						}));

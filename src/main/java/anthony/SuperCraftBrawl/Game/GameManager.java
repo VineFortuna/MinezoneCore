@@ -1005,7 +1005,7 @@ public class GameManager implements Listener, PluginMessageListener {
 					// Remove fire by setting fire ticks to 0
 					player.setFireTicks(0);
 					player.playSound(player.getLocation(), Sound.DRINK, 1, 1);
-					if (bc != null && bc.getType() != ClassType.BabyCow) { // BabyCow milk bucket has its own behaviour
+					if (bc != null && bc.getType() != ClassType.Mooshroom) { // Mooshroom milk bucket has its own behaviour
 						player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
 								+ ChatColor.RESET + "You feel refreshed!");
 						int amount = item.getAmount();
@@ -1484,14 +1484,16 @@ public class GameManager implements Listener, PluginMessageListener {
 			// ITEMS:
 			if (game.gameType != GameType.FRENZY) {
 				player.getInventory().setItem(0,
-						ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&9>&1>&f&lClasses&1<&9<"));
+						ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), "&9>&1>&f&lClasses&1<&9<",
+								"", "&7Click to choose a class"));
 			}
 			
 			player.getInventory().setItem(4,
 					ItemHelper.setDetails(new ItemStack(Material.CHEST), "&d>&5>&f&lCosmetics&5<&d<",
-							"", "&7Click to choose a class!"));
+							"", "&7Click to see your cosmetics"));
 			ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
-			player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&c>&4>&f&lProfile&4<&c<"));
+			player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&c>&4>&f&lProfile&4<&c<",
+					"", "&7Click to see your profile"));
 			player.getInventory().setItem(8, ItemHelper.setDetails(new ItemStack(Material.BARRIER), "&cLeave Game",
 					"", "&7Click to leave your game"));
 		}
@@ -1784,7 +1786,7 @@ public class GameManager implements Listener, PluginMessageListener {
 					tnt.setFuseTicks(50);
 
 					// Playing Sound
-					SoundManager.playSoundToAllFromLocation(i, loc, Sound.FUSE, 1, 1);
+					SoundManager.playSoundToAll(player, loc, Sound.FUSE, 1, 1);
 				}
 			}
 		}
@@ -2120,7 +2122,31 @@ public class GameManager implements Listener, PluginMessageListener {
 		if (item != null) {
 			ItemMeta meta = item.getItemMeta();
 			switch (item.getType()) {
-			case COMPASS:
+				case COMPASS:
+					if (player.getWorld() == this.main.getLobbyWorld()) {
+						Bukkit.getScheduler().runTaskLaterAsynchronously((Plugin) this.main, () -> {
+							ByteArrayOutputStream b = new ByteArrayOutputStream();
+							DataOutputStream out = new DataOutputStream(b);
+							try {
+								out.writeUTF("PlayerCount");
+								out.writeUTF("scb-1");
+							} catch (Exception exc) {
+								exc.printStackTrace();
+							}
+							player.sendPluginMessage((Plugin) this.main, "BungeeCord", b.toByteArray());
+							b = new ByteArrayOutputStream();
+							out = new DataOutputStream(b);
+							try {
+								out.writeUTF("PlayerCount");
+								out.writeUTF("scb-2");
+							} catch (Exception exc) {
+								exc.printStackTrace();
+							}
+							player.sendPluginMessage((Plugin) this.main, "BungeeCord", b.toByteArray());
+						}, 10L);
+						(new GameSelectorGUI(this.main)).inv.open(player);
+					}
+				case ENCHANTED_BOOK:
 				if (i != null) {
 					if (i.state == GameState.WAITING) {
 						PlayerData data = main.getDataManager().getPlayerData(player);
@@ -2137,29 +2163,6 @@ public class GameManager implements Listener, PluginMessageListener {
 					}
 				} else if (i2 != null && i2.spectators.contains(player) && player.getWorld() == i2.getMapWorld()) {
 					(new SpectatorGUI(this.main)).inv.open(player);
-				}
-				if (player.getWorld() == this.main.getLobbyWorld()) {
-					Bukkit.getScheduler().runTaskLaterAsynchronously((Plugin) this.main, () -> {
-						ByteArrayOutputStream b = new ByteArrayOutputStream();
-						DataOutputStream out = new DataOutputStream(b);
-						try {
-							out.writeUTF("PlayerCount");
-							out.writeUTF("scb-1");
-						} catch (Exception exc) {
-							exc.printStackTrace();
-						}
-						player.sendPluginMessage((Plugin) this.main, "BungeeCord", b.toByteArray());
-						b = new ByteArrayOutputStream();
-						out = new DataOutputStream(b);
-						try {
-							out.writeUTF("PlayerCount");
-							out.writeUTF("scb-2");
-						} catch (Exception exc) {
-							exc.printStackTrace();
-						}
-						player.sendPluginMessage((Plugin) this.main, "BungeeCord", b.toByteArray());
-					}, 10L);
-					(new GameSelectorGUI(this.main)).inv.open(player);
 				}
 				break;
 			case BARRIER:
