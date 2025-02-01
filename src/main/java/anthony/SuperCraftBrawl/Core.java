@@ -168,6 +168,10 @@ public class Core extends JavaPlugin implements Listener {
 		return dataManager;
 	}
 
+	public Fishing getFishing() {
+		return fishing;
+	}
+
 	public Version getVersion() {
 		return this.version;
 	}
