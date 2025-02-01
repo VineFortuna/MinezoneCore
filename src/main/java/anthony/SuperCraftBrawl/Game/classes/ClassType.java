@@ -307,7 +307,7 @@ public enum ClassType {
 			case Guardian:
 				return "" + ChatColor.DARK_AQUA + ChatColor.BOLD + "Guardian" + ChatColor.RESET;
 			case Firework:
-				return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "Firework" + ChatColor.RESET;
+				return "" + ChatColor.RED + ChatColor.BOLD + "Firework" + ChatColor.RESET;
 			case Bedrock:
 				return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bedrock" + ChatColor.RESET;
 			case Shulker:
@@ -348,7 +348,7 @@ public enum ClassType {
 			case Star:
 				return "" + ChatColor.DARK_GRAY + "Star" + ChatColor.RESET;
 			case Wizard:
-				return "" + ChatColor.RED + ChatColor.BOLD + "Wizard" + ChatColor.RESET;
+				return "" + ChatColor.GOLD + ChatColor.BOLD + ChatColor.ITALIC + "Wizard" + ChatColor.RESET;
 			case Present:
 				return "" + ChatColor.GOLD + ChatColor.BOLD + "Present" + ChatColor.RESET;
 			case Wither:
