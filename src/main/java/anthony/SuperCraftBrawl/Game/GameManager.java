@@ -409,7 +409,16 @@ public class GameManager implements Listener, PluginMessageListener {
 
 		if (instance != null) {
 			if (instance.state == GameState.STARTED) {
+				// On Tropical, void level is 70 because of the water
+				if (instance.getMap() == Maps.Tropical) {
+					if (e.getPlayer().getLocation().getY() <= 71 && e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
+						EntityDamageEvent damageEvent = new EntityDamageEvent(e.getPlayer(), DamageCause.VOID, 1000);
+						main.getServer().getPluginManager().callEvent(damageEvent);
+					}
+				}
+
 				if (e.getPlayer().getLocation().getY() < 50 && e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
+					if (instance.getMap() == Maps.Tropical) return;
 					EntityDamageEvent damageEvent = new EntityDamageEvent(e.getPlayer(), DamageCause.VOID, 1000);
 					main.getServer().getPluginManager().callEvent(damageEvent);
 				}
