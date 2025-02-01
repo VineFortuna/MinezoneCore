@@ -7,24 +7,17 @@ commands:
       usage: /join [map name]
    hub:
       description: Hub command
-   shop:
-      description: Shop command
+      aliases: h, lobby
    leave:
       description: Leave game command
-   l:
-      description: Leave game command
-   cw:
-      description: Crystal wars
+      aliases: l
    players:
       description: List of players in your game
-   fav:
-      description: Fav classes
    gamestats:
       description: Stats after a game
    fly:
       description: Fly command
-   f:
-      description: Fly command
+      aliases: f
    list:
       description: List of online players
    tournament:
@@ -33,14 +26,17 @@ commands:
       description: Class command
    startgame:
       description: Start game
+      aliases: sg
    setlevel:
       description: Set level command
    store:
       description: Store command
+      aliases: shop, ranks
    nick:
       description: Nickname!
    tell:
       description: Msg command!
+      aliases: msg, t, whisper, w, reply, r
    setrank:
       description: Rank command!
       permission: scb.setrank
@@ -52,26 +48,22 @@ commands:
       description: Online players command!
    purchases:
       description: Purchases command!
-   maplist:
-      description: Displays a list of SCB maps!
    maps:
       description: Displays a list of SCB maps!
+      aliases: maplist
    seen:
       description: Seen command
    ignite:
       description: Ignite a player!
    broadcast:
       description: Broadcast command
-   msg:
-      description: Message command
-   rank:
-      description: Ranks command
    spectate:
       description: Spectate command
    socials:
       description: Socials
    vanish:
       description: Vanish
+      aliases: v
    unvanish:
       description: Unvanish
    gmc:
@@ -86,10 +78,6 @@ commands:
       description: General gamemode command
    scbhelp:
       description: Displays SCB help/information
-   dailyreward:
-      description: Daily Rewards
-   tutorial:
-      description: Tutorial of the Server
    scb:
       description: Displays SCB help/information
    classes:
@@ -98,12 +86,11 @@ commands:
       description: Player Stats
    token:
       description: Give tokens
-   cwm:
-      description: Custom Win Messages!
    activegames:
       description: Test command
    help:
-      description: HelpppppPPPppp!!!
+      description: Sends discord link in chat
+      aliases: dc, discord
    sc:
       description: Staff Chat
    staff:
@@ -144,11 +131,13 @@ commands:
       description: Kit command for SkyWars
    items:
       description: Get all SCB Item Drops
+      aliases: i
    lactate:
       description: Lactate command!
    sound:
       description: Play a sound on your location
-      
+      aliases: s
+
 permissions:
    scb.admin:
       description: Admin perms

@@ -27,7 +27,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class BrewingStandClass extends BaseClass {
 
 	private int cooldownSec;
-	private int cooldownDuration = 10000;
+	private int cooldownDuration = 10 * 1000;
 	private boolean used = false;
 	private BukkitRunnable runnable;
 
@@ -131,7 +131,7 @@ public class BrewingStandClass extends BaseClass {
 								potionsToGive(blazePowder);
 						}
 					};
-					runnable.runTaskLater(instance.getGameManager().getMain(), 80L);
+					runnable.runTaskLater(instance.getGameManager().getMain(), 4 * 20L);
 				}
 			}
 		}
@@ -153,7 +153,7 @@ public class BrewingStandClass extends BaseClass {
 				pot.setSplash(true);
 				PotionMeta meta = (PotionMeta) potion.getItemMeta();
 				pot.setType(PotionType.SLOWNESS);
-				meta.addCustomEffect(new PotionEffect(PotionEffectType.SLOW, 300, 1), true);
+				meta.addCustomEffect(new PotionEffect(PotionEffectType.SLOW, 15 * 20, 1), true);
 				potion.setItemMeta(meta);
 			} else if (amount == 2) {
 				potion = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
@@ -161,7 +161,7 @@ public class BrewingStandClass extends BaseClass {
 				pot.setSplash(true);
 				PotionMeta meta = (PotionMeta) potion.getItemMeta();
 				pot.setType(PotionType.JUMP);
-				meta.addCustomEffect(new PotionEffect(PotionEffectType.JUMP, 400, 3), true);
+				meta.addCustomEffect(new PotionEffect(PotionEffectType.JUMP, 20 * 20, 3), true);
 				potion.setItemMeta(meta);
 			} else if (amount == 3) {
 				potion = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
@@ -169,7 +169,7 @@ public class BrewingStandClass extends BaseClass {
 				pot.setSplash(true);
 				PotionMeta meta = (PotionMeta) potion.getItemMeta();
 				pot.setType(PotionType.SPEED);
-				meta.addCustomEffect(new PotionEffect(PotionEffectType.SPEED, 400, 1), true);
+				meta.addCustomEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 20, 1), true);
 				potion.setItemMeta(meta);
 			} else if (amount == 4) {
 				potion = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
@@ -177,7 +177,7 @@ public class BrewingStandClass extends BaseClass {
 				pot.setSplash(true);
 				PotionMeta meta = (PotionMeta) potion.getItemMeta();
 				pot.setType(PotionType.REGEN);
-				meta.addCustomEffect(new PotionEffect(PotionEffectType.REGENERATION, 110, 2), true);
+				meta.addCustomEffect(new PotionEffect(PotionEffectType.REGENERATION, 5 * 20, 2), true);
 				potion.setItemMeta(meta);
 			} else if (amount == 5) {
 				potion = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
@@ -185,7 +185,7 @@ public class BrewingStandClass extends BaseClass {
 				pot.setSplash(true);
 				PotionMeta meta = (PotionMeta) potion.getItemMeta();
 				pot.setType(PotionType.STRENGTH);
-				meta.addCustomEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 110, 0), true);
+				meta.addCustomEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 5 * 20, 0), true);
 				potion.setItemMeta(meta);
 			}
 

@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
+import anthony.util.SoundManager;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -25,7 +26,7 @@ import java.util.List;
 public class SnowGolemClass extends BaseClass {
 
 	private int cooldownSec = 0;
-	private int pumpkinDuration = 5; // 5 seconds for pumpkin on players heads
+	private static final int PUMPKIN_DURATION = 5;
 
 	private ItemStack weapon;
 
@@ -149,13 +150,12 @@ public class SnowGolemClass extends BaseClass {
 												platformBlock.setType(Material.SNOW_BLOCK);
 												platformBlock.setMetadata("SnowPlatform",
 														new FixedMetadataValue(instance.getGameManager().getMain(), true));
+
+												// PLAYING SOUND FOR CREATING PLATFORM
+												SoundManager.playSoundToAll(player, platformLocation, Sound.STEP_SNOW, 2, 1.5f);
 											}
 										}
 									}
-
-									// PLAYING SOUND FOR CREATING PLATFORM
-									for (Player gamePlayer : instance.players)
-										gamePlayer.playSound(playerLocation, Sound.STEP_SNOW, 4, 2);
 
 									// REMOVING PLATFORM
 									Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
@@ -169,14 +169,12 @@ public class SnowGolemClass extends BaseClass {
 
 													platformBlock.removeMetadata("SnowPlatform",
 															instance.getGameManager().getMain());
+													// PLAYING SOUND FOR REMOVING PLATFORM
+													SoundManager.playSoundToAll(player, platformLocation, Sound.DIG_SNOW, 2, 2);
 												}
 											}
 										}
 									}, 4 * 20);
-
-									// PLAYING SOUND FOR REMOVING PLATFORM
-									for (Player gamePlayer : instance.players)
-										gamePlayer.playSound(playerLocation, Sound.DIG_SNOW, 4, 4);
 
 									ticks++;
 								}
@@ -192,7 +190,6 @@ public class SnowGolemClass extends BaseClass {
 			if (item.getType() == Material.PUMPKIN
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 				if (player.getGameMode() != GameMode.SPECTATOR) {
-					player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 200, 0));
 					int amount = item.getAmount();
 					if (amount > 0) {
 						amount--;
@@ -201,26 +198,27 @@ public class SnowGolemClass extends BaseClass {
 						else
 							item.setAmount(amount);
 
+						// Adding strength
+						player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, PUMPKIN_DURATION * 20, 0));
+						// Pumpkin Head Feedback Sound
+						player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
+
 						for (Player gamePlayer : instance.players) {
 							BaseClass baseClass = instance.classes.get(gamePlayer);
-
-							// Pumpkin Head Feedback Sound
-							player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
-							player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 110, 0));
 
 							if (player != gamePlayer) {
 
 								// Pumpkin Head Sound
-								gamePlayer.playSound(player.getLocation(), Sound.AMBIENCE_CAVE, 1, 4);
+								gamePlayer.playSound(player.getLocation(), Sound.AMBIENCE_CAVE, 1, 2);
 
 								// Pumpkin Head Duration and Application
 								BukkitRunnable runTimer = new BukkitRunnable() {
 
-									int ticks = pumpkinDuration;
+									int ticks = PUMPKIN_DURATION;
 
 									@Override
 									public void run() {
-										if (ticks == pumpkinDuration) {
+										if (ticks == PUMPKIN_DURATION) {
 											if (!checkIfDead(gamePlayer, instance))
 												gamePlayer.getInventory().setHelmet(new ItemStack(Material.PUMPKIN));
 										} else if (ticks == 0) {
@@ -257,6 +255,6 @@ public class SnowGolemClass extends BaseClass {
 
 	@Override
 	public void SetNameTag() {
-		
+
 	}
 }

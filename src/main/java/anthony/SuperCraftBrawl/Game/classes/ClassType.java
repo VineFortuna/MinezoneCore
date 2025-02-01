@@ -84,7 +84,7 @@ public enum ClassType {
 	Bat(15, 0, Rank.VIP),
 	SethBling(16, 0, Rank.VIP),
 	Melon(19, 0, Rank.VIP),
-	BabyCow(22, 0, Rank.VIP),
+	Mooshroom(22, 0, Rank.VIP),
 	Herobrine(23, 0, Rank.VIP),
 	Wizard(41, 0, Rank.VIP),
 	MagmaCube(48, 0, Rank.VIP),
@@ -258,7 +258,7 @@ public enum ClassType {
 				return "The creator of SCB, wanna fight?!?!";
 			case Melon:
 				return "The Owner of the server in the game?!";
-			case BabyCow:
+			case Mooshroom:
 				return "moo... MOO!!";
 			case Herobrine:
 				return "Use your Diamond of Despair to play tricks on your opponents!";
@@ -415,8 +415,8 @@ public enum ClassType {
 				return "" + ChatColor.DARK_BLUE + ChatColor.ITALIC + "Squid" + ChatColor.RESET;
 			case Spider:
 				return "" + ChatColor.RED + ChatColor.ITALIC + "Spider" + ChatColor.RESET;
-			case BabyCow:
-				return "" + ChatColor.RED + ChatColor.ITALIC + ChatColor.BOLD + "BabyCow" + ChatColor.RESET;
+			case Mooshroom:
+				return "" + ChatColor.RED + ChatColor.ITALIC + ChatColor.BOLD + "Mooshroom" + ChatColor.RESET;
 			case Bunny:
 				return "" + ChatColor.YELLOW + ChatColor.ITALIC + ChatColor.BOLD + "Bunny" + ChatColor.RESET;
 			case ButterBro:
@@ -538,7 +538,7 @@ public enum ClassType {
 		case Creeper:
 			return ItemHelper.createSkullHead(1, SkullType.CREEPER);
 		case IronGolem:
-			return new ItemStack(new ItemStack(Material.IRON_BLOCK));
+			return ItemHelper.createSkullTexture("e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWQ2NTJjOTVmYzViZGY3ZWQwM2M1NjdlOTBmZjYyNWJlMDI4YWQ4NDg2M2QzMjcxZDZlNmMxYWEzMDhmMzEzZiJ9fX0=");
 		case Ghast:
 			return new ItemStack(new ItemStack(Material.GHAST_TEAR));
 		case Slime:
@@ -548,14 +548,15 @@ public enum ClassType {
 		case Enderdragon:
 			return new ItemStack(new ItemStack(Material.DRAGON_EGG));
 		case Bat:
-			return new ItemStack(new ItemStack(Material.SHEARS));
+			return ItemHelper.createSkullTexture(
+					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWU5OWRlZWY5MTlkYjY2YWMyYmQyOGQ2MzAyNzU2Y2NkNTdjN2Y4YjEyYjlkY2E4ZjQxYzNlMGEwNGFjMWNjIn19fQ==");
 		case SethBling:
 			return ItemHelper.createSkullTexture(
 					"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I4NmI4MjE1YjM2MTBlYWE2NDhjMjNjNGEyMGFkNjc1OWYyNTFlZjg1NDc2ODI5ZGQ2ZDE4NDI4MjNiMTEzIn19fQ==");
 		case Melon:
 			return new ItemStack(new ItemStack(Material.MELON));
-		case BabyCow:
-			return new ItemStack(new ItemStack(Material.RED_MUSHROOM));
+		case Mooshroom:
+			return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDBiYzYxYjk3NTdhN2I4M2UwM2NkMjUwN2EyMTU3OTEzYzJjZjAxNmU3YzA5NmE0ZDZjZjFmZTFiOGRiIn19fQ==");
 		case Herobrine:
 			return new ItemStack(new ItemStack(Material.DIAMOND));
 		case Ninja:
@@ -732,8 +733,8 @@ public enum ClassType {
 				return new SquidClass(instance, player);
 			case Spider:
 				return new SpiderClass(instance, player);
-			case BabyCow:
-				return new BabyCowClass(instance, player);
+			case Mooshroom:
+				return new MooshroomClass(instance, player);
 			case Bunny:
 				return new BunnyClass(instance, player);
 			case Pig:

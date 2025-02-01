@@ -407,7 +407,7 @@ public class SilverfishClass extends BaseClass {
 //					replacedBlocks.remove(replacedBlocks.size() - 1);
 
 					// Playing digging stone sound to all players
-					SoundManager.playSoundToAllFromLocation(instance, randomizedBlockLocation, Sound.DIG_STONE, 1, 1);
+					SoundManager.playSoundToAll(player, randomizedBlockLocation, Sound.DIG_STONE, 1, 1);
 
 					// Adding Stone/Cobblestone block breaking particles
 					for (Player gamePlayer : instance.players) {

@@ -322,7 +322,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                 return new ItemStack(Material.REDSTONE_BLOCK);
             case Melon:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWY5YzJlOWUwYThmNTJhYjg1NDdkYTZlMmE2ODg4NTUyZmE0ZTFkZWEyNDM3Y2ZmNjViMDdhMTg5N2NmYmI2OCJ9fX0=");
-            case BabyCow:
+            case Mooshroom:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGM0YjVmNmQ3NTEyNjM4MGY1MjBhNjdjYTU3YmM5YTU2YWExMWRiOGFmZTdlNWRjYjJhNTJkZmNmZWFlMDc4NSJ9fX0=");
             case Herobrine:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWI3OGFiM2EzODhhNjliNTFhNjI1YjA2MGI3YzY3ZjQ3ZTczM2IyMTliMzMxMjE2YTY3OTFhZDZhYTU3YThmZCJ9fX0=");
