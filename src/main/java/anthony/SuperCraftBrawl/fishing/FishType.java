@@ -342,7 +342,7 @@ public enum FishType {
     public String getDesc() {
         switch (this) {
             case COD:
-                return "Something's fishy...";
+                return "You've cod to be kidding me!";
             case SALMON:
                 return "Mr. Salmon, bring me a drink";
             case TROUT:
@@ -355,10 +355,18 @@ public enum FishType {
                 return "Holy carp!";
             case PERCH:
                 return "Buy its merch!";
-            case URCHIN:
-                return "Handle with care";
             case SEWERFISH:
                 return "Eww";
+            case ROCKFISH:
+                return "Rockin' the sea";
+            case TUNA:
+                return "Tuna in, this catch is off the scales!";
+            case KOI:
+                return "Oh boy...";
+            case FLOUNDER:
+                return "Flat out amazing!";
+            case URCHIN:
+                return "Handle with care";
             case PICKLES:
                 return "In a pickle";
             case FROG:
@@ -366,13 +374,17 @@ public enum FishType {
             case SQUID:
                 return "Surprisingly good at SCB";
             case CLOWNFISH:
-                return "I found Nemo";
+                return "I found Nemo!";
             case SHRIMP:
                 return "It's as shrimple as that";
             case STARFISH:
                 return "High five!";
             case OARFISH:
                 return "Oarfish more like BOREfish";
+            case REDSNAPPER:
+                return "Red hot and ready to snap";
+            case CATFISH:
+                return "This catfish is the real deal";
             case DACE:
                 return "Warning: might hit you in the face";
             case LOBSTER:
@@ -415,14 +427,26 @@ public enum FishType {
                 return "How shocking";
             case DOLPHIN:
                 return "It wasn't on porpoise";
+            case CROCODILE:
+                return "In a while, crocodile";
+            case FLAPJACK:
+                return "A jack of all trades";
+            case GUARDIAN:
+                return "Guardian of the deep";
+            case KINGSALMON:
+                return "Bow down to the king of the stream";
             case BLOBFISH:
                 return "What a cutie";
             case LEVIATHAN:
-                return "Guardian of the loot at the bottom of the lake";
+                return "Keeper of the loot at the bottom of the lake";
             case SHARK:
                 return "Baby shark do do do dododo";
             case WHALE:
                 return "How did you even reel this in?";
+            case WHALESHARK:
+                return "It's a whale! It's a shark! It's a WHALESHARK!!";
+            case ELDERGUARDIAN:
+                return "Guardian of the deep... but older";
             case BOOTS:
                 return "Who threw these in here?";
             case BOTTLE:
@@ -435,6 +459,12 @@ public enum FishType {
                 return "Can't catch anything with this";
             case NAUTILUSSHELL:
                 return "Something's missing...";
+            case CLAY:
+                return "A solid find";
+            case SLIMEBALL:
+                return "Icky sticky";
+            case BONE:
+                return "Looks like someone had a bad day";
             case BOAT:
                 return "(Don't) row row row your boat";
             case EXP:
