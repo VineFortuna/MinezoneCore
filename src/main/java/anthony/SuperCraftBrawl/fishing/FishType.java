@@ -83,7 +83,7 @@ public enum FishType {
     BOAT(37, "Broken Boat", FishRarity.JUNK, null),
     CLAY(57, "Lump of Clay", FishRarity.JUNK, null),
     SLIMEBALL(74, "Slimeball", FishRarity.JUNK, Arrays.asList(FishArea.Sewers)),
-    BONE(75, "Bone", FishRarity.JUNK, null),
+    BONE(75, "Bone", FishRarity.JUNK, Arrays.asList(FishArea.Cavern)),
     EXP(45, "EXP Bottle", FishRarity.TREASURE, null),
     TOKENS(33, "Token Sack", FishRarity.TREASURE, null),
     MAP(34, "Treasure Map", FishRarity.TREASURE, null),
@@ -385,6 +385,10 @@ public enum FishType {
                 return "Red hot and ready to snap";
             case CATFISH:
                 return "This catfish is the real deal";
+            case OTTER:
+                return "Hello from the otter side";
+            case MINTYGOBBLER:
+                return "A breath of fresh sea air";
             case DACE:
                 return "Warning: might hit you in the face";
             case LOBSTER:
@@ -399,6 +403,10 @@ public enum FishType {
                 return "I like turtles";
             case OCTOPUS:
                 return "That's a lot of arms";
+            case NURSESHARK:
+                return "Not as scary as it looks";
+            case AMBERFIN:
+                return "Gold and bold";
             case JELLYFISH:
                 return "Is there a peanutbutterfish too?";
             case GOLDFISH:
@@ -413,6 +421,12 @@ public enum FishType {
                 return "Naut my problem";
             case CLAM:
                 return "Why so clammy?";
+            case CHROMIS:
+                return "Doesn't that make turquoise?";
+            case AXOLOTL:
+                return "Totally a-lotl fun!";
+            case SEAL:
+                return "Sealed and delivered";
             case PIRANHA:
                 return "Looking sharp";
             case ANGLERFISH:
@@ -429,8 +443,12 @@ public enum FishType {
                 return "It wasn't on porpoise";
             case CROCODILE:
                 return "In a while, crocodile";
+            case BULLHEAD:
+                return "Hope you're not wearing red";
             case FLAPJACK:
                 return "A jack of all trades";
+            case MANATEE:
+                return "Would you like a cup-a-tea?";
             case GUARDIAN:
                 return "Guardian of the deep";
             case KINGSALMON:
