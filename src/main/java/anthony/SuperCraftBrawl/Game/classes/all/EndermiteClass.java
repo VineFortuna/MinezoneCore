@@ -182,12 +182,14 @@ public class EndermiteClass extends BaseClass {
 
                             if (closest.distanceSquared(e.getLocation().add(0, 1, 0)) <= 1.75 * 1.75) {
                                 if (instance.isInBounds(e.getLocation())) {
-                                    Location playerLoc = player.getLocation();
-                                    Location targetLoc = e.getLocation();
+                                    Location playerLoc = player.getLocation().clone();
+                                    Location targetLoc = e.getLocation().clone();
+                                    targetLoc.setDirection(playerLoc.getDirection());
 
                                     // Swap player and Endermite locations
-                                    player.playSound(playerLoc, Sound.ENDERMAN_TELEPORT, 0.5f, 0);
+                                    player.getWorld().playSound(playerLoc, Sound.ENDERMAN_TELEPORT, 1, 0);
                                     player.teleport(targetLoc);
+
                                     player.getWorld().playEffect(playerLoc.add(0, 1, 0), Effect.PORTAL, 1);
                                     e.teleport(playerLoc);
 
