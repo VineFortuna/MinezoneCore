@@ -59,7 +59,9 @@ public class Fishing implements Listener {
             
             p.sendMessage(main.color("&3&l(!) &rYou caught a "
                     + fish.getRarity().getColor() + fish.getName() + "&r!"));
-            
+
+            boolean updateScoreboard = false;
+
             // When caught for the first time
             if (details.timesCaught == 0) {
                 // Message
@@ -101,10 +103,12 @@ public class Fishing implements Listener {
                     p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
                     p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "!"));
                 }
+                updateScoreboard = true;
             } else if (fish == FishType.TOKENS) {
                 int r = rand.nextInt(35) + 11;
                 data.tokens += r;
                 p.sendMessage(main.color("&3&l(!) &rYou have found &e" + r + " Tokens!"));
+                updateScoreboard = true;
             }
             reward(p, fish.getRarity());
             data.totalcaught++;
@@ -121,7 +125,7 @@ public class Fishing implements Listener {
                 friendship(p, data.friendshipLevel);
             
             removeFish(i);
-            if (main.getGameManager().GetInstanceOfPlayer(p) == null)
+            if (main.getGameManager().GetInstanceOfPlayer(p) == null && updateScoreboard)
             	main.getScoreboardManager().lobbyBoard(p);
         }
     }
@@ -270,6 +274,8 @@ public class Fishing implements Listener {
                     p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
                     p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "!"));
                 }
+                if (main.getGameManager().GetInstanceOfPlayer(p) == null)
+                    main.getScoreboardManager().lobbyBoard(p);
             }
         }
     }
