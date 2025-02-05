@@ -76,7 +76,7 @@ public class EndermiteClass extends BaseClass {
     public ItemStack getAttackWeapon() {
         return ItemHelper.setUnbreakable(ItemHelper.addEnchant(
                 ItemHelper.addEnchant(
-                new ItemStack(Material.ENDER_STONE), Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 1));
+                new ItemStack(Material.ENDER_STONE), Enchantment.DAMAGE_ALL, 4), Enchantment.KNOCKBACK, 1));
     }
     
     @Override
