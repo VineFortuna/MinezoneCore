@@ -346,15 +346,15 @@ public class Fishing implements Listener {
         int treasureFished = getTotalFish(player, FishRarity.TREASURE);
 
         // TO UNLOCK FISHERMAN
-        // COMMON - 10
-        // RARE - 9
+        // COMMON - 11
+        // RARE - 8
         // EPIC - 8
         // MYTHIC - 7
         // LEGENDARY - 5
         // JUNK - 7
         // TREASURE - 4
 
-        return Math.min(commonFished, 10) + Math.min(rareFished, 9) + Math.min(epicFished, 8)
+        return Math.min(commonFished, 11) + Math.min(rareFished, 8) + Math.min(epicFished, 8)
                 + Math.min(mythicFished, 7) + Math.min(legendaryFished, 5) + Math.min(junkFished, 7)
                 + Math.min(treasureFished, 4);
     }
