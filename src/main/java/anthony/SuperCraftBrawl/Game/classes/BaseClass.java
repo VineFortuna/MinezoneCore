@@ -140,7 +140,7 @@ public abstract class BaseClass {
 
 	public abstract void SetItems(Inventory playerInv);
 
-	public abstract void UseItem(PlayerInteractEvent event);
+	public void UseItem(PlayerInteractEvent event){};
 
 	public void onConsumingItem(PlayerItemConsumeEvent event) {
 	};

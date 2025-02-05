@@ -33,7 +33,7 @@ public class BrewingStandClass extends BaseClass {
 
 	public BrewingStandClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.15;
+		baseVerticalJump = 1.1;
 		createArmor(
 				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjU0M2JiZDkwNTcxYjFlMzVhYTAzOWE1ZWJhZDY1ZjQxNDI3YzhiODg3MWRkZjc2NzU4MGYzYTViMTAyMmZiZiJ9fX0=",
@@ -68,6 +68,7 @@ public class BrewingStandClass extends BaseClass {
 	/*
 	 * This function runs through every tick of a game but when doing the ticks
 	 * modulo 100, it will run through this code every 5 seconds of the game
+	 *
 	 */
 	@Override
 	public void Tick(int gameTicks) {
@@ -161,7 +162,7 @@ public class BrewingStandClass extends BaseClass {
 				pot.setSplash(true);
 				PotionMeta meta = (PotionMeta) potion.getItemMeta();
 				pot.setType(PotionType.JUMP);
-				meta.addCustomEffect(new PotionEffect(PotionEffectType.JUMP, 20 * 20, 3), true);
+				meta.addCustomEffect(new PotionEffect(PotionEffectType.JUMP, 10 * 20, 7), true);
 				potion.setItemMeta(meta);
 			} else if (amount == 3) {
 				potion = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
@@ -179,7 +180,7 @@ public class BrewingStandClass extends BaseClass {
 				pot.setType(PotionType.REGEN);
 				meta.addCustomEffect(new PotionEffect(PotionEffectType.REGENERATION, 5 * 20, 2), true);
 				potion.setItemMeta(meta);
-			} else if (amount == 5) {
+			} else if (amount == 7) {
 				potion = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
 						instance.getGameManager().getMain().color("&eStrength I &7(5 sec)"));
 				pot.setSplash(true);
@@ -249,10 +250,16 @@ public class BrewingStandClass extends BaseClass {
 
 	private ItemStack getBrewingStand() {
 		ItemStack brewingStand = ItemHelper.setDetails(new ItemStack(Material.BREWING_STAND_ITEM),
-				color("&eBrewing Stand"), "", color("&rHit players to obtain Brewing items"),
-				color("&rthen right click to get a potion"), "", color("&7 - 1 Powder: &eSlowness II (15 sec)"),
-				color("&7 - 2 Powder: &eJump IV (20 sec"), color("&7 - 3 Powder: &eSpeed II (20 sec)"),
-				color("&7 - 4 Powder: &eRegen III (5 sec)"), color("&7 - 5 Powder: &eStrength I (5 sec)"));
+				color("&eBrewing Stand"),
+				"",
+				color("&rHit players to obtain Brewing items"),
+				color("&rthen right click to get a potion"),
+				"",
+				color("&7 - 1 Powder: &eSlowness II (15 sec)"),
+				color("&7 - 2 Powder: &eJump 8 (10 sec"),
+				color("&7 - 3 Powder: &eSpeed II (20 sec)"),
+				color("&7 - 4 Powder: &eRegen III (5 sec)"),
+				color("&7 - 7 Powder: &eStrength I (5 sec)"));
 		return brewingStand;
 	}
 

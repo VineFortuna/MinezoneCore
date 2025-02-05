@@ -225,31 +225,12 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (event.getCause() == TeleportCause.ENDER_PEARL) {
 				event.setCancelled(true);
 				if (instance.isInBounds(event.getTo())) {
-					if (baseClass.isDead == true) {
-						if (event.getTo() == null || event.getTo() != null) {
-
-						}
-					} else {
+					if (!baseClass.isDead) {
 						player.teleport(event.getTo());
-
-						for (Player gamePlayer : instance.players) {
-							if (player != gamePlayer) {
-								int radius = 7;
-								if (!(player.getLocation().distance(gamePlayer.getLocation()) <= radius)) {
-									EntityDamageEvent damageEvent = new EntityDamageEvent(player,
-											DamageCause.PROJECTILE, 1.5);
-									instance.getGameManager().getMain().getServer().getPluginManager()
-											.callEvent(damageEvent);
-									player.damage(1.5);
-								}
-							}
-						}
 					}
-				} else if (!instance.isInBounds(event.getTo())){ // If player teleports outside map boundaries, don't teleport & give back pearl
+					// Cancel Teleport outside of bounds
+				} else if (!instance.isInBounds(event.getTo())){
 					player.sendMessage(getMain().color("&c&l(!) &rYou cannot teleport there!"));
-					/*ItemStack pearl = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL),
-							getMain().color("&5&lENDER PEARL"));
-					player.getInventory().addItem(pearl); // Adds an additional pearl to player's inventory*/
 				}
 			}
 	}
@@ -659,20 +640,39 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	/**
-	 * This function gets rid of loot drops & exp that certain mobs can drop
+	 * This event listens to when a creature spawns
+	 * This method removes all small magma cubes that spawns
 	 *
-	 * @param entity to remove loot drops/exp from
+	 * @param event on creature spawn event
 	 */
 	@EventHandler
-	public void EntityDeathEvent(EntityDeathEvent entity) {
+	public void onCreatureSpawn(CreatureSpawnEvent event) {
+		EntityType entityType = event.getEntityType();
+
+		if (entityType.equals(EntityType.MAGMA_CUBE)) {
+			MagmaCube magmaCube = (MagmaCube) event.getEntity();
+			if (magmaCube.getSize() < 3) { // Size 3 is the medium Magma Cube
+				magmaCube.remove();
+			}
+		}
+	}
+
+	/**
+	 * This function gets rid of loot drops & exp that certain mobs can drop
+	 *
+	 * @param event to remove loot drops/exp from
+	 */
+	@EventHandler
+	public void EntityDeathEvent(EntityDeathEvent event) {
+		EntityType entityType = event.getEntityType();
 		List<EntityType> entities = new ArrayList<>(
 				Arrays.asList(EntityType.ZOMBIE, EntityType.SKELETON, EntityType.CREEPER, EntityType.PIG_ZOMBIE,
 						EntityType.MAGMA_CUBE, EntityType.SILVERFISH, EntityType.WITCH, EntityType.ENDERMITE,
 						EntityType.CHICKEN, EntityType.BLAZE, EntityType.PIG, EntityType.MUSHROOM_COW, EntityType.COW,
 						EntityType.WOLF, EntityType.SPIDER));
-		if (entities.contains(entity.getEntityType())) {
-			entity.getDrops().clear();
-			entity.setDroppedExp(0);
+		if (entities.contains(entityType)) {
+			event.getDrops().clear();
+			event.setDroppedExp(0);
 		}
 	}
 

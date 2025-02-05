@@ -50,8 +50,8 @@ public class SethBlingClass extends BaseClass {
 	}
 
 	public void TestItems() {
-		player.getInventory().addItem(new ItemStack(instance.getItemToDrop()));
-		player.getInventory().addItem(new ItemStack(instance.getItemToDrop()));
+		player.getInventory().addItem(new ItemStack(instance.getSethBlingItemDrop()));
+		player.getInventory().addItem(new ItemStack(instance.getSethBlingItemDrop()));
 	}
 
 	@Override

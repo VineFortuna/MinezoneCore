@@ -7,6 +7,7 @@ import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.all.JebClass;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.gui.GameStatsGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
@@ -116,10 +117,107 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "sound":
 				soundCommand(args, player);
 				break;
+			case "jeb":
+				jebCommand(args, player);
+				break;
+			case "jebrework":
+				jebReworkCommand(player);
+				break;
 			}
 		} else
 			sender.sendMessage("Hey! You can't use this in the terminal!");
 		return true;
+	}
+
+	private void jebCommand(String[] args, Player player) {
+		if (!player.hasPermission("scb.jeb")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
+		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+
+		if (game == null) {
+			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
+			return;
+		}
+
+		if (game.state != GameState.STARTED) {
+			player.sendMessage(main.color("&c&l(!) &rGame is not Started!"));
+			return;
+		}
+
+		BaseClass baseClass = game.classes.get(player);
+		if (baseClass.getType() != ClassType.Jeb) return;
+
+		JebClass jebClass = (JebClass) baseClass;
+
+		try {
+			double strength = jebClass.pushAbilityStrength;
+			double maxVelocity = jebClass.pushAbilityMaxVelocity;
+
+			if (args.length >= 1) {
+				strength = Double.parseDouble(args[0]);
+				if (strength < 0) {
+					player.sendMessage(ChatColor.RED + "Strength must be a positive number!");
+					return;
+				}
+				jebClass.pushAbilityStrength = strength;
+			}
+
+			if (args.length >= 2) {
+				maxVelocity = Double.parseDouble(args[1]);
+				if (maxVelocity < 0) {
+					player.sendMessage(ChatColor.RED + "Max velocity must be a positive number!");
+					return;
+				}
+				jebClass.pushAbilityMaxVelocity = maxVelocity;
+			}
+
+			player.sendMessage(ChatColor.GREEN + "Strength: " + strength + " | Max velocity: " + maxVelocity);
+		} catch (NumberFormatException e) {
+			player.sendMessage(ChatColor.RED + "Invalid input! Please provide valid numbers for strength and max velocity.");
+		}
+	}
+
+	private void jebReworkCommand(Player player) {
+		if (!player.hasPermission("scb.jebrework")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
+		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+
+		if (game == null) {
+			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
+			return;
+		}
+
+		if (game.state != GameState.STARTED) {
+			player.sendMessage(main.color("&c&l(!) &rGame is not Started!"));
+			return;
+		}
+
+		BaseClass baseClass = game.classes.get(player);
+		if (baseClass.getType() != ClassType.Jeb) return;
+
+		JebClass jebClass = (JebClass) baseClass;
+
+		if (!jebClass.isRework) {
+			jebClass.isRework = true;
+			player.sendMessage(ChatColor.YELLOW + "===========================");
+			player.sendMessage(ChatColor.YELLOW + "Now you have REWORKED Jeb");
+			player.sendMessage(ChatColor.YELLOW + "Scales inversely with distance");
+			player.sendMessage(ChatColor.YELLOW + "===========================");
+		}
+		else {
+			jebClass.isRework = false;
+			jebClass.pushAbilityStrength = 10;
+			player.sendMessage(ChatColor.YELLOW + "===========================");
+			player.sendMessage(ChatColor.YELLOW + "Now you have OLD/REGULAR Jeb");
+			player.sendMessage(ChatColor.YELLOW + "Scales directly with distance");
+			player.sendMessage(ChatColor.YELLOW + "===========================");
+		}
 	}
 
 	private void soundCommand(String[] args, Player player) {
@@ -324,15 +422,15 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void startGameCommand(Player player) {
+		if (!player.hasPermission("scb.startGame")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
 		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 
 		if (game == null) {
 			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
-			return;
-		}
-
-		if (!player.hasPermission("scb.startGame")) {
-			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
 			return;
 		}
 

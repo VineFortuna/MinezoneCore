@@ -29,7 +29,7 @@ import java.util.Random;
 public class HorseClass extends BaseClass {
 	private ItemStack weapon;
 	private ItemStack saddle;
-	private final Ability jumpAbility = new Ability("&6&lJump", 5, player);
+	private final Ability jumpAbility = new Ability("&6&lJump", 3, player);
 	private final double jumpAbilityHeight = 1.6;
 
 	// Creating Treats

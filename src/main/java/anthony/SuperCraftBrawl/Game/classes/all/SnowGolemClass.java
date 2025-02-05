@@ -3,12 +3,14 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -26,7 +28,8 @@ import java.util.List;
 public class SnowGolemClass extends BaseClass {
 
 	private int cooldownSec = 0;
-	private static final int PUMPKIN_DURATION = 5;
+	private static final double PUMPKIN_ABILITY_DURATION = 5;
+	private static final double PUMPKIN_ABILITY_RANGE = 10;
 
 	private ItemStack weapon;
 
@@ -192,55 +195,69 @@ public class SnowGolemClass extends BaseClass {
 				if (player.getGameMode() != GameMode.SPECTATOR) {
 					int amount = item.getAmount();
 					if (amount > 0) {
-						amount--;
-						if (amount == 0)
-							player.getInventory().clear(player.getInventory().getHeldItemSlot());
-						else
-							item.setAmount(amount);
+						boolean foundPlayers = false;
 
-						// Adding strength
-						player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, PUMPKIN_DURATION * 20, 0));
-						// Pumpkin Head Feedback Sound
-						player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
-
-						for (Player gamePlayer : instance.players) {
-							BaseClass baseClass = instance.classes.get(gamePlayer);
-
-							if (player != gamePlayer) {
-
-								// Pumpkin Head Sound
-								gamePlayer.playSound(player.getLocation(), Sound.AMBIENCE_CAVE, 1, 2);
-
-								// Pumpkin Head Duration and Application
-								BukkitRunnable runTimer = new BukkitRunnable() {
-
-									int ticks = PUMPKIN_DURATION;
-
-									@Override
-									public void run() {
-										if (ticks == PUMPKIN_DURATION) {
-											if (!checkIfDead(gamePlayer, instance))
-												gamePlayer.getInventory().setHelmet(new ItemStack(Material.PUMPKIN));
-										} else if (ticks == 0) {
-											if (baseClass.getType() == ClassType.Fade && baseClass.fadeAbilityActive) {
-												gamePlayer.getEquipment().setHelmet(ItemHelper.create(Material.AIR));
-											} else {
-												baseClass.resetHead();
-											}
-											this.cancel();
-										}
-
-										ticks--;
-									}
-								};
-								runTimer.runTaskTimer(instance.getGameManager().getMain(), 0, 20); //20 ticks = 1 second
+						for (Entity entity : player.getWorld().getNearbyEntities(
+								player.getLocation(),
+								PUMPKIN_ABILITY_RANGE,
+								PUMPKIN_ABILITY_RANGE,
+								PUMPKIN_ABILITY_RANGE
+						)) {
+							if (entity instanceof Player && !entity.equals(player)) {
+								Player playerInRange = (Player) entity;
+								if (!checkIfDead(playerInRange, instance) && !instance.HasSpectator(playerInRange)) {
+									usePumpkinAbility(playerInRange);
+									foundPlayers = true;
+								}
 							}
 						}
+						if (foundPlayers) {
+							amount--;
+							if (amount == 0) player.getInventory().clear(player.getInventory().getHeldItemSlot());
+							else item.setAmount(amount);
+							// Adding strength
+							player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, (int) (PUMPKIN_ABILITY_DURATION * 20), 0));
+							// Pumpkin Head Feedback Sound
+							player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
+						} else player.sendMessage(ChatColorHelper.color("&c&l(!) &rNo nearby players have been found!"));
 					}
 					event.setCancelled(true);
 				}
 			}
 		}
+	}
+
+	private void usePumpkinAbility(Player playerInRange) {
+		// Pumpkin Head Sound
+		playerInRange.playSound(player.getLocation(), Sound.AMBIENCE_CAVE, 1, 2);
+
+		// Pumpkin Head Duration and Application
+		BukkitRunnable runTimer = new BukkitRunnable() {
+
+			int ticks = (int) PUMPKIN_ABILITY_DURATION;
+			BaseClass baseClass = instance.classes.get(playerInRange);
+
+			@Override
+			public void run() {
+				if (ticks == PUMPKIN_ABILITY_DURATION) {
+					if (!checkIfDead(playerInRange, instance)) {
+						ItemStack pumpkin = new ItemStack(Material.PUMPKIN);
+						pumpkin.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 6);
+						playerInRange.getInventory().setHelmet(pumpkin);
+					}
+				} else if (ticks == 0) {
+					if (baseClass.getType() == ClassType.Fade && baseClass.fadeAbilityActive) {
+						playerInRange.getEquipment().setHelmet(ItemHelper.create(Material.AIR));
+					} else {
+						baseClass.resetHead();
+					}
+					this.cancel();
+				}
+
+				ticks--;
+			}
+		};
+		runTimer.runTaskTimer(instance.getGameManager().getMain(), 0, 20); // 20 ticks = 1 second
 	}
 
 	@Override
@@ -253,8 +270,4 @@ public class SnowGolemClass extends BaseClass {
 		return weapon;
 	}
 
-	@Override
-	public void SetNameTag() {
-
-	}
 }

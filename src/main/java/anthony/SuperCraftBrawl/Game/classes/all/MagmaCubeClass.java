@@ -39,25 +39,10 @@ public class MagmaCubeClass extends BaseClass {
 	}
 
 	@Override
-	public ClassType getType() {
-		return ClassType.MagmaCube;
-	}
-
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
-	}
-
-	@Override
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper.setUnbreakable(ItemHelper.addEnchant(
 				new ItemStack(Material.WOOD_SWORD), Enchantment.KNOCKBACK, 1));
 		return item;
-	}
-
-	@Override
-	public void SetNameTag() {
-
 	}
 
 	@Override
@@ -139,4 +124,8 @@ public class MagmaCubeClass extends BaseClass {
 		}
 	}
 
+	@Override
+	public ClassType getType() {
+		return ClassType.MagmaCube;
+	}
 }

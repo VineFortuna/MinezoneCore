@@ -27,7 +27,7 @@ import org.bukkit.util.Vector;
 public class CreeperClass extends BaseClass {
 
 	private int cooldownSec = 0;
-	private ItemStack barrier = new ItemStack(Material.BARRIER);
+	private final ItemStack barrier = new ItemStack(Material.BARRIER);
 
 	public CreeperClass(GameInstance instance, Player player) {
 		super(instance, player);

@@ -66,10 +66,12 @@ public class ParrotClass extends BaseClass {
         );
 
         // Weapon
-        weapon = ItemHelper.setDetails(new ItemStack(Material.FEATHER),
+        weapon = ItemHelper.setDetails(
+                new ItemStack(Material.FEATHER),
                 flapAbility.getAbilityNameRightClickMessage(),
                 "",
-                "&7Flap your wings up");
+                "&7Flap your wings up"
+        );
         weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 4);
 
         // Dance Ability
@@ -78,13 +80,15 @@ public class ParrotClass extends BaseClass {
         String durationDisplay = ItemHelper.formatDouble(DANCE_ABILITY_DURATION);
         String radiusDisplay = ItemHelper.formatDouble(DANCE_ABILITY_RADIUS);
 
-        danceItem = ItemHelper.setDetails(new ItemStack(Material.JUKEBOX),
+        danceItem = ItemHelper.setDetails(
+                new ItemStack(Material.JUKEBOX),
                 danceAbility.getAbilityNameRightClickMessage(),
                 "&7Place down a jukebox",
                 "&7and dance to regenerate health",
                 "",
-                "&7Heals &e" + healingDisplay + " &c❤ &7over &a" + durationDisplay + " &7s",
-                "&7Range: &a" + radiusDisplay + " &7blocks");
+                "&7Heals &e" + healingDisplay + " &c❤ &7over &a" + durationDisplay + "s",
+                "&7Range: &a" + radiusDisplay + " &7blocks"
+        );
     }
 
     @Override

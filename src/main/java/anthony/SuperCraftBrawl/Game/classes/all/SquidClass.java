@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
@@ -19,6 +20,8 @@ import org.bukkit.potion.PotionEffectType;
 public class SquidClass extends BaseClass {
 	private int cooldownSec = 0;
 	private long inkCooldown;
+	private static final double INK_ABILITY_RANGE = 10;
+	private static final double INK_ABILITY_DURATION = 2;
 
 	public SquidClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -77,46 +80,58 @@ public class SquidClass extends BaseClass {
 					int seconds = (int) ((inkCooldown - System.currentTimeMillis()) / 1000) + 1;
 					player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "Your Ink is still on cooldown for "
 							+ ChatColor.YELLOW + seconds + " more seconds ");
-					return;
-				}
-				inkCooldown = System.currentTimeMillis() + (50L * 200);
-				player.getWorld().playEffect(player.getLocation(), Effect.SPLASH, 20);
-				player.getWorld().playSound(player.getLocation(), Sound.SPLASH, 1f, 1f);
-				for (Entity e : player.getWorld().getNearbyEntities(player.getLocation(), 10D, 10D, 10D)) {
-					if (e instanceof Player && !e.equals(player)) {
-						Player p = (Player) e;
-						if (!checkIfDead(p, instance) && !instance.HasSpectator(p)) {
-							p.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 75, 0));
-							Location playerLocation = p.getEyeLocation();
-							double radius = 2.0;
-							int particleCount = 20;
-							
-							for (int i = 0; i < particleCount; i++) {
-								double angle = 2 * Math.PI * i / particleCount;
-								double x = radius * Math.cos(angle);
-								double z = radius * Math.sin(angle);
-								
-								Location particleLoc = playerLocation.clone().add(x, 0, z);
-								
-								p.getWorld().spigot().playEffect(particleLoc, Effect.SMOKE, 0, 0, 0, 0, 0, 0, 1, 30);
-								player.getWorld().spigot().playEffect(particleLoc, Effect.SMOKE, 0, 0, 0, 0, 0, 0, 1, 30);
+				} else {
+					boolean foundPlayers = false;
+
+					for (Entity entity : player.getWorld().getNearbyEntities(
+							player.getLocation(),
+							INK_ABILITY_RANGE,
+							INK_ABILITY_RANGE,
+							INK_ABILITY_RANGE
+					)) {
+						if (entity instanceof Player && !entity.equals(player)) {
+							Player playerInRange = (Player) entity;
+							if (!checkIfDead(playerInRange, instance) && !instance.HasSpectator(playerInRange)) {
+								useInkAbility(playerInRange);
+								foundPlayers = true;
 							}
 						}
 					}
+					if (foundPlayers) {
+						player.getWorld().playEffect(player.getLocation(), Effect.SPLASH, 20);
+						player.getWorld().playSound(player.getLocation(), Sound.SPLASH, 1f, 1f);
+					} else player.sendMessage(ChatColorHelper.color("&c&l(!) &rNo nearby players have been found!"));
 				}
 			}
+		}
+	}
+
+	private void useInkAbility(Player playerInRange) {
+		inkCooldown = System.currentTimeMillis() + (50L * 200);
+		playerInRange.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, (int) (INK_ABILITY_DURATION * 20), 0));
+		spawnInkParticles(playerInRange);
+	}
+
+	private void spawnInkParticles(Player playerInRange) {
+		Location playerLocation = playerInRange.getEyeLocation();
+		double radius = 2.0;
+		int particleCount = 20;
+
+		for (int i = 0; i < particleCount; i++) {
+			double angle = 2 * Math.PI * i / particleCount;
+			double x = radius * Math.cos(angle);
+			double z = radius * Math.sin(angle);
+
+			Location particleLoc = playerLocation.clone().add(x, 0, z);
+
+			playerInRange.getWorld().spigot().playEffect(particleLoc, Effect.SMOKE, 0, 0, 0, 0, 0, 0, 1, 30);
+			player.getWorld().spigot().playEffect(particleLoc, Effect.SMOKE, 0, 0, 0, 0, 0, 0, 1, 30);
 		}
 	}
 
 	@Override
 	public ClassType getType() {
 		return ClassType.Squid;
-	}
-
-	@Override
-	public void SetNameTag() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

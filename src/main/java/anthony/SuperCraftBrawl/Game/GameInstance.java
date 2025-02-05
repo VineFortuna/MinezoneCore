@@ -79,6 +79,7 @@ public class GameInstance {
 	public Player firstBlood;
 	private final Map<UUID, Location> lastKnownLocations = new HashMap<>();
 	public List<ItemStack> allItemDrops = new ArrayList<>();
+	public List<ItemStack> sethBlingItemDrops = new ArrayList<>();
 	public List<ItemStack> items = new ArrayList<>();
 	public List<Player> favClassSelection = new ArrayList<>();
 	public List<ClassType> classList = generateClassList();
@@ -652,7 +653,7 @@ public class GameInstance {
 	/**
 	 * This function gives a random loot drop to all players when game starts
 	 */
-	private void giveLootDrop() {
+	private void giveRandomItemDrop() {
 		for (Player player : this.players) {
 			player.setFireTicks(0);
 			BaseClass bc = this.classes.get(player);
@@ -704,7 +705,7 @@ public class GameInstance {
 		GameScoreboard();
 		addAlivePlayers();
 		addAliveTeams();
-		giveLootDrop();
+		giveRandomItemDrop();
 		initialSpawn();
 		gameTicks();
 
@@ -974,7 +975,6 @@ public class GameInstance {
 		allItemDrops.add(broom);
 		allItemDrops.add(hammer);
 		allItemDrops.add(bazooka);
-		allItemDrops.add(extraLife);
 		allItemDrops.add(pearl);
 		allItemDrops.add(slowballs);
 		allItemDrops.add(miniShield);
@@ -989,6 +989,10 @@ public class GameInstance {
 		allItemDrops.add(milk);
 		allItemDrops.add(goldenApple);
 		allItemDrops.add(notchApple);
+
+		sethBlingItemDrops = allItemDrops;
+
+		allItemDrops.add(extraLife);
 
 		items = Arrays.asList(goldenApple, notchApple, slownessPot, bazooka, bazooka, healthPot, speedPot, slownessPot,
 				slownessPot, speedPot, bazooka, goldenApple, hammer, healthPot, extraLife, healthPot, milk, milk, milk,
@@ -2445,6 +2449,10 @@ public class GameInstance {
 
 	public List<ItemStack> getAllItemDrops() {
 		return allItemDrops;
+	}
+
+	public ItemStack getSethBlingItemDrop() {
+		return sethBlingItemDrops.get(random.nextInt(sethBlingItemDrops.size()));
 	}
 
 	public List<Player> getWinnerList() {
