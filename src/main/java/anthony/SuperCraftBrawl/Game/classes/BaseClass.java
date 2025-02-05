@@ -174,6 +174,7 @@ public abstract class BaseClass {
 
 	public boolean isPlayerAlive() {
 		return instance.classes.containsKey(player)
+				&& player.getGameMode() == GameMode.ADVENTURE
 				&& instance.classes.get(player).getType() == getType()
 				&& instance.classes.get(player).getLives() > 0;
 	}
@@ -212,11 +213,13 @@ public abstract class BaseClass {
 		setArmor(player.getEquipment());
 	}
 
-	public boolean checkIfDead(Player player, GameInstance i) {
-		if (player.getGameMode() == GameMode.SPECTATOR)
+	public boolean checkIfDead(Player player, GameInstance gameInstance) {
+		if (player.getGameMode() == GameMode.SPECTATOR) {
 			return true;
-		else if (i.classes.get(player) != null && i.classes.get(player).getLives() <= 0)
+		}
+		else if (gameInstance.classes.get(player) != null && gameInstance.classes.get(player).getLives() <= 0) {
 			return true;
+		}
 
 		return false;
 	}
@@ -424,7 +427,7 @@ public abstract class BaseClass {
 										TellAll(instance.getGameManager().getMain().color("&2&l(!) "
 
 												+ "&r" + p.getPlayer().getName() + " " + bc.getType().getTag()
-												+ " &cwalked off the edge.."));
+												+ " &cwalked off the edge..."));
 									}
 								} else {
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -473,7 +476,7 @@ public abstract class BaseClass {
 											TellAll(instance.getGameManager().getMain().color("&2&l(!) "
 
 													+ "&r" + p.getPlayer().getName() + " " + bc.getType().getTag()
-													+ " &cwalked off the edge.."));
+													+ " &cwalked off the edge..."));
 										}
 									} else {
 										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -497,7 +500,7 @@ public abstract class BaseClass {
 										TellAll(instance.getGameManager().getMain().color("&2&l(!) "
 
 												+ "&r" + p.getPlayer().getName() + " " + bc.getType().getTag()
-												+ " &cwalked off the edge.."));
+												+ " &cwalked off the edge..."));
 									}
 								} else {
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -521,7 +524,7 @@ public abstract class BaseClass {
 									TellAll(instance.getGameManager().getMain().color("&2&l(!) "
 
 											+ "&r" + p.getPlayer().getName() + " " + bc.getType().getTag()
-											+ " &cwalked off the edge.."));
+											+ " &cwalked off the edge..."));
 								}
 							} else {
 								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -593,7 +596,7 @@ public abstract class BaseClass {
 								TellAll(instance.getGameManager().getMain().color("&2&l(!) "
 
 										+ "&r" + p.getPlayer().getName() + " " + bc.getType().getTag()
-										+ " &cwalked off the edge.."));
+										+ " &cwalked off the edge..."));
 							}
 						} else {
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1492,7 +1495,7 @@ public abstract class BaseClass {
 												+ instance.getGameManager().getMain().getRankManager().getRank(player)
 														.getTagWithSpace()
 												+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-												+ " &cwalked off the edge.."));
+												+ " &cwalked off the edge..."));
 							}
 						} else {
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1545,7 +1548,7 @@ public abstract class BaseClass {
 											+ instance.getGameManager().getMain().getRankManager().getRank(player)
 													.getTagWithSpace()
 											+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-											+ " &cwalked off the edge.."));
+											+ " &cwalked off the edge..."));
 								}
 							} else {
 								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1574,7 +1577,7 @@ public abstract class BaseClass {
 												+ instance.getGameManager().getMain().getRankManager().getRank(player)
 														.getTagWithSpace()
 												+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-												+ " &cwalked off the edge.."));
+												+ " &cwalked off the edge..."));
 							}
 						} else {
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1602,7 +1605,7 @@ public abstract class BaseClass {
 											+ instance.getGameManager().getMain().getRankManager().getRank(player)
 													.getTagWithSpace()
 											+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-											+ " &cwalked off the edge.."));
+											+ " &cwalked off the edge..."));
 						}
 					} else {
 						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1657,7 +1660,7 @@ public abstract class BaseClass {
 										+ instance.getGameManager().getMain().getRankManager().getRank(player)
 												.getTagWithSpace()
 										+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-										+ " &cwalked off the edge.."));
+										+ " &cwalked off the edge..."));
 					}
 				} else {
 					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET

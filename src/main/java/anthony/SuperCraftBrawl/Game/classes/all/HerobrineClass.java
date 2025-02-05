@@ -1,5 +1,6 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import anthony.SuperCraftBrawl.Game.classes.Ability;
@@ -32,6 +33,7 @@ public class HerobrineClass extends BaseClass {
 	private final PotionEffect slowness = new PotionEffect(PotionEffectType.SLOW, 5 * 20, 2, true, true);
 	private final PotionEffect poison = new PotionEffect(PotionEffectType.POISON, 4 * 20, 1, true, true);
 
+	private PotionEffect effect;
 
 	public HerobrineClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -65,11 +67,6 @@ public class HerobrineClass extends BaseClass {
 				"",
 				"&7Range: &a" + radiusDisplay + " &7blocks"
 		);
-	}
-
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
 	}
 
 	@Override
@@ -109,37 +106,84 @@ public class HerobrineClass extends BaseClass {
 						+ "Your Diamond of Despair is still regenerating for " + ChatColor.YELLOW + seconds
 						+ " more seconds ");
 			} else {
-				for (Entity entity : player.getWorld().getNearbyEntities(player.getLocation(), DESPAIR_ABILITY_RANGE, DESPAIR_ABILITY_RANGE, DESPAIR_ABILITY_RANGE)) {
-					if (entity instanceof Player && !entity.equals(player)) {
-						Player playerInRange = (Player) entity;
-						if (!checkIfDead(playerInRange, instance) && !instance.HasSpectator(playerInRange)) {
-							useDespairAbility(playerInRange);
-							return;
-						}
-					}
-				}
-				player.sendMessage(ChatColorHelper.color("&c&l(!) &rNo nearby players have been found!"));
+				searchForPlayers();
 			}
 		}
 	}
 
-	private void useDespairAbility(Player playerInRange) {
-		herobrine.restart();
+	private void searchForPlayers() {
+		boolean foundPlayers = false;
+		ArrayList<Player> playersInRange = new ArrayList<>();
+
+		for (Entity entity : player.getWorld().getNearbyEntities(
+				player.getLocation(),
+				DESPAIR_ABILITY_RANGE,
+				DESPAIR_ABILITY_RANGE,
+				DESPAIR_ABILITY_RANGE
+		)) {
+			if (entity instanceof Player && !entity.equals(player)) {
+				Player playerInRange = (Player) entity;
+				if (isPlayerAlive()) {
+					playersInRange.add(playerInRange);
+					foundPlayers = true;
+				}
+			}
+		}
+		if (foundPlayers) {
+			herobrine.restart();
+			effect = getRandomEffect();
+			String feedbackMessage = getCasterFeedbackMessage(effect);
+			player.sendMessage(ChatColorHelper.color("&2&l(!) " + feedbackMessage));
+
+			playersInRange.forEach(this::applyDespairEffect);
+		} else player.sendMessage(ChatColorHelper.color("&c&l(!) &rNo nearby players have been found!"));
+	}
+
+	private void applyDespairEffect(Player playerInRange) {
+		if (effect == null) {
+			playerInRange.setFireTicks(80);
+			instance.getMapWorld().strikeLightningEffect(playerInRange.getLocation());
+		} else {
+			playerInRange.addPotionEffect(effect);
+		}
+
+		String enemyMessage = getEnemyFeedbackMessage(effect);
+		playerInRange.sendMessage(ChatColorHelper.color("&2&l(!) &e" + player.getName() + enemyMessage));
+	}
+
+	private PotionEffect getRandomEffect() {
 		Random rand = new Random();
 		int chance = rand.nextInt(3);
 
-		if (chance == 0) {
-			playerInRange.addPotionEffect(slowness);
-			playerInRange.sendMessage(ChatColorHelper.color("&2&l(!) &e" + player.getName() + " &rslowed you!"));
+		switch (chance) {
+			case 0:
+				return slowness;
+			case 1:
+				return poison;
+			case 2:
+				return null;
+			default:
+				return null;
 		}
-		else if (chance == 1) {
-			playerInRange.addPotionEffect(poison);
-			playerInRange.sendMessage(ChatColorHelper.color("&2&l(!) &e" + player.getName() + " &rpoisoned you!"));
+	}
+
+	private String getEnemyFeedbackMessage(PotionEffect effect) {
+		if (effect == slowness) {
+			return " &rslowed you!";
+		} else if (effect == poison) {
+			return " &rpoisoned you!";
+		} else {
+			return " &rset you on fire!";
 		}
-		else if (chance == 2) {
-			playerInRange.setFireTicks(80);
-			instance.getMapWorld().strikeLightningEffect(playerInRange.getLocation());
-			playerInRange.sendMessage(ChatColorHelper.color("&2&l(!) &e" + player.getName() + " &rset you on fire!"));
+	}
+
+	private String getCasterFeedbackMessage(PotionEffect effect) {
+		if (effect == slowness) {
+			return "&rYou slowed your enemies";
+		} else if (effect == poison) {
+			return "&rYou poisoned your enemies";
+		} else {
+			return "&rYou set your enemies on fire";
 		}
 	}
 

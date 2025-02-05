@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ChatColorHelper;
@@ -28,10 +29,12 @@ import java.util.List;
 public class SnowGolemClass extends BaseClass {
 
 	private int cooldownSec = 0;
-	private static final double PUMPKIN_ABILITY_DURATION = 5;
-	private static final double PUMPKIN_ABILITY_RANGE = 10;
 
 	private ItemStack weapon;
+	private final Ability pumpkinAbility = new Ability("&6&lPumpkin Head", player);
+	private final PotionEffect strength = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, (int) (PUMPKIN_ABILITY_DURATION * 20), 0, false, true);
+	private static final double PUMPKIN_ABILITY_DURATION = 5;
+	private static final double PUMPKIN_ABILITY_RANGE = 10;
 
 	public SnowGolemClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -43,11 +46,6 @@ public class SnowGolemClass extends BaseClass {
 				6,
 				"SnowGolem"
 		);
-	}
-
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
 	}
 
 	@Override
@@ -70,9 +68,18 @@ public class SnowGolemClass extends BaseClass {
 		);
 
 		// Pumpkin
-		List<String> pumpkinList = new ArrayList<>();
-		pumpkinList.add(ChatColor.RESET + "Right click to annoy other players");
-		ItemStack pumpkin = ItemHelper.create(Material.PUMPKIN, ChatColor.GRAY + "Pumpkin", pumpkinList);
+		String radiusDisplay = ItemHelper.formatDouble(PUMPKIN_ABILITY_RANGE);
+		String durationDisplay = ItemHelper.formatDouble(PUMPKIN_ABILITY_DURATION);
+
+		ItemStack pumpkin = ItemHelper.setDetails(
+				new ItemStack(Material.PUMPKIN),
+				pumpkinAbility.getAbilityNameRightClickMessage(),
+				"&7Put a pumpkin on your enemies head",
+				"",
+				"&7Gives you &4&oStrength &e" + (strength.getAmplifier() + 1) + " &7for &e" + strength.getDuration() / 20 + "s",
+				"&7Duration: &a" + durationDisplay + "s",
+				"&7Range: &a" + radiusDisplay + " &7blocks"
+		);
 
 		// Setting items
 		playerInv.setItem(0, weapon);
@@ -216,7 +223,7 @@ public class SnowGolemClass extends BaseClass {
 							if (amount == 0) player.getInventory().clear(player.getInventory().getHeldItemSlot());
 							else item.setAmount(amount);
 							// Adding strength
-							player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, (int) (PUMPKIN_ABILITY_DURATION * 20), 0));
+							player.addPotionEffect(strength);
 							// Pumpkin Head Feedback Sound
 							player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
 						} else player.sendMessage(ChatColorHelper.color("&c&l(!) &rNo nearby players have been found!"));

@@ -135,7 +135,7 @@ public enum ClassType {
 	public String getClassDesc() {
 		switch (this) {
 			case Cactus:
-				return "A pricklyyy living thing, made up of thorns & blood..";
+				return "A pricklyyy living thing, made up of thorns & blood...";
 			case Santa:
 				return "HO HO HO! MERRRRRRYYYY CHRISTMASSSSS";
 			case GingerBreadMan:
@@ -143,7 +143,7 @@ public enum ClassType {
 			case Elf:
 				return "Santa's lil helper here to deliver";
 			case GrimReaper:
-				return "Harvest souls with deadly precision, wielding dark powers..";
+				return "Harvest souls with deadly precision, wielding dark powers...";
 			case BrewingStand:
 				return "Hit players to obtain Brewing items to get epic potions!";
 			case Fade:

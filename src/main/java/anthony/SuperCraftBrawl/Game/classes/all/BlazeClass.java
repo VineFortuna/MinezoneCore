@@ -12,7 +12,6 @@ import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -100,11 +99,11 @@ public class BlazeClass extends BaseClass {
 		String fireballMessage;
 		if (!fireballAbility.isReady()) {
 			int remainingTime = (int) (fireballAbility.getCooldownInstance().getRemainingCooldownSeconds() + 1);
-			fireballMessage = ChatColorHelper.color(fireballAbility.getAbilityName() + " Shooter &rregenerates in &e&l" + remainingTime + "s");
+			fireballMessage = ChatColorHelper.color(fireballAbility.getAbilityName() + " &rregenerates in &e" + remainingTime + "s");
 		} else {
 			if (fireballCounter == 0) return;
 			String plural =  fireballCounter > 1 ? "s" : "";
-			fireballMessage = ChatColorHelper.color("&rYou can use &e&l" + fireballCounter + " &rmore " + fireballAbility.getAbilityName() + plural);
+			fireballMessage = ChatColorHelper.color("&e" + fireballCounter + " &rmore " + fireballAbility.getAbilityName() + plural);
 		}
 
 		// Flame Ability Message
@@ -152,7 +151,7 @@ public class BlazeClass extends BaseClass {
 			if (item.equals(weapon)) {
 				if (!flameAbility.isReady()) return;
 
-				useFireballAbility();
+				useFlameAbility();
 				flameAbility.use();
 			}
 
@@ -160,10 +159,10 @@ public class BlazeClass extends BaseClass {
 		}
 	}
 
-	private void useFireballAbility() {
-		launchPlayerUp();
+	private void useFlameAbility() {
 		launchFireballs(2, 0);
 		launchFireballs(4, 10);
+        launchPlayerUp();
 	}
 
 	private void launchPlayerUp() {

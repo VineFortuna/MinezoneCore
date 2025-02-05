@@ -392,7 +392,7 @@ public class GameInstance {
 					} else if (ticks == 60) {
 						if (gameManager.getMain().tournament) {
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ "The game is now starting..");
+									+ "The game is now starting...");
 						}
 					} else if (ticks == 30) {
 						for (Player gamePlayer : players) {
@@ -893,7 +893,7 @@ public class GameInstance {
 
 		// Speed Pot
 		ItemStack speedPot = ItemHelper.createPotionItem(PotionType.SPEED, 1, 30, true, true, true);
-		ItemHelper.setDetails(speedPot, "&9&lSPEED II &7(30 sec)");
+		ItemHelper.setDetails(speedPot, "&b&lSPEED II &7(30 sec)");
 
 		// Fire Res Pot
 		ItemStack fireRes = ItemHelper.createPotionItem(PotionType.FIRE_RESISTANCE, 0, 30, true, true, true);
@@ -1340,7 +1340,7 @@ public class GameInstance {
 							spectator.setAllowFlight(true);
 							spectator.setDisplayName(spectator.getName());
 							spectator.sendMessage(getGameManager().getMain().color("&2&l(!) &rThe game on &r&l"
-									+ mapName + " &rhas ended. Moving you back to spawn.."));
+									+ mapName + " &rhas ended. Moving you back to spawn..."));
 							spectator.spigot().setCollidesWithEntities(true);
 							gameManager.getMain().sendScoreboardUpdate(spectator);
 
@@ -2110,7 +2110,7 @@ public class GameInstance {
 							FastBoard board = this.boards.get(gamePlayer);
 							updateCountOnBoard();
 							board.updateLine(10, "" + ChatColor.BOLD + "Status:");
-							board.updateLine(11, "" + ChatColor.GRAY + ChatColor.ITALIC + " Waiting..");
+							board.updateLine(11, "" + ChatColor.GRAY + ChatColor.ITALIC + " Waiting...");
 						}
 					}
 				}
@@ -2295,7 +2295,7 @@ public class GameInstance {
 	 * "" + ChatColor.RESET + this.players.size() + "/" +
 	 * this.gameType.getMaxPlayers()) : "")); board.updateLine(7, "" +
 	 * ChatColor.BOLD + "Status:"); board.updateLine(8, "" + ChatColor.RESET +
-	 * ChatColor.ITALIC + " Waiting.."); } } } } else { for (Player gamePlayer :
+	 * ChatColor.ITALIC + " Waiting..."); } } } } else { for (Player gamePlayer :
 	 * this.players) { FastBoard board = this.boards.get(gamePlayer);
 	 * board.updateLine(5, " " + this.players.size() + "/6"); } TellAll("" +
 	 * ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET +
@@ -2315,7 +2315,7 @@ public class GameInstance {
 	 * gamePlayer.getInventory().remove(Material.PAPER); FastBoard board =
 	 * this.boards.get(gamePlayer); board.updateLine(5, " " + this.players.size() +
 	 * "/6"); board.updateLine(7, "" + ChatColor.BOLD + "Status:");
-	 * board.updateLine(8, "" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
+	 * board.updateLine(8, "" + ChatColor.RESET + ChatColor.ITALIC + " Waiting...");
 	 * } } } } if (this.state == GameState.STARTED) { PlayerData data =
 	 * this.gameManager.getMain().getDataManager().getPlayerData(player); if
 	 * (data.withersk != 3) data.withersk = 0; List<String> aliveTeam = new

@@ -30,11 +30,6 @@ public class ParrotClass extends BaseClass {
     private final ItemStack danceItem;
     private final Ability flapAbility = new Ability("&a&lFlap", 2, player);
     private final Ability danceAbility = new Ability("&a&lDance", 25, player);
-    private BukkitRunnable danceRunnable;
-    private Block danceTargetBlock;
-
-    private int armorColorCounter = 1;
-
     private static final double DANCE_ABILITY_RADIUS = 8;
     private static final double DANCE_ABILITY_DURATION = 10;
     private static final double HEAL_PER_SECOND = 1.0 ;
@@ -50,7 +45,9 @@ public class ParrotClass extends BaseClass {
     };
 
     private static final int TICKS_PER_SECOND = 20;
-
+    private BukkitRunnable danceRunnable;
+    private Block danceTargetBlock;
+    private int armorColorCounter = 1;
     private final int protectionLevel = 6;
 
     public ParrotClass(GameInstance instance, Player player) {
@@ -107,7 +104,6 @@ public class ParrotClass extends BaseClass {
 
         // Healing
         handleHealing();
-
     }
 
     private void handleHealing() {
@@ -138,7 +134,7 @@ public class ParrotClass extends BaseClass {
         if (player.getGameMode() == GameMode.SPECTATOR) return;
 
         if (action == Action.RIGHT_CLICK_BLOCK) {
-            // DANCE ABILITY
+            // Dance Ability
             if (item.equals(danceItem)) {
                 if (!danceAbility.isReady()) return;
 
@@ -167,7 +163,7 @@ public class ParrotClass extends BaseClass {
         }
 
         if (action == Action.RIGHT_CLICK_BLOCK || action == Action.RIGHT_CLICK_AIR) {
-            // FLAP ABILITY
+            // Flap Ability
             if (item.equals(weapon)) {
                 if (!flapAbility.isReady()) return;
 
