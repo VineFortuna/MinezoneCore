@@ -74,9 +74,9 @@ public class EndermiteClass extends BaseClass {
     
     @Override
     public ItemStack getAttackWeapon() {
-        ItemStack item = ItemHelper.setUnbreakable(ItemHelper.addEnchant(
-                new ItemStack(Material.WOOD_SWORD), Enchantment.KNOCKBACK, 1));
-        return item;
+        return ItemHelper.setUnbreakable(ItemHelper.addEnchant(
+                ItemHelper.addEnchant(
+                new ItemStack(Material.ENDER_STONE), Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 1));
     }
     
     @Override
@@ -126,7 +126,8 @@ public class EndermiteClass extends BaseClass {
                     if (!mite.isDead()) {
                         if (gameTicks % 20 == 0) {
                             if (player.getItemInHand().isSimilar(enderSwap)) {
-                                player.playEffect(mite.getLocation().add(0, 1, 0), Effect.HAPPY_VILLAGER, 1);
+                                player.playEffect(mite.getLocation().clone().add(0, 1, 0), Effect.HAPPY_VILLAGER, 1);
+                                player.playEffect(mite.getLocation().clone().add(0, 1.5, 0), Effect.HAPPY_VILLAGER, 1);
                             }
                         }
                     } else {
@@ -180,7 +181,7 @@ public class EndermiteClass extends BaseClass {
                         if (dist < maxDist) {
                             Location closest = player.getEyeLocation().add(dir.clone().multiply(dist));
 
-                            if (closest.distanceSquared(e.getLocation().add(0, 1, 0)) <= 1.75 * 1.75) {
+                            if (closest.distanceSquared(e.getLocation().add(0, 1, 0)) <= 1.8 * 1.8) {
                                 if (instance.isInBounds(e.getLocation())) {
                                     Location playerLoc = player.getLocation().clone();
                                     Location targetLoc = e.getLocation().clone();

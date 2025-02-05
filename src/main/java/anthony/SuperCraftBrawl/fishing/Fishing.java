@@ -65,7 +65,7 @@ public class Fishing implements Listener {
             // When caught for the first time
             if (details.timesCaught == 0) {
                 // Message
-                p.sendMessage(main.color("&2&l=============================================="));
+                p.sendMessage(main.color("&2&l============================================="));
                 p.sendMessage(main.color("&2&l||"));
                 if (fish.isFish()) {
                     p.sendMessage(main.color("&2&l|| &e&lCAUGHT " + fish.getRarity().getColor() + "&l"
@@ -76,7 +76,7 @@ public class Fishing implements Listener {
                 }
                 p.sendMessage(main.color("&2&l|| &7" + fish.getDesc()));
                 p.sendMessage(main.color("&2&l||"));
-                p.sendMessage(main.color("&2&l=============================================="));
+                p.sendMessage(main.color("&2&l============================================="));
                 
                 // Firework
                 if (main.fishing.getTotalFish(p) == FishType.values().length) {
