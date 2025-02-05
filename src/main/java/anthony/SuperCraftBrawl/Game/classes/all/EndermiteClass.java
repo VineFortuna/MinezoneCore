@@ -6,18 +6,12 @@ import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
-import anthony.util.PathfinderHelper;
 import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.EntityEndermite;
-import net.minecraft.server.v1_8_R3.EntityMonster;
-import net.minecraft.server.v1_8_R3.PathfinderGoalSelector;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEndermite;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Endermite;
 import org.bukkit.entity.Entity;
@@ -35,7 +29,6 @@ import org.bukkit.util.Vector;
 import xyz.xenondevs.particle.ParticleEffect;
 import xyz.xenondevs.particle.data.texture.BlockTexture;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -81,9 +74,9 @@ public class EndermiteClass extends BaseClass {
     
     @Override
     public ItemStack getAttackWeapon() {
-        ItemStack item = ItemHelper.setUnbreakable(ItemHelper.addEnchant(
-                new ItemStack(Material.WOOD_SWORD), Enchantment.KNOCKBACK, 1));
-        return item;
+        return ItemHelper.setUnbreakable(ItemHelper.addEnchant(
+                ItemHelper.addEnchant(
+                new ItemStack(Material.ENDER_STONE), Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 1));
     }
     
     @Override
@@ -133,7 +126,8 @@ public class EndermiteClass extends BaseClass {
                     if (!mite.isDead()) {
                         if (gameTicks % 20 == 0) {
                             if (player.getItemInHand().isSimilar(enderSwap)) {
-                                player.playEffect(mite.getLocation().add(0, 1, 0), Effect.HAPPY_VILLAGER, 1);
+                                player.playEffect(mite.getLocation().clone().add(0, 1, 0), Effect.HAPPY_VILLAGER, 1);
+                                player.playEffect(mite.getLocation().clone().add(0, 1.5, 0), Effect.HAPPY_VILLAGER, 1);
                             }
                         }
                     } else {
@@ -187,14 +181,16 @@ public class EndermiteClass extends BaseClass {
                         if (dist < maxDist) {
                             Location closest = player.getEyeLocation().add(dir.clone().multiply(dist));
 
-                            if (closest.distanceSquared(e.getLocation().add(0, 1, 0)) <= 1.75 * 1.75) {
+                            if (closest.distanceSquared(e.getLocation().add(0, 1, 0)) <= 1.8 * 1.8) {
                                 if (instance.isInBounds(e.getLocation())) {
-                                    Location playerLoc = player.getLocation();
-                                    Location targetLoc = e.getLocation();
+                                    Location playerLoc = player.getLocation().clone();
+                                    Location targetLoc = e.getLocation().clone();
+                                    targetLoc.setDirection(playerLoc.getDirection());
 
                                     // Swap player and Endermite locations
-                                    player.playSound(playerLoc, Sound.ENDERMAN_TELEPORT, 0.5f, 0);
+                                    player.getWorld().playSound(playerLoc, Sound.ENDERMAN_TELEPORT, 1, 0);
                                     player.teleport(targetLoc);
+
                                     player.getWorld().playEffect(playerLoc.add(0, 1, 0), Effect.PORTAL, 1);
                                     e.teleport(playerLoc);
 
