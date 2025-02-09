@@ -148,8 +148,8 @@ public class BedrockClass extends BaseClass {
 							// Setting cooldown
 							invincibilityAbility.use();
 							// Sending return message
-							invincibilityAbility.sendPlayerCustomUseAbilityChatMessage("&d&l(!) &rYou are now invincible for &e" + INVINCIBILITY_DURATION + " &rseconds");
-							invincibilityAbility.sendPlayerCustomUseAbilityChatMessage("&d&l(!) &rYou are also unable to hit other players");
+							invincibilityAbility.sendCustomMessage("&d&l(!) &rYou are now invincible for &e" + INVINCIBILITY_DURATION + " &rseconds");
+							invincibilityAbility.sendCustomMessage("&d&l(!) &rYou are also unable to hit other players");
 							// Setting invincibility
 							BaseClass bc = instance.classes.get(player);
 							bc.bedrockInvincibility = true;

@@ -24,7 +24,7 @@ import java.util.*;
 
 public class HorseClass extends BaseClass {
 	private final ItemStack weapon;
-	private final ItemStack saddleItem;
+	private final ItemStack jumpItem;
 	private final Ability jumpAbility = new Ability("&6&lJump", 3, player);
 	private static final double JUMP_ABILITY_HEIGHT = 1.6;
 	private final PotionEffect absorption = new PotionEffect(PotionEffectType.ABSORPTION, 9999999 * 20, 0, false, false);
@@ -70,9 +70,11 @@ public class HorseClass extends BaseClass {
 		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1); // Knockback 1
 
 		// Jump Ability
-		saddleItem = ItemHelper.setDetails(new ItemStack(Material.SADDLE),
+		jumpItem = ItemHelper.setDetails(new ItemStack(Material.SADDLE),
 				jumpAbility.getAbilityNameRightClickMessage(),
-				"&7Jump high in the air"
+				"&7Jump high in the air",
+				"",
+				jumpAbility.getOnGroundItemMessage()
 		);
 
 		// Treat ability
@@ -112,7 +114,7 @@ public class HorseClass extends BaseClass {
 
 		// Settings Items
 		playerInv.setItem(0, weapon);
-		playerInv.setItem(1, saddleItem);
+		playerInv.setItem(1, jumpItem);
 
 		giveRandomTreat(player);
 	}
@@ -130,9 +132,9 @@ public class HorseClass extends BaseClass {
 		int randomNumber = random.nextInt(100);
 
 		// Percentage chances for each treat
-		int carrotPercentage = 50;
-		int goldenApplePercentage = 30;
-		int notchApplePercentage = 20;
+		int carrotPercentage = 33;
+		int goldenApplePercentage = 33;
+		int notchApplePercentage = 33;
 
 		// Determining treat based on the number range
 		if (randomNumber < carrotPercentage) {
@@ -152,7 +154,7 @@ public class HorseClass extends BaseClass {
 		if (item != null) {
 			if (player.getGameMode() != GameMode.SPECTATOR) {
 				// JUMP ABILITY
-				if (item.equals(saddleItem)) {
+				if (item.equals(jumpItem)) {
 					if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
 						// If ability is on cooldown
 						if (!jumpAbility.isReady()) return;
@@ -160,7 +162,7 @@ public class HorseClass extends BaseClass {
 						else {
 							// If player is not on the ground
 							if (!player.isOnGround()) {
-								jumpAbility.sendPlayerCustomUseAbilityChatMessage("&c&l(!) &rYou have to be on the ground to use &6" + jumpAbility.getAbilityName());
+								jumpAbility.sendCustomMessage(jumpAbility.getOnGroundChatMessage());
 							}
 							// If player is on the ground
 							else {

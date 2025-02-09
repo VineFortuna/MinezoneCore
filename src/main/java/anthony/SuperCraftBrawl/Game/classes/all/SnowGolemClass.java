@@ -63,7 +63,7 @@ public class SnowGolemClass extends BaseClass {
 		// Slowballs
 		ItemStack slowballs =
 				ItemHelper.setDetails(new ItemStack(Material.SNOW_BALL, 5),
-				"&f&lSLOWBALLS",
+				"&f&lSLOWBALLS &7(Right click)",
 				"&7Give Slowness 1 for 3s to an enemy"
 		);
 

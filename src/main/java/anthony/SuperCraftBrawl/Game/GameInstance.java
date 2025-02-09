@@ -912,7 +912,9 @@ public class GameInstance {
 		hammer.addUnsafeEnchantment(Enchantment.KNOCKBACK, 10);
 
 		// Extra Life
-		ItemStack extraLife = ItemHelper.setDetails(new ItemStack(Material.PRISMARINE_SHARD), "&3&lEXTRA LIFE");
+		ItemStack extraLife = ItemHelper.setDetails(new ItemStack(Material.PRISMARINE_SHARD),
+				"&3&lEXTRA LIFE",
+				"&7Receive an extra life");
 
 		// Ender Pearl
 		ItemStack pearl = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL), "&5&lENDER PEARL");
@@ -939,22 +941,32 @@ public class GameInstance {
 		ItemHelper.setGlowing(nuke, true);
 
 		// Instagib
-		ItemStack instagib = ItemHelper.setDetails(new ItemStack(Material.GOLD_HOE, 5, (short) 1), "&e&lINSTAGIB");
+		ItemStack instagib = ItemHelper.setDetails(new ItemStack(Material.GOLD_HOE, 5, (short) 1), "&e&lINSTAGIB",
+				"&7Do damage and send your enemies up");
 
 		// Bazooka
-		ItemStack bazooka = ItemHelper.setDetails(new ItemStack(Material.DIAMOND_HOE, 3, (short) 1), "&b&lBAZOOKA");
+		ItemStack bazooka = ItemHelper.setDetails(new ItemStack(Material.DIAMOND_HOE, 3, (short) 1), "&b&lBAZOOKA",
+				"&7Explode the area it lands");
+		ItemHelper.setHideFlags(bazooka, true);
 
 		// Zombie Egg
-		ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
+		ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1);
+		ItemHelper.setDetails(zombieEgg, "&2&lZOMBIE POKEBALL", "&7Spawns an equipped zombie");
 
 		// Witch Egg
-		ItemStack witchEgg = ItemHelper.createMonsterEgg(EntityType.WITCH, 1, "&5&lWITCH POKEBALL");
+		ItemStack witchEgg = ItemHelper.createMonsterEgg(EntityType.WITCH, 1);
+		ItemHelper.setDetails(witchEgg, "&5&lWITCH POKEBALL", "&7Spawns a witch to help you");
 
 		// Skeleton Egg
-		ItemStack skeletonEgg = ItemHelper.createMonsterEgg(EntityType.SKELETON, 1, "&7&lSKELETON POKEBALL");
+		ItemStack skeletonEgg = ItemHelper.createMonsterEgg(EntityType.SKELETON, 1);
+		ItemHelper.setDetails(skeletonEgg, "&7&lSKELETON POKEBALL", "&7Spawns a skeleton with punch 2");
 
 		// Creeper Egg
-		ItemStack creeperEgg = ItemHelper.createMonsterEgg(EntityType.CREEPER, 1, "&a&lCREEPER POKEBALL");
+		ItemStack creeperEgg = ItemHelper.createMonsterEgg(EntityType.CREEPER, 1);
+		ItemHelper.setDetails(creeperEgg,
+				"&a&lCREEPER POKEBALL",
+				"&7Spawns a creeper",
+				"&7Be careful!");
 
 		// Milk Bucket
 		ItemStack milk = ItemHelper.setDetails(new ItemStack(Material.MILK_BUCKET), "&f&lMILK",
@@ -973,7 +985,6 @@ public class GameInstance {
 		allItemDrops.add(fireRes);
 		allItemDrops.add(bomb);
 		allItemDrops.add(broom);
-		allItemDrops.add(hammer);
 		allItemDrops.add(bazooka);
 		allItemDrops.add(pearl);
 		allItemDrops.add(slowballs);
@@ -993,6 +1004,14 @@ public class GameInstance {
 		sethBlingItemDrops = allItemDrops;
 
 		allItemDrops.add(extraLife);
+
+		allItemDrops.forEach(itemStack -> ItemHelper.setDetails(
+				itemStack,
+			itemStack.getItemMeta().getDisplayName() + " &7(Right click)",
+				itemStack.getItemMeta().getLore())
+		);
+		allItemDrops.add(hammer);
+		sethBlingItemDrops.add(hammer);
 
 		items = Arrays.asList(goldenApple, notchApple, slownessPot, bazooka, bazooka, healthPot, speedPot, slownessPot,
 				slownessPot, speedPot, bazooka, goldenApple, hammer, healthPot, extraLife, healthPot, milk, milk, milk,

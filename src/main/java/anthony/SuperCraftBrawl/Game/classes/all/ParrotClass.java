@@ -90,15 +90,15 @@ public class ParrotClass extends BaseClass {
 
     @Override
     public void Tick(int gameTicks) {
+        if (!isPlayerAlive()) return;
+
         if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
             player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, JUMP_BOOST_AMP));
 
         // ActionBar
-        if (isPlayerAlive()) {
-            ActionBarManager actionBarManager = this.getActionBarManager();
-            ActionBarManager.AbilityActionBar abilityActionBar = new ActionBarManager.AbilityActionBar(this, actionBarManager);
-            abilityActionBar.setActionBarAbility(player, flapAbility, danceAbility);
-        }
+        ActionBarManager actionBarManager = this.getActionBarManager();
+        ActionBarManager.AbilityActionBar abilityActionBar = new ActionBarManager.AbilityActionBar(this, actionBarManager);
+        abilityActionBar.setActionBarAbility(player, flapAbility, danceAbility);
 
         if (gameTicks % TICKS_PER_SECOND != 0) return;
 
@@ -153,7 +153,7 @@ public class ParrotClass extends BaseClass {
                 // Check if blocks below and above are not air
                 if (blockBelow.getType() == Material.AIR && blockAbove.getType() == Material.AIR) {
                     SoundManager.playErrorSound(player);
-                    danceAbility.sendPlayerCustomUseAbilityChatMessage("&c&l(!) &rYou can't place your ability there");
+                    danceAbility.sendCustomMessage("&c&l(!) &rYou can't place your ability there");
                     return;
                 }
 

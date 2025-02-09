@@ -143,7 +143,7 @@ public class FireworkClass extends BaseClass {
 				int chance = r.nextInt(4);
 
 				if (chance == 0) {
-					target.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 130, 1));
+					target.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 5 * 20, 1));
 					Firework fw = (Firework) target.getLocation().getWorld().spawnEntity(target.getLocation(),
 							EntityType.FIREWORK);
 					FireworkMeta fwm = fw.getFireworkMeta();
@@ -152,7 +152,7 @@ public class FireworkClass extends BaseClass {
 					fwm.addEffect(FireworkEffect.builder().withColor(Color.GREEN).flicker(true).build());
 					fw.setFireworkMeta(fwm);
 				} else if (chance == 1) {
-					target.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 1));
+					target.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 3 * 20, 0));
 					Firework fw = (Firework) target.getLocation().getWorld().spawnEntity(target.getLocation(),
 							EntityType.FIREWORK);
 					FireworkMeta fwm = fw.getFireworkMeta();
@@ -161,7 +161,7 @@ public class FireworkClass extends BaseClass {
 					fwm.addEffect(FireworkEffect.builder().withColor(Color.BLACK).flicker(true).build());
 					fw.setFireworkMeta(fwm);
 				} else if (chance == 2) {
-					target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 2));
+					target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 5 * 20, 2));
 					Firework fw = (Firework) target.getLocation().getWorld().spawnEntity(target.getLocation(),
 							EntityType.FIREWORK);
 					FireworkMeta fwm = fw.getFireworkMeta();
@@ -170,7 +170,7 @@ public class FireworkClass extends BaseClass {
 					fwm.addEffect(FireworkEffect.builder().withColor(Color.SILVER).flicker(true).build());
 					fw.setFireworkMeta(fwm);
 				} else if (chance == 3) {
-					target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 200, 1));
+					target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 5 * 20, 3));
 					Firework fw = (Firework) target.getLocation().getWorld().spawnEntity(target.getLocation(),
 							EntityType.FIREWORK);
 					FireworkMeta fwm = fw.getFireworkMeta();

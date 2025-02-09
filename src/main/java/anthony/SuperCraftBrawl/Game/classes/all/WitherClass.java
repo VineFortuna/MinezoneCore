@@ -18,7 +18,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class WitherClass extends BaseClass {
 
@@ -28,7 +27,6 @@ public class WitherClass extends BaseClass {
 	private final Ability skullAbility = new Ability("&8&lSkull", 5, player);
 	private static final int SKULL_AMOUNT = 10;
 	private final PotionEffect wither = new PotionEffect(PotionEffectType.WITHER, 5 * 20, 0, true);
-	private BukkitRunnable bowRunnable;
 
 	public WitherClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -105,7 +103,10 @@ public class WitherClass extends BaseClass {
 		ItemStack heldItem = player.getInventory().getItem(player.getInventory().getHeldItemSlot());
 
 		boolean isWitherSkull = event.getDamager() != null && event.getDamager().getType().equals(EntityType.WITHER_SKULL);
-		boolean isWeaponMelee = event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK) && heldItem != null && heldItem.equals(weapon);
+		boolean isWeaponMelee =
+				event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
+				&& heldItem != null
+				&& heldItem.equals(weapon);
 
 		if (isWitherSkull || isWeaponMelee) {
 			if (event.getEntity() instanceof Player) {

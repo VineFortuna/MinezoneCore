@@ -13,7 +13,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -110,16 +109,34 @@ public class NotchClass extends BaseClass {
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 			notch.restart();
 			item.setType(Material.DIRT);
-			int range = 25;
-			Location endLoc = player.getEyeLocation();
-			BlockIterator b = new BlockIterator(player.getEyeLocation(), 0, range);
-			
-			while (b.hasNext()) {
-				Block block = b.next();
-				endLoc = block.getLocation();
-				
-				if (block.getType().isSolid())
-					break;
+			pullAbility.use();
+		}
+
+		if (item.getType() == Material.DIRT) {
+			int remainingCooldown = (int) pullAbility.getCooldownInstance().getRemainingCooldownSeconds();
+			pullAbility.sendCustomMessage("&l&c(!) &rYou're still on cooldown for &e" + remainingCooldown + "s"
+			);
+		}
+	}
+
+	private void usePullAbility() {
+		Location endLocation = findEndLocation();
+	 	SoundManager.playSoundToAll(player, Sound.DIG_GRASS, 1, 1);
+		displayParticlesAlongPath(endLocation);
+		applyPullEffectToPlayers(endLocation);
+	}
+
+	private Location findEndLocation() {
+		Location startLocation = player.getEyeLocation();
+		BlockIterator blockIterator = new BlockIterator(startLocation, 0, (int) PULL_ABILITY_RANGE);
+		Location endLocation = startLocation;
+
+		while (blockIterator.hasNext()) {
+			Block block = blockIterator.next();
+			endLocation = block.getLocation();
+
+			if (block.getType().isSolid()) {
+				break;
 			}
 			
 			Vector dir = player.getEyeLocation().getDirection();

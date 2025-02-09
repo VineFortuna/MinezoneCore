@@ -177,7 +177,6 @@ public class WitchClass extends BaseClass {
 		Random rand = new Random();
 		int randomNum = rand.nextInt(itemList.length);
 		playerInv.setItem(1, new ItemStack(itemList[randomNum]));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
 	}
 
 	@Override

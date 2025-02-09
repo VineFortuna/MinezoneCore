@@ -39,6 +39,13 @@ public class Ability {
         return abilityName + " &7(Left/Right Click)";
     }
 
+    public String getOnGroundItemMessage() {
+        return "&7You have to be on the ground";
+    }
+    public String getOnGroundChatMessage() {
+        return "&c&l(!) &rYou have to be on the ground to use " + abilityName;
+    }
+
     public boolean isReady() {
         return cooldown.isReady();
     }
@@ -54,11 +61,18 @@ public class Ability {
         abilityActionBar.setActionBarAbility(player, this, null);
     }
 
+    public void updateActionBarWhite(Player player, BaseClass baseClass) {
+        ActionBarManager actionBarManager = baseClass.getActionBarManager();
+
+        ActionBarManager.AbilityActionBar abilityActionBar = new ActionBarManager.AbilityActionBar(baseClass, actionBarManager);
+        abilityActionBar.setActionBarAbilityWhite(player, this, null);
+    }
+
     public void sendPlayerUseAbilityChatMessage() {
         player.sendMessage(ChatColorHelper.color("&a&l(!) &6" + abilityName + "&r was used"));
     }
 
-    public void sendPlayerCustomUseAbilityChatMessage(String message) {
+    public void sendCustomMessage(String message) {
         player.sendMessage(ChatColorHelper.color(message));
     }
 

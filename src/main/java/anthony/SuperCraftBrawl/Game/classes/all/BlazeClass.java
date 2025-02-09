@@ -200,7 +200,7 @@ public class BlazeClass extends BaseClass {
 
 	private void spawnBlazes(Location loc) {
 		List<Blaze> blazes = new ArrayList<>();
-		armyAbility.sendPlayerCustomUseAbilityChatMessage("&2&l(!) &rYou spawned your &6&lBlaze Army");
+		armyAbility.sendCustomMessage("&2&l(!) &rYou spawned your &6&lBlaze Army");
 
 		// Helper method to spawn a Blaze with given location
 		Consumer<Location> spawnBlaze = (spawnLoc) -> {
@@ -221,7 +221,7 @@ public class BlazeClass extends BaseClass {
 			blazes.stream()
 					.filter(b -> b != null && !b.isDead())
 					.forEach(Blaze::remove);
-			armyAbility.sendPlayerCustomUseAbilityChatMessage("&2&l(!) &rYour &6&lBlaze Army &rdespawned");
+			armyAbility.sendCustomMessage("&2&l(!) &rYour &6&lBlaze Army &rdespawned");
 		}, (long) (ARMY_ABILITY_DURATION * 20));
 	}
 

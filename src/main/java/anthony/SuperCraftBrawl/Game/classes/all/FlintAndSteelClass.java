@@ -14,7 +14,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -50,20 +49,20 @@ public class FlintAndSteelClass extends BaseClass {
 		String durationDisplay = ItemHelper.formatDouble(FUSION_ABILITY_DURATION);
 		String windowDisplay = ItemHelper.formatDouble(FUSION_HIT_COMBO_WINDOW);
 
-		String[] msg = new String[]{
+		String[] lore = new String[]{
 				"",
 				"&7Combo players with " + flintName + " &7and then " + steelName,
 				"&7to combine them and gain &c&oFire Aspect",
 				"",
 				"&7Hit combo window: &a" + windowDisplay + "s",
-				fusionAbility.getAbilityName() + " &7lasts for &a" + durationDisplay + "s",
+				fusionAbility.getAbilityName() + " &7lasts for &a" + durationDisplay + "s"
 		};
 
 		// Flint
 		flintItem = ItemHelper.setDetails(
 				new ItemStack(Material.FLINT),
 				flintName,
-				msg
+				lore
 		);
 		flintItem.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
 
@@ -72,7 +71,7 @@ public class FlintAndSteelClass extends BaseClass {
 		steelItem = ItemHelper.setDetails(
 				new ItemStack(Material.IRON_INGOT),
 				steelName,
-				msg
+				lore
 		);
 		steelItem.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
 
@@ -84,16 +83,6 @@ public class FlintAndSteelClass extends BaseClass {
 		flintAndSteel.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
 		flintAndSteel.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
 		flintAndSteel.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
-	}
-
-	@Override
-	public ClassType getType() {
-		return ClassType.FlintAndSteel;
-	}
-
-	@Override
-	public ItemStack getAttackWeapon() {
-		return this.flintItem;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -136,7 +125,6 @@ public class FlintAndSteelClass extends BaseClass {
 		spawnParticles();
 		fusionAbilityRunnable();
 	}
-
 
 	private void spawnParticles() {
 		Location location = player.getLocation().add(0, 1, 0); // Center at player's torso
@@ -260,8 +248,12 @@ public class FlintAndSteelClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
-
+	public ClassType getType() {
+		return ClassType.FlintAndSteel;
 	}
 
+	@Override
+	public ItemStack getAttackWeapon() {
+		return this.flintItem;
+	}
 }

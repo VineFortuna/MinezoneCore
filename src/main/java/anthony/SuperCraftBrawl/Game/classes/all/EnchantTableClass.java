@@ -2,7 +2,6 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.util.ChatColorHelper;
 import anthony.SuperCraftBrawl.Game.classes.Ability;
-import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -11,7 +10,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
@@ -107,15 +105,15 @@ public class EnchantTableClass extends BaseClass {
 
 			// Checks if player has experience
 			if (xpLevelsAmount == 0) {
-				enchantAbility.sendPlayerCustomUseAbilityChatMessage("&c&l(!) &rYou do not have enough levels to enchant");
+				enchantAbility.sendCustomMessage("&c&l(!) &rYou do not have enough levels to enchant");
 				// 1 Level
 			} else if (xpLevelsAmount == 1) {
 				if (levelEnchanted == 1) {
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rYou already have that enchantment");
+					enchantAbility.sendCustomMessage("&a&l(!) &rYou already have that enchantment");
 					return;
 				} else {
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 1");
+					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 1");
 
 					xpSpent = 1;
 					xpLevelsAmount -= 1;
@@ -124,13 +122,13 @@ public class EnchantTableClass extends BaseClass {
 				// 2 Levels
 			} else if (xpLevelsAmount == 2) {
 				if (levelEnchanted == 2) {
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rYou already have that enchantment");
+					enchantAbility.sendCustomMessage("&a&l(!) &rYou already have that enchantment");
 					return;
 				} else {
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
 					weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 1");
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback 1");
+					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 1");
+					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback 1");
 
 					xpSpent = 2;
 					xpLevelsAmount -= 2;
@@ -140,13 +138,13 @@ public class EnchantTableClass extends BaseClass {
 				// 3 and 4 Levels
 			} else if (xpLevelsAmount == 3 || xpLevelsAmount == 4) {
 				if (levelEnchanted == 3) {
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rYou already have that enchantment");
+					enchantAbility.sendCustomMessage("&a&l(!) &rYou already have that enchantment");
 					return;
 				} else {
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
 					weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 1");
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback 2");
+					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 1");
+					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback 2");
 
 					xpSpent = 3;
 					xpLevelsAmount -= 3;
@@ -156,15 +154,15 @@ public class EnchantTableClass extends BaseClass {
 				// 5, 6 and 7 Levels
 			} else if (xpLevelsAmount == 5 || xpLevelsAmount == 6 || xpLevelsAmount == 7) {
 				if (levelEnchanted == 5) {
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rYou already have that enchantment");
+					enchantAbility.sendCustomMessage("&a&l(!) &rYou already have that enchantment");
 					return;
 				} else {
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
 					weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
 					weapon.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 1");
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback 1");
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &6&lFire Aspect 1");
+					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 1");
+					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback 1");
+					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &6&lFire Aspect 1");
 
 					xpSpent = 4;
 					xpLevelsAmount -= 5;
@@ -173,15 +171,15 @@ public class EnchantTableClass extends BaseClass {
 
 			} else {
 				if (levelEnchanted == 8) {
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rYou already have that enchantment");
+					enchantAbility.sendCustomMessage("&a&l(!) &rYou already have that enchantment");
 					return;
 				} else {
 					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
 					weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
 					weapon.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 2");
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback 1");
-					enchantAbility.sendPlayerCustomUseAbilityChatMessage("&a&l(!) &rWeapon enchanted with &6&lFire Aspect 1");
+					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 2");
+					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback 1");
+					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &6&lFire Aspect 1");
 
 					xpSpent = 8;
 					xpLevelsAmount -= 8;
@@ -202,14 +200,14 @@ public class EnchantTableClass extends BaseClass {
 
 
 	@Override
-	public void classesEvent(Player d, BaseClass baseClass) {
-		if (instance.classes.containsKey(d)) {
+	public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
+		if (instance.classes.containsKey(damagerPlayer)) {
 			xpLevelsAmount++;
-			d.giveExpLevels(1);
+			damagerPlayer.giveExpLevels(1);
 
 			// Playing XP Sound
 
-			d.sendMessage(ChatColorHelper.color("&b&l(!) &r&eYou got rewarded with a XP level"));
+			damagerPlayer.sendMessage(ChatColorHelper.color("&b&l(!) &r&eYou got rewarded with a XP level"));
 		}
 	}
 

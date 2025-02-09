@@ -14,7 +14,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -90,22 +89,25 @@ public class JebClass extends BaseClass {
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getPlayer().getItemInHand();
 
-		if (item != null) {
-			if (item.getType() == Material.STONE
-					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-				if (jeb.getTime() < 10000) {
-					int seconds = (10000 - jeb.getTime()) / 1000 + 1;
-					event.setCancelled(true);
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "Jeb's always in a rush man.. Please wait for " + ChatColor.YELLOW + seconds
-							+ " more seconds gosh damn");
-				} else {
-					jeb.restart();
-					item.setDurability((short) 5);
-					int range = 25;
-					Location endLoc = player.getEyeLocation();
-					BlockIterator b = new BlockIterator(player.getEyeLocation(), 0, range);
-					player.playSound(player.getLocation(), Sound.DIG_STONE, 1, 1);
+		if (item == null) return;
+		if (player.getGameMode() == GameMode.SPECTATOR) return;
+		if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
+		// Push Ability
+		if (item.equals(pushItem)) {
+			if (!pullAbility.isReady()) return;
+
+			usePushAbility();
+			item.setDurability((short) 5);
+			pullAbility.use();
+		}
+
+		if (item.getType() == Material.STONE) {
+			if (item.getDurability() != (short) 5) return;
+			int remainingCooldown = (int) pullAbility.getCooldownInstance().getRemainingCooldownSeconds();
+			pullAbility.sendCustomMessage("&l&c(!) &rYou're still on cooldown for &e" + remainingCooldown + "s"
+			);
+		}
+	}
 
 					while (b.hasNext()) {
 						Block block = b.next();
