@@ -26,7 +26,7 @@ public class BlazeClass extends BaseClass {
 	private final ItemStack weapon;
 	private final ItemStack fireballItem;
 	private final ItemStack armyItem;
-	private final Ability flameAbility = new Ability("&6&lFlame", 15, player);
+	private final Ability riseAbility = new Ability("&6&lRise", 15, player);
 	private final Ability fireballAbility = new Ability("&6&lFireball", 5, player);
 	private final Ability armyAbility = new Ability("&6&lArmy", player);
 	private static final double ARMY_ABILITY_DURATION = 25;
@@ -47,7 +47,7 @@ public class BlazeClass extends BaseClass {
 		// Weapon
 		weapon = ItemHelper.setDetails(
 				new ItemStack(Material.BLAZE_ROD),
-				flameAbility.getAbilityNameRightClickMessage(),
+				riseAbility.getAbilityNameRightClickMessage(),
 				"",
 				"&7Launch fireballs and send yourself up"
 		);
@@ -82,7 +82,7 @@ public class BlazeClass extends BaseClass {
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		flameAbility.getCooldownInstance().reset();
+		riseAbility.getCooldownInstance().reset();
 		fireballAbility.getCooldownInstance().reset();
 		fireballCounter = FIREBALL_AMOUNT;
 		playerInv.setItem(0, weapon);
@@ -99,23 +99,23 @@ public class BlazeClass extends BaseClass {
 		String fireballMessage;
 		if (!fireballAbility.isReady()) {
 			int remainingTime = (int) (fireballAbility.getCooldownInstance().getRemainingCooldownSeconds() + 1);
-			fireballMessage = ChatColorHelper.color(fireballAbility.getAbilityName() + " &rregenerates in &e" + remainingTime + "s");
+			fireballMessage = ChatColorHelper.color(fireballAbility.getAbilityName() + "s &rregenerate in &e" + remainingTime + "s");
 		} else {
 			if (fireballCounter == 0) return;
 			String plural =  fireballCounter > 1 ? "s" : "";
 			fireballMessage = ChatColorHelper.color("&e" + fireballCounter + " &rmore " + fireballAbility.getAbilityName() + plural);
 		}
 
-		// Flame Ability Message
-		String flameMessage;
-		if (!flameAbility.isReady()) {
-			int remainingTime = (int) flameAbility.getCooldownInstance().getRemainingCooldownSeconds();
-			flameMessage = ChatColorHelper.color(flameAbility.getAbilityName() + " &rregenerates in &e" + (remainingTime + 1) + "s");
+		// Rise Ability Message
+		String riseMessage;
+		if (!riseAbility.isReady()) {
+			int remainingTime = (int) riseAbility.getCooldownInstance().getRemainingCooldownSeconds();
+			riseMessage = ChatColorHelper.color(riseAbility.getAbilityName() + " &rregenerates in &e" + (remainingTime + 1) + "s");
 		} else {
-			flameMessage = ChatColorHelper.color("&rYou can use " + flameAbility.getAbilityName());
+			riseMessage = ChatColorHelper.color("&rYou can use " + riseAbility.getAbilityName());
 		}
 
-		String wholeMessage = flameMessage + ChatColor.DARK_GRAY + " ┃ " + fireballMessage;
+		String wholeMessage = riseMessage + ChatColor.DARK_GRAY + " ┃ " + fireballMessage;
 		getActionBarManager().setActionBar(player, "blaze.cooldown", wholeMessage, 2);
 
 	}
@@ -149,17 +149,17 @@ public class BlazeClass extends BaseClass {
 		if (action == Action.RIGHT_CLICK_BLOCK || action == Action.RIGHT_CLICK_AIR) {
 			// Fireball Ability
 			if (item.equals(weapon)) {
-				if (!flameAbility.isReady()) return;
+				if (!riseAbility.isReady()) return;
 
-				useFlameAbility();
-				flameAbility.use();
+				useRiseAbility();
+				riseAbility.use();
 			}
 
 			if (item.equals(armyItem)) useArmyAbility();
 		}
 	}
 
-	private void useFlameAbility() {
+	private void useRiseAbility() {
 		launchFireballs(2, 0);
 		launchFireballs(4, 10);
         launchPlayerUp();

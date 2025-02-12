@@ -37,7 +37,7 @@ public class PigClass extends BaseClass {
 		String[] lore = new String[]{
 				"",
 				"&7When damaged, receive &b&oSpeed &e" + (speed.getAmplifier() + 1) + " &7for &e" + speed.getDuration() / 20 + "s",
-				"&7When set on fire, receive &c&oFire Aspect"
+				"&7While set on fire, receive &c&oFire Aspect"
 		};
 
 		// Weapon

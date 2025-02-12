@@ -101,6 +101,7 @@ commands:
       description: Parkour
    invite:
       description: Invite command
+      aliases: i
    color:
       description: Color command
    tp:
@@ -131,12 +132,13 @@ commands:
       description: Kit command for SkyWars
    items:
       description: Get all SCB Item Drops
-      aliases: i
    lactate:
       description: Lactate command!
    sound:
       description: Play a sound on your location
       aliases: s
+   heal:
+      description: Fully heals the player
    jeb:
       description: Sets Jeb's push Strength and Max velocity
    jebrework:
@@ -163,6 +165,7 @@ permissions:
          scb.builder: true
          scb.items: true
          scb.sound: true
+         scb.heal: true
          scb.jeb: true
          scb.jebrework: true
          scb.lactate: true

@@ -34,7 +34,7 @@ public class CreeperClass extends BaseClass {
 	private final ItemStack suicideItem;
 	private final Ability potionAbility = new Ability("&a&lDamage Potion", 3, player);
 	private final Ability tntAbility = new Ability("&a&lDestructionators", 10, player);
-	private final Ability suicideAbility = new Ability("&a&lExplode", 1, player);
+	private final Ability suicideAbility = new Ability("&a&lSelf Explode", 1, player);
 
 	public CreeperClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -69,7 +69,7 @@ public class CreeperClass extends BaseClass {
 		tntItem = ItemHelper.setDetails(
 				new ItemStack(Material.TNT),
 				tntAbility.getAbilityNameRightClickMessage(),
-				"&7Spawn a tnt on your location"
+				"&7Spawn TNT at your location"
 		);
 
 		// Suicide Ability
@@ -156,7 +156,6 @@ public class CreeperClass extends BaseClass {
 	}
 
 	private void throwPotionFurther(ThrownPotion potion) {
-		player.sendMessage("Test 5");
 		Vector velocity = potion.getVelocity();
 		potion.setVelocity(velocity.multiply(1.3));
 	}

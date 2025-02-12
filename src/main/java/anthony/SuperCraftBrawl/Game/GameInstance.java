@@ -1001,7 +1001,7 @@ public class GameInstance {
 		allItemDrops.add(goldenApple);
 		allItemDrops.add(notchApple);
 
-		sethBlingItemDrops = allItemDrops;
+		sethBlingItemDrops = new ArrayList<>(allItemDrops);
 
 		allItemDrops.add(extraLife);
 

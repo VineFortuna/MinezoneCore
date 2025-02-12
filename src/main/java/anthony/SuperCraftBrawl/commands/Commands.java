@@ -117,6 +117,9 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "sound":
 				soundCommand(args, player);
 				break;
+			case "heal":
+				healCommand(player);
+				break;	
 			case "jeb":
 				jebCommand(args, player);
 				break;
@@ -127,6 +130,18 @@ public class Commands implements CommandExecutor, TabCompleter {
 		} else
 			sender.sendMessage("Hey! You can't use this in the terminal!");
 		return true;
+	}
+
+	private void healCommand(Player player) {
+		if (!player.hasPermission("scb.heal")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
+		// Fully heal the player to their maximum health
+		double maxHealth = player.getMaxHealth();
+		player.setHealth(maxHealth);
+		player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
 	}
 
 	private void jebCommand(String[] args, Player player) {
@@ -221,7 +236,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void soundCommand(String[] args, Player player) {
-		if (!player.hasPermission("scb.items")) {
+		if (!player.hasPermission("scb.sound")) {
 			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
 			return;
 		}

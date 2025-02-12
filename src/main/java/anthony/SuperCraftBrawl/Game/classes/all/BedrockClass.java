@@ -77,20 +77,10 @@ public class BedrockClass extends BaseClass {
 		lavaItem = ItemHelper.setDetails(new ItemStack(
 				Material.LAVA_BUCKET),
 				lavaAbility.getAbilityNameRightClickMessage(),
-				"&7Set lava on your opponents",
+				"&7Pour lava on your opponents",
 				"",
 				"&7Range: &a" + rangeDisplay + " &7blocks"
 		);
-	}
-
-	@Override
-	public ClassType getType() {
-		return ClassType.Bedrock;
-	}
-
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
 	}
 
 	public void modifyArmorDuringInvincibility() {
@@ -148,7 +138,8 @@ public class BedrockClass extends BaseClass {
 							// Setting cooldown
 							invincibilityAbility.use();
 							// Sending return message
-							invincibilityAbility.sendCustomMessage("&d&l(!) &rYou are now invincible for &e" + INVINCIBILITY_DURATION + " &rseconds");
+							String durationDisplay = ItemHelper.formatDouble(INVINCIBILITY_DURATION);
+							invincibilityAbility.sendCustomMessage("&d&l(!) &rYou are now invincible for &e" + durationDisplay + " &rseconds");
 							invincibilityAbility.sendCustomMessage("&d&l(!) &rYou are also unable to hit other players");
 							// Setting invincibility
 							BaseClass bc = instance.classes.get(player);
@@ -268,6 +259,11 @@ public class BedrockClass extends BaseClass {
 			this.bedrockInvincibility = false;
 			lava.cancel();
 		}
+	}
+
+	@Override
+	public ClassType getType() {
+		return ClassType.Bedrock;
 	}
 
 	@Override

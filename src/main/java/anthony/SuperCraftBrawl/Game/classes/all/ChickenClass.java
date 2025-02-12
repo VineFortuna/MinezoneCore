@@ -23,7 +23,7 @@ public class ChickenClass extends BaseClass {
 
 	public ChickenClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.2;
+		baseVerticalJump = 1.1;
 		createArmor(
 				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDg5ZmVmMmVmNGY4MWVlYzZkMDdiYWVmNmM0YWVhNzRlNDQyZGNlNzJhMDFkZTk2NGViY2JhYzhhOGQ4MmM3NyJ9fX0=",
@@ -117,11 +117,6 @@ public class ChickenClass extends BaseClass {
 	@Override
 	public ClassType getType() {
 		return ClassType.Chicken;
-	}
-
-	@Override
-	public void SetNameTag() {
-
 	}
 
 	@Override

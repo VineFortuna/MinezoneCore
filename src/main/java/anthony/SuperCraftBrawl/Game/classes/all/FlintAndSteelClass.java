@@ -33,7 +33,7 @@ public class FlintAndSteelClass extends BaseClass {
 
 	public FlintAndSteelClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.1;
+		baseVerticalJump = 1.0;
 		createArmor(
 				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTNlOTdmYWI0NzUzYjc1YmE1YjBjMDM4YmVkMzc3YjE2MmJhMjhiN2E1ZTI5MGFiZmQwMThhNTU4MWFjNTM4OCJ9fX0=",
@@ -52,7 +52,7 @@ public class FlintAndSteelClass extends BaseClass {
 		String[] lore = new String[]{
 				"",
 				"&7Combo players with " + flintName + " &7and then " + steelName,
-				"&7to combine them and gain &c&oFire Aspect",
+				"&7to combine them and gain &c&oFire Aspect 1",
 				"",
 				"&7Hit combo window: &a" + windowDisplay + "s",
 				fusionAbility.getAbilityName() + " &7lasts for &a" + durationDisplay + "s"

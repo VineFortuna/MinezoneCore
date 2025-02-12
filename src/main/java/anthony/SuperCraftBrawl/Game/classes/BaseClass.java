@@ -56,12 +56,10 @@ public abstract class BaseClass {
 	public Timer pearlTimer = new Timer();
 	public Timer tnt = new Timer();
 	public Timer slimeBall = new Timer();
-	public Timer skeleAttack = new Timer();
 	public Timer tntItem = new Timer();
 	public Timer ice = new Timer();
 	public Timer golem = new Timer();
 	public Timer herobrine = new Timer();
-	protected Timer anvil = new Timer();
 	public Timer bazooka = new Timer();
 	public Timer ninja = new Timer();
 	public Timer bee = new Timer();
@@ -80,7 +78,6 @@ public abstract class BaseClass {
 	public Timer summon = new Timer();
 	public Timer grimReaper = new Timer();
 	public Timer alexBrewingStand = new Timer();
-	public Timer phaseShifter = new Timer();
 	public Timer wolfBite = new Timer();
 	public boolean bedrockInvincibility = false;
 	public boolean hunterDash = true;

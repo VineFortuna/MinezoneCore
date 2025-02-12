@@ -74,7 +74,7 @@ public class SnowGolemClass extends BaseClass {
 		ItemStack pumpkin = ItemHelper.setDetails(
 				new ItemStack(Material.PUMPKIN),
 				pumpkinAbility.getAbilityNameRightClickMessage(),
-				"&7Put a pumpkin on your enemies head",
+				"&7Put a pumpkin on your enemies' head",
 				"",
 				"&7Gives you &4&oStrength &e" + (strength.getAmplifier() + 1) + " &7for &e" + strength.getDuration() / 20 + "s",
 				"&7Duration: &a" + durationDisplay + "s",
