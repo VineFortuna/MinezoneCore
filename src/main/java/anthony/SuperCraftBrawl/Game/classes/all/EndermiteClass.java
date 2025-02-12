@@ -194,13 +194,9 @@ public class EndermiteClass extends BaseClass {
                 break;
         }
 
+        boolean foundTarget = false;
         // Maximum distance along the beam
         double maxDist = endLoc.distance(playerEyeLoc);
-
-        for (double t = 1; t < maxDist; t += 0.5) {
-            ParticleEffect.BLOCK_CRACK.display(player.getEyeLocation().add(dir.clone().multiply(t)), 0.0F,
-                    0.0F, 0.0F, 0.0F, 1, new BlockTexture(Material.PORTAL));
-        }
 
         for (Endermite e : endermites) {
             Vector d = e.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
@@ -225,9 +221,19 @@ public class EndermiteClass extends BaseClass {
                         player.sendMessage(ChatColorHelper
                                 .color("&2&l(!) &rYou and your Endermite teleported to each other's location"));
                         phaseAbility.use();
+                        foundTarget = true;
                         break;
                     }
                 }
+            }
+        }
+        for (double t = 1; t < maxDist; t += 0.5) {
+            if (foundTarget) {
+                ParticleEffect.BLOCK_CRACK.display(player.getEyeLocation().add(dir.clone().multiply(t)), 0.0F,
+                        0.0F, 0.0F, 0.0F, 1, new BlockTexture(Material.PORTAL));
+            } else {
+                ParticleEffect.BLOCK_CRACK.display(player.getEyeLocation().add(dir.clone().multiply(t)), 0.0F,
+                        0.0F, 0.0F, 0.0F, 1, new BlockTexture(Material.PORTAL), player);
             }
         }
     }
