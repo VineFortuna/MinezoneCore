@@ -63,7 +63,7 @@ public enum ClassType {
 	WitherSkeleton(59, 1500, 0),
 	Wolf(71, 400, 0),
 	BrewingStand(68, 350, 0),
-	Parrot(72, 800, 0, true),
+	Parrot(72, 800, 0),
 
 	// Level Classes
 	ZombiePigman(51, 0, 3),
