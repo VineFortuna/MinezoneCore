@@ -2,7 +2,6 @@ package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
@@ -37,8 +36,7 @@ public class FreeClassesGUI implements InventoryProvider {
 		for (ClassType type : ClassType.sortAlphabetically(ClassType.getFreeClasses(false))) {
 			ItemStack item = type.getItem();
 
-			int fished = main.fishing.main.getTotalFish(player);
-			if (type == ClassType.Fisherman && fished < FishType.values().length) {
+			if (type == ClassType.Fisherman && !main.getFishing().hasUnlockedFisherman(player)) {
 				continue;
 			}
 

@@ -1575,30 +1575,30 @@ public enum Maps {
 					.setBounds(new Vector(97.411, 171, -152.539), 55, 100)
 					.setSignLoc(new Vector(174.558, 107, 690.700))
 					.setSource(MapSource.COMMUNITY)
-	);
+	),
 
-//	Arid(
-//			"Arid",
-//					new Gameplay[]{Gameplay.FLAT, Gameplay.ELEVATED},
-//	Size.SMALL,
-//	Category.CURATED,
-//			new ItemStack(Material.DEAD_BUSH), // Dead Bush
-//			new MapInstance(
-//					"arid")
-//					.setSpawnPos(
-//							new Vector(-4.5, 149, -126.5),
-//							new Vector(9.5, 149, -148.5),
-//							new Vector(23.5, 152, -166.5),
-//							new Vector(32.5, 151, -139.5),
-//							new Vector(-17.5, 149,-145.5),
-//							new Vector(-4.5, 149, -163.5)
-//					)
-//					.setLobbyLoc(new Vector(-68.5, 160, -144.5))
-//					.setSpecLoc(new Vector(1.5,  159, -144.5))
-//					.setBounds(new Vector(1.5,  151, -144.5), 55, 55)
-//					.setSignLoc(new Vector(174.558, 107, 690.700))
-//					.setSource(MapSource.COMMUNITY)
-//	);
+	Arid(
+			"Arid",
+					new Gameplay[]{Gameplay.FLAT, Gameplay.ELEVATED},
+	Size.SMALL,
+	Category.CURATED,
+			new ItemStack(Material.DEAD_BUSH), // Dead Bush
+			new MapInstance(
+					"arid")
+					.setSpawnPos(
+							new Vector(-4.5, 149, -126.5),
+							new Vector(9.5, 149, -148.5),
+							new Vector(23.5, 152, -166.5),
+							new Vector(32.5, 151, -139.5),
+							new Vector(-17.5, 149,-145.5),
+							new Vector(-4.5, 149, -163.5)
+					)
+					.setLobbyLoc(new Vector(-68.5, 160, -144.5))
+					.setSpecLoc(new Vector(1.5,  159, -144.5))
+					.setBounds(new Vector(1.5,  151, -144.5), 55, 55)
+					.setSignLoc(new Vector(174.558, 107, 690.700))
+					.setSource(MapSource.COMMUNITY)
+	);
 
 //	EggHunt(
 //			"EggHunt",

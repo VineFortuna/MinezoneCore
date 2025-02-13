@@ -5,31 +5,31 @@ import org.bukkit.entity.Player;
 
 public enum Rank {
     DEFAULT(0, "", color("&7")), //RANK GIVEN TO ALL NEW PLAYERS
-    VIP(6, color("&e&lVIP"), color("&e")), //FIRST DONATION RANK
-    CAPTAIN(8, color("&9&lCaptain"), color("&9")), //SECOND DONATION RANK
-    TRAINEE(3, color("&6&lTrainee"), color("&6")),
+    VIP(6, color("&eVIP"), color("&e")), //FIRST DONATION RANK
+    CAPTAIN(8, color("&9Captain"), color("&9")), //SECOND DONATION RANK
+    TRAINEE(3, color("&6Trainee"), color("&6")),
     //Trainee: Players who applied and have been accepted. They are under training and shall only have
     //Limited permissions. Job: Learn from staff and helper players, with a little bit of chat moderation.
-    MODERATOR(4, color("&3&lMOD"), color("&3")),
+    MODERATOR(4, color("&3MOD"), color("&3")),
     /*
      * Moderator:
      * Obtainable: Promotion from trainee (Passed final exam)
      * Job: Moderate gameplay chat and discord of the server to provide a safe place for players.
      * 
      */
-    SR_MODERATOR(16,color("&3&lSR.MOD"), color("&3")),
+    SR_MODERATOR(16,color("&3SR.MOD"), color("&3")),
     /*
      * SrMod:
      * Obtainable: Promotion from Moderator
      * Job: Appeals, Events, IP Punishments and community management
      */
-    ADMIN(1, color("&c&lAdmin"), color("&c")),
+    ADMIN(1, color("&cAdmin"), color("&c")),
     /*
      * Admin:
      * Obtainable: Applied or selected from SrMod
      * Job: Oversee their subsection they are assigned too (Appeals Events Ip punishments and community management)
      */
-    DEVELOPER(5, color("&2&lDev"), color("&2")),
+    DEVELOPER(5, color("&2Dev"), color("&2")),
     /*
      * Developer:
      * Obtainable: Application with a code test
@@ -42,18 +42,18 @@ public enum Rank {
      * LIMIT: only 1-3 Supervisors at a time
      * Job: Supervisors of all decisions on the servers and overseers of the admin team. They are LEADERSHIP
      */
-    OWNER(2, color("&c&lOwner"), color("&c")),
+    OWNER(2, color("&cOwner"), color("&c")), 
     /*
      * Owner:
      * Obtainable: NO
      * LIMIT: 1
      * Job: Funding the server, and assisting in which events need assitance in. (Help build code or whatever)
      */
-    QA(9, color("&e&lQA"), color("&e")),
+    QA(9, color("&eQA"), color("&e")),
     /*
      * QA: SHOULD BE REMOVED
      */
-    MEDIA(10,color("&b&lMedia"), color("&b")),
+    MEDIA(10,color("&bMedia"), color("&b")),
     /*
      * Media:
      * Obtainable: Application
@@ -66,27 +66,27 @@ public enum Rank {
      * Job: What ever the deal in which is what (A.K.A Enchilada)
      *NOT STAFF
      */
-    STAFF_MANAGER(12,color("&4&lSTAFF MANAGER"), color("&4")),
+    STAFF_MANAGER(12,color("&4STAFF MANAGER"), color("&4")),
     /*
      * Staff Manager:
      * Obtainable: Supervisor or Admin being selected by a Director+
      * Job: Management of all staff recuitment promotions demotions and fires.
      */
-    DIRECTOR(13,color("&c&lDirector"), color("&c")),
+    DIRECTOR(13,color("&cDirector"), color("&c")),
     /*
      * Director:
      * Obtainable: Admin, leadership or Staff Manager Promotion/selection
      * Job: Director of their subsection (Community Management, Appeals, QA ect) (Overseers)
      */
-    BUILDER(14, color("&2&lBuilder"), color("&2")),
+    BUILDER(14, color("&2Builder"), color("&2")),
     /*toh
      * Builder:
      * Obtainable: Application
      * Job: Build and design new maps
      */
-    SUPREME(17, color("&5&lSupreme"), color("&5")),
+    SUPREME(17, color("&5Supreme"), color("&5")),
     
-    HR(18, color("&5&lHR"), color("&5"));
+    HR(18, color("&5HR"), color("&5"));
 	/*
 	 * Human Resources:
 	 * Job: Oversee both the community and staff, ensuring smooth operations across the board
