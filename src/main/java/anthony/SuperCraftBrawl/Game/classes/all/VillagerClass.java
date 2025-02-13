@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
@@ -12,8 +13,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -23,7 +24,12 @@ import java.util.Random;
 
 public class VillagerClass extends BaseClass {
 
-	private ItemStack weapon;
+	private final ItemStack weapon;
+	private final ItemStack potatoItem;
+	private final Ability tradeAbility = new Ability("&a&lTrade", player);
+	private final Ability potatoAbility = new Ability("&6&lPotato Throw", player);
+	private final PotionEffect weakness = new PotionEffect(PotionEffectType.WEAKNESS, 5 * 20, 3, false, true);
+	private final PotionEffect slowness = new PotionEffect(PotionEffectType.SLOW, 5 * 20, 1, false, true);
 	private int emeraldsCount;
 
 
@@ -38,48 +44,49 @@ public class VillagerClass extends BaseClass {
 				6,
 				"Villager"
 		);
-	}
 
-	@Override
-	public ClassType getType() {
-		return ClassType.Villager;
-	}
+		// Weapon
+		weapon = ItemHelper.setDetails(
+				new ItemStack(Material.EMERALD),
+				tradeAbility.getAbilityNameRightClickMessage(),
+				"",
+				"&7Hit enemies to gain emeralds",
+				"&7Trade emeralds for items"
+		);
+		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
+		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
 
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
-	}
-
-	@Override
-	public ItemStack getAttackWeapon() {
-		return weapon;
+		// Potato Ability
+		potatoItem = ItemHelper.setDetails(
+				new ItemStack(Material.BAKED_POTATO, 4),
+				potatoAbility.getAbilityNameRightClickMessage(),
+				"&7Inflict one of 3 effects on enemies:",
+				"&7▶ &3&oSlowness &e" + (slowness.getAmplifier() + 1) + " &7for &e" + slowness.getDuration() / 20 + "s",
+				"&7▶ &f&oWeakness &e" + (weakness.getAmplifier() + 1) + " &7for &e" + weakness.getDuration() / 20 + "s"
+		);
 	}
 
 	@Override
 	public void DoDamage(EntityDamageByEntityEvent event) {
-		if (event.getEntity() instanceof Player) {
-			Player p = (Player) event.getEntity();
-			if (instance.duosMap != null)
-				if (instance.team.get(p).equals(instance.team.get(player)))
-					return;
-			
-			if (instance.getGameManager().spawnProt.containsKey(p)
-					|| instance.getGameManager().spawnProt.containsKey(player))
-				return;
-			
-			BaseClass bc = instance.classes.get(player);
-			if (bc != null && bc.getLives() <= 0)
-				return;
-			
-			emeraldsCount++;
-			weapon.setAmount(emeraldsCount);
-			player.getInventory().setItem(0, weapon);
-		}
+		if (!isPlayerAlive()) return;
+		if (!(event.getEntity() instanceof Player)) return;
+
+		checkToAddEmerald(event);
 	}
 
-	@Override
-	public void SetNameTag() {
+	private void checkToAddEmerald(EntityDamageByEntityEvent event) {
+		ItemStack heldItem = player.getInventory().getItem(player.getInventory().getHeldItemSlot());
 
+		boolean isWeaponMelee =
+				event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
+				&& heldItem != null
+				&& heldItem.equals(weapon);
+
+		if (!isWeaponMelee) return;
+
+		emeraldsCount++;
+		weapon.setAmount(emeraldsCount);
+		player.getInventory().setItem(0, weapon);
 	}
 
 	@Override
@@ -87,41 +94,28 @@ public class VillagerClass extends BaseClass {
 		// Resetting Emeralds on Death
 		emeraldsCount = 0;
 
-		// Weapon
-		ItemStack weapon = ItemHelper.setDetails(new ItemStack(Material.EMERALD),
-				"&aTrade Ability &7(Right Click)",
-				"&fHit enemies to gain emeralds",
-				"&fTrade emeralds for items");
-		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
-		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
-		this.weapon = weapon;
-
 		// Settings Items
 		playerInv.setItem(0, weapon);
-		playerInv.setItem(1,
-				ItemHelper.setDetails(new ItemStack(Material.BAKED_POTATO, 4), "", "",
-						instance.getGameManager().getMain().color("&7Gives players one of the following:"),
-						instance.getGameManager().getMain().color("   &r3 sec Blindness I"),
-						instance.getGameManager().getMain().color("   &r3 sec Slowness II"),
-						instance.getGameManager().getMain().color("   &r4 sec Weakness I")));
+		playerInv.setItem(1, potatoItem);
 	}
 
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		Action action = event.getAction();
-		
-		if (item != null && action == Action.RIGHT_CLICK_AIR ||
-				action == Action.RIGHT_CLICK_BLOCK) {
+
+		if (item == null) return;
+
+		if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
 			// TRADE ABILITY
-			if (item.equals(weapon)) {
+			if (item.isSimilar(weapon)) {
 				// Check Right CLick
 				new VillagerAbilityGUI(
 						instance.getGameManager().getMain(),
 						instance,
 						this
 				).inv.open(player);
-			} else if (item.getType() == Material.BAKED_POTATO) {
+			} else if (item.isSimilar(potatoItem)) {
 				event.setCancelled(true);
 				int amount = item.getAmount();
 				if (amount > 0) {
@@ -140,20 +134,29 @@ public class VillagerClass extends BaseClass {
 								Location hitLoc = this.getBaseProj().getEntity().getLocation();
 								player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
 								Random r = new Random();
-								int chance = r.nextInt(100);
-								
+								int randomNumber = r.nextInt(100);
+
+								// Percentage chances for each effect
+								int slownessPercentage = 50;
+								int weaknessPercentage = 50;
+
+								// Determining effect based on the number range
+								PotionEffect effect;
+								if (randomNumber < slownessPercentage) {
+									effect = slowness;
+								} else if (randomNumber < slownessPercentage + weaknessPercentage) {
+									effect = weakness;
+								} else {
+									effect = null;
+								}
+
+								// Applying effect
 								for (Player gamePlayer : this.getNearby(2.5)) {
 									if (gamePlayer != player && !checkIfDead(player, instance)) {
-										if (chance <= 40)
-											gamePlayer.addPotionEffect(
-													new PotionEffect(PotionEffectType.BLINDNESS, 75, 0));
-										else if (chance <= 79)
-											gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 75, 1));
-										else
-											gamePlayer.addPotionEffect(
-													new PotionEffect(PotionEffectType.WEAKNESS, 90, 0));
+											gamePlayer.addPotionEffect(effect);
 									}
 								}
+								// Playing sound and effect
 								player.getWorld().playSound(hitLoc, Sound.SPLASH2, 2, 1);
 								player.getWorld().playEffect(hitLoc, Effect.SPLASH, 1);
 							}
@@ -171,5 +174,15 @@ public class VillagerClass extends BaseClass {
 	}
 	public void setEmeraldsCount(int emeraldsCount) {
 		this.emeraldsCount = emeraldsCount;
+	}
+
+	@Override
+	public ClassType getType() {
+		return ClassType.Villager;
+	}
+
+	@Override
+	public ItemStack getAttackWeapon() {
+		return weapon;
 	}
 }

@@ -135,7 +135,7 @@ public enum ClassType {
 	public String getClassDesc() {
 		switch (this) {
 			case Cactus:
-				return "A pricklyyy living thing, made up of thorns & blood..";
+				return "A pricklyyy living thing, made up of thorns & blood...";
 			case Santa:
 				return "HO HO HO! MERRRRRRYYYY CHRISTMASSSSS";
 			case GingerBreadMan:
@@ -143,7 +143,7 @@ public enum ClassType {
 			case Elf:
 				return "Santa's lil helper here to deliver";
 			case GrimReaper:
-				return "Harvest souls with deadly precision, wielding dark powers..";
+				return "Harvest souls with deadly precision, wielding dark powers...";
 			case BrewingStand:
 				return "Hit players to obtain Brewing items to get epic potions!";
 			case Fade:
@@ -503,7 +503,8 @@ public enum ClassType {
 		case Anvil:
 			return new ItemStack(Material.ANVIL);
 		case Silverfish:
-			return new ItemStack(Material.IRON_HOE);
+			return ItemHelper.createSkullTexture(
+					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGE5MWRhYjgzOTFhZjVmZGE1NGFjZDJjMGIxOGZiZDgxOWI4NjVlMWE4ZjFkNjIzODEzZmE3NjFlOTI0NTQwIn19fQ==");
 		case Zombie:
 			return ItemHelper.createSkullHead(1, SkullType.ZOMBIE);
 		case Star:
@@ -610,7 +611,7 @@ public enum ClassType {
 	public BaseClass GetClassInstance(GameInstance instance, Player player) {
 		switch (this) {
 			case Cactus:
-				return new Cactus(instance, player);
+				return new CactusClass(instance, player);
 			case Santa:
 				return new SantaClass(instance, player);
 			case GingerBreadMan:

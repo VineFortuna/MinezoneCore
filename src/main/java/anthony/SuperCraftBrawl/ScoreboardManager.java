@@ -93,7 +93,7 @@ public class ScoreboardManager {
 									? "" + ChatColor.GRAY + game.players.size() + "/" + game.gameType.getMaxPlayers()
 									: ""),
 					"", "" + ChatColor.RESET + ChatColor.BOLD + "Status:",
-					"" + ChatColor.RESET + ChatColor.GRAY + ChatColor.ITALIC + " Waiting..");
+					"" + ChatColor.RESET + ChatColor.GRAY + ChatColor.ITALIC + " Waiting...");
 
 			game.boards.get(player).updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + game.getMap().toString());
 		} else {
@@ -102,7 +102,7 @@ public class ScoreboardManager {
 					"" + ChatColor.RESET + ChatColor.BOLD + "Players:",
 					" " + ChatColor.RESET + game.players.size() + "/6", "",
 					"" + ChatColor.RESET + ChatColor.BOLD + "Status:",
-					"" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
+					"" + ChatColor.RESET + ChatColor.ITALIC + " Waiting...");
 		}
 	}
 

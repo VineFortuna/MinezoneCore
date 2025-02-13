@@ -57,7 +57,8 @@ public class FishingGUI implements InventoryProvider {
         int i = 0;
         for (FishType type : FishType.values()) {
             FishingDetails details = data.playerFishing.get(type.getId());
-            ItemStack item = ItemHelper.setDetails(ItemHelper.createDye(DyeColor.GRAY, 1), main.color("&c???"), "");
+            ItemStack item = ItemHelper.setDetails(ItemHelper.createDye(DyeColor.GRAY, 1), "&c???",
+                    type.getRarity().getColor() + type.getRarity().getName(), "");
             
             if (details != null && details.timesCaught > 0) {
                 item = type.getItem();

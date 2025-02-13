@@ -30,11 +30,6 @@ public class ParrotClass extends BaseClass {
     private final ItemStack danceItem;
     private final Ability flapAbility = new Ability("&a&lFlap", 2, player);
     private final Ability danceAbility = new Ability("&a&lDance", 25, player);
-    private BukkitRunnable danceRunnable;
-    private Block danceTargetBlock;
-
-    private int armorColorCounter = 1;
-
     private static final double DANCE_ABILITY_RADIUS = 8;
     private static final double DANCE_ABILITY_DURATION = 10;
     private static final double HEAL_PER_SECOND = 1.0 ;
@@ -50,7 +45,9 @@ public class ParrotClass extends BaseClass {
     };
 
     private static final int TICKS_PER_SECOND = 20;
-
+    private BukkitRunnable danceRunnable;
+    private Block danceTargetBlock;
+    private int armorColorCounter = 1;
     private final int protectionLevel = 6;
 
     public ParrotClass(GameInstance instance, Player player) {
@@ -66,10 +63,12 @@ public class ParrotClass extends BaseClass {
         );
 
         // Weapon
-        weapon = ItemHelper.setDetails(new ItemStack(Material.FEATHER),
+        weapon = ItemHelper.setDetails(
+                new ItemStack(Material.FEATHER),
                 flapAbility.getAbilityNameRightClickMessage(),
                 "",
-                "&7Flap your wings up");
+                "&7Flap your wings up"
+        );
         weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 4);
 
         // Dance Ability
@@ -78,32 +77,33 @@ public class ParrotClass extends BaseClass {
         String durationDisplay = ItemHelper.formatDouble(DANCE_ABILITY_DURATION);
         String radiusDisplay = ItemHelper.formatDouble(DANCE_ABILITY_RADIUS);
 
-        danceItem = ItemHelper.setDetails(new ItemStack(Material.JUKEBOX),
+        danceItem = ItemHelper.setDetails(
+                new ItemStack(Material.JUKEBOX),
                 danceAbility.getAbilityNameRightClickMessage(),
                 "&7Place down a jukebox",
                 "&7and dance to regenerate health",
                 "",
-                "&7Heals &e" + healingDisplay + " &c❤ &7over &a" + durationDisplay + " &7s",
-                "&7Range: &a" + radiusDisplay + " &7blocks");
+                "&7Heals &e" + healingDisplay + " &c❤ &7over &a" + durationDisplay + "s",
+                "&7Range: &a" + radiusDisplay + " &7blocks"
+        );
     }
 
     @Override
     public void Tick(int gameTicks) {
+        if (!isPlayerAlive()) return;
+
         if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
             player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, JUMP_BOOST_AMP));
 
         // ActionBar
-        if (isPlayerAlive()) {
-            ActionBarManager actionBarManager = this.getActionBarManager();
-            ActionBarManager.AbilityActionBar abilityActionBar = new ActionBarManager.AbilityActionBar(this, actionBarManager);
-            abilityActionBar.setActionBarAbility(player, flapAbility, danceAbility);
-        }
+        ActionBarManager actionBarManager = this.getActionBarManager();
+        ActionBarManager.AbilityActionBar abilityActionBar = new ActionBarManager.AbilityActionBar(this, actionBarManager);
+        abilityActionBar.setActionBarAbility(player, flapAbility, danceAbility);
 
         if (gameTicks % TICKS_PER_SECOND != 0) return;
 
         // Healing
         handleHealing();
-
     }
 
     private void handleHealing() {
@@ -134,7 +134,7 @@ public class ParrotClass extends BaseClass {
         if (player.getGameMode() == GameMode.SPECTATOR) return;
 
         if (action == Action.RIGHT_CLICK_BLOCK) {
-            // DANCE ABILITY
+            // Dance Ability
             if (item.equals(danceItem)) {
                 if (!danceAbility.isReady()) return;
 
@@ -153,7 +153,7 @@ public class ParrotClass extends BaseClass {
                 // Check if blocks below and above are not air
                 if (blockBelow.getType() == Material.AIR && blockAbove.getType() == Material.AIR) {
                     SoundManager.playErrorSound(player);
-                    danceAbility.sendPlayerCustomUseAbilityChatMessage("&c&l(!) &rYou can't place your ability there");
+                    danceAbility.sendCustomMessage("&c&l(!) &rYou can't place your ability there");
                     return;
                 }
 
@@ -163,7 +163,7 @@ public class ParrotClass extends BaseClass {
         }
 
         if (action == Action.RIGHT_CLICK_BLOCK || action == Action.RIGHT_CLICK_AIR) {
-            // FLAP ABILITY
+            // Flap Ability
             if (item.equals(weapon)) {
                 if (!flapAbility.isReady()) return;
 

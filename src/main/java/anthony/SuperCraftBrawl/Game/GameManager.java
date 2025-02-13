@@ -61,6 +61,8 @@ import java.io.DataOutputStream;
 import java.util.*;
 import java.util.Map.Entry;
 
+import static sun.audio.AudioPlayer.player;
+
 public class GameManager implements Listener, PluginMessageListener {
 	public HashMap<Maps, GameInstance> gameMap;
 	public HashMap<DuosMaps, GameInstance> gameMap2;
@@ -225,31 +227,12 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (event.getCause() == TeleportCause.ENDER_PEARL) {
 				event.setCancelled(true);
 				if (instance.isInBounds(event.getTo())) {
-					if (baseClass.isDead == true) {
-						if (event.getTo() == null || event.getTo() != null) {
-
-						}
-					} else {
+					if (!baseClass.isDead) {
 						player.teleport(event.getTo());
-
-						for (Player gamePlayer : instance.players) {
-							if (player != gamePlayer) {
-								int radius = 7;
-								if (!(player.getLocation().distance(gamePlayer.getLocation()) <= radius)) {
-									EntityDamageEvent damageEvent = new EntityDamageEvent(player,
-											DamageCause.PROJECTILE, 1.5);
-									instance.getGameManager().getMain().getServer().getPluginManager()
-											.callEvent(damageEvent);
-									player.damage(1.5);
-								}
-							}
-						}
 					}
-				} else if (!instance.isInBounds(event.getTo())){ // If player teleports outside map boundaries, don't teleport & give back pearl
+					// Cancel Teleport outside of bounds
+				} else if (!instance.isInBounds(event.getTo())){
 					player.sendMessage(getMain().color("&c&l(!) &rYou cannot teleport there!"));
-					/*ItemStack pearl = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL),
-							getMain().color("&5&lENDER PEARL"));
-					player.getInventory().addItem(pearl); // Adds an additional pearl to player's inventory*/
 				}
 			}
 	}
@@ -625,6 +608,16 @@ public class GameManager implements Listener, PluginMessageListener {
 		gameInstance.classes.get(player).onConsumingItem(event);
 	}
 
+	@EventHandler
+	public void onPotionSplashEvent(PotionSplashEvent event) {
+		ThrownPotion thrownPotion = event.getEntity();
+		if (!(thrownPotion.getShooter() instanceof Player)) return;
+		Player shooter = (Player) thrownPotion.getShooter();
+		GameInstance gameInstance = GetInstanceOfPlayer(shooter);
+		if (gameInstance == null) return;
+		gameInstance.classes.get(shooter).PotionSplashEvent(event);
+	}
+
 	public void onPlayerMoveEvent(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
 		GameInstance gameInstance = GetInstanceOfPlayer(player);
@@ -659,20 +652,39 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	/**
-	 * This function gets rid of loot drops & exp that certain mobs can drop
+	 * This event listens to when a creature spawns
+	 * This method removes all small magma cubes that spawns
 	 *
-	 * @param entity to remove loot drops/exp from
+	 * @param event on creature spawn event
 	 */
 	@EventHandler
-	public void EntityDeathEvent(EntityDeathEvent entity) {
+	public void onCreatureSpawn(CreatureSpawnEvent event) {
+		EntityType entityType = event.getEntityType();
+
+		if (entityType.equals(EntityType.MAGMA_CUBE)) {
+			MagmaCube magmaCube = (MagmaCube) event.getEntity();
+			if (magmaCube.getSize() < 3) { // Size 3 is the medium Magma Cube
+				magmaCube.remove();
+			}
+		}
+	}
+
+	/**
+	 * This function gets rid of loot drops & exp that certain mobs can drop
+	 *
+	 * @param event to remove loot drops/exp from
+	 */
+	@EventHandler
+	public void EntityDeathEvent(EntityDeathEvent event) {
+		EntityType entityType = event.getEntityType();
 		List<EntityType> entities = new ArrayList<>(
 				Arrays.asList(EntityType.ZOMBIE, EntityType.SKELETON, EntityType.CREEPER, EntityType.PIG_ZOMBIE,
 						EntityType.MAGMA_CUBE, EntityType.SILVERFISH, EntityType.WITCH, EntityType.ENDERMITE,
 						EntityType.CHICKEN, EntityType.BLAZE, EntityType.PIG, EntityType.MUSHROOM_COW, EntityType.COW,
 						EntityType.WOLF, EntityType.SPIDER));
-		if (entities.contains(entity.getEntityType())) {
-			entity.getDrops().clear();
-			entity.setDroppedExp(0);
+		if (entities.contains(entityType)) {
+			event.getDrops().clear();
+			event.setDroppedExp(0);
 		}
 	}
 
@@ -871,10 +883,14 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	@EventHandler
-	public void bazooka(PlayerInteractEvent e) {
-		Player player = e.getPlayer();
-		ItemStack item = e.getItem();
+	public void bazooka(PlayerInteractEvent event) {
+		Player player = event.getPlayer();
+		ItemStack item = event.getItem();
 		GameInstance instance = this.GetInstanceOfPlayer(player);
+
+		Action action = event.getAction();
+
+		if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
 
 		if (instance != null && instance.state == GameState.STARTED) {
 			BaseClass bc = instance.classes.get(player);
@@ -886,7 +902,7 @@ public class GameManager implements Listener, PluginMessageListener {
 					if (bc != null) {
 						if (bc.bazooka.getTime() < 3000) {
 							int seconds = (3000 - bc.bazooka.getTime()) / 1000 + 1;
-							e.setCancelled(true);
+							event.setCancelled(true);
 							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
 									+ "Your Bazooka is still regenerating for " + ChatColor.YELLOW + seconds + "s");
 						} else {
@@ -938,7 +954,7 @@ public class GameManager implements Listener, PluginMessageListener {
 							instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 									player.getLocation().getDirection().multiply(2.0D));
 						}
-						e.setCancelled(true);
+						event.setCancelled(true);
 					}
 				}
 			}
@@ -1273,24 +1289,24 @@ public class GameManager implements Listener, PluginMessageListener {
 									new EntityDamageByEntityEvent(shoot, player, event.getCause(), event.getDamage()));
 						}
 					} else if (damageEvent.getDamager() instanceof Arrow) {
-						Arrow damager = (Arrow) damageEvent.getDamager();
-						if (damager.getShooter() instanceof Player) {
-							Player p = (Player) damager.getShooter();
-							BaseClass bc = instance.classes.get(p);
+						Arrow arrow = (Arrow) damageEvent.getDamager();
+						if (arrow.getShooter() instanceof Player) {
+							Player shooterPlayer = (Player) arrow.getShooter();
+							BaseClass shooterBaseClass = instance.classes.get(shooterPlayer);
 							BaseClass pBc = instance.classes.get(player);
 
 							if (instance.duosMap != null) {
-								if (instance.team.get(p).equals(instance.team.get(player))) {
+								if (instance.team.get(shooterPlayer).equals(instance.team.get(player))) {
 									event.setCancelled(true);
 									return;
 								}
 							}
 
-							if (bc != null && pBc != null) {
-								if (bc.getType() == ClassType.Vampire || bc.getType() == ClassType.WitherSkeleton
-										|| bc.getType() == ClassType.Shulker || bc.getType() == ClassType.Firework
-										|| bc.getType() == ClassType.Skeleton) {
-									if (this.spawnProt.containsKey(p) || bc.bedrockInvincibility == true) {
+							if (shooterBaseClass != null && pBc != null) {
+								if (shooterBaseClass.getType() == ClassType.Vampire || shooterBaseClass.getType() == ClassType.WitherSkeleton
+										|| shooterBaseClass.getType() == ClassType.Shulker || shooterBaseClass.getType() == ClassType.Firework
+										|| shooterBaseClass.getType() == ClassType.Skeleton || shooterBaseClass.getType() == ClassType.Ghast) {
+									if (this.spawnProt.containsKey(shooterPlayer) || shooterBaseClass.bedrockInvincibility == true) {
 										event.setCancelled(true);
 										return;
 									}
@@ -1298,9 +1314,9 @@ public class GameManager implements Listener, PluginMessageListener {
 										event.setCancelled(true);
 										return;
 									}
-									player.setLastDamageCause(new EntityDamageByEntityEvent(p, player, event.getCause(),
+									player.setLastDamageCause(new EntityDamageByEntityEvent(shooterPlayer, player, event.getCause(),
 											event.getDamage()));
-									bc.DoDamage(damageEvent);
+									shooterBaseClass.DoDamage(damageEvent);
 								}
 							}
 						}
@@ -1770,8 +1786,13 @@ public class GameManager implements Listener, PluginMessageListener {
 		ItemStack item = event.getItem();
 		GameInstance i = this.GetInstanceOfPlayer(player);
 
+
+
 		if (i != null && i.state == GameState.STARTED) {
 			if (item != null && item.getType() == Material.TNT) {
+				Action action = event.getAction();
+				if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
+
 				if (item.getAmount() % 3 == 0) {
 					if (item.getAmount() == 3)
 						player.getInventory().clear(player.getInventory().getHeldItemSlot());
@@ -2117,256 +2138,259 @@ public class GameManager implements Listener, PluginMessageListener {
 	public void itemInteract(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		final Player player = event.getPlayer();
-		GameInstance i = GetInstanceOfPlayer(player);
-		GameInstance i2 = GetInstanceOfSpectator(player);
-		if (item != null) {
-			ItemMeta meta = item.getItemMeta();
-			switch (item.getType()) {
-				case COMPASS:
-					if (player.getWorld() == this.main.getLobbyWorld()) {
-						Bukkit.getScheduler().runTaskLaterAsynchronously((Plugin) this.main, () -> {
-							ByteArrayOutputStream b = new ByteArrayOutputStream();
-							DataOutputStream out = new DataOutputStream(b);
-							try {
-								out.writeUTF("PlayerCount");
-								out.writeUTF("scb-1");
-							} catch (Exception exc) {
-								exc.printStackTrace();
-							}
-							player.sendPluginMessage((Plugin) this.main, "BungeeCord", b.toByteArray());
-							b = new ByteArrayOutputStream();
-							out = new DataOutputStream(b);
-							try {
-								out.writeUTF("PlayerCount");
-								out.writeUTF("scb-2");
-							} catch (Exception exc) {
-								exc.printStackTrace();
-							}
-							player.sendPluginMessage((Plugin) this.main, "BungeeCord", b.toByteArray());
-						}, 10L);
-						(new GameSelectorGUI(this.main)).inv.open(player);
-					}
-				case ENCHANTED_BOOK:
-					if (i != null) {
-						if (i.state == GameState.WAITING) {
-							PlayerData data = main.getDataManager().getPlayerData(player);
-							for (ClassType type : ClassType.getAvailableClasses()) {
-								ClassDetails details = data.playerClasses.get(type.getID());
-								if (details == null) {
-									details = new ClassDetails();
-									data.playerClasses.put(type.getID(), details);
-								}
-							}
-							(new ClassesGUI(this.main)).inv.open(player);
-						} else if (((BaseClass) i.classes.get(player)).getLives() <= 0) {
-							(new SpectatorGUI(this.main)).inv.open(player);
+		GameInstance gameInstance = GetInstanceOfPlayer(player);
+		GameInstance gameInstanceSpectator = GetInstanceOfSpectator(player);
+		Action action = event.getAction();
+
+		if (item == null) return;
+		ItemMeta meta = item.getItemMeta();
+
+		switch (item.getType()) {
+			case COMPASS:
+				if (player.getWorld() == this.main.getLobbyWorld()) {
+					Bukkit.getScheduler().runTaskLaterAsynchronously((Plugin) this.main, () -> {
+						ByteArrayOutputStream b = new ByteArrayOutputStream();
+						DataOutputStream out = new DataOutputStream(b);
+						try {
+							out.writeUTF("PlayerCount");
+							out.writeUTF("scb-1");
+						} catch (Exception exc) {
+							exc.printStackTrace();
 						}
-					} else if (i2 != null && i2.spectators.contains(player) && player.getWorld() == i2.getMapWorld()) {
+						player.sendPluginMessage((Plugin) this.main, "BungeeCord", b.toByteArray());
+						b = new ByteArrayOutputStream();
+						out = new DataOutputStream(b);
+						try {
+							out.writeUTF("PlayerCount");
+							out.writeUTF("scb-2");
+						} catch (Exception exc) {
+							exc.printStackTrace();
+						}
+						player.sendPluginMessage((Plugin) this.main, "BungeeCord", b.toByteArray());
+					}, 10L);
+					(new GameSelectorGUI(this.main)).inv.open(player);
+				}
+			case ENCHANTED_BOOK:
+				if (gameInstance != null) {
+					if (gameInstance.state == GameState.WAITING) {
+						PlayerData data = main.getDataManager().getPlayerData(player);
+						for (ClassType type : ClassType.getAvailableClasses()) {
+							ClassDetails details = data.playerClasses.get(type.getID());
+							if (details == null) {
+								details = new ClassDetails();
+								data.playerClasses.put(type.getID(), details);
+							}
+						}
+						(new ClassesGUI(this.main)).inv.open(player);
+					} else if (((BaseClass) gameInstance.classes.get(player)).getLives() <= 0) {
 						(new SpectatorGUI(this.main)).inv.open(player);
 					}
-					break;
-				case BARRIER:
-					if ((i != null && i.classes.containsKey(player) && ((BaseClass) i.classes.get(player)).getLives() <= 0)
-							|| i2 != null)
-						(new LeaveGameGUI(this.main)).inv.open(player);
-					if (i != null && i.state == GameState.WAITING)
-						new LeaveGameGUI(this.main).inv.open(player);
-					break;
-				case MONSTER_EGG:
-					if (i != null && i.state == GameState.STARTED) {
-						// Zombie Monster Egg
-						if (meta.getDisplayName().toLowerCase().contains("zombie")
-								&& !(meta.getDisplayName().toLowerCase().contains("pigman"))) {
-							int amount = item.getAmount();
+				} else if (gameInstanceSpectator != null && gameInstanceSpectator.spectators.contains(player) && player.getWorld() == gameInstanceSpectator.getMapWorld()) {
+					(new SpectatorGUI(this.main)).inv.open(player);
+				}
+				break;
+			case BARRIER:
+				if ((gameInstance != null && gameInstance.classes.containsKey(player) && ((BaseClass) gameInstance.classes.get(player)).getLives() <= 0)
+						|| gameInstanceSpectator != null)
+					(new LeaveGameGUI(this.main)).inv.open(player);
+				if (gameInstance != null && gameInstance.state == GameState.WAITING)
+					new LeaveGameGUI(this.main).inv.open(player);
+				break;
+			case MONSTER_EGG:
+				if (gameInstance != null && gameInstance.state == GameState.STARTED) {
+					if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
+					// Zombie Monster Egg
+					if (meta.getDisplayName().toLowerCase().contains("zombie")
+							&& !(meta.getDisplayName().toLowerCase().contains("pigman"))) {
+						int amount = item.getAmount();
 
-							if (amount > 0) {
-								if (amount == 1)
-									player.getInventory().clear(player.getInventory().getHeldItemSlot());
-								else {
-									amount--;
-									item.setAmount(amount);
+						if (amount > 0) {
+							if (amount == 1)
+								player.getInventory().clear(player.getInventory().getHeldItemSlot());
+							else {
+								amount--;
+								item.setAmount(amount);
+							}
+							ItemProjectile proj = new ItemProjectile(gameInstance, player, new ProjectileOnHit() {
+								@Override
+								public void onHit(Player hit) {
+									Location hitLoc = this.getBaseProj().getEntity().getLocation();
+									@SuppressWarnings("deprecation")
+
+									// Spawning Zombie
+									Zombie zombie = (Zombie) player.getWorld().spawnCreature(hitLoc, EntityType.ZOMBIE);
+									// Customizing Zombie
+									customizeMob(zombie, player);
+									customizeZombie(zombie);
+									zombie.setTarget(gameInstance.getNearestPlayer(player, zombie, 150));
+
+									// If ClassType == Summoner
+									if (gameInstance.classes.get(player).getType() == ClassType.Summoner) {
+										// Spawning Second Zombie
+										Zombie zombie2 = (Zombie) player.getWorld().spawnCreature(hitLoc.add(1, 0, 1),
+												EntityType.ZOMBIE);
+										// Customizing Second Zombie
+										customizeMob(zombie2, player);
+										customizeZombie(zombie2);
+										zombie2.setTarget(gameInstance.getNearestPlayer(player, zombie2, 150));
+									}
 								}
-								ItemProjectile proj = new ItemProjectile(i, player, new ProjectileOnHit() {
-									@Override
-									public void onHit(Player hit) {
-										Location hitLoc = this.getBaseProj().getEntity().getLocation();
-										@SuppressWarnings("deprecation")
 
-										// Spawning Zombie
-										Zombie zombie = (Zombie) player.getWorld().spawnCreature(hitLoc, EntityType.ZOMBIE);
-										// Customizing Zombie
-										customizeMob(zombie, player);
-										customizeZombie(zombie);
-										zombie.setTarget(i.getNearestPlayer(player, zombie, 150));
+							}, ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1));
+							gameInstance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+									player.getLocation().getDirection().multiply(2.0D));
+						}
+						// Skeleton Monster Egg
+					} else if (meta.getDisplayName().toLowerCase().contains("skeleton")) {
+						int amount = item.getAmount();
 
-										// If ClassType == Summoner
-										if (i.classes.get(player).getType() == ClassType.Summoner) {
-											// Spawning Second Zombie
-											Zombie zombie2 = (Zombie) player.getWorld().spawnCreature(hitLoc.add(1, 0, 1),
-													EntityType.ZOMBIE);
-											// Customizing Second Zombie
-											customizeMob(zombie2, player);
-											customizeZombie(zombie2);
-											zombie2.setTarget(i.getNearestPlayer(player, zombie2, 150));
-										}
+						if (amount > 0) {
+							if (amount == 1)
+								player.getInventory().clear(player.getInventory().getHeldItemSlot());
+							else {
+								amount--;
+								item.setAmount(amount);
+							}
+							ItemProjectile proj = new ItemProjectile(gameInstance, player, new ProjectileOnHit() {
+								@Override
+								public void onHit(Player hit) {
+									Location hitLoc = this.getBaseProj().getEntity().getLocation();
+									@SuppressWarnings("deprecation")
+
+									// Spawning Skeleton
+									Skeleton skeleton = (Skeleton) player.getWorld().spawnCreature(hitLoc,
+											EntityType.SKELETON);
+									// Customizing Skeleton
+									customizeMob(skeleton, player);
+									customizeSkeleton(skeleton);
+									skeleton.setTarget(gameInstance.getNearestPlayer(player, skeleton, 150));
+
+									// If ClassType == Summoner
+									if (gameInstance.classes.get(player).getType() == ClassType.Summoner) {
+										// Spawning Second Skeleton
+										Skeleton skeleton2 = (Skeleton) player.getWorld()
+												.spawnCreature(hitLoc.add(1, 0, 1), EntityType.SKELETON);
+										// Customizing Second Skeleton
+										customizeMob(skeleton2, player);
+										customizeSkeleton(skeleton2);
+										skeleton2.setTarget(gameInstance.getNearestPlayer(player, skeleton2, 150));
+									}
+								}
+							}, ItemHelper.createMonsterEgg(EntityType.SKELETON, 1));
+							gameInstance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+									player.getLocation().getDirection().multiply(2.0D));
+						}
+						// Witch Monster Egg
+					} else if (meta.getDisplayName().toLowerCase().contains("witch")) {
+						int amount = item.getAmount();
+
+						if (amount > 0) {
+							if (amount == 1)
+								player.getInventory().clear(player.getInventory().getHeldItemSlot());
+							else {
+								amount--;
+								item.setAmount(amount);
+							}
+							ItemProjectile proj = new ItemProjectile(gameInstance, player, new ProjectileOnHit() {
+								@Override
+								public void onHit(Player hit) {
+									Location hitLoc = this.getBaseProj().getEntity().getLocation();
+									@SuppressWarnings("deprecation")
+
+									// Spawning Witch
+									Witch witch = (Witch) player.getWorld().spawnCreature(hitLoc, EntityType.WITCH);
+									// Customizing Witch
+									customizeMob(witch, player);
+									witch.setTarget(gameInstance.getNearestPlayer(player, witch, 150));
+								}
+
+							}, ItemHelper.createMonsterEgg(EntityType.WITCH, 1));
+							gameInstance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+									player.getLocation().getDirection().multiply(2.0D));
+						}
+						// Creeper Monster Egg
+					} else if (meta.getDisplayName().toLowerCase().contains("creeper")) {
+						int amount = item.getAmount();
+
+						if (amount > 0) {
+							if (amount == 1)
+								player.getInventory().clear(player.getInventory().getHeldItemSlot());
+							else {
+								amount--;
+								item.setAmount(amount);
+							}
+							ItemProjectile proj = new ItemProjectile(gameInstance, player, new ProjectileOnHit() {
+								@Override
+								public void onHit(Player hit) {
+									Location hitLoc = this.getBaseProj().getEntity().getLocation();
+									@SuppressWarnings("deprecation")
+
+									// Spawning Creeper
+									Creeper creeper = (Creeper) player.getWorld().spawnCreature(hitLoc,
+											EntityType.CREEPER);
+									// Customizing Creeper
+									customizeMob(creeper, player);
+									customizeCreeper(creeper);
+									creeper.setTarget(gameInstance.getNearestPlayer(player, creeper, 150));
+
+									// If ClassType == Summoner
+									// Setting to Charged Creeper
+									if (gameInstance.classes.get(player).getType() == ClassType.Summoner) {
+										creeper.setPowered(true);
 									}
 
-								}, ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1));
-								i.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-										player.getLocation().getDirection().multiply(2.0D));
-							}
-							// Skeleton Monster Egg
-						} else if (meta.getDisplayName().toLowerCase().contains("skeleton")) {
-							int amount = item.getAmount();
-
-							if (amount > 0) {
-								if (amount == 1)
-									player.getInventory().clear(player.getInventory().getHeldItemSlot());
-								else {
-									amount--;
-									item.setAmount(amount);
 								}
-								ItemProjectile proj = new ItemProjectile(i, player, new ProjectileOnHit() {
-									@Override
-									public void onHit(Player hit) {
-										Location hitLoc = this.getBaseProj().getEntity().getLocation();
-										@SuppressWarnings("deprecation")
 
-										// Spawning Skeleton
-										Skeleton skeleton = (Skeleton) player.getWorld().spawnCreature(hitLoc,
-												EntityType.SKELETON);
-										// Customizing Skeleton
-										customizeMob(skeleton, player);
-										customizeSkeleton(skeleton);
-										skeleton.setTarget(i.getNearestPlayer(player, skeleton, 150));
-
-										// If ClassType == Summoner
-										if (i.classes.get(player).getType() == ClassType.Summoner) {
-											// Spawning Second Skeleton
-											Skeleton skeleton2 = (Skeleton) player.getWorld()
-													.spawnCreature(hitLoc.add(1, 0, 1), EntityType.SKELETON);
-											// Customizing Second Skeleton
-											customizeMob(skeleton2, player);
-											customizeSkeleton(skeleton2);
-											skeleton2.setTarget(i.getNearestPlayer(player, skeleton2, 150));
-										}
-									}
-								}, ItemHelper.createMonsterEgg(EntityType.SKELETON, 1));
-								i.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-										player.getLocation().getDirection().multiply(2.0D));
-							}
-							// Witch Monster Egg
-						} else if (meta.getDisplayName().toLowerCase().contains("witch")) {
-							int amount = item.getAmount();
-
-							if (amount > 0) {
-								if (amount == 1)
-									player.getInventory().clear(player.getInventory().getHeldItemSlot());
-								else {
-									amount--;
-									item.setAmount(amount);
-								}
-								ItemProjectile proj = new ItemProjectile(i, player, new ProjectileOnHit() {
-									@Override
-									public void onHit(Player hit) {
-										Location hitLoc = this.getBaseProj().getEntity().getLocation();
-										@SuppressWarnings("deprecation")
-
-										// Spawning Witch
-										Witch witch = (Witch) player.getWorld().spawnCreature(hitLoc, EntityType.WITCH);
-										// Customizing Witch
-										customizeMob(witch, player);
-										witch.setTarget(i.getNearestPlayer(player, witch, 150));
-									}
-
-								}, ItemHelper.createMonsterEgg(EntityType.WITCH, 1));
-								i.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-										player.getLocation().getDirection().multiply(2.0D));
-							}
-							// Creeper Monster Egg
-						} else if (meta.getDisplayName().toLowerCase().contains("creeper")) {
-							int amount = item.getAmount();
-
-							if (amount > 0) {
-								if (amount == 1)
-									player.getInventory().clear(player.getInventory().getHeldItemSlot());
-								else {
-									amount--;
-									item.setAmount(amount);
-								}
-								ItemProjectile proj = new ItemProjectile(i, player, new ProjectileOnHit() {
-									@Override
-									public void onHit(Player hit) {
-										Location hitLoc = this.getBaseProj().getEntity().getLocation();
-										@SuppressWarnings("deprecation")
-
-										// Spawning Creeper
-										Creeper creeper = (Creeper) player.getWorld().spawnCreature(hitLoc,
-												EntityType.CREEPER);
-										// Customizing Creeper
-										customizeMob(creeper, player);
-										customizeCreeper(creeper);
-										creeper.setTarget(i.getNearestPlayer(player, creeper, 150));
-
-										// If ClassType == Summoner
-										// Setting to Charged Creeper
-										if (i.classes.get(player).getType() == ClassType.Summoner) {
-											creeper.setPowered(true);
-										}
-
-									}
-
-								}, ItemHelper.createMonsterEgg(EntityType.CREEPER, 1));
-								i.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-										player.getLocation().getDirection().multiply(2.0D));
-							}
+							}, ItemHelper.createMonsterEgg(EntityType.CREEPER, 1));
+							gameInstance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+									player.getLocation().getDirection().multiply(2.0D));
 						}
 					}
-					break;
+				}
+				break;
 
-				case NETHER_STAR:
-					if (i != null && i.state == GameState.STARTED && meta != null && meta.hasDisplayName()
-							&& meta.getDisplayName().toLowerCase().contains("bounty")) {
-						if (i.alivePlayers > 1) {
-							int amount = item.getAmount();
-							if (amount > 0) {
-								if (amount == 1) {
-									player.getInventory().clear(player.getInventory().getHeldItemSlot());
-								} else {
-									amount--;
-									item.setAmount(amount);
-								}
-								if (i.classes.containsKey(player)) {
-									BaseClass bc = i.classes.get(player);
-									if (bc != null)
-										while (true) {
-											Random random = new Random();
-											int index = random.nextInt(i.players.size());
-											Player target = i.players.get(index);
-											if (target != null && target != player && i.classes.containsKey(target)
-													&& ((BaseClass) i.classes.get(target)).getLives() > 0) {
-												bc.bountyTarget = target;
-												player.sendMessage(this.main.color("&2&l(!) &e&lBOUNTY SET! &rKill &e"
-														+ target.getName() + " &rfor 25 Token reward!"));
-												target.sendMessage(
-														this.main.color("&2&l(!) &e&lBOUNTY SET! &rYou are being targeted!"));
-												player.sendTitle(this.main.color("&e&lBOUNTY"),
-														this.main.color("&rYou are targetting &e" + target.getName()));
-												target.sendTitle(this.main.color("&e&lBOUNTY"),
-														this.main.color("&rYou are being targetted!"));
-												player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 1);
-												target.playSound(target.getLocation(), Sound.WITHER_SPAWN, 1, 0);
-												break;
-											}
-										}
-								}
+			case NETHER_STAR:
+				if (gameInstance != null && gameInstance.state == GameState.STARTED && meta != null && meta.hasDisplayName()
+						&& meta.getDisplayName().toLowerCase().contains("bounty")) {
+					if (gameInstance.alivePlayers > 1) {
+						int amount = item.getAmount();
+						if (amount > 0) {
+							if (amount == 1) {
+								player.getInventory().clear(player.getInventory().getHeldItemSlot());
+							} else {
+								amount--;
+								item.setAmount(amount);
 							}
-						} else {
-							player.sendMessage(this.main.color("&2&l(!) &rNo players found!"));
+							if (gameInstance.classes.containsKey(player)) {
+								BaseClass bc = gameInstance.classes.get(player);
+								if (bc != null)
+									while (true) {
+										Random random = new Random();
+										int index = random.nextInt(gameInstance.players.size());
+										Player target = gameInstance.players.get(index);
+										if (target != null && target != player && gameInstance.classes.containsKey(target)
+												&& ((BaseClass) gameInstance.classes.get(target)).getLives() > 0) {
+											bc.bountyTarget = target;
+											player.sendMessage(this.main.color("&2&l(!) &e&lBOUNTY SET! &rKill &e"
+													+ target.getName() + " &rfor 25 Token reward!"));
+											target.sendMessage(
+													this.main.color("&2&l(!) &e&lBOUNTY SET! &rYou are being targeted!"));
+											player.sendTitle(this.main.color("&e&lBOUNTY"),
+													this.main.color("&rYou are targetting &e" + target.getName()));
+											target.sendTitle(this.main.color("&e&lBOUNTY"),
+													this.main.color("&rYou are being targetted!"));
+											player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 1);
+											target.playSound(target.getLocation(), Sound.WITHER_SPAWN, 1, 0);
+											break;
+										}
+									}
+							}
 						}
+					} else {
+						player.sendMessage(this.main.color("&2&l(!) &rNo players found!"));
 					}
-					break;
-			}
+				}
+				break;
 		}
 	}
 

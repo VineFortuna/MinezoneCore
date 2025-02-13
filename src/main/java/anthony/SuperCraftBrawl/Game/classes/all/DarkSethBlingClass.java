@@ -28,7 +28,7 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 
 	public DarkSethBlingClass(GameInstance instance, Player player) {
 		super(instance, player);
-		this.baseVerticalJump = 1.5D;
+		this.baseVerticalJump = 1.3;
 		instance.getGameManager().getMain().getServer().getPluginManager().registerEvents(this,
 				(Plugin) instance.getGameManager().getMain());
 

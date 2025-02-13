@@ -28,7 +28,7 @@ public class MagmaCubeClass extends BaseClass {
 
 	public MagmaCubeClass(GameInstance instance, Player player) {
 		super(instance, player);
-		this.baseVerticalJump = 1.3;
+		this.baseVerticalJump = 1.2;
 		createArmor(
 				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGFhNmM0NWIyY2Y3OTc1Yjk1ZmJjY2U0ZWQ5YjA2NDZhYzAwY2I5Y2M5ZjY2ZGM1YzI0ZTgxZDJjOTFlZTdjMSJ9fX0=",
@@ -39,25 +39,10 @@ public class MagmaCubeClass extends BaseClass {
 	}
 
 	@Override
-	public ClassType getType() {
-		return ClassType.MagmaCube;
-	}
-
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
-	}
-
-	@Override
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper.setUnbreakable(ItemHelper.addEnchant(
 				new ItemStack(Material.WOOD_SWORD), Enchantment.KNOCKBACK, 1));
 		return item;
-	}
-
-	@Override
-	public void SetNameTag() {
-
 	}
 
 	@Override
@@ -139,4 +124,8 @@ public class MagmaCubeClass extends BaseClass {
 		}
 	}
 
+	@Override
+	public ClassType getType() {
+		return ClassType.MagmaCube;
+	}
 }
