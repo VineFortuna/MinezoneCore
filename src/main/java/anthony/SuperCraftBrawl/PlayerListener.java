@@ -524,7 +524,7 @@ public class PlayerListener implements Listener {
 		if (e.getItem() != null && e.getItem().getType() == Material.ENCHANTED_BOOK) {
 			e.setCancelled(true);
 			if (i == null) {
-				new ClassSelectorGUI(main).inv.open(player);
+				new ClassesGUI(main).inv.open(player);
 			}
 		}
 	}

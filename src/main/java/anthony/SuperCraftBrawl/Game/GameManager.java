@@ -2157,7 +2157,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									data.playerClasses.put(type.getID(), details);
 								}
 							}
-							(new ClassSelectorGUI(this.main)).inv.open(player);
+							(new ClassesGUI(this.main)).inv.open(player);
 						} else if (((BaseClass) i.classes.get(player)).getLives() <= 0) {
 							(new SpectatorGUI(this.main)).inv.open(player);
 						}

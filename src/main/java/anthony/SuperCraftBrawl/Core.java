@@ -404,8 +404,9 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null) {
-			String[] commandTypes = { "maps", "join", "fly", "leave", "players", "class",
-					"spectate", "startgame", "gamestats", "setlives", "lactate", "purchases", "kit", "items", "color", "sound" };
+			String[] commandTypes = { "maps", "join", "fly", "leave", "players", "class", "socials",
+					"spectate", "startgame", "gamestats", "setlives", "lactate", "purchases", "kit",
+					"items", "color", "sound" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -425,7 +426,11 @@ public class Core extends JavaPlugin implements Listener {
 				PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
 				Object header = new ChatComponentText(color("\n&f&lMinezone Network\n"));
 				Object footer = new ChatComponentText(color(
-						"\n&7  /help&f for a list of commands  \n&7/store&f to purchase a rank\n\n&bminezone.club\n"));
+						"\n&7  /help&f for a list of commands" +
+								"  \n&7/store&f to purchase a rank" +
+								"  \n&7/discord&f to join our Discord" +
+								"\n\n&bminezone.club\n"
+				));
 				try {
 					Field a = packet.getClass().getDeclaredField("a");
 					a.setAccessible(true);
@@ -800,18 +805,6 @@ public class Core extends JavaPlugin implements Listener {
 						+ ChatColor.YELLOW + online + ChatColor.RESET + " players online");
 			}
 
-			if (cmd.getName().equalsIgnoreCase("socials") && sender instanceof Player) {
-				player.sendMessage(this.color("&8&m-------&8[Social Media]&8&m-------"));
-				player.sendMessage("");
-				player.sendMessage(this.color("&eDiscord: &7https://discord.gg/FSZpmY9FZB"));
-				player.sendMessage(this.color("&eStore: &7minezone.tebex.io"));
-				player.sendMessage(this.color("&eYouTube: &7https://www.youtube.com/@minezone6480"));
-				player.sendMessage(this.color("&eTwitter: &7https://twitter.com/MinezoneMC"));
-				player.sendMessage(this.color("&eTikTok: &7https://www.tiktok.com/@minezonemc"));
-				player.sendMessage("");
-				player.sendMessage(this.color("&8&m----------------------------"));
-			}
-
 			if (cmd.getName().equalsIgnoreCase("vanish") && sender instanceof Player) {
 				if (sender.hasPermission("scb.vanish")) {
 					player.sendMessage(
@@ -913,58 +906,32 @@ public class Core extends JavaPlugin implements Listener {
 				}
 			}
 
-			if (cmd.getName().equalsIgnoreCase("help") && sender instanceof Player) {
-				player.sendMessage("" + ChatColor.WHITE + ChatColor.BOLD + "(!) " + ChatColor.AQUA
-						+ "Need help? Go to our Discord Server for Help!");
-				player.sendMessage("- " + ChatColor.RED + ChatColor.BOLD + "Discord: " + ChatColor.GREEN
-						+ "discord.gg/FSZpmY9FZB");
-			}
+//			if (cmd.getName().equalsIgnoreCase("help") && sender instanceof Player) {
+//				player.sendMessage("" + ChatColor.WHITE + ChatColor.BOLD + "(!) " + ChatColor.AQUA
+//						+ "Need help? Go to our Discord Server for Help!");
+//				player.sendMessage("- " + ChatColor.RED + ChatColor.BOLD + "Discord: " + ChatColor.GREEN
+//						+ "discord.gg/FSZpmY9FZB");
+//			}
 
 			if (cmd.getName().equalsIgnoreCase("classes") && sender instanceof Player) {
-				String dClasses = "";
-				String tClasses = "";
-				String lClasses = "";
-				String rClasses = "";
-				for (ClassType type : ClassType.sortAlphabetically(ClassType.getAvailableClasses())) {
-					if (type.getTokenCost() == 0 && type.getLevel() == 0 && type.getMinRank() != Rank.VIP)
-						dClasses += type.getTag() + " ";
-					else if (type.getTokenCost() > 0)
-						tClasses += type.getTag() + " ";
-					else if (type.getLevel() > 0)
-						lClasses += type.getTag() + " ";
-					else if (type.getMinRank() == Rank.VIP)
-						rClasses += type.getTag() + " ";
-				}
-				player.sendMessage(color("&f&l----------------------------------------"));
-				player.sendMessage(color("&e&lFREE CLASSES:"));
-				player.sendMessage(dClasses);
-				player.sendMessage("");
-				player.sendMessage(color("&e&lTOKEN CLASSES:"));
-				player.sendMessage(tClasses);
-				player.sendMessage("");
-				player.sendMessage(color("&e&lLEVEL CLASSES:"));
-				player.sendMessage(lClasses);
-				player.sendMessage("");
-				player.sendMessage(color("&e&lDONOR CLASSES:"));
-				player.sendMessage(rClasses);
-				player.sendMessage(color("&f&l----------------------------------------"));
+				new ClassesGUI(this).inv.open(player);
+//				sendClassesList(player);
 			}
 			if (cmd.getName().equalsIgnoreCase("scb") && sender instanceof Player) {
-				player.sendMessage("" + ChatColor.GREEN + ChatColor.BOLD + "[SUPER CRAFT BLOCKS]");
-				player.sendMessage("" + ChatColor.GREEN + "Custom coded plugin by: VineFortuna & CowNecromancer");
-				player.sendMessage("" + ChatColor.GREEN + "Version: " + Version.SCB.getVersion());
-				player.sendMessage("" + ChatColor.GREEN + "Type " + ChatColor.WHITE + "/scbhelp " + ChatColor.GREEN
-						+ "for more information");
+//				player.sendMessage("" + ChatColor.GREEN + ChatColor.BOLD + "[SUPER CRAFT BLOCKS]");
+//				player.sendMessage("" + ChatColor.GREEN + "Custom coded plugin by: VineFortuna & CowNecromancer");
+//				player.sendMessage("" + ChatColor.GREEN + "Version: " + Version.SCB.getVersion());
+//				player.sendMessage("" + ChatColor.GREEN + "Type " + ChatColor.WHITE + "/help " + ChatColor.GREEN
+//						+ "for more information");
 			}
-			if (cmd.getName().equalsIgnoreCase("scbhelp") && sender instanceof Player) {
+			if (cmd.getName().equalsIgnoreCase("help") && sender instanceof Player) {
 				player.sendMessage("" + ChatColor.GREEN + ChatColor.BOLD + "GENERAL SCB COMMANDS");
 				player.sendMessage("" + ChatColor.WHITE + "/join -> " + ChatColor.GREEN + "Join a game");
-				player.sendMessage("" + ChatColor.WHITE + "/leave -> " + ChatColor.GREEN + "Leave your game");
-				player.sendMessage(
-						"" + ChatColor.WHITE + "/classes -> " + ChatColor.GREEN + "Lists all available classes");
+				player.sendMessage("" + ChatColor.WHITE + "/maps -> " + ChatColor.GREEN + "See all maps");
+				player.sendMessage("" + ChatColor.WHITE + "/classes -> " + ChatColor.GREEN + "See all classes");
 				player.sendMessage("" + ChatColor.WHITE + "/class -> " + ChatColor.GREEN + "Choose a class");
 				player.sendMessage("" + ChatColor.WHITE + "/spectate -> " + ChatColor.GREEN + "Spectate a game");
-				player.sendMessage("" + ChatColor.WHITE + "/maps -> " + ChatColor.GREEN + "List of all available maps");
+				player.sendMessage("" + ChatColor.WHITE + "/leave -> " + ChatColor.GREEN + "Leave your game");
 			}
 
 			if (cmd.getName().equalsIgnoreCase("exp")) {
@@ -1060,7 +1027,7 @@ public class Core extends JavaPlugin implements Listener {
 			}
 
 			if (cmd.getName().equalsIgnoreCase("store")) {
-				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+				player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
 						+ "Want to help support the server? Purchase a rank at " + ChatColor.GREEN
 						+ "https://minezone.tebex.io/");
 			}
@@ -1550,6 +1517,36 @@ public class Core extends JavaPlugin implements Listener {
 		return false;
 	}
 
+	private void sendClassesList(Player player) {
+		String dClasses = "";
+		String tClasses = "";
+		String lClasses = "";
+		String rClasses = "";
+		for (ClassType type : ClassType.sortAlphabetically(ClassType.getAvailableClasses())) {
+			if (type.getTokenCost() == 0 && type.getLevel() == 0 && type.getMinRank() != Rank.VIP)
+				dClasses += type.getTag() + " ";
+			else if (type.getTokenCost() > 0)
+				tClasses += type.getTag() + " ";
+			else if (type.getLevel() > 0)
+				lClasses += type.getTag() + " ";
+			else if (type.getMinRank() == Rank.VIP)
+				rClasses += type.getTag() + " ";
+		}
+		player.sendMessage(color("&f&l----------------------------------------"));
+		player.sendMessage(color("&e&lFREE CLASSES:"));
+		player.sendMessage(dClasses);
+		player.sendMessage("");
+		player.sendMessage(color("&e&lTOKEN CLASSES:"));
+		player.sendMessage(tClasses);
+		player.sendMessage("");
+		player.sendMessage(color("&e&lLEVEL CLASSES:"));
+		player.sendMessage(lClasses);
+		player.sendMessage("");
+		player.sendMessage(color("&e&lDONOR CLASSES:"));
+		player.sendMessage(rClasses);
+		player.sendMessage(color("&f&l----------------------------------------"));
+	}
+
 	public void sendScoreboardUpdate(Player player) {
 		Rank rank = this.getRankManager().getRank(player);
 		if (rank == null)
@@ -1659,49 +1656,50 @@ public class Core extends JavaPlugin implements Listener {
 		p.sendMessage("----------------------------------------------");
 		p.sendMessage("");
 		p.sendMessage("");
-		p.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "        WELCOME TO THE MINEZONE NETWORK!");
+		p.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "        WELCOME TO MINEZONE");
+		p.sendMessage("");
+		p.sendMessage("" + "         Enjoy Super Craft Blocks!");
+		p.sendMessage("");
 		p.sendMessage("" + "     Be sure to join our Discord Server with " + ChatColor.GREEN + "/socials");
 		p.sendMessage("");
 		p.sendMessage("");
 		p.sendMessage("----------------------------------------------");
-		p.sendTitle("" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.UNDERLINE + "MINEZONE",
-				color("&2&lNEW &e&lFISHING &2&lLOBBY ACTIVITY!"));
 
-		new BukkitRunnable() {
-			@Override
-			public void run() { // Runs after 4 seconds
-				p.sendMessage("----------------------------------------------");
-				p.sendMessage("");
-				p.sendMessage(color("          &2&lNEW &e&lFISHING &2&lLOBBY ACTIVITY"));
-				p.sendMessage("" + "     Try out fishing to get some amazing rewards");
-				p.sendMessage("" + "     by checking out the Fisherman in the lobby!");
-				p.sendMessage("");
-				p.sendMessage("----------------------------------------------");
-				p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
-				p.sendTitle(color("&e&lFISHING"),
-						color("&eVersion " + Version.FISHING.getVersion() + " available now!"));
-			}
-		}.runTaskLater(this, 80); // 80 ticks = 4 seconds (20 ticks per second)
+//		new BukkitRunnable() {
+//			@Override
+//			public void run() { // Runs after 4 seconds
+//				p.sendMessage("----------------------------------------------");
+//				p.sendMessage("");
+//				p.sendMessage(color("          &e&lFISHING &2&lLOBBY ACTIVITY"));
+//				p.sendMessage("" + "     Try out fishing to get some amazing rewards");
+//				p.sendMessage("" + "     by checking out the Fisherman in the lobby!");
+//				p.sendMessage("");
+//				p.sendMessage("----------------------------------------------");
+//				p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
+//				p.sendTitle(color("&e&lFISHING"),
+//						color("&eVersion " + Version.FISHING.getVersion() + " available now!"));
+//			}
+//		}.runTaskLater(this, 80); // 80 ticks = 4 seconds (20 ticks per second)
 
-		new BukkitRunnable() {
-			@Override
-			public void run() { // Runs after 20 seconds
-				p.sendMessage("----------------------------------------------");
-				p.sendMessage("");
-				p.sendMessage("" + ChatColor.AQUA + ChatColor.BOLD + "             Super Craft Blocks");
-				p.sendMessage("");
-				p.sendMessage(color("&7  Welcome to Super Craft Blocks! A custom suite of"));
-				p.sendMessage(color("" + ChatColor.AQUA + "  Class PvP &7based gamemodes hosted exclusively on"));
-				p.sendMessage("                    " + ChatColor.AQUA + ChatColor.UNDERLINE + "minezone.club");
-				p.sendMessage("");
-				if (p.hasPermission("scb.bonusTokens"))
-					p.sendMessage(color("&c&l>> &rThanks for being a "
-							+ (getRankManager().getRank(p) == Rank.VIP ? Rank.VIP.getTag() : Rank.CAPTAIN.getTag())
-							+ "&r Supporter!"));
-
-				p.sendMessage("----------------------------------------------");
-			}
-		}.runTaskLater(this, 400); // 400 ticks = 20 seconds (20 ticks per second)
+//		new BukkitRunnable() {
+//			@Override
+//			public void run() { // Runs after 20 seconds
+//				p.sendMessage("----------------------------------------------");
+//				p.sendMessage("");
+//				p.sendMessage("" + ChatColor.AQUA + ChatColor.BOLD + "             Super Craft Blocks");
+//				p.sendMessage("");
+//				p.sendMessage(color("&f  Welcome to Super Craft Blocks! A custom suite of"));
+//				p.sendMessage(color("" + ChatColor.AQUA + "  Class PvP &7based gamemodes hosted exclusively on"));
+//				p.sendMessage("                    " + ChatColor.AQUA + ChatColor.UNDERLINE + "minezone.club");
+//				p.sendMessage("");
+//				if (p.hasPermission("scb.bonusTokens"))
+//					p.sendMessage(color("&c&l>> &rThanks for being a "
+//							+ (getRankManager().getRank(p) == Rank.VIP ? Rank.VIP.getTag() : Rank.CAPTAIN.getTag())
+//							+ "&r Supporter!"));
+//
+//				p.sendMessage("----------------------------------------------");
+//			}
+//		}.runTaskLater(this, 400); // 400 ticks = 20 seconds (20 ticks per second)
 	}
 
 	public Map<Player, EntityArmorStand> msHologram = new HashMap<Player, EntityArmorStand>();

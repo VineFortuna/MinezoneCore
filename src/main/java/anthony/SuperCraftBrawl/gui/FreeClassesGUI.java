@@ -2,10 +2,8 @@ package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -114,7 +112,7 @@ public class FreeClassesGUI implements InventoryProvider {
 		
 		contents.set(2, 8, ClickableItem.of(
 				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
-					new ClassSelectorGUI(main).inv.open(player);
+					new ClassesGUI(main).inv.open(player);
 				}));
 	}
 
