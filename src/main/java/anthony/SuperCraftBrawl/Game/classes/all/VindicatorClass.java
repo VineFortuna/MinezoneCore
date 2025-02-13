@@ -38,11 +38,6 @@ public class VindicatorClass extends BaseClass {
     }
     
     @Override
-    public void setArmor(EntityEquipment playerEquip) {
-        setArmorNew(playerEquip);
-    }
-    
-    @Override
     public void SetItems(Inventory playerInv) {
         vindication.startTime = System.currentTimeMillis() - 100000;
         playerInv.setItem(0, this.getAttackWeapon());

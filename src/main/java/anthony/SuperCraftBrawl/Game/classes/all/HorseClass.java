@@ -37,8 +37,6 @@ public class HorseClass extends BaseClass {
 
 	public HorseClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.1;
-
 		createArmor(
 				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDJlYjk2N2FiOTRmZGQ0MWE2MzI1ZjEyNzdkNmRjMDE5MjI2ZTVjZjM0OTc3ZWVlNjk1OTdmYWZjZjVlIn19fQ",
