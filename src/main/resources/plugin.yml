@@ -7,24 +7,17 @@ commands:
       usage: /join [map name]
    hub:
       description: Hub command
-   shop:
-      description: Shop command
+      aliases: h, lobby
    leave:
       description: Leave game command
-   l:
-      description: Leave game command
-   cw:
-      description: Crystal wars
+      aliases: l
    players:
       description: List of players in your game
-   fav:
-      description: Fav classes
    gamestats:
       description: Stats after a game
    fly:
       description: Fly command
-   f:
-      description: Fly command
+      aliases: f
    list:
       description: List of online players
    tournament:
@@ -33,14 +26,17 @@ commands:
       description: Class command
    startgame:
       description: Start game
+      aliases: sg
    setlevel:
       description: Set level command
    store:
       description: Store command
+      aliases: shop, ranks
    nick:
       description: Nickname!
    tell:
       description: Msg command!
+      aliases: msg, t, whisper, w, reply, r
    setrank:
       description: Rank command!
       permission: scb.setrank
@@ -54,24 +50,24 @@ commands:
       description: Purchases command!
    maps:
       description: Displays a list of SCB maps!
+      aliases: maplist
    seen:
       description: Seen command
    ignite:
       description: Ignite a player!
    broadcast:
       description: Broadcast command
-   msg:
-      description: Message command
-   rank:
-      description: Ranks command
    spectate:
       description: Spectate command
    socials:
-      description: Socials
+      description: Sends all social media links in chat
+      aliases: discord, youtube, tiktok
    vanish:
       description: Vanish
+      aliases: v
    unvanish:
       description: Unvanish
+      aliases: uv
    gmc:
       description: Gamemode creative
    gms: 
@@ -82,26 +78,17 @@ commands:
       description: Gamemode spectator
    gm:
       description: General gamemode command
-   scbhelp:
+   help:
       description: Displays SCB help/information
-   dailyreward:
-      description: Daily Rewards
-   tutorial:
-      description: Tutorial of the Server
-   scb:
-      description: Displays SCB help/information
+      aliases: scb, scbhelp
    classes:
       description: Displays list of SCB Classes
    stats:
       description: Player Stats
    token:
       description: Give tokens
-   cwm:
-      description: Custom Win Messages!
    activegames:
       description: Test command
-   help:
-      description: HelpppppPPPppp!!!
    sc:
       description: Staff Chat
    staff:
@@ -112,6 +99,7 @@ commands:
       description: Parkour
    invite:
       description: Invite command
+      aliases: i
    color:
       description: Color command
    tp:
@@ -142,7 +130,19 @@ commands:
       description: Kit command for SkyWars
    items:
       description: Get all SCB Item Drops
-      
+   lactate:
+      description: Lactate command!
+   sound:
+      description: Play a sound on your location
+      aliases: s
+   heal:
+      description: Fully heals the player
+   jeb:
+      description: Sets Jeb's push Strength and Max velocity
+   jebrework:
+      description: Switch between old and new Jeb's push
+      aliases: jr
+
 permissions:
    scb.admin:
       description: Admin perms
@@ -157,12 +157,18 @@ permissions:
          scb.give: true
          scb.purchases: true
          punish.networkban: true
-   scb.builder:
-      description: Builder perms
-      children:
-         scb.developer: true
    scb.developer:
       description: Developer perms
+      children:
+         scb.builder: true
+         scb.items: true
+         scb.sound: true
+         scb.heal: true
+         scb.jeb: true
+         scb.jebrework: true
+         scb.lactate: true
+   scb.builder:
+      description: Builder perms
       children:
          scb.moderator: true
          scb.gm: true
@@ -170,7 +176,6 @@ permissions:
          scb.gms: true
          scb.gmsp: true
          scb.gma: true
-         scb.items: true
    scb.moderator:
       description: Moderator perms
       children:

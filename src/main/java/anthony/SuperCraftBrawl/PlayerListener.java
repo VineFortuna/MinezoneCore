@@ -107,15 +107,16 @@ public class PlayerListener implements Listener {
 	@SuppressWarnings("deprecation")
 	public void setPlayerOnTablist(Player p) {
 		String rank = main.getRankManager().getRank(p).getTagWithSpace(); // Gets the player's rank
+		Rank r = main.getRankManager().getRank(p);
 
 		if (rank.length() >= 16) {
 			String s = rank.substring(0, 9);
-			p.setPlayerListName("" + s + " " + ChatColor.RESET + p.getName());
+			p.setPlayerListName("" + s + " " + r.getColorForNames(p, r));
 		} else
-			p.setPlayerListName("" + rank + ChatColor.RESET + p.getName());
+			p.setPlayerListName("" + rank + r.getColorForNames(p, r));
 
 		if (main.getRankManager().getRank(p) == Rank.DEFAULT)
-			p.setPlayerListName("" + rank + ChatColor.GRAY + p.getName());
+			p.setPlayerListName("" + rank + r.getColorForNames(p, r));
 
 		/*
 		 * Team captain = c.registerNewTeam("b_captain");
@@ -188,7 +189,7 @@ public class PlayerListener implements Listener {
 	public void OnPlayerQuit(PlayerQuitEvent event) {
 		Player player = event.getPlayer();
 		GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
-        candyCaneSwirlPlayers.remove(player);
+		candyCaneSwirlPlayers.remove(player);
 		snowParticlePlayers.remove(player);
 		snowmanPetPlayers.remove(player);
 		elfCosmeticPlayers.remove(player);
@@ -227,7 +228,7 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
-		
+
 		if (this.snowParticlePlayers.contains(player) && player.getWorld() == main.getLobbyWorld()) {
 			Location loc = player.getLocation().add(0, 0.2, 0);
 
@@ -251,14 +252,14 @@ public class PlayerListener implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler
 	public void onJumpPadStep(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
 		// Lobby jump pad
 		if (player.getWorld() == main.getLobbyWorld()) {
 			Location location = player.getLocation();
-			
+
 			// Check if the block below the player is a gold block
 			if (player.isOnGround() && location.getBlock().getType() == Material.GOLD_PLATE) {
 				// Check if the player is facing south
@@ -266,61 +267,58 @@ public class PlayerListener implements Listener {
 				if (isFacingSouth(yaw)) {
 					// Set the boost direction to south
 					Vector direction = new Vector(0, 1.25, 3); // Current facing direction
-					
+
 					// Apply the velocity to the player
 					player.setVelocity(direction);
-					
+
 					player.getWorld().playSound(location, Sound.BAT_TAKEOFF, 1, 5);
 				}
 			}
 		}
 	}
-	
+
 	@EventHandler
 	public void onEnterFishingArea(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
 		Location to = event.getTo();
-		
+
 		// Ensure the event occurs in the lobby world
 		if (player.getWorld().equals(main.getLobbyWorld())) {
 			// Ignore if the player hasn't moved to a new block
 			if (to == null || to.equals(event.getFrom())) {
 				return;
 			}
-			
+
 			// Check if the player is entering a fishing area
 			FishArea newArea = main.getFishingArea(to);
 			FishArea previousArea = main.getFishingArea(event.getFrom());
-			
+
 			if (previousArea == null && newArea != null) {
 				String msg = main.color("&3&l(!) &rEntering &e" + newArea.getName());
-				PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
+				PacketPlayOutChat packet = new PacketPlayOutChat(
+						IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 				PlayerData data = main.getDataManager().getPlayerData(player);
 				if (!data.getFishingWarps().contains(newArea.getID())) {
-					player.sendTitle(
-							main.color("&6" + newArea.getName()),
-							main.color("&eArea discovered"));
+					player.sendTitle(main.color("&6" + newArea.getName()), main.color("&eArea discovered"));
 					data.addFishingWarp(newArea.getID());
 					main.getDataManager().saveData(data);
 				}
 			} else if (previousArea != null && newArea == null) {
 				String msg = main.color("&3&l(!) &rLeaving &e" + previousArea.getName());
-				PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-						(byte) 2);
+				PacketPlayOutChat packet = new PacketPlayOutChat(
+						IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
 				CraftPlayer craft = (CraftPlayer) player;
 				craft.getHandle().playerConnection.sendPacket(packet);
 			}
 		}
 	}
-	
-	
+
 	private boolean isFacingSouth(float yaw) {
 		// Normalize yaw to 0-360 degrees
 		yaw = (yaw % 360 + 360) % 360;
-		
+
 		// Check if yaw is within the range for south direction
 		return (yaw >= 337.5 || yaw <= 22.5);
 	}
@@ -331,31 +329,32 @@ public class PlayerListener implements Listener {
 			Location spawnLoc = player.getLocation().add(1, 0, 1);
 			Snowman snowman = player.getWorld().spawn(spawnLoc, Snowman.class);
 			snowman.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Snowman Pet");
-			
+
 			// Convert the player to NMS EntityLiving
 			EntityLiving targetPlayer = (EntityLiving) ((CraftLivingEntity) player).getHandle();
-			
+
 			// Add follow behavior to the mob
 			PathfinderHelper.clearPathfinderGoals(snowman);
 			PathfinderHelper.addPathfinderGoal(snowman, 1, new PathfinderGoalFollowPlayer(
 					(EntityInsentient) ((CraftLivingEntity) snowman).getHandle(), targetPlayer, 1.75, 3.0, 4.0));
-			
+
 			// Schedule a repeating task to "follow" the player by teleporting
 			Bukkit.getScheduler().runTaskTimer(main, () -> {
 				if (!player.isOnline() || !snowman.isValid() || player.getWorld() != snowman.getWorld())
 					return;
-				
+
 				Location playerLoc = player.getLocation();
 				double distance = playerLoc.distance(snowman.getLocation());
-				
+
 				// If the snowman is too far, teleport it closer to the player
 				if (distance > 15) {
 					// Teleport the snowman about 2 blocks behind the player
 					Location behindPlayer = playerLoc.clone().add(playerLoc.getDirection().multiply(-2));
-					behindPlayer.setY(Math.min(playerLoc.getWorld().getHighestBlockYAt(behindPlayer), playerLoc.getY() + 10));
+					behindPlayer.setY(
+							Math.min(playerLoc.getWorld().getHighestBlockYAt(behindPlayer), playerLoc.getY() + 10));
 					snowman.teleport(behindPlayer);
 				}
-				
+
 				if (!this.snowmanPetPlayers.contains(player)) {
 					snowman.remove();
 				} else if (!player.isOnline() || player.getWorld() != main.getLobbyWorld()) {
@@ -380,28 +379,28 @@ public class PlayerListener implements Listener {
 						this.cancel();
 						return;
 					}
-					
+
 					if (player.getWorld() == main.getLobbyWorld()) {
 						angle += Math.PI / 16; // adjust for speed of rotation
-						
+
 						// Set the radius of the swirl and the vertical height
 						double radius = 1.0;
 						double height = 1.0; // how high around the player the swirl appears
-						
+
 						// Calculate the positions for red and white particles in a circle
 						double xRed = radius * Math.cos(angle);
 						double zRed = radius * Math.sin(angle);
-						
+
 						double xWhite = radius * Math.cos(angle + Math.PI); // Opposite side for a striped effect
 						double zWhite = radius * Math.sin(angle + Math.PI);
-						
+
 						// Get player location
 						Location baseLoc = player.getLocation();
-						
+
 						// Red particle (REDSTONE)
 						sendParticleToAll(EnumParticle.REDSTONE, baseLoc.getX() + xRed, baseLoc.getY() + height,
 								baseLoc.getZ() + zRed, 0.1f, 0.1f, 0.1f, 0f, 5);
-						
+
 						// White particle (CLOUD)
 						sendParticleToAll(EnumParticle.SNOW_SHOVEL, baseLoc.getX() + xWhite, baseLoc.getY() + height,
 								baseLoc.getZ() + zWhite, 0.1f, 0.1f, 0.1f, 0f, 5);
@@ -416,7 +415,7 @@ public class PlayerListener implements Listener {
 			float offsetZ, float speed, int count) {
 		PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particle, false, // long distance
 				(float) x, (float) y, (float) z, offsetX, offsetY, offsetZ, speed, count);
-		
+
 		for (Player online : Bukkit.getOnlinePlayers()) {
 			((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
 		}
@@ -525,7 +524,7 @@ public class PlayerListener implements Listener {
 		if (e.getItem() != null && e.getItem().getType() == Material.ENCHANTED_BOOK) {
 			e.setCancelled(true);
 			if (i == null) {
-				new ClassSelectorGUI(main).inv.open(player);
+				new ClassesGUI(main).inv.open(player);
 			}
 		}
 	}
@@ -621,8 +620,8 @@ public class PlayerListener implements Listener {
 			// Chat filter
 			List<String> filteredWords = new ArrayList<>(Arrays.asList("nibba", "nigga", "niggas", "nigger", "niggers",
 					"porn", "pornhub", "cum", "fuck you", "fuckyou", "fuck", "bitch", "pussy", "fucker", "motherfucker",
-					"kys", "pu$$y", "fag", "faggot", "bitchass", "cunt", "retard", "penis",
-					"fucker", "twat", "cock", "dick", "cumming", "fuckass", "vagina", "fuckers"));
+					"kys", "pu$$y", "fag", "faggot", "bitchass", "cunt", "retard", "penis", "fucker", "twat", "cock",
+					"dick", "cumming", "fuckass", "vagina", "fuckers"));
 			PlayerData data = main.getDataManager().getPlayerData(event.getPlayer());
 			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
 			String message = event.getMessage();
@@ -633,20 +632,21 @@ public class PlayerListener implements Listener {
 //			else
 //				message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
 //						+ ChatColor.YELLOW + "] " + tag + ChatColor.GRAY + event.getPlayer().getDisplayName() + ": ";
-			
-			//&6&l✧&6262 &4Owner&c anthsauce: &fLorem ipsum...
 
-			event.setFormat(ChatColor.YELLOW + main.color("&6&l✧") + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
-					+ ChatColor.YELLOW + " " + tag); // This part will always be included
-			String displayName = event.getPlayer().getDisplayName(); // Base display name
+			// &6&l✧&6262 &4Owner&c anthsauce: &fLorem ipsum...
+
+			event.setFormat(ChatColor.YELLOW + main.color("" + data.checkPlayerLevel(event.getPlayer(), data) + "✧")
+					+ data.level + " " + tag);
+			String displayName = main.getRankManager().getRank(event.getPlayer()).getColorForNames(event.getPlayer(),
+					main.getRankManager().getRank(event.getPlayer()));
 
 			if (!data.color.isEmpty() && !data.color.equals("0"))
 				displayName = ChatColor.valueOf(data.color) + displayName;
 
 			if (event.getPlayer().hasPermission("scb.chat"))
-				event.setFormat(event.getFormat() + displayName + ChatColor.RESET + ": ");
+				event.setFormat(main.color(event.getFormat() + displayName + ":&r "));
 			else {
-				event.setFormat(event.getFormat() + ChatColor.GRAY + displayName + ChatColor.GRAY + ": ");
+				event.setFormat(main.color(event.getFormat() + "&7" + displayName + ":&r "));
 			}
 
 			String tempmsg = "";
@@ -657,39 +657,12 @@ public class PlayerListener implements Listener {
 					tempmsg += msgWord + " ";
 			}
 			message = tempmsg.trim();
-			event.setMessage(message);
 
-//			if (censored) {
-//				if (event.getPlayer().hasPermission("scb.chat"))
-//					message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
-//							+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + event.getPlayer().getDisplayName()
-//							+ ChatColor.RESET + ": " + msg2;
-//				else
-//					message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
-//							+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + ChatColor.GRAY
-//							+ event.getPlayer().getDisplayName() + ": " + msg2;
-//			} else {
-//				if (data != null) {
-//					if (data.blue == 1) {
-//						message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
-//								+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + ChatColor.BLUE
-//								+ event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
-//					} else if (data.red == 1) {
-//						message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
-//								+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + ChatColor.RED
-//								+ event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
-//					} else if (data.green == 1) {
-//						message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
-//								+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + ChatColor.GREEN
-//								+ event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
-//					} else if (data.yellow == 1) {
-//						message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level
-//								+ ChatColor.RESET + ChatColor.YELLOW + "] " + tag + ChatColor.YELLOW
-//								+ event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
-//					}
-//				}
-//			}
-//			//AuthAPI api = AuthAPI.get();
+			if (event.getPlayer().hasPermission("scb.colorChat"))
+				event.setMessage(main.color(message));
+			else
+				event.setMessage(message);
+
 			PunishAPI pu = PunishAPI.get();
 			if (pu.isPlayerMuted(event.getPlayer().getUniqueId())) {
 				String muteMsg = pu.getMuteMessage(event.getPlayer().getUniqueId());
@@ -697,13 +670,6 @@ public class PlayerListener implements Listener {
 				return;
 			}
 			Bukkit.broadcastMessage(event.getFormat() + event.getMessage());
-//			if (censored) {
-//				//if (api.isPlayerAuthed(event.getPlayer()))
-//					Bukkit.broadcastMessage(message);
-//			} else {
-//				//if (api.isPlayerAuthed(event.getPlayer()))
-//					Bukkit.broadcastMessage(message + event.getMessage());
-//			}
 		}
 	}
 
@@ -711,18 +677,6 @@ public class PlayerListener implements Listener {
 		for (Player staff : main.staffchat)
 			staff.sendMessage("" + ChatColor.GREEN + ChatColor.BOLD + "StaffChat> " + ChatColor.RESET + message);
 	}
-
-	/*
-	 * @EventHandler public void onInventory(PlayerInteractEntityEvent e) { Player p
-	 * = e.getPlayer();
-	 * 
-	 * System.out.println("Test1"); if (p.getWorld() == main.getLobbyWorld()) {
-	 * System.out.println("Test2"); if
-	 * (e.getRightClicked().getType().equals(EntityType.PLAYER)) {
-	 * System.out.println("Test3"); Player t = (Player) e.getRightClicked();
-	 * System.out.println("Test4"); new WagersGUI(main, t).inv.open(p);
-	 * System.out.println("Test5"); } } }
-	 */
 
 	// COSMETICS:
 

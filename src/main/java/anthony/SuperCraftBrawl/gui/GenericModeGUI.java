@@ -13,11 +13,9 @@ import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.*;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
@@ -97,12 +95,12 @@ public class GenericModeGUI implements InventoryProvider {
 
 		// Previous Page
 		if (!pagination.isFirst()) {contents.set(2, 0, ClickableItem.of(ItemHelper.getPreviousPageItem(), e -> {
-			SoundManager.playSoundToSinglePlayer(player, Sound.CLICK, 0.5f, 15);
+			SoundManager.playClickSound(player);
 			inv.open(player, pagination.previous().getPage());
 		}));}
 		// Next Page
 		if (!pagination.isLast()) {contents.set(2, 8, ClickableItem.of(ItemHelper.getNextPageItem(), e -> {
-			SoundManager.playSoundToSinglePlayer(player, Sound.CLICK, 0.5f, 15);
+			SoundManager.playClickSound(player);
 			inv.open(player, pagination.next().getPage());
 		}));}
 
@@ -120,7 +118,7 @@ public class GenericModeGUI implements InventoryProvider {
 
 		// Setting "Go Back" Button
 		contents.set(totalRows - 1, totalColumns - 1, ClickableItem.of(ItemHelper.getGoBackItem(), e -> {
-			SoundManager.playSoundToSinglePlayer(player, Sound.CLICK, 0.5f, 15);
+			SoundManager.playClickSound(player);
 			inv.close(player);
 			if (inv.getParent().isPresent()) {inv.getParent().get().open(player);}
 		}));
@@ -132,7 +130,7 @@ public class GenericModeGUI implements InventoryProvider {
 	}
 
 	private void updateMaps(Player player) {
-		SoundManager.playSoundToSinglePlayer(player, Sound.CLICK, 0.5f, 15);
+		SoundManager.playClickSound(player);
 		maps = Maps.filterMaps(gamemode, currentCategory, currentSize, currentGameplay);
 		if (maps == null) {
 			System.out.println("No maps found.");
