@@ -8,6 +8,8 @@ import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
+import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
 import anthony.SuperCraftBrawl.gui.GameStatsGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -76,7 +78,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 				gameStatsCommand(args, player);
 				break;
 
-			case "maplist":
+			case "socials":
+				socialsCommand(player);
+				break;
+
 			case "maps":
 				mapsCommand(args, player);
 				break;
@@ -120,6 +125,17 @@ public class Commands implements CommandExecutor, TabCompleter {
 		} else
 			sender.sendMessage("Hey! You can't use this in the terminal!");
 		return true;
+	}
+
+	private void socialsCommand(Player player) {
+		player.sendMessage(main.color("&7&m-------&7&l[Social Media]&7&m-------"));
+		player.sendMessage("");
+		player.sendMessage(main.color("&f&lDiscord: &ahttps://discord.gg/FSZpmY9FZB"));
+		player.sendMessage(main.color("&f&lYouTube: &ahttps://www.youtube.com/@minezone6480"));
+		player.sendMessage(main.color("&f&lTikTok: &ahttps://www.tiktok.com/@minezonemc"));
+//				player.sendMessage(main.color("&f&lTwitter: &ahttps://twitter.com/MinezoneMC"));
+		player.sendMessage("");
+		player.sendMessage(main.color("&7&m----------------------------"));
 	}
 
 	private void soundCommand(String[] args, Player player) {
@@ -494,8 +510,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
-		// Send the message to the player
-		player.sendMessage(ChatColorHelper.color(createMapsString()));
+		new GameSelectorGUI(main).inv.open(player);
+
+//		// Send the message to the player
+//		player.sendMessage(ChatColorHelper.color(createMapsString()));
 	}
 
 	private String createMapsString() {
@@ -606,27 +624,29 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void spectateCommand(String[] args, Player player) {
-		if (args.length == 0) {
-			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/spectate <map>"));
+		if (args.length != 0) {
+			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/spectate"));
 			return;
 		}
 
-		String mapName = args[0];
-		Maps map = null;
+		new ActiveGamesGUI(main).inv.open(player);
 
-		for (Maps maps : Maps.values()) {
-			if (maps.toString().equalsIgnoreCase(mapName)) {
-				map = maps;
-				break;
-			}
-		}
-
-		if (map == null) {
-			player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maps &rfor a list of maps"));
-			return;
-		}
-
-		main.getGameManager().SpectatorJoinMap(player, map);
+//		String mapName = args[0];
+//		Maps map = null;
+//
+//		for (Maps maps : Maps.values()) {
+//			if (maps.toString().equalsIgnoreCase(mapName)) {
+//				map = maps;
+//				break;
+//			}
+//		}
+//
+//		if (map == null) {
+//			player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maps &rfor a list of maps"));
+//			return;
+//		}
+//
+//		main.getGameManager().SpectatorJoinMap(player, map);
 	}
 
 	private void playersCommand(Player player) {
