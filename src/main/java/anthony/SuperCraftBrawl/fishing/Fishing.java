@@ -11,7 +11,10 @@ import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.meta.FireworkMeta;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Random;
 
 @SuppressWarnings("deprecation")
 public class Fishing implements Listener {
@@ -59,13 +62,11 @@ public class Fishing implements Listener {
             
             p.sendMessage(main.color("&3&l(!) &rYou caught a "
                     + fish.getRarity().getColor() + fish.getName() + "&r!"));
-
-            boolean updateScoreboard = false;
-
+            
             // When caught for the first time
             if (details.timesCaught == 0) {
                 // Message
-                p.sendMessage(main.color("&2&l============================================="));
+                p.sendMessage(main.color("&2&l=============================================="));
                 p.sendMessage(main.color("&2&l||"));
                 if (fish.isFish()) {
                     p.sendMessage(main.color("&2&l|| &e&lCAUGHT " + fish.getRarity().getColor() + "&l"
@@ -76,10 +77,10 @@ public class Fishing implements Listener {
                 }
                 p.sendMessage(main.color("&2&l|| &7" + fish.getDesc()));
                 p.sendMessage(main.color("&2&l||"));
-                p.sendMessage(main.color("&2&l============================================="));
+                p.sendMessage(main.color("&2&l=============================================="));
                 
                 // Firework
-                if (main.fishing.getTotalFish(p) == FishType.values().length) {
+                if (main.getTotalFish(p) == FishType.values().length) {
                     p.playSound(p.getLocation(), Sound.FIREWORK_TWINKLE, 1, 1);
                     p.sendMessage(main.color("&3&l(!) &rCongratulations! You caught everything!"));
                     Firework fw = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
@@ -103,12 +104,10 @@ public class Fishing implements Listener {
                     p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
                     p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "!"));
                 }
-                updateScoreboard = true;
             } else if (fish == FishType.TOKENS) {
                 int r = rand.nextInt(35) + 11;
                 data.tokens += r;
                 p.sendMessage(main.color("&3&l(!) &rYou have found &e" + r + " Tokens!"));
-                updateScoreboard = true;
             }
             reward(p, fish.getRarity());
             data.totalcaught++;
@@ -125,7 +124,7 @@ public class Fishing implements Listener {
                 friendship(p, data.friendshipLevel);
             
             removeFish(i);
-            if (main.getGameManager().GetInstanceOfPlayer(p) == null && updateScoreboard)
+            if (main.getGameManager().GetInstanceOfPlayer(p) == null)
             	main.getScoreboardManager().lobbyBoard(p);
         }
     }
@@ -274,8 +273,6 @@ public class Fishing implements Listener {
                     p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
                     p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "!"));
                 }
-                if (main.getGameManager().GetInstanceOfPlayer(p) == null)
-                    main.getScoreboardManager().lobbyBoard(p);
             }
         }
     }
@@ -308,54 +305,5 @@ public class Fishing implements Listener {
                 c = Color.NAVY;
                 break;
         }
-    }
-
-    public int getTotalFish(Player player, FishRarity... rarity) {
-        PlayerData data = main.getDataManager().getPlayerData(player);
-        int totalFished = 0;
-        for (FishType type : FishType.values()) {
-            if (rarity == null || Arrays.asList(rarity).contains(type.getRarity())) {
-                FishingDetails details = data.playerFishing.get(type.getId());
-                if (details != null) {
-                    totalFished++;
-                }
-            }
-        }
-        return totalFished;
-    }
-
-    public int getTotalFish(Player player) {
-        return getTotalFish(player, null);
-    }
-
-    public boolean hasAllFish(Player player) {
-        return getTotalFish(player) == FishType.values().length;
-    }
-
-    public boolean hasUnlockedFisherman(Player player) {
-        return getFishermanProgress(player) == 50;
-    }
-
-    public int getFishermanProgress(Player player) {
-        int commonFished = getTotalFish(player, FishRarity.COMMON);
-        int rareFished = getTotalFish(player, FishRarity.RARE);
-        int epicFished = getTotalFish(player, FishRarity.EPIC);
-        int mythicFished = getTotalFish(player, FishRarity.MYTHIC);
-        int legendaryFished = getTotalFish(player, FishRarity.LEGENDARY);
-        int junkFished = getTotalFish(player, FishRarity.JUNK);
-        int treasureFished = getTotalFish(player, FishRarity.TREASURE);
-
-        // TO UNLOCK FISHERMAN
-        // COMMON - 11
-        // RARE - 8
-        // EPIC - 8
-        // MYTHIC - 7
-        // LEGENDARY - 5
-        // JUNK - 7
-        // TREASURE - 4
-
-        return Math.min(commonFished, 11) + Math.min(rareFished, 8) + Math.min(epicFished, 8)
-                + Math.min(mythicFished, 7) + Math.min(legendaryFished, 5) + Math.min(junkFished, 7)
-                + Math.min(treasureFished, 4);
     }
 }

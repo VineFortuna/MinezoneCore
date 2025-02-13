@@ -1517,34 +1517,26 @@ public class Core extends JavaPlugin implements Listener {
 		return false;
 	}
 
-	private void sendClassesList(Player player) {
-		String dClasses = "";
-		String tClasses = "";
-		String lClasses = "";
-		String rClasses = "";
-		for (ClassType type : ClassType.sortAlphabetically(ClassType.getAvailableClasses())) {
-			if (type.getTokenCost() == 0 && type.getLevel() == 0 && type.getMinRank() != Rank.VIP)
-				dClasses += type.getTag() + " ";
-			else if (type.getTokenCost() > 0)
-				tClasses += type.getTag() + " ";
-			else if (type.getLevel() > 0)
-				lClasses += type.getTag() + " ";
-			else if (type.getMinRank() == Rank.VIP)
-				rClasses += type.getTag() + " ";
+	public int getTotalFish(Player player, FishRarity... rarity) {
+		PlayerData data = this.getDataManager().getPlayerData(player);
+		int totalFished = 0;
+		for (FishType type : FishType.values()) {
+			if (rarity == null || Arrays.asList(rarity).contains(type.getRarity())) {
+				FishingDetails details = data.playerFishing.get(type.getId());
+				if (details != null) {
+					totalFished++;
+				}
+			}
 		}
-		player.sendMessage(color("&f&l----------------------------------------"));
-		player.sendMessage(color("&e&lFREE CLASSES:"));
-		player.sendMessage(dClasses);
-		player.sendMessage("");
-		player.sendMessage(color("&e&lTOKEN CLASSES:"));
-		player.sendMessage(tClasses);
-		player.sendMessage("");
-		player.sendMessage(color("&e&lLEVEL CLASSES:"));
-		player.sendMessage(lClasses);
-		player.sendMessage("");
-		player.sendMessage(color("&e&lDONOR CLASSES:"));
-		player.sendMessage(rClasses);
-		player.sendMessage(color("&f&l----------------------------------------"));
+		return totalFished;
+	}
+
+	public int getTotalFish(Player player) {
+		return getTotalFish(player, null);
+	}
+
+	public boolean hasAllFish(Player player) {
+		return getTotalFish(player) == FishType.values().length;
 	}
 
 	public void sendScoreboardUpdate(Player player) {

@@ -8,6 +8,7 @@ import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
 import anthony.SuperCraftBrawl.gui.GameStatsGUI;
@@ -773,7 +774,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private boolean isFishermanClassUnlocked(Player player, ClassType type) {
-		if (type == ClassType.Fisherman && !main.fishing.hasUnlockedFisherman(player) && !player.isOp()) {
+		if (type == ClassType.Fisherman && main.getTotalFish(player) < FishType.values().length && !player.isOp()) {
 			player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
 			return false;
 		}
