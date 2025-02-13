@@ -58,9 +58,9 @@ public class JebClass extends BaseClass {
 		pushItem = ItemHelper.setDetails(
 				new ItemStack(Material.STONE),
 				pullAbility.getAbilityNameRightClickMessage(),
-				"&7Shoot a beam and push enemies hit",
+				"&7Shoot a beam that pushes enemies",
 				"",
-				"&7Stronger on close distances",
+				"&7Stronger at close distances",
 				"&7Range: &a" + displayRange + " &7blocks"
 		);
 	}

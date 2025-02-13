@@ -48,11 +48,6 @@ public class WitherSkeletonClass extends BaseClass {
 	}
 
 	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
-	}
-
-	@Override
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper
 				.addEnchant(
@@ -250,11 +245,6 @@ public class WitherSkeletonClass extends BaseClass {
 				}
 			}
 		}
-	}
-
-	@Override
-	public void SetNameTag() {
-
 	}
 
 	@Override

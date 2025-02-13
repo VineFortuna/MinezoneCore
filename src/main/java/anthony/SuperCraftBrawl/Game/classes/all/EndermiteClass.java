@@ -89,7 +89,7 @@ public class EndermiteClass extends BaseClass {
         eggItem = ItemHelper.setDetails(
                 ItemHelper.createMonsterEgg(EntityType.ENDERMITE, 6),
                 "&5&lEndermite Pokeball",
-                "Spawns an endermite"
+                "&7Spawns an endermite"
         );
     }
     
@@ -287,6 +287,15 @@ public class EndermiteClass extends BaseClass {
         player.getInventory().setItemInHand(passiveItem);
     }
 
+    @Override
+    public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
+        super.classesEvent(damagerPlayer, baseClass);
+
+        ItemStack endermiteEgg = eggItem;
+        endermiteEgg.setAmount(1);
+
+        player.getInventory().addItem(endermiteEgg);
+    }
 
     @Override
     public ClassType getType() {

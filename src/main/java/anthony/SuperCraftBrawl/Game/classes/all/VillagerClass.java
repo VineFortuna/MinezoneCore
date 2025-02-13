@@ -29,8 +29,7 @@ public class VillagerClass extends BaseClass {
 	private final Ability tradeAbility = new Ability("&a&lTrade", player);
 	private final Ability potatoAbility = new Ability("&6&lPotato Throw", player);
 	private final PotionEffect weakness = new PotionEffect(PotionEffectType.WEAKNESS, 5 * 20, 3, false, true);
-	private final PotionEffect blindness = new PotionEffect(PotionEffectType.BLINDNESS, 3 * 20, 0, false, true);
-	private final PotionEffect slowness = new PotionEffect(PotionEffectType.SLOW, 4 * 20, 1, false, true);
+	private final PotionEffect slowness = new PotionEffect(PotionEffectType.SLOW, 5 * 20, 1, false, true);
 	private int emeraldsCount;
 
 
@@ -63,8 +62,7 @@ public class VillagerClass extends BaseClass {
 				potatoAbility.getAbilityNameRightClickMessage(),
 				"&7Inflict one of 3 effects on enemies:",
 				"&7▶ &3&oSlowness &e" + (slowness.getAmplifier() + 1) + " &7for &e" + slowness.getDuration() / 20 + "s",
-				"&7▶ &f&oWeakness &e" + (weakness.getAmplifier() + 1) + " &7for &e" + weakness.getDuration() / 20 + "s",
-				"&7▶ &8&oBlindness &7for &e" + blindness.getDuration() / 20 + "s"
+				"&7▶ &f&oWeakness &e" + (weakness.getAmplifier() + 1) + " &7for &e" + weakness.getDuration() / 20 + "s"
 		);
 	}
 
@@ -139,9 +137,8 @@ public class VillagerClass extends BaseClass {
 								int randomNumber = r.nextInt(100);
 
 								// Percentage chances for each effect
-								int slownessPercentage = 33;
-								int weaknessPercentage = 33;
-								int blindnessPercentage = 33;
+								int slownessPercentage = 50;
+								int weaknessPercentage = 50;
 
 								// Determining effect based on the number range
 								PotionEffect effect;
@@ -150,7 +147,7 @@ public class VillagerClass extends BaseClass {
 								} else if (randomNumber < slownessPercentage + weaknessPercentage) {
 									effect = weakness;
 								} else {
-									effect = blindness;
+									effect = null;
 								}
 
 								// Applying effect

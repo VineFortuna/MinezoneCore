@@ -1000,9 +1000,6 @@ public class GameInstance {
 		allItemDrops.add(milk);
 		allItemDrops.add(goldenApple);
 		allItemDrops.add(notchApple);
-
-		sethBlingItemDrops = new ArrayList<>(allItemDrops);
-
 		allItemDrops.add(extraLife);
 
 		allItemDrops.forEach(itemStack -> ItemHelper.setDetails(
@@ -1011,7 +1008,6 @@ public class GameInstance {
 				itemStack.getItemMeta().getLore())
 		);
 		allItemDrops.add(hammer);
-		sethBlingItemDrops.add(hammer);
 
 		items = Arrays.asList(goldenApple, notchApple, slownessPot, bazooka, bazooka, healthPot, speedPot, slownessPot,
 				slownessPot, speedPot, bazooka, goldenApple, hammer, healthPot, extraLife, healthPot, milk, milk, milk,
@@ -1019,6 +1015,9 @@ public class GameInstance {
 				miniShield, slowballs, slowballs, slowballs, fireRes, fireRes, instagib, instagib, instagib, broom,
 				broom, zombieEgg, zombieEgg, zombieEgg, skeletonEgg, skeletonEgg, witchEgg, bounty, creeperEgg,
 				creeperEgg);
+
+		sethBlingItemDrops = new ArrayList<>(items);
+		sethBlingItemDrops.removeIf(itemStack -> itemStack.equals(extraLife));
 	}
 
 	public String truncateString(String string, int length) {

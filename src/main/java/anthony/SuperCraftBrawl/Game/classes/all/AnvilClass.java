@@ -25,7 +25,7 @@ public class AnvilClass extends BaseClass {
 
     private final ItemStack weapon;
     private final ItemStack stompItem;
-    private final Ability stompAbility = new Ability("&8&lGoomba Stomp", 1, player);
+    private final Ability stompAbility = new Ability("&8&lGoomba Stomp", 10, player);
 	private static final double MAX_STOMP_DAMAGE = 8 * 2.0;
 	private static final double STOMP_X_Z_RANGE = 3;
 	private static final double STOMP_Y_RANGE = 1;
@@ -109,13 +109,13 @@ public class AnvilClass extends BaseClass {
 		double currentHealth = playerInRange.getHealth();
 //		stompDamage = Math.min(stompDamage, currentHealth);
 		double finalHealth = currentHealth - stompDamage;
-		player.sendMessage("Stomp Damage: " + stompDamage);
-		player.sendMessage("Current Health: " + currentHealth);
-		player.sendMessage("Final Health Before Check: " + finalHealth);
+//		player.sendMessage("Stomp Damage: " + stompDamage);
+//		player.sendMessage("Current Health: " + currentHealth);
+//		player.sendMessage("Final Health Before Check: " + finalHealth);
 //		playerInRange.damage(0, player);
 		if (finalHealth <= 0) {
-			if (finalHealth == 0) player.sendMessage("Equals Zero");
-			else player.sendMessage("Below Zero");
+//			if (finalHealth == 0) player.sendMessage("Equals Zero");
+//			else player.sendMessage("Below Zero");
 			playerInRange.setHealth(0);
 		} else {
 			playerInRange.damage(0, player);
@@ -155,22 +155,17 @@ public class AnvilClass extends BaseClass {
 		performStompAbility(player);
     }
 
-	private int calculateFallHeight(Player player) {
-		int height = -1;
-		Block block = player.getLocation().getBlock();
-		while (block.getType() == Material.AIR && block.getY() > 50) {
-			height++;
-			block = block.getRelative(BlockFace.DOWN);
-		}
-		return height;
-	}
-
 	private double calculateDamage(int currentHeight) {
 		int deltaHeight = initialHeight - currentHeight;
-		double damage = deltaHeight * 0.4;
-		player.sendMessage("CurrentHeight: " + currentHeight);
-		player.sendMessage("DeltaHeight: " + deltaHeight);
-		player.sendMessage("Damage: " + damage);
+		double damage;
+		if (deltaHeight <= 12) {
+			damage = deltaHeight * 0.4;
+		} else {
+			damage = deltaHeight * 0.33;
+		}
+//		player.sendMessage("CurrentHeight: " + currentHeight);
+//		player.sendMessage("DeltaHeight: " + deltaHeight);
+//		player.sendMessage("Damage: " + damage);
 		return Math.min(damage, MAX_STOMP_DAMAGE);
 	}
 

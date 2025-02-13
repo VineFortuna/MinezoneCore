@@ -61,6 +61,8 @@ import java.io.DataOutputStream;
 import java.util.*;
 import java.util.Map.Entry;
 
+import static sun.audio.AudioPlayer.player;
+
 public class GameManager implements Listener, PluginMessageListener {
 	public HashMap<Maps, GameInstance> gameMap;
 	public HashMap<DuosMaps, GameInstance> gameMap2;
@@ -604,6 +606,16 @@ public class GameManager implements Listener, PluginMessageListener {
 		Player player = event.getPlayer();
 		GameInstance gameInstance = GetInstanceOfPlayer(player);
 		gameInstance.classes.get(player).onConsumingItem(event);
+	}
+
+	@EventHandler
+	public void onPotionSplashEvent(PotionSplashEvent event) {
+		ThrownPotion thrownPotion = event.getEntity();
+		if (!(thrownPotion.getShooter() instanceof Player)) return;
+		Player shooter = (Player) thrownPotion.getShooter();
+		GameInstance gameInstance = GetInstanceOfPlayer(shooter);
+		if (gameInstance == null) return;
+		gameInstance.classes.get(shooter).PotionSplashEvent(event);
 	}
 
 	public void onPlayerMoveEvent(PlayerMoveEvent event) {

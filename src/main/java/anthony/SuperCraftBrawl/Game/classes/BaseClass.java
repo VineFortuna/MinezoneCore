@@ -141,6 +141,9 @@ public abstract class BaseClass {
 	public void ProjectileHit(ProjectileHitEvent event) {
 	}; // To override
 
+	public void PotionSplashEvent(PotionSplashEvent event) {
+	}; // To override
+
 	public void DoDamage(EntityDamageByEntityEvent event) {
 	} // To override
 
@@ -1864,11 +1867,6 @@ public abstract class BaseClass {
 			} else if (baseClass.getType() == ClassType.GrimReaper) {
 				ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
 				damagerPlayer.getInventory().setItem(2, zombieEgg);
-			} else if (baseClass.getType() == ClassType.Endermite) {
-				damagerPlayer.getInventory().addItem(ItemHelper.createMonsterEgg(EntityType.ENDERMITE, 1,
-						instance.getGameManager().getMain().color("&5&lEndermite Pokeball")));
-				damagerPlayer.sendMessage(instance.getGameManager().getMain()
-						.color("&2&l(!) &rYou got a kill and gained an extra &5&lEndermite Pokeball"));
 			} else if (baseClass.getType() == ClassType.Wolf) {
 				wolfPackAdd = true;
 			}
