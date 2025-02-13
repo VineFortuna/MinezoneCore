@@ -14,7 +14,6 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -36,11 +35,6 @@ public class VindicatorClass extends BaseClass {
                 6,
                 "Vindicator"
         );
-    }
-    
-    @Override
-    public void setArmor(EntityEquipment playerEquip) {
-        setArmorNew(playerEquip);
     }
     
     @Override
@@ -74,7 +68,7 @@ public class VindicatorClass extends BaseClass {
                     !player.getNearbyEntities(8, 8, 8).isEmpty()) {
                 for (Entity nearby : player.getNearbyEntities(8, 8, 8)) {
                     if (nearby instanceof Player && instance.players.contains(nearby)) {
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 40, 0));
+                        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 2 * 20, 0));
                     }
                 }
             }
@@ -92,7 +86,7 @@ public class VindicatorClass extends BaseClass {
                     player.removePotionEffect(PotionEffectType.SPEED);
                     player.removePotionEffect(PotionEffectType.INCREASE_DAMAGE);
                     player.removePotionEffect(PotionEffectType.WEAKNESS);
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 160, 1));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 20 * 8, 1));
                     player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rYou lost your energy"));
                 }
             }
@@ -114,8 +108,8 @@ public class VindicatorClass extends BaseClass {
                 vindication.restart();
                 if (player.hasPotionEffect(PotionEffectType.SPEED))
                     player.removePotionEffect(PotionEffectType.SPEED);
-                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 2));
-                player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 100, 0));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 5 * 20, 2));
+                player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 5 * 20, 0));
                 player.getWorld().playSound(player.getLocation(), Sound.VILLAGER_HAGGLE, 1, 1);
                 player.getWorld().playEffect(player.getLocation().add(0, 1.5, 0), Effect.VILLAGER_THUNDERCLOUD, 1);
                 player.sendMessage(instance.getGameManager().getMain().color("&e&l(!) &rYou gained a sudden burst of energy. Chase down your enemies!"));

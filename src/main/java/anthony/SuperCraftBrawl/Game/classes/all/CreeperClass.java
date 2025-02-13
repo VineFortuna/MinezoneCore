@@ -1,33 +1,40 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
+import anthony.util.SoundManager;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Color;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.SkullType;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionType;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 public class CreeperClass extends BaseClass {
 
-	private int cooldownSec = 0;
-	private ItemStack barrier = new ItemStack(Material.BARRIER);
+	private final ItemStack weapon;
+	private final ItemStack potionItem;
+	private final ItemStack tntItem;
+	private final ItemStack suicideItem;
+	private final Ability potionAbility = new Ability("&a&lDamage Potion", 3, player);
+	private final Ability tntAbility = new Ability("&a&lDestructionators", 10, player);
+	private final Ability suicideAbility = new Ability("&a&lSelf Explode", 1, player);
 
 	public CreeperClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -38,6 +45,134 @@ public class CreeperClass extends BaseClass {
 				6,
 				"Creeper"
 		);
+
+		// Weapon
+		weapon = ItemHelper.setDetails(
+				new ItemStack(Material.SULPHUR),
+				"&a&lCreeper Essence"
+		);
+		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
+		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
+
+		// Potion ability
+		potionItem = ItemHelper.setDetails(
+				new ItemStack(Material.POTION),
+				potionAbility.getAbilityNameRightClickMessage(),
+				"",
+				"&7Throw a damage potion far away"
+		);
+		Potion potion = new Potion(PotionType.INSTANT_DAMAGE);
+		potion.setSplash(true);
+		potion.apply(potionItem);
+
+		// Tnt ability
+		tntItem = ItemHelper.setDetails(
+				new ItemStack(Material.TNT),
+				tntAbility.getAbilityNameRightClickMessage(),
+				"&7Spawn TNT at your location"
+		);
+
+		// Suicide Ability
+		suicideItem = ItemHelper.setDetails(
+				new ItemStack(Material.STONE_BUTTON),
+				suicideAbility.getAbilityNameRightClickMessage(),
+				"&7Explode yourself, doing damage to &oeveryone"
+		);
+	}
+
+	@Override
+	public void SetItems(Inventory playerInv) {
+		tntAbility.getCooldownInstance().reset();
+		playerInv.setItem(0, weapon);
+		playerInv.setItem(1, potionItem);
+		playerInv.setItem(2, tntItem);
+		playerInv.setItem(3, suicideItem);
+	}
+
+	@Override
+	public void Tick(int gameTicks) {
+		if (!isPlayerAlive()) return;
+		tntAbility.updateActionBar(player,this);
+
+		// Setting barrier and potions
+		if (potionAbility.isReady()) return;
+		if (!player.getInventory().contains(Material.BARRIER)) {
+			player.getInventory().setItem(1, new ItemStack(Material.BARRIER));
+			Bukkit.getScheduler().runTaskLater(
+					instance.getGameManager().getMain(),
+					() -> player.getInventory().setItem(1, potionItem),
+					(long) (potionAbility.getCooldownDurationSeconds() * 20)
+			);
+		}
+	}
+
+	@Override
+	public void UseItem(PlayerInteractEvent event) {
+		ItemStack item = event.getPlayer().getItemInHand();
+		Action action = event.getAction();
+
+		if (item == null) return;
+		if (player.getGameMode() == GameMode.SPECTATOR) return;
+
+		if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
+
+		if (item.equals(tntItem)) {
+			if (!tntAbility.isReady()) return;
+			spawnTnt();
+			tntAbility.use();
+			return;
+		}
+
+		if (item.equals(suicideItem)) {
+			if (instance.getGameManager().spawnProt.containsKey(player)) return;
+			if (!suicideAbility.isReady()) return;
+			useSuicideAbility();
+			suicideAbility.use();
+		}
+	}
+
+	private void spawnTnt() {
+		TNTPrimed tnt = player.getWorld().spawn(player.getLocation().add(0, 1, 0), TNTPrimed.class);
+		tnt.setFuseTicks(40);
+		SoundManager.playSoundToAll(player, Sound.FUSE, 1, 1);
+	}
+
+	private void useSuicideAbility() {
+		TNTPrimed tnt = player.getWorld().spawn(player.getLocation().add(0, 1, 0), TNTPrimed.class);
+		tnt.setFuseTicks(0);
+	}
+
+	@Override
+	public void ProjectileLaunch(ProjectileLaunchEvent event) {
+		Entity entity = event.getEntity();
+		if (!(entity instanceof ThrownPotion)) return;
+		ThrownPotion potion = (ThrownPotion) entity;
+		if (!potion.getItem().isSimilar(potionItem)) return;
+		if (!(potion.getShooter() instanceof Player)) return;
+		Player shooter = (Player) potion.getShooter();
+		throwPotionFurther(potion);
+//		setBarrierPotion(shooter);
+		potionAbility.use();
+	}
+
+	private void throwPotionFurther(ThrownPotion potion) {
+		Vector velocity = potion.getVelocity();
+		potion.setVelocity(velocity.multiply(1.3));
+	}
+
+	private void setBarrierPotion(Player shooter) {
+		ItemStack item = shooter.getInventory().getItem(1);
+		shooter.getInventory().remove(item);
+		shooter.getInventory().setItem(1, new ItemStack(Material.BARRIER));
+
+		Bukkit.getScheduler().runTaskLater(
+				instance.getGameManager().getMain(),
+				() -> {
+					shooter.getInventory().remove(Material.BARRIER);
+					shooter.getInventory().setItem(1, potionItem);
+				},
+				(long) (potionAbility.getCooldownDurationSeconds() * 20)
+		);
 	}
 
 	@Override
@@ -46,139 +181,7 @@ public class CreeperClass extends BaseClass {
 	}
 
 	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
-	}
-
-	@Override
-	public void SetNameTag() {
-
-	}
-
-	@Override
-	public void Tick(int gameTicks) {
-		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Creeper
-				&& instance.classes.get(player).getLives() > 0) {
-			int seconds = (10000 - tnt.getTime()) / 1000 + 1;
-			
-			if (tnt.getTime() < 10000) {
-				String msg = instance.getGameManager().getMain()
-						.color("&c&lDestructionators &rregenerates in: &e" + seconds + "s");
-				getActionBarManager().setActionBar(player, "tnt.cooldown", msg, 2);
-			} else {
-				String msg = instance.getGameManager().getMain().color("&rYou can use &c&lDestructionators");
-				getActionBarManager().setActionBar(player, "tnt.cooldown", msg, 2);
-			}
-			
-			ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-					instance.getGameManager().getMain().color("&c&lCreeper Potion"));
-			Potion pot3 = new Potion(1);
-			pot3.setType(PotionType.INSTANT_DAMAGE);
-			pot3.setSplash(true);
-			pot3.apply(item);
-			
-			if (!(player.getInventory().contains(item)) && !(player.getInventory().contains(barrier))) {
-				player.getInventory().addItem(barrier);
-				this.cooldownSec = 3;
-			}
-			
-			if (gameTicks % 20 == 0 && this.cooldownSec != 0) {
-				cooldownSec--;
-				
-				if (this.cooldownSec <= 0) {
-					if (!(player.getInventory().contains(item))) {
-						player.getInventory().remove(barrier);
-						player.getInventory().addItem(item);
-					}
-				}
-			}
-		}
-	}
-
-	@Override
-	public void ProjectileLaunch(ProjectileLaunchEvent event) {
-		if (event.getEntity() instanceof ThrownPotion) {
-			ThrownPotion potion = (ThrownPotion) event.getEntity();
-
-			if (potion.getShooter() instanceof Player) {
-				Player player = (Player) potion.getShooter();
-				if (player.getInventory().getItemInHand().getItemMeta().getDisplayName().contains("Creeper Potion")) {
-					// Adjust the velocity of the potion
-					Vector velocity = potion.getVelocity();
-					potion.setVelocity(velocity.multiply(1.3));
-				}
-			}
-		}
-	}
-
-	@Override
-	public void SetItems(Inventory playerInv) {
-		this.cooldownSec = 0;
-		playerInv.setItem(0, ItemHelper.addEnchant(
-				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.SULPHUR),
-						"" + ChatColor.YELLOW + ChatColor.BOLD + "Creeper Essence"), Enchantment.DAMAGE_ALL, 3),
-				Enchantment.KNOCKBACK, 1));
-		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				instance.getGameManager().getMain().color("&c&lCreeper Potion"));
-		Potion pot3 = new Potion(1);
-		pot3.setType(PotionType.INSTANT_DAMAGE);
-		pot3.setSplash(true);
-		pot3.apply(item);
-		playerInv.setItem(1, item);
-		playerInv.setItem(2, ItemHelper.setDetails(new ItemStack(Material.TNT),
-				"" + ChatColor.RED + ChatColor.BOLD + "Destructionators"));
-		playerInv.setItem(3, ItemHelper.setDetails(new ItemStack(Material.STONE_BUTTON),
-				"" + ChatColor.RED + ChatColor.BOLD + "Suicide Button"));
-	}
-	
-	@Override
-	public void UseItem(PlayerInteractEvent event) {
-		ItemStack item = event.getItem();
-
-		if (item != null) {
-			if (item.getType() == Material.POTION
-					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-				int amount = item.getAmount();
-
-				if (amount == 0) {
-					ItemStack item2 = new ItemStack(Material.POTION, 1);
-					Potion pot3 = new Potion(1);
-					pot3.setType(PotionType.INSTANT_DAMAGE);
-					pot3.setSplash(true);
-					pot3.apply(item2);
-					player.getInventory().setItem(1, item2);
-				}
-			} else if (item.getType() == Material.TNT && item.getAmount() == 1
-					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-				if (tnt.getTime() < 10000) {
-					int seconds = (10000 - tnt.getTime()) / 1000 + 1;
-					event.setCancelled(true);
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You have to wait "
-							+ ChatColor.YELLOW + seconds + " seconds " + ChatColor.RESET + "to use this item again");
-				} else {
-					tnt.restart();
-					TNTPrimed tnt = player.getWorld().spawn(player.getLocation().add(0, 1, 0), TNTPrimed.class);
-					tnt.setFuseTicks(40);
-				}
-			} else if (item.getType() == Material.STONE_BUTTON
-					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-				if (!(instance.getGameManager().spawnProt.containsKey(player))) {
-					if (player.getGameMode() != GameMode.SPECTATOR) {
-						TNTPrimed tnt = player.getWorld().spawn(player.getLocation().add(0, 1, 0), TNTPrimed.class);
-						tnt.setFuseTicks(0);
-					}
-				}
-			}
-		}
-	}
-
-	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(
-				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.SULPHUR),
-						"" + ChatColor.YELLOW + ChatColor.BOLD + "Creeper Essence"), Enchantment.DAMAGE_ALL, 3),
-				Enchantment.KNOCKBACK, 1);
-		return item;
+		return weapon;
 	}
-
 }

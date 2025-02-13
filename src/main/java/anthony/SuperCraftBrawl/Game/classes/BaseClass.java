@@ -53,22 +53,13 @@ public abstract class BaseClass {
 	public int totalExp = 0;
 	public double baseVerticalJump = 1.0;
 	public boolean flintUsed = false;
-	public Timer bedrockLava = new Timer();
 	public Timer pearlTimer = new Timer();
 	public Timer tnt = new Timer();
-	public Timer witherBow = new Timer();
 	public Timer slimeBall = new Timer();
-	public Timer skeleAttack = new Timer();
 	public Timer tntItem = new Timer();
-	public Timer notch = new Timer();
-	public Timer jeb = new Timer();
-	public Timer enderman = new Timer();
 	public Timer ice = new Timer();
-	public Timer blazeRod = new Timer();
 	public Timer golem = new Timer();
-	public Timer villager = new Timer();
 	public Timer herobrine = new Timer();
-	protected Timer anvil = new Timer();
 	public Timer bazooka = new Timer();
 	public Timer ninja = new Timer();
 	public Timer bee = new Timer();
@@ -82,16 +73,12 @@ public abstract class BaseClass {
 	public Timer snowGolem = new Timer();
 	public Timer santa = new Timer();
 	public Timer cookie = new Timer();
-	public Timer wallAbility = new Timer();
 	public Timer vindication = new Timer();
 	public Timer fadeAbility = new Timer();
 	public Timer summon = new Timer();
-	public Timer grapplingHook = new Timer();
 	public Timer grimReaper = new Timer();
 	public Timer alexBrewingStand = new Timer();
-	public Timer phaseShifter = new Timer();
 	public Timer wolfBite = new Timer();
-	public Timer wolfRecall = new Timer();
 	public boolean bedrockInvincibility = false;
 	public boolean hunterDash = true;
 	public boolean wolfPackAdd = false;
@@ -140,7 +127,7 @@ public abstract class BaseClass {
 
 	public abstract void SetItems(Inventory playerInv);
 
-	public abstract void UseItem(PlayerInteractEvent event);
+	public void UseItem(PlayerInteractEvent event){};
 
 	public void onConsumingItem(PlayerItemConsumeEvent event) {
 	};
@@ -152,6 +139,9 @@ public abstract class BaseClass {
 	}; // To override
 
 	public void ProjectileHit(ProjectileHitEvent event) {
+	}; // To override
+
+	public void PotionSplashEvent(PotionSplashEvent event) {
 	}; // To override
 
 	public void DoDamage(EntityDamageByEntityEvent event) {
@@ -174,6 +164,7 @@ public abstract class BaseClass {
 
 	public boolean isPlayerAlive() {
 		return instance.classes.containsKey(player)
+				&& player.getGameMode() == GameMode.ADVENTURE
 				&& instance.classes.get(player).getType() == getType()
 				&& instance.classes.get(player).getLives() > 0;
 	}
@@ -212,11 +203,13 @@ public abstract class BaseClass {
 		setArmor(player.getEquipment());
 	}
 
-	public boolean checkIfDead(Player player, GameInstance i) {
-		if (player.getGameMode() == GameMode.SPECTATOR)
+	public boolean checkIfDead(Player player, GameInstance gameInstance) {
+		if (player.getGameMode() == GameMode.SPECTATOR) {
 			return true;
-		else if (i.classes.get(player) != null && i.classes.get(player).getLives() <= 0)
+		}
+		else if (gameInstance.classes.get(player) != null && gameInstance.classes.get(player).getLives() <= 0) {
 			return true;
+		}
 
 		return false;
 	}
@@ -424,7 +417,7 @@ public abstract class BaseClass {
 										TellAll(instance.getGameManager().getMain().color("&2&l(!) "
 
 												+ "&r" + p.getPlayer().getName() + " " + bc.getType().getTag()
-												+ " &cwalked off the edge.."));
+												+ " &cwalked off the edge..."));
 									}
 								} else {
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -473,7 +466,7 @@ public abstract class BaseClass {
 											TellAll(instance.getGameManager().getMain().color("&2&l(!) "
 
 													+ "&r" + p.getPlayer().getName() + " " + bc.getType().getTag()
-													+ " &cwalked off the edge.."));
+													+ " &cwalked off the edge..."));
 										}
 									} else {
 										TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -497,7 +490,7 @@ public abstract class BaseClass {
 										TellAll(instance.getGameManager().getMain().color("&2&l(!) "
 
 												+ "&r" + p.getPlayer().getName() + " " + bc.getType().getTag()
-												+ " &cwalked off the edge.."));
+												+ " &cwalked off the edge..."));
 									}
 								} else {
 									TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -521,7 +514,7 @@ public abstract class BaseClass {
 									TellAll(instance.getGameManager().getMain().color("&2&l(!) "
 
 											+ "&r" + p.getPlayer().getName() + " " + bc.getType().getTag()
-											+ " &cwalked off the edge.."));
+											+ " &cwalked off the edge..."));
 								}
 							} else {
 								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -593,7 +586,7 @@ public abstract class BaseClass {
 								TellAll(instance.getGameManager().getMain().color("&2&l(!) "
 
 										+ "&r" + p.getPlayer().getName() + " " + bc.getType().getTag()
-										+ " &cwalked off the edge.."));
+										+ " &cwalked off the edge..."));
 							}
 						} else {
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1492,7 +1485,7 @@ public abstract class BaseClass {
 												+ instance.getGameManager().getMain().getRankManager().getRank(player)
 														.getTagWithSpace()
 												+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-												+ " &cwalked off the edge.."));
+												+ " &cwalked off the edge..."));
 							}
 						} else {
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1545,7 +1538,7 @@ public abstract class BaseClass {
 											+ instance.getGameManager().getMain().getRankManager().getRank(player)
 													.getTagWithSpace()
 											+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-											+ " &cwalked off the edge.."));
+											+ " &cwalked off the edge..."));
 								}
 							} else {
 								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1574,7 +1567,7 @@ public abstract class BaseClass {
 												+ instance.getGameManager().getMain().getRankManager().getRank(player)
 														.getTagWithSpace()
 												+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-												+ " &cwalked off the edge.."));
+												+ " &cwalked off the edge..."));
 							}
 						} else {
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1602,7 +1595,7 @@ public abstract class BaseClass {
 											+ instance.getGameManager().getMain().getRankManager().getRank(player)
 													.getTagWithSpace()
 											+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-											+ " &cwalked off the edge.."));
+											+ " &cwalked off the edge..."));
 						}
 					} else {
 						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1657,7 +1650,7 @@ public abstract class BaseClass {
 										+ instance.getGameManager().getMain().getRankManager().getRank(player)
 												.getTagWithSpace()
 										+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-										+ " &cwalked off the edge.."));
+										+ " &cwalked off the edge..."));
 					}
 				} else {
 					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1837,18 +1830,18 @@ public abstract class BaseClass {
 
 	// Classes such as Sheep & Hunter that when they get a kill, they one of their
 	// abilities back
-	public void classesEvent(Player d, BaseClass baseClass) {
-		if (instance.classes.containsKey(d) && !checkIfDead(player, instance)) {
+	public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
+		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
 			// Sheep
-			baseClass = instance.classes.get(d);
+			baseClass = instance.classes.get(damagerPlayer);
 			if (baseClass.getType() == ClassType.Sheep) {
-				d.getInventory().addItem(new ItemStack(Material.ENCHANTMENT_TABLE));
-				d.sendMessage(instance.getGameManager().getMain()
-						.color("&r&l(!) &rYou got a kill and now you can switch your wool color if you'd like!"));
+				damagerPlayer.getInventory().addItem(new ItemStack(Material.ENCHANTMENT_TABLE));
+				damagerPlayer.sendMessage(instance.getGameManager().getMain()
+						.color("&r&l(!) &rYou got a kill and now you can switch your wool color if you'damagerPlayer like!"));
 
 			} else if (baseClass.getType() == ClassType.Hunter) {
 				if (!hunterDash) {
-					d.sendMessage(instance.getGameManager().getMain()
+					damagerPlayer.sendMessage(instance.getGameManager().getMain()
 							.color("&r&l(!) &rYour &r&lDash &rhas been regenerated for getting a kill!"));
 					hunterDash = true;
 					ItemStack dash = ItemHelper.addEnchant(
@@ -1859,26 +1852,21 @@ public abstract class BaseClass {
 					player.getInventory().setItem(1, dash);
 				}
 			} else if (baseClass.getType() == ClassType.Present) {
-				d.sendMessage(instance.getGameManager().getMain().color(
-						"&r&l(!) &rYour &r&lAggressive Gift has regenerated and you can get a new weapon if you'd like!"));
-				d.getInventory().addItem(ItemHelper.setDetails(new ItemStack(Material.CHEST, 1),
+				damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
+						"&r&l(!) &rYour &r&lAggressive Gift has regenerated and you can get a new weapon if you'damagerPlayer like!"));
+				damagerPlayer.getInventory().addItem(ItemHelper.setDetails(new ItemStack(Material.CHEST, 1),
 						String.valueOf(ChatColor.RESET) + ChatColor.ITALIC + "Agressive Gift", "",
 						String.valueOf(ChatColor.RESET) + ChatColor.YELLOW + "Steals another player's main item"));
 			} else if (baseClass.getType() == ClassType.PiglinBrute) {
 				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK, 1),
 						"&eGold Balls",
 						"&7Right click to throw DEADLY gold balls!");
-				d.sendMessage(instance.getGameManager().getMain()
+				damagerPlayer.sendMessage(instance.getGameManager().getMain()
 						.color("&2&l(!) &rYou got a kill and gained an extra &eGold Ball"));
-				d.getInventory().addItem(item);
+				damagerPlayer.getInventory().addItem(item);
 			} else if (baseClass.getType() == ClassType.GrimReaper) {
 				ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
-				d.getInventory().setItem(2, zombieEgg);
-			} else if (baseClass.getType() == ClassType.Endermite) {
-				d.getInventory().addItem(ItemHelper.createMonsterEgg(EntityType.ENDERMITE, 1,
-						instance.getGameManager().getMain().color("&5&lEndermite Pokeball")));
-				d.sendMessage(instance.getGameManager().getMain()
-						.color("&2&l(!) &rYou got a kill and gained an extra &5&lEndermite Pokeball"));
+				damagerPlayer.getInventory().setItem(2, zombieEgg);
 			} else if (baseClass.getType() == ClassType.Wolf) {
 				wolfPackAdd = true;
 			}
