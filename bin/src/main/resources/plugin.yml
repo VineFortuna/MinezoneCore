@@ -66,6 +66,7 @@ commands:
       description: Displays list of SCB Maps
    socials:
       description: Socials
+      aliases: discord, youtube, tiktok
    vanish:
       description: Vanish
    unvanish:

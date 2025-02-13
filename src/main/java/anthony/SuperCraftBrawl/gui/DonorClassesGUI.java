@@ -35,7 +35,7 @@ public class DonorClassesGUI implements InventoryProvider {
 
 		contents.set(2, 8, ClickableItem.of(
 				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
-					new ClassSelectorGUI(main).inv.open(player);
+					new ClassesGUI(main).inv.open(player);
 				}));
 
 		for (ClassType type : ClassType.sortAlphabetically(ClassType.getDonorClasses(false))) {

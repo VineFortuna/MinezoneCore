@@ -15,7 +15,6 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class LevelClassesGUI implements InventoryProvider {
@@ -117,7 +116,7 @@ public class LevelClassesGUI implements InventoryProvider {
 		// Setting "Go Back" Button
 		contents.set(2, 8, ClickableItem.of(
 				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
-					new ClassSelectorGUI(main).inv.open(player);
+					new ClassesGUI(main).inv.open(player);
 				}));
 
 	}
