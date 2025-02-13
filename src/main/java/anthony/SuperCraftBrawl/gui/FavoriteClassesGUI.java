@@ -34,7 +34,7 @@ public class FavoriteClassesGUI implements InventoryProvider {
 		contents.set(4, 8, ClickableItem.of(
 				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
 					inv.close(player);
-					new ClassSelectorGUI(main).inv.open(player);
+					new ClassesGUI(main).inv.open(player);
 				}));
 
 		if (data != null) {

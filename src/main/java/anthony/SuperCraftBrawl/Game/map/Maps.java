@@ -1580,7 +1580,7 @@ public enum Maps {
 	Arid(
 			"Arid",
 					new Gameplay[]{Gameplay.FLAT, Gameplay.ELEVATED},
-	Size.MEDIUM,
+	Size.SMALL,
 	Category.CURATED,
 			new ItemStack(Material.DEAD_BUSH), // Dead Bush
 			new MapInstance(

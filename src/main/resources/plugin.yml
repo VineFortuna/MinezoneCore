@@ -60,12 +60,14 @@ commands:
    spectate:
       description: Spectate command
    socials:
-      description: Socials
+      description: Sends all social media links in chat
+      aliases: discord, youtube, tiktok
    vanish:
       description: Vanish
       aliases: v
    unvanish:
       description: Unvanish
+      aliases: uv
    gmc:
       description: Gamemode creative
    gms: 
@@ -76,10 +78,9 @@ commands:
       description: Gamemode spectator
    gm:
       description: General gamemode command
-   scbhelp:
+   help:
       description: Displays SCB help/information
-   scb:
-      description: Displays SCB help/information
+      aliases: scb, scbhelp
    classes:
       description: Displays list of SCB Classes
    stats:
@@ -88,9 +89,6 @@ commands:
       description: Give tokens
    activegames:
       description: Test command
-   help:
-      description: Sends discord link in chat
-      aliases: dc, discord
    sc:
       description: Staff Chat
    staff:
@@ -101,6 +99,7 @@ commands:
       description: Parkour
    invite:
       description: Invite command
+      aliases: i
    color:
       description: Color command
    tp:
@@ -131,7 +130,6 @@ commands:
       description: Kit command for SkyWars
    items:
       description: Get all SCB Item Drops
-      aliases: i
    lactate:
       description: Lactate command!
    sound:
