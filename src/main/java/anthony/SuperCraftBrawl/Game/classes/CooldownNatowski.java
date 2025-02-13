@@ -5,27 +5,27 @@ import net.md_5.bungee.api.ChatColor;
 public class CooldownNatowski {
     private long lastUsageTime;
     private final long cooldownDurationMillis;
-    private long cooldownDurationSeconds = 10;
-    private static final ChatColor useMessageColor = ChatColor.GREEN;
+    private final double cooldownDurationSeconds;
 
-    public CooldownNatowski(long cooldownDurationSeconds) {
+    public CooldownNatowski(double cooldownDurationSeconds) {
         this.cooldownDurationSeconds = cooldownDurationSeconds;
-        this.cooldownDurationMillis = cooldownDurationSeconds * 1000; // Convert seconds to milliseconds
+        this.cooldownDurationMillis = (long) (cooldownDurationSeconds * 1000); // Convert seconds to milliseconds
         reset();
     }
 
-    public long remainingCooldownMillis() {
+    public long getRemainingCooldownMillis() {
         long currentTime = System.currentTimeMillis();
-        return currentTime - lastUsageTime;
+        long elapsedMillis = currentTime - lastUsageTime;
+        return Math.max(0, cooldownDurationMillis - elapsedMillis);
     }
 
     public long getRemainingCooldownSeconds() {
-        return cooldownDurationSeconds - remainingCooldownMillis() / 1000;
+        return getRemainingCooldownMillis() / 1000;
     }
 
     public boolean isReady() {
         // Return true if remainingCooldown is higher than cooldownDuration
-        return remainingCooldownMillis() >= cooldownDurationMillis;
+        return getRemainingCooldownMillis() <= 0;
     }
 
     public void use() {
@@ -36,15 +36,11 @@ public class CooldownNatowski {
         lastUsageTime = 0;  // Set to a value that ensures the first use is allowed
     }
 
-    public long getCooldownDurationSeconds() {
+    public double getCooldownDurationSeconds() {
         return cooldownDurationSeconds;
     }
 
     public long getLastUsageTime() {
         return lastUsageTime;
-    }
-
-    public ChatColor getUseMessageColor() {
-        return useMessageColor;
     }
 }

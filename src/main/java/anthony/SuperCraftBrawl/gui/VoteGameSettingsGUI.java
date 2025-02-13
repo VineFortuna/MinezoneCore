@@ -60,7 +60,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 		contents.set(1, 3, ClickableItem.of(voteGameStart, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
-				SoundManager.playSoundSuccessfulHitToSinglePlayer(player);
+				SoundManager.playSuccessfulHit(player);
 				game.getGameSettings().handleVoteGameStart(clickingPlayer, game);
 				openForAll(game);
 				inv.close(player);
@@ -88,7 +88,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 						+ (game != null ? game.players.size() : "0") + ")");
 		contents.set(1, 5, ClickableItem.of(voteTime, event -> {
 			if (event.getWhoClicked() instanceof Player) {
-				SoundManager.playSoundSuccessfulHitToSinglePlayer(player);
+				SoundManager.playSuccessfulHit(player);
 				game.getGameSettings().handleVoteTime(player, game);
 				openForAll(game);
 			}
@@ -116,7 +116,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 						+ (game != null ? game.players.size() : "0") + ")");
 		contents.set(3, 5, ClickableItem.of(voteGameType, event -> {
 			if (event.getWhoClicked() instanceof Player) {
-				SoundManager.playSoundSuccessfulHitToSinglePlayer(player);
+				SoundManager.playSuccessfulHit(player);
 				game.getGameSettings().handleVoteGameType(player, game);
 				openForAll(game);
 			}
@@ -137,7 +137,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 						+ (game != null ? game.players.size() : "0") + ")");
 		contents.set(3, 3, ClickableItem.of(lightningRate, event -> {
 			if (event.getWhoClicked() instanceof Player) {
-				SoundManager.playSoundSuccessfulHitToSinglePlayer(player);
+				SoundManager.playSuccessfulHit(player);
 				game.getGameSettings().handleLightningRate(player, game);
 				openForAll(game);
 			}

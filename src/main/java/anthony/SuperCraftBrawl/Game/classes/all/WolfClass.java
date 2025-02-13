@@ -34,7 +34,6 @@ public class WolfClass extends BaseClass {
 
 	public WolfClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.1;
 		createArmor(
 				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjE5Y2MwNDdhM2ExYzJhNmZjZjVlMjNkNzk4OTUwOTQ5ZjBlYTc2YTU1Mzc3MDJjODBlNTQ1NDA5ZjBiODc0NiJ9fX0=",

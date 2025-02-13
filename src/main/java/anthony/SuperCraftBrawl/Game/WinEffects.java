@@ -17,20 +17,20 @@ import java.util.Random;
 public class WinEffects {
 
 	private Player player;
-	private GameInstance i;
+	private GameInstance instance;
 	private EnderDragon dragon;
 	private boolean defaultEffect = false;
 	private boolean rainEffect = false;
 	private ArrayList<Item> fish = new ArrayList<>();
 
-	public WinEffects(Player player, GameInstance i) {
+	public WinEffects(Player player, GameInstance instance) {
 		this.player = player;
-		this.i = i;
+		this.instance = instance;
 	}
 
 	public void checkWinEffect() { // Database checking here
-		if (i != null) {
-			PlayerData data = i.getGameManager().getMain().getDataManager().getPlayerData(player);
+		if (instance != null) {
+			PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(player);
 
 			if (data != null) {
 				if (player.hasPermission("scb.winEffects")) {
@@ -56,14 +56,18 @@ public class WinEffects {
 
 	//This spawns an Ender Dragon at the player & makes the player ride it
 	private void enderDragonEffect() {
-		this.dragon = (EnderDragon) this.player.getWorld().spawnEntity(this.player.getLocation(),
-				EntityType.ENDER_DRAGON);
+		World world = player.getWorld();
+		if (world != instance.getMapWorld()) return;
+		startFireworksRunnable(world);
+		this.dragon = (EnderDragon) world.spawnEntity(this.player.getLocation(), EntityType.ENDER_DRAGON);
 		this.dragon.setPassenger(this.player);
 	}
 
 	private void magicBroomEffect() {
-		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT),
-				i.getGameManager().getMain().color("&2&lMagic Broom"));
+		World world = player.getWorld();
+		if (world != instance.getMapWorld()) return;
+		startFireworksRunnable(world);
+		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT),"&2&lMagic Broom");
 		player.getInventory().setItem(0, broom);
 	}
 
@@ -75,6 +79,9 @@ public class WinEffects {
 	}
 
 	private void santaEffect() {
+		World world = player.getWorld();
+		if (world != instance.getMapWorld()) return;
+		startFireworksRunnable(world);
 		ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
 		SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
 		meta.setOwner("Santa");
@@ -94,7 +101,6 @@ public class WinEffects {
 		horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
 		player.teleport(horse.getLocation());
 		horse.setPassenger(player);
-
 	}
 
 	private void fireParticlesEffect() {
@@ -104,7 +110,7 @@ public class WinEffects {
 	public Location getItemRainLoc() {
 		Random rand = new Random();
 		int attempts = 0;
-		Location respawnLoc = i.GetRespawnLoc();
+		Location respawnLoc = instance.GetRespawnLoc();
 		while (true) {
 			Location loc = respawnLoc.clone().add(rand.nextFloat() * 50 - 25, 35, rand.nextFloat() * 50 - 25);
 			Location loc2 = loc.clone();
@@ -122,72 +128,81 @@ public class WinEffects {
 			attempts++;
 		}
 	}
+
 	private void fishRainEffect() {
 		this.rainEffect = true;
-		if (player.getWorld() == i.getMapWorld()) {
-			World w = player.getWorld();
-			w.setStorm(true);
-			w.setThundering(true);
-			BukkitRunnable runnable = new BukkitRunnable() {
-				int rep = 0;
-				Random rand = new Random();
-				@Override
-				public void run() {
-					if (rep == 240) {
-						this.cancel();
-					} else {
-						int chance = rand.nextInt(4);
-						Item i = player.getWorld().dropItem(getItemRainLoc(),
-								new ItemStack(Material.RAW_FISH, 1, (short) chance));
-						fish.add(i);
-					}
-					rep++;
+		World world = player.getWorld();
+		if (world != instance.getMapWorld()) return;
+		startFireworksRunnable(world);
+		world.setStorm(true);
+		world.setThundering(true);
+		BukkitRunnable runnable = new BukkitRunnable() {
+			int rep = 0;
+			Random rand = new Random();
+			@Override
+			public void run() {
+				if (rep == 240) {
+					this.cancel();
+				} else {
+					int chance = rand.nextInt(4);
+					Item i = world.dropItem(getItemRainLoc(),
+							new ItemStack(Material.RAW_FISH, 1, (short) chance));
+					fish.add(i);
 				}
-			};
-			runnable.runTaskTimer(i.getGameManager().getMain(), 0, 1);
-		}
+				rep++;
+			}
+		};
+		runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 1);
 	}
 
 	private void defaultEffect() {
 		this.defaultEffect = true;
 
 		if (this.defaultEffect == true) {
-			if (player.getWorld() == i.getMapWorld()) {
-				BukkitRunnable runnable = new BukkitRunnable() {
-					int sec = 0;
-
-					@Override
-					public void run() {
-						if (sec == 9) {
-							this.cancel();
-						} else {
-							Firework fw = (Firework) player.getWorld().spawnEntity(player.getLocation(), EntityType.FIREWORK);
-							FireworkMeta fwm = fw.getFireworkMeta();
-							fwm.setPower(1);
-
-							Color c = null;
-							Random r = new Random();
-							int chance = r.nextInt(4);
-
-							if (chance == 0)
-								c = Color.BLUE;
-							else if (chance == 1)
-								c = Color.LIME;
-							else if (chance == 2)
-								c = Color.GREEN;
-							else
-								c = Color.YELLOW;
-							fwm.addEffect(FireworkEffect.builder().withColor(c).flicker(true).build());
-							fw.setFireworkMeta(fwm);
-						}
-						
-						sec++;
-					}
-					
-				};
-				runnable.runTaskTimer(i.getGameManager().getMain(), 0, 20);
-			}
+			World world = player.getWorld();
+			if (world != instance.getMapWorld()) return;
+			startFireworksRunnable(world);
 		}
+	}
+
+	private void startFireworksRunnable(World world) {
+		BukkitRunnable runnable = new BukkitRunnable() {
+			int sec = 0;
+
+			@Override
+			public void run() {
+				if (sec == 9) {
+					this.cancel();
+				} else {
+					playFireworks(world);
+				}
+
+				sec++;
+			}
+
+		};
+		runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+	}
+
+	private void playFireworks(World world) {
+		Firework fw = (Firework) world.spawnEntity(player.getLocation(), EntityType.FIREWORK);
+		FireworkMeta fwm = fw.getFireworkMeta();
+		fwm.setPower(1);
+
+		Color c = null;
+		Random r = new Random();
+		int chance = r.nextInt(4);
+
+		if (chance == 0)
+			c = Color.BLUE;
+		else if (chance == 1)
+			c = Color.LIME;
+		else if (chance == 2)
+			c = Color.GREEN;
+		else
+			c = Color.YELLOW;
+		fwm.addEffect(FireworkEffect.builder().withColor(c).flicker(true).build());
+		fw.setFireworkMeta(fwm);
 	}
 
 	// REMOVE WIN EFFECTS:

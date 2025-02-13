@@ -155,17 +155,21 @@ public class Core extends JavaPlugin implements Listener {
 	public FlawlessWinsBoard getFlawlessWinsBoard() {
 		return this.flawlessWinsBoard;
 	}
-	
+
 	public BoardSettings getBoardSettings() {
 		return this.boardSettings;
 	}
-	
-	public WinstreakBoard getWinstreakBoard() { 
+
+	public WinstreakBoard getWinstreakBoard() {
 		return this.streakBoard;
 	}
 
 	public PlayerDataManager getDataManager() {
 		return dataManager;
+	}
+
+	public Fishing getFishing() {
+		return fishing;
 	}
 
 	public Version getVersion() {
@@ -333,20 +337,19 @@ public class Core extends JavaPlugin implements Listener {
 		plugin = this;
 		msg = new ArrayList<>();
 //		msg.add(color("&4&lREMEMBER TO TELL ITZZMIC (I LOVE YOU)"));
-//		msg.add(color("&c&lHOW DO YOU SPELL SCB AGAIN?"));
 //		msg.add(color("&3ItzzMic coded this btw..."));
-//		msg.add(color("&9&lAnthonyFortuna is so cool"));
 //		msg.add(color("&cItzzMic wants to remind you to have a good day!"));
+//		msg.add(color("&3&lWho is Adwyr?"));
+//		msg.add(color("&9&lAnthonyFortuna is so cool"));
+//		msg.add(color("&3astro is &b&l20% &3better than you"));
+//		msg.add(color("&c&lHOW DO YOU SPELL SCB AGAIN?"));
 //		msg.add(color("&e&lTacos are really good!"));
 //		msg.add(color("&cIdek what to put here"));
 //		msg.add(color("&cI be sweatin since 2002 baby"));
-//		msg.add(color("&3&lWho is Adwyr?"));
-//		msg.add(color("&cLove you!"));
-//		msg.add(color("&4&lSEASON 2 OUT ALREADY??"));
-//		msg.add(color("&a&lReminder to thank the Staff of &e&l&oMINEZONE"));
 //		msg.add(color("&cSheep kit is probably the best!"));
+//		msg.add(color("&cLove you!"));
+//		msg.add(color("&a&lReminder to thank the Staff of &e&l&oMINEZONE"));
 //		msg.add(color("&dSubscribe to &e&l&oMINEZONE &don &cYou&fTube&d!"));
-//		msg.add(color("&3astro is &b&l20% &3better than you"));
 
 		msg.add(color("&lReminder to thank the staff"));
 		msg.add(color("&lThank you for playing, you're awesome"));
@@ -363,7 +366,8 @@ public class Core extends JavaPlugin implements Listener {
 		for (Player onlinePlayer : this.getServer().getOnlinePlayers())
 			this.ResetPlayer(onlinePlayer);
 
-		//Bukkit.getScheduler().runTaskLater(this, this::removeOldLeaderboards, 8 * 20L);
+		// Bukkit.getScheduler().runTaskLater(this, this::removeOldLeaderboards, 8 *
+		// 20L);
 
 		listener = new PlayerListener(this);
 		// smmmanager = new SmmManager(this);
@@ -400,8 +404,9 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null) {
-			String[] commandTypes = { "maps", "join", "fav", "fly", "f", "shop", "leave", "l", "cw", "players", "class", "spectate",
-					"startgame", "gamestats", "setlives", "purchases", "kit", "items", "color" };
+			String[] commandTypes = { "maps", "join", "fly", "leave", "players", "class", "socials",
+					"spectate", "startgame", "gamestats", "setlives", "lactate", "purchases", "kit",
+					"items", "color", "sound", "heal" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -419,9 +424,13 @@ public class Core extends JavaPlugin implements Listener {
 			@Override
 			public void run() {
 				PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
-				Object header = new ChatComponentText("" + ChatColor.AQUA + ChatColor.BOLD + "MINEZONE");
-				Object footer = new ChatComponentText(
-						color("&7You are playing on ") + ChatColor.AQUA + "minezone.club");
+				Object header = new ChatComponentText(color("\n&f&lMinezone Network\n"));
+				Object footer = new ChatComponentText(color(
+						"\n&7  /help&f for a list of commands" +
+								"  \n&7/store&f to purchase a rank" +
+								"  \n&7/discord&f to join our Discord" +
+								"\n\n&bminezone.club\n"
+				));
 				try {
 					Field a = packet.getClass().getDeclaredField("a");
 					a.setAccessible(true);
@@ -533,13 +542,13 @@ public class Core extends JavaPlugin implements Listener {
 						target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Your rank has been set to "
 								+ ChatColor.YELLOW + temp2);
 					} else {
-                        boolean success;
-                        try {
-                            success = dataManager.setOfflinePlayerRank(args[0], rank);
-                        } catch (SQLException e) {
-                            throw new RuntimeException(e);
-                        }
-                        if (success) {
+						boolean success;
+						try {
+							success = dataManager.setOfflinePlayerRank(args[0], rank);
+						} catch (SQLException e) {
+							throw new RuntimeException(e);
+						}
+						if (success) {
 							String temp = rank.name();
 							String temp2 = temp.toUpperCase();
 							sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + args[0]
@@ -568,16 +577,16 @@ public class Core extends JavaPlugin implements Listener {
 						staffhelp += args[i] + " ";
 					}
 					player.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "StaffHelp> " + ChatColor.RESET
-							+ getRankManager().getRank(player).getTagWithSpace() + ChatColor.RESET + player.getName() + ": "
-							+ ChatColor.LIGHT_PURPLE + staffhelp);
+							+ getRankManager().getRank(player).getTagWithSpace() + ChatColor.RESET + player.getName()
+							+ ": " + ChatColor.LIGHT_PURPLE + staffhelp);
 					player.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "(!) " + ChatColor.RESET
 							+ "If any staff is online, you will recieve a reply shortly");
 
 					for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
 						if (onlinePlayers.hasPermission("scb.staffhelp")) {
 							onlinePlayers.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "StaffHelp> "
-									+ ChatColor.RESET + getRankManager().getRank(player).getTagWithSpace() + ChatColor.RESET
-									+ player.getName() + ": " + ChatColor.LIGHT_PURPLE + staffhelp);
+									+ ChatColor.RESET + getRankManager().getRank(player).getTagWithSpace()
+									+ ChatColor.RESET + player.getName() + ": " + ChatColor.LIGHT_PURPLE + staffhelp);
 						}
 					}
 				}
@@ -595,12 +604,14 @@ public class Core extends JavaPlugin implements Listener {
 							for (int i = 1; i < args.length; i++) {
 								staffhelpReply += args[i] + " ";
 							}
-							player.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "StaffHelp REPLY> "
-									+ ChatColor.RESET + getRankManager().getRank(player).getTagWithSpace() + ChatColor.RESET
-									+ player.getName() + ": " + ChatColor.LIGHT_PURPLE + staffhelpReply);
-							target.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "StaffHelp REPLY> "
-									+ ChatColor.RESET + getRankManager().getRank(player).getTagWithSpace() + ChatColor.RESET
-									+ player.getName() + ": " + ChatColor.LIGHT_PURPLE + staffhelpReply);
+							player.sendMessage(
+									"" + ChatColor.YELLOW + ChatColor.BOLD + "StaffHelp REPLY> " + ChatColor.RESET
+											+ getRankManager().getRank(player).getTagWithSpace() + ChatColor.RESET
+											+ player.getName() + ": " + ChatColor.LIGHT_PURPLE + staffhelpReply);
+							target.sendMessage(
+									"" + ChatColor.YELLOW + ChatColor.BOLD + "StaffHelp REPLY> " + ChatColor.RESET
+											+ getRankManager().getRank(player).getTagWithSpace() + ChatColor.RESET
+											+ player.getName() + ": " + ChatColor.LIGHT_PURPLE + staffhelpReply);
 						} else {
 							player.sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
 									+ "Please specify a player!");
@@ -616,8 +627,8 @@ public class Core extends JavaPlugin implements Listener {
 			if (cmd.getName().equalsIgnoreCase("broadcast")) {
 				if (player.hasPermission("scb.broadcast")) {
 					if (args.length == 0) {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-								+ ChatColor.GREEN + "/broadcast <message>");
+						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+								+ "Incorrect usage! Try doing: " + ChatColor.GREEN + "/broadcast <message>");
 						return true;
 					} else {
 						String message = "";
@@ -662,21 +673,20 @@ public class Core extends JavaPlugin implements Listener {
 			}
 
 			if (cmd.getName().equalsIgnoreCase("hub")) {
-			/*Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-
-			ByteArrayOutputStream b = new ByteArrayOutputStream();
-			DataOutputStream out = new DataOutputStream(b);
-
-			try {
-				out.writeUTF("Connect");
-				out.writeUTF("lobby-1");
-				player.sendMessage(color("&e&l(!) &rConnecting to &elobby-1"));
-			} catch (Exception ex) {
-				player.sendMessage(color("&c&l(!) &rThere was a problem connecting to &elobby-1"));
-			}
-			player.sendPluginMessage(this, "BungeeCord", b.toByteArray());*/
-				if (this.getGameManager().GetInstanceOfPlayer(player) != null ||
-						this.getGameManager().GetInstanceOfSpectator(player) != null) {
+				/*
+				 * Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+				 *
+				 * ByteArrayOutputStream b = new ByteArrayOutputStream(); DataOutputStream out =
+				 * new DataOutputStream(b);
+				 *
+				 * try { out.writeUTF("Connect"); out.writeUTF("lobby-1");
+				 * player.sendMessage(color("&e&l(!) &rConnecting to &elobby-1")); } catch
+				 * (Exception ex) { player.sendMessage(
+				 * color("&c&l(!) &rThere was a problem connecting to &elobby-1")); }
+				 * player.sendPluginMessage(this, "BungeeCord", b.toByteArray());
+				 */
+				if (this.getGameManager().GetInstanceOfPlayer(player) != null
+						|| this.getGameManager().GetInstanceOfSpectator(player) != null) {
 					this.getCommands().leaveGame(player);
 				} else if (this.getParkour().hasPlayer(player)) {
 					this.getParkour().removePlayer(player);
@@ -752,7 +762,8 @@ public class Core extends JavaPlugin implements Listener {
 								return false;
 							}
 							if (target != player) {
-								target.sendMessage(color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()));
+								target.sendMessage(
+										color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()));
 							} else {
 								player.sendMessage(color("&e&l(!) &rYou were given &e " + amount + " " + item.getType()
 										+ " &rwith &e " + ench.getName() + " " + level));
@@ -794,27 +805,15 @@ public class Core extends JavaPlugin implements Listener {
 						+ ChatColor.YELLOW + online + ChatColor.RESET + " players online");
 			}
 
-			if (cmd.getName().equalsIgnoreCase("socials") && sender instanceof Player) {
-				player.sendMessage(this.color("&8&m-------&8[Social Media]&8&m-------"));
-				player.sendMessage("");
-				player.sendMessage(this.color("&eDiscord: &7https://discord.gg/FSZpmY9FZB"));
-				player.sendMessage(this.color("&eStore: &7minezone.tebex.io"));
-				player.sendMessage(this.color("&eYouTube: &7https://www.youtube.com/@minezone6480"));
-				player.sendMessage(this.color("&eTwitter: &7https://twitter.com/MinezoneMC"));
-				player.sendMessage(this.color("&eTikTok: &7https://www.tiktok.com/@minezonemc"));
-				player.sendMessage("");
-				player.sendMessage(this.color("&8&m----------------------------"));
-			}
-
 			if (cmd.getName().equalsIgnoreCase("vanish") && sender instanceof Player) {
 				if (sender.hasPermission("scb.vanish")) {
 					player.sendMessage(
 							"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.GREEN + "You are now in vanish");
 					player.setGameMode(GameMode.SPECTATOR);
 				} else {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.RED + "You need the rank "
-							+ ChatColor.RED + ChatColor.BOLD + "ADMIN " + ChatColor.RESET + ChatColor.RED
-							+ "to use this command");
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.RED
+							+ "You need the rank " + ChatColor.RED + ChatColor.BOLD + "ADMIN " + ChatColor.RESET
+							+ ChatColor.RED + "to use this command");
 				}
 			}
 
@@ -824,9 +823,9 @@ public class Core extends JavaPlugin implements Listener {
 							+ ChatColor.RESET + ChatColor.RED + "unvanished");
 					player.setGameMode(GameMode.ADVENTURE);
 				} else {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.RED + "You need the rank "
-							+ ChatColor.RED + ChatColor.BOLD + "ADMIN " + ChatColor.RESET + ChatColor.RED
-							+ "to use this command");
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.RED
+							+ "You need the rank " + ChatColor.RED + ChatColor.BOLD + "ADMIN " + ChatColor.RESET
+							+ ChatColor.RED + "to use this command");
 				}
 			}
 
@@ -856,115 +855,90 @@ public class Core extends JavaPlugin implements Listener {
 			}
 			if (cmd.getName().equalsIgnoreCase("gmc") && sender instanceof Player) {
 				if (sender.hasPermission("scb.gmc")) {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Your gamemode has been updated to "
-							+ ChatColor.RESET + ChatColor.GREEN + "Creative!");
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "Your gamemode has been updated to " + ChatColor.RESET + ChatColor.GREEN + "Creative!");
 					player.setGameMode(GameMode.CREATIVE);
 				} else {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank " + ChatColor.RED
-							+ ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to perform this command!");
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
+							+ ChatColor.RED + ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to perform this command!");
 				}
 			}
 			if (cmd.getName().equalsIgnoreCase("gms") && sender instanceof Player) {
 				if (sender.hasPermission("scb.gms")) {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Your gamemode has been updated to "
-							+ ChatColor.RESET + ChatColor.GREEN + "Survival!");
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "Your gamemode has been updated to " + ChatColor.RESET + ChatColor.GREEN + "Survival!");
 					player.setGameMode(GameMode.SURVIVAL);
 					player.setAllowFlight(true);
 				} else {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank " + ChatColor.RED
-							+ ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to perform this command!");
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
+							+ ChatColor.RED + ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to perform this command!");
 				}
 			}
 			if (cmd.getName().equalsIgnoreCase("gmsp") && sender instanceof Player) {
 				if (sender.hasPermission("scb.gmsp")) {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Your gamemode has been updated to "
-							+ ChatColor.RESET + ChatColor.GREEN + "Spectator!");
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "Your gamemode has been updated to " + ChatColor.RESET + ChatColor.GREEN + "Spectator!");
 					player.setGameMode(GameMode.SPECTATOR);
 				} else {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank " + ChatColor.RED
-							+ ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to perform this command!");
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
+							+ ChatColor.RED + ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to perform this command!");
 				}
 			}
 			if (cmd.getName().equalsIgnoreCase("gma") && sender instanceof Player) {
 				if (sender.hasPermission("scb.gma")) {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Your gamemode has been updated to "
-							+ ChatColor.RESET + ChatColor.GREEN + "Adventure!");
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "Your gamemode has been updated to " + ChatColor.RESET + ChatColor.GREEN + "Adventure!");
 					player.setGameMode(GameMode.ADVENTURE);
 					player.setAllowFlight(true);
 				} else {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank " + ChatColor.RED
-							+ ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to perform this command!");
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
+							+ ChatColor.RED + ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to perform this command!");
 				}
 			}
 			if (cmd.getName().equalsIgnoreCase("gm") && sender instanceof Player) {
 				if (sender.hasPermission("scb.gm")) {
-					player.sendMessage(
-							"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.RED + "Incorrect usage! Try doing: "
-									+ ChatColor.RESET + ChatColor.GREEN + "/gms, /gmc, /gmsp or /gma");
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.RED
+							+ "Incorrect usage! Try doing: " + ChatColor.RESET + ChatColor.GREEN
+							+ "/gms, /gmc, /gmsp or /gma");
 				} else {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank " + ChatColor.RED
-							+ ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to perform this command!");
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
+							+ ChatColor.RED + ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to perform this command!");
 				}
 			}
 
-			if (cmd.getName().equalsIgnoreCase("help") && sender instanceof Player) {
-				player.sendMessage("" + ChatColor.WHITE + ChatColor.BOLD + "(!) " + ChatColor.AQUA
-						+ "Need help? Go to our Discord Server for Help!");
-				player.sendMessage(
-						"- " + ChatColor.RED + ChatColor.BOLD + "Discord: " + ChatColor.GREEN + "discord.gg/FSZpmY9FZB");
-			}
+//			if (cmd.getName().equalsIgnoreCase("help") && sender instanceof Player) {
+//				player.sendMessage("" + ChatColor.WHITE + ChatColor.BOLD + "(!) " + ChatColor.AQUA
+//						+ "Need help? Go to our Discord Server for Help!");
+//				player.sendMessage("- " + ChatColor.RED + ChatColor.BOLD + "Discord: " + ChatColor.GREEN
+//						+ "discord.gg/FSZpmY9FZB");
+//			}
 
 			if (cmd.getName().equalsIgnoreCase("classes") && sender instanceof Player) {
-				String dClasses = "";
-				String tClasses = "";
-				String lClasses = "";
-				String rClasses = "";
-				for (ClassType type : ClassType.values()) {
-					if (type.getTokenCost() == 0 && type.getLevel() == 0 && type.getMinRank() != Rank.VIP)
-						dClasses += type.getTag() + " ";
-					else if (type.getTokenCost() > 0)
-						tClasses += type.getTag() + " ";
-					else if (type.getLevel() > 0)
-						lClasses += type.getTag() + " ";
-					else if (type.getMinRank() == Rank.VIP)
-						rClasses += type.getTag() + " ";
-				}
-				player.sendMessage(color("&f&l----------------------------------------"));
-				player.sendMessage(color("&e&lFREE CLASSES:"));
-				player.sendMessage(dClasses);
-				player.sendMessage("");
-				player.sendMessage(color("&e&lTOKEN CLASSES:"));
-				player.sendMessage(tClasses);
-				player.sendMessage("");
-				player.sendMessage(color("&e&lLEVEL CLASSES:"));
-				player.sendMessage(lClasses);
-				player.sendMessage("");
-				player.sendMessage(color("&e&lDONOR CLASSES:"));
-				player.sendMessage(rClasses);
-				player.sendMessage(color("&f&l----------------------------------------"));
+				new ClassesGUI(this).inv.open(player);
+//				sendClassesList(player);
 			}
 			if (cmd.getName().equalsIgnoreCase("scb") && sender instanceof Player) {
-				player.sendMessage("" + ChatColor.GREEN + ChatColor.BOLD + "[SUPER CRAFT BLOCKS]");
-				player.sendMessage("" + ChatColor.GREEN + "Custom coded plugin by: VineFortuna & CowNecromancer");
-				player.sendMessage("" + ChatColor.GREEN + "Version: " + Version.SCB.getVersion());
-				player.sendMessage("" + ChatColor.GREEN + "Type " + ChatColor.WHITE + "/scbhelp " + ChatColor.GREEN
-						+ "for more information");
+//				player.sendMessage("" + ChatColor.GREEN + ChatColor.BOLD + "[SUPER CRAFT BLOCKS]");
+//				player.sendMessage("" + ChatColor.GREEN + "Custom coded plugin by: VineFortuna & CowNecromancer");
+//				player.sendMessage("" + ChatColor.GREEN + "Version: " + Version.SCB.getVersion());
+//				player.sendMessage("" + ChatColor.GREEN + "Type " + ChatColor.WHITE + "/help " + ChatColor.GREEN
+//						+ "for more information");
 			}
-			if (cmd.getName().equalsIgnoreCase("scbhelp") && sender instanceof Player) {
+			if (cmd.getName().equalsIgnoreCase("help") && sender instanceof Player) {
 				player.sendMessage("" + ChatColor.GREEN + ChatColor.BOLD + "GENERAL SCB COMMANDS");
 				player.sendMessage("" + ChatColor.WHITE + "/join -> " + ChatColor.GREEN + "Join a game");
-				player.sendMessage("" + ChatColor.WHITE + "/leave -> " + ChatColor.GREEN + "Leave your game");
-				player.sendMessage("" + ChatColor.WHITE + "/classes -> " + ChatColor.GREEN + "Lists all available classes");
+				player.sendMessage("" + ChatColor.WHITE + "/maps -> " + ChatColor.GREEN + "See all maps");
+				player.sendMessage("" + ChatColor.WHITE + "/classes -> " + ChatColor.GREEN + "See all classes");
 				player.sendMessage("" + ChatColor.WHITE + "/class -> " + ChatColor.GREEN + "Choose a class");
 				player.sendMessage("" + ChatColor.WHITE + "/spectate -> " + ChatColor.GREEN + "Spectate a game");
-				player.sendMessage("" + ChatColor.WHITE + "/maps -> " + ChatColor.GREEN + "List of all available maps");
+				player.sendMessage("" + ChatColor.WHITE + "/leave -> " + ChatColor.GREEN + "Leave your game");
 			}
 
 			if (cmd.getName().equalsIgnoreCase("exp")) {
 				if (player.hasPermission("scb.exp")) {
 					if (args.length == 0) {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-								+ ChatColor.GREEN + "/exp <amount>");
+						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+								+ "Incorrect usage! Try doing: " + ChatColor.GREEN + "/exp <amount>");
 					} else if (args.length == 1) {
 						int num = Integer.parseInt(args[0]);
 						PlayerData data = this.getDataManager().getPlayerData(player);
@@ -1017,8 +991,8 @@ public class Core extends JavaPlugin implements Listener {
 
 							Bukkit.broadcastMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
 									+ getRankManager().getRank(player).getTagWithSpace() + ChatColor.YELLOW
-									+ player.getName() + " " + ChatColor.RESET + "invited all players in the Lobby to join "
-									+ ChatColor.YELLOW + mapName);
+									+ player.getName() + " " + ChatColor.RESET
+									+ "invited all players in the Lobby to join " + ChatColor.YELLOW + mapName);
 							TextComponent message = new TextComponent(
 									"" + "     " + ChatColor.GREEN + ChatColor.BOLD + "Click here to join!");
 							message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/join " + mapName));
@@ -1053,7 +1027,7 @@ public class Core extends JavaPlugin implements Listener {
 			}
 
 			if (cmd.getName().equalsIgnoreCase("store")) {
-				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+				player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
 						+ "Want to help support the server? Purchase a rank at " + ChatColor.GREEN
 						+ "https://minezone.tebex.io/");
 			}
@@ -1061,15 +1035,17 @@ public class Core extends JavaPlugin implements Listener {
 			if (cmd.getName().equalsIgnoreCase("token") && sender instanceof Player) {
 				if (player.hasPermission("scb.giveTokens")) {
 					if (args.length == 0) {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-								+ ChatColor.GREEN + "/token add <player> <amount>");
+						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+								+ "Incorrect usage! Try doing: " + ChatColor.GREEN + "/token add <player> <amount>");
 					} else if (args[0].equalsIgnoreCase("add")) {
 						if (args.length == 1) {
-							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ "Incorrect usage! Try doing: " + ChatColor.GREEN + "/token add <player> <amount>");
+							player.sendMessage(
+									"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
+											+ ChatColor.GREEN + "/token add <player> <amount>");
 						} else if (args.length == 2) {
-							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ "Incorrect usage! Try doing: " + ChatColor.GREEN + "/token add <player> <amount>");
+							player.sendMessage(
+									"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
+											+ ChatColor.GREEN + "/token add <player> <amount>");
 						} else if (args.length == 3) {
 							Player target = Bukkit.getServer().getPlayerExact(args[1]);
 							try {
@@ -1079,17 +1055,17 @@ public class Core extends JavaPlugin implements Listener {
 								if (target != null) {
 									data.tokens += num;
 
-									player.sendMessage(
-											"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You gave " + ChatColor.GREEN
-													+ target.getName() + ChatColor.RESET + " " + num + " Tokens!");
-									target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given "
-											+ num + " Tokens!");
+									player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You gave "
+											+ ChatColor.GREEN + target.getName() + ChatColor.RESET + " " + num
+											+ " Tokens!");
+									target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+											+ "You were given " + num + " Tokens!");
 									if (this.getGameManager().GetInstanceOfPlayer(player) == null)
 										getScoreboardManager().lobbyBoard(target);
 									this.getDataManager().saveData(data);
 								} else {
-									player.sendMessage(
-											"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Please specify a player!");
+									player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+											+ "Please specify a player!");
 								}
 							} catch (Exception e) {
 								player.sendMessage(
@@ -1097,12 +1073,12 @@ public class Core extends JavaPlugin implements Listener {
 							}
 						}
 					} else {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-								+ ChatColor.GREEN + "/token add <player> <amount>");
+						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+								+ "Incorrect usage! Try doing: " + ChatColor.GREEN + "/token add <player> <amount>");
 					}
 				} else {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank " + ChatColor.RED
-							+ ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to use this command!");
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
+							+ ChatColor.RED + ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to use this command!");
 				}
 			}
 
@@ -1120,7 +1096,8 @@ public class Core extends JavaPlugin implements Listener {
 							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Teleporting to "
 									+ ChatColor.YELLOW + target.getName());
 						} else {
-							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Please enter a player!");
+							player.sendMessage(
+									"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Please enter a player!");
 						}
 					} else if (args.length == 2) {
 						player.sendMessage(color("&r&l(!) &rList of Teleport Commands:"));
@@ -1222,8 +1199,9 @@ public class Core extends JavaPlugin implements Listener {
 			if (cmd.getName().equalsIgnoreCase("tournament")) {
 				if (player.hasPermission("scb.toggleTournament")) {
 					if (args.length != 1) {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-								+ ChatColor.GREEN + "/tournament <toggle/reset/clear/end>");
+						player.sendMessage(
+								"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
+										+ ChatColor.GREEN + "/tournament <toggle/reset/clear/end>");
 					} else if (args[0].equalsIgnoreCase("toggle")) {
 						if (tournament) {
 							tournament = false;
@@ -1300,8 +1278,8 @@ public class Core extends JavaPlugin implements Listener {
 										c = Color.GREEN;
 									else
 										c = Color.YELLOW;
-									fwm.addEffect(FireworkEffect.builder().withColor(c).with(FireworkEffect.Type.BALL_LARGE)
-											.flicker(true).build());
+									fwm.addEffect(FireworkEffect.builder().withColor(c)
+											.with(FireworkEffect.Type.BALL_LARGE).flicker(true).build());
 									fw.setFireworkMeta(fwm);
 								}
 								sec++;
@@ -1328,7 +1306,8 @@ public class Core extends JavaPlugin implements Listener {
 									new BukkitRunnable() {
 										@Override
 										public void run() {
-											p.sendTitle(color("&a" + name), color("&a" + tourney.get(name) + " points"));
+											p.sendTitle(color("&a" + name),
+													color("&a" + tourney.get(name) + " points"));
 										}
 									}.runTaskLater(plugin, 50);
 								}
@@ -1396,8 +1375,9 @@ public class Core extends JavaPlugin implements Listener {
 						}.runTaskLater(plugin, 150 * Math.min(tourney.keySet().size(), 5) - 50);
 
 					} else {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-								+ ChatColor.GREEN + "/tournament <toggle/reset/clear/end>");
+						player.sendMessage(
+								"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
+										+ ChatColor.GREEN + "/tournament <toggle/reset/clear/end>");
 					}
 				} else {
 					player.sendMessage(color("&r&l(!) &rYou need the rank &c&lOWNER &rto use this command!"));
@@ -1414,7 +1394,8 @@ public class Core extends JavaPlugin implements Listener {
 
 						if (target != null) {
 							if (data != null) {
-								player.sendMessage(color("&r&l(!) &e" + target.getName() + "'s points: " + data.points));
+								player.sendMessage(
+										color("&r&l(!) &e" + target.getName() + "'s points: " + data.points));
 							}
 						} else {
 							player.sendMessage(color("&r&l(!) &rPlease specify a player!"));
@@ -1428,8 +1409,8 @@ public class Core extends JavaPlugin implements Listener {
 			if (cmd.getName().equalsIgnoreCase("setpoints") && sender instanceof Player) {
 				if (player.hasPermission("scb.setpoints")) {
 					if (args.length < 2) {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-								+ ChatColor.GREEN + "/setpoints <player> <amount>");
+						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+								+ "Incorrect usage! Try doing: " + ChatColor.GREEN + "/setpoints <player> <amount>");
 					} else {
 						Player target = Bukkit.getServer().getPlayerExact(args[0]);
 						try {
@@ -1441,7 +1422,8 @@ public class Core extends JavaPlugin implements Listener {
 
 								player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You set "
 										+ ChatColor.GREEN + target.getName() + ChatColor.RESET + "'s points to " + num);
-								target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Your points were set to " + num);
+								target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+										+ "Your points were set to " + num);
 								if (tournament && this.getGameManager().GetInstanceOfPlayer(player) == null)
 									getScoreboardManager().lobbyBoard(target);
 								this.getDataManager().saveData(data);
@@ -1450,12 +1432,13 @@ public class Core extends JavaPlugin implements Listener {
 										"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Please specify a player!");
 							}
 						} catch (Exception e) {
-							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Please enter a number!");
+							player.sendMessage(
+									"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Please enter a number!");
 						}
 					}
 				} else {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank " + ChatColor.RED
-							+ ChatColor.BOLD + "OWNER" + ChatColor.RESET + "to use this command!");
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
+							+ ChatColor.RED + ChatColor.BOLD + "OWNER" + ChatColor.RESET + "to use this command!");
 				}
 			}
 
@@ -1471,12 +1454,12 @@ public class Core extends JavaPlugin implements Listener {
 						Player target = Bukkit.getServer().getPlayerExact(args[0]);
 						if (target != null) {
 							new StatsGUI(this, target).inv.open(player);
-							player.sendMessage(
-									"" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Opening "
-											+ ChatColor.YELLOW + target.getName() + "'s" + ChatColor.RESET + " statistics");
+							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+									+ "Opening " + ChatColor.YELLOW + target.getName() + "'s" + ChatColor.RESET
+									+ " statistics");
 						} else
-							player.sendMessage(
-									"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "The specified target is not online!");
+							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+									+ "The specified target is not online!");
 					}
 				}
 			}
@@ -1494,8 +1477,8 @@ public class Core extends JavaPlugin implements Listener {
 					long s = TimeUnit.MILLISECONDS.toSeconds(t);
 					if (!target.isOnline()) {
 						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + target.getName()
-								+ " was last online " + ChatColor.GREEN + h + " hours, " + (m - h * 60) + " minutes, and "
-								+ (s - m * 60) + " seconds ago");
+								+ " was last online " + ChatColor.GREEN + h + " hours, " + (m - h * 60)
+								+ " minutes, and " + (s - m * 60) + " seconds ago");
 					} else {
 						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + target.getName()
 								+ " was last online " + ChatColor.GREEN + "now");
@@ -1507,8 +1490,8 @@ public class Core extends JavaPlugin implements Listener {
 			if (cmd.getName().equalsIgnoreCase("ignite")) {
 				if (player.hasPermission("scb.ignite")) {
 					if (args.length == 0) {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-								+ ChatColor.GREEN + "/ignite <player>");
+						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+								+ "Incorrect usage! Try doing: " + ChatColor.GREEN + "/ignite <player>");
 						return true;
 					}
 					Player target = Bukkit.getServer().getPlayerExact(args[0]);
@@ -1524,11 +1507,12 @@ public class Core extends JavaPlugin implements Listener {
 						return false;
 					}
 				} else {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank " + ChatColor.RED
-							+ ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to perform this command!");
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
+							+ ChatColor.RED + ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to perform this command!");
 				}
 			}
-		} else sender.sendMessage("Hey! You can't use this in the terminal!");
+		} else
+			sender.sendMessage("Hey! You can't use this in the terminal!");
 
 		return false;
 	}
@@ -1557,7 +1541,8 @@ public class Core extends JavaPlugin implements Listener {
 
 	public void sendScoreboardUpdate(Player player) {
 		Rank rank = this.getRankManager().getRank(player);
-		if (rank == null) return;
+		if (rank == null)
+			return;
 		player.setScoreboard(lobbyScoreBoard);
 
 		// Organized tab list for all online players
@@ -1614,8 +1599,12 @@ public class Core extends JavaPlugin implements Listener {
 		sendScoreboardUpdate(player); // This sets the rank next to player name above their head
 
 		// For join message:
-		String rank = getRankManager().getRank(player).getTagWithSpace(); // Gets the player's rank
-		e.setJoinMessage(color("&r&l[&a&l+&r&l] &r" + rank + "&b" + name + "&a connected"));
+		Rank rank = getRankManager().getRank(player); // Gets the player's rank
+		String tag = rank.getTagWithSpace(); // Gets the player's rank tag
+		// e.setJoinMessage(color("&r&l[&a&l+&r&l] &r" + rank + "&b" + name + "&a
+		// connected"));
+		e.setJoinMessage(color("" + rank.getArrowColor() + "► " + tag
+				+ getColorForNames(player, getRankManager().getRank(player)) + " &7has joined!"));
 
 		if (data != null) {
 			player.setLevel(data.level); // Indication what the player's level is
@@ -1641,53 +1630,68 @@ public class Core extends JavaPlugin implements Listener {
 		player.setFoodLevel(20);
 	}
 
+	public String getColorForNames(Player player, Rank rank) {
+		String msg = "";
+
+		if (rank == Rank.OWNER || rank == Rank.ADMIN)
+			msg = color("&c");
+		else if (rank == Rank.CAPTAIN)
+			msg = color("&9");
+		else if (rank == Rank.VIP)
+			msg = color("&e");
+
+		return msg += player.getName();
+	}
+
 	@SuppressWarnings("deprecation")
 	private void chatAnnouncementOnJoin(Player p) {
 		p.sendMessage("----------------------------------------------");
 		p.sendMessage("");
 		p.sendMessage("");
-		p.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "        WELCOME TO THE MINEZONE NETWORK!");
+		p.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "        WELCOME TO MINEZONE");
+		p.sendMessage("");
+		p.sendMessage("" + "         Enjoy Super Craft Blocks!");
+		p.sendMessage("");
 		p.sendMessage("" + "     Be sure to join our Discord Server with " + ChatColor.GREEN + "/socials");
 		p.sendMessage("");
 		p.sendMessage("");
 		p.sendMessage("----------------------------------------------");
-		p.sendTitle("" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.UNDERLINE + "MINEZONE",
-				color("&2&lNEW &e&lFISHING &2&lLOBBY ACTIVITY!"));
 
-		new BukkitRunnable() {
-			@Override
-			public void run() { // Runs after 4 seconds
-				p.sendMessage("----------------------------------------------");
-				p.sendMessage("");
-				p.sendMessage(color("          &2&lNEW &e&lFISHING &2&lLOBBY ACTIVITY"));
-				p.sendMessage("" + "     Try out fishing to get some amazing rewards");
-				p.sendMessage("" + "     by checking out the Fisherman in the lobby!");
-				p.sendMessage("");
-				p.sendMessage("----------------------------------------------");
-				p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
-				p.sendTitle(color("&e&lFISHING"),
-						color("&eVersion " + Version.FISHING.getVersion() + " available now!"));
-			}
-		}.runTaskLater(this, 80); // 80 ticks = 4 seconds (20 ticks per second)
+//		new BukkitRunnable() {
+//			@Override
+//			public void run() { // Runs after 4 seconds
+//				p.sendMessage("----------------------------------------------");
+//				p.sendMessage("");
+//				p.sendMessage(color("          &e&lFISHING &2&lLOBBY ACTIVITY"));
+//				p.sendMessage("" + "     Try out fishing to get some amazing rewards");
+//				p.sendMessage("" + "     by checking out the Fisherman in the lobby!");
+//				p.sendMessage("");
+//				p.sendMessage("----------------------------------------------");
+//				p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
+//				p.sendTitle(color("&e&lFISHING"),
+//						color("&eVersion " + Version.FISHING.getVersion() + " available now!"));
+//			}
+//		}.runTaskLater(this, 80); // 80 ticks = 4 seconds (20 ticks per second)
 
-		new BukkitRunnable() {
-			@Override
-			public void run() { // Runs after 20 seconds
-				p.sendMessage("----------------------------------------------");
-				p.sendMessage("");
-				p.sendMessage("" + ChatColor.AQUA + ChatColor.BOLD + "             Super Craft Blocks");
-				p.sendMessage("");
-				p.sendMessage(color("&7  Welcome to Super Craft Blocks! A custom suite of"));
-				p.sendMessage(color("" + ChatColor.AQUA + "  Class PvP &7based gamemodes hosted exclusively on"));
-				p.sendMessage("                    " + ChatColor.AQUA + ChatColor.UNDERLINE + "minezone.club");
-				p.sendMessage("");
-				if (p.hasPermission("scb.bonusTokens"))
-					p.sendMessage(color("&c&l>> &rThanks for being a " + (getRankManager().getRank(p) == Rank.VIP ?
-				Rank.VIP.getTag() : Rank.CAPTAIN.getTag()) + "&r Supporter!"));
-
-				p.sendMessage("----------------------------------------------");
-			}
-		}.runTaskLater(this, 400); // 400 ticks = 20 seconds (20 ticks per second)
+//		new BukkitRunnable() {
+//			@Override
+//			public void run() { // Runs after 20 seconds
+//				p.sendMessage("----------------------------------------------");
+//				p.sendMessage("");
+//				p.sendMessage("" + ChatColor.AQUA + ChatColor.BOLD + "             Super Craft Blocks");
+//				p.sendMessage("");
+//				p.sendMessage(color("&f  Welcome to Super Craft Blocks! A custom suite of"));
+//				p.sendMessage(color("" + ChatColor.AQUA + "  Class PvP &7based gamemodes hosted exclusively on"));
+//				p.sendMessage("                    " + ChatColor.AQUA + ChatColor.UNDERLINE + "minezone.club");
+//				p.sendMessage("");
+//				if (p.hasPermission("scb.bonusTokens"))
+//					p.sendMessage(color("&c&l>> &rThanks for being a "
+//							+ (getRankManager().getRank(p) == Rank.VIP ? Rank.VIP.getTag() : Rank.CAPTAIN.getTag())
+//							+ "&r Supporter!"));
+//
+//				p.sendMessage("----------------------------------------------");
+//			}
+//		}.runTaskLater(this, 400); // 400 ticks = 20 seconds (20 ticks per second)
 	}
 
 	public Map<Player, EntityArmorStand> msHologram = new HashMap<Player, EntityArmorStand>();
@@ -1723,7 +1727,7 @@ public class Core extends JavaPlugin implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler
 	public void serverMotd(ServerListPingEvent p) {
 		String msg = color("                   &eMinezone &7[1.8-1.21] \n          &2&lHOME OF &c&lSUPER CRAFT BLOCKS");
@@ -1734,6 +1738,9 @@ public class Core extends JavaPlugin implements Listener {
 	@EventHandler
 	public void leave(PlayerQuitEvent e) {
 		Player player = e.getPlayer();
+		Rank rank = getRankManager().getRank(player); // Gets the player's rank
+		String tag = rank.getTagWithSpace(); // Gets the player's rank tag
+
 		// this.packetMain.removePlayer(player);
 		Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
 			ByteArrayOutputStream b = new ByteArrayOutputStream();
@@ -1781,8 +1788,11 @@ public class Core extends JavaPlugin implements Listener {
 			game.getGameSettings().removeFromTimeVotes(player);
 		}
 
-		e.setQuitMessage(color("&r&l[&c&l-&r&l] &r" + getRankManager().getRank(player).getTagWithSpace()
-				+ "&b" + player.getName() + "&c disconnected"));
+		// e.setQuitMessage(color("&r&l[&c&l-&r&l] &r" +
+		// getRankManager().getRank(player).getTagWithSpace() + "&b"
+		// + player.getName() + "&c disconnected"));
+		e.setQuitMessage(color("" + rank.getArrowColor() + "► " + tag
+				+ getColorForNames(player, getRankManager().getRank(player)) + " &7has left!"));
 	}
 
 	public Location hologramLoc(Player player) {
@@ -1818,18 +1828,18 @@ public class Core extends JavaPlugin implements Listener {
 	public void LobbyItems(Player player) {
 		if (this.getCommands() != null) {
 			player.getInventory().setItem(1,
-					ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER), "&b>&3>&f&lQuick Join&3<&b<"));
+					ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER), "&bActive Games &7(Right Click)"));
 			player.getInventory().setItem(3,
-					ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), "&9>&1>&f&lClasses&1<&9<"));
+					ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), "&bClasses &7(Right Click)"));
 			player.getInventory().setItem(8,
-					ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), "&e>&6>&f&lChallenges&6<&e<"));
+					ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), "&bChallenges &7(Right Click)"));
 		}
 		player.getInventory().setItem(0,
-				ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&a>&2>&f&lGame Selector&2<&a<"));
+				ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&bGame Selector &7(Right Click)"));
 		player.getInventory().setItem(4,
-				ItemHelper.setDetails(new ItemStack(Material.CHEST), "&d>&5>&f&lCosmetics&5<&d<"));
+				ItemHelper.setDetails(new ItemStack(Material.CHEST), "&bCosmetics &7(Right Click)"));
 		ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
-		player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&c>&4>&f&lProfile&4<&c<"));
+		player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&bProfile &7(Right Click)"));
 
 		player.getInventory().setItem(5, getFishingRod(player));
 

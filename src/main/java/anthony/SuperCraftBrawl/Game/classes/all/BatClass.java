@@ -19,7 +19,7 @@ public class BatClass extends BaseClass {
 
 	public BatClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.6;
+		baseVerticalJump = 1.3;
 		createArmor(
 				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWU5OWRlZWY5MTlkYjY2YWMyYmQyOGQ2MzAyNzU2Y2NkNTdjN2Y4YjEyYjlkY2E4ZjQxYzNlMGEwNGFjMWNjIn19fQ==",

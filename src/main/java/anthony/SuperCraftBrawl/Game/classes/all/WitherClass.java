@@ -1,8 +1,10 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -10,19 +12,21 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.WitherSkull;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class WitherClass extends BaseClass {
 
-	private int count = 0;
-	private BukkitRunnable witherBow;
+	private int skullCounter;
+	private final ItemStack weapon;
+	private final ItemStack bow;
+	private final Ability skullAbility = new Ability("&8&lSkull", 5, player);
+	private static final int SKULL_AMOUNT = 10;
+	private final PotionEffect wither = new PotionEffect(PotionEffectType.WITHER, 5 * 20, 0, true);
 
 	public WitherClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -34,6 +38,29 @@ public class WitherClass extends BaseClass {
 				6,
 				"Wither"
 		);
+
+		// Weapon
+		weapon = ItemHelper.setDetails(
+				new ItemStack(Material.NETHER_STAR),
+				"&8&lWither Star",
+				"",
+				"&7Apply &8&oWither &e" + (wither.getAmplifier() + 1) + " &7for &e" + wither.getDuration() / 20 + "s"
+		);
+		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
+		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
+
+		// Bow
+		bow = ItemHelper.setDetails(
+				new ItemStack(Material.BOW),
+				skullAbility.getAbilityName() + " Shooter &7(Right Click)",
+				"&7Shoot up to &e" + SKULL_AMOUNT + " &7skulls before recharging",
+				"&7Skulls explode and apply &8&oWither &e" + (wither.getAmplifier() + 1) + " &7for &e" + wither.getDuration() / 20 + "s",
+				"",
+				"&7You can spam this ability"
+		);
+		bow.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
+		ItemHelper.setUnbreakable(bow);
+		ItemHelper.setHideFlags(bow, true);
 	}
 
 	@Override
@@ -42,36 +69,51 @@ public class WitherClass extends BaseClass {
 	}
 
 	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
-	}
-
-	@Override
-	public void SetNameTag() {
-
-	}
-
-	@Override
 	public void SetItems(Inventory playerInv) {
-		playerInv.setItem(0,
-				ItemHelper.addEnchant(
-						ItemHelper.addEnchant(new ItemStack(Material.NETHER_STAR), Enchantment.DAMAGE_ALL, 2),
-						Enchantment.KNOCKBACK, 1));
-		playerInv.setItem(1,
-				ItemHelper.setUnbreakable(ItemHelper.addEnchant(new ItemStack(Material.BOW),
-						Enchantment.ARROW_INFINITE, 1)));
+		skullAbility.getCooldownInstance().reset();
+		skullCounter = SKULL_AMOUNT;
+		playerInv.setItem(0, weapon);
+		playerInv.setItem(1, bow);
 		playerInv.setItem(35, new ItemStack(Material.ARROW));
-		count = 0;
+	}
+
+	@Override
+	public void Tick(int gameTicks) {
+		if (!isPlayerAlive()) return;
+
+		if (!skullAbility.isReady()) {
+			int remainingTime = (int) (skullAbility.getCooldownInstance().getRemainingCooldownSeconds() + 1);
+			String msg = ChatColorHelper.color(skullAbility.getAbilityName() + " Shooter &rregenerates in &e" + remainingTime + "s");
+			getActionBarManager().setActionBar(player, "wither.cooldown", msg, 2);
+		} else {
+			if (skullCounter == 0) return;
+			String plural =  skullCounter > 1 ? "s" : "";
+			String msg = ChatColorHelper.color("You can use &e" + skullCounter + " &rmore " + skullAbility.getAbilityName() + plural);
+			getActionBarManager().setActionBar(player, "wither.cooldown", msg, 2);
+		}
 	}
 
 	@Override
 	public void DoDamage(EntityDamageByEntityEvent event) {
-		BaseClass bc = instance.classes.get(player);
-		if (bc != null && bc.getLives() <= 0)
-			return;
-		if (event.getEntity() instanceof Player) {
-			Player p = (Player) event.getEntity();
-			p.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 95, 0, true));
+		if (!isPlayerAlive()) return;
+		checkToApplyWither(event);
+	}
+
+	private void checkToApplyWither(EntityDamageByEntityEvent event) {
+		ItemStack heldItem = player.getInventory().getItem(player.getInventory().getHeldItemSlot());
+
+		boolean isWitherSkull = event.getDamager() != null && event.getDamager().getType().equals(EntityType.WITHER_SKULL);
+		boolean isWeaponMelee =
+				event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
+				&& heldItem != null
+				&& heldItem.equals(weapon);
+
+		if (isWitherSkull || isWeaponMelee) {
+			if (event.getEntity() instanceof Player) {
+				Player damagedPlayer = (Player) event.getEntity();
+				if (damagedPlayer == player) return;
+				damagedPlayer.addPotionEffect(wither);
+			}
 		}
 	}
 
@@ -80,53 +122,20 @@ public class WitherClass extends BaseClass {
 		if (event.getEntityType() == EntityType.ARROW) {
 			event.setCancelled(true);
 
-			if (witherBow == null) {
+			if (skullAbility.isReady()) {
 				WitherSkull skull = player.launchProjectile(WitherSkull.class);
 				skull.setIsIncendiary(false);
-				count++;
-			}
-
-			if (count == 10) {
-				if (witherBow == null) {
-					witherBow = new BukkitRunnable() {
-						int ticks = 5;
-
-						@Override
-						public void run() {
-							if (ticks <= 5 && ticks > 0) {
-								String msg = instance.getGameManager().getMain()
-										.color("&9&l(!) &eWither's Bow Cooldown: " + ticks + "s");
-								getActionBarManager().setActionBar(player, "wither.cooldown", msg, 2);
-							} else if (ticks == 0) {
-								witherBow = null;
-								this.cancel();
-								String msg = instance.getGameManager().getMain()
-										.color("&9&l(!) &eYou can now use Wither's Bow");
-								getActionBarManager().setActionBar(player, "wither.cooldown", msg, 2);
-								count = 0;
-							}
-
-							ticks--;
-						}
-
-					};
-					witherBow.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+				skullCounter--;
+				if (skullCounter == 0) {
+					skullAbility.use();
+					skullCounter = SKULL_AMOUNT;
 				}
 			}
 		}
 	}
-	
-	@Override
-	public void UseItem(PlayerInteractEvent event) {
-
-	}
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(
-				ItemHelper.addEnchant(new ItemStack(Material.NETHER_STAR), Enchantment.DAMAGE_ALL, 2),
-				Enchantment.KNOCKBACK, 1);
-		return item;
+		return weapon;
 	}
-
 }

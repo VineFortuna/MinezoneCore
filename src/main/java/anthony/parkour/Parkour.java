@@ -158,7 +158,7 @@ public class Parkour implements Listener {
 					/*
 					 * } else if (player.getLocation().getBlock().getRelative(BlockFace.DOWN)
 					 * .getType() == Material.GLOWSTONE) { player.sendTitle("PARKOUR COMPLETE!",
-					 * main.color("&eSending to spawn.."));
+					 * main.color("&eSending to spawn..."));
 					 * main.getParkour().players.remove(player); checkpointNum.remove(player);
 					 * checkpoint.remove(player); b.remove(player); main.ResetPlayer(player);
 					 * main.LobbyItems(player); main.LobbyBoard(player);

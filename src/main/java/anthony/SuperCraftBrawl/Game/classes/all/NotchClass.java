@@ -1,19 +1,17 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import anthony.util.SoundManager;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -23,11 +21,13 @@ import org.bukkit.util.Vector;
 import xyz.xenondevs.particle.ParticleEffect;
 import xyz.xenondevs.particle.data.texture.BlockTexture;
 
-import java.util.Random;
-
 public class NotchClass extends BaseClass {
 
-	private int cooldownSec;
+	private final ItemStack weapon;
+	private final ItemStack pullItem;
+	private final Ability pullAbility = new Ability("&3&lCollapse X-Axis", 10, player);
+	private static final double PULL_ABILITY_RANGE = 25;
+
 
 	public NotchClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -41,149 +41,183 @@ public class NotchClass extends BaseClass {
 				6,
 				"Notch"
 		);
-	}
 
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
+		// Weapon
+		weapon = ItemHelper.setDetails(
+				new ItemStack(Material.STONE_SWORD),
+				"&3&lNotch's Sword"
+		);
+		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
+		ItemHelper.setUnbreakable(weapon);
+
+		// Pull Ability
+		String displayRange = ItemHelper.formatDouble(PULL_ABILITY_RANGE);
+
+		pullItem = ItemHelper.setDetails(
+				new ItemStack(Material.GRASS),
+				pullAbility.getAbilityNameRightClickMessage(),
+				"&7Shoot a beam that pulls enemies",
+				"",
+				"&7Stronger at farther distances",
+				"&7Range: &a" + displayRange + " &7blocks"
+		);
 	}
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		notch.startTime = System.currentTimeMillis() - 100000;
-		playerInv.setItem(0, ItemHelper.addEnchant(
-				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.STONE_SWORD),
-						"" + ChatColor.BLACK + ChatColor.BOLD + "Notch's Sword"), Enchantment.KNOCKBACK, 1),
-				Enchantment.DURABILITY, 10000));
-		playerInv.setItem(1,
-				ItemHelper.setDetails(new ItemStack(Material.EMERALD), "" + ChatColor.GRAY + "#RightClick"));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
+		pullAbility.getCooldownInstance().reset();
+		playerInv.setItem(0, weapon);
+		playerInv.setItem(1, pullItem);
+		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
 	}
 
 	@Override
 	public void Tick(int gameTicks) {
-		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Notch
-				&& instance.classes.get(player).getLives() > 0) {
-			this.cooldownSec = (10000 - notch.getTime()) / 1000 + 1;
-			
-			if (notch.getTime() < 10000) {
-				String msg = instance.getGameManager().getMain()
-						.color("&0Collape X-Axis &rregenerates in: &e" + this.cooldownSec + "s");
-				getActionBarManager().setActionBar(player, "notch.cooldown", msg, 2);
-			} else {
-				String msg = instance.getGameManager().getMain().color("&rYou can use &0Collape X-Axis");
-				getActionBarManager().setActionBar(player, "notch.cooldown", msg, 2);
-				
-				if (player.getInventory().contains(Material.DIRT) && !checkIfDead(player, instance)) {
-					int i = player.getInventory().first(Material.DIRT);
-					player.getInventory().getItem(i).setType(Material.GRASS);
+		if (!isPlayerAlive()) return;
+
+		if (!(player.getActivePotionEffects().contains(PotionEffectType.WEAKNESS)))
+			player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
+
+		pullAbility.updateActionBar(player, this);
+
+		if (!player.getInventory().contains(Material.DIRT)) return;
+		if (!pullAbility.isReady()) return;
+		int dirtSlot = player.getInventory().first(Material.DIRT);
+		player.getInventory().getItem(dirtSlot).setType(Material.GRASS);
+	}
+
+	@Override
+	public void UseItem(PlayerInteractEvent event) {
+		ItemStack item = event.getItem();
+		Action action = event.getAction();
+
+		if (item == null) return;
+		if (player.getGameMode() == GameMode.SPECTATOR) return;
+		if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
+		// Pull Ability
+		if (item.equals(pullItem)) {
+			if (!pullAbility.isReady()) return;
+
+			usePullAbility();
+			item.setType(Material.DIRT);
+			pullAbility.use();
+		}
+
+		if (item.getType() == Material.DIRT) {
+			int remainingCooldown = (int) pullAbility.getCooldownInstance().getRemainingCooldownSeconds();
+			pullAbility.sendCustomMessage("&l&c(!) &rYou're still on cooldown for &e" + remainingCooldown + "s"
+			);
+		}
+	}
+
+	private void usePullAbility() {
+		Location endLocation = findEndLocation();
+	 	SoundManager.playSoundToAll(player, Sound.DIG_GRASS, 1, 1);
+		displayParticlesAlongPath(endLocation);
+		applyPullEffectToPlayers(endLocation);
+	}
+
+	private Location findEndLocation() {
+		Location startLocation = player.getEyeLocation();
+		BlockIterator blockIterator = new BlockIterator(startLocation, 0, (int) PULL_ABILITY_RANGE);
+		Location endLocation = startLocation;
+
+		while (blockIterator.hasNext()) {
+			Block block = blockIterator.next();
+			endLocation = block.getLocation();
+
+			if (block.getType().isSolid()) {
+				break;
+			}
+		}
+
+		return endLocation;
+	}
+
+	private void displayParticlesAlongPath(Location endLocation) {
+		Vector direction = player.getEyeLocation().getDirection();
+		double maxDistance = endLocation.distance(player.getEyeLocation());
+
+		for (double t = 1; t < maxDistance; t += 0.5) {
+			ParticleEffect.BLOCK_CRACK.display(
+					player.getEyeLocation().add(direction.clone().multiply(t)),
+					0.0F, 0.0F, 0.0F, 0.0F, 1,
+					new BlockTexture(Material.GRASS)
+			);
+		}
+	}
+
+	private void applyPullEffectToPlayers(Location endLocation) {
+		Vector direction = player.getEyeLocation().getDirection();
+		double maxDistance = endLocation.distance(player.getEyeLocation());
+
+		for (Player targetPlayer : instance.players) {
+			if (targetPlayer != player) {
+				Vector playerVector = targetPlayer.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
+				double distance = playerVector.dot(direction);
+
+				if (distance < maxDistance) {
+					Location closestPoint = player.getEyeLocation().add(direction.clone().multiply(distance));
+
+					if (closestPoint.distanceSquared(targetPlayer.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
+						if (shouldApplyPullEffect(targetPlayer)) {
+							applyPullEffectReworkTest(targetPlayer, direction, distance);
+						}
+					}
 				}
 			}
 		}
 	}
 
-	@Override
-	public void UseItem(PlayerInteractEvent event) {
-		ItemStack item = event.getPlayer().getItemInHand();
-		if (item.getType() == Material.EMERALD
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			player.getInventory().clear(player.getInventory().getHeldItemSlot());
-			Random r = new Random();
-			int chance = r.nextInt(100);
+	private void applyPullEffectReworkTest(Player targetPlayer, Vector direction, double distance) {
+		boolean isOnGround = targetPlayer.isOnGround();
+		Vector velocity = getVelocity(isOnGround, direction, distance);
+		targetPlayer.setVelocity(velocity);
+		targetPlayer.playSound(targetPlayer.getLocation(), Sound.DIG_STONE, 1, 1);
+	}
 
-			if (chance <= 85) {
-				player.getInventory()
-						.addItem(ItemHelper.setDetails(new ItemStack(Material.GRASS),
-								"" + ChatColor.BLACK + "Collapse X-Axis", "",
-								instance.getGameManager().getMain().color("&7Pull enemies when aiming at them!"),
-								instance.getGameManager().getMain().color("   &rRange: &e20 blocks")));
-				player.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rYou were given &0Collapse X-Axis"));
+	private Vector getVelocity(Boolean isOnGround, Vector direction, double distance) {
+		Vector velocity = direction.clone().multiply(-1);
+
+		double minVelocity;
+		double maxVelocity;
+
+		if (isOnGround) {
+			if (distance <= 8) {
+				minVelocity = 2.5;
 			} else {
-				player.getInventory()
-						.addItem(ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR),
-								"" + ChatColor.YELLOW + "Teleport a Player", "",
-								instance.getGameManager().getMain().color("&7Teleport a random player to you!")));
-				player.sendMessage(
-						instance.getGameManager().getMain().color("&2&l(!) &rYou were given &eTeleport a Player"));
+				minVelocity = 3.5;
 			}
-		} else if (item.getType() == Material.GRASS
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			notch.restart();
-			item.setType(Material.DIRT);
-			int range = 25;
-			Location endLoc = player.getEyeLocation();
-			BlockIterator b = new BlockIterator(player.getEyeLocation(), 0, range);
-			
-			while (b.hasNext()) {
-				Block block = b.next();
-				endLoc = block.getLocation();
-				
-				if (block.getType().isSolid())
-					break;
-			}
-			
-			Vector dir = player.getEyeLocation().getDirection();
-			double maxDist = endLoc.distance(player.getEyeLocation());
-			
-			for (double t = 1; t < maxDist; t += 0.5) {
-				ParticleEffect.BLOCK_CRACK.display(player.getEyeLocation().add(dir.clone().multiply(t)), 0.0F, 0.0F,
-						0.0F, 0.0F, 1, new BlockTexture(Material.GRASS));
-			}
-			
-			for (Player p : instance.players) {
-				if (p != player) {
-					Vector d = p.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
-					double dist = d.dot(dir);
-					
-					if (dist < maxDist) {
-						Location closest = player.getEyeLocation().add(dir.clone().multiply(dist));
-						
-						if (closest.distanceSquared(p.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
-							if (instance.duosMap != null) {
-								if (!(instance.team.get(p).equals(instance.team.get(player)))) {
-									p.setVelocity(dir.clone().multiply(-dist / 3.5));
-								}
-							} else {
-								p.setVelocity(dir.clone().multiply(-dist / 3.5));
-							}
-						}
-					}
-				}
-			}
-		} else if (item.getType() == Material.DIRT
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			int seconds = (10000 - notch.getTime()) / 1000 + 1;
-			event.setCancelled(true);
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-					+ "Bro... You're still on cooldown for " + ChatColor.YELLOW + seconds + " more seconds ");
-		} else if (item.getType() == Material.NETHER_STAR
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			if (!(player.isOnGround())) {
-				player.sendMessage(
-						instance.getGameManager().getMain().color("&c&l(!) &rYou need to be on the ground to use this!"));
-				return;
-			}
-			if (instance.alivePlayers > 1) {
-				Random random = new Random();
-				Player gamePlayer = null;
-				boolean check = false;
-				
-				while (!check) {
-					gamePlayer = instance.players.get(random.nextInt(instance.players.size()));
-					
-					if (gamePlayer != player && gamePlayer.getGameMode() != GameMode.SPECTATOR)
-						if (instance.classes.containsKey(gamePlayer) && instance.classes.get(gamePlayer).getLives() > 0)
-							check = true;
-				}
-				
-				gamePlayer.teleport(player);
-				gamePlayer.sendMessage(
-						instance.getGameManager().getMain().color("&2&l(!) &rYou got teleported to &e" + player.getName()));
-				player.sendMessage(instance.getGameManager().getMain()
-						.color("&2&l(!) &rYou teleported &e" + gamePlayer.getName() + "&r to you!"));
-				player.getInventory().clear(player.getInventory().getHeldItemSlot());
-			}
+			maxVelocity = 6.5;
+		} else {
+			minVelocity = 1.0;
+			maxVelocity = 3.5;
 		}
+
+		double velocityMagnitude = calculateVelocityMagnitude(minVelocity, maxVelocity, distance);
+		velocity.multiply(velocityMagnitude);
+
+		return velocity;
+	}
+
+	private double calculateVelocityMagnitude(double minVelocity, double maxVelocity, double distance) {
+		double magnitude;
+
+		magnitude = maxVelocity * (distance / PULL_ABILITY_RANGE);
+
+		magnitude = Math.min(magnitude, maxVelocity);
+		magnitude = Math.max(magnitude, minVelocity);
+//		// Debug message
+//		player.sendMessage("Magnitude: " + magnitude + ", Distance: " + distance);
+
+		return magnitude;
+	}
+
+	private boolean shouldApplyPullEffect(Player targetPlayer) {
+		if (instance.duosMap != null) {
+			return !instance.team.get(targetPlayer).equals(instance.team.get(player));
+		}
+		return true;
 	}
 
 	@Override
@@ -192,15 +226,7 @@ public class NotchClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
-
-	}
-
-	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.setUnbreakable(
-				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.STONE_SWORD),
-						"" + ChatColor.BLACK + ChatColor.BOLD + "Notch's Sword"), Enchantment.KNOCKBACK, 1));
-		return item;
+		return weapon;
 	}
 }

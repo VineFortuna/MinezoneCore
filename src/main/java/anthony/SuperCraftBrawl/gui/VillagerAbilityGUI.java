@@ -163,54 +163,24 @@ public class VillagerAbilityGUI implements InventoryProvider {
             // Playing successful Sound to player
             player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
             // Playing villager Sound to all players
-            SoundManager.playSoundToAllGamePlayersFromALocation(gameInstance, player.getLocation(), Sound.VILLAGER_HAGGLE, 1, 1);
+            SoundManager.playSoundToAll(player, Sound.VILLAGER_HAGGLE, 1, 1);
             // Spawn green particles
             spawnTradeParticles(player);
-//            spawnTradeParticlesCircle(player);
             updateTitle(player);
         }
     }
 
     private void spawnTradeParticles(Player player) {
-        // Get player's location
         Location playerLocation = player.getLocation();
+        int particleCount = 100; // Adjust based on how dense you want the particles
+        double radius = 1.0; // Adjust the radius around the player
 
-        // Define number of particles and range
-        int particleCount = 20; // Lower particle count to focus around the player
-        double height = 1.5; // Spawn particles above the player's head
-
-        // Spawn particles
-        for (int i = 0; i < particleCount; i++) {
-            // Randomize slight horizontal offset for variation, but keep it small
-            double xOffset = (Math.random() - 0.5) * 0.5; // Small random x offset
-            double zOffset = (Math.random() - 0.5) * 0.5; // Small random z offset
-
-            // Set particle position to be slightly above the player and rise up
-            Location effectLocation = playerLocation.clone().add(xOffset, height + (Math.random() * 0.5), zOffset); // Add y-axis variance to create a rising effect
-
-            // Play the effect (replace with the desired effect)
-            player.getWorld().playEffect(effectLocation, Effect.HAPPY_VILLAGER, 0);
-        }
-    }
-
-    private void spawnTradeParticlesCircle(Player player) {
-        // Get player's location
-        Location playerLocation = player.getLocation();
-
-        // Define number of particles and range
-        int particleCount = 30; // Adjust based on how dense you want the particles
-        double radius = 1.5; // Adjust the radius around the player
-
-        // Spawn particles
         for (int i = 0; i < particleCount; i++) {
             double angle = Math.random() * Math.PI * 2; // Random angle for circle
             double x = radius * Math.cos(angle);
             double z = radius * Math.sin(angle);
 
-            // Create the location for the effect
             Location effectLocation = playerLocation.clone().add(x, 1, z); // 1 block above the player
-
-            // Play the effect (replace with the desired effect)
             player.getWorld().playEffect(effectLocation, Effect.HAPPY_VILLAGER, 0);
         }
     }

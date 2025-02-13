@@ -9,25 +9,26 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.fishing.FishType;
+import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
+import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
 import anthony.SuperCraftBrawl.gui.GameStatsGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
-import anthony.util.ChatColorHelper;
-import com.google.common.collect.Lists;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.minecraft.server.v1_8_R3.EnumParticle;
+import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 import org.apache.commons.lang.WordUtils;
+
+import com.google.common.collect.Lists;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 
@@ -62,7 +63,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 				break;
 
 			case "fly":
-			case "f":
 				flyCommand(player);
 				break;
 
@@ -76,6 +76,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 			case "gamestats":
 				gameStatsCommand(args, player);
+				break;
+
+			case "socials":
+				socialsCommand(player);
 				break;
 
 			case "maps":
@@ -93,25 +97,197 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "class":
 				classCommand(args, player);
 				break;
-
+				
 			case "leave":
-			case "l":
 				this.leaveGame(player);
 				break;
 
 			case "players":
 				playersCommand(player);
 				break;
+
 			case "party":
 				partyCommand(args, player);
 				break;
+
 			case "color":
 				colorCommand(args, player);
+				break;
+
+			case "lactate":
+				lactateCommand(player);
+				break;
+
+			case "sound":
+				soundCommand(args, player);
+				break;
+			case "heal":
+				healCommand(player);
 				break;
 			}
 		} else
 			sender.sendMessage("Hey! You can't use this in the terminal!");
 		return true;
+	}
+
+	private void socialsCommand(Player player) {
+		player.sendMessage(main.color("&7&m-------&7&l[Social Media]&7&m-------"));
+		player.sendMessage("");
+		player.sendMessage(main.color("&f&lDiscord: &ahttps://discord.gg/FSZpmY9FZB"));
+		player.sendMessage(main.color("&f&lYouTube: &ahttps://www.youtube.com/@minezone6480"));
+		player.sendMessage(main.color("&f&lTikTok: &ahttps://www.tiktok.com/@minezonemc"));
+//				player.sendMessage(main.color("&f&lTwitter: &ahttps://twitter.com/MinezoneMC"));
+		player.sendMessage("");
+		player.sendMessage(main.color("&7&m----------------------------"));
+	}
+
+	private void healCommand(Player player) {
+		if (!player.hasPermission("scb.heal")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
+		// Fully heal the player to their maximum health
+		double maxHealth = player.getMaxHealth();
+		player.setHealth(maxHealth);
+		player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
+	}
+
+	private void soundCommand(String[] args, Player player) {
+		if (!player.hasPermission("scb.sound")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
+		if (args.length < 1) {
+			// Display all sounds in a clickable list
+			displaySoundList(player);
+			return;
+		}
+
+		Location location = player.getLocation();
+
+		try {
+			Sound sound = Sound.valueOf(args[0].toUpperCase()); // Get the Sound enum value
+			float volume = 1.0f; // Default volume
+			float pitch = 1.0f;  // Default pitch
+
+			// Parse pitch if provided
+			if (args.length >= 2) {
+				pitch = Float.parseFloat(args[1]);
+			}
+
+			// Parse volume if provided
+			if (args.length >= 3) {
+				volume = Float.parseFloat(args[2]);
+			}
+
+			// Play the sound to everyone in the world
+			player.getWorld().playSound(location, sound, volume, pitch);
+			player.sendMessage(ChatColor.GREEN + "Played sound: " + sound.name() + " with pitch " + pitch + " and volume " + volume);
+		} catch (IllegalArgumentException e) {
+			player.sendMessage(ChatColor.RED + "Invalid sound name.");
+		}
+	}
+
+	private void displaySoundList(Player player) {
+		player.sendMessage(ChatColor.GOLD + "=== Click a Sound to Play It ===");
+
+		for (Sound sound : Sound.values()) {
+			// Create a clickable TextComponent for each sound
+			TextComponent soundMessage = new TextComponent(ChatColor.AQUA + "- " + sound.name());
+			soundMessage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/sound " + sound.name()));
+
+			// Send the clickable message to the player
+			player.spigot().sendMessage(soundMessage);
+		}
+
+		player.sendMessage(ChatColor.GOLD + "=== End of Sound List ===");
+	}
+
+	private void lactateCommand(Player player) {
+		if (player.hasPermission("scb.lactate")) {
+			Location loc = player.getLocation();
+			loc.setY(loc.getY() + 0.7);
+			player.sendMessage(main.color("&r&l(!) &rYou have &r&lLACTATED!"));
+			player.getWorld().playSound(loc, Sound.COW_HURT, 1, 1);
+			sendParticle(player, loc, EnumParticle.SNOWBALL, 300, 0.8f, 0.0f, -0.3f, 0.0f);
+		} else {
+			player.sendMessage(main.color("&c&l(!) &rYou need the rank &5&lSUPREME &rto use this command!"));
+		}
+	}
+
+	public static void sendParticle(Player player, Location location, EnumParticle particle, int amount, float speed,
+			float offsetX, float offsetY, float offsetZ) {
+		PacketPlayOutWorldParticles particles = new PacketPlayOutWorldParticles(particle, true, (float) location.getX(),
+				(float) location.getY(), (float) location.getZ(), offsetX, offsetY, offsetZ, speed, amount);
+
+		for (Player players : Bukkit.getOnlinePlayers())
+			((CraftPlayer) players).getHandle().playerConnection.sendPacket(particles);
+	}
+
+	public void colorCommand(String[] args, Player player) {
+		List<ChatColor> colors = Arrays.asList(
+				ChatColor.WHITE,
+				ChatColor.YELLOW, ChatColor.GOLD,
+				ChatColor.GREEN, ChatColor.DARK_GREEN,
+				ChatColor.AQUA, ChatColor.DARK_AQUA,
+				ChatColor.BLUE, ChatColor.DARK_BLUE,
+				ChatColor.LIGHT_PURPLE, ChatColor.DARK_PURPLE,
+				ChatColor.RED, ChatColor.DARK_RED,
+				ChatColor.GRAY, ChatColor.DARK_GRAY,
+				ChatColor.BLACK,
+				ChatColor.RESET
+		);
+
+		PlayerData data = main.getDataManager().getPlayerData(player);
+
+		if (player.hasPermission("scb.color")) {
+			if (data != null) {
+				try {
+					if (args.length == 0 || !colors.contains(ChatColor.valueOf(args[0].toUpperCase()))) {
+						colorMessage(player, colors);
+					} else if (args[0].equalsIgnoreCase("reset")) {
+						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
+								+ ChatColor.RESET + player.getName());
+						data.color = "";
+					} else {
+						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
+								+ ChatColor.valueOf(args[0].toUpperCase()) + player.getName());
+						data.color = args[0].toUpperCase();
+					}
+				} catch (IllegalArgumentException e) {
+					colorMessage(player, colors);
+				}
+			}
+		} else {
+			player.sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
+					+ "You need the rank " + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN " + ChatColor.RESET
+					+ "to use this command");
+		}
+	}
+
+	private void colorMessage(Player player, List<ChatColor> colors) {
+		player.sendMessage(main.color("&f&l----------------------------------------"));
+		player.sendMessage(main.color("&r&l(!) &rClick on a color below to select it:"));
+		TextComponent[] colorText = new TextComponent[colors.size()-1];
+		int i = 0;
+		for (ChatColor color : colors) {
+			if (color != ChatColor.RESET) {
+				TextComponent message = new TextComponent(WordUtils.capitalizeFully(color.name().replace('_', ' ')));
+				if (i < colorText.length)
+					message.addExtra(ChatColor.GRAY + ", ");
+				message.setColor(color.asBungee());
+				message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/color " + color.name()));
+				colorText[i] = message;
+				i++;
+			}
+		}
+		player.spigot().sendMessage(colorText);
+		TextComponent message = new TextComponent("Click here to reset color");
+		message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/color RESET"));
+		player.spigot().sendMessage(message);
+		player.sendMessage(main.color("&f&l----------------------------------------"));
 	}
 
 	private void partyCommand(String[] args, Player player) {
@@ -179,15 +355,15 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void startGameCommand(Player player) {
+		if (!player.hasPermission("scb.startGame")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
 		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 
 		if (game == null) {
 			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
-			return;
-		}
-
-		if (!player.hasPermission("scb.startGame")) {
-			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
 			return;
 		}
 
@@ -349,8 +525,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
-		// Send the message to the player
-		player.sendMessage(ChatColorHelper.color(createMapsString()));
+		new GameSelectorGUI(main).inv.open(player);
+
+//		// Send the message to the player
+//		player.sendMessage(ChatColorHelper.color(createMapsString()));
 	}
 
 	private String createMapsString() {
@@ -461,27 +639,29 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void spectateCommand(String[] args, Player player) {
-		if (args.length == 0) {
-			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/spectate <map>"));
+		if (args.length != 0) {
+			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/spectate"));
 			return;
 		}
 
-		String mapName = args[0];
-		Maps map = null;
+		new ActiveGamesGUI(main).inv.open(player);
 
-		for (Maps maps : Maps.values()) {
-			if (maps.toString().equalsIgnoreCase(mapName)) {
-				map = maps;
-				break;
-			}
-		}
-
-		if (map == null) {
-			player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maps &rfor a list of maps"));
-			return;
-		}
-
-		main.getGameManager().SpectatorJoinMap(player, map);
+//		String mapName = args[0];
+//		Maps map = null;
+//
+//		for (Maps maps : Maps.values()) {
+//			if (maps.toString().equalsIgnoreCase(mapName)) {
+//				map = maps;
+//				break;
+//			}
+//		}
+//
+//		if (map == null) {
+//			player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maps &rfor a list of maps"));
+//			return;
+//		}
+//
+//		main.getGameManager().SpectatorJoinMap(player, map);
 	}
 
 	private void playersCommand(Player player) {
@@ -503,70 +683,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 		player.sendMessage(main.color("&l(!) &aPlayers in your game (" + game.players.size() + "): "));
 		player.sendMessage(main.color("l--> " + players));
-	}
-
-	public void colorCommand(String[] args, Player player) {
-		List<ChatColor> colors = Arrays.asList(
-				ChatColor.WHITE,
-				ChatColor.YELLOW, ChatColor.GOLD,
-				ChatColor.GREEN, ChatColor.DARK_GREEN,
-				ChatColor.AQUA, ChatColor.DARK_AQUA,
-				ChatColor.BLUE, ChatColor.DARK_BLUE,
-				ChatColor.LIGHT_PURPLE, ChatColor.DARK_PURPLE,
-				ChatColor.RED, ChatColor.DARK_RED,
-				ChatColor.GRAY, ChatColor.DARK_GRAY,
-				ChatColor.BLACK,
-				ChatColor.RESET
-		);
-
-		PlayerData data = main.getDataManager().getPlayerData(player);
-
-		if (player.hasPermission("scb.color")) {
-			if (data != null) {
-				try {
-					if (args.length == 0 || !colors.contains(ChatColor.valueOf(args[0].toUpperCase()))) {
-						colorMessage(player, colors);
-					} else if (args[0].equalsIgnoreCase("reset")) {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
-								+ ChatColor.RESET + player.getName());
-						data.color = "";
-					} else {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
-								+ ChatColor.valueOf(args[0].toUpperCase()) + player.getName());
-						data.color = args[0].toUpperCase();
-					}
-				} catch (IllegalArgumentException e) {
-					colorMessage(player, colors);
-				}
-			}
-		} else {
-			player.sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-					+ "You need the rank " + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN " + ChatColor.RESET
-					+ "to use this command");
-		}
-	}
-
-	private void colorMessage(Player player, List<ChatColor> colors) {
-		player.sendMessage(main.color("&f&l----------------------------------------"));
-		player.sendMessage(main.color("&r&l(!) &rClick on a color below to select it:"));
-		TextComponent[] colorText = new TextComponent[colors.size()-1];
-		int i = 0;
-		for (ChatColor color : colors) {
-			if (color != ChatColor.RESET) {
-				TextComponent message = new TextComponent(WordUtils.capitalizeFully(color.name().replace('_', ' ')));
-				if (i < colorText.length)
-					message.addExtra(ChatColor.GRAY + ", ");
-				message.setColor(color.asBungee());
-				message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/color " + color.name()));
-				colorText[i] = message;
-				i++;
-			}
-		}
-		player.spigot().sendMessage(colorText);
-		TextComponent message = new TextComponent("Click here to reset color");
-		message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/color RESET"));
-		player.spigot().sendMessage(message);
-		player.sendMessage(main.color("&f&l----------------------------------------"));
 	}
 
 	private void classCommand(String[] args, Player player) {
@@ -599,8 +715,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 		ClassDetails classDetails = playerData.playerClasses.get(type.getID());
 
 		if (!isClassUnlocked(player, classDetails, type) || !isLevelUnlocked(player, playerData, type)
-				|| !isFishermanClassUnlocked(player, type) || !isRankRequirementMet(player, type) ||
-				!isPlayerInGame(player, game) || !isGameStateWaiting(game, player)
+				|| !isFishermanClassUnlocked(player, type) || !isRankRequirementMet(player, type)
+				|| !isPlayerInGame(player, game) || !isGameStateWaiting(game, player)
 				|| !isFrenzyGameType(game, player)) {
 			return;
 		}
@@ -611,19 +727,19 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void displayClassSelectionMessage(Player player, ClassType type) {
-		player.sendMessage(main.color("&2&l=============================================="));
+		player.sendMessage(main.color("&2&l============================================="));
 		player.sendMessage(main.color("&2&l|| "));
 		player.sendMessage(main.color("&2&l|| "));
 		player.sendMessage(main.color("&2&l|| " + "&e&lSelected Class: " + type.getTag()));
 		player.sendMessage(main.color("&2&l|| " + "&e&lClass Desc: &e" + type.getClassDesc()));
 		player.sendMessage(main.color("&2&l|| "));
 		player.sendMessage(main.color("&2&l|| "));
-		player.sendMessage(main.color("&2&l=============================================="));
+		player.sendMessage(main.color("&2&l============================================="));
 	}
 
 	private void selectRandomClass(Player player, PlayerData playerData) {
 		Random random = new Random();
-		ClassType classType = ClassType.values()[random.nextInt(ClassType.values().length)];
+		ClassType classType = ClassType.getAvailableClasses()[random.nextInt(ClassType.getAvailableClasses().length)];
 
 		if (playerData.playerClasses.get(classType.getID()) != null
 				&& playerData.playerClasses.get(classType.getID()).purchased || classType.getTokenCost() == 0) {
@@ -684,7 +800,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private ClassType getClassType(String className) {
-		for (ClassType type : ClassType.values()) {
+		for (ClassType type : ClassType.getAvailableClasses()) {
 			if (className.equalsIgnoreCase(type.toString())) {
 				return type;
 			}
@@ -757,7 +873,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 				return mapsString;
 			}
 		} else if (cmd.getName().equalsIgnoreCase("class")) {
-			List<ClassType> a = Arrays.asList(ClassType.values());
+			List<ClassType> a = Arrays.asList(ClassType.getAvailableClasses());
 			List<String> f = Lists.newArrayList();
 			if (args.length == 1) {
 				for (ClassType s : a) {
@@ -765,6 +881,16 @@ public class Commands implements CommandExecutor, TabCompleter {
 						f.add(s.name());
 				}
 				return f;
+			}
+		} else if (cmd.getName().equalsIgnoreCase("sound")) {
+			if (args.length == 1) {
+				List<String> soundNames = new ArrayList<>();
+				for (Sound sound : Sound.values()) {
+					if (sound.name().toLowerCase().startsWith(args[0].toLowerCase())) {
+						soundNames.add(sound.name());
+					}
+				}
+				return soundNames;
 			}
 		}
 		return null;

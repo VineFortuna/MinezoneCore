@@ -6,7 +6,6 @@ import anthony.SuperCraftBrawl.Game.classes.all.DarkSethBlingClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
-import anthony.SuperCraftBrawl.Holograms;
 import anthony.SuperCraftBrawl.PlayerListener;
 import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
@@ -19,7 +18,6 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
-import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
@@ -81,6 +79,7 @@ public class GameInstance {
 	public Player firstBlood;
 	private final Map<UUID, Location> lastKnownLocations = new HashMap<>();
 	public List<ItemStack> allItemDrops = new ArrayList<>();
+	public List<ItemStack> sethBlingItemDrops = new ArrayList<>();
 	public List<ItemStack> items = new ArrayList<>();
 	public List<Player> favClassSelection = new ArrayList<>();
 	public List<ClassType> classList = generateClassList();
@@ -393,7 +392,7 @@ public class GameInstance {
 					} else if (ticks == 60) {
 						if (gameManager.getMain().tournament) {
 							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ "The game is now starting..");
+									+ "The game is now starting...");
 						}
 					} else if (ticks == 30) {
 						for (Player gamePlayer : players) {
@@ -654,7 +653,7 @@ public class GameInstance {
 	/**
 	 * This function gives a random loot drop to all players when game starts
 	 */
-	private void giveLootDrop() {
+	private void giveRandomItemDrop() {
 		for (Player player : this.players) {
 			player.setFireTicks(0);
 			BaseClass bc = this.classes.get(player);
@@ -706,7 +705,7 @@ public class GameInstance {
 		GameScoreboard();
 		addAlivePlayers();
 		addAliveTeams();
-		giveLootDrop();
+		giveRandomItemDrop();
 		initialSpawn();
 		gameTicks();
 
@@ -894,7 +893,7 @@ public class GameInstance {
 
 		// Speed Pot
 		ItemStack speedPot = ItemHelper.createPotionItem(PotionType.SPEED, 1, 30, true, true, true);
-		ItemHelper.setDetails(speedPot, "&9&lSPEED II &7(30 sec)");
+		ItemHelper.setDetails(speedPot, "&b&lSPEED II &7(30 sec)");
 
 		// Fire Res Pot
 		ItemStack fireRes = ItemHelper.createPotionItem(PotionType.FIRE_RESISTANCE, 0, 30, true, true, true);
@@ -913,7 +912,9 @@ public class GameInstance {
 		hammer.addUnsafeEnchantment(Enchantment.KNOCKBACK, 10);
 
 		// Extra Life
-		ItemStack extraLife = ItemHelper.setDetails(new ItemStack(Material.PRISMARINE_SHARD), "&3&lEXTRA LIFE");
+		ItemStack extraLife = ItemHelper.setDetails(new ItemStack(Material.PRISMARINE_SHARD),
+				"&3&lEXTRA LIFE",
+				"&7Receive an extra life");
 
 		// Ender Pearl
 		ItemStack pearl = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL), "&5&lENDER PEARL");
@@ -940,22 +941,32 @@ public class GameInstance {
 		ItemHelper.setGlowing(nuke, true);
 
 		// Instagib
-		ItemStack instagib = ItemHelper.setDetails(new ItemStack(Material.GOLD_HOE, 5, (short) 1), "&e&lINSTAGIB");
+		ItemStack instagib = ItemHelper.setDetails(new ItemStack(Material.GOLD_HOE, 5, (short) 1), "&e&lINSTAGIB",
+				"&7Do damage and send your enemies up");
 
 		// Bazooka
-		ItemStack bazooka = ItemHelper.setDetails(new ItemStack(Material.DIAMOND_HOE, 3, (short) 1), "&b&lBAZOOKA");
+		ItemStack bazooka = ItemHelper.setDetails(new ItemStack(Material.DIAMOND_HOE, 3, (short) 1), "&b&lBAZOOKA",
+				"&7Explode the area it lands");
+		ItemHelper.setHideFlags(bazooka, true);
 
 		// Zombie Egg
-		ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
+		ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1);
+		ItemHelper.setDetails(zombieEgg, "&2&lZOMBIE POKEBALL", "&7Spawns an equipped zombie");
 
 		// Witch Egg
-		ItemStack witchEgg = ItemHelper.createMonsterEgg(EntityType.WITCH, 1, "&5&lWITCH POKEBALL");
+		ItemStack witchEgg = ItemHelper.createMonsterEgg(EntityType.WITCH, 1);
+		ItemHelper.setDetails(witchEgg, "&5&lWITCH POKEBALL", "&7Spawns a witch to help you");
 
 		// Skeleton Egg
-		ItemStack skeletonEgg = ItemHelper.createMonsterEgg(EntityType.SKELETON, 1, "&7&lSKELETON POKEBALL");
+		ItemStack skeletonEgg = ItemHelper.createMonsterEgg(EntityType.SKELETON, 1);
+		ItemHelper.setDetails(skeletonEgg, "&7&lSKELETON POKEBALL", "&7Spawns a skeleton with punch 2");
 
 		// Creeper Egg
-		ItemStack creeperEgg = ItemHelper.createMonsterEgg(EntityType.CREEPER, 1, "&a&lCREEPER POKEBALL");
+		ItemStack creeperEgg = ItemHelper.createMonsterEgg(EntityType.CREEPER, 1);
+		ItemHelper.setDetails(creeperEgg,
+				"&a&lCREEPER POKEBALL",
+				"&7Spawns a creeper",
+				"&7Be careful!");
 
 		// Milk Bucket
 		ItemStack milk = ItemHelper.setDetails(new ItemStack(Material.MILK_BUCKET), "&f&lMILK",
@@ -974,9 +985,7 @@ public class GameInstance {
 		allItemDrops.add(fireRes);
 		allItemDrops.add(bomb);
 		allItemDrops.add(broom);
-		allItemDrops.add(hammer);
 		allItemDrops.add(bazooka);
-		allItemDrops.add(extraLife);
 		allItemDrops.add(pearl);
 		allItemDrops.add(slowballs);
 		allItemDrops.add(miniShield);
@@ -991,6 +1000,14 @@ public class GameInstance {
 		allItemDrops.add(milk);
 		allItemDrops.add(goldenApple);
 		allItemDrops.add(notchApple);
+		allItemDrops.add(extraLife);
+
+		allItemDrops.forEach(itemStack -> ItemHelper.setDetails(
+				itemStack,
+			itemStack.getItemMeta().getDisplayName() + " &7(Right click)",
+				itemStack.getItemMeta().getLore())
+		);
+		allItemDrops.add(hammer);
 
 		items = Arrays.asList(goldenApple, notchApple, slownessPot, bazooka, bazooka, healthPot, speedPot, slownessPot,
 				slownessPot, speedPot, bazooka, goldenApple, hammer, healthPot, extraLife, healthPot, milk, milk, milk,
@@ -998,6 +1015,9 @@ public class GameInstance {
 				miniShield, slowballs, slowballs, slowballs, fireRes, fireRes, instagib, instagib, instagib, broom,
 				broom, zombieEgg, zombieEgg, zombieEgg, skeletonEgg, skeletonEgg, witchEgg, bounty, creeperEgg,
 				creeperEgg);
+
+		sethBlingItemDrops = new ArrayList<>(items);
+		sethBlingItemDrops.removeIf(itemStack -> itemStack.equals(extraLife));
 	}
 
 	public String truncateString(String string, int length) {
@@ -1125,7 +1145,7 @@ public class GameInstance {
 
 	public void PlayerDeath(Player player) {
 		if (this.gameType == GameType.FRENZY)
-			rerandomizeClass(player);
+			reRandomizeClass(player);
 		else if (this.gameType == GameType.GUNGAME)
 			nextClass(player);
 
@@ -1338,7 +1358,7 @@ public class GameInstance {
 							spectator.setAllowFlight(true);
 							spectator.setDisplayName(spectator.getName());
 							spectator.sendMessage(getGameManager().getMain().color("&2&l(!) &rThe game on &r&l"
-									+ mapName + " &rhas ended. Moving you back to spawn.."));
+									+ mapName + " &rhas ended. Moving you back to spawn..."));
 							spectator.spigot().setCollidesWithEntities(true);
 							gameManager.getMain().sendScoreboardUpdate(spectator);
 
@@ -1864,11 +1884,11 @@ public class GameInstance {
 	// public BaseClass oldBaseClass; // Public because we want to use this variable
 	// in BaseClass.java
 
-	private void rerandomizeClass(Player player) {
+	private void reRandomizeClass(Player player) {
 		BaseClass baseClass = classes.get(player);
 
 		if (baseClass.getLives() > 1) {
-			ClassType classType = ClassType.values()[random.nextInt(ClassType.values().length)];
+			ClassType classType = ClassType.getAvailableClasses()[random.nextInt(ClassType.getAvailableClasses().length)];
 			BaseClass newBaseClass = classType.GetClassInstance(this, player);
 			BaseClass oldBaseClass = classes.get(player);
 			oldClasses.put(player, oldBaseClass);
@@ -1961,7 +1981,7 @@ public class GameInstance {
 						int randomIndex = rand.nextInt(playerData.customIntegers.size());
 						int randValue = playerData.customIntegers.get(randomIndex);
 
-						for (ClassType type : ClassType.values()) {
+						for (ClassType type : ClassType.getAvailableClasses()) {
 							if (type.getID() == randValue) {
 								selectedClass = type;
 								break;
@@ -1969,11 +1989,11 @@ public class GameInstance {
 						}
 					}
 				} else {
-					selectedClass = ClassType.values()[rand.nextInt(ClassType.values().length)];
+					selectedClass = ClassType.getAvailableClasses()[rand.nextInt(ClassType.getAvailableClasses().length)];
 					if (gameType != GameType.FRENZY) {
 						while (attempts <= 500) {
 							attempts++;
-							ClassType classType = ClassType.values()[rand.nextInt(ClassType.values().length)];
+							ClassType classType = ClassType.getAvailableClasses()[rand.nextInt(ClassType.getAvailableClasses().length)];
 							Rank donor = classType.getMinRank();
 
 							if (playerData.playerClasses.get(classType.getID()) != null
@@ -1981,7 +2001,7 @@ public class GameInstance {
 									|| classType.getTokenCost() == 0) {
 								if (playerData.level >= classType.getLevel()) {
 									if (classType != ClassType.Fisherman
-											|| this.getGameManager().getMain().hasAllFish(player)) {
+											|| this.getGameManager().getMain().getFishing().main.hasAllFish(player)) {
 										if (donor == null
 												|| player.hasPermission("scb." + donor.toString().toLowerCase())) {
 											selectedClass = classType;
@@ -2108,7 +2128,7 @@ public class GameInstance {
 							FastBoard board = this.boards.get(gamePlayer);
 							updateCountOnBoard();
 							board.updateLine(10, "" + ChatColor.BOLD + "Status:");
-							board.updateLine(11, "" + ChatColor.GRAY + ChatColor.ITALIC + " Waiting..");
+							board.updateLine(11, "" + ChatColor.GRAY + ChatColor.ITALIC + " Waiting...");
 						}
 					}
 				}
@@ -2293,7 +2313,7 @@ public class GameInstance {
 	 * "" + ChatColor.RESET + this.players.size() + "/" +
 	 * this.gameType.getMaxPlayers()) : "")); board.updateLine(7, "" +
 	 * ChatColor.BOLD + "Status:"); board.updateLine(8, "" + ChatColor.RESET +
-	 * ChatColor.ITALIC + " Waiting.."); } } } } else { for (Player gamePlayer :
+	 * ChatColor.ITALIC + " Waiting..."); } } } } else { for (Player gamePlayer :
 	 * this.players) { FastBoard board = this.boards.get(gamePlayer);
 	 * board.updateLine(5, " " + this.players.size() + "/6"); } TellAll("" +
 	 * ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET +
@@ -2313,7 +2333,7 @@ public class GameInstance {
 	 * gamePlayer.getInventory().remove(Material.PAPER); FastBoard board =
 	 * this.boards.get(gamePlayer); board.updateLine(5, " " + this.players.size() +
 	 * "/6"); board.updateLine(7, "" + ChatColor.BOLD + "Status:");
-	 * board.updateLine(8, "" + ChatColor.RESET + ChatColor.ITALIC + " Waiting..");
+	 * board.updateLine(8, "" + ChatColor.RESET + ChatColor.ITALIC + " Waiting...");
 	 * } } } } if (this.state == GameState.STARTED) { PlayerData data =
 	 * this.gameManager.getMain().getDataManager().getPlayerData(player); if
 	 * (data.withersk != 3) data.withersk = 0; List<String> aliveTeam = new
@@ -2439,7 +2459,7 @@ public class GameInstance {
 		Random rand = new Random();
 		int r;
 		for (int i = 0; i < 5; i++) {
-			ClassType classType = ClassType.values()[random.nextInt(ClassType.values().length)];
+			ClassType classType = ClassType.getAvailableClasses()[random.nextInt(ClassType.getAvailableClasses().length)];
 			classes.add(classType);
 		}
 		return classes;
@@ -2447,6 +2467,10 @@ public class GameInstance {
 
 	public List<ItemStack> getAllItemDrops() {
 		return allItemDrops;
+	}
+
+	public ItemStack getSethBlingItemDrop() {
+		return sethBlingItemDrops.get(random.nextInt(sethBlingItemDrops.size()));
 	}
 
 	public List<Player> getWinnerList() {

@@ -46,7 +46,7 @@ public enum FishType {
     ANGLERFISH(22, "Anglerfish", FishRarity.MYTHIC, null),
     EEL(44, "Electric Eel", FishRarity.MYTHIC, Arrays.asList(FishArea.Woods)),
     ANEMONE(50, "Sea Anemone", FishRarity.MYTHIC, null),
-    BLOBFISH(23, "Blobfish", FishRarity.LEGENDARY, null),
+    BLOBFISH(23, "Blobfish", FishRarity.LEGENDARY, Arrays.asList(FishArea.Pond)),
     DOLPHIN(46, "Dolphin", FishRarity.LEGENDARY, Arrays.asList(FishArea.Pond)),
     LEVIATHAN(24, "Swamp Monster", FishRarity.LEGENDARY, Arrays.asList(FishArea.LushCave)),
     SHARK(25, "Shark", FishRarity.LEGENDARY, Arrays.asList(FishArea.Pond)),

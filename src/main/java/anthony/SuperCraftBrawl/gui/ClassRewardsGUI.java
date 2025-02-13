@@ -242,7 +242,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTVhMmZiYTUyNjg0ZDFmNzJkODMwZjc0ZDA4N2RmNzJmMjZiNWE2NmEwMzI1ZmZiODA3ZWY0OTQwOTMzM2VhMCJ9fX0=");
             case Dweller:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2JlM2NhMzc5MDAzNTRiODFiMjU5MWI4ZTljYzcwNmMyYTQ1MGZlZTM3MGVlNTIyZTZiOWYzMmRjMDM2Y2E4MCJ9fX0=");
-            case WitherSk:
+            case WitherSkeleton:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjhjMDE2NWU5YjJkYmQ3OGRhYzkxMjc3ZTk3ZDlhMDI2NDhmMzA1OWUxMjZhNTk0MWE4NGQwNTQyOWNlIn19fQ==");
             case Rabbit:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvY2M0MzQ5ZmU5OTAyZGQ3NmMxMzYxZjhkNmExZjc5YmZmNmY0MzNmM2I3YjE4YTQ3MDU4ZjBhYTE2YjkwNTNmIn19fQ==");
@@ -312,8 +312,8 @@ public class ClassRewardsGUI implements InventoryProvider {
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzhmNzdlZWVlZjZmZmIyZjY4MThlNTc2OTg3OTRhZTAzNTFhYjMyYmEyMzRkNjIxYzIyZmU0Y2U4ZTE1OTlkMiJ9fX0=");
             case Slime:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjU0ZjJiNGNiNmQyMWQzNTZlYzVjMGNiNmY1MTY2ZmVlMzExOWM3ZGM1OWUyMDgzOWMyMDMzMWNkMTNlNDM5ZCJ9fX0=");
-            case ButterGolem:
-                return new ItemStack(Material.GOLD_BLOCK);
+            case PiglinBrute:
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjVjYzFiZmI1NjY3MTYzYmFiNTQ1NWQ4NWRlMjU5YTg5MzRhZWJiOWJlOTdhYmQ4ZTZmNTM3YmRhMWIxNTIzMCJ9fX0=");
             case Enderdragon:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWVjM2ZmNTYzMjkwYjEzZmYzYmNjMzY4OThhZjdlYWE5ODhiNmNjMThkYzI1NDE0N2Y1ODM3NGFmZTliMjFiOSJ9fX0=");
             case Bat:
@@ -322,7 +322,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                 return new ItemStack(Material.REDSTONE_BLOCK);
             case Melon:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWY5YzJlOWUwYThmNTJhYjg1NDdkYTZlMmE2ODg4NTUyZmE0ZTFkZWEyNDM3Y2ZmNjViMDdhMTg5N2NmYmI2OCJ9fX0=");
-            case BabyCow:
+            case Mooshroom:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGM0YjVmNmQ3NTEyNjM4MGY1MjBhNjdjYTU3YmM5YTU2YWExMWRiOGFmZTdlNWRjYjJhNTJkZmNmZWFlMDc4NSJ9fX0=");
             case Herobrine:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWI3OGFiM2EzODhhNjliNTFhNjI1YjA2MGI3YzY3ZjQ3ZTczM2IyMTliMzMxMjE2YTY3OTFhZDZhYTU3YThmZCJ9fX0=");
@@ -364,6 +364,8 @@ public class ClassRewardsGUI implements InventoryProvider {
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTczMDEyN2UzYWM3Njc3MTIyNDIyZGYwMDI4ZDllNzM2OGJkMTU3NzM4YzhjM2NkZGVjYzUwMmU4OTZiZTAxYyJ9fX0=");
             case Wolf:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWFhODQ2MTFjOGM4OTU4MzM2ZjY0ZDU4ZGMyMDljN2FiOTU4ZGRkOTlkMmY1ODc2ZGFkNzI2M2Y3MGVjZWIyNyJ9fX0=");
+            case Parrot:
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjdhNjIzYjRjN2Y3OTAzZWRjYTEyMDE0OGJjYjNiY2ZjOGQ5N2U3MDVmZjI4YzQ4YTI5YTRhMTJjNThiZTM1ZCJ9fX0=");
         }
         return ItemHelper.create(Material.BARRIER);
     }

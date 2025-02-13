@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.GameMode;
@@ -24,10 +25,10 @@ import java.util.List;
 public class TNTClass extends BaseClass {
 
 	private int cooldownSec;
+	private static final int TNT_COOLDOWN = 10 * 1000;
 
 	public TNTClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.1;
 		createArmor(
 				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTU3M2Q3MDQ2ZDZlMDgxOTgzOTBhYTU2YzhmODY3OGMxNmQ0NDA3YWY5ZjIxNGJmMDI5MWYzYzdkYjFmMzc5YSJ9fX0=",
@@ -58,9 +59,9 @@ public class TNTClass extends BaseClass {
 	public void Tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.TNT
 				&& instance.classes.get(player).getLives() > 0) {
-			this.cooldownSec = (10000 - tntItem.getTime()) / 1000 + 1;
+			this.cooldownSec = (TNT_COOLDOWN - tntItem.getTime()) / 1000 + 1;
 
-			if (tntItem.getTime() < 10000) {
+			if (tntItem.getTime() < TNT_COOLDOWN) {
 				String msg = instance.getGameManager().getMain()
 						.color("&c&lTNT &rregenerates in: &e" + this.cooldownSec + "s");
 				getActionBarManager().setActionBar(player, "tnt.cooldown", msg, 2);
@@ -76,8 +77,8 @@ public class TNTClass extends BaseClass {
 		ItemStack item = event.getItem();
 		if (item != null && item.getType() == Material.TNT && item.getAmount() == 1) {
 			if (player.getGameMode() != GameMode.SPECTATOR) {
-				if (tntItem.getTime() < 10000) {
-					int seconds = (10000 - tntItem.getTime()) / 1000 + 1;
+				if (tntItem.getTime() < TNT_COOLDOWN) {
+					int seconds = (TNT_COOLDOWN - tntItem.getTime()) / 1000 + 1;
 					event.setCancelled(true);
 					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
 							+ "Your TNT is still regenerating for " + ChatColor.YELLOW + seconds + " more seconds ");
@@ -85,21 +86,21 @@ public class TNTClass extends BaseClass {
 					List<Entity> near = player.getNearbyEntities(20.0D, 25.0D, 20.0D);
 					for (Entity entity : near) {
 						if (entity instanceof Player) {
-							Player p = (Player) entity;
+							Player playerInRange = (Player) entity;
 
-							if (p != null && instance.classes.containsKey(p)
-									&& instance.classes.get(p).getLives() > 0) {
+							if (playerInRange != null && instance.classes.containsKey(playerInRange)
+									&& instance.classes.get(playerInRange).getLives() > 0) {
 								if (instance.duosMap != null)
-									if (instance.team.get(p).equals(instance.team.get(player)))
-										if (near.contains(p))
-											near.remove(p);
+									if (instance.team.get(playerInRange).equals(instance.team.get(player)))
+										if (near.contains(playerInRange))
+											near.remove(playerInRange);
 
-								if (p.getGameMode() != GameMode.SPECTATOR) {
-									p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 1));
-									TNTPrimed tnt = p.getWorld().spawn(p.getLocation().add(0, 5, 0), TNTPrimed.class);
+								if (playerInRange.getGameMode() != GameMode.SPECTATOR) {
+									playerInRange.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 1));
+									TNTPrimed tnt = playerInRange.getWorld().spawn(playerInRange.getLocation().add(0, 5, 0), TNTPrimed.class);
 									tnt.setFuseTicks(40);
 									player.sendMessage(instance.getGameManager().getMain()
-											.color("&e&l(!) &rSpawning a TNT at &e" + p.getName() + "'s &rlocation"));
+											.color("&e&l(!) &rSpawning a TNT at &e" + playerInRange.getName() + "'s &rlocation"));
 									tntItem.restart();
 									return;
 								}
@@ -107,8 +108,7 @@ public class TNTClass extends BaseClass {
 						}
 					}
 
-					player.sendMessage(
-							instance.getGameManager().getMain().color("&c&l(!) &rNo nearby players have been found!"));
+					player.sendMessage(ChatColorHelper.color("&c&l(!) &rNo nearby players have been found!"));
 				}
 			}
 		}

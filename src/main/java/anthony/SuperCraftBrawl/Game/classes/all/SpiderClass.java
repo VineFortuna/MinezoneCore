@@ -8,6 +8,8 @@ import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -22,6 +24,11 @@ import org.bukkit.potion.PotionEffectType;
 
 public class SpiderClass extends BaseClass {
 
+	private final ItemStack weapon;
+	private final PotionEffect poison = new PotionEffect(PotionEffectType.POISON, 4 * 20, 0, true);
+	private final PotionEffect speed = new PotionEffect(PotionEffectType.SPEED, 9999999, 2, false);
+
+
 	public SpiderClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
@@ -33,65 +40,47 @@ public class SpiderClass extends BaseClass {
 				6,
 				"Spider"
 		);
-	}
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
+
+		// Weapon
+		weapon = ItemHelper.setDetails(
+				new ItemStack(Material.SPIDER_EYE),
+				"&c&lEye",
+				"",
+				"&7Apply &2&oPoison &e" + (poison.getAmplifier() + 1) + " &7for &e" + poison.getDuration() / 20 + "s"
+		);
+		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
+		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
 	}
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		playerInv.setItem(0, this.getAttackWeapon());
-		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2));
+		playerInv.setItem(0,weapon);
+		player.addPotionEffect(speed);
 	}
 
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void Tick(int gameTicks) {
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
-			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2));
+			player.addPotionEffect(speed);
 	}
 
 	@Override
 	public void DoDamage(EntityDamageByEntityEvent event) {
-		BaseClass bc = instance.classes.get(player);
-		if (bc != null && bc.getLives() <= 0)
-			return;
+		if (!isPlayerAlive()) return;
 
-		if (event.getEntity() instanceof Player) {
-			Player p = (Player) event.getEntity();
-			if (instance.duosMap != null)
-				if (instance.team.get(p).equals(instance.team.get(player)))
-					return;
+		ItemStack heldItem = player.getInventory().getItem(player.getInventory().getHeldItemSlot());
+		boolean isWeaponMelee =
+				event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
+				&& heldItem != null
+				&& heldItem.equals(weapon);
 
-			p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 80, 0, true));
-		}
-	}
-	
-	@Override
-	public void TakeDamage(EntityDamageEvent event) {
-		if (instance.getGameManager().spawnProt.containsKey(player))
-			return;
-		
-		for (Player gamePlayer : instance.players)
-			gamePlayer.playSound(player.getLocation(), Sound.SPIDER_DEATH, 1, 1);
-	}
+		if (!isWeaponMelee) return;
+		Entity damagedEntity = event.getEntity();
+		if (!(damagedEntity instanceof Player)) return;
 
-	private void abilityMsg() {
-		player.sendMessage("");
-		player.sendMessage(instance.getGameManager().getMain()
-				.color("&e&lCLASS TIP> &rCertain chance to infect other players with Poison I by hitting them!"));
-		player.sendMessage("");
-	}
-
-	@Override
-	public void UseItem(PlayerInteractEvent event) {
-		ItemStack item = event.getItem();
-		if (item != null && item.getType() == Material.SPIDER_EYE
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			this.abilityMsg();
-			event.setCancelled(true);
-		}
+		Player damagedPlayer = (Player) damagedEntity;
+		damagedPlayer.addPotionEffect(poison);
 	}
 
 	@Override
@@ -100,16 +89,7 @@ public class SpiderClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
-
-	}
-
-	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper
-				.addEnchant(ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.SPIDER_EYE),
-						instance.getGameManager().getMain()
-						.color("&cSpider Eye &7(Right Click)")), Enchantment.DAMAGE_ALL, 2), Enchantment.KNOCKBACK, 1);
-		return item;
+		return weapon;
 	}
 }
