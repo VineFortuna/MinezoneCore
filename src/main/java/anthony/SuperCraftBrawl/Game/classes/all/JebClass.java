@@ -1,20 +1,17 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import anthony.util.SoundManager;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -26,11 +23,17 @@ import xyz.xenondevs.particle.data.texture.BlockTexture;
 
 public class JebClass extends BaseClass {
 
-	private int cooldownSec;
+	private final ItemStack weapon;
+	private final ItemStack pushItem;
+	private final Ability pullAbility = new Ability("&8&lJeb's Call", 10, player);
+	private static final double PUSH_ABILITY_RANGE = 25;
+
+	public boolean isRework = true;
+	public double pushAbilityStrength = 20;
+	public double pushAbilityMaxVelocity = 2.5;
 
 	public JebClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.0;
 		createArmor(
 				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDJlN2Y3OTdlOTJhOTk1NmU5MTUxYjM1YmJhZWMwMTIzNjVhOTAyY2U4OTc5MGRhYjVhNDc3ODliZWQ5NzE5MCJ9fX0=",
@@ -40,114 +43,233 @@ public class JebClass extends BaseClass {
 				6,
 				"Jeb"
 		);
-	}
 
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
+		// Weapon
+		weapon = ItemHelper.setDetails(
+				new ItemStack(Material.STONE_SWORD),
+				"&8&lJeb's Sword"
+		);
+		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
+		ItemHelper.setUnbreakable(weapon);
+
+		// Push Ability
+		String displayRange = ItemHelper.formatDouble(PUSH_ABILITY_RANGE);
+
+		pushItem = ItemHelper.setDetails(
+				new ItemStack(Material.STONE),
+				pullAbility.getAbilityNameRightClickMessage(),
+				"&7Shoot a beam that pushes enemies",
+				"",
+				"&7Stronger at close distances",
+				"&7Range: &a" + displayRange + " &7blocks"
+		);
 	}
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		jeb.startTime = System.currentTimeMillis() - 100000;
-		playerInv.setItem(0, this.getAttackWeapon());
-		playerInv.setItem(1,
-				ItemHelper.setDetails(new ItemStack(Material.STONE, 1), "" + ChatColor.GRAY + "Jeb's Call", "",
-						instance.getGameManager().getMain().color("&7Push enemies when aiming at them!"),
-						instance.getGameManager().getMain().color("   &rRange: &e25 blocks")));
+		pullAbility.getCooldownInstance().reset();
+		playerInv.setItem(0, weapon);
+		playerInv.setItem(1, pushItem);
 		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
 	}
 
 	@Override
 	public void Tick(int gameTicks) {
+		if (!isPlayerAlive()) return;
+
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.WEAKNESS)))
 			player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
 
-		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Jeb
-				&& instance.classes.get(player).getLives() > 0) {
-			this.cooldownSec = (10000 - jeb.getTime()) / 1000 + 1;
+		pullAbility.updateActionBar(player, this);
 
-			if (jeb.getTime() < 10000) {
-				String msg = instance.getGameManager().getMain()
-						.color("&7Jeb's Call &rregenerates in: &e" + this.cooldownSec + "s");
-				getActionBarManager().setActionBar(player, "jeb.cooldown", msg, 2);
-			} else {
-				String msg = instance.getGameManager().getMain().color("&rYou can use &7Jeb's Call");
-				getActionBarManager().setActionBar(player, "jeb.cooldown", msg, 2);
-				
-				if (player.getInventory().contains(Material.STONE) && !checkIfDead(player, instance)) {
-					int i = player.getInventory().first(Material.STONE);
-					if (player.getInventory().getItem(i).getDurability() != (short) 0) {
-						player.getInventory().getItem(i).setDurability((short) 0);
+		if (!pullAbility.isReady()) return;
+		int stoneSlot = player.getInventory().first(Material.STONE);
+		if (player.getInventory().getItem(stoneSlot).getDurability() == (short) 0) return;
+		player.getInventory().getItem(stoneSlot).setDurability((short) 0);
+	}
+
+	@Override
+	public void UseItem(PlayerInteractEvent event) {
+		ItemStack item = event.getItem();
+		Action action = event.getAction();
+
+		if (item == null) return;
+		if (player.getGameMode() == GameMode.SPECTATOR) return;
+		if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
+		// Push Ability
+		if (item.equals(pushItem)) {
+			if (!pullAbility.isReady()) return;
+
+			usePushAbility();
+			item.setDurability((short) 5);
+			pullAbility.use();
+		}
+
+		if (item.getType() == Material.STONE) {
+			if (item.getDurability() != (short) 5) return;
+			int remainingCooldown = (int) pullAbility.getCooldownInstance().getRemainingCooldownSeconds();
+			pullAbility.sendCustomMessage("&l&c(!) &rYou're still on cooldown for &e" + remainingCooldown + "s"
+			);
+		}
+	}
+
+	private void usePushAbility() {
+		Location endLocation = findEndLocation();
+		SoundManager.playSoundToAll(player, Sound.DIG_STONE, 1, 1);
+		displayParticlesAlongPath(endLocation);
+		applyPushEffectToPlayers(endLocation);
+	}
+
+	private Location findEndLocation() {
+		Location startLocation = player.getEyeLocation();
+		BlockIterator blockIterator = new BlockIterator(startLocation, 0, (int) PUSH_ABILITY_RANGE);
+		Location endLocation = startLocation;
+
+		while (blockIterator.hasNext()) {
+			Block block = blockIterator.next();
+			endLocation = block.getLocation();
+
+			if (block.getType().isSolid()) {
+				break;
+			}
+		}
+
+		return endLocation;
+	}
+
+	private void displayParticlesAlongPath(Location endLocation) {
+		Vector direction = player.getEyeLocation().getDirection();
+		double maxDistance = endLocation.distance(player.getEyeLocation());
+
+		for (double t = 1; t < maxDistance; t += 0.5) {
+			ParticleEffect.BLOCK_CRACK.display(
+					player.getEyeLocation().add(direction.clone().multiply(t)),
+					0.0F, 0.0F, 0.0F, 0.0F, 1,
+					new BlockTexture(Material.STONE)
+			);
+		}
+	}
+
+	private void applyPushEffectToPlayers(Location endLocation) {
+		Vector direction = player.getEyeLocation().getDirection();
+		double maxDistance = endLocation.distance(player.getEyeLocation());
+
+		for (Player targetPlayer : instance.players) {
+			if (targetPlayer == player) continue;
+			Vector playerVector = targetPlayer.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
+			double distance = playerVector.dot(direction);
+
+			if (distance < maxDistance) {
+				Location closestPoint = player.getEyeLocation().add(direction.clone().multiply(distance));
+
+				if (closestPoint.distanceSquared(targetPlayer.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
+					if (shouldApplyPushEffect(targetPlayer)) {
+						if (isRework) applyPushEffectReworkTest(targetPlayer, direction, distance);
+						else applyPushEffectOld(targetPlayer, direction, distance);
 					}
 				}
 			}
 		}
 	}
 
-	@SuppressWarnings("deprecation")
-	@Override
-	public void UseItem(PlayerInteractEvent event) {
-		ItemStack item = event.getPlayer().getItemInHand();
+	private void applyPushEffectOld(Player targetPlayer, Vector direction, double distance) {
+//		player.sendMessage("Distance / 4.3: " + (distance / 4.3));
+//		targetPlayer.setVelocity(direction.clone().multiply(distance / 4.3));
 
-		if (item != null) {
-			if (item.getType() == Material.STONE
-					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-				if (jeb.getTime() < 10000) {
-					int seconds = (10000 - jeb.getTime()) / 1000 + 1;
-					event.setCancelled(true);
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "Jeb's always in a rush man.. Please wait for " + ChatColor.YELLOW + seconds
-							+ " more seconds gosh damn");
-				} else {
-					jeb.restart();
-					item.setDurability((short) 5);
-					int range = 25;
-					Location endLoc = player.getEyeLocation();
-					BlockIterator b = new BlockIterator(player.getEyeLocation(), 0, range);
-					player.playSound(player.getLocation(), Sound.DIG_STONE, 1, 1);
+		// Base strength of the ability
+		double baseStrength = pushAbilityStrength; // Adjust this value to control overall strength
 
-					while (b.hasNext()) {
-						Block block = b.next();
-						endLoc = block.getLocation();
+		// Non-linear scaling: stronger at long range, weaker at close range
+		double velocityMagnitude = baseStrength * (1 + distance);
 
-						if (block.getType().isSolid())
-							break;
-					}
+		// Clamp velocity to prevent extreme values
+		double maxVelocity = pushAbilityMaxVelocity; // Maximum velocity
+		velocityMagnitude = Math.min(velocityMagnitude, maxVelocity);
 
-					Vector dir = player.getEyeLocation().getDirection();
-					double maxDist = endLoc.distance(player.getEyeLocation());
+		// Apply velocity
+		Vector velocity = direction.clone().multiply(velocityMagnitude);
 
-					for (double t = 1; t < maxDist; t += 0.5) {
-						ParticleEffect.BLOCK_CRACK.display(player.getEyeLocation().add(dir.clone().multiply(t)), 0.0F,
-								0.0F, 0.0F, 0.0F, 1, new BlockTexture(Material.STONE));
-					}
+		// Add a small upward bias to account for gravity/friction
+		velocity.setY(velocity.getY() + 0.2); // Adjust this value as needed
 
-					for (Player p : instance.players) {
-						if (p != player) {
-							Vector d = p.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
-							double dist = d.dot(dir);
+		targetPlayer.setVelocity(velocity);
+		targetPlayer.playSound(targetPlayer.getLocation(), Sound.DIG_STONE, 1, 1);
 
-							if (dist < maxDist) {
-								Location closest = player.getEyeLocation().add(dir.clone().multiply(dist));
+		// Debug message
+		player.sendMessage("Velocity: " + velocityMagnitude + ", Distance: " + distance);
+	}
 
-								if (closest.distanceSquared(p.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
-									if (instance.duosMap != null) {
-										if (!(instance.team.get(p).equals(instance.team.get(player)))) {
-											p.setVelocity(dir.clone().multiply(dist / 4.3));
-											p.playSound(p.getLocation(), Sound.DIG_STONE, 1, 1);
-										}
-									} else {
-										p.setVelocity(dir.clone().multiply(dist / 4.3));
-										p.playSound(p.getLocation(), Sound.DIG_STONE, 1, 1);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
+
+	private void applyPushEffectReworkTest(Player targetPlayer, Vector direction, double distance) {
+		boolean isOnGround = targetPlayer.isOnGround();
+		Vector velocity = getVelocity(isOnGround, direction, distance);
+		targetPlayer.setVelocity(velocity);
+		targetPlayer.playSound(targetPlayer.getLocation(), Sound.DIG_STONE, 1, 1);
+	}
+
+	private Vector getVelocity(Boolean isOnGround, Vector direction, double distance) {
+		Vector velocity = direction.clone();
+
+		double minVelocity;
+		double maxVelocity;
+
+		if (isOnGround) {
+			minVelocity = 2.0;
+			maxVelocity = 3.5;
+		} else {
+			minVelocity = 1.0;
+			maxVelocity = 2.5;
 		}
+
+		double velocityMagnitude = calculateVelocityMagnitude(minVelocity, maxVelocity, distance);
+		velocity.multiply(velocityMagnitude);
+
+		return velocity;
+	}
+
+	private double calculateVelocityMagnitude(double minVelocity, double maxVelocity, double distance) {
+		double magnitude;
+
+		magnitude = maxVelocity * (1 - (distance / PUSH_ABILITY_RANGE));
+
+		magnitude = Math.min(magnitude, maxVelocity);
+		magnitude = Math.max(magnitude, minVelocity);
+		// Debug message
+		player.sendMessage("Magnitude: " + magnitude + ", Distance: " + distance);
+
+		return magnitude;
+	}
+
+
+	private void applyPushEffectRework(Player targetPlayer, Vector direction, double distance) {
+		// Base strength of the ability
+		double baseStrength = pushAbilityStrength; // Adjust this value to control overall strength
+
+		// Non-linear scaling: stronger at close range, weaker at long range
+		double velocityMagnitude = baseStrength / (1 + distance);
+
+		// Clamp velocity to prevent extreme values
+		double maxVelocity = pushAbilityMaxVelocity; // Maximum velocity
+		velocityMagnitude = Math.min(velocityMagnitude, maxVelocity);
+
+		// Apply velocity
+		Vector velocity = direction.clone().multiply(velocityMagnitude);
+
+		// Add a small upward bias to account for gravity/friction
+		velocity.setY(velocity.getY() + 0.2); // Adjust this value as needed
+
+		targetPlayer.setVelocity(velocity);
+		targetPlayer.playSound(targetPlayer.getLocation(), Sound.DIG_STONE, 1, 1);
+
+		// Debug message
+		player.sendMessage("Velocity: " + velocityMagnitude + ", Distance: " + distance);
+	}
+
+	private boolean shouldApplyPushEffect(Player targetPlayer) {
+		if (instance.duosMap != null) {
+			return !instance.team.get(targetPlayer).equals(instance.team.get(player));
+		}
+		return true;
 	}
 
 	@Override
@@ -156,15 +278,7 @@ public class JebClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
-
-	}
-
-	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.setUnbreakable(
-				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.STONE_SWORD),
-						"" + ChatColor.BLACK + ChatColor.BOLD + "Jeb's Sword"), Enchantment.KNOCKBACK, 1));
-		return item;
+		return weapon;
 	}
 }

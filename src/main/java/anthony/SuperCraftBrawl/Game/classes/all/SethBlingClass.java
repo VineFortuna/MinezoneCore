@@ -21,7 +21,7 @@ public class SethBlingClass extends BaseClass {
 
 	public SethBlingClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.5;
+		baseVerticalJump = 1.3;
 		createArmor(
 				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I4NmI4MjE1YjM2MTBlYWE2NDhjMjNjNGEyMGFkNjc1OWYyNTFlZjg1NDc2ODI5ZGQ2ZDE4NDI4MjNiMTEzIn19fQ==",
@@ -31,27 +31,6 @@ public class SethBlingClass extends BaseClass {
 				6,
 				"SethBling"
 		);
-	}
-
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
-	}
-
-	public ItemStack getCmdBlock() {
-		return ItemHelper.setDetails(new ItemStack(Material.COMMAND, 1),
-				"" + ChatColor.GRAY + ChatColor.ITALIC + "Right Click", ChatColor.YELLOW + "");
-	}
-
-	@Override
-	public void SetItems(Inventory playerInv) {
-		playerInv.setItem(0, this.getAttackWeapon());
-		playerInv.setItem(1, this.getCmdBlock());
-	}
-
-	public void TestItems() {
-		player.getInventory().addItem(new ItemStack(instance.getItemToDrop()));
-		player.getInventory().addItem(new ItemStack(instance.getItemToDrop()));
 	}
 
 	@Override
@@ -74,15 +53,25 @@ public class SethBlingClass extends BaseClass {
 		}
 	}
 
-	@Override
-	public ClassType getType() {
-		return ClassType.SethBling;
+	public ItemStack getCmdBlock() {
+		return ItemHelper.setDetails(new ItemStack(Material.COMMAND, 1),
+				"" + ChatColor.GRAY + ChatColor.ITALIC + "Right Click", ChatColor.YELLOW + "");
 	}
 
 	@Override
-	public void SetNameTag() {
-		// TODO Auto-generated method stub
+	public void SetItems(Inventory playerInv) {
+		playerInv.setItem(0, this.getAttackWeapon());
+		playerInv.setItem(1, this.getCmdBlock());
+	}
 
+	public void TestItems() {
+		player.getInventory().addItem(new ItemStack(instance.getSethBlingItemDrop()));
+		player.getInventory().addItem(new ItemStack(instance.getSethBlingItemDrop()));
+	}
+
+	@Override
+	public ClassType getType() {
+		return ClassType.SethBling;
 	}
 
 	@Override

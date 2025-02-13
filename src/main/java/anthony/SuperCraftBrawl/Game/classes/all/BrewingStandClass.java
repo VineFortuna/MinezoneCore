@@ -9,9 +9,13 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.PotionSplashEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
@@ -24,7 +28,13 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.List;
+
 public class BrewingStandClass extends BaseClass {
+
+	ItemStack potionItem;
+	ItemStack resPotItem;
+	PotionEffect resistance = new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 15, 0, false, true); // Not using it to set the effect
 
 	private int cooldownSec;
 	private int cooldownDuration = 10 * 1000;
@@ -33,7 +43,7 @@ public class BrewingStandClass extends BaseClass {
 
 	public BrewingStandClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.15;
+		baseVerticalJump = 1.0;
 		createArmor(
 				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjU0M2JiZDkwNTcxYjFlMzVhYTAzOWE1ZWJhZDY1ZjQxNDI3YzhiODg3MWRkZjc2NzU4MGYzYTViMTAyMmZiZiJ9fX0=",
@@ -43,11 +53,6 @@ public class BrewingStandClass extends BaseClass {
 				6,
 				"BrewingStand"
 		);
-	}
-
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
 	}
 
 	/*
@@ -68,6 +73,7 @@ public class BrewingStandClass extends BaseClass {
 	/*
 	 * This function runs through every tick of a game but when doing the ticks
 	 * modulo 100, it will run through this code every 5 seconds of the game
+	 *
 	 */
 	@Override
 	public void Tick(int gameTicks) {
@@ -142,57 +148,68 @@ public class BrewingStandClass extends BaseClass {
 	 * they have in their inventory 8th slot
 	 */
 	private void potionsToGive(ItemStack blazePowder) {
-		ItemStack potion = null;
+		potionItem = null;
 		Potion pot = new Potion(1);
 		int amount = blazePowder.getAmount();
 
 		if (blazePowder != null) {
 			if (amount == 1) {
-				potion = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-						instance.getGameManager().getMain().color("&cSlowness II &7(15 sec)"));
+				potionItem = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
+						instance.getGameManager().getMain().color("&3&lSlowness II &7(15 sec)"));
 				pot.setSplash(true);
-				PotionMeta meta = (PotionMeta) potion.getItemMeta();
+				PotionMeta meta = (PotionMeta) potionItem.getItemMeta();
 				pot.setType(PotionType.SLOWNESS);
 				meta.addCustomEffect(new PotionEffect(PotionEffectType.SLOW, 15 * 20, 1), true);
-				potion.setItemMeta(meta);
+				potionItem.setItemMeta(meta);
 			} else if (amount == 2) {
-				potion = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-						instance.getGameManager().getMain().color("&6Jump IV &7(20 sec)"));
+				potionItem = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
+						instance.getGameManager().getMain().color("&a&lJump VIII &7(20 sec)"));
 				pot.setSplash(true);
-				PotionMeta meta = (PotionMeta) potion.getItemMeta();
+				PotionMeta meta = (PotionMeta) potionItem.getItemMeta();
 				pot.setType(PotionType.JUMP);
-				meta.addCustomEffect(new PotionEffect(PotionEffectType.JUMP, 20 * 20, 3), true);
-				potion.setItemMeta(meta);
+				meta.addCustomEffect(new PotionEffect(PotionEffectType.JUMP, 10 * 20, 7), true);
+				potionItem.setItemMeta(meta);
 			} else if (amount == 3) {
-				potion = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-						instance.getGameManager().getMain().color("&2Speed II &7(20 sec)"));
+				potionItem = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
+						instance.getGameManager().getMain().color("&b&lSpeed II &7(20 sec)"));
 				pot.setSplash(true);
-				PotionMeta meta = (PotionMeta) potion.getItemMeta();
+				PotionMeta meta = (PotionMeta) potionItem.getItemMeta();
 				pot.setType(PotionType.SPEED);
 				meta.addCustomEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 20, 1), true);
-				potion.setItemMeta(meta);
+				potionItem.setItemMeta(meta);
 			} else if (amount == 4) {
-				potion = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-						instance.getGameManager().getMain().color("&bRegen III &7(5 sec)"));
+				potionItem = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
+						instance.getGameManager().getMain().color("&d&lRegen III &7(5 sec)"));
 				pot.setSplash(true);
-				PotionMeta meta = (PotionMeta) potion.getItemMeta();
+				PotionMeta meta = (PotionMeta) potionItem.getItemMeta();
 				pot.setType(PotionType.REGEN);
 				meta.addCustomEffect(new PotionEffect(PotionEffectType.REGENERATION, 5 * 20, 2), true);
-				potion.setItemMeta(meta);
+				potionItem.setItemMeta(meta);
 			} else if (amount == 5) {
-				potion = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-						instance.getGameManager().getMain().color("&eStrength I &7(5 sec)"));
+				potionItem = ItemHelper.setDetails(
+						new ItemStack(Material.POTION, 1),
+						"&f&lResistance " + (resistance.getAmplifier() + 1) + " &7(" + resistance.getDuration() + " sec)"
+				);
 				pot.setSplash(true);
-				PotionMeta meta = (PotionMeta) potion.getItemMeta();
+				PotionMeta meta = (PotionMeta) potionItem.getItemMeta();
+				pot.setType(PotionType.NIGHT_VISION);
+				meta.addCustomEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 15 * 20, 0, false, true), true);
+				potionItem.setItemMeta(meta);
+				resPotItem = potionItem;
+			} else if (amount == 6) {
+				potionItem = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
+						instance.getGameManager().getMain().color("&4&lStrength I &7(5 sec)"));
+				pot.setSplash(true);
+				PotionMeta meta = (PotionMeta) potionItem.getItemMeta();
 				pot.setType(PotionType.STRENGTH);
 				meta.addCustomEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 5 * 20, 0), true);
-				potion.setItemMeta(meta);
+				potionItem.setItemMeta(meta);
 			}
 
-			pot.apply(potion);
-			player.getInventory().setItem(1, potion);
+			pot.apply(potionItem);
+			player.getInventory().setItem(1, potionItem);
 			player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 10);
-			player.sendMessage(color("&2&l(!) &rYou brewed a " + potion.getItemMeta().getDisplayName() + " &rpotion!"));
+			player.sendMessage(color("&2&l(!) &rYou brewed a " + potionItem.getItemMeta().getDisplayName() + " &rpotion!"));
 			this.used = false; // Reset Brewing Stand usage
 		}
 	}
@@ -220,22 +237,32 @@ public class BrewingStandClass extends BaseClass {
 				if (slot9 != null && slot9.getType() == Material.BARRIER) {
 					player.getInventory().setItem(8, new ItemStack(Material.BLAZE_POWDER));
 				} else {
-					if (slot9.getAmount() < 5)
+					if (slot9.getAmount() < 6)
 						player.getInventory().addItem(new ItemStack(Material.BLAZE_POWDER));
 				}
 			}
 		}
 	}
 
+//	@Override
+//	public void PotionSplashEvent(PotionSplashEvent event) {
+//		if (event.getEntity() == null) return;
+//		ThrownPotion potion = event.getPotion();
+//		if (potion == null) return;
+//		ItemStack item = potion.getItem();
+//		if (!(item.equals(resPotItem))) return;
+//		for (Entity affectedEntity : event.getAffectedEntities()) {
+//			if (!(affectedEntity instanceof Player)) continue;
+//			Player player1 = (Player) affectedEntity;
+//			if (!player1.equals(player)) continue;
+//
+//			player1.addPotionEffect(resistance);
+//		}
+//	}
+
 	@Override
 	public ClassType getType() {
 		return ClassType.BrewingStand;
-	}
-
-	@Override
-	public void SetNameTag() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -249,15 +276,21 @@ public class BrewingStandClass extends BaseClass {
 
 	private ItemStack getBrewingStand() {
 		ItemStack brewingStand = ItemHelper.setDetails(new ItemStack(Material.BREWING_STAND_ITEM),
-				color("&eBrewing Stand"), "", color("&rHit players to obtain Brewing items"),
-				color("&rthen right click to get a potion"), "", color("&7 - 1 Powder: &eSlowness II (15 sec)"),
-				color("&7 - 2 Powder: &eJump IV (20 sec"), color("&7 - 3 Powder: &eSpeed II (20 sec)"),
-				color("&7 - 4 Powder: &eRegen III (5 sec)"), color("&7 - 5 Powder: &eStrength I (5 sec)"));
+				color("&eBrewing Stand"),
+				"",
+				color("&rHit players to obtain Brewing items"),
+				color("&rthen right click to get a potion"),
+				"",
+				color("&7 - 1 Powder: &eSlowness II (15 sec)"),
+				color("&7 - 2 Powder: &eJump 8 (10 sec)"),
+				color("&7 - 3 Powder: &eSpeed II (20 sec)"),
+				color("&7 - 4 Powder: &eRegen III (5 sec)"),
+				color("&7 - 5 Powder: &eResistance I (15 sec)"),
+				color("&7 - 6 Powder: &eStrength I (5 sec)"));
 		return brewingStand;
 	}
 
 	private String color(String c) {
 		return ChatColor.translateAlternateColorCodes('&', c);
 	}
-
 }

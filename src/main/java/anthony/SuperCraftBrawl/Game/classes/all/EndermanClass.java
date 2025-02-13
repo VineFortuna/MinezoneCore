@@ -1,12 +1,14 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
+import anthony.SuperCraftBrawl.Game.ActionBarManager;
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
-import net.md_5.bungee.api.ChatColor;
+import anthony.util.SoundManager;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -16,10 +18,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.material.Banner;
 import org.bukkit.material.Door;
 import org.bukkit.material.Skull;
@@ -27,14 +27,19 @@ import org.bukkit.util.Vector;
 
 public class EndermanClass extends BaseClass {
 
-	private ItemStack stick;
+	private final ItemStack weapon;
+	private final ItemStack teleportItem;
+	private final ItemStack blockItem;
+	private final Ability teleportAbility = new Ability("&5&lTeleport", 10, player);
+	private final Ability blockAbility = new Ability("&5&lBlock", 10, player);
+	private final Ability blockThrowAbility = new Ability("&5&lBlock Throw", player);
+
 	private ItemStack newItem = null;
 	private boolean used = false;
-	private int pearlCooldownSec, itemPickupCooldownSec;
 
 	public EndermanClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.1;
+		baseVerticalJump = 1.0;
 		createArmor(
 				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2E1OWJiMGE3YTMyOTY1YjNkOTBkOGVhZmE4OTlkMTgzNWY0MjQ1MDllYWRkNGU2YjcwOWFkYTUwYjljZiJ9fX0",
@@ -42,158 +47,164 @@ public class EndermanClass extends BaseClass {
 				6,
 				"Enderman"
 		);
-	}
 
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
+		// Weapon
+		weapon = ItemHelper.setDetails(
+				new ItemStack(Material.EYE_OF_ENDER),
+				"&5&lEnderman Soul"
+		);
+		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 4);
+		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
+
+		// Teleport Ability
+		teleportItem = ItemHelper.setDetails(
+				new ItemStack(Material.ENDER_PEARL, 10),
+				teleportAbility.getAbilityNameRightClickMessage()
+		);
+
+		// Block Ability
+		blockItem = ItemHelper.setDetails(
+				new ItemStack(Material.STICK),
+				blockAbility.getAbilityName() + " Pickup &7(Right click)",
+				"&7Grab the block you're standing on",
+				"&7You can throw it to damage and knock players",
+				"",
+				blockAbility.getOnGroundItemMessage()
+		);
 	}
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-
-		stick = ItemHelper.setDetails(new ItemStack(Material.STICK),
-				instance.getGameManager().getMain().color("&c&lBlock Pickup"), "",
-				instance.getGameManager().getMain().color("&7Right click to grab the block you're standing on"));
 		used = false;
-		playerInv.setItem(0, this.getAttackWeapon());
-		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL, 10),
-				"" + ChatColor.BLACK + ChatColor.BOLD + "Teleporters"));
-		playerInv.setItem(2, stick);
+		teleportAbility.getCooldownInstance().reset();
+		blockAbility.getCooldownInstance().reset();
+		playerInv.setItem(0, weapon);
+		playerInv.setItem(1, blockItem);
+		playerInv.setItem(2, teleportItem);
 	}
 
-	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void Tick(int gameTicks) {
-		if (instance.classes.containsKey(player) && instance.classes.get(player).getLives() > 0
-				&& instance.classes.get(player).getType() == ClassType.Enderman)
-			if (!(player.getInventory().contains(this.getAttackWeapon())))
-				player.getInventory().setItem(0, this.getAttackWeapon()); // If some rare chance the player throws away
-																			// their melee
+		if (!isPlayerAlive()) return;
 
-		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Enderman
-				&& instance.classes.get(player).getLives() > 0) {
-			this.pearlCooldownSec = (10000 - pearlTimer.getTime()) / 1000 + 1;
-			this.itemPickupCooldownSec = (10000 - enderman.getTime()) / 1000 + 1;
+		// ActionBar
+		ActionBarManager actionBarManager = this.getActionBarManager();
+		ActionBarManager.AbilityActionBar abilityActionBar = new ActionBarManager.AbilityActionBar(this, actionBarManager);
+		abilityActionBar.setActionBarAbility(player, teleportAbility, blockAbility);
 
-			//For pearl cooldown message
-			if (pearlTimer.getTime() < 10000) {
-				String msg = instance.getGameManager().getMain()
-						.color("&c&lTeleporter &rin: &e" + this.pearlCooldownSec + "s");
-				getActionBarManager().setActionBar(player, "teleport.cooldown", msg, 2);
-			} else {
-				String msg = instance.getGameManager().getMain().color("&rYou can use &c&lTeleporter");
-				getActionBarManager().setActionBar(player, "teleport.cooldown", msg, 2);
-			}
-			
-			//For Item Pickup cooldown message
-			if (enderman.getTime() < 10000) {
-				String msg = instance.getGameManager().getMain()
-						.color("&c&lBlock Pickup &rin: &e" + this.itemPickupCooldownSec + "s");
-				getActionBarManager().setActionBar(player, "itemPickup.cooldown", msg, 2);
-			} else {
-				String msg = instance.getGameManager().getMain().color("&rYou can use &c&lBlock Pickup");
-				getActionBarManager().setActionBar(player, "itemPickup.cooldown", msg, 2);
-			}
-		}
+		// Check if player didn't throw the eye of ender
+		Inventory inventory = player.getInventory();
+		if (inventory.contains(weapon)) return;
+		player.getInventory().setItem(0, weapon);
 	}
 
 	@SuppressWarnings("deprecation")
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
+		Action action = event.getAction();
 
-		if (item != null && item.getType() == Material.EYE_OF_ENDER
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK
-						|| event.getAction() == Action.LEFT_CLICK_AIR
-						|| event.getAction() == Action.LEFT_CLICK_BLOCK)) {
-			event.setCancelled(true);
-		} else if (item != null && item.getType() == Material.STICK
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			if (used == true) {
-				player.sendMessage(
-						instance.getGameManager().getMain().color("&c&l(!) &rYou already have a block in your inventory!"));
-				return;
-			} else if (!(player.isOnGround())) {
-				player.sendMessage(
-						instance.getGameManager().getMain().color("&r&l(!) &rYou must be on the ground to use this item!"));
+		if (item == null) return;
+		if (player.getGameMode() == GameMode.SPECTATOR) return;
+
+		if (item.equals(weapon)) event.setCancelled(true);
+		if (item.equals(blockItem)) {
+			if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
+			if (used) {
+				blockAbility.sendCustomMessage("&c&l(!) &rYou already have a block in your inventory!");
 				return;
 			}
-
-			if (enderman.getTime() < 10000) {
-				int seconds = (10000 - enderman.getTime()) / 1000 + 1;
-				event.setCancelled(true);
-				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-						+ "Your stick is still on cooldown for " + ChatColor.YELLOW + seconds + " more seconds ");
-			} else {
-				Block block = player.getWorld().getBlockAt(player.getLocation().getBlockX(),
-						player.getLocation().getBlockY() - 1, player.getLocation().getBlockZ());
-				Block blockInside = player.getWorld().getBlockAt(player.getLocation());
-				
-				if (blockInside.getType().isSolid() && player.getLocation().getY() % 1 != 0) {
-					newItem = new ItemStack(blockInside.getType(), 1);
-				} else if (block.getType().isSolid()) {
-					newItem = new ItemStack(block.getType(), 1);
-				} else {
-					player.sendMessage(instance.getGameManager().getMain()
-							.color("&c&l(!) &rThere is no block under you. Please try again."));
-					return;
-				}
-				enderman.restart();
-				if (newItem.getType() == Material.DOUBLE_STEP || newItem.getType() == Material.DOUBLE_STONE_SLAB2 ||
-						newItem.getType() == Material.WOOD_DOUBLE_STEP)
-					newItem.setType(Material.valueOf(newItem.getType().name().replace("DOUBLE_", "")));
-				else if (newItem.getData() instanceof Door)
-					newItem.setType(Material.WOOD_DOOR);
-				else if (newItem.getData() instanceof Skull)
-					newItem.setType(Material.SKULL_ITEM);
-				else if (newItem.getType() == Material.SOIL)
-					newItem.setType(Material.DIRT);
-				else if (newItem.getType() == Material.BED_BLOCK)
-					newItem.setType(Material.BED);
-				else if (newItem.getData() instanceof Banner)
-					newItem.setType(Material.BANNER);
-				else if (newItem.getType() == Material.BREWING_STAND)
-					newItem.setType(Material.BREWING_STAND_ITEM);
-				else if (newItem.getType() == Material.CAULDRON)
-					newItem.setType(Material.CAULDRON_ITEM);
-				ItemHelper.setDetails(newItem, instance.getGameManager().getMain().color(
-						"&e&lBlock"));
-				player.getInventory().addItem(newItem);
-				player.sendMessage(
-						instance.getGameManager().getMain().color("&r&l(!) &rYou picked up &e1 " +
-								WordUtils.capitalizeFully(newItem.getType().name().replace('_', ' ').replaceAll("[0-9]", ""))));
-				used = true;
+			if (!player.isOnGround()) {
+				player.sendMessage(blockAbility.getOnGroundChatMessage());
+				return;
 			}
-		} else if (item != null && newItem != null && item.hasItemMeta() && item.isSimilar(newItem)) {
-			Vector direction = player.getLocation().getDirection();
-			player.getInventory().remove(newItem);
-			ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
-				@Override
-				public void onHit(Player hit) {
-					if (instance.duosMap != null)
-						if (instance.team.get(hit).equals(instance.team.get(player)))
-							return;
-
-					player.playSound(hit.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
-					Location loc = hit.getLocation();
-					Vector v = direction;
-					EntityDamageEvent damageEvent = new EntityDamageEvent(hit, DamageCause.PROJECTILE, 4.5);
-					instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
-					hit.damage(4.5, player);
-					v.setY(1.0);
-					hit.setVelocity(v);
-					for (Player gamePlayer : instance.players)
-						gamePlayer.playSound(loc, Sound.CHICKEN_EGG_POP, 1, 1);
-				}
-
-			}, new ItemStack(newItem));
-			instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-					player.getLocation().getDirection().multiply(2.0D));
-
-			newItem = null;
-			used = false;
+			if (!blockAbility.isReady()) return;
+			getBlockAbility();
 		}
+		if (item.isSimilar(teleportItem)) {
+			if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
+			if (!teleportAbility.isReady()) {
+				event.setCancelled(true);
+				return;
+			}
+			teleportAbility.use();
+		}
+		if (item.hasItemMeta() && item.isSimilar(newItem)) {
+			throwBlockAbility();
+		}
+	}
+
+	private void getBlockAbility() {
+		Location playerLocation = player.getLocation();
+		World playerWorld = player.getWorld();
+		Block block = playerWorld.getBlockAt(playerLocation.getBlockX(), playerLocation.getBlockY() - 1, playerLocation.getBlockZ());
+		Block blockInside = playerWorld.getBlockAt(playerLocation);
+
+		if (blockInside.getType().isSolid() && playerLocation.getY() % 1 != 0) {
+			newItem = new ItemStack(blockInside.getType(), 1);
+		} else if (block.getType().isSolid()) {
+			newItem = new ItemStack(block.getType(), 1);
+		} else {
+			player.sendMessage(instance.getGameManager().getMain()
+					.color("&c&l(!) &rThere is no block under you. Please try again."));
+			return;
+		}
+		if (newItem.getType() == Material.DOUBLE_STEP || newItem.getType() == Material.DOUBLE_STONE_SLAB2 ||
+				newItem.getType() == Material.WOOD_DOUBLE_STEP)
+			newItem.setType(Material.valueOf(newItem.getType().name().replace("DOUBLE_", "")));
+		else if (newItem.getData() instanceof Door)
+			newItem.setType(Material.WOOD_DOOR);
+		else if (newItem.getData() instanceof Skull)
+			newItem.setType(Material.SKULL_ITEM);
+		else if (newItem.getType() == Material.SOIL)
+			newItem.setType(Material.DIRT);
+		else if (newItem.getType() == Material.BED_BLOCK)
+			newItem.setType(Material.BED);
+		else if (newItem.getData() instanceof Banner)
+			newItem.setType(Material.BANNER);
+		else if (newItem.getType() == Material.BREWING_STAND)
+			newItem.setType(Material.BREWING_STAND_ITEM);
+		else if (newItem.getType() == Material.CAULDRON)
+			newItem.setType(Material.CAULDRON_ITEM);
+		ItemHelper.setDetails(newItem, instance.getGameManager().getMain().color(
+				"&e&lBlock"));
+		ItemHelper.setDetails(newItem, blockThrowAbility.getAbilityNameLeftRightClickMessage());
+		player.getInventory().addItem(newItem);
+		player.sendMessage(
+				instance.getGameManager().getMain().color("&r&l(!) &rYou picked up &e1 " +
+						WordUtils.capitalizeFully(newItem.getType().name().replace('_', ' ').replaceAll("[0-9]", ""))));
+		blockAbility.use();
+		used = true;
+	}
+
+	private void throwBlockAbility() {
+		Vector direction = player.getLocation().getDirection();
+		player.getInventory().remove(newItem);
+		ItemProjectile itemProjectile = new ItemProjectile(instance, player, new ProjectileOnHit() {
+			@Override
+			public void onHit(Player hitPlayer) {
+				if (instance.duosMap != null)
+					if (instance.team.get(hitPlayer).equals(instance.team.get(player)))
+						return;
+
+				if (hitPlayer == null) return;
+
+				player.playSound(hitPlayer.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
+				Location location = hitPlayer.getLocation();
+				EntityDamageEvent damageEvent = new EntityDamageEvent(hitPlayer, DamageCause.PROJECTILE, 4.5);
+				instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+				hitPlayer.damage(4.5, player);
+				direction.setY(1.0);
+				hitPlayer.setVelocity(direction);
+				SoundManager.playSoundToAll(player, location, Sound.CHICKEN_EGG_POP, 1, 1);
+			}
+
+		}, new ItemStack(newItem));
+		instance.getGameManager().getProjManager().shootProjectile(itemProjectile, player.getEyeLocation(),
+				player.getLocation().getDirection().multiply(2.0D));
+
+		newItem = null;
+		used = false;
 	}
 
 	@Override
@@ -202,17 +213,7 @@ public class EndermanClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
-
-	}
-
-	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(
-				ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER),
-						"" + ChatColor.RED + ChatColor.BOLD + "Enderman Soul"), Enchantment.DAMAGE_ALL, 4),
-				Enchantment.KNOCKBACK, 1);
-		return item;
+		return weapon;
 	}
-
 }

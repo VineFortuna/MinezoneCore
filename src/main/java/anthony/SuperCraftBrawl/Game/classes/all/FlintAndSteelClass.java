@@ -2,35 +2,38 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import org.bukkit.Effect;
-import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class FlintAndSteelClass extends BaseClass {
 
-	private BukkitRunnable r;
+	private static final double FUSION_ABILITY_DURATION = 10;
+	private static final double FUSION_HIT_COMBO_WINDOW = 5;
+	private final Ability fusionAbility = new Ability("&8&lFlint&7&&f&lSteel", player);
+	private final ItemStack flintItem;
+	private final ItemStack steelItem;
+	private final ItemStack flintAndSteel;
+
+	private BukkitRunnable runnable;
 	private boolean isUsed = false;
 	private int initialLives = 0;
-	private ItemStack flint = ItemHelper.addEnchant(
-			ItemHelper.setDetails(new ItemStack(Material.FLINT), instance.getGameManager().getMain().color("&4&lFlint")),
-			Enchantment.DAMAGE_ALL, 3);
-	private ItemStack steel = ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.IRON_INGOT),
-			instance.getGameManager().getMain().color("&b&lSteel")), Enchantment.KNOCKBACK, 2);
 
 	public FlintAndSteelClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.1;
+		baseVerticalJump = 1.0;
 		createArmor(
 				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTNlOTdmYWI0NzUzYjc1YmE1YjBjMDM4YmVkMzc3YjE2MmJhMjhiN2E1ZTI5MGFiZmQwMThhNTU4MWFjNTM4OCJ9fX0=",
@@ -40,27 +43,46 @@ public class FlintAndSteelClass extends BaseClass {
 				6,
 				"Flint&Steel"
 		);
-	}
 
-	@Override
-	public ClassType getType() {
-		return ClassType.FlintAndSteel;
-	}
+		String flintName = "&8&lFlint";
+		String steelName = "&f&lSteel";
+		String durationDisplay = ItemHelper.formatDouble(FUSION_ABILITY_DURATION);
+		String windowDisplay = ItemHelper.formatDouble(FUSION_HIT_COMBO_WINDOW);
 
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
-	}
+		String[] lore = new String[]{
+				"",
+				"&7Combo players with " + flintName + " &7and then " + steelName,
+				"&7to combine them and gain &c&oFire Aspect 1",
+				"",
+				"&7Hit combo window: &a" + windowDisplay + "s",
+				fusionAbility.getAbilityName() + " &7lasts for &a" + durationDisplay + "s"
+		};
 
-	@Override
-	public ItemStack getAttackWeapon() {
-		return this.steel;
-	}
+		// Flint
+		flintItem = ItemHelper.setDetails(
+				new ItemStack(Material.FLINT),
+				flintName,
+				lore
+		);
+		flintItem.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
 
-	@Override
-	public void SetNameTag() {
-		// TODO Auto-generated method stub
+		// Steel
 
+		steelItem = ItemHelper.setDetails(
+				new ItemStack(Material.IRON_INGOT),
+				steelName,
+				lore
+		);
+		steelItem.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
+
+		// Flint&Steel
+		flintAndSteel = ItemHelper.setDetails(
+				new ItemStack(Material.FLINT_AND_STEEL),
+				fusionAbility.getAbilityName()
+		);
+		flintAndSteel.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
+		flintAndSteel.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
+		flintAndSteel.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -72,38 +94,68 @@ public class FlintAndSteelClass extends BaseClass {
 				if (instance.team.get(p).equals(instance.team.get(player)))
 					return;
 
-			if (flintUsed == true) {
-				if (player.getInventory().getItemInHand().equals(steel)) {
+			if (flintUsed) {
+				if (player.getInventory().getItemInHand().equals(steelItem)) {
 					flintUsed = false;
 					isUsed = false;
 					BaseClass bc = instance.classes.get(player);
 					if (bc != null)
 						initialLives = bc.getLives();
 
-					r.cancel();
-					r = null;
-					player.sendMessage(instance.getGameManager().getMain()
-							.color("&2&l(!) &rYou made &4Flint&7And&bSteel&r! You have &e15 seconds &rto go nuts"));
-					player.getInventory().remove(this.flint);
-					player.getInventory().remove(this.steel);
-					player.getInventory()
-							.addItem(ItemHelper.addEnchant(
-									ItemHelper.addEnchant(ItemHelper.addEnchant(new ItemStack(Material.FLINT_AND_STEEL),
-											Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 2),
-									Enchantment.FIRE_ASPECT, 1));
-					
-					for (Player gamePlayer : instance.players)
-						gamePlayer.playEffect(player.getLocation(), Effect.BLAZE_SHOOT, 1);
-					expire();
+					useFusionAbility();
 				}
 			}
 		}
 	}
 
-	public void expire() {
-		if (r == null) {
-			r = new BukkitRunnable() {
-				int duration = 15; // In seconds
+	private void useFusionAbility() {
+		runnable.cancel();
+		runnable = null;
+		// Feedback message
+		player.sendMessage(ChatColorHelper.color(
+				"&2&l(!) &rYou got " + fusionAbility.getAbilityName() + "&r for &e" + (int) FUSION_ABILITY_DURATION + "s"
+		));
+		// Settings items
+		player.getInventory().remove(flintItem);
+		player.getInventory().remove(steelItem);
+		player.getInventory().setItem(0, flintAndSteel);
+		player.getInventory().setItem(1, ItemHelper.setDetails(new ItemStack(Material.BARRIER), ""));
+
+		player.getWorld().playEffect(player.getLocation(), Effect.BLAZE_SHOOT, 1);
+		spawnParticles();
+		fusionAbilityRunnable();
+	}
+
+	private void spawnParticles() {
+		Location location = player.getLocation().add(0, 1, 0); // Center at player's torso
+		int particles = 2; // Number of particles in the circle
+		double radius = 0.5; // Radius of the effect
+
+		for (int i = 0; i < particles; i++) {
+			double angle = 2 * Math.PI * i / particles;
+			double x = radius * Math.cos(angle);
+			double z = radius * Math.sin(angle);
+
+			// Main flame effect
+			player.getWorld().playEffect(
+					location.clone().add(x, 0, z),
+					Effect.MOBSPAWNER_FLAMES,
+					0
+			);
+
+			// Add smoke particles for depth
+			player.getWorld().playEffect(
+					location.clone().add(-x, 0.5, -z),
+					Effect.LARGE_SMOKE,
+					0
+			);
+		}
+	}
+
+	public void fusionAbilityRunnable() {
+		if (runnable == null) {
+			runnable = new BukkitRunnable() {
+				int duration = (int) FUSION_ABILITY_DURATION; // In seconds
 
 				@Override
 				public void run() {
@@ -112,85 +164,62 @@ public class FlintAndSteelClass extends BaseClass {
 						if ((initialLives != bc.getLives()) || instance.state == GameState.ENDED) {
 							flintUsed = false;
 							isUsed = false;
-							r = null;
+							runnable = null;
 							this.cancel();
 						}
 					}
 					if (duration == 0) {
 						player.sendMessage(instance.getGameManager().getMain()
-								.color("&2&l(!) &rYour &4Flint&7And&bSteel&r ran out of power!"));
-						player.getInventory().remove(Material.FLINT_AND_STEEL);
-						player.getInventory().addItem(flint);
-						player.getInventory().addItem(getAttackWeapon());
-						r = null;
+								.color("&2&l(!) &rYour " + fusionAbility.getAbilityName() + "&r ran out!"));
+						player.getInventory().remove(flintAndSteel);
+						player.getInventory().setItem(0, flintItem);
+						player.getInventory().setItem(1, steelItem);
+						runnable = null;
+
+						String message = ChatColorHelper.color(fusionAbility.getAbilityName() + " &7ran out");
+						getActionBarManager().setActionBar(player, "fns.cooldown", message, 2);
+
 						this.cancel();
-						cooldown();
+						return;
 					}
 
+
+					String message = ChatColorHelper.color(fusionAbility.getAbilityName() + " &7runs out in &e" + duration + "s");
+					getActionBarManager().setActionBar(player, "fns.cooldown", message, 2);
 					duration--;
 				}
 
 			};
-			r.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
-		}
-	}
-
-	private void cooldown() {
-		if (r == null) {
-			r = new BukkitRunnable() {
-				int ticks = 10;
-
-				@Override
-				public void run() {
-					if (player.getGameMode() == GameMode.SPECTATOR || instance.state == GameState.ENDED) {
-						r = null;
-						this.cancel();
-					}
-					if (ticks == 0) {
-						flintUsed = false;
-						isUsed = false;
-						r = null;
-						this.cancel();
-					} else {
-						String msg = instance.getGameManager().getMain()
-								.color("&9&l(!) &eAbility Cooldown: " + ticks + "s");
-						getActionBarManager().setActionBar(player, "fns.cooldown", msg, 2);
-					}
-
-					ticks--;
-				}
-
-			};
-			r.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+			runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
 		}
 	}
 
 	@Override
 	public void DoDamage(EntityDamageByEntityEvent event) {
-		if (r == null) {
-			if (isUsed == false) {
-				if (flintUsed == false) {
+		if (runnable == null) {
+			if (!isUsed) {
+				if (!flintUsed) {
 					if (event.getEntity() instanceof Player) {
 						Player p = (Player) event.getEntity();
 						if (instance.getGameManager().spawnProt.containsKey(p)
 								|| instance.getGameManager().spawnProt.containsKey(player))
 							return;
 							
-							if (instance.duosMap != null)
-								if (instance.team.get(p).equals(instance.team.get(player)))
-									return;
+						if (instance.duosMap != null)
+							if (instance.team.get(p).equals(instance.team.get(player)))
+								return;
 
-						if (player.getInventory().getItemInHand().equals(flint)) {
+						if (player.getInventory().getItemInHand().equals(flintItem)) {
 							flintUsed = true;
 							isUsed = true;
-							if (r == null) {
-								r = new BukkitRunnable() {
+							if (runnable == null) {
+								runnable = new BukkitRunnable() {
 									int ticks = 0;
 
 									@Override
 									public void run() {
-										if (ticks == 2) {
-											r = null;
+										if (ticks == FUSION_HIT_COMBO_WINDOW) {
+											runnable = null;
 											this.cancel();
 											flintUsed = false;
 											isUsed = false;
@@ -201,7 +230,7 @@ public class FlintAndSteelClass extends BaseClass {
 									}
 
 								};
-								r.runTaskTimer(instance.getGameManager().getMain(), 0, 50);
+								runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
 							}
 						}
 					}
@@ -214,13 +243,17 @@ public class FlintAndSteelClass extends BaseClass {
 	public void SetItems(Inventory playerInv) {
 		flintUsed = false; // Default state
 		isUsed = false; // Default state
-		playerInv.setItem(0, this.flint);
-		playerInv.setItem(1, this.getAttackWeapon());
+		playerInv.setItem(0, flintItem);
+		playerInv.setItem(1, steelItem);
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
-
+	public ClassType getType() {
+		return ClassType.FlintAndSteel;
 	}
 
+	@Override
+	public ItemStack getAttackWeapon() {
+		return this.flintItem;
+	}
 }

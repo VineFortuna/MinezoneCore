@@ -13,6 +13,7 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -25,11 +26,13 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class LargeFernClass extends BaseClass {
 
     private int numberOfSporesProjectiles = 5;
-    private final Ability sporesAbility = new Ability("&2&lSpore Launcher", 4, player);
-    private final Ability transfernAbility = new Ability("&2&lTransfern", 9, player);
-    private final CooldownNatowski transfernAbilitySmallFernTimer = new CooldownNatowski(2);
     private final ItemStack weapon;
     private final ItemStack transfernItem;
+    private final Ability sporesAbility = new Ability("&2&lSpores", 4, player);
+    private final Ability transfernAbility = new Ability("&2&lTransfern", 9, player);
+    private final PotionEffect regeneration = new PotionEffect(PotionEffectType.REGENERATION, 9999999, 1, false, false);
+
+    private final CooldownNatowski transfernAbilitySmallFernTimer = new CooldownNatowski(2);
     private boolean isTransferned;
     private Location fernLocation;
     int sporeDamage = 4;
@@ -47,45 +50,36 @@ public class LargeFernClass extends BaseClass {
         // Weapon
         weapon = ItemHelper.setDetails(
                 new ItemStack(Material.DOUBLE_PLANT, 1, (short) 3),
-                sporesAbility.getAbilityNameRightClickMessage(),
+                "&2&lSpore Launcher &7(Right Click)",
                 "",
                 "&7Launch spores at enemies",
-                "&7High spread at close range");
+                "&7High spread at close range"
+        );
         weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
         weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
 
         // Disguise Ability
-        transfernItem = ItemHelper.setDetails(new ItemStack(Material.LONG_GRASS, 1, (short) 2),
+        transfernItem = ItemHelper.setDetails(
+                new ItemStack(Material.LONG_GRASS, 1, (short) 2),
                 transfernAbility.getAbilityNameRightClickMessage(),
-                "&7Transform into a fern to regenerate health");
+                "&7Transform into a fern to regenerate health"
+        );
     }
 
     @Override
     public void SetItems(Inventory playerInv) {
+        isTransferned = false;
         // Resetting Spore Launcher CD
         sporesAbility.getCooldownInstance().reset();
         // Setting Items
         playerInv.setItem(0, weapon);
         playerInv.setItem(1, transfernItem);
-        
-        isTransferned = false;
     }
     
     @Override
     public void Tick(int gameTicks) {
-        if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.LargeFern
-                && instance.classes.get(player).getLives() > 0) {
-            
-            if (!sporesAbility.isReady()) {
-                String msg = instance.getGameManager().getMain()
-                        .color("&2Spore Launch &rregenerates in: &e" +
-                                (sporesAbility.getCooldownInstance().getRemainingCooldownSeconds() + 1) + "s");
-                getActionBarManager().setActionBar(player, "spore.cooldown", msg, 2);
-            } else {
-                String msg = instance.getGameManager().getMain().color("&rYou can use &2Spore Launch");
-                getActionBarManager().setActionBar(player, "spore.cooldown", msg, 2);
-            }
-        }
+        if (!isPlayerAlive()) return;
+        sporesAbility.updateActionBar(player,this);
     }
 
     @Override
@@ -95,233 +89,247 @@ public class LargeFernClass extends BaseClass {
 
     @Override
     public void UseItem(PlayerInteractEvent event) {
-        ItemStack item = event.getItem();
-    
-        if (item != null) {
-            // SPORE LAUNCH ABILITY
-            if (item.equals(weapon) && (event.getAction().toString().contains("RIGHT_CLICK"))) {
-                if (!sporesAbility.isReady()) return;
+        ItemStack item = event.getPlayer().getItemInHand();
+        Action action = event.getAction();
 
-                sporesAbility.use();
+        if (item == null) return;
+        if (player.getGameMode() == GameMode.SPECTATOR) return;
 
-                ItemProjectile itemProjectile = new ItemProjectile(instance, player, new ProjectileOnHit() {
-                    @Override
-                    public void onHit(Player hit) {
-                        if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
-                            Location hitLoc = this.getBaseProj().getEntity().getLocation();
+        if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
 
-                            for (Player gamePlayer : this.getNearby(3.0)) {
-                                // Check if the hit player is not the player who triggered the ability
-                                if (!gamePlayer.equals(player)) {
-                                    if (instance.duosMap != null) {
-                                        if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
-                                            @SuppressWarnings("deprecation")
-                                            EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-                                                    EntityDamageEvent.DamageCause.VOID, sporeDamage);
-                                            instance.getGameManager().getMain().getServer().getPluginManager()
-                                                    .callEvent(damageEvent);
-                                            gamePlayer.damage(sporeDamage, player);
-                                        }
-                                    } else {
+        // Spores Ability
+        if (item.equals(weapon)) {
+            event.setCancelled(true);
+            if (!sporesAbility.isReady()) return;
+            useSporesAbility();
+            sporesAbility.use();
+        }
+
+        // Transfern Ability
+        if (item.equals(transfernItem)) {
+            useTransfernAbility();
+        }
+    }
+
+    private void useSporesAbility() {
+            ItemProjectile itemProjectile = new ItemProjectile(instance, player, new ProjectileOnHit() {
+                @Override
+                public void onHit(Player hit) {
+                    if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
+                        Location hitLoc = this.getBaseProj().getEntity().getLocation();
+
+                        for (Player gamePlayer : this.getNearby(3.0)) {
+                            // Check if the hit player is not the player who triggered the ability
+                            if (!gamePlayer.equals(player)) {
+                                if (instance.duosMap != null) {
+                                    if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
+                                        @SuppressWarnings("deprecation")
                                         EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
                                                 EntityDamageEvent.DamageCause.VOID, sporeDamage);
                                         instance.getGameManager().getMain().getServer().getPluginManager()
                                                 .callEvent(damageEvent);
                                         gamePlayer.damage(sporeDamage, player);
                                     }
+                                } else {
+                                    EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
+                                            EntityDamageEvent.DamageCause.VOID, sporeDamage);
+                                    instance.getGameManager().getMain().getServer().getPluginManager()
+                                            .callEvent(damageEvent);
+                                    gamePlayer.damage(sporeDamage, player);
                                 }
                             }
+                        }
 //                                player.getWorld().playSound(hitLoc, Sound.EXPLODE, 2, 5);
 //                                player.getWorld().playEffect(hitLoc, Effect.EXPLOSION_LARGE, 1);
-                        }
                     }
-                }, new ItemStack(Material.WOOD_BUTTON));
+                }
+            }, new ItemStack(Material.WOOD_BUTTON));
 
-                ItemProjectile itemProjectile2 = new ItemProjectile(instance, player, new ProjectileOnHit() {
-                    @Override
-                    public void onHit(Player hit) {
-                        if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
-                            Location hitLoc = this.getBaseProj().getEntity().getLocation();
+            ItemProjectile itemProjectile2 = new ItemProjectile(instance, player, new ProjectileOnHit() {
+                @Override
+                public void onHit(Player hit) {
+                    if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
+                        Location hitLoc = this.getBaseProj().getEntity().getLocation();
 
-                            for (Player gamePlayer : this.getNearby(3.0)) {
-                                // Check if the hit player is not the player who triggered the ability
-                                if (!gamePlayer.equals(player)) {
-                                    if (instance.duosMap != null) {
-                                        if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
-                                            @SuppressWarnings("deprecation")
-                                            EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-                                                    EntityDamageEvent.DamageCause.VOID, sporeDamage);
-                                            instance.getGameManager().getMain().getServer().getPluginManager()
-                                                    .callEvent(damageEvent);
-                                            gamePlayer.damage(sporeDamage, player);
-                                        }
-                                    } else {
+                        for (Player gamePlayer : this.getNearby(3.0)) {
+                            // Check if the hit player is not the player who triggered the ability
+                            if (!gamePlayer.equals(player)) {
+                                if (instance.duosMap != null) {
+                                    if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
+                                        @SuppressWarnings("deprecation")
                                         EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
                                                 EntityDamageEvent.DamageCause.VOID, sporeDamage);
                                         instance.getGameManager().getMain().getServer().getPluginManager()
                                                 .callEvent(damageEvent);
                                         gamePlayer.damage(sporeDamage, player);
                                     }
+                                } else {
+                                    EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
+                                            EntityDamageEvent.DamageCause.VOID, sporeDamage);
+                                    instance.getGameManager().getMain().getServer().getPluginManager()
+                                            .callEvent(damageEvent);
+                                    gamePlayer.damage(sporeDamage, player);
                                 }
                             }
-                            for (Player gamePlayer : instance.players) {
+                        }
+                        for (Player gamePlayer : instance.players) {
 //                                    gamePlayer.playSound(hitLoc, Sound.EXPLODE, 2, 5);
 //                                    gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_LARGE, 1);
-                            }
                         }
                     }
-                }, new ItemStack(Material.WOOD_BUTTON));
+                }
+            }, new ItemStack(Material.WOOD_BUTTON));
 
-                ItemProjectile itemProjectile3 = new ItemProjectile(instance, player, new ProjectileOnHit() {
-                    @Override
-                    public void onHit(Player hit) {
-                        if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
-                            Location hitLoc = this.getBaseProj().getEntity().getLocation();
+            ItemProjectile itemProjectile3 = new ItemProjectile(instance, player, new ProjectileOnHit() {
+                @Override
+                public void onHit(Player hit) {
+                    if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
+                        Location hitLoc = this.getBaseProj().getEntity().getLocation();
 
-                            for (Player gamePlayer : this.getNearby(3.0)) {
-                                // Check if the hit player is not the player who triggered the ability
-                                if (!gamePlayer.equals(player)) {
-                                    if (instance.duosMap != null) {
-                                        if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
-                                            @SuppressWarnings("deprecation")
-                                            EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-                                                    EntityDamageEvent.DamageCause.VOID, sporeDamage);
-                                            instance.getGameManager().getMain().getServer().getPluginManager()
-                                                    .callEvent(damageEvent);
-                                            gamePlayer.damage(sporeDamage, player);
-                                        }
-                                    } else {
+                        for (Player gamePlayer : this.getNearby(3.0)) {
+                            // Check if the hit player is not the player who triggered the ability
+                            if (!gamePlayer.equals(player)) {
+                                if (instance.duosMap != null) {
+                                    if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
+                                        @SuppressWarnings("deprecation")
                                         EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
                                                 EntityDamageEvent.DamageCause.VOID, sporeDamage);
                                         instance.getGameManager().getMain().getServer().getPluginManager()
                                                 .callEvent(damageEvent);
                                         gamePlayer.damage(sporeDamage, player);
                                     }
+                                } else {
+                                    EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
+                                            EntityDamageEvent.DamageCause.VOID, sporeDamage);
+                                    instance.getGameManager().getMain().getServer().getPluginManager()
+                                            .callEvent(damageEvent);
+                                    gamePlayer.damage(sporeDamage, player);
                                 }
                             }
-                            for (Player gamePlayer : instance.players) {
+                        }
+                        for (Player gamePlayer : instance.players) {
 //                                    gamePlayer.playSound(hitLoc, Sound.EXPLODE, 2, 5);
 //                                    gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_LARGE, 1);
-                            }
                         }
                     }
-                }, new ItemStack(Material.WOOD_BUTTON));
+                }
+            }, new ItemStack(Material.WOOD_BUTTON));
 
-                ItemProjectile itemProjectile4 = new ItemProjectile(instance, player, new ProjectileOnHit() {
-                    @Override
-                    public void onHit(Player hit) {
-                        if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
-                            Location hitLoc = this.getBaseProj().getEntity().getLocation();
+            ItemProjectile itemProjectile4 = new ItemProjectile(instance, player, new ProjectileOnHit() {
+                @Override
+                public void onHit(Player hit) {
+                    if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
+                        Location hitLoc = this.getBaseProj().getEntity().getLocation();
 
-                            for (Player gamePlayer : this.getNearby(3.0)) {
-                                // Check if the hit player is not the player who triggered the ability
-                                if (!gamePlayer.equals(player)) {
-                                    if (instance.duosMap != null) {
-                                        if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
-                                            @SuppressWarnings("deprecation")
-                                            EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-                                                    EntityDamageEvent.DamageCause.VOID, sporeDamage);
-                                            instance.getGameManager().getMain().getServer().getPluginManager()
-                                                    .callEvent(damageEvent);
-                                            gamePlayer.damage(sporeDamage, player);
-                                        }
-                                    } else {
+                        for (Player gamePlayer : this.getNearby(3.0)) {
+                            // Check if the hit player is not the player who triggered the ability
+                            if (!gamePlayer.equals(player)) {
+                                if (instance.duosMap != null) {
+                                    if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
+                                        @SuppressWarnings("deprecation")
                                         EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
                                                 EntityDamageEvent.DamageCause.VOID, sporeDamage);
                                         instance.getGameManager().getMain().getServer().getPluginManager()
                                                 .callEvent(damageEvent);
                                         gamePlayer.damage(sporeDamage, player);
                                     }
+                                } else {
+                                    EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
+                                            EntityDamageEvent.DamageCause.VOID, sporeDamage);
+                                    instance.getGameManager().getMain().getServer().getPluginManager()
+                                            .callEvent(damageEvent);
+                                    gamePlayer.damage(sporeDamage, player);
                                 }
                             }
-                            for (Player gamePlayer : instance.players) {
+                        }
+                        for (Player gamePlayer : instance.players) {
 //                                    gamePlayer.playSound(hitLoc, Sound.EXPLODE, 2, 5);
 //                                    gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_LARGE, 1);
-                            }
                         }
                     }
-                }, new ItemStack(Material.WOOD_BUTTON));
+                }
+            }, new ItemStack(Material.WOOD_BUTTON));
 
-                ItemProjectile itemProjectile5 = new ItemProjectile(instance, player, new ProjectileOnHit() {
-                    @Override
-                    public void onHit(Player hit) {
-                        if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
-                            Location hitLoc = this.getBaseProj().getEntity().getLocation();
+            ItemProjectile itemProjectile5 = new ItemProjectile(instance, player, new ProjectileOnHit() {
+                @Override
+                public void onHit(Player hit) {
+                    if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
+                        Location hitLoc = this.getBaseProj().getEntity().getLocation();
 
-                            for (Player gamePlayer : this.getNearby(3.0)) {
-                                // Check if the hit player is not the player who triggered the ability
-                                if (!gamePlayer.equals(player)) {
-                                    if (instance.duosMap != null) {
-                                        if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
-                                            @SuppressWarnings("deprecation")
-                                            EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-                                                    EntityDamageEvent.DamageCause.VOID, sporeDamage);
-                                            instance.getGameManager().getMain().getServer().getPluginManager()
-                                                    .callEvent(damageEvent);
-                                            gamePlayer.damage(sporeDamage, player);
-                                        }
-                                    } else {
+                        for (Player gamePlayer : this.getNearby(3.0)) {
+                            // Check if the hit player is not the player who triggered the ability
+                            if (!gamePlayer.equals(player)) {
+                                if (instance.duosMap != null) {
+                                    if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
+                                        @SuppressWarnings("deprecation")
                                         EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
                                                 EntityDamageEvent.DamageCause.VOID, sporeDamage);
                                         instance.getGameManager().getMain().getServer().getPluginManager()
                                                 .callEvent(damageEvent);
                                         gamePlayer.damage(sporeDamage, player);
                                     }
+                                } else {
+                                    EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
+                                            EntityDamageEvent.DamageCause.VOID, sporeDamage);
+                                    instance.getGameManager().getMain().getServer().getPluginManager()
+                                            .callEvent(damageEvent);
+                                    gamePlayer.damage(sporeDamage, player);
                                 }
                             }
-                            for (Player gamePlayer : instance.players) {
+                        }
+                        for (Player gamePlayer : instance.players) {
 //                                    gamePlayer.playSound(hitLoc, Sound.EXPLODE, 2, 5);
 //                                    gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_LARGE, 1);
-                            }
                         }
                     }
-                }, new ItemStack(Material.WOOD_BUTTON));
+                }
+            }, new ItemStack(Material.WOOD_BUTTON));
 
-                // Shooting Projectile
+            // Shooting Projectile
 //                    for (int i = 0; i < numberOfSporesProjectiles; i++) {
-                // Generate a random offset for each projectile
-                double xOffset = (Math.random() - 0.5) * 0.4; // Adjust the multiplier to control the spread
-                double yOffset = (Math.random() - 0.5) * 0.4;
-                double zOffset = (Math.random() - 0.5) * 0.4;
+            // Generate a random offset for each projectile
+            double xOffset = (Math.random() - 0.5) * 0.4; // Adjust the multiplier to control the spread
+            double yOffset = (Math.random() - 0.5) * 0.4;
+            double zOffset = (Math.random() - 0.5) * 0.4;
 
-                double xOffset2 = (Math.random() - 0.5) * 0.4; // Adjust the multiplier to control the spread
-                double yOffset2 = (Math.random() - 0.5) * 0.4;
-                double zOffset2 = (Math.random() - 0.5) * 0.4;
+            double xOffset2 = (Math.random() - 0.5) * 0.4; // Adjust the multiplier to control the spread
+            double yOffset2 = (Math.random() - 0.5) * 0.4;
+            double zOffset2 = (Math.random() - 0.5) * 0.4;
 
-                double xOffset3 = (Math.random() - 0.5) * 0.4; // Adjust the multiplier to control the spread
-                double yOffset3 = (Math.random() - 0.5) * 0.4;
-                double zOffset3 = (Math.random() - 0.5) * 0.4;
+            double xOffset3 = (Math.random() - 0.5) * 0.4; // Adjust the multiplier to control the spread
+            double yOffset3 = (Math.random() - 0.5) * 0.4;
+            double zOffset3 = (Math.random() - 0.5) * 0.4;
 
-                double xOffset4 = (Math.random() - 0.5) * 0.4; // Adjust the multiplier to control the spread
-                double yOffset4 = (Math.random() - 0.5) * 0.4;
-                double zOffset4 = (Math.random() - 0.5) * 0.4;
+            double xOffset4 = (Math.random() - 0.5) * 0.4; // Adjust the multiplier to control the spread
+            double yOffset4 = (Math.random() - 0.5) * 0.4;
+            double zOffset4 = (Math.random() - 0.5) * 0.4;
 
-                double xOffset5 = (Math.random() - 0.5) * 0.4; // Adjust the multiplier to control the spread
-                double yOffset5 = (Math.random() - 0.5) * 0.4;
-                double zOffset5 = (Math.random() - 0.5) * 0.4;
+            double xOffset5 = (Math.random() - 0.5) * 0.4; // Adjust the multiplier to control the spread
+            double yOffset5 = (Math.random() - 0.5) * 0.4;
+            double zOffset5 = (Math.random() - 0.5) * 0.4;
 
-                // Apply the offset to the initial direction
-                org.bukkit.util.Vector offset = new org.bukkit.util.Vector(xOffset, yOffset, zOffset);
-                org.bukkit.util.Vector shotDirection = player.getLocation().getDirection().add(offset).normalize();
+            // Apply the offset to the initial direction
+            org.bukkit.util.Vector offset = new org.bukkit.util.Vector(xOffset, yOffset, zOffset);
+            org.bukkit.util.Vector shotDirection = player.getLocation().getDirection().add(offset).normalize();
 
-                org.bukkit.util.Vector offset2 = new org.bukkit.util.Vector(xOffset2, yOffset2, zOffset2);
-                org.bukkit.util.Vector shotDirection2 = player.getLocation().getDirection().add(offset2).normalize();
+            org.bukkit.util.Vector offset2 = new org.bukkit.util.Vector(xOffset2, yOffset2, zOffset2);
+            org.bukkit.util.Vector shotDirection2 = player.getLocation().getDirection().add(offset2).normalize();
 
-                org.bukkit.util.Vector offset3 = new org.bukkit.util.Vector(xOffset3, yOffset3, zOffset3);
-                org.bukkit.util.Vector shotDirection3 = player.getLocation().getDirection().add(offset3).normalize();
+            org.bukkit.util.Vector offset3 = new org.bukkit.util.Vector(xOffset3, yOffset3, zOffset3);
+            org.bukkit.util.Vector shotDirection3 = player.getLocation().getDirection().add(offset3).normalize();
 
-                org.bukkit.util.Vector offset4 = new org.bukkit.util.Vector(xOffset4, yOffset4, zOffset4);
-                org.bukkit.util.Vector shotDirection4 = player.getLocation().getDirection().add(offset4).normalize();
+            org.bukkit.util.Vector offset4 = new org.bukkit.util.Vector(xOffset4, yOffset4, zOffset4);
+            org.bukkit.util.Vector shotDirection4 = player.getLocation().getDirection().add(offset4).normalize();
 
-                org.bukkit.util.Vector offset5 = new org.bukkit.util.Vector(xOffset5, yOffset5, zOffset5);
-                org.bukkit.util.Vector shotDirection5 = player.getLocation().getDirection().add(offset5).normalize();
+            org.bukkit.util.Vector offset5 = new org.bukkit.util.Vector(xOffset5, yOffset5, zOffset5);
+            org.bukkit.util.Vector shotDirection5 = player.getLocation().getDirection().add(offset5).normalize();
 
-                // Shoot the projectile with the modified direction
-                instance.getGameManager().getProjManager().shootProjectile(itemProjectile, player.getEyeLocation(), shotDirection.multiply(1.5D));
-                instance.getGameManager().getProjManager().shootProjectile(itemProjectile2, player.getEyeLocation(), shotDirection2.multiply(1.5D));
-                instance.getGameManager().getProjManager().shootProjectile(itemProjectile3, player.getEyeLocation(), shotDirection3.multiply(1.5D));
-                instance.getGameManager().getProjManager().shootProjectile(itemProjectile4, player.getEyeLocation(), shotDirection4.multiply(1.5D));
-                instance.getGameManager().getProjManager().shootProjectile(itemProjectile5, player.getEyeLocation(), shotDirection5.multiply(1.5D));
+            // Shoot the projectile with the modified direction
+            instance.getGameManager().getProjManager().shootProjectile(itemProjectile, player.getEyeLocation(), shotDirection.multiply(1.5D));
+            instance.getGameManager().getProjManager().shootProjectile(itemProjectile2, player.getEyeLocation(), shotDirection2.multiply(1.5D));
+            instance.getGameManager().getProjManager().shootProjectile(itemProjectile3, player.getEyeLocation(), shotDirection3.multiply(1.5D));
+            instance.getGameManager().getProjManager().shootProjectile(itemProjectile4, player.getEyeLocation(), shotDirection4.multiply(1.5D));
+            instance.getGameManager().getProjManager().shootProjectile(itemProjectile5, player.getEyeLocation(), shotDirection5.multiply(1.5D));
 //                    }
 
 //                    Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
@@ -340,7 +348,7 @@ public class LargeFernClass extends BaseClass {
 //                        }
 //                    }, 2 * 20L);
 
-                // Run the task every 60 seconds (adjust as needed)
+            // Run the task every 60 seconds (adjust as needed)
 
 //                    Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
 //                        for (Entity e : player.getWorld().getEntities()) {
@@ -350,37 +358,34 @@ public class LargeFernClass extends BaseClass {
 //                        }
 //                            } , 1 * 20);
 
-                event.setCancelled(true);
+            // Playing Shotgun Sound
+            SoundManager.playSoundToAll(player, Sound.EXPLODE, 1, 4);
+    }
 
-                // Playing Shotgun Sound
-                SoundManager.playSoundToAll(player, Sound.EXPLODE, 1, 4);
-            }
-        
-            // TRANSFERN ABILITY
-            if (item.equals(transfernItem)) {
-                if (!isTransferned) {
-                    if (player.getLocation().getBlock().getType() == Material.AIR &&
-                            player.getLocation().add(0, 1, 0).getBlock().getType() == Material.AIR &&
-                            player.getLocation().subtract(0, 1, 0).getBlock().getType().isSolid() && player.isOnGround()) {
-                        // Setting instant when disguise ability was clicked
-                        transfernAbility.use();
-                        isTransferned = true;
-                        // Sending return message
-                        transfernAbility.sendPlayerCustomUseAbilityChatMessage("&9&l(!) &rStand still for &6" + transfernAbility.getCooldownDurationSeconds() + " seconds");
-    
-                        TransfernRunnable runnableInstance = new TransfernRunnable();
-                        runnableInstance.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
-                    } else {
-                        transfernAbility.sendPlayerCustomUseAbilityChatMessage("&c&l(!) &rYou cannot transfern on this block");
-                    }
-                }
+    private void useTransfernAbility() {
+        if (!isTransferned) {
+            if (player.getLocation().getBlock().getType() == Material.AIR &&
+                    player.getLocation().add(0, 1, 0).getBlock().getType() == Material.AIR &&
+                    player.getLocation().subtract(0, 1, 0).getBlock().getType().isSolid() && player.isOnGround()) {
+                // Setting instant when disguise ability was clicked
+                transfernAbility.use();
+                isTransferned = true;
+                // Sending return message
+                transfernAbility.sendCustomMessage("&9&l(!) &rStand still for &6" + transfernAbility.getCooldownDurationSeconds() + " seconds");
+
+                TransfernRunnable runnableInstance = new TransfernRunnable();
+                runnableInstance.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+            } else {
+                transfernAbility.sendCustomMessage("&c&l(!) &rYou cannot transfern on this block");
             }
         }
     }
+
+
     public class TransfernRunnable extends BukkitRunnable {
         int standingStillTime = 0;
         PotionEffect transfernInvisibility = new PotionEffect(PotionEffectType.INVISIBILITY, 99999, 0, false, false);
-        PotionEffect transfernRegeneration = new PotionEffect(PotionEffectType.REGENERATION, 99999, 0, false, false);
+        PotionEffect transfernRegeneration = regeneration;
 
         public TransfernRunnable() {
 
@@ -390,7 +395,7 @@ public class LargeFernClass extends BaseClass {
         public void run() {
             
             if (transfernAbility.getCooldownInstance().getRemainingCooldownSeconds() > 0) {
-                transfernAbility.sendPlayerCustomUseAbilityChatMessage("&6" + transfernAbility.getCooldownInstance().getRemainingCooldownSeconds() + "...");
+                transfernAbility.sendCustomMessage("&6" + transfernAbility.getCooldownInstance().getRemainingCooldownSeconds() + "...");
             }
 
             // If player moves
@@ -407,7 +412,7 @@ public class LargeFernClass extends BaseClass {
                     fernLocation.add(0, 1, 0).getBlock().setType(Material.AIR);
                 }
                 // Sending player moving message
-                transfernAbility.sendPlayerCustomUseAbilityChatMessage("&c&l(!) &rYou moved and you are no longer a fern");
+                transfernAbility.sendCustomMessage("&c&l(!) &rYou moved and you are no longer a fern");
 
                 standingStillTime = 0;
                 isTransferned = false;
@@ -418,7 +423,7 @@ public class LargeFernClass extends BaseClass {
             // If player stood still for duration required to transfern into the small fern
             if (standingStillTime == transfernAbilitySmallFernTimer.getCooldownDurationSeconds()) {
                 // Sending Transfern Small fern return message
-                transfernAbility.sendPlayerCustomUseAbilityChatMessage("&d&l(!) &rYou are now a &2Small Fern");
+                transfernAbility.sendCustomMessage("&d&l(!) &rYou are now a &2Small Fern");
                 // Adding invisibility
                 player.getInventory().setArmorContents(null);
                 player.addPotionEffect(transfernInvisibility);
@@ -431,7 +436,7 @@ public class LargeFernClass extends BaseClass {
             // If player stood still for duration required to transfern into the large fern
             if (standingStillTime == transfernAbility.getCooldownDurationSeconds()) {
                 // Sending Transfern Large fern return message
-                transfernAbility.sendPlayerCustomUseAbilityChatMessage("&d&l(!) &rYou are now a &2Large Fern");
+                transfernAbility.sendCustomMessage("&d&l(!) &rYou are now a &2Large Fern");
                 // Adding regeneration
                 player.addPotionEffect(transfernRegeneration);
 

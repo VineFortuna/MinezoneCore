@@ -117,25 +117,37 @@ public class ActionBarManager {
 
 			if (ability2 != null) name += ability2.getAbilityName();
 
-			actionBarManager.setActionBar(player, name + baseClass, createAbilityMessage(ability1, ability2), 2);
+			actionBarManager.setActionBar(player, name + baseClass, createAbilityMessage(ability1, ability2, false), 2);
 		}
 
-		public String createAbilityMessage(Ability ability1, @Nullable Ability ability2) {
-			String message1 = constructAbilityMessage(ability1);
+		public void setActionBarAbilityWhite(Player player, Ability ability1, Ability ability2) {
+			String name = ability1.getAbilityName();
+
+			if (ability2 != null) name += ability2.getAbilityName();
+
+			actionBarManager.setActionBar(player, name + baseClass, createAbilityMessage(ability1, ability2, true), 2);
+		}
+
+		public String createAbilityMessage(Ability ability1, @Nullable Ability ability2, boolean isWhite) {
+			String message1 = constructAbilityMessage(ability1, isWhite);
 
 			if (ability2 == null) return message1;
 
-			String message2 = constructAbilityMessage(ability2);
+			String message2 = constructAbilityMessage(ability2, isWhite);
 			return message1 + org.bukkit.ChatColor.DARK_GRAY + " ┃ " + message2;
 		}
 
-		String constructAbilityMessage(Ability ability) {
+		String constructAbilityMessage(Ability ability, boolean isWhite) {
 			long remainingTime = ability.getCooldownInstance().getRemainingCooldownSeconds();
 
+			String colorString;
+			if (isWhite) colorString = "&7";
+			else colorString = "&r";
+
 			if (!ability.isReady()) {
-				return ChatColorHelper.color(ability.getAbilityName() + " &rregenerates in &e" + (remainingTime + 1) + "s");
+				return ChatColorHelper.color(ability.getAbilityName() + colorString + " regenerates in &e" + (remainingTime + 1) + "s");
 			} else {
-				return ChatColorHelper.color("&rYou can use " + ability.getAbilityName());
+				return ChatColorHelper.color(colorString + "You can use " + ability.getAbilityName());
 			}
 		}
 	}

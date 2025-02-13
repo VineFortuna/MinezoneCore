@@ -61,7 +61,7 @@ public enum FishType {
     AMBERFIN(72, "Amberfin", FishRarity.EPIC, null),
     PINEAPPLEFISH(80, "Pineapplefish", FishRarity.EPIC, null),
     LEAFSEASLUG(84, "Leaf Sheep Sea Slug", FishRarity.EPIC, null),
-    TURTLE(20, "Turtle", FishRarity.EPIC, Arrays.asList(FishArea.Pond)),
+    TURTLE(20, "Turtle", FishRarity.MYTHIC, Arrays.asList(FishArea.Pond)),
     NAUTILUS(21, "Nautilus", FishRarity.MYTHIC, null),
     SEAHORSE(39, "Seahorse", FishRarity.MYTHIC, null),
     PIRANHA(36, "Piranha", FishRarity.MYTHIC, Arrays.asList(FishArea.LushCave)),

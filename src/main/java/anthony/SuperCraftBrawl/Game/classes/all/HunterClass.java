@@ -31,7 +31,7 @@ public class HunterClass extends BaseClass {
 
 	public HunterClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.2;
+		baseVerticalJump = 1.1;
 		createArmor(
 				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGI0YWNjM2YyNmU1NGI5MDA0MWZlOTVjNGU2MmI4ZTdiNjNhZWVmN2E5ZmMzOWNkOWJjN2U4ZWI5MWEzMzQ3MCJ9fX0=",
@@ -110,7 +110,7 @@ public class HunterClass extends BaseClass {
 						pot.setType(PotionType.STRENGTH);
 						pot.setSplash(true);
 						PotionMeta meta = (PotionMeta) item.getItemMeta();
-						meta.addCustomEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 110, 0), true);
+						meta.addCustomEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 5 * 20, 0), true);
 						item.setItemMeta(meta);
 						pot.apply(item);
 						player.getInventory().addItem(item);
@@ -121,10 +121,10 @@ public class HunterClass extends BaseClass {
 						ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
 								instance.getGameManager().getMain().color("&eResistance Potion &7(15 sec)"));
 						Potion pot = new Potion(1);
-						pot.setType(PotionType.FIRE_RESISTANCE);
+						pot.setType(PotionType.NIGHT_VISION);
 						pot.setSplash(true);
 						PotionMeta meta = (PotionMeta) item.getItemMeta();
-						meta.addCustomEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 300, 1), true);
+						meta.addCustomEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 15  * 20, 1), true);
 						item.setItemMeta(meta);
 						pot.apply(item);
 						player.getInventory().addItem(item);

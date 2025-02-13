@@ -114,7 +114,7 @@ public class AntiCheat implements Listener {
 							flyRunnable.put(player, runnable);
 						}
 					} else {
-						warnMac(player, "" + player.getName() + " suspected of possibly cheating. Now spectating..");
+						warnMac(player, "" + player.getName() + " suspected of possibly cheating. Now spectating...");
 					}
 				//}
 			}

@@ -14,7 +14,6 @@ import anthony.SuperCraftBrawl.gui.GameStatsGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
-import anthony.util.ChatColorHelper;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_8_R3.EnumParticle;
@@ -121,6 +120,9 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "sound":
 				soundCommand(args, player);
 				break;
+			case "heal":
+				healCommand(player);
+				break;
 			}
 		} else
 			sender.sendMessage("Hey! You can't use this in the terminal!");
@@ -138,8 +140,20 @@ public class Commands implements CommandExecutor, TabCompleter {
 		player.sendMessage(main.color("&7&m----------------------------"));
 	}
 
+	private void healCommand(Player player) {
+		if (!player.hasPermission("scb.heal")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
+		// Fully heal the player to their maximum health
+		double maxHealth = player.getMaxHealth();
+		player.setHealth(maxHealth);
+		player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
+	}
+
 	private void soundCommand(String[] args, Player player) {
-		if (!player.hasPermission("scb.items")) {
+		if (!player.hasPermission("scb.sound")) {
 			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
 			return;
 		}
@@ -340,15 +354,15 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void startGameCommand(Player player) {
+		if (!player.hasPermission("scb.startGame")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
 		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 
 		if (game == null) {
 			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
-			return;
-		}
-
-		if (!player.hasPermission("scb.startGame")) {
-			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
 			return;
 		}
 

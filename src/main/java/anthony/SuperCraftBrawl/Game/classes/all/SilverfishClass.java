@@ -7,14 +7,12 @@ import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -28,11 +26,9 @@ import java.util.Random;
 import java.util.function.Consumer;
 
 public class SilverfishClass extends BaseClass {
-	private ItemStack weapon;
-	private ItemStack wallItem;
-	private Ability wallAbilityNatowski = new Ability("&7&lWall", 10, player);
-	private int cooldownSec = 0;
-	private int wallCooldown = 10 * 1000;
+	private final ItemStack weapon;
+	private final ItemStack wallItem;
+	private final Ability wallAbility = new Ability("&7&lWall", 10, player);
 
 	public SilverfishClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -45,45 +41,36 @@ public class SilverfishClass extends BaseClass {
 		);
 
 		// Weapon
-		weapon = ItemHelper.setDetails(new ItemStack(Material.IRON_HOE),
-				"&7Silverfish Weapon");
+		weapon = ItemHelper.setDetails(
+				new ItemStack(Material.SHEARS),
+				"&7&lChitin Bite"
+		);
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
 		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
 
 		// Wall Ability
-		wallItem = ItemHelper.setDetails(new ItemStack(Material.SMOOTH_BRICK),
-				wallAbilityNatowski.getAbilityNameLeftRightClickMessage(),
-				"&fCreate a wall of silverfishes",
-				"&e&nLeft Click&r&7 to place a wall &ofurther",
-				"&e&nRight Click&r&7 to place a wall &ocloser");
+		wallItem = ItemHelper.setDetails(
+				new ItemStack(Material.SMOOTH_BRICK),
+				wallAbility.getAbilityNameLeftRightClickMessage(),
+				"&7Create a wall of infested stone",
+				"&7that slowly breaks, spawning silverfish",
+				"",
+				"&e&nLeft Click&7 to place a wall &ofurther",
+				"&e&nRight Click&7 to place a wall &ocloser"
+		);
 		wallItem.setDurability((short) 2);
 	}
 
 	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
-	}
-
-	@Override
 	public void Tick(int gameTicks) {
-		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Silverfish
-				&& instance.classes.get(player).getLives() > 0) {
-			this.cooldownSec = (wallCooldown - wallAbility.getTime()) / 1000 + 1;
+		if (!isPlayerAlive()) return;
 
-			if (wallAbility.getTime() < wallCooldown) {
-				String msg = instance.getGameManager().getMain()
-						.color("&7Wall Ability &rregenerates in: &e" + this.cooldownSec + "s");
-				getActionBarManager().setActionBar(player, "wall.cooldown", msg, 2);
-			} else {
-				String msg = instance.getGameManager().getMain().color("&rYou can use &7Wall Ability");
-				getActionBarManager().setActionBar(player, "wall.cooldown", msg, 2);
-			}
-		}
+		wallAbility.updateActionBar(player, this);
 	}
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		wallAbility.startTime = System.currentTimeMillis() - 100000;
+		wallAbility.getCooldownInstance().reset();
 
 		// Settings Items
 		playerInv.setItem(0, weapon);
@@ -110,27 +97,24 @@ public class SilverfishClass extends BaseClass {
 							|| action == Action.LEFT_CLICK_AIR
 							|| action == Action.LEFT_CLICK_BLOCK) {
 						// If ability is on cooldown
-						if (wallAbility.getTime() < wallCooldown) {
-							int seconds = (wallCooldown - wallAbility.getTime()) / 1000 + 1;
-							event.setCancelled(true);
-							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Your Wall Ability is still on cooldown for " + ChatColor.YELLOW + seconds + "s");
-						} else {
-							wallAbility.restart();
-							SilverfishWall createWall = new SilverfishWall(3, 3, player, 2, 0.2);
-							// Wall logic
-								// When right or left click on block
-							if (action == Action.RIGHT_CLICK_BLOCK) {
-								createWall.buildWallClickedBlock(event.getClickedBlock());
+						if (!wallAbility.isReady()) return;
 
-							}    // When right click on air
-							else if (event.getAction() == Action.RIGHT_CLICK_AIR) {
-								createWall.buildWallClickedAir(2);
+						SilverfishWall createWall = new SilverfishWall(3, 3, player, 2, 0.2);
+						// Wall logic
+							// When right or left click on block
+						if (action == Action.RIGHT_CLICK_BLOCK) {
+							createWall.buildWallClickedBlock(event.getClickedBlock());
 
-							}	// When left click on air
-							else if (event.getAction() == Action.LEFT_CLICK_AIR) {
-								createWall.buildWallClickedAir(6);
-							}
+						}    // When right click on air
+						else if (event.getAction() == Action.RIGHT_CLICK_AIR) {
+							createWall.buildWallClickedAir(2);
+
+						}	// When left click on air
+						else if (event.getAction() == Action.LEFT_CLICK_AIR) {
+							createWall.buildWallClickedAir(6);
 						}
+
+						wallAbility.use();
 					}
 				}
 			}
@@ -140,12 +124,6 @@ public class SilverfishClass extends BaseClass {
 	@Override
 	public ClassType getType() {
 		return ClassType.Silverfish;
-	}
-
-	@Override
-	public void SetNameTag() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override

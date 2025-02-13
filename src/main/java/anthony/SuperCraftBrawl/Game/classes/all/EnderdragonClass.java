@@ -20,7 +20,7 @@ public class EnderdragonClass extends BaseClass {
 
 	public EnderdragonClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.6;
+		baseVerticalJump = 1.3;
 		createArmor(
 				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2U0ZDM1YTJmNmJkNzM5NjA1ZmE0ZWFhNmUxNWQwMzgwMDlmM2YyMGIxYTIwNDYyODAxNjA1ODczNmU3Yjk1ZSJ9fX0=",

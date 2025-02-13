@@ -165,29 +165,22 @@ public class VillagerAbilityGUI implements InventoryProvider {
             // Playing villager Sound to all players
             SoundManager.playSoundToAll(player, Sound.VILLAGER_HAGGLE, 1, 1);
             // Spawn green particles
-            spawnTradeParticlesCircle(player);
+            spawnTradeParticles(player);
             updateTitle(player);
         }
     }
 
-    private void spawnTradeParticlesCircle(Player player) {
-        // Get player's location
+    private void spawnTradeParticles(Player player) {
         Location playerLocation = player.getLocation();
-
-        // Define number of particles and range
         int particleCount = 100; // Adjust based on how dense you want the particles
         double radius = 1.0; // Adjust the radius around the player
 
-        // Spawn particles
         for (int i = 0; i < particleCount; i++) {
             double angle = Math.random() * Math.PI * 2; // Random angle for circle
             double x = radius * Math.cos(angle);
             double z = radius * Math.sin(angle);
 
-            // Create the location for the effect
             Location effectLocation = playerLocation.clone().add(x, 1, z); // 1 block above the player
-
-            // Play the effect (replace with the desired effect)
             player.getWorld().playEffect(effectLocation, Effect.HAPPY_VILLAGER, 0);
         }
     }
