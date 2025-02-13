@@ -4,32 +4,25 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
-import org.bukkit.Color;
+import anthony.util.SoundManager;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.Collection;
+
 public class PigClass extends BaseClass {
 
-	private ItemStack pork = ItemHelper.addEnchant(
-			ItemHelper.addEnchant(new ItemStack(Material.PORK), Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 1);
-	private ItemStack grilledPork = ItemHelper.addEnchant(ItemHelper.addEnchant(
-			ItemHelper.addEnchant(new ItemStack(Material.GRILLED_PORK), Enchantment.DAMAGE_ALL, 1),
-			Enchantment.FIRE_ASPECT, 1), Enchantment.KNOCKBACK, 1);
-	private boolean speed = false;
-	private boolean fire = false;
+	private final ItemStack weapon;
+	private final ItemStack speedPork;
+	private final ItemStack cookedPork;
+	private final PotionEffect speed = new PotionEffect(PotionEffectType.SPEED, 5 * 20, 2, false, true);
 
 	public PigClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -40,113 +33,94 @@ public class PigClass extends BaseClass {
 				6,
 				"Pig"
 		);
-	}
 
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
+		String[] lore = new String[]{
+				"",
+				"&7When damaged, receive &b&oSpeed &e" + (speed.getAmplifier() + 1) + " &7for &e" + speed.getDuration() / 20 + "s",
+				"&7While set on fire, receive &c&oFire Aspect"
+		};
+
+		// Weapon
+		weapon = ItemHelper.setDetails(
+				new ItemStack(Material.PORK),
+				"&d&lPork",
+				lore
+			);
+		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
+		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
+
+		// Weapon
+		speedPork = ItemHelper.setDetails(
+				new ItemStack(Material.PORK),
+				"&d&lPork",
+				lore
+		);
+		speedPork.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
+		speedPork.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
+
+		// Cooked Pork
+		cookedPork = ItemHelper.setDetails(
+				new ItemStack(Material.GRILLED_PORK),
+				"&6&lCooked Pork",
+				lore
+		);
+		cookedPork.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
+		cookedPork.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
+		cookedPork.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
 	}
 
 	@Override
 	public void Tick(int gameTicks) {
-		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Pig
-				&& instance.classes.get(player).getLives() > 0) {
-			if (player.hasPotionEffect(PotionEffectType.SPEED)) {
-				if (!(player.getFireTicks() > 0)) {
-					if (player.getInventory().contains(this.grilledPork)) {
-						player.getInventory().remove(Material.GRILLED_PORK);
-						player.getInventory().addItem(this.pork);
-						this.speed = true;
-						this.fire = false;
-					}
-					if (!(player.getInventory().contains(this.pork))) {
-						player.getInventory().remove(Material.PORK);
-						player.getInventory().addItem(this.pork);
-						this.speed = true;
-						this.fire = false;
-					}
-				} else {
-					if (!(player.getInventory().contains(this.grilledPork))) {
-						player.getInventory().remove(Material.PORK);
-						player.getInventory().addItem(this.grilledPork);
-						this.fire = true;
-						this.speed = false;
-					}
-				}
-			} else if (this.speed == true && !(player.getFireTicks() > 0)) {
-				if (player.getInventory().contains(this.pork)) {
-					player.getInventory().remove(Material.PORK);
-					player.getInventory().addItem(this.getAttackWeapon());
-					this.speed = false;
-				}
-			} else if (this.fire == true) {
-				if (player.getInventory().contains(this.grilledPork)) {
-					player.getInventory().remove(Material.GRILLED_PORK);
-					player.getInventory().addItem(this.getAttackWeapon());
-					this.fire = false;
-				}
+		if (!isPlayerAlive()) return;
 
-			}
+		Inventory inventory = player.getInventory();
+		boolean hasSpeedEffect = player.hasPotionEffect(speed.getType());
+		boolean hasSpeedPork= inventory.contains(speedPork);
+		boolean hasCookedPork = inventory.contains(cookedPork);
+		boolean isBurning = player.getFireTicks() > 0;
+
+		if (isBurning) {
+			if (!hasCookedPork) inventory.setItem(0, cookedPork);
+			return;
 		}
+
+		if (hasSpeedEffect) {
+			if (!hasSpeedPork) inventory.setItem(0, speedPork);
+			return;
+		}
+
+		if (inventory.contains(weapon)) return;
+		inventory.setItem(0, weapon);
 	}
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		this.speed = false; // To reset
-		this.fire = false;
-		playerInv.setItem(0, this.getAttackWeapon());
+		playerInv.setItem(0, weapon);
 	}
 
 	@Override
 	public void TakeDamage(EntityDamageEvent event) {
-		if (instance.getGameManager().spawnProt.containsKey(player))
-			return;
+		if (!isPlayerAlive()) return;
+		if (instance.getGameManager().spawnProt.containsKey(player)) return;
+		if (!(event.getEntity().equals(player))) return;
+		addBestEffect(player, speed);
+		SoundManager.playSoundToAll(player, Sound.PIG_DEATH, 1, 1);
+	}
 
-		if (event instanceof EntityDamageByEntityEvent) {
-			EntityDamageByEntityEvent e = (EntityDamageByEntityEvent) event;
-			if (e.getDamager() instanceof Player) {
-				Player k = (Player) e.getDamager();
-				if (instance.getGameManager().spawnProt.containsKey(k))
-					return;
-				if (instance.classes.containsKey(k)) {
-					if (instance.classes.get(k).getLives() <= 0) {
-						return;
-					}
-				}
-				if (instance.HasSpectator(k))
-					return;
-			}
-			if (((LivingEntity) event.getEntity()).hasPotionEffect(PotionEffectType.SPEED)) {
-				((LivingEntity) event.getEntity()).removePotionEffect(PotionEffectType.SPEED);
-				((LivingEntity) event.getEntity())
-						.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 2, true));
-			} else {
-				((LivingEntity) event.getEntity())
-						.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 2, true));
-			}
-			event.getEntity()
-					.sendMessage(instance.getGameManager().getMain().color("&6&l(!) &rOuch! You gained some speed"));
+	private void addBestEffect(Player player, PotionEffect potionEffect) {
+		Collection<PotionEffect> potionEffectCollection = player.getActivePotionEffects();
 
-			for (Player gamePlayer : instance.players)
-				gamePlayer.playSound(player.getLocation(), Sound.PIG_DEATH, 1, 1);
+		PotionEffect existingEffect = potionEffectCollection.stream()
+				.filter(effect -> effect.getType().equals(potionEffect.getType()))
+				.findFirst()
+				.orElse(null);
+
+		if (existingEffect != null) {
+			if (existingEffect.getAmplifier() > potionEffect.getAmplifier()) return;
+			if (existingEffect.getDuration() > potionEffect.getDuration()) return;
 		}
-	}
-
-	private void abilityMsg() {
-		player.sendMessage("");
-		player.sendMessage(instance.getGameManager().getMain().color(
-				"&e&lCLASS TIP> &rWhen set on fire, you'll recieve a cooked porkchop for as long as you're on fire for, with Fire Aspect I"));
-		player.sendMessage("");
-	}
-
-	@Override
-	public void UseItem(PlayerInteractEvent event) {
-		ItemStack item = event.getItem();
-		if (item != null && item.getType() == Material.PORK
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			this.abilityMsg();
-		}
-	}
+		player.addPotionEffect(potionEffect, true);
+    }
 
 	@Override
 	public ClassType getType() {
@@ -154,17 +128,7 @@ public class PigClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.PORK),
-						instance.getGameManager().getMain().color("&rRaw Pork &7(Right Click)")),
-				Enchantment.DAMAGE_ALL, 4), Enchantment.KNOCKBACK, 1);
-		return item;
+		return weapon;
 	}
 }

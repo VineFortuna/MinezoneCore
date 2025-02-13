@@ -135,6 +135,13 @@ commands:
    sound:
       description: Play a sound on your location
       aliases: s
+   heal:
+      description: Fully heals the player
+   jeb:
+      description: Sets Jeb's push Strength and Max velocity
+   jebrework:
+      description: Switch between old and new Jeb's push
+      aliases: jr
 
 permissions:
    scb.admin:
@@ -156,6 +163,9 @@ permissions:
          scb.builder: true
          scb.items: true
          scb.sound: true
+         scb.heal: true
+         scb.jeb: true
+         scb.jebrework: true
          scb.lactate: true
    scb.builder:
       description: Builder perms
