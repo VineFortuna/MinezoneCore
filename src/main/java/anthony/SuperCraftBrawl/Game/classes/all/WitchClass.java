@@ -5,7 +5,6 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
 import org.bukkit.ChatColor;
-import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -14,24 +13,25 @@ import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.Potion;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
 
+import java.util.List;
 import java.util.Random;
 
 public class WitchClass extends BaseClass {
 
+	ItemStack weaknessItem;
+	ItemStack damageItem;
+	ItemStack poisonItem;
+	ItemStack slownessItem;
+	ItemStack[] potionsList;
+
 	private boolean used = false;
-	private ItemStack broom = ItemHelper.addEnchant(
+	private ItemStack weapon = ItemHelper.addEnchant(
 			ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4),
 					"" + ChatColor.BLACK + ChatColor.BOLD + "Magic Broom"), Enchantment.DAMAGE_ALL, 3),
 			Enchantment.KNOCKBACK, 1);
@@ -40,7 +40,6 @@ public class WitchClass extends BaseClass {
 
 	public WitchClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.2;
 		createArmor(
 				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjBlMTNkMTg0NzRmYzk0ZWQ1NWFlYjcwNjk1NjZlNDY4N2Q3NzNkYWMxNmY0YzNmODcyMmZjOTViZjlmMmRmYSJ9fX0=",
@@ -48,11 +47,52 @@ public class WitchClass extends BaseClass {
 				6,
 				"Witch"
 		);
-	}
 
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
+		weaknessItem = ItemHelper.setDetails(
+				ItemHelper.createPotionItem(
+						PotionType.WEAKNESS,
+						3,
+						5,
+						true,
+						true,
+						false),
+				"&8&lWeakness"
+		);
+
+		damageItem = ItemHelper.setDetails(
+				ItemHelper.createPotionItem(
+						PotionType.INSTANT_DAMAGE,
+						0,
+						0,
+						true,
+						true,
+						false),
+				"&4&lDamage"
+		);
+
+		poisonItem = ItemHelper.setDetails(
+				ItemHelper.createPotionItem(
+						PotionType.POISON,
+						0,
+						15,
+						true,
+						true,
+						false),
+				"&2&lPoison"
+		);
+
+		slownessItem = ItemHelper.setDetails(
+		ItemHelper.createPotionItem(
+				PotionType.SLOWNESS,
+				0,
+				5,
+				true,
+				true,
+				false),
+				"&3&lSlowness"
+		);
+
+		potionsList = new ItemStack[]{weaknessItem, damageItem, poisonItem, slownessItem};
 	}
 
 	@Override
@@ -86,38 +126,9 @@ public class WitchClass extends BaseClass {
 				this.cooldown--;
 				
 				if (this.cooldown == 0) {
-					ItemStack weakness = new ItemStack(Material.POTION, 1);
-					Potion pot2 = new Potion(1);
-					pot2.setType(PotionType.WEAKNESS);
-					pot2.setSplash(true);
-					pot2.apply(weakness);
-					
-					ItemStack damage = new ItemStack(Material.POTION, 1);
-					Potion pot3 = new Potion(1);
-					pot3.setType(PotionType.INSTANT_DAMAGE);
-					pot3.setSplash(true);
-					pot3.apply(damage);
-					
-					ItemStack poison = new ItemStack(Material.POTION, 1);
-					Potion pot9 = new Potion(1);
-					pot9.setType(PotionType.POISON);
-					pot9.setSplash(true);
-					PotionMeta meta2 = (PotionMeta) poison.getItemMeta();
-					meta2.addCustomEffect(new PotionEffect(PotionEffectType.POISON, 300, 0), true);
-					poison.setItemMeta(meta2);
-					pot9.apply(poison);
-					
-					ItemStack slowness = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-							"" + ChatColor.RED + ChatColor.BOLD + "Slowness");
-					Potion pot5 = new Potion(3);
-					pot5.setType(PotionType.SLOWNESS);
-					pot5.setSplash(true);
-					pot5.apply(slowness);
-					
-					ItemStack[] itemList = {weakness, damage, poison, slowness};
 					Random rand = new Random();
-					int randomNum = rand.nextInt(itemList.length);
-					player.getInventory().setItem(1, new ItemStack(itemList[randomNum]));
+					int randomNum = rand.nextInt(potionsList.length);
+					player.getInventory().setItem(1, new ItemStack(potionsList[randomNum]));
 				}
 			}
 			
@@ -144,40 +155,10 @@ public class WitchClass extends BaseClass {
 		this.cooldown = 0; // Also same
 		this.regenBrooms = 4; // ALSO SAME LMFAO!!!
 
-		ItemStack weakness = new ItemStack(Material.POTION, 1);
-		Potion pot2 = new Potion(1);
-		pot2.setType(PotionType.WEAKNESS);
-		pot2.setSplash(true);
-		pot2.apply(weakness);
-
-		ItemStack damage = new ItemStack(Material.POTION, 1);
-		Potion pot3 = new Potion(1);
-		pot3.setType(PotionType.INSTANT_DAMAGE);
-		pot3.setSplash(true);
-		pot3.apply(damage);
-
-		ItemStack poison = new ItemStack(Material.POTION, 1);
-		Potion pot9 = new Potion(1);
-		pot9.setType(PotionType.POISON);
-		pot9.setSplash(true);
-		PotionMeta meta2 = (PotionMeta) poison.getItemMeta();
-		meta2.addCustomEffect(new PotionEffect(PotionEffectType.POISON, 300, 0), true);
-		poison.setItemMeta(meta2);
-		pot9.apply(poison);
-
-		ItemStack slowness = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				"" + ChatColor.RED + ChatColor.BOLD + "Slowness");
-		Potion pot5 = new Potion(3);
-		pot5.setType(PotionType.SLOWNESS);
-		pot5.setSplash(true);
-		pot5.apply(slowness);
-
 		playerInv.setItem(0, this.getAttackWeapon());
-		ItemStack[] itemList = { weakness, damage, poison, slowness };
 		Random rand = new Random();
-		int randomNum = rand.nextInt(itemList.length);
-		playerInv.setItem(1, new ItemStack(itemList[randomNum]));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
+		int randomNum = rand.nextInt(potionsList.length);
+		playerInv.setItem(1, new ItemStack(potionsList[randomNum]));
 	}
 
 	@Override
@@ -210,14 +191,8 @@ public class WitchClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public ItemStack getAttackWeapon() {
-		return this.broom;
+		return weapon;
 	}
 
 }

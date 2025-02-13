@@ -27,7 +27,6 @@ public class IrongolemClass extends BaseClass {
 
 	public IrongolemClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.1;
 		createArmor(
 				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWQ2NTJjOTVmYzViZGY3ZWQwM2M1NjdlOTBmZjYyNWJlMDI4YWQ4NDg2M2QzMjcxZDZlNmMxYWEzMDhmMzEzZiJ9fX0=",

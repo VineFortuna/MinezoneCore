@@ -34,12 +34,12 @@ public class FavoriteClassesGUI implements InventoryProvider {
 		contents.set(4, 8, ClickableItem.of(
 				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
 					inv.close(player);
-					new ClassSelectorGUI(main).inv.open(player);
+					new ClassesGUI(main).inv.open(player);
 				}));
 
 		if (data != null) {
 			if (!(data.customIntegers.isEmpty())) {
-				for (ClassType type : ClassType.values()) {
+				for (ClassType type : ClassType.sortAlphabetically(ClassType.getAvailableClasses())) {
 					if (data.customIntegers.contains(type.getID())) {
 
 						ClassDetails details = data.playerClasses.get(type.getID());
