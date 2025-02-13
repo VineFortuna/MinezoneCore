@@ -34,7 +34,6 @@ public class IceClass extends BaseClass {
 
 	public IceClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.1;
 		createArmor(
 				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjZlNDI5YzYwOTMyZWJjMzY2ZTc5MWE0MmUxODZhZjg4OGRlMDhlNWQ4ZWI4YWM2ZjViNmY0ZDQ0MGRiNDg2YyJ9fX0=",
@@ -80,13 +79,13 @@ public class IceClass extends BaseClass {
 				ItemHelper.setDetails(new ItemStack(Material.PACKED_ICE),
 						instance.getGameManager().getMain().color("&bFreeze Bomb"), "",
 						instance.getGameManager().getMain().color("&7Right click to freeze nearby enemies!")));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
 	}
 
 	@Override
 	public void Tick(int gameTicks) {
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.WEAKNESS)))
-			player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
 		
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Ice
 				&& instance.classes.get(player).getLives() > 0) {

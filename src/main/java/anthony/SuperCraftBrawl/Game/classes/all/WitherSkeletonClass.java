@@ -32,7 +32,6 @@ public class WitherSkeletonClass extends BaseClass {
 
 	public WitherSkeletonClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.1;
 		createArmor(
 				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjVlYzk2NDY0NWE4ZWZhYzc2YmUyZjE2MGQ3Yzk5NTYzNjJmMzJiNjUxNzM5MGM1OWMzMDg1MDM0ZjA1MGNmZiJ9fX0=",
@@ -44,12 +43,7 @@ public class WitherSkeletonClass extends BaseClass {
 
 	@Override
 	public ClassType getType() {
-		return ClassType.WitherSk;
-	}
-
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
+		return ClassType.WitherSkeleton;
 	}
 
 	@Override
@@ -87,7 +81,7 @@ public class WitherSkeletonClass extends BaseClass {
 	@Override
 	public void Tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getLives() > 0
-				&& instance.classes.get(player).getType() == ClassType.WitherSk)
+				&& instance.classes.get(player).getType() == ClassType.WitherSkeleton)
 			if (!(player.getInventory().contains(this.getAttackWeapon())))
 				player.getInventory().setItem(0, this.getAttackWeapon()); // If some rare chance the player throws away
 																			// their melee
@@ -253,19 +247,16 @@ public class WitherSkeletonClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
-
-	}
-
-	@Override
 	public void SetItems(Inventory playerInv) {
 		this.cooldown = 0; // Reset each life
 		this.used = false; // Same here
-		this.bow = ItemHelper
-				.addEnchant(ItemHelper.addEnchant(
-						ItemHelper.setDetails(new ItemStack(Material.BOW),
-								instance.getGameManager().getMain().color("&7&lWitherSk Bow")),
-						Enchantment.DURABILITY, 1000), Enchantment.ARROW_INFINITE, 1);
+		this.bow = ItemHelper.setUnbreakable(
+								ItemHelper
+										.addEnchant(
+												ItemHelper.setDetails(new ItemStack(Material.BOW),
+														instance.getGameManager().getMain()
+																.color("&7&lWitherSk Bow")),
+												Enchantment.ARROW_INFINITE, 1));
 
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, this.bow);

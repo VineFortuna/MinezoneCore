@@ -33,7 +33,7 @@ public class WizardClass extends BaseClass {
 
 	public WizardClass(GameInstance instance, Player player) {
 		super(instance, player);
-		baseVerticalJump = 1.3;
+		baseVerticalJump = 1.1;
 		createArmor(
 				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODM4NTY0ZTI4YWJhOTgzMDFkYmRhNWZhZmQ4NmQxZGE0ZTJlYWVlZjEyZWE5NGRjZjQ0MGI4ODNlNTU5MzExYyJ9fX0=",
@@ -158,7 +158,7 @@ public class WizardClass extends BaseClass {
 													Enchantment.DAMAGE_ALL, 4));
 							fireball = true;
 							player.sendMessage(instance.getGameManager().getMain()
-									.color("&e&l(!) &rI cast spell.. Fireball fireball fireball!!"));
+									.color("&e&l(!) &rI cast spell... Fireball fireball fireball!!"));
 						} else if (chance == 1) {
 							for (Player gamePlayer : instance.players) {
 								if (gamePlayer != player) {
@@ -183,7 +183,7 @@ public class WizardClass extends BaseClass {
 															Enchantment.KNOCKBACK, 2));
 							blindness = true;
 							player.sendMessage(instance.getGameManager().getMain()
-									.color("&e&l(!) &rI cast spell.. Let my enemy see darkness"));
+									.color("&e&l(!) &rI cast spell... Let my enemy see darkness"));
 						} else if (chance == 2) {
 							for (Player gamePlayer : instance.players) {
 								if (gamePlayer != player) {
@@ -207,7 +207,7 @@ public class WizardClass extends BaseClass {
 															Enchantment.KNOCKBACK, 1));
 							speedyjumpy = true;
 							player.sendMessage(instance.getGameManager().getMain()
-									.color("&e&l(!) &rI cast spell.. Speedy speedy jumpy jumpy!"));
+									.color("&e&l(!) &rI cast spell... Speedy speedy jumpy jumpy!"));
 						}
 					} else {
 						if (fireball) {
