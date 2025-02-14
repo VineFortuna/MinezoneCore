@@ -160,8 +160,6 @@ permissions:
          scb.items: true
          scb.sound: true
          scb.heal: true
-         scb.jeb: true
-         scb.jebrework: true
          scb.lactate: true
    scb.builder:
       description: Builder perms
