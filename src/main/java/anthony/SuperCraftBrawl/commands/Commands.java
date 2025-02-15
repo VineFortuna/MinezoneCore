@@ -130,7 +130,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void socialsCommand(Player player) {
-		player.sendMessage(main.color("&7&m-------&7&l[Social Media]&7&m-------"));
+		player.sendMessage(main.color("&7&m-------&7&l[Social Medias]&7&m-------"));
 		player.sendMessage("");
 		player.sendMessage(main.color("&f&lDiscord: &ahttps://discord.gg/FSZpmY9FZB"));
 		player.sendMessage(main.color("&f&lYouTube: &ahttps://www.youtube.com/@minezone6480"));

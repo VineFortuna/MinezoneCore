@@ -28,10 +28,6 @@ public class JebClass extends BaseClass {
 	private final Ability pullAbility = new Ability("&8&lJeb's Call", 10, player);
 	private static final double PUSH_ABILITY_RANGE = 25;
 
-	public boolean isRework = true;
-	public double pushAbilityStrength = 20;
-	public double pushAbilityMaxVelocity = 2.5;
-
 	public JebClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
@@ -164,43 +160,14 @@ public class JebClass extends BaseClass {
 
 				if (closestPoint.distanceSquared(targetPlayer.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
 					if (shouldApplyPushEffect(targetPlayer)) {
-						if (isRework) applyPushEffectReworkTest(targetPlayer, direction, distance);
-						else applyPushEffectOld(targetPlayer, direction, distance);
+						applyPushEffect(targetPlayer, direction, distance);
 					}
 				}
 			}
 		}
 	}
 
-	private void applyPushEffectOld(Player targetPlayer, Vector direction, double distance) {
-//		player.sendMessage("Distance / 4.3: " + (distance / 4.3));
-//		targetPlayer.setVelocity(direction.clone().multiply(distance / 4.3));
-
-		// Base strength of the ability
-		double baseStrength = pushAbilityStrength; // Adjust this value to control overall strength
-
-		// Non-linear scaling: stronger at long range, weaker at close range
-		double velocityMagnitude = baseStrength * (1 + distance);
-
-		// Clamp velocity to prevent extreme values
-		double maxVelocity = pushAbilityMaxVelocity; // Maximum velocity
-		velocityMagnitude = Math.min(velocityMagnitude, maxVelocity);
-
-		// Apply velocity
-		Vector velocity = direction.clone().multiply(velocityMagnitude);
-
-		// Add a small upward bias to account for gravity/friction
-		velocity.setY(velocity.getY() + 0.2); // Adjust this value as needed
-
-		targetPlayer.setVelocity(velocity);
-		targetPlayer.playSound(targetPlayer.getLocation(), Sound.DIG_STONE, 1, 1);
-
-		// Debug message
-		player.sendMessage("Velocity: " + velocityMagnitude + ", Distance: " + distance);
-	}
-
-
-	private void applyPushEffectReworkTest(Player targetPlayer, Vector direction, double distance) {
+	private void applyPushEffect(Player targetPlayer, Vector direction, double distance) {
 		boolean isOnGround = targetPlayer.isOnGround();
 		Vector velocity = getVelocity(isOnGround, direction, distance);
 		targetPlayer.setVelocity(velocity);
@@ -234,35 +201,8 @@ public class JebClass extends BaseClass {
 
 		magnitude = Math.min(magnitude, maxVelocity);
 		magnitude = Math.max(magnitude, minVelocity);
-		// Debug message
-		player.sendMessage("Magnitude: " + magnitude + ", Distance: " + distance);
 
 		return magnitude;
-	}
-
-
-	private void applyPushEffectRework(Player targetPlayer, Vector direction, double distance) {
-		// Base strength of the ability
-		double baseStrength = pushAbilityStrength; // Adjust this value to control overall strength
-
-		// Non-linear scaling: stronger at close range, weaker at long range
-		double velocityMagnitude = baseStrength / (1 + distance);
-
-		// Clamp velocity to prevent extreme values
-		double maxVelocity = pushAbilityMaxVelocity; // Maximum velocity
-		velocityMagnitude = Math.min(velocityMagnitude, maxVelocity);
-
-		// Apply velocity
-		Vector velocity = direction.clone().multiply(velocityMagnitude);
-
-		// Add a small upward bias to account for gravity/friction
-		velocity.setY(velocity.getY() + 0.2); // Adjust this value as needed
-
-		targetPlayer.setVelocity(velocity);
-		targetPlayer.playSound(targetPlayer.getLocation(), Sound.DIG_STONE, 1, 1);
-
-		// Debug message
-		player.sendMessage("Velocity: " + velocityMagnitude + ", Distance: " + distance);
 	}
 
 	private boolean shouldApplyPushEffect(Player targetPlayer) {
