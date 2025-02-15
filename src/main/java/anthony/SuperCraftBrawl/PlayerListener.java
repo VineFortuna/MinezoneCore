@@ -641,7 +641,7 @@ public class PlayerListener implements Listener {
 					main.getRankManager().getRank(event.getPlayer()));
 
 			if (!data.color.isEmpty() && !data.color.equals("0"))
-				displayName = ChatColor.valueOf(data.color) + displayName;
+				displayName = ChatColor.valueOf(data.color) + event.getPlayer().getDisplayName();
 
 			if (event.getPlayer().hasPermission("scb.chat"))
 				event.setFormat(main.color(event.getFormat() + displayName + ":&r "));
