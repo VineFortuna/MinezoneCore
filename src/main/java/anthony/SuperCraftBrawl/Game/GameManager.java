@@ -61,6 +61,8 @@ import java.io.DataOutputStream;
 import java.util.*;
 import java.util.Map.Entry;
 
+import static sun.audio.AudioPlayer.player;
+
 public class GameManager implements Listener, PluginMessageListener {
 	public HashMap<Maps, GameInstance> gameMap;
 	public HashMap<DuosMaps, GameInstance> gameMap2;
