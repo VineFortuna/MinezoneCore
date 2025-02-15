@@ -7,7 +7,7 @@ commands:
       usage: /join [map name]
    hub:
       description: Hub command
-      aliases: [h, lobby]
+      aliases: h, lobby
    leave:
       description: Leave game command
       aliases: l
@@ -31,12 +31,12 @@ commands:
       description: Set level command
    store:
       description: Store command
-      aliases: [shop, ranks]
+      aliases: shop, ranks
    nick:
       description: Nickname!
    tell:
       description: Msg command!
-      aliases: [msg, t, whisper, w, reply, r]
+      aliases: msg, t, whisper, w, reply, r
    setrank:
       description: Rank command!
       permission: scb.setrank
@@ -61,7 +61,7 @@ commands:
       description: Spectate command
    socials:
       description: Sends all social media links in chat
-      aliases: [discord, dc, youtube, tiktok]
+      aliases: discord, youtube, tiktok
    vanish:
       description: Vanish
       aliases: v
@@ -80,7 +80,7 @@ commands:
       description: General gamemode command
    help:
       description: Displays SCB help/information
-      aliases: [scb, scbhelp]
+      aliases: scb, scbhelp
    classes:
       description: Displays list of SCB Classes
    stats:
@@ -130,7 +130,6 @@ commands:
       description: Kit command for SkyWars
    items:
       description: Get all SCB Item Drops
-      aliases: it
    lactate:
       description: Lactate command!
    sound:
@@ -138,6 +137,11 @@ commands:
       aliases: s
    heal:
       description: Fully heals the player
+   jeb:
+      description: Sets Jeb's push Strength and Max velocity
+   jebrework:
+      description: Switch between old and new Jeb's push
+      aliases: jr
 
 permissions:
    scb.admin:
@@ -160,6 +164,8 @@ permissions:
          scb.items: true
          scb.sound: true
          scb.heal: true
+         scb.jeb: true
+         scb.jebrework: true
          scb.lactate: true
    scb.builder:
       description: Builder perms

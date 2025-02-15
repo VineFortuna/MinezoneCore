@@ -250,11 +250,13 @@ public class WitherSkeletonClass extends BaseClass {
 	public void SetItems(Inventory playerInv) {
 		this.cooldown = 0; // Reset each life
 		this.used = false; // Same here
-		this.bow = ItemHelper
-				.addEnchant(ItemHelper.addEnchant(
-						ItemHelper.setDetails(new ItemStack(Material.BOW),
-								instance.getGameManager().getMain().color("&7&lWitherSkeleton Bow")),
-						Enchantment.DURABILITY, 1000), Enchantment.ARROW_INFINITE, 1);
+		this.bow = ItemHelper.setUnbreakable(
+								ItemHelper
+										.addEnchant(
+												ItemHelper.setDetails(new ItemStack(Material.BOW),
+														instance.getGameManager().getMain()
+																.color("&7&lWitherSk Bow")),
+												Enchantment.ARROW_INFINITE, 1));
 
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, this.bow);
