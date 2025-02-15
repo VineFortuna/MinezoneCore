@@ -146,7 +146,7 @@ public enum Rank {
         if (this == DEFAULT)
             return "";   //GIVES TAG A SPACE;
         else
-            return tag + " " + ChatColor.RESET;
+            return tag  + ChatColor.RESET + " ";
     }
 
     public static Rank getRankFromID(int id) {
@@ -170,7 +170,7 @@ public enum Rank {
 		else
 			msg = color("&7");
 
-		return msg += player.getDisplayName();
+		return msg + player.getDisplayName();
 	}
 
     public static Rank getRankFromName(String name) {
