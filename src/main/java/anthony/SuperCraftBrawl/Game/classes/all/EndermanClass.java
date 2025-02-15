@@ -115,7 +115,7 @@ public class EndermanClass extends BaseClass {
 				return;
 			}
 			if (!player.isOnGround()) {
-				player.sendMessage(blockAbility.getOnGroundChatMessage());
+				blockAbility.sendCustomMessage(blockAbility.getOnGroundChatMessage());
 				return;
 			}
 			if (!blockAbility.isReady()) return;
