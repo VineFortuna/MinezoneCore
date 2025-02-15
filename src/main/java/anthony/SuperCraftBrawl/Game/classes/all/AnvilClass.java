@@ -141,7 +141,7 @@ public class AnvilClass extends BaseClass {
 		if (!item.equals(stompItem)) return;
         if (!stompAbility.isReady()) return;
         if (player.isOnGround()) {
-			stompAbility.sendCustomMessage(stompAbility.getOnGroundChatMessage());
+			stompAbility.sendCustomMessage("&c&l(!) You can't be on ground to use " + stompAbility.getAbilityName());
             return;
         }
 
