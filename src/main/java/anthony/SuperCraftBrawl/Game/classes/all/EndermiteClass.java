@@ -291,7 +291,7 @@ public class EndermiteClass extends BaseClass {
     public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
         super.classesEvent(damagerPlayer, baseClass);
 
-        ItemStack endermiteEgg = eggItem;
+        ItemStack endermiteEgg = eggItem.clone();
         endermiteEgg.setAmount(1);
 
         player.getInventory().addItem(endermiteEgg);
