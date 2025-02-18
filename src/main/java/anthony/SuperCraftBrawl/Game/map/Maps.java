@@ -492,6 +492,7 @@ public enum Maps {
 					.setBounds(new Vector(260.500, 155, 167.500), 50, 50)
 					.setSignLoc(new Vector(176.477, 108, 690.700))
 					.setSource(MapSource.COMMUNITY)
+					.setGameType(GameType.DUEL)
 	),
 	
 	TheCraftOf87(
@@ -1598,6 +1599,28 @@ public enum Maps {
 					.setBounds(new Vector(1.5,  151, -144.5), 55, 55)
 					.setSignLoc(new Vector(174.558, 107, 690.700))
 					.setSource(MapSource.COMMUNITY)
+	),
+
+	Alpine(
+			"Alpine",
+					new Gameplay[]{Gameplay.FLAT, Gameplay.ELEVATED},
+	Size.SMALL,
+	Category.CURATED,
+			new ItemStack(Material.SNOW_BLOCK),
+			new MapInstance(
+					"alpine")
+					.setSpawnPos(
+							new Vector(15.5, 140, -137.5),
+							new Vector(7.5, 139, -117.5),
+							new Vector(-15.5, 139, -119.5),
+							new Vector(-15.5, 144, -135.5)
+					)
+							.setLobbyLoc(new Vector(-3.5, 137, -128.5))
+			.setSpecLoc(new Vector(-3.5, 137, -128.5))
+			.setBounds(new Vector(-3.5, 137, -128.5), 45, 45)
+			.setSignLoc(new Vector(174.558, 107, 690.700))
+			.setSource(MapSource.COMMUNITY)
+			.setGameType(GameType.DUEL)
 	);
 
 //	Arid(
