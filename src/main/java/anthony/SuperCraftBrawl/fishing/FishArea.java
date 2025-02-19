@@ -45,7 +45,7 @@ public enum FishArea {
 
     Cavern("Cavern",
             new Vector(196, 70, 629),
-            30, 10, 30,
+            30, 9, 30,
             new Vector(175.5, 71, 638.5),
             new ItemStack(Material.STONE));
     
