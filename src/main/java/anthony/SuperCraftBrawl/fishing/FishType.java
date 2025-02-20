@@ -455,9 +455,9 @@ public enum FishType {
             case KOI:
                 return "Oh boy...";
             case SANDDOLLAR:
-
+                return "Not accepted at any store";
             case GROUPER:
-
+                return "Group hug? No thanks!";
             case SEAGULL:
                 return  "Hide your snacks";
             case FLOUNDER:
@@ -489,7 +489,7 @@ public enum FishType {
             case OTTER:
                 return "Hello from the otter side";
             case PELICAN:
-
+                return "Pouch game strong";
             case MINTYGOBBLER:
                 return "A breath of fresh sea air";
             case DOLPHINCICHLID:
@@ -521,7 +521,9 @@ public enum FishType {
             case LEAFSEASLUG:
                 return "Leaf me alone!";
             case VIOLETSEASLUG:
+                return "No need for violence, just a little violet";
             case SNUBFINDOLPHIN:
+                return "Short snout, big heart";
             case JELLYFISH:
                 return "Is there a peanutbutterfish too?";
             case GOLDFISH:
@@ -545,7 +547,7 @@ public enum FishType {
             case PIRANHA:
                 return "Looking sharp";
             case ANGLERFISH:
-                return "Lurker of the depths";
+                return "The ocean's creepiest lamp";
             case PARROTFISH:
                 return "Polly want seaweed?";
             case SEAHORSE:
