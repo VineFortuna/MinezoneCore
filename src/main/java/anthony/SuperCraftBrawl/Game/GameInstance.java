@@ -1306,7 +1306,7 @@ public class GameInstance {
 		}
 
 		endGameAnimation = new BukkitRunnable() {
-			int ticks = 10;
+			int ticks = 12;
 
 			@Override
 			public void run() {
