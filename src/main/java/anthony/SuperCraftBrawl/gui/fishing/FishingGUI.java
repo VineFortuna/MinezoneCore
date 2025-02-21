@@ -16,8 +16,12 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class FishingGUI implements InventoryProvider {
     
@@ -42,24 +46,27 @@ public class FishingGUI implements InventoryProvider {
     @Override
     public void init(Player player, InventoryContents contents) {
         Pagination pagination = contents.pagination();
-        
+
         PlayerData data = main.getDataManager().getPlayerData(player);
         if (this.target != null)
             data = main.getDataManager().getPlayerData(target);
         
         contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(
                 new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
-        
-        
-        
+
+        // Sort FishType values by rarity and then alphabetically
+        FishType[] sortedFishTypes = Arrays.stream(FishType.values())
+                .sorted(Comparator.comparing(FishType::getRarity)
+                        .thenComparing(FishType::name)).toArray(FishType[]::new);
+
         ClickableItem[] items = new ClickableItem[FishType.values().length];
     
         int i = 0;
-        for (FishType type : FishType.values()) {
+        for (FishType type : sortedFishTypes) {
             FishingDetails details = data.playerFishing.get(type.getId());
             ItemStack item = ItemHelper.setDetails(ItemHelper.createDye(DyeColor.GRAY, 1), "&c???",
                     type.getRarity().getColor() + type.getRarity().getName(), "");
-            
+
             if (details != null && details.timesCaught > 0) {
                 item = type.getItem();
                 ItemHelper.setDetails(item, item.getItemMeta().getDisplayName(),
@@ -67,11 +74,11 @@ public class FishingGUI implements InventoryProvider {
             }
             ItemHelper.setDetails(item, item.getItemMeta().getDisplayName(),
                     item.getItemMeta().getLore(), main.color("&7Found in: "), main.color(generateAreas(type)));
-            
+
             items[i] = ClickableItem.empty(item);
             i++;
         }
-        
+
         pagination.setItems(items);
         pagination.setItemsPerPage(21);
         

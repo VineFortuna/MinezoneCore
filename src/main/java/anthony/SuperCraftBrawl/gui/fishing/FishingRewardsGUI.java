@@ -127,7 +127,7 @@ public class FishingRewardsGUI implements InventoryProvider {
                         }));
             }
     
-            contents.set(1, 4, ClickableItem.of(
+            contents.set(1, 3, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.DIAMOND), main.color("&aSell"),
                             rewardStrings), e -> {
                         if (data.caught >= next && (e.isLeftClick() || e.isRightClick())) {
@@ -178,24 +178,39 @@ public class FishingRewardsGUI implements InventoryProvider {
         final int fishermanAmount = 50;
 
         String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWY1ZDM4MTlhNjVkYjc5YzQ1ZmQwMDE0MWMwODgyZTQ3YWQyMzRjMGU1Zjg5OTJiZjRhZjE4Y2VkMGUxZWNkYyJ9fX0=";
-        if (sumFished < fishermanAmount + 1000) {
-            contents.set(1, 7, ClickableItem.of(
-                    ItemHelper.setDetails(ItemHelper.createSkullTexture(texture), main.color("&7???"),
-                            main.color("&8To unlock:"),
-                            main.color("&7Common - " + commonFished + "/10"),
-                            main.color("&aRare - " + rareFished + "/9"),
-                            main.color("&dEpic - " + epicFished + "/8"),
-                            main.color("&cMythic - " + mythicFished + "/7"),
-                            main.color("&6Legendary - " + legendaryFished + "/5"),
-                            main.color("&4Junk - " + junkFished + "/7"),
-                            main.color("&eTreasure - " + treasureFished + "/4"), "",
+        if (!main.getFishing().hasUnlockedFisherman(player)) {
+            contents.set(1, 5, ClickableItem.of(
+                    ItemHelper.setDetails(ItemHelper.createSkullTexture(texture), main.color("&3Fisherman"),
+                            main.color("&7Catch me the following and"),
+                            main.color("&7I might do you a favor:"),
+                            "",
+                            main.color("&7Common &7- (" + commonFished + "/10)"),
+                            main.color("&aRare &7- (" + rareFished + "/9)"),
+                            main.color("&dEpic &7- (" + epicFished + "/8)"),
+                            main.color("&cMythic &7- (" + mythicFished + "/7)"),
+                            main.color("&6Legendary &7- (" + legendaryFished + "/5)"),
+                            main.color("&4Junk &7- (" + junkFished + "/7)"),
+                            main.color("&eTreasure &7- (" + treasureFished + "/4)"), "",
                             main.progressBar(sumFished, fishermanAmount, fishermanAmount)), e -> {
-                            player.sendMessage(main.color("&c&l(!) &rGo fish some more!"));
+                        player.sendMessage(main.color("&c&l(!) &rGo fish some more!"));
+                    }));
+        } else {
+            contents.set(1, 5, ClickableItem.of(
+                    ItemHelper.setDetails(ItemHelper.createSkullTexture(texture),
+                                    main.color("&3Fisherman Class"), main.color("&a&lUNLOCKED")), e -> {
+                    }));
+        }
+
+        if (!main.getFishing().hasAllFish(player)) {
+            contents.set(1, 7, ClickableItem.of(
+                    ItemHelper.setDetails(ItemHelper.create(Material.BOAT), main.color("&cFlood Win Effect"),
+                            main.progressBar(main.getFishing().getTotalFish(player), FishType.values().length, 50)), e -> {
+                        player.sendMessage(main.color("&c&l(!) &rGo fish some more!"));
                     }));
         } else {
             contents.set(1, 7, ClickableItem.of(
-                    ItemHelper.setDetails(ItemHelper.createSkullTexture(texture),
-                                    main.color("&3Fisherman Class"), main.color("&a&lUNLOCKED")), e -> {
+                    ItemHelper.setDetails(ItemHelper.create(Material.BOAT),
+                            main.color("&cFlood Win Effect"), main.color("&a&lUNLOCKED")), e -> {
                     }));
         }
         
