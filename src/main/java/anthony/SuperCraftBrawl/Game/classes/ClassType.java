@@ -393,7 +393,7 @@ public enum ClassType {
 			case SethBling:
 				return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "SethBling" + ChatColor.RESET;
 			case Sheep:
-				return "" + ChatColor.WHITE + ChatColor.BOLD + ChatColor.ITALIC + "Sheep" + ChatColor.RESET;
+				return "" + ChatColor.WHITE + ChatColor.BOLD + "Sheep" + ChatColor.RESET;
 			case Skeleton:
 				return "" + ChatColor.GRAY + "Skeleton" + ChatColor.RESET;
 			case Slime:

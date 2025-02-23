@@ -1048,10 +1048,10 @@ public class GameInstance {
 				PlayerData data = gameManager.getMain().getDataManager().getPlayerData(player);
 
 				if (map != null) {
-					if (data != null) {
+					/*if (data != null) {
 						if (data.color.isEmpty() || data.color.equals("0")) {
 							Score livesScore = o.getScore(truncateString(
-									"" + playerClass.getType().getTag() + " " + ChatColor.WHITE + player.getName() + "",
+									"" + playerClass.getType().getTag() + " " + ChatColor.RESET + player.getName() + "",
 									38));
 							livesScore.setScore(5);
 							playerClass.score = livesScore;
@@ -1062,7 +1062,13 @@ public class GameInstance {
 							livesScore.setScore(5);
 							playerClass.score = livesScore;
 						}
-					}
+					}*/
+					// Set name on scoreboard
+					Score livesScore = o.getScore(truncateString(
+							playerClass.getType().getTag() + " " + ChatColor.RESET + player.getName(),
+							38));
+					livesScore.setScore(5);
+					playerClass.score = livesScore;
 				} else {
 					if (team.get(player).equals("Blue"))
 						boardColor(o, player, ChatColor.BLUE);
