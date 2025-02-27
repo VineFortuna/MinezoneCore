@@ -1615,12 +1615,37 @@ public enum Maps {
 							new Vector(-15.5, 139, -119.5),
 							new Vector(-15.5, 144, -135.5)
 					)
-							.setLobbyLoc(new Vector(-7.5, 146, -66.5))
-			.setSpecLoc(new Vector(-3.5, 137, -128.5))
-			.setBounds(new Vector(-3.5, 137, -128.5), 45, 45)
-			.setSignLoc(new Vector(174.558, 107, 690.700))
-			.setSource(MapSource.COMMUNITY)
-			.setGameType(GameType.DUEL)
+					.setLobbyLoc(new Vector(-7.5, 145, -66.5))
+					.setSpecLoc(new Vector(-3.5, 137, -128.5))
+					.setBounds(new Vector(-3.5, 137, -128.5), 45, 45)
+					.setSignLoc(new Vector(174.558, 107, 690.700))
+					.setSource(MapSource.COMMUNITY)
+					.setGameType(GameType.DUEL)
+	),
+
+	CoastGuard(
+			"CoastGuard",
+			new Gameplay[]{Gameplay.INDOOR, Gameplay.ELEVATED},
+			Size.LARGE,
+			Category.CURATED,
+			new ItemStack(Material.SANDSTONE),
+			new MapInstance(
+					"coastguard")
+					.setSpawnPos(
+							new Vector(42.5, 131, -120.5),
+							new Vector(25.5, 151, -100.5),
+							new Vector(27.5, 143, -128.5),
+							new Vector(41.5, 145, -158.5),
+							new Vector(17.5, 128, -151.5),
+							new Vector(-4.5, 127, -144.5),
+							new Vector(31.5, 129, -140.5)
+					)
+					.setLobbyLoc(new Vector(13.5, 129, -136.5))
+					.setSpecLoc(new Vector(13.5, 129, -136.5))
+					.setBounds(new Vector(13.5, 129, -136.5), 50, 50)
+					.setSignLoc(new Vector(174.558, 107, 690.700))
+					.setSource(MapSource.COMMUNITY)
+					.setGameType(GameType.CLASSIC)
 	);
 
 //	Arid(

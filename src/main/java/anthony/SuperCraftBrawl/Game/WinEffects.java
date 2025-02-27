@@ -47,7 +47,8 @@ public class WinEffects {
 				else if (data.broomWinEffect == 1)
 					magicBroomEffect();
 				else if (data.fishRainEffect == 1)
-					fishRainEffect();
+					//fishRainEffect();
+					floodEffect();
 				else if (data.floodEffect == 1)
 					floodEffect();
 				else

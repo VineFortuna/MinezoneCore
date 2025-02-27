@@ -36,6 +36,7 @@ public class WinEffectsGUI implements InventoryProvider {
 		data.enderDragonEffect = 0;
 		data.fireParticlesEffect = 0;
 		data.fishRainEffect = 0;
+		data.floodEffect = 0;
 	}
 
 	@Override
