@@ -93,6 +93,7 @@ public class VillagerClass extends BaseClass {
 	public void SetItems(Inventory playerInv) {
 		// Resetting Emeralds on Death
 		emeraldsCount = 0;
+		weapon.setAmount(1);
 
 		// Settings Items
 		playerInv.setItem(0, weapon);
