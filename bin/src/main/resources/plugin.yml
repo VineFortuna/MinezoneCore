@@ -142,7 +142,7 @@ commands:
       
 permissions:
    scb.admin:
-      description: Admin perms
+      description: Admin perms.
       children:
          scb.developer: true
          scb.startGame: true
@@ -153,7 +153,7 @@ permissions:
          scb.ignite: true
          punish.networkban: true
    scb.developer:
-      description: Developer perms
+      description: Developer perms.
       children:
          scb.moderator: true
          scb.gm: true
@@ -161,21 +161,20 @@ permissions:
          scb.gms: true
          scb.gmsp: true
          scb.gma: true
-   
    scb.moderator:
-      description: Moderator perms
+      description: Moderator perms.
       children:
          scb.trainee: true
          punish.ban: true
          punish.mute: true
    scb.senior_moderator:
-      description: Moderator perms
+      description: Moderator perms.
       children:
          scb.trainee: true
          punish.ban: true
          punish.mute: true
    scb.trainee:
-      description: Trainee perms
+      description: Trainee perms.
       children:
          scb.captain: true
          scb.vanish: true
@@ -192,15 +191,15 @@ permissions:
          punish.check: true
          punish.kick: true
    scb.qa:
-      description: Design perms
+      description: Tester perms.
       children:
          scb.captain: true
    scb.media:
-      description: Media perms
+      description: Media perms.
       children:
          scb.captain: true
    scb.captain:
-      description: Captain perms
+      description: Captain perms.
       children:
          scb.vip: true
          scb.customWin: true
@@ -211,7 +210,7 @@ permissions:
          scb.customKillMsgs: true
          scb.winEffects: true
    scb.vip:
-      description: Vip perms
+      description: Vip perms.
       children:
          scb.default: true
          scb.nickname.use: true
@@ -223,7 +222,4 @@ permissions:
          scb.bypassFull: true
          scb.deathParticles: true
    scb.default:
-      description: Default perms
-      children:
-         
-   
+      description: Default perms.
