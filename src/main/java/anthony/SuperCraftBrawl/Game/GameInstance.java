@@ -819,22 +819,23 @@ public class GameInstance {
 		int attempts = 0;
 		Location respawnLoc = GetRespawnLoc();
 
-		while (true) {
-			Location loc = respawnLoc.clone().add(rand.nextFloat() * 50 - 25, 10, rand.nextFloat() * 50 - 25);
-			while (true) {
-				loc.setY(loc.getY() - 1);
+		while (attempts < 100) {
+			Location loc = respawnLoc.clone().add(rand.nextInt(51) - 25, 10, rand.nextInt(51) - 25);
+
+			// Find the highest solid ground
+			while (loc.getY() > 40) {
 				Material mat = loc.getBlock().getType();
 				if (mat.isSolid() && isNotWaterOrLava(loc.clone().add(0, 1, 0).getBlock().getType())) {
-					return loc.add(0, 1, 0);
+					return loc.add(0, 1, 0); // Return valid spawn location
 				}
-				if (loc.getY() < 40) // Too low down without finding block
-					break;
+				loc.setY(loc.getY() - 1);
 			}
-			if (attempts > 100)
-				return respawnLoc;
 			attempts++;
 		}
+
+		return respawnLoc; // Fallback if no valid spawn found
 	}
+
 
 	/*
 	 * Starts the timer of 30 seconds for each item drop in a game. If player is
