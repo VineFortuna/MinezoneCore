@@ -58,7 +58,7 @@ public class FishermanClass extends BaseClass {
             "&7Swim away with &b&oSpeed&e 1 &7for &e5 &7s");
     
     private final ItemStack healFish = ItemHelper.setDetails(new ItemStack(Material.COOKED_FISH, 1, (short) 1),
-            "&d&lHealing Fish",
+            "&c&lHearty Fish",
             "&7Heals &e0.5 &c❤");
     
     public FishermanClass(GameInstance instance, Player player) {
