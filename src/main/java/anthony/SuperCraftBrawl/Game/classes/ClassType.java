@@ -53,7 +53,7 @@ public enum ClassType {
 	Potato(32, 750, 0),
 	Ocelot(34, 250, 0),
 	Noteblock(36, 800, 0),
-	EnchantTable(37, 350, 0),
+	EnchantTable(37, 350, 0, true),
 	Star(42, 850, 0, true),
 	Anvil(46, 700, 0),
 	Summoner(47, 525, 0),
