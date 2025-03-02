@@ -1640,9 +1640,9 @@ public enum Maps {
 							new Vector(-4.5, 127, -144.5),
 							new Vector(31.5, 129, -140.5)
 					)
-					.setLobbyLoc(new Vector(13.5, 129, -136.5))
-					.setSpecLoc(new Vector(13.5, 129, -136.5))
-					.setBounds(new Vector(13.5, 129, -136.5), 50, 50)
+					.setLobbyLoc(new Vector(-57.5, 134, -132.5))
+					.setSpecLoc(new Vector(21.5, 143, -142.5))
+					.setBounds(new Vector(25.5, 147, -133.5), 66, 66)
 					.setSignLoc(new Vector(174.558, 107, 690.700))
 					.setSource(MapSource.COMMUNITY)
 					.setGameType(GameType.CLASSIC)
