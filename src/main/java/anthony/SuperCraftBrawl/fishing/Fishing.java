@@ -79,7 +79,7 @@ public class Fishing implements Listener {
                 p.sendMessage(main.color("&2&l============================================="));
                 
                 // Firework
-                if (main.fishing.getTotalFish(p) == FishType.values().length) {
+                if (getTotalFish(p) == FishType.values().length) {
                     p.playSound(p.getLocation(), Sound.FIREWORK_TWINKLE, 1, 1);
                     p.sendMessage(main.color("&3&l(!) &rCongratulations! You caught everything!"));
                     Firework fw = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
@@ -91,23 +91,23 @@ public class Fishing implements Listener {
                 }
             }
             if (fish == FishType.CRATE) {
-                p.sendMessage(main.color("&3&l(!) &rYou have found &e1 Mystery Chest!"));
+                p.sendMessage(main.color("&3&l(!) &rYou have found &e1 Mystery Chest&r!"));
                 data.mysteryChests++;
             } else if (fish == FishType.EXP) {
                 int r = rand.nextInt(40) + 11;
                 data.exp += r;
-                p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + r + " EXP!"));
+                p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + r + " EXP&r!"));
                 if (data.exp >= 2500) {
                     data.level++;
                     data.exp -= 2500;
                     p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
-                    p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "!"));
+                    p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "&r!"));
                 }
                 updateScoreboard = true;
             } else if (fish == FishType.TOKENS) {
                 int r = rand.nextInt(35) + 11;
                 data.tokens += r;
-                p.sendMessage(main.color("&3&l(!) &rYou have found &e" + r + " Tokens!"));
+                p.sendMessage(main.color("&3&l(!) &rYou have found &e" + r + " Tokens&r!"));
                 updateScoreboard = true;
             }
             reward(p, fish.getRarity());

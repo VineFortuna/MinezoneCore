@@ -1564,7 +1564,7 @@ public class GameInstance {
 			if (chance >= 0 && chance < 25) {
 				if (data3 != null) {
 					data3.mysteryChests++;
-					winner.sendMessage(getGameManager().getMain().color("&5&l(!) &rYou have found &e1 Mystery Chest!"));
+					winner.sendMessage(getGameManager().getMain().color("&5&l(!) &rYou have found &e1 Mystery Chest&r!"));
 				}
 			}
 		}
@@ -1708,7 +1708,7 @@ public class GameInstance {
 					data.level++;
 					data.exp -= 2500;
 					winner.sendMessage(getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
-					winner.sendMessage("You are now Level: " + data.level + "!");
+					winner.sendMessage(getGameManager().getMain().color("&r&l(!) &rYou are now Level " + data.level + "&r!"));
 				}
 			}
 		}
