@@ -47,9 +47,7 @@ public class NoteblockClass extends BaseClass {
 	public void setArmor(EntityEquipment playerEquip) {
 		setArmorNew(playerEquip);
 		player.removePotionEffect(PotionEffectType.SPEED);
-		player.removePotionEffect(PotionEffectType.JUMP);
 		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 0));
 	}
 
 	@Override
@@ -125,8 +123,6 @@ public class NoteblockClass extends BaseClass {
 			else
 				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
 		}
-		if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
-			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 0));
 	}
 	
 
