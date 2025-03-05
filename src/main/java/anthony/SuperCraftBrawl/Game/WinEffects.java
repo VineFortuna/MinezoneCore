@@ -171,7 +171,7 @@ public class WinEffects {
 		MapInstance map = instance.getMap().GetInstance();
 		Vector center = map.center.clone();
 		double centerX = center.getX();
-		double centerY = player.getLocation().clone().getY() - 4;
+		double centerY = player.getLocation().clone().getY() - 5;
 		double centerZ = center.getZ();
 		double width = map.boundsX; // Width of the flooded area (along X axis)
 		double length = map.boundsZ; // Length of the flooded area (along Z axis)

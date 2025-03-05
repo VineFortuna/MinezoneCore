@@ -120,7 +120,7 @@ public enum FishType {
     private FishRarity rarity;
     private List<FishArea> areas;
 
-    private FishType(int id, String name, FishRarity rarity, List<FishArea> areas) {
+    FishType(int id, String name, FishRarity rarity, List<FishArea> areas) {
         this.id = id;
         this.name = name;
         this.rarity = rarity;
