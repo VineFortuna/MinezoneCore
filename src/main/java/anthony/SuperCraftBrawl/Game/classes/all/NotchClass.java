@@ -152,17 +152,17 @@ public class NotchClass extends BaseClass {
 		double maxDistance = endLocation.distance(player.getEyeLocation());
 
 		for (Player targetPlayer : instance.players) {
-			if (targetPlayer != player) {
-				Vector playerVector = targetPlayer.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
-				double distance = playerVector.dot(direction);
+			if (targetPlayer == player) continue;
+			if (instance.getGameManager().spawnProt.containsKey(targetPlayer)) continue;
+			Vector playerVector = targetPlayer.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
+			double distance = playerVector.dot(direction);
 
-				if (distance < maxDistance) {
-					Location closestPoint = player.getEyeLocation().add(direction.clone().multiply(distance));
+			if (distance < maxDistance) {
+				Location closestPoint = player.getEyeLocation().add(direction.clone().multiply(distance));
 
-					if (closestPoint.distanceSquared(targetPlayer.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
-						if (shouldApplyPullEffect(targetPlayer)) {
-							applyPullEffectReworkTest(targetPlayer, direction, distance);
-						}
+				if (closestPoint.distanceSquared(targetPlayer.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
+					if (shouldApplyPullEffect(targetPlayer)) {
+						applyPullEffectReworkTest(targetPlayer, direction, distance);
 					}
 				}
 			}

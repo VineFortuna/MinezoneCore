@@ -93,6 +93,7 @@ public class IrongolemClass extends BaseClass {
 									return;
 
 							if (hit != null) {
+								if (instance.getGameManager().spawnProt.containsKey(hit)) return;
 								@SuppressWarnings("deprecation")
 								EntityDamageEvent damageEvent = new EntityDamageEvent(hit, DamageCause.VOID, 5.5);
 								instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
