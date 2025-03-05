@@ -57,7 +57,7 @@ public class FishingGUI implements InventoryProvider {
         // Sort FishType values by rarity and then alphabetically
         FishType[] sortedFishTypes = Arrays.stream(FishType.values())
                 .sorted(Comparator.comparing(FishType::getRarity)
-                        .thenComparing(FishType::name)).toArray(FishType[]::new);
+                        .thenComparing(FishType::getName, String.CASE_INSENSITIVE_ORDER)).toArray(FishType[]::new);
 
         ClickableItem[] items = new ClickableItem[FishType.values().length];
     
