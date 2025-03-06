@@ -564,7 +564,25 @@ public class Core extends JavaPlugin implements Listener {
 			} else {
 				sender.sendMessage(color("&c&l(!) &rYou do not have permission for that!"));
 			}
-		} else if (sender instanceof Player) {
+		}
+		else if (cmd.getName().equalsIgnoreCase("list")) {
+			String players = "";
+			int count = 0;
+			int totalPlayers = Bukkit.getOnlinePlayers().size();
+			sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "There are " + ChatColor.YELLOW
+					+ totalPlayers + ChatColor.RESET + " players online:");
+
+			for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
+				count++;
+				players += "" + ChatColor.YELLOW + onlinePlayers.getName() + "";
+
+				if (count < totalPlayers) {
+					players += "" + ChatColor.RESET + ", ";
+				}
+			}
+			sender.sendMessage(players);
+		}
+		else if (sender instanceof Player) {
 			Player player = (Player) sender;
 
 			if (cmd.getName().equalsIgnoreCase("sh")) {
