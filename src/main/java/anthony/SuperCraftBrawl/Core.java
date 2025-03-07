@@ -321,12 +321,14 @@ public class Core extends JavaPlugin implements Listener {
 				msg = Announcements.values()[random.nextInt(Announcements.values().length)];
 				String msgToPlayers = msg.getName();
 				if (Bukkit.getOnlinePlayers().size() > 0)
-					for (Player player : Bukkit.getOnlinePlayers())
-						player.sendMessage(msgToPlayers);
-			}
+					for (Player player : Bukkit.getOnlinePlayers()) {
+						if (getGameManager().GetInstanceOfPlayer(player) != null) continue;
 
+						player.sendMessage(msgToPlayers);
+					}
+			}
 		};
-		runnable.runTaskTimer(this, 0, 6000);
+		runnable.runTaskTimer(this, 0, 5 * 60 * 20);
 	}
 
 	// For tab organization.
