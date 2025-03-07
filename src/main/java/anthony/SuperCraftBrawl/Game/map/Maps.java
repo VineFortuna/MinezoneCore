@@ -492,6 +492,7 @@ public enum Maps {
 					.setBounds(new Vector(260.500, 155, 167.500), 50, 50)
 					.setSignLoc(new Vector(176.477, 108, 690.700))
 					.setSource(MapSource.COMMUNITY)
+					.setGameType(GameType.DUEL)
 	),
 	
 	TheCraftOf87(
@@ -1199,7 +1200,7 @@ public enum Maps {
 							new Vector(5001.994, 174, 606.994),
 							new Vector(5015.599, 158, 606.437),
 							new Vector(5001.069, 134, 592.949),
-							new Vector(5000.984, 159, 592.974),
+							new Vector(5000.984, 160, 592.974),
 							new Vector(4985.440, 151, 605.448),
 							new Vector(5001.538, 152, 588.452)
 					)
@@ -1575,6 +1576,76 @@ public enum Maps {
 					.setBounds(new Vector(97.411, 171, -152.539), 55, 100)
 					.setSignLoc(new Vector(174.558, 107, 690.700))
 					.setSource(MapSource.COMMUNITY)
+	),
+
+	Arid(
+			"Arid",
+					new Gameplay[]{Gameplay.FLAT, Gameplay.ELEVATED},
+	Size.SMALL,
+	Category.CURATED,
+			new ItemStack(Material.DEAD_BUSH), // Dead Bush
+			new MapInstance(
+					"arid")
+					.setSpawnPos(
+							new Vector(-4.5, 149, -126.5),
+							new Vector(9.5, 149, -148.5),
+							new Vector(23.5, 152, -166.5),
+							new Vector(32.5, 151, -139.5),
+							new Vector(-17.5, 149,-145.5),
+							new Vector(-4.5, 149, -163.5)
+					)
+					.setLobbyLoc(new Vector(-68.5, 160, -144.5))
+					.setSpecLoc(new Vector(1.5,  159, -144.5))
+					.setBounds(new Vector(1.5,  151, -144.5), 55, 55)
+					.setSignLoc(new Vector(174.558, 107, 690.700))
+					.setSource(MapSource.COMMUNITY)
+	),
+
+	Alpine(
+			"Alpine",
+					new Gameplay[]{Gameplay.FLAT, Gameplay.ELEVATED},
+	Size.SMALL,
+	Category.CURATED,
+			new ItemStack(Material.SNOW_BLOCK),
+			new MapInstance(
+					"alpine")
+					.setSpawnPos(
+							new Vector(15.5, 140, -137.5),
+							new Vector(7.5, 139, -117.5),
+							new Vector(-15.5, 139, -119.5),
+							new Vector(-15.5, 144, -135.5)
+					)
+					.setLobbyLoc(new Vector(-7.5, 145, -66.5))
+					.setSpecLoc(new Vector(-3.5, 137, -128.5))
+					.setBounds(new Vector(-3.5, 137, -128.5), 45, 45)
+					.setSignLoc(new Vector(174.558, 107, 690.700))
+					.setSource(MapSource.COMMUNITY)
+					.setGameType(GameType.DUEL)
+	),
+
+	CoastGuard(
+			"CoastGuard",
+			new Gameplay[]{Gameplay.INDOOR, Gameplay.ELEVATED},
+			Size.LARGE,
+			Category.CURATED,
+			new ItemStack(Material.SANDSTONE),
+			new MapInstance(
+					"coastguard")
+					.setSpawnPos(
+							new Vector(42.5, 131, -120.5),
+							new Vector(25.5, 151, -100.5),
+							new Vector(27.5, 143, -128.5),
+							new Vector(41.5, 145, -158.5),
+							new Vector(17.5, 128, -151.5),
+							new Vector(-4.5, 127, -144.5),
+							new Vector(31.5, 129, -140.5)
+					)
+					.setLobbyLoc(new Vector(-57.5, 134, -132.5))
+					.setSpecLoc(new Vector(21.5, 143, -142.5))
+					.setBounds(new Vector(25.5, 147, -133.5), 66, 66)
+					.setSignLoc(new Vector(174.558, 107, 690.700))
+					.setSource(MapSource.COMMUNITY)
+					.setGameType(GameType.CLASSIC)
 	);
 
 //	Arid(

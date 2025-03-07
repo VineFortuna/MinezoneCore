@@ -36,6 +36,7 @@ public class WinEffectsGUI implements InventoryProvider {
 		data.enderDragonEffect = 0;
 		data.fireParticlesEffect = 0;
 		data.fishRainEffect = 0;
+		data.floodEffect = 0;
 	}
 
 	@Override
@@ -43,6 +44,11 @@ public class WinEffectsGUI implements InventoryProvider {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 		
 		// Icons Items
+		String sethblingTexture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I4NmI4MjE1YjM2MTBlYWE2NDhjMjNjNGEyMGFkNjc1OWYyNTFlZjg1NDc2ODI5ZGQ2ZDE4NDI4MjNiMTEzIn19fQ==";
+		ItemStack playerskull = ItemHelper.createSkullTexture(sethblingTexture);
+
+		String santaTexture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19";
+		ItemStack santa = ItemHelper.createSkullTexture(santaTexture);
 
 		// Setting Items
 		contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
@@ -52,10 +58,15 @@ public class WinEffectsGUI implements InventoryProvider {
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.WHEAT), main.color("&cMagic Broom"),
 							"", main.color("&rFly around the map with this"), main.color("&rwhen you win!"), "",
 							"" + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN" + ChatColor.RESET + "+ exclusive!"), e -> {
-						resetWinEffects(data);
-						data.broomWinEffect = 1;
-						inv.close(player);
-						player.sendMessage(main.color("&e&l(!) &rYou have enabled &eMagic Broom &rwin effect"));
+						if (player.hasPermission("scb.winEffects")) {
+							resetWinEffects(data);
+							data.broomWinEffect = 1;
+							inv.close(player);
+							player.sendMessage(main.color("&e&l(!) &rYou have enabled &eMagic Broom &rwin effect"));
+						} else {
+							player.sendMessage(main.color(
+									"&c&l(!) &rYou need the rank " + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN &rto use this!"));
+						}
 					}));
 			
 			contents.set(1, 4,
@@ -66,31 +77,36 @@ public class WinEffectsGUI implements InventoryProvider {
 											main.color("&rEnderDragon when you win!"), "", "" + ChatColor.BLUE
 													+ ChatColor.BOLD + "CAPTAIN" + ChatColor.RESET + "+ exclusive!"),
 							e -> {
-								resetWinEffects(data);
-								data.enderDragonEffect = 1;
-								inv.close(player);
-								player.sendMessage(main.color("&e&l(!) &rYou have enabled &eEnderDragon &rwin effect"));
+								if (player.hasPermission("scb.winEffects")) {
+									resetWinEffects(data);
+									data.enderDragonEffect = 1;
+									inv.close(player);
+									player.sendMessage(main.color("&e&l(!) &rYou have enabled &eEnderDragon &rwin effect"));
+								} else {
+									player.sendMessage(main.color(
+											"&c&l(!) &rYou need the rank " + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN &rto use this!"));
+								}
 							}));
-			String sethblingTexture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I4NmI4MjE1YjM2MTBlYWE2NDhjMjNjNGEyMGFkNjc1OWYyNTFlZjg1NDc2ODI5ZGQ2ZDE4NDI4MjNiMTEzIn19fQ==";
-			ItemStack playerskull = ItemHelper.createSkullTexture(sethblingTexture);
-			
-			String santaTexture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19";
-			ItemStack santa = ItemHelper.createSkullTexture(santaTexture);
 			
 			contents.set(1, 3,
-					ClickableItem.of(ItemHelper.setDetails(santa, main.color("&cSanta Claus Effect"), "",
+					ClickableItem.of(ItemHelper.setDetails(santa, main.color("&cSanta Claus"), "",
 							main.color("&rBecome old Saint Nick himself"), main.color("&rand ride along!"), "",
 							"" + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN" + ChatColor.RESET + "+ exclusive!"), e -> {
-						resetWinEffects(data);
-						data.santaEffect = 1;
-						inv.close(player);
-						player.sendMessage(main.color("&e&l(!) &rYou have enabled &eSanta Claus &rwin effect"));
+						if (player.hasPermission("scb.winEffects")) {
+							resetWinEffects(data);
+							data.santaEffect = 1;
+							inv.close(player);
+							player.sendMessage(main.color("&e&l(!) &rYou have enabled &eSanta Claus &rwin effect"));
+						} else {
+							player.sendMessage(main.color(
+									"&c&l(!) &rYou need the rank " + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN &rto use this!"));
+						}
 					}));
 			contents.set(1, 5,
 					ClickableItem.of(
 							ItemHelper
 									.setDetails(new ItemStack(Material.RAW_FISH), main.color("&cFish Rain"), "",
-											main.color("&rIt's raining fish"),
+											main.color("&rCover the map with fish"), main.color("&rfalling from the sky"),
 											"", main.color("&aFishing reward!")),
 							e -> {
 								if (data.rewardLevel >= 4) {
@@ -98,6 +114,23 @@ public class WinEffectsGUI implements InventoryProvider {
 									data.fishRainEffect = 1;
 									inv.close(player);
 									player.sendMessage(main.color("&e&l(!) &rYou have enabled &eFish Rain &rwin effect"));
+								} else {
+									player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
+											+ "You have not unlocked this cosmetic yet!");
+								}
+							}));
+			contents.set(1, 6,
+					ClickableItem.of(
+							ItemHelper
+									.setDetails(new ItemStack(Material.BOAT), main.color("&cFlood"), "",
+											main.color("&rFlood the map and"), main.color("&rride a boat to safety"),
+											"", main.color("&aFishing reward!")),
+							e -> {
+								if (main.getFishing().hasAllFish(player)) {
+									resetWinEffects(data);
+									data.floodEffect = 1;
+									inv.close(player);
+									player.sendMessage(main.color("&e&l(!) &rYou have enabled &eFlood &rwin effect"));
 								} else {
 									player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
 											+ "You have not unlocked this cosmetic yet!");

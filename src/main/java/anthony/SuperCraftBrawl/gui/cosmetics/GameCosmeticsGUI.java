@@ -37,12 +37,13 @@ public class GameCosmeticsGUI implements InventoryProvider {
 		contents.fill(ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 
 		contents.set(1, 2, ClickableItem.of(winEffects, e -> {
+			new WinEffectsGUI(main, inv).inv.open(player);
 
-			if (player.hasPermission("scb.winEffects"))
+			/*if (player.hasPermission("scb.winEffects"))
 				new WinEffectsGUI(main, inv).inv.open(player);
 			else
 				player.sendMessage(main.color(
-						"&c&l(!) &rYou need the rank " + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN &rto use this!"));
+						"&c&l(!) &rYou need the rank " + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN &rto use this!"));*/
 		}));
 
 		contents.set(1, 6, ClickableItem.of(deathEffects, e -> {

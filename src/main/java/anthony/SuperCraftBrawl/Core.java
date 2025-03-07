@@ -321,12 +321,14 @@ public class Core extends JavaPlugin implements Listener {
 				msg = Announcements.values()[random.nextInt(Announcements.values().length)];
 				String msgToPlayers = msg.getName();
 				if (Bukkit.getOnlinePlayers().size() > 0)
-					for (Player player : Bukkit.getOnlinePlayers())
-						player.sendMessage(msgToPlayers);
-			}
+					for (Player player : Bukkit.getOnlinePlayers()) {
+						if (getGameManager().GetInstanceOfPlayer(player) != null) continue;
 
+						player.sendMessage(msgToPlayers);
+					}
+			}
 		};
-		runnable.runTaskTimer(this, 0, 6000);
+		runnable.runTaskTimer(this, 0, 5 * 60 * 20);
 	}
 
 	// For tab organization.
@@ -564,7 +566,25 @@ public class Core extends JavaPlugin implements Listener {
 			} else {
 				sender.sendMessage(color("&c&l(!) &rYou do not have permission for that!"));
 			}
-		} else if (sender instanceof Player) {
+		}
+		else if (cmd.getName().equalsIgnoreCase("list")) {
+			String players = "";
+			int count = 0;
+			int totalPlayers = Bukkit.getOnlinePlayers().size();
+			sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "There are " + ChatColor.YELLOW
+					+ totalPlayers + ChatColor.RESET + " players online:");
+
+			for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
+				count++;
+				players += "" + ChatColor.YELLOW + onlinePlayers.getName() + "";
+
+				if (count < totalPlayers) {
+					players += "" + ChatColor.RESET + ", ";
+				}
+			}
+			sender.sendMessage(players);
+		}
+		else if (sender instanceof Player) {
 			Player player = (Player) sender;
 
 			if (cmd.getName().equalsIgnoreCase("sh")) {
@@ -675,10 +695,10 @@ public class Core extends JavaPlugin implements Listener {
 			if (cmd.getName().equalsIgnoreCase("hub")) {
 				/*
 				 * Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-				 *
+				 * 
 				 * ByteArrayOutputStream b = new ByteArrayOutputStream(); DataOutputStream out =
 				 * new DataOutputStream(b);
-				 *
+				 * 
 				 * try { out.writeUTF("Connect"); out.writeUTF("lobby-1");
 				 * player.sendMessage(color("&e&l(!) &rConnecting to &elobby-1")); } catch
 				 * (Exception ex) { player.sendMessage(
@@ -1517,26 +1537,34 @@ public class Core extends JavaPlugin implements Listener {
 		return false;
 	}
 
-	public int getTotalFish(Player player, FishRarity... rarity) {
-		PlayerData data = this.getDataManager().getPlayerData(player);
-		int totalFished = 0;
-		for (FishType type : FishType.values()) {
-			if (rarity == null || Arrays.asList(rarity).contains(type.getRarity())) {
-				FishingDetails details = data.playerFishing.get(type.getId());
-				if (details != null) {
-					totalFished++;
-				}
-			}
+	private void sendClassesList(Player player) {
+		String dClasses = "";
+		String tClasses = "";
+		String lClasses = "";
+		String rClasses = "";
+		for (ClassType type : ClassType.sortAlphabetically(ClassType.getAvailableClasses())) {
+			if (type.getTokenCost() == 0 && type.getLevel() == 0 && type.getMinRank() != Rank.VIP)
+				dClasses += type.getTag() + " ";
+			else if (type.getTokenCost() > 0)
+				tClasses += type.getTag() + " ";
+			else if (type.getLevel() > 0)
+				lClasses += type.getTag() + " ";
+			else if (type.getMinRank() == Rank.VIP)
+				rClasses += type.getTag() + " ";
 		}
-		return totalFished;
-	}
-
-	public int getTotalFish(Player player) {
-		return getTotalFish(player, null);
-	}
-
-	public boolean hasAllFish(Player player) {
-		return getTotalFish(player) == FishType.values().length;
+		player.sendMessage(color("&f&l----------------------------------------"));
+		player.sendMessage(color("&e&lFREE CLASSES:"));
+		player.sendMessage(dClasses);
+		player.sendMessage("");
+		player.sendMessage(color("&e&lTOKEN CLASSES:"));
+		player.sendMessage(tClasses);
+		player.sendMessage("");
+		player.sendMessage(color("&e&lLEVEL CLASSES:"));
+		player.sendMessage(lClasses);
+		player.sendMessage("");
+		player.sendMessage(color("&e&lDONOR CLASSES:"));
+		player.sendMessage(rClasses);
+		player.sendMessage(color("&f&l----------------------------------------"));
 	}
 
 	public void sendScoreboardUpdate(Player player) {
@@ -1938,7 +1966,6 @@ public class Core extends JavaPlugin implements Listener {
 
 			player.kickPlayer(color("&c&lSERVER IS RESTARTING\n &e\n" + string));
 		}
-
 		Bukkit.broadcastMessage("");
 		Bukkit.broadcastMessage(color("&4&l(!) &eServer Restarting..."));
 		Bukkit.broadcastMessage("");
@@ -1962,12 +1989,8 @@ public class Core extends JavaPlugin implements Listener {
 	public ItemStack getFishingRod(Player player) {
 		PlayerData data = getDataManager().getPlayerData(player);
 
-		ItemStack fishingRod = ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
-				"&3&lGo Fishing!",
-				"&fAnywhere with water",
-				"&fFish for junk, fish and treasure",
-				"&fEarn unique rewards"
-		);
+		ItemStack fishingRod = ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD), "&3&lGo Fishing!",
+				"&fAnywhere with water", "&fFish for junk, fish and treasure", "&fEarn unique rewards");
 		ItemHelper.setUnbreakable(fishingRod);
 		if (data != null) {
 			if (data.lure == 1 && data.lureLevel > 0) {
@@ -1989,7 +2012,7 @@ public class Core extends JavaPlugin implements Listener {
 		}
 		return this.color("&cInvalid");
 	}
-	
+
 	public FishArea getFishingArea(Location loc) {
 		for (FishArea area : FishArea.values()) {
 			if (area.isInBounds(loc)) {
@@ -2006,6 +2029,7 @@ public class Core extends JavaPlugin implements Listener {
 		getWinstreakBoard().close();
 		getFlawlessWinsBoard().close();
 	}
+
 	public void updateLeaderboards() {
 		getLeaderboard().updateLeaderboard(true);
 		getFishingLeaderboard().updateLeaderboard(true);

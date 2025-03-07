@@ -8,7 +8,6 @@ import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
-import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
 import anthony.SuperCraftBrawl.gui.GameStatsGUI;
@@ -122,7 +121,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 				soundCommand(args, player);
 				break;
 			case "heal":
-				healCommand(player);
+				healCommand(player, args);
 				break;
 			}
 		} else
@@ -141,16 +140,37 @@ public class Commands implements CommandExecutor, TabCompleter {
 		player.sendMessage(main.color("&7&m----------------------------"));
 	}
 
-	private void healCommand(Player player) {
+	private void healCommand(Player player, String [] args) {
 		if (!player.hasPermission("scb.heal")) {
 			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
 			return;
 		}
 
+		Player targetPlayer;
+
+		if (args.length == 0) {
+			targetPlayer = player;
+		} else {
+			targetPlayer = Bukkit.getPlayer(args[0]);
+
+			if (targetPlayer == null) {
+				player.sendMessage(main.color("&c&l(!) &rPlayer not found!"));
+				return;
+			}
+		}
+
 		// Fully heal the player to their maximum health
-		double maxHealth = player.getMaxHealth();
-		player.setHealth(maxHealth);
-		player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
+		double maxHealth = targetPlayer.getMaxHealth();
+		targetPlayer.setHealth(maxHealth);
+		targetPlayer.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
+
+		if (targetPlayer.equals(player)) {
+			player.sendMessage(main.color("&a&l(!) &rYou have been healed!"));
+		} else {
+			player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
+			player.sendMessage(main.color("&a&l(!) &rYou have healed &e" + targetPlayer.getName() + "&r!"));
+			targetPlayer.sendMessage(main.color("&a&l(!) &rYou have been healed by &e" + player.getName() + "&r!"));
+		}
 	}
 
 	private void soundCommand(String[] args, Player player) {
@@ -774,7 +794,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private boolean isFishermanClassUnlocked(Player player, ClassType type) {
-		if (type == ClassType.Fisherman && main.getTotalFish(player) < FishType.values().length && !player.isOp()) {
+		if (type == ClassType.Fisherman && !main.fishing.hasUnlockedFisherman(player) && !player.isOp()) {
 			player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
 			return false;
 		}

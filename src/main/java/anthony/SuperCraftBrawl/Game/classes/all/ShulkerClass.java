@@ -119,6 +119,7 @@ public class ShulkerClass extends BaseClass {
 			Player p = (Player) event.getEntity();
 			if (event.getDamager() instanceof Arrow) {
 				event.setCancelled(true);
+				if (instance.getGameManager().spawnProt.containsKey(p)) return;
 				Location loc = p.getLocation();
 				Vector v = this.dir;
 				v.setY(1.5);

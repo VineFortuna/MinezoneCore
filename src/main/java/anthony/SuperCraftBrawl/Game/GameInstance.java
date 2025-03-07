@@ -819,22 +819,23 @@ public class GameInstance {
 		int attempts = 0;
 		Location respawnLoc = GetRespawnLoc();
 
-		while (true) {
-			Location loc = respawnLoc.clone().add(rand.nextFloat() * 50 - 25, 10, rand.nextFloat() * 50 - 25);
-			while (true) {
-				loc.setY(loc.getY() - 1);
+		while (attempts < 100) {
+			Location loc = respawnLoc.clone().add(rand.nextInt(51) - 25, 10, rand.nextInt(51) - 25);
+
+			// Find the highest solid ground
+			while (loc.getY() > 40) {
 				Material mat = loc.getBlock().getType();
 				if (mat.isSolid() && isNotWaterOrLava(loc.clone().add(0, 1, 0).getBlock().getType())) {
-					return loc.add(0, 1, 0);
+					return loc.add(0, 1, 0); // Return valid spawn location
 				}
-				if (loc.getY() < 40) // Too low down without finding block
-					break;
+				loc.setY(loc.getY() - 1);
 			}
-			if (attempts > 100)
-				return respawnLoc;
 			attempts++;
 		}
+
+		return respawnLoc; // Fallback if no valid spawn found
 	}
+
 
 	/*
 	 * Starts the timer of 30 seconds for each item drop in a game. If player is
@@ -1048,10 +1049,10 @@ public class GameInstance {
 				PlayerData data = gameManager.getMain().getDataManager().getPlayerData(player);
 
 				if (map != null) {
-					if (data != null) {
+					/*if (data != null) {
 						if (data.color.isEmpty() || data.color.equals("0")) {
 							Score livesScore = o.getScore(truncateString(
-									"" + playerClass.getType().getTag() + " " + ChatColor.WHITE + player.getName() + "",
+									"" + playerClass.getType().getTag() + " " + ChatColor.RESET + player.getName() + "",
 									38));
 							livesScore.setScore(5);
 							playerClass.score = livesScore;
@@ -1062,7 +1063,13 @@ public class GameInstance {
 							livesScore.setScore(5);
 							playerClass.score = livesScore;
 						}
-					}
+					}*/
+					// Set name on scoreboard
+					Score livesScore = o.getScore(truncateString(
+							playerClass.getType().getTag() + " " + ChatColor.RESET + player.getName(),
+							38));
+					livesScore.setScore(5);
+					playerClass.score = livesScore;
 				} else {
 					if (team.get(player).equals("Blue"))
 						boardColor(o, player, ChatColor.BLUE);
@@ -1306,7 +1313,7 @@ public class GameInstance {
 		}
 
 		endGameAnimation = new BukkitRunnable() {
-			int ticks = 10;
+			int ticks = 12;
 
 			@Override
 			public void run() {
@@ -1557,7 +1564,7 @@ public class GameInstance {
 			if (chance >= 0 && chance < 25) {
 				if (data3 != null) {
 					data3.mysteryChests++;
-					winner.sendMessage(getGameManager().getMain().color("&5&l(!) &rYou have found &e1 Mystery Chest!"));
+					winner.sendMessage(getGameManager().getMain().color("&5&l(!) &rYou have found &e1 Mystery Chest&r!"));
 				}
 			}
 		}
@@ -1701,7 +1708,7 @@ public class GameInstance {
 					data.level++;
 					data.exp -= 2500;
 					winner.sendMessage(getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
-					winner.sendMessage("You are now Level: " + data.level + "!");
+					winner.sendMessage(getGameManager().getMain().color("&r&l(!) &rYou are now Level " + data.level + "&r!"));
 				}
 			}
 		}
@@ -2001,7 +2008,7 @@ public class GameInstance {
 									|| classType.getTokenCost() == 0) {
 								if (playerData.level >= classType.getLevel()) {
 									if (classType != ClassType.Fisherman
-											|| this.getGameManager().getMain().getFishing().main.hasAllFish(player)) {
+											|| this.getGameManager().getMain().getFishing().hasUnlockedFisherman(player)) {
 										if (donor == null
 												|| player.hasPermission("scb." + donor.toString().toLowerCase())) {
 											selectedClass = classType;

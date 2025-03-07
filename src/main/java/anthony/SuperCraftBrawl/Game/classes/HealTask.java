@@ -64,7 +64,7 @@ public class HealTask implements Runnable {
 			}
             if (count < 3){
                 if (p.getHealth() < 20) {
-                	p.setHealth(p.getHealth() + 1);
+                	p.setHealth(Math.min(p.getHealth() + 1, p.getMaxHealth()));
                     count++;
                 }
             }
