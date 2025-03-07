@@ -1,8 +1,11 @@
 package anthony.SuperCraftBrawl.Game;
 
+import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
@@ -10,6 +13,7 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -21,6 +25,7 @@ public class WinEffects {
 	private EnderDragon dragon;
 	private boolean defaultEffect = false;
 	private boolean rainEffect = false;
+	private boolean floodEffect = false;
 	private ArrayList<Item> fish = new ArrayList<>();
 
 	public WinEffects(Player player, GameInstance instance) {
@@ -33,20 +38,19 @@ public class WinEffects {
 			PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(player);
 
 			if (data != null) {
-				if (player.hasPermission("scb.winEffects")) {
-					if (data.enderDragonEffect == 1)
-						enderDragonEffect();
-					else if (data.santaEffect == 1)
-						santaEffect();
-					else if (data.fireParticlesEffect == 1)
-						fireParticlesEffect();
-					else if (data.broomWinEffect == 1)
-						magicBroomEffect();
-					else if (data.fishRainEffect == 1)
-						fishRainEffect();
-					else
-						defaultEffect();
-				} else
+				if (data.enderDragonEffect == 1)
+					enderDragonEffect();
+				else if (data.santaEffect == 1)
+					santaEffect();
+				else if (data.fireParticlesEffect == 1)
+					fireParticlesEffect();
+				else if (data.broomWinEffect == 1)
+					magicBroomEffect();
+				else if (data.fishRainEffect == 1)
+					fishRainEffect();
+				else if (data.floodEffect == 1)
+					floodEffect();
+				else
 					defaultEffect();
 			}
 		}
@@ -155,6 +159,55 @@ public class WinEffects {
 		runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 1);
 	}
 
+	private void floodEffect() {
+		World world = player.getWorld();
+		if (world != instance.getMapWorld()) return;
+		startFireworksRunnable(world);
+		world.setStorm(true);
+		world.setThundering(true);
+
+		// Define the bounds for flooding (center and size)
+		MapInstance map = instance.getMap().GetInstance();
+		Vector center = map.center.clone();
+		double centerX = center.getX();
+		double centerY = player.getLocation().clone().getY() - 5;
+		double centerZ = center.getZ();
+		double width = map.boundsX; // Width of the flooded area (along X axis)
+		double length = map.boundsZ; // Length of the flooded area (along Z axis)
+
+		final Boat boat = (Boat) player.getWorld().spawnEntity(player.getLocation(), EntityType.BOAT);
+		player.teleport(boat.getLocation());
+		boat.setPassenger(player);
+
+		BukkitRunnable runnable = new BukkitRunnable() {
+			int rep = 0;
+			double y = centerY;
+			@Override
+			public void run() {
+				if (rep == 120) {
+					this.cancel();
+				} else {
+					// Loop through the blocks in the defined bounds
+					for (int x = (int) (centerX - width); x <= centerX + width; x++) {
+						for (int z = (int) (centerZ - length); z <= centerZ + length; z++) {
+							Block block = world.getBlockAt(x, (int) y, z);
+							Block blockBelow = block.getRelative(BlockFace.DOWN);
+
+							if (blockBelow.getType() != Material.AIR && block.getType() == Material.AIR) {
+								block.setType(Material.WATER);
+							}
+						}
+					}
+					y++;
+					boat.teleport(boat.getLocation().add(0, 1, 0)); // Move boat up
+				}
+				rep++;
+			}
+		};
+
+		runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+	}
+
 	private void defaultEffect() {
 		this.defaultEffect = true;
 
@@ -219,6 +272,10 @@ public class WinEffects {
 				i.remove();
 			}
 			this.rainEffect = false;
+		} else if (this.floodEffect) {
+			player.getWorld().setStorm(false);
+			player.getWorld().setThundering(false);
+			this.floodEffect = false;
 		}
 	}
 }
