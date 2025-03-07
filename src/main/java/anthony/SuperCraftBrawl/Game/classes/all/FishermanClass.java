@@ -296,8 +296,9 @@ public class FishermanClass extends BaseClass {
                 @Override
                 public void onHit(Player hit) {
                     if (instance.duosMap != null)
-                        if (instance.team.get(hit).equals(instance.team.get(player)))
-                            return;
+                        if (instance.team.get(hit).equals(instance.team.get(player))) return;
+
+                    if (instance.getGameManager().spawnProt.containsKey(hit)) return;
 
                     player.playSound(hit.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
 
@@ -309,7 +310,6 @@ public class FishermanClass extends BaseClass {
                     hit.setVelocity(v);
 
                     player.getWorld().playSound(hit.getLocation(), Sound.SPLASH, 1, 1);
-
                 }
 
             }, new ItemStack(Material.RAW_FISH));
