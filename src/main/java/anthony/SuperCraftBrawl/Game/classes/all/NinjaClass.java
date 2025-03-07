@@ -110,8 +110,11 @@ public class NinjaClass extends BaseClass {
                         }
 					}
 				}
-				if (!this.usedAllStars && player.getInventory().getItem(2) == null
-						|| player.getInventory().getItem(1).getType() == Material.AIR) {
+				if (!this.usedAllStars &&
+						(player.getInventory().getItem(2) == null ||
+								player.getInventory().getItem(1) == null ||
+								player.getInventory().getItem(1).getType() == Material.AIR)) {
+
 					this.usedAllStars = true;
 					player.getInventory().setItem(2, this.barrier);
 					this.starsCooldown = 3;

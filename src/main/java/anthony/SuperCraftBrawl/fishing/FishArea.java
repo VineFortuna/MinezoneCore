@@ -25,7 +25,7 @@ public enum FishArea {
             new Vector(98, 115, 950),
             32, 20, 42,
             new Vector(96.5, 113, 923.5),
-            new ItemStack(Material.APPLE)),
+            new ItemStack(Material.WOOD)),
     /*Shores("Rocky Shores",
             new Vector(46, 80, 555),
             25, 15, 35,
@@ -35,7 +35,7 @@ public enum FishArea {
             new Vector(218, 107, 586),
             12, 14, 12,
             new Vector(204.5, 105, 582.5),
-            new ItemStack(Material.LEAVES)),
+            new ItemStack(Material.LEAVES, 1, (short) 3)),
 
     Sewers("Sewers",
             new Vector(90, 99, 832),
@@ -44,8 +44,8 @@ public enum FishArea {
             new ItemStack(Material.IRON_FENCE)),
 
     Cavern("Cavern",
-            new Vector(196, 71, 629),
-            30, 10, 30,
+            new Vector(196, 70, 629),
+            30, 9, 30,
             new Vector(175.5, 71, 638.5),
             new ItemStack(Material.STONE));
     

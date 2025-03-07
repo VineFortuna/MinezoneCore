@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.gui.fishing;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.fishing.FishRarity;
 import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
@@ -126,7 +127,7 @@ public class FishingRewardsGUI implements InventoryProvider {
                         }));
             }
     
-            contents.set(1, 4, ClickableItem.of(
+            contents.set(1, 3, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.DIAMOND), main.color("&aSell"),
                             rewardStrings), e -> {
                         if (data.caught >= next && (e.isLeftClick() || e.isRightClick())) {
@@ -155,18 +156,63 @@ public class FishingRewardsGUI implements InventoryProvider {
                     }));
         }
         int length = FishType.values().length;
-        int fished = main.getTotalFish(player);
-        
+        int totalFished = main.fishing.getTotalFish(player);
+        int commonFished = main.fishing.getTotalFish(player, FishRarity.COMMON);
+        int rareFished = main.fishing.getTotalFish(player, FishRarity.RARE);
+        int epicFished = main.fishing.getTotalFish(player, FishRarity.EPIC);
+        int mythicFished = main.fishing.getTotalFish(player, FishRarity.MYTHIC);
+        int legendaryFished = main.fishing.getTotalFish(player, FishRarity.LEGENDARY);
+        int junkFished = main.fishing.getTotalFish(player, FishRarity.JUNK);
+        int treasureFished = main.fishing.getTotalFish(player, FishRarity.TREASURE);
+
+        // TO UNLOCK FISHERMAN
+        // COMMON - 10
+        // RARE - 9
+        // EPIC - 8
+        // MYTHIC - 7
+        // LEGENDARY - 5
+        // JUNK - 7
+        // TREASURE - 4
+
+        int sumFished = main.fishing.getFishermanProgress(player);
+        final int fishermanAmount = 50;
+
         String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWY1ZDM4MTlhNjVkYjc5YzQ1ZmQwMDE0MWMwODgyZTQ3YWQyMzRjMGU1Zjg5OTJiZjRhZjE4Y2VkMGUxZWNkYyJ9fX0=";
-        contents.set(1, 7, ClickableItem.of(
-                ItemHelper.setDetails(ItemHelper.createSkullTexture(texture), fished == length?
-                        main.color("&3Fisherman Class"):main.color("&7???"),
-                        fished == length ?
-                        main.color("&a&lUNLOCKED"):main.progressBar(fished, length, length)), e -> {
-                    if (fished < length) {
+        if (!main.getFishing().hasUnlockedFisherman(player)) {
+            contents.set(1, 5, ClickableItem.of(
+                    ItemHelper.setDetails(ItemHelper.createSkullTexture(texture), main.color("&3Fisherman"),
+                            main.color("&7Catch me the following and"),
+                            main.color("&7I might do you a favor:"),
+                            "",
+                            main.color("&7Common &7- (" + commonFished + "/10)"),
+                            main.color("&aRare &7- (" + rareFished + "/9)"),
+                            main.color("&dEpic &7- (" + epicFished + "/8)"),
+                            main.color("&cMythic &7- (" + mythicFished + "/7)"),
+                            main.color("&6Legendary &7- (" + legendaryFished + "/5)"),
+                            main.color("&4Junk &7- (" + junkFished + "/7)"),
+                            main.color("&eTreasure &7- (" + treasureFished + "/4)"), "",
+                            main.progressBar(sumFished, fishermanAmount, fishermanAmount)), e -> {
                         player.sendMessage(main.color("&c&l(!) &rGo fish some more!"));
-                    }
-                }));
+                    }));
+        } else {
+            contents.set(1, 5, ClickableItem.of(
+                    ItemHelper.setDetails(ItemHelper.createSkullTexture(texture),
+                                    main.color("&3Fisherman Class"), main.color("&a&lUNLOCKED")), e -> {
+                    }));
+        }
+
+        if (!main.getFishing().hasAllFish(player)) {
+            contents.set(1, 7, ClickableItem.of(
+                    ItemHelper.setDetails(ItemHelper.create(Material.BOAT), main.color("&cFlood Win Effect"),
+                            main.progressBar(main.getFishing().getTotalFish(player), FishType.values().length, 50)), e -> {
+                        player.sendMessage(main.color("&c&l(!) &rGo fish some more!"));
+                    }));
+        } else {
+            contents.set(1, 7, ClickableItem.of(
+                    ItemHelper.setDetails(ItemHelper.create(Material.BOAT),
+                            main.color("&cFlood Win Effect"), main.color("&a&lUNLOCKED")), e -> {
+                    }));
+        }
         
         contents.set(2, 8, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {

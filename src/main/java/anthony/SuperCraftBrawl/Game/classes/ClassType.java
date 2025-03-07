@@ -63,7 +63,7 @@ public enum ClassType {
 	WitherSkeleton(59, 1500, 0),
 	Wolf(71, 400, 0),
 	BrewingStand(68, 350, 0),
-	Parrot(72, 800, 0, true),
+	Parrot(72, 800, 0),
 
 	// Level Classes
 	ZombiePigman(51, 0, 3),
@@ -135,7 +135,7 @@ public enum ClassType {
 	public String getClassDesc() {
 		switch (this) {
 			case Cactus:
-				return "A pricklyyy living thing, made up of thorns & blood...";
+				return "A prickly living thing, made up of thorns and... blood";
 			case Santa:
 				return "HO HO HO! MERRRRRRYYYY CHRISTMASSSSS";
 			case GingerBreadMan:
@@ -145,47 +145,47 @@ public enum ClassType {
 			case GrimReaper:
 				return "Harvest souls with deadly precision, wielding dark powers...";
 			case BrewingStand:
-				return "Hit players to obtain Brewing items to get epic potions!";
+				return "Use blaze powder to brew potions";
 			case Fade:
 				return "Fade out of existence from your opponents briefly!";
 			case Cloud:
-				return "Use your powers to send cool effects on your opponents!";
+				return "Cast different effects on your opponents!";
 			case Firework:
-				return "Shoot colorful fireworks and inflict different effects!";
+				return "Shoot fireworks and inflict different effects!";
 			case Shulker:
-				return "You want me? I want you baby, my sugar boo, I'm levitating";
+				return "Levitate enemies into the air and damage them";
 			case WitherSkeleton:
 				return "Shoot your withering blasts at other players!";
 			case Rabbit:
-				return "Hit your enemies and eventually obtain a strong weapon";
+				return "Jump around and hyper kick enemies";
 			case FlintAndSteel:
-				return "Combo your flint & steel for a special reward";
+				return "Combo your Flint and Steel to fuse them";
 			case Hunter:
-				return "Damage your enemies to gain Blood Lust to get special potions!";
+				return "Damage your enemies to gain Blood Lust and special potions!";
 			case Jeb:
-				return "Notch vs. Jeb, who wins?";
+				return "Shoot a beam that pushes enemies, stronger at closer distances";
 			case Bee:
-				return "Mama taught ya to sting so use it!";
+				return "Sting enemies and sustain you from the flower sources";
 			case Ice:
-				return "Freeze thy enemies!!";
+				return "Freeze your enemies into place";
 			case Vampire:
-				return "Use your bow to poison your enemies!";
+				return "Use your bow to poison your enemies, rewards precision";
 			case ZombiePigman:
-				return "Summon your brothers to help you fight your enemies while you smack them with your Gold Sword!";
+				return "Summon your brothers to fight with you";
 			case ZombieVillager:
-				return "A poisonous creature...";
+				return "Poisonous creature...";
 			case Villager:
-				return "Toss your potatoes to confuse your enemies";
+				return "Trade emeralds for items";
 			case MagmaCube:
-				return "Fairly high double jump and ability to spawn 7 MagmaCube minions";
+				return "Bounce around and spawn Fairly high double jump and ability to spawn 7 MagmaCube minions";
 			case Summoner:
-				return "Beware the Summoner...";
+				return "Beware the Summoner!";
 			case Anvil:
-				return "Goomba stomp your opponents!";
+				return "Stomp your opponents from great heights";
 			case Silverfish:
-				return "A very annoying creature ready to eat your enemies!";
+				return "Place a wall to block off enemies and spawn annoying little creatures";
 			case Zombie:
-				return "What do I even write here";
+				return "Summon an army to fight with you and infect enemies";
 			case Dweller:
 				return "Beware the Dweller of SCB!";
 			case Star:
@@ -195,11 +195,11 @@ public enum ClassType {
 			case Present:
 				return "Copy other people's item, armor, or effect/double jump!";
 			case Bedrock:
-				return "Tough to defeat am I right haha";
+				return "Some say tough to defeat, I'd say invincible";
 			case Noteblock:
-				return "Play some songs for some awesome effects!";
+				return "Play songs for some awesome effects!";
 			case EnchantTable:
-				return "Get kills to get some awesome enchantments!";
+				return "Gain exp by fighting and upgrade your sword with awesome enchantments!";
 			case Ocelot:
 				return "Chase down your opponents with your high speed or Purr Attack!";
 			case Creeper:
@@ -209,21 +209,21 @@ public enum ClassType {
 			case Wither:
 				return "Utilize your explosive skulls to defeat your enemies!";
 			case Notch:
-				return "The owner of Minecraft...";
+				return "Shoot a beam that pulls enemies, stronger at further distances";
 			case Blaze:
-				return "ITS A BLAZE LOL!";
+				return "Use your fire abilities to defeat enemies";
 			case Steve:
-				return "OMG OMG GET HYPED!!!";
+				return "Mine minerals to upgrade your pickaxe and get special items";
 			case Skeleton:
-				return "A long range shooter effective at taking down their targets";
+				return "Effective shooter at taking down their targets";
 			case Enderdragon:
-				return "Jump higher than your opponents and teleport around!";
+				return "More around your opponents and heal from your ender crystals!";
 			case Enderman:
 				return "Stare into the souls of your enemies whilst teleporting around them";
 			case Horse:
-				return "Nayyy!! Different effects = different powers!";
+				return "Different treats equals different effects";
 			case Squid:
-				return "UNDA DA SEA! UNDA DA SEA!";
+				return "Use your ink to blind enemies";
 			case Spider:
 				return "Bite and poison your enemies while fighting them!";
 			case Ninja:
@@ -231,37 +231,37 @@ public enum ClassType {
 			case TNT:
 				return "Blow up your enemies with TNT!";
 			case Chicken:
-				return "Bock bock backaaack! One of the best classes hehe tip";
+				return "Bock bock backaaack! Your eggs are a bit explosive";
 			case DarkSethBling:
 				return "The evil counterpart of the redstone King";
 			case Witch:
-				return "She lives in daydreams with me! (She)";
+				return "Use brooms to fly away from tricky situations";
 			case Sheep:
-				return "Different colors of wool gives you different powers!";
+				return "Your different colors gives you different powers!";
 			case SnowGolem:
-				return "This is a SnowGolem, not a Snowman. Get it right pleb!";
+				return "Build a snow platform to save yourself";
 			case Bunny:
 				return "Easter Bunny is coming to town!";
 			case ButterBro:
 				return "Yo, you there Sky??";
 			case IronGolem:
-				return "Smack your enemies into the air while defending your village!";
+				return "Smack down your enemies to defend your village!";
 			case Ghast:
 				return "Burn down your enemies with your sorrows";
 			case Slime:
-				return "Throw sticky grenades and attack enemies!";
+				return "Throw sticky grenades at enemies!";
 			case PiglinBrute:
-				return "Knock people away... or explode them";
+				return "Knock people away... or explode them!";
 			case Bat:
-				return "Dance around your opponents with SUPER high jumps!";
+				return "Move around your opponents and bite them to death!";
 			case SethBling:
-				return "The creator of SCB, wanna fight?!?!";
+				return "The creator of SCB, wanna fight?";
 			case Melon:
-				return "The Owner of the server in the game?!";
+				return "Gain different weapon and powers";
 			case Mooshroom:
-				return "moo... MOO!!";
+				return "Your strength comes from the milk";
 			case Herobrine:
-				return "Use your Diamond of Despair to play tricks on your opponents!";
+				return "Play different tricks on enemies";
 			case Pig:
 				return "Hit and run. In your panic, you gain speed when hit";
 			case LargeFern:
@@ -277,7 +277,7 @@ public enum ClassType {
 			case Parrot:
 				return "Regenerate health through music!";
 			case Guardian:
-				return "Guard thyself and thy family (or something idk)";
+				return "Guard thyself and thy family";
 //		case Fluxty:
 //			return: "We cannot have HATERS in the community... So use your Wood Axe to kick em all out!";
 //		case Snowman:
@@ -393,7 +393,7 @@ public enum ClassType {
 			case SethBling:
 				return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "SethBling" + ChatColor.RESET;
 			case Sheep:
-				return "" + ChatColor.WHITE + ChatColor.BOLD + ChatColor.ITALIC + "Sheep" + ChatColor.RESET;
+				return "" + ChatColor.WHITE + ChatColor.BOLD + "Sheep" + ChatColor.RESET;
 			case Skeleton:
 				return "" + ChatColor.GRAY + "Skeleton" + ChatColor.RESET;
 			case Slime:

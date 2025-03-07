@@ -49,13 +49,13 @@ public class SheepClass extends BaseClass {
 
 	public ItemStack getStartWool() {
 		player.setDisplayName(
-				"" + player.getName() + " " + ChatColor.RESET + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
-		return ItemHelper.setDetails(new ItemStack(Material.WOOL, 1), "" + ChatColor.RESET + "White Wool");
+				player.getName() + " " + ChatColor.RESET + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
+		return ItemHelper.setDetails(new ItemStack(Material.WOOL, 1), ChatColor.RESET + "White Wool");
 	}
 
 	public ItemStack getStartEnchanter() {
 		return ItemHelper.setDetails(new ItemStack(Material.ENCHANTMENT_TABLE, 1),
-				"" + ChatColor.BLUE + "Wool Enchanter", ChatColor.YELLOW + "Right click!");
+				ChatColor.BLUE + "Wool Enchanter", ChatColor.YELLOW + "Right click!");
 	}
 
 	private ChatColor getTeamColor() {
@@ -86,7 +86,7 @@ public class SheepClass extends BaseClass {
 		if (bc.getLives() > 0 && bc.getLives() != 5) {
 			bc.score.getScoreboard().resetScores(bc.score.getEntry());
 			Score newScore = instance.livesObjective.getScore(instance
-					.truncateString("" + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
+					.truncateString(bc.getType().getTag() + " " + getTeamColor() + player.getName(), 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 		}
@@ -104,12 +104,12 @@ public class SheepClass extends BaseClass {
 		if (bc != null && bc.getLives() <= 0)
 			return;
 
-		if (green == true) {
+		if (green) {
 			if (event.getEntity() instanceof LivingEntity) {
 				((LivingEntity) event.getEntity())
 						.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 70, 0, true));
 			}
-		} else if (gray == true) {
+		} else if (gray) {
 			if (event.getEntity() instanceof LivingEntity) {
 				Random r = new Random();
 				int chance = r.nextInt(5);
@@ -117,7 +117,7 @@ public class SheepClass extends BaseClass {
 					((LivingEntity) event.getEntity())
 							.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 65, 1, true));
 			}
-		} else if (black == true) {
+		} else if (black) {
 			if (event.getEntity() instanceof LivingEntity) {
 				Random r = new Random();
 				int chance = r.nextInt(5);
@@ -125,13 +125,13 @@ public class SheepClass extends BaseClass {
 					((LivingEntity) event.getEntity())
 							.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 55, 1, true));
 			}
-		} else if (pink == true) {
+		} else if (pink) {
 			Random r = new Random();
 			int chance = r.nextInt(5);
 
 			if (chance == 0 || chance == 1)
 				player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 70, 1, true));
-		} else if (lime == true) {
+		} else if (lime) {
 			if (event.getEntity() instanceof LivingEntity) {
 				Random r = new Random();
 				int chance = r.nextInt(5);
@@ -233,90 +233,90 @@ public class SheepClass extends BaseClass {
 		String color = "FFFFFF";
 		if (itemList[randomNum] == item3) { // RED
 			color = "FF0000";
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.RED
+			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.RED
 					+ ChatColor.BOLD + "RED WOOL");
 			player.setDisplayName(
-					"" + player.getName() + " " + ChatColor.RED + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
+					player.getName() + " " + ChatColor.RED + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.RED
-					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
+					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 		} else if (itemList[randomNum] == item) { // BLUE
 			color = "FF";
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.BLUE
+			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.BLUE
 					+ ChatColor.BOLD + "BLUE WOOL");
 			player.setDisplayName(
-					"" + player.getName() + " " + ChatColor.BLUE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
+					player.getName() + " " + ChatColor.BLUE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.BLUE
-					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
+					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 		} else if (itemList[randomNum] == item7) { // BLACK
 			color = "0";
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.BLACK
+			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.BLACK
 					+ ChatColor.BOLD + "BLACK WOOL");
 			player.setDisplayName(
-					"" + player.getName() + " " + ChatColor.BLUE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
+					player.getName() + " " + ChatColor.BLUE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.BLACK
-					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
+					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 			black = true;
 		} else if (itemList[randomNum] == item4) { // PURPLE
 			color = "800080";
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given "
+			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given "
 					+ ChatColor.DARK_PURPLE + ChatColor.BOLD + "PURPLE WOOL");
 			player.setDisplayName(
-					"" + player.getName() + " " + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
+					player.getName() + " " + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.DARK_PURPLE
-					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
+					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 		} else if (itemList[randomNum] == item5) { // GREEN
 			color = "8000";
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.DARK_GREEN
+			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.DARK_GREEN
 					+ ChatColor.BOLD + "GREEN WOOL");
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.DARK_GREEN
-					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
+					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 			green = true;
 		} else if (itemList[randomNum] == item6) { // GRAY
 			color = "808080";
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.GRAY
+			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.GRAY
 					+ ChatColor.BOLD + "GRAY WOOL");
 			player.setDisplayName(
-					"" + player.getName() + " " + ChatColor.GRAY + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
+					player.getName() + " " + ChatColor.GRAY + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.GRAY
-					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
+					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 			gray = true;
 		} else if (itemList[randomNum] == pinkWool) { // PINK
 			color = "FF69B4";
 			player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou were given &d&lPINK WOOL"));
-			player.setDisplayName(instance.getGameManager().getMain().color("" + player.getName() + " &9&lSheep&r"));
+			player.setDisplayName(instance.getGameManager().getMain().color(player.getName() + " &9&lSheep&r"));
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.LIGHT_PURPLE
-					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
+					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 			pink = true;
 		} else if (itemList[randomNum] == limeWool) {
 			color = "FF00";
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.GREEN
+			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.GREEN
 					+ ChatColor.BOLD + "LIME WOOL");
 			player.setDisplayName(
-					"" + player.getName() + " " + ChatColor.GREEN + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
+					player.getName() + " " + ChatColor.GREEN + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.GREEN
-					+ ChatColor.BOLD + bc.getType().getTag() + " " + getTeamColor() + player.getName() + "", 40));
+					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " "  + getTeamColor() + player.getName(), 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 			lime = true;
