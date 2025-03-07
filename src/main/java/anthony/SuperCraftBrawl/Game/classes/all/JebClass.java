@@ -152,6 +152,7 @@ public class JebClass extends BaseClass {
 
 		for (Player targetPlayer : instance.players) {
 			if (targetPlayer == player) continue;
+			if (instance.getGameManager().spawnProt.containsKey(targetPlayer)) continue;
 			Vector playerVector = targetPlayer.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
 			double distance = playerVector.dot(direction);
 
