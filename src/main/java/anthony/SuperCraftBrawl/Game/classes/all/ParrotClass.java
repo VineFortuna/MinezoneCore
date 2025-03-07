@@ -33,7 +33,7 @@ public class ParrotClass extends BaseClass {
     private static final double DANCE_ABILITY_RADIUS = 8;
     private static final double DANCE_ABILITY_DURATION = 10;
     private static final double HEAL_PER_SECOND = 1.0 ;
-    private static final int JUMP_BOOST_AMP = 0;
+    private static final int JUMP_BOOST_AMP = 1;
 
     private static final Material[] RECORDS= {
             Material.RECORD_3,
@@ -93,7 +93,7 @@ public class ParrotClass extends BaseClass {
         if (!isPlayerAlive()) return;
 
         if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
-            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, JUMP_BOOST_AMP));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, JUMP_BOOST_AMP, false, false));
 
         // ActionBar
         ActionBarManager actionBarManager = this.getActionBarManager();
@@ -122,7 +122,7 @@ public class ParrotClass extends BaseClass {
         playerInv.setItem(0, weapon);
         playerInv.setItem(1, danceItem);
 
-        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, JUMP_BOOST_AMP));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, JUMP_BOOST_AMP, false, false));
     }
 
     @Override
@@ -167,7 +167,7 @@ public class ParrotClass extends BaseClass {
             if (item.equals(weapon)) {
                 if (!flapAbility.isReady()) return;
 
-                player.setVelocity(new Vector(0, 0.8, 0));
+                player.setVelocity(new Vector(0, 0.9, 0));
                 SoundManager.playSoundToAll(player, Sound.BAT_TAKEOFF, 0.8f, 1.6f);
 
                 flapAbility.use();

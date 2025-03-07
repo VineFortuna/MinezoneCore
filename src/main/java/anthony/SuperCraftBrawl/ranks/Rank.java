@@ -8,14 +8,16 @@ public enum Rank {
     VIP(6, color("&e&lVIP"), color("&e")), //FIRST DONATION RANK
     CAPTAIN(8, color("&9&lCaptain"), color("&9")), //SECOND DONATION RANK
     TRAINEE(3, color("&6&lTrainee"), color("&6")),
-    //Trainee: Players who applied and have been accepted. They are under training and shall only have
-    //Limited permissions. Job: Learn from staff and helper players, with a little bit of chat moderation.
+    /* Trainee:
+     * Obtainable: Players who applied and have been accepted. They are under training and shall only have
+     * Job: Learn from staff and helper players, with a little bit of chat moderation.
+     * Limited permissions.
+     */
     MODERATOR(4, color("&3&lMOD"), color("&3")),
     /*
      * Moderator:
      * Obtainable: Promotion from trainee (Passed final exam)
      * Job: Moderate gameplay chat and discord of the server to provide a safe place for players.
-     * 
      */
     SR_MODERATOR(16,color("&3&lSR.MOD"), color("&3")),
     /*
@@ -29,11 +31,11 @@ public enum Rank {
      * Obtainable: Applied or selected from SrMod
      * Job: Oversee their subsection they are assigned too (Appeals Events Ip punishments and community management)
      */
-    DEVELOPER(5, color("&2&lDev"), color("&2")),
+    DEVELOPER(5, color("&6&lDev"), color("&6")),
     /*
      * Developer:
      * Obtainable: Application with a code test
-     * Job: Design new features for the server.
+     * Job: Implement new features for the server.
      */
     SUPERVISOR(7, "" + ChatColor.DARK_AQUA + ChatColor.BOLD + "SUPERVISOR", color("&b")),
     /*
@@ -46,25 +48,27 @@ public enum Rank {
     /*
      * Owner:
      * Obtainable: NO
-     * LIMIT: 1
-     * Job: Funding the server, and assisting in which events need assitance in. (Help build code or whatever)
+     * Job: Funding the server, and assisting in which events need assistance in.
      */
-    QA(9, color("&e&lQA"), color("&e")),
+    QA(9, color("&a&lQA"), color("&a")),
     /*
-     * QA: SHOULD BE REMOVED
+     * QA:
+     * Obtainable:
+     * Job: Playtest early version of updates in the dev server and provide feedback
+     *      on gameplay, mechanics, balance, and overall experience.
      */
     MEDIA(10,color("&b&lMedia"), color("&b")),
     /*
      * Media:
      * Obtainable: Application
-     * Job: Advertise and record videos on tiktok insta or youtube
+     * Job: Advertise and record videos or streams for social medias.
      */
     PARTNER(11,color("&b&lPartner"), color("&b")),
     /*
      * Partner:
      * Obtainable: DEALS
      * Job: What ever the deal in which is what (A.K.A Enchilada)
-     *NOT STAFF
+     * NOT STAFF
      */
     STAFF_MANAGER(12,color("&4&lSTAFF MANAGER"), color("&4")),
     /*
@@ -165,8 +169,12 @@ public enum Rank {
 			msg = color("&c");
 		else if (rank == Rank.CAPTAIN)
 			msg = color("&9");
-		else if (rank == Rank.VIP || rank == Rank.QA)
+		else if (rank == Rank.VIP)
 			msg = color("&e");
+        else if (rank == Rank.QA)
+            msg = color("&a");
+        else if (rank == Rank.DEVELOPER)
+            msg = color("&6");
 		else
 			msg = color("&7");
 

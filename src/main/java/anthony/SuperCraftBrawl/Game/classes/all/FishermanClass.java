@@ -27,6 +27,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
 
 public class FishermanClass extends BaseClass {
@@ -142,6 +143,38 @@ public class FishermanClass extends BaseClass {
     public void Tick(int gameTicks) {
         if (!isPlayerAlive()) return;
         grappleAbility.updateActionBar(player, this);
+
+        if (gameTicks % 10 == 0) {
+            detonateTacticalFish();
+        }
+    }
+
+    private void detonateTacticalFish() {
+        Iterator<Item> it= puffer.iterator();
+        while (it.hasNext()) {
+            Item fish = it.next();
+            boolean nearby = false;
+            Location loc = fish.getLocation();
+            for (Player p : instance.players) {
+                if (!checkIfDead(p, instance) &&
+                        p != player && p.getLocation().distance(fish.getLocation()) <= 2) {
+                    nearby = true;
+                    EntityDamageEvent damageEvent = new EntityDamageEvent(p,
+                            EntityDamageEvent.DamageCause.VOID, 5);
+                    instance.getGameManager().getMain().getServer().getPluginManager()
+                            .callEvent(damageEvent);
+                    p.damage(5, player);
+                    p.addPotionEffect(poison);
+                }
+            }
+            if (nearby) {
+                player.getWorld().playSound(loc, Sound.EXPLODE, 1, 1);
+                player.getWorld().playEffect(loc, Effect.EXPLOSION_LARGE, 1);
+                player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
+                fish.remove();
+                puffer.remove(fish);
+            }
+        }
     }
     
     @Override
@@ -263,8 +296,9 @@ public class FishermanClass extends BaseClass {
                 @Override
                 public void onHit(Player hit) {
                     if (instance.duosMap != null)
-                        if (instance.team.get(hit).equals(instance.team.get(player)))
-                            return;
+                        if (instance.team.get(hit).equals(instance.team.get(player))) return;
+
+                    if (instance.getGameManager().spawnProt.containsKey(hit)) return;
 
                     player.playSound(hit.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
 
@@ -275,9 +309,7 @@ public class FishermanClass extends BaseClass {
                     v.setY(0.7);
                     hit.setVelocity(v);
 
-                    for (Player gamePlayer : instance.players)
-                        gamePlayer.playSound(hit.getLocation(), Sound.SPLASH, 1, 1);
-
+                    player.getWorld().playSound(hit.getLocation(), Sound.SPLASH, 1, 1);
                 }
 
             }, new ItemStack(Material.RAW_FISH));
