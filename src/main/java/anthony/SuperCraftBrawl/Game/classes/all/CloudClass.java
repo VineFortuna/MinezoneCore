@@ -93,6 +93,7 @@ public class CloudClass extends BaseClass {
 		for (Entity target : near) {
 			if (target instanceof Player) {
 				if (target != player) {
+					if (instance.getGameManager().spawnProt.containsKey(target)) continue;
 					// Calculate the vector between the player and the target
 					Vector direction = target.getLocation().subtract(player.getLocation()).toVector();
 
