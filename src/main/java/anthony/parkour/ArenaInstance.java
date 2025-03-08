@@ -3,18 +3,22 @@ package anthony.parkour;
 import org.bukkit.util.Vector;
 
 public class ArenaInstance {
-	
-	public Vector spawnLoc = new Vector(0, 100, 0);
-	public Vector center = new Vector(0, 100, 0);
+
+	public Vector startLoc = new Vector(0, 100, 0);
+	public Vector endLoc = new Vector(0, 100, 0);
 	public double boundsX, boundsY, boundsZ;
 	
-	public ArenaInstance setSpawnLoc(Vector v) {
-		this.spawnLoc = v;
+	public ArenaInstance setStartLoc(Vector v) {
+		this.startLoc = v;
+		return this;
+	}
+
+	public ArenaInstance setEndLoc(Vector v) {
+		this.endLoc = v;
 		return this;
 	}
 	
-	public ArenaInstance setBounds(Vector center, double boundsX, double boundsY, double boundsZ) {
-		this.center = center;
+	public ArenaInstance setBounds(double boundsX, double boundsY, double boundsZ) {;
 		this.boundsX = boundsX;
 		this.boundsY = boundsY;
 		this.boundsZ = boundsZ;

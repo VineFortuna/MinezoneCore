@@ -41,9 +41,9 @@ public class Parkour implements Listener {
 		this.main.getServer().getPluginManager().registerEvents(this, main);
 	}
 
-	public void AddPlayer(Player player, Arenas arena) {
+	public void addPlayer(Player player, Arenas arena) {
 		if (!hasPlayer(player)) {
-			Vector ai = arena.getInstance().spawnLoc;
+			Vector ai = arena.getInstance().startLoc;
 			players.put(player, arena);
 			checkpoint.put(player, new Location(main.getLobbyWorld(), ai.getBlockX(), ai.getBlockY(), ai.getBlockZ()));
 			checkpointNum.put(player, 0);
@@ -105,7 +105,7 @@ public class Parkour implements Listener {
 		player.getInventory().setItem(2, ItemHelper.setDetails(new ItemStack(Material.BARRIER), main.color("&cLeave")));
 	}
 
-	public boolean isInBounds(Player player, Location loc, Arenas arena) {
+/*	public boolean isInBounds(Player player, Location loc, Arenas arena) {
 		ArenaInstance mapInstance = arena.getInstance();
 		Vector v = mapInstance.center;
 		Location centre = new Location(main.getLobbyWorld(), v.getX(), v.getY(), v.getZ());
@@ -120,7 +120,7 @@ public class Parkour implements Listener {
 		if (Math.abs(centre.getZ() - loc.getZ()) > boundsZ)
 			return false;
 		return true;
-	}
+	}*/
 
 	public boolean hasPlayer(Player player) {
 		return players.containsKey(player);
@@ -134,8 +134,8 @@ public class Parkour implements Listener {
 
 		if (player.getWorld() == main.getLobbyWorld()) {
 			if (hasPlayer(player)) {
-				if (!(isInBounds(player, player.getLocation(), players.get(player))))
-					player.teleport(checkpoint.get(player));
+				/*if (!(isInBounds(player, player.getLocation(), players.get(player))))
+					player.teleport(checkpoint.get(player));*/
 
 				if (player.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.BEACON) {
 					if (!(checkpoint.containsValue(player.getLocation()))) {
@@ -169,11 +169,19 @@ public class Parkour implements Listener {
 					player.sendMessage(main.color("&e&l(!) &rSent back to checkpoint"));
 					player.setFireTicks(0);
 				}
+				if (player.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.SEA_LANTERN) {
+					for (Arenas arena : Arenas.values()) {
+						if (player.getLocation().toVector().toBlockVector().equals(arena.getInstance().endLoc.toBlockVector())) {
+							this.removePlayer(player);
+							return;
+						}
+					}
+				}
 			} else {
 				if (player.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.SEA_LANTERN) {
 					for (Arenas arena : Arenas.values()) {
-						if (isInBounds(player, player.getLocation(), arena)) {
-							this.AddPlayer(player, arena);
+						if (player.getLocation().toVector().toBlockVector().equals(arena.getInstance().startLoc.toBlockVector())) {
+							this.addPlayer(player, arena);
 							return;
 						}
 					}
@@ -188,14 +196,12 @@ public class Parkour implements Listener {
 	}
 	
 	public void removePlayer(Player player) {
-		Location start = players.get(player).getInstance().spawnLoc.toLocation(player.getWorld());
 		this.time.remove(player);
 		this.runnables.remove(player);
 		main.getParkour().players.remove(player);
-		main.ResetPlayer(player);
-		main.LobbyItems(player);
 		main.getScoreboardManager().lobbyBoard(player);
-		player.teleport(start);
+		player.getInventory().clear();
+		main.LobbyItems(player);
 		player.sendMessage(main.color("&r&l(!) &rYou have left parkour mode"));
 		player.setAllowFlight(true);
 	}
@@ -213,7 +219,7 @@ public class Parkour implements Listener {
 					player.sendMessage(main.color("&e&l(!) &rSent back to checkpoint"));
 					break;
 				case SEA_LANTERN:
-					Vector v = players.get(player).getInstance().spawnLoc;
+					Vector v = players.get(player).getInstance().startLoc;
 					player.teleport(new Location(main.getLobbyWorld(), v.getBlockX(), v.getBlockY(), v.getBlockZ()));
 					checkpoint.put(player,
 							new Location(main.getLobbyWorld(), v.getBlockX(), v.getBlockY(), v.getBlockZ()));
