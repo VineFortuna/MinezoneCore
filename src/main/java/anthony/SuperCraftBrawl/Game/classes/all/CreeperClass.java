@@ -28,10 +28,10 @@ import org.bukkit.util.Vector;
 
 public class CreeperClass extends BaseClass {
 
-	private final ItemStack weapon;
-	private final ItemStack potionItem;
-	private final ItemStack tntItem;
-	private final ItemStack suicideItem;
+	private ItemStack weapon;
+	private ItemStack potionItem;
+	private ItemStack tntItem;
+	private ItemStack suicideItem;
 	private final Ability potionAbility = new Ability("&a&lDamage Potion", 3, player);
 	private final Ability tntAbility = new Ability("&a&lDestructionators", 10, player);
 	private final Ability suicideAbility = new Ability("&a&lSelf Explode", 1, player);
@@ -46,6 +46,10 @@ public class CreeperClass extends BaseClass {
 				"Creeper"
 		);
 
+		initializeItems();
+	}
+
+	private void initializeItems() {
 		// Weapon
 		weapon = ItemHelper.setDetails(
 				new ItemStack(Material.SULPHUR),
@@ -93,17 +97,44 @@ public class CreeperClass extends BaseClass {
 	public void Tick(int gameTicks) {
 		if (!isPlayerAlive()) return;
 		tntAbility.updateActionBar(player,this);
+	}
 
-		// Setting barrier and potions
-		if (potionAbility.isReady()) return;
-		if (!player.getInventory().contains(Material.BARRIER)) {
-			player.getInventory().setItem(1, new ItemStack(Material.BARRIER));
-			Bukkit.getScheduler().runTaskLater(
-					instance.getGameManager().getMain(),
-					() -> player.getInventory().setItem(1, potionItem),
-					(long) (potionAbility.getCooldownDurationSeconds() * 20)
-			);
-		}
+	@Override
+	public void projectileLaunch(ProjectileLaunchEvent event) {
+		Entity entity = event.getEntity();
+		if (!(entity instanceof ThrownPotion)) return;
+		ThrownPotion potion = (ThrownPotion) entity;
+		if (!potion.getItem().isSimilar(potionItem)) return;
+		if (!(potion.getShooter() instanceof Player)) return;
+		Player shooter = (Player) potion.getShooter();
+		potionAbility.use();
+		throwPotionFurther(potion);
+		setBarrierPotion(shooter);
+	}
+
+	private void throwPotionFurther(ThrownPotion potion) {
+		Vector velocity = potion.getVelocity();
+		potion.setVelocity(velocity.multiply(1.3));
+	}
+
+	private void setBarrierPotion(Player shooter) {
+		shooter.getInventory().remove(potionItem);
+		// Set the barrier after 1 tick (fix I found othewise the barrier won't be set at all)
+		Bukkit.getScheduler().runTaskLater(
+				instance.getGameManager().getMain(),
+				() -> shooter.getInventory().setItem(1, new ItemStack(Material.BARRIER)),
+				1L
+		);
+
+		// Set the potion after the cooldown
+		Bukkit.getScheduler().runTaskLater(
+				instance.getGameManager().getMain(),
+				() -> {
+					shooter.getInventory().remove(Material.BARRIER);
+					shooter.getInventory().setItem(1, potionItem);
+				},
+				(long) (potionAbility.getCooldownDurationSeconds() * 20)
+		);
 	}
 
 	@Override
@@ -140,39 +171,6 @@ public class CreeperClass extends BaseClass {
 	private void useSuicideAbility() {
 		TNTPrimed tnt = player.getWorld().spawn(player.getLocation().add(0, 1, 0), TNTPrimed.class);
 		tnt.setFuseTicks(0);
-	}
-
-	@Override
-	public void ProjectileLaunch(ProjectileLaunchEvent event) {
-		Entity entity = event.getEntity();
-		if (!(entity instanceof ThrownPotion)) return;
-		ThrownPotion potion = (ThrownPotion) entity;
-		if (!potion.getItem().isSimilar(potionItem)) return;
-		if (!(potion.getShooter() instanceof Player)) return;
-		Player shooter = (Player) potion.getShooter();
-		throwPotionFurther(potion);
-//		setBarrierPotion(shooter);
-		potionAbility.use();
-	}
-
-	private void throwPotionFurther(ThrownPotion potion) {
-		Vector velocity = potion.getVelocity();
-		potion.setVelocity(velocity.multiply(1.3));
-	}
-
-	private void setBarrierPotion(Player shooter) {
-		ItemStack item = shooter.getInventory().getItem(1);
-		shooter.getInventory().remove(item);
-		shooter.getInventory().setItem(1, new ItemStack(Material.BARRIER));
-
-		Bukkit.getScheduler().runTaskLater(
-				instance.getGameManager().getMain(),
-				() -> {
-					shooter.getInventory().remove(Material.BARRIER);
-					shooter.getInventory().setItem(1, potionItem);
-				},
-				(long) (potionAbility.getCooldownDurationSeconds() * 20)
-		);
 	}
 
 	@Override
