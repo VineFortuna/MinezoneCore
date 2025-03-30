@@ -100,7 +100,7 @@ public class CreeperClass extends BaseClass {
 	}
 
 	@Override
-	public void projectileLaunch(ProjectileLaunchEvent event) {
+	public void ProjectileLaunch(ProjectileLaunchEvent event) {
 		Entity entity = event.getEntity();
 		if (!(entity instanceof ThrownPotion)) return;
 		ThrownPotion potion = (ThrownPotion) entity;
