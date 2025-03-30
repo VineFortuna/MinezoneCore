@@ -24,6 +24,7 @@ public class VampireClass extends BaseClass {
 	private boolean hitPlayer = false;
 	private boolean launched = false;
 	private BukkitRunnable r;
+	private final int cooldownTicks = 7;
 
 	public VampireClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -99,24 +100,19 @@ public class VampireClass extends BaseClass {
 	private void restart() {
 		this.launched = false;
 		this.hitPlayer = false;
-		String msg = instance.getGameManager().getMain().color("&9&l(!) &rYou can now use &eVampire's Bow");
-		getActionBarManager().setActionBar(player, "vampire.cooldown", msg, 2);
 	}
 
 	private void cooldown() {
 		if (r == null) {
 			r = new BukkitRunnable() {
-				int ticks = 7;
+				int ticks = cooldownTicks;
 
 				@Override
 				public void run() {
 					if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Vampire
 							&& instance.classes.get(player).getLives() > 0) {
 						if (hitPlayer) {
-							restart();
-							player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 70, 1));
-							r = null;
-							this.cancel();
+							ticks = 0;
 						}
 						if (ticks == 0) {
 							restart();
