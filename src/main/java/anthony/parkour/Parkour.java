@@ -24,8 +24,7 @@ public class Parkour implements Listener {
 
 	private Core main;
 	public Map<Player, Arenas> players;
-	public Map<Player, Location> checkpoint;
-	public Map<Player, Integer> checkpointNum;
+	public Map<Player, Integer> checkpoint;
 	public Map<Player, FastBoard> b;
 	public Map<Player, String> time;
 	public Map<Player, BukkitRunnable> runnables;
@@ -33,8 +32,7 @@ public class Parkour implements Listener {
 	public Parkour(Core main) {
 		this.main = main;
 		this.players = new HashMap<Player, Arenas>();
-		this.checkpoint = new HashMap<Player, Location>();
-		this.checkpointNum = new HashMap<Player, Integer>();
+		this.checkpoint = new HashMap<Player, Integer>();
 		this.b = new HashMap<Player, FastBoard>();
 		this.time = new HashMap<Player, String>();
 		this.runnables = new HashMap<Player, BukkitRunnable>();
@@ -43,15 +41,15 @@ public class Parkour implements Listener {
 
 	public void addPlayer(Player player, Arenas arena) {
 		if (!hasPlayer(player)) {
-			Vector ai = arena.getInstance().startLoc;
 			players.put(player, arena);
-			checkpoint.put(player, new Location(main.getLobbyWorld(), ai.getBlockX(), ai.getBlockY(), ai.getBlockZ()));
-			checkpointNum.put(player, 0);
+
 			double timeTaken = 0.0;
 			DecimalFormat decimalFormat = new DecimalFormat("#.#");
 			String formattedTime = decimalFormat.format(timeTaken);
 			time.put(player, formattedTime);
-			player.sendMessage(main.color("&e&l(!) &rYou have joined &r&l" + arena.toString()));
+
+			player.sendMessage(main.color("&e&l(!) &rYou have joined &r&l" + arena.getName()));
+
 			player.getInventory().clear();
 			gameBoard(player);
 			gameItems(player);
@@ -90,7 +88,8 @@ public class Parkour implements Listener {
 		b.updateTitle(main.color("&e&lPARKOUR"));
 		b.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 				main.color(
-						"&r&lCheckpoints: &7" + checkpointNum.get(player) + "/" + players.get(player).getCheckpoints()),
+						"&r&lCheckpoints: &7" + (checkpoint.containsKey(player) ? checkpoint.get(player) + 1 : 0) +
+						"/" + players.get(player).getCheckpoints()),
 				"", main.color("&r&lTime:&7 0.0s"),
 				"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 				main.color("&7minezone.club"));
@@ -134,27 +133,25 @@ public class Parkour implements Listener {
 
 		if (player.getWorld() == main.getLobbyWorld()) {
 			if (hasPlayer(player)) {
-				/*if (!(isInBounds(player, player.getLocation(), players.get(player))))
-					player.teleport(checkpoint.get(player));*/
+				ArenaInstance arenaInstance = players.get(player).getInstance();
+				if (player.getLocation().getY() < 50)
+					teleportToCheckpoint(player);
 
 				if (player.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.BEACON) {
-					if (!(checkpoint.containsValue(player.getLocation()))) {
-						Location old = checkpoint.get(player);
-						int x = (int) old.getX();
-						int y = (int) old.getY();
-						int z = (int) old.getZ();
-						int otherx = (int) player.getLocation().getX();
-						int othery = (int) player.getLocation().getY();
-						int otherz = (int) player.getLocation().getZ();
-						if (x == otherx && y == othery && z == otherz)
-							return;
+					Vector blockVector = player.getLocation().getBlock().getLocation().toVector();
 
-						checkpoint.put(player, player.getLocation());
-						checkpointNum.put(player, checkpointNum.get(player) + 1);
-						b.get(player).updateLine(1, main.color("&r&lCheckpoints: &7" + checkpointNum.get(player) + "/"
-								+ players.get(player).getCheckpoints()));
-						player.sendMessage(main.color("&e&l(!) &rCheckpoint set!"));
+					if (arenaInstance.checkpoints.contains(blockVector)) { // Check if checkpoint exists
+						int newCheckpointIndex = arenaInstance.checkpoints.indexOf(blockVector);
+						Integer currentCheckpointIndex = checkpoint.get(player);
+
+						if (currentCheckpointIndex == null || newCheckpointIndex != currentCheckpointIndex) {
+							checkpoint.put(player, newCheckpointIndex);
+							b.get(player).updateLine(1, main.color("&r&lCheckpoints: &7" + (newCheckpointIndex + 1) + "/"
+									+ players.get(player).getCheckpoints()));
+							player.sendMessage(main.color("&e&l(!) &rCheckpoint set!"));
+						}
 					}
+
 					/*
 					 * } else if (player.getLocation().getBlock().getRelative(BlockFace.DOWN)
 					 * .getType() == Material.GLOWSTONE) { player.sendTitle("PARKOUR COMPLETE!",
@@ -165,7 +162,7 @@ public class Parkour implements Listener {
 					 * player.setAllowFlight(true); }
 					 */
 				} else if (isPlayerInLava(player)) {
-					player.teleport(checkpoint.get(player));
+					teleportToCheckpoint(player);
 					player.sendMessage(main.color("&e&l(!) &rSent back to checkpoint"));
 					player.setFireTicks(0);
 				}
@@ -215,15 +212,17 @@ public class Parkour implements Listener {
 			if (item != null) {
 				switch (item) {
 				case BEACON:
-					player.teleport(checkpoint.get(player));
+					teleportToCheckpoint(player);
 					player.sendMessage(main.color("&e&l(!) &rSent back to checkpoint"));
 					break;
 				case SEA_LANTERN:
-					Vector v = players.get(player).getInstance().startLoc;
-					player.teleport(new Location(main.getLobbyWorld(), v.getBlockX(), v.getBlockY(), v.getBlockZ()));
-					checkpoint.put(player,
-							new Location(main.getLobbyWorld(), v.getBlockX(), v.getBlockY(), v.getBlockZ()));
-					checkpointNum.put(player, 0);
+					teleportToStart(player);
+					checkpoint.remove(player);
+
+					runnables.get(player).cancel();
+					runnables.remove(player);
+					timeTicking(player);
+
 					gameBoard(player);
 					player.sendMessage(main.color("&e&l(!) &rSent back to start"));
 					break;
@@ -231,6 +230,19 @@ public class Parkour implements Listener {
 					removePlayer(player);
 				}
 			}
+		}
+	}
+
+	public void teleportToStart(Player player) {
+		Vector v = players.get(player).getInstance().startLoc;
+		player.teleport(new Location(main.getLobbyWorld(), v.getBlockX(), v.getBlockY(), v.getBlockZ()));
+	}
+
+	public void teleportToCheckpoint(Player player) {
+		if (checkpoint.containsKey(player)) {
+			player.teleport(players.get(player).getCheckpoint(checkpoint.get(player)).toLocation(player.getWorld()));
+		} else {
+			teleportToStart(player);
 		}
 	}
 
