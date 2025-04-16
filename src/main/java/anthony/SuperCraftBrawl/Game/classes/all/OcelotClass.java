@@ -115,7 +115,10 @@ public class OcelotClass extends BaseClass {
 							}
 						}
 					}
-					if (foundPlayers) player.sendMessage(ChatColorHelper.color("&r&l(!) &rYou attacked all players with &7&lPurr Attack"));
+					if (foundPlayers) {
+						player.sendMessage(ChatColorHelper.color("&r&l(!) &rYou attacked all players with &7&lPurr Attack"));
+						player.playSound(player.getLocation(), Sound.CAT_MEOW, 1, 1);
+					}
 					else player.sendMessage(ChatColorHelper.color("&c&l(!) &rNo nearby players have been found!"));
 				}
 			}
