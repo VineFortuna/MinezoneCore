@@ -144,7 +144,10 @@ public class Parkour implements Listener {
 						int newCheckpointIndex = arenaInstance.checkpoints.indexOf(blockVector);
 						Integer currentCheckpointIndex = checkpoint.get(player);
 
-						if (currentCheckpointIndex == null || newCheckpointIndex != currentCheckpointIndex) {
+						if (currentCheckpointIndex == null && newCheckpointIndex == 0 ||
+								currentCheckpointIndex != null && newCheckpointIndex != currentCheckpointIndex
+										&& newCheckpointIndex == currentCheckpointIndex + 1) {
+
 							checkpoint.put(player, newCheckpointIndex);
 							b.get(player).updateLine(1, main.color("&r&lCheckpoints: &7" + (newCheckpointIndex + 1) + "/"
 									+ players.get(player).getCheckpoints()));
@@ -195,6 +198,7 @@ public class Parkour implements Listener {
 	public void removePlayer(Player player) {
 		this.time.remove(player);
 		this.runnables.remove(player);
+		this.checkpoint.remove(player);
 		main.getParkour().players.remove(player);
 		main.getScoreboardManager().lobbyBoard(player);
 		player.getInventory().clear();
