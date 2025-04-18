@@ -196,9 +196,10 @@ public class Parkour implements Listener {
 							player.sendMessage(main.color("&e&l(!) &rCheckpoint set!"));
 						}
 					}
-				} else if (player.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.GLOWSTONE) {
+				} else if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.GLOWSTONE) {
 					for (Arenas arena : Arenas.values()) {
-						if (event.getTo().toVector().toBlockVector().equals(arena.getInstance().endLoc.toBlockVector())) {
+						if (event.getTo().toVector().toBlockVector().equals(arena.getInstance().endLoc.toBlockVector())
+							&& !event.getFrom().toVector().toBlockVector().equals(arena.getInstance().endLoc.toBlockVector())) {
 							if (checkpoint.get(player) == arena.getCheckpoints() - 1) {
 								player.sendTitle("PARKOUR COMPLETE!", main.color("&eSending you to spawn..."));
 								removePlayer(player);
