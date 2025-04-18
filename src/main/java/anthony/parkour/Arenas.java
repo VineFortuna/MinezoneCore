@@ -9,8 +9,8 @@ public enum Arenas {
 	MainParkour(
 			"Main",
 			new ArenaInstance()
-					.setStartLoc(new Vector(189.5, 105, 567.5))
-					.setEndLoc(new Vector(178.5, 107, 547.5))
+					.setStartLoc(new Vector(189, 105, 567))
+					.setEndLoc(new Vector(178, 107, 547))
 					.setCheckpoints(
 							Arrays.asList(
 									new Vector(182, 106, 557),
