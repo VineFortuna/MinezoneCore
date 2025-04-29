@@ -1,6 +1,9 @@
 package anthony.parkour;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.playerdata.FishingDetails;
+import anthony.SuperCraftBrawl.playerdata.ParkourDetails;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
 import fr.mrmicky.fastboard.FastBoard;
 import net.md_5.bungee.api.ChatColor;
@@ -34,8 +37,8 @@ public class Parkour implements Listener {
 	public Map<Player, Arenas> players;
 	public Map<Player, Integer> checkpoint;
 	public Map<Player, FastBoard> b;
-	public Map<Player, String> time;
 	public Map<Player, BukkitRunnable> runnables;
+	public Map<Player, Long> startTime = new HashMap<>();
 	private final Map<Player, List<EntityArmorStand>> checkpointHolograms = new HashMap<>();
 
 
@@ -44,7 +47,7 @@ public class Parkour implements Listener {
 		this.players = new HashMap<Player, Arenas>();
 		this.checkpoint = new HashMap<Player, Integer>();
 		this.b = new HashMap<Player, FastBoard>();
-		this.time = new HashMap<Player, String>();
+		this.startTime = new HashMap<Player, Long>();
 		this.runnables = new HashMap<Player, BukkitRunnable>();
 		this.main.getServer().getPluginManager().registerEvents(this, main);
 	}
@@ -52,6 +55,7 @@ public class Parkour implements Listener {
 	public void addPlayer(Player player, Arenas arena) {
 		if (!hasPlayer(player)) {
 			players.put(player, arena);
+			startTime.put(player, System.currentTimeMillis());
 
 			player.sendMessage(main.color("&e&l(!) &rYou have joined &r&l" + arena.getName()));
 
@@ -90,6 +94,21 @@ public class Parkour implements Listener {
 			stands.add(stand);
 			i++;
 		}
+
+		Vector vec = arena.getInstance().endLoc;
+		Location loc = new Location(main.getLobbyWorld(), vec.getX() + 0.5, vec.getY() - 0.75, vec.getZ() + 0.5);
+
+		EntityArmorStand stand = new EntityArmorStand(world);
+		stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+		stand.setCustomName(main.color("&e&lParkour &b&lEnd"));
+		stand.setCustomNameVisible(true);
+		stand.setInvisible(true);
+		stand.setGravity(false);
+
+		PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
+		((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+
+		stands.add(stand);
 	}
 
 	public void removeHolograms(Player player, Arenas arena) {
@@ -103,25 +122,26 @@ public class Parkour implements Listener {
 	}
 
 	private void timeTicking(Player player) {
-		BukkitRunnable r = new BukkitRunnable() {
-			double timeTaken = 0.0;
+		long startTime = System.currentTimeMillis();
 
+		BukkitRunnable r = new BukkitRunnable() {
 			@Override
 			public void run() {
 				if (runnables.get(player) != null) {
-					DecimalFormat decimalFormat = new DecimalFormat("#.##");
-					String formattedTime = decimalFormat.format(timeTaken);
-					//time.put(player, formattedTime);
-					b.get(player).updateLine(3, main.color("&r&lTime:&7 " + formattedTime + "s"));
+					long currentTime = System.currentTimeMillis();
+					long elapsedMillis = currentTime - startTime;
 
-					timeTaken += 0.1;
+					String formattedTime = formatTime(elapsedMillis);
+
+					b.get(player).updateLine(3, main.color("&r&lTime:&7 " + formattedTime));
 				} else {
 					this.cancel();
 					runnables.remove(player);
 				}
 			}
 		};
-		r.runTaskTimer(main, 0, 2);
+
+		r.runTaskTimer(main, 0, 2); // runs every 0.1 seconds
 		runnables.put(player, r);
 	}
 
@@ -202,6 +222,29 @@ public class Parkour implements Listener {
 							&& !event.getFrom().toVector().toBlockVector().equals(arena.getInstance().endLoc.toBlockVector())) {
 							if (checkpoint.get(player) == arena.getCheckpoints() - 1) {
 								player.sendTitle("PARKOUR COMPLETE!", main.color("&eSending you to spawn..."));
+
+								long endTime = System.currentTimeMillis();
+								long start = startTime.getOrDefault(player, endTime);
+								long totalTime = endTime - start;
+
+								PlayerData data = main.getDataManager().getPlayerData(player);
+								int arenaID = players.get(player).getId();
+								ParkourDetails details = data.playerParkour.get(arenaID);
+								if (details == null) {
+									details = new ParkourDetails();
+									data.playerParkour.put(arenaID, details);
+								}
+								if (details.totalTime == 0 || totalTime < details.totalTime) {
+									details.completeParkour(totalTime);
+									main.getDataManager().saveData(data);
+									player.sendMessage(main.color("&e&l(!) &rParkour completed in &a" + formatTime(totalTime) +
+											"&r! &e&lNEW RECORD"));
+								} else {
+									player.sendMessage(main.color("&e&l(!) &rParkour completed in &e" + formatTime(totalTime) + "&r!"));
+									player.sendMessage(main.color("&e&l(!) &rYou did not beat your record of &a" +
+											formatTime(details.totalTime)));
+								}
+
 								removePlayer(player);
 							} else {
 								player.sendMessage(main.color("&c&l(!) &rYou must reach every checkpoint before completing the parkour!"));
@@ -234,7 +277,7 @@ public class Parkour implements Listener {
 	public void removePlayer(Player player) {
 		removeHolograms(player, players.get(player));
 
-		this.time.remove(player);
+		this.startTime.remove(player);
 		this.runnables.remove(player);
 		this.checkpoint.remove(player);
 		main.getParkour().players.remove(player);
@@ -292,6 +335,17 @@ public class Parkour implements Listener {
 			player.setFireTicks(0);
 		} else {
 			teleportToStart(player);
+		}
+	}
+
+	public String formatTime(long milliseconds) {
+		long minutes = milliseconds / 60000;
+		double seconds = (milliseconds % 60000) / 1000.0;
+
+		if (minutes > 0) {
+			return String.format("%dm %.1fs", minutes, seconds);
+		} else {
+			return String.format("%.1fs", seconds);
 		}
 	}
 }

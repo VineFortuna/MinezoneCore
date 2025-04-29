@@ -184,6 +184,7 @@ public class PlayerDataManager implements Listener {
 		}
 		set.close();
 		stmt.close();
+
 		Statement classState = c.createStatement();
 		ResultSet classSet = classState
 				.executeQuery("SELECT * FROM PlayerClasses WHERE UUID = '" + player.getUniqueId().toString() + "'");
@@ -202,6 +203,7 @@ public class PlayerDataManager implements Listener {
 					new ClassDetails(purchased, timePurchased, gamesPlayed, gamesWon, reward1, reward2, reward3, reward4, reward5));
 		}
 		classSet.close();
+		classState.close();
 
 		Statement fishingState = c.createStatement();
 		ResultSet fishingSet = fishingState
@@ -212,6 +214,18 @@ public class PlayerDataManager implements Listener {
 			data.playerFishing.put(fishID, new FishingDetails(timesCaught));
 		}
 		fishingSet.close();
+		fishingState.close();
+
+		Statement parkourState = c.createStatement();
+		ResultSet parkourSet = parkourState
+				.executeQuery("SELECT * FROM PlayerParkour WHERE UUID = '" + player.getUniqueId().toString() + "'");
+		while (parkourSet.next()) {
+			int parkourID = parkourSet.getInt("ParkourID");
+			long totalTime = parkourSet.getLong("TotalTime");
+			data.playerParkour.put(parkourID, new ParkourDetails(totalTime));
+		}
+		parkourSet.close();
+		parkourState.close();
 
 		Statement favClassesState = c.createStatement();
 		ResultSet favClassesSet = favClassesState.executeQuery(
@@ -320,6 +334,26 @@ public class PlayerDataManager implements Listener {
 
 		if (index > 0) {
 			updateCMD += " ON DUPLICATE KEY UPDATE TimesCaught = VALUES (TimesCaught);";
+			//System.out.print("Executing " + updateCMD);
+			manager.executeUpdateCommand(updateCMD);
+		}
+
+		updateCMD = "INSERT INTO PlayerParkour (UUID, ParkourID, TotalTime) VALUES ";
+		index = 0;
+
+		for (Entry<Integer, ParkourDetails> entry : data.playerParkour.entrySet()) {
+			if (entry.getValue().hasUpdated) {
+				if (index != 0)
+					updateCMD += ", ";
+				updateCMD += "('" + data.playerUUID.toString() + "', " + entry.getKey() + ", "
+						+ entry.getValue().totalTime + ")";
+				index++;
+				entry.getValue().hasUpdated = false;
+			}
+		}
+
+		if (index > 0) {
+			updateCMD += " ON DUPLICATE KEY UPDATE TotalTime = VALUES (TotalTime);";
 			//System.out.print("Executing " + updateCMD);
 			manager.executeUpdateCommand(updateCMD);
 		}

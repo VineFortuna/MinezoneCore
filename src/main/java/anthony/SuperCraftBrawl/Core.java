@@ -7,21 +7,19 @@ import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.commands.Commands;
 import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.fishing.FishArea;
-import anthony.SuperCraftBrawl.fishing.FishRarity;
-import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.leaderboards.*;
 import anthony.SuperCraftBrawl.npcs.NPCManager;
 import anthony.SuperCraftBrawl.packets.PacketMain;
 import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
-import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
 import anthony.SuperCraftBrawl.practice.BowPractice;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.ranks.RankManager;
 import anthony.SuperCraftBrawl.tablist.TablistManager;
+import anthony.parkour.Arenas;
 import anthony.parkour.Parkour;
 import anthony.util.ItemHelper;
 import me.itzzmic.minezone.api.PunishAPI;
@@ -106,6 +104,7 @@ public class Core extends JavaPlugin implements Listener {
 	public BoardSettings boardSettings;
 	public WinstreakBoard streakBoard;
 	public FlawlessWinsBoard flawlessWinsBoard;
+	public List<ParkourBoard> parkourBoards = new ArrayList<>();
 	public Fishing fishing;
 	private ArrayList<String> msg;
 	public Map<Player, Player> wagers = new HashMap<Player, Player>();
@@ -186,6 +185,9 @@ public class Core extends JavaPlugin implements Listener {
 
 	public KillsBoard getKillsLeaderboard() {
 		return kb;
+	}
+
+	public List<ParkourBoard> getParkourLeaderboards() { return parkourBoards;
 	}
 
 	public String color(String c) {
@@ -395,6 +397,10 @@ public class Core extends JavaPlugin implements Listener {
 		streakBoard = new WinstreakBoard(this);
 		flawlessWinsBoard = new FlawlessWinsBoard(this);
 		fishing = new Fishing(this);
+
+		for (Arenas arena : Arenas.values()) {
+			parkourBoards.add(new ParkourBoard(this, arena));
+		}
 		// kb = new KillsBoard(this);
 		// swManager = new anthony.skywars.GameManager(this);
 		// abilityManager = new anthony.skywars.AbilityManager(this);
@@ -2028,6 +2034,9 @@ public class Core extends JavaPlugin implements Listener {
 		getKillsLeaderboard().close();
 		getWinstreakBoard().close();
 		getFlawlessWinsBoard().close();
+		for (ParkourBoard parkourBoard : getParkourLeaderboards()) {
+			parkourBoard.close();
+		}
 	}
 
 	public void updateLeaderboards() {
@@ -2036,5 +2045,8 @@ public class Core extends JavaPlugin implements Listener {
 		getKillsLeaderboard().updateLeaderboard(true);
 		getWinstreakBoard().updateLeaderboard(true);
 		getFlawlessWinsBoard().updateLeaderboard(true);
+		for (ParkourBoard parkourBoard : getParkourLeaderboards()) {
+			parkourBoard.updateLeaderboard(true);
+		}
 	}
 }

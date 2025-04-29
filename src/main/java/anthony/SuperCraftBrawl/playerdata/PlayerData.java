@@ -29,6 +29,7 @@ public class PlayerData {
 
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
 	public HashMap<Integer, FishingDetails> playerFishing = new HashMap<>();
+	public HashMap<Integer, ParkourDetails> playerParkour = new HashMap<>();
 	public ArrayList<Integer> customIntegers = new ArrayList<>();
 
 	public PlayerData(UUID playerUUID, String playerName, String playerIP, int roleID, int tokens, int wins, int kills,
@@ -135,7 +136,6 @@ public class PlayerData {
 		this.playerUUID = playerUUID;
 		this.playerName = playerName;
 		this.playerIP = playerIP;
-
 	}
 
 	public Rank getRank() {
