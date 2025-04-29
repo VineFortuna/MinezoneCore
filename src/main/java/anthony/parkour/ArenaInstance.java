@@ -8,7 +8,7 @@ public class ArenaInstance {
 
 	public Vector startLoc = new Vector(0, 100, 0);
 	public Vector endLoc = new Vector(0, 100, 0);
-	public double boundsX, boundsY, boundsZ;
+	public Vector leaderboardLoc = new Vector(0, 100, 0);
 	public List<Vector> checkpoints;
 	
 	public ArenaInstance setStartLoc(Vector v) {
@@ -20,11 +20,9 @@ public class ArenaInstance {
 		this.endLoc = v;
 		return this;
 	}
-	
-	public ArenaInstance setBounds(double boundsX, double boundsY, double boundsZ) {;
-		this.boundsX = boundsX;
-		this.boundsY = boundsY;
-		this.boundsZ = boundsZ;
+
+	public ArenaInstance setLeaderboardLoc(Vector v) {
+		this.leaderboardLoc = v;
 		return this;
 	}
 
