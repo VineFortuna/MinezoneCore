@@ -57,7 +57,8 @@ public class ParkourBoard extends LeaderboardBase {
                 "SELECT p.LastPlayerName, p.RoleID, parkour.TotalTime, p.UUID " +
                         "FROM PlayerData p " +
                         "JOIN PlayerParkour parkour ON p.UUID = parkour.UUID " +
-                        "WHERE parkour.ParkourID = '" + arena.getId() + "'");
+                        "WHERE parkour.ParkourID = '" + arena.getId() + "' " +
+                        "ORDER BY parkour.TotalTime ASC");
         while (set.next()) {
             if (a == 10) {
                 break;
@@ -131,14 +132,15 @@ public class ParkourBoard extends LeaderboardBase {
         roleID.clear();
     }
 
-    public String formatTime(long milliseconds) {
-        long minutes = milliseconds / 60000;
-        double seconds = (milliseconds % 60000) / 1000.0;
+    public String formatTime(long nanoseconds) {
+        double totalSeconds = nanoseconds / 1_000_000_000.0;
+        long minutes = (long) (totalSeconds / 60);
+        double seconds = totalSeconds % 60;
 
         if (minutes > 0) {
-            return String.format("%dm %.1fs", minutes, seconds);
+            return String.format("%dm %.3fs", minutes, seconds);
         } else {
-            return String.format("%.1fs", seconds);
+            return String.format("%.3fs", seconds);
         }
     }
 }
