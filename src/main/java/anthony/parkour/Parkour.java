@@ -1,7 +1,6 @@
 package anthony.parkour;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.ParkourDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
@@ -25,7 +24,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,25 +36,23 @@ public class Parkour implements Listener {
 	public Map<Player, Integer> checkpoint;
 	public Map<Player, FastBoard> b;
 	public Map<Player, BukkitRunnable> runnables;
-	public Map<Player, Long> startTime = new HashMap<>();
+	public Map<Player, Long> startTime;
 	private final Map<Player, List<EntityArmorStand>> checkpointHolograms = new HashMap<>();
 
 
 	public Parkour(Core main) {
 		this.main = main;
-		this.players = new HashMap<Player, Arenas>();
-		this.checkpoint = new HashMap<Player, Integer>();
-		this.b = new HashMap<Player, FastBoard>();
-		this.startTime = new HashMap<Player, Long>();
-		this.runnables = new HashMap<Player, BukkitRunnable>();
+		this.players = new HashMap<>();
+		this.checkpoint = new HashMap<>();
+		this.b = new HashMap<>();
+		this.startTime = new HashMap<>();
+		this.runnables = new HashMap<>();
 		this.main.getServer().getPluginManager().registerEvents(this, main);
 	}
 
 	public void addPlayer(Player player, Arenas arena) {
 		if (!hasPlayer(player)) {
 			players.put(player, arena);
-			startTime.put(player, System.currentTimeMillis());
-
 			player.sendMessage(main.color("&e&l(!) &rYou have joined &r&l" + arena.getName()));
 
 			player.getInventory().clear();
@@ -122,16 +118,17 @@ public class Parkour implements Listener {
 	}
 
 	private void timeTicking(Player player) {
-		long startTime = System.currentTimeMillis();
+		long start = System.nanoTime();
+		startTime.put(player, start);
 
 		BukkitRunnable r = new BukkitRunnable() {
 			@Override
 			public void run() {
 				if (runnables.get(player) != null) {
-					long currentTime = System.currentTimeMillis();
-					long elapsedMillis = currentTime - startTime;
+					long currentTime = System.nanoTime();
+					long elapsedMillis = currentTime - startTime.get(player);
 
-					String formattedTime = formatTime(elapsedMillis);
+					String formattedTime = formatTimeScoreboard(elapsedMillis);
 
 					b.get(player).updateLine(3, main.color("&r&lTime:&7 " + formattedTime));
 				} else {
@@ -151,7 +148,7 @@ public class Parkour implements Listener {
 		b.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 				main.color(
 						"&r&lCheckpoints: &7" + (checkpoint.containsKey(player) ? checkpoint.get(player) + 1 : 0) +
-						"/" + players.get(player).getCheckpoints()),
+								"/" + players.get(player).getCheckpoints()),
 				"", main.color("&r&lTime:&7 0.0s"),
 				"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 				main.color("&7minezone.club"));
@@ -165,23 +162,6 @@ public class Parkour implements Listener {
 				ItemHelper.setDetails(new ItemStack(Material.SEA_LANTERN), main.color("&7Return to Start")));
 		player.getInventory().setItem(2, ItemHelper.setDetails(new ItemStack(Material.BARRIER), main.color("&cLeave")));
 	}
-
-/*	public boolean isInBounds(Player player, Location loc, Arenas arena) {
-		ArenaInstance mapInstance = arena.getInstance();
-		Vector v = mapInstance.center;
-		Location centre = new Location(main.getLobbyWorld(), v.getX(), v.getY(), v.getZ());
-		double boundsX = mapInstance.boundsX;
-		double boundsY = mapInstance.boundsY;
-		double boundsZ = mapInstance.boundsZ;
-
-		if (Math.abs(centre.getX() - loc.getX()) > boundsX)
-			return false;
-		if (Math.abs(centre.getY() - loc.getY()) > boundsY)
-			return false;
-		if (Math.abs(centre.getZ() - loc.getZ()) > boundsZ)
-			return false;
-		return true;
-	}*/
 
 	public boolean hasPlayer(Player player) {
 		return players.containsKey(player);
@@ -213,19 +193,20 @@ public class Parkour implements Listener {
 							checkpoint.put(player, newCheckpointIndex);
 							b.get(player).updateLine(1, main.color("&r&lCheckpoints: &7" + (newCheckpointIndex + 1) + "/"
 									+ players.get(player).getCheckpoints()));
-							player.sendMessage(main.color("&e&l(!) &rCheckpoint set!"));
+							player.sendMessage(main.color("&e&l(!) &rYou reached checkpoint #" + (newCheckpointIndex + 1) + "!"));
 						}
 					}
 				} else if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.GLOWSTONE) {
 					for (Arenas arena : Arenas.values()) {
 						if (event.getTo().toVector().toBlockVector().equals(arena.getInstance().endLoc.toBlockVector())
-							&& !event.getFrom().toVector().toBlockVector().equals(arena.getInstance().endLoc.toBlockVector())) {
+								&& !event.getFrom().toVector().toBlockVector().equals(arena.getInstance().endLoc.toBlockVector())) {
 							if (checkpoint.get(player) == arena.getCheckpoints() - 1) {
-								player.sendTitle("PARKOUR COMPLETE!", main.color("&eSending you to spawn..."));
 
-								long endTime = System.currentTimeMillis();
+								long endTime = System.nanoTime();
 								long start = startTime.getOrDefault(player, endTime);
 								long totalTime = endTime - start;
+
+								player.sendTitle(main.color("&aPARKOUR COMPLETE!"), null);
 
 								PlayerData data = main.getDataManager().getPlayerData(player);
 								int arenaID = players.get(player).getId();
@@ -273,7 +254,7 @@ public class Parkour implements Listener {
 			}
 		}
 	}
-	
+
 	public void removePlayer(Player player) {
 		removeHolograms(player, players.get(player));
 
@@ -296,23 +277,24 @@ public class Parkour implements Listener {
 		if (hasPlayer(player)) {
 			if (item != null) {
 				switch (item) {
-				case BEACON:
-					teleportToCheckpoint(player);
-					player.sendMessage(main.color("&e&l(!) &rSent back to checkpoint"));
-					break;
-				case SEA_LANTERN:
-					teleportToStart(player);
-					checkpoint.remove(player);
+					case BEACON:
+						teleportToCheckpoint(player);
+						player.sendMessage(main.color("&e&l(!) &rSent back to checkpoint"));
+						break;
+					case SEA_LANTERN:
+						teleportToStart(player);
+						checkpoint.remove(player);
 
-					runnables.get(player).cancel();
-					runnables.remove(player);
-					timeTicking(player);
+						runnables.get(player).cancel();
+						runnables.remove(player);
 
-					gameBoard(player);
-					player.sendMessage(main.color("&e&l(!) &rSent back to start"));
-					break;
-				case BARRIER:
-					removePlayer(player);
+						timeTicking(player);
+
+						gameBoard(player);
+						player.sendMessage(main.color("&e&l(!) &rSent back to start"));
+						break;
+					case BARRIER:
+						removePlayer(player);
 				}
 			}
 		}
@@ -338,9 +320,22 @@ public class Parkour implements Listener {
 		}
 	}
 
-	public String formatTime(long milliseconds) {
-		long minutes = milliseconds / 60000;
-		double seconds = (milliseconds % 60000) / 1000.0;
+	public String formatTime(long nanoseconds) {
+		double totalSeconds = nanoseconds / 1_000_000_000.0;
+		long minutes = (long) (totalSeconds / 60);
+		double seconds = totalSeconds % 60;
+
+		if (minutes > 0) {
+			return String.format("%dm %.3fs", minutes, seconds);
+		} else {
+			return String.format("%.3fs", seconds);
+		}
+	}
+
+	public String formatTimeScoreboard(long nanoseconds) {
+		double totalSeconds = nanoseconds / 1_000_000_000.0;
+		long minutes = (long) (totalSeconds / 60);
+		double seconds = totalSeconds % 60;
 
 		if (minutes > 0) {
 			return String.format("%dm %.1fs", minutes, seconds);
