@@ -214,6 +214,10 @@ public class Parkour implements Listener {
 								if (details == null) {
 									details = new ParkourDetails();
 									data.playerParkour.put(arenaID, details);
+
+									player.sendMessage(
+											main.color("&d&l(!) &rYou have earned &e100 Tokens &rfor clearing this parkour for the first time!"));
+									data.tokens += 100;
 								}
 								if (details.totalTime == 0 || totalTime < details.totalTime) {
 									details.completeParkour(totalTime);
