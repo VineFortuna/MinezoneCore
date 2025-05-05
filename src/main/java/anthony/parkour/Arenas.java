@@ -11,12 +11,13 @@ public enum Arenas {
 			"Main",
 			new ArenaInstance()
 					.setStartLoc(new Vector(189, 105, 567))
-					.setEndLoc(new Vector(178, 107, 547))
+					.setEndLoc(new Vector(297, 92, 501))
 					.setLeaderboardLoc(new Vector(192, 106, 566))
 					.setCheckpoints(
 							Arrays.asList(
-									new Vector(182, 106, 557),
-									new Vector(178, 106, 553)
+									new Vector(185, 109, 520),
+									new Vector(223, 123, 487),
+									new Vector(271, 96, 489)
 							)
 					)
 	);
