@@ -1762,6 +1762,34 @@ public class Core extends JavaPlugin implements Listener {
 		}
 	}
 
+	public void parkourHolograms(Player p) {
+		for (Arenas arena : Arenas.values()) {
+			Vector vec = arena.getInstance().startLoc;
+			Location loc = new Location(this.getLobbyWorld(), vec.getX() + 0.5, vec.getY() - 0.75, vec.getZ() + 0.5);
+			WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
+			EntityArmorStand stand = new EntityArmorStand(s);
+
+			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+			stand.setCustomName(color("&e&lParkour &b&lStart"));
+			stand.setCustomNameVisible(true);
+			stand.setGravity(false);
+			stand.setInvisible(true);
+			PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
+			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+
+			loc = new Location(this.getLobbyWorld(), vec.getX() + 0.5, vec.getY() - 1.05, vec.getZ() + 0.5);
+			stand = new EntityArmorStand(s);
+
+			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+			stand.setCustomName(color("&r&l" + arena.getName()));
+			stand.setCustomNameVisible(true);
+			stand.setGravity(false);
+			stand.setInvisible(true);
+			packet = new PacketPlayOutSpawnEntityLiving(stand);
+			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+		}
+	}
+
 	@EventHandler
 	public void serverMotd(ServerListPingEvent p) {
 		String msg = color("                   &eMinezone &7[1.8-1.21] \n          &2&lHOME OF &c&lSUPER CRAFT BLOCKS");
@@ -1893,6 +1921,7 @@ public class Core extends JavaPlugin implements Listener {
 		player.setAllowFlight(true);
 		LobbyItems(player);
 		mysteryChestHologram(player);
+		parkourHolograms(player);
 		updateLeaderboards();
 		getScoreboardManager().lobbyBoard(player);
 		sendScoreboardUpdate(player);
