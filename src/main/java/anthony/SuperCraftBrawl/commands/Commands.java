@@ -412,6 +412,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
+		if (main.getParkour().players.containsKey(player)) {
+			player.sendMessage(main.color("&c&l(!) &rYou cannot use this now!"));
+			return;
+		}
+
 		if (!player.hasPermission("scb.fly")) {
 			player.sendMessage(main.color("&c&l(!) &rYou need the rank &9&lCAPTAIN &rto use this command!"));
 			return;
