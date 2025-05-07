@@ -22,12 +22,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
+import org.bukkit.util.BlockVector;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Parkour implements Listener {
 
@@ -74,8 +71,8 @@ public class Parkour implements Listener {
 		WorldServer world = ((CraftWorld) main.getLobbyWorld()).getHandle();
 
 		int i = 1;
-		for (Vector vec : arena.getInstance().checkpoints) {
-			Location loc = new Location(main.getLobbyWorld(), vec.getX() + 0.5, vec.getY() - 0.75, vec.getZ() + 0.5);
+		for (Location l : arena.getInstance().checkpoints) {
+			Location loc = new Location(main.getLobbyWorld(), l.getX() + 0.5, l.getY() - 0.75, l.getZ() + 0.5);
 
 			EntityArmorStand stand = new EntityArmorStand(world);
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
@@ -91,8 +88,7 @@ public class Parkour implements Listener {
 			i++;
 		}
 
-		Vector vec = arena.getInstance().endLoc;
-		Location loc = new Location(main.getLobbyWorld(), vec.getX() + 0.5, vec.getY() - 0.75, vec.getZ() + 0.5);
+		Location loc = arena.getInstance().endLoc.clone().add(0.5, -0.75, 0.5);
 
 		EntityArmorStand stand = new EntityArmorStand(world);
 		stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
@@ -180,10 +176,10 @@ public class Parkour implements Listener {
 					teleportToCheckpoint(player);
 
 				if (player.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.BEACON) {
-					Vector blockVector = player.getLocation().getBlock().getLocation().toVector();
+					BlockVector blockVector = player.getLocation().getBlock().getLocation().toVector().toBlockVector();
 
-					if (arenaInstance.checkpoints.contains(blockVector)) { // Check if checkpoint exists
-						int newCheckpointIndex = arenaInstance.checkpoints.indexOf(blockVector);
+					if (arenaInstance.checkpointBlocks.contains(blockVector)) { // Check if checkpoint exists
+						int newCheckpointIndex = arenaInstance.checkpointBlocks.indexOf(blockVector);
 						Integer currentCheckpointIndex = checkpoint.get(player);
 
 						if (currentCheckpointIndex == null && newCheckpointIndex == 0 ||
@@ -198,8 +194,8 @@ public class Parkour implements Listener {
 					}
 				} else if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.GLOWSTONE) {
 					for (Arenas arena : Arenas.values()) {
-						if (event.getTo().toVector().toBlockVector().equals(arena.getInstance().endLoc.toBlockVector())
-								&& !event.getFrom().toVector().toBlockVector().equals(arena.getInstance().endLoc.toBlockVector())) {
+						if (event.getTo().toVector().toBlockVector().equals(arena.getInstance().endLoc.toVector().toBlockVector())
+								&& !event.getFrom().toVector().toBlockVector().equals(arena.getInstance().endLoc.toVector().toBlockVector())) {
 							if (checkpoint.get(player) == arena.getCheckpoints() - 1) {
 
 								long endTime = System.nanoTime();
@@ -240,7 +236,7 @@ public class Parkour implements Listener {
 				}
 				if (player.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.SEA_LANTERN) {
 					for (Arenas arena : Arenas.values()) {
-						if (player.getLocation().toVector().toBlockVector().equals(arena.getInstance().endLoc.toBlockVector())) {
+						if (player.getLocation().toVector().toBlockVector().equals(arena.getInstance().endLoc.toVector().toBlockVector())) {
 							this.removePlayer(player);
 							return;
 						}
@@ -249,7 +245,7 @@ public class Parkour implements Listener {
 			} else {
 				if (player.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.SEA_LANTERN) {
 					for (Arenas arena : Arenas.values()) {
-						if (player.getLocation().toVector().toBlockVector().equals(arena.getInstance().startLoc.toBlockVector())) {
+						if (player.getLocation().toVector().toBlockVector().equals(arena.getInstance().startLoc.toVector().toBlockVector())) {
 							this.addPlayer(player, arena);
 							return;
 						}
@@ -305,18 +301,14 @@ public class Parkour implements Listener {
 	}
 
 	public void teleportToStart(Player player) {
-		Location loc = players.get(player).getInstance().startLoc.toLocation(main.lobbyWorld);
-		loc.setPitch(player.getLocation().getPitch());
-		loc.setYaw(player.getLocation().getYaw());
+		Location loc = players.get(player).getInstance().startLoc;
 		player.teleport(loc);
 		player.setFireTicks(0);
 	}
 
 	public void teleportToCheckpoint(Player player) {
 		if (checkpoint.containsKey(player)) {
-			Location loc = players.get(player).getCheckpoint(checkpoint.get(player)).toLocation(player.getWorld());
-			loc.setPitch(player.getLocation().getPitch());
-			loc.setYaw(player.getLocation().getYaw());
+			Location loc = players.get(player).getCheckpoint(checkpoint.get(player));
 			player.teleport(loc);
 			player.setFireTicks(0);
 		} else {
