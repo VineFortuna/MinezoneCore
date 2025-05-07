@@ -1764,8 +1764,7 @@ public class Core extends JavaPlugin implements Listener {
 
 	public void parkourHolograms(Player p) {
 		for (Arenas arena : Arenas.values()) {
-			Vector vec = arena.getInstance().startLoc;
-			Location loc = new Location(this.getLobbyWorld(), vec.getX() + 0.5, vec.getY() - 0.75, vec.getZ() + 0.5);
+			Location loc = arena.getInstance().startLoc.clone().add(0.5, -0.75, 0.5);
 			WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
 			EntityArmorStand stand = new EntityArmorStand(s);
 
@@ -1777,7 +1776,7 @@ public class Core extends JavaPlugin implements Listener {
 			PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
 			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
 
-			loc = new Location(this.getLobbyWorld(), vec.getX() + 0.5, vec.getY() - 1.05, vec.getZ() + 0.5);
+			loc = arena.getInstance().startLoc.clone().add(0.5, -1.05, 0.5);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
