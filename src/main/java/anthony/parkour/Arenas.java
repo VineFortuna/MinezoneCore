@@ -1,5 +1,7 @@
 package anthony.parkour;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
 import java.util.Arrays;
@@ -10,14 +12,14 @@ public enum Arenas {
 			1,
 			"Main",
 			new ArenaInstance()
-					.setStartLoc(new Vector(189, 105, 567))
-					.setEndLoc(new Vector(297, 92, 501))
+					.setStartLoc(new Location(Bukkit.getWorld("lobby-1"), 189, 105, 567, 170, 0))
+					.setEndLoc(new Location(Bukkit.getWorld("lobby-1"), 297, 92, 501))
 					.setLeaderboardLoc(new Vector(192, 106, 566))
 					.setCheckpoints(
 							Arrays.asList(
-									new Vector(185, 109, 520),
-									new Vector(223, 123, 487),
-									new Vector(271, 96, 489)
+									new Location(Bukkit.getWorld("lobby-1"), 185, 109, 520, -150, 0),
+									new Location(Bukkit.getWorld("lobby-1"), 223, 123, 487, -90, 0),
+									new Location(Bukkit.getWorld("lobby-1"), 271, 96, 489, -125, 25)
 							)
 					)
 	);
@@ -48,7 +50,7 @@ public enum Arenas {
 		return this.getInstance().checkpoints.size();
 	}
 
-	public Vector getCheckpoint(int i) {
+	public Location getCheckpoint(int i) {
 		return this.getInstance().checkpoints.get(i);
 	}
 
