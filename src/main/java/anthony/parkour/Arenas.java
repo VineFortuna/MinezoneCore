@@ -12,9 +12,9 @@ public enum Arenas {
 			1,
 			"Main",
 			new ArenaInstance()
-					.setStartLoc(new Location(Bukkit.getWorld("lobby-1"), 189, 105, 567, 170, 0))
+					.setStartLoc(new Location(Bukkit.getWorld("lobby-1"), 189, 105, 567, 160, 0))
 					.setEndLoc(new Location(Bukkit.getWorld("lobby-1"), 297, 92, 501))
-					.setLeaderboardLoc(new Vector(192, 106, 566))
+					.setLeaderboardLoc(new Vector(195.5, 106, 568.5))
 					.setCheckpoints(
 							Arrays.asList(
 									new Location(Bukkit.getWorld("lobby-1"), 185, 109, 520, -150, 0),
@@ -54,4 +54,12 @@ public enum Arenas {
 		return this.getInstance().checkpoints.get(i);
 	}
 
+	public static Arenas getById(int id) {
+		for (Arenas arena : values()) {
+			if (arena.id == id) {
+				return arena;
+			}
+		}
+		return null;
+	}
 }
