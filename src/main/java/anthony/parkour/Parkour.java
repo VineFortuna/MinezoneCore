@@ -6,6 +6,8 @@ import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
 import fr.mrmicky.fastboard.FastBoard;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_8_R3.EntityArmorStand;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
@@ -18,6 +20,7 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
@@ -225,6 +228,7 @@ public class Parkour implements Listener {
 									player.sendMessage(main.color("&e&l(!) &rYou did not beat your record of &a" +
 											formatTime(details.totalTime)));
 								}
+								sendTeleportMessage(player, arenaID);
 
 								removePlayer(player);
 							} else {
@@ -337,6 +341,48 @@ public class Parkour implements Listener {
 			return String.format("%dm %.1fs", minutes, seconds);
 		} else {
 			return String.format("%.1fs", seconds);
+		}
+	}
+
+	public void sendTeleportMessage(Player player, int id) {
+		TextComponent message = new TextComponent(main.color("&a&lClick to try again"));
+		message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/_teleportstart " + id));
+
+		player.spigot().sendMessage(message);
+	}
+
+	@EventHandler
+	public void onCommandPreprocess(PlayerCommandPreprocessEvent event) {
+		String msg = event.getMessage();
+		Player player = event.getPlayer();
+
+		if (msg.startsWith("/_teleportstart ")) {
+			event.setCancelled(true); // prevent command from reaching server
+
+			if (!players.containsKey(player)) {
+				String[] parts = msg.split(" ");
+				if (parts.length < 2) {
+					return;
+				}
+
+				try {
+					int id = Integer.parseInt(parts[1]);
+
+					Arenas arena = Arenas.getById(id);
+					if (arena != null) {
+						Location targetLocation = arena.getInstance().startLoc;
+						if (targetLocation == null) {
+							return;
+						}
+						player.teleport(targetLocation);
+						addPlayer(player, arena);
+					}
+
+				} catch (NumberFormatException ignored) {
+				}
+			} else {
+				player.sendMessage(main.color("&c&l(!) &rYou are already in parkour mode!"));
+			}
 		}
 	}
 }
