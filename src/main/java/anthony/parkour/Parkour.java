@@ -215,8 +215,8 @@ public class Parkour implements Listener {
 									data.playerParkour.put(arenaID, details);
 
 									player.sendMessage(
-											main.color("&d&l(!) &rYou have earned &e100 Tokens &rfor clearing this parkour for the first time!"));
-									data.tokens += 100;
+											main.color("&d&l(!) &rYou have earned &e250 Tokens &rfor clearing this parkour for the first time!"));
+									data.tokens += 250;
 								}
 								if (details.totalTime == 0 || totalTime < details.totalTime) {
 									details.completeParkour(totalTime);
