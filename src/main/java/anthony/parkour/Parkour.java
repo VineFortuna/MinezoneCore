@@ -156,9 +156,9 @@ public class Parkour implements Listener {
 
 	public void gameItems(Player player) {
 		player.getInventory().setItem(0,
-				ItemHelper.setDetails(new ItemStack(Material.BEACON), main.color("&7Return to Checkpoint")));
+				ItemHelper.setDetails(new ItemStack(Material.BEACON), main.color("&bReturn to Checkpoint")));
 		player.getInventory().setItem(1,
-				ItemHelper.setDetails(new ItemStack(Material.SEA_LANTERN), main.color("&7Return to Start")));
+				ItemHelper.setDetails(new ItemStack(Material.SEA_LANTERN), main.color("&bRestart")));
 		player.getInventory().setItem(2, ItemHelper.setDetails(new ItemStack(Material.BARRIER), main.color("&cLeave")));
 	}
 
