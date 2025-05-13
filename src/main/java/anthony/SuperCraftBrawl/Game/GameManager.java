@@ -650,7 +650,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (item.getType() == Material.POTION) {
 				if (meta.getDisplayName().toLowerCase().contains("mini-shield")) {
 					player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 1000, 0));
-					player.playSound(player.getLocation(), Sound.LAVA, 1, 0);
+					player.playSound(player.getLocation(), Sound.LAVA, 1, 1);
 					event.setCancelled(true);
 					player.getInventory().clear(player.getInventory().getHeldItemSlot());
 				}
