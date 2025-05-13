@@ -14,7 +14,7 @@ public enum Arenas {
 			new ArenaInstance()
 					.setStartLoc(new Location(Bukkit.getWorld("lobby-1"), 189, 105, 567, 160, 0))
 					.setEndLoc(new Location(Bukkit.getWorld("lobby-1"), 297, 92, 501))
-					.setLeaderboardLoc(new Vector(194.5, 106, 568.5))
+					.setLeaderboardLoc(new Vector(194.5, 107, 568.5))
 					.setCheckpoints(
 							Arrays.asList(
 									new Location(Bukkit.getWorld("lobby-1"), 185, 109, 520, -150, 0),

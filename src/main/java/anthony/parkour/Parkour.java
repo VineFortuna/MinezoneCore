@@ -24,6 +24,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BlockVector;
 
@@ -60,6 +61,11 @@ public class Parkour implements Listener {
 			gameItems(player);
 			timeTicking(player);
 			player.setAllowFlight(false);
+			player.closeInventory();
+
+			for (PotionEffect effect : player.getActivePotionEffects()) {
+				player.removePotionEffect(effect.getType());
+			}
 
 			addHolograms(player, arena);
 		} else {
@@ -199,7 +205,7 @@ public class Parkour implements Listener {
 					for (Arenas arena : Arenas.values()) {
 						if (event.getTo().toVector().toBlockVector().equals(arena.getInstance().endLoc.toVector().toBlockVector())
 								&& !event.getFrom().toVector().toBlockVector().equals(arena.getInstance().endLoc.toVector().toBlockVector())) {
-							if (checkpoint.get(player) == arena.getCheckpoints() - 1) {
+							if (checkpoint.containsKey(player) && checkpoint.get(player) == arena.getCheckpoints() - 1) {
 
 								long endTime = System.nanoTime();
 								long start = startTime.getOrDefault(player, endTime);
