@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
+import anthony.util.SoundManager;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
@@ -93,7 +94,7 @@ public class CloudClass extends BaseClass {
 
 	private void pushPlayersBack(Player player) {
 		List<Entity> near = player.getNearbyEntities(10.0D, 10.0D, 10.0D);
-
+		SoundManager.playSoundToAll(player, Sound.GHAST_FIREBALL, 0.8f, 1);
 		pushParticles(player);
 
 		for (Entity target : near) {
