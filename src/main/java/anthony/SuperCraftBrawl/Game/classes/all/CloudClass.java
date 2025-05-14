@@ -28,6 +28,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import xyz.xenondevs.particle.ParticleEffect;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -136,18 +137,20 @@ public class CloudClass extends BaseClass {
 					double z = radius * Math.sin(t);
 					Location loc = center.clone().add(x, 0.2, z);
 
-					((CraftPlayer) player).getHandle().playerConnection.sendPacket(
-							new PacketPlayOutWorldParticles(
-									EnumParticle.CLOUD,
-									false,
-									(float) loc.getX(),
-									(float) loc.getY(),
-									(float) loc.getZ(),
-									0f, 0f, 0f,
-									0f,
-									1
-							)
-					);
+					for (Player online : Bukkit.getOnlinePlayers()) {
+						((CraftPlayer) online).getHandle().playerConnection.sendPacket(
+								new PacketPlayOutWorldParticles(
+										EnumParticle.CLOUD,
+										false,
+										(float) loc.getX(),
+										(float) loc.getY(),
+										(float) loc.getZ(),
+										0f, 0f, 0f,
+										0f,
+										1
+								)
+						);
+					}
 				}
 
 				count++;
