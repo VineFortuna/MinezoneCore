@@ -1786,6 +1786,29 @@ public class Core extends JavaPlugin implements Listener {
 			stand.setInvisible(true);
 			packet = new PacketPlayOutSpawnEntityLiving(stand);
 			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+
+			loc = arena.getInstance().endLoc.clone().add(0.5, -0.75, 0.5);
+			stand = new EntityArmorStand(s);
+
+			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+			stand.setCustomName(color("&e&lParkour &b&lEnd"));
+			stand.setCustomNameVisible(true);
+			stand.setInvisible(true);
+			stand.setGravity(false);
+
+			packet = new PacketPlayOutSpawnEntityLiving(stand);
+			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+
+			loc = arena.getInstance().endLoc.clone().add(0.5, -1.05, 0.5);
+			stand = new EntityArmorStand(s);
+
+			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+			stand.setCustomName(color("&r&l" + arena.getName()));
+			stand.setCustomNameVisible(true);
+			stand.setGravity(false);
+			stand.setInvisible(true);
+			packet = new PacketPlayOutSpawnEntityLiving(stand);
+			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
 		}
 	}
 

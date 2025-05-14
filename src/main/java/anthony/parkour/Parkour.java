@@ -96,20 +96,6 @@ public class Parkour implements Listener {
 			stands.add(stand);
 			i++;
 		}
-
-		Location loc = arena.getInstance().endLoc.clone().add(0.5, -0.75, 0.5);
-
-		EntityArmorStand stand = new EntityArmorStand(world);
-		stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-		stand.setCustomName(main.color("&e&lParkour &b&lEnd"));
-		stand.setCustomNameVisible(true);
-		stand.setInvisible(true);
-		stand.setGravity(false);
-
-		PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
-		((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-
-		stands.add(stand);
 	}
 
 	public void removeHolograms(Player player, Arenas arena) {

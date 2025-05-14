@@ -184,8 +184,6 @@ public class IceClass extends BaseClass {
 					}
 				}
 
-				fireworkEffect(player);
-
 				if (nearby.isEmpty()) {
 					player.sendMessage(
 							instance.getGameManager().getMain().color("&c&l(!) &rNo nearby players have been found :("));
@@ -207,6 +205,8 @@ public class IceClass extends BaseClass {
 						Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), firework::detonate, 2L);
 					}
 				}
+
+				fireworkEffect(player);
 
 				player.sendMessage(
 						instance.getGameManager().getMain().color("&2&l(!) &rYou have &b&lFrozen &rnearby players!"));
