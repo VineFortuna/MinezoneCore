@@ -22,6 +22,7 @@ public enum Arenas {
 									new Location(Bukkit.getWorld("lobby-1"), 271, 96, 489, -125, 25)
 							)
 					)
+					.setTokenReward(250)
 	);
 
 	private int id;
