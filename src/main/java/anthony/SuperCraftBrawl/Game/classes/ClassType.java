@@ -159,13 +159,13 @@ public enum ClassType {
 			case Rabbit:
 				return "Jump around and hyper kick enemies";
 			case FlintAndSteel:
-				return "Combo your Flint and Steel to fuse them";
+				return "Combo your Flint and Steel to fuse them and set enemies on fire";
 			case Hunter:
 				return "Damage your enemies to gain Blood Lust and special potions!";
 			case Jeb:
 				return "Shoot a beam that pushes enemies, stronger at closer distances";
 			case Bee:
-				return "Sting enemies and sustain you from the flower sources";
+				return "Sting enemies and sustain yourself from the flower sources";
 			case Ice:
 				return "Freeze your enemies into place";
 			case Vampire:
@@ -235,7 +235,7 @@ public enum ClassType {
 			case DarkSethBling:
 				return "The evil counterpart of the redstone King";
 			case Witch:
-				return "Use brooms to fly away from tricky situations";
+				return "Throw potions at enemies and use brooms to fly away from tricky situations";
 			case Sheep:
 				return "Your different colors gives you different powers!";
 			case SnowGolem:
