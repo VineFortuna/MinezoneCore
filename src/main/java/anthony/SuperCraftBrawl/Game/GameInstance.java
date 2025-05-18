@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.all.DarkSethBlingClass;
+import anthony.SuperCraftBrawl.Game.classes.all.EnchantTableClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -78,6 +79,8 @@ public class GameInstance {
 	public int gameTime = 0;
 	public Player firstBlood;
 	private final Map<UUID, Location> lastKnownLocations = new HashMap<>();
+	private int lightningDropCountdown = 0;
+	private ItemStack nextItemToDrop;
 	public List<ItemStack> allItemDrops = new ArrayList<>();
 	public List<ItemStack> sethBlingItemDrops = new ArrayList<>();
 	public List<ItemStack> items = new ArrayList<>();
@@ -836,46 +839,41 @@ public class GameInstance {
 		return respawnLoc; // Fallback if no valid spawn found
 	}
 
-
 	/*
-	 * Starts the timer of 30 seconds for each item drop in a game. If player is
-	 * DarkSethBling, it tells them the location the item spawned
+	 * Starts the timer of 30 seconds for each item drop in a game.
 	 */
 	public void startLightningDropsTimer() {
 		int seconds = getGameSettings().dropTimer; // The amount of seconds till lightning drops spawn on map
+		lightningDropCountdown = seconds;
+		nextItemToDrop = getItemToDrop();
 
 		BukkitRunnable runnable = new BukkitRunnable() {
 			@Override
 			public void run() {
-				Location loc = getItemSpawnLoc();
-				ItemStack drop = getItemToDrop();
-				Item item = mapWorld.dropItem(loc, drop);
-				item.setVelocity(new Vector(0, 0, 0));
-				mapWorld.strikeLightningEffect(loc);
+				if (lightningDropCountdown <= 0) {
+					Location loc = getItemSpawnLoc();
+					ItemStack drop = nextItemToDrop;
+					Item item = mapWorld.dropItem(loc, drop);
+					item.setVelocity(new Vector(0, 0, 0));
+					mapWorld.strikeLightningEffect(loc);
 
-				int x = (int) loc.getX();
-				int y = (int) loc.getY();
-				int z = (int) loc.getZ();
-				loc = new Location(mapWorld, x, y, z);
-				recentDrop = loc;
+					int x = (int) loc.getX();
+					int y = (int) loc.getY();
+					int z = (int) loc.getZ();
+					loc = new Location(mapWorld, x, y, z);
+					recentDrop = loc;
 
-				for (Player gamePlayer : players) {
-					BaseClass bc = classes.get(gamePlayer);
-
-					if (bc != null) {
-						if (bc.getType() == ClassType.DarkSethBling) {
-							DarkSethBlingClass d = (DarkSethBlingClass) bc;
-
-							if (d.usedTp == false) {
-								gamePlayer.sendMessage(
-										color("&2&l(!) &eAn item just spawned at &e&l" + x + ", " + y + ", " + z));
-							}
-						}
+					for (Player gamePlayer : players) {
+						BaseClass bc = classes.get(gamePlayer);
 					}
+					lightningDropCountdown = seconds;
+					nextItemToDrop = getItemToDrop();
+				} else {
+					lightningDropCountdown--;
 				}
 			}
 		};
-		runnable.runTaskTimer(gameManager.getMain(), 20 * seconds, 20 * seconds);
+		runnable.runTaskTimer(gameManager.getMain(), 0, 20);
 		runnables.add(runnable);
 	}
 
@@ -2479,6 +2477,15 @@ public class GameInstance {
 	public ItemStack getSethBlingItemDrop() {
 		return sethBlingItemDrops.get(random.nextInt(sethBlingItemDrops.size()));
 	}
+
+	public int getLightningDropRemainingTime(){
+		return lightningDropCountdown;
+	}
+
+	public ItemStack getNextItemToDrop(){
+		return nextItemToDrop;
+	}
+
 
 	public List<Player> getWinnerList() {
 		return winnerList;
