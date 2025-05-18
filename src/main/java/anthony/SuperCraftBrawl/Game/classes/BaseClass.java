@@ -1763,6 +1763,8 @@ public abstract class BaseClass {
 				instance.classes.get(d).getType() == ClassType.Horse)
 			return;
 
+		if (player.getHealth() / player.getMaxHealth() >= 0.5) return;
+
 		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
 				String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + "Health Pot");
 		Potion pot = new Potion(1);
