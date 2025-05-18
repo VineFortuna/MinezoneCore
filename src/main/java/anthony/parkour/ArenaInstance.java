@@ -15,6 +15,7 @@ public class ArenaInstance {
 	public Vector leaderboardLoc = new Vector(0, 100, 0);
 	public List<Location> checkpoints = new ArrayList<>();
 	public List<BlockVector> checkpointBlocks = new ArrayList<>();
+	public int tokenReward = 0;
 	
 	public ArenaInstance setStartLoc(Location loc) {
 		this.startLoc = loc;
@@ -36,6 +37,11 @@ public class ArenaInstance {
 		for (Location loc : checkpoints) {
 			checkpointBlocks.add(loc.toVector().toBlockVector());
 		}
+		return this;
+	}
+
+	public ArenaInstance setTokenReward(int amount) {
+		this.tokenReward = amount;
 		return this;
 	}
 

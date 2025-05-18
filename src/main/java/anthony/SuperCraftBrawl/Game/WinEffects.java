@@ -184,7 +184,7 @@ public class WinEffects {
 			double y = centerY;
 			@Override
 			public void run() {
-				if (rep == 120) {
+				if (rep == 100) {
 					this.cancel();
 				} else {
 					// Loop through the blocks in the defined bounds
