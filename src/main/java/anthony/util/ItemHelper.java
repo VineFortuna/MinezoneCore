@@ -11,6 +11,7 @@ import org.bukkit.inventory.meta.*;
 import org.bukkit.material.Dye;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
 import java.lang.reflect.Field;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
+import static org.bukkit.potion.PotionEffectType.*;
 
 public class ItemHelper {
 	public static ItemStack setDetails(ItemStack item, String name, String...lore) {
@@ -349,6 +352,33 @@ public class ItemHelper {
 		return potionItem;
 	}
 
+	public static ItemStack createPotionItem(PotionEffect effect, boolean splashable, boolean overrideSameEffect) {
+		ItemStack potionItem = new ItemStack(Material.POTION, 1);
+		PotionMeta potionMeta = (PotionMeta) potionItem.getItemMeta();
+
+		potionMeta.addCustomEffect(effect, overrideSameEffect);
+		potionItem.setItemMeta(potionMeta);
+
+		Potion pot = new Potion(getPotionTypeFromEffect(effect));
+		if (splashable) pot.setSplash(true);
+		pot.apply(potionItem);
+
+
+		return potionItem;
+	}
+
+	private static PotionType getPotionTypeFromEffect(PotionEffect effect) {
+        PotionEffectType type = effect.getType();
+        if (type.equals(JUMP)) {return PotionType.JUMP;
+        } else if (type.equals(SPEED)) {return PotionType.SPEED;
+        } else if (type.equals(REGENERATION)) {return PotionType.REGEN;
+        } else if (type.equals(FIRE_RESISTANCE)) {return PotionType.FIRE_RESISTANCE;
+        } else if (type.equals(INCREASE_DAMAGE)) {return PotionType.STRENGTH;
+        } else if (type.equals(DAMAGE_RESISTANCE)) {return PotionType.NIGHT_VISION;
+		}
+        return PotionType.WATER; // Fallback to water if no matching type is found
+    }
+
 	public static ItemStack setUnbreakable(ItemStack item) {
 		ItemMeta meta = item.getItemMeta();
 		meta.spigot().setUnbreakable(true);
@@ -450,7 +480,7 @@ public class ItemHelper {
 		return ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " ");
 	}
 
-	public enum StainedClayColor {
+    public enum StainedClayColor {
 		WHITE(0),
 		ORANGE(1),
 		MAGENTA(2),
