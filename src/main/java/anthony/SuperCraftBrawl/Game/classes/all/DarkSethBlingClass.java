@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.lang.WordUtils;
@@ -58,6 +59,22 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 				"" + ChatColor.RED + ChatColor.BOLD + "Item Teleporter",
 				"", ChatColor.GRAY + "Teleport to a recent lightning drop");
 		playerInv.setItem(2, this.teleporterItem);
+	}
+
+	@Override
+	public void Tick(int gameTicks) {
+		if (instance.classes.get(player).getLives() <= 0) return;
+		String nextItemString = instance.getNextItemToDrop().getItemMeta().getDisplayName();
+		int index = nextItemString.indexOf("§7(");
+		if (index != -1) { // Check if "§7(" exists in the string
+			nextItemString = nextItemString.substring(0, index).trim(); // Trim to remove any trailing spaces
+		}
+
+		int remainingTime = instance.getLightningDropRemainingTime();
+		if (remainingTime == 0) return;
+
+		String msg = ChatColorHelper.color(nextItemString + " &7is spawning in &e" + remainingTime + "s");
+		getActionBarManager().setActionBar(player, "darkSethBling.itemDropInfo", msg, 2);
 	}
 
 	private Player getRandomPlayer(Player cant) {
@@ -131,7 +148,7 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 					this.player.teleport(this.instance.recentDrop);
 					this.player.getInventory().remove(this.player.getItemInHand());
 					this.player.sendMessage(this.instance.getGameManager().getMain().color(
-							"&2&l(!) &rYou teleported to the recently spawned item! (Could be good or bad luck idk lol)"));
+							"&2&l(!) &rYou teleported to the recently spawned item!"));
 					this.usedTp = true;
 				}
 			}
