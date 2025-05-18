@@ -24,6 +24,7 @@ public class VampireClass extends BaseClass {
 	private boolean hitPlayer = false;
 	private boolean launched = false;
 	private BukkitRunnable r;
+	private final int cooldownTicks = 7;
 
 	public VampireClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -79,6 +80,10 @@ public class VampireClass extends BaseClass {
 					p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 4 * 20, 1));
 					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 4 * 20, 1));
 					this.hitPlayer = true;
+					if (r != null) {
+						r.cancel();
+						r = null;
+					}
 				}
 			}
 		}
@@ -96,32 +101,33 @@ public class VampireClass extends BaseClass {
 		}
 	}
 
+	@Override
+	public void Tick(int gameTicks) {
+		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Vampire
+				&& instance.classes.get(player).getLives() > 0) {
+			if (r == null) {
+				String msg = instance.getGameManager().getMain().color("&9&l(!) &rYou can now use &eVampire's Bow");
+				getActionBarManager().setActionBar(player, "vampire.cooldown", msg, 2);
+			}
+		}
+	}
+
 	private void restart() {
 		this.launched = false;
 		this.hitPlayer = false;
-		String msg = instance.getGameManager().getMain().color("&9&l(!) &rYou can now use &eVampire's Bow");
-		getActionBarManager().setActionBar(player, "vampire.cooldown", msg, 2);
 	}
 
 	private void cooldown() {
 		if (r == null) {
 			r = new BukkitRunnable() {
-				int ticks = 7;
+				int ticks = cooldownTicks;
 
 				@Override
 				public void run() {
 					if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Vampire
 							&& instance.classes.get(player).getLives() > 0) {
-						if (hitPlayer) {
-							restart();
-							player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 70, 1));
-							r = null;
-							this.cancel();
-						}
 						if (ticks == 0) {
 							restart();
-							String msg = instance.getGameManager().getMain().color("&9&l(!) &rYou can now use &eVampire's Bow");
-							getActionBarManager().setActionBar(player, "vampire.cooldown", msg, 2);
 							r = null;
 							this.cancel();
 						} else {
@@ -157,7 +163,7 @@ public class VampireClass extends BaseClass {
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper.addEnchant(ItemHelper.addEnchant(
 				ItemHelper.setDetails(new ItemStack(Material.GHAST_TEAR),
-						instance.getGameManager().getMain().color("Ghast Tear &7(Right Click)")),
+						instance.getGameManager().getMain().color("Fang &7(Right Click)")),
 				Enchantment.DAMAGE_ALL, 2), Enchantment.KNOCKBACK, 1);
 		return item;
 	}
