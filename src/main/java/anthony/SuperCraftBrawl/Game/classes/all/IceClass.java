@@ -26,6 +26,7 @@ import org.bukkit.util.Vector;
 import xyz.xenondevs.particle.ParticleEffect;
 import xyz.xenondevs.particle.data.texture.BlockTexture;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class IceClass extends BaseClass {
@@ -172,7 +173,16 @@ public class IceClass extends BaseClass {
 				}
 			} else if (item.getType() == Material.PACKED_ICE
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-				List<Entity> nearby = player.getNearbyEntities(10.0, 10.0, 10.0);
+				List<Player> nearby = new ArrayList<>();
+
+				for (Entity en : player.getNearbyEntities(10.0, 10.0, 10.0)) {
+					if (en instanceof Player) {
+						Player target = (Player) en;
+						if (!target.equals(player) && target.getGameMode() != GameMode.SPECTATOR) {
+							nearby.add(target);
+						}
+					}
+				}
 
 				if (nearby.isEmpty()) {
 					player.sendMessage(
@@ -180,22 +190,24 @@ public class IceClass extends BaseClass {
 					return;
 				}
 
-				for (Entity en : nearby) {
-					if (en instanceof Player) {
-						Player p = (Player) en;
-						if (p.getGameMode() != GameMode.SPECTATOR) {
-							p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 4));
-							Firework firework = p.getWorld().spawn(p.getEyeLocation(), Firework.class);
-							FireworkEffect effect = FireworkEffect.builder().flicker(true)
-									.withColor(Color.BLUE, Color.WHITE).build();
-							FireworkMeta meta = firework.getFireworkMeta();
-							meta.clearEffects();
-							meta.addEffect(effect);
-							firework.setFireworkMeta(meta);
-							firework.detonate();
-						}
+				for (Player p : nearby) {
+					if (p.getGameMode() != GameMode.SPECTATOR) {
+						p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 4));
+						Firework firework = p.getWorld().spawn(p.getEyeLocation(), Firework.class);
+						FireworkEffect effect = FireworkEffect.builder().flicker(true)
+								.withColor(Color.WHITE)
+								.with(FireworkEffect.Type.BURST)
+								.build();
+						FireworkMeta meta = firework.getFireworkMeta();
+						meta.clearEffects();
+						meta.addEffect(effect);
+						firework.setFireworkMeta(meta);
+						Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), firework::detonate, 2L);
 					}
 				}
+
+				fireworkEffect(player);
+
 				player.sendMessage(
 						instance.getGameManager().getMain().color("&2&l(!) &rYou have &b&lFrozen &rnearby players!"));
 				player.getInventory().clear(player.getInventory().getHeldItemSlot());
@@ -204,16 +216,29 @@ public class IceClass extends BaseClass {
 	}
 
 	@Override
-	public void Death(PlayerDeathEvent e) {
-		super.Death(e);
-		if (player.equals(e.getEntity().getKiller())) {
-			if (player.getInventory().contains(Material.PACKED_ICE))
-				return;
-			// Regeneration ice bomb upon killing.
-			player.getInventory()
-					.addItem(ItemHelper.setDetails(new ItemStack(Material.PACKED_ICE),
-							instance.getGameManager().getMain().color("&bFreeze Bomb"), "",
-							instance.getGameManager().getMain().color("&7Right click to freeze nearby enemies!")));
-		}
+	public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
+		super.classesEvent(damagerPlayer, baseClass);
+		if (player.getInventory().contains(Material.PACKED_ICE))
+			return;
+		// Regeneration ice bomb upon killing.
+		player.getInventory()
+				.addItem(ItemHelper.setDetails(new ItemStack(Material.PACKED_ICE),
+						instance.getGameManager().getMain().color("&bFreeze Bomb"), "",
+						instance.getGameManager().getMain().color("&7Right click to freeze nearby enemies!")));
+
+	}
+
+	public void fireworkEffect(Player player) {
+		Firework firework = player.getWorld().spawn(player.getLocation(), Firework.class);
+		FireworkEffect effect = FireworkEffect.builder().flicker(true)
+				.withColor(Color.AQUA, Color.SILVER, Color.WHITE)
+				.withFade(Color.SILVER)
+				.with(FireworkEffect.Type.BALL_LARGE)
+				.build();
+		FireworkMeta meta = firework.getFireworkMeta();
+		meta.clearEffects();
+		meta.addEffect(effect);
+		firework.setFireworkMeta(meta);
+		Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), firework::detonate, 2L);
 	}
 }

@@ -100,7 +100,7 @@ public class GadgetsGUI implements InventoryProvider {
 		contents.set(1, 2, ClickableItem.of(paintball, e -> {
 			if (data.paintball > 0) {
 				if (!(player.getInventory().contains(Material.GOLD_BARDING))) {
-					ItemStack p = ItemHelper.setDetails(new ItemStack(Material.GOLD_BARDING, data.paintball),
+					ItemStack p = ItemHelper.setDetails(new ItemStack(Material.GOLD_BARDING),
 							"" + ChatColor.RESET + ChatColor.GREEN + "Paintball Gun", "",
 							"" + ChatColor.RESET + ChatColor.GRAY + "Right click to shoot a paintball!");
 					player.getInventory().setItem(5, p);
