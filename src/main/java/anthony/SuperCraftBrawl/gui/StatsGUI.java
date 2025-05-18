@@ -5,7 +5,9 @@ import anthony.SuperCraftBrawl.fishing.FishRarity;
 import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.gui.fishing.FishingGUI;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
+import anthony.SuperCraftBrawl.playerdata.ParkourDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.parkour.Arenas;
 import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -16,7 +18,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class StatsGUI implements InventoryProvider {
 
@@ -71,7 +75,7 @@ public class StatsGUI implements InventoryProvider {
 									main.color("&aMatches Played: &r" + (data.wins + data.losses)))), e-> {}));
 			/*contents.set(2, 2,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FEATHER), "&cComing soon..."), e-> {}));*/
-			contents.set(2, 3,
+			contents.set(2, 4,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
 							main.color("&e&lSCB Stats"),
 							"" + ChatColor.RESET + ChatColor.GREEN + "Wins: " + ChatColor.RESET + data.wins,
@@ -97,13 +101,28 @@ public class StatsGUI implements InventoryProvider {
 			if (target != null)
 				uniqueCaught = main.fishing.getTotalFish(target);
 			
-			contents.set(2, 5,
+			contents.set(2, 6,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
 							main.color("&e&lFishing Stats"),
 							main.color("&aCaught: &r" + data.totalcaught),
 							main.color("&aUnique Caught: &r" + uniqueCaught + "/" + FishType.values().length),
 							main.color("&aTreasure Caught: &r" + treasure)), e -> {
 					}));
+
+
+			List<String> parkourLore = new ArrayList<>();
+			for (Arenas arenas : Arenas.values()) {
+				ParkourDetails details = data.playerParkour.get(arenas.getId());
+				if (details != null && details.totalTime > 0) {
+					parkourLore.add(main.color("&a" + arenas.getName() + ": &r" + main.getParkour().formatTime(details.totalTime)));
+				}
+			}
+
+			contents.set(2, 2,
+					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FEATHER),
+							main.color("&e&lParkour Stats"), parkourLore), e -> {
+					}));
+
 			String fishingTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTk2YTQ4ZGNkYWY0MThmMjJjZDE4NjdjMWViMGFlMjgyYzI4NGI2Nzk5MDZiNzk3ODFkOGQyYjJlZWJhMjEwMiJ9fX0=";
 			contents.set(4, 0,
 					ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(fishingTexture),
@@ -113,7 +132,7 @@ public class StatsGUI implements InventoryProvider {
 						else
 							new FishingGUI(main, inv).inv.open(player);
 					}));
-			
+
 		}
 	}
 

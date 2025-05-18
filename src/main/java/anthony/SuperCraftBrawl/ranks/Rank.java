@@ -175,6 +175,10 @@ public enum Rank {
             msg = color("&a");
         else if (rank == Rank.DEVELOPER)
             msg = color("&6");
+        else if (rank == Rank.MODERATOR)
+            msg = color("&3");
+        else if (rank == Rank.BUILDER)
+            msg = color("&2");
 		else
 			msg = color("&7");
 

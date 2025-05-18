@@ -696,14 +696,16 @@ public class PlayerListener implements Listener {
 					if (data != null) {
 						if (data.paintball > 0) {
 							player.launchProjectile(Snowball.class);
-							int amt = item.getAmount();
-							amt--;
 							data.paintball--;
 							main.getDataManager().saveData(data);
-							item.setAmount(amt);
 
-							for (Player players : Bukkit.getOnlinePlayers())
-								players.playSound(player.getLocation(), Sound.CHICKEN_EGG_POP, 1, 1);
+							String msg = main.color("&9&l(!) &rYou have &e" + data.paintball + " paintballs");
+							PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
+									(byte) 2);
+							CraftPlayer craft = (CraftPlayer) player;
+							craft.getHandle().playerConnection.sendPacket(packet);
+
+							player.getWorld().playSound(player.getLocation(), Sound.CHICKEN_EGG_POP, 1, 1);
 						} else
 							player.sendMessage(main.color("&c&l(!) &rYou do not have anymore &ePaintballs &r:("));
 					}
@@ -784,7 +786,9 @@ public class PlayerListener implements Listener {
 				&& block.getType() != Material.FLOWER_POT && block.getType() != Material.DOUBLE_PLANT
 				&& block.getType() != Material.BED_BLOCK && !(block.getState().getData() instanceof Door)
 				&& !(block.getState() instanceof InventoryHolder) && !(block.getState() instanceof Banner)
-				&& block.getType() != Material.SKULL && block.getType() != Material.SOIL) {
+				&& block.getType() != Material.SKULL && block.getType() != Material.SOIL
+				&& block.getType() != Material.SEA_LANTERN && block.getType() != Material.BEACON
+				&& block.getType() != Material.GLOWSTONE) {
 			Material og = block.getType();
 			Byte data = block.getData();
 			if (og == Material.WOOL) {

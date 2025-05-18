@@ -1,20 +1,46 @@
 package anthony.parkour;
 
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.util.Vector;
+
+import java.util.Arrays;
 
 public enum Arenas {
 
-	DeathParkour(new ArenaInstance().setSpawnLoc(new Vector(148.488, 99, 629.481))
-			.setBounds(new Vector(148.488, 99, 629.481), 40, 50, 30), 2, "Jessey2105");
+	MainParkour(
+			1,
+			"Main",
+			new ArenaInstance()
+					.setStartLoc(new Location(Bukkit.getWorld("lobby-1"), 189, 105, 567, 160, 0))
+					.setEndLoc(new Location(Bukkit.getWorld("lobby-1"), 297, 92, 501))
+					.setLeaderboardLoc(new Vector(194.5, 107, 568.5))
+					.setCheckpoints(
+							Arrays.asList(
+									new Location(Bukkit.getWorld("lobby-1"), 185, 109, 520, -150, 0),
+									new Location(Bukkit.getWorld("lobby-1"), 223, 123, 487, -90, 0),
+									new Location(Bukkit.getWorld("lobby-1"), 271, 96, 489, -125, 25)
+							)
+					)
+					.setTokenReward(250)
+	);
 
+	private int id;
+	private String name;
 	private ArenaInstance i;
-	private int checkpointNum;
-	private String designer;
 
-	Arenas(ArenaInstance i, int checkpointNum, String designer) {
+	Arenas(int id, String name, ArenaInstance i) {
+		this.id = id;
+		this.name = name;
 		this.i = i;
-		this.checkpointNum = checkpointNum;
-		this.designer = designer;
+	}
+
+	public int getId() {
+		return this.id;
+	}
+
+	public String getName() {
+		return this.name;
 	}
 
 	public ArenaInstance getInstance() {
@@ -22,11 +48,19 @@ public enum Arenas {
 	}
 
 	public int getCheckpoints() {
-		return this.checkpointNum;
-	}
-	
-	public String getDesigner() {
-		return this.designer;
+		return this.getInstance().checkpoints.size();
 	}
 
+	public Location getCheckpoint(int i) {
+		return this.getInstance().checkpoints.get(i);
+	}
+
+	public static Arenas getById(int id) {
+		for (Arenas arena : values()) {
+			if (arena.id == id) {
+				return arena;
+			}
+		}
+		return null;
+	}
 }

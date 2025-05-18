@@ -4,8 +4,12 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
+import anthony.util.SoundManager;
 import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.EnumParticle;
+import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 import org.bukkit.*;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -24,6 +28,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import xyz.xenondevs.particle.ParticleEffect;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,6 +95,9 @@ public class CloudClass extends BaseClass {
 
 	private void pushPlayersBack(Player player) {
 		List<Entity> near = player.getNearbyEntities(10.0D, 10.0D, 10.0D);
+		SoundManager.playSoundToAll(player, Sound.GHAST_FIREBALL, 0.8f, 1);
+		pushParticles(player);
+
 		for (Entity target : near) {
 			if (target instanceof Player) {
 				if (target != player) {
@@ -104,6 +112,51 @@ public class CloudClass extends BaseClass {
 				}
 			}
 		}
+	}
+
+	public void pushParticles(Player player) {
+		new BukkitRunnable() {
+			int count = 0;
+			final int maxCount = 5;
+			double radius = 1;
+
+			@Override
+			public void run() {
+				if (count >= maxCount) {
+					this.cancel();
+					return;
+				}
+
+				Location center = player.getLocation();
+
+				int particlesInRing = (int) (Math.PI * radius * 2);
+				particlesInRing = Math.max(particlesInRing, 16);
+
+				for (double t = 0; t < 2 * Math.PI; t += Math.PI / (particlesInRing / 2)) { // 32 particles per ring
+					double x = radius * Math.cos(t);
+					double z = radius * Math.sin(t);
+					Location loc = center.clone().add(x, 0.2, z);
+
+					for (Player online : Bukkit.getOnlinePlayers()) {
+						((CraftPlayer) online).getHandle().playerConnection.sendPacket(
+								new PacketPlayOutWorldParticles(
+										EnumParticle.CLOUD,
+										false,
+										(float) loc.getX(),
+										(float) loc.getY(),
+										(float) loc.getZ(),
+										0f, 0f, 0f,
+										0f,
+										1
+								)
+						);
+					}
+				}
+
+				count++;
+				radius += 2; // Increase radius each tick
+			}
+		}.runTaskTimer(instance.getGameManager().getMain(), 0, 1);
 	}
 
 	private void strikeNearbyPlayers(Player player) {
@@ -254,6 +307,8 @@ public class CloudClass extends BaseClass {
 				getActionBarManager().setActionBar(player, "cloud.cooldown", msg, 2);
 			}
 		}
+		if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
+			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 1, false, false));
 	}
 
 	// Send messages to player each life about abilities
@@ -280,7 +335,7 @@ public class CloudClass extends BaseClass {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, this.wool);
 		forcesOfNature();
-		player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 1));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 1, false, false));
 	}
 
 	@Override
