@@ -1,6 +1,8 @@
 package anthony.parkour;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.doublejump.DoubleJumpData;
+import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.playerdata.ParkourDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
@@ -27,6 +29,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BlockVector;
+import org.bukkit.util.Vector;
 
 import java.util.*;
 
@@ -165,13 +168,17 @@ public class Parkour implements Listener {
 		Player player = event.getPlayer();
 
 		if (player.getWorld() == main.getLobbyWorld()) {
+			if (event.getTo() == null || event.getFrom() == null
+					|| event.getTo().toVector().toBlockVector().equals(event.getFrom().toVector().toBlockVector()))
+				return;
+
 			if (hasPlayer(player)) {
 				ArenaInstance arenaInstance = players.get(player).getInstance();
-				if (player.getLocation().getY() < 50)
+				if (event.getTo().getY() < 50)
 					teleportToCheckpoint(player);
 
-				if (player.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.BEACON) {
-					BlockVector blockVector = player.getLocation().getBlock().getLocation().toVector().toBlockVector();
+				if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.BEACON) {
+					BlockVector blockVector = event.getTo().getBlock().getLocation().toVector().toBlockVector();
 
 					if (arenaInstance.checkpointBlocks.contains(blockVector)) { // Check if checkpoint exists
 						int newCheckpointIndex = arenaInstance.checkpointBlocks.indexOf(blockVector);
@@ -229,19 +236,25 @@ public class Parkour implements Listener {
 							return;
 						}
 					}
-				}
-				if (player.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.SEA_LANTERN) {
-					for (Arenas arena : Arenas.values()) {
-						if (player.getLocation().toVector().toBlockVector().equals(arena.getInstance().endLoc.toVector().toBlockVector())) {
-							this.removePlayer(player);
-							return;
-						}
+				} else if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.SEA_LANTERN) {
+					if (event.getTo().toVector().toBlockVector().equals(
+							players.get(player).getInstance().startLoc.toVector().toBlockVector())) {
+						checkpoint.remove(player);
+
+						runnables.get(player).cancel();
+						runnables.remove(player);
+
+						timeTicking(player);
+
+						gameBoard(player);
+						player.sendMessage(main.color("&e&l(!) &rReset your time"));
 					}
 				}
 			} else {
-				if (player.getLocation().getBlock().getRelative(BlockFace.DOWN).getType() == Material.SEA_LANTERN) {
+				if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.SEA_LANTERN) {
 					for (Arenas arena : Arenas.values()) {
-						if (player.getLocation().toVector().toBlockVector().equals(arena.getInstance().startLoc.toVector().toBlockVector())) {
+						if (event.getTo().toVector().toBlockVector().equals(
+								arena.getInstance().startLoc.toVector().toBlockVector())) {
 							this.addPlayer(player, arena);
 							return;
 						}

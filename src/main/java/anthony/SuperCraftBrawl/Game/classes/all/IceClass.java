@@ -215,19 +215,6 @@ public class IceClass extends BaseClass {
 		}
 	}
 
-	@Override
-	public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
-		super.classesEvent(damagerPlayer, baseClass);
-		if (player.getInventory().contains(Material.PACKED_ICE))
-			return;
-		// Regeneration ice bomb upon killing.
-		player.getInventory()
-				.addItem(ItemHelper.setDetails(new ItemStack(Material.PACKED_ICE),
-						instance.getGameManager().getMain().color("&bFreeze Bomb"), "",
-						instance.getGameManager().getMain().color("&7Right click to freeze nearby enemies!")));
-
-	}
-
 	public void fireworkEffect(Player player) {
 		Firework firework = player.getWorld().spawn(player.getLocation(), Firework.class);
 		FireworkEffect effect = FireworkEffect.builder().flicker(true)

@@ -43,8 +43,9 @@ public class FishingAreasGUI implements InventoryProvider {
                                                     , "&e&l" + area.getName(),
                                                     "&7Click to teleport"),
                                     e -> {
-                                        if (main.getGameManager().GetInstanceOfPlayer(player) == null &&
-                                                main.getGameManager().GetInstanceOfSpectator(player) == null) {
+                                        if (main.getGameManager().GetInstanceOfPlayer(player) == null
+                                                && main.getGameManager().GetInstanceOfSpectator(player) == null
+                                                && !main.getParkour().hasPlayer(player)) {
                                             player.teleport(area.getSpawnPoint(main.getLobbyWorld()));
                                             player.sendMessage(main.color("&3&l(!) &rGrab a rod and go fishing!"));
 
