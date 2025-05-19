@@ -41,7 +41,7 @@ public class VillagerAbilityGUI implements InventoryProvider {
 
         buildInventory(emeraldsCount);
         setUpTradeableItems(gameInstance);
-        sortTradeableitems();
+        sortTradeableItems();
     }
 
     private void buildInventory(int emeralds) {
@@ -64,7 +64,7 @@ public class VillagerAbilityGUI implements InventoryProvider {
         }
     }
 
-    private void sortTradeableitems() {
+    private void sortTradeableItems() {
         // Sorting tradeableItems by price (the value of the map)
         Map<ItemStack, Integer> sortedTradeableItems = tradeableItems.entrySet()
                 .stream()
@@ -90,16 +90,16 @@ public class VillagerAbilityGUI implements InventoryProvider {
             return 3;
         } else if (type == Material.TNT) {
             return 4;
-        } else if (type == Material.GOLDEN_APPLE && item.getDurability() == 0) {
-            return 10;
-        } else if (type == Material.GOLD_HOE) {
-            return 6;
+        } else if (item.getItemMeta().getDisplayName().toLowerCase().contains("speed")) {
+            return 5;
         } else if (type == Material.ENDER_PEARL) {
+            return 5;
+        } else if (type == Material.GOLD_HOE) {
             return 6;
         } else if (type == Material.WHEAT) {
             return 8;
-        } else if (item.getItemMeta().getDisplayName().toLowerCase().contains("speed")) {
-            return 5;
+        } else if (type == Material.GOLDEN_APPLE && item.getDurability() == 0) {
+            return 10;
         } else if (type == Material.IRON_SWORD) {
             return 14;
         } else return null;
