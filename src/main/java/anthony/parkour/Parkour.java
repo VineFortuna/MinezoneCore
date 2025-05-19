@@ -1,8 +1,6 @@
 package anthony.parkour;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.doublejump.DoubleJumpData;
-import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.playerdata.ParkourDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
@@ -29,7 +27,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BlockVector;
-import org.bukkit.util.Vector;
 
 import java.util.*;
 
