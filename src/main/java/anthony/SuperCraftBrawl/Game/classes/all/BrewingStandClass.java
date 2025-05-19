@@ -29,11 +29,11 @@ public class BrewingStandClass extends BaseClass {
 	private ItemStack brewingItem;
 	private ItemStack barrierItem;
 	private final Ability brewAbility = new Ability("&e&lBrewing", 3, player);
-	private final PotionEffect jump = new PotionEffect(PotionEffectType.JUMP, 16 * 20, 7, true);
-	private final PotionEffect speed = new PotionEffect(PotionEffectType.SPEED, 12 * 20, 1, true);
+	private final PotionEffect jump = new PotionEffect(PotionEffectType.JUMP, 12 * 20, 7, true);
+	private final PotionEffect speed = new PotionEffect(PotionEffectType.SPEED, 10 * 20, 1, true);
 	private final PotionEffect strength = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 8 * 20, 0, true);
 	private final PotionEffect resistance = new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 12 * 20, 0, false, true);
-	private final PotionEffect regeneration = new PotionEffect(PotionEffectType.REGENERATION, 5 * 20, 2, true);
+	private final PotionEffect regeneration = new PotionEffect(PotionEffectType.REGENERATION, 7 * 20, 1, true);
 
 	String potionDisplayNamePrefix;
 	private boolean hasSentBrewedMessage = true;
