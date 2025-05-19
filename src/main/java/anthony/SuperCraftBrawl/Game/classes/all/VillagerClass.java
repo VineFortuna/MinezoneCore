@@ -24,7 +24,7 @@ public class VillagerClass extends BaseClass {
 	private final ItemStack weapon;
 	private final ItemStack potatoItem;
 	private final Ability tradeAbility = new Ability("&a&lTrade", player);
-	private final Ability potatoAbility = new Ability("&6&lPotato Throw", 3, player);
+	private final Ability potatoAbility = new Ability("&6&lPotato Throw", 4, player);
 	private static final int MAX_POTATO_AMOUNT = 4;
 	private int emeraldsCount;
 
