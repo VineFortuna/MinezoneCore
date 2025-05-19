@@ -36,7 +36,7 @@ public class BrewingStandClass extends BaseClass {
 	private final PotionEffect regeneration = new PotionEffect(PotionEffectType.REGENERATION, 5 * 20, 2, true);
 
 	String potionDisplayNamePrefix;
-	private boolean hasSentBrewedMessage;
+	private boolean hasSentBrewedMessage = true;
 
 	private BukkitRunnable runnable;
 
