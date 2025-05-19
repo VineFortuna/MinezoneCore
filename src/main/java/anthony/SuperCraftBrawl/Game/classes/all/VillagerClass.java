@@ -7,6 +7,7 @@ import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.SuperCraftBrawl.gui.VillagerAbilityGUI;
+import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
@@ -17,21 +18,15 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
-
-import java.util.Random;
 
 public class VillagerClass extends BaseClass {
 
 	private final ItemStack weapon;
 	private final ItemStack potatoItem;
 	private final Ability tradeAbility = new Ability("&a&lTrade", player);
-	private final Ability potatoAbility = new Ability("&6&lPotato Throw", player);
-	private final PotionEffect weakness = new PotionEffect(PotionEffectType.WEAKNESS, 5 * 20, 3, false, true);
-	private final PotionEffect slowness = new PotionEffect(PotionEffectType.SLOW, 5 * 20, 1, false, true);
+	private final Ability potatoAbility = new Ability("&6&lPotato Throw", 3, player);
+	private static final int MAX_POTATO_AMOUNT = 4;
 	private int emeraldsCount;
-
 
 	public VillagerClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -58,11 +53,12 @@ public class VillagerClass extends BaseClass {
 
 		// Potato Ability
 		potatoItem = ItemHelper.setDetails(
-				new ItemStack(Material.BAKED_POTATO, 4),
+				new ItemStack(Material.BAKED_POTATO),
 				potatoAbility.getAbilityNameRightClickMessage(),
-				"&7Inflict one of 3 effects on enemies:",
-				"&7▶ &3&oSlowness &e" + (slowness.getAmplifier() + 1) + " &7for &e" + slowness.getDuration() / 20 + "s",
-				"&7▶ &f&oWeakness &e" + (weakness.getAmplifier() + 1) + " &7for &e" + weakness.getDuration() / 20 + "s"
+				"&7Throw at enemies to damage and",
+				"&7knock them like a snowball",
+				"",
+				"&7Allows you to get combos easier"
 		);
 	}
 
@@ -94,10 +90,64 @@ public class VillagerClass extends BaseClass {
 		// Resetting Emeralds on Death
 		emeraldsCount = 0;
 		weapon.setAmount(1);
+		// Resetting Potatoes on Death
+		potatoAbility.getCooldownInstance().reset();
+		ItemStack initialPotatoItem = potatoItem.clone();
+		initialPotatoItem.setAmount(MAX_POTATO_AMOUNT);
 
 		// Settings Items
 		playerInv.setItem(0, weapon);
-		playerInv.setItem(1, potatoItem);
+		playerInv.setItem(1, initialPotatoItem);
+	}
+
+	@Override
+	public void Tick(int gameTicks) {
+		if (!isPlayerAlive()) return;
+		handleAddingPotato();
+		updateActionBarMessage();
+	}
+
+	private void updateActionBarMessage() {
+		ItemStack potatoStack = player.getInventory().getItem(1);
+		if (potatoStack == null) return;
+
+		int potatoes = potatoStack.getType() == Material.BARRIER ? 0 : potatoStack.getAmount() ;
+		long timeLeft = potatoAbility.getCooldownInstance().getRemainingCooldownMillis();
+
+		String message = ChatColorHelper.color("&6&lPotatoes: &r&e" + potatoes + "/" + MAX_POTATO_AMOUNT);;
+		if (potatoes < MAX_POTATO_AMOUNT) {
+			// Regenerating case
+			int secondsLeft = (int) (timeLeft > 0 ? (timeLeft / 1000) + 1 : 0);
+			String regenText = "&8 ┃ &fRegenerating in &e" + secondsLeft + "s";
+
+			message += ChatColorHelper.color(regenText);
+		}
+
+		getActionBarManager().setActionBar(player, "villager.potato", message, 2);
+	}
+
+	private void handleAddingPotato() {
+		ItemStack item = player.getInventory().getItem(1);
+		if (item == null) return;
+
+		// Handle barrier case
+		if (item.getType() == Material.BARRIER && potatoAbility.isReady()) {
+			player.getInventory().setItem(1, potatoItem.clone());
+			potatoAbility.use();
+			player.playSound(player.getLocation(), Sound.ITEM_PICKUP, 0.5f, 1.5f);
+			return;
+		}
+
+		// Only proceed if it's a potato item
+		if (!item.isSimilar(potatoItem)) return;
+
+		// Add potato if we have less than 4 and timer has passed
+		int currentAmount = item.getAmount();
+		if (currentAmount < MAX_POTATO_AMOUNT && potatoAbility.isReady()) {
+			item.setAmount(currentAmount + 1);
+			potatoAbility.use();
+			player.playSound(player.getLocation(), Sound.ITEM_PICKUP, 0.5f, 1.5f);
+		}
 	}
 
 	@Override
@@ -108,7 +158,7 @@ public class VillagerClass extends BaseClass {
 		if (item == null) return;
 
 		if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
-			// TRADE ABILITY
+			// Trade Ability
 			if (item.isSimilar(weapon)) {
 				// Check Right CLick
 				new VillagerAbilityGUI(
@@ -116,58 +166,46 @@ public class VillagerClass extends BaseClass {
 						instance,
 						this
 				).inv.open(player);
+			// Potato Ability
 			} else if (item.isSimilar(potatoItem)) {
 				event.setCancelled(true);
-				int amount = item.getAmount();
-				if (amount > 0) {
-					amount--;
-					if (amount == 0)
-						player.getInventory().clear(player.getInventory().getHeldItemSlot());
-					else
-						item.setAmount(amount);
-					
-					player.getWorld().playSound(player.getLocation(), Sound.VILLAGER_HAGGLE, 1, 1);
-					ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
-						@SuppressWarnings("deprecation")
-						@Override
-						public void onHit(Player hit) {
-							if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
-								Location hitLoc = this.getBaseProj().getEntity().getLocation();
-								player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
-								Random r = new Random();
-								int randomNumber = r.nextInt(100);
-
-								// Percentage chances for each effect
-								int slownessPercentage = 50;
-								int weaknessPercentage = 50;
-
-								// Determining effect based on the number range
-								PotionEffect effect;
-								if (randomNumber < slownessPercentage) {
-									effect = slowness;
-								} else if (randomNumber < slownessPercentage + weaknessPercentage) {
-									effect = weakness;
-								} else {
-									effect = null;
-								}
-
-								// Applying effect
-								for (Player gamePlayer : this.getNearby(2.5)) {
-									if (gamePlayer != player && !checkIfDead(player, instance)) {
-											gamePlayer.addPotionEffect(effect);
-									}
-								}
-								// Playing sound and effect
-								player.getWorld().playSound(hitLoc, Sound.SPLASH2, 2, 1);
-								player.getWorld().playEffect(hitLoc, Effect.SPLASH, 1);
-							}
-						}
-					}, new ItemStack(Material.BAKED_POTATO));
-					instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-							player.getLocation().getDirection().multiply(2.0D));
-				}
+				usePotatoThrowAbility(item);
 			}
 		}
+	}
+
+	private void usePotatoThrowAbility(ItemStack item) {
+		int amount = item.getAmount();
+
+		if (amount > 0) {
+			amount--;
+
+			if (amount == 0)
+				player.getInventory().setItem(1, new ItemStack(Material.BARRIER));
+			else {
+				item.setAmount(amount);
+			}
+
+			if (amount == 3) {
+				potatoAbility.use();
+			}
+
+			player.getWorld().playSound(player.getLocation(), Sound.VILLAGER_HAGGLE, 1, 1);
+			throwPotatoProjectile();
+		}
+	}
+
+	private void throwPotatoProjectile() {
+		ItemProjectile projectile = new ItemProjectile(instance, player, new ProjectileOnHit() {
+			@SuppressWarnings("deprecation")
+			@Override
+			public void onHit(Player playerHit) {
+				if (playerHit == null) return;
+				playerHit.damage(0, player);
+			}
+		}, new ItemStack(Material.BAKED_POTATO));
+		instance.getGameManager().getProjManager().shootProjectile(projectile, player.getEyeLocation(),
+				player.getLocation().getDirection().multiply(1.5D));
 	}
 
 	public int getEmeraldsCount() {
