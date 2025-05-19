@@ -14,14 +14,11 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 import org.bukkit.util.Vector;
 
-import com.comphenix.protocol.wrappers.EnumWrappers.Particle;
-
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
-import net.md_5.bungee.api.ChatColor;
 
 public class DoubleJumpManager implements Listener {
 	private final Core main;

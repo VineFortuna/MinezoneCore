@@ -16,6 +16,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class VoteGameSettingsGUI implements InventoryProvider {
 
 	private final Core main;
@@ -57,7 +60,9 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 		ItemStack voteGameStart = ItemHelper.setDetails(new ItemStack(Material.BEACON), ChatColor.YELLOW + "Game Start",
 				"", "" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().totalStartVotes : "0") + "/"
 						+ (game != null ? game.players.size() : "0") + ")",
-				"&7Start the game immediately when all players are ready");
+				"",
+				"&7Start the game immediately",
+				"&7when all players are ready");
 		contents.set(1, 3, ClickableItem.of(voteGameStart, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
@@ -87,7 +92,9 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 				ChatColor.YELLOW + "Time Of Day -> " + timeSetting, "",
 				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().totalTimeVotes : "0") + "/"
 						+ (game != null ? game.players.size() : "0") + ")",
-				"&7Change the time of day to " + timeSetting.toLowerCase() + " for the entire game");
+				"",
+				"&7Change the time of day to",
+				"&7" + timeSetting.toLowerCase() + " for the entire game");
 		contents.set(1, 5, ClickableItem.of(voteTime, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				SoundManager.playSuccessfulHit(player);
@@ -116,6 +123,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 				ChatColor.YELLOW + "Vote Game Type -> " + type.getName(), "",
 				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().totalGameTypeVotes : "0") + "/"
 						+ (game != null ? game.players.size() : "0") + ")",
+				"",
 				"&7Receive a random class each life");
 		contents.set(3, 5, ClickableItem.of(voteGameType, event -> {
 			if (event.getWhoClicked() instanceof Player) {
@@ -138,7 +146,9 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 				ChatColor.YELLOW + "Lightning Drop Rate -> 2x", "",
 				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().getLightningVotes() : "0") + "/"
 						+ (game != null ? game.players.size() : "0") + ")",
-				"&7Reduce the time between item drops by half");
+				"",
+				"&7Items spawn every 15 seconds",
+				"&7instead of every 30");
 		contents.set(3, 3, ClickableItem.of(lightningRate, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				SoundManager.playSuccessfulHit(player);
