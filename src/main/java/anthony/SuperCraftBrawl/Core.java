@@ -734,6 +734,7 @@ public class Core extends JavaPlugin implements Listener {
 								if (data != null) {
 									data.level = num;
 									player.sendMessage(color("&2&l(!) &rYou set your level to &e" + num + "!"));
+									player.setLevel(num);
 									if (this.getGameManager().GetInstanceOfPlayer(player) == null)
 										getScoreboardManager().lobbyBoard(player);
 									this.getDataManager().saveData(data);
