@@ -177,6 +177,7 @@ public class BeeClass extends BaseClass {
 						player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 110, 0));
 						player.sendMessage(instance.getGameManager().getMain()
 								.color("&2&l(!) &rYour &eNectar &rhas given you more energy for 5 seconds"));
+						player.playSound(player.getLocation(), Sound.DRINK, 1, 1.5f);
 					}
 				}
 			} else if (item.getType() == Material.RED_ROSE
@@ -187,6 +188,7 @@ public class BeeClass extends BaseClass {
 					player.sendMessage(instance.getGameManager().getMain()
 							.color("&2&l(!) &rYour Pollen has given you nutrients for 3 seconds"));
 					player.getInventory().clear(player.getInventory().getHeldItemSlot());
+					player.playSound(player.getLocation(), Sound.SILVERFISH_IDLE, 1, 1.5f);
 				}
 			}
 		}
