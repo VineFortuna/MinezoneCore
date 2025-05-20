@@ -668,6 +668,7 @@ public class GameInstance {
 					player.getInventory().addItem(this.getItemToDrop());
 			}
 
+			player.setLevel(0);
 			player.setGameMode(GameMode.ADVENTURE);
 		}
 	}
