@@ -815,7 +815,7 @@ public class GameManager implements Listener, PluginMessageListener {
 					baseClass.score.setScore(baseClass.lives);
 					baseClass.TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 							+ ChatColor.YELLOW + player.getName() + ChatColor.RESET + " used an extra life!");
-					player.getWorld().playSound(player.getLocation(), Sound.LEVEL_UP, 5, 2);
+					player.getWorld().playSound(player.getLocation(), Sound.LEVEL_UP, 1, 2);
 					if (amount > 0) {
 						amount--;
 						if (amount == 0)

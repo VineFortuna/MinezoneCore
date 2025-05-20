@@ -1939,6 +1939,7 @@ public class Core extends JavaPlugin implements Listener {
 	public void ResetPlayer(Player player) {
 		player.teleport(LobbyLoc());
 		player.setHealth(20.0f);
+		player.setLevel(getDataManager().getPlayerData(player).level);
 		player.getInventory().clear();
 		player.setGameMode(GameMode.ADVENTURE);
 		player.setAllowFlight(true);
