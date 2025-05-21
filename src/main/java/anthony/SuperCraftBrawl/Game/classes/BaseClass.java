@@ -403,6 +403,7 @@ public abstract class BaseClass {
 											+ baseClassKiller.getType().getTag());
 								}
 								p.teleport(d.getLocation());
+								this.healthPots(d);
 							} else {
 								Random r = new Random();
 								int chance = r.nextInt(2);
@@ -439,6 +440,7 @@ public abstract class BaseClass {
 											.getPlayerData(d);
 									if (killerData != null && killerData.killMsgs == 1) {
 										this.giveStats(d, p);
+										this.healthPots(d);
 										TellAll(instance.getGameManager().getMain()
 												.color("&2&l(!) &cHello? AND GOODBYE TO " + ChatColor.WHITE
 														+ p.getPlayer().getName() + " " + bc.getType().getTag()
@@ -531,6 +533,7 @@ public abstract class BaseClass {
 							if (lives == 0) {
 								if (killerData != null && killerData.killMsgs == 1) {
 									this.giveStats(killer, p);
+									this.healthPots(killer);
 									TellAll(instance.getGameManager().getMain()
 											.color("&2&l(!) " + "&r" + p.getPlayer().getName() + " "
 													+ bc.getType().getTag() + " &cwas not strong enough to encounter "
@@ -546,6 +549,7 @@ public abstract class BaseClass {
 							} else if (lives > 0) {
 								if (killerData != null && killerData.killMsgs == 1) {
 									this.giveStats(killer, p);
+									this.healthPots(killer);
 									TellAll(instance.getGameManager().getMain()
 											.color("&2&l(!) " + "&r" + p.getPlayer().getName() + " "
 													+ bc.getType().getTag() + " &cwas not strong enough to encounter "
@@ -1763,10 +1767,10 @@ public abstract class BaseClass {
 				instance.classes.get(d).getType() == ClassType.Horse)
 			return;
 
-		if (player.getHealth() / player.getMaxHealth() >= 0.5) return;
+		if (d.getHealth() / d.getMaxHealth() >= 0.5) return;
 
 		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				String.valueOf(ChatColor.YELLOW) + ChatColor.BOLD + "Health Pot");
+				String.valueOf(ChatColor.RED) + ChatColor.BOLD + "HEALING II");
 		Potion pot = new Potion(1);
 		pot.setType(PotionType.INSTANT_HEAL);
 		pot.setSplash(true);
