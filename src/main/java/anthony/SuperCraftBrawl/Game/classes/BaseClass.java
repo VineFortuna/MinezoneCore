@@ -1770,7 +1770,7 @@ public abstract class BaseClass {
 		if (d.getHealth() / d.getMaxHealth() >= 0.5) return;
 
 		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				String.valueOf(ChatColor.RED) + ChatColor.BOLD + "HEALING II");
+				String.valueOf(ChatColor.RED) + ChatColor.BOLD + "HEALING I");
 		Potion pot = new Potion(1);
 		pot.setType(PotionType.INSTANT_HEAL);
 		pot.setSplash(true);
