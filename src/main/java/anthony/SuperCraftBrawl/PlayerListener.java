@@ -431,7 +431,7 @@ public class PlayerListener implements Listener {
 				GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 				GameInstance spectating = main.getGameManager().GetInstanceOfSpectator(player);
 
-				if ((game != null && game.state == GameState.STARTED) || spectating != null) {
+				if ((game != null && game.state == GameState.STARTED) || spectating != null || main.getParkour().hasPlayer(player)) {
 					return;
 				}
 
