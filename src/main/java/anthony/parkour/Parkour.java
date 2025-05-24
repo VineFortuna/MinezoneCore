@@ -14,6 +14,7 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
 import net.minecraft.server.v1_8_R3.WorldServer;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -186,9 +187,16 @@ public class Parkour implements Listener {
 										&& newCheckpointIndex == currentCheckpointIndex + 1) {
 
 							checkpoint.put(player, newCheckpointIndex);
+
+							long currTime = System.nanoTime();
+							long start = startTime.getOrDefault(player, currTime);
+							long elapsedTime = currTime - start;
+
 							b.get(player).updateLine(1, main.color("&r&lCheckpoints: &7" + (newCheckpointIndex + 1) + "/"
 									+ players.get(player).getCheckpoints()));
-							player.sendMessage(main.color("&e&l(!) &rYou reached checkpoint #" + (newCheckpointIndex + 1) + "!"));
+							player.sendMessage(main.color("&e&l(!) &rYou reached checkpoint &e#" + (newCheckpointIndex + 1) + "&r in &a" +
+									(formatTime(elapsedTime))));
+							player.playSound(player.getLocation(), Sound.CLICK, 1, 0.6f);
 						}
 					}
 				} else if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.GLOWSTONE) {
@@ -202,6 +210,7 @@ public class Parkour implements Listener {
 								long totalTime = endTime - start;
 
 								player.sendTitle(main.color("&aPARKOUR COMPLETE!"), null);
+								player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
 
 								PlayerData data = main.getDataManager().getPlayerData(player);
 								int arenaID = players.get(player).getId();
@@ -245,6 +254,7 @@ public class Parkour implements Listener {
 
 						gameBoard(player);
 						player.sendMessage(main.color("&e&l(!) &rReset your time"));
+						player.playSound(player.getLocation(), Sound.CLICK, 1, 0.6f);
 					}
 				}
 			} else {
@@ -253,6 +263,7 @@ public class Parkour implements Listener {
 						if (event.getTo().toVector().toBlockVector().equals(
 								arena.getInstance().startLoc.toVector().toBlockVector())) {
 							this.addPlayer(player, arena);
+							player.playSound(player.getLocation(), Sound.CLICK, 1, 0.6f);
 							return;
 						}
 					}
@@ -271,7 +282,6 @@ public class Parkour implements Listener {
 		main.getScoreboardManager().lobbyBoard(player);
 		player.getInventory().clear();
 		main.LobbyItems(player);
-		player.sendMessage(main.color("&r&l(!) &rYou have left parkour mode"));
 		player.setAllowFlight(true);
 	}
 
@@ -285,7 +295,10 @@ public class Parkour implements Listener {
 				switch (item) {
 					case BEACON:
 						teleportToCheckpoint(player);
-						player.sendMessage(main.color("&e&l(!) &rSent back to checkpoint"));
+						if (checkpoint.containsKey(player))
+							player.sendMessage(main.color("&e&l(!) &rSent back to checkpoint &e#" + (checkpoint.get(player) + 1)));
+						else
+							player.sendMessage(main.color("&e&l(!) &rSent back to checkpoint"));
 						break;
 					case SEA_LANTERN:
 						teleportToStart(player);
@@ -301,6 +314,7 @@ public class Parkour implements Listener {
 						break;
 					case BARRIER:
 						removePlayer(player);
+						player.sendMessage(main.color("&r&l(!) &rYou have left parkour mode"));
 				}
 			}
 		}
