@@ -1646,7 +1646,33 @@ public enum Maps {
 					.setSignLoc(new Vector(174.558, 107, 690.700))
 					.setSource(MapSource.COMMUNITY)
 					.setGameType(GameType.CLASSIC)
-	);
+					
+					
+	),
+	WizardTower(
+			"WizardTower",
+			new Gameplay[]{Gameplay.FLAT, Gameplay.ELEVATED},
+			Size.LARGE,
+			Category.CURATED,
+			new ItemStack(Material.ENCHANTMENT_TABLE),
+			new MapInstance(
+					"wizardtower")
+					.setSpawnPos(
+							new Vector(-13.440, 146, -17.521),
+							new Vector(-71.483, 147, -80.540),
+							new Vector(-59.519, 148, -26.566),
+							new Vector(-36.585, 148, -56.510),
+							new Vector(-86.554, 149, -63.544),
+							new Vector(-72.549, 134, -34.493),
+							new Vector(-39.510, 146, -2.487)
+					)
+					.setLobbyLoc(new Vector(47.514, 154, -49.511))
+					.setSpecLoc(new Vector(-68.442, 165, -52.477))
+					.setBounds(new Vector(-65.477, 199, -52.517), 80, 150)
+					.setSignLoc(new Vector(174.558, 107, 690.700))
+					.setSource(MapSource.COMMUNITY)
+					.setGameType(GameType.CLASSIC))
+					;
 
 //	Arid(
 //			"Arid",
