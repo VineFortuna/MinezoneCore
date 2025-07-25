@@ -86,6 +86,9 @@ public class GameInstance {
 	public List<ItemStack> items = new ArrayList<>();
 	public List<Player> favClassSelection = new ArrayList<>();
 	public List<ClassType> classList = generateClassList();
+	
+	//DUEL COMMAND
+	public boolean isDuel = false;
 
 	// Constructors:
 	public GameInstance(GameManager gameManager, Maps map) {
