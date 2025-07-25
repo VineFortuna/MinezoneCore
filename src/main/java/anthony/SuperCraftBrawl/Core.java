@@ -187,7 +187,8 @@ public class Core extends JavaPlugin implements Listener {
 		return kb;
 	}
 
-	public List<ParkourBoard> getParkourLeaderboards() { return parkourBoards;
+	public List<ParkourBoard> getParkourLeaderboards() {
+		return parkourBoards;
 	}
 
 	public String color(String c) {
@@ -324,7 +325,8 @@ public class Core extends JavaPlugin implements Listener {
 				String msgToPlayers = msg.getName();
 				if (Bukkit.getOnlinePlayers().size() > 0)
 					for (Player player : Bukkit.getOnlinePlayers()) {
-						if (getGameManager().GetInstanceOfPlayer(player) != null) continue;
+						if (getGameManager().GetInstanceOfPlayer(player) != null)
+							continue;
 
 						player.sendMessage(msgToPlayers);
 					}
@@ -412,9 +414,9 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null) {
-			String[] commandTypes = { "maps", "join", "fly", "leave", "players", "class", "socials",
-					"spectate", "startgame", "gamestats", "setlives", "lactate", "purchases", "kit",
-					"items", "color", "sound", "heal" };
+			String[] commandTypes = { "maps", "join", "fly", "leave", "players", "class", "socials", "spectate",
+					"startgame", "gamestats", "setlives", "lactate", "purchases", "kit", "items", "color", "sound",
+					"heal" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -433,12 +435,9 @@ public class Core extends JavaPlugin implements Listener {
 			public void run() {
 				PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
 				Object header = new ChatComponentText(color("\n&f&lMinezone Network\n"));
-				Object footer = new ChatComponentText(color(
-						"\n&7  /help&f for a list of commands" +
-								"  \n&7/store&f to purchase a rank" +
-								"  \n&7/discord&f to join our Discord" +
-								"\n\n&bminezone.club\n"
-				));
+				Object footer = new ChatComponentText(
+						color("\n&7  /help&f for a list of commands" + "  \n&7/store&f to purchase a rank"
+								+ "  \n&7/discord&f to join our Discord" + "\n\n&bminezone.club\n"));
 				try {
 					Field a = packet.getClass().getDeclaredField("a");
 					a.setAccessible(true);
@@ -572,8 +571,7 @@ public class Core extends JavaPlugin implements Listener {
 			} else {
 				sender.sendMessage(color("&c&l(!) &rYou do not have permission for that!"));
 			}
-		}
-		else if (cmd.getName().equalsIgnoreCase("list")) {
+		} else if (cmd.getName().equalsIgnoreCase("list")) {
 			String players = "";
 			int count = 0;
 			int totalPlayers = Bukkit.getOnlinePlayers().size();
@@ -589,8 +587,7 @@ public class Core extends JavaPlugin implements Listener {
 				}
 			}
 			sender.sendMessage(players);
-		}
-		else if (sender instanceof Player) {
+		} else if (sender instanceof Player) {
 			Player player = (Player) sender;
 
 			if (cmd.getName().equalsIgnoreCase("sh")) {
@@ -1734,33 +1731,33 @@ public class Core extends JavaPlugin implements Listener {
 	public void mysteryChestHologram(Player p) {
 		PlayerData data = this.getDataManager().getPlayerData(p);
 
-		//if (!(this.msHologram.containsKey(p))) {
-			if (data != null) {
-				Location loc = new Location(this.getLobbyWorld(), 194.520, 116, 641.500);
-				WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
-				EntityArmorStand stand = new EntityArmorStand(s);
+		// if (!(this.msHologram.containsKey(p))) {
+		if (data != null) {
+			Location loc = new Location(this.getLobbyWorld(), 194.520, 116, 641.500);
+			WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
+			EntityArmorStand stand = new EntityArmorStand(s);
 
-				stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-				stand.setCustomName("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MYSTERY CHESTS");
-				stand.setCustomNameVisible(true);
-				stand.setGravity(false);
-				stand.setInvisible(true);
-				PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
-				((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+			stand.setCustomName("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MYSTERY CHESTS");
+			stand.setCustomNameVisible(true);
+			stand.setGravity(false);
+			stand.setInvisible(true);
+			PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
+			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
 
-				loc = new Location(this.getLobbyWorld(), 194.520, 115.7, 641.500);
-				stand = new EntityArmorStand(s);
+			loc = new Location(this.getLobbyWorld(), 194.520, 115.7, 641.500);
+			stand = new EntityArmorStand(s);
 
-				stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-				stand.setCustomName(color("&e&l" + data.mysteryChests + " &eto open!"));
-				stand.setCustomNameVisible(true);
-				stand.setGravity(false);
-				stand.setInvisible(true);
-				packet = new PacketPlayOutSpawnEntityLiving(stand);
-				((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
-				this.msHologram.put(p, stand);
-			}
-		//}
+			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+			stand.setCustomName(color("&e&l" + data.mysteryChests + " &eto open!"));
+			stand.setCustomNameVisible(true);
+			stand.setGravity(false);
+			stand.setInvisible(true);
+			packet = new PacketPlayOutSpawnEntityLiving(stand);
+			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+			this.msHologram.put(p, stand);
+		}
+		// }
 	}
 
 	public void parkourHolograms(Player p) {
@@ -1937,21 +1934,26 @@ public class Core extends JavaPlugin implements Listener {
 	}
 
 	public void ResetPlayer(Player player) {
-		player.teleport(LobbyLoc());
-		player.setHealth(20.0f);
-		player.setLevel(getDataManager().getPlayerData(player).level);
-		player.getInventory().clear();
-		player.setGameMode(GameMode.ADVENTURE);
-		player.setAllowFlight(true);
-		LobbyItems(player);
-		mysteryChestHologram(player);
-		parkourHolograms(player);
-		updateLeaderboards();
-		getScoreboardManager().lobbyBoard(player);
-		sendScoreboardUpdate(player);
+		PlayerData playerData = this.getDataManager().getPlayerData(player);
+		
+		if (player != null && playerData != null) {
+			player.teleport(LobbyLoc());
+			player.setHealth(20.0f);
+			player.setLevel(playerData.level);
+			player.getInventory().clear();
+			player.setGameMode(GameMode.ADVENTURE);
+			player.setAllowFlight(true);
+			LobbyItems(player);
+			mysteryChestHologram(player);
+			parkourHolograms(player);
+			updateLeaderboards();
+			getScoreboardManager().lobbyBoard(player);
+			sendScoreboardUpdate(player);
 
-		if (!(holograms.containsKey(player)))
-			holograms.put(player, new Holograms(this, player)); // All players' holograms
+			if (!(holograms.containsKey(player)))
+				holograms.put(player, new Holograms(this, player)); // All players' holograms
+
+		}
 	}
 
 	public Location GetSpawnLocation() {
