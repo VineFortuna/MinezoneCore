@@ -96,13 +96,17 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "class":
 				classCommand(args, player);
 				break;
-				
+
 			case "leave":
 				this.leaveGame(player);
 				break;
 
 			case "players":
 				playersCommand(player);
+				break;
+
+			case "duel":
+				duelCommand(args, player);
 				break;
 
 			case "party":
@@ -140,7 +144,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		player.sendMessage(main.color("&7&m----------------------------"));
 	}
 
-	private void healCommand(Player player, String [] args) {
+	private void healCommand(Player player, String[] args) {
 		if (!player.hasPermission("scb.heal")) {
 			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
 			return;
@@ -190,7 +194,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		try {
 			Sound sound = Sound.valueOf(args[0].toUpperCase()); // Get the Sound enum value
 			float volume = 1.0f; // Default volume
-			float pitch = 1.0f;  // Default pitch
+			float pitch = 1.0f; // Default pitch
 
 			// Parse pitch if provided
 			if (args.length >= 2) {
@@ -204,7 +208,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 			// Play the sound to everyone in the world
 			player.getWorld().playSound(location, sound, volume, pitch);
-			player.sendMessage(ChatColor.GREEN + "Played sound: " + sound.name() + " with pitch " + pitch + " and volume " + volume);
+			player.sendMessage(ChatColor.GREEN + "Played sound: " + sound.name() + " with pitch " + pitch
+					+ " and volume " + volume);
 		} catch (IllegalArgumentException e) {
 			player.sendMessage(ChatColor.RED + "Invalid sound name.");
 		}
@@ -247,18 +252,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	public void colorCommand(String[] args, Player player) {
-		List<ChatColor> colors = Arrays.asList(
-				ChatColor.WHITE,
-				ChatColor.YELLOW, ChatColor.GOLD,
-				ChatColor.GREEN, ChatColor.DARK_GREEN,
-				ChatColor.AQUA, ChatColor.DARK_AQUA,
-				ChatColor.BLUE, ChatColor.DARK_BLUE,
-				ChatColor.LIGHT_PURPLE, ChatColor.DARK_PURPLE,
-				ChatColor.RED, ChatColor.DARK_RED,
-				ChatColor.GRAY, ChatColor.DARK_GRAY,
-				ChatColor.BLACK,
-				ChatColor.RESET
-		);
+		List<ChatColor> colors = Arrays.asList(ChatColor.WHITE, ChatColor.YELLOW, ChatColor.GOLD, ChatColor.GREEN,
+				ChatColor.DARK_GREEN, ChatColor.AQUA, ChatColor.DARK_AQUA, ChatColor.BLUE, ChatColor.DARK_BLUE,
+				ChatColor.LIGHT_PURPLE, ChatColor.DARK_PURPLE, ChatColor.RED, ChatColor.DARK_RED, ChatColor.GRAY,
+				ChatColor.DARK_GRAY, ChatColor.BLACK, ChatColor.RESET);
 
 		PlayerData data = main.getDataManager().getPlayerData(player);
 
@@ -281,16 +278,16 @@ public class Commands implements CommandExecutor, TabCompleter {
 				}
 			}
 		} else {
-			player.sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-					+ "You need the rank " + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN " + ChatColor.RESET
-					+ "to use this command");
+			player.sendMessage(
+					"" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
+							+ ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN " + ChatColor.RESET + "to use this command");
 		}
 	}
 
 	private void colorMessage(Player player, List<ChatColor> colors) {
 		player.sendMessage(main.color("&f&l----------------------------------------"));
 		player.sendMessage(main.color("&r&l(!) &rClick on a color below to select it:"));
-		TextComponent[] colorText = new TextComponent[colors.size()-1];
+		TextComponent[] colorText = new TextComponent[colors.size() - 1];
 		int i = 0;
 		for (ChatColor color : colors) {
 			if (color != ChatColor.RESET) {
@@ -632,6 +629,23 @@ public class Commands implements CommandExecutor, TabCompleter {
 		stringBuilder.append("\n"); // Newline after each map group
 	}
 
+	private void duelCommand(String[] args, Player player) {
+		if (args.length == 0) {
+			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/duel <player>"));
+			return;
+		}
+
+		Player targetPlayer = Bukkit.getPlayer(args[0]);
+
+		if (targetPlayer != null) {
+			if (targetPlayer != player) {
+				
+			} else
+				player.sendMessage(main.color("&c&l(!) &rSilly you! You can't duel yourself!"));
+		} else
+			player.sendMessage(main.color("&c&l(!) &rThe specified player is not online!"));
+	}
+
 	private void joinCommand(String[] args, Player player) {
 		if (args.length == 0) {
 			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/join <map>"));
@@ -774,7 +788,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 				player.sendMessage(main.color("&2&l(!) " + "&eYou have selected to go a &lRandom class"));
 				main.getGameManager().playerSelectClass(player, classType);
 				GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
-				game.board.updateLine(5, main.color("&6 Random"));
+				game.board.updateLine(5, main.color(" &6R&aa&rn&2d&0o&5m"));
 				player.setDisplayName(player.getName());
 			}
 		}

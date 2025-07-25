@@ -86,7 +86,7 @@ public class SheepClass extends BaseClass {
 		if (bc.getLives() > 0 && bc.getLives() != 5) {
 			bc.score.getScoreboard().resetScores(bc.score.getEntry());
 			Score newScore = instance.livesObjective.getScore(instance
-					.truncateString(bc.getType().getTag() + " " + getTeamColor() + player.getName(), 40));
+					.truncateString(instance.getGameManager().getMain().color("&r&lSheep &r" + player.getName()), 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 		}
@@ -183,7 +183,7 @@ public class SheepClass extends BaseClass {
 												instance.getGameManager().getMain().color("&7Lime Wool ability:"),
 												instance.getGameManager().getMain()
 														.color("   &r3 sec Nausea chance on hit")),
-										Enchantment.DAMAGE_ALL, 3),
+										Enchantment.DAMAGE_ALL, 4),
 						Enchantment.KNOCKBACK, 1);
 
 		ItemStack item = ItemHelper.addEnchant(
