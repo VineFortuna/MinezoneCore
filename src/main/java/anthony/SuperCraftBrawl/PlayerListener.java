@@ -39,6 +39,7 @@ import org.bukkit.event.player.*;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Door;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
@@ -695,7 +696,8 @@ public class PlayerListener implements Listener {
 
 					if (data != null) {
 						if (data.paintball > 0) {
-							player.launchProjectile(Snowball.class);
+							Snowball snowball = player.launchProjectile(Snowball.class);
+							snowball.setMetadata("paintball", new FixedMetadataValue(main, true));
 							data.paintball--;
 							main.getDataManager().saveData(data);
 
@@ -725,7 +727,7 @@ public class PlayerListener implements Listener {
 		Entity e = event.getEntity();
 		Snowball s;
 
-		if (e instanceof Snowball) {
+		if (e instanceof Snowball && e.hasMetadata("paintball")) {
 			s = (Snowball) e;
 			DyeColor col = DyeColor.values()[new Random().nextInt(DyeColor.values().length)];
 			if (s.getShooter() instanceof Player) {
