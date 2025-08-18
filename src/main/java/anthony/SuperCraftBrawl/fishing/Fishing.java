@@ -4,6 +4,8 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,6 +31,8 @@ public class Fishing implements Listener {
     private final int junk = FishRarity.JUNK.getChance();
     private final int treasure = FishRarity.TREASURE.getChance();
     private HashMap<Player, Integer> caughtRecent = new HashMap<>();
+
+    public Block treasureBlock;
     
     public Fishing(Core main) {
         this.main = main;
@@ -43,7 +47,8 @@ public class Fishing implements Listener {
             event.setExpToDrop(0);
             Player p = event.getPlayer();
             PlayerData data = main.getDataManager().getPlayerData(p);
-            FishType fish = getFish(main.getFishingArea(event.getHook().getLocation()));
+            //FishType fish = getFish(main.getFishingArea(event.getHook().getLocation()));
+            FishType fish = FishType.MAP;
             FishingDetails details = data.playerFishing.get(fish.getId());
             
             i.getItemStack().setType(fish.getItem().getType());
@@ -109,6 +114,14 @@ public class Fishing implements Listener {
                 data.tokens += r;
                 p.sendMessage(main.color("&3&l(!) &rYou have found &e" + r + " Tokens&r!"));
                 updateScoreboard = true;
+            } else if (fish == FishType.MAP) {
+                if (data.treasureLoc.isEmpty()) {
+                    Block b = randomTreasureBlock();
+                    if (b != null) {
+                        data.treasureLoc = treasureLocString(b.getLocation());
+                    }
+                }
+                p.sendMessage(main.color("&3&l(!) &rTreasure Map added to collection!"));
             }
             reward(p, fish.getRarity());
             data.totalcaught++;
@@ -358,4 +371,44 @@ public class Fishing implements Listener {
                 + Math.min(mythicFished, 7) + Math.min(legendaryFished, 5) + Math.min(junkFished, 7)
                 + Math.min(treasureFished, 4);
     }
+
+    public Block randomTreasureBlock() {
+        FishArea[] areas = FishArea.values();
+        Random rand = new Random();
+        int areaId = rand.nextInt(areas.length);
+        FishArea fishArea = areas[areaId];
+
+        Location centerLoc = fishArea.getLocation().toLocation(main.getLobbyWorld());
+        int centerX = centerLoc.getBlockX();
+        int centerY = centerLoc.getBlockY();
+        int centerZ = centerLoc.getBlockZ();
+
+        for (int attempt = 0; attempt < 1000; attempt++) {
+            int x = centerX - fishArea.getBoundsX() + rand.nextInt(fishArea.getBoundsX() * 2 + 1);
+            int z = centerZ - fishArea.getBoundsZ() + rand.nextInt(fishArea.getBoundsZ() * 2 + 1);
+            int y = centerY - fishArea.getBoundsY() + rand.nextInt(fishArea.getBoundsY() * 2 + 1);
+
+            Block block = main.getLobbyWorld().getBlockAt(x, y, z);
+            Block blockAbove = block.getRelative(BlockFace.UP);
+
+            if (block.getType().isSolid() && (blockAbove.getType() == Material.WATER || blockAbove.getType() == Material.STATIONARY_WATER)
+                    && fishArea.isInBounds(blockAbove.getLocation())) {
+                return block;
+            }
+        }
+        return null; // no valid block found after max attempts
+    }
+
+    public String treasureLocString(Location loc) {
+        int x = loc.getBlockX();
+        int y = loc.getBlockY();
+        int z = loc.getBlockZ();
+        return x + "," + y + "," + z;
+    }
+
+    public Location getTreasureLoc(String loc) {
+        String[] str = loc.split(",");
+        return new Location(main.getLobbyWorld(), Double.parseDouble(str[0]), Double.parseDouble(str[1]), Double.parseDouble(str[2]));
+    }
+
 }

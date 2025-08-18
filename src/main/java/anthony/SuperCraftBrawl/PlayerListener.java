@@ -3,9 +3,12 @@ package anthony.SuperCraftBrawl;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.fishing.FishArea;
+import anthony.SuperCraftBrawl.fishing.FishType;
+import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.gui.christmas.ChristmasRewardsGUI;
 import anthony.SuperCraftBrawl.gui.cosmetics.CosmeticsGUI;
+import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.PathfinderGoalFollowPlayer;
@@ -712,6 +715,30 @@ public class PlayerListener implements Listener {
 							player.sendMessage(main.color("&c&l(!) &rYou do not have anymore &ePaintballs &r:("));
 					}
 				}
+			}
+		}
+	}
+
+	@EventHandler
+	public void findTreasure(PlayerInteractEvent event) {
+		Player p = event.getPlayer();
+		PlayerData data = main.getDataManager().getPlayerData(p);
+		if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null && data != null) {
+			if (!data.treasureLoc.isEmpty() && event.getClickedBlock().getLocation()
+					.equals(main.getFishing().getTreasureLoc(data.treasureLoc))) {
+				p.sendMessage("You found treasure");
+				p.getWorld().dropItem(event.getClickedBlock().getLocation().add(0, 1, 0), FishType.AMBERFIN.getItem());
+				FishingDetails details = data.playerFishing.get(FishType.MAP.getId());
+				details.removeCarrying(1);
+				if (details.carrying > 0) {
+					Block b = main.getFishing().randomTreasureBlock();
+					if (b != null) {
+						data.treasureLoc = main.getFishing().treasureLocString(b.getLocation());
+					}
+				} else {
+					data.treasureLoc = "";
+				}
+				main.getDataManager().saveData(data);
 			}
 		}
 	}
