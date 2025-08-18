@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.gui.fishing;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.fishing.FishRarity;
 import anthony.SuperCraftBrawl.fishing.FishType;
+import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
@@ -109,6 +110,17 @@ public class FishingGUI implements InventoryProvider {
                         "", main.color("&eClick to view upgrades")), e -> {
                     new FishingUpgradesGUI(main, inv).inv.open(player);
                 }));
+
+        FishingDetails mapDetails = data.playerFishing.get(FishType.MAP.getId());
+        if (mapDetails != null && mapDetails.carrying > 0) {
+            Location treasureLoc = main.getFishing().getTreasureLoc(data.treasureLoc);
+            contents.set(4, 4, ClickableItem.of(
+                    ItemHelper.setDetails(new ItemStack(Material.MAP, mapDetails.carrying), ChatColor.GRAY + "Treasure Map",
+                            "", main.color("&e" + treasureLoc.getBlockX() + ", " + treasureLoc.getBlockY()
+                                    + ", " + treasureLoc.getBlockZ())), e -> {
+                    }));
+        }
+
         contents.set(4, 0, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.PAPER), ChatColor.GRAY + "Chance Breakdown",
                         main.color("&eTotal chance:"),
