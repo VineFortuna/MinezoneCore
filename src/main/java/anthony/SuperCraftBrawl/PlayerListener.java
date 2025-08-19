@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.fishing.FishArea;
+import anthony.SuperCraftBrawl.fishing.FishRarity;
 import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
@@ -11,8 +12,10 @@ import anthony.SuperCraftBrawl.gui.cosmetics.CosmeticsGUI;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.util.ItemHelper;
 import anthony.util.PathfinderGoalFollowPlayer;
 import anthony.util.PathfinderHelper;
+import com.comphenix.protocol.wrappers.EnumWrappers;
 import me.itzzmic.minezone.api.PunishAPI;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.*;
@@ -25,6 +28,7 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.*;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -539,7 +543,7 @@ public class PlayerListener implements Listener {
 		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
 
 		if (e.getItem() != null && e.getItem().getType() == Material.CHEST) {
-			if (i != null && i.state == anthony.SuperCraftBrawl.Game.GameState.WAITING)
+			if (i != null && i.state == GameState.WAITING)
 				new CosmeticsGUI(main).inv.open(player);
 			else if (player.getWorld() == main.getLobbyWorld())
 				new CosmeticsGUI(main).inv.open(player);
@@ -695,7 +699,7 @@ public class PlayerListener implements Listener {
 			if (item.getType() == Material.GOLD_BARDING
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 				if ((player.getWorld() == main.getLobbyWorld())
-						|| (i != null && i.state == anthony.SuperCraftBrawl.Game.GameState.WAITING)) {
+						|| (i != null && i.state == GameState.WAITING)) {
 
 					if (data != null) {
 						if (data.paintball > 0) {
@@ -723,11 +727,55 @@ public class PlayerListener implements Listener {
 	public void findTreasure(PlayerInteractEvent event) {
 		Player p = event.getPlayer();
 		PlayerData data = main.getDataManager().getPlayerData(p);
+
 		if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null && data != null) {
 			if (!data.treasureLoc.isEmpty() && event.getClickedBlock().getLocation()
 					.equals(main.getFishing().getTreasureLoc(data.treasureLoc))) {
-				p.sendMessage("You found treasure");
-				p.getWorld().dropItem(event.getClickedBlock().getLocation().add(0, 1, 0), FishType.AMBERFIN.getItem());
+
+				Location loc = event.getClickedBlock().getLocation().add(0.5, 0, 0.5);
+
+				// --- ARMORSTAND CHEST ANIMATION (1.8 COMPATIBLE) ---
+				final ArmorStand stand = loc.getWorld().spawn(loc.clone().add(0, -0.5, 0), ArmorStand.class);
+				stand.setVisible(false);
+				stand.setGravity(false);
+				stand.setSmall(false);
+				stand.setHelmet(new ItemStack(Material.CHEST));
+
+				// animate chest rising slightly
+				Bukkit.getScheduler().runTaskLater(main, () -> {
+					stand.teleport(stand.getLocation().add(0, 0.5, 0));
+					loc.getWorld().playSound(loc, Sound.CHEST_OPEN, 1f, 1f);
+
+					// pop out random loot
+					for (int i = 0; i < 5; i++) {
+						ItemStack reward = getRandomReward(p);
+						Item dropped = loc.getWorld().dropItem(loc.clone().add(0, 1, 0), reward);
+
+						Vector v = new Vector(
+								(Math.random() - 0.5) * 0.5,
+								0.5 + (Math.random() * 0.3),
+								(Math.random() - 0.5) * 0.5
+						);
+						dropped.setVelocity(v);
+					}
+
+					// guaranteed reward
+					p.getWorld().dropItem(loc.clone().add(0, 1, 0), FishType.AMBERFIN.getItem());
+
+				}, 20L); // 1 second later
+
+				// remove chest after a few seconds
+				Bukkit.getScheduler().runTaskLater(main, () -> {
+					loc.getWorld().playSound(loc, Sound.CHEST_CLOSE, 1f, 1f);
+
+					// use 1.8 particle (CLOUD doesn't exist yet, so use SMOKE_NORMAL or EXPLOSION_NORMAL)
+					loc.getWorld().playEffect(loc.clone().add(0, 0.5, 0), Effect.SMOKE, 4);
+
+					stand.remove();
+				}, 60L); // after 3 seconds
+				// --- END ARMORSTAND CHEST ---
+
+				// Update treasure map state
 				FishingDetails details = data.playerFishing.get(FishType.MAP.getId());
 				details.removeCarrying(1);
 				if (details.carrying > 0) {
@@ -739,8 +787,65 @@ public class PlayerListener implements Listener {
 					data.treasureLoc = "";
 				}
 				main.getDataManager().saveData(data);
+
+				p.sendMessage("§6You found treasure!");
 			}
 		}
+	}
+
+	private ItemStack getRandomReward(Player p) {
+		FishType reward = null;
+		int amount = 0;
+		boolean updateScoreboard = false;
+		PlayerData data = main.getDataManager().getPlayerData(p);
+
+		Random rand = new Random();
+		int r = rand.nextInt(100) + 1;
+
+		if (r <= 10) {
+			reward = FishType.TOKENS;
+			amount = rand.nextInt(100) + 400;
+			data.tokens += amount;
+			p.sendMessage(main.color("&3&l(!) &rYou have found &e" + amount + " Tokens&r!"));
+			updateScoreboard = true;
+		} else if (r <= 20) {
+			reward = FishType.EXP;
+			amount = rand.nextInt(100) + 400;
+			data.exp += amount;
+			p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + r + " EXP&r!"));
+			if (data.exp >= 2500) {
+				data.level++;
+				data.exp -= 2500;
+				p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
+				p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "&r!"));
+			}
+			updateScoreboard = true;
+		} else if (r <= 50) {
+			reward = FishType.TOKENS;
+			amount = rand.nextInt(35) + 11;
+			data.tokens += amount;
+			p.sendMessage(main.color("&3&l(!) &rYou have found &e" + amount + " Tokens&r!"));
+			updateScoreboard = true;
+		} else if (r <= 80) {
+			reward = FishType.EXP;
+			amount = rand.nextInt(40) + 11;
+			data.exp += amount;
+			p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + amount + " EXP&r!"));
+			if (data.exp >= 2500) {
+				data.level++;
+				data.exp -= 2500;
+				p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
+				p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "&r!"));
+			}
+			updateScoreboard = true;
+		} else {
+			reward = FishType.CRATE;
+			amount = 1;
+			p.sendMessage(main.color("&3&l(!) &rYou have found &e1 Mystery Chest&r!"));
+			data.mysteryChests += amount;
+		}
+
+		return reward.getItem();
 	}
 
 	@EventHandler
@@ -761,7 +866,7 @@ public class PlayerListener implements Listener {
 				Player p = (Player) s.getShooter();
 				GameInstance i = main.getGameManager().GetInstanceOfPlayer(p);
 
-				if (i != null && i.state == anthony.SuperCraftBrawl.Game.GameState.STARTED)
+				if (i != null && i.state == GameState.STARTED)
 					return;
 
 				Block center = s.getLocation().getBlock();
