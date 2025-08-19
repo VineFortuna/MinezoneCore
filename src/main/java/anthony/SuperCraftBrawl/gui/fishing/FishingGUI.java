@@ -116,8 +116,20 @@ public class FishingGUI implements InventoryProvider {
             Location treasureLoc = main.getFishing().getTreasureLoc(data.treasureLoc);
             contents.set(4, 4, ClickableItem.of(
                     ItemHelper.setDetails(new ItemStack(Material.MAP, mapDetails.carrying), ChatColor.GRAY + "Treasure Map",
-                            "", main.color("&e" + treasureLoc.getBlockX() + ", " + treasureLoc.getBlockY()
-                                    + ", " + treasureLoc.getBlockZ())), e -> {
+                            "",
+                            main.color("&8Leads to hidden riches beneath the waves"),
+                            main.color("&7Sunken treasure location:"),
+                            main.color("&e" + treasureLoc.getBlockX() + ", " + treasureLoc.getBlockY()
+                                    + ", " + treasureLoc.getBlockZ()),
+                            "",
+                            main.color("&7Maps carried: " + mapDetails.carrying),
+                            main.color("&8Follow the clues to claim your reward")), e -> {
+                    }));
+        } else {
+            contents.set(4, 4, ClickableItem.of(
+                    ItemHelper.setDetails(new ItemStack(Material.EMPTY_MAP), ChatColor.GRAY + "Empty Map",
+                            "", main.color("&7You have no maps"),
+                            main.color("&8Catch one to reveal hidden loot")), e -> {
                     }));
         }
 
