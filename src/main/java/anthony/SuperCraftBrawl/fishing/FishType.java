@@ -645,7 +645,7 @@ public enum FishType {
             case TOKENS:
                 return "Sweet cash";
             case MAP:
-                return "Could it lead to the fabled treasure?";
+                return "Could it lead to sunken treasure?";
             case CRATE:
                 return "I wonder what's inside";
         }
