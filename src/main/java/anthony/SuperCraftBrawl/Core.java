@@ -1938,8 +1938,8 @@ public class Core extends JavaPlugin implements Listener {
 		
 		if (player != null && playerData != null) {
 			player.getInventory().clear();
-			LobbyItems(player);
 			player.teleport(LobbyLoc());
+			LobbyItems(player);
 			player.setHealth(20.0f);
 			player.setLevel(playerData.level);
 			player.setGameMode(GameMode.ADVENTURE);
