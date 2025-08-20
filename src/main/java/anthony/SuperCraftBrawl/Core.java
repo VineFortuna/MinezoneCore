@@ -1937,13 +1937,13 @@ public class Core extends JavaPlugin implements Listener {
 		PlayerData playerData = this.getDataManager().getPlayerData(player);
 		
 		if (player != null && playerData != null) {
+			player.getInventory().clear();
+			LobbyItems(player);
 			player.teleport(LobbyLoc());
 			player.setHealth(20.0f);
 			player.setLevel(playerData.level);
-			player.getInventory().clear();
 			player.setGameMode(GameMode.ADVENTURE);
 			player.setAllowFlight(true);
-			LobbyItems(player);
 			mysteryChestHologram(player);
 			parkourHolograms(player);
 			updateLeaderboards();
