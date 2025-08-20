@@ -3,9 +3,15 @@ package anthony.SuperCraftBrawl.fishing;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import net.minecraft.server.v1_8_R3.EntityArmorStand;
+import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
+import net.minecraft.server.v1_8_R3.WorldServer;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -455,9 +461,6 @@ public class Fishing implements Listener {
                         dropped.setVelocity(v);
                     }
 
-                    // guaranteed reward
-                    p.getWorld().dropItem(loc.clone().add(0, 1, 0), FishType.AMBERFIN.getItem());
-
                 }, 20L); // 1 second later
 
                 // remove chest after a few seconds
@@ -484,7 +487,7 @@ public class Fishing implements Listener {
                 }
                 main.getDataManager().saveData(data);
 
-                p.sendMessage(main.color("&3&l(!) &rYou have found &eTreasure&r!"));
+                p.sendMessage(main.color("&3&l(!) &rYou opened the &esunken treasure chest&r!"));
             }
         }
     }
@@ -539,12 +542,42 @@ public class Fishing implements Listener {
             amount = 1;
             p.sendMessage(main.color("&3&l(!) &rYou have found &e1 Mystery Chest&r!"));
             data.mysteryChests += amount;
+            hologram(p);
         }
 
         if (main.getGameManager().GetInstanceOfPlayer(p) == null && updateScoreboard)
             main.getScoreboardManager().lobbyBoard(p);
 
         return reward.getItem();
+    }
+
+    private void hologram(Player player) {
+        PlayerData data = main.getDataManager().getPlayerData(player);
+        if (data != null && main.msHologram.get(player) != null) {
+            if (player.getWorld() == main.getLobbyWorld()) {
+                EntityArmorStand stand = main.msHologram.get(player);
+                PacketPlayOutEntityDestroy destroyPacket = new PacketPlayOutEntityDestroy(
+                        stand.getId());
+                ((CraftPlayer) player).getHandle().playerConnection
+                        .sendPacket(destroyPacket);
+                Location loc = new Location(main.getLobbyWorld(), 194.520, 115.7, 641.500);
+
+                WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
+                stand = new EntityArmorStand(s);
+
+                stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+                stand.setCustomName(
+                        main.color("&e&l" + data.mysteryChests + " &eto open!"));
+                stand.setCustomNameVisible(true);
+                stand.setGravity(false);
+                stand.setInvisible(true);
+                PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(
+                        stand);
+                ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+                main.msHologram.put(player, stand);
+                main.getDataManager().saveData(data);
+            }
+        }
     }
 
 }
