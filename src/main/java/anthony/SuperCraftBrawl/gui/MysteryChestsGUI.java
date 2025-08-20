@@ -67,6 +67,9 @@ public class MysteryChestsGUI implements InventoryProvider {
 								new BukkitRunnable() {
 									@Override
 									public void run() {
+										Chunk chunk = stand.getLocation().getChunk();
+										chunk.load(true);
+
 										Random r = new Random();
 										int chance = r.nextInt(100);
 										
