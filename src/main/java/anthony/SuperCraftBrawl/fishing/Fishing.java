@@ -9,9 +9,13 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.util.Vector;
 
 import java.util.*;
 
@@ -136,7 +140,7 @@ public class Fishing implements Listener {
             
             if (data.friendship == 1)
                 friendship(p, data.friendshipLevel);
-            
+
             removeFish(i);
             if (main.getGameManager().GetInstanceOfPlayer(p) == null && updateScoreboard)
             	main.getScoreboardManager().lobbyBoard(p);
@@ -409,6 +413,138 @@ public class Fishing implements Listener {
     public Location getTreasureLoc(String loc) {
         String[] str = loc.split(",");
         return new Location(main.getLobbyWorld(), Double.parseDouble(str[0]), Double.parseDouble(str[1]), Double.parseDouble(str[2]));
+    }
+
+    @EventHandler
+    public void findTreasure(PlayerInteractEvent event) {
+        Player p = event.getPlayer();
+        PlayerData data = main.getDataManager().getPlayerData(p);
+
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock() != null && data != null) {
+            if (!data.treasureLoc.isEmpty() && event.getClickedBlock().getLocation()
+                    .equals(getTreasureLoc(data.treasureLoc))) {
+
+                Location loc = event.getClickedBlock().getLocation().add(0.5, 0, 0.5);
+
+                // --- ARMORSTAND CHEST ANIMATION (1.8 COMPATIBLE) ---
+                final ArmorStand stand = loc.getWorld().spawn(loc.clone().add(0, -0.5, 0), ArmorStand.class);
+                stand.setVisible(false);
+                stand.setGravity(false);
+                stand.setSmall(false);
+                stand.setHelmet(new ItemStack(Material.CHEST));
+
+                // animate chest rising slightly
+                Bukkit.getScheduler().runTaskLater(main, () -> {
+                    stand.teleport(stand.getLocation().add(0, 0.5, 0));
+                    loc.getWorld().playSound(loc, Sound.CHEST_OPEN, 1f, 1f);
+
+                    // pop out random loot
+                    for (int i = 0; i < 5; i++) {
+                        ItemStack reward = getRandomReward(p);
+                        Item dropped = loc.getWorld().dropItem(loc.clone().add(0, 1, 0), reward);
+                        dropped.setPickupDelay(Integer.MAX_VALUE);
+                        fishItems.add(dropped);
+
+                        removeFish(dropped);
+
+                        org.bukkit.util.Vector v = new Vector(
+                                (Math.random() - 0.5) * 0.5,
+                                0.5 + (Math.random() * 0.3),
+                                (Math.random() - 0.5) * 0.5
+                        );
+                        dropped.setVelocity(v);
+                    }
+
+                    // guaranteed reward
+                    p.getWorld().dropItem(loc.clone().add(0, 1, 0), FishType.AMBERFIN.getItem());
+
+                }, 20L); // 1 second later
+
+                // remove chest after a few seconds
+                Bukkit.getScheduler().runTaskLater(main, () -> {
+                    loc.getWorld().playSound(loc, Sound.CHEST_CLOSE, 1f, 1f);
+
+                    // use 1.8 particle (CLOUD doesn't exist yet, so use SMOKE_NORMAL or EXPLOSION_NORMAL)
+                    loc.getWorld().playEffect(loc.clone().add(0, 0.5, 0), Effect.SMOKE, 4);
+
+                    stand.remove();
+                }, 60L); // after 3 seconds
+                // --- END ARMORSTAND CHEST ---
+
+                // Update treasure map state
+                FishingDetails details = data.playerFishing.get(FishType.MAP.getId());
+                details.removeCarrying(1);
+                if (details.carrying > 0) {
+                    Block b = randomTreasureBlock();
+                    if (b != null) {
+                        data.treasureLoc = treasureLocString(b.getLocation());
+                    }
+                } else {
+                    data.treasureLoc = "";
+                }
+                main.getDataManager().saveData(data);
+
+                p.sendMessage(main.color("&3&l(!) &rYou have found &eTreasure&r!"));
+            }
+        }
+    }
+
+    private ItemStack getRandomReward(Player p) {
+        FishType reward = null;
+        int amount = 0;
+        boolean updateScoreboard = false;
+        PlayerData data = main.getDataManager().getPlayerData(p);
+
+        Random rand = new Random();
+        int r = rand.nextInt(100) + 1;
+
+        if (r <= 10) {
+            reward = FishType.TOKENS;
+            amount = rand.nextInt(100) + 400;
+            data.tokens += amount;
+            p.sendMessage(main.color("&3&l(!) &rYou have found &e" + amount + " Tokens&r!"));
+            updateScoreboard = true;
+        } else if (r <= 20) {
+            reward = FishType.EXP;
+            amount = rand.nextInt(100) + 400;
+            data.exp += amount;
+            p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + r + " EXP&r!"));
+            if (data.exp >= 2500) {
+                data.level++;
+                data.exp -= 2500;
+                p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
+                p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "&r!"));
+            }
+            updateScoreboard = true;
+        } else if (r <= 50) {
+            reward = FishType.TOKENS;
+            amount = rand.nextInt(35) + 11;
+            data.tokens += amount;
+            p.sendMessage(main.color("&3&l(!) &rYou have found &e" + amount + " Tokens&r!"));
+            updateScoreboard = true;
+        } else if (r <= 80) {
+            reward = FishType.EXP;
+            amount = rand.nextInt(40) + 11;
+            data.exp += amount;
+            p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + amount + " EXP&r!"));
+            if (data.exp >= 2500) {
+                data.level++;
+                data.exp -= 2500;
+                p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
+                p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "&r!"));
+            }
+            updateScoreboard = true;
+        } else {
+            reward = FishType.CRATE;
+            amount = 1;
+            p.sendMessage(main.color("&3&l(!) &rYou have found &e1 Mystery Chest&r!"));
+            data.mysteryChests += amount;
+        }
+
+        if (main.getGameManager().GetInstanceOfPlayer(p) == null && updateScoreboard)
+            main.getScoreboardManager().lobbyBoard(p);
+
+        return reward.getItem();
     }
 
 }
