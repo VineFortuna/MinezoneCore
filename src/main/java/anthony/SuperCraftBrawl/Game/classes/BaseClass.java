@@ -2,7 +2,6 @@ package anthony.SuperCraftBrawl.Game.classes;
 
 import anthony.SuperCraftBrawl.Game.ActionBarManager;
 import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.gui.ClassRewardsGUI;
@@ -930,7 +929,7 @@ public abstract class BaseClass {
 						if (data != null) {
 							data.mysteryChests++;
 							player.sendMessage(instance.getGameManager().getMain()
-									.color("&5&l(!) &rYou have found &e1 Mystery Chest!"));
+									.color("&5&l(!) &rYou have found &e1 MysteryChest!"));
 						}
 					}
 

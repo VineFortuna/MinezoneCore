@@ -1566,7 +1566,7 @@ public class GameInstance {
 			if (chance >= 0 && chance < 25) {
 				if (data3 != null) {
 					data3.mysteryChests++;
-					winner.sendMessage(getGameManager().getMain().color("&5&l(!) &rYou have found &e1 Mystery Chest&r!"));
+					winner.sendMessage(getGameManager().getMain().color("&5&l(!) &rYou have found &e1 MysteryChest&r!"));
 				}
 			}
 		}

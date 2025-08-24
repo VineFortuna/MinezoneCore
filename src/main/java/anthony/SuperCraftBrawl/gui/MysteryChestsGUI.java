@@ -34,7 +34,7 @@ public class MysteryChestsGUI implements InventoryProvider {
 
 	public MysteryChestsGUI(Core main, Location loc) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
-				.title("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Mystery Chest").build();
+				.title("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MysteryChest").build();
 		this.main = main;
 		this.loc = loc;
 	}
