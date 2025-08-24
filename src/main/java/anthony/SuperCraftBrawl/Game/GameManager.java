@@ -34,6 +34,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
+import org.bukkit.event.block.EntityBlockFormEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
@@ -494,7 +495,7 @@ public class GameManager implements Listener, PluginMessageListener {
 				} else {
 					e.setCancelled(true);
 					player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "This mystery chest is already in use!");
+							+ "This MysteryChest is already in use!");
 				}
 			}
 		} else {
@@ -1619,6 +1620,7 @@ public class GameManager implements Listener, PluginMessageListener {
 						+ ChatColor.RESET + "to leave");
 				player.setGameMode(GameMode.ADVENTURE); // Edit if needed
 				player.spigot().setCollidesWithEntities(false);
+				player.getInventory().clear();
 				ItemStack spec = ItemHelper.setDetails(new ItemStack(Material.COMPASS),
 						"" + ChatColor.GREEN + "Spectate a Player",
 						ChatColor.GRAY + "Click to Spectate a specific player!");
@@ -2137,6 +2139,28 @@ public class GameManager implements Listener, PluginMessageListener {
 				|| event.getItem().getType().name().contains("BOOTS")) {
 
 			// Cancel the event to prevent armor from breaking
+			event.setCancelled(true);
+		}
+	}
+
+	@EventHandler
+	public void onSnowmanDamage(EntityDamageEvent event) {
+		if (event.getEntity() instanceof Snowman) {
+			event.setCancelled(true); // Cancel all other damage
+		}
+	}
+
+	// Prevent snow trails
+	@EventHandler
+	public void onEntityFormBlock(EntityBlockFormEvent event) {
+		if (event.getEntity() instanceof Snowman)
+			event.setCancelled(true);
+	}
+
+	// Prevent trampling
+	@EventHandler
+	public void onEntityInteract(EntityInteractEvent event) {
+		if (event.getBlock().getType() == Material.SOIL) {
 			event.setCancelled(true);
 		}
 	}

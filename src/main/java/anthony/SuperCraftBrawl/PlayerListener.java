@@ -53,10 +53,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class PlayerListener implements Listener {
 
@@ -64,7 +61,7 @@ public class PlayerListener implements Listener {
 	public ScoreboardManager scoreManager = Bukkit.getScoreboardManager();
 	public Scoreboard c;
 	public List<Player> snowParticlePlayers = new ArrayList<Player>();
-	public List<Player> snowmanPetPlayers = new ArrayList<Player>();
+	public Map<Player, Snowman> snowmanPetPlayers = new HashMap<>();
 	public List<Player> candyCaneSwirlPlayers = new ArrayList<Player>();
 	public List<Player> elfCosmeticPlayers = new ArrayList<Player>();
 
@@ -199,6 +196,7 @@ public class PlayerListener implements Listener {
 		GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
 		candyCaneSwirlPlayers.remove(player);
 		snowParticlePlayers.remove(player);
+		snowmanPetPlayers.get(player).remove();
 		snowmanPetPlayers.remove(player);
 		elfCosmeticPlayers.remove(player);
 		// anthony.CrystalWars.game.GameInstance i =
@@ -332,11 +330,9 @@ public class PlayerListener implements Listener {
 	}
 
 	public void snowmanPet(Player player) {
-		if (this.snowmanPetPlayers.contains(player)) {
+		if (this.snowmanPetPlayers.containsKey(player)) {
 			// Spawn a Snowman near the player
-			Location spawnLoc = player.getLocation().add(1, 0, 1);
-			Snowman snowman = player.getWorld().spawn(spawnLoc, Snowman.class);
-			snowman.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Snowman Pet");
+			Snowman snowman = snowmanPetPlayers.get(player);
 
 			// Convert the player to NMS EntityLiving
 			EntityLiving targetPlayer = (EntityLiving) ((CraftLivingEntity) player).getHandle();
@@ -363,7 +359,7 @@ public class PlayerListener implements Listener {
 					snowman.teleport(behindPlayer);
 				}
 
-				if (!this.snowmanPetPlayers.contains(player)) {
+				if (!this.snowmanPetPlayers.containsKey(player)) {
 					snowman.remove();
 				} else if (!player.isOnline() || player.getWorld() != main.getLobbyWorld()) {
 					this.snowmanPetPlayers.remove(player);
