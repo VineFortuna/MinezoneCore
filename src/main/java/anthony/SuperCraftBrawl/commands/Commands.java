@@ -788,7 +788,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 				player.sendMessage(main.color("&2&l(!) " + "&eYou have selected to go a &lRandom class"));
 				main.getGameManager().playerSelectClass(player, classType);
 				GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
-				game.board.updateLine(5, main.color(" &6R&aa&rn&2d&0o&5m"));
+				game.board.updateLine(5, main.color(" &4R&6a&en&2d&3o&dm"));
 				player.setDisplayName(player.getName());
 			}
 		}

@@ -106,7 +106,7 @@ public class Fishing implements Listener {
                 }
             }
             if (fish == FishType.CRATE) {
-                p.sendMessage(main.color("&3&l(!) &rYou have found &e1 Mystery Chest&r!"));
+                p.sendMessage(main.color("&3&l(!) &rYou have found &e1 MysteryChest&r!"));
                 data.mysteryChests++;
             } else if (fish == FishType.EXP) {
                 int r = rand.nextInt(40) + 11;
@@ -431,9 +431,13 @@ public class Fishing implements Listener {
                     .equals(getTreasureLoc(data.treasureLoc))) {
 
                 Location loc = event.getClickedBlock().getLocation().add(0.5, 0, 0.5);
+                Location chestLoc = loc.clone();
 
-                // --- ARMORSTAND CHEST ANIMATION (1.8 COMPATIBLE) ---
-                final ArmorStand stand = loc.getWorld().spawn(loc.clone().add(0, -0.5, 0), ArmorStand.class);
+                // make it face the player
+                chestLoc.setDirection(p.getLocation().toVector().subtract(chestLoc.toVector()));
+
+                // ARMORSTAND CHEST ANIMATION
+                final ArmorStand stand = loc.getWorld().spawn(chestLoc.add(0, -0.5, 0), ArmorStand.class);
                 stand.setVisible(false);
                 stand.setGravity(false);
                 stand.setSmall(false);
@@ -487,13 +491,13 @@ public class Fishing implements Listener {
                 }
                 main.getDataManager().saveData(data);
 
-                p.sendMessage(main.color("&3&l(!) &rYou opened the &esunken treasure chest&r!"));
+                p.sendMessage(main.color("&3&l(!) &rYou opened the &eSunken Treasure Chest&r!"));
             }
         }
     }
 
     private ItemStack getRandomReward(Player p) {
-        FishType reward = null;
+        FishType reward;
         int amount = 0;
         boolean updateScoreboard = false;
         PlayerData data = main.getDataManager().getPlayerData(p);
@@ -540,7 +544,7 @@ public class Fishing implements Listener {
         } else {
             reward = FishType.CRATE;
             amount = 1;
-            p.sendMessage(main.color("&3&l(!) &rYou have found &e1 Mystery Chest&r!"));
+            p.sendMessage(main.color("&3&l(!) &rYou have found &e1 MysteryChest&r!"));
             data.mysteryChests += amount;
             hologram(p);
         }

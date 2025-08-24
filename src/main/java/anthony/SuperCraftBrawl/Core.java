@@ -37,11 +37,11 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Firework;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.EntityBlockFormEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -657,19 +657,17 @@ public class Core extends JavaPlugin implements Listener {
 						String message = "";
 
 						for (int i = 0; i < args.length; i++) {
-							message += args[i];
+							message += args[i] + " ";
 						}
 
 						for (Player allPlayers : Bukkit.getOnlinePlayers()) {
-							if (args.length != 0) {
-								allPlayers.sendTitle(
-										"" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.UNDERLINE + "ANNOUNCEMENT",
-										"" + ChatColor.RESET + message + " - " + ChatColor.YELLOW
-												+ player.getName().substring(0, 3));
-								allPlayers.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-										+ message + " - " + ChatColor.YELLOW + player.getName());
-							}
-						}
+                            allPlayers.sendTitle(
+                                    "" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.UNDERLINE + "ANNOUNCEMENT",
+                                    "" + ChatColor.RESET + message.trim() + " - " + ChatColor.YELLOW
+                                            + player.getName().substring(0, 3));
+                            allPlayers.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                    + message.trim() + " - " + ChatColor.YELLOW + player.getName());
+                        }
 					}
 				} else
 					player.sendMessage(color("&c&l(!) &rYou need the rank &c&lADMIN &rto use this command!"));
@@ -1738,7 +1736,7 @@ public class Core extends JavaPlugin implements Listener {
 			EntityArmorStand stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MYSTERY CHESTS");
+			stand.setCustomName("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MYSTERYCHESTS");
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
