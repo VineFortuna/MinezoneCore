@@ -80,7 +80,7 @@ public class ScoreboardManager {
 		if (game.getMap() != null) {
 			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + game.getMap());
 			board.updateLines("", "" + ChatColor.BOLD + "Game Mode:", " " + ChatColor.GRAY + game.gameType.getName(),
-					"", "" + ChatColor.RESET + ChatColor.BOLD + "Class:", main.color(" &6R&aa&rn&2d&0o&5m"), "",
+					"", "" + ChatColor.RESET + ChatColor.BOLD + "Class:", main.color(" &4R&6a&en&2d&3o&dm"), "",
 					"" + ChatColor.RESET + ChatColor.BOLD + "Players:",
 					" " + ChatColor.GRAY
 							+ (game.getMap().GetInstance().gameType == GameType.FRENZY

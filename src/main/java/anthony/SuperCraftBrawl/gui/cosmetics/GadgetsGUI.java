@@ -9,8 +9,10 @@ import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Snowman;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
@@ -168,12 +170,16 @@ public class GadgetsGUI implements InventoryProvider {
 
 		contents.set(1, 6, ClickableItem.of(snowmanPet, e -> {
 			if (data.snowmanPet == 1) {
-				if (!(main.getListener().snowmanPetPlayers.contains(player))) {
+				if (!(main.getListener().snowmanPetPlayers.containsKey(player))) {
 					player.sendMessage(main.color("&r&l(!) &rYou equipped &eSnowman &rpet"));
-					main.getListener().snowmanPetPlayers.add(player);
+					Location spawnLoc = player.getLocation().add(1, 0, 1);
+					Snowman snowman = player.getWorld().spawn(spawnLoc, Snowman.class);
+					snowman.setCustomName(ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Snowman Pet");
+					main.getListener().snowmanPetPlayers.put(player, snowman);
 					main.getListener().snowmanPet(player);
 				} else {
 					player.sendMessage(main.color("&r&l(!) &rYou removed &eSnowman &rpet"));
+					main.getListener().snowmanPetPlayers.get(player).remove();
 					main.getListener().snowmanPetPlayers.remove(player);
 				}
 			} else {
