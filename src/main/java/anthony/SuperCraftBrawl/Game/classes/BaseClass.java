@@ -921,6 +921,8 @@ public abstract class BaseClass {
 					}
 					p.setDisplayName("" + p.getName() + " " + ChatColor.RESET + ChatColor.GRAY + ChatColor.ITALIC
 							+ "Spectator" + ChatColor.RESET);
+					instance.sendScoreboardUpdate(player);
+
 					Random r = new Random();
 					int chance = r.nextInt(100);
 
@@ -1762,8 +1764,7 @@ public abstract class BaseClass {
 
 	// Giving health potions on kill
 	protected void healthPots(Player d) {
-		if (checkIfDead(d, instance) || instance.alivePlayers < 2 ||
-				instance.classes.get(d).getType() == ClassType.Horse)
+		if (checkIfDead(d, instance) || instance.classes.get(d).getType() == ClassType.Horse)
 			return;
 
 		if (d.getHealth() / d.getMaxHealth() >= 0.5) return;

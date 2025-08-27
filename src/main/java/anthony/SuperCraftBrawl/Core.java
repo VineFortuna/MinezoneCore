@@ -1939,6 +1939,7 @@ public class Core extends JavaPlugin implements Listener {
 			player.teleport(LobbyLoc());
 			LobbyItems(player);
 			player.setHealth(20.0f);
+			player.setFireTicks(0);
 			player.setLevel(playerData.level);
 			player.setGameMode(GameMode.ADVENTURE);
 			player.setAllowFlight(true);

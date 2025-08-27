@@ -726,6 +726,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 	private void classCommand(String[] args, Player player) {
 		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+
+		if (!isGameStateWaiting(game, player))
+			return;
+
 		PlayerData playerData = main.getDataManager().getPlayerData(player);
 
 		if (args.length == 0) {

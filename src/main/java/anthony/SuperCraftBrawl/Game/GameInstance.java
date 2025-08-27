@@ -226,6 +226,9 @@ public class GameInstance {
 				for (Player gamePlayer : players) {
 					gamePlayer.hidePlayer(player);
 				}
+				for (Player spectator : this.spectators) {
+					spectator.showPlayer(player);
+				}
 				player.getInventory().clear();
 				player.setAllowFlight(true);
 				player.teleport(GetSpecLoc());
@@ -661,7 +664,6 @@ public class GameInstance {
 	 */
 	private void giveRandomItemDrop() {
 		for (Player player : this.players) {
-			player.setFireTicks(0);
 			BaseClass bc = this.classes.get(player);
 
 			if (bc != null) {
@@ -670,9 +672,6 @@ public class GameInstance {
 				else
 					player.getInventory().addItem(this.getItemToDrop());
 			}
-
-			player.setLevel(0);
-			player.setGameMode(GameMode.ADVENTURE);
 		}
 	}
 
@@ -708,6 +707,7 @@ public class GameInstance {
 		}
 
 		this.state = GameState.STARTED; // Sets game state to 'Started'
+		resetState();
 		LoadClasses();
 		GameScoreboard();
 		addAlivePlayers();
@@ -807,11 +807,15 @@ public class GameInstance {
 			team.addEntry(player.getName());
 		}
 
-		String className = classType.getTag() + " ";
-		if (className.length() > 12) {
-			className = classType.getTag().substring(0, 10).trim() + " " + ChatColor.RESET;
+		if (this.classes.get(player).getLives() > 0) {
+			String className = classType.getTag() + " ";
+			if (className.length() > 12) {
+				className = classType.getTag().substring(0, 10).trim() + " " + ChatColor.RESET;
+			}
+			team.setPrefix(className);
+		} else {
+			team.setPrefix("");
 		}
-		team.setPrefix(className);
 		/* } */
 	}
 
@@ -1245,6 +1249,7 @@ public class GameInstance {
 					player.spigot().setCollidesWithEntities(false);
 					player.setAllowFlight(false);
 					player.setAllowFlight(true);
+					player.getInventory().clear();
 
 					ItemStack spec = ItemHelper.setDetails(new ItemStack(Material.COMPASS),
 							"" + ChatColor.GREEN + "Spectate a Player",
@@ -1255,6 +1260,8 @@ public class GameInstance {
 					player.getInventory().setItem(8, leave);
 					for (Player gamePlayer : this.players)
 						gamePlayer.hidePlayer(player);
+					for (Player spectator : this.spectators)
+						spectator.showPlayer(player);
 					try {
 						baseClass.score.getScoreboard().resetScores(baseClass.score.getEntry());
 					} catch (Exception e) {
@@ -2497,5 +2504,15 @@ public class GameInstance {
 
 	public String color(String c) {
 		return ChatColor.translateAlternateColorCodes('&', c);
+	}
+
+	public void resetState() {
+		for (Player player : this.players) {
+			player.setFireTicks(0);
+			player.setLevel(0);
+			player.setGameMode(GameMode.ADVENTURE);
+			for (PotionEffect type : player.getActivePotionEffects())
+				player.removePotionEffect(type.getType());
+		}
 	}
 }
