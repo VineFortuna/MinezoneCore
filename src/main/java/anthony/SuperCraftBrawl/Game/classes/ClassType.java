@@ -90,7 +90,7 @@ public enum ClassType {
 	MagmaCube(48, 0, Rank.VIP),
 	Bedrock(61, 0, Rank.VIP),
 	Firework(62, 0, Rank.VIP),
-	Vindicator(65, 0, Rank.VIP),
+	Vindicator(65, 0, Rank.VIP, true),
 	Fade(66, 0, Rank.VIP),
 	Endermite(70, 0, Rank.VIP),
 
