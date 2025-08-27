@@ -59,7 +59,7 @@ public class ClassesGUI implements InventoryProvider {
 		contents.set(1, 6,
 				ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.EMERALD),
 						String.valueOf(ChatColor.GREEN) + ChatColor.BOLD + "TOKEN CLASSES",
-						ChatColor.GRAY + "You can buy these classes with coins!"), e -> {
+						ChatColor.GRAY + "You can buy these classes with Tokens!"), e -> {
 							new TokenClassesGUI(main).inv.open(player);
 						}));
 		contents.set(2, 4,
@@ -87,11 +87,10 @@ public class ClassesGUI implements InventoryProvider {
 									if (!data.customIntegers.isEmpty()) {
 										instance.boards.get(player).updateLine(5, " " + ChatColor.GRAY + "Random Fav");
 										instance.favClassSelection.add(player);
-										if (instance.classSelection.containsKey(player)) {
-											instance.classSelection.remove(player);
-										}
+                                        instance.classSelection.remove(player);
 										player.sendMessage(
 												main.color("&2&l(!) &rYou selected to go a random favorite class!"));
+										player.setDisplayName(player.getName());
 									} else {
 										player.sendMessage(
 												main.color("&c&l(!) &rYou don't have any favorite classes!"));

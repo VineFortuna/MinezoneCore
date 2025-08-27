@@ -120,7 +120,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 			type = GameType.CLASSIC;
 		
 		ItemStack voteGameType = ItemHelper.setDetails(new ItemStack(Material.TNT),
-				ChatColor.YELLOW + "Vote Game Type -> " + type.getName(), "",
+				ChatColor.YELLOW + "Game Type -> " + type.getName(), "",
 				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().totalGameTypeVotes : "0") + "/"
 						+ (game != null ? game.players.size() : "0") + ")",
 				"",
