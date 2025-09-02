@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.gui.cosmetics;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -38,6 +39,8 @@ public class GadgetsGUI implements InventoryProvider {
 		// Broom
 		List<String> broomList = new ArrayList<>();
 		broomList.add(ChatColor.DARK_GRAY + "Fly around like a Witch!");
+		broomList.add("");
+		broomList.add(Rank.CAPTAIN.getTag() + ChatColor.RESET + "+ exclusive!");
 		ItemStack broom = ItemHelper.create(Material.WHEAT,
 				ChatColor.DARK_GREEN.toString() + ChatColor.BOLD + "Magic Broom", broomList);
 
@@ -94,7 +97,7 @@ public class GadgetsGUI implements InventoryProvider {
 				}
 			} else {
 				player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
-						+ ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN " + ChatColor.RESET + "to use this item!");
+						+ Rank.CAPTAIN.getTag() + ChatColor.RESET + " to use this item!");
 			}
 		}));
 

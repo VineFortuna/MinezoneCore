@@ -64,6 +64,7 @@ public class PlayerListener implements Listener {
 	public Map<Player, Snowman> snowmanPetPlayers = new HashMap<>();
 	public List<Player> candyCaneSwirlPlayers = new ArrayList<Player>();
 	public List<Player> elfCosmeticPlayers = new ArrayList<Player>();
+	public List<Player> goldenOutfitPlayers = new ArrayList<>();
 
 	public PlayerListener(Core main) {
 		this.main = main;
@@ -196,7 +197,8 @@ public class PlayerListener implements Listener {
 		GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
 		candyCaneSwirlPlayers.remove(player);
 		snowParticlePlayers.remove(player);
-		snowmanPetPlayers.get(player).remove();
+		if (snowmanPetPlayers.containsKey(player))
+			snowmanPetPlayers.get(player).remove();
 		snowmanPetPlayers.remove(player);
 		elfCosmeticPlayers.remove(player);
 		// anthony.CrystalWars.game.GameInstance i =

@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.gui.cosmetics;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -46,6 +47,10 @@ public class SuitsGUI implements InventoryProvider {
 		
 		ItemStack elfHead = ItemHelper.createSkullTexture(ELF_TEXTURE, "&a&lElf Outfit", "", "&cChristmas exclusive");
 
+		// Golden Outfit
+		ItemStack goldenHead = ItemHelper.create(Material.GOLD_HELMET, main.color("&6&lGolden Outfit"),
+				"", main.color(Rank.VIP.getTag() + "&r+ exclusive"));
+
 		// Setting Items
 		contents.fillBorders(ClickableItem
 				.of(ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e -> {
@@ -55,6 +60,7 @@ public class SuitsGUI implements InventoryProvider {
 		contents.set(1, 1, ClickableItem.of(astronautHead, e -> {
 			if (data.astronaut == 1) {
 				if (!(main.ao.containsKey(player))) {
+					removeOutfits(player);
 					main.ao.put(player, true);
 					player.getInventory().setHelmet(astronautHead);
 					player.getInventory().setChestplate(ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE,
@@ -66,13 +72,10 @@ public class SuitsGUI implements InventoryProvider {
 					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
 							+ "You have equipped " + ChatColor.YELLOW + "Astronaut Outfit");
 				} else {
-					main.ao.remove(player);
-					player.getInventory().setHelmet(new ItemStack(Material.AIR));
-					player.getInventory().setChestplate(new ItemStack(Material.AIR));
-					player.getInventory().setLeggings(new ItemStack(Material.AIR));
-					player.getInventory().setBoots(new ItemStack(Material.AIR));
+					removeOutfits(player);
 					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
 							+ "You have unequipped " + ChatColor.YELLOW + "Astronaut Outfit");
+					main.getListener().resetArmor(player);
 				}
 			} else {
 				player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -86,11 +89,7 @@ public class SuitsGUI implements InventoryProvider {
 			if (data != null) {
 				if (data.santaoutfit == 1) {
 					if (!(main.so.containsKey(player))) {
-						if (main.ao.containsKey(player)) {
-							main.ao.remove(player);
-							player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ "You have unequipped " + ChatColor.YELLOW + "Astronaut Outfit");
-						}
+						removeOutfits(player);
 						main.so.put(player, true);
 						player.getInventory().setHelmet(santaHead);
 						player.getInventory().setChestplate(ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE,
@@ -102,13 +101,10 @@ public class SuitsGUI implements InventoryProvider {
 						player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
 								+ "You have equipped " + ChatColor.RED + ChatColor.BOLD + "Santa Outfit");
 					} else {
-						main.so.remove(player);
-						player.getInventory().setHelmet(new ItemStack(Material.AIR));
-						player.getInventory().setChestplate(new ItemStack(Material.AIR));
-						player.getInventory().setLeggings(new ItemStack(Material.AIR));
-						player.getInventory().setBoots(new ItemStack(Material.AIR));
+						removeOutfits(player);
 						player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
 								+ "You have unequipped " + ChatColor.RED + ChatColor.BOLD + "Santa Outfit");
+						main.getListener().resetArmor(player);
 					}
 				} else {
 					player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -121,6 +117,7 @@ public class SuitsGUI implements InventoryProvider {
 		contents.set(1, 3, ClickableItem.of(pirateHead, e -> {
 			if (data.rewardLevel >= 6) {
 				if (!(main.po.containsKey(player))) {
+					removeOutfits(player);
 					main.po.put(player, true);
 					player.getInventory().setHelmet(pirateHead);
 					player.getInventory().setChestplate(ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE,
@@ -132,13 +129,10 @@ public class SuitsGUI implements InventoryProvider {
 					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
 							+ "You have equipped " + ChatColor.DARK_AQUA + "Pirate Outfit");
 				} else {
-					main.po.remove(player);
-					player.getInventory().setHelmet(new ItemStack(Material.AIR));
-					player.getInventory().setChestplate(new ItemStack(Material.AIR));
-					player.getInventory().setLeggings(new ItemStack(Material.AIR));
-					player.getInventory().setBoots(new ItemStack(Material.AIR));
+					removeOutfits(player);
 					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
 							+ "You have unequipped " + ChatColor.DARK_AQUA + "Pirate Outfit");
+					main.getListener().resetArmor(player);
 				}
 			} else {
 				player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -150,7 +144,8 @@ public class SuitsGUI implements InventoryProvider {
 		contents.set(1, 4, ClickableItem.of(elfHead, e -> {
 			if (data.elfCosmetic == 1) {
 				if (!(main.getListener().elfCosmeticPlayers.contains(player))) {
-					player.sendMessage(main.color("&r&l(!) &rYou have equipped &aElf Outfit"));
+					player.sendMessage(main.color("&9&l(!) &rYou have equipped &aElf Outfit"));
+					removeOutfits(player);
 					main.getListener().elfCosmeticPlayers.add(player);
 					ItemStack chest = getDyedArmor(Material.LEATHER_CHESTPLATE, Color.GREEN, ChatColor.GREEN + "Elf Outfit");
 					ItemStack legs = getDyedArmor(Material.LEATHER_LEGGINGS, Color.RED, ChatColor.GREEN + "Elf Outfit");
@@ -161,14 +156,41 @@ public class SuitsGUI implements InventoryProvider {
 					player.getInventory().setLeggings(legs);
 					player.getInventory().setBoots(boots);
 				} else {
-					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "You have equipped " + ChatColor.GREEN + "Elf Outfit");
-					main.getListener().elfCosmeticPlayers.remove(player);
+					removeOutfits(player);
+					player.sendMessage(main.color("&9&l(!) &rYou have unequipped &aElf Outfit"));
 					main.getListener().resetArmor(player);
 				}
 			} else {
 				player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this cosmetic yet!"));
 			}
+			inv.close(player);
+		}));
+
+		contents.set(1, 5, ClickableItem.of(goldenHead, e -> {
+			if (player.hasPermission("scb.vip")) {
+				if (!(main.getListener().goldenOutfitPlayers.contains(player))) {
+					player.sendMessage(main.color("&9&l(!) &rYou have equipped &6Golden Outfit"));
+					removeOutfits(player);
+					main.getListener().goldenOutfitPlayers.add(player);
+					ItemStack helmet = ItemHelper.create(Material.GOLD_HELMET, main.color("&6Golden Outfit"));
+					ItemStack chest = ItemHelper.create(Material.GOLD_CHESTPLATE, main.color("&6Golden Outfit"));
+					ItemStack legs = ItemHelper.create(Material.GOLD_LEGGINGS, main.color("&6Golden Outfit"));
+					ItemStack boots = ItemHelper.create(Material.GOLD_BOOTS, main.color("&6Golden Outfit"));
+
+					player.getInventory().setHelmet(helmet);
+					player.getInventory().setChestplate(chest);
+					player.getInventory().setLeggings(legs);
+					player.getInventory().setBoots(boots);
+				} else {
+					removeOutfits(player);
+					player.sendMessage(main.color("&9&l(!) &rYou have unequipped &6Golden Outfit"));
+					main.getListener().resetArmor(player);
+				}
+			} else {
+				player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
+						+ Rank.VIP.getTag() + ChatColor.RESET + " to use this!");
+			}
+			inv.close(player);
 		}));
 
 		contents.set(2, 8, ClickableItem
@@ -189,5 +211,13 @@ public class SuitsGUI implements InventoryProvider {
 	@Override
 	public void update(Player player, InventoryContents contents) {
 
+	}
+
+	private void removeOutfits(Player player) {
+		main.ao.remove(player);
+		main.so.remove(player);
+		main.po.remove(player);
+		main.getListener().elfCosmeticPlayers.remove(player);
+		main.getListener().goldenOutfitPlayers.remove(player);
 	}
 }

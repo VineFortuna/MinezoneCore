@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.gui.cosmetics;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import fr.minuskube.inv.ClickableItem;
@@ -57,7 +58,7 @@ public class WinEffectsGUI implements InventoryProvider {
 			contents.set(1, 2,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.WHEAT), main.color("&cMagic Broom"),
 							"", main.color("&rFly around the map with this"), main.color("&rwhen you win!"), "",
-							"" + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN" + ChatColor.RESET + "+ exclusive!"), e -> {
+							Rank.CAPTAIN.getTag() + ChatColor.RESET + "+ exclusive!"),e -> {
 						if (player.hasPermission("scb.winEffects")) {
 							resetWinEffects(data);
 							data.broomWinEffect = 1;
@@ -65,7 +66,7 @@ public class WinEffectsGUI implements InventoryProvider {
 							player.sendMessage(main.color("&e&l(!) &rYou have enabled &eMagic Broom &rwin effect"));
 						} else {
 							player.sendMessage(main.color(
-									"&c&l(!) &rYou need the rank " + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN &rto use this!"));
+									"&c&l(!) &rYou need the rank " + Rank.CAPTAIN.getTag() + "&r to use this!"));
 						}
 					}));
 			
@@ -74,8 +75,8 @@ public class WinEffectsGUI implements InventoryProvider {
 							ItemHelper
 									.setDetails(new ItemStack(Material.DRAGON_EGG), main.color("&cEnderDragon"), "",
 											main.color("&rFly around the map with an"),
-											main.color("&rEnderDragon when you win!"), "", "" + ChatColor.BLUE
-													+ ChatColor.BOLD + "CAPTAIN" + ChatColor.RESET + "+ exclusive!"),
+											main.color("&rEnderDragon when you win!"), "",
+											Rank.CAPTAIN.getTag() + ChatColor.RESET + "+ exclusive!"),
 							e -> {
 								if (player.hasPermission("scb.winEffects")) {
 									resetWinEffects(data);
@@ -84,14 +85,14 @@ public class WinEffectsGUI implements InventoryProvider {
 									player.sendMessage(main.color("&e&l(!) &rYou have enabled &eEnderDragon &rwin effect"));
 								} else {
 									player.sendMessage(main.color(
-											"&c&l(!) &rYou need the rank " + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN &rto use this!"));
+											"&c&l(!) &rYou need the rank " + Rank.CAPTAIN.getTag() + "&r to use this!"));
 								}
 							}));
 			
 			contents.set(1, 3,
 					ClickableItem.of(ItemHelper.setDetails(santa, main.color("&cSanta Claus"), "",
 							main.color("&rBecome old Saint Nick himself"), main.color("&rand ride along!"), "",
-							"" + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN" + ChatColor.RESET + "+ exclusive!"), e -> {
+							Rank.CAPTAIN.getTag() + ChatColor.RESET + "+ exclusive!"), e -> {
 						if (player.hasPermission("scb.winEffects")) {
 							resetWinEffects(data);
 							data.santaEffect = 1;
@@ -99,7 +100,7 @@ public class WinEffectsGUI implements InventoryProvider {
 							player.sendMessage(main.color("&e&l(!) &rYou have enabled &eSanta Claus &rwin effect"));
 						} else {
 							player.sendMessage(main.color(
-									"&c&l(!) &rYou need the rank " + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN &rto use this!"));
+									"&c&l(!) &rYou need the rank " + Rank.CAPTAIN.getTag() + "&r to use this!"));
 						}
 					}));
 			contents.set(1, 5,
