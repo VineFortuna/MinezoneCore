@@ -1843,7 +1843,7 @@ public abstract class BaseClass {
 			if (baseClass.getType() == ClassType.Sheep) {
 				damagerPlayer.getInventory().addItem(new ItemStack(Material.ENCHANTMENT_TABLE));
 				damagerPlayer.sendMessage(instance.getGameManager().getMain()
-						.color("&r&l(!) &rYou got a kill and now you can switch your wool color if you'damagerPlayer like!"));
+						.color("&r&l(!) &rYou got a kill and now you can switch your wool color if you'd like!"));
 
 			} else if (baseClass.getType() == ClassType.Hunter) {
 				if (!hunterDash) {
