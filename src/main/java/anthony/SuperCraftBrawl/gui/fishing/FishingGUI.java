@@ -124,7 +124,7 @@ public class FishingGUI implements InventoryProvider {
                             "",
                             main.color("&7Maps carried: " + mapDetails.carrying),
                             main.color("&8Follow the clues to claim your reward")), e -> {
-                        player.sendMessage(main.color("&3&l(!) &rSunken treasure location: &e&l"
+                        player.sendMessage(main.color("&3&l(!) &rThe map leads to &e&l"
                                 + treasureLoc.getBlockX() + ", " + treasureLoc.getBlockY() + ", " + treasureLoc.getBlockZ()));
                     }));
         } else {
