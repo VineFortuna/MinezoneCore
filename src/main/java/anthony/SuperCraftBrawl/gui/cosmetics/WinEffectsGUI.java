@@ -38,6 +38,7 @@ public class WinEffectsGUI implements InventoryProvider {
 		data.fireParticlesEffect = 0;
 		data.fishRainEffect = 0;
 		data.floodEffect = 0;
+		data.treasureEffect = 0;
 	}
 
 	@Override
@@ -137,7 +138,25 @@ public class WinEffectsGUI implements InventoryProvider {
 											+ "You have not unlocked this cosmetic yet!");
 								}
 							}));
-			
+			contents.set(1, 7,
+					ClickableItem.of(
+							ItemHelper
+									.setDetails(new ItemStack(Material.GOLD_BLOCK), main.color("&cTreasure Hoard"), "",
+											main.color("&rPlunder shiny riches"), main.color("&rlike a true pirate"),
+											"", main.color("&aFishing reward!")),
+							e -> {
+								if (data.treasureOpened == 1) {
+									resetWinEffects(data);
+									data.treasureEffect = 1;
+									inv.close(player);
+									player.sendMessage(main.color("&e&l(!) &rYou have enabled &eTreasure Hoard &rwin effect"));
+								} else {
+									player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
+											+ "You have not unlocked this cosmetic yet!");
+								}
+							}));
+
+
 			contents.set(1, 1, ClickableItem.of(ItemHelper.setDetails(playerskull, main.color("&cDefault Effect"), "",
 					main.color("&rFireworks shoot up when winning"), main.color("&ra game!")), e -> {
 				resetWinEffects(data);
