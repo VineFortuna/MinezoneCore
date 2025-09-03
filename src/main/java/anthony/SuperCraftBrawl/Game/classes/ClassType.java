@@ -217,7 +217,7 @@ public enum ClassType {
 			case Skeleton:
 				return "Effective shooter at taking down their targets";
 			case Enderdragon:
-				return "More around your opponents and heal from your ender crystals!";
+				return "Move around your opponents and heal from your ender crystals!";
 			case Enderman:
 				return "Stare into the souls of your enemies whilst teleporting around them";
 			case Horse:
