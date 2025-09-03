@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.fishing;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.util.ItemHelper;
 import net.minecraft.server.v1_8_R3.EntityArmorStand;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
@@ -57,8 +58,7 @@ public class Fishing implements Listener {
             event.setExpToDrop(0);
             Player p = event.getPlayer();
             PlayerData data = main.getDataManager().getPlayerData(p);
-            //FishType fish = getFish(main.getFishingArea(event.getHook().getLocation()));
-            FishType fish = FishType.MAP;
+            FishType fish = getFish(main.getFishingArea(event.getHook().getLocation()));
             FishingDetails details = data.playerFishing.get(fish.getId());
             
             i.getItemStack().setType(fish.getItem().getType());
@@ -448,9 +448,16 @@ public class Fishing implements Listener {
                     stand.teleport(stand.getLocation().add(0, 0.5, 0));
                     loc.getWorld().playSound(loc, Sound.CHEST_OPEN, 1f, 1f);
 
+                    ItemStack reward;
                     // pop out random loot
                     for (int i = 0; i < 5; i++) {
-                        ItemStack reward = getRandomReward(p);
+                        if (data.treasureOpened == 0 && i == 4) {
+                            reward = ItemHelper.create(Material.GOLD_BLOCK);
+                            p.sendMessage(main.color("&3&l(!) &rYou have found &6Treasure Hoard &rwin effect!"));
+                            data.treasureOpened = 1;
+                        } else {
+                            reward = getRandomReward(p);
+                        }
                         Item dropped = loc.getWorld().dropItem(loc.clone().add(0, 1, 0), reward);
                         dropped.setPickupDelay(Integer.MAX_VALUE);
                         fishItems.add(dropped);
