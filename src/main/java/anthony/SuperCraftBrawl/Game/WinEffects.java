@@ -16,6 +16,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class WinEffects {
@@ -26,6 +27,7 @@ public class WinEffects {
 	private boolean defaultEffect = false;
 	private boolean rainEffect = false;
 	private boolean floodEffect = false;
+	private boolean treasureEffect = false;
 	private ArrayList<Item> fish = new ArrayList<>();
 
 	public WinEffects(Player player, GameInstance instance) {
@@ -50,6 +52,8 @@ public class WinEffects {
 					fishRainEffect();
 				else if (data.floodEffect == 1)
 					floodEffect();
+				else if (data.treasureEffect == 1)
+					treasureEffect();
 				else
 					defaultEffect();
 			}
@@ -208,6 +212,77 @@ public class WinEffects {
 		runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
 	}
 
+	public void treasureEffect() {
+		final World world = player.getWorld();
+		if (world != instance.getMapWorld()) return;
+		final Random rand = new Random();
+		final Location loc = player.getLocation();
+		final List<Block> placedBlocks = new ArrayList<>();
+		final int durationTicks = 200; // 10 seconds at 20 ticks/sec
+		final double maxHeight = 5; // max height the pile can reach above player
+
+		new BukkitRunnable() {
+			int tick = 0;
+
+			@Override
+			public void run() {
+				if (tick >= durationTicks) {
+					cancel();
+
+					// Final explosion cleanup
+					for (Block b : placedBlocks) {
+						if (b.getType() == Material.GOLD_BLOCK) b.setType(Material.AIR);
+					}
+				}
+
+				// Determine vertical rise based on elapsed time
+				double rise = ((double) tick / durationTicks) * maxHeight;
+
+				// Place multiple blocks per tick for a natural mound
+				for (int i = 0; i < 3; i++) {
+					int dx = rand.nextInt(9) - 4;
+					int dz = rand.nextInt(9) - 4;
+
+					// Base Y rises gradually
+					int baseY = loc.getBlockY() + (int) rise;
+
+					// Find highest solid block below current height
+					while (baseY > 0 && world.getBlockAt(loc.getBlockX() + dx, baseY, loc.getBlockZ() + dz).getType() == Material.AIR) {
+						baseY--;
+					}
+
+					Block target = world.getBlockAt(loc.getBlockX() + dx, baseY + 1, loc.getBlockZ() + dz);
+
+					if (target.getType() == Material.AIR) {
+						target.setType(Material.GOLD_BLOCK);
+						placedBlocks.add(target);
+
+						// Coin trickle
+						if (rand.nextInt(3) == 0) { // 1/3 chance
+							Location coinLoc = target.getLocation().add(0.5, 1.2, 0.5);
+							Material coinMat = rand.nextBoolean() ? Material.GOLD_NUGGET : Material.GOLD_INGOT;
+							Item item = world.dropItem(coinLoc, new ItemStack(coinMat, 1));
+							item.setPickupDelay(Integer.MAX_VALUE);
+							item.setVelocity(new Vector(
+									(rand.nextDouble() - 0.5) * 0.8,
+									0.6 + rand.nextDouble() * 0.4,
+									(rand.nextDouble() - 0.5) * 0.8
+							));
+							new BukkitRunnable() {
+								@Override
+								public void run() {
+									if (!item.isDead()) item.remove();
+								}
+							}.runTaskLater(instance.getGameManager().getMain(), 40L);
+						}
+					}
+				}
+
+				tick++;
+			}
+		}.runTaskTimer(instance.getGameManager().getMain(), 0L, 4L); // every 4 ticks
+	}
+
 	private void defaultEffect() {
 		this.defaultEffect = true;
 
@@ -276,6 +351,8 @@ public class WinEffects {
 			player.getWorld().setStorm(false);
 			player.getWorld().setThundering(false);
 			this.floodEffect = false;
+		} else if (this.treasureEffect) {
+			this.treasureEffect = false;
 		}
 	}
 }
