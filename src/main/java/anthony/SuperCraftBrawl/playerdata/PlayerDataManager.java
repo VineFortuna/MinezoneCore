@@ -168,6 +168,8 @@ public class PlayerDataManager implements Listener {
 			int candycaneParticles = set.getInt("CandyCaneParticles");
 			int snowball = set.getInt("Snowball");
 			int floodEffect = set.getInt("FloodEffect");
+			int treasureEffect = set.getInt("TreasureEffect");
+			int treasureOpened = set.getInt("TreasureOpened");
 			String color = set.getString("Color");
 			String fishingWarps = set.getString("FishingWarps");
 			String treasureLoc = set.getString("TreasureLoc");
@@ -181,7 +183,8 @@ public class PlayerDataManager implements Listener {
 					matchMvps, fly, totalcaught, caught, rewardLevel, lureLevel, lure, friendshipLevel, friendship,
 					bestWinstreak, december15, december16, december17, december18, december19, december20, december21,
 					december22, december23, december24, december25, snowParticles, snowballDeathEffect, elfCosmetic,
-					snowmanPet, candycaneParticles, snowball, floodEffect, color, fishingWarps, treasureLoc);
+					snowmanPet, candycaneParticles, snowball, floodEffect, treasureEffect, treasureOpened, color,
+					fishingWarps, treasureLoc);
 		}
 		set.close();
 		stmt.close();
@@ -291,7 +294,8 @@ public class PlayerDataManager implements Listener {
 				+ data.caught + ", RewardLevel = " + data.rewardLevel + ", LureLevel = " + data.lureLevel + ", Lure = "
 				+ data.lure + ", FriendshipLevel = " + data.friendshipLevel + ", Friendship = " + data.friendship
 				+ ", FishRainEffect = " + data.fishRainEffect + ", Snowball = " + data.snowball
-				+ ", FloodEffect = " + data.floodEffect + ", Color = '" + data.color + "', FishingWarps = '" + data.fishingWarps
+				+ ", FloodEffect = " + data.floodEffect + ", TreasureEffect = " + data.treasureEffect
+				+ ", TreasureOpened = " + data.treasureOpened + ", Color = '" + data.color + "', FishingWarps = '" + data.fishingWarps
 				+ "', TreasureLoc = '" + data.treasureLoc + "' WHERE UUID = '" + data.playerUUID.toString() + "';");
 		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon, "
 				+ "Reward1, Reward2, Reward3, Reward4, Reward5) VALUES ";
