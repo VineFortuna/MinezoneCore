@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.all.DarkSethBlingClass;
 import anthony.SuperCraftBrawl.Game.classes.all.EnchantTableClass;
+import anthony.SuperCraftBrawl.Game.classes.all.LargeFernClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -2163,6 +2164,14 @@ public class GameInstance {
 				RemovePlayer(player); // Recursion to make sure player is removed from the arraylist
 				SetLobbyScoreboard(player); // Sets the main lobby board to player
 				getGameManager().getMain().sendScoreboardUpdate(player);
+
+				if (baseClass.getType() == ClassType.LargeFern) {
+					LargeFernClass largeFernClass = (LargeFernClass) baseClass;
+					if (largeFernClass.transfernRunnable != null) {
+//						largeFernClass.transfernRunnable.cleanup();
+						largeFernClass.transfernRunnable.cancel();
+					}
+				}
 			}
 
 			// getGameManager().getMain().ResetPlayer(player);
