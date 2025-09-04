@@ -21,14 +21,21 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class SilverfishClass extends BaseClass {
 	private final ItemStack weapon;
 	private final ItemStack wallItem;
 	private final Ability wallAbility = new Ability("&7&lWall", 10, player);
+	private static final Material[] REPLACEABLE_BLOCKS = {
+			Material.AIR, Material.GRASS, Material.LONG_GRASS, Material.VINE,
+			Material.WATER, Material.STATIONARY_WATER, Material.LAVA, Material.STATIONARY_LAVA
+	};
 
 	public SilverfishClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -87,37 +94,30 @@ public class SilverfishClass extends BaseClass {
 		ItemStack item = event.getItem();
 		Action action = event.getAction();
 
-		if (item != null) {
-			if (player.getGameMode() != GameMode.SPECTATOR) {
-				// WALL ABILITY
-				if (item.equals(wallItem)) {
-					// Check Right or Left Button Click
-					if (action == Action.RIGHT_CLICK_AIR
-							|| action == Action.RIGHT_CLICK_BLOCK
-							|| action == Action.LEFT_CLICK_AIR
-							|| action == Action.LEFT_CLICK_BLOCK) {
-						// If ability is on cooldown
-						if (!wallAbility.isReady()) return;
+		if (item == null) return;
+		// Wall Ability
+		if (!item.equals(wallItem)) return;
+		if (player.getGameMode() == GameMode.SPECTATOR) return;
+		if (!wallAbility.isClickAction(action)) return;
+		if (!wallAbility.isReady()) return;
 
-						SilverfishWall createWall = new SilverfishWall(3, 3, player, 2, 0.2);
-						// Wall logic
-							// When right or left click on block
-						if (action == Action.RIGHT_CLICK_BLOCK) {
-							createWall.buildWallClickedBlock(event.getClickedBlock());
+		SilverfishWall wall = new SilverfishWall(3, 3, player, 2, 0.2);
+		handleWallPlacement(action, event.getClickedBlock(), wall);
+		wallAbility.use();
+	}
 
-						}    // When right click on air
-						else if (event.getAction() == Action.RIGHT_CLICK_AIR) {
-							createWall.buildWallClickedAir(2);
-
-						}	// When left click on air
-						else if (event.getAction() == Action.LEFT_CLICK_AIR) {
-							createWall.buildWallClickedAir(6);
-						}
-
-						wallAbility.use();
-					}
-				}
-			}
+	private void handleWallPlacement(Action action, Block clickedBlock, SilverfishWall wall) {
+		// Block (Right-Click)
+		if (action == Action.RIGHT_CLICK_BLOCK) {
+			wall.buildWallOnBlock(clickedBlock);
+		}
+		// Air (Left-Click)
+		else if (action == Action.LEFT_CLICK_AIR) {
+			wall.buildWallOnAir(7);
+		}
+		// Air (Right-Click)
+		else if (action == Action.RIGHT_CLICK_AIR) {
+			wall.buildWallOnAir(3);
 		}
 	}
 
@@ -136,7 +136,6 @@ public class SilverfishClass extends BaseClass {
 		int wallWidth; // Platform Width
 		Player player;
 		Location playerLocation;
-		Vector playerDirection;
 		double startBreakingWallTime;
 		double delayBetweenBreakingBlocks;
 		List<Location> wallLocations = new ArrayList<>();
@@ -147,68 +146,31 @@ public class SilverfishClass extends BaseClass {
 		public SilverfishWall(int wallHeight, int wallWidth, Player player, double startBreakingWallTime, double delayBetweenBreakingBlocks) {
 			this.player = player;
 			this.playerLocation = player.getLocation();
-			this.playerDirection = playerLocation.getDirection();
 			this.wallHeight = wallHeight;
 			this.wallWidth = wallWidth;
 			this.startBreakingWallTime = startBreakingWallTime;
 			this.delayBetweenBreakingBlocks = delayBetweenBreakingBlocks;
 		}
 
-		// Right-Click Block Action
-		public void buildWallClickedBlock(Block clickedBlock) {
-			Location clickedLocation = clickedBlock.getLocation();
-
-			// Creating wall
-			buildWall(clickedLocation);
-			// Breaking wall
+		public void buildWallOnBlock(Block clickedBlock) {
+			buildWall(clickedBlock.getLocation());
 			breakWall();
 		}
 
 		// Right-Click Air Action
-		public void buildWallClickedAir(int distanceFromPlayer) {
+		public void buildWallOnAir(int distance) {
+			// Get player's eye location and direction vector
+			Location eyeLocation = player.getEyeLocation();
+			Vector direction = eyeLocation.getDirection();
 
-			double yawRadians = Math.toRadians(playerLocation.getYaw());
-			double xOffset = -distanceFromPlayer * Math.sin(yawRadians);
-			double zOffset = distanceFromPlayer * Math.cos(yawRadians);
-			Location wallLocation = playerLocation.clone().add(xOffset, -1, zOffset);
+			// Calculate spawn location using the direction vector
+			Location spawnLocation = eyeLocation.add(direction.multiply(distance));
 
-			buildWall(wallLocation);
+			// Adjust height to be relative to player's feet instead of eyes
+			spawnLocation.subtract(0, player.getEyeHeight(), 0);
+
+			buildWall(spawnLocation);
 			breakWall();
-		}
-
-		/**
-		 * Checks the player yaw to determine which of the 4 directions the wall is going to be built.
-		 * Returns an int from 1 to 4.
-		 *
-		 */
-		public int getPlayerSightDirection() {
-			float yaw = player.getLocation().getYaw();
-
-			// Normalizing yaw to the range of 0 to 180
-			if (yaw < 0) {
-				if (yaw < -180) {
-					yaw += 360;
-				} else {
-					yaw += 180;
-				}
-			} else if (yaw > 180) {
-				yaw -= 180;
-			}
-
-			// Getting absolute value of the normalized yaw
-			float absoluteYaw = Math.abs(yaw);
-
-			// Returning 1 of the 4 possible wall building directions
-			if ((absoluteYaw >= 0 && absoluteYaw < 30) || (absoluteYaw >= 150 && absoluteYaw <= 180)) {
-				return 1;
-			} else if ((absoluteYaw >= 30 && absoluteYaw < 60)) {
-				return 2;
-			} else if ((absoluteYaw >= 60 && absoluteYaw < 120)) {
-				return 3;
-			} else if ((absoluteYaw >= 120 && absoluteYaw < 150)) {
-				return 4;
-			} else
-				return 0;
 		}
 
 		/**
@@ -222,55 +184,39 @@ public class SilverfishClass extends BaseClass {
 		 */
 		public void setRandomSilverfishBlock(Location location) {
 			Block block = location.getBlock();
-
 			// Checks if block is one of the possible replaced materials
-			if (block.getType() == Material.AIR
-					|| block.getType() == Material.GRASS
-					|| block.getType() == Material.LONG_GRASS
-					|| block.getType() == Material.VINE
-					|| block.getType() == Material.WATER
-					|| block.getType() == Material.STATIONARY_WATER
-					|| block.getType() == Material.LAVA
-					|| block.getType() == Material.STATIONARY_LAVA) {
+			if (!Arrays.asList(REPLACEABLE_BLOCKS).contains(block.getType())) return;
 
-				// Randomizes a number from 1 to 8
-				Random random = new Random();
-				int randomNumber = random.nextInt(8) + 1;
+			// Randomizes a number from 1 to 8
+			Random random = new Random();
+			int variant = random.nextInt(8) + 1;
 
-				switch (randomNumber) {
-					case 1:
-						// Stone
-						block.setType(Material.STONE);
-						break;
-					case 2:
-						// Cobblestone
-						block.setType(Material.COBBLESTONE);
-						break;
-					case 3:
-						// Stone Brick
-						block.setType(Material.SMOOTH_BRICK);
-						break;
-					case 4:
-						// Chiseled Stone Brick
-						block.setType(Material.SMOOTH_BRICK);
-						block.setData((byte) 3);
-						break;
-					case 5:
-						// Cracked Stone Brick
-						block.setType(Material.SMOOTH_BRICK);
-						block.setData((byte) 2);
-						break;
-					case 6:
-					case 7:
-					case 8:
-						// Mossy Stone Brick
-						block.setType(Material.SMOOTH_BRICK);
-						block.setData((byte) 1);
-						break;
-				}
-				// Setting block metadata
-				block.setMetadata(player.getDisplayName() + "Silverfish Block", new FixedMetadataValue(instance.getGameManager().getMain(), true));
+			switch (variant) {
+				case 1: block.setType(Material.STONE); break;
+				case 2: block.setType(Material.COBBLESTONE); break;
+				case 3:
+					// Stone Brick
+					block.setType(Material.SMOOTH_BRICK);
+					break;
+				case 4:
+					// Chiseled Stone Brick
+					block.setType(Material.SMOOTH_BRICK);
+					block.setData((byte) 3);
+					break;
+				case 5:
+					// Cracked Stone Brick
+					block.setType(Material.SMOOTH_BRICK);
+					block.setData((byte) 2);
+					break;
+				default:
+					// Mossy Stone Brick
+					block.setType(Material.SMOOTH_BRICK);
+					block.setData((byte) 1);
+					break;
 			}
+			// Setting block metadata
+			block.setMetadata(player.getDisplayName() + "Silverfish Block",
+					new FixedMetadataValue(instance.getGameManager().getMain(), true));
 		}
 
 		/**
@@ -313,15 +259,14 @@ public class SilverfishClass extends BaseClass {
 		 *
 		 */
 		public void loopThroughWallBlocks(Consumer<Location> behavior, double delayBetweenBlocks) {
-			double t = 0;
+			double delayTicks = (long) (delayBetweenBlocks * 20);
 
-			for (Location blockLocation : wallLocations) {
-				t++;
+			for (int i = 0; i < wallLocations.size(); i++) {
+				Location blockLocation = wallLocations.get(i);
+				long currentDelay = (long) (i * delayTicks);
 
-				Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
-					behavior.accept(blockLocation);
-				}, (long) ((delayBetweenBlocks * t) * 20));
-
+				Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(),
+						() -> behavior.accept(blockLocation), currentDelay);
 			}
 		}
 
@@ -333,21 +278,46 @@ public class SilverfishClass extends BaseClass {
 			loopThroughWallBlocks(this::setRandomSilverfishBlock, 0);
 		}
 
+		/**
+		 * Checks the player yaw to determine which of the 4 directions the wall is going to be built.
+		 * Returns an int from 1 to 4.
+		 *
+		 */
+		public int getPlayerSightDirection() {
+			float yaw = Math.abs(playerLocation.getYaw() % 360);
+			if (yaw < 0) yaw += 360;
+
+			// Returning 1 of the 4 possible wall building directions
+			if ((yaw >= 0 && yaw < 30) || (yaw >= 150 && yaw <= 180)) return 1;
+			if ((yaw >= 30 && yaw < 60)) return 2;
+			if ((yaw >= 60 && yaw < 120)) return 3;
+			if ((yaw >= 120 && yaw < 150)) return 4;
+			return 0;
+		}
+
 		private Location getRandomWallBlockLocation() {
 			if (wallLocations.isEmpty()) {
 				return null;
 			}
 
 			Random random = new Random();
-			int randomIndex;
+			List<Integer> availableIndexes = IntStream.range(0, wallLocations.size())
+					.boxed()
+					.filter(i -> !randomizedIndexes.contains(i))
+					.collect(Collectors.toList());
 
-			do {
-				randomIndex = random.nextInt(wallLocations.size());
-			} while (randomizedIndexes.contains(randomIndex));
+			if (availableIndexes.isEmpty()) {
+				return null;
+			}
 
+			int randomIndex = availableIndexes.get(random.nextInt(availableIndexes.size()));
 			randomizedIndexes.add(randomIndex);
-
 			return wallLocations.get(randomIndex);
+		}
+
+		public void breakWall() {
+			loopThroughWallBlocks(this::breakWallBlock, delayBetweenBreakingBlocks);
+			despawnSilverfish();
 		}
 
 		/**
@@ -362,19 +332,16 @@ public class SilverfishClass extends BaseClass {
 		public void breakWallBlock(Location location) {
 			Location randomizedBlockLocation = getRandomWallBlockLocation();
 
-			if (randomizedBlockLocation == null) {
-				return;
-			}
+			if (randomizedBlockLocation == null) return;
 
 			Block block = randomizedBlockLocation.getBlock();
+			String metadataKey = player.getDisplayName() + "Silverfish Block";
 
 			// Removing Block
 			Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
 				// Checks if block has the custom set metadata
-				if (block.hasMetadata(player.getDisplayName() + "Silverfish Block")) {
-					// Removes the custom set metadata
-					block.removeMetadata(player.getDisplayName() + "Silverfish Block", instance.getGameManager().getMain());
-					// Sets the block to Air
+				if (block.hasMetadata(metadataKey)) {
+					block.removeMetadata(metadataKey, instance.getGameManager().getMain());
 					block.setType(Material.AIR);
 
 //					// Restore the original block type
@@ -387,66 +354,52 @@ public class SilverfishClass extends BaseClass {
 					// Playing digging stone sound to all players
 					SoundManager.playSoundToAll(player, randomizedBlockLocation, Sound.DIG_STONE, 1, 1);
 
-					// Adding Stone/Cobblestone block breaking particles
-					for (Player gamePlayer : instance.players) {
-						for (int i = 0; i < 8; i++) {
-							gamePlayer.playEffect(randomizedBlockLocation, Effect.TILE_BREAK, 1);
-							gamePlayer.playEffect(randomizedBlockLocation, Effect.TILE_BREAK, 4);
-						}
-					}
+
+					playBlockBreakEffects(randomizedBlockLocation);
+					spawnSilverfish(randomizedBlockLocation);
+					// Removing broken block from the list
+					wallLocations.remove(randomizedBlockLocation);
 				}
-
-				// Spawning Silverfish
-				spawnSilverfish(randomizedBlockLocation);
-
-				// Removing broken block from the list
-				wallLocations.remove(randomizedBlockLocation);
-//				randomizedIndexes.remove(randomizedIndexes.size() - 1);
-
-				// Break wall after a defined delay
 			}, (long) (startBreakingWallTime * 20));
 		}
 
-		public void breakWall() {
-			loopThroughWallBlocks(this::breakWallBlock, delayBetweenBreakingBlocks);
-			despawnSilverfish();
+		private void playBlockBreakEffects(Location randomizedBlockLocation) {
+			// Adding Stone/Cobblestone block breaking particles
+			for (Player gamePlayer : instance.players) {
+				for (int i = 0; i < 8; i++) {
+					gamePlayer.playEffect(randomizedBlockLocation, Effect.TILE_BREAK, 1);
+					gamePlayer.playEffect(randomizedBlockLocation, Effect.TILE_BREAK, 4);
+				}
+			}
 		}
 
 		public void spawnSilverfish(Location location) {
 			Silverfish silverfish = (Silverfish) player.getWorld().spawnCreature(location, EntityType.SILVERFISH);
-
-			silverfish.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 3, 4));
-			silverfish.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 10, 4));
-
-			// Customizing Creeper
 			customizeSilverfish(silverfish, player);
-			silverfish.setTarget(instance.getNearestPlayer(player, silverfish, 150));
+
+			Player target = instance.getNearestPlayer(player, silverfish, 150);
+			if (target != null) {
+				silverfish.setTarget(target);
+			}
 		}
 
 		public void despawnSilverfish() {
 			Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
-				for (Entity en : player.getWorld().getEntities())
-					if (!(en instanceof Player))
-						if (en.getType().equals(EntityType.SILVERFISH)) {
-							if (en.getName().contains(player.getName())) {
-								if (en.getName().contains(ChatColorHelper.color("&eSilverfish")));
-								en.remove();
-							}
-						}
-				// Silverfish despawn after half the cooldown of the wall
-			}, (long) 10 * 20);
+				for (Entity entity : player.getWorld().getEntities()) {
+					if (entity.getType() == EntityType.SILVERFISH &&
+							entity.getCustomName() != null &&
+							entity.getCustomName().contains(player.getName())) {
+						entity.remove();
+					}
+				}
+			}, 10 * 20L);
 		}
 
 		private void customizeSilverfish(Creature mob, Player player) {
-			// Adding resistance, so it will not suffocate in the wall and die
-//			mob.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 3, 4));
-//			mob.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 10, 4));
-
-			// Setting Mob to not de-spawn when far away
+			mob.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 9999 * 20, 1, false, false));
+			mob.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 3, 4));
 			mob.setRemoveWhenFarAway(false);
-			// Setting Mob Name to owner's
 			mob.setCustomName(ChatColorHelper.color("&c" + player.getName() + "'s &eSilverfish"));
-			// Setting Custom name visible
 			mob.setCustomNameVisible(true);
 		}
 	}
