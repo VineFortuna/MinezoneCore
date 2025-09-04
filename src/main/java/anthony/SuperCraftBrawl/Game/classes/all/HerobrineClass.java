@@ -55,7 +55,7 @@ public class HerobrineClass extends BaseClass {
 		ItemHelper.setUnbreakable(weapon);
 
 		// Despair Ability
-		String radiusDisplay = ItemHelper.formatDouble(DESPAIR_ABILITY_RANGE);
+		String rangeDisplay = ItemHelper.formatDouble(DESPAIR_ABILITY_RANGE);
 
 		despairItem = ItemHelper.setDetails(
 				new ItemStack(Material.DIAMOND),
@@ -65,7 +65,7 @@ public class HerobrineClass extends BaseClass {
 				"&7▶ &2&oPoison &e" + (poison.getAmplifier() + 1) + " &7for &e" + poison.getDuration() / 20 + "s",
 				"&7▶ &c&oFire&7, by striking lightning at them",
 				"",
-				"&7Range: &a" + radiusDisplay + " &7blocks"
+				"&7Range: &a" + rangeDisplay + " &7blocks"
 		);
 	}
 

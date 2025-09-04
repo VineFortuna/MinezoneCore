@@ -71,8 +71,8 @@ public class LargeFernClass extends BaseClass {
                 "",
                 "&7Moving or performing actions cancel this",
                 "",
-                "&7Small Fern Time: &a" + durationDisplaySmall + "s",
-                "&7Large Fern Time: &a" + durationDisplayLarge + "s"
+                "&7Small Fern Time: &a" + durationDisplaySmall + "&as",
+                "&7Large Fern Time: &a" + durationDisplayLarge + "&as"
         );
     }
 

@@ -72,7 +72,7 @@ public class SnowGolemClass extends BaseClass {
 				"&7Put a pumpkin on your enemies' head",
 				"",
 				"&7Gives you &4&oStrength &e" + (strength.getAmplifier() + 1) + " &7for &e" + strength.getDuration() / 20 + "s",
-				"&7Duration: &a" + durationDisplay + "s",
+				"&7Duration: &a" + durationDisplay + "&as",
 				"&7Range: &a" + radiusDisplay + " &7blocks"
 		);
 

@@ -88,7 +88,7 @@ public class SpiderClass extends BaseClass {
 				webAbility.getAbilityNameRightClickMessage(),
 				"&7Throw an attachable cobweb to trap enemies",
 				"",
-				"&7Duration: &a" + durationDisplay + "s"
+				"&7Duration: &a" + durationDisplay + "&as"
 		);
 	}
 

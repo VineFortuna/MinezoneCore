@@ -76,7 +76,7 @@ public class BlazeClass extends BaseClass {
 				armyAbility.getAbilityNameRightClickMessage(),
 				"&7Summon 3 Blazes to help you fight",
 				"",
-				"&7Duration: &a" + durationDisplay + "s"
+				"&7Duration: &a" + durationDisplay + "&as"
 		);
 	}
 
