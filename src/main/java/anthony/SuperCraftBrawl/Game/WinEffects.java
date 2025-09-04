@@ -215,6 +215,7 @@ public class WinEffects {
 	public void treasureEffect() {
 		final World world = player.getWorld();
 		if (world != instance.getMapWorld()) return;
+		startFireworksRunnable(world);
 		final Random rand = new Random();
 		final Location loc = player.getLocation();
 		final List<Block> placedBlocks = new ArrayList<>();

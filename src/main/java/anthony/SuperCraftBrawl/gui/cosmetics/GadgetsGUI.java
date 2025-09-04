@@ -177,7 +177,7 @@ public class GadgetsGUI implements InventoryProvider {
 					player.sendMessage(main.color("&r&l(!) &rYou equipped &eSnowman &rpet"));
 					Location spawnLoc = player.getLocation().add(1, 0, 1);
 					Snowman snowman = player.getWorld().spawn(spawnLoc, Snowman.class);
-					snowman.setCustomName(ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Snowman Pet");
+					snowman.setCustomName(ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Snowman");
 					main.getListener().snowmanPetPlayers.put(player, snowman);
 					main.getListener().snowmanPet(player);
 				} else {
