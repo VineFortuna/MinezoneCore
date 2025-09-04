@@ -225,7 +225,7 @@ public enum ClassType {
 			case Squid:
 				return "Use your ink to blind enemies";
 			case Spider:
-				return "Bite and poison your enemies while fighting them!";
+				return "Web enemies into place and Mutate to get random effects";
 			case Ninja:
 				return "Ambush your enemies with sneaky attacks and agility";
 			case TNT:

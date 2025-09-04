@@ -2,8 +2,8 @@ package anthony.SuperCraftBrawl.Game.classes;
 
 import anthony.SuperCraftBrawl.Game.ActionBarManager;
 import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
+import anthony.SuperCraftBrawl.Game.classes.all.SpiderClass;
 import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.gui.ClassRewardsGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
@@ -1943,6 +1943,22 @@ public abstract class BaseClass {
 	}
 
 	public void resetHead() {
+		if (this.getType() == ClassType.Spider) {
+			SpiderClass spiderClass = (SpiderClass) this;
+			if (spiderClass.invisTaskId != -1) {
+				ItemStack invisHelmet = playerHead.clone();
+				invisHelmet.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 8);
+				player.getEquipment().setHelmet(invisHelmet);
+				return;
+			}
+		}
+		if (this.getType() == ClassType.Fade) {
+			if (fadeAbilityActive) {
+				player.getEquipment().setHelmet(ItemHelper.create(Material.AIR));
+				return;
+			}
+		}
+
 		player.getEquipment().setHelmet(playerHead);
 	}
 }
