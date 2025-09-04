@@ -73,7 +73,7 @@ public class SpiderClass extends BaseClass {
 				"",
 				"&7Mutate to gain one of these effects:",
 				"&7▶ &b&oSpeed &e" + (speed.getAmplifier() + 1) + " &7for &e" + speed.getDuration() / 20 + "s",
-				"&7▶ &2&oVenom for &e" + poison.getDuration() / 20 + "s",
+				"&7▶ &2&oVenom &7for &e" + poison.getDuration() / 20 + "s",
 				"&7▶ &4&oStrength &e" + (strength.getAmplifier() + 1) + " &7for &e" + strength.getDuration() / 20 + "s",
 				"&7▶ &d&oRegeneration &e" + (regen.getAmplifier() + 1) + " &7for &e" + regen.getDuration() / 20 + "s",
 				"&7▶ &f&oInvisibility &e" + (invis.getAmplifier() + 1) + " &7for &e" + invis.getDuration() / 20 + "s"
