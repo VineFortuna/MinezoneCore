@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.Game.classes;
 
 import anthony.SuperCraftBrawl.Game.ActionBarManager;
 import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
 import anthony.util.ChatColorHelper;
 
@@ -44,6 +45,11 @@ public class Ability {
     }
     public String getOnGroundChatMessage() {
         return "&c&l(!) &rYou have to be on the ground to use " + abilityName;
+    }
+
+    public boolean isClickAction(Action action) {
+        return action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK ||
+                action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK;
     }
 
     public boolean isReady() {
