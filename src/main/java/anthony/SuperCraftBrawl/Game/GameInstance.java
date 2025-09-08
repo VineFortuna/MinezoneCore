@@ -2,8 +2,6 @@ package anthony.SuperCraftBrawl.Game;
 
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.all.DarkSethBlingClass;
-import anthony.SuperCraftBrawl.Game.classes.all.EnchantTableClass;
 import anthony.SuperCraftBrawl.Game.classes.all.LargeFernClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
@@ -519,32 +517,28 @@ public class GameInstance {
 	}
 
 	public void initialSpawn() {
-		MapInstance mapInstance = null;
+		// Get the appropriate map instance
+		MapInstance mapInstance = map != null ? map.GetInstance() : duosMap.GetInstance();
+		List<Vector> spawnPoints = mapInstance.spawnPos;
+		World world = getMapWorld();
 
-		if (map != null)
-			mapInstance = map.GetInstance();
-		else
-			mapInstance = duosMap.GetInstance();
-
-		int count = 0;
-		int size = mapInstance.spawnPos.size();
-
-		if (size == 0) { // If no spawn locations are set
-			for (Player gamePlayer : players) {
-				gamePlayer.teleport(new Location(getMapWorld(), 42, 2, 2.5));
+		// Handle case with no spawn locations
+		if (spawnPoints.isEmpty()) {
+			Location defaultSpawn = new Location(world, 42, 2, 2.5);
+			for (Player player : players) {
+				player.teleport(defaultSpawn);
 			}
-		} else {
-			for (Player gamePlayer : players) {
-				double x = mapInstance.spawnPos.get(count).getX();
-				double y = mapInstance.spawnPos.get(count).getY();
-				double z = mapInstance.spawnPos.get(count).getZ();
+			return;
+		}
 
-				gamePlayer.teleport(new Location(getMapWorld(), x, y, z));
-				count++;
+		// Create shuffled list of spawn points
+		ArrayList<Vector> shuffledSpawns = new ArrayList<>(spawnPoints);
+		Collections.shuffle(shuffledSpawns);
 
-				if (count >= mapInstance.spawnPos.size())
-					count = 0;
-			}
+		// Teleport players using shuffled spawn points
+		for (int i = 0; i < players.size(); i++) {
+			Vector spawn = shuffledSpawns.get(i % shuffledSpawns.size());
+			players.get(i).teleport(spawn.toLocation(world));
 		}
 	}
 
@@ -809,15 +803,18 @@ public class GameInstance {
 		}
 
 		if (this.classes.get(player).getLives() > 0) {
-			String className = classType.getTag() + " ";
-			if (className.length() > 12) {
-				className = classType.getTag().substring(0, 10).trim() + " " + ChatColor.RESET;
+			String baseName = classType.getSecondTag() != null ? classType.getSecondTag() : classType.getTag();
+			baseName += " ";
+
+			if (baseName.length() > 12) {
+				baseName = baseName.substring(0, Math.min(baseName.length(), 10)).trim() + " " + ChatColor.RESET;
+				player.sendMessage("BaseName.lenght > 12");
 			}
-			team.setPrefix(className);
+
+			team.setPrefix(baseName);
 		} else {
 			team.setPrefix("");
 		}
-		/* } */
 	}
 
 	/**
@@ -1194,7 +1191,7 @@ public class GameInstance {
 								player.setGameMode(GameMode.ADVENTURE);
 								player.setHealth(20.0D);
 								player.setAllowFlight(true);
-								GameInstance.this.getGameManager().spawnProtection2(player);
+								GameInstance.this.getGameManager().addSpawnProtection(player);
 								if (!GameInstance.this.players.contains(player)) {
 									GameInstance.this.getGameManager().getMain().ResetPlayer(player);
 								} else {
