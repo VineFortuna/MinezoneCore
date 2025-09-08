@@ -1973,6 +1973,32 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	/**
+	 * This function cancels spectators hitting entities
+	 *
+	 * @param event
+	 */
+	@EventHandler
+	public void onSpectatorDamage(EntityDamageByEntityEvent event) {
+		// Damager
+		if (event.getDamager() instanceof Player) {
+			Player damager = (Player) event.getDamager();
+			GameInstance instance = this.GetInstanceOfPlayer(damager);
+			if (instance == null) return;
+			if (!(damager.getGameMode() == GameMode.SPECTATOR)) return;
+			event.setCancelled(true);
+		}
+
+		// Damagee
+		if (event.getEntity() instanceof Player) {
+			Player damagee = (Player) event.getEntity();
+			GameInstance instance = this.GetInstanceOfPlayer(damagee);
+			if (instance == null) return;
+			if (!(damagee.getGameMode() == GameMode.SPECTATOR)) return;
+			event.setCancelled(true);
+		}
+	}
+
+	/**
 	 * This function handles spawn protection so players cant get damaged
 	 *
 	 * @param event
