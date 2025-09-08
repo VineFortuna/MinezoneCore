@@ -1765,8 +1765,10 @@ public abstract class BaseClass {
 
 	// Giving health potions on kill
 	protected void healthPots(Player d) {
-		if (checkIfDead(d, instance) || instance.classes.get(d).getType() == ClassType.Horse)
+		if (!isPlayerAlive() || instance.classes.get(d).getType() == ClassType.Horse)
 			return;
+
+		if (instance.alivePlayers == 1) return;
 
 		if (d.getHealth() / d.getMaxHealth() >= 0.5) return;
 

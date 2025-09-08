@@ -25,7 +25,7 @@ public class PlayerData {
 			december19 = 0, december20 = 0, december21 = 0, december22 = 0, december23 = 0, december24 = 0,
 			december25 = 0, snowParticles = 0, snowballDeathEffect = 0, elfCosmetic = 0, snowmanPet = 0,
 			candycaneParticles = 0, snowball = 0, floodEffect = 0, treasureEffect = 0, treasureOpened = 0;
-	public String color = "GRAY", fishingWarps = "", treasureLoc = "";
+	public String color = "", fishingWarps = "", treasureLoc = "";
 
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
 	public HashMap<Integer, FishingDetails> playerFishing = new HashMap<>();
