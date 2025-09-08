@@ -808,7 +808,6 @@ public class GameInstance {
 
 			if (baseName.length() > 12) {
 				baseName = baseName.substring(0, Math.min(baseName.length(), 10)).trim() + " " + ChatColor.RESET;
-				player.sendMessage("BaseName.lenght > 12");
 			}
 
 			team.setPrefix(baseName);
