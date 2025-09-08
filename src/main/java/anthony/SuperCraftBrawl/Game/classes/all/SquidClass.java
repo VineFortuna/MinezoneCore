@@ -95,7 +95,7 @@ public class SquidClass extends BaseClass {
 		)) {
 			if (entity instanceof Player && !entity.equals(player)) {
 				Player playerInRange = (Player) entity;
-				if (isPlayerAlive()) {
+				if (!checkIfDead(playerInRange, instance) && !instance.HasSpectator(playerInRange)) {
 					useInkAbility(playerInRange);
 					foundPlayers = true;
 				}
