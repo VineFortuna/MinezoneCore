@@ -73,6 +73,8 @@ public class GameManager implements Listener, PluginMessageListener {
 	public GameState state;
 	public GameType gameType;
 
+	private static final int SPAWN_PROT_DURATION = 5;
+
 	public GameManager(Core main) {
 		this.main = main;
 		this.playercount = new HashMap<>();
@@ -1082,12 +1084,12 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	@EventHandler (priority = EventPriority.HIGHEST)
-	public void activeGames(PlayerInteractEvent e) {
-		Player player = e.getPlayer();
+	public void activeGames(PlayerInteractEvent event) {
+		Player player = event.getPlayer();
 		GameInstance i = this.GetInstanceOfPlayer(player);
 
-		if (e.getItem() != null && e.getItem().getType() == Material.EYE_OF_ENDER) {
-			e.setCancelled(true);
+		if (event.getItem() != null && event.getItem().getType() == Material.EYE_OF_ENDER) {
+			event.setCancelled(true);
 			if (player.getWorld() == main.getLobbyWorld())
 				new ActiveGamesGUI(getMain()).inv.open(player);
 		}
@@ -1976,89 +1978,39 @@ public class GameManager implements Listener, PluginMessageListener {
 	 * @param event
 	 */
 	@EventHandler
-	public void spawnProtection(EntityDamageByEntityEvent event) {
+	public void onDamageSpawnProtection(EntityDamageByEntityEvent event) {
+		// Damager
+		if (event.getDamager() instanceof Player) {
+			Player damager = (Player) event.getDamager();
+			GameInstance instance = this.GetInstanceOfPlayer(damager);
+			if (instance == null) return;
+			if (!spawnProt.containsKey(damager)) return;
+			event.setCancelled(true);
+			SoundManager.playNMSSoundToPlayer(damager, "mob.guardian.elder.hit", 1, 1);
+		}
+
+		// Damagee
 		if (event.getEntity() instanceof Player) {
-			Player p = (Player) event.getEntity();
-
-			if (event.getDamager() instanceof Player) {
-				Player k = (Player) event.getDamager();
-				GameInstance i = this.GetInstanceOfPlayer(k);
-
-				if (i != null) {
-					BaseClass bc = i.classes.get(k);
-					BaseClass bc2 = i.classes.get(p);
-
-					if (bc != null && bc2 != null) {
-						if (bc.bedrockInvincibility == true) {
-							event.setCancelled(true);
-						} else if (bc2.bedrockInvincibility == true) {
-							event.setCancelled(true);
-						}
-					}
-				}
-
-				if (this.spawnProt.containsKey(p)) {
-					event.setCancelled(true);
-				}
-				if (this.spawnProt.containsKey(k)) {
-					event.setCancelled(true);
-				}
-
-				// For spectators:
-				if (i != null && i.classes.containsKey(k) && i.classes.get(k).getLives() <= 0) {
-					event.setCancelled(true);
-				} else {
-					i = this.GetInstanceOfSpectator(k);
-
-					if (i != null && i.spectators.contains(k) && k.getWorld() == i.getMapWorld()) {
-						event.setCancelled(true);
-					}
-				}
-			} else {
-				GameInstance i = this.GetInstanceOfPlayer(p);
-
-				if (i != null) {
-					BaseClass bc = i.classes.get(p);
-
-					if (bc != null) {
-						if (bc.bedrockInvincibility == true) {
-							event.setCancelled(true);
-						}
-					}
-				}
-				if (this.spawnProt.containsKey(p)) {
-					event.setCancelled(true);
-				}
-			}
-		} else {
-			if (event.getDamager() instanceof Player) {
-				Player k = (Player) event.getDamager();
-				GameInstance i = this.GetInstanceOfPlayer(k);
-
-				if (i != null && i.classes.get(k).getLives() <= 0) {
-					event.setCancelled(true);
-				} else {
-					i = this.GetInstanceOfSpectator(k);
-
-					if (i != null && i.spectators.contains(k) && k.getWorld() == i.getMapWorld()) {
-						event.setCancelled(true);
-					}
-				}
-			}
+			Player damagee = (Player) event.getEntity();
+			GameInstance instance = this.GetInstanceOfPlayer(damagee);
+			if (instance == null) return;
+			if (!spawnProt.containsKey(damagee)) return;
+			event.setCancelled(true);
+			SoundManager.playNMSSoundToPlayer(damagee, "mob.guardian.elder.hit", 1, 1);
 		}
 	}
 
-	public void spawnProtection2(Player player) {
-		BukkitRunnable r = this.spawnProt.get(player);
-		GameInstance i = this.GetInstanceOfPlayer(player);
+	public void addSpawnProtection(Player player) {
+		BukkitRunnable runnable = this.spawnProt.get(player);
+		GameInstance instance = this.GetInstanceOfPlayer(player);
 
-		if (r == null) {
-			r = new BukkitRunnable() {
-				int ticks = 5;
+		if (runnable == null) {
+			runnable = new BukkitRunnable() {
+				int ticks = SPAWN_PROT_DURATION;
 
 				@Override
 				public void run() {
-					if (ticks == 0 || (i != null && i.state == GameState.ENDED)) {
+					if (ticks == 0 || (instance != null && instance.state == GameState.ENDED)) {
 						spawnProt.remove(player);
 						this.cancel();
 					}
@@ -2066,9 +2018,10 @@ public class GameManager implements Listener, PluginMessageListener {
 					ticks--;
 				}
 			};
-			r.runTaskTimer(main, 0, 20);
-			this.spawnProt.put(player, r);
-			spawnProtParticles(player, i);
+
+			runnable.runTaskTimer(main, 0, 20);
+			this.spawnProt.put(player, runnable);
+			spawnProtParticles(player, instance);
 		}
 	}
 
@@ -2076,10 +2029,10 @@ public class GameManager implements Listener, PluginMessageListener {
 	 * This function spawns Spawn Protection particles around the player
 	 *
 	 * @param player
-	 * @param i
+	 * @param instance
 	 */
-	private void spawnProtParticles(Player player, GameInstance i) {
-		int durationTicks = 5 * 20; // 5 seconds in ticks
+	private void spawnProtParticles(Player player, GameInstance instance) {
+		int durationTicks = SPAWN_PROT_DURATION * 20; // 5 seconds in ticks
 		double radius = 1.0;
 		int particleCount = 20;
 
@@ -2104,8 +2057,8 @@ public class GameManager implements Listener, PluginMessageListener {
 							true, (float) particleLoc.getX(), (float) particleLoc.getY(), (float) particleLoc.getZ(),
 							0F, 0F, 0F, 0F, 1);
 
-					if (i != null) {
-						for (Player gamePlayer : i.players)
+					if (instance != null) {
+						for (Player gamePlayer : instance.players)
 							((CraftPlayer) gamePlayer).getHandle().playerConnection.sendPacket(packet);
 					}
 				}
