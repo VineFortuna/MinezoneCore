@@ -208,7 +208,7 @@ public class SnowGolemClass extends BaseClass {
 							if (entity instanceof Player && !entity.equals(player)) {
 								Player playerInRange = (Player) entity;
 								if (!checkIfDead(playerInRange, instance) && !instance.HasSpectator(playerInRange)) {
-									usePumpkinAbility(playerInRange);
+									setPumpkinHead(playerInRange);
 									foundPlayers = true;
 								}
 							}
@@ -229,7 +229,7 @@ public class SnowGolemClass extends BaseClass {
 		}
 	}
 
-	private void usePumpkinAbility(Player playerInRange) {
+	private void setPumpkinHead(Player playerInRange) {
 		// Pumpkin Head Sound
 		playerInRange.playSound(player.getLocation(), Sound.AMBIENCE_CAVE, 1, 2);
 

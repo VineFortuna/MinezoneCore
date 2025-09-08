@@ -144,7 +144,8 @@ public class EndermiteClass extends BaseClass {
         if (player.getGameMode() == GameMode.SPECTATOR) return;
         if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
 
-        if (item.equals(weapon)) {
+        if (item.isSimilar(weapon)) {
+            event.setCancelled(true);
             if (!phaseAbility.isReady()) return;
             usePhaseAbility();
         }

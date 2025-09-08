@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
@@ -94,6 +95,9 @@ public class NinjaClass extends BaseClass {
 
 	@Override
 	public void Tick(int gameTicks) {
+		if (!isPlayerAlive()) return;
+		if (instance.state == GameState.ENDED) return;
+
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getLives() > 0) {
 			if (gameTicks % 20 == 0 && !checkIfDead(player, instance)) {
 				if (this.starsCooldown != 0) {

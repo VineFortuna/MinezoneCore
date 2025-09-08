@@ -329,8 +329,7 @@ public enum ClassType {
 			case ZombiePigman:
 				return "" + ChatColor.GREEN + ChatColor.ITALIC + "Zombie" + ChatColor.LIGHT_PURPLE + ChatColor.ITALIC + "Pigman" + ChatColor.RESET;
 			case ZombieVillager:
-				return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Zombie" + ChatColor.GRAY + ChatColor.BOLD + "Villager"
-						+ ChatColor.RESET;
+				return "" + ChatColor.GREEN + ChatColor.BOLD + "Zombie" + ChatColor.GRAY + ChatColor.BOLD + "Villager" + ChatColor.RESET;
 			case Villager:
 				return "" + ChatColor.GREEN + "Villager" + ChatColor.RESET;
 			case MagmaCube:
@@ -443,6 +442,24 @@ public enum ClassType {
 				break;
 		}
 		return this.toString();
+	}
+
+	public String getSecondTag() {
+		switch (this) {
+			case WitherSkeleton:
+				return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "WSkele" + ChatColor.RESET;
+//			case Enderdragon:
+//				return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "EDragon" + ChatColor.RESET + ChatColor.DARK_GRAY + ChatColor.BOLD + "Dragon" + ChatColor.RESET;
+//			case FlintAndSteel:
+//				return "" + ChatColor.DARK_GRAY + "Fl" + ChatColor.GRAY + "&" + ChatColor.WHITE + "St" + ChatColor.RESET;
+//			case LargeFern:
+//				return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + ChatColor.BOLD + "LFern" + ChatColor.RESET;
+//			case ZombiePigman:
+//				return "" + ChatColor.GREEN + ChatColor.ITALIC + "Z" + ChatColor.LIGHT_PURPLE + ChatColor.ITALIC + "Pigman" + ChatColor.RESET;
+//			case ZombieVillager:
+//				return "" + ChatColor.GREEN + ChatColor.BOLD + "Z" + ChatColor.GRAY + ChatColor.BOLD + "Villager" + ChatColor.RESET;
+		}
+		return null;
 	}
 
 	public ItemStack getItem() {

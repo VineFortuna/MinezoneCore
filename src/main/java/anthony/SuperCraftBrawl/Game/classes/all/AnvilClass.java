@@ -94,18 +94,20 @@ public class AnvilClass extends BaseClass {
 			if (!(entity instanceof Player)) continue;
 			Player playerInRange = (Player) entity;
 			if (playerInRange == player) continue;
+			if (checkIfDead(playerInRange, instance)) return;
 			applyStompToPlayer(playerInRange);
 		}
 	}
 
 	private void applyStompToPlayer(Player playerInRange) {
-		playerInRange.setVelocity((new Vector(0, 1, 0)).multiply(0.5D));
 		// Damage
 		EntityDamageEvent damageEvent = new EntityDamageEvent(
 				playerInRange, EntityDamageEvent.DamageCause.CUSTOM, stompDamage
 		);
 
 		instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+		if (damageEvent.isCancelled()) return;
+
 		double currentHealth = playerInRange.getHealth();
 //		stompDamage = Math.min(stompDamage, currentHealth);
 		double finalHealth = currentHealth - stompDamage;
@@ -121,6 +123,8 @@ public class AnvilClass extends BaseClass {
 			playerInRange.damage(0, player);
 			playerInRange.setHealth(finalHealth);
 		}
+
+		playerInRange.setVelocity((new Vector(0, 1, 0)).multiply(0.5D));
 	}
 
 	private void playEffectsForAllPlayers() {
