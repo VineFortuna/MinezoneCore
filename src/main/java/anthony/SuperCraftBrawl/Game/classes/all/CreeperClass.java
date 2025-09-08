@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
@@ -96,6 +97,7 @@ public class CreeperClass extends BaseClass {
 	@Override
 	public void Tick(int gameTicks) {
 		if (!isPlayerAlive()) return;
+		if (instance.state == GameState.ENDED) return;
 		tntAbility.updateActionBar(player,this);
 	}
 
