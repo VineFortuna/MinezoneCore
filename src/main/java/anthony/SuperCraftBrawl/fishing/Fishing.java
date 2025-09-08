@@ -109,7 +109,7 @@ public class Fishing implements Listener {
                 p.sendMessage(main.color("&3&l(!) &rYou have found &e1 MysteryChest&r!"));
                 data.mysteryChests++;
             } else if (fish == FishType.EXP) {
-                int r = rand.nextInt(40) + 11;
+                int r = rand.nextInt(40) + 481;
                 data.exp += r;
                 p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + r + " EXP&r!"));
                 if (data.exp >= 2500) {
@@ -120,7 +120,7 @@ public class Fishing implements Listener {
                 }
                 updateScoreboard = true;
             } else if (fish == FishType.TOKENS) {
-                int r = rand.nextInt(35) + 11;
+                int r = rand.nextInt(20) + 41;
                 data.tokens += r;
                 p.sendMessage(main.color("&3&l(!) &rYou have found &e" + r + " Tokens&r!"));
                 updateScoreboard = true;
@@ -514,13 +514,13 @@ public class Fishing implements Listener {
 
         if (r <= 10) {
             reward = FishType.TOKENS;
-            amount = rand.nextInt(100) + 400;
+            amount = rand.nextInt(50) + 226;
             data.tokens += amount;
             p.sendMessage(main.color("&3&l(!) &rYou have found &e" + amount + " Tokens&r!"));
             updateScoreboard = true;
         } else if (r <= 20) {
             reward = FishType.EXP;
-            amount = rand.nextInt(100) + 400;
+            amount = rand.nextInt(40) + 481;
             data.exp += amount;
             p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + r + " EXP&r!"));
             if (data.exp >= 2500) {
@@ -532,13 +532,13 @@ public class Fishing implements Listener {
             updateScoreboard = true;
         } else if (r <= 50) {
             reward = FishType.TOKENS;
-            amount = rand.nextInt(35) + 11;
+            amount = rand.nextInt(20) + 31;
             data.tokens += amount;
             p.sendMessage(main.color("&3&l(!) &rYou have found &e" + amount + " Tokens&r!"));
             updateScoreboard = true;
         } else if (r <= 80) {
             reward = FishType.EXP;
-            amount = rand.nextInt(40) + 11;
+            amount = rand.nextInt(40) + 81;
             data.exp += amount;
             p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + amount + " EXP&r!"));
             if (data.exp >= 2500) {
