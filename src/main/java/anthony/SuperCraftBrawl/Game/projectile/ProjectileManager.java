@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -88,8 +89,8 @@ public class ProjectileManager {
 			return true;
 		if (didStop(newVel.getZ(), oldVel.getZ()))
 			return true;
-		if (newVel.lengthSquared() < 0.01 * 0.01)
-			return true;
+		//if (newVel.lengthSquared() < 0.01 * 0.01)
+			//return true;
 		return false;
 	}
 
