@@ -36,8 +36,8 @@ public class FishingRewardsGUI implements InventoryProvider {
         
         int next = 25;
     
-        String[] milestonerewards = {"&e100 Tokens", "&dMysteryChest", "&d150 EXP", "&cFish Rain Win Effect", "&e250 Tokens",
-                "&3Pirate Outfit", "&d300 EXP"};
+        String[] milestonerewards = {"&e100 Tokens", "&dMysteryChest", "&d200 EXP", "&cFish Rain Win Effect", "&e250 Tokens",
+                "&3Pirate Outfit", "&d500 EXP"};
     
         List<String> rewardStrings = new ArrayList<>();
         rewardStrings.add(main.color("&7Claim these as many times as you'd like"));
@@ -45,9 +45,9 @@ public class FishingRewardsGUI implements InventoryProvider {
         rewardStrings.add(main.progressBar(data.caught, next, 25));
         if (data.caught >= next) {
             rewardStrings.add(main.color("&aLeft Click to claim 15 Tokens"));
-            rewardStrings.add(main.color("&aRight Click to claim 30 EXP"));
+            rewardStrings.add(main.color("&aRight Click to claim 125 EXP"));
         } else {
-            rewardStrings.add(main.color("&e15 Tokens or 30 EXP"));
+            rewardStrings.add(main.color("&e15 Tokens or 125 EXP"));
         }
         rewardStrings.add("");
 
@@ -77,9 +77,9 @@ public class FishingRewardsGUI implements InventoryProvider {
                                                 + "You have found " + ChatColor.GREEN + 1 + " MysteryChest!");
                                         break;
                                     case 3:
-                                        data.exp += 150;
+                                        data.exp += 200;
                                         player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                                + "You have gained " + ChatColor.GREEN + 150 + " EXP!");
+                                                + "You have gained " + ChatColor.GREEN + 200 + " EXP!");
                                         if (data.exp >= 2500) {
                                             data.level++;
                                             data.exp -= 2500;
@@ -100,9 +100,9 @@ public class FishingRewardsGUI implements InventoryProvider {
                                                 + "You have earned " + ChatColor.GREEN + " Pirate Outfit!");
                                         break;
                                     case 7:
-                                        data.exp += 300;
+                                        data.exp += 500;
                                         player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                                + "You have gained " + ChatColor.GREEN + 300 + " EXP!");
+                                                + "You have gained " + ChatColor.GREEN + 500 + " EXP!");
                                         if (data.exp >= 2500) {
                                             data.level++;
                                             data.exp -= 2500;
@@ -138,9 +138,9 @@ public class FishingRewardsGUI implements InventoryProvider {
                                 player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
                                         + "You have earned " + ChatColor.GREEN + 15 + " Tokens!");
                             } else if (e.isRightClick()){
-                                data.exp += 30;
+                                data.exp += 125;
                                 player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                        + "You have gained " + ChatColor.GREEN + 30 + " EXP!");
+                                        + "You have gained " + ChatColor.GREEN + 125 + " EXP!");
                                 if (data.exp >= 2500) {
                                     data.level++;
                                     data.exp -= 2500;
