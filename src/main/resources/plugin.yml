@@ -134,8 +134,11 @@ commands:
    lactate:
       description: Lactate command!
    sound:
-      description: Play a sound on your location
+      description: Play a sound to everyone, at your location
       aliases: s
+   soundnms:
+      description: Play a nms sound to everyone, at your location
+      aliases: sn
    heal:
       description: Fully heals the player
 
@@ -159,6 +162,7 @@ permissions:
          scb.builder: true
          scb.items: true
          scb.sound: true
+         scb.soundnms: true
          scb.heal: true
          scb.lactate: true
    scb.builder:
