@@ -131,8 +131,6 @@ commands:
    items:
       description: Get all SCB Item Drops
       aliases: it
-   lactate:
-      description: Lactate command!
    sound:
       description: Play a sound to everyone, at your location
       aliases: s
@@ -164,7 +162,6 @@ permissions:
          scb.sound: true
          scb.soundnms: true
          scb.heal: true
-         scb.lactate: true
    scb.builder:
       description: Builder perms
       children:
