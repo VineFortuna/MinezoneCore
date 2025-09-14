@@ -118,16 +118,14 @@ public class Commands implements CommandExecutor, TabCompleter {
 				colorCommand(args, player);
 				break;
 
-			case "lactate":
-				lactateCommand(player);
-				break;
-
 			case "sound":
 				soundCommand(args, player);
 				break;
+
 			case "soundnms":
 				soundNMSCommand(args, player);
 				break;
+
 			case "heal":
 				healCommand(player, args);
 				break;
@@ -584,27 +582,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 				"music.game.end.credits",
 				"music.game.nether"
 		);
-	}
-
-	private void lactateCommand(Player player) {
-		if (player.hasPermission("scb.lactate")) {
-			Location loc = player.getLocation();
-			loc.setY(loc.getY() + 0.7);
-			player.sendMessage(main.color("&r&l(!) &rYou have &r&lLACTATED!"));
-			player.getWorld().playSound(loc, Sound.COW_HURT, 1, 1);
-			sendParticle(player, loc, EnumParticle.SNOWBALL, 300, 0.8f, 0.0f, -0.3f, 0.0f);
-		} else {
-			player.sendMessage(main.color("&c&l(!) &rYou need the rank &5&lSUPREME &rto use this command!"));
-		}
-	}
-
-	public static void sendParticle(Player player, Location location, EnumParticle particle, int amount, float speed,
-			float offsetX, float offsetY, float offsetZ) {
-		PacketPlayOutWorldParticles particles = new PacketPlayOutWorldParticles(particle, true, (float) location.getX(),
-				(float) location.getY(), (float) location.getZ(), offsetX, offsetY, offsetZ, speed, amount);
-
-		for (Player players : Bukkit.getOnlinePlayers())
-			((CraftPlayer) players).getHandle().playerConnection.sendPacket(particles);
 	}
 
 	public void colorCommand(String[] args, Player player) {
