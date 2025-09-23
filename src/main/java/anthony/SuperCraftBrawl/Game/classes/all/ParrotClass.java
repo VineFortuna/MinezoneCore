@@ -83,7 +83,7 @@ public class ParrotClass extends BaseClass {
                 "&7Place down a jukebox",
                 "&7and dance to regenerate health",
                 "",
-                "&7Heals &e" + healingDisplay + " &c❤ &7over &a" + durationDisplay + "s",
+                "&7Heals &e" + healingDisplay + " &c❤ &7over &a" + durationDisplay + "&as",
                 "&7Range: &a" + radiusDisplay + " &7blocks"
         );
     }
