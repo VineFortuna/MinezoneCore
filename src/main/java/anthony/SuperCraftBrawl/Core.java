@@ -16,6 +16,8 @@ import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
 import anthony.SuperCraftBrawl.practice.BowPractice;
+import anthony.SuperCraftBrawl.practice.PracticeManager;
+import anthony.SuperCraftBrawl.practice.SCBPractice;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.ranks.RankManager;
 import anthony.SuperCraftBrawl.tablist.TablistManager;
@@ -37,11 +39,11 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Firework;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.EntityBlockFormEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -108,6 +110,8 @@ public class Core extends JavaPlugin implements Listener {
 	public Fishing fishing;
 	private ArrayList<String> msg;
 	public Map<Player, Player> wagers = new HashMap<Player, Player>();
+	public PersonalNPCPlugin pnp;
+	public PracticeManager scbPractice;
 
 	// Player's game stats
 	public Map<Player, GameInstance> gameStats = new HashMap<Player, GameInstance>();
@@ -129,6 +133,14 @@ public class Core extends JavaPlugin implements Listener {
 
 	public ActionBarManager getActionBarManager() {
 		return this.actionBarManager;
+	}
+	
+	public PracticeManager getSCBPractice() {
+		return this.scbPractice;
+	}
+	
+	public PersonalNPCPlugin getNPCPlugin() {
+		return this.pnp;
 	}
 
 	public ScoreboardManager getScoreboardManager() {
@@ -399,6 +411,8 @@ public class Core extends JavaPlugin implements Listener {
 		streakBoard = new WinstreakBoard(this);
 		flawlessWinsBoard = new FlawlessWinsBoard(this);
 		fishing = new Fishing(this);
+		//pnp = new PersonalNPCPlugin(this);
+		scbPractice = new PracticeManager(this);
 
 		for (Arenas arena : Arenas.values()) {
 			parkourBoards.add(new ParkourBoard(this, arena));
@@ -414,8 +428,13 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null) {
-			String[] commandTypes = { "maps", "join", "fly", "leave", "players", "class", "socials", "spectate",
+<<<<<<< HEAD
+			String[] commandTypes = { "maps", "join", "practice", "fly", "leave", "players", "class", "socials", "spectate",
 					"startgame", "gamestats", "setlives", "lactate", "purchases", "kit", "items", "color", "sound",
+=======
+			String[] commandTypes = { "maps", "join", "fly", "leave", "players", "class", "socials", "spectate",
+					"startgame", "gamestats", "setlives", "purchases", "kit", "items", "color", "sound", "soundnms",
+>>>>>>> 8d893e5d9e1431988e088fc5f446f5a8b02cba02
 					"heal" };
 
 			for (String command : commandTypes) {
@@ -657,19 +676,17 @@ public class Core extends JavaPlugin implements Listener {
 						String message = "";
 
 						for (int i = 0; i < args.length; i++) {
-							message += args[i];
+							message += args[i] + " ";
 						}
 
 						for (Player allPlayers : Bukkit.getOnlinePlayers()) {
-							if (args.length != 0) {
-								allPlayers.sendTitle(
-										"" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.UNDERLINE + "ANNOUNCEMENT",
-										"" + ChatColor.RESET + message + " - " + ChatColor.YELLOW
-												+ player.getName().substring(0, 3));
-								allPlayers.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-										+ message + " - " + ChatColor.YELLOW + player.getName());
-							}
-						}
+                            allPlayers.sendTitle(
+                                    "" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.UNDERLINE + "ANNOUNCEMENT",
+                                    "" + ChatColor.RESET + message.trim() + " - " + ChatColor.YELLOW
+                                            + player.getName().substring(0, 3));
+                            allPlayers.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                    + message.trim() + " - " + ChatColor.YELLOW + player.getName());
+                        }
 					}
 				} else
 					player.sendMessage(color("&c&l(!) &rYou need the rank &c&lADMIN &rto use this command!"));
@@ -1738,7 +1755,7 @@ public class Core extends JavaPlugin implements Listener {
 			EntityArmorStand stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MYSTERY CHESTS");
+			stand.setCustomName("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MYSTERYCHESTS");
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -1937,13 +1954,14 @@ public class Core extends JavaPlugin implements Listener {
 		PlayerData playerData = this.getDataManager().getPlayerData(player);
 		
 		if (player != null && playerData != null) {
-			player.teleport(LobbyLoc());
-			player.setHealth(20.0f);
-			player.setLevel(playerData.level);
 			player.getInventory().clear();
+			player.teleport(LobbyLoc());
+			LobbyItems(player);
+			player.setHealth(20.0f);
+			player.setFireTicks(0);
+			player.setLevel(playerData.level);
 			player.setGameMode(GameMode.ADVENTURE);
 			player.setAllowFlight(true);
-			LobbyItems(player);
 			mysteryChestHologram(player);
 			parkourHolograms(player);
 			updateLeaderboards();

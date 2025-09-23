@@ -2,8 +2,7 @@ package anthony.SuperCraftBrawl.Game;
 
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.all.DarkSethBlingClass;
-import anthony.SuperCraftBrawl.Game.classes.all.EnchantTableClass;
+import anthony.SuperCraftBrawl.Game.classes.all.LargeFernClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -225,6 +224,9 @@ public class GameInstance {
 				spectators.add(player);
 				for (Player gamePlayer : players) {
 					gamePlayer.hidePlayer(player);
+				}
+				for (Player spectator : this.spectators) {
+					spectator.showPlayer(player);
 				}
 				player.getInventory().clear();
 				player.setAllowFlight(true);
@@ -515,32 +517,28 @@ public class GameInstance {
 	}
 
 	public void initialSpawn() {
-		MapInstance mapInstance = null;
+		// Get the appropriate map instance
+		MapInstance mapInstance = map != null ? map.GetInstance() : duosMap.GetInstance();
+		List<Vector> spawnPoints = mapInstance.spawnPos;
+		World world = getMapWorld();
 
-		if (map != null)
-			mapInstance = map.GetInstance();
-		else
-			mapInstance = duosMap.GetInstance();
-
-		int count = 0;
-		int size = mapInstance.spawnPos.size();
-
-		if (size == 0) { // If no spawn locations are set
-			for (Player gamePlayer : players) {
-				gamePlayer.teleport(new Location(getMapWorld(), 42, 2, 2.5));
+		// Handle case with no spawn locations
+		if (spawnPoints.isEmpty()) {
+			Location defaultSpawn = new Location(world, 42, 2, 2.5);
+			for (Player player : players) {
+				player.teleport(defaultSpawn);
 			}
-		} else {
-			for (Player gamePlayer : players) {
-				double x = mapInstance.spawnPos.get(count).getX();
-				double y = mapInstance.spawnPos.get(count).getY();
-				double z = mapInstance.spawnPos.get(count).getZ();
+			return;
+		}
 
-				gamePlayer.teleport(new Location(getMapWorld(), x, y, z));
-				count++;
+		// Create shuffled list of spawn points
+		ArrayList<Vector> shuffledSpawns = new ArrayList<>(spawnPoints);
+		Collections.shuffle(shuffledSpawns);
 
-				if (count >= mapInstance.spawnPos.size())
-					count = 0;
-			}
+		// Teleport players using shuffled spawn points
+		for (int i = 0; i < players.size(); i++) {
+			Vector spawn = shuffledSpawns.get(i % shuffledSpawns.size());
+			players.get(i).teleport(spawn.toLocation(world));
 		}
 	}
 
@@ -661,7 +659,6 @@ public class GameInstance {
 	 */
 	private void giveRandomItemDrop() {
 		for (Player player : this.players) {
-			player.setFireTicks(0);
 			BaseClass bc = this.classes.get(player);
 
 			if (bc != null) {
@@ -670,9 +667,6 @@ public class GameInstance {
 				else
 					player.getInventory().addItem(this.getItemToDrop());
 			}
-
-			player.setLevel(0);
-			player.setGameMode(GameMode.ADVENTURE);
 		}
 	}
 
@@ -708,6 +702,7 @@ public class GameInstance {
 		}
 
 		this.state = GameState.STARTED; // Sets game state to 'Started'
+		resetState();
 		LoadClasses();
 		GameScoreboard();
 		addAlivePlayers();
@@ -807,12 +802,18 @@ public class GameInstance {
 			team.addEntry(player.getName());
 		}
 
-		String className = classType.getTag() + " ";
-		if (className.length() > 12) {
-			className = classType.getTag().substring(0, 10).trim() + " " + ChatColor.RESET;
+		if (this.classes.get(player).getLives() > 0) {
+			String baseName = classType.getSecondTag() != null ? classType.getSecondTag() : classType.getTag();
+			baseName += " ";
+
+			if (baseName.length() > 12) {
+				baseName = baseName.substring(0, Math.min(baseName.length(), 10)).trim() + " " + ChatColor.RESET;
+			}
+
+			team.setPrefix(baseName);
+		} else {
+			team.setPrefix("");
 		}
-		team.setPrefix(className);
-		/* } */
 	}
 
 	/**
@@ -1189,7 +1190,7 @@ public class GameInstance {
 								player.setGameMode(GameMode.ADVENTURE);
 								player.setHealth(20.0D);
 								player.setAllowFlight(true);
-								GameInstance.this.getGameManager().spawnProtection2(player);
+								GameInstance.this.getGameManager().addSpawnProtection(player);
 								if (!GameInstance.this.players.contains(player)) {
 									GameInstance.this.getGameManager().getMain().ResetPlayer(player);
 								} else {
@@ -1245,6 +1246,7 @@ public class GameInstance {
 					player.spigot().setCollidesWithEntities(false);
 					player.setAllowFlight(false);
 					player.setAllowFlight(true);
+					player.getInventory().clear();
 
 					ItemStack spec = ItemHelper.setDetails(new ItemStack(Material.COMPASS),
 							"" + ChatColor.GREEN + "Spectate a Player",
@@ -1255,6 +1257,8 @@ public class GameInstance {
 					player.getInventory().setItem(8, leave);
 					for (Player gamePlayer : this.players)
 						gamePlayer.hidePlayer(player);
+					for (Player spectator : this.spectators)
+						spectator.showPlayer(player);
 					try {
 						baseClass.score.getScoreboard().resetScores(baseClass.score.getEntry());
 					} catch (Exception e) {
@@ -1566,7 +1570,7 @@ public class GameInstance {
 			if (chance >= 0 && chance < 25) {
 				if (data3 != null) {
 					data3.mysteryChests++;
-					winner.sendMessage(getGameManager().getMain().color("&5&l(!) &rYou have found &e1 Mystery Chest&r!"));
+					winner.sendMessage(getGameManager().getMain().color("&5&l(!) &rYou have found &e1 MysteryChest&r!"));
 				}
 			}
 		}
@@ -2156,6 +2160,14 @@ public class GameInstance {
 				RemovePlayer(player); // Recursion to make sure player is removed from the arraylist
 				SetLobbyScoreboard(player); // Sets the main lobby board to player
 				getGameManager().getMain().sendScoreboardUpdate(player);
+
+				if (baseClass.getType() == ClassType.LargeFern) {
+					LargeFernClass largeFernClass = (LargeFernClass) baseClass;
+					if (largeFernClass.transfernRunnable != null) {
+//						largeFernClass.transfernRunnable.cleanup();
+						largeFernClass.transfernRunnable.cancel();
+					}
+				}
 			}
 
 			// getGameManager().getMain().ResetPlayer(player);
@@ -2497,5 +2509,15 @@ public class GameInstance {
 
 	public String color(String c) {
 		return ChatColor.translateAlternateColorCodes('&', c);
+	}
+
+	public void resetState() {
+		for (Player player : this.players) {
+			player.setFireTicks(0);
+			player.setLevel(0);
+			player.setGameMode(GameMode.ADVENTURE);
+			for (PotionEffect type : player.getActivePotionEffects())
+				player.removePotionEffect(type.getType());
+		}
 	}
 }

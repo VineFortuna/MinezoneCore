@@ -24,8 +24,8 @@ public class PlayerData {
 			friendship = 0, bestWinstreak = 0, december15 = 0, december16 = 0, december17 = 0, december18 = 0,
 			december19 = 0, december20 = 0, december21 = 0, december22 = 0, december23 = 0, december24 = 0,
 			december25 = 0, snowParticles = 0, snowballDeathEffect = 0, elfCosmetic = 0, snowmanPet = 0,
-			candycaneParticles = 0, snowball = 0, floodEffect = 0;
-	public String color = "GRAY", fishingWarps = "";
+			candycaneParticles = 0, snowball = 0, floodEffect = 0, treasureEffect = 0, treasureOpened = 0;
+	public String color = "", fishingWarps = "", treasureLoc = "";
 
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
 	public HashMap<Integer, FishingDetails> playerFishing = new HashMap<>();
@@ -44,7 +44,8 @@ public class PlayerData {
 			int december15, int december16, int december17, int december18, int december19, int december20,
 			int december21, int december22, int december23, int december24, int december25, int snowParticles,
 			int snowballDeathEffect, int elfCosmetic, int snowmanPet, int candycaneParticles, int snowball, int floodEffect,
-			String color, String fishingWarps) {
+			int treasureEffect, int treasureOpened,
+			String color, String fishingWarps, String treasureLoc) {
 		this(playerUUID, playerName, playerIP);
 		this.roleID = roleID;
 		this.tokens = tokens;
@@ -123,8 +124,11 @@ public class PlayerData {
 		this.candycaneParticles = candycaneParticles;
 		this.snowball = snowball;
 		this.floodEffect = floodEffect;
+		this.treasureEffect = treasureEffect;
+		this.treasureOpened = treasureOpened;
 		this.color = color;
 		this.fishingWarps = (fishingWarps == null || fishingWarps.equals("null")) ? "" : fishingWarps;
+		this.treasureLoc = (treasureLoc == null || treasureLoc.equals("null")) ? "" : treasureLoc;
 	}
 
 	public boolean isPurchased(ClassType type) {

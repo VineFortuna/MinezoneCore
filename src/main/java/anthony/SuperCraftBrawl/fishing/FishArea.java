@@ -99,5 +99,17 @@ public enum FishArea {
     public int getID() {
         return ordinal();
     }
+
+    public int getBoundsX() {
+        return boundsX;
+    }
+
+    public int getBoundsY() {
+        return boundsY;
+    }
+
+    public int getBoundsZ() {
+        return boundsZ;
+    }
 }
 

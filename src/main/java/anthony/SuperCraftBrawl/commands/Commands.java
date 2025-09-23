@@ -13,19 +13,22 @@ import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
 import anthony.SuperCraftBrawl.gui.GameStatsGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.practice.Game;
+import anthony.SuperCraftBrawl.practice.SCBPractice;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.minecraft.server.v1_8_R3.EnumParticle;
-import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
+import net.minecraft.server.v1_8_R3.*;
 import org.apache.commons.lang.WordUtils;
 
 import com.google.common.collect.Lists;
 import org.bukkit.*;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -117,15 +120,19 @@ public class Commands implements CommandExecutor, TabCompleter {
 				colorCommand(args, player);
 				break;
 
-			case "lactate":
-				lactateCommand(player);
-				break;
-
 			case "sound":
 				soundCommand(args, player);
 				break;
+
+			case "soundnms":
+				soundNMSCommand(args, player);
+				break;
+
 			case "heal":
 				healCommand(player, args);
+				break;
+			case "practice":
+				new SCBPractice(player, Game.BowPractice, main);
 				break;
 			}
 		} else
@@ -194,7 +201,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		try {
 			Sound sound = Sound.valueOf(args[0].toUpperCase()); // Get the Sound enum value
 			float volume = 1.0f; // Default volume
-			float pitch = 1.0f; // Default pitch
+			float pitch = 1.0f;  // Default pitch
 
 			// Parse pitch if provided
 			if (args.length >= 2) {
@@ -230,25 +237,356 @@ public class Commands implements CommandExecutor, TabCompleter {
 		player.sendMessage(ChatColor.GOLD + "=== End of Sound List ===");
 	}
 
-	private void lactateCommand(Player player) {
-		if (player.hasPermission("scb.lactate")) {
-			Location loc = player.getLocation();
-			loc.setY(loc.getY() + 0.7);
-			player.sendMessage(main.color("&r&l(!) &rYou have &r&lLACTATED!"));
-			player.getWorld().playSound(loc, Sound.COW_HURT, 1, 1);
-			sendParticle(player, loc, EnumParticle.SNOWBALL, 300, 0.8f, 0.0f, -0.3f, 0.0f);
-		} else {
-			player.sendMessage(main.color("&c&l(!) &rYou need the rank &5&lSUPREME &rto use this command!"));
+	private void soundNMSCommand(String[] args, Player player) {
+		if (!player.hasPermission("scb.soundnms")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
+		// Handle list command
+		if (args.length > 0 && args[0].equalsIgnoreCase("list")) {
+			List<String> allSounds = getAllNMSSounds();
+			int page = args.length > 1 ? tryParseInt(args[1], 1) : 1;
+			displayPaginatedSoundList(player, allSounds, page);
+			return;
+		}
+
+		// Handle sound playing
+		if (args.length < 1) {
+			player.sendMessage(ChatColor.RED + "Usage: /soundnms (sn) <name> [pitch] [volume]");
+			player.sendMessage(ChatColor.GRAY + "Or /soundnms (sn) list [page] to see all sounds");
+			return;
+		}
+
+		try {
+			float volume = 10.0f;
+			float pitch = 1.0f;
+
+			if (args.length >= 2) pitch = Float.parseFloat(args[1]);
+			if (args.length >= 3) volume = Float.parseFloat(args[2]);
+
+			// Play sound using NMS
+			String soundName = args[0].toLowerCase();
+			SoundManager.playNMSSoundToAll(player, soundName, volume, pitch);
+
+			player.sendMessage(ChatColor.GREEN + "Played sound: " + soundName
+					+ " (Pitch: " + pitch + ", Volume: " + volume + ")");
+
+		} catch (NumberFormatException e) {
+			player.sendMessage(ChatColor.RED + "Invalid number format for pitch/volume");
+		} catch (Exception e) {
+			player.sendMessage(ChatColor.RED + "Error playing sound: " + e.getMessage());
+			if (player.hasPermission("scb.sound.debug")) {
+				player.sendMessage(ChatColor.GRAY + "Technical: " + e);
+			}
 		}
 	}
 
-	public static void sendParticle(Player player, Location location, EnumParticle particle, int amount, float speed,
-			float offsetX, float offsetY, float offsetZ) {
-		PacketPlayOutWorldParticles particles = new PacketPlayOutWorldParticles(particle, true, (float) location.getX(),
-				(float) location.getY(), (float) location.getZ(), offsetX, offsetY, offsetZ, speed, amount);
+	private void displayPaginatedSoundList(Player player, List<String> sounds, int page) {
+		if (sounds.isEmpty()) {
+			player.sendMessage(ChatColor.RED + "No sounds found in registry!");
+			return;
+		}
 
-		for (Player players : Bukkit.getOnlinePlayers())
-			((CraftPlayer) players).getHandle().playerConnection.sendPacket(particles);
+		int perPage = 25;
+		int totalPages = (int) Math.ceil((double) sounds.size() / perPage);
+		page = Math.max(1, Math.min(page, totalPages));
+
+		player.sendMessage(ChatColor.GOLD + "=== Available Sounds (Page " + page + "/" + totalPages + ") ===");
+
+		int start = (page - 1) * perPage;
+		int end = Math.min(start + perPage, sounds.size());
+
+		for (int i = start; i < end; i++) {
+			// Create a clickable TextComponent for each sound
+			TextComponent soundMessage = new TextComponent(ChatColor.YELLOW + "- " + sounds.get(i));
+			soundMessage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/soundnms " + sounds.get(i)));
+
+			// Send the clickable message to the player
+			player.spigot().sendMessage(soundMessage);
+		}
+
+		player.sendMessage(ChatColor.GOLD + "=====================");
+		player.sendMessage(ChatColor.GRAY + "Use /soundnms list <page> to see more sounds");
+	}
+	public List<String> getAllNMSSounds() {
+		return Arrays.asList(
+				// Ambient sounds
+				"ambient.cave.cave",
+				"ambient.weather.rain",
+				"ambient.weather.thunder",
+
+				// Player/entity hurt sounds
+				"game.player.hurt.fall.big",
+				"game.neutral.hurt.fall.big",
+				"game.hostile.hurt.fall.big",
+				"game.player.hurt.fall.small",
+				"game.neutral.hurt.fall.small",
+				"game.hostile.hurt.fall.small",
+				"game.player.hurt",
+				"game.neutral.hurt",
+				"game.hostile.hurt",
+				"game.player.die",
+				"game.neutral.die",
+				"game.hostile.die",
+
+				// Dig/break sounds
+				"dig.cloth",
+				"dig.glass",
+				"game.potion.smash",
+				"dig.grass",
+				"dig.gravel",
+				"dig.sand",
+				"dig.snow",
+				"dig.stone",
+				"dig.wood",
+
+				// Fire sounds
+				"fire.fire",
+				"fire.ignite",
+				"item.fireCharge.use",
+
+				// Firework sounds
+				"fireworks.blast",
+				"fireworks.blast_far",
+				"fireworks.largeBlast",
+				"fireworks.largeBlast_far",
+				"fireworks.launch",
+				"fireworks.twinkle",
+				"fireworks.twinkle_far",
+
+				// Swim sounds
+				"game.player.swim.splash",
+				"game.neutral.swim.splash",
+				"game.hostile.swim.splash",
+				"game.player.swim",
+				"game.neutral.swim",
+				"game.hostile.swim",
+
+				// Liquid sounds
+				"liquid.lava",
+				"liquid.lavapop",
+				"liquid.water",
+
+				// Minecart sounds
+				"minecart.base",
+				"minecart.inside",
+
+				// Note block sounds
+				"note.bass",
+				"note.bassattack",
+				"note.bd",
+				"note.harp",
+				"note.hat",
+				"note.pling",
+				"note.snare",
+
+				// Portal sounds
+				"portal.portal",
+				"portal.travel",
+				"portal.trigger",
+
+				// Random sounds
+				"random.anvil_break",
+				"random.anvil_land",
+				"random.anvil_use",
+				"random.bow",
+				"random.bowhit",
+				"random.break",
+				"random.burp",
+				"random.chestclosed",
+				"random.chestopen",
+				"gui.button.press",
+				"random.click",
+				"random.door_open",
+				"random.door_close",
+				"random.drink",
+				"random.eat",
+				"random.explode",
+				"random.fizz",
+				"game.tnt.primed",
+				"creeper.primed",
+				"random.levelup",
+				"random.orb",
+				"random.pop",
+				"random.splash",
+				"random.successful_hit",
+				"random.wood_click",
+
+				// Step sounds
+				"step.cloth",
+				"step.grass",
+				"step.gravel",
+				"step.ladder",
+				"step.sand",
+				"step.snow",
+				"step.stone",
+				"step.wood",
+
+				// Piston sounds
+				"tile.piston.in",
+				"tile.piston.out",
+
+				// Mob sounds
+				"mob.bat.death",
+				"mob.bat.hurt",
+				"mob.bat.idle",
+				"mob.bat.loop",
+				"mob.bat.takeoff",
+				"mob.blaze.breathe",
+				"mob.blaze.death",
+				"mob.blaze.hit",
+				"mob.cat.hiss",
+				"mob.cat.hitt",
+				"mob.cat.meow",
+				"mob.cat.purr",
+				"mob.cat.purreow",
+				"mob.chicken.hurt",
+				"mob.chicken.plop",
+				"mob.chicken.say",
+				"mob.chicken.step",
+				"mob.cow.hurt",
+				"mob.cow.say",
+				"mob.cow.step",
+				"mob.creeper.death",
+				"mob.creeper.say",
+				"mob.enderdragon.end",
+				"mob.enderdragon.growl",
+				"mob.enderdragon.hit",
+				"mob.enderdragon.wings",
+				"mob.endermen.death",
+				"mob.endermen.hit",
+				"mob.endermen.idle",
+				"mob.endermen.portal",
+				"mob.endermen.scream",
+				"mob.endermen.stare",
+				"mob.ghast.affectionate_scream",
+				"mob.ghast.charge",
+				"mob.ghast.death",
+				"mob.ghast.fireball",
+				"mob.ghast.moan",
+				"mob.ghast.scream",
+				"mob.guardian.hit",
+				"mob.guardian.idle",
+				"mob.guardian.death",
+				"mob.guardian.elder.hit",
+				"mob.guardian.elder.idle",
+				"mob.guardian.elder.death",
+				"mob.guardian.land.hit",
+				"mob.guardian.land.idle",
+				"mob.guardian.land.death",
+				"mob.guardian.curse",
+				"mob.guardian.attack",
+				"mob.guardian.flop",
+				"mob.horse.angry",
+				"mob.horse.armor",
+				"mob.horse.breathe",
+				"mob.horse.death",
+				"mob.horse.donkey.angry",
+				"mob.horse.donkey.death",
+				"mob.horse.donkey.hit",
+				"mob.horse.donkey.idle",
+				"mob.horse.gallop",
+				"mob.horse.hit",
+				"mob.horse.idle",
+				"mob.horse.jump",
+				"mob.horse.land",
+				"mob.horse.leather",
+				"mob.horse.skeleton.death",
+				"mob.horse.skeleton.hit",
+				"mob.horse.skeleton.idle",
+				"mob.horse.soft",
+				"mob.horse.wood",
+				"mob.horse.zombie.death",
+				"mob.horse.zombie.hit",
+				"mob.horse.zombie.idle",
+				"mob.irongolem.death",
+				"mob.irongolem.hit",
+				"mob.irongolem.throw",
+				"mob.irongolem.walk",
+				"mob.magmacube.big",
+				"mob.magmacube.jump",
+				"mob.magmacube.small",
+				"mob.pig.death",
+				"mob.pig.say",
+				"mob.pig.step",
+				"mob.rabbit.hurt",
+				"mob.rabbit.idle",
+				"mob.rabbit.hop",
+				"mob.rabbit.death",
+				"mob.sheep.say",
+				"mob.sheep.shear",
+				"mob.sheep.step",
+				"mob.silverfish.hit",
+				"mob.silverfish.kill",
+				"mob.silverfish.say",
+				"mob.silverfish.step",
+				"mob.skeleton.death",
+				"mob.skeleton.hurt",
+				"mob.skeleton.say",
+				"mob.skeleton.step",
+				"mob.slime.attack",
+				"mob.slime.big",
+				"mob.slime.small",
+				"mob.spider.death",
+				"mob.spider.say",
+				"mob.spider.step",
+				"mob.villager.death",
+				"mob.villager.haggle",
+				"mob.villager.hit",
+				"mob.villager.idle",
+				"mob.villager.no",
+				"mob.villager.yes",
+				"mob.wither.death",
+				"mob.wither.hurt",
+				"mob.wither.idle",
+				"mob.wither.shoot",
+				"mob.wither.spawn",
+				"mob.wolf.bark",
+				"mob.wolf.death",
+				"mob.wolf.growl",
+				"mob.wolf.howl",
+				"mob.wolf.hurt",
+				"mob.wolf.panting",
+				"mob.wolf.shake",
+				"mob.wolf.step",
+				"mob.wolf.whine",
+				"mob.zombie.death",
+				"mob.zombie.hurt",
+				"mob.zombie.infect",
+				"mob.zombie.metal",
+				"mob.zombie.remedy",
+				"mob.zombie.say",
+				"mob.zombie.step",
+				"mob.zombie.unfect",
+				"mob.zombie.wood",
+				"mob.zombie.woodbreak",
+				"mob.zombiepig.zpig",
+				"mob.zombiepig.zpigangry",
+				"mob.zombiepig.zpigdeath",
+				"mob.zombiepig.zpighurt",
+
+				// Music/record sounds
+				"records.11",
+				"records.13",
+				"records.blocks",
+				"records.cat",
+				"records.chirp",
+				"records.far",
+				"records.mall",
+				"records.mellohi",
+				"records.stal",
+				"records.strad",
+				"records.wait",
+				"records.ward",
+				"music.menu",
+				"music.game",
+				"music.game.creative",
+				"music.game.end",
+				"music.game.end.dragon",
+				"music.game.end.credits",
+				"music.game.nether"
+		);
 	}
 
 	public void colorCommand(String[] args, Player player) {
@@ -726,6 +1064,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 	private void classCommand(String[] args, Player player) {
 		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+
+		if (!isGameStateWaiting(game, player))
+			return;
+
 		PlayerData playerData = main.getDataManager().getPlayerData(player);
 
 		if (args.length == 0) {
@@ -788,7 +1130,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 				player.sendMessage(main.color("&2&l(!) " + "&eYou have selected to go a &lRandom class"));
 				main.getGameManager().playerSelectClass(player, classType);
 				GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
-				game.board.updateLine(5, main.color(" &6R&aa&rn&2d&0o&5m"));
+				game.board.updateLine(5, main.color(" &cR&6a&en&ad&bo&3m"));
 				player.setDisplayName(player.getName());
 			}
 		}
@@ -962,5 +1304,13 @@ public class Commands implements CommandExecutor, TabCompleter {
 	private void resetDoubleJump(Player player) {
 		player.setAllowFlight(false);
 		player.setAllowFlight(true);
+	}
+
+	private int tryParseInt(String value, int defaultValue) {
+		try {
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e) {
+			return defaultValue;
+		}
 	}
 }

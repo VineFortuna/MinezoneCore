@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.gui.cosmetics;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -9,8 +10,10 @@ import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Snowman;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
@@ -36,6 +39,8 @@ public class GadgetsGUI implements InventoryProvider {
 		// Broom
 		List<String> broomList = new ArrayList<>();
 		broomList.add(ChatColor.DARK_GRAY + "Fly around like a Witch!");
+		broomList.add("");
+		broomList.add(Rank.CAPTAIN.getTag() + ChatColor.RESET + "+ exclusive!");
 		ItemStack broom = ItemHelper.create(Material.WHEAT,
 				ChatColor.DARK_GREEN.toString() + ChatColor.BOLD + "Magic Broom", broomList);
 
@@ -92,7 +97,7 @@ public class GadgetsGUI implements InventoryProvider {
 				}
 			} else {
 				player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
-						+ ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN " + ChatColor.RESET + "to use this item!");
+						+ Rank.CAPTAIN.getTag() + ChatColor.RESET + " to use this item!");
 			}
 		}));
 
@@ -168,12 +173,16 @@ public class GadgetsGUI implements InventoryProvider {
 
 		contents.set(1, 6, ClickableItem.of(snowmanPet, e -> {
 			if (data.snowmanPet == 1) {
-				if (!(main.getListener().snowmanPetPlayers.contains(player))) {
+				if (!(main.getListener().snowmanPetPlayers.containsKey(player))) {
 					player.sendMessage(main.color("&r&l(!) &rYou equipped &eSnowman &rpet"));
-					main.getListener().snowmanPetPlayers.add(player);
+					Location spawnLoc = player.getLocation().add(1, 0, 1);
+					Snowman snowman = player.getWorld().spawn(spawnLoc, Snowman.class);
+					snowman.setCustomName(ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Snowman");
+					main.getListener().snowmanPetPlayers.put(player, snowman);
 					main.getListener().snowmanPet(player);
 				} else {
 					player.sendMessage(main.color("&r&l(!) &rYou removed &eSnowman &rpet"));
+					main.getListener().snowmanPetPlayers.get(player).remove();
 					main.getListener().snowmanPetPlayers.remove(player);
 				}
 			} else {

@@ -90,7 +90,7 @@ public enum ClassType {
 	MagmaCube(48, 0, Rank.VIP),
 	Bedrock(61, 0, Rank.VIP),
 	Firework(62, 0, Rank.VIP),
-	Vindicator(65, 0, Rank.VIP),
+	Vindicator(65, 0, Rank.VIP, true),
 	Fade(66, 0, Rank.VIP),
 	Endermite(70, 0, Rank.VIP),
 
@@ -217,7 +217,7 @@ public enum ClassType {
 			case Skeleton:
 				return "Effective shooter at taking down their targets";
 			case Enderdragon:
-				return "More around your opponents and heal from your ender crystals!";
+				return "Move around your opponents and heal from your ender crystals!";
 			case Enderman:
 				return "Stare into the souls of your enemies whilst teleporting around them";
 			case Horse:
@@ -225,7 +225,7 @@ public enum ClassType {
 			case Squid:
 				return "Use your ink to blind enemies";
 			case Spider:
-				return "Bite and poison your enemies while fighting them!";
+				return "Web enemies into place and Mutate to get random effects";
 			case Ninja:
 				return "Ambush your enemies with sneaky attacks and agility";
 			case TNT:
@@ -329,8 +329,7 @@ public enum ClassType {
 			case ZombiePigman:
 				return "" + ChatColor.GREEN + ChatColor.ITALIC + "Zombie" + ChatColor.LIGHT_PURPLE + ChatColor.ITALIC + "Pigman" + ChatColor.RESET;
 			case ZombieVillager:
-				return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Zombie" + ChatColor.GRAY + ChatColor.BOLD + "Villager"
-						+ ChatColor.RESET;
+				return "" + ChatColor.GREEN + ChatColor.BOLD + "Zombie" + ChatColor.GRAY + ChatColor.BOLD + "Villager" + ChatColor.RESET;
 			case Villager:
 				return "" + ChatColor.GREEN + "Villager" + ChatColor.RESET;
 			case MagmaCube:
@@ -443,6 +442,24 @@ public enum ClassType {
 				break;
 		}
 		return this.toString();
+	}
+
+	public String getSecondTag() {
+		switch (this) {
+			case WitherSkeleton:
+				return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + "WSkele" + ChatColor.RESET;
+//			case Enderdragon:
+//				return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "EDragon" + ChatColor.RESET + ChatColor.DARK_GRAY + ChatColor.BOLD + "Dragon" + ChatColor.RESET;
+//			case FlintAndSteel:
+//				return "" + ChatColor.DARK_GRAY + "Fl" + ChatColor.GRAY + "&" + ChatColor.WHITE + "St" + ChatColor.RESET;
+//			case LargeFern:
+//				return "" + ChatColor.DARK_GREEN + ChatColor.ITALIC + ChatColor.BOLD + "LFern" + ChatColor.RESET;
+//			case ZombiePigman:
+//				return "" + ChatColor.GREEN + ChatColor.ITALIC + "Z" + ChatColor.LIGHT_PURPLE + ChatColor.ITALIC + "Pigman" + ChatColor.RESET;
+//			case ZombieVillager:
+//				return "" + ChatColor.GREEN + ChatColor.BOLD + "Z" + ChatColor.GRAY + ChatColor.BOLD + "Villager" + ChatColor.RESET;
+		}
+		return null;
 	}
 
 	public ItemStack getItem() {

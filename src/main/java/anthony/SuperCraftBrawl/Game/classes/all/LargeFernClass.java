@@ -4,17 +4,18 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.CooldownNatowski;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
+import anthony.util.TitleHelper;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.Inventory;
@@ -28,13 +29,13 @@ public class LargeFernClass extends BaseClass {
     private int numberOfSporesProjectiles = 5;
     private final ItemStack weapon;
     private final ItemStack transfernItem;
-    private final Ability sporesAbility = new Ability("&2&lSpores", 4, player);
-    private final Ability transfernAbility = new Ability("&2&lTransfern", 9, player);
+    private final Ability sporeAbility = new Ability("&2&lSpores", 4, player);
+    private final Ability transfernAbility = new Ability("&2&lTransfern", player);
+    private static final double SMALL_FERN_TIME = 2;
+    private static final double LARGE_FERN_TIME = 10;
     private final PotionEffect regeneration = new PotionEffect(PotionEffectType.REGENERATION, 9999999, 1, false, false);
-
-    private final CooldownNatowski transfernAbilitySmallFernTimer = new CooldownNatowski(2);
+    public TransfernRunnable transfernRunnable;
     private boolean isTransferned;
-    private Location fernLocation;
     int sporeDamage = 4;
 
     public LargeFernClass(GameInstance instance, Player player) {
@@ -50,19 +51,28 @@ public class LargeFernClass extends BaseClass {
         // Weapon
         weapon = ItemHelper.setDetails(
                 new ItemStack(Material.DOUBLE_PLANT, 1, (short) 3),
-                "&2&lSpore Launcher &7(Right Click)",
+                "&2&lSpore Burst &7(Right Click)",
                 "",
-                "&7Launch spores at enemies",
-                "&7High spread at close range"
+                "&7Launch a burst of spores in a wide spread",
+                "",
+                "&7Effective at close range"
         );
         weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
         weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
 
         // Disguise Ability
+        String durationDisplaySmall = ItemHelper.formatDouble(SMALL_FERN_TIME);
+        String durationDisplayLarge = ItemHelper.formatDouble(LARGE_FERN_TIME);
+
         transfernItem = ItemHelper.setDetails(
                 new ItemStack(Material.LONG_GRASS, 1, (short) 2),
                 transfernAbility.getAbilityNameRightClickMessage(),
-                "&7Transform into a fern to regenerate health"
+                "&7Transform into a fern to regenerate health",
+                "",
+                "&7Moving or performing actions cancel this",
+                "",
+                "&7Small Fern Time: &a" + durationDisplaySmall + "&as",
+                "&7Large Fern Time: &a" + durationDisplayLarge + "&as"
         );
     }
 
@@ -70,7 +80,7 @@ public class LargeFernClass extends BaseClass {
     public void SetItems(Inventory playerInv) {
         isTransferned = false;
         // Resetting Spore Launcher CD
-        sporesAbility.getCooldownInstance().reset();
+        sporeAbility.getCooldownInstance().reset();
         // Setting Items
         playerInv.setItem(0, weapon);
         playerInv.setItem(1, transfernItem);
@@ -79,7 +89,7 @@ public class LargeFernClass extends BaseClass {
     @Override
     public void Tick(int gameTicks) {
         if (!isPlayerAlive()) return;
-        sporesAbility.updateActionBar(player,this);
+        sporeAbility.updateActionBar(player,this);
     }
 
     @Override
@@ -95,14 +105,19 @@ public class LargeFernClass extends BaseClass {
         if (item == null) return;
         if (player.getGameMode() == GameMode.SPECTATOR) return;
 
+        if (transfernRunnable != null && isTransferned) {
+            transfernRunnable.cleanup();
+            transfernRunnable.cancel();
+        }
+
         if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
 
         // Spores Ability
         if (item.equals(weapon)) {
             event.setCancelled(true);
-            if (!sporesAbility.isReady()) return;
+            if (!sporeAbility.isReady()) return;
             useSporesAbility();
-            sporesAbility.use();
+            sporeAbility.use();
         }
 
         // Transfern Ability
@@ -330,133 +345,172 @@ public class LargeFernClass extends BaseClass {
             instance.getGameManager().getProjManager().shootProjectile(itemProjectile3, player.getEyeLocation(), shotDirection3.multiply(1.5D));
             instance.getGameManager().getProjManager().shootProjectile(itemProjectile4, player.getEyeLocation(), shotDirection4.multiply(1.5D));
             instance.getGameManager().getProjManager().shootProjectile(itemProjectile5, player.getEyeLocation(), shotDirection5.multiply(1.5D));
-//                    }
-
-//                    Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
-//                        for (World world : Bukkit.getWorlds()) {
-//                            for (Entity entity : world.getEntities()) {
-//                                if (entity instanceof Item) {
-//                                    Item item2 = (Item) entity;
-//                                    // Check if the item is dropped on a wood button block
-//                                    Block block = item2.getLocation().getBlock();
-//                                    if (block.getType() == Material.WOOD_BUTTON) {
-//                                        // Remove the item
-//                                        item2.remove();
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }, 2 * 20L);
-
-            // Run the task every 60 seconds (adjust as needed)
-
-//                    Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
-//                        for (Entity e : player.getWorld().getEntities()) {
-//                            if (e != null && e instanceof BlockWoodButton) {
-//                                e.remove();to
-//                            }
-//                        }
-//                            } , 1 * 20);
 
             // Playing Shotgun Sound
             SoundManager.playSoundToAll(player, Sound.EXPLODE, 1, 4);
     }
 
     private void useTransfernAbility() {
-        if (!isTransferned) {
-            if (player.getLocation().getBlock().getType() == Material.AIR &&
-                    player.getLocation().add(0, 1, 0).getBlock().getType() == Material.AIR &&
-                    player.getLocation().subtract(0, 1, 0).getBlock().getType().isSolid() && player.isOnGround()) {
-                // Setting instant when disguise ability was clicked
-                transfernAbility.use();
-                isTransferned = true;
-                // Sending return message
-                transfernAbility.sendCustomMessage("&9&l(!) &rStand still for &6" + transfernAbility.getCooldownDurationSeconds() + " seconds");
+        if (isTransferned) return;
+        if (!player.isOnGround()) {
+            transfernAbility.sendCustomMessage(transfernAbility.getOnGroundChatMessage());
+            return;
+        }
 
-                TransfernRunnable runnableInstance = new TransfernRunnable();
-                runnableInstance.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
-            } else {
-                transfernAbility.sendCustomMessage("&c&l(!) &rYou cannot transfern on this block");
-            }
+        Location playerLoc = player.getLocation();
+        Block feetBlock = playerLoc.getBlock();
+        Block headBlock = playerLoc.clone().add(0, 1, 0).getBlock();
+        Block groundBlock = playerLoc.clone().subtract(0, 1, 0).getBlock();
+
+        if (feetBlock.getType() == Material.AIR &&
+                headBlock.getType() == Material.AIR &&
+                groundBlock.getType().isSolid()) {
+
+            isTransferned = true;
+
+            transfernRunnable = new TransfernRunnable();
+            transfernRunnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+        } else {
+            transfernAbility.sendCustomMessage("&c&l(!) &rYou cannot transfern on this block");
         }
     }
 
+    @Override
+    public void Death(PlayerDeathEvent e) {
+        super.Death(e);
+        if (transfernRunnable != null) {
+            transfernRunnable.cleanup();
+            transfernRunnable.cancel();
+        }
+    }
+
+    @Override
+    public void GameEnd() {
+        if (transfernRunnable != null) {
+            transfernRunnable.cleanup();
+            transfernRunnable.cancel();
+        }
+    }
 
     public class TransfernRunnable extends BukkitRunnable {
         int standingStillTime = 0;
-        PotionEffect transfernInvisibility = new PotionEffect(PotionEffectType.INVISIBILITY, 99999, 0, false, false);
-        PotionEffect transfernRegeneration = regeneration;
+        Location fernLocation;
+        boolean smallFernSet = false;
+        boolean largeFernSet = false;
+        final PotionEffect transfernInvisibility = new PotionEffect(PotionEffectType.INVISIBILITY, 99999, 0, false, false);
+        final PotionEffect transfernRegeneration = regeneration;
+        final int smallFernTime = (int) Math.ceil(SMALL_FERN_TIME);
+        final int largeFernTime = (int) Math.ceil(LARGE_FERN_TIME);
+        int lastDisplayedTime = -1;
 
-        public TransfernRunnable() {
-
-        }
+        // Store original ground block information
+        Block originalGroundBlock = null;
+        Material originalGroundType = null;
+        byte originalGroundData = 0;
 
         @Override
         public void run() {
-            
-            if (transfernAbility.getCooldownInstance().getRemainingCooldownSeconds() > 0) {
-                transfernAbility.sendCustomMessage("&6" + transfernAbility.getCooldownInstance().getRemainingCooldownSeconds() + "...");
-            }
-
-            // If player moves
+            // Check if player moved first
             if (instance.hasPlayerMovedPosition(player)) {
-                // Removing Invisibility
-                player.removePotionEffect(transfernInvisibility.getType());
-                // Removing Regeneration
-                player.removePotionEffect(transfernRegeneration.getType());
-                // Setting Armor back
-                setArmor(player.getEquipment());
-                // Removing Fern block
-                if (fernLocation != null) {
-                    fernLocation.getBlock().setType(Material.AIR);
-                    fernLocation.add(0, 1, 0).getBlock().setType(Material.AIR);
-                }
-                // Sending player moving message
-                transfernAbility.sendCustomMessage("&c&l(!) &rYou moved and you are no longer a fern");
-
-                standingStillTime = 0;
-                isTransferned = false;
-                instance.clearLastPosition(player);
+                cleanup();
                 this.cancel();
+                return;
             }
 
-            // If player stood still for duration required to transfern into the small fern
-            if (standingStillTime == transfernAbilitySmallFernTimer.getCooldownDurationSeconds()) {
-                // Sending Transfern Small fern return message
-                transfernAbility.sendCustomMessage("&d&l(!) &rYou are now a &2Small Fern");
-                // Adding invisibility
-                player.getInventory().setArmorContents(null);
-                player.addPotionEffect(transfernInvisibility);
-                // Setting small fern on the player's location
-                fernLocation = player.getLocation();
-                fernLocation.getBlock().setType(Material.LONG_GRASS);
-                fernLocation.getBlock().setData((byte) 2);
+            int remainingTime = largeFernTime - standingStillTime;
+
+            // Handle countdown messages with accurate timing
+            if (remainingTime > 0 && remainingTime <= largeFernTime && remainingTime != lastDisplayedTime) {
+                TitleHelper.sendTitle(player, "", "&2" + remainingTime + "...", 0, 20, 5);
+                lastDisplayedTime = remainingTime;
             }
-            
-            // If player stood still for duration required to transfern into the large fern
-            if (standingStillTime == transfernAbility.getCooldownDurationSeconds()) {
-                // Sending Transfern Large fern return message
-                transfernAbility.sendCustomMessage("&d&l(!) &rYou are now a &2Large Fern");
-                // Adding regeneration
-                player.addPotionEffect(transfernRegeneration);
 
-                // Place the bottom part of the double fern
-                Block bottomBlock = fernLocation.getBlock();
-                bottomBlock.setType(Material.DOUBLE_PLANT);
-                bottomBlock.setData((byte) 3);  // Set to fern bottom part (byte 3 for bottom fern)
-
-                /*// Place the top part of the double fern
-                Block topBlock = fernLocation.clone().add(0, 1, 0).getBlock();
-                topBlock.setType(Material.DOUBLE_PLANT);
-                topBlock.setData((byte) 8);  // Set to fern top part (byte 8 for top fern)
-
-                bottomBlock.setType(Material.DOUBLE_PLANT);
-                bottomBlock.setData((byte) 3);  // Set to fern bottom part (byte 3 for bottom fern)*/
-
+            // Small Fern Transformation
+            if (!smallFernSet && standingStillTime >= smallFernTime) {
+                setSmallFern();
+                smallFernSet = true;
             }
-    
-            // Increasing standing still time on second
+
+            // Large Fern Transformation
+            if (!largeFernSet && standingStillTime >= largeFernTime) {
+                setLargeFern();
+                largeFernSet = true;
+            }
+
             standingStillTime++;
+        }
+
+        private void setSmallFern() {
+            SoundManager.playSoundToAll(player, Sound.DIG_GRASS, 1, 1);
+            player.getInventory().setArmorContents(null);
+            player.addPotionEffect(transfernInvisibility);
+
+            fernLocation = player.getLocation().clone();
+
+            // Store original ground block information
+            originalGroundBlock = fernLocation.clone().subtract(0, 1, 0).getBlock();
+            originalGroundType = originalGroundBlock.getType();
+            originalGroundData = originalGroundBlock.getData();
+
+            // Change the ground to grass to allow fern placement
+            originalGroundBlock.setType(Material.GRASS);
+            originalGroundBlock.setData((byte) 0); // Regular grass
+
+            // Set the small fern
+            fernLocation.getBlock().setType(Material.LONG_GRASS);
+            fernLocation.getBlock().setData((byte) 2);
+        }
+
+        private void setLargeFern() {
+            SoundManager.playSoundToAll(player, Sound.DIG_GRASS, 1, 1);
+            player.addPotionEffect(transfernRegeneration);
+
+            // Ensure we have a valid location reference
+            if (fernLocation == null) {
+                fernLocation = player.getLocation().clone();
+            }
+
+            // Remove the small fern
+            fernLocation.getBlock().setType(Material.AIR);
+
+            // Set bottom part of large fern
+            Block bottomBlock = fernLocation.getBlock();
+            bottomBlock.setType(Material.DOUBLE_PLANT);
+            bottomBlock.setData((byte) 3); // Fern bottom
+
+            // Set top part of large fern
+            Block topBlock = fernLocation.clone().add(0, 1, 0).getBlock();
+            topBlock.setType(Material.DOUBLE_PLANT);
+            topBlock.setData((byte) 11); // Fern top
+        }
+
+        private void cleanup() {
+            player.removePotionEffect(transfernInvisibility.getType());
+            player.removePotionEffect(transfernRegeneration.getType());
+            setArmor(player.getEquipment());
+
+            // Restore original ground block if it was changed
+            if (originalGroundBlock != null && originalGroundType != null) {
+                originalGroundBlock.setType(originalGroundType);
+                originalGroundBlock.setData(originalGroundData);
+            }
+
+            if (fernLocation != null) {
+                fernLocation.getBlock().setType(Material.AIR);
+                fernLocation.clone().add(0, 1, 0).getBlock().setType(Material.AIR);
+            }
+
+            if (!largeFernSet || player.getHealth() != player.getMaxHealth()) SoundManager.playErrorSound(player);
+
+            standingStillTime = 0;
+            isTransferned = false;
+            smallFernSet = false;
+            largeFernSet = false;
+            lastDisplayedTime = -1;
+            instance.clearLastPosition(player);
+            // Reset ground block references
+            originalGroundBlock = null;
+            originalGroundType = null;
         }
     }
 

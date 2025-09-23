@@ -15,16 +15,12 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class SnowGolemClass extends BaseClass {
 
@@ -76,7 +72,7 @@ public class SnowGolemClass extends BaseClass {
 				"&7Put a pumpkin on your enemies' head",
 				"",
 				"&7Gives you &4&oStrength &e" + (strength.getAmplifier() + 1) + " &7for &e" + strength.getDuration() / 20 + "s",
-				"&7Duration: &a" + durationDisplay + "s",
+				"&7Duration: &a" + durationDisplay + "&as",
 				"&7Range: &a" + radiusDisplay + " &7blocks"
 		);
 
@@ -212,7 +208,7 @@ public class SnowGolemClass extends BaseClass {
 							if (entity instanceof Player && !entity.equals(player)) {
 								Player playerInRange = (Player) entity;
 								if (!checkIfDead(playerInRange, instance) && !instance.HasSpectator(playerInRange)) {
-									usePumpkinAbility(playerInRange);
+									setPumpkinHead(playerInRange);
 									foundPlayers = true;
 								}
 							}
@@ -233,7 +229,7 @@ public class SnowGolemClass extends BaseClass {
 		}
 	}
 
-	private void usePumpkinAbility(Player playerInRange) {
+	private void setPumpkinHead(Player playerInRange) {
 		// Pumpkin Head Sound
 		playerInRange.playSound(player.getLocation(), Sound.AMBIENCE_CAVE, 1, 2);
 
@@ -248,15 +244,19 @@ public class SnowGolemClass extends BaseClass {
 				if (ticks == PUMPKIN_ABILITY_DURATION) {
 					if (!checkIfDead(playerInRange, instance)) {
 						ItemStack pumpkin = new ItemStack(Material.PUMPKIN);
-						pumpkin.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 6);
+
+						if (baseClass.getType() == ClassType.Spider) {
+							SpiderClass spiderClass = (SpiderClass) baseClass;
+							if (spiderClass.invisTaskId != -1)
+								pumpkin.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 8);
+							else
+								pumpkin.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 6);
+						}
+						else pumpkin.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 6);
 						playerInRange.getInventory().setHelmet(pumpkin);
 					}
 				} else if (ticks == 0) {
-					if (baseClass.getType() == ClassType.Fade && baseClass.fadeAbilityActive) {
-						playerInRange.getEquipment().setHelmet(ItemHelper.create(Material.AIR));
-					} else {
-						baseClass.resetHead();
-					}
+					baseClass.resetHead();
 					this.cancel();
 				}
 

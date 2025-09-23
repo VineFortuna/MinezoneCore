@@ -34,7 +34,7 @@ public abstract class BaseProjectile {
 	}
 	
 	public boolean tooOld() {
-		return age > maxAge || summonedEntity.getVelocity().lengthSquared() < 0.01;
+		return age > maxAge;
 	}
 	
 	public Player getShooter() {

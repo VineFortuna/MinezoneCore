@@ -7,6 +7,7 @@ import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -101,6 +102,7 @@ public class BunnyClass extends BaseClass {
 				event.setCancelled(true);
 			}
 			carrotEffect();
+			player.playSound(player.getLocation(), Sound.EAT, 1, 1);
 		}
 	}
 

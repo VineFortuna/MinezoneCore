@@ -435,7 +435,7 @@ public enum FishType {
                 return ItemHelper.create(Material.EXP_BOTTLE);
             case TOKENS:
                 return ItemHelper.createSkullTexture(
-                        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2QyNGRjNTgwNjljMTIxMmI1MjlhNGFlNWQ0ZTczYmUwOTkwZDQ2ZmU5MzcxYjFmNzllODE2NGI0Mjg1OWFjOCJ9fX0=");
+                        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzFkODI3YTVkZWNiMGFlNzMwYWJiNjk2MTc3NzZlMTg5NGYyYmRiNDY5Njg1NDA0MzMxMTVkMzY4OGZiYWMzOCJ9fX0=");
             case MAP:
                 return ItemHelper.create(Material.MAP);
             case CRATE:
@@ -645,7 +645,7 @@ public enum FishType {
             case TOKENS:
                 return "Sweet cash";
             case MAP:
-                return "Could it lead to the fabled treasure?";
+                return "Could it lead to sunken treasure?";
             case CRATE:
                 return "I wonder what's inside";
         }
