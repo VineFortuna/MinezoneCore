@@ -305,7 +305,7 @@ public class ClassRewardsGUI implements InventoryProvider {
             case Wither:
                 return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTE2OWM5MGM4ODc0YWI1NzViMjAxYjYxNmE2OWVhYzdlMGI1YWM2OWJiY2NjYmIyNzcyZTM2Nzc2ZmU2OTQ0MSJ9fX0=");
             case Creeper:
-                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzAyMTMwMzFlNjdlZTRiNjJhMGQ5MzljZDIyZjliMmQ4Zjg0NDIyMDRhYzM1ZGIwMzA4OThlZDk4MzZkMDNkOSJ9fX0=");
+                return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjJjZWIzOWRkNGRlMjRhN2FkZmUyOTFhM2EwY2ZjN2NmNGY2NDVkZTU5YjYwM2ZjZmUwNmM2YjVhMDZlMjYifX19");
             case IronGolem:
                 return new ItemStack(Material.IRON_BLOCK);
             case Ghast:

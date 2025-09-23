@@ -34,7 +34,7 @@ public class MysteryChestsGUI implements InventoryProvider {
 
 	public MysteryChestsGUI(Core main, Location loc) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
-				.title("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Mystery Chest").build();
+				.title("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MysteryChest").build();
 		this.main = main;
 		this.loc = loc;
 	}
@@ -67,6 +67,9 @@ public class MysteryChestsGUI implements InventoryProvider {
 								new BukkitRunnable() {
 									@Override
 									public void run() {
+										Chunk chunk = stand.getLocation().getChunk();
+										chunk.load(true);
+
 										Random r = new Random();
 										int chance = r.nextInt(100);
 										

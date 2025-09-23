@@ -168,8 +168,11 @@ public class PlayerDataManager implements Listener {
 			int candycaneParticles = set.getInt("CandyCaneParticles");
 			int snowball = set.getInt("Snowball");
 			int floodEffect = set.getInt("FloodEffect");
+			int treasureEffect = set.getInt("TreasureEffect");
+			int treasureOpened = set.getInt("TreasureOpened");
 			String color = set.getString("Color");
 			String fishingWarps = set.getString("FishingWarps");
+			String treasureLoc = set.getString("TreasureLoc");
 
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
@@ -180,7 +183,8 @@ public class PlayerDataManager implements Listener {
 					matchMvps, fly, totalcaught, caught, rewardLevel, lureLevel, lure, friendshipLevel, friendship,
 					bestWinstreak, december15, december16, december17, december18, december19, december20, december21,
 					december22, december23, december24, december25, snowParticles, snowballDeathEffect, elfCosmetic,
-					snowmanPet, candycaneParticles, snowball, floodEffect, color, fishingWarps);
+					snowmanPet, candycaneParticles, snowball, floodEffect, treasureEffect, treasureOpened, color,
+					fishingWarps, treasureLoc);
 		}
 		set.close();
 		stmt.close();
@@ -211,7 +215,8 @@ public class PlayerDataManager implements Listener {
 		while (fishingSet.next()) {
 			int fishID = fishingSet.getInt("FishID");
 			int timesCaught = fishingSet.getInt("TimesCaught");
-			data.playerFishing.put(fishID, new FishingDetails(timesCaught));
+			int carrying = fishingSet.getInt("Carrying");
+			data.playerFishing.put(fishID, new FishingDetails(timesCaught, carrying));
 		}
 		fishingSet.close();
 		fishingState.close();
@@ -288,9 +293,10 @@ public class PlayerDataManager implements Listener {
 				+ data.paintball + ", Wins = " + data.wins + ", TotalCaught = " + data.totalcaught + ", Caught = "
 				+ data.caught + ", RewardLevel = " + data.rewardLevel + ", LureLevel = " + data.lureLevel + ", Lure = "
 				+ data.lure + ", FriendshipLevel = " + data.friendshipLevel + ", Friendship = " + data.friendship
-				+ ", FishRainEffect = " + data.fishRainEffect + ", Snowball = " + data.snowball + ", FloodEffect = " + data.floodEffect
-				+ ", Color = '" + data.color + "', FishingWarps = '" + data.fishingWarps
-				+ "' WHERE UUID = '" + data.playerUUID.toString() + "';");
+				+ ", FishRainEffect = " + data.fishRainEffect + ", Snowball = " + data.snowball
+				+ ", FloodEffect = " + data.floodEffect + ", TreasureEffect = " + data.treasureEffect
+				+ ", TreasureOpened = " + data.treasureOpened + ", Color = '" + data.color + "', FishingWarps = '" + data.fishingWarps
+				+ "', TreasureLoc = '" + data.treasureLoc + "' WHERE UUID = '" + data.playerUUID.toString() + "';");
 		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon, "
 				+ "Reward1, Reward2, Reward3, Reward4, Reward5) VALUES ";
 		int index = 0;
@@ -318,7 +324,7 @@ public class PlayerDataManager implements Listener {
 			manager.executeUpdateCommand(updateCMD);
 		}
 
-		updateCMD = "INSERT INTO PlayerFishing (UUID, FishID, TimesCaught) VALUES ";
+		updateCMD = "INSERT INTO PlayerFishing (UUID, FishID, TimesCaught, Carrying) VALUES ";
 		index = 0;
 
 		for (Entry<Integer, FishingDetails> entry : data.playerFishing.entrySet()) {
@@ -326,14 +332,15 @@ public class PlayerDataManager implements Listener {
 				if (index != 0)
 					updateCMD += ", ";
 				updateCMD += "('" + data.playerUUID.toString() + "', " + entry.getKey() + ", "
-						+ entry.getValue().timesCaught + ")";
+						+ entry.getValue().timesCaught + ", "
+						+ entry.getValue().carrying + ")";
 				index++;
 				entry.getValue().hasUpdated = false;
 			}
 		}
 
 		if (index > 0) {
-			updateCMD += " ON DUPLICATE KEY UPDATE TimesCaught = VALUES (TimesCaught);";
+			updateCMD += " ON DUPLICATE KEY UPDATE TimesCaught = VALUES (TimesCaught), Carrying = VALUES (Carrying);";
 			//System.out.print("Executing " + updateCMD);
 			manager.executeUpdateCommand(updateCMD);
 		}

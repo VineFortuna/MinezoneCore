@@ -2,8 +2,8 @@ package anthony.SuperCraftBrawl.Game.classes;
 
 import anthony.SuperCraftBrawl.Game.ActionBarManager;
 import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
+import anthony.SuperCraftBrawl.Game.classes.all.SpiderClass;
 import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.gui.ClassRewardsGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
@@ -922,6 +922,8 @@ public abstract class BaseClass {
 					}
 					p.setDisplayName("" + p.getName() + " " + ChatColor.RESET + ChatColor.GRAY + ChatColor.ITALIC
 							+ "Spectator" + ChatColor.RESET);
+					instance.sendScoreboardUpdate(player);
+
 					Random r = new Random();
 					int chance = r.nextInt(100);
 
@@ -930,7 +932,7 @@ public abstract class BaseClass {
 						if (data != null) {
 							data.mysteryChests++;
 							player.sendMessage(instance.getGameManager().getMain()
-									.color("&5&l(!) &rYou have found &e1 Mystery Chest!"));
+									.color("&5&l(!) &rYou have found &e1 MysteryChest!"));
 						}
 					}
 
@@ -1763,9 +1765,10 @@ public abstract class BaseClass {
 
 	// Giving health potions on kill
 	protected void healthPots(Player d) {
-		if (checkIfDead(d, instance) || instance.alivePlayers < 2 ||
-				instance.classes.get(d).getType() == ClassType.Horse)
+		if (checkIfDead(d, instance) || instance.classes.get(d).getType() == ClassType.Horse)
 			return;
+
+		if (instance.alivePlayers == 1) return;
 
 		if (d.getHealth() / d.getMaxHealth() >= 0.5) return;
 
@@ -1843,7 +1846,7 @@ public abstract class BaseClass {
 			if (baseClass.getType() == ClassType.Sheep) {
 				damagerPlayer.getInventory().addItem(new ItemStack(Material.ENCHANTMENT_TABLE));
 				damagerPlayer.sendMessage(instance.getGameManager().getMain()
-						.color("&r&l(!) &rYou got a kill and now you can switch your wool color if you'damagerPlayer like!"));
+						.color("&r&l(!) &rYou got a kill and now you can switch your wool color if you'd like!"));
 
 			} else if (baseClass.getType() == ClassType.Hunter) {
 				if (!hunterDash) {
@@ -1943,6 +1946,22 @@ public abstract class BaseClass {
 	}
 
 	public void resetHead() {
+		if (this.getType() == ClassType.Spider) {
+			SpiderClass spiderClass = (SpiderClass) this;
+			if (spiderClass.invisTaskId != -1) {
+				ItemStack invisHelmet = playerHead.clone();
+				invisHelmet.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 8);
+				player.getEquipment().setHelmet(invisHelmet);
+				return;
+			}
+		}
+		if (this.getType() == ClassType.Fade) {
+			if (fadeAbilityActive) {
+				player.getEquipment().setHelmet(ItemHelper.create(Material.AIR));
+				return;
+			}
+		}
+
 		player.getEquipment().setHelmet(playerHead);
 	}
 }
