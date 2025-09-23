@@ -66,7 +66,7 @@ public class BedrockClass extends BaseClass {
 				"&7Be invincible to all damage",
 				"&7You can not hit other players",
 				"",
-				"&7Duration: &a" + durationDisplay + "s"
+				"&7Duration: &a" + durationDisplay + "&as"
 		);
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3); // Sharpness 3
 		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1); // Knockback 1

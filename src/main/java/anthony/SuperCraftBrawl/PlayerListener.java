@@ -3,13 +3,19 @@ package anthony.SuperCraftBrawl;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.fishing.FishArea;
+import anthony.SuperCraftBrawl.fishing.FishRarity;
+import anthony.SuperCraftBrawl.fishing.FishType;
+import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.gui.christmas.ChristmasRewardsGUI;
 import anthony.SuperCraftBrawl.gui.cosmetics.CosmeticsGUI;
+import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.util.ItemHelper;
 import anthony.util.PathfinderGoalFollowPlayer;
 import anthony.util.PathfinderHelper;
+import com.comphenix.protocol.wrappers.EnumWrappers;
 import me.itzzmic.minezone.api.PunishAPI;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.*;
@@ -22,6 +28,7 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.*;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -46,10 +53,7 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class PlayerListener implements Listener {
 
@@ -57,9 +61,10 @@ public class PlayerListener implements Listener {
 	public ScoreboardManager scoreManager = Bukkit.getScoreboardManager();
 	public Scoreboard c;
 	public List<Player> snowParticlePlayers = new ArrayList<Player>();
-	public List<Player> snowmanPetPlayers = new ArrayList<Player>();
+	public Map<Player, Snowman> snowmanPetPlayers = new HashMap<>();
 	public List<Player> candyCaneSwirlPlayers = new ArrayList<Player>();
 	public List<Player> elfCosmeticPlayers = new ArrayList<Player>();
+	public List<Player> goldenOutfitPlayers = new ArrayList<>();
 
 	public PlayerListener(Core main) {
 		this.main = main;
@@ -192,6 +197,8 @@ public class PlayerListener implements Listener {
 		GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
 		candyCaneSwirlPlayers.remove(player);
 		snowParticlePlayers.remove(player);
+		if (snowmanPetPlayers.containsKey(player))
+			snowmanPetPlayers.get(player).remove();
 		snowmanPetPlayers.remove(player);
 		elfCosmeticPlayers.remove(player);
 		// anthony.CrystalWars.game.GameInstance i =
@@ -325,11 +332,9 @@ public class PlayerListener implements Listener {
 	}
 
 	public void snowmanPet(Player player) {
-		if (this.snowmanPetPlayers.contains(player)) {
+		if (this.snowmanPetPlayers.containsKey(player)) {
 			// Spawn a Snowman near the player
-			Location spawnLoc = player.getLocation().add(1, 0, 1);
-			Snowman snowman = player.getWorld().spawn(spawnLoc, Snowman.class);
-			snowman.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Snowman Pet");
+			Snowman snowman = snowmanPetPlayers.get(player);
 
 			// Convert the player to NMS EntityLiving
 			EntityLiving targetPlayer = (EntityLiving) ((CraftLivingEntity) player).getHandle();
@@ -356,7 +361,7 @@ public class PlayerListener implements Listener {
 					snowman.teleport(behindPlayer);
 				}
 
-				if (!this.snowmanPetPlayers.contains(player)) {
+				if (!this.snowmanPetPlayers.containsKey(player)) {
 					snowman.remove();
 				} else if (!player.isOnline() || player.getWorld() != main.getLobbyWorld()) {
 					this.snowmanPetPlayers.remove(player);
@@ -536,7 +541,7 @@ public class PlayerListener implements Listener {
 		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
 
 		if (e.getItem() != null && e.getItem().getType() == Material.CHEST) {
-			if (i != null && i.state == anthony.SuperCraftBrawl.Game.GameState.WAITING)
+			if (i != null && i.state == GameState.WAITING)
 				new CosmeticsGUI(main).inv.open(player);
 			else if (player.getWorld() == main.getLobbyWorld())
 				new CosmeticsGUI(main).inv.open(player);
@@ -692,7 +697,7 @@ public class PlayerListener implements Listener {
 			if (item.getType() == Material.GOLD_BARDING
 					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 				if ((player.getWorld() == main.getLobbyWorld())
-						|| (i != null && i.state == anthony.SuperCraftBrawl.Game.GameState.WAITING)) {
+						|| (i != null && i.state == GameState.WAITING)) {
 
 					if (data != null) {
 						if (data.paintball > 0) {
@@ -734,7 +739,7 @@ public class PlayerListener implements Listener {
 				Player p = (Player) s.getShooter();
 				GameInstance i = main.getGameManager().GetInstanceOfPlayer(p);
 
-				if (i != null && i.state == anthony.SuperCraftBrawl.Game.GameState.STARTED)
+				if (i != null && i.state == GameState.STARTED)
 					return;
 
 				Block center = s.getLocation().getBlock();

@@ -10,7 +10,7 @@ public class ItemProjectile extends BaseProjectile {
 	private final ItemStack item;
 	
 	public ItemProjectile(GameInstance instance, Player shooter, ProjectileOnHit onHit, ItemStack item) {
-		super(instance, shooter, onHit, 20 * 3);
+		super(instance, shooter, onHit, 20 * 10);
 		this.item  = item;
 	}
 	

@@ -55,7 +55,7 @@ public class FlintAndSteelClass extends BaseClass {
 				"&7to combine them and gain &c&oFire Aspect 1",
 				"",
 				"&7Hit combo window: &a" + windowDisplay + "s",
-				fusionAbility.getAbilityName() + " &7lasts for &a" + durationDisplay + "s"
+				fusionAbility.getAbilityName() + " &7lasts for &a" + durationDisplay + "&as"
 		};
 
 		// Flint

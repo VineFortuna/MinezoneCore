@@ -107,7 +107,7 @@ public class EndermanClass extends BaseClass {
 		if (item == null) return;
 		if (player.getGameMode() == GameMode.SPECTATOR) return;
 
-		if (item.equals(weapon)) event.setCancelled(true);
+		if (item.isSimilar(weapon)) event.setCancelled(true);
 		if (item.equals(blockItem)) {
 			if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
 			if (used) {
