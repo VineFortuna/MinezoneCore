@@ -235,8 +235,7 @@ public class SheepClass extends BaseClass {
 			color = "FF0000";
 			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.RED
 					+ ChatColor.BOLD + "RED WOOL");
-			player.setDisplayName(
-					player.getName() + " " + ChatColor.RED + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
+			player.setDisplayName(instance.getGameManager().getMain().color(player.getName() + " &c&lSheep&r"));
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.RED
 					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
@@ -246,8 +245,7 @@ public class SheepClass extends BaseClass {
 			color = "FF";
 			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.BLUE
 					+ ChatColor.BOLD + "BLUE WOOL");
-			player.setDisplayName(
-					player.getName() + " " + ChatColor.BLUE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
+			player.setDisplayName(instance.getGameManager().getMain().color(player.getName() + " &9&lSheep&r"));
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.BLUE
 					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
@@ -257,8 +255,7 @@ public class SheepClass extends BaseClass {
 			color = "0";
 			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.BLACK
 					+ ChatColor.BOLD + "BLACK WOOL");
-			player.setDisplayName(
-					player.getName() + " " + ChatColor.BLUE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
+			player.setDisplayName(instance.getGameManager().getMain().color(player.getName() + " &0&lSheep&r"));
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.BLACK
 					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
@@ -269,8 +266,7 @@ public class SheepClass extends BaseClass {
 			color = "800080";
 			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given "
 					+ ChatColor.DARK_PURPLE + ChatColor.BOLD + "PURPLE WOOL");
-			player.setDisplayName(
-					player.getName() + " " + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
+			player.setDisplayName(instance.getGameManager().getMain().color(player.getName() + " &5&lSheep&r"));
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.DARK_PURPLE
 					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
@@ -280,6 +276,7 @@ public class SheepClass extends BaseClass {
 			color = "8000";
 			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.DARK_GREEN
 					+ ChatColor.BOLD + "GREEN WOOL");
+			player.setDisplayName(instance.getGameManager().getMain().color(player.getName() + " &2&lSheep&r"));
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.DARK_GREEN
 					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
@@ -290,8 +287,7 @@ public class SheepClass extends BaseClass {
 			color = "808080";
 			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.GRAY
 					+ ChatColor.BOLD + "GRAY WOOL");
-			player.setDisplayName(
-					player.getName() + " " + ChatColor.GRAY + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
+			player.setDisplayName(instance.getGameManager().getMain().color(player.getName() + " &7&lSheep&r"));
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.GRAY
 					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
@@ -301,19 +297,18 @@ public class SheepClass extends BaseClass {
 		} else if (itemList[randomNum] == pinkWool) { // PINK
 			color = "FF69B4";
 			player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou were given &d&lPINK WOOL"));
-			player.setDisplayName(instance.getGameManager().getMain().color(player.getName() + " &9&lSheep&r"));
+			player.setDisplayName(instance.getGameManager().getMain().color(player.getName() + " &d&lSheep&r"));
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.LIGHT_PURPLE
 					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
 			bc.score = newScore;
 			newScore.setScore(bc.getLives());
 			pink = true;
-		} else if (itemList[randomNum] == limeWool) {
+		} else if (itemList[randomNum] == limeWool) { // LIME
 			color = "FF00";
 			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.GREEN
 					+ ChatColor.BOLD + "LIME WOOL");
-			player.setDisplayName(
-					player.getName() + " " + ChatColor.GREEN + ChatColor.BOLD + "Sheep" + ChatColor.RESET);
+			player.setDisplayName(instance.getGameManager().getMain().color(player.getName() + " &a&lSheep&r"));
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.GREEN
 					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " "  + getTeamColor() + player.getName(), 40));
