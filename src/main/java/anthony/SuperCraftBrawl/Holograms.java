@@ -9,6 +9,7 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
 import net.minecraft.server.v1_8_R3.WorldServer;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -37,6 +38,39 @@ public class Holograms {
 	private void giveHolograms() {
 		scbPlayerStats();
 		destroyBoards();
+		mapCategories();
+	}
+	
+	private void mapCategories() {
+		Location loc = new Location(main.getLobbyWorld(), 203, 107, 690.547);
+		String name = main.color("&b&lOG SCB MAPS");
+		
+		EntityArmorStand armorStand = new EntityArmorStand(((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) loc.getWorld()).getHandle());
+		armorStand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+		armorStand.setCustomName(name);
+		armorStand.setCustomNameVisible(true);
+		armorStand.setInvisible(true);
+		armorStand.setGravity(false);
+
+		PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(armorStand);
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+		}
+		
+		loc = new Location(main.getLobbyWorld(), 176, 107, 690.547);
+		name = main.color("&b&lCOMMUNITY MAPS");
+		
+		armorStand = new EntityArmorStand(((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) loc.getWorld()).getHandle());
+		armorStand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+		armorStand.setCustomName(name);
+		armorStand.setCustomNameVisible(true);
+		armorStand.setInvisible(true);
+		armorStand.setGravity(false);
+
+		packet = new PacketPlayOutSpawnEntityLiving(armorStand);
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+		}
 	}
 
 	private void scbPlayerStats() {

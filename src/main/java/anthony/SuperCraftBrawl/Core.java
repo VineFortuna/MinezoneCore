@@ -1,6 +1,6 @@
 package anthony.SuperCraftBrawl;
 
-import anthony.SuperCraftBrawl.Game.*;
+import anthony.SuperCraftBrawl.Game.*; 
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -110,6 +110,7 @@ public class Core extends JavaPlugin implements Listener {
 	private ArrayList<String> msg;
 	public Map<Player, Player> wagers = new HashMap<Player, Player>();
 	public SignManager signManager;
+	public anthony.SuperCraftBrawl.lobbyitems.LobbyItems lobbyItems;
 
 	// Player's game stats
 	public Map<Player, GameInstance> gameStats = new HashMap<Player, GameInstance>();
@@ -135,6 +136,10 @@ public class Core extends JavaPlugin implements Listener {
 
 	public ScoreboardManager getScoreboardManager() {
 		return this.scoreboardManager;
+	}
+	
+	public anthony.SuperCraftBrawl.lobbyitems.LobbyItems getLobbyItems() {
+		return this.lobbyItems;
 	}
 
 	public TablistManager getTabManager() {
@@ -406,6 +411,7 @@ public class Core extends JavaPlugin implements Listener {
 		flawlessWinsBoard = new FlawlessWinsBoard(this);
 		fishing = new Fishing(this);
 		signManager = new SignManager(this);
+		lobbyItems = new anthony.SuperCraftBrawl.lobbyitems.LobbyItems(this);
 
 		for (Arenas arena : Arenas.values()) {
 			parkourBoards.add(new ParkourBoard(this, arena));
@@ -1687,7 +1693,7 @@ public class Core extends JavaPlugin implements Listener {
 		p.sendMessage("");
 		p.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "        WELCOME TO MINEZONE");
 		p.sendMessage("");
-		p.sendMessage("" + "         Enjoy Super Craft Blocks!");
+		p.sendMessage("" + "         Enjoy Super Craft Bros!");
 		p.sendMessage("");
 		p.sendMessage("" + "     Be sure to join our Discord Server with " + ChatColor.GREEN + "/socials");
 		p.sendMessage("");
@@ -1817,7 +1823,7 @@ public class Core extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void serverMotd(ServerListPingEvent p) {
-		String msg = color("                   &eMinezone &7[1.8-1.21] \n          &2&lHOME OF &c&lSUPER CRAFT BLOCKS");
+		String msg = color("                   &eMinezone &7[1.8-1.21] \n          &2&lHOME OF &c&lSUPER CRAFT BROS");
 		p.setMotd(msg);
 		p.setMaxPlayers(1);
 	}
