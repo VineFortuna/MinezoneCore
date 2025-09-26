@@ -7,6 +7,7 @@ import anthony.SuperCraftBrawl.fishing.FishRarity;
 import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.gui.battlepass.BattlePassGUI;
 import anthony.SuperCraftBrawl.gui.christmas.ChristmasRewardsGUI;
 import anthony.SuperCraftBrawl.gui.cosmetics.CosmeticsGUI;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
@@ -587,7 +588,7 @@ public class PlayerListener implements Listener {
 				}
 			} else if (item.getType() == Material.NETHER_STAR) {
 				if (player.getWorld() == main.getLobbyWorld())
-					new ChallengesGUI(main).inv.open(player);
+					new BattlePassGUI(main).inv.open(player);
 			}
 		}
 	}
