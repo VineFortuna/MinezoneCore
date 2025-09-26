@@ -18,6 +18,7 @@ import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
 import anthony.SuperCraftBrawl.practice.BowPractice;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.ranks.RankManager;
+import anthony.SuperCraftBrawl.signs.SignManager;
 import anthony.SuperCraftBrawl.tablist.TablistManager;
 import anthony.parkour.Arenas;
 import anthony.parkour.Parkour;
@@ -108,6 +109,7 @@ public class Core extends JavaPlugin implements Listener {
 	public Fishing fishing;
 	private ArrayList<String> msg;
 	public Map<Player, Player> wagers = new HashMap<Player, Player>();
+	public SignManager signManager;
 
 	// Player's game stats
 	public Map<Player, GameInstance> gameStats = new HashMap<Player, GameInstance>();
@@ -137,6 +139,10 @@ public class Core extends JavaPlugin implements Listener {
 
 	public TablistManager getTabManager() {
 		return this.tabManager;
+	}
+	
+	public SignManager getSignManager() {
+		return this.signManager;
 	}
 
 	public long getCurrentTick() {
@@ -399,6 +405,7 @@ public class Core extends JavaPlugin implements Listener {
 		streakBoard = new WinstreakBoard(this);
 		flawlessWinsBoard = new FlawlessWinsBoard(this);
 		fishing = new Fishing(this);
+		signManager = new SignManager(this);
 
 		for (Arenas arena : Arenas.values()) {
 			parkourBoards.add(new ParkourBoard(this, arena));
