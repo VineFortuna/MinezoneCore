@@ -6,11 +6,13 @@ import anthony.SuperCraftBrawl.Game.classes.all.LargeFernClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.PlayerListener;
 import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.SuperCraftBrawl.signs.SignManager;
 import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
 import anthony.util.ItemHelper;
 import fr.mrmicky.fastboard.FastBoard;
@@ -85,6 +87,7 @@ public class GameInstance {
 	public List<ItemStack> items = new ArrayList<>();
 	public List<Player> favClassSelection = new ArrayList<>();
 	public List<ClassType> classList = generateClassList();
+	private SignManager sm;
 
 	// DUEL COMMAND
 	public boolean isDuel = false;
@@ -116,6 +119,7 @@ public class GameInstance {
 		this.winnerList = new ArrayList<Player>();
 		this.spectators = new ArrayList<Player>();
 		this.firstBlood = null;
+		this.sm = getGameManager().getMain().getSignManager();
 		classes = new HashMap<>();
 		oldClasses = new HashMap<>();
 		allClasses = new HashMap<>();
@@ -380,16 +384,17 @@ public class GameInstance {
 	}
 
 	public void StartGameTimer() {
+		SignManager sm = getGameManager().getMain().getSignManager();
+		
 		if (gameStartTime == null) {
 			timeToStartSeconds = getSecondsUntilStart();
 			gameStartTime = new BukkitRunnable() {
 
 				@Override
 				public void run() {
-					if (s != null) {
-						s.setLine(3, getGameManager().getMain().color("&0" + timeToStartSeconds + "s"));
-						s.update();
-					}
+					if (sm != null)
+						sm.updateSignCountdown(s, timeToStartSeconds);
+					
 					int ticks = timeToStartSeconds;
 					if (ticks == 0) {
 						StartGame();
@@ -701,7 +706,7 @@ public class GameInstance {
 	 * started
 	 */
 	public void StartGame() {
-		this.updateLobbySign();
+		this.sm.updateSignInProgress(s); //Updates the sign in lobby to show match In Progress
 		
 		setTeams(); // Sets teams if mode is Duos
 		startLightningDropsTimer(); // Loot drops will start spawning every 45 seconds
@@ -746,18 +751,6 @@ public class GameInstance {
 
 		};
 		r.runTaskLater(getGameManager().getMain(), 20);
-	}
-	
-	/*
-	 * This updates the sign in the lobby to show map is in progress
-	 * and to "Spectate" if clicked
-	 */
-	private void updateLobbySign() {
-		if (s != null) {
-			s.setLine(0, getGameManager().getMain().color("&2In Progress"));
-			s.setLine(3, "" + ChatColor.BLACK + ChatColor.UNDERLINE + "Spectate");
-			s.update();
-		}
 	}
 
 	/*
@@ -1272,18 +1265,9 @@ public class GameInstance {
 							}
 						}
 					}
-					if (s != null) {
-						s.setLine(0, getGameManager().getMain().color("&2Lobby"));
-						s.setLine(1, getGameManager().getMain().color("&0" + mapName));
-						if (map != null)
-							s.setLine(2, getGameManager().getMain()
-									.color("&0Players: 0/" + getMap().GetInstance().gameType.getMaxPlayers()));
-						else
-							s.setLine(2, getGameManager().getMain().color("&0Players: 0/6"));
-
-						s.setLine(3, getGameManager().getMain().color("&030s"));
-						s.update();
-					}
+					
+					if (sm != null)
+						sm.resetSign(s, map);
 
 					for (Player player : players) {
 						gameManager.getMain().ResetPlayer(player);
