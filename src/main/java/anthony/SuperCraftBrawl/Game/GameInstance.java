@@ -382,6 +382,35 @@ public class GameInstance {
 			return timeToStartSeconds = 30;
 		return timeToStartSeconds = 60;
 	}
+	
+	public void StartGameTimer2() {
+		SignManager sm = getGameManager().getMain().getSignManager();
+		
+		if (gameStartTime == null) {
+			timeToStartSeconds = getSecondsUntilStart();
+			gameStartTime = new BukkitRunnable() {
+
+				@Override
+				public void run() {
+					if (sm != null)
+						sm.updateSignCountdown(s, timeToStartSeconds);
+					
+					int ticks = timeToStartSeconds;
+					
+					if (ticks == 0) {
+						StartGame();
+						GameScoreboard();
+						gameStartTime = null;
+						this.cancel();
+					}
+					
+					timeToStartSeconds--;
+				}
+				
+			};
+			gameStartTime.runTaskTimer(gameManager.getMain(), 0, 20);
+		}
+	}
 
 	public void StartGameTimer() {
 		SignManager sm = getGameManager().getMain().getSignManager();
