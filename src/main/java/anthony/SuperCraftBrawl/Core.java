@@ -16,8 +16,6 @@ import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
 import anthony.SuperCraftBrawl.practice.BowPractice;
-import anthony.SuperCraftBrawl.practice.PracticeManager;
-import anthony.SuperCraftBrawl.practice.SCBPractice;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.ranks.RankManager;
 import anthony.SuperCraftBrawl.tablist.TablistManager;
@@ -110,8 +108,6 @@ public class Core extends JavaPlugin implements Listener {
 	public Fishing fishing;
 	private ArrayList<String> msg;
 	public Map<Player, Player> wagers = new HashMap<Player, Player>();
-	public PersonalNPCPlugin pnp;
-	public PracticeManager scbPractice;
 
 	// Player's game stats
 	public Map<Player, GameInstance> gameStats = new HashMap<Player, GameInstance>();
@@ -133,14 +129,6 @@ public class Core extends JavaPlugin implements Listener {
 
 	public ActionBarManager getActionBarManager() {
 		return this.actionBarManager;
-	}
-	
-	public PracticeManager getSCBPractice() {
-		return this.scbPractice;
-	}
-	
-	public PersonalNPCPlugin getNPCPlugin() {
-		return this.pnp;
 	}
 
 	public ScoreboardManager getScoreboardManager() {
@@ -411,8 +399,6 @@ public class Core extends JavaPlugin implements Listener {
 		streakBoard = new WinstreakBoard(this);
 		flawlessWinsBoard = new FlawlessWinsBoard(this);
 		fishing = new Fishing(this);
-		//pnp = new PersonalNPCPlugin(this);
-		scbPractice = new PracticeManager(this);
 
 		for (Arenas arena : Arenas.values()) {
 			parkourBoards.add(new ParkourBoard(this, arena));
@@ -428,13 +414,8 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null) {
-<<<<<<< HEAD
-			String[] commandTypes = { "maps", "join", "practice", "fly", "leave", "players", "class", "socials", "spectate",
-					"startgame", "gamestats", "setlives", "lactate", "purchases", "kit", "items", "color", "sound",
-=======
 			String[] commandTypes = { "maps", "join", "fly", "leave", "players", "class", "socials", "spectate",
-					"startgame", "gamestats", "setlives", "purchases", "kit", "items", "color", "sound", "soundnms",
->>>>>>> 8d893e5d9e1431988e088fc5f446f5a8b02cba02
+					"startgame", "gamestats", "setlives", "lactate", "purchases", "kit", "items", "color", "sound",
 					"heal" };
 
 			for (String command : commandTypes) {
@@ -1931,7 +1912,7 @@ public class Core extends JavaPlugin implements Listener {
 			player.getInventory().setItem(3,
 					ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), "&bClasses &7(Right Click)"));
 			player.getInventory().setItem(8,
-					ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), "&bChallenges &7(Right Click)"));
+					ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), "&bBattle Pass &7(Right Click)"));
 		}
 		player.getInventory().setItem(0,
 				ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&bGame Selector &7(Right Click)"));
