@@ -1504,28 +1504,6 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	private void waitingLobbyItems(Player player, GameInstance game) {
-		if (player.getWorld() != main.getLobbyWorld()) {
-			player.getInventory().clear();
-
-			// ITEMS:
-			if (game.gameType != GameType.FRENZY) {
-				player.getInventory().setItem(0,
-						ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), "&9>&1>&f&lClasses&1<&9<",
-								"", "&7Click to choose a class"));
-			}
-
-			player.getInventory().setItem(4,
-					ItemHelper.setDetails(new ItemStack(Material.CHEST), "&d>&5>&f&lCosmetics&5<&d<",
-							"", "&7Click to see your cosmetics"));
-			ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
-			player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&c>&4>&f&lProfile&4<&c<",
-					"", "&7Click to see your profile"));
-			player.getInventory().setItem(8, ItemHelper.setDetails(new ItemStack(Material.BARRIER), "&cLeave Game",
-					"", "&7Click to leave your game"));
-		}
-	}
-
 	public void JoinMap(Player player, Maps map) {
 		GameReason result = main.getGameManager().AddPlayerToMap(player, map);
 		GameInstance instance = this.GetInstanceOfPlayer(player);
@@ -1541,7 +1519,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 				player.setGameMode(GameMode.ADVENTURE);
 				main.getListener().resetDoubleJump(player);
-				waitingLobbyItems(player, instance);
+				main.getLobbyItems().gameLobbyItems(player);
 				break;
 			case ALREADY_IN:
 				player.sendMessage(main.color("&c&l(!) &rYou are already in a map!"));

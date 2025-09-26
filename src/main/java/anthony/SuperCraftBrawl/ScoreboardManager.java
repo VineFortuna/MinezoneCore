@@ -42,7 +42,7 @@ public class ScoreboardManager {
 		}
 
 		if (main.tournament == false) {
-			String gameServer = "Super Craft Blocks";
+			String gameServer = "Super Craft Bros";
 			board.updateTitle(main.color("&r&l" + gameServer));
 			if (data != null) {
 				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
