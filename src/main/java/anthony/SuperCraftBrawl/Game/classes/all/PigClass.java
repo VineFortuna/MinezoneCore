@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
@@ -71,7 +72,7 @@ public class PigClass extends BaseClass {
 
 	@Override
 	public void Tick(int gameTicks) {
-		if (!isPlayerAlive()) return;
+		if (!isPlayerAlive() || instance.state == GameState.ENDED) return;
 
 		Inventory inventory = player.getInventory();
 		boolean hasSpeedEffect = player.hasPotionEffect(speed.getType());
