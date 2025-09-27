@@ -79,6 +79,7 @@ public abstract class BaseClass {
 	public Timer grimReaper = new Timer();
 	public Timer alexBrewingStand = new Timer();
 	public Timer wolfBite = new Timer();
+	public Timer freddyCooldown = new Timer();
 	public boolean bedrockInvincibility = false;
 	public boolean hunterDash = true;
 	public boolean wolfPackAdd = false;

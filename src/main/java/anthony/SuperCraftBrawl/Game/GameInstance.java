@@ -735,7 +735,8 @@ public class GameInstance {
 	 * started
 	 */
 	public void StartGame() {
-		this.sm.updateSignInProgress(s); //Updates the sign in lobby to show match In Progress
+		if (sm != null && s != null)
+			this.sm.updateSignInProgress(s); //Updates the sign in lobby to show match In Progress
 		
 		setTeams(); // Sets teams if mode is Duos
 		startLightningDropsTimer(); // Loot drops will start spawning every 45 seconds
@@ -1295,7 +1296,7 @@ public class GameInstance {
 						}
 					}
 					
-					if (sm != null)
+					if (sm != null && s != null)
 						sm.resetSign(s, map);
 
 					for (Player player : players) {
@@ -2397,10 +2398,6 @@ public class GameInstance {
 
 	public List<ItemStack> getAllItemDrops() {
 		return allItemDrops;
-	}
-
-	public ItemStack getSethBlingItemDrop() {
-		return sethBlingItemDrops.get(random.nextInt(sethBlingItemDrops.size()));
 	}
 
 	public int getLightningDropRemainingTime() {
