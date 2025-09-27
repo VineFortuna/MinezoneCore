@@ -42,14 +42,14 @@ public class ScoreboardManager {
 		}
 
 		if (main.tournament == false) {
-			String gameServer = "Super Craft Blocks";
+			String gameServer = "Super Craft Bros";
 			board.updateTitle(main.color("&r&l" + gameServer));
 			if (data != null) {
 				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 						main.color("&b&lTokens: &7" + data.tokens), "",
 						main.color("&b&lRank: &r" + main.getRankManager().getRank(player).getTag()), "",
 						main.color("&b&lLevel: &7" + data.checkPlayerLevel(player, data) + "✧" + data.level),
-						main.color("&7" + data.exp + "/2500 EXP"),
+						main.color("&7" + data.exp + "/2500 EXP"), "", main.color("&b&lBattle Pass Tier: &70/10"),
 						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------", main.color("&bminezone.club"));
 			}
 		} else {
