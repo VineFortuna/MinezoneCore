@@ -3,7 +3,7 @@ package anthony.SuperCraftBrawl;
 public enum VaultedStuff {
 	
 	//Items:
-	NotchApple, EasterEgg,
+	EasterEgg, MiniShield, FireRes,
 	
 	//Maps:
 	NeoVillage, EggHunt, WitchesBrew, 

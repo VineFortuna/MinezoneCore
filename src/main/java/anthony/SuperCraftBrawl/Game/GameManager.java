@@ -1504,48 +1504,11 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	private void waitingLobbyItems(Player player, GameInstance game) {
-		if (player.getWorld() != main.getLobbyWorld()) {
-			player.getInventory().clear();
-
-			// ITEMS:
-			if (game.gameType != GameType.FRENZY) {
-				player.getInventory().setItem(0,
-						ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), "&9>&1>&f&lClasses&1<&9<",
-								"", "&7Click to choose a class"));
-			}
-
-			player.getInventory().setItem(4,
-					ItemHelper.setDetails(new ItemStack(Material.CHEST), "&d>&5>&f&lCosmetics&5<&d<",
-							"", "&7Click to see your cosmetics"));
-			ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
-			player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&c>&4>&f&lProfile&4<&c<",
-					"", "&7Click to see your profile"));
-			player.getInventory().setItem(8, ItemHelper.setDetails(new ItemStack(Material.BARRIER), "&cLeave Game",
-					"", "&7Click to leave your game"));
-		}
-	}
-
 	public void JoinMap(Player player, Maps map) {
 		GameReason result = main.getGameManager().AddPlayerToMap(player, map);
 		GameInstance instance = this.GetInstanceOfPlayer(player);
 		MapInstance mi = map.GetInstance();
-		Vector v = new Vector(0, 100, 0);
-		Vector newV = new Vector(mi.signLoc.getX(), mi.signLoc.getY(), mi.signLoc.getZ());
-
-		Location loc = new Location(main.getLobbyWorld(), mi.signLoc.getX(), mi.signLoc.getY(), mi.signLoc.getZ());
-		Block b = main.getLobbyWorld().getBlockAt(loc);
-
-		if (b.getType() == Material.SIGN || b.getType() == Material.WALL_SIGN || b.getType() == Material.SIGN_POST) {
-			if (instance != null) {
-				Sign s = (Sign) b.getState();
-				instance.setSign(s);
-				s.setLine(2, main.color("&0Players: " + instance.players.size() + "/"
-						+ instance.getMap().GetInstance().gameType.getMaxPlayers()));
-				s.setLine(3, main.color("&0" + instance.timeToStartSeconds + "s"));
-				s.update();
-			}
-		}
+		main.getSignManager().updateSign(mi, instance); //Updates sign in lobby when a new player joins
 
 		switch (result) {
 			case SUCCESS:
@@ -1556,7 +1519,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 				player.setGameMode(GameMode.ADVENTURE);
 				main.getListener().resetDoubleJump(player);
-				waitingLobbyItems(player, instance);
+				main.getLobbyItems().gameLobbyItems(player);
 				break;
 			case ALREADY_IN:
 				player.sendMessage(main.color("&c&l(!) &rYou are already in a map!"));
@@ -1679,17 +1642,20 @@ public class GameManager implements Listener, PluginMessageListener {
 		return reason;
 	}
 
+	/*
+	 * This function adds player to the game they are joining as long
+	 * as they are not in another game
+	 */
 	public GameReason AddPlayerToMap(Player player, Maps map) {
 		GameInstance instance = null;
 
-		if (GetInstanceOfPlayer(player) != null || getMain().getParkour().hasPlayer(player)) {
+		if (GetInstanceOfPlayer(player) != null || getMain().getParkour().hasPlayer(player))
 			return GameReason.IN_ANOTHER;
-		}
 
-		if (gameMap.containsKey(map))
+		if (gameMap.containsKey(map)) //Checks if the game has already been initialized
 			instance = gameMap.get(map);
 		else {
-			instance = new GameInstance(this, map);
+			instance = new GameInstance(this, map); //Creates a new game if one doesn't already exist
 			gameMap.put(map, instance);
 		}
 
