@@ -1,7 +1,7 @@
 package anthony.SuperCraftBrawl.Game;
 
 public enum GameState {
-	WAITING("Lobby"), STARTED("In Progress"), ENDED ("Ended")/*, STARTING("Starting")*/;
+	WAITING("Lobby"), STARTED("In Progress"), ENDED ("Ended");
 	
 	private String name;
 	

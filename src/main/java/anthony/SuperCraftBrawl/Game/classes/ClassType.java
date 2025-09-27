@@ -98,7 +98,8 @@ public enum ClassType {
 	Elf(101, 0, 0, true),
 	GingerBreadMan(102, 0, 0, true),
 	Santa(103, 0, 0, true),
-	GrimReaper(104, 0, 0, true);
+	GrimReaper(104, 0, 0, true),
+	Freddy(105, 0, 0);
 
 	private final int id;
 	private int tokenCost = 0;
@@ -136,6 +137,8 @@ public enum ClassType {
 		switch (this) {
 			case Cactus:
 				return "A prickly living thing, made up of thorns and... blood";
+			case Freddy:
+				return "Uh oh, its 5 nights at Freddy's!!!";
 			case Santa:
 				return "HO HO HO! MERRRRRRYYYY CHRISTMASSSSS";
 			case GingerBreadMan:
@@ -290,6 +293,8 @@ public enum ClassType {
 		switch (this) {
 			case Bat:
 				return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bat" + ChatColor.RESET;
+			case Freddy:
+				return "" + ChatColor.ITALIC + color("&2&lFreddy&r");
 			case Santa:
 				return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "Santa" + ChatColor.RESET;
 			case GingerBreadMan:
@@ -466,6 +471,8 @@ public enum ClassType {
 		switch (this) {
 		case Cactus:
 			return new ItemStack(Material.CACTUS);
+		case Freddy:
+			return new ItemStack(Material.REDSTONE);
 		case Santa:
 			return ItemHelper.createSkullTexture(
 					"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19");
@@ -616,10 +623,6 @@ public enum ClassType {
 			return new ItemStack(Material.FEATHER);
  		case Guardian:
  			return new ItemStack(Material.PRISMARINE_SHARD);
-//		case Snowman:
-//			return new ItemStack(Material.PUMPKIN);
-//		case Fluxty:
-//			return new ItemStack(Material.LEATHER_CHESTPLATE);
 		}
 
 		return null;
@@ -629,6 +632,8 @@ public enum ClassType {
 		switch (this) {
 			case Cactus:
 				return new CactusClass(instance, player);
+			case Freddy:
+				return new FreddyClass(instance, player);
 			case Santa:
 				return new SantaClass(instance, player);
 			case GingerBreadMan:
