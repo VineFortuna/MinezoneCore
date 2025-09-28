@@ -294,7 +294,7 @@ public enum ClassType {
 			case Bat:
 				return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "Bat" + ChatColor.RESET;
 			case Freddy:
-				return "" + ChatColor.ITALIC + color("&2&lFreddy&r");
+				return "" + ChatColor.ITALIC + color("&6&l&oFreddy&r");
 			case Santa:
 				return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "Santa" + ChatColor.RESET;
 			case GingerBreadMan:

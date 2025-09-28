@@ -36,8 +36,8 @@ public class FreddyClass extends BaseClass {
 		super(instance, player);
 		baseVerticalJump = 1.2;
 		createArmor(null,
-				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGRlNjkzZjEyYjY4MjJmYWQ1ZTZmMjgzYzU1YzM4NWJmZjI1NDhhZTRiMWIyOTQzYWQwNWI1N2VmNWQzOTNiYiJ9fX0=",
-				"228B22", 6, "Freddy");
+				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmEyMGFhMmE5YTI4YzUzM2QwMWE3ZDk4MDdmZTcyYWYzZGRlOTg1Y2NlNzQyMTZkNzNhYzUxNTlkOTdmNmE3ZCJ9fX0=",
+				"D87F33", 6, "Freddy");
 	}
 
 	@Override
@@ -52,7 +52,7 @@ public class FreddyClass extends BaseClass {
 		playerInv.setItem(1, getStunAbility());
 		playerInv.setItem(2, getScareAbility());
 	}
-	
+
 	@Override
 	public void Tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Freddy
@@ -84,7 +84,8 @@ public class FreddyClass extends BaseClass {
 				} else {
 					freddyCooldown.restart();
 					p.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 5, 1, true, false));
-					//p.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 20 * 5, 0, true, false));
+					// p.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 20 * 5,
+					// 0, true, false));
 
 					Location cLoc = p.getLocation();
 					World w = cLoc.getWorld();

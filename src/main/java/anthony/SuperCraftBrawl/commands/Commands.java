@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.commands;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameLootDrops;
 import anthony.SuperCraftBrawl.Game.GameSettings;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
@@ -789,8 +790,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
-		for (ItemStack itemStack : game.allItemDrops) {
-			player.getInventory().addItem(itemStack);
+		for (GameLootDrops loot : GameLootDrops.values()) {
+			player.getInventory().addItem(loot.getItem());
 		}
 	}
 

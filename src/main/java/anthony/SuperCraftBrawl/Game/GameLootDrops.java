@@ -15,11 +15,11 @@ public enum GameLootDrops {
 
 	// COMMON:
 	SLOWNESS(Rarity.COMMON), SLOWBALLS(Rarity.COMMON), BLOOPER(Rarity.COMMON), ZOMBIE_EGG(Rarity.COMMON),
-	SKELE_EGG(Rarity.COMMON), MILK(Rarity.COMMON),
+	SKELE_EGG(Rarity.COMMON), MILK(Rarity.COMMON), SLIME_EGG(Rarity.COMMON),
 
 	// UNCOMMON:
 	SPEED2(Rarity.UNCOMMON), INSTAGIB(Rarity.UNCOMMON), BAZOOKA(Rarity.UNCOMMON),
-	WITCH_EGG(Rarity.UNCOMMON), CREEPER_EGG(Rarity.UNCOMMON),
+	WITCH_EGG(Rarity.UNCOMMON), CREEPER_EGG(Rarity.UNCOMMON), FIRE_FLOWER(Rarity.UNCOMMON),
 
 	// RARE:
 	HEALTH2(Rarity.RARE), BROOMS(Rarity.RARE), HAMMER(Rarity.RARE), ENDER_PEARL(Rarity.RARE), BOUNTY(Rarity.RARE),
@@ -77,59 +77,64 @@ public enum GameLootDrops {
 	        // ===== COMMON =====
 	        case SLOWNESS:
 	            item = ItemHelper.createPotionItem(PotionType.SLOWNESS, 1, 15, true, true, true);
-	            ItemHelper.setDetails(item, "&8&lSLOWNESS II &7(15 sec)");
+	            ItemHelper.setDetails(item, "&8&lSLOWNESS II &7(15 sec)", "", "&7&lCOMMON");
 	            break;
 
 	        case SLOWBALLS:
 	            item = ItemHelper.setDetails(new ItemStack(Material.SNOW_BALL, 8),
 	                    "&f&lSLOWBALLS",
-	                    "&7Give Slowness 1 for 3s to an enemy");
+	                    "&7Give Slowness 1 for 3s to an enemy", "", "&7&lCOMMON");
 	            break;
 
 	        case BLOOPER:
 	            item = ItemHelper.setDetails(new ItemStack(Material.RABBIT_FOOT),
 	                    "&e&lBLOOPER",
-	                    "&7Give Blindness or Nausea to an enemy");
+	                    "&7Give Blindness or Nausea to an enemy", "", "&7&lCOMMON");
 	            break;
 
 	        case ZOMBIE_EGG:
 	            item = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1);
-	            ItemHelper.setDetails(item, "&2&lZOMBIE POKEBALL", "&7Spawns an equipped zombie");
+	            ItemHelper.setDetails(item, "&2&lZOMBIE POKEBALL", "&7Spawns an equipped zombie", "", "&7&lCOMMON");
 	            break;
 
 	        case SKELE_EGG:
 	            item = ItemHelper.createMonsterEgg(EntityType.SKELETON, 1);
-	            ItemHelper.setDetails(item, "&7&lSKELETON POKEBALL", "&7Spawns a skeleton with punch 2");
+	            ItemHelper.setDetails(item, "&7&lSKELETON POKEBALL", "&7Spawns a skeleton with punch 2", "", "&7&lCOMMON");
 	            break;
 
 	        case MILK:
 	            item = ItemHelper.setDetails(new ItemStack(Material.MILK_BUCKET),
 	                    "&f&lMILK",
-	                    "&7Removes fire and all negative effects");
+	                    "&7Removes fire and all negative effects", "", "&7&lCOMMON");
+	            break;
+	            
+	        case SLIME_EGG:
+	        	item = ItemHelper.createMonsterEgg(EntityType.SLIME, 1);
+	            ItemHelper.setDetails(item, "&2&lSLIME POKEBALL", "&7Right click to throw a Slime spawn egg", "", "&7&lCOMMON");
 	            break;
 
 	        // ===== UNCOMMON =====
 	        case SPEED2:
 	            item = ItemHelper.createPotionItem(PotionType.SPEED, 1, 30, true, true, true);
-	            ItemHelper.setDetails(item, "&b&lSPEED II &7(30 sec)");
-	            break; // <<< IMPORTANT (prevents fall-through to default)
+	            ItemHelper.setDetails(item, "&b&lSPEED II &7(30 sec)", "", "&2&lUNCOMMON");
+	            break;
 
 	        case INSTAGIB:
 	            item = ItemHelper.setDetails(new ItemStack(Material.GOLD_HOE, 5, (short) 1),
 	                    "&e&lINSTAGIB",
-	                    "&7Do damage and send your enemies up");
+	                    "&7Do damage and send your enemies to the sky!", "", "&2&lUNCOMMON");
 	            break;
 
 	        case BAZOOKA:
 	            item = ItemHelper.setDetails(new ItemStack(Material.DIAMOND_HOE, 3, (short) 1),
 	                    "&b&lBAZOOKA",
-	                    "&7Explode the area it lands");
+	                    "&7Explode the area it lands", "", "&2&lUNCOMMON");
 	            ItemHelper.setHideFlags(item, true);
 	            break;
 
 	        case WITCH_EGG:
 	            item = ItemHelper.createMonsterEgg(EntityType.WITCH, 1);
-	            ItemHelper.setDetails(item, "&5&lWITCH POKEBALL", "&7Spawns a witch to help you");
+	            ItemHelper.setDetails(item, "&5&lWITCH POKEBALL", "&7Spawns a witch to help you", "", "&2&lUNCOMMON");
 	            break;
 
 	        case CREEPER_EGG:
@@ -137,59 +142,65 @@ public enum GameLootDrops {
 	            ItemHelper.setDetails(item,
 	                    "&a&lCREEPER POKEBALL",
 	                    "&7Spawns a creeper",
-	                    "&7Be careful!");
+	                    "&7Be careful!", "", "&2&lUNCOMMON");
 	            break;
+	            
+	        case FIRE_FLOWER:
+	        	 item = ItemHelper.setDetails(new ItemStack(Material.FIREWORK_CHARGE, 3),
+		                    "&c&lFire &e&lFlower",
+		                    "&7Throw a fire flower at an enemy to set", "them on fire!", "", "&2&lUNCOMMON");
+	        	 break;
 
 	        // ===== RARE =====
 	        case HEALTH2:
 	            item = ItemHelper.createPotionItem(PotionType.INSTANT_HEAL, 1, 0, true, true, true);
-	            ItemHelper.setDetails(item, "&c&lHEALING II");
+	            ItemHelper.setDetails(item, "&c&lHEALING II", "", "&9&lRARE");
 	            break;
 
 	        case BROOMS:
 	            item = ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4),
 	                    "&5&lBROOM",
-	                    "&7Sends you up and saves you from the void");
+	                    "&7Sends you up and saves you from the void", "", "&9&lRARE");
 	            break;
 
 	        case HAMMER:
 	            item = ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD, 1, (short) 250),
-	                    "&d&lHAMMER");
+	                    "&d&lHAMMER", "", "&9&lRARE");
 	            item.addUnsafeEnchantment(Enchantment.KNOCKBACK, 10);
 	            break;
 
 	        case ENDER_PEARL:
 	            item = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL),
-	                    "&5&lENDER PEARL");
+	                    "&5&lENDER PEARL", "", "&9&lRARE");
 	            break;
 
 	        case BOUNTY:
 	            item = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR, 1),
 	                    "&a&lBOUNTY",
 	                    "&7Set a bounty on a random player",
-	                    "&7Kill them to claim extra tokens");
+	                    "&7Kill them to claim extra tokens", "", "&9&lRARE");
 	            break;
 
 	        case GOLDEN_APPLE:
 	            item = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE),
-	                    "&6&lGOLDEN APPLE");
+	                    "&6&lGOLDEN APPLE", "", "&9&lRARE");
 	            break;
 
 	        // ===== LEGENDARY =====
 	        case BOMB:
 	            item = ItemHelper.createPotionItem(PotionType.INSTANT_DAMAGE, 1000, 0, true, true, true);
-	            ItemHelper.setDetails(item, "&4&lBOMB", "&7Be careful!", "&7Instantly kills... anyone");
+	            ItemHelper.setDetails(item, "&4&lBOMB", "&7Be careful!", "&7Instantly kills... anyone", "", "&6&lLEGENDARY");
 	            break;
 
 	        case NOTCH_APPLE:
 	            item = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE, 1, (short) 1),
-	                    "&d&lNOTCH APPLE");
+	                    "&d&lNOTCH APPLE", "", "&6&lLEGENDARY");
 	            break;
 
 	        case EXTRA_LIFE:
 	            item = ItemHelper.setDetails(new ItemStack(Material.PRISMARINE_SHARD),
 	                    "&3&lEXTRA LIFE",
-	                    "&7Receive an extra life");
+	                    "&7Receive an extra life", "", "&6&lLEGENDARY");
 	            break;
 
 	        default:

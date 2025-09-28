@@ -1744,19 +1744,19 @@ public class Core extends JavaPlugin implements Listener {
 
 		// if (!(this.msHologram.containsKey(p))) {
 		if (data != null) {
-			Location loc = new Location(this.getLobbyWorld(), 194.520, 116, 641.500);
+			Location loc = new Location(this.getLobbyWorld(), 214.515, 105.5, 670.490);
 			WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
 			EntityArmorStand stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MYSTERYCHESTS");
+			stand.setCustomName("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Mystery Chests");
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
 			PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
 			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
 
-			loc = new Location(this.getLobbyWorld(), 194.520, 115.7, 641.500);
+			loc = new Location(this.getLobbyWorld(), 214.515, 105.2, 670.490);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
