@@ -75,42 +75,45 @@ public class IrongolemClass extends BaseClass {
 
 		if (item != null && item.getType() == Material.RED_ROSE
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			if (golem.getTime() < 5000) {
-				int seconds = (5000 - golem.getTime()) / 1000 + 1;
-				event.setCancelled(true);
-				player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-						+ "Your Rose of Elevation is still regenerating for " + ChatColor.YELLOW + seconds
-						+ " more seconds ");
-			} else {
-				golem.restart();
-				Vector direction = player.getLocation().getDirection();
-				ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
-					@Override
-					public void onHit(Player hit) {
-						if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
-							if (instance.duosMap != null)
-								if (instance.team.get(hit).equals(instance.team.get(player)))
-									return;
+			if (item.getItemMeta() != null && item.getItemMeta().getDisplayName() != null &&
+					ChatColor.stripColor(item.getItemMeta().getDisplayName()).contains("Rose of Elevation")) {
+				if (golem.getTime() < 5000) {
+					int seconds = (5000 - golem.getTime()) / 1000 + 1;
+					event.setCancelled(true);
+					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ "Your Rose of Elevation is still regenerating for " + ChatColor.YELLOW + seconds
+							+ " more seconds ");
+				} else {
+					golem.restart();
+					Vector direction = player.getLocation().getDirection();
+					ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
+						@Override
+						public void onHit(Player hit) {
+							if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
+								if (instance.duosMap != null)
+									if (instance.team.get(hit).equals(instance.team.get(player)))
+										return;
 
-							if (hit != null) {
-								if (instance.getGameManager().spawnProt.containsKey(hit)) return;
-								@SuppressWarnings("deprecation")
-								EntityDamageEvent damageEvent = new EntityDamageEvent(hit, DamageCause.VOID, 5.5);
-								instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
-								hit.damage(5.5, player);
-								Location loc = hit.getLocation();
-								Vector v = direction;
-								v.setY(1.0);
-								hit.setVelocity(v);
-								for (Player gamePlayer : instance.players)
-									gamePlayer.playSound(loc, Sound.EXPLODE, 1, 1);
+								if (hit != null) {
+									if (instance.getGameManager().spawnProt.containsKey(hit)) return;
+									@SuppressWarnings("deprecation")
+									EntityDamageEvent damageEvent = new EntityDamageEvent(hit, DamageCause.VOID, 5.5);
+									instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+									hit.damage(5.5, player);
+									Location loc = hit.getLocation();
+									Vector v = direction;
+									v.setY(1.0);
+									hit.setVelocity(v);
+									for (Player gamePlayer : instance.players)
+										gamePlayer.playSound(loc, Sound.EXPLODE, 1, 1);
+								}
 							}
 						}
-					}
 
-				}, new ItemStack(Material.RED_ROSE));
-				instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-						player.getLocation().getDirection().multiply(2.5D));
+					}, new ItemStack(Material.RED_ROSE));
+					instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+							player.getLocation().getDirection().multiply(2.5D));
+				}
 			}
 		}
 	}
