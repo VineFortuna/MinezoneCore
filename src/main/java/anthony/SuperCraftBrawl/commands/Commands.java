@@ -1098,6 +1098,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 		if (!isClassUnlocked(player, classDetails, type) || !isLevelUnlocked(player, playerData, type)
 				|| !isFishermanClassUnlocked(player, type) || !isRankRequirementMet(player, type)
+				|| (game != null && !isGameStateWaiting(game, player))
 				|| (game != null && !isFrenzyGameType(game, player))) {
 			return;
 		}
