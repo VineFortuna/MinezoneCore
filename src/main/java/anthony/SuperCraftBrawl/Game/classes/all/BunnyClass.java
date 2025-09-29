@@ -69,6 +69,8 @@ public class BunnyClass extends BaseClass {
 
 			@Override
 			public void run() {
+				if (isPlayerAlive())
+					this.cancel();
 				if (ticks == 5) {
 					player.removePotionEffect(PotionEffectType.SPEED);
 					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 110, 4));
