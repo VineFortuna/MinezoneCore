@@ -1067,9 +1067,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 	private void classCommand(String[] args, Player player) {
 		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 
-		if (!isGameStateWaiting(game, player))
-			return;
-
 		PlayerData playerData = main.getDataManager().getPlayerData(player);
 
 		if (args.length == 0) {
@@ -1078,7 +1075,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 
 		String className = args[0];
-		if (className.equalsIgnoreCase("random")) {
+		if (className.equalsIgnoreCase("random") && game != null && game.state == GameState.WAITING) {
 			selectRandomClass(player, playerData);
 			player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
 			return;
@@ -1095,18 +1092,22 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void handleClassSelection(Player player, GameInstance game, PlayerData playerData, ClassType type) {
+
+
 		ClassDetails classDetails = playerData.playerClasses.get(type.getID());
 
 		if (!isClassUnlocked(player, classDetails, type) || !isLevelUnlocked(player, playerData, type)
 				|| !isFishermanClassUnlocked(player, type) || !isRankRequirementMet(player, type)
-				|| !isPlayerInGame(player, game) || !isGameStateWaiting(game, player)
-				|| !isFrenzyGameType(game, player)) {
+				|| (game != null && !isFrenzyGameType(game, player))) {
 			return;
 		}
 
 		displayClassSelectionMessage(player, type);
-		main.getGameManager().playerSelectClass(player, type);
-		player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
+
+		if (game != null) {
+			main.getGameManager().playerSelectClass(player, type);
+			player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
+		}
 	}
 
 	private void displayClassSelectionMessage(Player player, ClassType type) {
