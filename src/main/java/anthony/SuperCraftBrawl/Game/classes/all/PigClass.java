@@ -52,8 +52,10 @@ public class PigClass extends BaseClass {
 
 	@Override
 	public void Tick(int gameTicks) {
-	    if (!isPlayerAlive()) return;
+		System.out.println("Re-applying speed");
+	    if (!isPlayerAlive() && instance.classes.get(player).getType() != ClassType.Pig) return;
 
+	    System.out.println("Re-applying speed 2!");
 	    // Fire overrides speed
 	    boolean onFire = player.getFireTicks() > 0; // 1.8-friendly "is burning" check
 	    boolean hasSpeed = player.hasPotionEffect(PotionEffectType.SPEED);
