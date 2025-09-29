@@ -1815,7 +1815,8 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (item != null && item.getType() == Material.RED_ROSE) {
 				ItemMeta meta = item.getItemMeta();
 
-				if (meta != null && meta.getDisplayName() != null && meta.getDisplayName().contains("Flower")) {
+				if (meta != null && meta.getDisplayName() != null &&
+						ChatColor.stripColor(meta.getDisplayName()).contains("Fire Flower")) {
 					int amount = item.getAmount();
 					if (amount > 0) {
 						amount--;
@@ -1841,12 +1842,14 @@ public class GameManager implements Listener, PluginMessageListener {
 												gamePlayer.setFireTicks(80);
 											}
 										} else {
-											EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-													DamageCause.VOID, 4.0);
-											instance.getGameManager().getMain().getServer().getPluginManager()
-													.callEvent(damageEvent);
-											gamePlayer.damage(4.0, player);
-											gamePlayer.setFireTicks(80);
+											if (instance.classes.containsKey(gamePlayer) && instance.classes.get(gamePlayer).getLives() > 0) {
+												EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
+														DamageCause.VOID, 4.0);
+												instance.getGameManager().getMain().getServer().getPluginManager()
+														.callEvent(damageEvent);
+												gamePlayer.damage(4.0, player);
+												gamePlayer.setFireTicks(80);
+											}
 										}
 									}
 									for (Player gamePlayer : instance.players) {
