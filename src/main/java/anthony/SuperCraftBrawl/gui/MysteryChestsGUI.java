@@ -1,7 +1,7 @@
 package anthony.SuperCraftBrawl.gui;
 
-import anthony.SuperCraftBrawl.Animation;
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.MysteryChestAnimation;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
@@ -13,252 +13,146 @@ import net.minecraft.server.v1_8_R3.EntityArmorStand;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
 import net.minecraft.server.v1_8_R3.WorldServer;
-import org.bukkit.*;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.scheduler.BukkitRunnable;
-
-import java.util.Random;
 
 public class MysteryChestsGUI implements InventoryProvider {
 
-	public Core main;
-	public SmartInventory inv;
-	private Location loc;
+    public Core main;
+    public SmartInventory inv;
+    private Location loc;
 
-	public MysteryChestsGUI(Core main, Location loc) {
-		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
-				.title("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MysteryChest").build();
-		this.main = main;
-		this.loc = loc;
-	}
+    public MysteryChestsGUI(Core main, Location loc) {
+        inv = SmartInventory.builder()
+                .id("myInventory")
+                .provider(this)
+                .size(3, 9)
+                .title("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MysteryChest")
+                .build();
+        this.main = main;
+        this.loc = loc;
+    }
 
-	@Override
-	public void init(Player player, InventoryContents contents) {
-		PlayerData data = main.getDataManager().getPlayerData(player);
-		Location newLoc = new Location(player.getWorld(), loc.getX() + 1, loc.getY() + 2, loc.getZ() + 0.5);
+    @Override
+    public void init(Player player, InventoryContents contents) {
+        PlayerData data = main.getDataManager().getPlayerData(player);
 
-		if (data != null) {
-			if (data.mysteryChests > 0) {
-				contents.set(0, 0, ClickableItem.of(ItemHelper.setDetails(
-								new ItemStack(Material.ENDER_CHEST, data.mysteryChests),
-								"" + ChatColor.RESET + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MysteryChest", "",
-								"" + ChatColor.RESET + ChatColor.YELLOW + "You have " + data.mysteryChests
-								+ (data.mysteryChests > 1 ?" Chests" : " Chest") + " to Open!"),
-						e -> {
-							if (data.mysteryChests > 0) {
-								inv.close(player);
-								main.getGameManager().chestCanOpen = true;
-								ArmorStand stand = newLoc.getWorld().spawn(newLoc, ArmorStand.class);
-								stand.setVisible(false);
-								stand.setGravity(false);
-								stand.setArms(true);
-								stand.setItemInHand(new ItemStack(Material.CHEST));
-								@SuppressWarnings("deprecation")
-								int animate = Bukkit.getScheduler().scheduleAsyncRepeatingTask(main, new Animation(stand),
-										0, 1);
-								
-								new BukkitRunnable() {
-									@Override
-									public void run() {
-										Chunk chunk = stand.getLocation().getChunk();
-										chunk.load(true);
+        if (data != null) {
+            if (data.mysteryChests > 0) {
+                contents.set(0, 0, ClickableItem.of(
+                        ItemHelper.setDetails(
+                                new ItemStack(Material.ENDER_CHEST, data.mysteryChests),
+                                "" + ChatColor.RESET + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MysteryChest",
+                                "",
+                                "" + ChatColor.RESET + ChatColor.YELLOW + "You have " + data.mysteryChests
+                                        + (data.mysteryChests > 1 ? " Chests" : " Chest") + " to Open!"
+                        ),
+                        e -> {
+                            // guard
+                            if (data.mysteryChests <= 0) return;
 
-										Random r = new Random();
-										int chance = r.nextInt(100);
-										
-										if (chance <= 5) {
-											if (data.astronaut == 0) {
-												data.astronaut = 1;
-												player.sendMessage(
-														main.color("&9&l(!) &rYou unlocked &eAstronaut Outfit!"));
-												player.sendTitle(main.color("&e&lUNLOCKED"),
-														main.color("&eAstronaut Outfit"));
-											} else {
-												player.sendMessage(main.color(
-														"&9&l(!) &rYou recieved &e25 Tokens &rfor a duplicate item"));
-												player.sendTitle(main.color("&c&lDUPLICATE"),
-														main.color("&eAstronaut Outfit"));
-												data.tokens += 25;
-											}
-											Location newLoc = new Location(loc.getWorld(), loc.getX() + 0.5,
-													loc.getY() + 1, loc.getZ() + 0.5);
-											helper(newLoc);
-											helper(newLoc);
-											helper(newLoc);
-											helper(newLoc);
-											helper(newLoc);
-										} else if (chance <= 20) {
-											if (data.santaoutfit == 0) {
-												data.santaoutfit = 1;
-												player.sendMessage(main.color("&9&l(!) &rYou unlocked &c&lSanta Outfit!"));
-												player.sendTitle(main.color("&e&lUNLOCKED"),
-														main.color("&c&lSanta Outfit"));
-											} else {
-												player.sendMessage(main.color(
-														"&9&l(!) &rYou recieved &e50 Tokens &rfor a duplicate item"));
-												player.sendTitle(main.color("&c&lDUPLICATE"),
-														main.color("&c&lSanta Outfit"));
-												data.tokens += 50;
-											}
-											Location newLoc = new Location(loc.getWorld(), loc.getX() + 0.5,
-													loc.getY() + 1, loc.getZ() + 0.5);
-											Firework fw = (Firework) newLoc.getWorld().spawnEntity(newLoc,
-													EntityType.FIREWORK);
-											FireworkMeta fwm = fw.getFireworkMeta();
-											
-											fwm.setPower(1);
-											fwm.addEffect(
-													FireworkEffect.builder().withColor(Color.RED).flicker(true).build());
-											
-											fw.setFireworkMeta(fwm);
-										} else if (chance <= 40) {
-											data.melon += 14;
-											player.sendMessage(main.color("&9&l(!) &rYou unlocked &e14 Melons!"));
-											player.sendTitle(main.color("&e&lUNLOCKED"), main.color("&e14 Melons"));
-											Location newLoc = new Location(loc.getWorld(), loc.getX() + 0.5,
-													loc.getY() + 1, loc.getZ() + 0.5);
-											Firework fw = (Firework) newLoc.getWorld().spawnEntity(newLoc,
-													EntityType.FIREWORK);
-											FireworkMeta fwm = fw.getFireworkMeta();
-											
-											fwm.setPower(1);
-											fwm.addEffect(
-													FireworkEffect.builder().withColor(Color.LIME).flicker(true).build());
-											
-											fw.setFireworkMeta(fwm);
-										} else if (chance <= 60) {
-											data.melon += 20;
-											player.sendMessage(main.color("&9&l(!) &rYou unlocked &e20 Melons!"));
-											player.sendTitle(main.color("&e&lUNLOCKED"), main.color("&e20 Melons"));
-											Location newLoc = new Location(loc.getWorld(), loc.getX() + 0.5,
-													loc.getY() + 1, loc.getZ() + 0.5);
-											Firework fw = (Firework) newLoc.getWorld().spawnEntity(newLoc,
-													EntityType.FIREWORK);
-											FireworkMeta fwm = fw.getFireworkMeta();
-											
-											fwm.setPower(1);
-											fwm.addEffect(
-													FireworkEffect.builder().withColor(Color.ORANGE).flicker(true).build());
-											
-											fw.setFireworkMeta(fwm);
-										} else if (chance > 60 && chance <= 80) {
-											data.paintball += 23;
-											player.sendMessage(main.color("&9&l(!) &rYou unlocked &e23 Paintballs!"));
-											player.sendTitle(main.color("&e&lUNLOCKED"), main.color("&e23 Paintballs"));
-											Location newLoc = new Location(loc.getWorld(), loc.getX() + 0.5,
-													loc.getY() + 1, loc.getZ() + 0.5);
-											Firework fw = (Firework) newLoc.getWorld().spawnEntity(newLoc,
-													EntityType.FIREWORK);
-											FireworkMeta fwm = fw.getFireworkMeta();
-											
-											fwm.setPower(1);
-											fwm.addEffect(
-													FireworkEffect.builder().withColor(Color.BLUE).flicker(true).build());
-											
-											fw.setFireworkMeta(fwm);
-										} else {
-											data.paintball += 17;
-											player.sendMessage(main.color("&9&l(!) &rYou unlocked &e17 Paintballs!"));
-											player.sendTitle(main.color("&e&lUNLOCKED"), main.color("&e17 Paintballs"));
-											Location newLoc = new Location(loc.getWorld(), loc.getX() + 0.5,
-													loc.getY() + 1, loc.getZ() + 0.5);
-											Firework fw = (Firework) newLoc.getWorld().spawnEntity(newLoc,
-													EntityType.FIREWORK);
-											FireworkMeta fwm = fw.getFireworkMeta();
-											
-											fwm.setPower(1);
-											fwm.addEffect(
-													FireworkEffect.builder().withColor(Color.BLUE).flicker(true).build());
-											
-											fw.setFireworkMeta(fwm);
-										}
-										
-										Bukkit.getScheduler().cancelTask(animate);
-										// newLoc.getWorld().spawnEntity(newLoc, fw.getType());
-										stand.remove();
-										main.getGameManager().chestCanOpen = false;
-										data.mysteryChests--;
-										hologram(player);
-									}
-								}.runTaskLater(main, 100);
-							}
-						}));
-			} else {
-				contents.set(0, 0, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14),
-						"" + ChatColor.RESET + ChatColor.RED + ChatColor.BOLD + "No MysteryChests", "",
-						"" + ChatColor.RESET + ChatColor.GRAY + "Craft MysteryChests or find them by playing",
-						"" + ChatColor.RESET + ChatColor.GRAY + "matches to unlock exciting cosmetics!"), e-> {}));
-			}
-			contents.set(1, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.WORKBENCH),
-					"" + ChatColor.RESET + ChatColor.YELLOW + "Craft MysteryChest", "", "" + ChatColor.RESET
-							+ ChatColor.RESET + "Click to craft 1 MysteryChest for " + ChatColor.YELLOW + "100 Tokens"),
-					e -> {
-						if (data.tokens >= 100) {
-							data.tokens -= 100;
-							data.mysteryChests++;
-							main.getScoreboardManager().lobbyBoard(player);
-							player.sendMessage(main.color("&9&l(!) &rYou crafted &e1 MysteryChest!"));
-							hologram(player);
-						} else
-							player.sendMessage(main.color("&c&l(!) &rYou do not have enough to craft a MysteryChest!"));
+                            inv.close(player);
 
-						inv.close(player);
-					}));
-		}
+                            // optional global re-entry guard
+                            if (main.getGameManager() != null) {
+                                if (main.getGameManager().chestCanOpen) {
+                                    player.sendMessage(main.color("&c&l(!) &rPlease wait, a chest is already opening."));
+                                    return;
+                                }
+                                main.getGameManager().chestCanOpen = true;
+                            }
 
-	}
+                            // nice display location centered above the block
+                            Location displayLoc = new Location(
+                                    player.getWorld(),
+                                    loc.getX() + 0.5,
+                                    loc.getY() + 1.0,
+                                    loc.getZ() + 0.5
+                            );
 
-	@Override
-	public void update(Player player, InventoryContents contents) {
+                            // start cinematic animation (handles rewards & cleanup)
+                            new MysteryChestAnimation(main, player, data, displayLoc).start();
 
-	}
+                            // consume one chest immediately so UI/hologram reflect it
+                            data.mysteryChests--;
+                            main.getDataManager().saveData(data);
+                            main.getScoreboardManager().lobbyBoard(player);
+                            hologram(player);
+                        }
+                ));
+            } else {
+                contents.set(0, 0, ClickableItem.of(
+                        ItemHelper.setDetails(
+                                new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14),
+                                "" + ChatColor.RESET + ChatColor.RED + ChatColor.BOLD + "No MysteryChests",
+                                "",
+                                "" + ChatColor.RESET + ChatColor.GRAY + "Craft MysteryChests or find them by playing",
+                                "" + ChatColor.RESET + ChatColor.GRAY + "matches to unlock exciting cosmetics!"
+                        ),
+                        e -> {}
+                ));
+            }
 
-	private void helper(Location newLoc) {
-		Bukkit.getScheduler().runTaskLater(main, () -> {
-			Firework fw = (Firework) newLoc.getWorld().spawnEntity(newLoc, EntityType.FIREWORK);
-			FireworkMeta fwm = fw.getFireworkMeta();
+            contents.set(1, 4, ClickableItem.of(
+                    ItemHelper.setDetails(
+                            new ItemStack(Material.WORKBENCH),
+                            "" + ChatColor.RESET + ChatColor.YELLOW + "Craft MysteryChest",
+                            "",
+                            "" + ChatColor.RESET + ChatColor.RESET + "Click to craft 1 MysteryChest for " + ChatColor.YELLOW + "100 Tokens"
+                    ),
+                    e -> {
+                        if (data.tokens >= 100) {
+                            data.tokens -= 100;
+                            data.mysteryChests++;
+                            main.getScoreboardManager().lobbyBoard(player);
+                            player.sendMessage(main.color("&9&l(!) &rYou crafted &e1 MysteryChest!"));
+                            hologram(player);
+                        } else {
+                            player.sendMessage(main.color("&c&l(!) &rYou do not have enough to craft a MysteryChest!"));
+                        }
+                        inv.close(player);
+                    }
+            ));
+        }
+    }
 
-			fwm.setPower(1);
-			fwm.addEffect(FireworkEffect.builder().withColor(Color.LIME).flicker(true).build());
+    @Override
+    public void update(Player player, InventoryContents contents) {
+        // no-op
+    }
 
-			fw.setFireworkMeta(fwm);
-		}, 15);
-	}
-	
-	private void hologram(Player player) {
-		PlayerData data = main.getDataManager().getPlayerData(player);
-		if (data != null && main.msHologram.get(player) != null) {
-			if (player.getWorld() == main.getLobbyWorld()) {
-				EntityArmorStand stand = main.msHologram.get(player);
-				PacketPlayOutEntityDestroy destroyPacket = new PacketPlayOutEntityDestroy(
-						stand.getId());
-				((CraftPlayer) player).getHandle().playerConnection
-						.sendPacket(destroyPacket);
-				loc = new Location(main.getLobbyWorld(), 194.520, 115.7, 641.500);
-				
-				WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
-				stand = new EntityArmorStand(s);
-				
-				stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-				stand.setCustomName(
-						main.color("&e&l" + data.mysteryChests + " &eto open!"));
-				stand.setCustomNameVisible(true);
-				stand.setGravity(false);
-				stand.setInvisible(true);
-				PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(
-						stand);
-				((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-				main.msHologram.put(player, stand);
-				main.getDataManager().saveData(data);
-			}
-		}
-	}
+    private void hologram(Player player) {
+        PlayerData data = main.getDataManager().getPlayerData(player);
+        if (data != null && main.msHologram.get(player) != null) {
+            World lobby = main.getLobbyWorld();
+            if (player.getWorld() == lobby) {
+                EntityArmorStand stand = main.msHologram.get(player);
+                PacketPlayOutEntityDestroy destroyPacket = new PacketPlayOutEntityDestroy(stand.getId());
+                ((CraftPlayer) player).getHandle().playerConnection.sendPacket(destroyPacket);
 
+                // fixed hologram position (adjust if needed)
+                loc = new Location(lobby, 194.520, 115.7, 641.500);
+
+                WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
+                stand = new EntityArmorStand(s);
+
+                stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+                stand.setCustomName(main.color("&e&l" + data.mysteryChests + " &eto open!"));
+                stand.setCustomNameVisible(true);
+                stand.setGravity(false);
+                stand.setInvisible(true);
+
+                PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
+                ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+
+                main.msHologram.put(player, stand);
+                main.getDataManager().saveData(data);
+            }
+        }
+    }
 }

@@ -14,6 +14,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
@@ -48,8 +49,7 @@ public class KillsBoard extends LeaderboardBase {
 
 		Statement s = c.createStatement();
 		int a = 0;
-		set = s.executeQuery(
-				"SELECT UUID, LastPlayerName, Kills, RoleID FROM PlayerData ORDER BY Kills DESC");
+		set = s.executeQuery("SELECT UUID, LastPlayerName, Kills, RoleID FROM PlayerData ORDER BY Kills DESC");
 		while (set.next()) {
 			if (a == 10) {
 				break;
@@ -71,7 +71,7 @@ public class KillsBoard extends LeaderboardBase {
 	public void updateLeaderboard(boolean init) {
 		removeOldLeaderboards();
 
-		Location loc = new Location(main.getLobbyWorld(), 194.5, 106.5, 713.5);
+		Location loc = new Location(main.getLobbyWorld(), 195.5, 106.5, 713.5);
 		sendArmorStandPacket(loc, ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Kills");
 		loc.setY(loc.getY() - 0.4);
 
@@ -80,13 +80,31 @@ public class KillsBoard extends LeaderboardBase {
 			loc.setY(loc.getY() - 0.24);
 			String name = lead2.get(count - 1);
 			Integer win = kills.get(id);
-			sendArmorStandPacket(loc, ChatColor.AQUA + "#" + count + ": " + ChatColor.YELLOW + name + ChatColor.RESET + " - " + win);
+			sendArmorStandPacket(loc,
+					ChatColor.AQUA + "#" + count + ": " + ChatColor.YELLOW + name + ChatColor.RESET + " - " + win);
 			count++;
+		}
+
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			PlayerData data = main.getDataManager().getPlayerData(player);
+
+			if (data != null) {
+				if (!(lead.contains(data.playerUUID))) {
+					int win = data.wins;
+					loc.setY(loc.getY() - 0.24);
+					sendStandToOnePlayer(loc, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------",
+							player);
+					loc.setY(loc.getY() - 0.20);
+					sendStandToOnePlayer(loc, "" + ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + win,
+							player);
+				}
+			}
 		}
 	}
 
 	private void sendArmorStandPacket(Location loc, String customName) {
-		EntityArmorStand armorStand = new EntityArmorStand(((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) loc.getWorld()).getHandle());
+		EntityArmorStand armorStand = new EntityArmorStand(
+				((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) loc.getWorld()).getHandle());
 		armorStand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
 		armorStand.setCustomName(customName);
 		armorStand.setCustomNameVisible(true);
@@ -98,8 +116,25 @@ public class KillsBoard extends LeaderboardBase {
 
 		PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(armorStand);
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+			((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection
+					.sendPacket(packet);
 		}
+	}
+
+	private void sendStandToOnePlayer(Location loc, String customName, Player player) {
+		EntityArmorStand armorStand = new EntityArmorStand(
+				((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) loc.getWorld()).getHandle());
+		armorStand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+		armorStand.setCustomName(customName);
+		armorStand.setCustomNameVisible(true);
+		armorStand.setInvisible(true);
+		armorStand.setGravity(false);
+
+		int entityId = armorStand.getId();
+		entityIds.add(entityId);
+
+		PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(armorStand);
+		((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 	}
 
 	private void removeOldLeaderboards() {
@@ -107,7 +142,8 @@ public class KillsBoard extends LeaderboardBase {
 			for (int entityId : entityIds) {
 				PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(entityId);
 				for (Player player : Bukkit.getOnlinePlayers()) {
-					((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+					((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection
+							.sendPacket(packet);
 				}
 			}
 			entityIds.clear();

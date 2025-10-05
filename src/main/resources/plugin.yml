@@ -32,6 +32,8 @@ commands:
    store:
       description: Store command
       aliases: [shop, ranks]
+   server:
+      description: Displays what server you're currently playing
    nick:
       description: Nickname!
    tell:
