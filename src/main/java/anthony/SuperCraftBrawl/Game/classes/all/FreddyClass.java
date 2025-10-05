@@ -37,7 +37,7 @@ public class FreddyClass extends BaseClass {
 		baseVerticalJump = 1.2;
 		createArmor(null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmEyMGFhMmE5YTI4YzUzM2QwMWE3ZDk4MDdmZTcyYWYzZGRlOTg1Y2NlNzQyMTZkNzNhYzUxNTlkOTdmNmE3ZCJ9fX0=",
-				"D87F33", 6, "Freddy");
+				"664C33", 6, "Freddy");
 	}
 
 	@Override

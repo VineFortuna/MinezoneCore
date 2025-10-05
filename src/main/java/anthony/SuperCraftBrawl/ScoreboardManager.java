@@ -24,6 +24,20 @@ public class ScoreboardManager {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 		this.playersLobbyBoard.put(player, board);
 
+		// EXP settings (tweak if you have a dynamic requirement)
+		// EXP settings (tweak if you have a dynamic requirement)
+		final int expRequired = 2500;
+
+		// Hypixel-style micro bar: 10 tiny squares, with [ ] and % (no space before %)
+		final String expBar = (data == null) ? ChatColor.DARK_GRAY + "[]0%" // placeholder when null (won't show long)
+				: Bars.dotsBar(data.exp, expRequired, 10, ChatColor.AQUA, // filled color
+						ChatColor.DARK_GRAY, // empty color
+						'■', // filled glyph (try '•' or '▪' if you prefer)
+						'■', // empty glyph
+						true, // showBrackets -> [........]
+						true // showPercent -> ]79%
+				);
+
 		if (main.getCommands() == null) {
 			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + "MINEZONE");
 			if (data != null) {
@@ -32,25 +46,32 @@ public class ScoreboardManager {
 						"" + ChatColor.RESET + ChatColor.BOLD + "Gems: " + ChatColor.GRAY + "0", "",
 						"" + ChatColor.RESET + ChatColor.BOLD + "Rank: "
 								+ main.getRankManager().getRank(player).getTag(),
-						"", "" + ChatColor.RESET + ChatColor.BOLD + "Level: " + ChatColor.GRAY + data.level,
-						"" + ChatColor.DARK_GRAY + "[" + ChatColor.GRAY + data.exp + "/2500 EXP" + ChatColor.DARK_GRAY
-								+ "]",
+						"", "" + ChatColor.RESET + ChatColor.BOLD + "Level: " + ChatColor.GRAY + data.level, expBar, // ★
+																														// micro
+																														// EXP
+																														// dots
+																														// line
 						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 						"" + ChatColor.AQUA + "minezone.club");
 			}
 			return;
 		}
 
-		if (main.tournament == false) {
-			String gameServer = "Super Craft Bros";
+		if (!main.tournament) {
+			String gameServer = "Minezone";
 			board.updateTitle(main.color("&r&l" + gameServer));
 			if (data != null) {
 				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 						main.color("&b&lTokens: &7" + data.tokens), "",
 						main.color("&b&lRank: &r" + main.getRankManager().getRank(player).getTag()), "",
-						main.color("&b&lLevel: &7" + data.checkPlayerLevel(player, data) + "✧" + data.level),
-						main.color("&7" + data.exp + "/2500 EXP"), "", main.color("&b&lBattle Pass Tier: &70/10"),
-						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------", main.color("&bminezone.club"));
+						// shows ✧ plus the level like your existing line
+						main.color("&b&lLevel: &7" + data.checkPlayerLevel(player, data) + "✧" + data.level), expBar, // ★
+																														// micro
+																														// EXP
+																														// dots
+																														// line
+						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
+						main.color("&bminezone.club"));
 			}
 		} else {
 			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + "MINEZONE");

@@ -427,7 +427,7 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null) {
-			String[] commandTypes = { "maps", "join", "fly", "leave", "players", "class", "socials", "spectate",
+			String[] commandTypes = { "maps", "join", "server", "fly", "leave", "players", "class", "socials", "spectate",
 					"startgame", "gamestats", "setlives", "lactate", "purchases", "kit", "items", "color", "sound",
 					"heal" };
 
@@ -1647,7 +1647,7 @@ public class Core extends JavaPlugin implements Listener {
 		// e.setJoinMessage(color("&r&l[&a&l+&r&l] &r" + rank + "&b" + name + "&a
 		// connected"));
 		e.setJoinMessage(color("" + rank.getArrowColor() + "► " + tag
-				+ getColorForNames(player, getRankManager().getRank(player)) + " &7has joined!"));
+				+ getColorForNames(player, getRankManager().getRank(player)) + " &6spooked into the server!"));
 
 		if (data != null) {
 			player.setLevel(data.level); // Indication what the player's level is
@@ -1885,7 +1885,7 @@ public class Core extends JavaPlugin implements Listener {
 		// getRankManager().getRank(player).getTagWithSpace() + "&b"
 		// + player.getName() + "&c disconnected"));
 		e.setQuitMessage(color("" + rank.getArrowColor() + "► " + tag
-				+ getColorForNames(player, getRankManager().getRank(player)) + " &7has left!"));
+				+ getColorForNames(player, getRankManager().getRank(player)) + " &6faded away!"));
 	}
 
 	public Location hologramLoc(Player player) {
