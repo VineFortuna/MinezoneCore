@@ -21,9 +21,10 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
 import net.minecraft.server.v1_8_R3.EntityArmorStand;
 
-public class KillsBoard extends LeaderboardBase {
+public class LevelBoard extends LeaderboardBase {
+	
 	private Core main;
-	private HashMap<UUID, Integer> kills;
+	private HashMap<UUID, Integer> level;
 	private HashMap<UUID, Rank> roleID;
 	private ArrayList<UUID> lead;
 	private ArrayList<String> lead2;
@@ -31,7 +32,7 @@ public class KillsBoard extends LeaderboardBase {
 	private Connection c;
 	private List<Integer> entityIds = new ArrayList<>();
 
-	public KillsBoard(Core main) {
+	public LevelBoard(Core main) {
 		super(main);
 		this.main = main;
 	}
@@ -39,17 +40,17 @@ public class KillsBoard extends LeaderboardBase {
 	@Override
 	public void asyncUpdate() throws SQLException {
 		roleID = new HashMap<>();
-		kills = new HashMap<>();
+		level = new HashMap<>();
 		lead = new ArrayList<>();
 		lead2 = new ArrayList<>();
 		c = main.getDatabaseManager().getConnection();
-		kills.clear();
+		level.clear();
 		lead.clear();
 		roleID.clear();
 
 		Statement s = c.createStatement();
 		int a = 0;
-		set = s.executeQuery("SELECT UUID, LastPlayerName, Kills, RoleID FROM PlayerData ORDER BY Kills DESC");
+		set = s.executeQuery("SELECT UUID, LastPlayerName, Level, RoleID FROM PlayerData ORDER BY Level DESC");
 		while (set.next()) {
 			if (a == 10) {
 				break;
@@ -62,7 +63,7 @@ public class KillsBoard extends LeaderboardBase {
 			a++;
 			lead.add(id);
 			lead2.add(name);
-			kills.put(id, set.getInt("Kills"));
+			level.put(id, set.getInt("Level"));
 			roleID.put(id, Rank.getRankFromID(set.getInt("RoleID")));
 		}
 	}
@@ -71,34 +72,36 @@ public class KillsBoard extends LeaderboardBase {
 	public void updateLeaderboard(boolean init) {
 		removeOldLeaderboards();
 
-		Location loc = new Location(main.getLobbyWorld(), 195.5, 106.5, 713.5);
-		sendArmorStandPacket(loc, ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Kills");
+		Location loc = new Location(main.getLobbyWorld(), 190.494, 106.5, 717.520);
+		sendArmorStandPacket(loc, ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + "Top Levels");
 		loc.setY(loc.getY() - 0.4);
 
 		int count = 1;
 		for (UUID id : lead) {
 			loc.setY(loc.getY() - 0.24);
 			String name = lead2.get(count - 1);
-			Integer win = kills.get(id);
+			Integer win = level.get(id);
 			sendArmorStandPacket(loc,
 					ChatColor.AQUA + "#" + count + ": " + ChatColor.YELLOW + name + ChatColor.RESET + " - " + win);
 			count++;
 		}
+		
+		// after you've finished drawing the top 10 using 'loc'
+		Location base = loc.clone(); // freeze the baseline after the top list
 
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			PlayerData data = main.getDataManager().getPlayerData(player);
+		    PlayerData data = main.getDataManager().getPlayerData(player);
+		    if (data != null && !lead.contains(data.playerUUID)) {
+		        int win = data.level;
 
-			if (data != null) {
-				if (!(lead.contains(data.playerUUID))) {
-					int win = data.kills;
-					loc.setY(loc.getY() - 0.24);
-					sendStandToOnePlayer(loc, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-							player);
-					loc.setY(loc.getY() - 0.20);
-					sendStandToOnePlayer(loc, "" + ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + win,
-							player);
-				}
-			}
+		        // draw the separator for THIS player at a fixed offset from base
+		        Location line1 = base.clone().add(0, -0.24, 0);
+		        sendStandToOnePlayer(line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------", player);
+
+		        // draw the player's own line just below it
+		        Location line2 = base.clone().add(0, -0.44, 0);
+		        sendStandToOnePlayer(line2, "" + ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + win, player);
+		    }
 		}
 	}
 
@@ -153,7 +156,7 @@ public class KillsBoard extends LeaderboardBase {
 	@Override
 	public void close() {
 		removeOldLeaderboards();
-		kills.clear();
+		level.clear();
 		lead.clear();
 		c = null;
 		roleID.clear();

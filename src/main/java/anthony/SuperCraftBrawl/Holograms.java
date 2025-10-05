@@ -94,7 +94,7 @@ public class Holograms {
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName("" + ChatColor.AQUA + ChatColor.BOLD + "SuperCraftBlocks");
+			stand.setCustomName("" + ChatColor.AQUA + ChatColor.BOLD + "Super Craft Bros");
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);

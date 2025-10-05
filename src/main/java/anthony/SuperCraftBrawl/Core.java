@@ -102,6 +102,7 @@ public class Core extends JavaPlugin implements Listener {
 	public Leaderboard lb;
 	public FishingBoard fb;
 	public KillsBoard kb;
+	public LevelBoard levelBoard;
 	public BoardSettings boardSettings;
 	public WinstreakBoard streakBoard;
 	public FlawlessWinsBoard flawlessWinsBoard;
@@ -132,6 +133,10 @@ public class Core extends JavaPlugin implements Listener {
 
 	public ActionBarManager getActionBarManager() {
 		return this.actionBarManager;
+	}
+	
+	public LevelBoard getLevelBoard() {
+		return this.levelBoard;
 	}
 
 	public ScoreboardManager getScoreboardManager() {
@@ -406,6 +411,7 @@ public class Core extends JavaPlugin implements Listener {
 		lb = new Leaderboard(this);
 		kb = new KillsBoard(this);
 		fb = new FishingBoard(this);
+		levelBoard = new LevelBoard(this);
 		boardSettings = new BoardSettings(this);
 		streakBoard = new WinstreakBoard(this);
 		flawlessWinsBoard = new FlawlessWinsBoard(this);
@@ -427,7 +433,7 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null) {
-			String[] commandTypes = { "maps", "join", "server", "fly", "leave", "players", "class", "socials", "spectate",
+			String[] commandTypes = { "maps", "join", "fishing", "server", "fly", "leave", "players", "class", "socials", "spectate",
 					"startgame", "gamestats", "setlives", "lactate", "purchases", "kit", "items", "color", "sound",
 					"heal" };
 
@@ -960,13 +966,16 @@ public class Core extends JavaPlugin implements Listener {
 //						+ "for more information");
 			}
 			if (cmd.getName().equalsIgnoreCase("help") && sender instanceof Player) {
-				player.sendMessage("" + ChatColor.GREEN + ChatColor.BOLD + "GENERAL SCB COMMANDS");
-				player.sendMessage("" + ChatColor.WHITE + "/join -> " + ChatColor.GREEN + "Join a game");
-				player.sendMessage("" + ChatColor.WHITE + "/maps -> " + ChatColor.GREEN + "See all maps");
-				player.sendMessage("" + ChatColor.WHITE + "/classes -> " + ChatColor.GREEN + "See all classes");
-				player.sendMessage("" + ChatColor.WHITE + "/class -> " + ChatColor.GREEN + "Choose a class");
-				player.sendMessage("" + ChatColor.WHITE + "/spectate -> " + ChatColor.GREEN + "Spectate a game");
-				player.sendMessage("" + ChatColor.WHITE + "/leave -> " + ChatColor.GREEN + "Leave your game");
+				player.sendMessage(color("&2&l(!) &b&lSCB COMMANDS"));
+				player.sendMessage(color("&r/join -> &7Join a game"));
+				player.sendMessage(color("&r/maps -> &7See all playable maps"));
+				player.sendMessage(color("&r/classes -> &7See all playable classes"));
+				player.sendMessage(color("&r/class -> &7Choose a class"));
+				player.sendMessage(color("&r/spectate -> &7Spectate a game"));
+				player.sendMessage(color("&r/leave -> &7Leave your game"));
+				player.sendMessage("");
+				player.sendMessage(color("&2&l(!) &b&lFISHING COMMANDS"));
+				player.sendMessage(color("&r/fishing -> &7Opens Fishing menu"));
 			}
 
 			if (cmd.getName().equalsIgnoreCase("exp")) {
@@ -978,12 +987,19 @@ public class Core extends JavaPlugin implements Listener {
 						int num = Integer.parseInt(args[0]);
 						PlayerData data = this.getDataManager().getPlayerData(player);
 						data.exp += num;
-						player.sendMessage("Added " + num + " to your account");
+						player.sendMessage(color("&6&l(!) &rAdded &e" + num + " EXP &rto your account"));
 
 						if (data.exp >= 2500) {
 							data.level++;
 							data.exp -= 2500;
-							player.sendMessage("Level upgraded to " + data.level + "!");
+							player.sendMessage(color("&8&m----------------------------------------"));
+							player.sendMessage(color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
+							player.sendMessage(color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
+							player.sendMessage(color("&8&m----------------------------------------"));
+
+							// (optional but fun) little audio feedback on 1.8:
+							player.playSound(player.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
+
 						}
 						if (this.getGameManager().GetInstanceOfPlayer(player) == null)
 							getScoreboardManager().lobbyBoard(player);
@@ -1064,7 +1080,7 @@ public class Core extends JavaPlugin implements Listener {
 			if (cmd.getName().equalsIgnoreCase("store")) {
 				player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
 						+ "Want to help support the server? Purchase a rank at " + ChatColor.GREEN
-						+ "https://minezone.tebex.io/");
+						+ "https://minezone.club/");
 			}
 
 			if (cmd.getName().equalsIgnoreCase("token") && sender instanceof Player) {
@@ -1744,7 +1760,7 @@ public class Core extends JavaPlugin implements Listener {
 
 		// if (!(this.msHologram.containsKey(p))) {
 		if (data != null) {
-			Location loc = new Location(this.getLobbyWorld(), 214.515, 105.5, 670.490);
+			Location loc = new Location(this.getLobbyWorld(), 179.527, 105.5, 673.493);
 			WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
 			EntityArmorStand stand = new EntityArmorStand(s);
 
@@ -1756,7 +1772,7 @@ public class Core extends JavaPlugin implements Listener {
 			PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
 			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
 
-			loc = new Location(this.getLobbyWorld(), 214.515, 105.2, 670.490);
+			loc = new Location(this.getLobbyWorld(), 179.527, 105.2, 673.493);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
@@ -1823,7 +1839,7 @@ public class Core extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void serverMotd(ServerListPingEvent p) {
-		String msg = color("                   &eMinezone &7[1.8-1.21] \n          &2&lHOME OF &c&lSUPER CRAFT BROS");
+		String msg = color("                     &eMinezone &7[1.8-1.21] \n    &c&lSUPER CRAFT BROS &7- &6&lHALLOWEEN UPDATE");
 		p.setMotd(msg);
 		p.setMaxPlayers(1);
 	}
@@ -1925,7 +1941,7 @@ public class Core extends JavaPlugin implements Listener {
 			player.getInventory().setItem(3,
 					ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), "&bClasses &7(Right Click)"));
 			player.getInventory().setItem(8,
-					ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), "&bBattle Pass &7(Right Click)"));
+					ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), "&bChallenges &7(Right Click)"));
 		}
 		player.getInventory().setItem(0,
 				ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&bGame Selector &7(Right Click)"));
