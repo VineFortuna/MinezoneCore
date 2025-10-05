@@ -10,6 +10,8 @@ import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.leaderboards.*;
+import anthony.SuperCraftBrawl.lobbyexplorer.LobbyExplorerManager;
+import anthony.SuperCraftBrawl.lobbyexplorer.LobbyExplorers;
 import anthony.SuperCraftBrawl.npcs.ChannelInjector;
 import anthony.SuperCraftBrawl.npcs.NPC;
 import anthony.SuperCraftBrawl.npcs.NPCManager;
@@ -118,6 +120,7 @@ public class Core extends JavaPlugin implements Listener {
 	
 	//CUSTOM NPCs
     private NPC playNPC, infoNPC;
+    private LobbyExplorerManager lem;
 
 	// Player's game stats
 	public Map<Player, GameInstance> gameStats = new HashMap<Player, GameInstance>();
@@ -139,6 +142,10 @@ public class Core extends JavaPlugin implements Listener {
 
 	public ActionBarManager getActionBarManager() {
 		return this.actionBarManager;
+	}
+	
+	public LobbyExplorerManager getExplorerManager() {
+		return this.lem;
 	}
 	
 	public LevelBoard getLevelBoard() {
@@ -424,6 +431,7 @@ public class Core extends JavaPlugin implements Listener {
 		fishing = new Fishing(this);
 		signManager = new SignManager(this);
 		lobbyItems = new anthony.SuperCraftBrawl.lobbyitems.LobbyItems(this);
+		lem = new LobbyExplorerManager(this);
 
 		for (Arenas arena : Arenas.values()) {
 			parkourBoards.add(new ParkourBoard(this, arena));
@@ -496,43 +504,38 @@ public class Core extends JavaPlugin implements Listener {
 	
 	public void createNPCs() {
 	    World w = lobbyWorld;
+	    // make sure the chunk is loaded
 	    w.getChunkAt(new Location(w, 161.481, 105.5, 657.443)).load(true);
 
-	    // ===== SKINS (paste your Base64 pairs) =====
-	    // Girl skin
+	    // ===== SKINS (paste real Base64 pairs) =====
 	    final String GIRL_VALUE = "<PASTE_GIRL_TEXTURE_VALUE>";
 	    final String GIRL_SIG   = "<PASTE_GIRL_TEXTURE_SIGNATURE>";
-
-	    // Guy skin
 	    final String GUY_VALUE  = "<PASTE_GUY_TEXTURE_VALUE>";
 	    final String GUY_SIG    = "<PASTE_GUY_TEXTURE_SIGNATURE>";
 	    // ===========================================
 
-	    NPC playNPC = new NPC(
-	            "Play",
-	            new Location(w, 161.481, 105.5, 657.443, 180f, 0f),
-	            GIRL_VALUE, GIRL_SIG,
-	            p -> p.performCommand("menu")
+	    // Assign to FIELDS, not locals
+	    playNPC = new NPC(this,
+	        "Amy",
+	        new Location(w, 161.481, 105.5, 657.443, 180f, 0f),
+	        GIRL_VALUE, GIRL_SIG,
+	        null,                       // use LobbyExplorer's default action
+	        LobbyExplorers.Amy
 	    );
 
-	    NPC infoNPC = new NPC(
-	            "Info",
-	            new Location(w, 163.5, 105.5, 657.443, 180f, 0f),
-	            GUY_VALUE, GUY_SIG,
-	            p -> p.sendMessage(Core.inst().color("&aWelcome to Minezone! Use &e/menu &ato begin."))
-	    );
-
-	    // NPC visibility + click handling
+	    // Register visibility/click listener with the actual instances
 	    getServer().getPluginManager().registerEvents(new VisibleHook(playNPC, infoNPC), this);
 
-	    // For already-online players (e.g., /reload)
+	    // Show to players already online (e.g. after /reload)
 	    for (Player p : Bukkit.getOnlinePlayers()) {
 	        ChannelInjector.inject(p);
-	        playNPC.showTo(p);
-	        infoNPC.showTo(p);
+	        // small delay helps when joining/reloading
+	        Bukkit.getScheduler().runTaskLater(this, () -> {
+	            if (playNPC != null) playNPC.showTo(p);
+	            if (infoNPC != null) infoNPC.showTo(p);
+	        }, 5L);
 	    }
 	}
-
 	public static BowPractice bowPractice;
 
 	private void enablePracticeModes() {
