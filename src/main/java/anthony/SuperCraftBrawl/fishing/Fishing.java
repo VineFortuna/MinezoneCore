@@ -115,8 +115,13 @@ public class Fishing implements Listener {
                 if (data.exp >= 2500) {
                     data.level++;
                     data.exp -= 2500;
-                    p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
-                    p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "&r!"));
+                    p.sendMessage(main.color("&8&m----------------------------------------"));
+					p.sendMessage(main.color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
+					p.sendMessage(main.color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
+					p.sendMessage(main.color("&8&m----------------------------------------"));
+
+					// (optional but fun) little audio feedback on 1.8:
+					p.playSound(p.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
                 }
                 updateScoreboard = true;
             } else if (fish == FishType.TOKENS) {

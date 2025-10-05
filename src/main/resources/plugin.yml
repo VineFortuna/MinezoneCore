@@ -143,6 +143,8 @@ commands:
       description: Fully heals the player
    practice:
       description: SCB Practice Mode (BETA)
+   fishing:
+      description: Opens Fishing GUI
 
 permissions:
    scb.admin:
