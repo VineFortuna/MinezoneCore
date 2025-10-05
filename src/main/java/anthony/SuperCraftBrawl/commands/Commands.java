@@ -65,6 +65,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "startgame":
 				startGameCommand(player);
 				break;
+				
+			case "server":
+				serverCommand(player);
+				break;
 
 			case "fly":
 				flyCommand(player);
@@ -140,6 +144,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 		} else
 			sender.sendMessage("Hey! You can't use this in the terminal!");
 		return true;
+	}
+
+	private void serverCommand(Player player) {
+		player.sendMessage(main.color("&b&l(!) &rYou are currently connected to &2SCB-1"));
 	}
 
 	private void socialsCommand(Player player) {
