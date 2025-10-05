@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.npcs;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.lobbyexplorer.LobbyExplorers;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.server.v1_8_R3.*;
@@ -25,12 +26,24 @@ public class NPC {
     private final Location baseLoc;
     private final GameProfile profile;
     private final int entityId;
+
+    // optional direct click handler (overrides explorer default if non-null)
     private final Consumer<Player> onRightClick;
+
+    // which lobby explorer this NPC represents
+    private final LobbyExplorers explorer;
 
     private final Set<UUID> viewers = Collections.synchronizedSet(new HashSet<>());
     private BukkitRunnable lookTask;
+    private Core core;
 
-    public NPC(String name, Location loc, String skinValue, String skinSig, Consumer<Player> onRightClick) {
+    public NPC(Core core, String name,
+               Location loc,
+               String skinValue,
+               String skinSig,
+               Consumer<Player> onRightClick,
+               LobbyExplorers explorerName) {
+    	this.core = core;
         this.name = name.length() > 16 ? name.substring(0, 16) : name;
         this.baseLoc = loc.clone();
         this.profile = new GameProfile(uuid, this.name);
@@ -38,7 +51,8 @@ public class NPC {
             this.profile.getProperties().put("textures", new Property("textures", skinValue, skinSig));
         }
         this.entityId = new Random().nextInt(Integer.MAX_VALUE);
-        this.onRightClick = onRightClick;
+        this.onRightClick = onRightClick;   // if null, we'll fall back to explorer action
+        this.explorer = explorerName;       // can be null if you don't want a preset behavior
     }
 
     public int getEntityId() { return entityId; }
@@ -96,10 +110,7 @@ public class NPC {
         if (viewers.isEmpty() && lookTask != null) { lookTask.cancel(); lookTask = null; }
     }
 
-    public void showToAll() {
-        baseLoc.getWorld().getPlayers().forEach(this::showTo);
-    }
-
+    public void showToAll() { baseLoc.getWorld().getPlayers().forEach(this::showTo); }
     public void hideFromAll() {
         for (UUID id : new HashSet<>(viewers)) {
             Player p = Bukkit.getPlayer(id);
@@ -107,10 +118,34 @@ public class NPC {
         }
     }
 
-    /** Called by NPCRegistry when ChannelInjector detects a right click. */
+    /** Called by NPCRegistry when ChannelInjector detects a right click (gives us the Player). */
     void handleRightClick(Player clicker) {
+        // If a custom Consumer was provided, use that first
         if (onRightClick != null) {
             onRightClick.accept(clicker);
+            return;
+        }
+        // Otherwise, run the explorer-specific default behavior
+        runExplorerAction(clicker);
+    }
+
+    // ----- Explorer-specific default behaviors (you can customize freely) -----
+    private void runExplorerAction(Player p) {
+        if (explorer == null) return;
+        switch (explorer) {
+            case Amy:
+                core.getExplorerManager().checkSelectedExplorer(explorer, p);
+                break;
+
+            case Steve:
+                p.sendMessage(Core.inst().color("&b[Ben] &fOpening explorer GUI..."));
+                // Example: open a GUI if you have one
+                // new ExplorerGUI(Core.inst()).inv.open(p);
+                break;
+
+            // Add more cases for other LobbyExplorers as needed
+            default:
+                break;
         }
     }
 
@@ -124,7 +159,7 @@ public class NPC {
                 for (UUID id : new HashSet<>(viewers)) {
                     Player p = Bukkit.getPlayer(id);
                     if (p == null || !p.isOnline() || !p.getWorld().equals(baseLoc.getWorld())) continue;
-                    if (p.getLocation().distanceSquared(baseLoc) > 14*14) continue;
+                    if (p.getLocation().distanceSquared(baseLoc) > 14 * 14) continue;
 
                     float[] yp = lookAt(baseLoc, p.getEyeLocation());
                     byte yaw = toPackedByte(yp[0]);
@@ -155,7 +190,7 @@ public class NPC {
         double dx = dst.getX() - src.getX();
         double dy = dst.getY() - (src.getY() + 1.62);
         double dz = dst.getZ() - src.getZ();
-        double distXZ = Math.sqrt(dx*dx + dz*dz);
+        double distXZ = Math.sqrt(dx * dx + dz * dz);
 
         float yaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
         float pitch = (float) Math.toDegrees(-Math.atan2(dy, distXZ));
