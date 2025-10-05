@@ -1,6 +1,6 @@
 package anthony.SuperCraftBrawl;
 
-import anthony.SuperCraftBrawl.Game.*; 
+import anthony.SuperCraftBrawl.Game.*;  
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -10,7 +10,10 @@ import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.leaderboards.*;
+import anthony.SuperCraftBrawl.npcs.ChannelInjector;
+import anthony.SuperCraftBrawl.npcs.NPC;
 import anthony.SuperCraftBrawl.npcs.NPCManager;
+import anthony.SuperCraftBrawl.npcs.VisibleHook;
 import anthony.SuperCraftBrawl.packets.PacketMain;
 import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -112,6 +115,9 @@ public class Core extends JavaPlugin implements Listener {
 	public Map<Player, Player> wagers = new HashMap<Player, Player>();
 	public SignManager signManager;
 	public anthony.SuperCraftBrawl.lobbyitems.LobbyItems lobbyItems;
+	
+	//CUSTOM NPCs
+    private NPC playNPC, infoNPC;
 
 	// Player's game stats
 	public Map<Player, GameInstance> gameStats = new HashMap<Player, GameInstance>();
@@ -447,6 +453,7 @@ public class Core extends JavaPlugin implements Listener {
 			}
 		}
 
+		createNPCs();
 		enablePracticeModes();
 
 		new BukkitRunnable() {
@@ -485,6 +492,45 @@ public class Core extends JavaPlugin implements Listener {
 				tickCounter++;
 			}
 		}.runTaskTimer(this, 0, 1);
+	}
+	
+	public void createNPCs() {
+	    World w = lobbyWorld;
+	    w.getChunkAt(new Location(w, 161.481, 105.5, 657.443)).load(true);
+
+	    // ===== SKINS (paste your Base64 pairs) =====
+	    // Girl skin
+	    final String GIRL_VALUE = "<PASTE_GIRL_TEXTURE_VALUE>";
+	    final String GIRL_SIG   = "<PASTE_GIRL_TEXTURE_SIGNATURE>";
+
+	    // Guy skin
+	    final String GUY_VALUE  = "<PASTE_GUY_TEXTURE_VALUE>";
+	    final String GUY_SIG    = "<PASTE_GUY_TEXTURE_SIGNATURE>";
+	    // ===========================================
+
+	    NPC playNPC = new NPC(
+	            "Play",
+	            new Location(w, 161.481, 105.5, 657.443, 180f, 0f),
+	            GIRL_VALUE, GIRL_SIG,
+	            p -> p.performCommand("menu")
+	    );
+
+	    NPC infoNPC = new NPC(
+	            "Info",
+	            new Location(w, 163.5, 105.5, 657.443, 180f, 0f),
+	            GUY_VALUE, GUY_SIG,
+	            p -> p.sendMessage(Core.inst().color("&aWelcome to Minezone! Use &e/menu &ato begin."))
+	    );
+
+	    // NPC visibility + click handling
+	    getServer().getPluginManager().registerEvents(new VisibleHook(playNPC, infoNPC), this);
+
+	    // For already-online players (e.g., /reload)
+	    for (Player p : Bukkit.getOnlinePlayers()) {
+	        ChannelInjector.inject(p);
+	        playNPC.showTo(p);
+	        infoNPC.showTo(p);
+	    }
 	}
 
 	public static BowPractice bowPractice;
@@ -1687,6 +1733,11 @@ public class Core extends JavaPlugin implements Listener {
 		}
 		player.setHealth(20);
 		player.setFoodLevel(20);
+		
+		ChannelInjector.inject(player);
+		if (playNPC != null) playNPC.showTo(player);
+		if (infoNPC != null) infoNPC.showTo(player);
+
 	}
 
 	public String getColorForNames(Player player, Rank rank) {
@@ -2066,6 +2117,8 @@ public class Core extends JavaPlugin implements Listener {
 		}
 
 		closeLeaderboards();
+		for (Player p : Bukkit.getOnlinePlayers()) ChannelInjector.uninject(p);
+
 
 		Bukkit.getMessenger().unregisterOutgoingPluginChannel(plugin);
 		Bukkit.getMessenger().unregisterIncomingPluginChannel(this, "BungeeCord");
