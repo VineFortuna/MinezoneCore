@@ -70,7 +70,7 @@ public class ScoreboardManager {
 																														// EXP
 																														// dots
 																														// line
-						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
+						"", main.color("&b&lBaskets Found: &70/10"),"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 						main.color("&bminezone.club"));
 			}
 		} else {
