@@ -12,6 +12,7 @@ import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
 import anthony.SuperCraftBrawl.gui.GameStatsGUI;
+import anthony.SuperCraftBrawl.gui.fishing.FishingGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.practice.Game;
@@ -60,6 +61,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 			switch (cmd.getName().toLowerCase()) {
 			case "purchases":
 				purchaseCommand(args, player);
+				break;
+				
+			case "fishing":
+				new FishingGUI(main, null).inv.open(player);
 				break;
 
 			case "startgame":

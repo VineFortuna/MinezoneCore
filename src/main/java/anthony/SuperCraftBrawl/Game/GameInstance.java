@@ -1620,9 +1620,14 @@ public class GameInstance {
 				if (data.exp >= 2500) {
 					data.level++;
 					data.exp -= 2500;
-					winner.sendMessage(getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
-					winner.sendMessage(
-							getGameManager().getMain().color("&r&l(!) &rYou are now Level " + data.level + "&r!"));
+					winner.sendMessage(getGameManager().getMain().color("&8&m----------------------------------------"));
+					winner.sendMessage(getGameManager().getMain().color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
+					winner.sendMessage(getGameManager().getMain().color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
+					winner.sendMessage(getGameManager().getMain().color("&8&m----------------------------------------"));
+
+					// (optional but fun) little audio feedback on 1.8:
+					winner.playSound(winner.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
+
 				}
 			}
 		}
