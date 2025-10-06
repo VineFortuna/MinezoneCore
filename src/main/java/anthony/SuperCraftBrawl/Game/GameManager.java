@@ -2599,6 +2599,8 @@ public class GameManager implements Listener, PluginMessageListener {
 			return "Zombie Pigman";
 		case SPIDER:
 			return "Spider";
+		case SLIME:
+			return "Slime";
 		}
 		return "Creature";
 	}
