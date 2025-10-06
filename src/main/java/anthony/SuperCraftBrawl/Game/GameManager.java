@@ -2094,7 +2094,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (!spawnProt.containsKey(damager))
 				return;
 			event.setCancelled(true);
-			SoundManager.playNMSSoundToPlayer(damager, "mob.guardian.elder.hit", 1, 1);
+			SoundManager.playNMSSoundToPlayer(damager, "mob.guardian.elder.hit", 1, 1.6f);
 		}
 
 		// Damagee
@@ -2106,7 +2106,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (!spawnProt.containsKey(damagee))
 				return;
 			event.setCancelled(true);
-			SoundManager.playNMSSoundToPlayer(damagee, "mob.guardian.elder.hit", 1, 1);
+			SoundManager.playNMSSoundToPlayer(damagee, "mob.guardian.elder.hit", 1, 1.6f);
 		}
 	}
 
