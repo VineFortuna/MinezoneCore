@@ -504,38 +504,40 @@ public class Core extends JavaPlugin implements Listener {
 	
 	public void createNPCs() {
 	    World w = lobbyWorld;
-	    // make sure the chunk is loaded
+	    // Ensure chunk is loaded
 	    w.getChunkAt(new Location(w, 161.481, 105.5, 657.443)).load(true);
 
-	    // ===== SKINS (paste real Base64 pairs) =====
-	    final String GIRL_VALUE = "<PASTE_GIRL_TEXTURE_VALUE>";
-	    final String GIRL_SIG   = "<PASTE_GIRL_TEXTURE_SIGNATURE>";
-	    final String GUY_VALUE  = "<PASTE_GUY_TEXTURE_VALUE>";
-	    final String GUY_SIG    = "<PASTE_GUY_TEXTURE_SIGNATURE>";
-	    // ===========================================
+	    // ===== SKINS (use real values; leaving nulls just shows default Steve skin) =====
+	    final String GIRL_VALUE = null; // "<BASE64_TEXTURE_VALUE>";
+	    final String GIRL_SIG   = null; // "<BASE64_TEXTURE_SIGNATURE>";
+	    // ===============================================================================
 
-	    // Assign to FIELDS, not locals
-	    playNPC = new NPC(this,
-	        "Amy",
-	        new Location(w, 161.481, 105.5, 657.443, 180f, 0f),
-	        GIRL_VALUE, GIRL_SIG,
-	        null,                       // use LobbyExplorer's default action
-	        LobbyExplorers.Amy
-	    );
+	    // Create and assign to FIELDS so other code can see/use them
+	    this.playNPC = new NPC(
+	            Core.inst(),
+	            "Amy",
+	            new Location(w, 161.481, 105.5, 657.443, 180f, 0f),
+	            GIRL_VALUE, GIRL_SIG,
+	            null,                      // no custom click handler -> uses explorer default
+	            LobbyExplorers.Amy         // explorer enum
+	    ).setNameLines("&eAmy - Lobby Explorer", "&7(Right Click)");
 
-	    // Register visibility/click listener with the actual instances
-	    getServer().getPluginManager().registerEvents(new VisibleHook(playNPC, infoNPC), this);
+	    // If you have a second NPC, create and assign it too (or set to null)
+	    this.infoNPC = null; // or build another NPC here
 
-	    // Show to players already online (e.g. after /reload)
+	    // Register visibility/click routing with the actual instances
+	    getServer().getPluginManager().registerEvents(new VisibleHook(this.playNPC, this.infoNPC), this);
+
+	    // Show to players already online (e.g., after /reload)
 	    for (Player p : Bukkit.getOnlinePlayers()) {
 	        ChannelInjector.inject(p);
-	        // small delay helps when joining/reloading
 	        Bukkit.getScheduler().runTaskLater(this, () -> {
-	            if (playNPC != null) playNPC.showTo(p);
-	            if (infoNPC != null) infoNPC.showTo(p);
+	            if (this.playNPC != null) this.playNPC.showTo(p);
+	            if (this.infoNPC != null) this.infoNPC.showTo(p);
 	        }, 5L);
 	    }
 	}
+	
 	public static BowPractice bowPractice;
 
 	private void enablePracticeModes() {
