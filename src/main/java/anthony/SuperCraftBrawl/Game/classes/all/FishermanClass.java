@@ -306,7 +306,7 @@ public class FishermanClass extends BaseClass {
                     EntityDamageEvent damageEvent = new EntityDamageEvent(hit, EntityDamageEvent.DamageCause.PROJECTILE, 4.5);
                     instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
                     hit.damage(2, player);
-                    v.setY(0.7);
+                    v.setY(0.9);
                     hit.setVelocity(v);
 
                     player.getWorld().playSound(hit.getLocation(), Sound.SPLASH, 1, 1);
