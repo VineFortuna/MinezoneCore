@@ -6,6 +6,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -17,8 +18,9 @@ import java.util.*;
 import java.util.function.Consumer;
 
 /**
- * Packet-only fake player NPC (v1_8_R3) with per-viewer head tracking and right-click callback.
- * No external dependencies. Use ChannelInjector + NPCRegistry for interaction routing.
+ * Packet-only fake player NPC (v1_8_R3) with per-viewer head tracking,
+ * right-click callback, and multi-line name via invisible armor stands.
+ * Restores Amy -> LobbyExplorerManager.checkSelectedExplorer(...) behavior.
  */
 public class NPC {
     private final UUID uuid = UUID.randomUUID();
@@ -27,32 +29,48 @@ public class NPC {
     private final GameProfile profile;
     private final int entityId;
 
+    // keep a Core ref so we can call the explorer manager (restored behavior)
+    private final Core core;
+
     // optional direct click handler (overrides explorer default if non-null)
     private final Consumer<Player> onRightClick;
 
-    // which lobby explorer this NPC represents
+    // which lobby explorer this NPC represents (can be null)
     private final LobbyExplorers explorer;
 
     private final Set<UUID> viewers = Collections.synchronizedSet(new HashSet<>());
     private BukkitRunnable lookTask;
-    private Core core;
 
-    public NPC(Core core, String name,
+    // multi-line floating text state
+    private final List<String> nameLines = new ArrayList<>();
+    private final Map<UUID, List<Integer>> hologramIds = new HashMap<>();
+
+    public NPC(Core core,
+               String name,
                Location loc,
                String skinValue,
                String skinSig,
                Consumer<Player> onRightClick,
                LobbyExplorers explorerName) {
-    	this.core = core;
+
+        this.core = core;
         this.name = name.length() > 16 ? name.substring(0, 16) : name;
         this.baseLoc = loc.clone();
         this.profile = new GameProfile(uuid, this.name);
+
         if (skinValue != null && skinSig != null) {
             this.profile.getProperties().put("textures", new Property("textures", skinValue, skinSig));
         }
         this.entityId = new Random().nextInt(Integer.MAX_VALUE);
-        this.onRightClick = onRightClick;   // if null, we'll fall back to explorer action
-        this.explorer = explorerName;       // can be null if you don't want a preset behavior
+        this.onRightClick = onRightClick;
+        this.explorer = explorerName;
+    }
+
+    /** Optional: set multiple lines to display above the NPC (top line first). */
+    public NPC setNameLines(String... lines) {
+        this.nameLines.clear();
+        if (lines != null) Collections.addAll(this.nameLines, lines);
+        return this;
     }
 
     public int getEntityId() { return entityId; }
@@ -100,6 +118,9 @@ public class NPC {
         // Register so clicks can be routed by ChannelInjector
         NPCRegistry.register(this);
 
+        // spawn multi-line "name" hologram
+        spawnNameHologramFor(p);
+
         ensureLookTask();
     }
 
@@ -107,10 +128,16 @@ public class NPC {
     public void hideFrom(Player p) {
         if (!viewers.remove(p.getUniqueId())) return;
         send(p, new PacketPlayOutEntityDestroy(entityId));
-        if (viewers.isEmpty() && lookTask != null) { lookTask.cancel(); lookTask = null; }
+        destroyNameHologramFor(p);
+
+        if (viewers.isEmpty() && lookTask != null) {
+            lookTask.cancel();
+            lookTask = null;
+        }
     }
 
     public void showToAll() { baseLoc.getWorld().getPlayers().forEach(this::showTo); }
+
     public void hideFromAll() {
         for (UUID id : new HashSet<>(viewers)) {
             Player p = Bukkit.getPlayer(id);
@@ -118,29 +145,30 @@ public class NPC {
         }
     }
 
-    /** Called by NPCRegistry when ChannelInjector detects a right click (gives us the Player). */
+    /** Called by NPCRegistry when ChannelInjector detects a right click (with the Player). */
     void handleRightClick(Player clicker) {
-        // If a custom Consumer was provided, use that first
-        if (onRightClick != null) {
+        if (onRightClick != null) { // explicit handler wins
             onRightClick.accept(clicker);
             return;
         }
-        // Otherwise, run the explorer-specific default behavior
-        runExplorerAction(clicker);
+        runExplorerAction(clicker); // fallback behavior by explorer enum
     }
 
-    // ----- Explorer-specific default behaviors (you can customize freely) -----
+    // ----- Explorer-specific default behaviors (Amy restored to use LobbyExplorerManager) -----
     private void runExplorerAction(Player p) {
         if (explorer == null) return;
+
         switch (explorer) {
             case Amy:
-                core.getExplorerManager().checkSelectedExplorer(explorer, p);
+                // RESTORED: this calls your LobbyExplorerManager, which will create
+                // an AmyLobbyExplorer instance and manage per-player selection.
+                if (core != null && core.getExplorerManager() != null) {
+                    core.getExplorerManager().checkSelectedExplorer(explorer, p);
+                }
                 break;
 
             case Steve:
-                p.sendMessage(Core.inst().color("&b[Ben] &fOpening explorer GUI..."));
-                // Example: open a GUI if you have one
-                // new ExplorerGUI(Core.inst()).inv.open(p);
+                p.sendMessage(Core.inst().color("&aWelcome! Use &e/menu &ato begin."));
                 break;
 
             // Add more cases for other LobbyExplorers as needed
@@ -176,6 +204,49 @@ public class NPC {
             }
         };
         lookTask.runTaskTimer(Core.inst(), 2L, 2L);
+    }
+
+    // ---------- Multi-line hologram (per viewer, packet-only) ----------
+    private void spawnNameHologramFor(Player p) {
+        if (nameLines.isEmpty()) return;
+
+        try {
+            WorldServer world = ((CraftWorld) baseLoc.getWorld()).getHandle();
+
+            // place lines a bit above the head; top line is highest
+            double baseY = baseLoc.getY() + 0.55;
+            double step = 0.25;
+
+            List<Integer> ids = new ArrayList<>(nameLines.size());
+            for (int i = 0; i < nameLines.size(); i++) {
+                String raw = nameLines.get(i) == null ? "" : nameLines.get(i);
+                String line = ChatColor.translateAlternateColorCodes('&', raw);
+
+                EntityArmorStand stand = new EntityArmorStand(world);
+                double y = baseY - (i * step);
+
+                stand.setLocation(baseLoc.getX(), y, baseLoc.getZ(), 0f, 0f);
+                stand.setCustomName(line);
+                stand.setCustomNameVisible(true);
+                stand.setInvisible(true);
+                stand.setSmall(true);
+                stand.setGravity(false);
+
+                PacketPlayOutSpawnEntityLiving sp = new PacketPlayOutSpawnEntityLiving(stand);
+                send(p, sp);
+
+                ids.add(stand.getId());
+            }
+            hologramIds.put(p.getUniqueId(), ids);
+        } catch (Throwable ignored) {}
+    }
+
+    private void destroyNameHologramFor(Player p) {
+        List<Integer> ids = hologramIds.remove(p.getUniqueId());
+        if (ids == null || ids.isEmpty()) return;
+        for (int id : ids) {
+            send(p, new PacketPlayOutEntityDestroy(id));
+        }
     }
 
     // --- helpers ---
