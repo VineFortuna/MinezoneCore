@@ -1957,6 +1957,7 @@ public class GameInstance {
 			player.setGameMode(GameMode.ADVENTURE);
 			player.setAllowFlight(true);
 			baseClass.loadPlayer();
+			this.getGameManager().addSpawnProtection(player);
 		}
 	}
 
