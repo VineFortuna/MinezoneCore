@@ -67,7 +67,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "purchases":
 				purchaseCommand(args, player);
 				break;
-				
+
 			case "fishing":
 				new FishingGUI(main, null).inv.open(player);
 				break;
@@ -75,7 +75,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "startgame":
 				startGameCommand(player);
 				break;
-				
+
 			case "server":
 				serverCommand(player);
 				break;
@@ -158,7 +158,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 			sender.sendMessage("Hey! You can't use this in the terminal!");
 		return true;
 	}
-	
+
 	private void candyAuraCommand(String[] args, Player player) {
 		// Optional permission – remove this block if you want everyone to use it
 		if (!player.hasPermission("cosmetic.candyaura")) {
@@ -168,38 +168,41 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 		String mode = (args.length == 0) ? "toggle" : args[0].toLowerCase();
 		switch (mode) {
-			case "on":
+		case "on":
+			candyAuraEnabled.add(player.getUniqueId());
+			player.sendMessage(main.color("&dCandy Aura &aenabled&d. Sweet!"));
+			ensureCandyAuraTaskRunning();
+			break;
+		case "off":
+			candyAuraEnabled.remove(player.getUniqueId());
+			player.sendMessage(main.color("&dCandy Aura &cdisabled&d."));
+			break;
+		case "toggle":
+		default:
+			if (candyAuraEnabled.contains(player.getUniqueId())) {
+				candyAuraEnabled.remove(player.getUniqueId());
+				player.sendMessage(main.color("&dCandy Aura &cdisabled&d."));
+			} else {
 				candyAuraEnabled.add(player.getUniqueId());
 				player.sendMessage(main.color("&dCandy Aura &aenabled&d. Sweet!"));
 				ensureCandyAuraTaskRunning();
-				break;
-			case "off":
-				candyAuraEnabled.remove(player.getUniqueId());
-				player.sendMessage(main.color("&dCandy Aura &cdisabled&d."));
-				break;
-			case "toggle":
-			default:
-				if (candyAuraEnabled.contains(player.getUniqueId())) {
-					candyAuraEnabled.remove(player.getUniqueId());
-					player.sendMessage(main.color("&dCandy Aura &cdisabled&d."));
-				} else {
-					candyAuraEnabled.add(player.getUniqueId());
-					player.sendMessage(main.color("&dCandy Aura &aenabled&d. Sweet!"));
-					ensureCandyAuraTaskRunning();
-				}
-				break;
+			}
+			break;
 		}
 	}
 
-	
 	private void ensureCandyAuraTaskRunning() {
-		if (candyAuraTaskId != -1) return; // already running
+		if (candyAuraTaskId != -1)
+			return; // already running
 		candyAuraTaskId = Bukkit.getScheduler().runTaskTimer(main, new Runnable() {
-			@Override public void run() {
-				if (candyAuraEnabled.isEmpty()) return;
+			@Override
+			public void run() {
+				if (candyAuraEnabled.isEmpty())
+					return;
 				for (java.util.UUID id : new java.util.HashSet<>(candyAuraEnabled)) {
 					Player p = Bukkit.getPlayer(id);
-					if (p == null || !p.isOnline()) continue;
+					if (p == null || !p.isOnline())
+						continue;
 					renderCandyAura(p);
 				}
 			}
@@ -229,7 +232,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 			p.getWorld().playEffect(ring, Effect.HAPPY_VILLAGER, 0, 8);
 		}
 	}
-
 
 	private void serverCommand(Player player) {
 		player.sendMessage(main.color("&b&l(!) &rYou are currently connected to &2SCB-1"));
@@ -296,7 +298,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		try {
 			Sound sound = Sound.valueOf(args[0].toUpperCase()); // Get the Sound enum value
 			float volume = 1.0f; // Default volume
-			float pitch = 1.0f;  // Default pitch
+			float pitch = 1.0f; // Default pitch
 
 			// Parse pitch if provided
 			if (args.length >= 2) {
@@ -357,15 +359,17 @@ public class Commands implements CommandExecutor, TabCompleter {
 			float volume = 10.0f;
 			float pitch = 1.0f;
 
-			if (args.length >= 2) pitch = Float.parseFloat(args[1]);
-			if (args.length >= 3) volume = Float.parseFloat(args[2]);
+			if (args.length >= 2)
+				pitch = Float.parseFloat(args[1]);
+			if (args.length >= 3)
+				volume = Float.parseFloat(args[2]);
 
 			// Play sound using NMS
 			String soundName = args[0].toLowerCase();
 			SoundManager.playNMSSoundToAll(player, soundName, volume, pitch);
 
-			player.sendMessage(ChatColor.GREEN + "Played sound: " + soundName
-					+ " (Pitch: " + pitch + ", Volume: " + volume + ")");
+			player.sendMessage(
+					ChatColor.GREEN + "Played sound: " + soundName + " (Pitch: " + pitch + ", Volume: " + volume + ")");
 
 		} catch (NumberFormatException e) {
 			player.sendMessage(ChatColor.RED + "Invalid number format for pitch/volume");
@@ -404,284 +408,96 @@ public class Commands implements CommandExecutor, TabCompleter {
 		player.sendMessage(ChatColor.GOLD + "=====================");
 		player.sendMessage(ChatColor.GRAY + "Use /soundnms list <page> to see more sounds");
 	}
+
 	public List<String> getAllNMSSounds() {
 		return Arrays.asList(
 				// Ambient sounds
-				"ambient.cave.cave",
-				"ambient.weather.rain",
-				"ambient.weather.thunder",
+				"ambient.cave.cave", "ambient.weather.rain", "ambient.weather.thunder",
 
 				// Player/entity hurt sounds
-				"game.player.hurt.fall.big",
-				"game.neutral.hurt.fall.big",
-				"game.hostile.hurt.fall.big",
-				"game.player.hurt.fall.small",
-				"game.neutral.hurt.fall.small",
-				"game.hostile.hurt.fall.small",
-				"game.player.hurt",
-				"game.neutral.hurt",
-				"game.hostile.hurt",
-				"game.player.die",
-				"game.neutral.die",
+				"game.player.hurt.fall.big", "game.neutral.hurt.fall.big", "game.hostile.hurt.fall.big",
+				"game.player.hurt.fall.small", "game.neutral.hurt.fall.small", "game.hostile.hurt.fall.small",
+				"game.player.hurt", "game.neutral.hurt", "game.hostile.hurt", "game.player.die", "game.neutral.die",
 				"game.hostile.die",
 
 				// Dig/break sounds
-				"dig.cloth",
-				"dig.glass",
-				"game.potion.smash",
-				"dig.grass",
-				"dig.gravel",
-				"dig.sand",
-				"dig.snow",
-				"dig.stone",
-				"dig.wood",
+				"dig.cloth", "dig.glass", "game.potion.smash", "dig.grass", "dig.gravel", "dig.sand", "dig.snow",
+				"dig.stone", "dig.wood",
 
 				// Fire sounds
-				"fire.fire",
-				"fire.ignite",
-				"item.fireCharge.use",
+				"fire.fire", "fire.ignite", "item.fireCharge.use",
 
 				// Firework sounds
-				"fireworks.blast",
-				"fireworks.blast_far",
-				"fireworks.largeBlast",
-				"fireworks.largeBlast_far",
-				"fireworks.launch",
-				"fireworks.twinkle",
-				"fireworks.twinkle_far",
+				"fireworks.blast", "fireworks.blast_far", "fireworks.largeBlast", "fireworks.largeBlast_far",
+				"fireworks.launch", "fireworks.twinkle", "fireworks.twinkle_far",
 
 				// Swim sounds
-				"game.player.swim.splash",
-				"game.neutral.swim.splash",
-				"game.hostile.swim.splash",
-				"game.player.swim",
-				"game.neutral.swim",
-				"game.hostile.swim",
+				"game.player.swim.splash", "game.neutral.swim.splash", "game.hostile.swim.splash", "game.player.swim",
+				"game.neutral.swim", "game.hostile.swim",
 
 				// Liquid sounds
-				"liquid.lava",
-				"liquid.lavapop",
-				"liquid.water",
+				"liquid.lava", "liquid.lavapop", "liquid.water",
 
 				// Minecart sounds
-				"minecart.base",
-				"minecart.inside",
+				"minecart.base", "minecart.inside",
 
 				// Note block sounds
-				"note.bass",
-				"note.bassattack",
-				"note.bd",
-				"note.harp",
-				"note.hat",
-				"note.pling",
-				"note.snare",
+				"note.bass", "note.bassattack", "note.bd", "note.harp", "note.hat", "note.pling", "note.snare",
 
 				// Portal sounds
-				"portal.portal",
-				"portal.travel",
-				"portal.trigger",
+				"portal.portal", "portal.travel", "portal.trigger",
 
 				// Random sounds
-				"random.anvil_break",
-				"random.anvil_land",
-				"random.anvil_use",
-				"random.bow",
-				"random.bowhit",
-				"random.break",
-				"random.burp",
-				"random.chestclosed",
-				"random.chestopen",
-				"gui.button.press",
-				"random.click",
-				"random.door_open",
-				"random.door_close",
-				"random.drink",
-				"random.eat",
-				"random.explode",
-				"random.fizz",
-				"game.tnt.primed",
-				"creeper.primed",
-				"random.levelup",
-				"random.orb",
-				"random.pop",
-				"random.splash",
-				"random.successful_hit",
-				"random.wood_click",
+				"random.anvil_break", "random.anvil_land", "random.anvil_use", "random.bow", "random.bowhit",
+				"random.break", "random.burp", "random.chestclosed", "random.chestopen", "gui.button.press",
+				"random.click", "random.door_open", "random.door_close", "random.drink", "random.eat", "random.explode",
+				"random.fizz", "game.tnt.primed", "creeper.primed", "random.levelup", "random.orb", "random.pop",
+				"random.splash", "random.successful_hit", "random.wood_click",
 
 				// Step sounds
-				"step.cloth",
-				"step.grass",
-				"step.gravel",
-				"step.ladder",
-				"step.sand",
-				"step.snow",
-				"step.stone",
+				"step.cloth", "step.grass", "step.gravel", "step.ladder", "step.sand", "step.snow", "step.stone",
 				"step.wood",
 
 				// Piston sounds
-				"tile.piston.in",
-				"tile.piston.out",
+				"tile.piston.in", "tile.piston.out",
 
 				// Mob sounds
-				"mob.bat.death",
-				"mob.bat.hurt",
-				"mob.bat.idle",
-				"mob.bat.loop",
-				"mob.bat.takeoff",
-				"mob.blaze.breathe",
-				"mob.blaze.death",
-				"mob.blaze.hit",
-				"mob.cat.hiss",
-				"mob.cat.hitt",
-				"mob.cat.meow",
-				"mob.cat.purr",
-				"mob.cat.purreow",
-				"mob.chicken.hurt",
-				"mob.chicken.plop",
-				"mob.chicken.say",
-				"mob.chicken.step",
-				"mob.cow.hurt",
-				"mob.cow.say",
-				"mob.cow.step",
-				"mob.creeper.death",
-				"mob.creeper.say",
-				"mob.enderdragon.end",
-				"mob.enderdragon.growl",
-				"mob.enderdragon.hit",
-				"mob.enderdragon.wings",
-				"mob.endermen.death",
-				"mob.endermen.hit",
-				"mob.endermen.idle",
-				"mob.endermen.portal",
-				"mob.endermen.scream",
-				"mob.endermen.stare",
-				"mob.ghast.affectionate_scream",
-				"mob.ghast.charge",
-				"mob.ghast.death",
-				"mob.ghast.fireball",
-				"mob.ghast.moan",
-				"mob.ghast.scream",
-				"mob.guardian.hit",
-				"mob.guardian.idle",
-				"mob.guardian.death",
-				"mob.guardian.elder.hit",
-				"mob.guardian.elder.idle",
-				"mob.guardian.elder.death",
-				"mob.guardian.land.hit",
-				"mob.guardian.land.idle",
-				"mob.guardian.land.death",
-				"mob.guardian.curse",
-				"mob.guardian.attack",
-				"mob.guardian.flop",
-				"mob.horse.angry",
-				"mob.horse.armor",
-				"mob.horse.breathe",
-				"mob.horse.death",
-				"mob.horse.donkey.angry",
-				"mob.horse.donkey.death",
-				"mob.horse.donkey.hit",
-				"mob.horse.donkey.idle",
-				"mob.horse.gallop",
-				"mob.horse.hit",
-				"mob.horse.idle",
-				"mob.horse.jump",
-				"mob.horse.land",
-				"mob.horse.leather",
-				"mob.horse.skeleton.death",
-				"mob.horse.skeleton.hit",
-				"mob.horse.skeleton.idle",
-				"mob.horse.soft",
-				"mob.horse.wood",
-				"mob.horse.zombie.death",
-				"mob.horse.zombie.hit",
-				"mob.horse.zombie.idle",
-				"mob.irongolem.death",
-				"mob.irongolem.hit",
-				"mob.irongolem.throw",
-				"mob.irongolem.walk",
-				"mob.magmacube.big",
-				"mob.magmacube.jump",
-				"mob.magmacube.small",
-				"mob.pig.death",
-				"mob.pig.say",
-				"mob.pig.step",
-				"mob.rabbit.hurt",
-				"mob.rabbit.idle",
-				"mob.rabbit.hop",
-				"mob.rabbit.death",
-				"mob.sheep.say",
-				"mob.sheep.shear",
-				"mob.sheep.step",
-				"mob.silverfish.hit",
-				"mob.silverfish.kill",
-				"mob.silverfish.say",
-				"mob.silverfish.step",
-				"mob.skeleton.death",
-				"mob.skeleton.hurt",
-				"mob.skeleton.say",
-				"mob.skeleton.step",
-				"mob.slime.attack",
-				"mob.slime.big",
-				"mob.slime.small",
-				"mob.spider.death",
-				"mob.spider.say",
-				"mob.spider.step",
-				"mob.villager.death",
-				"mob.villager.haggle",
-				"mob.villager.hit",
-				"mob.villager.idle",
-				"mob.villager.no",
-				"mob.villager.yes",
-				"mob.wither.death",
-				"mob.wither.hurt",
-				"mob.wither.idle",
-				"mob.wither.shoot",
-				"mob.wither.spawn",
-				"mob.wolf.bark",
-				"mob.wolf.death",
-				"mob.wolf.growl",
-				"mob.wolf.howl",
-				"mob.wolf.hurt",
-				"mob.wolf.panting",
-				"mob.wolf.shake",
-				"mob.wolf.step",
-				"mob.wolf.whine",
-				"mob.zombie.death",
-				"mob.zombie.hurt",
-				"mob.zombie.infect",
-				"mob.zombie.metal",
-				"mob.zombie.remedy",
-				"mob.zombie.say",
-				"mob.zombie.step",
-				"mob.zombie.unfect",
-				"mob.zombie.wood",
-				"mob.zombie.woodbreak",
-				"mob.zombiepig.zpig",
-				"mob.zombiepig.zpigangry",
-				"mob.zombiepig.zpigdeath",
-				"mob.zombiepig.zpighurt",
+				"mob.bat.death", "mob.bat.hurt", "mob.bat.idle", "mob.bat.loop", "mob.bat.takeoff", "mob.blaze.breathe",
+				"mob.blaze.death", "mob.blaze.hit", "mob.cat.hiss", "mob.cat.hitt", "mob.cat.meow", "mob.cat.purr",
+				"mob.cat.purreow", "mob.chicken.hurt", "mob.chicken.plop", "mob.chicken.say", "mob.chicken.step",
+				"mob.cow.hurt", "mob.cow.say", "mob.cow.step", "mob.creeper.death", "mob.creeper.say",
+				"mob.enderdragon.end", "mob.enderdragon.growl", "mob.enderdragon.hit", "mob.enderdragon.wings",
+				"mob.endermen.death", "mob.endermen.hit", "mob.endermen.idle", "mob.endermen.portal",
+				"mob.endermen.scream", "mob.endermen.stare", "mob.ghast.affectionate_scream", "mob.ghast.charge",
+				"mob.ghast.death", "mob.ghast.fireball", "mob.ghast.moan", "mob.ghast.scream", "mob.guardian.hit",
+				"mob.guardian.idle", "mob.guardian.death", "mob.guardian.elder.hit", "mob.guardian.elder.idle",
+				"mob.guardian.elder.death", "mob.guardian.land.hit", "mob.guardian.land.idle",
+				"mob.guardian.land.death", "mob.guardian.curse", "mob.guardian.attack", "mob.guardian.flop",
+				"mob.horse.angry", "mob.horse.armor", "mob.horse.breathe", "mob.horse.death", "mob.horse.donkey.angry",
+				"mob.horse.donkey.death", "mob.horse.donkey.hit", "mob.horse.donkey.idle", "mob.horse.gallop",
+				"mob.horse.hit", "mob.horse.idle", "mob.horse.jump", "mob.horse.land", "mob.horse.leather",
+				"mob.horse.skeleton.death", "mob.horse.skeleton.hit", "mob.horse.skeleton.idle", "mob.horse.soft",
+				"mob.horse.wood", "mob.horse.zombie.death", "mob.horse.zombie.hit", "mob.horse.zombie.idle",
+				"mob.irongolem.death", "mob.irongolem.hit", "mob.irongolem.throw", "mob.irongolem.walk",
+				"mob.magmacube.big", "mob.magmacube.jump", "mob.magmacube.small", "mob.pig.death", "mob.pig.say",
+				"mob.pig.step", "mob.rabbit.hurt", "mob.rabbit.idle", "mob.rabbit.hop", "mob.rabbit.death",
+				"mob.sheep.say", "mob.sheep.shear", "mob.sheep.step", "mob.silverfish.hit", "mob.silverfish.kill",
+				"mob.silverfish.say", "mob.silverfish.step", "mob.skeleton.death", "mob.skeleton.hurt",
+				"mob.skeleton.say", "mob.skeleton.step", "mob.slime.attack", "mob.slime.big", "mob.slime.small",
+				"mob.spider.death", "mob.spider.say", "mob.spider.step", "mob.villager.death", "mob.villager.haggle",
+				"mob.villager.hit", "mob.villager.idle", "mob.villager.no", "mob.villager.yes", "mob.wither.death",
+				"mob.wither.hurt", "mob.wither.idle", "mob.wither.shoot", "mob.wither.spawn", "mob.wolf.bark",
+				"mob.wolf.death", "mob.wolf.growl", "mob.wolf.howl", "mob.wolf.hurt", "mob.wolf.panting",
+				"mob.wolf.shake", "mob.wolf.step", "mob.wolf.whine", "mob.zombie.death", "mob.zombie.hurt",
+				"mob.zombie.infect", "mob.zombie.metal", "mob.zombie.remedy", "mob.zombie.say", "mob.zombie.step",
+				"mob.zombie.unfect", "mob.zombie.wood", "mob.zombie.woodbreak", "mob.zombiepig.zpig",
+				"mob.zombiepig.zpigangry", "mob.zombiepig.zpigdeath", "mob.zombiepig.zpighurt",
 
 				// Music/record sounds
-				"records.11",
-				"records.13",
-				"records.blocks",
-				"records.cat",
-				"records.chirp",
-				"records.far",
-				"records.mall",
-				"records.mellohi",
-				"records.stal",
-				"records.strad",
-				"records.wait",
-				"records.ward",
-				"music.menu",
-				"music.game",
-				"music.game.creative",
-				"music.game.end",
-				"music.game.end.dragon",
-				"music.game.end.credits",
-				"music.game.nether"
-		);
+				"records.11", "records.13", "records.blocks", "records.cat", "records.chirp", "records.far",
+				"records.mall", "records.mellohi", "records.stal", "records.strad", "records.wait", "records.ward",
+				"music.menu", "music.game", "music.game.creative", "music.game.end", "music.game.end.dragon",
+				"music.game.end.credits", "music.game.nether");
 	}
 
 	public void colorCommand(String[] args, Player player) {
@@ -1072,7 +888,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 		if (targetPlayer != null) {
 			if (targetPlayer != player) {
-				
+
 			} else
 				player.sendMessage(main.color("&c&l(!) &rSilly you! You can't duel yourself!"));
 		} else
@@ -1186,13 +1002,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void handleClassSelection(Player player, GameInstance game, PlayerData playerData, ClassType type) {
-
-
 		ClassDetails classDetails = playerData.playerClasses.get(type.getID());
 
 		if (!isClassUnlocked(player, classDetails, type) || !isLevelUnlocked(player, playerData, type)
-				|| !isFishermanClassUnlocked(player, type) || !isRankRequirementMet(player, type)
-				|| (game != null && !isGameStateWaiting(game, player))
+				|| !isFishermanClassUnlocked(player, type) || !isFreddyUnlocked(player, type)
+				|| !isRankRequirementMet(player, type) || (game != null && !isGameStateWaiting(game, player))
 				|| (game != null && !isFrenzyGameType(game, player))) {
 			return;
 		}
@@ -1246,6 +1060,14 @@ public class Commands implements CommandExecutor, TabCompleter {
 	private boolean isLevelUnlocked(Player player, PlayerData playerData, ClassType type) {
 		// Level Classes
 		if (type.getLevel() > 0 && playerData.level < type.getLevel()) {
+			player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
+			return false;
+		}
+		return true;
+	}
+	
+	private boolean isFreddyUnlocked(Player player, ClassType type) {
+		if (type == ClassType.Freddy && !main.getHalloweenManager().hasUnlockedFreddy(player) && !player.isOp()) {
 			player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
 			return false;
 		}
