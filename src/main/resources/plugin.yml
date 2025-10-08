@@ -146,6 +146,12 @@ commands:
       description: SCB Practice Mode (BETA)
    fishing:
       description: Opens Fishing GUI
+      aliases: fs
+   cosmetics:
+      description: Opens Cosmetics GUI
+      aliases: c
+   candyaura:
+      description: Candy aura cosmetic (testing for Admins)
    treatsadmin:
       description: Reset halloween treats command (Admins only)
    candyaura:
@@ -175,6 +181,7 @@ permissions:
          scb.sound: true
          scb.soundnms: true
          scb.heal: true
+         scb.candyaura: true
    scb.builder:
       description: Builder perms
       children:
