@@ -119,6 +119,7 @@ public class HalloweenHuntManager implements Listener {
 		if (data != null) {
 			data.exp += amount;
 			p.sendMessage(core.color("&6&l(!) &rYou were given &e500 EXP!"));
+			core.getListener().checkIfLevelUp(p);
 		}
 	}
 

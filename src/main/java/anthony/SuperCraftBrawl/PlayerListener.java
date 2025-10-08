@@ -111,6 +111,25 @@ public class PlayerListener implements Listener {
 		for (PotionEffect type : p.getActivePotionEffects()) // Loop through all active effects
 			p.removePotionEffect(type.getType());
 	}
+	
+	public void checkIfLevelUp(Player player) {
+		PlayerData data = main.getDataManager().getPlayerData(player);
+		
+		if (data != null) {
+			if (data.exp >= 2500) {
+				data.level++;
+				data.exp -= 2500;
+				player.sendMessage(main.color("&8&m----------------------------------------"));
+				player.sendMessage(main.color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
+				player.sendMessage(main.color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
+				player.sendMessage(main.color("&8&m----------------------------------------"));
+				player.playSound(player.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
+				
+				if (player.getWorld() == main.getLobbyWorld())
+					main.getScoreboardManager().lobbyBoard(player);
+			}
+		}
+	}
 
 	/**
 	 * This function sets the player's rank on the tablist to the left of their name
