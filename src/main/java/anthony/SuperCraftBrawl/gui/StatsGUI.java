@@ -127,7 +127,7 @@ public class StatsGUI implements InventoryProvider {
 			String fishingTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTk2YTQ4ZGNkYWY0MThmMjJjZDE4NjdjMWViMGFlMjgyYzI4NGI2Nzk5MDZiNzk3ODFkOGQyYjJlZWJhMjEwMiJ9fX0=";
 			contents.set(4, 0,
 					ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(fishingTexture),
-							main.color("&eFishing")), e-> {
+							main.color("&eFishingpedia")), e-> {
 						if (target != null)
 							new FishingGUI(main, target, inv).inv.open(player);
 						else
