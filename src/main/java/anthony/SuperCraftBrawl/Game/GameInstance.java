@@ -382,10 +382,10 @@ public class GameInstance {
 			return timeToStartSeconds = 30;
 		return timeToStartSeconds = 60;
 	}
-	
+
 	public void StartGameTimer2() {
 		SignManager sm = getGameManager().getMain().getSignManager();
-		
+
 		if (gameStartTime == null) {
 			timeToStartSeconds = getSecondsUntilStart();
 			gameStartTime = new BukkitRunnable() {
@@ -394,19 +394,19 @@ public class GameInstance {
 				public void run() {
 					if (sm != null)
 						sm.updateSignCountdown(s, timeToStartSeconds);
-					
+
 					int ticks = timeToStartSeconds;
-					
+
 					if (ticks == 0) {
 						StartGame();
 						GameScoreboard();
 						gameStartTime = null;
 						this.cancel();
 					}
-					
+
 					timeToStartSeconds--;
 				}
-				
+
 			};
 			gameStartTime.runTaskTimer(gameManager.getMain(), 0, 20);
 		}
@@ -414,7 +414,7 @@ public class GameInstance {
 
 	public void StartGameTimer() {
 		SignManager sm = getGameManager().getMain().getSignManager();
-		
+
 		if (gameStartTime == null) {
 			timeToStartSeconds = getSecondsUntilStart();
 			gameStartTime = new BukkitRunnable() {
@@ -423,7 +423,7 @@ public class GameInstance {
 				public void run() {
 					if (sm != null)
 						sm.updateSignCountdown(s, timeToStartSeconds);
-					
+
 					int ticks = timeToStartSeconds;
 					if (ticks == 0) {
 						StartGame();
@@ -518,35 +518,36 @@ public class GameInstance {
 			gameStartTime.runTaskTimer(gameManager.getMain(), 0, 20);
 		}
 	}
-	
+
 	/*
-	 * This function removes vote paper when 5 seconds left 
-	 * before game starts
+	 * This function removes vote paper when 5 seconds left before game starts
 	 */
 	private void removeVotePaper() {
 		for (Player player : players) {
 			if (player.getInventory().contains(votePaper)) {
-				if (player.getOpenInventory() != null
-						&& player.getOpenInventory().getTitle().contains("Vote"))
+				if (player.getOpenInventory() != null && player.getOpenInventory().getTitle().contains("Vote"))
 					player.closeInventory();
 				player.getInventory().removeItem(votePaper);
 			}
 		}
 	}
-	
+
 	private void tipMessages() {
 		Random rand = new Random();
 		int chance = rand.nextInt(4);
 
 		if (chance == 0)
-			TellAll(getGameManager().getMain().color("&2[&aTip&2] &9Execute double jump by tapping the space bar twice!"));
+			TellAll(getGameManager().getMain()
+					.color("&2[&aTip&2] &9Execute double jump by tapping the space bar twice!"));
 		else if (chance == 1)
-			TellAll(getGameManager().getMain().color("&2[&aTip&2] &9Consider purchasing a rank at our /store for more SCB perks!"));
+			TellAll(getGameManager().getMain()
+					.color("&2[&aTip&2] &9Consider purchasing a rank at our /store for more SCB perks!"));
 		else if (chance == 2)
 			TellAll(getGameManager().getMain().color("&2[&aTip&2] &9Be sure to select a class by using the compass!"));
 		else
-			TellAll(getGameManager().getMain().color("&2[&aTip&2] &9Use the paper to ready up or vote for game settings!"));
-			
+			TellAll(getGameManager().getMain()
+					.color("&2[&aTip&2] &9Use the paper to ready up or vote for game settings!"));
+
 		for (Player player : players)
 			player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 1);
 	}
@@ -717,8 +718,8 @@ public class GameInstance {
 	}
 
 	/*
-	 * This function checks if the initial game start item is
-	 * an extra life or not. If it is, reroll 
+	 * This function checks if the initial game start item is an extra life or not.
+	 * If it is, reroll
 	 */
 	private ItemStack checkIfExtraLife(ItemStack item) {
 		while (true) {
@@ -736,8 +737,8 @@ public class GameInstance {
 	 */
 	public void StartGame() {
 		if (sm != null && s != null)
-			this.sm.updateSignInProgress(s); //Updates the sign in lobby to show match In Progress
-		
+			this.sm.updateSignInProgress(s); // Updates the sign in lobby to show match In Progress
+
 		setTeams(); // Sets teams if mode is Duos
 		startLightningDropsTimer(); // Loot drops will start spawning every 45 seconds
 
@@ -1295,7 +1296,7 @@ public class GameInstance {
 							}
 						}
 					}
-					
+
 					if (sm != null && s != null)
 						sm.resetSign(s, map);
 
@@ -1620,10 +1621,13 @@ public class GameInstance {
 				if (data.exp >= 2500) {
 					data.level++;
 					data.exp -= 2500;
-					winner.sendMessage(getGameManager().getMain().color("&8&m----------------------------------------"));
+					winner.sendMessage(
+							getGameManager().getMain().color("&8&m----------------------------------------"));
 					winner.sendMessage(getGameManager().getMain().color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
-					winner.sendMessage(getGameManager().getMain().color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
-					winner.sendMessage(getGameManager().getMain().color("&8&m----------------------------------------"));
+					winner.sendMessage(getGameManager().getMain()
+							.color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
+					winner.sendMessage(
+							getGameManager().getMain().color("&8&m----------------------------------------"));
 
 					// (optional but fun) little audio feedback on 1.8:
 					winner.playSound(winner.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
@@ -1931,11 +1935,13 @@ public class GameInstance {
 								if (playerData.level >= classType.getLevel()) {
 									if (classType != ClassType.Fisherman || this.getGameManager().getMain().getFishing()
 											.hasUnlockedFisherman(player)) {
-										if (donor == null
-												|| player.hasPermission("scb." + donor.toString().toLowerCase())) {
-											selectedClass = classType;
-											break;
-										}
+										if (classType != ClassType.Freddy || this.getGameManager().getMain()
+												.getHalloweenManager().hasUnlockedFreddy(player))
+											if (donor == null
+													|| player.hasPermission("scb." + donor.toString().toLowerCase())) {
+												selectedClass = classType;
+												break;
+											}
 									}
 								}
 							}

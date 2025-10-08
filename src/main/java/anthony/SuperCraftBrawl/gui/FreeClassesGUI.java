@@ -36,9 +36,12 @@ public class FreeClassesGUI implements InventoryProvider {
 		for (ClassType type : ClassType.sortAlphabetically(ClassType.getFreeClasses(false))) {
 			ItemStack item = type.getItem();
 
-			if (type == ClassType.Fisherman && !main.getFishing().hasUnlockedFisherman(player)) {
+			if (type == ClassType.Fisherman && !main.getFishing().hasUnlockedFisherman(player))
 				continue;
-			}
+			
+			//Checks if Halloween Hunt is not complete, then dont show Freddy in GUI
+			if (type == ClassType.Freddy && !main.getHalloweenManager().hasUnlockedFreddy(player))
+				continue;
 
 			ClassDetails details = data.playerClasses.get(type.getID());
 			int played = details.gamesPlayed + 2 * details.gamesWon;
