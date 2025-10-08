@@ -98,7 +98,7 @@ public enum FishType {
     WHALE(26, "Whale", FishRarity.LEGENDARY, Arrays.asList(FishArea.Pond)),
     WHALESHARK(58, "Whale Shark", FishRarity.LEGENDARY, Arrays.asList(FishArea.Pond)),
     ELDERGUARDIAN(56, "Elder Guardian", FishRarity.LEGENDARY, null),
-    LILYPAD(27, "Lilypad", FishRarity.JUNK, Arrays.asList(FishArea.LushCave)),
+    LILYPAD(27, "Lily Pad", FishRarity.JUNK, Arrays.asList(FishArea.LushCave)),
     STRING(28, "Fishing Line", FishRarity.JUNK, null),
     BUCKET(29, "Bucket", FishRarity.JUNK, null),
     BOTTLE(30, "Empty Bottle", FishRarity.JUNK, Arrays.asList(FishArea.Pond, FishArea.Park, FishArea.Woods)),
