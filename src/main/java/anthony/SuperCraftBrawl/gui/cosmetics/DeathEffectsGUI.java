@@ -37,6 +37,10 @@ public class DeathEffectsGUI implements InventoryProvider {
 	public void init(Player player, InventoryContents contents) {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 
+		final int basketsFoundForLore = (main.getHalloweenManager() != null)
+				? main.getHalloweenManager().getFoundCount(player.getUniqueId())
+				: 0;
+
 		// Icons Items
 		ItemStack goldenApple = ItemHelper.create(Material.GOLDEN_APPLE, ChatColor.YELLOW + "Golden Apple");
 		ItemStack glowstone = ItemHelper.create(Material.GLOWSTONE_DUST, ChatColor.YELLOW + "Glowstone");
@@ -46,7 +50,11 @@ public class DeathEffectsGUI implements InventoryProvider {
 		ItemStack snowball = ItemHelper.setDetails(ItemHelper.create(Material.SNOW_BALL), ChatColor.YELLOW + "Snowball",
 				"", main.color("&cChristmas 2024 exclusive"));
 		ItemStack pumpkinPie = ItemHelper.setDetails(ItemHelper.create(Material.PUMPKIN_PIE),
-				main.color("&6Pumpkin Pie"), "", main.color("&cHalloween 2025 Exclusive"));
+				main.color("&6Pumpkin Pie"), "",
+				main.color("&7Unlock by finding 7 baskets in the lobby!"),
+				main.color("&7Progress: &e" + Math.min(basketsFoundForLore, 7) + "&7/7"),
+				"",
+				main.color("&cHalloween 2025 exclusive"));
 
 		// Setting Items
 		contents.fillBorders(ClickableItem
