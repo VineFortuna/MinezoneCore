@@ -26,7 +26,7 @@ public class GadgetsGUI implements InventoryProvider {
 	public SmartInventory inv;
 
 	public GadgetsGUI(Core main, SmartInventory parent) {
-		inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
+		inv = SmartInventory.builder().id("myInventory").provider(this).size(4, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Gadgets").parent(parent).build();
 		this.main = main;
 	}
@@ -65,16 +65,15 @@ public class GadgetsGUI implements InventoryProvider {
 		// Fishing
 		ItemStack fishingRod = main.getFishingRod(player);
 
-		ItemStack snowball = ItemHelper.setDetails(ItemHelper.create(Material.SNOW_BALL),
-				"&r&lSnow Particles", "", "&cChristmas exclusive");
+		ItemStack snowball = ItemHelper.setDetails(ItemHelper.create(Material.SNOW_BALL), "&r&lSnow Particles", "",
+				"&cChristmas exclusive");
 
-		ItemStack snowmanPet = ItemHelper.setDetails(ItemHelper.create(Material.MONSTER_EGG),
-				"&e&lSnowman Pet", "", "&cChristmas exclusive");
-
+		ItemStack snowmanPet = ItemHelper.setDetails(ItemHelper.create(Material.MONSTER_EGG), "&e&lSnowman Pet", "",
+				"&cChristmas exclusive");
 
 		String candyCaneTexture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWM4M2E0MmU4MmNkNmE3MGUyMTZkOWE4YzJmZjZmMWU1ZTViMjU2Y2VhM2I4Y2QyMjU0NzIzOTNhYTNlY2E1YSJ9fX0=";
-		ItemStack candyCane = ItemHelper.createSkullTexture(candyCaneTexture,
-				"&c&lCandy &r&lCane &c&lSwirl", "", "&cChristmas exclusive");
+		ItemStack candyCane = ItemHelper.createSkullTexture(candyCaneTexture, "&c&lCandy &r&lCane &c&lSwirl", "",
+				"&cChristmas exclusive");
 
 		// Setting Items
 		contents.fillBorders(ClickableItem
@@ -205,10 +204,89 @@ public class GadgetsGUI implements InventoryProvider {
 			}
 		}));
 
+		// --- Candy Aura cosmetic (unlocks at 4 baskets) ---
+		// Snapshot for icon/lore at open time (final so lambdas are happy)
+		final int basketsFoundForLore = (main.getHalloweenManager() != null)
+				? main.getHalloweenManager().getFoundCount(player.getUniqueId())
+				: 0;
+		final boolean candyAuraUnlockedAtOpen = basketsFoundForLore >= 4;
+
+		List<String> candyAuraLore = new ArrayList<>();
+		if (candyAuraUnlockedAtOpen) {
+			candyAuraLore.add(ChatColor.DARK_GRAY + "A sweet particle swirl around you.");
+			candyAuraLore.add("");
+			candyAuraLore.add(ChatColor.GRAY + "Click to " + (ChatColor.LIGHT_PURPLE + "toggle"));
+		} else {
+			candyAuraLore.add(ChatColor.DARK_GRAY + "Unlock by finding 4 baskets in the lobby!");
+			candyAuraLore.add("");
+			candyAuraLore.add(
+					ChatColor.GRAY + "Progress: " + ChatColor.YELLOW + basketsFoundForLore + ChatColor.GRAY + "/4");
+			candyAuraLore.add(main.color("&7Progress: &e" + basketsFoundForLore + "&7/4"));
+			candyAuraLore.add("");
+			candyAuraLore.add(main.color("&cHalloween 2025 Exclusive"));
+		}
+
+		// Icon & name
+		ItemStack candyAuraIcon = ItemHelper.create(Material.SUGAR,
+				ChatColor.LIGHT_PURPLE.toString() + ChatColor.BOLD + "Candy Aura", candyAuraLore);
+
+		// Place it in the GUI (slot row=1, col=0 is free in your layout)
+		contents.set(2, 1, ClickableItem.of(candyAuraIcon, e -> {
+			// Recompute live progress in case they found more while GUI was open
+			int current = (main.getHalloweenManager() != null)
+					? main.getHalloweenManager().getFoundCount(player.getUniqueId())
+					: 0;
+
+			if (current < 4) {
+				player.sendMessage(main.color("&c&l(!) &rYou need to find &e4 baskets &rto use &dCandy Aura&r."));
+				player.sendMessage(main.color("&7Progress: &e" + current + "&7/10"));
+				return;
+			}
+
+			player.performCommand("candyaura");
+			inv.close(player);
+		}));
+
+		// Trick-or-Treater title gadget
+		ItemStack trickOrTreatTitle = ItemHelper.setDetails(new ItemStack(Material.PUMPKIN),
+				main.color("&6&lTrick-or-Treater &rTitle"), "",
+				main.color("&rUnlock by finding 2 baskets in the lobby!"),
+				main.color("&8Progress: &e" + basketsFoundForLore + "&7/10"));
+
+		contents.set(2, 2, ClickableItem.of(trickOrTreatTitle, e -> {
+			int current = (main.getHalloweenManager() != null)
+					? main.getHalloweenManager().getFoundCount(player.getUniqueId())
+					: 0;
+
+			if (current < 2) {
+				player.sendMessage(
+						main.color("&c&l(!) &rYou need to find &e2 baskets &rto use &6&lTrick-or-Treater &rtitle."));
+				player.sendMessage(main.color("&7Progress: &e" + current + "&7/10"));
+				return;
+			}
+
+			enableDisableTrickTitle(player); // Enable/disable gadget
+			inv.close(player);
+		}));
+
 		contents.set(2, 8, ClickableItem
 				.of(ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
 					inv.getParent().get().open(player);
 				}));
+	}
+
+	/*
+	 * This function checks whether the Trick-or-Treater title should be
+	 * enabled/disabled
+	 */
+	private void enableDisableTrickTitle(Player player) {
+		if (main.getTrickTitle().isEnabled(player)) {
+			player.sendMessage(main.color("&r&l(!) &rYou have disabled &eTrick-or-Treater &rtitle"));
+			main.getTrickPacket().enable(player);
+		} else {
+			player.sendMessage(main.color("&r&l(!) &rYou have enabled &eTrick-or-Treater &rtitle"));
+			main.getTrickPacket().disable(player);
+		}
 	}
 
 	private ItemStack getDyedArmor(Material material, Color color, String name) {

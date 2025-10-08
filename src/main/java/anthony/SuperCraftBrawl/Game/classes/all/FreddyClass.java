@@ -36,7 +36,7 @@ public class FreddyClass extends BaseClass {
 		super(instance, player);
 		baseVerticalJump = 1.2;
 		createArmor(null,
-				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmEyMGFhMmE5YTI4YzUzM2QwMWE3ZDk4MDdmZTcyYWYzZGRlOTg1Y2NlNzQyMTZkNzNhYzUxNTlkOTdmNmE3ZCJ9fX0=",
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWRiMjdjY2I0ZjEyNjQwZjFiNThlYTYyZDkwY2RhY2U0NGMwZjJkYTlmMzkwOGUyNWViMTZiZGI1YmJiNWE2NSJ9fX0=",
 				"664C33", 6, "Freddy");
 	}
 

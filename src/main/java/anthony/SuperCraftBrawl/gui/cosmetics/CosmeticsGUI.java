@@ -19,7 +19,7 @@ public class CosmeticsGUI implements InventoryProvider {
 	private RankManager rm;
 
 	// Creating Cosmetics Inventory
-	public CosmeticsGUI(Core main) {
+	public CosmeticsGUI(Core main) { 
 		inv = SmartInventory.builder()
 				.id("myInventory")
 				.provider(this)

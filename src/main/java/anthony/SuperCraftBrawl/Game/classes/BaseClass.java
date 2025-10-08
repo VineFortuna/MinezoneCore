@@ -278,6 +278,8 @@ public abstract class BaseClass {
 					mat = Material.WEB;
 				} else if (data2.bottleEXP == 1) {
 					mat = Material.EXP_BOTTLE;
+				} else if (data2.pumpkinPie == 1) {
+					mat = Material.PUMPKIN_PIE;
 				}
 			}
 
@@ -1720,6 +1722,8 @@ public abstract class BaseClass {
 				mat = Material.WEB;
 			else if (pData.bottleEXP == 1)
 				mat = Material.EXP_BOTTLE;
+			else if (pData.pumpkinPie == 1)
+				mat = Material.PUMPKIN_PIE;
 		}
 
 		ItemStack particleItem;
