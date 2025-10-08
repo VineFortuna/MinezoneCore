@@ -59,7 +59,7 @@ public class SuitsGUI implements InventoryProvider {
 		texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjlhYzgwNGEyYzVhOGVhNTdlZjY5NjU3YWI2NDM0N2QxZWQzNmIzNGNhNzBhMjE4ZjZhNjNkNWI2YWEyZmU5ZiJ9fX0=";
 		ItemStack pirateHead = ItemHelper.createSkullTexture(texture, "&3&lPirate Outfit", "", "&aFishing reward!");
 
-		ItemStack elfHead = ItemHelper.createSkullTexture(ELF_TEXTURE, "&a&lElf Outfit", "", "&cChristmas exclusive");
+		ItemStack elfHead = ItemHelper.createSkullTexture(ELF_TEXTURE, "&a&lElf Outfit", "", "&cChristmas 2024 exclusive");
 
 		// Golden Outfit
 		ItemStack goldenHead = ItemHelper.create(Material.GOLD_HELMET, main.color("&6&lGolden Outfit"), "",
@@ -71,8 +71,12 @@ public class SuitsGUI implements InventoryProvider {
 				: 0;
 		
 		texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWRiMjdjY2I0ZjEyNjQwZjFiNThlYTYyZDkwY2RhY2U0NGMwZjJkYTlmMzkwOGUyNWViMTZiZGI1YmJiNWE2NSJ9fX0=";
-		ItemStack freddyOutfit = ItemHelper.createSkullTexture(texture, main.color("&4&6Freddy Outfit"),
-				main.color("&7Progress: &e" + basketsFoundForLore + "&7/6"), main.color("&cHalloween 2025 Exclusive"));
+		ItemStack freddyOutfit = ItemHelper.createSkullTexture(texture,
+				main.color("&4&6Freddy Outfit"), "",
+				main.color("&7Unlock by finding 6 baskets in the lobby!"),
+				main.color("&7Progress: &e" + Math.min(basketsFoundForLore, 6) + "&7/6"),
+				"",
+				main.color("&cHalloween 2025 exclusive"));
 
 		// Setting Items
 		contents.fillBorders(ClickableItem
@@ -222,7 +226,7 @@ public class SuitsGUI implements InventoryProvider {
 				if (main.getListener().getHalloweenEventProgress(player) >= 6) {
 					removeOutfits(player);
 					createArmor(player,
-							"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmEyMGFhMmE5YTI4YzUzM2QwMWE3ZDk4MDdmZTcyYWYzZGRlOTg1Y2NlNzQyMTZkNzNhYzUxNTlkOTdmNmE3ZCJ9fX0=",
+							"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWRiMjdjY2I0ZjEyNjQwZjFiNThlYTYyZDkwY2RhY2U0NGMwZjJkYTlmMzkwOGUyNWViMTZiZGI1YmJiNWE2NSJ9fX0",
 							"664C33", 6, "Freddy");
 					main.getListener().freddyOutfitPlayers.add(player);
 					player.sendMessage(main.color("&9&l(!) &rYou have equipped &6&lFreddy&r outfit"));

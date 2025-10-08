@@ -63,20 +63,20 @@ public class NPCManager implements Listener {
 
 		scbModes = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "JOIN GAME", "",
 				main.color("&7Click to join a SCB game")));
-		scbModes.setLocation(new Location(main.getLobbyWorld(), 192.506, 113, 649.530, 179, -0));
+		scbModes.setLocation(new Location(main.getLobbyWorld(), 192.506, 109, 649.530, 179, -0));
 		scbModes.setSkin(sethblingSkin);
 		scbModes.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));
 		scbModes.create();
 
 		socialMedia = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "View Social Medias", "",
 				main.color("&7Click to check the list!")));
-		socialMedia.setLocation(new Location(main.getLobbyWorld(), 192.962, 115.5, 632.989, 137, 10));
+		socialMedia.setLocation(new Location(main.getLobbyWorld(), 192.962, 111.5, 632.989, 137, 10));
 		socialMedia.setSkin(sethblingSkin);
 		socialMedia.create();
 
 		fishing = npcLib.createNPC(Arrays.asList("" + ChatColor.DARK_AQUA + ChatColor.BOLD + "FISHING", "",
 				main.color("&7Click to go fishing")));
-		fishing.setLocation(new Location(main.getLobbyWorld(), 186.506, 113, 649.530, -179, -0));
+		fishing.setLocation(new Location(main.getLobbyWorld(), 186.506, 109, 649.530, -179, -0));
 		fishing.setSkin(fishermanSkin);
 		fishing.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.FISHING_ROD));
 		fishing.create();

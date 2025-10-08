@@ -36,7 +36,9 @@ public class TitlesCosmeticsGUI implements InventoryProvider {
 		ItemStack trickOrTreatTitle = ItemHelper.setDetails(new ItemStack(Material.PUMPKIN),
 				main.color("&6&lTrick-or-Treater"), "",
 				main.color("&7Unlock by finding 2 baskets in the lobby!"),
-				main.color("&8Progress: &e" + basketsFoundForLore + "&7/10"));
+				main.color("&8Progress: &e" + Math.min(basketsFoundForLore, 2) + "&7/2"),
+				"",
+				main.color("&cHalloween 2025 exclusive"));
 
 		contents.set(1, 4, ClickableItem.of(trickOrTreatTitle, e -> {
 			int current = (main.getHalloweenManager() != null)
@@ -53,6 +55,11 @@ public class TitlesCosmeticsGUI implements InventoryProvider {
 			enableDisableTrickTitle(player); // Enable/disable gadget
 			inv.close(player);
 		}));
+
+		contents.set(2, 8, ClickableItem
+				.of(ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
+					inv.getParent().get().open(player);
+				}));
 	}
 
 	private void enableDisableTrickTitle(Player player) {

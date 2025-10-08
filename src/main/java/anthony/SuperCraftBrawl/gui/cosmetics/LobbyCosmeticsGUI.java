@@ -34,7 +34,7 @@ public class LobbyCosmeticsGUI implements InventoryProvider {
 
         ItemStack lobbyOutfits = ItemHelper.create(Material.GOLD_HELMET, ChatColor.YELLOW + "Outfits");
         
-        ItemStack titles = ItemHelper.create(Material.ENCHANTED_BOOK, main.color("&eTitles"));
+        ItemStack titles = ItemHelper.create(Material.NAME_TAG, main.color("&eTitles"));
 
         // Setting Icons
         contents.fill(ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));

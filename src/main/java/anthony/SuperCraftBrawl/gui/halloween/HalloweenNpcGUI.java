@@ -50,7 +50,7 @@ public class HalloweenNpcGUI implements InventoryProvider {
                         base.clone(),                          // <-- clone so each slot has its own stack
                         main.color(title),
                         "",
-                        main.color("Hint: " + hint)
+                        main.color("&7Hint: " + hint)
                 );
 
         contents.set(0, 0, ClickableItem.of(make.apply("&c&lBasket #1",  "Spawn area"), e -> {}));
