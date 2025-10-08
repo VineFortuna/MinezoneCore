@@ -621,7 +621,7 @@ public class PlayerListener implements Listener {
 				}
 			} else if (item.getType() == Material.NETHER_STAR) {
 				if (player.getWorld() == main.getLobbyWorld())
-					new BattlePassGUI(main).inv.open(player);
+					new ChallengesGUI(main).inv.open(player);
 			}
 		}
 	}
