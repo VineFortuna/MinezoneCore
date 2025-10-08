@@ -12,6 +12,7 @@ import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
 import anthony.SuperCraftBrawl.gui.GameStatsGUI;
+import anthony.SuperCraftBrawl.gui.cosmetics.CosmeticsGUI;
 import anthony.SuperCraftBrawl.gui.fishing.FishingGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -69,7 +70,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 				break;
 
 			case "fishing":
-				new FishingGUI(main, null).inv.open(player);
+				fishingCommand(args, player);
+				break;
+
+			case "cosmetics":
+				cosmeticsCommand(args, player);
 				break;
 
 			case "startgame":
@@ -800,6 +805,24 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 //		// Send the message to the player
 //		player.sendMessage(ChatColorHelper.color(createMapsString()));
+	}
+
+	private void fishingCommand(String[] args, Player player) {
+		if (args.length != 0) {
+			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/fishing"));
+			return;
+		}
+
+		new FishingGUI(main, null).inv.open(player);
+	}
+
+	private void cosmeticsCommand(String[] args, Player player) {
+		if (args.length != 0) {
+			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/cosmetics"));
+			return;
+		}
+
+		new CosmeticsGUI(main).inv.open(player);
 	}
 
 	private String createMapsString() {

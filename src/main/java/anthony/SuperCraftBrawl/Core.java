@@ -149,7 +149,7 @@ public class Core extends JavaPlugin implements Listener {
 	public TrickTitleManager getTrickTitle() {
 		return this.trickTitleOld;
 	}
-	
+
 	public TrickTitlePackets getTrickPacket() {
 		return this.trickTitle;
 	}
@@ -457,9 +457,9 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null) {
-			String[] commandTypes = { "maps", "join", "fishing", "server", "fly", "leave", "players", "class",
-					"socials", "spectate", "startgame", "gamestats", "setlives", "lactate", "purchases", "kit", "items",
-					"color", "sound", "heal", "candyaura" };
+			String[] commandTypes = { "maps", "join", "cosmetics", "fishing", "server", "fly", "leave", "players", "class", "socials", "spectate",
+					"startgame", "gamestats", "setlives", "lactate", "purchases", "kit", "items", "color", "sound",
+					"heal" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
