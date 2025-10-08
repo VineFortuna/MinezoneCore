@@ -247,28 +247,6 @@ public class GadgetsGUI implements InventoryProvider {
 			inv.close(player);
 		}));
 
-		// Trick-or-Treater title gadget
-		ItemStack trickOrTreatTitle = ItemHelper.setDetails(new ItemStack(Material.PUMPKIN),
-				main.color("&6&lTrick-or-Treater &rTitle"), "",
-				main.color("&rUnlock by finding 2 baskets in the lobby!"),
-				main.color("&8Progress: &e" + basketsFoundForLore + "&7/10"));
-
-		contents.set(2, 2, ClickableItem.of(trickOrTreatTitle, e -> {
-			int current = (main.getHalloweenManager() != null)
-					? main.getHalloweenManager().getFoundCount(player.getUniqueId())
-					: 0;
-
-			if (current < 2) {
-				player.sendMessage(
-						main.color("&c&l(!) &rYou need to find &e2 baskets &rto use &6&lTrick-or-Treater &rtitle."));
-				player.sendMessage(main.color("&7Progress: &e" + current + "&7/10"));
-				return;
-			}
-
-			enableDisableTrickTitle(player); // Enable/disable gadget
-			inv.close(player);
-		}));
-
 		contents.set(2, 8, ClickableItem
 				.of(ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
 					inv.getParent().get().open(player);
