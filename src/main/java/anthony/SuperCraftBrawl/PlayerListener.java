@@ -27,6 +27,7 @@ import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -66,6 +67,7 @@ public class PlayerListener implements Listener {
 	public List<Player> candyCaneSwirlPlayers = new ArrayList<Player>();
 	public List<Player> elfCosmeticPlayers = new ArrayList<Player>();
 	public List<Player> goldenOutfitPlayers = new ArrayList<>();
+	public List<Player> freddyOutfitPlayers = new ArrayList<>();
 
 	public PlayerListener(Core main) {
 		this.main = main;
@@ -82,6 +84,10 @@ public class PlayerListener implements Listener {
 		p.setAllowFlight(false);
 		p.setAllowFlight(true);
 		p.setGameMode(GameMode.ADVENTURE);
+	}
+	
+	public void removeCosmetics(Player player) {
+		main.getTrickTitle().disable(player);
 	}
 
 	/**
@@ -137,6 +143,14 @@ public class PlayerListener implements Listener {
 		 * 
 		 * if (main.getTabManager() != null) main.getTabManager().setPlayerTeam(p);
 		 */
+	}
+	
+	public int getHalloweenEventProgress(Player player) {
+		int progress = (main.getHalloweenManager() != null)
+				? main.getHalloweenManager().getFoundCount(player.getUniqueId())
+				: 0;
+		
+		return progress;
 	}
 
 	// Clicking leaderboard settings in lobby

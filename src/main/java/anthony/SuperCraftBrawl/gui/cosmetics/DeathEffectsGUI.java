@@ -30,6 +30,7 @@ public class DeathEffectsGUI implements InventoryProvider {
 		data.web = 0;
 		data.bottleEXP = 0;
 		data.snowball = 0;
+		data.pumpkinPie = 0;
 	}
 
 	@Override
@@ -42,8 +43,10 @@ public class DeathEffectsGUI implements InventoryProvider {
 		ItemStack redstone = ItemHelper.create(Material.REDSTONE, ChatColor.YELLOW + "Redstone");
 		ItemStack cobweb = ItemHelper.create(Material.WEB, ChatColor.YELLOW + "Cobweb");
 		ItemStack expBottle = ItemHelper.create(Material.EXP_BOTTLE, ChatColor.YELLOW + "Exp Bottle");
-		ItemStack snowball = ItemHelper.setDetails(ItemHelper.create(Material.SNOW_BALL),
-				ChatColor.YELLOW + "Snowball", "", main.color("&cChristmas exclusive"));
+		ItemStack snowball = ItemHelper.setDetails(ItemHelper.create(Material.SNOW_BALL), ChatColor.YELLOW + "Snowball",
+				"", main.color("&cChristmas 2024 exclusive"));
+		ItemStack pumpkinPie = ItemHelper.setDetails(ItemHelper.create(Material.PUMPKIN_PIE),
+				main.color("&6Pumpkin Pie"), "", main.color("&cHalloween 2025 Exclusive"));
 
 		// Setting Items
 		contents.fillBorders(ClickableItem
@@ -124,12 +127,31 @@ public class DeathEffectsGUI implements InventoryProvider {
 					player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this yet!"));
 				}
 			}));
+			contents.set(1, 7, ClickableItem.of(pumpkinPie, e -> {
+				pumpkinPieEffect(player, data);
+			}));
 
 			contents.set(2, 8, ClickableItem
 					.of(ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
 						inv.getParent().get().open(player);
 					}));
 		}
+	}
+	
+	private void pumpkinPieEffect(Player player, PlayerData data) {
+		int progress = main.getListener().getHalloweenEventProgress(player);
+		
+		if (progress >= 7) {
+			if (data.pumpkinPie == 0) {
+				resetData(data);
+				data.pumpkinPie = 1;
+				player.sendMessage(main.color("&9&l(!) &rYou have enabled &ePumpkin Pie &rdeath particle"));
+			} else {
+				resetData(data);
+				player.sendMessage(main.color("&9&l(!) &rYou have disabled &ePumpkin Pie &rdeath particle"));
+			}
+		} else
+			player.sendMessage(main.color("&c&l(!) &rYou need &e7&r baskets to unlock this!"));
 	}
 
 	@Override
