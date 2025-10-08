@@ -145,6 +145,12 @@ commands:
       description: SCB Practice Mode (BETA)
    fishing:
       description: Opens Fishing GUI
+   treatsadmin:
+      description: Reset halloween treats command (Admins only)
+   candyaura:
+      description: Candy aura cosmetic (testing for Admins)
+   tricktitle:
+      description: Trick-or-Treat title (for Admins)
 
 permissions:
    scb.admin:

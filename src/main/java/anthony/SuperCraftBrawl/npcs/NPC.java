@@ -45,7 +45,7 @@ public class NPC {
         if (!viewers.add(p.getUniqueId())) return;
 
         // Create fake EntityPlayer (server-side only)
-        WorldServer world = ((CraftPlayer) p).getHandle().getWorld();
+        WorldServer world = (WorldServer) ((CraftPlayer) p).getHandle().getWorld();
         MinecraftServer srv = ((CraftPlayer) p).getHandle().server;
         PlayerInteractManager pim = new PlayerInteractManager(world);
         EntityPlayer ep = new EntityPlayer(srv, world, profile, pim);

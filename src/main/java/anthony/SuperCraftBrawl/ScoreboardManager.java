@@ -70,7 +70,10 @@ public class ScoreboardManager {
 																														// EXP
 																														// dots
 																														// line
-						"", main.color("&b&lBaskets Found: &70/10"),"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
+						"",
+						main.color("&b&lBaskets Found: &7"
+								+ main.getHalloweenManager().getFoundCount(player.getUniqueId()) + "/10"),
+						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 						main.color("&bminezone.club"));
 			}
 		} else {
