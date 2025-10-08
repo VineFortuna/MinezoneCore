@@ -85,6 +85,7 @@ commands:
       aliases: [scb, scbhelp]
    classes:
       description: Displays list of SCB Classes
+      aliases: cl
    stats:
       description: Player Stats
    token:
