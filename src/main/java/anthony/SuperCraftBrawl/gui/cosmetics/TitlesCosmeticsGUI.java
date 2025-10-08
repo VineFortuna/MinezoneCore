@@ -56,13 +56,16 @@ public class TitlesCosmeticsGUI implements InventoryProvider {
 	}
 
 	private void enableDisableTrickTitle(Player player) {
-		if (main.getTrickTitle().isEnabled(player)) {
-			player.sendMessage(main.color("&r&l(!) &rYou have disabled &eTrick-or-Treater &rtitle"));
-			main.getTrickPacket().enable(player);
-		} else {
-			player.sendMessage(main.color("&r&l(!) &rYou have enabled &eTrick-or-Treater &rtitle"));
-			main.getTrickPacket().disable(player);
-		}
+	    // pick ONE: TrickPacket or TrickTitle — using TrickPacket here
+	    boolean enabled = main.getTrickPacket().isEnabled(player);
+
+	    if (enabled) {
+	        main.getTrickPacket().disable(player);
+	        player.sendMessage(main.color("&r&l(!) &rYou have &cdisabled &eTrick-or-Treater &rtitle"));
+	    } else {
+	        main.getTrickPacket().enable(player);
+	        player.sendMessage(main.color("&r&l(!) &rYou have &aenabled &eTrick-or-Treater &rtitle"));
+	    }
 	}
 
 	@Override
