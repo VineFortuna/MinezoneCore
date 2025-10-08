@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import anthony.SuperCraftBrawl.playerdata.ParkourDetails;
 import anthony.parkour.Arenas;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -97,7 +98,9 @@ public class ParkourBoard extends LeaderboardBase {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			PlayerData data = main.getDataManager().getPlayerData(player);
 			if (data != null && !lead.contains(data.playerUUID)) {
-				int win = data.bestTime;
+				ParkourDetails details = data.playerParkour.get(arena.getId());
+				long bestTime = details != null ? details.totalTime : 0;
+				String formattedTime = formatTime(bestTime);
 
 				// draw the separator for THIS player at a fixed offset from base
 				Location line1 = base.clone().add(0, -0.24, 0);
@@ -106,7 +109,7 @@ public class ParkourBoard extends LeaderboardBase {
 
 				// draw the player's own line just below it
 				Location line2 = base.clone().add(0, -0.44, 0);
-				sendStandToOnePlayer(line2, "" + ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + win,
+				sendStandToOnePlayer(line2, "" + ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + formattedTime,
 						player);
 			}
 		}
