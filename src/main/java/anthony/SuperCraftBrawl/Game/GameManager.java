@@ -270,26 +270,47 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
+	/**
+	 * Checks if a player tried to teleport to a barrier block and it cancels it.
+	 *
+	 * @param event PlayerTeleportEvent
+	 */
 	@EventHandler
-	public void onEntityDamage(PlayerTeleportEvent event) {
+	public void onEnderPearl(PlayerTeleportEvent event) {
+		if (event.getCause() != TeleportCause.ENDER_PEARL) return;
+		event.setCancelled(true);
+
 		Player player = event.getPlayer();
 		GameInstance instance = this.GetInstanceOfPlayer(player);
-		BaseClass baseClass = null;
-		if (instance != null)
-			baseClass = instance.classes.get(player);
+		if (instance == null) return;
 
-		if (instance != null && baseClass != null)
-			if (event.getCause() == TeleportCause.ENDER_PEARL) {
-				event.setCancelled(true);
-				if (instance.isInBounds(event.getTo())) {
-					if (!baseClass.isDead) {
-						player.teleport(event.getTo());
+		BaseClass baseClass = instance.classes.get(player);
+		if (baseClass == null || baseClass.isDead) return;
+
+		Location to = event.getTo();
+
+		// Check for nearby barrier blocks (1-block radius around teleport location)
+		boolean nearBarrier = false;
+		for (int x = -1; x <= 1; x++) {
+			for (int y = -1; y <= 1; y++) {
+				for (int z = -1; z <= 1; z++) {
+					if (to.clone().add(x, y, z).getBlock().getType() == Material.BARRIER) {
+						nearBarrier = true;
+						break;
 					}
-					// Cancel Teleport outside of bounds
-				} else if (!instance.isInBounds(event.getTo())) {
-					player.sendMessage(getMain().color("&c&l(!) &rYou cannot teleport there!"));
 				}
+				if (nearBarrier) break;
 			}
+			if (nearBarrier) break;
+		}
+
+		// Cancel if near barrier or out of bounds
+		if (nearBarrier || !instance.isInBounds(to)) {
+			player.sendMessage(getMain().color("&c&l(!) &rYou cannot teleport there!"));
+			return;
+		}
+
+		player.teleport(to);
 	}
 
 	/**
@@ -1750,33 +1771,33 @@ public class GameManager implements Listener, PluginMessageListener {
 			/*
 			 * if (e.getDamager() instanceof Player) { Player player = (Player)
 			 * e.getDamager();
-			 * 
+			 *
 			 * if (main.getCwManager() == null) { e.setCancelled(true); }
 			 * anthony.CrystalWars.game.GameInstance i =
 			 * main.getCwManager().getInstanceOfPlayer(player);
-			 * 
+			 *
 			 * if (i != null) { if (i.getTeam(player).equals("Blue")) { if
 			 * (i.isInBlue(player.getLocation())) { player.sendMessage(main.
 			 * color("&c&l(!) &rYou cannot destroy your own crystal!"));
 			 * e.setCancelled(true); } else if (i.isInRed(player.getLocation())) {
 			 * i.TellAll(main.color("&2&l(!) &r&lRed Crystal &rwas destroyed by &e" +
 			 * player.getName()));
-			 * 
+			 *
 			 * for (Player p : i.getPlayers()) { if (i.getTeam(p).equals("Red")) {
 			 * p.sendTitle(main.color("&cCRYSTAL DESTROYED"),
 			 * main.color("&rYou will no longer respawn")); i.crystal.remove(p); } }
-			 * 
+			 *
 			 * e.setCancelled(false); } } else if (i.getTeam(player).equals("Red")) { if
 			 * (i.isInRed(player.getLocation())) { player.sendMessage(main.
 			 * color("&c&l(!) &rYou cannot destroy your own crystal!"));
 			 * e.setCancelled(true); } else if (i.isInBlue(player.getLocation())) {
 			 * i.TellAll(main.color("&2&l(!) &r&lBlue Crystal &rwas destroyed by &e" +
 			 * player.getName()));
-			 * 
+			 *
 			 * for (Player p : i.getPlayers()) { if (i.getTeam(p).equals("Blue")) {
 			 * p.sendTitle(main.color("&cCRYSTAL DESTROYED"),
 			 * main.color("&rYou will no longer respawn")); i.crystal.remove(p); } }
-			 * 
+			 *
 			 * e.setCancelled(false); } } } else { e.setCancelled(true); } } else {
 			 * e.setCancelled(true); }
 			 */
@@ -2095,7 +2116,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (!spawnProt.containsKey(damager))
 				return;
 			event.setCancelled(true);
-			SoundManager.playNMSSoundToPlayer(damager, "mob.guardian.elder.hit", 1, 1);
+			SoundManager.playNMSSoundToPlayer(damager, "mob.guardian.elder.hit", 1, 1.6f);
 		}
 
 		// Damagee
@@ -2107,7 +2128,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (!spawnProt.containsKey(damagee))
 				return;
 			event.setCancelled(true);
-			SoundManager.playNMSSoundToPlayer(damagee, "mob.guardian.elder.hit", 1, 1);
+			SoundManager.playNMSSoundToPlayer(damagee, "mob.guardian.elder.hit", 1, 1.6f);
 		}
 	}
 
