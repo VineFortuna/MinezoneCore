@@ -174,9 +174,18 @@ public class HalloweenHuntManager implements Listener {
 	}
 
 	private void reward(Player p) {
-		p.getInventory().addItem(new org.bukkit.inventory.ItemStack(Material.DIAMOND, 5));
 		Bukkit.broadcastMessage(
-				core.color("&6&l[HALLOWEEN HUNT] &e" + p.getName() + "&6 has found all 10 Baskets! Happy Halloween!"));
+				core.color("&8[&6&lHALLOWEEN HUNT&8] &e" + p.getName() + "&6 has found all 10 Baskets! Happy Halloween!"));
+	}
+	
+	/*
+	 * Checks if player has unlocked Freddy class by getting
+	 * all of the Halloween baskets from the lobby event
+	 */
+	public boolean hasUnlockedFreddy(Player p) {
+		if (core.getListener().getHalloweenEventProgress(p) == 10)
+			return true;
+		return false;
 	}
 
 	/** For scoreboard: number found from DB. */
