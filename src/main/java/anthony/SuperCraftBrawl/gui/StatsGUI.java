@@ -72,6 +72,7 @@ public class StatsGUI implements InventoryProvider {
 					ClickableItem.of(ItemHelper.createSkullHeadPlayer(1, data.playerName, main.color("&e" + data.playerName),
 							Arrays.asList(main.color("&aRank: &r" + data.getRank().getTag()),
 									main.color("&aLevel: &r" + data.level),
+									main.color("&aEXP: &r" + data.exp + "/2500"),
 									main.color("&aMatches Played: &r" + (data.wins + data.losses)))), e-> {}));
 			/*contents.set(2, 2,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FEATHER), "&cComing soon..."), e-> {}));*/
