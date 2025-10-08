@@ -166,7 +166,8 @@ public class HalloweenHuntManager implements Listener {
 			p.sendMessage(ChatColor.DARK_AQUA + "▶ " + ChatColor.AQUA + "Milestone 9/10! (sample prize here)");
 			break;
 		case 10:
-			p.sendMessage(ChatColor.GREEN + "✔ " + ChatColor.GOLD + "Milestone 10/10! (final prize here)");
+			p.sendMessage(core.color("&6&l(!) &rYou found all &e10 &rbaskets!"));
+			p.sendMessage(core.color("&6&l(!) &rYou unlocked &6&l&oFreddy&r class!"));
 			break;
 		default:
 
