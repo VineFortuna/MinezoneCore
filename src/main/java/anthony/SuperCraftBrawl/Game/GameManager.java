@@ -1817,6 +1817,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 				if (meta != null && meta.getDisplayName() != null &&
 						ChatColor.stripColor(meta.getDisplayName()).contains("Fire Flower")) {
+					player.playSound(player.getLocation(), Sound.FIREWORK_BLAST, 1, 1);
 					int amount = item.getAmount();
 					if (amount > 0) {
 						amount--;
@@ -1853,7 +1854,7 @@ public class GameManager implements Listener, PluginMessageListener {
 										}
 									}
 									for (Player gamePlayer : instance.players) {
-										gamePlayer.playSound(hitLoc, Sound.CHICKEN_EGG_POP, 2, 1);
+										gamePlayer.playSound(hitLoc, Sound.ZOMBIE_INFECT, 2, 1);
 										gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_LARGE, 1);
 									}
 								}

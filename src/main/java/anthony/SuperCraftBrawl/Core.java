@@ -1,6 +1,6 @@
 package anthony.SuperCraftBrawl;
 
-import anthony.SuperCraftBrawl.Game.*; 
+import anthony.SuperCraftBrawl.Game.*;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -9,6 +9,12 @@ import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.halloween.BasketItemUtil;
+import anthony.SuperCraftBrawl.halloween.HalloweenHuntManager;
+import anthony.SuperCraftBrawl.halloween.TreatsAdminCommand;
+import anthony.SuperCraftBrawl.halloween.TrickTitleCommand;
+import anthony.SuperCraftBrawl.halloween.TrickTitleManager;
+import anthony.SuperCraftBrawl.halloween.TrickTitlePackets;
 import anthony.SuperCraftBrawl.leaderboards.*;
 import anthony.SuperCraftBrawl.npcs.NPCManager;
 import anthony.SuperCraftBrawl.packets.PacketMain;
@@ -120,6 +126,11 @@ public class Core extends JavaPlugin implements Listener {
 
 	private long tickCounter = 0;
 
+	// HALLOWEEN CLASSES:
+	private HalloweenHuntManager halloweenHunt;
+	private TrickTitleManager trickTitleOld;
+	private TrickTitlePackets trickTitle;
+
 	public Core() {
 		this.staffchat = new ArrayList<Player>();
 		this.globalchat = new ArrayList<Player>();
@@ -134,7 +145,19 @@ public class Core extends JavaPlugin implements Listener {
 	public ActionBarManager getActionBarManager() {
 		return this.actionBarManager;
 	}
+
+	public TrickTitleManager getTrickTitle() {
+		return this.trickTitleOld;
+	}
 	
+	public TrickTitlePackets getTrickPacket() {
+		return this.trickTitle;
+	}
+
+	public HalloweenHuntManager getHalloweenManager() {
+		return this.halloweenHunt;
+	}
+
 	public LevelBoard getLevelBoard() {
 		return this.levelBoard;
 	}
@@ -142,7 +165,7 @@ public class Core extends JavaPlugin implements Listener {
 	public ScoreboardManager getScoreboardManager() {
 		return this.scoreboardManager;
 	}
-	
+
 	public anthony.SuperCraftBrawl.lobbyitems.LobbyItems getLobbyItems() {
 		return this.lobbyItems;
 	}
@@ -150,7 +173,7 @@ public class Core extends JavaPlugin implements Listener {
 	public TablistManager getTabManager() {
 		return this.tabManager;
 	}
-	
+
 	public SignManager getSignManager() {
 		return this.signManager;
 	}
@@ -418,6 +441,7 @@ public class Core extends JavaPlugin implements Listener {
 		fishing = new Fishing(this);
 		signManager = new SignManager(this);
 		lobbyItems = new anthony.SuperCraftBrawl.lobbyitems.LobbyItems(this);
+		halloweenHunt = new HalloweenHuntManager(this);
 
 		for (Arenas arena : Arenas.values()) {
 			parkourBoards.add(new ParkourBoard(this, arena));
@@ -433,9 +457,9 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null) {
-			String[] commandTypes = { "maps", "join", "fishing", "server", "fly", "leave", "players", "class", "socials", "spectate",
-					"startgame", "gamestats", "setlives", "lactate", "purchases", "kit", "items", "color", "sound",
-					"heal" };
+			String[] commandTypes = { "maps", "join", "fishing", "server", "fly", "leave", "players", "class",
+					"socials", "spectate", "startgame", "gamestats", "setlives", "lactate", "purchases", "kit", "items",
+					"color", "sound", "heal", "candyaura" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -448,6 +472,12 @@ public class Core extends JavaPlugin implements Listener {
 		}
 
 		enablePracticeModes();
+
+		//Halloween stuff
+		getCommand("treatsadmin").setExecutor(new TreatsAdminCommand(halloweenHunt));
+		trickTitleOld = new TrickTitleManager(this, "lobby-1");
+		this.trickTitle = new TrickTitlePackets(this, "lobby-1"); // change world name if needed
+	    getCommand("tricktitle").setExecutor(new TrickTitleCommand(trickTitle));
 
 		new BukkitRunnable() {
 			@Override
@@ -552,8 +582,7 @@ public class Core extends JavaPlugin implements Listener {
 	@SuppressWarnings({ "null", "deprecation" })
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-
-		if (cmd.getName().equalsIgnoreCase("setrank")) {
+        if (cmd.getName().equalsIgnoreCase("setrank")) {
 			if (sender.hasPermission("scb.setrank")) {
 				if (args.length > 1) {
 					Rank rank = Rank.getRankFromName(args[1]);
@@ -680,13 +709,13 @@ public class Core extends JavaPlugin implements Listener {
 						}
 
 						for (Player allPlayers : Bukkit.getOnlinePlayers()) {
-                            allPlayers.sendTitle(
-                                    "" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.UNDERLINE + "ANNOUNCEMENT",
-                                    "" + ChatColor.RESET + message.trim() + " - " + ChatColor.YELLOW
-                                            + player.getName().substring(0, 3));
-                            allPlayers.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                    + message.trim() + " - " + ChatColor.YELLOW + player.getName());
-                        }
+							allPlayers.sendTitle(
+									"" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.UNDERLINE + "ANNOUNCEMENT",
+									"" + ChatColor.RESET + message.trim() + " - " + ChatColor.YELLOW
+											+ player.getName().substring(0, 3));
+							allPlayers.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+									+ message.trim() + " - " + ChatColor.YELLOW + player.getName());
+						}
 					}
 				} else
 					player.sendMessage(color("&c&l(!) &rYou need the rank &c&lADMIN &rto use this command!"));
@@ -1839,7 +1868,8 @@ public class Core extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void serverMotd(ServerListPingEvent p) {
-		String msg = color("                     &eMinezone &7[1.8-1.21] \n    &c&lSUPER CRAFT BROS &7- &6&lHALLOWEEN UPDATE");
+		String msg = color(
+				"                     &eMinezone &7[1.8-1.21] \n    &c&lSUPER CRAFT BROS &7- &6&lHALLOWEEN UPDATE");
 		p.setMotd(msg);
 		p.setMaxPlayers(1);
 	}
@@ -1934,6 +1964,8 @@ public class Core extends JavaPlugin implements Listener {
 		return lobbyWorld;
 	}
 
+	private static final String BASKET_B64 = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzEzODVhN2FmYjM1NTJmYWY3MWMyYzVhOGU2YTViMWQyZTY3MmM3ODZlODA3NDQzM2ViNTgzOWFjZTgzYjQifX19";
+
 	public void LobbyItems(Player player) {
 		if (this.getCommands() != null) {
 			player.getInventory().setItem(1,
@@ -1945,6 +1977,7 @@ public class Core extends JavaPlugin implements Listener {
 		}
 		player.getInventory().setItem(0,
 				ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&bGame Selector &7(Right Click)"));
+
 		player.getInventory().setItem(4,
 				ItemHelper.setDetails(new ItemStack(Material.CHEST), "&bCosmetics &7(Right Click)"));
 		ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
@@ -1962,7 +1995,7 @@ public class Core extends JavaPlugin implements Listener {
 
 	public void ResetPlayer(Player player) {
 		PlayerData playerData = this.getDataManager().getPlayerData(player);
-		
+
 		if (player != null && playerData != null) {
 			player.getInventory().clear();
 			player.teleport(LobbyLoc());
