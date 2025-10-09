@@ -29,7 +29,7 @@ public class GameSelectorGUI implements InventoryProvider {
 	public SmartInventory inv;
 
 	public GameSelectorGUI(Core main) {
-		inv = SmartInventory.builder().id("myInventory").provider(this).size(5
+		inv = SmartInventory.builder().id("myInventory").provider(this).size(3
 						, 9)
 				.title(ChatColorHelper.color("&8&lGame Selector")).build();
 		this.main = main;
@@ -38,14 +38,14 @@ public class GameSelectorGUI implements InventoryProvider {
 
 	@Override
 	public void init(Player player, InventoryContents contents) {
-		contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(
+		contents.fill(ClickableItem.of(ItemHelper.setDetails(
 				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 
 		// Classic Mode
-		contents.set(1, 2,
+		contents.set(1, 1,
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.REDSTONE_BLOCK),
-								"&eClassic",
+								"&eSCB: Classic",
 								"&7Free for all, kill everyone",
 								"",
 								"&e&nLeft Click&r&e to choose a map",
@@ -62,10 +62,10 @@ public class GameSelectorGUI implements InventoryProvider {
 						}));
 
 		// Duels Mode
-		contents.set(1, 6,
+		contents.set(1, 3,
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD),
-								"&eDuels",
+								"&eSCB: Duels",
 								"&71v1 someone to the death",
 								"",
 								"&e&nLeft Click&r&e to choose a map",
@@ -82,7 +82,7 @@ public class GameSelectorGUI implements InventoryProvider {
 						}));
 
 		// Fishing
-		contents.set(3, 3,
+		contents.set(1, 5,
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
 								"&eFishing",
@@ -105,7 +105,7 @@ public class GameSelectorGUI implements InventoryProvider {
 						}));
 
 		// Parkour
-		contents.set(3, 5,
+		contents.set(1, 7,
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.GRASS),
 								"&eParkour",
