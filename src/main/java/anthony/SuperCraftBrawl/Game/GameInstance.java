@@ -745,7 +745,7 @@ public class GameInstance {
 		startLightningDropsTimer(); // Loot drops will start spawning every 45 seconds
 
 		TellAll(color("&e&l----------------------------------------"));
-		TellAll("" + ChatColor.AQUA + ChatColor.BOLD + "             Super Craft Blocks");
+		TellAll("" + ChatColor.AQUA + ChatColor.BOLD + "          Super Craft Brothers");
 		TellAll("");
 		TellAll(color("&r  5 lives each with different classes & unique"));
 		TellAll(color("&r    abilities. Look out for lightning drops as"));
@@ -1046,6 +1046,8 @@ public class GameInstance {
 				WinGame(lastAlive);
 			} else if (alivePlayers <= 0)
 				EndGame();
+			else
+				announcePlayersLeft(alivePlayers);
 
 			this.alivePlayers = alivePlayers;
 		} else {
@@ -1068,6 +1070,14 @@ public class GameInstance {
 					WinGame(blackTeam);
 			} else if (teamsAlive == 0)
 				EndGame();
+		}
+	}
+	
+	private void announcePlayersLeft(int alivePlayers) {
+		TellAll(color("&2&l(!) &rThere are &e" + alivePlayers + "&r players left!"));
+		
+		for (Player gamePlayer : this.players) {
+			gamePlayer.playSound(gamePlayer.getLocation(), Sound.NOTE_PLING, 1, 1);
 		}
 	}
 
@@ -1166,14 +1176,8 @@ public class GameInstance {
 				player.setAllowFlight(false);
 				player.setAllowFlight(true);
 				player.getInventory().clear();
-
-				ItemStack spec = ItemHelper.setDetails(new ItemStack(Material.COMPASS),
-						"" + ChatColor.GREEN + "Spectate a Player",
-						new String[] { ChatColor.GRAY + "Click to Spectate a specific player!" });
-				player.getInventory().setItem(0, spec);
-				ItemStack leave = ItemHelper.setDetails(new ItemStack(Material.BARRIER),
-						"" + ChatColor.RED + "Leave", new String[] { ChatColor.GRAY + "Click to leave game" });
-				player.getInventory().setItem(8, leave);
+				getGameManager().getMain().getLobbyItems().spectatorItems(player);
+				
 				for (Player gamePlayer : this.players)
 					gamePlayer.hidePlayer(player);
 				for (Player spectator : this.spectators)

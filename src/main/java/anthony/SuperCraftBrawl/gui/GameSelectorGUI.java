@@ -45,7 +45,9 @@ public class GameSelectorGUI implements InventoryProvider {
 		contents.set(1, 1,
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.REDSTONE_BLOCK),
-								"&eSCB: Classic",
+								"&eSuper Craft Brothers",
+								"&eMode: &rClassic",
+								"",
 								"&7Free for all, kill everyone",
 								"",
 								"&e&nLeft Click&r&e to choose a map",
@@ -65,7 +67,9 @@ public class GameSelectorGUI implements InventoryProvider {
 		contents.set(1, 3,
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD),
-								"&eSCB: Duels",
+								"&eSuper Craft Brothers",
+								"&eMode: &rDuels",
+								"",
 								"&71v1 someone to the death",
 								"",
 								"&e&nLeft Click&r&e to choose a map",
