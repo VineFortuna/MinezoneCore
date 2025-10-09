@@ -27,6 +27,9 @@ commands:
    startgame:
       description: Start game
       aliases: sg
+   frenzy:
+      description: Changes the game mode to Frenzy
+      aliases: fr
    setlevel:
       description: Set level command
    store:
@@ -164,8 +167,6 @@ permissions:
       description: Admin perms
       children:
          scb.developer: true
-         scb.startGame: true
-         scb.setLives: true
          scb.setrank: true
          scb.giveTokens: true
          scb.broadcast: true
@@ -181,6 +182,9 @@ permissions:
          scb.sound: true
          scb.soundnms: true
          scb.heal: true
+         scb.startGame: true
+         scb.frenzy: true
+         scb.setLives: true
          scb.candyaura: true
    scb.builder:
       description: Builder perms

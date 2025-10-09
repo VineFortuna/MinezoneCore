@@ -81,6 +81,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 				startGameCommand(player);
 				break;
 
+			case "frenzy":
+				setFrenzyCommand(player);
+				break;
+
 			case "server":
 				serverCommand(player);
 				break;
@@ -253,6 +257,64 @@ public class Commands implements CommandExecutor, TabCompleter {
 		player.sendMessage(main.color("&7&m----------------------------"));
 	}
 
+	private void forceClassCommand(Player player, String[] args) {
+		if (!player.hasPermission("scb.forceclass")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
+		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+
+		if (game == null) {
+			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
+			return;
+		}
+
+		if (args.length != 1) {
+			player.sendMessage(main.color("&c&l(!) &rUsage: /fc className"));
+			return;
+		}
+
+		ClassType[] classes = ClassType.values();
+		ClassType selectedClass = Arrays.stream(classes)
+				.filter(clazz -> clazz.toString().equalsIgnoreCase(args[0]))
+				.findFirst()
+				.orElse(null);
+
+		if (selectedClass == null) {
+			player.sendMessage(main.color("&c&l(!) &rClass not found"));
+			return;
+		}
+
+		BaseClass newBaseClass = selectedClass.GetClassInstance(game, player);
+		BaseClass oldBaseClass = game.classes.get(player);
+
+		String classTag = newBaseClass.getType().getTag();
+		String score = game.truncateString("" + classTag + " " + net.md_5.bungee.api.ChatColor.WHITE + player.getName() + "", 40);
+		newBaseClass.score = game.livesObjective.getScore(score);
+		newBaseClass.lives = oldBaseClass.lives;
+		newBaseClass.tokens = oldBaseClass.tokens;
+		newBaseClass.totalTokens = oldBaseClass.totalTokens;
+		newBaseClass.totalExp = oldBaseClass.totalExp;
+		newBaseClass.totalKills = oldBaseClass.totalKills;
+		newBaseClass.bountyTarget = oldBaseClass.bountyTarget;
+		game.classes.put(player, newBaseClass);
+		oldBaseClass.score.getScoreboard().resetScores(oldBaseClass.score.getEntry());
+		game.classes.put(player, newBaseClass);
+		game.allClasses.put(player, newBaseClass);
+		game.sendScoreboardUpdate(player);
+
+		if (player.hasPermission("scb.chat"))
+			player.setDisplayName("" + player.getName() + " " + classTag);
+		else
+			player.setDisplayName("" + player.getName() + " " + classTag + net.md_5.bungee.api.ChatColor.GRAY);
+
+		player.getInventory().clear();
+		newBaseClass.loadPlayer();
+
+		player.sendMessage(main.color("&a&l(!) &rYour class was forcefully to " + classTag));
+	}
+
 	private void healCommand(Player player, String[] args) {
 		if (!player.hasPermission("scb.heal")) {
 			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
@@ -283,44 +345,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 			player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
 			player.sendMessage(main.color("&a&l(!) &rYou have healed &e" + targetPlayer.getName() + "&r!"));
 			targetPlayer.sendMessage(main.color("&a&l(!) &rYou have been healed by &e" + player.getName() + "&r!"));
-		}
-	}
-
-	private void soundCommand(String[] args, Player player) {
-		if (!player.hasPermission("scb.sound")) {
-			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
-			return;
-		}
-
-		if (args.length < 1) {
-			// Display all sounds in a clickable list
-			displaySoundList(player);
-			return;
-		}
-
-		Location location = player.getLocation();
-
-		try {
-			Sound sound = Sound.valueOf(args[0].toUpperCase()); // Get the Sound enum value
-			float volume = 1.0f; // Default volume
-			float pitch = 1.0f; // Default pitch
-
-			// Parse pitch if provided
-			if (args.length >= 2) {
-				pitch = Float.parseFloat(args[1]);
-			}
-
-			// Parse volume if provided
-			if (args.length >= 3) {
-				volume = Float.parseFloat(args[2]);
-			}
-
-			// Play the sound to everyone in the world
-			player.getWorld().playSound(location, sound, volume, pitch);
-			player.sendMessage(ChatColor.GREEN + "Played sound: " + sound.name() + " with pitch " + pitch
-					+ " and volume " + volume);
-		} catch (IllegalArgumentException e) {
-			player.sendMessage(ChatColor.RED + "Invalid sound name.");
 		}
 	}
 
@@ -652,6 +676,30 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 
 		game.getGameSettings().forceStartGame(true);
+	}
+
+	private void setFrenzyCommand(Player player) {
+		if (!player.hasPermission("scb.frenzy")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
+		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+
+		if (game == null) {
+			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
+			return;
+		}
+
+		if (game.state != GameState.WAITING) {
+			if (game.state == GameState.STARTED)
+				player.sendMessage(main.color("&c&l(!) &rGame is already in progress!"));
+			else if (game.state == GameState.ENDED)
+				player.sendMessage(main.color("&c&l(!) &rGame has already ended!"));
+			return;
+		}
+
+		game.getGameSettings().changeGameType(true);
 	}
 
 	private void flyCommand(Player player) {
