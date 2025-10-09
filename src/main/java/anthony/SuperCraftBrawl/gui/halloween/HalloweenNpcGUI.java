@@ -71,8 +71,8 @@ public class HalloweenNpcGUI implements InventoryProvider {
             int id = i + 1;
             boolean status = dao.hasFound(player.getUniqueId(), i);
 
-            String basketTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzEzODVhN2FmYjM1NTJmYWY3MWMyYzVhOGU2YTViMWQyZTY3MmM3ODZlODA3NDQzM2ViNTgzOWFjZTgzYjQifX19";
-            String notFoundTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjliYTdmZWY2YTFhOGJkODk5YWJhZTRhNWI1NGNiMGVjZTUzYmFkYzY3N2MxNjY4YmVlMGE0NjIxYTgifX19";
+            String basketTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTdlZGM5MDk4MDg5NDBmNjU2NGU5NjA4NmM5Yjk4Y2RhYTg1OWY2MjdlZWQ1NTZlYzM3NWQ2ZWQyNzA0YzUwNiJ9fX0=";
+            String notFoundTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjIzZDdlNjU1ZGViZGQ1OTFkMDk5ZDc2ZmYwMDBkNzU1NWJlNGFlMTFiMWUyNmI5YWRmMjQ0YWUwMjJiMjljOCJ9fX0=";
 
             ItemStack basketItem = ItemHelper.setDetails(ItemHelper.createSkullTexture(status ? basketTexture : notFoundTexture),
                     main.color("&6&lBasket &6#" + id + " &8[" + (status ? "&a✔" : "&c✖") + "&8]"),
