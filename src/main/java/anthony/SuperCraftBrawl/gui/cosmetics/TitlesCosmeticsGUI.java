@@ -90,7 +90,7 @@ public class TitlesCosmeticsGUI implements InventoryProvider {
 		ItemStack wabyink = ItemHelper.setDetails(new ItemStack(Material.LAPIS_LAZULI), main.color("&f&lWabyink Title"),
 				"", main.color("&7The one and only Wabyink Title is here."), "", main.color("&7Must be Wabyink."));
 
-		contents.set(1, 5, ClickableItem.of(o_zone, e -> {
+		contents.set(1, 5, ClickableItem.of(wabyink, e -> {
 			if (!player.getName().equals("Wabyink")) {
 				player.sendMessage(main.color("&c&l(!) &rYou need to be Wabyink for this!"));
 				return;
