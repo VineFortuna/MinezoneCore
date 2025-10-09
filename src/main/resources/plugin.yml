@@ -260,6 +260,7 @@ permissions:
          scb.chat: true
          scb.bypassFull: true
          scb.deathParticles: true
+         scb.fiesta: true
    scb.default:
       description: Default perms
       children:
