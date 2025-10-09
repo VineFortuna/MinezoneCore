@@ -9,6 +9,7 @@ import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
 import anthony.SuperCraftBrawl.gui.GameStatsGUI;
@@ -461,6 +462,15 @@ public class Commands implements CommandExecutor, TabCompleter {
 		} else {
 			player.sendMessage(main.color("&c&l(!) &rYou need the rank &5&lSUPREME &rto use this command!"));
 		}
+	}
+	
+	public static void sendParticle(Player player, Location location, EnumParticle particle, int amount, float speed,
+			float offsetX, float offsetY, float offsetZ) {
+		PacketPlayOutWorldParticles particles = new PacketPlayOutWorldParticles(particle, true, (float) location.getX(),
+				(float) location.getY(), (float) location.getZ(), offsetX, offsetY, offsetZ, speed, amount);
+
+		for (Player players : Bukkit.getOnlinePlayers())
+			((CraftPlayer) players).getHandle().playerConnection.sendPacket(particles);
 	}
 
 	private void soundNMSCommand(String[] args, Player player) {

@@ -54,13 +54,25 @@ public class WinEffects {
 					floodEffect();
 				else if (data.treasureEffect == 1)
 					treasureEffect();
+				else if (safeRitualEnabled(data)) // <--- NEW: ritual effect gate
+					ritualEffect();
 				else
 					defaultEffect();
 			}
 		}
 	}
 
-	// ALL WIN EFFECTS:
+	// If you haven't added this field yet, either add "public int ritualEffect;" in PlayerData,
+	// or temporarily return false here to keep builds happy.
+	private boolean safeRitualEnabled(PlayerData data) {
+		try {
+			return data.ritualEffect == 1;
+		} catch (Throwable ignored) {
+			return false;
+		}
+	}
+
+	// ============== ALL WIN EFFECTS ==============
 
 	//This spawns an Ender Dragon at the player & makes the player ride it
 	private void enderDragonEffect() {
@@ -112,9 +124,9 @@ public class WinEffects {
 	}
 
 	private void fireParticlesEffect() {
-		
+		// (left empty by your original class)
 	}
-	
+
 	public Location getItemRainLoc() {
 		Random rand = new Random();
 		int attempts = 0;
@@ -284,10 +296,141 @@ public class WinEffects {
 		}.runTaskTimer(instance.getGameManager().getMain(), 0L, 4L); // every 4 ticks
 	}
 
+	// ========= NEW: Herobrine "Ritual" Win Effect =========
+	private void ritualEffect() {
+		final World w = player.getWorld();
+		if (w != instance.getMapWorld()) return;
+		startFireworksRunnable(w);
+
+		// snapshot helper to restore blocks after the ritual
+		final class Snap {
+			final Block b; final Material type; final byte data;
+			Snap(Block b){ this.b=b; this.type=b.getType(); this.data=b.getData(); }
+			void restore(){ b.setType(type); b.setData(data, true); b.getState().update(true, false); }
+		}
+		final List<Snap> snaps = new ArrayList<>();
+
+		// align base to grid so the totem looks neat
+		Location base = player.getLocation().clone();
+		base.setX(Math.floor(base.getX()));
+		base.setY(Math.floor(base.getY()));
+		base.setZ(Math.floor(base.getZ()));
+
+		// Totem:
+		// y  : +0 GOLD
+		// y  : +1 GOLD
+		// y  : +2 NETHERRACK + 4 wall redstone torches around
+		// y  : +3 FIRE
+		Block gold1 = w.getBlockAt(base);
+		Block gold2 = w.getBlockAt(base.clone().add(0, 1, 0));
+		Block nether = w.getBlockAt(base.clone().add(0, 2, 0));
+		Block fire  = w.getBlockAt(base.clone().add(0, 3, 0));
+
+		Block torchN = w.getBlockAt(base.clone().add(0, 2, -1)); // north (-Z)
+		Block torchS = w.getBlockAt(base.clone().add(0, 2,  1)); // south (+Z)
+		Block torchW = w.getBlockAt(base.clone().add(-1,2, 0));  // west  (-X)
+		Block torchE = w.getBlockAt(base.clone().add(1, 2,  0)); // east  (+X)
+
+		snaps.add(new Snap(gold1));
+		snaps.add(new Snap(gold2));
+		snaps.add(new Snap(nether));
+		snaps.add(new Snap(fire));
+		snaps.add(new Snap(torchN));
+		snaps.add(new Snap(torchS));
+		snaps.add(new Snap(torchW));
+		snaps.add(new Snap(torchE));
+
+		setBlock(gold1, Material.GOLD_BLOCK);
+		setBlock(gold2, Material.GOLD_BLOCK);
+		setBlock(nether, Material.NETHERRACK);
+
+		// 1.8 wall torch data: 1=east, 2=west, 3=south, 4=north
+		placeWallTorch(torchN, (byte)4);
+		placeWallTorch(torchS, (byte)3);
+		placeWallTorch(torchW, (byte)2);
+		placeWallTorch(torchE, (byte)1);
+
+		setBlock(fire, Material.FIRE);
+
+		// spooky sounds/particles
+		w.playSound(base, Sound.AMBIENCE_CAVE, 1.0f, 0.6f);
+		w.playSound(base, Sound.GHAST_MOAN, 0.7f, 0.7f);
+		w.spigot().playEffect(base.clone().add(0, 2.5, 0), Effect.SMOKE, 0, 0, 0.3f, 0.6f, 0.3f, 0.02f, 30, 16);
+		w.spigot().playEffect(base.clone().add(0, 2.5, 0), Effect.ENDER_SIGNAL, 0, 0, 0,0,0, 0, 10, 16);
+
+		// bats
+		final List<Entity> bats = new ArrayList<>(10);
+		for (int i = 0; i < 10; i++) {
+			double angle = (Math.PI * 2) * i / 10.0;
+			double r = 2.2;
+			Location bLoc = base.clone().add(Math.cos(angle) * r, 2.0 + (i % 3) * 0.3, Math.sin(angle) * r);
+			Bat bat = w.spawn(bLoc, Bat.class);
+			bat.setRemoveWhenFarAway(false);
+			bats.add(bat);
+		}
+
+		// lightning visuals
+		new BukkitRunnable() {
+			int flashes = 0;
+			@Override public void run() {
+				w.strikeLightningEffect(base.clone().add(0, 2.5, 0));
+				if (++flashes >= 3) cancel();
+			}
+		}.runTaskTimer(instance.getGameManager().getMain(), 0L, 10L);
+
+		// animate bats in swirl + periodic particles, then restore blocks
+		final int lifetime = 20 * 6; // 6s
+		new BukkitRunnable() {
+			int t = 0;
+			@Override public void run() {
+				if (t >= lifetime) {
+					for (Entity e : bats) if (e != null && !e.isDead()) e.remove();
+					// restore blocks
+					for (Snap s : snaps) {
+						try { s.restore(); } catch (Throwable ignored) {}
+					}
+					w.playSound(base, Sound.PORTAL_TRAVEL, 0.7f, 0.7f);
+					w.spigot().playEffect(base.clone().add(0, 2, 0), Effect.LARGE_SMOKE, 0, 0, 0.5f,0.5f,0.5f, 0.02f, 20, 16);
+					cancel();
+					return;
+				}
+
+				double theta = (t / 6.0);
+				int i = 0;
+				for (Entity e : bats) {
+					if (!(e instanceof Bat) || e.isDead()) continue;
+					double a = theta + (i++ * (Math.PI * 2 / Math.max(1, bats.size())));
+					double r = 2.2;
+					Location target = base.clone().add(Math.cos(a) * r, 1.8 + Math.sin(theta * 0.7) * 0.3, Math.sin(a) * r);
+					e.teleport(target);
+				}
+
+				if (t % 10 == 0) {
+					w.spigot().playEffect(base.clone().add(0, 2.2, 0), Effect.PORTAL, 0, 0, 0.6f, 0.6f, 0.6f, 0.02f, 40, 16);
+					w.playSound(base, Sound.AMBIENCE_THUNDER, 0.25f, 1.5f);
+				}
+				t += 2;
+			}
+		}.runTaskTimer(instance.getGameManager().getMain(), 10L, 2L);
+	}
+
+	// ======= helpers for ritual =======
+	private void setBlock(Block b, Material m) {
+		b.setType(m);
+		b.getState().update(true, false);
+	}
+	private void placeWallTorch(Block target, byte dataFacing) {
+		target.setType(Material.REDSTONE_TORCH_ON);
+		target.setData(dataFacing, true);
+		target.getState().update(true, false);
+	}
+
+	// ============== DEFAULT + SHARED FIREWORKS ==============
+
 	private void defaultEffect() {
 		this.defaultEffect = true;
 
-		if (this.defaultEffect == true) {
+		if (this.defaultEffect) {
 			World world = player.getWorld();
 			if (world != instance.getMapWorld()) return;
 			startFireworksRunnable(world);
@@ -318,23 +461,20 @@ public class WinEffects {
 		FireworkMeta fwm = fw.getFireworkMeta();
 		fwm.setPower(1);
 
-		Color c = null;
+		Color c;
 		Random r = new Random();
 		int chance = r.nextInt(4);
 
-		if (chance == 0)
-			c = Color.BLUE;
-		else if (chance == 1)
-			c = Color.LIME;
-		else if (chance == 2)
-			c = Color.GREEN;
-		else
-			c = Color.YELLOW;
+		if (chance == 0) c = Color.BLUE;
+		else if (chance == 1) c = Color.LIME;
+		else if (chance == 2) c = Color.GREEN;
+		else c = Color.YELLOW;
+
 		fwm.addEffect(FireworkEffect.builder().withColor(c).flicker(true).build());
 		fw.setFireworkMeta(fwm);
 	}
 
-	// REMOVE WIN EFFECTS:
+	// ============== REMOVE WIN EFFECTS ==============
 
 	public void removeWinEffects() {
 		if (this.dragon != null && !(this.dragon.isDead())) {

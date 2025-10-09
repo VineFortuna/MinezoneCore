@@ -18,7 +18,7 @@ import java.util.*;
 /**
  * Packet-only subtitle titles manager (1.8 R3).
  * - Supports registering multiple titles (key -> text + yOffset).
- * - Exactly ONE active title per player (easy to extend later).
+ * - Exactly ONE active title per player.
  * - Title shows to OTHER players (not the owner) so right-click works.
  * - Lobby-only by world name.
  */
@@ -26,7 +26,7 @@ public final class TrickTitlePackets implements Listener {
 
     // ----- Title definition -----
     public static final class TitleDef {
-        public final String text;    // already colorized (ChatColor)
+        public final String text;    // already colorized
         public final double yOffset; // blocks above feet
         public TitleDef(String text, double yOffset) {
             this.text = text; this.yOffset = yOffset;
@@ -46,7 +46,7 @@ public final class TrickTitlePackets implements Listener {
     // Registry of available titles
     private final Map<String, TitleDef> registry = new LinkedHashMap<>();
 
-    // Player -> current active stand packets
+    // Player -> current active stand packets (shown to others)
     private final Map<UUID, StandData> active = new HashMap<>();
 
     // Player -> preferred active title key (even if not currently visible)
@@ -84,6 +84,10 @@ public final class TrickTitlePackets implements Listener {
 
         hideFor(p); // replace current
         if (isInLobby(p)) showFor(p, def, key);
+        // After owner updates, refresh all viewers in world
+        for (Player viewer : p.getWorld().getPlayers()) {
+            if (viewer != p) refreshForViewer(viewer);
+        }
         return true;
     }
 
@@ -103,6 +107,10 @@ public final class TrickTitlePackets implements Listener {
     public void clearTitle(Player p) {
         pref.remove(p.getUniqueId());
         hideFor(p);
+        // also refresh viewers so they destroy this owner’s stand
+        for (Player viewer : p.getWorld().getPlayers()) {
+            if (viewer != p) refreshForViewer(viewer);
+        }
     }
 
     public boolean isEnabled(Player p) { return active.containsKey(p.getUniqueId()); }
@@ -125,62 +133,67 @@ public final class TrickTitlePackets implements Listener {
             if (!isInLobby(p)) return;
             TitleDef def = registry.get(key);
             if (def != null) showFor(p, def, key);
+            // new world → refresh viewers in that world
+            for (Player viewer : p.getWorld().getPlayers()) {
+                if (viewer != p) refreshForViewer(viewer);
+            }
         });
     }
 
-    @EventHandler public void onChangedWorld(PlayerChangedWorldEvent e) {
+    @EventHandler
+    public void onChangedWorld(PlayerChangedWorldEvent e) {
         Player p = e.getPlayer();
         String key = pref.get(p.getUniqueId());
         if (key == null) { hideFor(p); return; }
         TitleDef def = registry.get(key);
         if (def == null) { hideFor(p); return; }
         if (isInLobby(p)) showFor(p, def, key); else hideFor(p);
+        // after owner moves worlds, refresh viewers in owner’s current world
+        for (Player viewer : p.getWorld().getPlayers()) {
+            if (viewer != p) refreshForViewer(viewer);
+        }
     }
 
     @EventHandler public void onQuit(PlayerQuitEvent e)  { hideFor(e.getPlayer()); pref.remove(e.getPlayer().getUniqueId()); }
     @EventHandler public void onDeath(PlayerDeathEvent e){ hideFor(e.getEntity()); }
 
     // Send active titles to the NEW viewer (exclude self-view)
-    @EventHandler public void onJoin(PlayerJoinEvent e) {
-        Player viewer = e.getPlayer();
-        for (Map.Entry<UUID, StandData> entry : active.entrySet()) {
-            Player owner = Bukkit.getPlayer(entry.getKey());
-            if (owner != null && owner.isOnline() && isInLobby(owner) && viewer != owner) {
-                sendSpawnAndAttach(viewer, owner, entry.getValue());
-            }
-        }
-    }
+    @EventHandler public void onJoin(PlayerJoinEvent e) { refreshForViewer(e.getPlayer()); }
 
-    // Re-send to viewer after their world change / teleport
+    // ===== Viewer refresh (these were broken earlier due to invalid signatures) =====
     @EventHandler
-    public void onViewerWorldChange(PlayerChangedWorldEvent e, @SuppressWarnings("unused") boolean ignore) {
-        Player viewer = e.getPlayer();
-        if (!isInLobby(viewer)) {
-            for (StandData sd : active.values())
-                send(viewer, new PacketPlayOutEntityDestroy(new int[]{ sd.entityId }));
-            return;
-        }
-        for (Map.Entry<UUID, StandData> entry : active.entrySet()) {
-            Player owner = Bukkit.getPlayer(entry.getKey());
-            if (owner != null && owner.isOnline() && isInLobby(owner) && viewer != owner) {
-                sendSpawnAndAttach(viewer, owner, entry.getValue());
-            }
-        }
+    public void onViewerWorldChange(PlayerChangedWorldEvent e) {
+        refreshForViewer(e.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onViewerTeleport(PlayerTeleportEvent e, @SuppressWarnings("unused") boolean ignore) {
+    public void onViewerTeleport(PlayerTeleportEvent e) {
         final Player viewer = e.getPlayer();
-        if (!isInLobby(viewer)) return;
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            if (!viewer.isOnline() || !isInLobby(viewer)) return;
-            for (Map.Entry<UUID, StandData> entry : active.entrySet()) {
-                Player owner = Bukkit.getPlayer(entry.getKey());
-                if (owner != null && owner.isOnline() && viewer != owner) {
-                    sendSpawnAndAttach(viewer, owner, entry.getValue());
-                }
+        Bukkit.getScheduler().runTask(plugin, () -> refreshForViewer(viewer));
+    }
+
+    // Refreshes what the *viewer* should see right now
+    private void refreshForViewer(Player viewer) {
+        if (!viewer.isOnline()) return;
+
+        if (!isInLobby(viewer)) {
+            // ensure any previously shown stands are destroyed for this viewer
+            for (StandData sd : active.values()) {
+                send(viewer, new PacketPlayOutEntityDestroy(new int[]{ sd.entityId }));
             }
-        });
+            return;
+        }
+
+        // (Re)send spawn/attach for all owners in the same world
+        World vw = viewer.getWorld();
+        for (Map.Entry<UUID, StandData> entry : active.entrySet()) {
+            Player owner = Bukkit.getPlayer(entry.getKey());
+            if (owner == null || !owner.isOnline()) continue;
+            if (owner == viewer) continue; // no self-view
+            if (owner.getWorld() != vw) continue;
+
+            sendSpawnAndAttach(viewer, owner, entry.getValue());
+        }
     }
 
     // ===== Core =====

@@ -174,6 +174,7 @@ public class PlayerDataManager implements Listener {
 			String fishingWarps = set.getString("FishingWarps");
 			String treasureLoc = set.getString("TreasureLoc");
 			int pumpkinPie = set.getInt("PumpkinPie");
+			int ritualEffect = set.getInt("RitualEffect");
 
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
@@ -185,7 +186,7 @@ public class PlayerDataManager implements Listener {
 					bestWinstreak, december15, december16, december17, december18, december19, december20, december21,
 					december22, december23, december24, december25, snowParticles, snowballDeathEffect, elfCosmetic,
 					snowmanPet, candycaneParticles, snowball, floodEffect, treasureEffect, treasureOpened, color,
-					fishingWarps, treasureLoc, pumpkinPie);
+					fishingWarps, treasureLoc, pumpkinPie, ritualEffect);
 		}
 		set.close();
 		stmt.close();
@@ -272,33 +273,33 @@ public class PlayerDataManager implements Listener {
 				+ ", EnderDragonEffect = " + data.enderDragonEffect + ", SantaEffect = " + data.santaEffect
 				+ ", FireParticlesEffect = " + data.fireParticlesEffect + ", Losses = " + data.losses + ", Votes = "
 				+ data.votes + ", FlawlessWins = " + data.flawlessWins + ", BonusTokens = " + data.bonusTokens
-				+ ", BonusLevels = " + data.bonusLevels + ", WitherSk = " + data.withersk + ", Points = " + data.points
-				+ ", MagicBroom = " + data.magicbroom + ", Cwm = " + data.cwm + ", Blue = " + data.blue + ", Red = "
-				+ data.red + ", Green = " + data.green + ", Yellow = " + data.yellow + ", MelonCosmetic = " + data.melon
-				+ ", PrivateMessages = " + data.pm + ", Muted = " + data.muted + ", GoldApple = " + data.goldApple
-				+ ", PumpkinPie = " + data.pumpkinPie + ", Fly = " + data.fly + ", Glowstone = " + data.glowstone
-				+ ", Redstone = " + data.redstone + ", Web = " + data.web + ", BottleEXP = " + data.bottleEXP
-				+ ", MysteryChests = " + data.mysteryChests + ", AstronautCosmetic = " + data.astronaut
-				+ ", SantaOutfit = " + data.santaoutfit + ", BestWinstreak = " + data.bestWinstreak
-				+ ", BroomWinEffect = " + data.broomWinEffect + ", BestTime = " + data.bestTime + ", Exp = " + data.exp
-				+ ", Winstreak = " + data.winstreak + ", ElfCosmetic = " + data.elfCosmetic + ", SnowballDeathEffect = "
-				+ data.snowballDeathEffect + ", SnowmanPet = " + data.snowmanPet + ", CandyCaneParticles = "
-				+ data.candycaneParticles + ", GingerBreadMan = " + data.gingerbreadman + ", Elf = " + data.elf
-				+ ", Challenge1 = " + data.challenge1 + ", Challenge2 = " + data.challenge2 + ", Challenge3 = "
-				+ data.challenge3 + ", December15 = " + data.december15 + ", December16 = " + data.december16
-				+ ", December17 = " + data.december17 + ", December18 = " + data.december18 + ", December19 = "
-				+ data.december19 + ", December20 = " + data.december20 + ", December21 = " + data.december21
-				+ ", December22 = " + data.december22 + ", December23 = " + data.december23 + ", December24 = "
-				+ data.december24 + ", SnowParticles = " + data.snowParticles + ", December25 = " + data.december25
-				+ ", KillMsgs = " + data.killMsgs + ", Level = " + data.level + ", Deaths = " + data.deaths
-				+ ", Paintball = " + data.paintball + ", Wins = " + data.wins + ", TotalCaught = " + data.totalcaught
-				+ ", Caught = " + data.caught + ", RewardLevel = " + data.rewardLevel + ", LureLevel = "
-				+ data.lureLevel + ", Lure = " + data.lure + ", FriendshipLevel = " + data.friendshipLevel
-				+ ", Friendship = " + data.friendship + ", FishRainEffect = " + data.fishRainEffect + ", Snowball = "
-				+ data.snowball + ", FloodEffect = " + data.floodEffect + ", TreasureEffect = " + data.treasureEffect
-				+ ", TreasureOpened = " + data.treasureOpened + ", Color = '" + data.color + "', FishingWarps = '"
-				+ data.fishingWarps + "', TreasureLoc = '" + data.treasureLoc + "' WHERE UUID = '"
-				+ data.playerUUID.toString() + "';");
+				+ ", RitualEffect = " + data.ritualEffect + ", BonusLevels = " + data.bonusLevels + ", WitherSk = "
+				+ data.withersk + ", Points = " + data.points + ", MagicBroom = " + data.magicbroom + ", Cwm = "
+				+ data.cwm + ", Blue = " + data.blue + ", Red = " + data.red + ", Green = " + data.green + ", Yellow = "
+				+ data.yellow + ", MelonCosmetic = " + data.melon + ", PrivateMessages = " + data.pm + ", Muted = "
+				+ data.muted + ", GoldApple = " + data.goldApple + ", PumpkinPie = " + data.pumpkinPie + ", Fly = "
+				+ data.fly + ", Glowstone = " + data.glowstone + ", Redstone = " + data.redstone + ", Web = " + data.web
+				+ ", BottleEXP = " + data.bottleEXP + ", MysteryChests = " + data.mysteryChests
+				+ ", AstronautCosmetic = " + data.astronaut + ", SantaOutfit = " + data.santaoutfit
+				+ ", BestWinstreak = " + data.bestWinstreak + ", BroomWinEffect = " + data.broomWinEffect
+				+ ", BestTime = " + data.bestTime + ", Exp = " + data.exp + ", Winstreak = " + data.winstreak
+				+ ", ElfCosmetic = " + data.elfCosmetic + ", SnowballDeathEffect = " + data.snowballDeathEffect
+				+ ", SnowmanPet = " + data.snowmanPet + ", CandyCaneParticles = " + data.candycaneParticles
+				+ ", GingerBreadMan = " + data.gingerbreadman + ", Elf = " + data.elf + ", Challenge1 = "
+				+ data.challenge1 + ", Challenge2 = " + data.challenge2 + ", Challenge3 = " + data.challenge3
+				+ ", December15 = " + data.december15 + ", December16 = " + data.december16 + ", December17 = "
+				+ data.december17 + ", December18 = " + data.december18 + ", December19 = " + data.december19
+				+ ", December20 = " + data.december20 + ", December21 = " + data.december21 + ", December22 = "
+				+ data.december22 + ", December23 = " + data.december23 + ", December24 = " + data.december24
+				+ ", SnowParticles = " + data.snowParticles + ", December25 = " + data.december25 + ", KillMsgs = "
+				+ data.killMsgs + ", Level = " + data.level + ", Deaths = " + data.deaths + ", Paintball = "
+				+ data.paintball + ", Wins = " + data.wins + ", TotalCaught = " + data.totalcaught + ", Caught = "
+				+ data.caught + ", RewardLevel = " + data.rewardLevel + ", LureLevel = " + data.lureLevel + ", Lure = "
+				+ data.lure + ", FriendshipLevel = " + data.friendshipLevel + ", Friendship = " + data.friendship
+				+ ", FishRainEffect = " + data.fishRainEffect + ", Snowball = " + data.snowball + ", FloodEffect = "
+				+ data.floodEffect + ", TreasureEffect = " + data.treasureEffect + ", TreasureOpened = "
+				+ data.treasureOpened + ", Color = '" + data.color + "', FishingWarps = '" + data.fishingWarps
+				+ "', TreasureLoc = '" + data.treasureLoc + "' WHERE UUID = '" + data.playerUUID.toString() + "';");
 		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon, "
 				+ "Reward1, Reward2, Reward3, Reward4, Reward5) VALUES ";
 		int index = 0;
