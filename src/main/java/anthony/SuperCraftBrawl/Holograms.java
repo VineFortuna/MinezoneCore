@@ -23,6 +23,7 @@ public class Holograms {
 	private Core main;
 	private Player player;
 	private List<EntityArmorStand> playerStats;
+	private List<EntityArmorStand> mapCategory;
 
 	/*
 	 * This entire class keeps track of all the holograms the player should have in
@@ -32,6 +33,7 @@ public class Holograms {
 		this.main = main;
 		this.player = player;
 		this.playerStats = new ArrayList<EntityArmorStand>();
+		this.mapCategory = new ArrayList<EntityArmorStand>();
 		giveHolograms(); // To give holograms to player in lobby when joining the server
 	}
 
@@ -53,9 +55,8 @@ public class Holograms {
 		armorStand.setGravity(false);
 
 		PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(armorStand);
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-		}
+		((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+		mapCategory.add(armorStand);
 		
 		loc = new Location(main.getLobbyWorld(), 176, 107, 690.547);
 		name = main.color("&b&lCOMMUNITY MAPS");
@@ -68,9 +69,36 @@ public class Holograms {
 		armorStand.setGravity(false);
 
 		packet = new PacketPlayOutSpawnEntityLiving(armorStand);
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-		}
+		((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+		mapCategory.add(armorStand);
+		
+		loc = new Location(main.getLobbyWorld(), 164, 107, 690.700);
+		name = main.color("&b&lDUEL MAPS");
+		
+		armorStand = new EntityArmorStand(((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) loc.getWorld()).getHandle());
+		armorStand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+		armorStand.setCustomName(name);
+		armorStand.setCustomNameVisible(true);
+		armorStand.setInvisible(true);
+		armorStand.setGravity(false);
+
+		packet = new PacketPlayOutSpawnEntityLiving(armorStand);
+		((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+		mapCategory.add(armorStand);
+		
+		loc = new Location(main.getLobbyWorld(), 215, 107, 690.700);
+		name = main.color("&b&lFRENZY MAPS");
+		
+		armorStand = new EntityArmorStand(((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) loc.getWorld()).getHandle());
+		armorStand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+		armorStand.setCustomName(name);
+		armorStand.setCustomNameVisible(true);
+		armorStand.setInvisible(true);
+		armorStand.setGravity(false);
+
+		packet = new PacketPlayOutSpawnEntityLiving(armorStand);
+		((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+		mapCategory.add(armorStand);
 	}
 
 	private void scbPlayerStats() {
@@ -181,7 +209,14 @@ public class Holograms {
 						PacketPlayOutEntityDestroy destroyPacket = new PacketPlayOutEntityDestroy(stand.getId());
 						((CraftPlayer) player).getHandle().playerConnection.sendPacket(destroyPacket);
 					}
+					
+					for (EntityArmorStand stand : mapCategory) {
+						PacketPlayOutEntityDestroy destroyPacket = new PacketPlayOutEntityDestroy(stand.getId());
+						((CraftPlayer) player).getHandle().playerConnection.sendPacket(destroyPacket);
+					}
+					
 					playerStats.clear();
+					mapCategory.clear();
 				}
 			}
 		};

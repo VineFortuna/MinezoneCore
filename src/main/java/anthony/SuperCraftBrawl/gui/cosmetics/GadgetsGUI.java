@@ -246,20 +246,6 @@ public class GadgetsGUI implements InventoryProvider {
 				}));
 	}
 
-	/*
-	 * This function checks whether the Trick-or-Treater title should be
-	 * enabled/disabled
-	 */
-	private void enableDisableTrickTitle(Player player) {
-		if (main.getTrickTitle().isEnabled(player)) {
-			player.sendMessage(main.color("&r&l(!) &rYou have disabled &eTrick-or-Treater &rtitle"));
-			main.getTrickPacket().enable(player);
-		} else {
-			player.sendMessage(main.color("&r&l(!) &rYou have enabled &eTrick-or-Treater &rtitle"));
-			main.getTrickPacket().disable(player);
-		}
-	}
-
 	private ItemStack getDyedArmor(Material material, Color color, String name) {
 		ItemStack item = new ItemStack(material);
 		LeatherArmorMeta meta = (LeatherArmorMeta) item.getItemMeta();

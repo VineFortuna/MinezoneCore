@@ -28,12 +28,11 @@ public class HalloweenHuntManager implements Listener {
 
 	// ===== EDIT THESE =====
 	private static final String WORLD = "lobby-1";
-	private static final List<int[]> BASKETS = Arrays.asList(
-			new int[] { 197, 105, 689 }, // map selection
-			new int[] { 115, 114, 643 }, //houses
+	private static final List<int[]> BASKETS = Arrays.asList(new int[] { 197, 105, 689 }, // map selection
+			new int[] { 115, 114, 643 }, // houses
 			new int[] { 126, 111, 702 }, // city parkour
 			new int[] { 282, 112, 660 }, // cobweb cave
-			new int[] { 205, 105, 574 }, //woods
+			new int[] { 205, 105, 574 }, // woods
 			new int[] { 295, 94, 532 }, // pond
 			new int[] { 229, 86, 569 }, // market
 			new int[] { 8, 112, 841 }, // hospital
@@ -76,7 +75,7 @@ public class HalloweenHuntManager implements Listener {
 		UUID id = p.getUniqueId();
 
 		if (dao.hasFound(id, idx)) {
-			p.sendMessage(ChatColor.GRAY + "🎃 You already found this basket.");
+			p.sendMessage(core.color("&c&l(!) &rYou already found this basket!"));
 			p.playEffect(e.getClickedBlock().getLocation().add(0.5, 1.0, 0.5), Effect.SMOKE, 1);
 			return;
 		}
@@ -89,13 +88,13 @@ public class HalloweenHuntManager implements Listener {
 		p.sendMessage(
 				ChatColor.GOLD + "🍬 Basket found! (" + ChatColor.GREEN + found + ChatColor.GOLD + "/" + TOTAL + ")");
 
-		//Gives players the rewards for finding baskets
+		// Gives players the rewards for finding baskets
 		grantMilestoneReward(p, found);
 
 		if (newMask == FULL_MASK)
 			reward(p);
 
-		//Updates lobby scoreboard with new Basket count
+		// Updates lobby scoreboard with new Basket count
 		refreshLobbyBoard(p);
 	}
 
@@ -107,7 +106,6 @@ public class HalloweenHuntManager implements Listener {
 
 		if (data != null) {
 			data.tokens += amount;
-			p.sendMessage(core.color("&6&l(!) &rYou were given &e25 tokens!"));
 		}
 	}
 
@@ -119,7 +117,6 @@ public class HalloweenHuntManager implements Listener {
 
 		if (data != null) {
 			data.exp += amount;
-			p.sendMessage(core.color("&6&l(!) &rYou were given &e500 EXP!"));
 			core.getListener().checkIfLevelUp(p);
 		}
 	}
@@ -131,40 +128,43 @@ public class HalloweenHuntManager implements Listener {
 	private void grantMilestoneReward(Player p, int found) {
 		switch (found) {
 		case 1:
-			p.sendMessage(core.color("&6&l(!) &6🎃 &rYou found &e1&r/10 baskets!"));
+			p.sendMessage(core.color("&8[&6&lHUNT&8] &rYou have found &cBasket #1&r, you were given &e25 Tokens!"));
 			giveTokensReward(p, 25); // Gives 25 tokens for getting 1/10 baskets
 			break;
 		case 2:
-			p.sendMessage(core.color("&6&l(!) &6🎃 &rYou found &e2&r/10 baskets!"));
-			p.sendMessage(core
-					.color("&6&l(!) &rYou unlocked the &6&lTrick-or-Treat &rtitle cosmetic! Open 'Cosmetics' to view"));
+			p.sendMessage(core.color(
+					"&8[&6&lHUNT&8] &rYou have found &cBasket #2&r, you unlocked the &6&lTrick-or-Treater &rtitle cosmetic!"));
 			break;
 		case 3:
-			p.sendMessage(core.color("&6&l(!) &6🎃 &rYou found &e3&r/10 baskets!"));
-			p.sendMessage(core.color("&6&l(!) &rYou unlocked the &6Ritual &rwin effect! Open 'Cosmetics' to view"));
+			p.sendMessage(core.color(
+					"&8[&6&lHUNT&8] &rYou have found &cBasket #3&r, you unlocked the &6Ritual &rwin effect!"));
 			break;
 		case 4:
-			p.sendMessage(core.color("&6&l(!) &6🎃 Milestone 4/10! &rYou unlocked: &9&lCandy Aura &rcosmetic!"));
+			p.sendMessage(core.color(
+					"&8[&6&lHUNT&8] &rYou have found &cBasket #4&r, you unlocked the &9&lCandy Aura &rcosmetic!"));
 			break;
 		case 5:
-			p.sendMessage(core.color("&6&l(!) &rYou found &e5&r/10 baskets!"));
+			p.sendMessage(core.color(
+					"&8[&6&lHUNT&8] &rYou have found &cBasket #5&r, you were given &e500 EXP!"));
 			giveExpReward(p, 500); // Gives 500 EXP reward for getting 5/10 baskets
 			break;
 		case 6:
-			p.sendMessage(core.color("&6&l(!) &rYou found &e6&r/10 baskets!"));
-			p.sendMessage(
-					core.color("&6&l(!) &rYou unlocked the &6&lFreddy &routfit cosmetic! Open 'Cosmetics' to view"));
+			p.sendMessage(core.color(
+					"&8[&6&lHUNT&8] &rYou have found &cBasket #6&r, you unlocked the &6&lFreddy &routfit cosmetic!"));
 			break;
 		case 7:
-			p.sendMessage(core.color("&6&l(!) &rYou found &e7&r/10 baskets!"));
-			p.sendMessage(
-					core.color("&6&l(!) &rYou unlocked the &6Pumpkin Pie &rdeath particles! Open 'Cosmetics' to view"));
+			p.sendMessage(core.color(
+					"&8[&6&lHUNT&8] &rYou have found &cBasket #7&r, you unlocked the &6Pumpkin Pie &rdeath particles!"));
 			break;
 		case 8:
-			p.sendMessage(ChatColor.DARK_AQUA + "▶ " + ChatColor.AQUA + "Milestone 8/10! (sample prize here)");
+			p.sendMessage(core.color(
+					"&8[&6&lHUNT&8] &rYou have found &cBasket #8&r, you unlocked the &6&lFreddy Fazbear &rtitle cosmetic!"));
 			break;
 		case 9:
-			p.sendMessage(ChatColor.DARK_AQUA + "▶ " + ChatColor.AQUA + "Milestone 9/10! (sample prize here)");
+			p.sendMessage(core.color(
+					"&8[&6&lHUNT&8] &rYou have found &cBasket #9&r, you were given &e30 Tokens&r and &e700 EXP!"));
+			giveTokensReward(p, 30);
+			giveExpReward(p, 700);
 			break;
 		case 10:
 			p.sendMessage(core.color("&6&l(!) &rYou found all &e10 &rbaskets!"));
@@ -176,13 +176,14 @@ public class HalloweenHuntManager implements Listener {
 	}
 
 	private void reward(Player p) {
-		Bukkit.broadcastMessage(
-				core.color("&8[&6&lHALLOWEEN HUNT&8] &e" + p.getName() + "&6 has found all 10 Baskets! Happy Halloween!"));
+		Bukkit.broadcastMessage(core
+				.color("&8[&6&lHALLOWEEN HUNT&8] &e" + p.getName() + "&6 has found all 10 Baskets! Happy Halloween!"));
+		
 	}
-	
+
 	/*
-	 * Checks if player has unlocked Freddy class by getting
-	 * all of the Halloween baskets from the lobby event
+	 * Checks if player has unlocked Freddy class by getting all of the Halloween
+	 * baskets from the lobby event
 	 */
 	public boolean hasUnlockedFreddy(Player p) {
 		if (core.getListener().getHalloweenEventProgress(p) == 10)

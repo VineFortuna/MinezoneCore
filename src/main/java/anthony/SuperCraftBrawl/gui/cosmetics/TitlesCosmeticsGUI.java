@@ -31,16 +31,14 @@ public class TitlesCosmeticsGUI implements InventoryProvider {
 		final int basketsFoundForLore = (main.getHalloweenManager() != null)
 				? main.getHalloweenManager().getFoundCount(player.getUniqueId())
 				: 0;
-		
+
 		// Trick-or-Treater title gadget
 		ItemStack trickOrTreatTitle = ItemHelper.setDetails(new ItemStack(Material.PUMPKIN),
-				main.color("&6&lTrick-or-Treater"), "",
-				main.color("&7Unlock by finding 2 baskets in the lobby!"),
-				main.color("&8Progress: &e" + Math.min(basketsFoundForLore, 2) + "&7/2"),
-				"",
+				main.color("&6&lTrick-or-Treater"), "", main.color("&7Unlock by finding 2 baskets in the lobby!"),
+				main.color("&8Progress: &e" + Math.min(basketsFoundForLore, 2) + "&7/2"), "",
 				main.color("&cHalloween 2025 exclusive"));
 
-		contents.set(1, 4, ClickableItem.of(trickOrTreatTitle, e -> {
+		contents.set(1, 2, ClickableItem.of(trickOrTreatTitle, e -> {
 			int current = (main.getHalloweenManager() != null)
 					? main.getHalloweenManager().getFoundCount(player.getUniqueId())
 					: 0;
@@ -48,11 +46,44 @@ public class TitlesCosmeticsGUI implements InventoryProvider {
 			if (current < 2) {
 				player.sendMessage(
 						main.color("&c&l(!) &rYou need to find &e2 baskets &rto use &6&lTrick-or-Treater &rtitle."));
-				player.sendMessage(main.color("&7Progress: &e" + current + "&7/10"));
 				return;
 			}
 
-			enableDisableTrickTitle(player); // Enable/disable gadget
+			enableDisableTitle(player, "Trick-or-Treater"); // Enable/disable gadget
+			inv.close(player);
+		}));
+
+		String freddyTexture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWM4M2E0MmU4MmNkNmE3MGUyMTZkOWE4YzJmZjZmMWU1ZTViMjU2Y2VhM2I4Y2QyMjU0NzIzOTNhYTNlY2E1YSJ9fX0=";
+		ItemStack freddy = ItemHelper.createSkullTexture(freddyTexture, "&6&lFreddy Fazbear",
+				"&7Unlock by finding 8 baskets in the lobby!",
+				main.color("&8Progress: &e" + Math.min(basketsFoundForLore, 2) + "&7/8"), "",
+				"&cHalloween 2025 Exclusive");
+
+		contents.set(1, 3, ClickableItem.of(freddy, e -> {
+			int current = (main.getHalloweenManager() != null)
+					? main.getHalloweenManager().getFoundCount(player.getUniqueId())
+					: 0;
+
+			if (current < 8) {
+				player.sendMessage(
+						main.color("&c&l(!) &rYou need to find &e8 baskets &rto use &6&lFreddy Fazbear &rtitle."));
+				return;
+			}
+
+			enableDisableTitle(player, "Freddy Fazbear"); // Enable/disable gadget
+			inv.close(player);
+		}));
+
+		ItemStack o_zone = ItemHelper.setDetails(new ItemStack(Material.FIREWORK), main.color("&b&lFIESTA DE LA NOCHE"),
+				"", main.color("&7Go listen to the album DiscO-Zone"), "", main.color("&e&lVIP&r+"));
+
+		contents.set(1, 4, ClickableItem.of(o_zone, e -> {
+			if (!player.hasPermission("scb.fiesta")) {
+				player.sendMessage(main.color("&c&l(!) &rYou need the rank &e&lVIP&r+ for this!"));
+				return;
+			}
+
+			enableDisableTitle(player, "Fiesta De La Noche"); // Enable/disable gadget
 			inv.close(player);
 		}));
 
@@ -62,17 +93,10 @@ public class TitlesCosmeticsGUI implements InventoryProvider {
 				}));
 	}
 
-	private void enableDisableTrickTitle(Player player) {
-	    // pick ONE: TrickPacket or TrickTitle — using TrickPacket here
-	    boolean enabled = main.getTrickPacket().isEnabled(player);
-
-	    if (enabled) {
-	        main.getTrickPacket().disable(player);
-	        player.sendMessage(main.color("&r&l(!) &rYou have &cdisabled &eTrick-or-Treater &rtitle"));
-	    } else {
-	        main.getTrickPacket().enable(player);
-	        player.sendMessage(main.color("&r&l(!) &rYou have &aenabled &eTrick-or-Treater &rtitle"));
-	    }
+	private void enableDisableTitle(Player player, String title) {
+		boolean nowEnabled = main.getTrickPacket().toggleTitle(player, title);
+		player.sendMessage(main.color(nowEnabled ? "&9&l(!) &rYou have enabled &e" + title + " &rtitle"
+				: "&9&l(!) &rYou have disabled &e" + title + " &rtitle"));
 	}
 
 	@Override
