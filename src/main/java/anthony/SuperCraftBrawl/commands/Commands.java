@@ -144,6 +144,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 				colorCommand(args, player);
 				break;
 
+			case "lactate":
+				lactateCommand(player);
+				break;
+
 			case "sound":
 				soundCommand(args, player);
 				break;
@@ -163,6 +167,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "practice":
 				new SCBPractice(player, Game.BowPractice, main);
 				break;
+
 			case "candyaura":
 				candyAuraCommand(args, player);
 				break;
@@ -444,6 +449,18 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 
 		player.sendMessage(ChatColor.GOLD + "=== End of Sound List ===");
+	}
+
+	private void lactateCommand(Player player) {
+		if (player.hasPermission("scb.lactate")) {
+			Location loc = player.getLocation();
+			loc.setY(loc.getY() + 0.7);
+			player.sendMessage(main.color("&r&l(!) &rYou have &r&lLACTATED!"));
+			player.getWorld().playSound(loc, Sound.COW_HURT, 1, 1);
+			sendParticle(player, loc, EnumParticle.SNOWBALL, 300, 0.8f, 0.0f, -0.3f, 0.0f);
+		} else {
+			player.sendMessage(main.color("&c&l(!) &rYou need the rank &5&lSUPREME &rto use this command!"));
+		}
 	}
 
 	private void soundNMSCommand(String[] args, Player player) {
