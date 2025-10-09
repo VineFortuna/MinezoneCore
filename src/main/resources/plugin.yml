@@ -153,14 +153,15 @@ commands:
    cosmetics:
       description: Opens Cosmetics GUI
       aliases: c
+   forceclass:
+      description: Forcefully changes your class midgame
+      aliases: fc
    candyaura:
       description: Candy aura cosmetic (testing for Admins)
    treatsadmin:
       description: Reset halloween treats command (Admins only)
-   candyaura:
-      description: Candy aura cosmetic (testing for Admins)
    tricktitle:
-      description: Trick-or-Treat title (for Admins)
+      description: a
 
 permissions:
    scb.admin:
@@ -186,6 +187,9 @@ permissions:
          scb.frenzy: true
          scb.setLives: true
          scb.candyaura: true
+         scb.forceclass: true
+         scb.treatadmin: true
+         scb.tricktitle: true
    scb.builder:
       description: Builder perms
       children:
