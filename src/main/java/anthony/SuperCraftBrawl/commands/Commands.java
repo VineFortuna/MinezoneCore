@@ -32,11 +32,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scoreboard.Score;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -156,6 +155,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "heal":
 				healCommand(player, args);
 				break;
+
+			case "forceclass":
+				forceClassCommand(player, args);
+				break;
+
 			case "practice":
 				new SCBPractice(player, Game.BowPractice, main);
 				break;
@@ -263,15 +267,28 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
-		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+		Player targetPlayer;
 
-		if (game == null) {
-			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
+		if (args.length == 1) {
+			// /fc className - apply to self
+			targetPlayer = player;
+		} else if (args.length == 2) {
+			// /fc className player - apply to specified player
+			targetPlayer = Bukkit.getPlayer(args[1]);
+
+			if (targetPlayer == null) {
+				player.sendMessage(main.color("&c&l(!) &rPlayer not found!"));
+				return;
+			}
+		} else {
+			player.sendMessage(main.color("&c&l(!) &rUsage: /fc <className> [player]"));
 			return;
 		}
 
-		if (args.length != 1) {
-			player.sendMessage(main.color("&c&l(!) &rUsage: /fc className"));
+		GameInstance game = main.getGameManager().GetInstanceOfPlayer(targetPlayer);
+
+		if (game == null) {
+			player.sendMessage(main.color("&c&l(!) &r" + (targetPlayer == player ? "You are" : targetPlayer.getName() + " is") + " not in a game!"));
 			return;
 		}
 
@@ -286,33 +303,61 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
-		BaseClass newBaseClass = selectedClass.GetClassInstance(game, player);
-		BaseClass oldBaseClass = game.classes.get(player);
+		BaseClass oldBaseClass = game.classes.get(targetPlayer);
 
-		String classTag = newBaseClass.getType().getTag();
-		String score = game.truncateString("" + classTag + " " + net.md_5.bungee.api.ChatColor.WHITE + player.getName() + "", 40);
-		newBaseClass.score = game.livesObjective.getScore(score);
+		if (oldBaseClass == null) {
+			player.sendMessage(main.color("&c&l(!) &r" + (targetPlayer == player ? "You don't" : targetPlayer.getName() + " doesn't") + " have a current class!"));
+			return;
+		}
+
+		// Store old class in oldClasses map
+		game.oldClasses.put(targetPlayer, oldBaseClass);
+
+		// Reset old score if it exists
+		if (oldBaseClass.score != null) {
+			try {
+				oldBaseClass.score.getScoreboard().resetScores(oldBaseClass.score.getEntry());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		// Create new class instance
+		BaseClass newBaseClass = selectedClass.GetClassInstance(game, targetPlayer);
+
+		// Transfer all stats from old class
 		newBaseClass.lives = oldBaseClass.lives;
 		newBaseClass.tokens = oldBaseClass.tokens;
 		newBaseClass.totalTokens = oldBaseClass.totalTokens;
 		newBaseClass.totalExp = oldBaseClass.totalExp;
 		newBaseClass.totalKills = oldBaseClass.totalKills;
 		newBaseClass.bountyTarget = oldBaseClass.bountyTarget;
-		game.classes.put(player, newBaseClass);
-		oldBaseClass.score.getScoreboard().resetScores(oldBaseClass.score.getEntry());
-		game.classes.put(player, newBaseClass);
-		game.allClasses.put(player, newBaseClass);
-		game.sendScoreboardUpdate(player);
 
-		if (player.hasPermission("scb.chat"))
-			player.setDisplayName("" + player.getName() + " " + classTag);
-		else
-			player.setDisplayName("" + player.getName() + " " + classTag + net.md_5.bungee.api.ChatColor.GRAY);
+		// Create new scoreboard entry
+		String scoreEntry = game.truncateString("" + selectedClass.getTag() + " " + ChatColor.WHITE + targetPlayer.getName(), 40);
+		Score newScore = game.livesObjective.getScore(scoreEntry);
+		newBaseClass.score = newScore;
+		newScore.setScore(newBaseClass.lives);
 
-		player.getInventory().clear();
+		// Update class mappings
+		game.classes.put(targetPlayer, newBaseClass);
+		game.allClasses.put(targetPlayer, newBaseClass);
+
+		// Update scoreboard
+		game.sendScoreboardUpdate(targetPlayer);
+
+		// Update display name
+		if (targetPlayer.hasPermission("scb.chat"))
+			targetPlayer.setDisplayName("" + targetPlayer.getName() + " " + selectedClass.getTag());
+		else targetPlayer.setDisplayName("" + targetPlayer.getName() + " " + selectedClass.getTag() + ChatColor.GRAY);
+
+		// Clear inventory and load new class
+		for (PotionEffect type : targetPlayer.getActivePotionEffects()) targetPlayer.removePotionEffect(type.getType());
+		targetPlayer.getInventory().clear();
 		newBaseClass.loadPlayer();
 
-		player.sendMessage(main.color("&a&l(!) &rYour class was forcefully to " + classTag));
+		String message = "&a&l(!) &r&e" + targetPlayer.getName() + "&r's class was set to " + selectedClass.getTag();
+		newBaseClass.TellAll(main.color(message));
 	}
 
 	private void healCommand(Player player, String[] args) {
@@ -345,6 +390,44 @@ public class Commands implements CommandExecutor, TabCompleter {
 			player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
 			player.sendMessage(main.color("&a&l(!) &rYou have healed &e" + targetPlayer.getName() + "&r!"));
 			targetPlayer.sendMessage(main.color("&a&l(!) &rYou have been healed by &e" + player.getName() + "&r!"));
+		}
+	}
+
+	private void soundCommand(String[] args, Player player) {
+		if (!player.hasPermission("scb.sound")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
+		if (args.length < 1) {
+			// Display all sounds in a clickable list
+			displaySoundList(player);
+			return;
+		}
+
+		Location location = player.getLocation();
+
+		try {
+			Sound sound = Sound.valueOf(args[0].toUpperCase()); // Get the Sound enum value
+			float volume = 1.0f; // Default volume
+			float pitch = 1.0f; // Default pitch
+
+			// Parse pitch if provided
+			if (args.length >= 2) {
+				pitch = Float.parseFloat(args[1]);
+			}
+
+			// Parse volume if provided
+			if (args.length >= 3) {
+				volume = Float.parseFloat(args[2]);
+			}
+
+			// Play the sound to everyone in the world
+			player.getWorld().playSound(location, sound, volume, pitch);
+			player.sendMessage(ChatColor.GREEN + "Played sound: " + sound.name() + " with pitch " + pitch
+					+ " and volume " + volume);
+		} catch (IllegalArgumentException e) {
+			player.sendMessage(ChatColor.RED + "Invalid sound name.");
 		}
 	}
 
