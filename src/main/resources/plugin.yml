@@ -162,6 +162,8 @@ commands:
       description: Reset halloween treats command (Admins only)
    tricktitle:
       description: a
+   lactate:
+      description: Lactate command!
 
 permissions:
    scb.admin:
