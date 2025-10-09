@@ -28,16 +28,17 @@ public class HalloweenHuntManager implements Listener {
 
 	// ===== EDIT THESE =====
 	private static final String WORLD = "lobby-1";
-	private static final List<int[]> BASKETS = Arrays.asList(new int[] { 197, 105, 689 },
-			new int[] { 126,111, 702 }, 
-			new int[] { 205, 105, 574 },
-			new int[] { 229, 86, 569 },
-			new int[] { 115, 114, 643 }, 
-			new int[] { 72, 116, 929 },
-			new int[] { 8, 112, 841 }, 
-			new int[] { 282, 112, 660 }, 
-			new int[] { 295, 94, 532 },
-			new int[] { 253, 143, 626 }
+	private static final List<int[]> BASKETS = Arrays.asList(
+			new int[] { 197, 105, 689 }, // map selection
+			new int[] { 115, 114, 643 }, //houses
+			new int[] { 126, 111, 702 }, // city parkour
+			new int[] { 282, 112, 660 }, // cobweb cave
+			new int[] { 205, 105, 574 }, //woods
+			new int[] { 295, 94, 532 }, // pond
+			new int[] { 229, 86, 569 }, // market
+			new int[] { 8, 112, 841 }, // hospital
+			new int[] { 72, 116, 929 }, // city park
+			new int[] { 253, 143, 626 } // castle
 	);
 
 	public HalloweenHuntManager(Core core) {
