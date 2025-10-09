@@ -506,7 +506,7 @@ public class GameInstance {
 					}
 
 					if (ticks == 5) {
-						getGameSettings().changeGameType();
+						getGameSettings().changeGameType(false);
 						getGameSettings().increaseLightningRate();
 						getGameSettings().setTimeOfDay();
 						removeVotePaper();
