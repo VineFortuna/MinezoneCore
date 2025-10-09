@@ -38,6 +38,13 @@ public class FreeClassesGUI implements InventoryProvider {
 
 		for (ClassType type : ClassType.sortAlphabetically(ClassType.getFreeClasses(false))) {
 			ItemStack item = type.getItem();
+			
+			if (type == ClassType.Fisherman &&  !main.fishing.hasUnlockedFisherman(player)) {
+				continue;
+			}
+			if (type == ClassType.Freddy &&  !main.getHalloweenManager().hasUnlockedFreddy(player)) {
+				continue;
+			}
 
 			// Lore
 			List<String> lore = type.buildDescription();
