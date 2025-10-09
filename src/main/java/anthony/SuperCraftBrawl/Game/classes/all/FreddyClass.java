@@ -118,7 +118,7 @@ public class FreddyClass extends BaseClass {
 							// Apply stun effects
 							target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 20 * 2, 0, true, false));
 							target.addPotionEffect(
-									new PotionEffect(PotionEffectType.CONFUSION, 20 * 3, 0, true, false));
+									new PotionEffect(PotionEffectType.CONFUSION, 20 * 5, 2, true, false));
 							target.playSound(target.getLocation(), Sound.GHAST_SCREAM, 0.6f, 1.2f);
 						}
 					}
@@ -213,13 +213,13 @@ public class FreddyClass extends BaseClass {
 	}
 
 	public ItemStack getStunAbility() {
-		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.REDSTONE, 1), instance.color("&cStun Ability"),
+		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.REDSTONE, 1), instance.color("&cStun"),
 				"", instance.color("&7Right click to stun players"), instance.color("&7within 6 blocks!"));
 		return item;
 	}
 
 	public ItemStack getScareAbility() {
-		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.BEACON, 1), instance.color("&cScare Ability"), "",
+		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.BEACON, 1), instance.color("&cJump Scare"), "",
 				instance.color("&7Right click to scare your opponents by blinding"),
 				instance.color("&7them and teleporting to a random player"));
 		return item;

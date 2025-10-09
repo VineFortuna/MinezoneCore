@@ -8,7 +8,8 @@ public enum Announcements {
 	Discord(color("&2&l(!) &rJoin our Discord by using &e/socials")),
 	Maps(color(
 			"&2&l(!) &rNot all maps are listed in lobby. Use &e/maps &rfor a list of maps and &e/join <map> &rto play!")),
-	Store(color("&2&l(!) &rConsider purchasing a rank at &e&nminezone.club&r for some awesome perks!"));
+	Store(color("&2&l(!) &rConsider purchasing a rank at &e&nminezone.club&r for some awesome perks!")), 
+	Halloween(color("&2&l(!) &rCheck out the Halloween NPC in lobby for some amazing &e&lEXCLUSIVE &rrewards!"));
 
 	public String name;
 
