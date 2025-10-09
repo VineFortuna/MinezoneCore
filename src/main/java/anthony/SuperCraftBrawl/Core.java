@@ -477,10 +477,10 @@ public class Core extends JavaPlugin implements Listener {
 		getCommand("treatsadmin").setExecutor(new TreatsAdminCommand(halloweenHunt));
 		trickTitleOld = new TrickTitleManager(this, "lobby-1");
 		this.trickTitle = new TrickTitlePackets(this, "lobby-1"); // change world name if needed
-		this.trickTitle.registerTitle("Trick-or-Treater", color("&6&lTrick-or-Treater"), 0.80);
-		this.trickTitle.registerTitle("Freddy Fazbear", color("&6&lFreddy Fazbear"), 0.80);
-		this.trickTitle.registerTitle("Fiesta De La Noche", color("&b&lFIESTA DE LA NOCHE"), 0.80);
-		this.trickTitle.registerTitle("i'm gay btw...", color("&di'm gay btw..."), 0.80);
+		this.trickTitle.registerTitle("Trick-or-Treater", color("&6&lTrick-or-Treater"), 0.2);
+		this.trickTitle.registerTitle("Freddy Fazbear", color("&6&lFreddy Fazbear"), 0.2);
+		this.trickTitle.registerTitle("Fiesta De La Noche", color("&b&lFIESTA DE LA NOCHE"), 0.2);
+		this.trickTitle.registerTitle("i'm gay btw...", color("&di'm gay btw..."), 0.2);
 		getCommand("tricktitle").setExecutor(new TrickTitleCommand(trickTitle));
 
 		new BukkitRunnable() {
