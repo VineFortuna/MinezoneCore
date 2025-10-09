@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.all.LargeFernClass;
+import anthony.SuperCraftBrawl.Game.classes.all.ParrotClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -28,6 +29,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
@@ -1070,126 +1072,127 @@ public class GameInstance {
 	}
 
 	public void PlayerDeath(Player player) {
-		if (this.gameType == GameType.FRENZY)
-			reRandomizeClass(player);
-		else if (this.gameType == GameType.GUNGAME)
-			nextClass(player);
-
+		BaseClass baseClassBeforeChecks = this.classes.get(player);
+		PlayerDeathEvent event = new PlayerDeathEvent(player, null, 0, null);
+		baseClassBeforeChecks.isDead = true;
+		baseClassBeforeChecks.Death(event);
 		final BaseClass baseClass = this.classes.get(player);
+		if (baseClass == null) return;
 
-		if (baseClass != null)
-			try {
-				player.getInventory().clear();
-				PlayerDeathEvent event = new PlayerDeathEvent(player, null, 0, null);
-				player.setGameMode(GameMode.SPECTATOR);
-				if (!baseClass.isDead) {
-					baseClass.isDead = true;
-					baseClass.Death(event);
+		try {
+//				event = new PlayerDeathEvent(player, null, 0, null);
+			player.getInventory().clear();
+			player.setGameMode(GameMode.SPECTATOR);
+			player.teleport(GetSpecLoc());
+
+			// Frenzy Class Randomization
+			if (this.gameType == GameType.FRENZY && baseClass.getLives() > 0) reRandomizeClass(player);
+			else if (this.gameType == GameType.GUNGAME && baseClass.getLives() > 0) nextClass(player);
+			final BaseClass finalBaseClass = this.classes.get(player);
+
+			BukkitRunnable runTimer = new BukkitRunnable() {
+				int ticks = 3;
+
+				@SuppressWarnings("deprecation")
+				public void run() {
+					if (GameInstance.this.state == GameState.ENDED) {
+						cancel();
+						/*
+						 * } else if (player.getWorld() != GameInstance.this.getMapWorld()) { cancel();
+						 * player.setAllowFlight(true); player.setGameMode(GameMode.ADVENTURE);
+						 * GameInstance.this.getGameManager().getMain().ResetPlayer(player);
+						 */
+					}
+					if (finalBaseClass.getLives() > 0)
+						if (this.ticks == 0) {
+							player.teleport(GameInstance.this.GetRespawnLoc());
+							player.setGameMode(GameMode.ADVENTURE);
+							player.setHealth(20.0D);
+							player.setAllowFlight(true);
+							GameInstance.this.getGameManager().addSpawnProtection(player);
+							if (!GameInstance.this.players.contains(player)) {
+								GameInstance.this.getGameManager().getMain().ResetPlayer(player);
+							} else {
+								finalBaseClass.loadPlayer();
+								if (GameInstance.this.gameType == GameType.FRENZY
+										|| GameInstance.this.gameType == GameType.GUNGAME) {
+									player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "New Class:",
+											"" + finalBaseClass.getType().getTag());
+									new BukkitRunnable() { // Get rid of title after 1.5 seconds
+										@Override
+										public void run() {
+											player.sendTitle("", "");
+										}
+									}.runTaskLater(getGameManager().getMain(), 30);
+								} else {
+									player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "Respawned", "");
+									new BukkitRunnable() { // Get rid of title after 1.5 seconds
+										@Override
+										public void run() {
+											player.sendTitle("", "");
+										}
+									}.runTaskLater(getGameManager().getMain(), 30);
+								}
+								finalBaseClass.isDead = false;
+							}
+
+							cancel();
+						} else if (this.ticks <= 3 && GameInstance.this.state == GameState.STARTED) {
+							if (!players.contains(player)) {
+								cancel();
+							} else {
+								player.sendTitle("", "" + ChatColor.RED + this.ticks);
+								player.setGameMode(GameMode.SPECTATOR);
+							}
+						}
+					this.ticks--;
+				}
+			};
+			runTimer.runTaskTimer(this.gameManager.getMain(), 0L, 20L);
+			this.runnables.add(runTimer);
+
+			player.setHealth(20.0D);
+			player.setAllowFlight(true);
+			player.setGameMode(GameMode.ADVENTURE);
+			if (finalBaseClass.getLives() == 0) {
+				this.playerPosition.add(player);
+				if (this.players.size() > 2) {
+					player.sendTitle("" + ChatColor.RED + "You have died!",
+							"" + ChatColor.RESET + "You are now a Spectator");
 					player.teleport(GetSpecLoc());
 				}
-				BukkitRunnable runTimer = new BukkitRunnable() {
-					int ticks = 3;
-
-					@SuppressWarnings("deprecation")
-					public void run() {
-						if (GameInstance.this.state == GameState.ENDED) {
-							cancel();
-							/*
-							 * } else if (player.getWorld() != GameInstance.this.getMapWorld()) { cancel();
-							 * player.setAllowFlight(true); player.setGameMode(GameMode.ADVENTURE);
-							 * GameInstance.this.getGameManager().getMain().ResetPlayer(player);
-							 */
-						}
-						if (baseClass.getLives() > 0)
-							if (this.ticks == 0) {
-								player.teleport(GameInstance.this.GetRespawnLoc());
-								player.setGameMode(GameMode.ADVENTURE);
-								player.setHealth(20.0D);
-								player.setAllowFlight(true);
-								GameInstance.this.getGameManager().addSpawnProtection(player);
-								if (!GameInstance.this.players.contains(player)) {
-									GameInstance.this.getGameManager().getMain().ResetPlayer(player);
-								} else {
-									baseClass.loadPlayer();
-									if (GameInstance.this.gameType == GameType.FRENZY
-											|| GameInstance.this.gameType == GameType.GUNGAME) {
-										player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "New Class:",
-												"" + baseClass.getType().getTag());
-										new BukkitRunnable() { // Get rid of title after 1.5 seconds
-											@Override
-											public void run() {
-												player.sendTitle("", "");
-											}
-										}.runTaskLater(getGameManager().getMain(), 30);
-									} else {
-										player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "Respawned", "");
-										new BukkitRunnable() { // Get rid of title after 1.5 seconds
-											@Override
-											public void run() {
-												player.sendTitle("", "");
-											}
-										}.runTaskLater(getGameManager().getMain(), 30);
-									}
-									baseClass.isDead = false;
-								}
-
-								cancel();
-							} else if (this.ticks <= 3 && GameInstance.this.state == GameState.STARTED) {
-								if (!players.contains(player)) {
-									cancel();
-								} else {
-									player.sendTitle("", "" + ChatColor.RED + this.ticks);
-									player.setGameMode(GameMode.SPECTATOR);
-								}
-							}
-						this.ticks--;
-					}
-				};
-				runTimer.runTaskTimer(this.gameManager.getMain(), 0L, 20L);
-				this.runnables.add(runTimer);
-
-				player.setHealth(20.0D);
+				player.getPlayer().setGameMode(GameMode.ADVENTURE);
+				player.spigot().setCollidesWithEntities(false);
+				player.setAllowFlight(false);
 				player.setAllowFlight(true);
-				player.setGameMode(GameMode.ADVENTURE);
-				if (baseClass.getLives() == 0) {
-					this.playerPosition.add(player);
-					if (this.players.size() > 2) {
-						player.sendTitle("" + ChatColor.RED + "You have died!",
-								"" + ChatColor.RESET + "You are now a Spectator");
-						player.teleport(GetSpecLoc());
-					}
-					player.getPlayer().setGameMode(GameMode.ADVENTURE);
-					player.spigot().setCollidesWithEntities(false);
-					player.setAllowFlight(false);
-					player.setAllowFlight(true);
-					player.getInventory().clear();
+				player.getInventory().clear();
 
-					ItemStack spec = ItemHelper.setDetails(new ItemStack(Material.COMPASS),
-							"" + ChatColor.GREEN + "Spectate a Player",
-							new String[] { ChatColor.GRAY + "Click to Spectate a specific player!" });
-					player.getInventory().setItem(0, spec);
-					ItemStack leave = ItemHelper.setDetails(new ItemStack(Material.BARRIER),
-							"" + ChatColor.RED + "Leave", new String[] { ChatColor.GRAY + "Click to leave game" });
-					player.getInventory().setItem(8, leave);
-					for (Player gamePlayer : this.players)
-						gamePlayer.hidePlayer(player);
-					for (Player spectator : this.spectators)
-						spectator.showPlayer(player);
-					try {
-						baseClass.score.getScoreboard().resetScores(baseClass.score.getEntry());
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
-					CheckForWin();
-				} else {
-					player.getInventory().clear();
+				ItemStack spec = ItemHelper.setDetails(new ItemStack(Material.COMPASS),
+						"" + ChatColor.GREEN + "Spectate a Player",
+						new String[] { ChatColor.GRAY + "Click to Spectate a specific player!" });
+				player.getInventory().setItem(0, spec);
+				ItemStack leave = ItemHelper.setDetails(new ItemStack(Material.BARRIER),
+						"" + ChatColor.RED + "Leave", new String[] { ChatColor.GRAY + "Click to leave game" });
+				player.getInventory().setItem(8, leave);
+				for (Player gamePlayer : this.players)
+					gamePlayer.hidePlayer(player);
+				for (Player spectator : this.spectators)
+					spectator.showPlayer(player);
+				try {
+					finalBaseClass.score.getScoreboard().resetScores(finalBaseClass.score.getEntry());
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-			} catch (
 
-			Exception e) {
-				e.printStackTrace();
+				CheckForWin();
+			} else {
+				player.getInventory().clear();
 			}
+		} catch (
+
+				Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1817,29 +1820,46 @@ public class GameInstance {
 	private void reRandomizeClass(Player player) {
 		BaseClass baseClass = classes.get(player);
 
-		if (baseClass.getLives() > 1) {
+		if (baseClass.getLives() > 0) {
 			ClassType classType = ClassType.getAvailableClasses()[random
 					.nextInt(ClassType.getAvailableClasses().length)];
+
+			// Create new class instance
 			BaseClass newBaseClass = classType.GetClassInstance(this, player);
 			BaseClass oldBaseClass = classes.get(player);
 			oldClasses.put(player, oldBaseClass);
 
-			Score newScore = livesObjective.getScore(
-					truncateString("" + classType.getTag() + " " + ChatColor.WHITE + player.getName() + "", 40));
+			// Reset old score if it exists
+			if (oldBaseClass.score != null) {
+				try {
+					oldBaseClass.score.getScoreboard().resetScores(oldBaseClass.score.getEntry());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			// Transfer all stats from old class
 			newBaseClass.lives = oldBaseClass.lives;
 			newBaseClass.tokens = oldBaseClass.tokens;
-			newBaseClass.score = newScore;
 			newBaseClass.totalTokens = oldBaseClass.totalTokens;
 			newBaseClass.totalExp = oldBaseClass.totalExp;
 			newBaseClass.totalKills = oldBaseClass.totalKills;
 			newBaseClass.bountyTarget = oldBaseClass.bountyTarget;
 
-			oldBaseClass.score.getScoreboard().resetScores(oldBaseClass.score.getEntry());
+			// Create new scoreboard entry
+			String scoreEntry = truncateString("" + classType.getTag() + " " + ChatColor.WHITE + player.getName(), 40);
+			Score newScore = livesObjective.getScore(scoreEntry);
+			newBaseClass.score = newScore;
+			newScore.setScore(newBaseClass.lives);
 
+			// Update class mappings
 			classes.put(player, newBaseClass);
 			allClasses.put(player, newBaseClass);
+
+			// Update scoreboard
 			sendScoreboardUpdate(player);
 
+			// Update display name
 			player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 					+ "Your class has been randomly selected to " + classType.getTag());
 
@@ -2087,9 +2107,16 @@ public class GameInstance {
 				if (baseClass.getType() == ClassType.LargeFern) {
 					LargeFernClass largeFernClass = (LargeFernClass) baseClass;
 					if (largeFernClass.transfernRunnable != null) {
-//						largeFernClass.transfernRunnable.cleanup();
 						largeFernClass.transfernRunnable.cancel();
 					}
+				} else if (baseClass.getType() == ClassType.Parrot) {
+					ParrotClass parrotClass = (ParrotClass) baseClass;
+					if (parrotClass.isDanceAbilityActive()) {
+						parrotClass.cleanupDanceAbility();
+					}
+				} else if (baseClass.getType() == ClassType.Pig) {
+					player.removePotionEffect(PotionEffectType.SPEED);
+
 				}
 			}
 
