@@ -62,16 +62,16 @@ public class ScoreboardManager {
 			board.updateTitle(main.color("&d&l" + gameServer));
 			if (data != null) {
 				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						main.color("&f&lTokens: &6" + data.tokens), "",
-						main.color("&f&lRank: &r" + main.getRankManager().getRank(player).getTag()), "",
+						main.color("&f&lTokens&f: &6" + data.tokens), "",
+						main.color("&f&lRank&f: &r" + main.getRankManager().getRank(player).getTag()), "",
 						// shows ✧ plus the level like your existing line
-						main.color("&f&lLevel: &f" + data.checkPlayerLevel(player, data) + "✧" + data.level), expBar, // ★
+						main.color("&f&lLevel&f: &f" + data.checkPlayerLevel(player, data) + "✧" + data.level), expBar, // ★
 																														// micro
 																														// EXP
 																														// dots
 																														// line
 						"",
-						main.color("&f&lBaskets Found: &6"
+						main.color("&f&lBaskets Found&f: &6"
 								+ main.getHalloweenManager().getFoundCount(player.getUniqueId()) + "/10"),
 						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 						main.color("&dminezone.club"));
