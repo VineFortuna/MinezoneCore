@@ -43,7 +43,7 @@ public class TrickTitleCommand implements CommandExecutor, TabExecutor {
 				p.sendMessage(ChatColor.GOLD + "Trick-or-Treater " + ChatColor.YELLOW + "is already enabled.");
 				return true;
 			}
-			manager.enable(p);
+			manager.toggleTitle(p, "trick");
 			p.sendMessage(ChatColor.GOLD + "Trick-or-Treater " + ChatColor.GREEN + "enabled");
 			return true;
 		}
@@ -52,13 +52,13 @@ public class TrickTitleCommand implements CommandExecutor, TabExecutor {
 				p.sendMessage(ChatColor.GOLD + "Trick-or-Treater " + ChatColor.YELLOW + "is already disabled.");
 				return true;
 			}
-			manager.disable(p);
+			manager.toggleTitle(p, "trick");
 			p.sendMessage(ChatColor.GOLD + "Trick-or-Treater " + ChatColor.RED + "disabled");
 			return true;
 		}
 		case "toggle":
 		default: {
-			boolean nowOn = manager.toggle(p);
+			boolean nowOn = manager.toggleTitle(p, "trick");
 			p.sendMessage(ChatColor.GOLD + "Trick-or-Treater "
 					+ (nowOn ? ChatColor.GREEN + "enabled" : ChatColor.RED + "disabled"));
 			return true;
