@@ -322,9 +322,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	public int getNumOfGames() {
 		int num = 0;
 		for (Entry<Maps, GameInstance> entry : gameMap.entrySet()) {
-			if (entry.getValue().state == GameState.STARTED) {
-				num++;
-			}
+			num++;
 		}
 		return num;
 	}

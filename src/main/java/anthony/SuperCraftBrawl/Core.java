@@ -458,8 +458,8 @@ public class Core extends JavaPlugin implements Listener {
 
 		if (this.getCommands() != null) {
 			String[] commandTypes = { "maps", "join", "cosmetics", "fishing", "server", "fly", "leave", "players",
-					"class", "socials", "spectate", "startgame", "frenzy", "gamestats", "setlives", "purchases",
-					"kit", "items", "color", "sound", "heal", "forceclass" };
+					"class", "socials", "spectate", "startgame", "frenzy", "gamestats", "setlives", "purchases", "kit",
+					"items", "color", "sound", "heal", "forceclass" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -473,11 +473,11 @@ public class Core extends JavaPlugin implements Listener {
 
 		enablePracticeModes();
 
-		//Halloween stuff
+		// Halloween stuff
 		getCommand("treatsadmin").setExecutor(new TreatsAdminCommand(halloweenHunt));
 		trickTitleOld = new TrickTitleManager(this, "lobby-1");
 		this.trickTitle = new TrickTitlePackets(this, "lobby-1"); // change world name if needed
-	    getCommand("tricktitle").setExecutor(new TrickTitleCommand(trickTitle));
+		getCommand("tricktitle").setExecutor(new TrickTitleCommand(trickTitle));
 
 		new BukkitRunnable() {
 			@Override
@@ -582,7 +582,7 @@ public class Core extends JavaPlugin implements Listener {
 	@SuppressWarnings({ "null", "deprecation" })
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        if (cmd.getName().equalsIgnoreCase("setrank")) {
+		if (cmd.getName().equalsIgnoreCase("setrank")) {
 			if (sender.hasPermission("scb.setrank")) {
 				if (args.length > 1) {
 					Rank rank = Rank.getRankFromName(args[1]);
@@ -1735,51 +1735,24 @@ public class Core extends JavaPlugin implements Listener {
 	private void chatAnnouncementOnJoin(Player p) {
 		p.sendMessage("----------------------------------------------");
 		p.sendMessage("");
-		p.sendMessage("");
-		p.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "        WELCOME TO MINEZONE");
+		p.sendMessage(color("          &b&lWELCOME TO MINEZONE"));
 		p.sendMessage("");
 		p.sendMessage("" + "         Enjoy Super Craft Bros!");
 		p.sendMessage("");
-		p.sendMessage("" + "     Be sure to join our Discord Server with " + ChatColor.GREEN + "/socials");
-		p.sendMessage("");
+		p.sendMessage("" + " Be sure to join our Discord Server with " + ChatColor.GREEN + "/socials");
 		p.sendMessage("");
 		p.sendMessage("----------------------------------------------");
+		p.sendMessage("");
 
-//		new BukkitRunnable() {
-//			@Override
-//			public void run() { // Runs after 4 seconds
-//				p.sendMessage("----------------------------------------------");
-//				p.sendMessage("");
-//				p.sendMessage(color("          &e&lFISHING &2&lLOBBY ACTIVITY"));
-//				p.sendMessage("" + "     Try out fishing to get some amazing rewards");
-//				p.sendMessage("" + "     by checking out the Fisherman in the lobby!");
-//				p.sendMessage("");
-//				p.sendMessage("----------------------------------------------");
-//				p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
-//				p.sendTitle(color("&e&lFISHING"),
-//						color("&eVersion " + Version.FISHING.getVersion() + " available now!"));
-//			}
-//		}.runTaskLater(this, 80); // 80 ticks = 4 seconds (20 ticks per second)
-
-//		new BukkitRunnable() {
-//			@Override
-//			public void run() { // Runs after 20 seconds
-//				p.sendMessage("----------------------------------------------");
-//				p.sendMessage("");
-//				p.sendMessage("" + ChatColor.AQUA + ChatColor.BOLD + "             Super Craft Blocks");
-//				p.sendMessage("");
-//				p.sendMessage(color("&f  Welcome to Super Craft Blocks! A custom suite of"));
-//				p.sendMessage(color("" + ChatColor.AQUA + "  Class PvP &7based gamemodes hosted exclusively on"));
-//				p.sendMessage("                    " + ChatColor.AQUA + ChatColor.UNDERLINE + "minezone.club");
-//				p.sendMessage("");
-//				if (p.hasPermission("scb.bonusTokens"))
-//					p.sendMessage(color("&c&l>> &rThanks for being a "
-//							+ (getRankManager().getRank(p) == Rank.VIP ? Rank.VIP.getTag() : Rank.CAPTAIN.getTag())
-//							+ "&r Supporter!"));
-//
-//				p.sendMessage("----------------------------------------------");
-//			}
-//		}.runTaskLater(this, 400); // 400 ticks = 20 seconds (20 ticks per second)
+		Bukkit.getScheduler().runTaskLater(this, () -> {
+			p.sendMessage("----------------------------------------------");
+			p.sendMessage(color("            &6&lHALLOWEEN HUNT"));
+			p.sendMessage("");
+			p.sendMessage(color("" + "     &6Check out the Halloween NPC in"));
+			p.sendMessage(color("" + "       &6spawn for amazing rewards!"));
+			p.sendMessage("");
+			p.sendMessage("----------------------------------------------");
+		}, 40L);
 	}
 
 	public Map<Player, EntityArmorStand> msHologram = new HashMap<Player, EntityArmorStand>();
