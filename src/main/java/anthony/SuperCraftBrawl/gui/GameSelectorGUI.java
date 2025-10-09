@@ -42,9 +42,10 @@ public class GameSelectorGUI implements InventoryProvider {
 				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 
 		// Classic Mode
-		contents.set(1, 1,
+		ItemStack scbClassic = ItemHelper.createSkullTexture("e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I4NmI4MjE1YjM2MTBlYWE2NDhjMjNjNGEyMGFkNjc1OWYyNTFlZjg1NDc2ODI5ZGQ2ZDE4NDI4MjNiMTEzIn19fQ==");
+		contents.set(1, 3,
 				ClickableItem.of(
-						ItemHelper.setDetails(new ItemStack(Material.REDSTONE_BLOCK),
+						ItemHelper.setDetails(scbClassic,
 								"&eSuper Craft Brothers",
 								"&eMode: &rClassic",
 								"",
@@ -64,7 +65,7 @@ public class GameSelectorGUI implements InventoryProvider {
 						}));
 
 		// Duels Mode
-		contents.set(1, 3,
+		contents.set(1, 5,
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD),
 								"&eSuper Craft Brothers",
@@ -86,7 +87,7 @@ public class GameSelectorGUI implements InventoryProvider {
 						}));
 
 		// Fishing
-		contents.set(1, 5,
+		contents.set(1, 1,
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
 								"&eFishing",
