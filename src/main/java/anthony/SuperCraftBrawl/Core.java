@@ -480,6 +480,7 @@ public class Core extends JavaPlugin implements Listener {
 		this.trickTitle.registerTitle("Trick-or-Treater", color("&6&lTrick-or-Treater"), 1.10);
 		this.trickTitle.registerTitle("Freddy Fazbear", color("&6&lFreddy Fazbear"), 1.08);
 		this.trickTitle.registerTitle("Fiesta De La Noche", color("&b&lFIESTA DE LA NOCHE"), 1.12);
+		this.trickTitle.registerTitle("i'm gay btw...", color("&di'm gay btw..."), 1.08);
 		getCommand("tricktitle").setExecutor(new TrickTitleCommand(trickTitle));
 
 		new BukkitRunnable() {
