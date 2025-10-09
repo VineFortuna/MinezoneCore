@@ -59,7 +59,7 @@ public class ScoreboardManager {
 
 		if (!main.tournament) {
 			String gameServer = "Minezone";
-			board.updateTitle(main.color("&e&l" + gameServer));
+			board.updateTitle(main.color("&d&l" + gameServer));
 			if (data != null) {
 				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 						main.color("&f&lTokens: &6" + data.tokens), "",
@@ -74,7 +74,7 @@ public class ScoreboardManager {
 						main.color("&f&lBaskets Found: &6"
 								+ main.getHalloweenManager().getFoundCount(player.getUniqueId()) + "/10"),
 						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						main.color("&6minezone.club"));
+						main.color("&dminezone.club"));
 			}
 		} else {
 			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + "MINEZONE");
