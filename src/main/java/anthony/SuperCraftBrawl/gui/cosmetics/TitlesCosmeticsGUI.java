@@ -86,8 +86,8 @@ public class TitlesCosmeticsGUI implements InventoryProvider {
 			inv.close(player);
 		}));
 
-		ItemStack wabyink = ItemHelper.setDetails(new ItemStack(Material.LAPIS_BLOCK), main.color("&f&lWabyink Title"),
-				main.color("&7The one and only Wabyink Title is here."), main.color("&7Must be Wabyink."));
+		ItemStack wabyink = ItemHelper.setDetails(new ItemStack(Material.LAPIS_BLOCK), main.color("&f&lThe Wabyink Title"),
+				main.color("&7The Wabyink Title, the one, and the only."), "", main.color("&8Must be Wabyink."));
 
 		contents.set(1, 5, ClickableItem.of(wabyink, e -> {
 			if (!player.getName().equals("Wabyink")) {
