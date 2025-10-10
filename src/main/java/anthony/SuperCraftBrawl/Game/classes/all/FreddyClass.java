@@ -116,7 +116,7 @@ public class FreddyClass extends BaseClass {
 								continue;
 
 							// Apply stun effects
-							target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 20 * 2, 0, true, false));
+							target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 20 * 5, 0, true, false));
 							target.addPotionEffect(
 									new PotionEffect(PotionEffectType.CONFUSION, 20 * 10, 2, true, false));
 							target.playSound(target.getLocation(), Sound.GHAST_SCREAM, 0.6f, 1.2f);
