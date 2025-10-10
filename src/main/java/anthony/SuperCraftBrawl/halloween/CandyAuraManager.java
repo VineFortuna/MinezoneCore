@@ -13,40 +13,51 @@ import java.util.UUID;
 
 /**
  * Candy Aura (Spigot 1.8).
- * - Renders only in the configured lobby world.
- * - If a player leaves that world, the aura is automatically DISABLED.
+ * STRICT PALETTE: ORANGE (COLOURED_DUST), BLACK (SMOKE), PURPLE (WITCH_MAGIC).
+ * - Only runs in the configured lobby world (if provided).
+ * - Auto-disables for players that leave that world or go offline.
  */
 public class CandyAuraManager {
     private final Plugin plugin;
-    private final String lobbyWorldName;              // e.g. "lobby-1"
+    private final String lobbyWorldName;              // e.g., "lobby-1"
     private final Set<UUID> enabled = new HashSet<>();
 
-    // how often to render (ticks). 5 = 4 times/second
+    // How often to render (ticks). 5 = 4 times/second
     private static final long PERIOD_TICKS = 5L;
+
+    // ---------- ORANGE DUST COLOR (RGB 255,120,0) ----------
+    private static final float ORANGE_R = 1.0f;           // 255/255
+    private static final float ORANGE_G = 120f / 255f;    // 120/255
+    private static final float ORANGE_B = 0.0f;           // 0/255
+
+    // Tune counts/radius centrally
+    private static final int DUST_FEET_COUNT = 6;
+    private static final int DUST_FEET_RADIUS = 16;
+
+    private static final int SMOKE_DATA = 0;              // small black smoke
+    private static final int SMOKE_RADIUS = 12;
+
+    private static final int WITCH_RADIUS = 16;
 
     public CandyAuraManager(Plugin plugin, String lobbyWorldName) {
         this.plugin = plugin;
         this.lobbyWorldName = (lobbyWorldName == null) ? "" : lobbyWorldName;
 
-        // one repeating task for all players
+        // One repeating task for all enabled players
         new BukkitRunnable() {
             @Override public void run() {
                 if (enabled.isEmpty()) return;
 
-                // copy to avoid CME when we remove during iteration
                 for (UUID id : enabled.toArray(new UUID[0])) {
                     Player p = Bukkit.getPlayer(id);
                     if (p == null || !p.isOnline()) {
                         enabled.remove(id);
                         continue;
                     }
-
-                    // If player left lobby, auto-disable so it won't play until re-enabled.
                     if (!isInLobby(p)) {
                         enabled.remove(id);
                         continue;
                     }
-
                     renderCandyAura(p);
                 }
             }
@@ -55,12 +66,13 @@ public class CandyAuraManager {
 
     // ---- Public API ----
     public boolean toggle(Player p) {
-        if (enabled.contains(p.getUniqueId())) {
-            enabled.remove(p.getUniqueId());
+        UUID id = p.getUniqueId();
+        if (enabled.contains(id)) {
+            enabled.remove(id);
             return false;
         } else {
             if (!isInLobby(p)) return false; // don't enable outside lobby
-            enabled.add(p.getUniqueId());
+            enabled.add(id);
             return true;
         }
     }
@@ -78,26 +90,49 @@ public class CandyAuraManager {
         return p.getWorld().getName().equalsIgnoreCase(lobbyWorldName);
     }
 
-    // fun little swirl with mixed "candy" effects
+    // --- Particle helpers (Spigot 1.8 "COLOURED_DUST" uses RGB via offsets; speed must be 1) ---
+    private void colouredDust(Location loc, float r, float g, float b, int count, int radius) {
+        // Only orange dust allowed here
+        loc.getWorld().spigot().playEffect(loc, Effect.COLOURED_DUST, 0, 0, r, g, b, 1.0f, count, radius);
+    }
+
+    private void orangeDust(Location loc, int count, int radius) {
+        colouredDust(loc, ORANGE_R, ORANGE_G, ORANGE_B, count, radius);
+    }
+
+    private void blackSmoke(Location loc, int radius) {
+        // BLACK ONLY: small smoke puff (SMOKE effect)
+        loc.getWorld().playEffect(loc, Effect.SMOKE, SMOKE_DATA, radius);
+    }
+
+    private void purpleWitch(Location loc, int radius) {
+        // PURPLE ONLY: witch magic
+        loc.getWorld().playEffect(loc, Effect.WITCH_MAGIC, 0, radius);
+    }
+
+    // --- Renders ONLY orange, purple, black ---
     private void renderCandyAura(Player p) {
-        Location base = p.getLocation().add(0, 0.1, 0);
+        Location base = p.getLocation().add(0, 0.05, 0);
 
-        // light “sparkles” around feet
-        p.getWorld().playEffect(base, Effect.HAPPY_VILLAGER, 0, 16);
-        p.getWorld().playEffect(base, Effect.CRIT, 0, 16);
+        // ORANGE: soft dust at the feet
+        orangeDust(base, DUST_FEET_COUNT, DUST_FEET_RADIUS);
 
-        // small purple-ish witch magic near waist
+        // BLACK: faint smoke wisp close to the ground
+        blackSmoke(base, SMOKE_RADIUS);
+
+        // PURPLE: witch magic near waist
         Location waist = base.clone().add(0, 0.7, 0);
-        p.getWorld().playEffect(waist, Effect.WITCH_MAGIC, 0, 16);
+        purpleWitch(waist, WITCH_RADIUS);
 
-        // tiny swirl offsets
-        final double r = 0.45;
+        // ORANGE: a small orbiting dust ring around waist height
+        final double ringRadius = 0.45;
+        long t = System.currentTimeMillis();
         for (int i = 0; i < 6; i++) {
-            double a = (System.currentTimeMillis() / 120.0 + i * Math.PI / 3.0);
-            double x = Math.cos(a) * r;
-            double z = Math.sin(a) * r;
-            Location ring = waist.clone().add(x, 0.1, z);
-            p.getWorld().playEffect(ring, Effect.HAPPY_VILLAGER, 0, 8);
+            double a = (t / 120.0 + i * Math.PI / 3.0);
+            double x = Math.cos(a) * ringRadius;
+            double z = Math.sin(a) * ringRadius;
+            Location ring = waist.clone().add(x, 0.10, z);
+            orangeDust(ring, 1, 8);
         }
     }
 }
