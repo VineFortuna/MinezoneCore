@@ -448,7 +448,7 @@ public class Core extends JavaPlugin implements Listener {
 		signManager = new SignManager(this);
 		lobbyItems = new anthony.SuperCraftBrawl.lobbyitems.LobbyItems(this);
 		halloweenHunt = new HalloweenHuntManager(this);
-		candyAura = new CandyAuraManager(this);
+		candyAura = new CandyAuraManager(this, "lobby-1");
 
 		for (Arenas arena : Arenas.values()) {
 			parkourBoards.add(new ParkourBoard(this, arena));

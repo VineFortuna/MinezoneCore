@@ -12,46 +12,71 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Simple particle aura that draws candy-colored sparkles around players.
- * Spigot 1.8-compatible (uses Effect.*).
+ * Candy Aura (Spigot 1.8).
+ * - Renders only in the configured lobby world.
+ * - If a player leaves that world, the aura is automatically DISABLED.
  */
 public class CandyAuraManager {
     private final Plugin plugin;
+    private final String lobbyWorldName;              // e.g. "lobby-1"
     private final Set<UUID> enabled = new HashSet<>();
 
     // how often to render (ticks). 5 = 4 times/second
     private static final long PERIOD_TICKS = 5L;
 
-    public CandyAuraManager(Plugin plugin) {
+    public CandyAuraManager(Plugin plugin, String lobbyWorldName) {
         this.plugin = plugin;
+        this.lobbyWorldName = (lobbyWorldName == null) ? "" : lobbyWorldName;
+
         // one repeating task for all players
         new BukkitRunnable() {
             @Override public void run() {
                 if (enabled.isEmpty()) return;
+
+                // copy to avoid CME when we remove during iteration
                 for (UUID id : enabled.toArray(new UUID[0])) {
                     Player p = Bukkit.getPlayer(id);
-                    if (p == null || !p.isOnline()) continue;
-                    
-                    if (p.getWorld().toString() == "lobby-1")
-                    	renderCandyAura(p);
+                    if (p == null || !p.isOnline()) {
+                        enabled.remove(id);
+                        continue;
+                    }
+
+                    // If player left lobby, auto-disable so it won't play until re-enabled.
+                    if (!isInLobby(p)) {
+                        enabled.remove(id);
+                        continue;
+                    }
+
+                    renderCandyAura(p);
                 }
             }
         }.runTaskTimer(plugin, PERIOD_TICKS, PERIOD_TICKS);
     }
 
+    // ---- Public API ----
     public boolean toggle(Player p) {
         if (enabled.contains(p.getUniqueId())) {
             enabled.remove(p.getUniqueId());
             return false;
         } else {
+            if (!isInLobby(p)) return false; // don't enable outside lobby
             enabled.add(p.getUniqueId());
             return true;
         }
     }
 
-    public void enable(Player p) { enabled.add(p.getUniqueId()); }
+    public void enable(Player p) {
+        if (isInLobby(p)) enabled.add(p.getUniqueId());
+    }
+
     public void disable(Player p) { enabled.remove(p.getUniqueId()); }
+
     public boolean isEnabled(Player p) { return enabled.contains(p.getUniqueId()); }
+
+    private boolean isInLobby(Player p) {
+        if (lobbyWorldName.isEmpty()) return true;
+        return p.getWorld().getName().equalsIgnoreCase(lobbyWorldName);
+    }
 
     // fun little swirl with mixed "candy" effects
     private void renderCandyAura(Player p) {
