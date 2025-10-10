@@ -119,7 +119,6 @@ public class GenericModeGUI implements InventoryProvider {
 		// Setting "Go Back" Button
 		contents.set(totalRows - 1, totalColumns - 1, ClickableItem.of(ItemHelper.getGoBackItem(), e -> {
 			SoundManager.playClickSound(player);
-			inv.close(player);
 			if (inv.getParent().isPresent()) {inv.getParent().get().open(player);}
 		}));
 
