@@ -71,7 +71,7 @@ public class KillsBoard extends LeaderboardBase {
 	public void updateLeaderboard(boolean init) {
 		removeOldLeaderboards();
 
-		Location loc = new Location(main.getLobbyWorld(), 195.5, 106.5, 713.5);
+		Location loc = new Location(main.getLobbyWorld(), 194.5, 106.5, 713.5);
 		sendArmorStandPacket(loc, ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Kills");
 		loc.setY(loc.getY() - 0.4);
 

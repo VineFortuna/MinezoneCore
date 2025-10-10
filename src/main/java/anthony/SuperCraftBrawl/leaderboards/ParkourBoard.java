@@ -99,8 +99,6 @@ public class ParkourBoard extends LeaderboardBase {
 			PlayerData data = main.getDataManager().getPlayerData(player);
 			if (data != null && !lead.contains(data.playerUUID)) {
 				ParkourDetails details = data.playerParkour.get(arena.getId());
-				long bestTime = details != null ? details.totalTime : 0;
-				String formattedTime = formatTime(bestTime);
 
 				// draw the separator for THIS player at a fixed offset from base
 				Location line1 = base.clone().add(0, -0.24, 0);
@@ -109,7 +107,8 @@ public class ParkourBoard extends LeaderboardBase {
 
 				// draw the player's own line just below it
 				Location line2 = base.clone().add(0, -0.44, 0);
-				sendStandToOnePlayer(line2, "" + ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + formattedTime,
+				sendStandToOnePlayer(line2, "" + ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " +
+						(details != null ? formatTime(details.totalTime) : "N/A"),
 						player);
 			}
 		}

@@ -22,7 +22,7 @@ public class WinEffectsGUI implements InventoryProvider {
 		inv = SmartInventory.builder()
 				.id("myInventory")
 				.provider(this)
-				.size(3, 9)
+				.size(4, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Win Effects")
 				.parent(parent)
 				.build();
@@ -157,12 +157,12 @@ public class WinEffectsGUI implements InventoryProvider {
 								}
 							}));
 			
-			contents.set(1, 8,
+			contents.set(2, 1,
 					ClickableItem.of(
 							ItemHelper
 									.setDetails(new ItemStack(Material.NETHERRACK), main.color("&cRitual"), "",
-											main.color("&rHerobrine totem and bats"), main.color("&rflood the map..."),
-											"", main.color("&cHalloween 2025 Exclusive")),
+											main.color("&rHerobrine totem and bats"), main.color("&rtake over the map..."),
+											"", main.color("&cHalloween 2025 exclusive")),
 							e -> {
 								if (main.getListener().getHalloweenEventProgress(player) >= 3) {
 									resetWinEffects(data);
@@ -184,7 +184,7 @@ public class WinEffectsGUI implements InventoryProvider {
 				player.sendMessage(main.color("&e&l(!) &rYou have enabled &eDefault &rwin effect"));
 			}));
 
-			contents.set(2, 8, ClickableItem.of(
+			contents.set(3, 8, ClickableItem.of(
 					ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
 						inv.getParent().get().open(player);
 					}
