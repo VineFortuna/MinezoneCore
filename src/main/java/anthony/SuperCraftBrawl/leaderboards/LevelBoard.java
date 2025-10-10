@@ -72,7 +72,7 @@ public class LevelBoard extends LeaderboardBase {
 	public void updateLeaderboard(boolean init) {
 		removeOldLeaderboards();
 
-		Location loc = new Location(main.getLobbyWorld(), 190.494, 106.5, 717.520);
+		Location loc = new Location(main.getLobbyWorld(), 189.5, 106.5, 717.5);
 		sendArmorStandPacket(loc, ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + "Top Levels");
 		loc.setY(loc.getY() - 0.4);
 

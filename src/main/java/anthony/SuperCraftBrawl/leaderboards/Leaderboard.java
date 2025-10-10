@@ -71,7 +71,7 @@ public class Leaderboard extends LeaderboardBase {
 	public void updateLeaderboard(boolean init) {
 		removeOldLeaderboards();
 
-		Location loc = new Location(main.getLobbyWorld(), 185.5, 106.5, 713.5);
+		Location loc = new Location(main.getLobbyWorld(), 184.5, 106.5, 713.5);
 		sendArmorStandPacket(loc, ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Wins");
 		loc.setY(loc.getY() - 0.4);
 
