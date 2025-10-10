@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.Game;
 
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.util.ItemHelper;
+import net.minecraft.server.v1_8_R3.PacketPlayOutNamedSoundEffect;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -28,7 +29,10 @@ public class WinEffects {
 	private boolean rainEffect = false;
 	private boolean floodEffect = false;
 	private boolean treasureEffect = false;
+	private boolean ritualEffect = false;
+
 	private ArrayList<Item> fish = new ArrayList<>();
+	private final List<Bat> ritualBats = new ArrayList<>();
 
 	public WinEffects(Player player, GameInstance instance) {
 		this.player = player;
@@ -54,7 +58,7 @@ public class WinEffects {
 					floodEffect();
 				else if (data.treasureEffect == 1)
 					treasureEffect();
-				else if (safeRitualEnabled(data)) // <--- NEW: ritual effect gate
+				else if (data.ritualEffect == 1)
 					ritualEffect();
 				else
 					defaultEffect();
@@ -62,22 +66,13 @@ public class WinEffects {
 		}
 	}
 
-	// If you haven't added this field yet, either add "public int ritualEffect;" in PlayerData,
-	// or temporarily return false here to keep builds happy.
-	private boolean safeRitualEnabled(PlayerData data) {
-		try {
-			return data.ritualEffect == 1;
-		} catch (Throwable ignored) {
-			return false;
-		}
-	}
+	// ALL WIN EFFECTS:
 
-	// ============== ALL WIN EFFECTS ==============
-
-	//This spawns an Ender Dragon at the player & makes the player ride it
+	// This spawns an Ender Dragon at the player & makes the player ride it
 	private void enderDragonEffect() {
 		World world = player.getWorld();
-		if (world != instance.getMapWorld()) return;
+		if (world != instance.getMapWorld())
+			return;
 		startFireworksRunnable(world);
 		this.dragon = (EnderDragon) world.spawnEntity(this.player.getLocation(), EntityType.ENDER_DRAGON);
 		this.dragon.setPassenger(this.player);
@@ -85,9 +80,10 @@ public class WinEffects {
 
 	private void magicBroomEffect() {
 		World world = player.getWorld();
-		if (world != instance.getMapWorld()) return;
+		if (world != instance.getMapWorld())
+			return;
 		startFireworksRunnable(world);
-		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT),"&2&lMagic Broom");
+		ItemStack broom = ItemHelper.setDetails(new ItemStack(Material.WHEAT), "&2&lMagic Broom");
 		player.getInventory().setItem(0, broom);
 	}
 
@@ -100,7 +96,8 @@ public class WinEffects {
 
 	private void santaEffect() {
 		World world = player.getWorld();
-		if (world != instance.getMapWorld()) return;
+		if (world != instance.getMapWorld())
+			return;
 		startFireworksRunnable(world);
 		ItemStack playerskull = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
 		SkullMeta meta = (SkullMeta) playerskull.getItemMeta();
@@ -124,7 +121,7 @@ public class WinEffects {
 	}
 
 	private void fireParticlesEffect() {
-		// (left empty by your original class)
+		// (left intentionally blank in your original)
 	}
 
 	public Location getItemRainLoc() {
@@ -152,21 +149,22 @@ public class WinEffects {
 	private void fishRainEffect() {
 		this.rainEffect = true;
 		World world = player.getWorld();
-		if (world != instance.getMapWorld()) return;
+		if (world != instance.getMapWorld())
+			return;
 		startFireworksRunnable(world);
 		world.setStorm(true);
 		world.setThundering(true);
 		BukkitRunnable runnable = new BukkitRunnable() {
 			int rep = 0;
 			Random rand = new Random();
+
 			@Override
 			public void run() {
 				if (rep == 240) {
 					this.cancel();
 				} else {
 					int chance = rand.nextInt(4);
-					Item i = world.dropItem(getItemRainLoc(),
-							new ItemStack(Material.RAW_FISH, 1, (short) chance));
+					Item i = world.dropItem(getItemRainLoc(), new ItemStack(Material.RAW_FISH, 1, (short) chance));
 					fish.add(i);
 				}
 				rep++;
@@ -177,7 +175,8 @@ public class WinEffects {
 
 	private void floodEffect() {
 		World world = player.getWorld();
-		if (world != instance.getMapWorld()) return;
+		if (world != instance.getMapWorld())
+			return;
 		startFireworksRunnable(world);
 		world.setStorm(true);
 		world.setThundering(true);
@@ -198,6 +197,7 @@ public class WinEffects {
 		BukkitRunnable runnable = new BukkitRunnable() {
 			int rep = 0;
 			double y = centerY;
+
 			@Override
 			public void run() {
 				if (rep == 100) {
@@ -226,7 +226,8 @@ public class WinEffects {
 
 	public void treasureEffect() {
 		final World world = player.getWorld();
-		if (world != instance.getMapWorld()) return;
+		if (world != instance.getMapWorld())
+			return;
 		startFireworksRunnable(world);
 		final Random rand = new Random();
 		final Location loc = player.getLocation();
@@ -244,7 +245,8 @@ public class WinEffects {
 
 					// Final explosion cleanup
 					for (Block b : placedBlocks) {
-						if (b.getType() == Material.GOLD_BLOCK) b.setType(Material.AIR);
+						if (b.getType() == Material.GOLD_BLOCK)
+							b.setType(Material.AIR);
 					}
 				}
 
@@ -260,7 +262,8 @@ public class WinEffects {
 					int baseY = loc.getBlockY() + (int) rise;
 
 					// Find highest solid block below current height
-					while (baseY > 0 && world.getBlockAt(loc.getBlockX() + dx, baseY, loc.getBlockZ() + dz).getType() == Material.AIR) {
+					while (baseY > 0 && world.getBlockAt(loc.getBlockX() + dx, baseY, loc.getBlockZ() + dz)
+							.getType() == Material.AIR) {
 						baseY--;
 					}
 
@@ -276,15 +279,13 @@ public class WinEffects {
 							Material coinMat = rand.nextBoolean() ? Material.GOLD_NUGGET : Material.GOLD_INGOT;
 							Item item = world.dropItem(coinLoc, new ItemStack(coinMat, 1));
 							item.setPickupDelay(Integer.MAX_VALUE);
-							item.setVelocity(new Vector(
-									(rand.nextDouble() - 0.5) * 0.8,
-									0.6 + rand.nextDouble() * 0.4,
-									(rand.nextDouble() - 0.5) * 0.8
-							));
+							item.setVelocity(new Vector((rand.nextDouble() - 0.5) * 0.8, 0.6 + rand.nextDouble() * 0.4,
+									(rand.nextDouble() - 0.5) * 0.8));
 							new BukkitRunnable() {
 								@Override
 								public void run() {
-									if (!item.isDead()) item.remove();
+									if (!item.isDead())
+										item.remove();
 								}
 							}.runTaskLater(instance.getGameManager().getMain(), 40L);
 						}
@@ -296,143 +297,121 @@ public class WinEffects {
 		}.runTaskTimer(instance.getGameManager().getMain(), 0L, 4L); // every 4 ticks
 	}
 
-	// ========= NEW: Herobrine "Ritual" Win Effect =========
+	private void playRecord11Compat(World world, Location loc, float volume, float pitch) {
+		// Try Bukkit enum if present on this server
+		try {
+			Sound s = Sound.valueOf("RECORD_11");
+			world.playSound(loc, s, volume, pitch);
+			return;
+		} catch (Throwable ignored) {
+		}
+
+		// Fallback: send the NMS sound name used in 1.8 ("records.11")
+		try {
+			PacketPlayOutNamedSoundEffect pkt = new PacketPlayOutNamedSoundEffect("records.11", loc.getX(), loc.getY(),
+					loc.getZ(), volume, pitch);
+			for (Player p : world.getPlayers()) {
+				((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) p).getHandle().playerConnection.sendPacket(pkt);
+			}
+		} catch (Throwable ignored) {
+		}
+	}
+
+	// --- UPDATED: Ritual effect (totem stays, bats wander normally, lightning then Enderman scream) ---
 	private void ritualEffect() {
-		final World w = player.getWorld();
-		if (w != instance.getMapWorld()) return;
-		startFireworksRunnable(w);
+		World world = player.getWorld();
+		if (world != instance.getMapWorld())
+			return;
 
-		// snapshot helper to restore blocks after the ritual
-		final class Snap {
-			final Block b; final Material type; final byte data;
-			Snap(Block b){ this.b=b; this.type=b.getType(); this.data=b.getData(); }
-			void restore(){ b.setType(type); b.setData(data, true); b.getState().update(true, false); }
-		}
-		final List<Snap> snaps = new ArrayList<>();
+		this.ritualEffect = true;
 
-		// align base to grid so the totem looks neat
-		Location base = player.getLocation().clone();
-		base.setX(Math.floor(base.getX()));
-		base.setY(Math.floor(base.getY()));
-		base.setZ(Math.floor(base.getZ()));
+		// Fireworks flair
+		startFireworksRunnable(world);
 
-		// Totem:
-		// y  : +0 GOLD
-		// y  : +1 GOLD
-		// y  : +2 NETHERRACK + 4 wall redstone torches around
-		// y  : +3 FIRE
-		Block gold1 = w.getBlockAt(base);
-		Block gold2 = w.getBlockAt(base.clone().add(0, 1, 0));
-		Block nether = w.getBlockAt(base.clone().add(0, 2, 0));
-		Block fire  = w.getBlockAt(base.clone().add(0, 3, 0));
+		// Build a Herobrine-style totem near the winner
+		final List<Block> placed = new ArrayList<>();
+		final Location base = findGround(player.getLocation()).add(0, 1, 0); // one block above ground
 
-		Block torchN = w.getBlockAt(base.clone().add(0, 2, -1)); // north (-Z)
-		Block torchS = w.getBlockAt(base.clone().add(0, 2,  1)); // south (+Z)
-		Block torchW = w.getBlockAt(base.clone().add(-1,2, 0));  // west  (-X)
-		Block torchE = w.getBlockAt(base.clone().add(1, 2,  0)); // east  (+X)
+		// Totem: GOLD -> GOLD -> NETHERRACK (+ fire on top), redstone torches on sides at netherrack level
+		Block b1 = base.getBlock();
+		Block b2 = base.clone().add(0, 1, 0).getBlock();
+		Block b3 = base.clone().add(0, 2, 0).getBlock(); // netherrack
+		Block fire = base.clone().add(0, 3, 0).getBlock();
 
-		snaps.add(new Snap(gold1));
-		snaps.add(new Snap(gold2));
-		snaps.add(new Snap(nether));
-		snaps.add(new Snap(fire));
-		snaps.add(new Snap(torchN));
-		snaps.add(new Snap(torchS));
-		snaps.add(new Snap(torchW));
-		snaps.add(new Snap(torchE));
+		if (b1.getType() == Material.AIR) { b1.setType(Material.GOLD_BLOCK); placed.add(b1); }
+		if (b2.getType() == Material.AIR) { b2.setType(Material.GOLD_BLOCK); placed.add(b2); }
+		if (b3.getType() == Material.AIR) { b3.setType(Material.NETHERRACK); placed.add(b3); }
+		if (fire.getType() == Material.AIR) { fire.setType(Material.FIRE); placed.add(fire); }
 
-		setBlock(gold1, Material.GOLD_BLOCK);
-		setBlock(gold2, Material.GOLD_BLOCK);
-		setBlock(nether, Material.NETHERRACK);
+		// Four redstone torches around the netherrack level
+		Block torchN = base.clone().add(0, 2, -1).getBlock();
+		Block torchS = base.clone().add(0, 2,  1).getBlock();
+		Block torchW = base.clone().add(-1,2,  0).getBlock();
+		Block torchE = base.clone().add(1, 2,  0).getBlock();
+		if (torchN.getType() == Material.AIR) { torchN.setType(Material.REDSTONE_TORCH_ON); placed.add(torchN); }
+		if (torchS.getType() == Material.AIR) { torchS.setType(Material.REDSTONE_TORCH_ON); placed.add(torchS); }
+		if (torchW.getType() == Material.AIR) { torchW.setType(Material.REDSTONE_TORCH_ON); placed.add(torchW); }
+		if (torchE.getType() == Material.AIR) { torchE.setType(Material.REDSTONE_TORCH_ON); placed.add(torchE); }
 
-		// 1.8 wall torch data: 1=east, 2=west, 3=south, 4=north
-		placeWallTorch(torchN, (byte)4);
-		placeWallTorch(torchS, (byte)3);
-		placeWallTorch(torchW, (byte)2);
-		placeWallTorch(torchE, (byte)1);
+		// Lightning at the totem top
+		world.strikeLightningEffect(fire.getLocation());
 
-		setBlock(fire, Material.FIRE);
-
-		// spooky sounds/particles
-		w.playSound(base, Sound.AMBIENCE_CAVE, 1.0f, 0.6f);
-		w.playSound(base, Sound.GHAST_MOAN, 0.7f, 0.7f);
-		w.spigot().playEffect(base.clone().add(0, 2.5, 0), Effect.SMOKE, 0, 0, 0.3f, 0.6f, 0.3f, 0.02f, 30, 16);
-		w.spigot().playEffect(base.clone().add(0, 2.5, 0), Effect.ENDER_SIGNAL, 0, 0, 0,0,0, 0, 10, 16);
-
-		// bats
-		final List<Entity> bats = new ArrayList<>(10);
-		for (int i = 0; i < 10; i++) {
-			double angle = (Math.PI * 2) * i / 10.0;
-			double r = 2.2;
-			Location bLoc = base.clone().add(Math.cos(angle) * r, 2.0 + (i % 3) * 0.3, Math.sin(angle) * r);
-			Bat bat = w.spawn(bLoc, Bat.class);
-			bat.setRemoveWhenFarAway(false);
-			bats.add(bat);
+		// After lightning, play ENDERMAN_SCREAM
+		try {
+			world.playSound(fire.getLocation(), Sound.ENDERMAN_SCREAM, 1.0f, 1.0f);
+		} catch (Throwable ignored) {
+			// 1.8 friendly; ENDERMAN_SCREAM exists here, just being cautious
 		}
 
-		// lightning visuals
-		new BukkitRunnable() {
-			int flashes = 0;
-			@Override public void run() {
-				w.strikeLightningEffect(base.clone().add(0, 2.5, 0));
-				if (++flashes >= 3) cancel();
-			}
-		}.runTaskTimer(instance.getGameManager().getMain(), 0L, 10L);
+		// Spawn some bats nearby (default behavior; no orbit logic)
+		final int BAT_COUNT = 10;
+		final Random rand = new Random();
+		Location center = base.clone().add(0.5, 2.0, 0.5);
+		for (int i = 0; i < BAT_COUNT; i++) {
+			Location spawn = center.clone().add(rand.nextDouble() * 6 - 3, rand.nextDouble() * 2, rand.nextDouble() * 6 - 3);
+			Bat bat = (Bat) world.spawnEntity(spawn, EntityType.BAT);
+			bat.setRemoveWhenFarAway(true);
+			ritualBats.add(bat);
+		}
 
-		// animate bats in swirl + periodic particles, then restore blocks
-		final int lifetime = 20 * 6; // 6s
+		// Cleanup after ~10 seconds (remove bats + remove placed blocks safely)
 		new BukkitRunnable() {
-			int t = 0;
-			@Override public void run() {
-				if (t >= lifetime) {
-					for (Entity e : bats) if (e != null && !e.isDead()) e.remove();
-					// restore blocks
-					for (Snap s : snaps) {
-						try { s.restore(); } catch (Throwable ignored) {}
+			@Override
+			public void run() {
+				for (Bat b : ritualBats) {
+					if (b != null && !b.isDead()) b.remove();
+				}
+				ritualBats.clear();
+
+				for (Block b : placed) {
+					// Avoid nuking map blocks if something else replaced them in the meantime
+					// We only remove what we originally placed (gold, netherrack, fire, torches)
+					Material t = b.getType();
+					if (t == Material.GOLD_BLOCK || t == Material.NETHERRACK || t == Material.FIRE || t == Material.REDSTONE_TORCH_ON) {
+						b.setType(Material.AIR);
 					}
-					w.playSound(base, Sound.PORTAL_TRAVEL, 0.7f, 0.7f);
-					w.spigot().playEffect(base.clone().add(0, 2, 0), Effect.LARGE_SMOKE, 0, 0, 0.5f,0.5f,0.5f, 0.02f, 20, 16);
-					cancel();
-					return;
 				}
 
-				double theta = (t / 6.0);
-				int i = 0;
-				for (Entity e : bats) {
-					if (!(e instanceof Bat) || e.isDead()) continue;
-					double a = theta + (i++ * (Math.PI * 2 / Math.max(1, bats.size())));
-					double r = 2.2;
-					Location target = base.clone().add(Math.cos(a) * r, 1.8 + Math.sin(theta * 0.7) * 0.3, Math.sin(a) * r);
-					e.teleport(target);
-				}
-
-				if (t % 10 == 0) {
-					w.spigot().playEffect(base.clone().add(0, 2.2, 0), Effect.PORTAL, 0, 0, 0.6f, 0.6f, 0.6f, 0.02f, 40, 16);
-					w.playSound(base, Sound.AMBIENCE_THUNDER, 0.25f, 1.5f);
-				}
-				t += 2;
+				ritualEffect = false;
 			}
-		}.runTaskTimer(instance.getGameManager().getMain(), 10L, 2L);
+		}.runTaskLater(instance.getGameManager().getMain(), 200L); // 10s
 	}
 
-	// ======= helpers for ritual =======
-	private void setBlock(Block b, Material m) {
-		b.setType(m);
-		b.getState().update(true, false);
+	private Location findGround(Location start) {
+		Location loc = start.clone();
+		World w = loc.getWorld();
+		int y = Math.min(255, Math.max(1, loc.getBlockY()));
+		while (y > 1 && w.getBlockAt(loc.getBlockX(), y, loc.getBlockZ()).getType() == Material.AIR) y--;
+		return new Location(w, loc.getBlockX() + 0.5, y, loc.getBlockZ() + 0.5);
 	}
-	private void placeWallTorch(Block target, byte dataFacing) {
-		target.setType(Material.REDSTONE_TORCH_ON);
-		target.setData(dataFacing, true);
-		target.getState().update(true, false);
-	}
-
-	// ============== DEFAULT + SHARED FIREWORKS ==============
 
 	private void defaultEffect() {
 		this.defaultEffect = true;
 
 		if (this.defaultEffect) {
 			World world = player.getWorld();
-			if (world != instance.getMapWorld()) return;
+			if (world != instance.getMapWorld())
+				return;
 			startFireworksRunnable(world);
 		}
 	}
@@ -465,16 +444,19 @@ public class WinEffects {
 		Random r = new Random();
 		int chance = r.nextInt(4);
 
-		if (chance == 0) c = Color.BLUE;
-		else if (chance == 1) c = Color.LIME;
-		else if (chance == 2) c = Color.GREEN;
-		else c = Color.YELLOW;
-
+		if (chance == 0)
+			c = Color.BLUE;
+		else if (chance == 1)
+			c = Color.LIME;
+		else if (chance == 2)
+			c = Color.GREEN;
+		else
+			c = Color.YELLOW;
 		fwm.addEffect(FireworkEffect.builder().withColor(c).flicker(true).build());
 		fw.setFireworkMeta(fwm);
 	}
 
-	// ============== REMOVE WIN EFFECTS ==============
+	// REMOVE WIN EFFECTS:
 
 	public void removeWinEffects() {
 		if (this.dragon != null && !(this.dragon.isDead())) {
@@ -494,6 +476,11 @@ public class WinEffects {
 			this.floodEffect = false;
 		} else if (this.treasureEffect) {
 			this.treasureEffect = false;
+		} else if (this.ritualEffect) {
+			// cleanup bats + try to remove any lingering simple totem parts (best-effort)
+			for (Bat b : ritualBats) if (b != null && !b.isDead()) b.remove();
+			ritualBats.clear();
+			this.ritualEffect = false;
 		}
 	}
 }

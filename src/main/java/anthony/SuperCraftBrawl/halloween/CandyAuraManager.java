@@ -31,7 +31,9 @@ public class CandyAuraManager {
                 for (UUID id : enabled.toArray(new UUID[0])) {
                     Player p = Bukkit.getPlayer(id);
                     if (p == null || !p.isOnline()) continue;
-                    renderCandyAura(p);
+                    
+                    if (p.getWorld().toString() == "lobby-1")
+                    	renderCandyAura(p);
                 }
             }
         }.runTaskTimer(plugin, PERIOD_TICKS, PERIOD_TICKS);
