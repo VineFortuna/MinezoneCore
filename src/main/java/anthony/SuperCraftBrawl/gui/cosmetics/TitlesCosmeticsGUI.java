@@ -86,18 +86,20 @@ public class TitlesCosmeticsGUI implements InventoryProvider {
 			inv.close(player);
 		}));
 
-		ItemStack wabyink = ItemHelper.setDetails(new ItemStack(Material.LAPIS_BLOCK), main.color("&f&lThe Wabyink Title"),
-				main.color("&7The Wabyink Title, the one, and the only."), "", main.color("&8Must be Wabyink."));
+		if (player.getName().equals("Wabyink")) {
+			ItemStack wabyink = ItemHelper.setDetails(new ItemStack(Material.LAPIS_BLOCK), main.color("&f&lThe Wabyink Title"),
+					main.color("&7The Wabyink Title, the one, and the only."), "", main.color("&8Must be Wabyink."));
 
-		contents.set(1, 5, ClickableItem.of(wabyink, e -> {
-			if (!player.getName().equals("Wabyink")) {
-				player.sendMessage(main.color("&c&l(!) &rYou need to be Wabyink for this!"));
-				return;
-			}
+			contents.set(1, 5, ClickableItem.of(wabyink, e -> {
+				if (!player.getName().equals("Wabyink")) {
+					player.sendMessage(main.color("&c&l(!) &rYou need to be Wabyink for this!"));
+					return;
+				}
 
-			enableDisableTitle(player, "i'm gay btw..."); // Enable/disable gadget
-			inv.close(player);
-		}));
+				enableDisableTitle(player, "i'm gay btw..."); // Enable/disable gadget
+				inv.close(player);
+			}));
+		}
 
 		contents.set(2, 8, ClickableItem
 				.of(ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
