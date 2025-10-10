@@ -72,7 +72,7 @@ public class WinstreakBoard extends LeaderboardBase {
 	public void updateLeaderboard(boolean init) {
 		removeOldLeaderboards();
 
-		Location loc = new Location(main.getLobbyWorld(), 201.5, 106.5, 709.5);
+		Location loc = new Location(main.getLobbyWorld(), 200.5, 106.5, 709.5);
 		sendArmorStandPacket(loc, ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + "Best Winstreak");
 		loc.setY(loc.getY() - 0.4);
 
