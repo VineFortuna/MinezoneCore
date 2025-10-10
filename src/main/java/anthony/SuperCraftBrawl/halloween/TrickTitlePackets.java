@@ -2,7 +2,6 @@ package anthony.SuperCraftBrawl.halloween;
 
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -125,40 +124,25 @@ public final class TrickTitlePackets implements Listener {
 
     // ===== Events =====
 
-    /**
-     * Only handle intra-world teleports here (refresh attachments).
-     * World changes are handled exclusively in onChangedWorld to avoid double spawns.
-     */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onTeleport(PlayerTeleportEvent e) {
         final Player p = e.getPlayer();
-
-        // Ignore world changes here; onChangedWorld will take care of hide/show.
         if (e.getFrom() != null && e.getTo() != null && e.getFrom().getWorld() != e.getTo().getWorld()) {
-            return;
+            return; // handled in onChangedWorld
         }
-
-        // If the player has a preferred title and is in the lobby, make sure viewers see it
         String key = pref.get(p.getUniqueId());
         if (key == null || !isInLobby(p)) return;
-
-        // Re-attach for nearby viewers after the teleport completes
         Bukkit.getScheduler().runTask(plugin, () -> {
             if (!p.isOnline() || !isInLobby(p)) return;
             refreshOwnerForAllViewers(p);
         });
     }
 
-    /**
-     * World change: do a strict hide, then show once if appropriate.
-     * This guarantees there is never more than one stand per owner.
-     */
     @EventHandler
     public void onChangedWorld(PlayerChangedWorldEvent e) {
         Player p = e.getPlayer();
         lastWorldChange.put(p.getUniqueId(), System.currentTimeMillis());
 
-        // Always nuke any previous stand first (in previous world or viewer staleness)
         hideFor(p);
 
         String key = pref.get(p.getUniqueId());
@@ -167,54 +151,81 @@ public final class TrickTitlePackets implements Listener {
             if (def != null) showFor(p, def, key);
         }
 
-        // Refresh everyone in the new world to (re)see all active owners
-        for (Player viewer : p.getWorld().getPlayers()) {
-            refreshForViewer(viewer);
-        }
+        // 3s later, do a HARD refresh for all viewers in this world
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            for (Player viewer : p.getWorld().getPlayers()) {
+                refreshForViewerHard(viewer);
+            }
+        }, 60L);
     }
 
     @EventHandler public void onQuit(PlayerQuitEvent e)  { hideFor(e.getPlayer()); pref.remove(e.getPlayer().getUniqueId()); }
     @EventHandler public void onDeath(PlayerDeathEvent e){ hideFor(e.getEntity()); }
 
     // Send active titles to the NEW viewer (exclude self-view)
-    @EventHandler public void onJoin(PlayerJoinEvent e) { refreshForViewer(e.getPlayer()); }
+    @EventHandler public void onJoin(PlayerJoinEvent e) {
+        // 3s later, HARD refresh for this viewer (vanilla-safe)
+        Bukkit.getScheduler().runTaskLater(plugin, () -> refreshForViewerHard(e.getPlayer()), 60L);
+    }
 
     // Viewer-side refresh hooks
     @EventHandler
     public void onViewerWorldChange(PlayerChangedWorldEvent e) {
-        refreshForViewer(e.getPlayer());
+        Bukkit.getScheduler().runTaskLater(plugin, () -> refreshForViewerHard(e.getPlayer()), 60L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onViewerTeleport(PlayerTeleportEvent e) {
         final Player viewer = e.getPlayer();
-        // Avoid spamming during a world change burst
         Long last = lastWorldChange.get(viewer.getUniqueId());
         if (last != null && (System.currentTimeMillis() - last) < 300) return;
         Bukkit.getScheduler().runTask(plugin, () -> refreshForViewer(viewer));
     }
 
-    // Refreshes what the *viewer* should see right now
+    // ===== Refresh logic =====
+
+    // Soft refresh (no destroy): fine most of the time
     private void refreshForViewer(Player viewer) {
         if (!viewer.isOnline()) return;
 
         if (!isInLobby(viewer)) {
-            // ensure any previously shown stands are destroyed for this viewer
             for (StandData sd : active.values()) {
                 send(viewer, new PacketPlayOutEntityDestroy(new int[]{ sd.entityId }));
             }
             return;
         }
 
-        // (Re)send spawn/attach for all owners in the same world
         World vw = viewer.getWorld();
         for (Map.Entry<UUID, StandData> entry : active.entrySet()) {
             Player owner = Bukkit.getPlayer(entry.getKey());
             if (owner == null || !owner.isOnline()) continue;
-            if (owner == viewer) continue; // no self-view
+            if (owner == viewer) continue;
             if (owner.getWorld() != vw) continue;
 
+            // vanilla-safe order (no destroy)
             sendSpawnAndAttach(viewer, owner, entry.getValue());
+        }
+    }
+
+    // HARD refresh: destroy first, then re-spawn/attach (fixes vanilla dropping passengers)
+    private void refreshForViewerHard(Player viewer) {
+        if (!viewer.isOnline()) return;
+
+        if (!isInLobby(viewer)) {
+            for (StandData sd : active.values()) {
+                send(viewer, new PacketPlayOutEntityDestroy(new int[]{ sd.entityId }));
+            }
+            return;
+        }
+
+        World vw = viewer.getWorld();
+        for (Map.Entry<UUID, StandData> entry : active.entrySet()) {
+            Player owner = Bukkit.getPlayer(entry.getKey());
+            if (owner == null || !owner.isOnline()) continue;
+            if (owner == viewer) continue;
+            if (owner.getWorld() != vw) continue;
+
+            sendHardRefresh(viewer, owner, entry.getValue());
         }
     }
 
@@ -223,6 +234,7 @@ public final class TrickTitlePackets implements Listener {
         if (sd == null) return;
         for (Player viewer : owner.getWorld().getPlayers()) {
             if (viewer == owner || !viewer.isOnline()) continue;
+            // soft refresh here (owner moved/teleported recently)
             sendSpawnAndAttach(viewer, owner, sd);
         }
     }
@@ -253,7 +265,6 @@ public final class TrickTitlePackets implements Listener {
         sd.key = key;
         active.put(owner.getUniqueId(), sd);
 
-        // Show to viewers (exclude owner)
         for (Player viewer : owner.getWorld().getPlayers()) {
             if (!viewer.isOnline() || viewer == owner) continue;
             sendSpawnAndAttach(viewer, owner, sd);
@@ -263,11 +274,11 @@ public final class TrickTitlePackets implements Listener {
     private void hideFor(Player owner) {
         StandData sd = active.remove(owner.getUniqueId());
         if (sd == null) return;
-        // Destroy in BOTH the owner's current world and across all online players to be safe
         PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(new int[]{ sd.entityId });
         for (Player p : Bukkit.getOnlinePlayers()) send(p, destroy);
     }
 
+    /** Soft pipeline: spawn → metadata → (pre)teleport → attach (attach LAST) */
     private void sendSpawnAndAttach(Player viewer, Player owner, StandData sd) {
         TitleDef def = registry.get(sd.key);
         double yOff = (def != null ? def.yOffset : 1.10D);
@@ -276,14 +287,37 @@ public final class TrickTitlePackets implements Listener {
                            owner.getLocation().getY() + yOff,
                            owner.getLocation().getZ(), 0f, 0f);
 
-        PacketPlayOutSpawnEntityLiving spawn = new PacketPlayOutSpawnEntityLiving(sd.nms);
-        send(viewer, spawn);
+        send(viewer, new PacketPlayOutSpawnEntityLiving(sd.nms));
+        send(viewer, new PacketPlayOutEntityMetadata(sd.entityId, sd.nms.getDataWatcher(), true));
+        send(viewer, makeTeleport(sd)); // pre-attach teleport to lock position
+        send(viewer, new PacketPlayOutAttachEntity(0, sd.nms, ((CraftPlayer) owner).getHandle())); // attach LAST
 
-        PacketPlayOutEntityMetadata meta = new PacketPlayOutEntityMetadata(sd.entityId, sd.nms.getDataWatcher(), true);
-        send(viewer, meta);
+        // tiny re-attach 1 tick later for vanilla edge cases
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            if (!viewer.isOnline() || !owner.isOnline()) return;
+            send(viewer, new PacketPlayOutAttachEntity(0, sd.nms, ((CraftPlayer) owner).getHandle()));
+        }, 1L);
+    }
 
-        PacketPlayOutAttachEntity attach = new PacketPlayOutAttachEntity(0, sd.nms, ((CraftPlayer) owner).getHandle());
-        send(viewer, attach);
+    /** HARD pipeline: destroy → spawn → metadata → teleport → attach (attach LAST) */
+    private void sendHardRefresh(Player viewer, Player owner, StandData sd) {
+        // 0) Destroy first (even if client doesn't know it yet, it's harmless)
+        send(viewer, new PacketPlayOutEntityDestroy(new int[]{ sd.entityId }));
+
+        // 1..4) Re-spawn pipeline (same as soft, but after destroy)
+        sendSpawnAndAttach(viewer, owner, sd);
+    }
+
+    private PacketPlayOutEntityTeleport makeTeleport(StandData sd) {
+        return new PacketPlayOutEntityTeleport(
+                sd.entityId,
+                (int) Math.floor(sd.nms.locX * 32.0D),
+                (int) Math.floor(sd.nms.locY * 32.0D),
+                (int) Math.floor(sd.nms.locZ * 32.0D),
+                (byte) 0,
+                (byte) 0,
+                false
+        );
     }
 
     // periodic reattach (prevents occasional client detaches)
@@ -302,9 +336,8 @@ public final class TrickTitlePackets implements Listener {
                     if (!viewer.isOnline() || viewer == owner) continue;
                     if (viewer.getLocation().distanceSquared(owner.getLocation()) > MAX_DIST_SQ) continue;
 
-                    PacketPlayOutAttachEntity attach =
-                            new PacketPlayOutAttachEntity(0, sd.nms, ((CraftPlayer) owner).getHandle());
-                    send(viewer, attach);
+                    // soft re-attach is enough most of the time
+                    send(viewer, new PacketPlayOutAttachEntity(0, sd.nms, ((CraftPlayer) owner).getHandle()));
                 }
             }
         }, 20L, 20L).getTaskId();
