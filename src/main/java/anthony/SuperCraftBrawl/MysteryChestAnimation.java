@@ -89,7 +89,7 @@ public class MysteryChestAnimation extends BukkitRunnable {
         display.setBasePlate(false);
 
         // hologram line
-        holo = base.getWorld().spawn(base.clone().add(0, 0.6, 0), ArmorStand.class);
+        holo = base.getWorld().spawn(base.clone().add(0, 1.2, 0), ArmorStand.class);
         holo.setVisible(false);
         holo.setGravity(false);
         holo.setSmall(true);
@@ -149,15 +149,12 @@ public class MysteryChestAnimation extends BukkitRunnable {
         if (ticks == WARMUP + BUILD / 2) holo.setCustomName(color("&d&lRolling..&7."));
         if (ticks == WARMUP + BUILD) holo.setCustomName(color("&d&lRolling..."));
         if (ticks == WARMUP + BUILD + SLOWMO - 6) {
-            holo.setCustomName(color("&e&l3"));
             base.getWorld().playSound(base, Sound.NOTE_PIANO, 1f, 0.8f);
         }
         if (ticks == WARMUP + BUILD + SLOWMO - 4) {
-            holo.setCustomName(color("&e&l2"));
             base.getWorld().playSound(base, Sound.NOTE_PIANO, 1f, 0.9f);
         }
         if (ticks == WARMUP + BUILD + SLOWMO - 2) {
-            holo.setCustomName(color("&e&l1"));
             base.getWorld().playSound(base, Sound.NOTE_PIANO, 1f, 1.0f);
         }
 
