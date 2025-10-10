@@ -11,18 +11,15 @@ public class PlayerAndNPC {
 
 	private Core core;
 	private int clicks = 0;
-	private int max_clicks = 2;
-	private Player player;
 
 	public PlayerAndNPC(Core core, Player player) {
 		this.core = core;
 		this.clicks = 0;
-		this.max_clicks = 2;
 	}
 
 	public void sendMessage(Player player) {
 		int progress = core.getListener().getHalloweenEventProgress(player);
-		if (progress != 10) {
+		if (progress == 0) {
 			if (clicks == 0) {
 				clicks++;
 				player.playSound(player.getLocation(), Sound.VILLAGER_IDLE, 1, 1);
@@ -39,10 +36,11 @@ public class PlayerAndNPC {
 				new HalloweenNpcGUI(core).inv.open(player);
 			} else
 				new HalloweenNpcGUI(core).inv.open(player);
-		} else  {
-			player.sendMessage(color("&6&l[HUNT] &rYou finished the hunt already! What more do you want?"));
+		} else 
 			new HalloweenNpcGUI(core).inv.open(player);
-		}
+		
+		if (progress == 10)
+			player.sendMessage(color("&6&l[HUNT] &rYou finished the hunt already! What more do you want?"));
 	}
 
 	public String color(String c) {
