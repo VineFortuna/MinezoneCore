@@ -44,25 +44,22 @@ public class ActiveGamesGUI implements InventoryProvider {
 		}
 
 		for (Entry<Maps, GameInstance> entry : main.getGameManager().gameMap.entrySet()) {
-			String mapName = entry.getValue().getMap().toString();
-
-			// Checking gameType to set due item
+			GameInstance game = entry.getValue();
+			Maps map = game.getMap();
+			String mapName = map.getName();
+			ItemStack displayItem = map.getDisplayItem();
 			GameType gameType = entry.getValue().gameType;
-			ItemStack displayItem = null;
+			String mode = gameType.getName();
 
-			if (gameType == GameType.CLASSIC) {
-				// displayItem = ItemHelper.createSkullHeadPlayer(1, player.getName());
-				displayItem = new ItemStack(Material.REDSTONE_BLOCK);
-			} else if (gameType == GameType.DUEL) {
-				displayItem = new ItemStack(Material.IRON_SWORD);
-			} else if (gameType == GameType.FRENZY) {
-				displayItem = new ItemStack(Material.TNT);
-			}
+			System.out.println(mode);
 
 			if (entry.getValue().state == GameState.WAITING) {
 				if (entry.getValue().gameStartTime != null) {
 					contents.set(count, i, ClickableItem.of(
-							ItemHelper.setDetails(displayItem, "&e&l" + mapName,
+							ItemHelper.setDetails(displayItem,
+									"&e&l" + mapName,
+									"&eMode: &f" + mode,
+									"",
 									"&rStarting In: &e" + entry.getValue().timeToStartSeconds + "s",
 									"&rPlayers: &e" + entry.getValue().players.size() + "/"
 											+ entry.getValue().gameType.getMaxPlayers(),
@@ -73,7 +70,11 @@ public class ActiveGamesGUI implements InventoryProvider {
 							}));
 				} else {
 					contents.set(count, i, ClickableItem.of(
-							ItemHelper.setDetails(displayItem, "&e&l" + mapName, "&eWaiting for Players",
+							ItemHelper.setDetails(displayItem,
+									"&e&l" + mapName,
+									"&eMode: &f" + mode,
+									"",
+									"&eWaiting for Players",
 									"&rPlayers: &e" + entry.getValue().players.size() + "/"
 											+ entry.getValue().gameType.getMaxPlayers(),
 									"", "&r&nClick to join!"),
@@ -85,7 +86,11 @@ public class ActiveGamesGUI implements InventoryProvider {
 			} else if (entry.getValue().state == GameState.STARTED) {
 				String state = "In Progress";
 				contents.set(count, i, ClickableItem.of(
-						ItemHelper.setDetails(ItemHelper.setGlowing(displayItem, true), "&e&l" + mapName, "&a" + state,
+						ItemHelper.setDetails(ItemHelper.setGlowing(displayItem, true),
+								"&e&l" + mapName,
+								"&eMode: &f" + mode,
+								"",
+								"&a" + state,
 								"&rPlayers: &e" + entry.getValue().players.size() + "/"
 										+ entry.getValue().gameType.getMaxPlayers(),
 								"&rSpectators: &e" + entry.getValue().spectators.size(), "", "&r&nClick to spectate!"),
