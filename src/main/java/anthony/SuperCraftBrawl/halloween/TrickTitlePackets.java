@@ -17,10 +17,10 @@ import java.util.*;
 
 /**
  * Packet-only subtitle titles manager (1.8 R3).
- * - Supports registering multiple titles (key -> text + yOffset).
- * - Exactly ONE active title per player.
- * - Title shows to OTHER players (not the owner) so right-click works.
- * - Lobby-only by world name.
+ * - Multiple titles (key -> text + yOffset)
+ * - Exactly ONE active title per player
+ * - Title shows to OTHER players (not the owner)
+ * - Lobby-only by world name
  */
 public final class TrickTitlePackets implements Listener {
 
@@ -51,6 +51,9 @@ public final class TrickTitlePackets implements Listener {
 
     // Player -> preferred active title key (even if not currently visible)
     private final Map<UUID, String> pref = new HashMap<>();
+
+    // Used to avoid rapid double-processing after world changes
+    private final Map<UUID, Long> lastWorldChange = new HashMap<>();
 
     private int reattachTaskId = -1;
 
@@ -120,37 +123,53 @@ public final class TrickTitlePackets implements Listener {
     }
     public String getActiveKey(Player p) { return pref.get(p.getUniqueId()); }
 
-    // ===== Events (owner flow) =====
+    // ===== Events =====
+
+    /**
+     * Only handle intra-world teleports here (refresh attachments).
+     * World changes are handled exclusively in onChangedWorld to avoid double spawns.
+     */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onTeleport(PlayerTeleportEvent e) {
-        Player p = e.getPlayer();
-        String key = pref.get(p.getUniqueId());
-        if (key == null) return;
+        final Player p = e.getPlayer();
 
-        hideFor(p);
+        // Ignore world changes here; onChangedWorld will take care of hide/show.
+        if (e.getFrom() != null && e.getTo() != null && e.getFrom().getWorld() != e.getTo().getWorld()) {
+            return;
+        }
+
+        // If the player has a preferred title and is in the lobby, make sure viewers see it
+        String key = pref.get(p.getUniqueId());
+        if (key == null || !isInLobby(p)) return;
+
+        // Re-attach for nearby viewers after the teleport completes
         Bukkit.getScheduler().runTask(plugin, () -> {
-            if (!p.isOnline()) return;
-            if (!isInLobby(p)) return;
-            TitleDef def = registry.get(key);
-            if (def != null) showFor(p, def, key);
-            // new world → refresh viewers in that world
-            for (Player viewer : p.getWorld().getPlayers()) {
-                if (viewer != p) refreshForViewer(viewer);
-            }
+            if (!p.isOnline() || !isInLobby(p)) return;
+            refreshOwnerForAllViewers(p);
         });
     }
 
+    /**
+     * World change: do a strict hide, then show once if appropriate.
+     * This guarantees there is never more than one stand per owner.
+     */
     @EventHandler
     public void onChangedWorld(PlayerChangedWorldEvent e) {
         Player p = e.getPlayer();
+        lastWorldChange.put(p.getUniqueId(), System.currentTimeMillis());
+
+        // Always nuke any previous stand first (in previous world or viewer staleness)
+        hideFor(p);
+
         String key = pref.get(p.getUniqueId());
-        if (key == null) { hideFor(p); return; }
-        TitleDef def = registry.get(key);
-        if (def == null) { hideFor(p); return; }
-        if (isInLobby(p)) showFor(p, def, key); else hideFor(p);
-        // after owner moves worlds, refresh viewers in owner’s current world
+        if (key != null && isInLobby(p)) {
+            TitleDef def = registry.get(key);
+            if (def != null) showFor(p, def, key);
+        }
+
+        // Refresh everyone in the new world to (re)see all active owners
         for (Player viewer : p.getWorld().getPlayers()) {
-            if (viewer != p) refreshForViewer(viewer);
+            refreshForViewer(viewer);
         }
     }
 
@@ -160,7 +179,7 @@ public final class TrickTitlePackets implements Listener {
     // Send active titles to the NEW viewer (exclude self-view)
     @EventHandler public void onJoin(PlayerJoinEvent e) { refreshForViewer(e.getPlayer()); }
 
-    // ===== Viewer refresh (these were broken earlier due to invalid signatures) =====
+    // Viewer-side refresh hooks
     @EventHandler
     public void onViewerWorldChange(PlayerChangedWorldEvent e) {
         refreshForViewer(e.getPlayer());
@@ -169,6 +188,9 @@ public final class TrickTitlePackets implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onViewerTeleport(PlayerTeleportEvent e) {
         final Player viewer = e.getPlayer();
+        // Avoid spamming during a world change burst
+        Long last = lastWorldChange.get(viewer.getUniqueId());
+        if (last != null && (System.currentTimeMillis() - last) < 300) return;
         Bukkit.getScheduler().runTask(plugin, () -> refreshForViewer(viewer));
     }
 
@@ -193,6 +215,15 @@ public final class TrickTitlePackets implements Listener {
             if (owner.getWorld() != vw) continue;
 
             sendSpawnAndAttach(viewer, owner, entry.getValue());
+        }
+    }
+
+    private void refreshOwnerForAllViewers(Player owner) {
+        StandData sd = active.get(owner.getUniqueId());
+        if (sd == null) return;
+        for (Player viewer : owner.getWorld().getPlayers()) {
+            if (viewer == owner || !viewer.isOnline()) continue;
+            sendSpawnAndAttach(viewer, owner, sd);
         }
     }
 
@@ -232,7 +263,9 @@ public final class TrickTitlePackets implements Listener {
     private void hideFor(Player owner) {
         StandData sd = active.remove(owner.getUniqueId());
         if (sd == null) return;
-        broadcastInWorld(owner.getWorld(), new PacketPlayOutEntityDestroy(new int[]{ sd.entityId }));
+        // Destroy in BOTH the owner's current world and across all online players to be safe
+        PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(new int[]{ sd.entityId });
+        for (Player p : Bukkit.getOnlinePlayers()) send(p, destroy);
     }
 
     private void sendSpawnAndAttach(Player viewer, Player owner, StandData sd) {
@@ -280,9 +313,6 @@ public final class TrickTitlePackets implements Listener {
     // ===== helpers =====
     private static void send(Player to, Packet<?> packet) {
         ((CraftPlayer) to).getHandle().playerConnection.sendPacket(packet);
-    }
-    private static void broadcastInWorld(World world, Packet<?> packet) {
-        for (Player p : world.getPlayers()) send(p, packet);
     }
     private static void setMarkerSafe(EntityArmorStand stand, boolean marker) {
         try {

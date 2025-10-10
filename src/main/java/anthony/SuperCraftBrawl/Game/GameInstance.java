@@ -1479,9 +1479,9 @@ public class GameInstance {
 			}
 
 			Random r = new Random();
-			int chance = r.nextInt(100);
+			int chance = r.nextInt(1000);
 
-			if (chance >= 0 && chance < 25) {
+			if (chance >= 0 && chance < 1) {
 				if (data3 != null) {
 					data3.mysteryChests++;
 					winner.sendMessage(
