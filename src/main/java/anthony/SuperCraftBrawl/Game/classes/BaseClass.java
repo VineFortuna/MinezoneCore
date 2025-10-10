@@ -923,9 +923,9 @@ public abstract class BaseClass {
 					instance.sendScoreboardUpdate(player);
 
 					Random r = new Random();
-					int chance = r.nextInt(100);
+					int chance = r.nextInt(1000);
 
-					if (chance >= 0 && chance <= 15) {
+					if (chance >= 0 && chance <= 1) {
 
 						if (data != null) {
 							data.mysteryChests++;
