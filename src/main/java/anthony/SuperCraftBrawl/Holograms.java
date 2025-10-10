@@ -105,7 +105,7 @@ public class Holograms {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 
 		if (data != null) {
-			Location loc = new Location(main.getLobbyWorld(), 193.500, 106, 660.500);
+			Location loc = new Location(main.getLobbyWorld(), 196.5, 106, 667.5);
 			WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
 			EntityArmorStand stand = new EntityArmorStand(s);
 
@@ -118,7 +118,7 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 193.500, 105.7, 660.500);
+			loc = new Location(main.getLobbyWorld(), 196.5, 105.7, 667.5);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
@@ -130,7 +130,7 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 193.500, 105.3, 660.500);
+			loc = new Location(main.getLobbyWorld(), 196.5, 105.3, 667.5);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
@@ -142,7 +142,7 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 193.500, 105.0, 660.500);
+			loc = new Location(main.getLobbyWorld(), 196.5, 105, 667.5);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
@@ -154,7 +154,7 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 193.500, 104.7, 660.500);
+			loc = new Location(main.getLobbyWorld(), 196.5, 104.7, 667.5);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
@@ -166,7 +166,7 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 193.500, 104.4, 660.500);
+			loc = new Location(main.getLobbyWorld(), 196.5, 104.4, 667.5);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
@@ -178,7 +178,7 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 193.500, 104.1, 660.500);
+			loc = new Location(main.getLobbyWorld(), 196.5, 104.1, 667.5);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
