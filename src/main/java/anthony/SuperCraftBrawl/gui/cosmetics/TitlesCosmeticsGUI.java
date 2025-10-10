@@ -53,10 +53,10 @@ public class TitlesCosmeticsGUI implements InventoryProvider {
 			inv.close(player);
 		}));
 
-		String freddyTexture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWM4M2E0MmU4MmNkNmE3MGUyMTZkOWE4YzJmZjZmMWU1ZTViMjU2Y2VhM2I4Y2QyMjU0NzIzOTNhYTNlY2E1YSJ9fX0=";
+		String freddyTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWRiMjdjY2I0ZjEyNjQwZjFiNThlYTYyZDkwY2RhY2U0NGMwZjJkYTlmMzkwOGUyNWViMTZiZGI1YmJiNWE2NSJ9fX0";
 		ItemStack freddy = ItemHelper.createSkullTexture(freddyTexture, "&6&lFreddy Fazbear",
 				"&7Unlock by finding 8 baskets in the lobby!", "",
-				main.color("&8Progress: &e" + Math.min(basketsFoundForLore, 2) + "&7/8"), "&cHalloween 2025 Exclusive");
+				main.color("&8Progress: &e" + Math.min(basketsFoundForLore, 8) + "&7/8"), "&cHalloween 2025 Exclusive");
 
 		contents.set(1, 3, ClickableItem.of(freddy, e -> {
 			int current = (main.getHalloweenManager() != null)
