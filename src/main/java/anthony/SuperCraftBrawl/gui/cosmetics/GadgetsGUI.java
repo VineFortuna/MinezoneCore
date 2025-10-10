@@ -236,7 +236,7 @@ public class GadgetsGUI implements InventoryProvider {
 				return;
 			}
 
-			player.performCommand("candyaura");
+			toggleCandyAura(player);
 			inv.close(player);
 		}));
 
@@ -244,6 +244,16 @@ public class GadgetsGUI implements InventoryProvider {
 				.of(ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
 					inv.getParent().get().open(player);
 				}));
+	}
+	
+	private void toggleCandyAura(Player player) {
+		if (main.getCandyAuraManager().isEnabled(player)) {
+			main.getCandyAuraManager().disable(player);
+			player.sendMessage(main.color("&9&l(!) &rYou have unequipped &eCandy Aura &rgadget"));
+		} else {
+			main.getCandyAuraManager().enable(player);
+			player.sendMessage(main.color("&9&l(!) &rYou have equipped &eCandy Aura &rgadget"));
+		}
 	}
 
 	private ItemStack getDyedArmor(Material material, Color color, String name) {

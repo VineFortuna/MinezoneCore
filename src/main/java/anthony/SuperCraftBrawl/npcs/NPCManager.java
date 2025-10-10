@@ -61,8 +61,8 @@ public class NPCManager implements Listener {
 				"ewogICJ0aW1lc3RhbXAiIDogMTc1OTg1MzI3MTI0NSwKICAicHJvZmlsZUlkIiA6ICI1MWI4MjcxNDE5YWE0NDA5YTFhNmU1OTcwYTc1MzgyNSIsCiAgInByb2ZpbGVOYW1lIiA6ICJYRHJha2U5OSIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS9jNjYyMjk2MTM1MmRiMjcwNjUzNjdlNTRlNWU1MDdkNTczYzY1OTAyODZjYzdkZmJkMTYxNTIxMmViYjdlNGI3IgogICAgfQogIH0KfQ==",
 				"fDPfnJCwqHYdnjP/pUfYwz8FPFn7+iANKw/Ie1Zrbxk0c5N5yKLbDV6eR/sZ8lYwHAnjXeYqyXeU8XWh76udy8BBSIjSQznD4UztxjxbHKHOK/tcXIpv6J+d9ZSkoWysWVa7hqv1VVX5W15ofSClvNqKDaVZNM6Y2FEK7YqWvlzu6inR9iUo1KZRGX5QY0yOY0LHj/6KX0A2vQRqBskKTclQov4gHvb7AXqOH8DzBwFqWwg7IfLVA6GCyDIUmiJLyXMBtZjoHjDCQWRfMKAc+Xwy5WYUe9tPE5+9Tol+RWngT8yAf63q2MgNN/TI6wkpwHgO+Jv0060FoJpcevQcJY2aTQLcfuDpGNDu7JDzTpBvtrNZ8KimXlWBRgghvT31KYfQmSdPbnFjzAqOw2ONrBYv8I8CxT9XHSwUCIy5c9OSyfTqeBLFc+wojYqc143g7Udo6wdb1bFHuLetqgYfxAIVxdTCd1ZsOdLbghiMQoNfQUX3pJJURxUFWPVe5+XexNZ6MbRQoz9EvjQdiY8jgsywJ88B2JpRcobdXsFKdgAGvm73harsg3goXWU9jmyhlNxHxBkvEQLIMv2NTP3N1OdmSdPOlObbxkBxyPiU8MlXY8ImSU9NJVOvoQNSCZofzFA4YHMKlgFeNmrKvklyK/tqosT19Nt3JZEkO4YV0ws=");
 
-		scbModes = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "JOIN GAME", "",
-				main.color("&7Click to join a SCB game")));
+		scbModes = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "SUPER CRAFT BROTHERS", "",
+				main.color("&7Click to play")));
 		scbModes.setLocation(new Location(main.getLobbyWorld(), 192.506, 109, 649.530, 179, -0));
 		scbModes.setSkin(sethblingSkin);
 		scbModes.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));

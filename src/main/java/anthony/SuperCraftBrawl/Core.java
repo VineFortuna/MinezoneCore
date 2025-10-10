@@ -10,6 +10,7 @@ import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.halloween.BasketItemUtil;
+import anthony.SuperCraftBrawl.halloween.CandyAuraManager;
 import anthony.SuperCraftBrawl.halloween.HalloweenHuntManager;
 import anthony.SuperCraftBrawl.halloween.TreatsAdminCommand;
 import anthony.SuperCraftBrawl.halloween.TrickTitleCommand;
@@ -118,6 +119,7 @@ public class Core extends JavaPlugin implements Listener {
 	public Map<Player, Player> wagers = new HashMap<Player, Player>();
 	public SignManager signManager;
 	public anthony.SuperCraftBrawl.lobbyitems.LobbyItems lobbyItems;
+	public CandyAuraManager candyAura;
 
 	// Player's game stats
 	public Map<Player, GameInstance> gameStats = new HashMap<Player, GameInstance>();
@@ -146,6 +148,10 @@ public class Core extends JavaPlugin implements Listener {
 		return this.actionBarManager;
 	}
 
+	public CandyAuraManager getCandyAuraManager() {
+		return this.candyAura;
+	}
+	
 	public TrickTitleManager getTrickTitle() {
 		return this.trickTitleOld;
 	}
@@ -442,6 +448,7 @@ public class Core extends JavaPlugin implements Listener {
 		signManager = new SignManager(this);
 		lobbyItems = new anthony.SuperCraftBrawl.lobbyitems.LobbyItems(this);
 		halloweenHunt = new HalloweenHuntManager(this);
+		candyAura = new CandyAuraManager(this);
 
 		for (Arenas arena : Arenas.values()) {
 			parkourBoards.add(new ParkourBoard(this, arena));
@@ -999,7 +1006,7 @@ public class Core extends JavaPlugin implements Listener {
 //						+ "for more information");
 			}
 			if (cmd.getName().equalsIgnoreCase("help") && sender instanceof Player) {
-				player.sendMessage(color("&2&l(!) &b&lSCB COMMANDS"));
+				player.sendMessage(color("&b&lSCB COMMANDS"));
 				player.sendMessage(color("&r/join -> &7Join a game"));
 				player.sendMessage(color("&r/maps -> &7See all playable maps"));
 				player.sendMessage(color("&r/classes -> &7See all playable classes"));
@@ -1007,7 +1014,7 @@ public class Core extends JavaPlugin implements Listener {
 				player.sendMessage(color("&r/spectate -> &7Spectate a game"));
 				player.sendMessage(color("&r/leave -> &7Leave your game"));
 				player.sendMessage("");
-				player.sendMessage(color("&2&l(!) &b&lFISHING COMMANDS"));
+				player.sendMessage(color("&b&lFISHING COMMANDS"));
 				player.sendMessage(color("&r/fishing -> &7Opens Fishing menu"));
 			}
 
@@ -1766,7 +1773,7 @@ public class Core extends JavaPlugin implements Listener {
 
 		// if (!(this.msHologram.containsKey(p))) {
 		if (data != null) {
-			Location loc = new Location(this.getLobbyWorld(), 179.527, 105.5, 673.493);
+			Location loc = new Location(this.getLobbyWorld(), 174.5, 106.5, 677.5);
 			WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
 			EntityArmorStand stand = new EntityArmorStand(s);
 
@@ -1778,7 +1785,7 @@ public class Core extends JavaPlugin implements Listener {
 			PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
 			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
 
-			loc = new Location(this.getLobbyWorld(), 179.527, 105.2, 673.493);
+			loc = new Location(this.getLobbyWorld(), 174.5, 106.2, 677.5);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
