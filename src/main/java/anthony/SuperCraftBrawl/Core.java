@@ -1888,21 +1888,6 @@ public class Core extends JavaPlugin implements Listener {
 			player.sendPluginMessage(this, "BungeeCord", b.toByteArray());
 		}, 10L);
 		GameInstance game = this.getGameManager().GetInstanceOfPlayer(player);
-		PunishAPI pu = PunishAPI.get();
-
-		String IP = e.getPlayer().getAddress().getAddress().toString();
-		if (pu.isPlayerNetworkBanned(player.getUniqueId())) {
-			e.setQuitMessage(null);
-			return;
-		}
-		if (pu.isIPBanned(IP)) {
-			e.setQuitMessage(null);
-			return;
-		}
-		if (pu.isPlayerBannedNoUnban(player.getUniqueId())) {
-			e.setQuitMessage(null);
-			return;
-		}
 
 		if (game != null && game.getGameSettings() != null) {
 			game.getGameSettings().removeFromStartVotes(player);
