@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameLootDrops;
 import anthony.SuperCraftBrawl.Game.classes.all.VillagerClass;
 import anthony.util.ChatColorHelper;
 import anthony.util.SoundManager;
@@ -28,19 +29,17 @@ public class VillagerAbilityGUI implements InventoryProvider {
     public int totalRows = 1;
     public int totalColumns = 9;
 
-    private GameInstance gameInstance;
     private VillagerClass villagerClass;
     private int emeraldsCount;
     private Map<ItemStack, Integer> tradeableItems;
 
-    public VillagerAbilityGUI(Core main, GameInstance gameInstance, VillagerClass villagerClass) {
+    public VillagerAbilityGUI(Core main, VillagerClass villagerClass) {
         this.main = main;
-        this.gameInstance = gameInstance;
         this.villagerClass = villagerClass;
         this.emeraldsCount = villagerClass.getEmeraldsCount();
 
         buildInventory(emeraldsCount);
-        setUpTradeableItems(gameInstance);
+        setUpTradeableItems();
         sortTradeableItems();
     }
 
@@ -53,10 +52,11 @@ public class VillagerAbilityGUI implements InventoryProvider {
         ;
     }
 
-    private void setUpTradeableItems(GameInstance gameInstance) {
+    private void setUpTradeableItems() {
         tradeableItems = new HashMap<>();
 
-        for (ItemStack item : gameInstance.allItemDrops) {
+        for (GameLootDrops gameLootDrops : GameLootDrops.values()) {
+            ItemStack item = gameLootDrops.getItem();
             Integer price = getPriceForItem(item);
             if (price != null) {
                     tradeableItems.put(item, price);
