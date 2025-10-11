@@ -18,7 +18,7 @@ public enum GameLootDrops {
 	SKELE_EGG(Rarity.COMMON), MILK(Rarity.COMMON), SLIME_EGG(Rarity.COMMON),
 
 	// UNCOMMON:
-	SPEED2(Rarity.RARE), INSTAGIB(Rarity.RARE), BAZOOKA(Rarity.RARE),
+	NUKE(Rarity.RARE), SPEED2(Rarity.RARE), INSTAGIB(Rarity.RARE), BAZOOKA(Rarity.RARE),
 	WITCH_EGG(Rarity.RARE), CREEPER_EGG(Rarity.RARE), FIRE_FLOWER(Rarity.RARE),
 
 	// RARE:
@@ -114,6 +114,13 @@ public enum GameLootDrops {
 	            break;
 
 	        // ===== UNCOMMON =====
+			case NUKE:
+				item = ItemHelper.setDetails(new ItemStack(Material.TNT, 3),
+						"&4&lNUKE",
+						"&7Spawn TNTs where you're looking");
+				ItemHelper.setGlowing(item, true);
+				break;
+
 	        case SPEED2:
 	            item = ItemHelper.createPotionItem(PotionType.SPEED, 1, 30, true, true, true);
 	            ItemHelper.setDetails(item, "&b&lSPEED II &7(30 sec)", "", "&2&lUNCOMMON");
