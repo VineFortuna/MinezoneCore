@@ -1,6 +1,7 @@
 name: MinezoneCore
 main: anthony.SuperCraftBrawl.Core
 version: 1.0
+softdepend: [MinezonePunish]
 commands:
    join:
       description: Join a game
@@ -112,8 +113,6 @@ commands:
       description: Teleport command
    world:
       description: World command
-   punish:
-      description: Punishment command
    exp:
       description: Exp command
    smmtest:
