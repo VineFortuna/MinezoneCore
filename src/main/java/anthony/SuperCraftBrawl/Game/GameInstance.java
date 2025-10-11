@@ -85,8 +85,6 @@ public class GameInstance {
 	private int lightningDropCountdown = 0;
 	private ItemStack nextItemToDrop;
 	public List<ItemStack> allItemDrops = new ArrayList<>();
-	public List<ItemStack> sethBlingItemDrops = new ArrayList<>();
-	public List<ItemStack> items = new ArrayList<>();
 	public List<Player> favClassSelection = new ArrayList<>();
 	public List<ClassType> classList = generateClassList();
 	private SignManager sm;
