@@ -661,19 +661,10 @@ public class PlayerListener implements Listener {
 			List<String> filteredWords = new ArrayList<>(Arrays.asList("nibba", "nigga", "niggas", "nigger", "niggers",
 					"porn", "pornhub", "cum", "fuck you", "fuckyou", "fuck", "bitch", "pussy", "fucker", "motherfucker",
 					"kys", "pu$$y", "fag", "faggot", "bitchass", "cunt", "retard", "penis", "fucker", "twat", "cock",
-					"dick", "cumming", "fuckass", "vagina", "fuckers"));
+					"dick", "cumming", "fuckass", "vagina", "fuckers", "shit", "shitter", "shitters", "fucking"));
 			PlayerData data = main.getDataManager().getPlayerData(event.getPlayer());
 			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
 			String message = event.getMessage();
-
-//			if (event.getPlayer().hasPermission("scb.chat"))
-//				message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
-//						+ ChatColor.YELLOW + "] " + tag + event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
-//			else
-//				message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
-//						+ ChatColor.YELLOW + "] " + tag + ChatColor.GRAY + event.getPlayer().getDisplayName() + ": ";
-
-			// &6&l✧&6262 &4Owner&c anthsauce: &fLorem ipsum...
 
 			event.setFormat(ChatColor.YELLOW + main.color("" + data.checkPlayerLevel(event.getPlayer(), data) + "✧")
 					+ data.level + " " + tag);
@@ -703,12 +694,6 @@ public class PlayerListener implements Listener {
 			else
 				event.setMessage(message);
 
-			PunishAPI pu = PunishAPI.get();
-			if (pu.isPlayerMuted(event.getPlayer().getUniqueId())) {
-				String muteMsg = pu.getMuteMessage(event.getPlayer().getUniqueId());
-				event.getPlayer().sendMessage(muteMsg);
-				return;
-			}
 			Bukkit.broadcastMessage(event.getFormat() + event.getMessage());
 		}
 	}
