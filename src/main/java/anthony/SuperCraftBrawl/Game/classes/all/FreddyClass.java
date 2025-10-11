@@ -37,10 +37,7 @@ public class FreddyClass extends BaseClass {
 		baseVerticalJump = 1.2;
 		createArmor(null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWRiMjdjY2I0ZjEyNjQwZjFiNThlYTYyZDkwY2RhY2U0NGMwZjJkYTlmMzkwOGUyNWViMTZiZGI1YmJiNWE2NSJ9fX0=",
-				"7F3A1A",
-				6,
-				"Freddy"
-		);
+				"7F3A1A", 6, "Freddy");
 	}
 
 	@Override
@@ -180,7 +177,7 @@ public class FreddyClass extends BaseClass {
 
 	private void spawnSubtleRing(World w, Location center) {
 		int points = 12; // low particle count to avoid lag
-		double r = 6.0;
+		double r = 8.0;
 		for (int i = 0; i < points; i++) {
 			double angle = (2 * Math.PI * i) / points;
 			double x = center.getX() + r * Math.cos(angle);
@@ -214,14 +211,15 @@ public class FreddyClass extends BaseClass {
 
 	public ItemStack getStunAbility() {
 		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.REDSTONE, 1), instance.color("&cStun"),
-				"", instance.color("&7Right click to stun players"), instance.color("&7within 6 blocks!"));
+				instance.color("&7Stuns players within 8 blocks"), "", instance.color("&7Effects:"),
+				instance.color("&r&oNausea 3 &7for &e5s"), instance.color("&8&oSlowness 1 &7for &e5s"));
 		return item;
 	}
 
 	public ItemStack getScareAbility() {
-		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.BEACON, 1), instance.color("&cJump Scare"), "",
-				instance.color("&7Right click to scare your opponents by blinding"),
-				instance.color("&7them and teleporting to a random player"));
+		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.BEACON, 1), instance.color("&cJump Scare"),
+				instance.color("&7Blinds everyone in the game and teleports"),
+				instance.color("&7you to a random player"), "", instance.color("&cOne use per life!"));
 		return item;
 	}
 
