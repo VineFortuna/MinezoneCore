@@ -51,6 +51,7 @@ public class FreddyClass extends BaseClass {
 		playerInv.setItem(0, getAttackWeapon());
 		playerInv.setItem(1, getStunAbility());
 		playerInv.setItem(2, getScareAbility());
+		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
 	}
 
 	@Override
@@ -170,9 +171,16 @@ public class FreddyClass extends BaseClass {
 
 	private void blindGamePlayers() {
 		for (Player gamePlayer : instance.players) {
-			if (gamePlayer != player)
+			if (gamePlayer != player && checkIfAlive(gamePlayer))
 				gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 20 * 6, 2, true, false));
 		}
+	}
+	
+	private boolean checkIfAlive(Player gamePlayer) {
+		if (!checkIfDead(gamePlayer, instance) && !instance.HasSpectator(gamePlayer))
+			return true;
+		
+		return false;
 	}
 
 	private void spawnSubtleRing(World w, Location center) {

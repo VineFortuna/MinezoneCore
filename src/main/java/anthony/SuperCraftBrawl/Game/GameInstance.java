@@ -1124,7 +1124,7 @@ public class GameInstance {
 								finalBaseClass.loadPlayer();
 								if (GameInstance.this.gameType == GameType.FRENZY
 										|| GameInstance.this.gameType == GameType.GUNGAME) {
-									player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "New Class:",
+									player.sendTitle(color("&b&lNew Class:"),
 											"" + finalBaseClass.getType().getTag());
 									new BukkitRunnable() { // Get rid of title after 1.5 seconds
 										@Override
@@ -1133,7 +1133,7 @@ public class GameInstance {
 										}
 									}.runTaskLater(getGameManager().getMain(), 30);
 								} else {
-									player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "Respawned", "");
+									player.sendTitle(color("&b&lRespawned"), "");
 									new BukkitRunnable() { // Get rid of title after 1.5 seconds
 										@Override
 										public void run() {
@@ -1149,7 +1149,7 @@ public class GameInstance {
 							if (!players.contains(player)) {
 								cancel();
 							} else {
-								player.sendTitle("", "" + ChatColor.RED + this.ticks);
+								player.sendTitle(color("&b&lRespawning In:"), color("&e" + this.ticks));
 								player.setGameMode(GameMode.SPECTATOR);
 							}
 						}
