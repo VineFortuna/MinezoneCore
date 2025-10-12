@@ -14,6 +14,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
@@ -83,6 +84,41 @@ public class FishingBoard extends LeaderboardBase {
 			sendArmorStandPacket(loc, ChatColor.AQUA + "#" + count + ": " + ChatColor.YELLOW + name + ChatColor.RESET + " - " + win);
 			count++;
 		}
+		
+		Location base = loc.clone();
+
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			PlayerData data = main.getDataManager().getPlayerData(player);
+			if (data != null && !lead.contains(data.playerUUID)) {
+				int win = data.totalcaught;
+
+				// draw the separator for THIS player at a fixed offset from base
+				Location line1 = base.clone().add(0, -0.24, 0);
+				sendStandToOnePlayer(line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------",
+						player);
+
+				// draw the player's own line just below it
+				Location line2 = base.clone().add(0, -0.44, 0);
+				sendStandToOnePlayer(line2, "" + ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + win,
+						player);
+			}
+		}
+	}
+	
+	private void sendStandToOnePlayer(Location loc, String customName, Player player) {
+		EntityArmorStand armorStand = new EntityArmorStand(
+				((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) loc.getWorld()).getHandle());
+		armorStand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+		armorStand.setCustomName(customName);
+		armorStand.setCustomNameVisible(true);
+		armorStand.setInvisible(true);
+		armorStand.setGravity(false);
+
+		int entityId = armorStand.getId();
+		entityIds.add(entityId);
+
+		PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(armorStand);
+		((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 	}
 
 	private void sendArmorStandPacket(Location loc, String customName) {
