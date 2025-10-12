@@ -8,7 +8,6 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.util.ItemHelper;
-import net.md_5.bungee.api.ChatColor;
 
 public class LobbyItems {
 
@@ -48,19 +47,6 @@ public class LobbyItems {
 	 */
 	public void addVotePaper(Player player) {
 		
-	}
-	
-	/*
-	 * This function assigns Spectator items to a player
-	 * spectating a game
-	 */
-	public void spectatorItems(Player player) {
-		ItemStack spec = ItemHelper.setDetails(new ItemStack(Material.COMPASS),
-				core.color("&bSpectate &7(Right Click)"), "", core.color("&7Click to spectate a player!"));
-		player.getInventory().setItem(0, spec);
-		ItemStack leave = ItemHelper.setDetails(new ItemStack(Material.BARRIER),
-				core.color("&bLeave &7(Right Click)"), "", core.color("&7Click to leave your game"));
-		player.getInventory().setItem(8, leave);
 	}
 
 }

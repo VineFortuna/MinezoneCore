@@ -1,7 +1,6 @@
 name: MinezoneCore
 main: anthony.SuperCraftBrawl.Core
 version: 1.0
-softdepend: [MinezonePunish]
 commands:
    join:
       description: Join a game
@@ -28,9 +27,6 @@ commands:
    startgame:
       description: Start game
       aliases: sg
-   frenzy:
-      description: Changes the game mode to Frenzy
-      aliases: fr
    setlevel:
       description: Set level command
    store:
@@ -89,7 +85,6 @@ commands:
       aliases: [scb, scbhelp]
    classes:
       description: Displays list of SCB Classes
-      aliases: cl
    stats:
       description: Player Stats
    token:
@@ -113,6 +108,8 @@ commands:
       description: Teleport command
    world:
       description: World command
+   punish:
+      description: Punishment command
    exp:
       description: Exp command
    smmtest:
@@ -148,27 +145,14 @@ commands:
       description: SCB Practice Mode (BETA)
    fishing:
       description: Opens Fishing GUI
-      aliases: fs
-   cosmetics:
-      description: Opens Cosmetics GUI
-      aliases: c
-   forceclass:
-      description: Forcefully changes your class midgame
-      aliases: fc
-   candyaura:
-      description: Candy aura cosmetic (testing for Admins)
-   treatsadmin:
-      description: Reset halloween treats command (Admins only)
-   tricktitle:
-      description: a
-   lactate:
-      description: Lactate command!
 
 permissions:
    scb.admin:
       description: Admin perms
       children:
          scb.developer: true
+         scb.startGame: true
+         scb.setLives: true
          scb.setrank: true
          scb.giveTokens: true
          scb.broadcast: true
@@ -184,13 +168,6 @@ permissions:
          scb.sound: true
          scb.soundnms: true
          scb.heal: true
-         scb.startGame: true
-         scb.frenzy: true
-         scb.setLives: true
-         scb.candyaura: true
-         scb.forceclass: true
-         scb.treatadmin: true
-         scb.tricktitle: true
    scb.builder:
       description: Builder perms
       children:
@@ -261,7 +238,6 @@ permissions:
          scb.chat: true
          scb.bypassFull: true
          scb.deathParticles: true
-         scb.fiesta: true
    scb.default:
       description: Default perms
       children:

@@ -79,12 +79,9 @@ public class JebClass extends BaseClass {
 		pullAbility.updateActionBar(player, this);
 
 		if (!pullAbility.isReady()) return;
-
-		if (player.getInventory().contains(Material.STONE)) {
-			int stoneSlot = player.getInventory().first(Material.STONE);
-			if (player.getInventory().getItem(stoneSlot).getDurability() == (short) 0) return;
-			player.getInventory().getItem(stoneSlot).setDurability((short) 0);
-		}
+		int stoneSlot = player.getInventory().first(Material.STONE);
+		if (player.getInventory().getItem(stoneSlot).getDurability() == (short) 0) return;
+		player.getInventory().getItem(stoneSlot).setDurability((short) 0);
 	}
 
 	@Override
