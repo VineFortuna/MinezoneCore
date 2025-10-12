@@ -14,6 +14,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FreeClassesGUI implements InventoryProvider {
 
 	public Core main;
@@ -35,39 +38,44 @@ public class FreeClassesGUI implements InventoryProvider {
 
 		for (ClassType type : ClassType.sortAlphabetically(ClassType.getFreeClasses(false))) {
 			ItemStack item = type.getItem();
-
-			if (type == ClassType.Fisherman && !main.getFishing().hasUnlockedFisherman(player)) {
+			
+			if (type == ClassType.Fisherman &&  !main.fishing.hasUnlockedFisherman(player)) {
+				continue;
+			}
+			if (type == ClassType.Freddy &&  !main.getHalloweenManager().hasUnlockedFreddy(player)) {
 				continue;
 			}
 
+			// Lore
+			List<String> lore = type.buildDescription();
+			lore.add("");
+
+				// Adds Unlocked lore text to Free but not regularly unlocked classes
+			if (type == ClassType.Fisherman || type == ClassType.Freddy) {
+				lore.addAll(getUnlockedDescriptionText(player, type));
+			}
+
+				// Click Messages
+			String chooseClassString = "&e&nLeft Click&r &eto choose a class";
+			String viewMasteryString = "&e&nRight Click&r &eto view mastery";
+			String favoriteClassString = "&e&nShift Click&r &eto add a favorite class";
+			lore.add(main.color(chooseClassString));
+			lore.add(main.color(viewMasteryString));
+			lore.add(main.color(favoriteClassString));
+			lore.add("");
+
+				// Class Mastery
 			ClassDetails details = data.playerClasses.get(type.getID());
-			int played = details.gamesPlayed + 2 * details.gamesWon;
-			int nextLevel = 10;
+			lore.addAll(getNextRewardAndProgressBar(details));
 
-			if (played >= 75)
-				nextLevel = 100;
-			else if (played >= 50)
-				nextLevel = 75;
-			else if (played >= 25)
-				nextLevel = 50;
-			else if (played >= 10)
-				nextLevel = 25;
-
-
-			if (item == null)
-				item = new ItemStack(Material.WOOD);
+			if (item == null) item = new ItemStack(Material.WOOD);
 			contents.set(a, b,
-					ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true),
-									type.getTag(), type.buildDescription(), "",
-									"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
-											+ ChatColor.YELLOW + " to choose a class",
-									"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET
-											+ ChatColor.YELLOW + " to view mastery",
-									"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Shift Click" + ChatColor.RESET
-											+ ChatColor.YELLOW + " to add a favorite class",
-									"",
-									main.color("&aNext reward:"),
-									main.progressBar(played, nextLevel, 25)),
+					ClickableItem.of(
+							ItemHelper.setDetails(
+									ItemHelper.setHideFlags(item, true),
+									type.getTag(),
+									lore
+							),
 							e -> {
 								if (e.isShiftClick()) {
 									if (data != null) {
@@ -114,6 +122,56 @@ public class FreeClassesGUI implements InventoryProvider {
 				ItemHelper.setDetails(new ItemStack(Material.ARROW), String.valueOf(ChatColor.GRAY) + "Go Back"), e -> {
 					new ClassesGUI(main).inv.open(player);
 				}));
+	}
+
+	private List<String> getUnlockedDescriptionText(Player player, ClassType type) {
+		List<String> stringList = new ArrayList<>();
+		String unlocked = "&lUnlocked";
+		String source = null;
+
+		boolean isUnlocked = false;
+
+		if (type == ClassType.Fisherman) {
+			isUnlocked = main.getFishing().hasUnlockedFisherman(player);
+			source = "Fishing";
+		} else if (type == ClassType.Freddy) {
+			isUnlocked = main.getHalloweenManager().hasUnlockedFreddy(player);
+			source = "Halloween Hunt";
+		}
+
+		String color = isUnlocked ? "&e" : "&c";
+		String through = isUnlocked ? "Through " : " through ";
+
+		String firstLine = color + unlocked;
+		String mean = through + source;
+		firstLine += isUnlocked ? "" : mean;
+
+		stringList.add(main.color(firstLine));
+		if (isUnlocked) stringList.add(main.color(color	+ mean));
+		stringList.add("");
+
+		return stringList;
+	}
+
+	private List<String> getNextRewardAndProgressBar(ClassDetails details) {
+		List<String> rewardLines = new ArrayList<>();
+
+		int played = details.gamesPlayed + 2 * details.gamesWon;
+		int nextLevel = 10;
+
+		if (played >= 75)
+			nextLevel = 100;
+		else if (played >= 50)
+			nextLevel = 75;
+		else if (played >= 25)
+			nextLevel = 50;
+		else if (played >= 10)
+			nextLevel = 25;
+
+		rewardLines.add(main.color("&aNext reward:"));
+		rewardLines.add(main.progressBar(played, nextLevel, 25));
+
+		return rewardLines;
 	}
 
 	@Override
