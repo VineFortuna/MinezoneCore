@@ -86,18 +86,12 @@ public class GameSettings {
 		game.StartGame();
 	}
 
-	public void changeGameType() {
-		if (game != null) {
-			if (this.totalGameTypeVotes >= game.players.size() / 2 + 1) {
-				if (game.gameType == GameType.CLASSIC)
-					game.gameType = GameType.FRENZY;
-				else
-					game.gameType = GameType.CLASSIC;
-
-				game.TellAll(color("&2&l(!) &rThe game mode has been set to &e&l" + game.gameType.getName()));
-				updateModeOnBoard();
-			}
-		}
+	public void changeGameType(boolean isCommand) {
+		if (game == null) return;
+		if (!isCommand && totalGameTypeVotes < game.players.size() / 2 + 1)  return;
+		game.gameType = (game.gameType == GameType.FRENZY) ?  GameType.CLASSIC : GameType.FRENZY;
+		game.TellAll(color("&2&l(!) &rThe game mode has been set to &e&l" + game.gameType.getName()));
+		updateModeOnBoard();
 	}
 	
 	private void updateModeOnBoard() {
@@ -197,7 +191,7 @@ public class GameSettings {
 	 * the other game settings
 	 */
 	private void checkOtherSettings() {
-		changeGameType();
+		changeGameType(false);
 		increaseLightningRate();
 		setTimeOfDay();
 	}

@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
+import anthony.util.SoundManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -48,6 +49,7 @@ public class FishingAreasGUI implements InventoryProvider {
                                                 && !main.getParkour().hasPlayer(player)) {
                                             player.teleport(area.getSpawnPoint(main.getLobbyWorld()));
                                             player.sendMessage(main.color("&3&l(!) &rGrab a rod and go fishing!"));
+                                            SoundManager.playSuccessfulHit(player);
 
                                             if (!(player.getInventory().contains(main.getFishingRod(player)))) {
                                                 player.getInventory().setItem(5, main.getFishingRod(player));
