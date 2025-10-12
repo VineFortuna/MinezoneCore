@@ -72,6 +72,7 @@ public class StatsGUI implements InventoryProvider {
 					ClickableItem.of(ItemHelper.createSkullHeadPlayer(1, data.playerName, main.color("&e" + data.playerName),
 							Arrays.asList(main.color("&aRank: &r" + data.getRank().getTag()),
 									main.color("&aLevel: &r" + data.level),
+									main.color("&aEXP: &r" + data.exp + "/2500"),
 									main.color("&aMatches Played: &r" + (data.wins + data.losses)))), e-> {}));
 			/*contents.set(2, 2,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FEATHER), "&cComing soon..."), e-> {}));*/
@@ -126,7 +127,7 @@ public class StatsGUI implements InventoryProvider {
 			String fishingTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTk2YTQ4ZGNkYWY0MThmMjJjZDE4NjdjMWViMGFlMjgyYzI4NGI2Nzk5MDZiNzk3ODFkOGQyYjJlZWJhMjEwMiJ9fX0=";
 			contents.set(4, 0,
 					ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(fishingTexture),
-							main.color("&eFishing")), e-> {
+							main.color("&eFishingpedia")), e-> {
 						if (target != null)
 							new FishingGUI(main, target, inv).inv.open(player);
 						else

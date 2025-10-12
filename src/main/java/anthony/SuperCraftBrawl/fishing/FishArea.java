@@ -16,11 +16,11 @@ public enum FishArea {
             new Vector(302.5, 91, 527.5),
             new ItemStack(Material.GRASS)),
     LushCave(
-            "Lush Cave",
+            "Cobweb Cave",
             new Vector(265, 105, 629),
             32, 20, 41,
             new Vector(280.5, 107, 625.5),
-            new ItemStack(Material.GLOWSTONE)),
+            new ItemStack(Material.WEB)),
     Park("City Park",
             new Vector(98, 115, 950),
             32, 20, 42,

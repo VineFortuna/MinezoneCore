@@ -179,7 +179,7 @@ public enum Maps {
 			"HauntedMansion",
 			new Gameplay[]{Gameplay.INDOOR},
 			Size.MEDIUM,
-			Category.HOLIDAY,
+			Category.HALLOWEEN,
 			new ItemStack(Material.WOOD, 1, (short) 5), // Dark Oak Wood
 			new MapInstance(
 					"hauntedmansion")
@@ -248,7 +248,7 @@ public enum Maps {
 			"WitchesBrew",
 			new Gameplay[]{Gameplay.VOIDY},
 			Size.SMALL,
-			Category.HOLIDAY,
+			Category.HALLOWEEN,
 			new ItemStack(Material.SLIME_BLOCK), // Slime Block
 			new MapInstance(
 					"witchesbrew")
@@ -499,8 +499,8 @@ public enum Maps {
 			"TheCraftOf87",
 			new Gameplay[]{Gameplay.INDOOR},
 			Size.SMALL,
-			Category.HOLIDAY,
-			new ItemStack(Material.REDSTONE_LAMP_ON),
+			Category.HALLOWEEN,
+			new ItemStack(Material.REDSTONE_LAMP_OFF),
 			new MapInstance(
 					"thecraftof87")
 					.setSpawnPos(
@@ -705,7 +705,7 @@ public enum Maps {
 			"SnowGlobe",
 			new Gameplay[]{Gameplay.INDOOR},
 			Size.SMALL,
-			Category.HOLIDAY,
+			Category.CHRISTMAS,
 			new ItemStack(Material.STAINED_GLASS, 1, (short) 0), // White Glass
 			new MapInstance(
 					"snowglobe")
@@ -1534,7 +1534,7 @@ public enum Maps {
 			"SantasWorkshop",
 			new Gameplay[]{Gameplay.INDOOR, Gameplay.FLAT},
 			Size.MEDIUM,
-			Category.HOLIDAY,
+			Category.CHRISTMAS,
 			new ItemStack(Material.WOOD), // Oak Wood
 			new MapInstance(
 					"santafactory")
@@ -1732,7 +1732,7 @@ public enum Maps {
 		// Filter by Type
 		if (category == null) {
 			filteredMaps = filteredMaps.stream()
-					.filter(map -> map.getCategory() != Category.HOLIDAY) // Exclude Holiday maps
+					.filter(map -> map.getCategory() != Category.CHRISTMAS) // Exclude Christmas maps
 					.collect(Collectors.toList());
 		} else {
 			filteredMaps = filteredMaps.stream()
@@ -1874,7 +1874,8 @@ public enum Maps {
 		CURATED,
 		CASUAL,
 		VAULTED,
-		HOLIDAY;
+		HALLOWEEN,
+		CHRISTMAS;
 		
 		@Override
 		public String toString() {
@@ -1885,8 +1886,10 @@ public enum Maps {
 					return "Casual";
 				case VAULTED:
 					return "Vaulted";
-				case HOLIDAY:
-					return "Holiday";
+				case HALLOWEEN:
+					return "Halloween";
+				case CHRISTMAS:
+					return "Christmas";
 			}
 			return "Unknown Map " + this.getClass();
 		}

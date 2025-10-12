@@ -173,6 +173,8 @@ public class PlayerDataManager implements Listener {
 			String color = set.getString("Color");
 			String fishingWarps = set.getString("FishingWarps");
 			String treasureLoc = set.getString("TreasureLoc");
+			int pumpkinPie = set.getInt("PumpkinPie");
+			int ritualEffect = set.getInt("RitualEffect");
 
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
@@ -184,7 +186,7 @@ public class PlayerDataManager implements Listener {
 					bestWinstreak, december15, december16, december17, december18, december19, december20, december21,
 					december22, december23, december24, december25, snowParticles, snowballDeathEffect, elfCosmetic,
 					snowmanPet, candycaneParticles, snowball, floodEffect, treasureEffect, treasureOpened, color,
-					fishingWarps, treasureLoc);
+					fishingWarps, treasureLoc, pumpkinPie, ritualEffect);
 		}
 		set.close();
 		stmt.close();
@@ -203,8 +205,8 @@ public class PlayerDataManager implements Listener {
 			boolean reward3 = classSet.getInt("Reward3") == 1;
 			boolean reward4 = classSet.getInt("Reward4") == 1;
 			boolean reward5 = classSet.getInt("Reward5") == 1;
-			data.playerClasses.put(classID,
-					new ClassDetails(purchased, timePurchased, gamesPlayed, gamesWon, reward1, reward2, reward3, reward4, reward5));
+			data.playerClasses.put(classID, new ClassDetails(purchased, timePurchased, gamesPlayed, gamesWon, reward1,
+					reward2, reward3, reward4, reward5));
 		}
 		classSet.close();
 		classState.close();
@@ -271,12 +273,13 @@ public class PlayerDataManager implements Listener {
 				+ ", EnderDragonEffect = " + data.enderDragonEffect + ", SantaEffect = " + data.santaEffect
 				+ ", FireParticlesEffect = " + data.fireParticlesEffect + ", Losses = " + data.losses + ", Votes = "
 				+ data.votes + ", FlawlessWins = " + data.flawlessWins + ", BonusTokens = " + data.bonusTokens
-				+ ", BonusLevels = " + data.bonusLevels + ", WitherSk = " + data.withersk + ", Points = " + data.points
-				+ ", MagicBroom = " + data.magicbroom + ", Cwm = " + data.cwm + ", Blue = " + data.blue + ", Red = "
-				+ data.red + ", Green = " + data.green + ", Yellow = " + data.yellow + ", MelonCosmetic = " + data.melon
-				+ ", PrivateMessages = " + data.pm + ", Muted = " + data.muted + ", GoldApple = " + data.goldApple
-				+ ", Fly = " + data.fly + ", Glowstone = " + data.glowstone + ", Redstone = " + data.redstone
-				+ ", Web = " + data.web + ", BottleEXP = " + data.bottleEXP + ", MysteryChests = " + data.mysteryChests
+				+ ", RitualEffect = " + data.ritualEffect + ", BonusLevels = " + data.bonusLevels + ", WitherSk = "
+				+ data.withersk + ", Points = " + data.points + ", MagicBroom = " + data.magicbroom + ", Cwm = "
+				+ data.cwm + ", Blue = " + data.blue + ", Red = " + data.red + ", Green = " + data.green + ", Yellow = "
+				+ data.yellow + ", MelonCosmetic = " + data.melon + ", PrivateMessages = " + data.pm + ", Muted = "
+				+ data.muted + ", GoldApple = " + data.goldApple + ", PumpkinPie = " + data.pumpkinPie + ", Fly = "
+				+ data.fly + ", Glowstone = " + data.glowstone + ", Redstone = " + data.redstone + ", Web = " + data.web
+				+ ", BottleEXP = " + data.bottleEXP + ", MysteryChests = " + data.mysteryChests
 				+ ", AstronautCosmetic = " + data.astronaut + ", SantaOutfit = " + data.santaoutfit
 				+ ", BestWinstreak = " + data.bestWinstreak + ", BroomWinEffect = " + data.broomWinEffect
 				+ ", BestTime = " + data.bestTime + ", Exp = " + data.exp + ", Winstreak = " + data.winstreak
@@ -293,9 +296,9 @@ public class PlayerDataManager implements Listener {
 				+ data.paintball + ", Wins = " + data.wins + ", TotalCaught = " + data.totalcaught + ", Caught = "
 				+ data.caught + ", RewardLevel = " + data.rewardLevel + ", LureLevel = " + data.lureLevel + ", Lure = "
 				+ data.lure + ", FriendshipLevel = " + data.friendshipLevel + ", Friendship = " + data.friendship
-				+ ", FishRainEffect = " + data.fishRainEffect + ", Snowball = " + data.snowball
-				+ ", FloodEffect = " + data.floodEffect + ", TreasureEffect = " + data.treasureEffect
-				+ ", TreasureOpened = " + data.treasureOpened + ", Color = '" + data.color + "', FishingWarps = '" + data.fishingWarps
+				+ ", FishRainEffect = " + data.fishRainEffect + ", Snowball = " + data.snowball + ", FloodEffect = "
+				+ data.floodEffect + ", TreasureEffect = " + data.treasureEffect + ", TreasureOpened = "
+				+ data.treasureOpened + ", Color = '" + data.color + "', FishingWarps = '" + data.fishingWarps
 				+ "', TreasureLoc = '" + data.treasureLoc + "' WHERE UUID = '" + data.playerUUID.toString() + "';");
 		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon, "
 				+ "Reward1, Reward2, Reward3, Reward4, Reward5) VALUES ";
@@ -318,9 +321,9 @@ public class PlayerDataManager implements Listener {
 
 		if (index > 0) {
 			updateCMD += " ON DUPLICATE KEY UPDATE TimePurchased = VALUES (TimePurchased), Purchased = VALUES (Purchased), GamesPlayed = VALUES (GamesPlayed),"
-					+ "GamesWon = VALUES (GamesWon), Reward1 = VALUES (Reward1), Reward2 = VALUES (Reward2)," +
-					"Reward3 = VALUES (Reward3), Reward4 = VALUES (Reward4), Reward5 = VALUES (Reward5);";
-			//System.out.print("Executing " + updateCMD);
+					+ "GamesWon = VALUES (GamesWon), Reward1 = VALUES (Reward1), Reward2 = VALUES (Reward2),"
+					+ "Reward3 = VALUES (Reward3), Reward4 = VALUES (Reward4), Reward5 = VALUES (Reward5);";
+			// System.out.print("Executing " + updateCMD);
 			manager.executeUpdateCommand(updateCMD);
 		}
 
@@ -332,8 +335,7 @@ public class PlayerDataManager implements Listener {
 				if (index != 0)
 					updateCMD += ", ";
 				updateCMD += "('" + data.playerUUID.toString() + "', " + entry.getKey() + ", "
-						+ entry.getValue().timesCaught + ", "
-						+ entry.getValue().carrying + ")";
+						+ entry.getValue().timesCaught + ", " + entry.getValue().carrying + ")";
 				index++;
 				entry.getValue().hasUpdated = false;
 			}
@@ -341,7 +343,7 @@ public class PlayerDataManager implements Listener {
 
 		if (index > 0) {
 			updateCMD += " ON DUPLICATE KEY UPDATE TimesCaught = VALUES (TimesCaught), Carrying = VALUES (Carrying);";
-			//System.out.print("Executing " + updateCMD);
+			// System.out.print("Executing " + updateCMD);
 			manager.executeUpdateCommand(updateCMD);
 		}
 
@@ -361,7 +363,7 @@ public class PlayerDataManager implements Listener {
 
 		if (index > 0) {
 			updateCMD += " ON DUPLICATE KEY UPDATE TotalTime = VALUES (TotalTime);";
-			//System.out.print("Executing " + updateCMD);
+			// System.out.print("Executing " + updateCMD);
 			manager.executeUpdateCommand(updateCMD);
 		}
 
@@ -382,7 +384,7 @@ public class PlayerDataManager implements Listener {
 
 		if (index > 0) {
 			updateCMD.append(" ON DUPLICATE KEY UPDATE CustomInteger = VALUES (CustomInteger);");
-			//System.out.print("Executing " + updateCMD);
+			// System.out.print("Executing " + updateCMD);
 			manager.multiExecuteUpdateCommand(s, updateCMD.toString());
 		} else {
 			manager.multiExecuteUpdateCommand(s);
@@ -397,7 +399,8 @@ public class PlayerDataManager implements Listener {
 	}
 
 	public boolean setOfflinePlayerRank(String name, Rank rank) throws SQLException {
-		String updateSql = "UPDATE PlayerData SET RoleID = '" + rank.getRoleID() + "' WHERE LastPlayerName = '" + name + "'";
+		String updateSql = "UPDATE PlayerData SET RoleID = '" + rank.getRoleID() + "' WHERE LastPlayerName = '" + name
+				+ "'";
 
 		Connection c = manager.getConnection();
 		Statement stmt = c.createStatement();
