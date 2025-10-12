@@ -163,7 +163,6 @@ public class VillagerClass extends BaseClass {
 				// Check Right CLick
 				new VillagerAbilityGUI(
 						instance.getGameManager().getMain(),
-						instance,
 						this
 				).inv.open(player);
 			// Potato Ability
