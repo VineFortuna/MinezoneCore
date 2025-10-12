@@ -1,6 +1,6 @@
 package anthony.SuperCraftBrawl;
 
-import anthony.SuperCraftBrawl.Game.*;  
+import anthony.SuperCraftBrawl.Game.*;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -9,13 +9,15 @@ import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.halloween.BasketItemUtil;
+import anthony.SuperCraftBrawl.halloween.CandyAuraManager;
+import anthony.SuperCraftBrawl.halloween.HalloweenHuntManager;
+import anthony.SuperCraftBrawl.halloween.TreatsAdminCommand;
+import anthony.SuperCraftBrawl.halloween.TrickTitleCommand;
+import anthony.SuperCraftBrawl.halloween.TrickTitleManager;
+import anthony.SuperCraftBrawl.halloween.TrickTitlePackets;
 import anthony.SuperCraftBrawl.leaderboards.*;
-import anthony.SuperCraftBrawl.lobbyexplorer.LobbyExplorerManager;
-import anthony.SuperCraftBrawl.lobbyexplorer.LobbyExplorers;
-import anthony.SuperCraftBrawl.npcs.ChannelInjector;
-import anthony.SuperCraftBrawl.npcs.NPC;
 import anthony.SuperCraftBrawl.npcs.NPCManager;
-import anthony.SuperCraftBrawl.npcs.VisibleHook;
 import anthony.SuperCraftBrawl.packets.PacketMain;
 import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -117,10 +119,7 @@ public class Core extends JavaPlugin implements Listener {
 	public Map<Player, Player> wagers = new HashMap<Player, Player>();
 	public SignManager signManager;
 	public anthony.SuperCraftBrawl.lobbyitems.LobbyItems lobbyItems;
-	
-	//CUSTOM NPCs
-    private NPC playNPC, infoNPC;
-    private LobbyExplorerManager lem;
+	public CandyAuraManager candyAura;
 
 	// Player's game stats
 	public Map<Player, GameInstance> gameStats = new HashMap<Player, GameInstance>();
@@ -128,6 +127,11 @@ public class Core extends JavaPlugin implements Listener {
 	public boolean finalEvent = false;
 
 	private long tickCounter = 0;
+
+	// HALLOWEEN CLASSES:
+	private HalloweenHuntManager halloweenHunt;
+	private TrickTitleManager trickTitleOld;
+	private TrickTitlePackets trickTitle;
 
 	public Core() {
 		this.staffchat = new ArrayList<Player>();
@@ -143,11 +147,23 @@ public class Core extends JavaPlugin implements Listener {
 	public ActionBarManager getActionBarManager() {
 		return this.actionBarManager;
 	}
-	
-	public LobbyExplorerManager getExplorerManager() {
-		return this.lem;
+
+	public CandyAuraManager getCandyAuraManager() {
+		return this.candyAura;
 	}
 	
+	public TrickTitleManager getTrickTitle() {
+		return this.trickTitleOld;
+	}
+
+	public TrickTitlePackets getTrickPacket() {
+		return this.trickTitle;
+	}
+
+	public HalloweenHuntManager getHalloweenManager() {
+		return this.halloweenHunt;
+	}
+
 	public LevelBoard getLevelBoard() {
 		return this.levelBoard;
 	}
@@ -155,7 +171,7 @@ public class Core extends JavaPlugin implements Listener {
 	public ScoreboardManager getScoreboardManager() {
 		return this.scoreboardManager;
 	}
-	
+
 	public anthony.SuperCraftBrawl.lobbyitems.LobbyItems getLobbyItems() {
 		return this.lobbyItems;
 	}
@@ -163,7 +179,7 @@ public class Core extends JavaPlugin implements Listener {
 	public TablistManager getTabManager() {
 		return this.tabManager;
 	}
-	
+
 	public SignManager getSignManager() {
 		return this.signManager;
 	}
@@ -431,7 +447,8 @@ public class Core extends JavaPlugin implements Listener {
 		fishing = new Fishing(this);
 		signManager = new SignManager(this);
 		lobbyItems = new anthony.SuperCraftBrawl.lobbyitems.LobbyItems(this);
-		lem = new LobbyExplorerManager(this);
+		halloweenHunt = new HalloweenHuntManager(this);
+		candyAura = new CandyAuraManager(this, "lobby-1");
 
 		for (Arenas arena : Arenas.values()) {
 			parkourBoards.add(new ParkourBoard(this, arena));
@@ -447,9 +464,9 @@ public class Core extends JavaPlugin implements Listener {
 		messages();
 
 		if (this.getCommands() != null) {
-			String[] commandTypes = { "maps", "join", "fishing", "server", "fly", "leave", "players", "class", "socials", "spectate",
-					"startgame", "gamestats", "setlives", "lactate", "purchases", "kit", "items", "color", "sound",
-					"heal" };
+			String[] commandTypes = { "maps", "join", "cosmetics", "fishing", "server", "fly", "leave", "players",
+					"class", "socials", "spectate", "startgame", "frenzy", "gamestats", "setlives", "purchases", "kit",
+					"items", "color", "sound", "heal", "forceclass", "lactate" };
 
 			for (String command : commandTypes) {
 				PluginCommand pluginCommand = this.getCommand(command);
@@ -461,8 +478,17 @@ public class Core extends JavaPlugin implements Listener {
 			}
 		}
 
-		createNPCs();
 		enablePracticeModes();
+
+		// Halloween stuff
+		getCommand("treatsadmin").setExecutor(new TreatsAdminCommand(halloweenHunt));
+		trickTitleOld = new TrickTitleManager(this, "lobby-1");
+		this.trickTitle = new TrickTitlePackets(this, "lobby-1"); // change world name if needed
+		this.trickTitle.registerTitle("Trick-or-Treater", color("&6&lTrick-or-Treater"), 0.2);
+		this.trickTitle.registerTitle("Freddy Fazbear", color("&6&lFreddy Fazbear"), 0.2);
+		this.trickTitle.registerTitle("Fiesta De La Noche", color("&b&lFIESTA DE LA NOCHE"), 0.2);
+		this.trickTitle.registerTitle("i'm gay btw...", color("&di'm gay btw..."), 0.2);
+		getCommand("tricktitle").setExecutor(new TrickTitleCommand(trickTitle));
 
 		new BukkitRunnable() {
 			@Override
@@ -501,43 +527,7 @@ public class Core extends JavaPlugin implements Listener {
 			}
 		}.runTaskTimer(this, 0, 1);
 	}
-	
-	public void createNPCs() {
-	    World w = lobbyWorld;
-	    // Ensure chunk is loaded
-	    w.getChunkAt(new Location(w, 161.481, 105.5, 657.443)).load(true);
 
-	    // ===== SKINS (use real values; leaving nulls just shows default Steve skin) =====
-	    final String GIRL_VALUE = null; // "<BASE64_TEXTURE_VALUE>";
-	    final String GIRL_SIG   = null; // "<BASE64_TEXTURE_SIGNATURE>";
-	    // ===============================================================================
-
-	    // Create and assign to FIELDS so other code can see/use them
-	    this.playNPC = new NPC(
-	            Core.inst(),
-	            "Amy",
-	            new Location(w, 161.481, 105.5, 657.443, 180f, 0f),
-	            GIRL_VALUE, GIRL_SIG,
-	            null,                      // no custom click handler -> uses explorer default
-	            LobbyExplorers.Amy         // explorer enum
-	    ).setNameLines("&eAmy - Lobby Explorer", "&7(Right Click)");
-
-	    // If you have a second NPC, create and assign it too (or set to null)
-	    this.infoNPC = null; // or build another NPC here
-
-	    // Register visibility/click routing with the actual instances
-	    getServer().getPluginManager().registerEvents(new VisibleHook(this.playNPC, this.infoNPC), this);
-
-	    // Show to players already online (e.g., after /reload)
-	    for (Player p : Bukkit.getOnlinePlayers()) {
-	        ChannelInjector.inject(p);
-	        Bukkit.getScheduler().runTaskLater(this, () -> {
-	            if (this.playNPC != null) this.playNPC.showTo(p);
-	            if (this.infoNPC != null) this.infoNPC.showTo(p);
-	        }, 5L);
-	    }
-	}
-	
 	public static BowPractice bowPractice;
 
 	private void enablePracticeModes() {
@@ -603,7 +593,6 @@ public class Core extends JavaPlugin implements Listener {
 	@SuppressWarnings({ "null", "deprecation" })
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-
 		if (cmd.getName().equalsIgnoreCase("setrank")) {
 			if (sender.hasPermission("scb.setrank")) {
 				if (args.length > 1) {
@@ -731,13 +720,13 @@ public class Core extends JavaPlugin implements Listener {
 						}
 
 						for (Player allPlayers : Bukkit.getOnlinePlayers()) {
-                            allPlayers.sendTitle(
-                                    "" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.UNDERLINE + "ANNOUNCEMENT",
-                                    "" + ChatColor.RESET + message.trim() + " - " + ChatColor.YELLOW
-                                            + player.getName().substring(0, 3));
-                            allPlayers.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                    + message.trim() + " - " + ChatColor.YELLOW + player.getName());
-                        }
+							allPlayers.sendTitle(
+									"" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.UNDERLINE + "ANNOUNCEMENT",
+									"" + ChatColor.RESET + message.trim() + " - " + ChatColor.YELLOW
+											+ player.getName().substring(0, 3));
+							allPlayers.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+									+ message.trim() + " - " + ChatColor.YELLOW + player.getName());
+						}
 					}
 				} else
 					player.sendMessage(color("&c&l(!) &rYou need the rank &c&lADMIN &rto use this command!"));
@@ -1017,7 +1006,7 @@ public class Core extends JavaPlugin implements Listener {
 //						+ "for more information");
 			}
 			if (cmd.getName().equalsIgnoreCase("help") && sender instanceof Player) {
-				player.sendMessage(color("&2&l(!) &b&lSCB COMMANDS"));
+				player.sendMessage(color("&b&lSCB COMMANDS"));
 				player.sendMessage(color("&r/join -> &7Join a game"));
 				player.sendMessage(color("&r/maps -> &7See all playable maps"));
 				player.sendMessage(color("&r/classes -> &7See all playable classes"));
@@ -1025,7 +1014,7 @@ public class Core extends JavaPlugin implements Listener {
 				player.sendMessage(color("&r/spectate -> &7Spectate a game"));
 				player.sendMessage(color("&r/leave -> &7Leave your game"));
 				player.sendMessage("");
-				player.sendMessage(color("&2&l(!) &b&lFISHING COMMANDS"));
+				player.sendMessage(color("&b&lFISHING COMMANDS"));
 				player.sendMessage(color("&r/fishing -> &7Opens Fishing menu"));
 			}
 
@@ -1738,11 +1727,6 @@ public class Core extends JavaPlugin implements Listener {
 		}
 		player.setHealth(20);
 		player.setFoodLevel(20);
-		
-		ChannelInjector.inject(player);
-		if (playNPC != null) playNPC.showTo(player);
-		if (infoNPC != null) infoNPC.showTo(player);
-
 	}
 
 	public String getColorForNames(Player player, Rank rank) {
@@ -1762,51 +1746,24 @@ public class Core extends JavaPlugin implements Listener {
 	private void chatAnnouncementOnJoin(Player p) {
 		p.sendMessage("----------------------------------------------");
 		p.sendMessage("");
-		p.sendMessage("");
-		p.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "        WELCOME TO MINEZONE");
+		p.sendMessage(color("          &b&lWELCOME TO MINEZONE"));
 		p.sendMessage("");
 		p.sendMessage("" + "         Enjoy Super Craft Bros!");
 		p.sendMessage("");
-		p.sendMessage("" + "     Be sure to join our Discord Server with " + ChatColor.GREEN + "/socials");
-		p.sendMessage("");
+		p.sendMessage("" + " Be sure to join our Discord Server with " + ChatColor.GREEN + "/socials");
 		p.sendMessage("");
 		p.sendMessage("----------------------------------------------");
+		p.sendMessage("");
 
-//		new BukkitRunnable() {
-//			@Override
-//			public void run() { // Runs after 4 seconds
-//				p.sendMessage("----------------------------------------------");
-//				p.sendMessage("");
-//				p.sendMessage(color("          &e&lFISHING &2&lLOBBY ACTIVITY"));
-//				p.sendMessage("" + "     Try out fishing to get some amazing rewards");
-//				p.sendMessage("" + "     by checking out the Fisherman in the lobby!");
-//				p.sendMessage("");
-//				p.sendMessage("----------------------------------------------");
-//				p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
-//				p.sendTitle(color("&e&lFISHING"),
-//						color("&eVersion " + Version.FISHING.getVersion() + " available now!"));
-//			}
-//		}.runTaskLater(this, 80); // 80 ticks = 4 seconds (20 ticks per second)
-
-//		new BukkitRunnable() {
-//			@Override
-//			public void run() { // Runs after 20 seconds
-//				p.sendMessage("----------------------------------------------");
-//				p.sendMessage("");
-//				p.sendMessage("" + ChatColor.AQUA + ChatColor.BOLD + "             Super Craft Blocks");
-//				p.sendMessage("");
-//				p.sendMessage(color("&f  Welcome to Super Craft Blocks! A custom suite of"));
-//				p.sendMessage(color("" + ChatColor.AQUA + "  Class PvP &7based gamemodes hosted exclusively on"));
-//				p.sendMessage("                    " + ChatColor.AQUA + ChatColor.UNDERLINE + "minezone.club");
-//				p.sendMessage("");
-//				if (p.hasPermission("scb.bonusTokens"))
-//					p.sendMessage(color("&c&l>> &rThanks for being a "
-//							+ (getRankManager().getRank(p) == Rank.VIP ? Rank.VIP.getTag() : Rank.CAPTAIN.getTag())
-//							+ "&r Supporter!"));
-//
-//				p.sendMessage("----------------------------------------------");
-//			}
-//		}.runTaskLater(this, 400); // 400 ticks = 20 seconds (20 ticks per second)
+		Bukkit.getScheduler().runTaskLater(this, () -> {
+			p.sendMessage("----------------------------------------------");
+			p.sendMessage(color("            &6&lHALLOWEEN HUNT"));
+			p.sendMessage("");
+			p.sendMessage(color("" + "     &6Check out the Halloween NPC in"));
+			p.sendMessage(color("" + "       &6spawn for amazing rewards!"));
+			p.sendMessage("");
+			p.sendMessage("----------------------------------------------");
+		}, 40L);
 	}
 
 	public Map<Player, EntityArmorStand> msHologram = new HashMap<Player, EntityArmorStand>();
@@ -1816,7 +1773,7 @@ public class Core extends JavaPlugin implements Listener {
 
 		// if (!(this.msHologram.containsKey(p))) {
 		if (data != null) {
-			Location loc = new Location(this.getLobbyWorld(), 179.527, 105.5, 673.493);
+			Location loc = new Location(this.getLobbyWorld(), 174.5, 106.5, 677.5);
 			WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
 			EntityArmorStand stand = new EntityArmorStand(s);
 
@@ -1828,7 +1785,7 @@ public class Core extends JavaPlugin implements Listener {
 			PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
 			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
 
-			loc = new Location(this.getLobbyWorld(), 179.527, 105.2, 673.493);
+			loc = new Location(this.getLobbyWorld(), 174.5, 106.2, 677.5);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
@@ -1895,7 +1852,8 @@ public class Core extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void serverMotd(ServerListPingEvent p) {
-		String msg = color("                     &eMinezone &7[1.8-1.21] \n    &c&lSUPER CRAFT BROS &7- &6&lHALLOWEEN UPDATE");
+		String msg = color(
+				"                     &eMinezone &7[1.8-1.21] \n    &c&lSUPER CRAFT BROS &7- &6&lHALLOWEEN UPDATE");
 		p.setMotd(msg);
 		p.setMaxPlayers(1);
 	}
@@ -1930,21 +1888,6 @@ public class Core extends JavaPlugin implements Listener {
 			player.sendPluginMessage(this, "BungeeCord", b.toByteArray());
 		}, 10L);
 		GameInstance game = this.getGameManager().GetInstanceOfPlayer(player);
-		PunishAPI pu = PunishAPI.get();
-
-		String IP = e.getPlayer().getAddress().getAddress().toString();
-		if (pu.isPlayerNetworkBanned(player.getUniqueId())) {
-			e.setQuitMessage(null);
-			return;
-		}
-		if (pu.isIPBanned(IP)) {
-			e.setQuitMessage(null);
-			return;
-		}
-		if (pu.isPlayerBannedNoUnban(player.getUniqueId())) {
-			e.setQuitMessage(null);
-			return;
-		}
 
 		if (game != null && game.getGameSettings() != null) {
 			game.getGameSettings().removeFromStartVotes(player);
@@ -1990,6 +1933,8 @@ public class Core extends JavaPlugin implements Listener {
 		return lobbyWorld;
 	}
 
+	private static final String BASKET_B64 = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzEzODVhN2FmYjM1NTJmYWY3MWMyYzVhOGU2YTViMWQyZTY3MmM3ODZlODA3NDQzM2ViNTgzOWFjZTgzYjQifX19";
+
 	public void LobbyItems(Player player) {
 		if (this.getCommands() != null) {
 			player.getInventory().setItem(1,
@@ -2001,6 +1946,7 @@ public class Core extends JavaPlugin implements Listener {
 		}
 		player.getInventory().setItem(0,
 				ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&bGame Selector &7(Right Click)"));
+
 		player.getInventory().setItem(4,
 				ItemHelper.setDetails(new ItemStack(Material.CHEST), "&bCosmetics &7(Right Click)"));
 		ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
@@ -2018,7 +1964,7 @@ public class Core extends JavaPlugin implements Listener {
 
 	public void ResetPlayer(Player player) {
 		PlayerData playerData = this.getDataManager().getPlayerData(player);
-		
+
 		if (player != null && playerData != null) {
 			player.getInventory().clear();
 			player.teleport(LobbyLoc());
@@ -2122,8 +2068,6 @@ public class Core extends JavaPlugin implements Listener {
 		}
 
 		closeLeaderboards();
-		for (Player p : Bukkit.getOnlinePlayers()) ChannelInjector.uninject(p);
-
 
 		Bukkit.getMessenger().unregisterOutgoingPluginChannel(plugin);
 		Bukkit.getMessenger().unregisterIncomingPluginChannel(this, "BungeeCord");
