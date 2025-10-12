@@ -26,7 +26,7 @@ public enum ClassType {
 	Rabbit(26, 0, 0),
 	Squid(20, 0, 0),
 	Spider(21, 0, 0),
-	Pig(30, 0, 0, true),
+	Pig(30, 0, 0),
 	Blaze(31, 0, 0),
 	Wither(33, 0, 0),
 	Creeper(35, 0, 0),
@@ -53,7 +53,7 @@ public enum ClassType {
 	Potato(32, 750, 0),
 	Ocelot(34, 250, 0),
 	Noteblock(36, 800, 0),
-	EnchantTable(37, 350, 0, true),
+	EnchantTable(37, 350, 0),
 	Star(42, 850, 0, true),
 	Anvil(46, 700, 0),
 	Summoner(47, 525, 0),
@@ -87,7 +87,7 @@ public enum ClassType {
 	Mooshroom(22, 0, Rank.VIP),
 	Herobrine(23, 0, Rank.VIP),
 	Wizard(41, 0, Rank.VIP),
-	MagmaCube(48, 0, Rank.VIP, true),
+	MagmaCube(48, 0, Rank.VIP),
 	Bedrock(61, 0, Rank.VIP),
 	Firework(62, 0, Rank.VIP),
 	Vindicator(65, 0, Rank.VIP, true),
@@ -472,7 +472,7 @@ public enum ClassType {
 		case Cactus:
 			return new ItemStack(Material.CACTUS);
 		case Freddy:
-			return ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWRiMjdjY2I0ZjEyNjQwZjFiNThlYTYyZDkwY2RhY2U0NGMwZjJkYTlmMzkwOGUyNWViMTZiZGI1YmJiNWE2NSJ9fX0=");
+			return new ItemStack(Material.REDSTONE);
 		case Santa:
 			return ItemHelper.createSkullTexture(
 					"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19");

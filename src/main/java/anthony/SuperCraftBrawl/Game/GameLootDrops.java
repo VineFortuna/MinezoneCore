@@ -18,12 +18,12 @@ public enum GameLootDrops {
 	SKELE_EGG(Rarity.COMMON), MILK(Rarity.COMMON), SLIME_EGG(Rarity.COMMON),
 
 	// UNCOMMON:
-	NUKE(Rarity.RARE), SPEED2(Rarity.RARE), INSTAGIB(Rarity.RARE), BAZOOKA(Rarity.RARE),
-	WITCH_EGG(Rarity.RARE), CREEPER_EGG(Rarity.RARE), FIRE_FLOWER(Rarity.RARE),
+	SPEED2(Rarity.UNCOMMON), INSTAGIB(Rarity.UNCOMMON), BAZOOKA(Rarity.UNCOMMON),
+	WITCH_EGG(Rarity.UNCOMMON), CREEPER_EGG(Rarity.UNCOMMON), FIRE_FLOWER(Rarity.UNCOMMON),
 
 	// RARE:
-	HEALTH2(Rarity.MYTHIC), BROOMS(Rarity.MYTHIC), HAMMER(Rarity.MYTHIC), ENDER_PEARL(Rarity.MYTHIC), BOUNTY(Rarity.MYTHIC),
-	GOLDEN_APPLE(Rarity.MYTHIC),
+	HEALTH2(Rarity.RARE), BROOMS(Rarity.RARE), HAMMER(Rarity.RARE), ENDER_PEARL(Rarity.RARE), BOUNTY(Rarity.RARE),
+	GOLDEN_APPLE(Rarity.RARE),
 
 	// LEGENDARY:
 	BOMB(Rarity.LEGENDARY), NOTCH_APPLE(Rarity.LEGENDARY), EXTRA_LIFE(Rarity.LEGENDARY);
@@ -44,12 +44,12 @@ public enum GameLootDrops {
 		GameLootDrops[] drops = GameLootDrops.values();
 		GameLootDrops randomDrop = null; // Default value
 
-		if (chance >= 50 && chance <= 100) {
+		if (chance >= 40 && chance <= 100) {
 			randomDrop = helper(Rarity.COMMON, randomDrop, drops, r);
-		} else if (chance < 50 && chance >= 15) {
-			randomDrop = helper(Rarity.RARE, randomDrop, drops, r);
+		} else if (chance < 40 && chance >= 15) {
+			randomDrop = helper(Rarity.UNCOMMON, randomDrop, drops, r);
 		} else if (chance < 15 && chance >= 3) {
-			randomDrop = helper(Rarity.MYTHIC, randomDrop, drops, r);
+			randomDrop = helper(Rarity.RARE, randomDrop, drops, r);
 		} else if (chance >= 0 && chance < 3) {
 			randomDrop = helper(Rarity.LEGENDARY, randomDrop, drops, r);
 		}
@@ -114,13 +114,6 @@ public enum GameLootDrops {
 	            break;
 
 	        // ===== UNCOMMON =====
-			case NUKE:
-				item = ItemHelper.setDetails(new ItemStack(Material.TNT, 3),
-						"&4&lNUKE",
-						"&7Spawn TNTs where you're looking");
-				ItemHelper.setGlowing(item, true);
-				break;
-
 	        case SPEED2:
 	            item = ItemHelper.createPotionItem(PotionType.SPEED, 1, 30, true, true, true);
 	            ItemHelper.setDetails(item, "&b&lSPEED II &7(30 sec)", "", "&2&lUNCOMMON");
@@ -218,7 +211,7 @@ public enum GameLootDrops {
 	}
 
 	public enum Rarity {
-		COMMON(60), RARE(25), MYTHIC(12), LEGENDARY(3);
+		COMMON(60), UNCOMMON(25), RARE(12), LEGENDARY(3);
 
 		private final int weight;
 

@@ -71,7 +71,7 @@ public class KillsBoard extends LeaderboardBase {
 	public void updateLeaderboard(boolean init) {
 		removeOldLeaderboards();
 
-		Location loc = new Location(main.getLobbyWorld(), 199.5, 107.5, 709.4);
+		Location loc = new Location(main.getLobbyWorld(), 195.5, 106.5, 713.5);
 		sendArmorStandPacket(loc, ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Kills");
 		loc.setY(loc.getY() - 0.4);
 
@@ -85,23 +85,19 @@ public class KillsBoard extends LeaderboardBase {
 			count++;
 		}
 
-		// after you've finished drawing the top 10 using 'loc'
-		Location base = loc.clone(); // freeze the baseline after the top list
-
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			PlayerData data = main.getDataManager().getPlayerData(player);
-			if (data != null && !lead.contains(data.playerUUID)) {
-				int win = data.kills;
 
-				// draw the separator for THIS player at a fixed offset from base
-				Location line1 = base.clone().add(0, -0.24, 0);
-				sendStandToOnePlayer(line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						player);
-
-				// draw the player's own line just below it
-				Location line2 = base.clone().add(0, -0.44, 0);
-				sendStandToOnePlayer(line2, "" + ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + win,
-						player);
+			if (data != null) {
+				if (!(lead.contains(data.playerUUID))) {
+					int win = data.kills;
+					loc.setY(loc.getY() - 0.24);
+					sendStandToOnePlayer(loc, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------",
+							player);
+					loc.setY(loc.getY() - 0.20);
+					sendStandToOnePlayer(loc, "" + ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + win,
+							player);
+				}
 			}
 		}
 	}

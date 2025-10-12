@@ -136,7 +136,7 @@ public class MysteryChestsGUI implements InventoryProvider {
                 ((CraftPlayer) player).getHandle().playerConnection.sendPacket(destroyPacket);
 
                 // fixed hologram position (adjust if needed)
-                loc = new Location(lobby, 174.5, 106.2, 677.5);
+                loc = new Location(lobby, 179.527, 105.2, 673.493);
 
                 WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
                 stand = new EntityArmorStand(s);

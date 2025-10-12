@@ -27,7 +27,6 @@ import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -67,7 +66,6 @@ public class PlayerListener implements Listener {
 	public List<Player> candyCaneSwirlPlayers = new ArrayList<Player>();
 	public List<Player> elfCosmeticPlayers = new ArrayList<Player>();
 	public List<Player> goldenOutfitPlayers = new ArrayList<>();
-	public List<Player> freddyOutfitPlayers = new ArrayList<>();
 
 	public PlayerListener(Core main) {
 		this.main = main;
@@ -84,10 +82,6 @@ public class PlayerListener implements Listener {
 		p.setAllowFlight(false);
 		p.setAllowFlight(true);
 		p.setGameMode(GameMode.ADVENTURE);
-	}
-	
-	public void removeCosmetics(Player player) {
-		main.getTrickTitle().disable(player);
 	}
 
 	/**
@@ -110,25 +104,6 @@ public class PlayerListener implements Listener {
 	public void resetPotionEffects(Player p) {
 		for (PotionEffect type : p.getActivePotionEffects()) // Loop through all active effects
 			p.removePotionEffect(type.getType());
-	}
-	
-	public void checkIfLevelUp(Player player) {
-		PlayerData data = main.getDataManager().getPlayerData(player);
-		
-		if (data != null) {
-			if (data.exp >= 2500) {
-				data.level++;
-				data.exp -= 2500;
-				player.sendMessage(main.color("&8&m----------------------------------------"));
-				player.sendMessage(main.color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
-				player.sendMessage(main.color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
-				player.sendMessage(main.color("&8&m----------------------------------------"));
-				player.playSound(player.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
-				
-				if (player.getWorld() == main.getLobbyWorld())
-					main.getScoreboardManager().lobbyBoard(player);
-			}
-		}
 	}
 
 	/**
@@ -162,14 +137,6 @@ public class PlayerListener implements Listener {
 		 * 
 		 * if (main.getTabManager() != null) main.getTabManager().setPlayerTeam(p);
 		 */
-	}
-	
-	public int getHalloweenEventProgress(Player player) {
-		int progress = (main.getHalloweenManager() != null)
-				? main.getHalloweenManager().getFoundCount(player.getUniqueId())
-				: 0;
-		
-		return progress;
 	}
 
 	// Clicking leaderboard settings in lobby
@@ -621,7 +588,7 @@ public class PlayerListener implements Listener {
 				}
 			} else if (item.getType() == Material.NETHER_STAR) {
 				if (player.getWorld() == main.getLobbyWorld())
-					new ChallengesGUI(main).inv.open(player);
+					new BattlePassGUI(main).inv.open(player);
 			}
 		}
 	}
@@ -661,10 +628,19 @@ public class PlayerListener implements Listener {
 			List<String> filteredWords = new ArrayList<>(Arrays.asList("nibba", "nigga", "niggas", "nigger", "niggers",
 					"porn", "pornhub", "cum", "fuck you", "fuckyou", "fuck", "bitch", "pussy", "fucker", "motherfucker",
 					"kys", "pu$$y", "fag", "faggot", "bitchass", "cunt", "retard", "penis", "fucker", "twat", "cock",
-					"dick", "cumming", "fuckass", "vagina", "fuckers", "shit", "shitter", "shitters", "fucking"));
+					"dick", "cumming", "fuckass", "vagina", "fuckers"));
 			PlayerData data = main.getDataManager().getPlayerData(event.getPlayer());
 			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
 			String message = event.getMessage();
+
+//			if (event.getPlayer().hasPermission("scb.chat"))
+//				message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
+//						+ ChatColor.YELLOW + "] " + tag + event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
+//			else
+//				message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
+//						+ ChatColor.YELLOW + "] " + tag + ChatColor.GRAY + event.getPlayer().getDisplayName() + ": ";
+
+			// &6&l✧&6262 &4Owner&c anthsauce: &fLorem ipsum...
 
 			event.setFormat(ChatColor.YELLOW + main.color("" + data.checkPlayerLevel(event.getPlayer(), data) + "✧")
 					+ data.level + " " + tag);

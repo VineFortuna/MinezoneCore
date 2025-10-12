@@ -33,7 +33,7 @@ public class GenericModeGUI implements InventoryProvider {
 	private Maps randomMap = null;
 	private Maps previousRandomMap = null;
 
-	Maps.Category[] categories = {Maps.Category.CURATED, Maps.Category.CASUAL, Maps.Category.VAULTED, Maps.Category.HALLOWEEN, null};
+	Maps.Category[] categories = {Maps.Category.CURATED, Maps.Category.CASUAL, Maps.Category.VAULTED, null};
 	private Maps.Category currentCategory = Maps.Category.CURATED;
 	private Maps.Category nextCategory = Maps.Category.CASUAL;
 
@@ -119,6 +119,7 @@ public class GenericModeGUI implements InventoryProvider {
 		// Setting "Go Back" Button
 		contents.set(totalRows - 1, totalColumns - 1, ClickableItem.of(ItemHelper.getGoBackItem(), e -> {
 			SoundManager.playClickSound(player);
+			inv.close(player);
 			if (inv.getParent().isPresent()) {inv.getParent().get().open(player);}
 		}));
 
@@ -181,7 +182,7 @@ public class GenericModeGUI implements InventoryProvider {
 				case VAULTED:
 					material = Material.RECORD_11;
 					break;
-				case HALLOWEEN:
+				case HOLIDAY:
 					material = Material.RECORD_7;
 					break;
 			}

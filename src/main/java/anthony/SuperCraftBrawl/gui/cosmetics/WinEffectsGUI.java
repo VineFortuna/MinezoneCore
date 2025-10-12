@@ -22,7 +22,7 @@ public class WinEffectsGUI implements InventoryProvider {
 		inv = SmartInventory.builder()
 				.id("myInventory")
 				.provider(this)
-				.size(4, 9)
+				.size(3, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Win Effects")
 				.parent(parent)
 				.build();
@@ -39,7 +39,6 @@ public class WinEffectsGUI implements InventoryProvider {
 		data.fishRainEffect = 0;
 		data.floodEffect = 0;
 		data.treasureEffect = 0;
-		data.ritualEffect = 0;
 	}
 
 	@Override
@@ -156,25 +155,6 @@ public class WinEffectsGUI implements InventoryProvider {
 											+ "You have not unlocked this cosmetic yet!");
 								}
 							}));
-			
-			contents.set(2, 1,
-					ClickableItem.of(
-							ItemHelper
-									.setDetails(new ItemStack(Material.NETHERRACK), main.color("&cRitual"), "",
-											main.color("&rHerobrine totem and bats"), main.color("&rtake over the map..."),
-											"", main.color("&cHalloween 2025 exclusive")),
-							e -> {
-								if (main.getListener().getHalloweenEventProgress(player) >= 3) {
-									resetWinEffects(data);
-									data.ritualEffect = 1;
-									inv.close(player);
-									player.sendMessage(main.color("&e&l(!) &rYou have enabled &eRitual &rwin effect"));
-								} else {
-									player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ "You have not unlocked this cosmetic yet!");
-								}
-							}));
-
 
 
 			contents.set(1, 1, ClickableItem.of(ItemHelper.setDetails(playerskull, main.color("&cDefault Effect"), "",
@@ -184,7 +164,7 @@ public class WinEffectsGUI implements InventoryProvider {
 				player.sendMessage(main.color("&e&l(!) &rYou have enabled &eDefault &rwin effect"));
 			}));
 
-			contents.set(3, 8, ClickableItem.of(
+			contents.set(2, 8, ClickableItem.of(
 					ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
 						inv.getParent().get().open(player);
 					}
