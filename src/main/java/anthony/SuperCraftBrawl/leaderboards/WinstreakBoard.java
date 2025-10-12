@@ -14,6 +14,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
@@ -71,7 +72,7 @@ public class WinstreakBoard extends LeaderboardBase {
 	public void updateLeaderboard(boolean init) {
 		removeOldLeaderboards();
 
-		Location loc = new Location(main.getLobbyWorld(), 201.5, 106.5, 709.5);
+		Location loc = new Location(main.getLobbyWorld(), 209.5, 107.5, 704.4);
 		sendArmorStandPacket(loc, ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + "Best Winstreak");
 		loc.setY(loc.getY() - 0.4);
 
@@ -80,13 +81,51 @@ public class WinstreakBoard extends LeaderboardBase {
 			loc.setY(loc.getY() - 0.24);
 			String name = lead2.get(count - 1);
 			Integer win = winstreak.get(id);
-			sendArmorStandPacket(loc, ChatColor.AQUA + "#" + count + ": " + ChatColor.YELLOW + name + ChatColor.RESET + " - " + win);
+			sendArmorStandPacket(loc,
+					ChatColor.AQUA + "#" + count + ": " + ChatColor.YELLOW + name + ChatColor.RESET + " - " + win);
 			count++;
+		}
+
+		// after you've finished drawing the top 10 using 'loc'
+		Location base = loc.clone(); // freeze the baseline after the top list
+
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			PlayerData data = main.getDataManager().getPlayerData(player);
+			if (data != null && !lead.contains(data.playerUUID)) {
+				int win = data.bestWinstreak;
+
+				// draw the separator for THIS player at a fixed offset from base
+				Location line1 = base.clone().add(0, -0.24, 0);
+				sendStandToOnePlayer(line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------",
+						player);
+
+				// draw the player's own line just below it
+				Location line2 = base.clone().add(0, -0.44, 0);
+				sendStandToOnePlayer(line2, "" + ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + win,
+						player);
+			}
 		}
 	}
 
+	private void sendStandToOnePlayer(Location loc, String customName, Player player) {
+		EntityArmorStand armorStand = new EntityArmorStand(
+				((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) loc.getWorld()).getHandle());
+		armorStand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+		armorStand.setCustomName(customName);
+		armorStand.setCustomNameVisible(true);
+		armorStand.setInvisible(true);
+		armorStand.setGravity(false);
+
+		int entityId = armorStand.getId();
+		entityIds.add(entityId);
+
+		PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(armorStand);
+		((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+	}
+
 	private void sendArmorStandPacket(Location loc, String customName) {
-		EntityArmorStand armorStand = new EntityArmorStand(((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) loc.getWorld()).getHandle());
+		EntityArmorStand armorStand = new EntityArmorStand(
+				((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) loc.getWorld()).getHandle());
 		armorStand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
 		armorStand.setCustomName(customName);
 		armorStand.setCustomNameVisible(true);
@@ -98,7 +137,8 @@ public class WinstreakBoard extends LeaderboardBase {
 
 		PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(armorStand);
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+			((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection
+					.sendPacket(packet);
 		}
 	}
 
@@ -107,7 +147,8 @@ public class WinstreakBoard extends LeaderboardBase {
 			for (int entityId : entityIds) {
 				PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(entityId);
 				for (Player player : Bukkit.getOnlinePlayers()) {
-					((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+					((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection
+							.sendPacket(packet);
 				}
 			}
 			entityIds.clear();

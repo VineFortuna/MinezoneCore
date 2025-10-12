@@ -1,5 +1,7 @@
 package anthony.SuperCraftBrawl;
 
+import net.md_5.bungee.api.ChatColor;
+
 // Bars.java
 public final class Bars {
     private Bars() {}
@@ -71,7 +73,7 @@ public final class Bars {
         sb.append(net.md_5.bungee.api.ChatColor.DARK_GRAY).append(' ');
 
         if (showPercent) {
-            sb.append(net.md_5.bungee.api.ChatColor.GRAY)
+            sb.append(ChatColor.GOLD)
               .append((int) Math.round(pct * 100)).append('%'); // tight "79%"
         }
         return sb.toString();

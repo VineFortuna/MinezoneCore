@@ -59,6 +59,9 @@ public class ButterBroClass extends BaseClass {
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
+
+		if (item == null) return;
+
 		if (item.getType() == Material.RED_ROSE) {
 			if (player.getGameMode() != GameMode.SPECTATOR) {
 				if (shurikenCooldown.useAndResetCooldown()) {
@@ -74,9 +77,10 @@ public class ButterBroClass extends BaseClass {
 							@Override
 							public void onHit(Player hit) {
 								if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
-									player.playSound(hit.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
+									Location hitLoc = this.getBaseProj().getEntity().getLocation();
 
-									for (Player gamePlayer : this.getNearby(3.0)) {
+									for (Player gamePlayer : this.getNearby(1.5)) {
+										if (gamePlayer == player) continue;
 										if (instance.duosMap != null) {
 											if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
 												EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
@@ -84,7 +88,7 @@ public class ButterBroClass extends BaseClass {
 												instance.getGameManager().getMain().getServer().getPluginManager()
 														.callEvent(damageEvent);
 												gamePlayer.damage(4.0, player);
-												gamePlayer.setFireTicks(80);
+												gamePlayer.setFireTicks(4 * 20);
 											}
 										} else {
 											EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
@@ -92,17 +96,15 @@ public class ButterBroClass extends BaseClass {
 											instance.getGameManager().getMain().getServer().getPluginManager()
 													.callEvent(damageEvent);
 											gamePlayer.damage(4.0, player);
-											gamePlayer.setFireTicks(80);
+											gamePlayer.setFireTicks(4 * 20);
 										}
 									}
-								}
-								for (Player gamePlayer : instance.players) {
-									gamePlayer.playSound(hit.getLocation(), Sound.EXPLODE, 2, 1);
-									gamePlayer.playEffect(hit.getLocation(), Effect.EXPLOSION_LARGE, 1);
-									// gamePlayer.getWorld().createExplosion(hit.getLocation().getX(),
-									// hit.getLocation().getY(), hit.getLocation().getZ(), 3, false, false);
-								}
 
+									for (Player gamePlayer : instance.players) {
+										gamePlayer.playSound(hitLoc, Sound.EXPLODE, 2, 1);
+										gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_LARGE, 1);
+									}
+								}
 							}
 
 						}, new ItemStack(Material.FIREBALL));
