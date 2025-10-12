@@ -23,7 +23,6 @@ public class Holograms {
 	private Core main;
 	private Player player;
 	private List<EntityArmorStand> playerStats;
-	private List<EntityArmorStand> mapCategory;
 
 	/*
 	 * This entire class keeps track of all the holograms the player should have in
@@ -33,7 +32,6 @@ public class Holograms {
 		this.main = main;
 		this.player = player;
 		this.playerStats = new ArrayList<EntityArmorStand>();
-		this.mapCategory = new ArrayList<EntityArmorStand>();
 		giveHolograms(); // To give holograms to player in lobby when joining the server
 	}
 
@@ -55,8 +53,9 @@ public class Holograms {
 		armorStand.setGravity(false);
 
 		PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(armorStand);
-		((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-		mapCategory.add(armorStand);
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+		}
 		
 		loc = new Location(main.getLobbyWorld(), 176, 107, 690.547);
 		name = main.color("&b&lCOMMUNITY MAPS");
@@ -69,43 +68,16 @@ public class Holograms {
 		armorStand.setGravity(false);
 
 		packet = new PacketPlayOutSpawnEntityLiving(armorStand);
-		((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-		mapCategory.add(armorStand);
-		
-		loc = new Location(main.getLobbyWorld(), 164, 107, 690.700);
-		name = main.color("&b&lDUEL MAPS");
-		
-		armorStand = new EntityArmorStand(((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) loc.getWorld()).getHandle());
-		armorStand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-		armorStand.setCustomName(name);
-		armorStand.setCustomNameVisible(true);
-		armorStand.setInvisible(true);
-		armorStand.setGravity(false);
-
-		packet = new PacketPlayOutSpawnEntityLiving(armorStand);
-		((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-		mapCategory.add(armorStand);
-		
-		loc = new Location(main.getLobbyWorld(), 215, 107, 690.700);
-		name = main.color("&b&lFRENZY MAPS");
-		
-		armorStand = new EntityArmorStand(((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) loc.getWorld()).getHandle());
-		armorStand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-		armorStand.setCustomName(name);
-		armorStand.setCustomNameVisible(true);
-		armorStand.setInvisible(true);
-		armorStand.setGravity(false);
-
-		packet = new PacketPlayOutSpawnEntityLiving(armorStand);
-		((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-		mapCategory.add(armorStand);
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+		}
 	}
 
 	private void scbPlayerStats() {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 
 		if (data != null) {
-			Location loc = new Location(main.getLobbyWorld(), 196.5, 106, 667.5);
+			Location loc = new Location(main.getLobbyWorld(), 197.517, 106, 668.532);
 			WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
 			EntityArmorStand stand = new EntityArmorStand(s);
 
@@ -118,7 +90,7 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 196.5, 105.7, 667.5);
+			loc = new Location(main.getLobbyWorld(), 197.517, 105.7, 668.532);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
@@ -130,7 +102,7 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 196.5, 105.3, 667.5);
+			loc = new Location(main.getLobbyWorld(), 197.517, 105.3, 668.532);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
@@ -142,7 +114,7 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 196.5, 105, 667.5);
+			loc = new Location(main.getLobbyWorld(), 197.517, 105, 668.532);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
@@ -154,7 +126,7 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 196.5, 104.7, 667.5);
+			loc = new Location(main.getLobbyWorld(), 197.517, 104.7, 668.532);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
@@ -166,7 +138,7 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 196.5, 104.4, 667.5);
+			loc = new Location(main.getLobbyWorld(), 197.517, 104.4, 668.532);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
@@ -178,7 +150,7 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 196.5, 104.1, 667.5);
+			loc = new Location(main.getLobbyWorld(), 197.517, 104.1, 668.532);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
@@ -209,14 +181,7 @@ public class Holograms {
 						PacketPlayOutEntityDestroy destroyPacket = new PacketPlayOutEntityDestroy(stand.getId());
 						((CraftPlayer) player).getHandle().playerConnection.sendPacket(destroyPacket);
 					}
-					
-					for (EntityArmorStand stand : mapCategory) {
-						PacketPlayOutEntityDestroy destroyPacket = new PacketPlayOutEntityDestroy(stand.getId());
-						((CraftPlayer) player).getHandle().playerConnection.sendPacket(destroyPacket);
-					}
-					
 					playerStats.clear();
-					mapCategory.clear();
 				}
 			}
 		};

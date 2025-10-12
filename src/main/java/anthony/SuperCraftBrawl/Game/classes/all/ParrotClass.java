@@ -220,7 +220,7 @@ public class ParrotClass extends BaseClass {
         player.getWorld().playEffect(danceTargetBlock.getLocation(), Effect.RECORD_PLAY, randomRecord);
     }
 
-    public void cleanupDanceAbility() {
+    private void cleanupDanceAbility() {
         if (danceRunnable != null) {
             danceRunnable.cancel();
             danceRunnable = null;
@@ -305,7 +305,7 @@ public class ParrotClass extends BaseClass {
         return player.getLocation().distance(danceTargetBlock.getLocation()) <= ParrotClass.DANCE_ABILITY_RADIUS;
     }
 
-    public boolean isDanceAbilityActive() {
+    private boolean isDanceAbilityActive() {
         return danceRunnable != null && danceTargetBlock != null;
     }
 
