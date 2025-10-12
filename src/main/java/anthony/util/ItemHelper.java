@@ -453,16 +453,6 @@ public class ItemHelper {
 		return item;
 	}
 
-	public static void addRightClickMessage(ItemStack item) {
-		ItemMeta itemMeta = item.getItemMeta();
-
-		if (itemMeta.hasDisplayName()) {
-			String name = itemMeta.getDisplayName();
-			itemMeta.setDisplayName(ChatColorHelper.color( name + " &7(Right Click)"));
-			item.setItemMeta(itemMeta);
-		}
-	}
-
 	public static boolean isAirOrNull(ItemStack item) {
 		return item == null || item.getType() == Material.AIR;
 	}

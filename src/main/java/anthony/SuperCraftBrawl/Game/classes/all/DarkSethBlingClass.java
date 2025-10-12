@@ -1,7 +1,6 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameLootDrops;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ChatColorHelper;
@@ -99,8 +98,8 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 					for (i = 0; i < playerInventory.getSize(); i++) {
 						ItemStack playerItem = playerInventory.getItem(i);
 						if (playerItem != null && playerItem.getType() != null && playerItem.getType() != Material.AIR) {
-							for (GameLootDrops gameLootDrops : GameLootDrops.values()) {
-								if (playerItem.isSimilar(gameLootDrops.getItem()) ||
+							for (ItemStack itemDrop : this.instance.getAllItemDrops()) {
+								if (playerItem.isSimilar(itemDrop) ||
 										(playerItem.hasItemMeta() && playerItem.getItemMeta().hasDisplayName()
 												&& playerItem.getItemMeta().getDisplayName()
 												.equals(instance.getGameManager().getMain().color("&4&lBomb")))) {

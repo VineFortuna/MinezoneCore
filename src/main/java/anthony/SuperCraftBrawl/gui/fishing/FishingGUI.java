@@ -90,7 +90,6 @@ public class FishingGUI implements InventoryProvider {
                     ClickableItem.of(ItemHelper.createSkullHeadPlayer(1, data.playerName, main.color("&e" + data.playerName),
                             Arrays.asList(main.color("&aRank: &r" + data.getRank().getTag()),
                                     main.color("&aLevel: &r" + data.level),
-                                    main.color("&aEXP: &r" + data.exp + "/2500"),
                                     main.color("&aCaught: &r" + (data.totalcaught)))), e -> {
                     }));
         }
@@ -112,30 +111,28 @@ public class FishingGUI implements InventoryProvider {
                     new FishingUpgradesGUI(main, inv).inv.open(player);
                 }));
 
-        if (target != null) {
-            FishingDetails mapDetails = data.playerFishing.get(FishType.MAP.getId());
-            if (mapDetails != null && mapDetails.carrying > 0) {
-                Location treasureLoc = main.getFishing().getTreasureLoc(data.treasureLoc);
-                contents.set(4, 4, ClickableItem.of(
-                        ItemHelper.setDetails(new ItemStack(Material.MAP, mapDetails.carrying), ChatColor.GRAY + "Treasure Map",
-                                "",
-                                main.color("&8Leads to hidden riches beneath the waves"),
-                                main.color("&7Sunken treasure location:"),
-                                main.color("&e&l" + treasureLoc.getBlockX() + ", " + treasureLoc.getBlockY()
-                                        + ", " + treasureLoc.getBlockZ()),
-                                "",
-                                main.color("&7Maps carried: " + mapDetails.carrying),
-                                main.color("&8Follow the clues to claim your reward")), e -> {
-                            player.sendMessage(main.color("&3&l(!) &rThe map leads to &e&l"
-                                    + treasureLoc.getBlockX() + ", " + treasureLoc.getBlockY() + ", " + treasureLoc.getBlockZ()));
-                        }));
-            } else {
-                contents.set(4, 4, ClickableItem.of(
-                        ItemHelper.setDetails(new ItemStack(Material.EMPTY_MAP), ChatColor.GRAY + "Empty Map",
-                                "", main.color("&7You have no maps"),
-                                main.color("&8Catch one to reveal hidden loot")), e -> {
-                        }));
-            }
+        FishingDetails mapDetails = data.playerFishing.get(FishType.MAP.getId());
+        if (mapDetails != null && mapDetails.carrying > 0) {
+            Location treasureLoc = main.getFishing().getTreasureLoc(data.treasureLoc);
+            contents.set(4, 4, ClickableItem.of(
+                    ItemHelper.setDetails(new ItemStack(Material.MAP, mapDetails.carrying), ChatColor.GRAY + "Treasure Map",
+                            "",
+                            main.color("&8Leads to hidden riches beneath the waves"),
+                            main.color("&7Sunken treasure location:"),
+                            main.color("&e&l" + treasureLoc.getBlockX() + ", " + treasureLoc.getBlockY()
+                                    + ", " + treasureLoc.getBlockZ()),
+                            "",
+                            main.color("&7Maps carried: " + mapDetails.carrying),
+                            main.color("&8Follow the clues to claim your reward")), e -> {
+                        player.sendMessage(main.color("&3&l(!) &rThe map leads to &e&l"
+                                + treasureLoc.getBlockX() + ", " + treasureLoc.getBlockY() + ", " + treasureLoc.getBlockZ()));
+                    }));
+        } else {
+            contents.set(4, 4, ClickableItem.of(
+                    ItemHelper.setDetails(new ItemStack(Material.EMPTY_MAP), ChatColor.GRAY + "Empty Map",
+                            "", main.color("&7You have no maps"),
+                            main.color("&8Catch one to reveal hidden loot")), e -> {
+                    }));
         }
 
         contents.set(4, 0, ClickableItem.of(
