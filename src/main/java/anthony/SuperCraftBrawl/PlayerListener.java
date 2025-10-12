@@ -670,12 +670,6 @@ public class PlayerListener implements Listener {
 			else
 				event.setMessage(message);
 
-			PunishAPI pu = PunishAPI.get();
-			if (pu.isPlayerMuted(event.getPlayer().getUniqueId())) {
-				String muteMsg = pu.getMuteMessage(event.getPlayer().getUniqueId());
-				event.getPlayer().sendMessage(muteMsg);
-				return;
-			}
 			Bukkit.broadcastMessage(event.getFormat() + event.getMessage());
 		}
 	}
