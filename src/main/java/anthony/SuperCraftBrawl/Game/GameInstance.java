@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.all.LargeFernClass;
+import anthony.SuperCraftBrawl.Game.classes.all.ParrotClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -28,6 +29,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.*;
@@ -83,8 +85,6 @@ public class GameInstance {
 	private int lightningDropCountdown = 0;
 	private ItemStack nextItemToDrop;
 	public List<ItemStack> allItemDrops = new ArrayList<>();
-	public List<ItemStack> sethBlingItemDrops = new ArrayList<>();
-	public List<ItemStack> items = new ArrayList<>();
 	public List<Player> favClassSelection = new ArrayList<>();
 	public List<ClassType> classList = generateClassList();
 	private SignManager sm;
@@ -382,10 +382,10 @@ public class GameInstance {
 			return timeToStartSeconds = 30;
 		return timeToStartSeconds = 60;
 	}
-	
+
 	public void StartGameTimer2() {
 		SignManager sm = getGameManager().getMain().getSignManager();
-		
+
 		if (gameStartTime == null) {
 			timeToStartSeconds = getSecondsUntilStart();
 			gameStartTime = new BukkitRunnable() {
@@ -394,19 +394,19 @@ public class GameInstance {
 				public void run() {
 					if (sm != null)
 						sm.updateSignCountdown(s, timeToStartSeconds);
-					
+
 					int ticks = timeToStartSeconds;
-					
+
 					if (ticks == 0) {
 						StartGame();
 						GameScoreboard();
 						gameStartTime = null;
 						this.cancel();
 					}
-					
+
 					timeToStartSeconds--;
 				}
-				
+
 			};
 			gameStartTime.runTaskTimer(gameManager.getMain(), 0, 20);
 		}
@@ -414,7 +414,7 @@ public class GameInstance {
 
 	public void StartGameTimer() {
 		SignManager sm = getGameManager().getMain().getSignManager();
-		
+
 		if (gameStartTime == null) {
 			timeToStartSeconds = getSecondsUntilStart();
 			gameStartTime = new BukkitRunnable() {
@@ -423,7 +423,7 @@ public class GameInstance {
 				public void run() {
 					if (sm != null)
 						sm.updateSignCountdown(s, timeToStartSeconds);
-					
+
 					int ticks = timeToStartSeconds;
 					if (ticks == 0) {
 						StartGame();
@@ -506,7 +506,7 @@ public class GameInstance {
 					}
 
 					if (ticks == 5) {
-						getGameSettings().changeGameType();
+						getGameSettings().changeGameType(false);
 						getGameSettings().increaseLightningRate();
 						getGameSettings().setTimeOfDay();
 						removeVotePaper();
@@ -518,35 +518,36 @@ public class GameInstance {
 			gameStartTime.runTaskTimer(gameManager.getMain(), 0, 20);
 		}
 	}
-	
+
 	/*
-	 * This function removes vote paper when 5 seconds left 
-	 * before game starts
+	 * This function removes vote paper when 5 seconds left before game starts
 	 */
 	private void removeVotePaper() {
 		for (Player player : players) {
 			if (player.getInventory().contains(votePaper)) {
-				if (player.getOpenInventory() != null
-						&& player.getOpenInventory().getTitle().contains("Vote"))
+				if (player.getOpenInventory() != null && player.getOpenInventory().getTitle().contains("Vote"))
 					player.closeInventory();
 				player.getInventory().removeItem(votePaper);
 			}
 		}
 	}
-	
+
 	private void tipMessages() {
 		Random rand = new Random();
 		int chance = rand.nextInt(4);
 
 		if (chance == 0)
-			TellAll(getGameManager().getMain().color("&2[&aTip&2] &9Execute double jump by tapping the space bar twice!"));
+			TellAll(getGameManager().getMain()
+					.color("&2[&aTip&2] &9Execute double jump by tapping the space bar twice!"));
 		else if (chance == 1)
-			TellAll(getGameManager().getMain().color("&2[&aTip&2] &9Consider purchasing a rank at our /store for more SCB perks!"));
+			TellAll(getGameManager().getMain()
+					.color("&2[&aTip&2] &9Consider purchasing a rank at our /store for more SCB perks!"));
 		else if (chance == 2)
 			TellAll(getGameManager().getMain().color("&2[&aTip&2] &9Be sure to select a class by using the compass!"));
 		else
-			TellAll(getGameManager().getMain().color("&2[&aTip&2] &9Use the paper to ready up or vote for game settings!"));
-			
+			TellAll(getGameManager().getMain()
+					.color("&2[&aTip&2] &9Use the paper to ready up or vote for game settings!"));
+
 		for (Player player : players)
 			player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 1);
 	}
@@ -717,8 +718,8 @@ public class GameInstance {
 	}
 
 	/*
-	 * This function checks if the initial game start item is
-	 * an extra life or not. If it is, reroll 
+	 * This function checks if the initial game start item is an extra life or not.
+	 * If it is, reroll
 	 */
 	private ItemStack checkIfExtraLife(ItemStack item) {
 		while (true) {
@@ -736,13 +737,13 @@ public class GameInstance {
 	 */
 	public void StartGame() {
 		if (sm != null && s != null)
-			this.sm.updateSignInProgress(s); //Updates the sign in lobby to show match In Progress
-		
+			this.sm.updateSignInProgress(s); // Updates the sign in lobby to show match In Progress
+
 		setTeams(); // Sets teams if mode is Duos
 		startLightningDropsTimer(); // Loot drops will start spawning every 45 seconds
 
 		TellAll(color("&e&l----------------------------------------"));
-		TellAll("" + ChatColor.AQUA + ChatColor.BOLD + "             Super Craft Blocks");
+		TellAll("" + ChatColor.AQUA + ChatColor.BOLD + "          Super Craft Brothers");
 		TellAll("");
 		TellAll(color("&r  5 lives each with different classes & unique"));
 		TellAll(color("&r    abilities. Look out for lightning drops as"));
@@ -1043,6 +1044,8 @@ public class GameInstance {
 				WinGame(lastAlive);
 			} else if (alivePlayers <= 0)
 				EndGame();
+			else
+				announcePlayersLeft(alivePlayers);
 
 			this.alivePlayers = alivePlayers;
 		} else {
@@ -1067,128 +1070,131 @@ public class GameInstance {
 				EndGame();
 		}
 	}
+	
+	private void announcePlayersLeft(int alivePlayers) {
+		TellAll(color("&2&l(!) &rThere are &e" + alivePlayers + "&r players left!"));
+		
+		for (Player gamePlayer : this.players) {
+			gamePlayer.playSound(gamePlayer.getLocation(), Sound.NOTE_PLING, 1, 1);
+		}
+	}
 
 	public void PlayerDeath(Player player) {
-		if (this.gameType == GameType.FRENZY)
-			reRandomizeClass(player);
-		else if (this.gameType == GameType.GUNGAME)
-			nextClass(player);
-
+		BaseClass baseClassBeforeChecks = this.classes.get(player);
+		PlayerDeathEvent event = new PlayerDeathEvent(player, null, 0, null);
+		baseClassBeforeChecks.isDead = true;
+		baseClassBeforeChecks.Death(event);
 		final BaseClass baseClass = this.classes.get(player);
+		if (baseClass == null) return;
 
-		if (baseClass != null)
-			try {
-				player.getInventory().clear();
-				PlayerDeathEvent event = new PlayerDeathEvent(player, null, 0, null);
-				player.setGameMode(GameMode.SPECTATOR);
-				if (!baseClass.isDead) {
-					baseClass.isDead = true;
-					baseClass.Death(event);
+		try {
+//				event = new PlayerDeathEvent(player, null, 0, null);
+			player.getInventory().clear();
+			player.setGameMode(GameMode.SPECTATOR);
+			player.teleport(GetSpecLoc());
+
+			// Frenzy Class Randomization
+			if (this.gameType == GameType.FRENZY && baseClass.getLives() > 0) reRandomizeClass(player);
+			else if (this.gameType == GameType.GUNGAME && baseClass.getLives() > 0) nextClass(player);
+			final BaseClass finalBaseClass = this.classes.get(player);
+
+			BukkitRunnable runTimer = new BukkitRunnable() {
+				int ticks = 3;
+
+				@SuppressWarnings("deprecation")
+				public void run() {
+					if (GameInstance.this.state == GameState.ENDED) {
+						cancel();
+						/*
+						 * } else if (player.getWorld() != GameInstance.this.getMapWorld()) { cancel();
+						 * player.setAllowFlight(true); player.setGameMode(GameMode.ADVENTURE);
+						 * GameInstance.this.getGameManager().getMain().ResetPlayer(player);
+						 */
+					}
+					if (finalBaseClass.getLives() > 0)
+						if (this.ticks == 0) {
+							player.teleport(GameInstance.this.GetRespawnLoc());
+							player.setGameMode(GameMode.ADVENTURE);
+							player.setHealth(20.0D);
+							player.setAllowFlight(true);
+							GameInstance.this.getGameManager().addSpawnProtection(player);
+							if (!GameInstance.this.players.contains(player)) {
+								GameInstance.this.getGameManager().getMain().ResetPlayer(player);
+							} else {
+								finalBaseClass.loadPlayer();
+								if (GameInstance.this.gameType == GameType.FRENZY
+										|| GameInstance.this.gameType == GameType.GUNGAME) {
+									player.sendTitle(color("&b&lNew Class:"),
+											"" + finalBaseClass.getType().getTag());
+									new BukkitRunnable() { // Get rid of title after 1.5 seconds
+										@Override
+										public void run() {
+											player.sendTitle("", "");
+										}
+									}.runTaskLater(getGameManager().getMain(), 30);
+								} else {
+									player.sendTitle(color("&b&lRespawned"), "");
+									new BukkitRunnable() { // Get rid of title after 1.5 seconds
+										@Override
+										public void run() {
+											player.sendTitle("", "");
+										}
+									}.runTaskLater(getGameManager().getMain(), 30);
+								}
+								finalBaseClass.isDead = false;
+							}
+
+							cancel();
+						} else if (this.ticks <= 3 && GameInstance.this.state == GameState.STARTED) {
+							if (!players.contains(player)) {
+								cancel();
+							} else {
+								player.sendTitle(color("&b&lRespawning In:"), color("&e" + this.ticks));
+								player.setGameMode(GameMode.SPECTATOR);
+							}
+						}
+					this.ticks--;
+				}
+			};
+			runTimer.runTaskTimer(this.gameManager.getMain(), 0L, 20L);
+			this.runnables.add(runTimer);
+
+			player.setHealth(20.0D);
+			player.setAllowFlight(true);
+			player.setGameMode(GameMode.ADVENTURE);
+			if (finalBaseClass.getLives() == 0) {
+				this.playerPosition.add(player);
+				if (this.players.size() > 2) {
+					player.sendTitle("" + ChatColor.RED + "You have died!",
+							"" + ChatColor.RESET + "You are now a Spectator");
 					player.teleport(GetSpecLoc());
 				}
-				BukkitRunnable runTimer = new BukkitRunnable() {
-					int ticks = 3;
-
-					@SuppressWarnings("deprecation")
-					public void run() {
-						if (GameInstance.this.state == GameState.ENDED) {
-							cancel();
-							/*
-							 * } else if (player.getWorld() != GameInstance.this.getMapWorld()) { cancel();
-							 * player.setAllowFlight(true); player.setGameMode(GameMode.ADVENTURE);
-							 * GameInstance.this.getGameManager().getMain().ResetPlayer(player);
-							 */
-						}
-						if (baseClass.getLives() > 0)
-							if (this.ticks == 0) {
-								player.teleport(GameInstance.this.GetRespawnLoc());
-								player.setGameMode(GameMode.ADVENTURE);
-								player.setHealth(20.0D);
-								player.setAllowFlight(true);
-								GameInstance.this.getGameManager().addSpawnProtection(player);
-								if (!GameInstance.this.players.contains(player)) {
-									GameInstance.this.getGameManager().getMain().ResetPlayer(player);
-								} else {
-									baseClass.loadPlayer();
-									if (GameInstance.this.gameType == GameType.FRENZY
-											|| GameInstance.this.gameType == GameType.GUNGAME) {
-										player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "New Class:",
-												"" + baseClass.getType().getTag());
-										new BukkitRunnable() { // Get rid of title after 1.5 seconds
-											@Override
-											public void run() {
-												player.sendTitle("", "");
-											}
-										}.runTaskLater(getGameManager().getMain(), 30);
-									} else {
-										player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + "Respawned", "");
-										new BukkitRunnable() { // Get rid of title after 1.5 seconds
-											@Override
-											public void run() {
-												player.sendTitle("", "");
-											}
-										}.runTaskLater(getGameManager().getMain(), 30);
-									}
-									baseClass.isDead = false;
-								}
-
-								cancel();
-							} else if (this.ticks <= 3 && GameInstance.this.state == GameState.STARTED) {
-								if (!players.contains(player)) {
-									cancel();
-								} else {
-									player.sendTitle("", "" + ChatColor.RED + this.ticks);
-									player.setGameMode(GameMode.SPECTATOR);
-								}
-							}
-						this.ticks--;
-					}
-				};
-				runTimer.runTaskTimer(this.gameManager.getMain(), 0L, 20L);
-				this.runnables.add(runTimer);
-
-				player.setHealth(20.0D);
+				player.getPlayer().setGameMode(GameMode.ADVENTURE);
+				player.spigot().setCollidesWithEntities(false);
+				player.setAllowFlight(false);
 				player.setAllowFlight(true);
-				player.setGameMode(GameMode.ADVENTURE);
-				if (baseClass.getLives() == 0) {
-					this.playerPosition.add(player);
-					if (this.players.size() > 2) {
-						player.sendTitle("" + ChatColor.RED + "You have died!",
-								"" + ChatColor.RESET + "You are now a Spectator");
-						player.teleport(GetSpecLoc());
-					}
-					player.getPlayer().setGameMode(GameMode.ADVENTURE);
-					player.spigot().setCollidesWithEntities(false);
-					player.setAllowFlight(false);
-					player.setAllowFlight(true);
-					player.getInventory().clear();
-
-					ItemStack spec = ItemHelper.setDetails(new ItemStack(Material.COMPASS),
-							"" + ChatColor.GREEN + "Spectate a Player",
-							new String[] { ChatColor.GRAY + "Click to Spectate a specific player!" });
-					player.getInventory().setItem(0, spec);
-					ItemStack leave = ItemHelper.setDetails(new ItemStack(Material.BARRIER),
-							"" + ChatColor.RED + "Leave", new String[] { ChatColor.GRAY + "Click to leave game" });
-					player.getInventory().setItem(8, leave);
-					for (Player gamePlayer : this.players)
-						gamePlayer.hidePlayer(player);
-					for (Player spectator : this.spectators)
-						spectator.showPlayer(player);
-					try {
-						baseClass.score.getScoreboard().resetScores(baseClass.score.getEntry());
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
-					CheckForWin();
-				} else {
-					player.getInventory().clear();
+				player.getInventory().clear();
+				getGameManager().getMain().getLobbyItems().spectatorItems(player);
+				
+				for (Player gamePlayer : this.players)
+					gamePlayer.hidePlayer(player);
+				for (Player spectator : this.spectators)
+					spectator.showPlayer(player);
+				try {
+					finalBaseClass.score.getScoreboard().resetScores(finalBaseClass.score.getEntry());
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-			} catch (
 
-			Exception e) {
-				e.printStackTrace();
+				CheckForWin();
+			} else {
+				player.getInventory().clear();
 			}
+		} catch (
+
+				Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -1295,7 +1301,7 @@ public class GameInstance {
 							}
 						}
 					}
-					
+
 					if (sm != null && s != null)
 						sm.resetSign(s, map);
 
@@ -1471,9 +1477,9 @@ public class GameInstance {
 			}
 
 			Random r = new Random();
-			int chance = r.nextInt(100);
+			int chance = r.nextInt(1000);
 
-			if (chance >= 0 && chance < 25) {
+			if (chance >= 0 && chance < 1) {
 				if (data3 != null) {
 					data3.mysteryChests++;
 					winner.sendMessage(
@@ -1620,10 +1626,13 @@ public class GameInstance {
 				if (data.exp >= 2500) {
 					data.level++;
 					data.exp -= 2500;
-					winner.sendMessage(getGameManager().getMain().color("&8&m----------------------------------------"));
+					winner.sendMessage(
+							getGameManager().getMain().color("&8&m----------------------------------------"));
 					winner.sendMessage(getGameManager().getMain().color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
-					winner.sendMessage(getGameManager().getMain().color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
-					winner.sendMessage(getGameManager().getMain().color("&8&m----------------------------------------"));
+					winner.sendMessage(getGameManager().getMain()
+							.color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
+					winner.sendMessage(
+							getGameManager().getMain().color("&8&m----------------------------------------"));
 
 					// (optional but fun) little audio feedback on 1.8:
 					winner.playSound(winner.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
@@ -1813,29 +1822,46 @@ public class GameInstance {
 	private void reRandomizeClass(Player player) {
 		BaseClass baseClass = classes.get(player);
 
-		if (baseClass.getLives() > 1) {
+		if (baseClass.getLives() > 0) {
 			ClassType classType = ClassType.getAvailableClasses()[random
 					.nextInt(ClassType.getAvailableClasses().length)];
+
+			// Create new class instance
 			BaseClass newBaseClass = classType.GetClassInstance(this, player);
 			BaseClass oldBaseClass = classes.get(player);
 			oldClasses.put(player, oldBaseClass);
 
-			Score newScore = livesObjective.getScore(
-					truncateString("" + classType.getTag() + " " + ChatColor.WHITE + player.getName() + "", 40));
+			// Reset old score if it exists
+			if (oldBaseClass.score != null) {
+				try {
+					oldBaseClass.score.getScoreboard().resetScores(oldBaseClass.score.getEntry());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			// Transfer all stats from old class
 			newBaseClass.lives = oldBaseClass.lives;
 			newBaseClass.tokens = oldBaseClass.tokens;
-			newBaseClass.score = newScore;
 			newBaseClass.totalTokens = oldBaseClass.totalTokens;
 			newBaseClass.totalExp = oldBaseClass.totalExp;
 			newBaseClass.totalKills = oldBaseClass.totalKills;
 			newBaseClass.bountyTarget = oldBaseClass.bountyTarget;
 
-			oldBaseClass.score.getScoreboard().resetScores(oldBaseClass.score.getEntry());
+			// Create new scoreboard entry
+			String scoreEntry = truncateString("" + classType.getTag() + " " + ChatColor.WHITE + player.getName(), 40);
+			Score newScore = livesObjective.getScore(scoreEntry);
+			newBaseClass.score = newScore;
+			newScore.setScore(newBaseClass.lives);
 
+			// Update class mappings
 			classes.put(player, newBaseClass);
 			allClasses.put(player, newBaseClass);
+
+			// Update scoreboard
 			sendScoreboardUpdate(player);
 
+			// Update display name
 			player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 					+ "Your class has been randomly selected to " + classType.getTag());
 
@@ -1931,11 +1957,13 @@ public class GameInstance {
 								if (playerData.level >= classType.getLevel()) {
 									if (classType != ClassType.Fisherman || this.getGameManager().getMain().getFishing()
 											.hasUnlockedFisherman(player)) {
-										if (donor == null
-												|| player.hasPermission("scb." + donor.toString().toLowerCase())) {
-											selectedClass = classType;
-											break;
-										}
+										if (classType != ClassType.Freddy || this.getGameManager().getMain()
+												.getHalloweenManager().hasUnlockedFreddy(player))
+											if (donor == null
+													|| player.hasPermission("scb." + donor.toString().toLowerCase())) {
+												selectedClass = classType;
+												break;
+											}
 									}
 								}
 							}
@@ -1957,6 +1985,7 @@ public class GameInstance {
 			player.setGameMode(GameMode.ADVENTURE);
 			player.setAllowFlight(true);
 			baseClass.loadPlayer();
+			this.getGameManager().addSpawnProtection(player);
 		}
 	}
 
@@ -2080,9 +2109,16 @@ public class GameInstance {
 				if (baseClass.getType() == ClassType.LargeFern) {
 					LargeFernClass largeFernClass = (LargeFernClass) baseClass;
 					if (largeFernClass.transfernRunnable != null) {
-//						largeFernClass.transfernRunnable.cleanup();
 						largeFernClass.transfernRunnable.cancel();
 					}
+				} else if (baseClass.getType() == ClassType.Parrot) {
+					ParrotClass parrotClass = (ParrotClass) baseClass;
+					if (parrotClass.isDanceAbilityActive()) {
+						parrotClass.cleanupDanceAbility();
+					}
+				} else if (baseClass.getType() == ClassType.Pig) {
+					player.removePotionEffect(PotionEffectType.SPEED);
+
 				}
 			}
 
