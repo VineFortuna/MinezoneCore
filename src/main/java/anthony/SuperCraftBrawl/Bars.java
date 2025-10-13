@@ -3,7 +3,7 @@ package anthony.SuperCraftBrawl;
 import net.md_5.bungee.api.ChatColor;
 
 // Bars.java
-public final class Bars {
+public final class Bars { //
     private Bars() {}
 
     // ---------- Existing progress bar overloads (kept) ----------
