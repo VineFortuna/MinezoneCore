@@ -4,6 +4,10 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameManager;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
 import anthony.SuperCraftBrawl.gui.fishing.FishingGUI;
+import anthony.SuperCraftBrawl.gui.games.ParkourGUI;
+import anthony.SuperCraftBrawl.gui.games.ParkourMapsGUI;
+import anthony.SuperCraftBrawl.gui.games.SCBClassicGUI;
+import anthony.SuperCraftBrawl.gui.games.SCBDuelsGUI;
 import anthony.util.ItemHelper;
 import net.jitse.npclib.NPCLib;
 import net.jitse.npclib.api.NPC;
@@ -70,8 +74,7 @@ public class NPCManager implements Listener {
 		socialMedia.setSkin(sethblingSkin);
 		socialMedia.create();
 
-		fishing = npcLib.createNPC(Arrays.asList(main.color("&b&lFISHING"),
-				main.color("&7Click to go fishing")));
+		fishing = npcLib.createNPC(Arrays.asList(main.color("&b&lFISHING"), main.color("&7Click to go fishing")));
 		fishing.setLocation(new Location(main.getLobbyWorld(), 195.5, 106, 655.5, 162, 3));
 		fishing.setSkin(fishermanSkin);
 		fishing.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.FISHING_ROD));
@@ -160,7 +163,11 @@ public class NPCManager implements Listener {
 		if (e.getNPC() == fishing) {
 			new FishingGUI(main, null).inv.open(player);
 		} else if (e.getNPC() == scbClassic) {
-			new GameSelectorGUI(main).inv.open(player);
+			new SCBClassicGUI(main).inv.open(player);
+		} else if (e.getNPC() == scbDuels) {
+			new SCBDuelsGUI(main).inv.open(player);
+		} else if (e.getNPC() == parkour) {
+			new ParkourMapsGUI(main).inv.open(player);
 		} else if (e.getNPC() == socialMedia) {
 			player.sendMessage(main.color("&8&m-------&8[Social Media]&8&m-------"));
 			player.sendMessage("");
