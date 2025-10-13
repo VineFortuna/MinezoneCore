@@ -814,7 +814,7 @@ public class PlayerListener implements Listener {
 				&& !(block.getState() instanceof InventoryHolder) && !(block.getState() instanceof Banner)
 				&& block.getType() != Material.SKULL && block.getType() != Material.SOIL
 				&& block.getType() != Material.SEA_LANTERN && block.getType() != Material.BEACON
-				&& block.getType() != Material.GLOWSTONE) {
+				&& block.getType() != Material.GLOWSTONE && block.getType() != Material.LADDER) {
 			Material og = block.getType();
 			Byte data = block.getData();
 			if (og == Material.WOOL) {
