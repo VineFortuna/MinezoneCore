@@ -2546,6 +2546,37 @@ public class GameManager implements Listener, PluginMessageListener {
 						gameInstance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 								player.getLocation().getDirection().multiply(2.0D));
 					}
+				} else if (meta.getDisplayName().toLowerCase().contains("silverfish")) {
+					int amount = item.getAmount();
+
+					if (amount > 0) {
+						if (amount == 1)
+							player.getInventory().clear(player.getInventory().getHeldItemSlot());
+						else {
+							amount--;
+							item.setAmount(amount);
+						}
+						ItemProjectile proj = new ItemProjectile(gameInstance, player, new ProjectileOnHit() {
+							@Override
+							public void onHit(Player hit) {
+								Location hitLoc = this.getBaseProj().getEntity().getLocation();
+
+								for (int i = 0; i < 3; i++) {
+									// Spawning Slime
+									Silverfish mob = (Silverfish) player.getWorld().spawnCreature(hitLoc, EntityType.SILVERFISH);
+									mob.setRemoveWhenFarAway(false);
+									// Setting Mob Name to owner's
+									mob.setCustomName(ChatColorHelper
+											.color("&c" + player.getName() + "'s &e" + getMobTypeName(mob.getType())));
+									// Setting Custom name visible
+									mob.setCustomNameVisible(true);
+								}
+							}
+
+						}, ItemHelper.createMonsterEgg(EntityType.SILVERFISH, 1));
+						gameInstance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+								player.getLocation().getDirection().multiply(2.0D));
+					}
 				}
 			}
 			break;
