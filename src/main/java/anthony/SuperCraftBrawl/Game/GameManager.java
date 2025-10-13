@@ -1835,7 +1835,7 @@ public class GameManager implements Listener, PluginMessageListener {
 				ItemMeta meta = item.getItemMeta();
 
 				if (meta != null && meta.getDisplayName() != null &&
-						ChatColor.stripColor(meta.getDisplayName()).contains("Fire Flower")) {
+						ChatColor.stripColor(meta.getDisplayName()).contains("FIRE FLOWER")) {
 					player.playSound(player.getLocation(), Sound.FIREWORK_BLAST, 1, 1);
 					int amount = item.getAmount();
 					if (amount > 0) {
@@ -1880,7 +1880,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 							}
 
-						}, new ItemStack(Material.FIREBALL));
+						}, new ItemStack(Material.BLAZE_POWDER));
 						instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 								player.getLocation().getDirection().multiply(2.0D));
 					}
@@ -1888,6 +1888,59 @@ public class GameManager implements Listener, PluginMessageListener {
 			}
 		}
 	}
+
+	@EventHandler
+	public void brick(PlayerInteractEvent event) {
+		Player player = event.getPlayer();
+		ItemStack item = event.getItem();
+		GameInstance instance = this.GetInstanceOfPlayer(player);
+
+		if (instance != null && instance.state == GameState.STARTED) {
+			if (item != null && item.getType() == Material.CLAY_BRICK
+					&& (event.getAction().name().contains("RIGHT_CLICK"))) {
+				ItemMeta meta = item.getItemMeta();
+
+				if (meta != null && meta.getDisplayName() != null &&
+						ChatColor.stripColor(meta.getDisplayName()).contains("BRICK")) {
+					int amount = item.getAmount();
+					if (amount > 0) {
+						amount--;
+						if (amount == 0)
+							player.getInventory().clear(player.getInventory().getHeldItemSlot());
+						else
+							item.setAmount(amount);
+						ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
+							@Override
+							public void onHit(Player hit) {
+								if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
+									if (instance.duosMap != null)
+										if (instance.team.get(hit).equals(instance.team.get(player)))
+											return;
+
+									if (hit != null) {
+										if (instance.getGameManager().spawnProt.containsKey(hit)) return;
+										@SuppressWarnings("deprecation")
+										EntityDamageEvent damageEvent = new EntityDamageEvent(hit, DamageCause.VOID, 3);
+										instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+										hit.damage(3, player);
+										Location loc = hit.getLocation();
+										Vector v = hit.getVelocity();
+										v.setY(-2.0);
+										hit.setVelocity(v);
+										player.getWorld().playSound(loc, Sound.ANVIL_LAND, 1, 1);
+									}
+								}
+							}
+
+						}, new ItemStack(Material.CLAY_BRICK));
+						instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+								player.getLocation().getDirection().multiply(2.0D));
+					}
+				}
+			}
+		}
+	}
+
 
 	@EventHandler
 	public void Nuke(PlayerInteractEvent event) {
@@ -2477,7 +2530,7 @@ public class GameManager implements Listener, PluginMessageListener {
 							public void onHit(Player hit) {
 								Location hitLoc = this.getBaseProj().getEntity().getLocation();
 
-								// Spawning Witch
+								// Spawning Slime
 								Slime mob = (Slime) player.getWorld().spawnCreature(hitLoc, EntityType.SLIME);
 								mob.setRemoveWhenFarAway(false);
 								// Setting Mob Name to owner's
@@ -2485,6 +2538,8 @@ public class GameManager implements Listener, PluginMessageListener {
 										.color("&c" + player.getName() + "'s &e" + getMobTypeName(mob.getType())));
 								// Setting Custom name visible
 								mob.setCustomNameVisible(true);
+								// Setting Slime Size
+								mob.setSize(4);
 							}
 
 						}, ItemHelper.createMonsterEgg(EntityType.SLIME, 1));
