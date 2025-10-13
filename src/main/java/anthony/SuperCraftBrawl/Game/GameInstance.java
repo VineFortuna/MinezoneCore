@@ -58,7 +58,7 @@ public class GameInstance {
 	public HashMap<Player, BaseClass> classes;
 	public HashMap<Player, BaseClass> oldClasses;
 	public HashMap<Player, BaseClass> allClasses; // Keep track of all players' BaseClass, even ones that left game
-													// before end
+	// before end
 	public List<Player> playerPosition = new ArrayList<>();
 	public HashMap<Player, FastBoard> boards = new HashMap();
 	public final HashMap<Player, ClassType> classSelection = new HashMap<>();
@@ -183,7 +183,7 @@ public class GameInstance {
 
 	/**
 	 * Retrieves the location of the game lobby for the current map.
-	 * 
+	 *
 	 * @return The Location of the game lobby.
 	 */
 	public Location GetLobbyLoc() {
@@ -207,7 +207,7 @@ public class GameInstance {
 
 	/**
 	 * Sends player to the game lobby location
-	 * 
+	 *
 	 * @param player to be teleported
 	 */
 	public void SendPlayerToMap(Player player) {
@@ -216,9 +216,9 @@ public class GameInstance {
 
 	/**
 	 * This function adds a spectator to the game if the game is in progress
-	 * 
+	 *
 	 * @param player to be added as Spectator
-	 * 
+	 *
 	 * @return If success, or already in a game, or if the game is not started
 	 */
 	public GameReason AddSpectator(Player player) {
@@ -248,9 +248,9 @@ public class GameInstance {
 	/**
 	 * This function adds a player to the game if they're in the main lobby and not
 	 * in any other game, either spectating or playing
-	 * 
+	 *
 	 * @param player to be added to game
-	 * 
+	 *
 	 * @return If success adding to game, if game is full, already playing a game or
 	 *         if game is already in progress
 	 */
@@ -292,14 +292,14 @@ public class GameInstance {
 					gamePlayer.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
 							+ player.getName() + ChatColor.GREEN + " joined " + ChatColor.RED + "(" + ChatColor.GREEN
 							+ (map.GetInstance().gameType == GameType.FRENZY
-									? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
-									: "")
+							? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
+							: "")
 							+ (map.GetInstance().gameType == GameType.CLASSIC
-									? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
-									: "")
+							? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
+							: "")
 							+ (map.GetInstance().gameType == GameType.DUEL
-									? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
-									: "")
+							? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers()
+							: "")
 							+ ChatColor.RED + ")");
 				}
 
@@ -313,7 +313,7 @@ public class GameInstance {
 	/**
 	 * Checks if the game lobby is full based on the game type and player
 	 * permissions.
-	 * 
+	 *
 	 * @param player The player whose permission to join a full game is being
 	 *               checked.
 	 * @return True if the lobby is full and the player is not permitted to join;
@@ -362,7 +362,7 @@ public class GameInstance {
 	/**
 	 * This function checks if there's the minimum required players to start the
 	 * game countdown timer
-	 * 
+	 *
 	 * @param
 	 */
 	public void CheckForGameStart() {
@@ -786,9 +786,9 @@ public class GameInstance {
 
 	/*
 	 * This function will run through each tick of the game.
-	 * 
+	 *
 	 * Every minute, the game time will update on the scoreboard
-	 * 
+	 *
 	 * Every tick, if there are arrows on the ground that players shot it will
 	 * remove them
 	 */
@@ -834,7 +834,7 @@ public class GameInstance {
 	/**
 	 * This function sets the player's class name next to their name above their
 	 * head for other players to see each other's class
-	 * 
+	 *
 	 * @param player
 	 */
 	@SuppressWarnings("deprecation")
@@ -876,7 +876,7 @@ public class GameInstance {
 	/**
 	 * This function gets a random location on the map which loot drops will spawn
 	 * at every 30 seconds
-	 * 
+	 *
 	 * @return random location on the map
 	 */
 	public Location getItemSpawnLoc() {
@@ -1070,10 +1070,10 @@ public class GameInstance {
 				EndGame();
 		}
 	}
-	
+
 	private void announcePlayersLeft(int alivePlayers) {
 		TellAll(color("&2&l(!) &rThere are &e" + alivePlayers + "&r players left!"));
-		
+
 		for (Player gamePlayer : this.players) {
 			gamePlayer.playSound(gamePlayer.getLocation(), Sound.NOTE_PLING, 1, 1);
 		}
@@ -1175,7 +1175,7 @@ public class GameInstance {
 				player.setAllowFlight(true);
 				player.getInventory().clear();
 				getGameManager().getMain().getLobbyItems().spectatorItems(player);
-				
+
 				for (Player gamePlayer : this.players)
 					gamePlayer.hidePlayer(player);
 				for (Player spectator : this.spectators)
@@ -1262,7 +1262,7 @@ public class GameInstance {
 				}
 				if (ticks == 0) {
 					for (Entry<Player, WinEffects> entry : effects.entrySet()) // To remove win effects after 10 seconds
-																				// or if player left
+						// or if player left
 						entry.getValue().removeWinEffects();
 
 					endGameAnimation = null;
@@ -2013,9 +2013,9 @@ public class GameInstance {
 
 	/*
 	 * This function removes a player from the game
-	 * 
+	 *
 	 * @param Player that is being removed
-	 * 
+	 *
 	 * @returns True if successful
 	 */
 
@@ -2061,11 +2061,11 @@ public class GameInstance {
 									? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
 									: "")
 							+ (((this.map.GetInstance()).gameType == GameType.CLASSIC)
-									? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
-									: "")
+							? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
+							: "")
 							+ (((this.map.GetInstance()).gameType == GameType.DUEL)
-									? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
-									: "")
+							? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
+							: "")
 							+ ChatColor.RED + ")");
 
 					if (checkIfMinPlayers() && this.gameStartTime != null) {
@@ -2098,7 +2098,7 @@ public class GameInstance {
 				data.winstreak = 0;
 				try {
 					baseClass.score.getScoreboard().resetScores(baseClass.score.getEntry()); // Gets rid of the player
-																								// on the game board
+					// on the game board
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -2182,17 +2182,17 @@ public class GameInstance {
 							? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
 							: "")
 							+ (((this.map.GetInstance()).gameType == GameType.CLASSIC)
-									? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
-									: "")
+							? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
+							: "")
 							+ (((this.map.GetInstance()).gameType == GameType.DUEL)
-									? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
-									: ""));
+							? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
+							: ""));
 		}
 	}
 
 	/*
 	 * This function removes a player from their Duos team if Duos is being played
-	 * 
+	 *
 	 * @param Player to be removed
 	 */
 	private void removeFromDuos(Player player) {
@@ -2210,7 +2210,7 @@ public class GameInstance {
 
 	/*
 	 * This function removes a player from the game if they are spectating
-	 * 
+	 *
 	 * @param Spectator to be removed
 	 */
 	private void removeSpectator(Player spec) {
@@ -2251,7 +2251,7 @@ public class GameInstance {
 	 * this.gameType.getMaxPlayers()) : "")); } TellAll("" + ChatColor.DARK_GREEN +
 	 * ChatColor.BOLD + "(!) " + ChatColor.RESET + player.getName() + ChatColor.RED
 	 * + " left " + ChatColor.RED + "(" + ChatColor.GREEN + (
-	 * 
+	 *
 	 * ((this.map.GetInstance()).gameType == GameType.FRENZY) ? ("" +
 	 * ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
 	 * : "") + (((this.map.GetInstance()).gameType == GameType.CLASSIC) ? ("" +
@@ -2265,24 +2265,24 @@ public class GameInstance {
 	 * "Game start cancelled, not enough players!"); for (Player gamePlayer :
 	 * this.players) { this.gameSettings = new GameSettings(this); // To reset all
 	 * variables
-	 * 
+	 *
 	 * PlayerData data =
 	 * this.gameManager.getMain().getDataManager().getPlayerData(gamePlayer); if
 	 * (data != null && data.votes == 1) data.votes = 0; if
 	 * (gamePlayer.getInventory().contains(Material.PAPER))
 	 * gamePlayer.getInventory().remove(Material.PAPER); FastBoard board =
 	 * this.boards.get(gamePlayer); board.updateLine(5, " " + (
-	 * 
+	 *
 	 * ((this.map.GetInstance()).gameType == GameType.FRENZY) ? (
-	 * 
+	 *
 	 * "" + ChatColor.RESET + this.players.size() + "/" +
 	 * this.gameType.getMaxPlayers()) : "") + (((this.map.GetInstance()).gameType ==
 	 * GameType.CLASSIC) ? (
-	 * 
+	 *
 	 * "" + ChatColor.RESET + this.players.size() + "/" +
 	 * this.gameType.getMaxPlayers()) : "") + (((this.map.GetInstance()).gameType ==
 	 * GameType.DUEL) ? (
-	 * 
+	 *
 	 * "" + ChatColor.RESET + this.players.size() + "/" +
 	 * this.gameType.getMaxPlayers()) : "")); board.updateLine(7, "" +
 	 * ChatColor.BOLD + "Status:"); board.updateLine(8, "" + ChatColor.RESET +
@@ -2298,7 +2298,7 @@ public class GameInstance {
 	 * .color("&c&l(!) &rGame start cancelled. Not enough players!")); for (Player
 	 * gamePlayer : this.players) { this.gameSettings = new GameSettings(this); //
 	 * To reset all variables
-	 * 
+	 *
 	 * PlayerData data =
 	 * this.gameManager.getMain().getDataManager().getPlayerData(gamePlayer); if
 	 * (data != null && data.votes == 1) data.votes = 0; if
@@ -2348,7 +2348,7 @@ public class GameInstance {
 						&& event.getPlayer().getItemInHand().hasItemMeta()
 						&& event.getPlayer().getItemInHand().getItemMeta().getDisplayName().contains("Teleporters")
 						&& (event.getAction() == Action.RIGHT_CLICK_AIR
-								|| event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+						|| event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 					if (baseClass.pearlTimer.getTime() < 10000) {
 						int seconds = (10000 - baseClass.pearlTimer.getTime()) / 1000 + 1;
 						event.setCancelled(true);
