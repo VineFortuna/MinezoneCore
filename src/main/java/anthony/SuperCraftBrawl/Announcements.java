@@ -12,9 +12,7 @@ public enum Announcements {
 			"&2&l(!) &rNot all maps are listed in lobby. Use &e/maps &rfor a list of maps and &e/join <map> &rto play!")),
 	
 	Store(color(
-			"&2&l(!) &rConsider purchasing a rank at &e&nminezone.club&r to support the server and for some awesome perks!")),
-	
-	Halloween(color("&2&l(!) &rCheck out the Halloween NPC in lobby for some amazing &e&lEXCLUSIVE &rrewards!"));
+			"&2&l(!) &rConsider purchasing a rank at &e&nminezone.club&r to support the server and for some awesome perks!"));
 
 	public String name;
 
