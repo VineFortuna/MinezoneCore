@@ -16,7 +16,7 @@ public enum GameLootDrops {
 
 	// COMMON:
 	SLOWNESS(Rarity.COMMON), SLOWBALLS(Rarity.COMMON), BLOOPER(Rarity.COMMON), ZOMBIE_EGG(Rarity.COMMON),
-	SKELE_EGG(Rarity.COMMON), MILK(Rarity.COMMON), SLIME_EGG(Rarity.COMMON), BRICK(Rarity.COMMON),
+	SKELE_EGG(Rarity.COMMON), MILK(Rarity.COMMON), SLIME_EGG(Rarity.COMMON), BRICK(Rarity.COMMON), SILVERFISH_EGG(Rarity.COMMON),
 
 	// UNCOMMON:
 	NUKE(Rarity.RARE), SPEED2(Rarity.RARE), INSTAGIB(Rarity.RARE), BAZOOKA(Rarity.RARE),
@@ -118,6 +118,12 @@ public enum GameLootDrops {
 				item = ItemHelper.setDetails(new ItemStack(Material.CLAY_BRICK, 2),
 						"&c&lBRICK",
 						"&7Throw at your enemies to make them fall", "", "&7&lCOMMON");
+				break;
+
+
+			case SILVERFISH_EGG:
+				item = ItemHelper.createMonsterEgg(EntityType.SILVERFISH, 1);
+				ItemHelper.setDetails(item, "&7&lSILVERFISH POKEBALL", "&7Right click to throw a Silverfish spawn egg", "", "&7&lCOMMON");
 				break;
 
 	        // ===== UNCOMMON =====
