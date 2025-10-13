@@ -14,12 +14,16 @@ public final class ChannelInjector {
     private static final String HANDLER_NAME = "npc-interact";
     private static final Map<UUID, ChannelDuplexHandler> ACTIVE = new ConcurrentHashMap<>();
 
+    // simple debounce to avoid accidental double-fires
+    private static final Map<String, Long> DEBOUNCE = new ConcurrentHashMap<>();
+    private static final long DEBOUNCE_MS = 150L;
+
     private ChannelInjector() {}
 
     public static void inject(Player p) {
         try {
             Channel channel = ((CraftPlayer) p).getHandle().playerConnection.networkManager.channel;
-            if (channel.pipeline().get(HANDLER_NAME) != null) return;
+            if (channel == null || channel.pipeline().get(HANDLER_NAME) != null) return;
 
             ChannelDuplexHandler handler = new ChannelDuplexHandler() {
                 @Override
@@ -28,14 +32,21 @@ public final class ChannelInjector {
                         if (msg instanceof PacketPlayInUseEntity) {
                             PacketPlayInUseEntity packet = (PacketPlayInUseEntity) msg;
 
-                            // 1.8 fields: "a" (int entityId), "action" (enum)
                             int id = getEntityId(packet);
                             String action = getActionName(packet); // "INTERACT", "ATTACK", "INTERACT_AT"
 
-                            boolean rightClick = "INTERACT".equalsIgnoreCase(action) || "INTERACT_AT".equalsIgnoreCase(action);
-                            if (rightClick) {
-                                NPCRegistry.handleUseEntity(id, true, p);
+                            // Only handle right-click "INTERACT" once. Ignore INTERACT_AT to prevent double fire.
+                            if ("INTERACT".equalsIgnoreCase(action)) {
+                                // debounce per (player, entity)
+                                String key = p.getUniqueId() + ":" + id;
+                                long now = System.currentTimeMillis();
+                                Long last = DEBOUNCE.get(key);
+                                if (last == null || (now - last) >= DEBOUNCE_MS) {
+                                    DEBOUNCE.put(key, now);
+                                    NPCRegistry.handleUseEntity(id, true, p);
+                                }
                             }
+                            // ignore ATTACK and INTERACT_AT here
                         }
                     } catch (Throwable ignored) {}
                     super.channelRead(ctx, msg);
@@ -54,17 +65,18 @@ public final class ChannelInjector {
             ChannelDuplexHandler h = ACTIVE.remove(p.getUniqueId());
             if (h == null) return;
             Channel channel = ((CraftPlayer) p).getHandle().playerConnection.networkManager.channel;
-            if (channel.pipeline().get(HANDLER_NAME) != null) {
+            if (channel != null && channel.pipeline().get(HANDLER_NAME) != null) {
                 channel.pipeline().remove(HANDLER_NAME);
             }
         } catch (Exception ignored) {}
     }
 
     private static int getEntityId(PacketPlayInUseEntity pkt) throws Exception {
-        Field a = PacketPlayInUseEntity.class.getDeclaredField("a");
+        Field a = PacketPlayInUseEntity.class.getDeclaredField("a"); // entity id
         a.setAccessible(true);
         return a.getInt(pkt);
     }
+
     private static String getActionName(PacketPlayInUseEntity pkt) throws Exception {
         Field f = PacketPlayInUseEntity.class.getDeclaredField("action");
         f.setAccessible(true);
