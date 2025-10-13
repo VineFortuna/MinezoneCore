@@ -214,8 +214,8 @@ public class NPC {
             WorldServer world = ((CraftWorld) baseLoc.getWorld()).getHandle();
 
             // place lines a bit above the head; top line is highest
-            double baseY = baseLoc.getY() + 0.55;
-            double step = 0.25;
+            double baseY = baseLoc.getY() + 1.95;
+            double step = 0.28;
 
             List<Integer> ids = new ArrayList<>(nameLines.size());
             for (int i = 0; i < nameLines.size(); i++) {
