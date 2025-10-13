@@ -112,7 +112,7 @@ public class FishingGUI implements InventoryProvider {
                     new FishingUpgradesGUI(main, inv).inv.open(player);
                 }));
 
-        if (target != null) {
+        if (target == null) {
             FishingDetails mapDetails = data.playerFishing.get(FishType.MAP.getId());
             if (mapDetails != null && mapDetails.carrying > 0) {
                 Location treasureLoc = main.getFishing().getTreasureLoc(data.treasureLoc);
