@@ -1845,7 +1845,7 @@ public class Core extends JavaPlugin implements Listener {
 
 		// if (!(this.msHologram.containsKey(p))) {
 		if (data != null) {
-			Location loc = new Location(this.getLobbyWorld(), 174.5, 106.5, 677.5);
+			Location loc = new Location(this.getLobbyWorld(), 196.5, 105.5, 648.5);
 			WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
 			EntityArmorStand stand = new EntityArmorStand(s);
 
@@ -1857,7 +1857,7 @@ public class Core extends JavaPlugin implements Listener {
 			PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
 			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
 
-			loc = new Location(this.getLobbyWorld(), 174.5, 106.2, 677.5);
+			loc = new Location(this.getLobbyWorld(), 196.5, 105.2, 648.5);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
