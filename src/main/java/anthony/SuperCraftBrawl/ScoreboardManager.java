@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.ranks.Rank;
 import fr.mrmicky.fastboard.FastBoard;
 import net.md_5.bungee.api.ChatColor;
 
@@ -23,6 +24,11 @@ public class ScoreboardManager {
 		FastBoard board = new FastBoard(player);
 		PlayerData data = main.getDataManager().getPlayerData(player);
 		this.playersLobbyBoard.put(player, board);
+		Rank rank = main.getRankManager().getRank(player);
+		String rankName = rank.getTag();
+
+		if (rank == Rank.DEFAULT)
+			rankName = main.color("&7Default");
 
 		// EXP settings (tweak if you have a dynamic requirement)
 		// EXP settings (tweak if you have a dynamic requirement)
@@ -44,13 +50,12 @@ public class ScoreboardManager {
 				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 						"" + ChatColor.RESET + ChatColor.BOLD + "Server: " + ChatColor.GRAY + "Lobby-1", "",
 						"" + ChatColor.RESET + ChatColor.BOLD + "Gems: " + ChatColor.GRAY + "0", "",
-						"" + ChatColor.RESET + ChatColor.BOLD + "Rank: "
-								+ main.getRankManager().getRank(player).getTag(),
-						"", "" + ChatColor.RESET + ChatColor.BOLD + "Level: " + ChatColor.WHITE + data.level, expBar, // ★
-																														// micro
-																														// EXP
-																														// dots
-																														// line
+						"" + ChatColor.RESET + ChatColor.BOLD + "Rank: " + rankName, "",
+						"" + ChatColor.RESET + ChatColor.BOLD + "Level: " + ChatColor.WHITE + data.level, expBar, // ★
+																													// micro
+																													// EXP
+																													// dots
+																													// line
 						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 						"" + ChatColor.AQUA + "minezone.club");
 			}
@@ -62,17 +67,10 @@ public class ScoreboardManager {
 			board.updateTitle(main.color("&d&l" + gameServer));
 			if (data != null) {
 				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						main.color("&f&lTokens&f: &6" + data.tokens), "",
-						main.color("&f&lRank&f: &r" + main.getRankManager().getRank(player).getTag()), "",
+						main.color("&f&lTokens&f: &6" + data.tokens), "", main.color("&f&lRank&f: &r" + rankName), "",
 						// shows ✧ plus the level like your existing line
-						main.color("&f&lLevel&f: &f" + data.checkPlayerLevel(player, data) + "✧" + data.level), expBar, // ★
-																														// micro
-																														// EXP
-																														// dots
-																														// line
-						"",
-						main.color("&f&lBaskets Found&f: &6"
-								+ main.getHalloweenManager().getFoundCount(player.getUniqueId()) + "/10"),
+						main.color("&f&lLevel&f: &f" + data.checkPlayerLevel(player, data) + "✧" + data.level), expBar,
+
 						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 						main.color("&dminezone.club"));
 			}
@@ -81,9 +79,8 @@ public class ScoreboardManager {
 			if (data != null) {
 				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 						"" + ChatColor.WHITE + ChatColor.BOLD + "Tokens: " + ChatColor.GRAY + data.tokens, "",
-						"" + ChatColor.WHITE + ChatColor.BOLD + "Rank: "
-								+ main.getRankManager().getRank(player).getTag(),
-						"", "" + ChatColor.WHITE + ChatColor.BOLD + "Points: " + ChatColor.GRAY + data.points,
+						"" + ChatColor.WHITE + ChatColor.BOLD + "Rank: " + rankName, "",
+						"" + ChatColor.WHITE + ChatColor.BOLD + "Points: " + ChatColor.GRAY + data.points,
 						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
 						"" + ChatColor.AQUA + "minezone.club");
 			}

@@ -17,6 +17,9 @@ import anthony.SuperCraftBrawl.halloween.TrickTitleCommand;
 import anthony.SuperCraftBrawl.halloween.TrickTitleManager;
 import anthony.SuperCraftBrawl.halloween.TrickTitlePackets;
 import anthony.SuperCraftBrawl.leaderboards.*;
+import anthony.SuperCraftBrawl.lobbyexplorer.LobbyExplorerManager;
+import anthony.SuperCraftBrawl.lobbyexplorer.LobbyExplorers;
+import anthony.SuperCraftBrawl.npcs.NPC;
 import anthony.SuperCraftBrawl.npcs.NPCManager;
 import anthony.SuperCraftBrawl.packets.PacketMain;
 import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
@@ -132,6 +135,9 @@ public class Core extends JavaPlugin implements Listener {
 	private HalloweenHuntManager halloweenHunt;
 	private TrickTitleManager trickTitleOld;
 	private TrickTitlePackets trickTitle;
+	
+	//NPCS:
+	public LobbyExplorerManager explorerManager;
 
 	public Core() {
 		this.staffchat = new ArrayList<Player>();
@@ -449,6 +455,7 @@ public class Core extends JavaPlugin implements Listener {
 		lobbyItems = new anthony.SuperCraftBrawl.lobbyitems.LobbyItems(this);
 		halloweenHunt = new HalloweenHuntManager(this);
 		candyAura = new CandyAuraManager(this, "lobby-1");
+		explorerManager = new LobbyExplorerManager(this);
 
 		for (Arenas arena : Arenas.values()) {
 			parkourBoards.add(new ParkourBoard(this, arena));
@@ -479,6 +486,13 @@ public class Core extends JavaPlugin implements Listener {
 		}
 
 		enablePracticeModes();
+		spawnLobbyNPCs();
+		
+		// Ensure already-online players (e.g., on /reload) are injected and see NPCs
+		for (Player p : Bukkit.getOnlinePlayers()) {
+		    anthony.SuperCraftBrawl.npcs.ChannelInjector.inject(p);
+		    for (NPC n : npcs) n.showTo(p);
+		}
 
 		// Halloween stuff
 		getCommand("treatsadmin").setExecutor(new TreatsAdminCommand(halloweenHunt));
@@ -527,6 +541,57 @@ public class Core extends JavaPlugin implements Listener {
 			}
 		}.runTaskTimer(this, 0, 1);
 	}
+	
+	private final List<NPC> npcs = new ArrayList<>();
+	
+	private void spawnLobbyNPCs() {
+	    // Example location – replace with your actual world/coords
+	    org.bukkit.World w = this.lobbyWorld;
+	    Location loc = new Location(w, 164.347, 105, 657.741, -126, -0);
+
+	    // Skin (Base64 value + signature). Put yours here or read from config.
+	    String SKIN_VALUE = getConfig().getString("npc.amy.skin.value");
+	    String SKIN_SIG   = getConfig().getString("npc.amy.skin.signature");
+
+	    // Example 1: “Explorer Amy” uses the default explorer behavior (calls ExplorerManager)
+	    NPC amy = new NPC(
+	            this,
+	            "Amy",              // max 16 chars (class trims if longer)
+	            loc,
+	            SKIN_VALUE,
+	            SKIN_SIG,
+	            null,               // no custom onRightClick -> uses explorer fallback
+	            LobbyExplorers.Amy  // this triggers core.getExplorerManager().checkSelectedExplorer(...)
+	    ).setNameLines(
+	            "&d&lAMY",
+	            "&7Click to explore"
+	    );
+
+	    npcs.add(amy);
+	    amy.showToAll(); // send spawn packets to everyone currently online
+
+	    // Example 2: a custom-click NPC (no explorer enum, inline Consumer)
+	    Location infoLoc = loc.clone().add(3, 0, 0);
+	    NPC greeter = new NPC(
+	            this,
+	            "Greeter",
+	            infoLoc,
+	            null, null, // no skin -> uses default Steve
+	            (player) -> player.sendMessage(color("&aWelcome! Use &e/menu &afor options.")),
+	            null
+	    ).setNameLines("&a&lINFO", "&7Right-click");
+
+	    npcs.add(greeter);
+	    greeter.showToAll();
+	    
+	 // Make NPCs visible and clicks detectable for joins/respawns/world-changes
+	    Bukkit.getPluginManager().registerEvents(
+	        new anthony.SuperCraftBrawl.npcs.VisibleHook(npcs.toArray(new NPC[0])),
+	        this
+	    );
+
+	}
+
 
 	public static BowPractice bowPractice;
 
@@ -1673,6 +1738,12 @@ public class Core extends JavaPlugin implements Listener {
 			}
 		}
 	}
+	
+	private void showNPCs(Player player) {
+		for (NPC npc : npcs) {
+	        npc.showTo(player);
+	    }
+	}
 
 	public Map<Player, Holograms> holograms = new HashMap<Player, Holograms>();
 
@@ -1696,6 +1767,7 @@ public class Core extends JavaPlugin implements Listener {
 		chatAnnouncementOnJoin(player);
 		getScoreboardManager().lobbyBoard(player); // Gives the lobby scoreboard to player
 		sendScoreboardUpdate(player); // This sets the rank next to player name above their head
+		showNPCs(player);
 
 		// For join message:
 		Rank rank = getRankManager().getRank(player); // Gets the player's rank
@@ -2133,5 +2205,9 @@ public class Core extends JavaPlugin implements Listener {
 		for (ParkourBoard parkourBoard : getParkourLeaderboards()) {
 			parkourBoard.updateLeaderboard(true);
 		}
+	}
+
+	public LobbyExplorerManager getExplorerManager() {
+		return this.explorerManager;
 	}
 }
