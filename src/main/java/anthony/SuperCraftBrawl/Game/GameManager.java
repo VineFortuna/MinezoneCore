@@ -91,6 +91,21 @@ public class GameManager implements Listener, PluginMessageListener {
 		return projManager;
 	}
 
+    /*
+    * This function removes a player from game settings votes.
+    * Function is called in onQuit in Core.java
+     */
+    public void removePlayerFromVotes(Player player) {
+        GameInstance game = GetInstanceOfPlayer(player);
+
+        if (game != null && game.getGameSettings() != null) {
+            game.getGameSettings().removeFromStartVotes(player);
+            game.getGameSettings().removeFromGameTypeVotes(player);
+            game.getGameSettings().removeFromLightningVotes(player);
+            game.getGameSettings().removeFromTimeVotes(player);
+        }
+    }
+
 	// EVENTS:
 
 	@EventHandler

@@ -25,7 +25,10 @@ public class ScoreboardManager {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 		this.playersLobbyBoard.put(player, board);
 		Rank rank = main.getRankManager().getRank(player);
-		String rankName = rank.getTag();
+        String rankName = "";
+
+        if (rank != null && rank.getTag() != null)
+		    rankName = rank.getTag();
 
 		if (rank == Rank.DEFAULT)
 			rankName = main.color("&7Default");
@@ -36,7 +39,7 @@ public class ScoreboardManager {
 
 		// Hypixel-style micro bar: 10 tiny squares, with [ ] and % (no space before %)
 		final String expBar = (data == null) ? ChatColor.WHITE + "[]0%" // placeholder when null (won't show long)
-				: Bars.dotsBar(data.exp, expRequired, 10, ChatColor.GOLD, // filled color
+				: Bars.dotsBar(data.exp, expRequired, 10, ChatColor.GRAY, // filled color
 						ChatColor.GRAY, // empty color
 						'■', // filled glyph (try '•' or '▪' if you prefer)
 						'■', // empty glyph
@@ -64,15 +67,15 @@ public class ScoreboardManager {
 
 		if (!main.tournament) {
 			String gameServer = "Minezone";
-			board.updateTitle(main.color("&d&l" + gameServer));
+			board.updateTitle(main.color("&b&l" + gameServer));
 			if (data != null) {
 				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						main.color("&f&lTokens&f: &6" + data.tokens), "", main.color("&f&lRank&f: &r" + rankName), "",
+						main.color("&f&lTokens&f: &7" + data.tokens), "", main.color("&f&lRank&f: &r" + rankName), "",
 						// shows ✧ plus the level like your existing line
 						main.color("&f&lLevel&f: &f" + data.checkPlayerLevel(player, data) + "✧" + data.level), expBar,
 
 						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						main.color("&dminezone.club"));
+						main.color("&bminezone.club"));
 			}
 		} else {
 			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + "MINEZONE");
