@@ -77,8 +77,6 @@ public class GameInstance {
 	public List<Player> redTeam;
 	public List<Player> blueTeam;
 	public List<Player> blackTeam;
-	public int tokensBet = 0;
-	public boolean wagers = false;
 	public int gameTime = 0;
 	public Player firstBlood;
 	private final Map<UUID, Location> lastKnownLocations = new HashMap<>();
