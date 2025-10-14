@@ -75,21 +75,7 @@
 			<artifactId>bukkit-nms</artifactId>
 			<version>1.0</version>
 			<scope>system</scope>
-			<systemPath>C:\Users\antho\OneDrive\Desktop\TheArchive-Core\lib\spigot-1.8.8.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>me.itzzmic.auth</groupId>
-			<artifactId>SCBAuth</artifactId>
-			<version>1.5</version>
-			<scope>system</scope>
-			<systemPath>C:\Users\antho\OneDrive\Desktop\TheArchive-Core\lib\MinezoneAuth.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>me.itzzmic.minezone</groupId>
-			<artifactId>PunishSystem</artifactId>
-			<version>1.9</version>
-			<scope>system</scope>
-			<systemPath>C:\Users\antho\OneDrive\Desktop\TheArchive-Core\lib\PunishSystem.jar</systemPath>
+			<systemPath>${project.basedir}\lib\spigot-1.8.8.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
