@@ -21,6 +21,7 @@ import anthony.SuperCraftBrawl.lobbyexplorer.LobbyExplorerManager;
 import anthony.SuperCraftBrawl.lobbyexplorer.LobbyExplorers;
 import anthony.SuperCraftBrawl.npcs.NPC;
 import anthony.SuperCraftBrawl.npcs.NPCManager;
+import anthony.SuperCraftBrawl.npcs.VisibleHook;
 import anthony.SuperCraftBrawl.packets.PacketMain;
 import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -33,7 +34,6 @@ import anthony.SuperCraftBrawl.tablist.TablistManager;
 import anthony.parkour.Arenas;
 import anthony.parkour.Parkour;
 import anthony.util.ItemHelper;
-import me.itzzmic.minezone.api.PunishAPI;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -148,7 +148,11 @@ public class Core extends JavaPlugin implements Listener {
 		return plugin;
 	}
 
-	// Getters:
+    public List<NPC> getAllNPCs() {
+        return npcs;
+    }
+
+    // Getters:
 
 	public ActionBarManager getActionBarManager() {
 		return this.actionBarManager;
@@ -457,7 +461,7 @@ public class Core extends JavaPlugin implements Listener {
 		candyAura = new CandyAuraManager(this, "lobby-1");
 		explorerManager = new LobbyExplorerManager(this);
 
-		for (Arenas arena : Arenas.values()) {
+        for (Arenas arena : Arenas.values()) {
 			parkourBoards.add(new ParkourBoard(this, arena));
 		}
 		// kb = new KillsBoard(this);
@@ -487,6 +491,9 @@ public class Core extends JavaPlugin implements Listener {
 
 		enablePracticeModes();
 		spawnLobbyNPCs();
+        spawnSelfStatsNPC();
+
+        Bukkit.getPluginManager().registerEvents(new VisibleHook(() -> getAllNPCs()), this);
 		
 		// Ensure already-online players (e.g., on /reload) are injected and see NPCs
 		for (Player p : Bukkit.getOnlinePlayers()) {
@@ -541,8 +548,28 @@ public class Core extends JavaPlugin implements Listener {
 			}
 		}.runTaskTimer(this, 0, 1);
 	}
-	
-	private final List<NPC> npcs = new ArrayList<>();
+
+    private void spawnSelfStatsNPC() {
+        World w = lobbyWorld;
+        Location loc = new Location(w, 207.5, 105.0, 643.5, 0f, 1f); // where the NPC stands
+
+        NPC selfNPC = new NPC(
+                this,
+                "",
+                loc,
+                null, null,
+                (clicker) -> new StatsGUI(this, clicker).inv.open(clicker),
+                null
+        )
+                .mimicViewerSkin()
+                .disableHeadTracking()
+                .perViewerLines(p -> Collections.emptyList());  // does nothing
+
+        npcs.add(selfNPC);
+        selfNPC.showToAll(); // spawn now for everyone online; VisibleHook will handle future joins
+    }
+
+    private final List<NPC> npcs = new ArrayList<>();
 	
 	private void spawnLobbyNPCs() {
 	    // Example location – replace with your actual world/coords
@@ -583,12 +610,6 @@ public class Core extends JavaPlugin implements Listener {
 
 	    npcs.add(greeter);
 	    greeter.showToAll();
-	    
-	 // Make NPCs visible and clicks detectable for joins/respawns/world-changes
-	    Bukkit.getPluginManager().registerEvents(
-	        new anthony.SuperCraftBrawl.npcs.VisibleHook(npcs.toArray(new NPC[0])),
-	        this
-	    );
 
 	}
 
@@ -1775,7 +1796,7 @@ public class Core extends JavaPlugin implements Listener {
 		// e.setJoinMessage(color("&r&l[&a&l+&r&l] &r" + rank + "&b" + name + "&a
 		// connected"));
 		e.setJoinMessage(color("" + rank.getArrowColor() + "► " + tag
-				+ getColorForNames(player, getRankManager().getRank(player)) + " &6spooked into the server!"));
+				+ getColorForNames(player, getRankManager().getRank(player)) + " &7has joined!"));
 
 		if (data != null) {
 			player.setLevel(data.level); // Indication what the player's level is
@@ -1826,16 +1847,6 @@ public class Core extends JavaPlugin implements Listener {
 		p.sendMessage("");
 		p.sendMessage("----------------------------------------------");
 		p.sendMessage("");
-
-		Bukkit.getScheduler().runTaskLater(this, () -> {
-			p.sendMessage("----------------------------------------------");
-			p.sendMessage(color("            &6&lHALLOWEEN HUNT"));
-			p.sendMessage("");
-			p.sendMessage(color("" + "     &6Check out the Halloween NPC in"));
-			p.sendMessage(color("" + "       &6spawn for amazing rewards!"));
-			p.sendMessage("");
-			p.sendMessage("----------------------------------------------");
-		}, 40L);
 	}
 
 	public Map<Player, EntityArmorStand> msHologram = new HashMap<Player, EntityArmorStand>();
@@ -1925,7 +1936,7 @@ public class Core extends JavaPlugin implements Listener {
 	@EventHandler
 	public void serverMotd(ServerListPingEvent p) {
 		String msg = color(
-				"                     &eMinezone &7[1.8-1.21] \n    &c&lSUPER CRAFT BROS &7- &6&lHALLOWEEN UPDATE");
+				"                     &eMinezone &7[1.8-1.21] \n    &c&lSUPER CRAFT BROS &7- &b&lLOBBY UPDATE!");
 		p.setMotd(msg);
 		p.setMaxPlayers(1);
 	}
@@ -1959,20 +1970,10 @@ public class Core extends JavaPlugin implements Listener {
 			}
 			player.sendPluginMessage(this, "BungeeCord", b.toByteArray());
 		}, 10L);
-		GameInstance game = this.getGameManager().GetInstanceOfPlayer(player);
 
-		if (game != null && game.getGameSettings() != null) {
-			game.getGameSettings().removeFromStartVotes(player);
-			game.getGameSettings().removeFromGameTypeVotes(player);
-			game.getGameSettings().removeFromLightningVotes(player);
-			game.getGameSettings().removeFromTimeVotes(player);
-		}
-
-		// e.setQuitMessage(color("&r&l[&c&l-&r&l] &r" +
-		// getRankManager().getRank(player).getTagWithSpace() + "&b"
-		// + player.getName() + "&c disconnected"));
+        getGameManager().removePlayerFromVotes(player);
 		e.setQuitMessage(color("" + rank.getArrowColor() + "► " + tag
-				+ getColorForNames(player, getRankManager().getRank(player)) + " &6faded away!"));
+				+ getColorForNames(player, getRankManager().getRank(player)) + " &7has left!"));
 	}
 
 	public Location hologramLoc(Player player) {
@@ -2005,33 +2006,12 @@ public class Core extends JavaPlugin implements Listener {
 		return lobbyWorld;
 	}
 
-	private static final String BASKET_B64 = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzEzODVhN2FmYjM1NTJmYWY3MWMyYzVhOGU2YTViMWQyZTY3MmM3ODZlODA3NDQzM2ViNTgzOWFjZTgzYjQifX19";
-
+   /*
+    * This function gives a player the main lobby
+    * items when in lobby
+    */
 	public void LobbyItems(Player player) {
-		if (this.getCommands() != null) {
-			player.getInventory().setItem(1,
-					ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER), "&bActive Games &7(Right Click)"));
-			player.getInventory().setItem(3,
-					ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), "&bClasses &7(Right Click)"));
-			player.getInventory().setItem(8,
-					ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), "&bChallenges &7(Right Click)"));
-		}
-		player.getInventory().setItem(0,
-				ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&bGame Selector &7(Right Click)"));
-
-		player.getInventory().setItem(4,
-				ItemHelper.setDetails(new ItemStack(Material.CHEST), "&bCosmetics &7(Right Click)"));
-		ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
-		player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&bProfile &7(Right Click)"));
-
-		player.getInventory().setItem(5, getFishingRod(player));
-
-		if (tournament) {
-			ItemStack tournament = ItemHelper.createSkullTexture(
-					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGYzOTk3YzQzMDkxNjk0ZmMyZmI3NmM4ODNhNzZjY2U4OWYwMjI3ZTVjOWYxZGZlIn19fQ==");
-			player.getInventory().setItem(2, ItemHelper.setDetails(tournament, "&7>&f>&6&lTournament&f<&7<"));
-		}
-		player.setAllowFlight(true);
+		getLobbyItems().mainLobbyItems(player);
 	}
 
 	public void ResetPlayer(Player player) {

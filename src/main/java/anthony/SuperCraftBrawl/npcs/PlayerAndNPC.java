@@ -47,4 +47,5 @@ public class PlayerAndNPC {
 		return ChatColor.translateAlternateColorCodes('&', c);
 	}
 
+    //
 }

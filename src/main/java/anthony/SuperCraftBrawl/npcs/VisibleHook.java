@@ -10,18 +10,25 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
-/**
- * Injects players' Netty channels for click detection and shows NPCs
- * whenever a player (re)appears in the relevant world.
- */
-public class VisibleHook implements Listener {
-    private final NPC[] npcs;
+import java.util.Collection;
+import java.util.function.Supplier;
 
-    public VisibleHook(NPC... npcs) { this.npcs = npcs; }
+public class VisibleHook implements Listener {
+    private final Supplier<Collection<NPC>> npcsSupplier;
+
+    public VisibleHook(Supplier<Collection<NPC>> npcsSupplier) {
+        this.npcsSupplier = npcsSupplier;
+    }
 
     private void showAll(Player p) {
-        for (NPC n : npcs) {
+        for (NPC n : npcsSupplier.get()) {
             if (n != null) n.showTo(p);
+        }
+    }
+
+    private void hideAll(Player p) {
+        for (NPC n : npcsSupplier.get()) {
+            if (n != null) n.hideFrom(p);
         }
     }
 
@@ -29,19 +36,13 @@ public class VisibleHook implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         ChannelInjector.inject(p);
-        // short delay so the client is fully ready before spawn packets
         Bukkit.getScheduler().runTaskLater(Core.inst(), () -> showAll(p), 5L);
     }
 
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
-    	Player p = e.getPlayer();
-
-        // ✅ make sure we forget this viewer so rejoin works
-        for (NPC n : npcs) {
-            if (n != null) n.hideFrom(p);
-        }
-
+        Player p = e.getPlayer();
+        hideAll(p);                // clears viewers for ALL current NPCs
         ChannelInjector.uninject(p);
     }
 
