@@ -1684,24 +1684,10 @@ public abstract class BaseClass {
 	private void resetMobTarget(Player p) {
 		for (Creature en : p.getWorld().getEntitiesByClass(Creature.class)) {
 			if (en.getTarget() != null && en.getTarget() == p) {
-				if (getMobOwner(en) != null)
-					en.setTarget(instance.getNearestPlayer(getMobOwner(en), en, 150));
+				if (instance.getGameManager().getMobOwner(en) != null)
+					en.setTarget(instance.getNearestPlayer(instance.getGameManager().getMobOwner(en), en, 150));
 			}
 		}
-	}
-
-	private Player getMobOwner(Creature creature) {
-		if (creature.getCustomName() != null) {
-			String customName = ChatColor.stripColor(creature.getCustomName());
-
-			if (!customName.contains("'")) {
-				return null;
-			}
-
-			String owner = customName.substring(0, customName.indexOf("'"));
-			return Bukkit.getPlayer(owner);
-		}
-		return null;
 	}
 
 	private void deathParticles(PlayerData pData, Player p) {
