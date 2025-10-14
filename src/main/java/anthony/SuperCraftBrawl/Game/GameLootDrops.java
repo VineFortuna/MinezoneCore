@@ -5,7 +5,6 @@ import java.util.Random;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionType;
 
@@ -16,7 +15,7 @@ public enum GameLootDrops {
 
 	// COMMON:
 	SLOWNESS(Rarity.COMMON), SLOWBALLS(Rarity.COMMON), BLOOPER(Rarity.COMMON), ZOMBIE_EGG(Rarity.COMMON),
-	SKELE_EGG(Rarity.COMMON), MILK(Rarity.COMMON), SLIME_EGG(Rarity.COMMON), BRICK(Rarity.COMMON), SILVERFISH_EGG(Rarity.COMMON),
+	SKELE_EGG(Rarity.COMMON), MILK(Rarity.COMMON), SLIME_EGG(Rarity.COMMON),
 
 	// UNCOMMON:
 	NUKE(Rarity.RARE), SPEED2(Rarity.RARE), INSTAGIB(Rarity.RARE), BAZOOKA(Rarity.RARE),
@@ -114,18 +113,6 @@ public enum GameLootDrops {
 	            ItemHelper.setDetails(item, "&2&lSLIME POKEBALL", "&7Right click to throw a Slime spawn egg", "", "&7&lCOMMON");
 	            break;
 
-			case BRICK:
-				item = ItemHelper.setDetails(new ItemStack(Material.CLAY_BRICK, 2),
-						"&c&lBRICK",
-						"&7Throw at your enemies to make them fall", "", "&7&lCOMMON");
-				break;
-
-
-			case SILVERFISH_EGG:
-				item = ItemHelper.createMonsterEgg(EntityType.SILVERFISH, 1);
-				ItemHelper.setDetails(item, "&7&lSILVERFISH POKEBALL", "&7Right click to throw a Silverfish spawn egg", "", "&7&lCOMMON");
-				break;
-
 	        // ===== UNCOMMON =====
 			case NUKE:
 				item = ItemHelper.setDetails(new ItemStack(Material.TNT, 3),
@@ -167,7 +154,7 @@ public enum GameLootDrops {
 	            
 	        case FIRE_FLOWER:
 	        	 item = ItemHelper.setDetails(new ItemStack(Material.RED_ROSE, 3),
-		                    "&c&lFIRE &e&lFLOWER",
+		                    "&c&lFire &e&lFlower",
 		                    "&7Throw a fire flower at an enemy to set", "&7them on fire!", "", "&2&lUNCOMMON");
 	        	 break;
 
