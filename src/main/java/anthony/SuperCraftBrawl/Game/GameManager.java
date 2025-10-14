@@ -134,14 +134,25 @@ public class GameManager implements Listener, PluginMessageListener {
 				}
 			}
 		} else if (event.getTarget() instanceof Creature) {
-			Creature creature = (Creature) event.getTarget();
+			Creature target = (Creature) event.getTarget();
+			Creature creature = (Creature) event.getEntity();
 			if (event.getEntity().getCustomName() != null && creature.getCustomName() != null) {
-				String ownerE = event.getEntity().getCustomName().substring(0,
-						event.getEntity().getCustomName().indexOf("'"));
-				String ownerT = creature.getCustomName().substring(0, creature.getCustomName().indexOf("'"));
+				String ownerE = getMobOwner(creature).getName();
+				String ownerT = getMobOwner(target).getName();
 				if (ownerE.equals(ownerT))
 					event.setCancelled(true);
 			}
+		} else if (event.getTarget() == null) {
+			Creature creature = (Creature) event.getEntity();
+			Player player = getMobOwner(creature);
+			GameInstance i = this.GetInstanceOfPlayer(player);
+			Bukkit.getScheduler().runTaskLater(main, () -> {
+				if (creature.getTarget() == null) {
+					LivingEntity newTarget = i.getNearestPlayer(player, creature, 150);
+					if (newTarget != null) creature.setTarget(newTarget);
+				}
+			}, 1L);
+
 		}
 	}
 
@@ -1890,59 +1901,6 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	@EventHandler
-	public void brick(PlayerInteractEvent event) {
-		Player player = event.getPlayer();
-		ItemStack item = event.getItem();
-		GameInstance instance = this.GetInstanceOfPlayer(player);
-
-		if (instance != null && instance.state == GameState.STARTED) {
-			if (item != null && item.getType() == Material.CLAY_BRICK
-					&& (event.getAction().name().contains("RIGHT_CLICK"))) {
-				ItemMeta meta = item.getItemMeta();
-
-				if (meta != null && meta.getDisplayName() != null &&
-						ChatColor.stripColor(meta.getDisplayName()).contains("BRICK")) {
-					int amount = item.getAmount();
-					if (amount > 0) {
-						amount--;
-						if (amount == 0)
-							player.getInventory().clear(player.getInventory().getHeldItemSlot());
-						else
-							item.setAmount(amount);
-						ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
-							@Override
-							public void onHit(Player hit) {
-								if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
-									if (instance.duosMap != null)
-										if (instance.team.get(hit).equals(instance.team.get(player)))
-											return;
-
-									if (hit != null) {
-										if (instance.getGameManager().spawnProt.containsKey(hit)) return;
-										@SuppressWarnings("deprecation")
-										EntityDamageEvent damageEvent = new EntityDamageEvent(hit, DamageCause.VOID, 3);
-										instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
-										hit.damage(3, player);
-										Location loc = hit.getLocation();
-										Vector v = hit.getVelocity();
-										v.setY(-2.0);
-										hit.setVelocity(v);
-										player.getWorld().playSound(loc, Sound.ANVIL_LAND, 1, 1);
-									}
-								}
-							}
-
-						}, new ItemStack(Material.CLAY_BRICK));
-						instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-								player.getLocation().getDirection().multiply(2.0D));
-					}
-				}
-			}
-		}
-	}
-
-
-	@EventHandler
 	public void Nuke(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
 		ItemStack item = event.getItem();
@@ -2562,18 +2520,40 @@ public class GameManager implements Listener, PluginMessageListener {
 								Location hitLoc = this.getBaseProj().getEntity().getLocation();
 
 								for (int i = 0; i < 3; i++) {
-									// Spawning Slime
+									// Spawning Silverfish
 									Silverfish mob = (Silverfish) player.getWorld().spawnCreature(hitLoc, EntityType.SILVERFISH);
-									mob.setRemoveWhenFarAway(false);
-									// Setting Mob Name to owner's
-									mob.setCustomName(ChatColorHelper
-											.color("&c" + player.getName() + "'s &e" + getMobTypeName(mob.getType())));
-									// Setting Custom name visible
-									mob.setCustomNameVisible(true);
+									customizeMob(mob, player);
+									mob.setTarget(gameInstance.getNearestPlayer(player, mob, 150));
 								}
 							}
 
 						}, ItemHelper.createMonsterEgg(EntityType.SILVERFISH, 1));
+						gameInstance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+								player.getLocation().getDirection().multiply(2.0D));
+					}
+				} else if (meta.getDisplayName().toLowerCase().contains("spider")) {
+					int amount = item.getAmount();
+
+					if (amount > 0) {
+						if (amount == 1)
+							player.getInventory().clear(player.getInventory().getHeldItemSlot());
+						else {
+							amount--;
+							item.setAmount(amount);
+						}
+						ItemProjectile proj = new ItemProjectile(gameInstance, player, new ProjectileOnHit() {
+							@Override
+							public void onHit(Player hit) {
+								Location hitLoc = this.getBaseProj().getEntity().getLocation();
+
+								// Spawning Spider
+								Spider mob = (Spider) player.getWorld().spawnCreature(hitLoc, EntityType.SPIDER);
+								customizeMob(mob, player);
+								customizeSpider(mob);
+								mob.setTarget(gameInstance.getNearestPlayer(player, mob, 150));
+							}
+
+						}, ItemHelper.createMonsterEgg(EntityType.SPIDER, 1));
 						gameInstance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 								player.getLocation().getDirection().multiply(2.0D));
 					}
@@ -2626,6 +2606,20 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
+	public Player getMobOwner(Creature creature) {
+		if (creature.getCustomName() != null) {
+			String customName = ChatColor.stripColor(creature.getCustomName());
+
+			if (!customName.contains("'")) {
+				return null;
+			}
+
+			String owner = customName.substring(0, customName.indexOf("'"));
+			return Bukkit.getPlayer(owner);
+		}
+		return null;
+	}
+
 	private void customizeSkeleton(Skeleton skeleton) {
 		// Setting Bow
 		EntityEquipment equipment = skeleton.getEquipment();
@@ -2672,6 +2666,10 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	private void customizeCreeper(Creeper creeper) {
 		creeper.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999, 0, false, false));
+	}
+
+	private void customizeSpider(Spider spider) {
+		spider.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999, 0, false, false));
 	}
 
 	private void customizeMob(Creature mob, Player player) {
