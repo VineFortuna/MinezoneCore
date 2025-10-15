@@ -66,25 +66,25 @@ public class ScoreboardManager {
 		}
 
 		if (!main.tournament) {
-			String gameServer = "Minezone";
-			board.updateTitle(main.color("&b&l" + gameServer));
+			String gameServer = "MINEZONE";
+			board.updateTitle(main.color("&e&l" + gameServer));
 			if (data != null) {
-				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						main.color("&f&lTokens&f: &7" + data.tokens), "", main.color("&f&lRank&f: &r" + rankName), "",
+				board.updateLines("",
+						main.color("&fTokens: &a" + data.tokens), "", main.color("&fRank: &r" + rankName), "",
 						// shows ✧ plus the level like your existing line
-						main.color("&f&lLevel&f: &f" + data.checkPlayerLevel(player, data) + "✧" + data.level), expBar,
+						main.color("&fLevel: &f" + data.checkPlayerLevel(player, data) + "✧" + data.level), expBar,
 
-						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						main.color("&bminezone.club"));
+						"",
+						main.color("&eminezone.club"));
 			}
 		} else {
 			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + "MINEZONE");
 			if (data != null) {
-				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
+				board.updateLines("",
 						"" + ChatColor.WHITE + ChatColor.BOLD + "Tokens: " + ChatColor.GRAY + data.tokens, "",
 						"" + ChatColor.WHITE + ChatColor.BOLD + "Rank: " + rankName, "",
 						"" + ChatColor.WHITE + ChatColor.BOLD + "Points: " + ChatColor.GRAY + data.points,
-						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
+						"",
 						"" + ChatColor.AQUA + "minezone.club");
 			}
 		}
