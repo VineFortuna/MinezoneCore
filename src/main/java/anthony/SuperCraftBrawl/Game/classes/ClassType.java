@@ -87,7 +87,7 @@ public enum ClassType {
 	Mooshroom(22, 0, Rank.VIP),
 	Herobrine(23, 0, Rank.VIP),
 	Wizard(41, 0, Rank.VIP),
-	MagmaCube(48, 0, Rank.VIP, true),
+	MagmaCube(48, 0, Rank.VIP, false),
 	Bedrock(61, 0, Rank.VIP),
 	Firework(62, 0, Rank.VIP),
 	Vindicator(65, 0, Rank.VIP, true),
