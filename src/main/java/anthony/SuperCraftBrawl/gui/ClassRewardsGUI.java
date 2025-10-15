@@ -213,6 +213,61 @@ public class ClassRewardsGUI implements InventoryProvider {
                         inv.open(player);
                     }
                 }));
+
+        for (int i = 0; i < 5; i++) {
+            ItemStack pane;
+            String name;
+            boolean claimed = false;
+            boolean claimable = false;
+
+            switch (i) {
+                case 0: // Reward 1
+                    claimed = details.reward1;
+                    claimable = played >= 10;
+                    break;
+                case 1:
+                    claimed = details.reward2;
+                    claimable = played >= 25;
+                    break;
+                case 2:
+                    claimed = details.reward3;
+                    claimable = played >= 50;
+                    break;
+                case 3:
+                    claimed = details.reward4;
+                    claimable = played >= 75;
+                    break;
+                case 4:
+                    claimed = details.reward5;
+                    claimable = played >= 100;
+                    break;
+            }
+
+            // Determine color and name
+            if (i < 4) {
+                if (claimed)
+                    pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 5); // Lime
+                else if (claimable)
+                    pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 4); // Yellow
+                else
+                    pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14); // Red
+
+            } else {
+                // Alt head indicator
+                if (claimable) {
+                    if (claimed)
+                        pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 5); // Lime (enabled)
+                    else
+                        pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 4); // Yellow (disabled)
+                } else {
+                    pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14); // Red (locked)
+                }
+            }
+
+            ItemHelper.setDetails(pane, " ", "");
+            contents.set(2, i + 1, ClickableItem.empty(pane));
+        }
+
         contents.set(1, 7, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.PAPER), "&a&lMastery Points", "&7When using this class:",
                         "&a- Match played: &r+1 point", "&a- Match won: &r+2 points"), e -> {
@@ -222,7 +277,7 @@ public class ClassRewardsGUI implements InventoryProvider {
                     inv.getParent().get().open(player);
                 }));
     }
-    
+
     @Override
     public void update(Player player, InventoryContents contents) {
     
