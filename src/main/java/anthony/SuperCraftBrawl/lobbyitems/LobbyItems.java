@@ -25,26 +25,26 @@ public class LobbyItems {
     public void mainLobbyItems(Player player) {
         if (core.getCommands() != null) {
             player.getInventory().setItem(1,
-                    ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER), "&bActive Games &7(Right Click)"));
+                    ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER), "&eActive Games &7(Right Click)"));
             player.getInventory().setItem(3,
-                    ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), "&bClasses &7(Right Click)"));
+                    ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), "&eClasses &7(Right Click)"));
             player.getInventory().setItem(8,
-                    ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), "&bChallenges &7(Right Click)"));
+                    ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), "&eChallenges &7(Right Click)"));
         }
         player.getInventory().setItem(0,
-                ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&bGame Selector &7(Right Click)"));
+                ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&eGame Selector &7(Right Click)"));
 
         player.getInventory().setItem(4,
-                ItemHelper.setDetails(new ItemStack(Material.CHEST), "&bCosmetics &7(Right Click)"));
+                ItemHelper.setDetails(new ItemStack(Material.CHEST), "&eCosmetics &7(Right Click)"));
         ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
-        player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&bProfile &7(Right Click)"));
+        player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&eProfile &7(Right Click)"));
 
         player.getInventory().setItem(5, core.getFishingRod(player));
 
         if (core.tournament) {
             ItemStack tournament = ItemHelper.createSkullTexture(
                     "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGYzOTk3YzQzMDkxNjk0ZmMyZmI3NmM4ODNhNzZjY2U4OWYwMjI3ZTVjOWYxZGZlIn19fQ==");
-            player.getInventory().setItem(2, ItemHelper.setDetails(tournament, "&7>&f>&6&lTournament&f<&7<"));
+            player.getInventory().setItem(2, ItemHelper.setDetails(tournament, "&eTournament &7(Right Click)"));
         }
         player.setAllowFlight(true);
     }
