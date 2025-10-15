@@ -95,7 +95,7 @@ public class FavoriteClassesGUI implements InventoryProvider {
 														+ "=============================================");
 												inv.close(player);
 											} else if (e.isRightClick()) {
-												new ClassRewardsGUI(main, type, inv).inv.open(player);
+												new ClassMasteryGUI(main, type, inv).inv.open(player);
 											}
 										}));
 						x++;
