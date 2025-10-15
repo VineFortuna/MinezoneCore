@@ -2171,6 +2171,7 @@ public class Core extends JavaPlugin implements Listener {
 		getKillsLeaderboard().close();
 		getWinstreakBoard().close();
 		getFlawlessWinsBoard().close();
+		getLevelBoard().updateLeaderboard(true);
 		for (ParkourBoard parkourBoard : getParkourLeaderboards()) {
 			parkourBoard.close();
 		}
@@ -2182,6 +2183,7 @@ public class Core extends JavaPlugin implements Listener {
 		getKillsLeaderboard().updateLeaderboard(true);
 		getWinstreakBoard().updateLeaderboard(true);
 		getFlawlessWinsBoard().updateLeaderboard(true);
+		getLevelBoard().updateLeaderboard(true);
 		for (ParkourBoard parkourBoard : getParkourLeaderboards()) {
 			parkourBoard.updateLeaderboard(true);
 		}
