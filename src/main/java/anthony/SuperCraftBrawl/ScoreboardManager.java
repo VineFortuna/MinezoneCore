@@ -39,7 +39,7 @@ public class ScoreboardManager {
 
 		// Hypixel-style micro bar: 10 tiny squares, with [ ] and % (no space before %)
 		final String expBar = (data == null) ? ChatColor.WHITE + "[]0%" // placeholder when null (won't show long)
-				: Bars.dotsBar(data.exp, expRequired, 10, ChatColor.GRAY, // filled color
+				: Bars.dotsBar(data.exp, expRequired, 10, ChatColor.AQUA, // filled color
 						ChatColor.GRAY, // empty color
 						'■', // filled glyph (try '•' or '▪' if you prefer)
 						'■', // empty glyph
