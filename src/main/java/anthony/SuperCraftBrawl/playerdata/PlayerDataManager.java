@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.playerdata;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.ranks.Rank;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -257,6 +258,7 @@ public class PlayerDataManager implements Listener {
 		manager.executeUpdateCommand("INSERT INTO PlayerData (`UUID`, `LastPlayerName`, `LastIP`) VALUES ('"
 				+ player.getUniqueId().toString() + "', '" + player.getName() + "', '" + lastIp + "');");
 
+        Bukkit.broadcastMessage(main.color("&7► " + player.getName() + " &ejoined &b&lMinezone &efor the first time!"));
 		return newData;
 	}
 
