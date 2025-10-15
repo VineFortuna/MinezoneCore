@@ -154,7 +154,7 @@ public enum GameLootDrops {
 	            
 	        case FIRE_FLOWER:
 	        	 item = ItemHelper.setDetails(new ItemStack(Material.RED_ROSE, 3),
-		                    "&c&lFire &e&lFlower",
+		                    "&c&lFIRE &e&lFLOWER",
 		                    "&7Throw a fire flower at an enemy to set", "&7them on fire!", "", "&2&lUNCOMMON");
 	        	 break;
 
