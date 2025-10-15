@@ -106,7 +106,46 @@ public class GameManager implements Listener, PluginMessageListener {
         }
     }
 
-	// EVENTS:
+    public boolean checkIfFull(Player player, GameInstance game, GameType type) {
+        if (type == GameType.DUEL && game.players.size() == 2) {
+            return true;
+        } else if (type == GameType.CLASSIC && game.players.size() == 6) {
+            if (!player.hasPermission("scb.bypassFull")) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /*
+    * This function lists active games that are in waiting/lobby state
+     */
+    public GameInstance getLobbyActiveGames(Player player, GameType type) {
+        for (Map.Entry<Maps, GameInstance> entry : gameMap.entrySet()) {
+            GameInstance gi = entry.getValue();
+            if (gi.state == GameState.WAITING && gi.gameType == type && !checkIfFull(player, gi, type)) {
+                return gi; //Found a game
+            }
+        }
+
+        List<Maps> candidates = new ArrayList<>();
+        for (Maps m : Maps.values()) {
+            if (m.getGamemode() == type && !gameMap.containsKey(m)) {
+                candidates.add(m);
+            }
+        }
+
+        if (candidates.isEmpty())
+            return null;
+
+        Maps map = candidates.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(candidates.size()));
+        GameInstance newGame = new GameInstance(this, map);
+        gameMap.put(map, newGame);
+        return newGame;
+    }
+
+    // EVENTS:
 
 	@EventHandler
 	public void Target(EntityTargetLivingEntityEvent event) {
