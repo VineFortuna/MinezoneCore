@@ -17,13 +17,13 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
 
-public class ClassRewardsGUI implements InventoryProvider {
+public class ClassMasteryGUI implements InventoryProvider {
     
     public Core main;
     public ClassType type;
     public SmartInventory inv;
     
-    public ClassRewardsGUI(Core main, ClassType type, SmartInventory parent) {
+    public ClassMasteryGUI(Core main, ClassType type, SmartInventory parent) {
         inv = SmartInventory.builder().id("myInventory").provider(this).size(3, 9)
                 .title(main.color("&8&l" + type.name() + " Mastery")).parent(parent).build();
         this.main = main;
@@ -32,246 +32,73 @@ public class ClassRewardsGUI implements InventoryProvider {
     
     @Override
     public void init(Player player, InventoryContents contents) {
-    
+
+        // Fill
         contents.fill(ClickableItem.of(ItemHelper.setDetails(
                 new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
-    
+
         PlayerData data = main.getDataManager().getPlayerData(player);
         ClassDetails details = data.playerClasses.get(type.getID());
-        int played = details.gamesPlayed + 2 * details.gamesWon;
+        int played = details.gamesPlayed + (2 * details.gamesWon); // played = 1 point, won = 2 points
     
-        /*First reward [10] 10 tokens & 20 xp
+        /* First reward [10] 10 tokens & 20 xp
         Second reward [25] 25 tokens & 50 xp
         Third Reward [50] 50 tokens & 100 xp
         Fourth Reward [75] 75 tokens & 150 xp
-        Fifth Reward [100] Alternative Head.*/
-        
-        ItemStack tokens1 = ItemHelper.setDetails(new ItemStack(Material.GOLD_PLATE), main.color("&e&l10 Tokens & 20 EXP"));
-        if (played < 10) {
-            ItemHelper.setLore(tokens1, Arrays.asList("", main.progressBar(played, 10, 25)));
-        } else {
-            if (details.reward1) {
-                ItemHelper.setLore(tokens1, Arrays.asList("", main.color("&a&lCLAIMED")));
-                ItemHelper.setGlowing(tokens1, true);
-            } else {
-                ItemHelper.setLore(tokens1, Arrays.asList("", main.color("&eClick to claim reward")));
-            }
-        }
-        ItemStack tokens2 = ItemHelper.setDetails(new ItemStack(Material.GOLD_NUGGET), main.color("&e&l25 Tokens & 50 EXP"));
-        if (played < 25) {
-            ItemHelper.setLore(tokens2, Arrays.asList("", main.progressBar(played, 25, 25)));
-        } else {
-            if (details.reward2) {
-                ItemHelper.setLore(tokens2, Arrays.asList("", main.color("&a&lCLAIMED")));
-                ItemHelper.setGlowing(tokens2, true);
-            } else {
-                ItemHelper.setLore(tokens2, Arrays.asList("", main.color("&eClick to claim reward")));
-            }
-        }
-        ItemStack tokens3 = ItemHelper.setDetails(new ItemStack(Material.GOLD_INGOT), main.color("&e&l50 Tokens & 100 EXP"));
-        if (played < 50) {
-            ItemHelper.setLore(tokens3, Arrays.asList("", main.progressBar(played, 50, 25)));
-        } else {
-            if (details.reward3) {
-                ItemHelper.setLore(tokens3, Arrays.asList("", main.color("&a&lCLAIMED")));
-                ItemHelper.setGlowing(tokens3, true);
-            } else {
-                ItemHelper.setLore(tokens3, Arrays.asList("", main.color("&eClick to claim reward")));
-            }
-        }
-        ItemStack tokens4 = ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK), main.color("&e&l75 Tokens & 150 EXP"));
-        if (played < 75) {
-            ItemHelper.setLore(tokens4, Arrays.asList("", main.progressBar(played, 75, 25)));
-        } else {
-            if (details.reward4) {
-                ItemHelper.setLore(tokens4, Arrays.asList("", main.color("&a&lCLAIMED")));
-                ItemHelper.setGlowing(tokens4, true);
-            } else {
-                ItemHelper.setLore(tokens4, Arrays.asList("", main.color("&eClick to claim reward")));
-            }
-        }
-        
-        ItemStack head = ItemHelper.setDetails(headReward(type), main.color("&e&lAlternate Head"));
-        if (played < 100) {
-            ItemHelper.setLore(head, Arrays.asList("", main.progressBar(played, 100, 25)));
-        } else {
-            if (details.reward5) {
-                ItemHelper.setLore(head, Arrays.asList("", main.color("&a&lENABLED"), main.color("&eClick to disable")));
-                ItemHelper.setGlowing(head, true);
-            } else {
-                ItemHelper.setLore(head, Arrays.asList("", main.color("&eClick to enable")));
-            }
-        }
-        
-        contents.set(1, 1,
-                ClickableItem.of(tokens1, e -> {
-                    if (played >= 10) {
-                        if (!details.reward1) {
-                            details.reward1 = true;
-                            player.sendMessage(
-                                    main.color("&d&l(!) &rYou have earned &a10 Tokens & 20 EXP!"));
-                            data.tokens += 10;
-                            data.exp += 20;
-                            if (data.exp >= 2500) {
-                                data.level++;
-                                data.exp -= 2500;
-                                player.sendMessage("Level upgraded to " + data.level + "!");
-                            }
-                            if (main.getGameManager().GetInstanceOfPlayer(player) == null)
-                                main.getScoreboardManager().lobbyBoard(player);
-                            player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
-                            details.hasUpdated = true;
-                            main.getDataManager().saveData(data);
-                            inv.open(player);
-                        }
-                    }
-                    }));
-        contents.set(1, 2,
-                ClickableItem.of(tokens2, e -> {
-                    if (played >= 25) {
-                        if (!details.reward2) {
-                            details.reward2 = true;
-                            player.sendMessage(
-                                    main.color("&d&l(!) &rYou have earned &a25 Tokens & 50 EXP!"));
-                            data.tokens += 25;
-                            data.exp += 50;
-                            if (data.exp >= 2500) {
-                                data.level++;
-                                data.exp -= 2500;
-                                player.sendMessage("Level upgraded to " + data.level + "!");
-                            }
-                            if (main.getGameManager().GetInstanceOfPlayer(player) == null)
-                                main.getScoreboardManager().lobbyBoard(player);
-                            player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
-                            details.hasUpdated = true;
-                            main.getDataManager().saveData(data);
-                            inv.open(player);
-                        }
-                    }
-                }));
-        contents.set(1, 3,
-                ClickableItem.of(tokens3, e -> {
-                    if (played >= 50) {
-                        if (!details.reward3) {
-                            details.reward3 = true;
-                            player.sendMessage(
-                                    main.color("&d&l(!) &rYou have earned &a50 Tokens & 100 EXP!"));
-                            data.tokens += 50;
-                            data.exp += 100;
-                            if (data.exp >= 2500) {
-                                data.level++;
-                                data.exp -= 2500;
-                                player.sendMessage("Level upgraded to " + data.level + "!");
-                            }
-                            if (main.getGameManager().GetInstanceOfPlayer(player) == null)
-                                main.getScoreboardManager().lobbyBoard(player);
-                            player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
-                            details.hasUpdated = true;
-                            main.getDataManager().saveData(data);
-                            inv.open(player);
-                        }
-                    }
-                }));
-        contents.set(1, 4,
-                ClickableItem.of(tokens4, e -> {
-                    if (played >= 75) {
-                        if (!details.reward4) {
-                            details.reward4 = true;
-                            player.sendMessage(
-                                    main.color("&d&l(!) &rYou have earned &a75 Tokens & 150 EXP!"));
-                            data.tokens += 75;
-                            data.exp += 150;
-                            if (data.exp >= 2500) {
-                                data.level++;
-                                data.exp -= 2500;
-                                player.sendMessage("Level upgraded to " + data.level + "!");
-                            }
-                            if (main.getGameManager().GetInstanceOfPlayer(player) == null)
-                                main.getScoreboardManager().lobbyBoard(player);
-                            player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
-                            details.hasUpdated = true;
-                            main.getDataManager().saveData(data);
-                            inv.open(player);
-                        }
-                    }
-                }));
-        contents.set(1, 5,
-                ClickableItem.of(head, e -> {
-                    if (played >= 100) {
-                        if (!details.reward5) {
-                            details.reward5 = true;
-                            player.sendMessage(
-                                    main.color("&2&l(!) &rEnabled alternate head for " + type.getTag()));
-                        } else {
-                            details.reward5 = false;
-                            player.sendMessage(
-                                    main.color("&2&l(!) &rDisabled alternate head for " + type.getTag()));
-                        }
-                        player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 2);
-                        details.hasUpdated = true;
-                        main.getDataManager().saveData(data);
-                        inv.open(player);
-                    }
-                }));
+        Fifth Reward [100] Alternate Head */
 
-        for (int i = 0; i < 5; i++) {
+        // Reward setup
+        Reward[] rewards = new Reward[]{
+                new Reward(10, 10, 20, Material.GOLD_PLATE, 1),
+                new Reward(25, 25, 50, Material.GOLD_NUGGET, 2),
+                new Reward(50, 50, 100, Material.GOLD_INGOT, 3),
+                new Reward(75, 75, 150, Material.GOLD_BLOCK, 4),
+                new Reward(100, 0, 0, null, 5) // Alternate head
+        };
+
+        // Create clickable rewards
+        for (int i = 0; i < rewards.length; i++) {
+            Reward r = rewards[i];
+            ItemStack item = (i < 4)
+                    ? createRewardItem(player, data, details, played, r)
+                    : createAltHeadItem(player, details, played);
+
+            int column = i + 1;
+            contents.set(1, column, ClickableItem.of(item, e -> handleRewardClick(player, data, details, r, played)));
+        }
+
+        // Bottom indicator row
+        for (int i = 0; i < rewards.length; i++) {
+            Reward r = rewards[i];
+            boolean claimed = r.isClaimed(details);
+            boolean claimable = played >= r.required;
+
             ItemStack pane;
-            String name;
-            boolean claimed = false;
-            boolean claimable = false;
-
-            switch (i) {
-                case 0: // Reward 1
-                    claimed = details.reward1;
-                    claimable = played >= 10;
-                    break;
-                case 1:
-                    claimed = details.reward2;
-                    claimable = played >= 25;
-                    break;
-                case 2:
-                    claimed = details.reward3;
-                    claimable = played >= 50;
-                    break;
-                case 3:
-                    claimed = details.reward4;
-                    claimable = played >= 75;
-                    break;
-                case 4:
-                    claimed = details.reward5;
-                    claimable = played >= 100;
-                    break;
-            }
-
-            // Determine color and name
             if (i < 4) {
-                if (claimed)
-                    pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 5); // Lime
-                else if (claimable)
-                    pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 4); // Yellow
-                else
-                    pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14); // Red
-
+                pane = new ItemStack(Material.STAINED_GLASS_PANE, 1,
+                        (short) (claimed ? 5 : claimable ? 4 : 14)); // lime / yellow / red
             } else {
-                // Alt head indicator
-                if (claimable) {
-                    if (claimed)
-                        pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 5); // Lime (enabled)
-                    else
-                        pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 4); // Yellow (disabled)
-                } else {
-                    pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14); // Red (locked)
-                }
+                // Alternate head indicator
+                if (claimable)
+                    pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) (claimed ? 5 : 4));
+                else
+                    pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 14);
             }
 
             ItemHelper.setDetails(pane, " ", "");
             contents.set(2, i + 1, ClickableItem.empty(pane));
         }
 
+        // Mastery info
         contents.set(1, 7, ClickableItem.of(
-                ItemHelper.setDetails(new ItemStack(Material.PAPER), "&a&lMastery Points", "&7When using this class:",
-                        "&a- Match played: &r+1 point", "&a- Match won: &r+2 points"), e -> {
+                ItemHelper.setDetails(new ItemStack(Material.PAPER),
+                        "&a&lMastery Points",
+                        "&7When using this class:",
+                        "&a- Match played: &r+1 point",
+                        "&a- Match won: &r+2 points"), e -> {
                 }));
+
+        // Back button
         contents.set(2, 8, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
                     inv.getParent().get().open(player);
@@ -282,7 +109,73 @@ public class ClassRewardsGUI implements InventoryProvider {
     public void update(Player player, InventoryContents contents) {
     
     }
-    
+
+    private ItemStack createRewardItem(Player player, PlayerData data, ClassDetails details, int played, Reward r) {
+        ItemStack item = ItemHelper.setDetails(new ItemStack(r.material),
+                main.color("&e&l" + r.tokenReward + " Tokens & " + r.expReward + " EXP"));
+
+        if (played < r.required) {
+            ItemHelper.setLore(item, Arrays.asList("", main.progressBar(played, r.required, 25)));
+        } else if (r.isClaimed(details)) {
+            ItemHelper.setLore(item, Arrays.asList("", main.color("&a&lCLAIMED")));
+            ItemHelper.setGlowing(item, true);
+        } else {
+            ItemHelper.setLore(item, Arrays.asList("", main.color("&eClick to claim reward")));
+        }
+        return item;
+    }
+
+    private ItemStack createAltHeadItem(Player player, ClassDetails details, int played) {
+        ItemStack head = ItemHelper.setDetails(headReward(type), main.color("&e&lAlternate Head"));
+        if (played < 100) {
+            ItemHelper.setLore(head, Arrays.asList("", main.progressBar(played, 100, 25)));
+        } else if (details.reward5) {
+            ItemHelper.setLore(head, Arrays.asList("", main.color("&a&lENABLED"), main.color("&eClick to disable")));
+            ItemHelper.setGlowing(head, true);
+        } else {
+            ItemHelper.setLore(head, Arrays.asList("", main.color("&eClick to enable")));
+        }
+        return head;
+    }
+
+    private void handleRewardClick(Player player, PlayerData data, ClassDetails details, Reward r, int played) {
+
+        // Alt head toggle
+        if (r.material == null) {
+            if (played >= 100) {
+                boolean enabled = !r.isClaimed(details);
+                r.setClaimed(details, enabled);
+                player.sendMessage(main.color("&2&l(!) &r" + (enabled ? "Enabled" : "Disabled")
+                        + " alternate head for " + type.getTag()));
+                player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 2);
+                details.hasUpdated = true;
+                main.getDataManager().saveData(data);
+                inv.open(player);
+            }
+            return;
+        }
+
+        // Token/EXP rewards
+        if (played >= r.required && !r.isClaimed(details)) {
+            r.setClaimed(details, true);
+            player.sendMessage(main.color("&d&l(!) &rYou have earned &a" + r.tokenReward +
+                    " Tokens & " + r.expReward + " EXP!"));
+            data.tokens += r.tokenReward;
+            data.exp += r.expReward;
+            if (data.exp >= 2500) {
+                data.level++;
+                data.exp -= 2500;
+                player.sendMessage("Level upgraded to " + data.level + "!");
+            }
+            if (main.getGameManager().GetInstanceOfPlayer(player) == null)
+                main.getScoreboardManager().lobbyBoard(player);
+            player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
+            details.hasUpdated = true;
+            main.getDataManager().saveData(data);
+            inv.open(player);
+        }
+    }
+
     public static ItemStack headReward(ClassType type) {
         switch (type) {
             case Cactus:
@@ -425,3 +318,57 @@ public class ClassRewardsGUI implements InventoryProvider {
         return ItemHelper.create(Material.BARRIER);
     }
 }
+
+class Reward {
+    int required;
+    int tokenReward;
+    int expReward;
+    Material material;
+    int rewardIndex; // 1–5
+
+    Reward(int required, int tokenReward, int expReward, Material material, int rewardIndex) {
+        this.required = required;
+        this.tokenReward = tokenReward;
+        this.expReward = expReward;
+        this.material = material;
+        this.rewardIndex = rewardIndex;
+    }
+
+    boolean isClaimed(ClassDetails details) {
+        switch (rewardIndex) {
+            case 1:
+                return details.reward1;
+            case 2:
+                return details.reward2;
+            case 3:
+                return details.reward3;
+            case 4:
+                return details.reward4;
+            case 5:
+                return details.reward5;
+            default:
+                return false;
+        }
+    }
+
+    void setClaimed(ClassDetails details, boolean value) {
+        switch (rewardIndex) {
+            case 1:
+                details.reward1 = value;
+                break;
+            case 2:
+                details.reward2 = value;
+                break;
+            case 3:
+                details.reward3 = value;
+                break;
+            case 4:
+                details.reward4 = value;
+                break;
+            case 5:
+                details.reward5 = value;
+                break;
+        }
+    }
+}
+
