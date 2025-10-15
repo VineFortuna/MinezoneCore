@@ -90,7 +90,7 @@ public class DonorClassesGUI implements InventoryProvider {
 								player.sendMessage(main.color("&2&l============================================="));
 								inv.close(player);
 							} else if (e.isRightClick()) {
-								new ClassRewardsGUI(main, type, inv).inv.open(player);
+								new ClassMasteryGUI(main, type, inv).inv.open(player);
 							}
 						} else {
 							player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD
