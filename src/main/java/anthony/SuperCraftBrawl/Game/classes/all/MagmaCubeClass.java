@@ -5,7 +5,6 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
-import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
@@ -99,45 +98,24 @@ public class MagmaCubeClass extends BaseClass {
 								amount--;
 								item.setAmount(amount);
 							}
-							/*ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
+							ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
 								@Override
 								public void onHit(Player hit) {
 									Location hitLoc = this.getBaseProj().getEntity().getLocation();
 									player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
 									MagmaCube en = (MagmaCube) player.getWorld().spawnCreature(hitLoc,
 											EntityType.MAGMA_CUBE);
-									en.setSize(3);
-									en.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW
-											+ "MagmaCube");
-									en.setCustomNameVisible(true);
-
-								}
-
-							}, ItemHelper.createMonsterEgg(EntityType.MAGMA_CUBE, 1));
-							instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-									player.getLocation().getDirection().multiply(2.0D));*/
-							ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
-								@Override
-								public void onHit(Player hit) {
-									Location hitLoc = this.getBaseProj().getEntity().getLocation();
-
-									// Spawning Slime
-									Slime mob = (Slime) player.getWorld().spawnEntity(hitLoc, EntityType.MAGMA_CUBE);
 									for (int i = 0; i < 50; i++) {
-										if (mob.isDead() || !mob.isValid()) {
-											mob = (Slime) player.getWorld().spawnEntity(hitLoc, EntityType.MAGMA_CUBE);
+										if (en.isDead() || !en.isValid()) {
+											en = (MagmaCube) player.getWorld().spawnEntity(hitLoc, EntityType.MAGMA_CUBE);
 										} else {
 											break;
 										}
 									}
-									mob.setRemoveWhenFarAway(false);
-									// Setting Mob Name to owner's
-									mob.setCustomName(ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW
+									en.setSize(3);
+									en.setCustomName(ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW
 											+ "MagmaCube");
-									// Setting Custom name visible
-									mob.setCustomNameVisible(true);
-									// Setting Slime Size
-									mob.setSize(3);
+									en.setCustomNameVisible(true);
 								}
 
 							}, ItemHelper.createMonsterEgg(EntityType.MAGMA_CUBE, 1));
