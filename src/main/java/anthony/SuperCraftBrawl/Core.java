@@ -558,7 +558,7 @@ public class Core extends JavaPlugin implements Listener {
                 "",
                 loc,
                 null, null,
-                (clicker) -> new StatsGUI(this, clicker).inv.open(clicker),
+                (clicker) -> new StatsGUI(this).inv.open(clicker),
                 null
         )
                 .mimicViewerSkin()
