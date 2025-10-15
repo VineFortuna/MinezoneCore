@@ -5,7 +5,7 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.classes.all.SpiderClass;
 import anthony.SuperCraftBrawl.Timer;
-import anthony.SuperCraftBrawl.gui.ClassRewardsGUI;
+import anthony.SuperCraftBrawl.gui.ClassMasteryGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
@@ -246,7 +246,7 @@ public abstract class BaseClass {
 		PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(player);
 		ClassDetails details = data.playerClasses.get(this.getType().getID());
 		if (details != null && details.reward5)
-			return ClassRewardsGUI.headReward(this.getType());
+			return ClassMasteryGUI.headReward(this.getType());
 		return helmet;
 	}
 
