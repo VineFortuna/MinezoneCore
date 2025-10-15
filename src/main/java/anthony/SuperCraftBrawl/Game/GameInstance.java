@@ -268,8 +268,8 @@ public class GameInstance {
 					player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + map.toString(),
 							"" + ChatColor.GREEN + "Your class will be randomly selected!");
 				else
-					player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + map.toString(),
-							"" + ChatColor.GREEN + "Choose your class!");
+					player.sendTitle(color("&b&l" + map.toString()),
+							color("&bChoose your class!"));
 
 				listener.resetDoubleJump(player);
 				listener.resetArmor(player);
