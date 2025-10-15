@@ -196,7 +196,7 @@ public class GameManager implements Listener, PluginMessageListener {
 				if (ownerE.equals(ownerT))
 					event.setCancelled(true);
 			}
-		} else if (event.getTarget() == null) {
+		} else if (event.getTarget() == null && event.getEntity() instanceof Creature) {
 			Creature creature = (Creature) event.getEntity();
 			Player player = getMobOwner(creature);
 			GameInstance i = this.GetInstanceOfPlayer(player);
