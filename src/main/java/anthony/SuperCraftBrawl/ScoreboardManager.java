@@ -1,6 +1,8 @@
 package anthony.SuperCraftBrawl;
 
+import java.text.NumberFormat;
 import java.util.HashMap;
+import java.util.Locale;
 
 import org.bukkit.entity.Player;
 
@@ -20,77 +22,93 @@ public class ScoreboardManager {
 		this.main = main;
 	}
 
-	public void lobbyBoard(Player player) {
-		FastBoard board = new FastBoard(player);
-		PlayerData data = main.getDataManager().getPlayerData(player);
-		this.playersLobbyBoard.put(player, board);
-		Rank rank = main.getRankManager().getRank(player);
+    public void lobbyBoard(Player player) {
+        FastBoard board = new FastBoard(player);
+        PlayerData data = main.getDataManager().getPlayerData(player);
+        this.playersLobbyBoard.put(player, board);
+        Rank rank = main.getRankManager().getRank(player);
         String rankName = "";
 
         if (rank != null && rank.getTag() != null)
-		    rankName = rank.getTag();
+            rankName = rank.getTag();
 
-		if (rank == Rank.DEFAULT)
-			rankName = main.color("&7Default");
+        if (rank == Rank.DEFAULT)
+            rankName = main.color("&7Default");
 
-		// EXP settings (tweak if you have a dynamic requirement)
-		// EXP settings (tweak if you have a dynamic requirement)
-		final int expRequired = 2500;
+        // EXP settings (tweak if you have a dynamic requirement)
+        final int expRequired = 2500;
 
-		// Hypixel-style micro bar: 10 tiny squares, with [ ] and % (no space before %)
-		final String expBar = (data == null) ? ChatColor.WHITE + "[]0%" // placeholder when null (won't show long)
-				: Bars.dotsBar(data.exp, expRequired, 10, ChatColor.AQUA, // filled color
-						ChatColor.GRAY, // empty color
-						'■', // filled glyph (try '•' or '▪' if you prefer)
-						'■', // empty glyph
-						true, // showBrackets -> [........]
-						true // showPercent -> ]79%
-				);
+        // Hypixel-style micro bar: 10 tiny squares, with [ ] and % (no space before %)
+        final String expBar = (data == null) ? ChatColor.WHITE + "[]0%" // placeholder when null (won't show long)
+                : Bars.dotsBar(data.exp, expRequired, 10, ChatColor.GREEN, // filled color
+                ChatColor.GRAY, // empty color
+                '■', // filled glyph (try '•' or '▪' if you prefer)
+                '■', // empty glyph
+                true, // showBrackets -> [........]
+                true // showPercent -> ]79%
+        );
 
-		if (main.getCommands() == null) {
-			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + "MINEZONE");
-			if (data != null) {
-				board.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						"" + ChatColor.RESET + ChatColor.BOLD + "Server: " + ChatColor.GRAY + "Lobby-1", "",
-						"" + ChatColor.RESET + ChatColor.BOLD + "Gems: " + ChatColor.GRAY + "0", "",
-						"" + ChatColor.RESET + ChatColor.BOLD + "Rank: " + rankName, "",
-						"" + ChatColor.RESET + ChatColor.BOLD + "Level: " + ChatColor.WHITE + data.level, expBar, // ★
-																													// micro
-																													// EXP
-																													// dots
-																													// line
-						"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-						"" + ChatColor.AQUA + "minezone.club");
-			}
-			return;
-		}
+        if (main.getCommands() == null) {
+            board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + "MINEZONE");
+            if (data != null) {
+                board.updateLines(
+                        "" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
+                        "" + ChatColor.RESET + ChatColor.BOLD + "Server: " + ChatColor.GRAY + "Lobby-1",
+                        "",
+                        "" + ChatColor.RESET + ChatColor.BOLD + "Gems: " + ChatColor.GRAY + "0",
+                        "",
+                        "" + ChatColor.RESET + ChatColor.BOLD + "Rank: " + rankName,
+                        "",
+                        "" + ChatColor.RESET + ChatColor.BOLD + "Level: " + ChatColor.WHITE + data.level,
+                        expBar,
+                        "" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
+                        "" + ChatColor.AQUA + "minezone.club"
+                );
+            }
+            return;
+        }
 
-		if (!main.tournament) {
-			String gameServer = "MINEZONE";
-			board.updateTitle(main.color("&e&l" + gameServer));
-			if (data != null) {
-				board.updateLines("",
-						main.color("&fTokens: &a" + data.tokens), "", main.color("&fRank: &r" + rankName), "",
-						// shows ✧ plus the level like your existing line
-						main.color("&fLevel: &f" + data.checkPlayerLevel(player, data) + "✧" + data.level), expBar,
+        if (!main.tournament) {
+            String gameServer = "MINEZONE";
+            board.updateTitle(main.color("&e&l" + gameServer));
+            if (data != null) {
+                board.updateLines(
+                        "",
+                        main.color("&fTokens: &a" + fmt(data.tokens)),  // ← formatted with commas
+                        "",
+                        main.color("&fRank: &r" + rankName),
+                        "",
+                        // shows ✧ plus the level like your existing line
+                        main.color("&fLevel: &f" + data.checkPlayerLevel(player, data) + "✧" + data.level),
+                        expBar,
+                        "",
+                        main.color("&eminezone.club")
+                );
+            }
+        } else {
+            board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + "MINEZONE");
+            if (data != null) {
+                board.updateLines(
+                        "",
+                        "" + ChatColor.WHITE + ChatColor.BOLD + "Tokens: " + ChatColor.GRAY + fmt(data.tokens), // ← commas
+                        "",
+                        "" + ChatColor.WHITE + ChatColor.BOLD + "Rank: " + rankName,
+                        "",
+                        "" + ChatColor.WHITE + ChatColor.BOLD + "Points: " + ChatColor.GRAY + fmt(data.points),   // ← commas
+                        "",
+                        "" + ChatColor.AQUA + "minezone.club"
+                );
+            }
+        }
+    }
 
-						"",
-						main.color("&eminezone.club"));
-			}
-		} else {
-			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + "MINEZONE");
-			if (data != null) {
-				board.updateLines("",
-						"" + ChatColor.WHITE + ChatColor.BOLD + "Tokens: " + ChatColor.GRAY + data.tokens, "",
-						"" + ChatColor.WHITE + ChatColor.BOLD + "Rank: " + rankName, "",
-						"" + ChatColor.WHITE + ChatColor.BOLD + "Points: " + ChatColor.GRAY + data.points,
-						"",
-						"" + ChatColor.AQUA + "minezone.club");
-			}
-		}
-	}
+    // Add inside the same class (e.g., near other helpers):
+    private String fmt(long n) {
+        return NumberFormat.getIntegerInstance(Locale.US).format(n);
+    }
 
-	/**
+
+    /**
 	 * This function sets the waiting lobby scoreboard for when a player joins the
 	 * game
 	 * 
@@ -102,22 +120,20 @@ public class ScoreboardManager {
 		game.boards.put(player, board);
 
 		if (game.getMap() != null) {
-			board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + game.getMap());
-			board.updateLines("", "" + ChatColor.BOLD + "Game Mode:", " " + ChatColor.GRAY + game.gameType.getName(),
-					"", "" + ChatColor.RESET + ChatColor.BOLD + "Class:", main.color(" &cR&6a&en&ad&bo&3m"), "",
-					"" + ChatColor.RESET + ChatColor.BOLD + "Players:",
-					" " + ChatColor.GRAY
-							+ (game.getMap().GetInstance().gameType == GameType.FRENZY
-									? "" + ChatColor.GRAY + game.players.size() + "/" + game.gameType.getMaxPlayers()
-									: "")
-							+ (game.getMap().GetInstance().gameType == GameType.CLASSIC
-									? "" + ChatColor.GRAY + game.players.size() + "/" + game.gameType.getMaxPlayers()
-									: "")
-							+ (game.getMap().GetInstance().gameType == GameType.DUEL
-									? "" + ChatColor.GRAY + game.players.size() + "/" + game.gameType.getMaxPlayers()
-									: ""),
-					"", "" + ChatColor.RESET + ChatColor.BOLD + "Status:",
-					"" + ChatColor.RESET + ChatColor.GRAY + ChatColor.ITALIC + " Waiting...");
+			board.updateTitle(main.color("&e&l" + game.getMap()));
+			board.updateLines("", main.color("&fMode: &e" + game.gameType.getName()),
+					"", main.color("&fClass: &cR&6a&en&ad&bo&3m"), "",
+					main.color("Players: &e"
+                            + (game.getMap().GetInstance().gameType == GameType.FRENZY
+                            ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.gameType.getMaxPlayers()
+                            : "")
+                            + (game.getMap().GetInstance().gameType == GameType.CLASSIC
+                            ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.gameType.getMaxPlayers()
+                            : "")
+                            + (game.getMap().GetInstance().gameType == GameType.DUEL
+                            ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.gameType.getMaxPlayers()
+                            : "")),
+					"", main.color("&fStarting In: &e&oWaiting"), "", main.color("&eminezone.club"));
 
 			game.boards.get(player).updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + game.getMap().toString());
 		} else {
@@ -136,11 +152,28 @@ public class ScoreboardManager {
 			int playerSize = game.players.size();
 			int maxSize = game.gameType.getMaxPlayers();
 
-			game.boards.get(player).updateLine(8,
-					" " + ChatColor.GRAY
-							+ (gameType == GameType.FRENZY ? "" + ChatColor.GRAY + playerSize + "/" + maxSize : "")
-							+ (gameType == GameType.CLASSIC ? "" + ChatColor.GRAY + playerSize + "/" + maxSize : "")
-							+ (gameType == GameType.DUEL ? "" + ChatColor.GRAY + playerSize + "/" + maxSize : ""));
+			game.boards.get(player).updateLine(5,
+                    main.color("Players: &e"
+                            + (game.getMap().GetInstance().gameType == GameType.FRENZY
+                            ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.gameType.getMaxPlayers()
+                            : "")
+                            + (game.getMap().GetInstance().gameType == GameType.CLASSIC
+                            ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.gameType.getMaxPlayers()
+                            : "")
+                            + (game.getMap().GetInstance().gameType == GameType.DUEL
+                            ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.gameType.getMaxPlayers()
+                            : "")));
 		}
 	}
+    public void removeLobbyBoard(Player p) {
+        FastBoard b = playersLobbyBoard.remove(p);
+        if (b != null) b.delete();
+    }
+
+    public void removeAllBoards() {
+        for (FastBoard b : playersLobbyBoard.values()) b.delete();
+        playersLobbyBoard.clear();
+    }
+
+
 }
