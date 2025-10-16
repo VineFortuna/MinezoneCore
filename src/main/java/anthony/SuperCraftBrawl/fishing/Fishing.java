@@ -22,7 +22,14 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.FishHook;
+import org.bukkit.entity.Player;
+import org.bukkit.projectiles.ProjectileSource;
 
 import java.util.*;
 
@@ -596,4 +603,39 @@ public class Fishing implements Listener {
         }
     }
 
+    public void cleanup(Player p) {
+        if (p == null) return;
+
+        // Remove any active FishHook shot by this player in any world (safe no-op if none)
+        for (World w : Bukkit.getWorlds()) {
+            for (Entity e : w.getEntitiesByClass(FishHook.class)) {
+                ProjectileSource src = ((FishHook) e).getShooter();
+                if (src instanceof Player && ((Player) src).getUniqueId().equals(p.getUniqueId())) {
+                    e.remove();
+                }
+            }
+        }
+
+        // If you track per-player tasks/sessions in maps, cancel & remove them here.
+        // Example (uncomment/adapt if you have these fields):
+        // BukkitTask task = playerTasks.remove(p.getUniqueId());
+        // if (task != null) task.cancel();
+        // fishingSessions.remove(p.getUniqueId());
+    }
+
+    public void cleanupAll() {
+        // Remove all FishHooks globally (safe no-op if none)
+        for (World w : Bukkit.getWorlds()) {
+            for (Entity e : w.getEntitiesByClass(FishHook.class)) {
+                e.remove();
+            }
+        }
+
+        // If you track any global tasks, cancel them here as well.
+        // Example:
+        // if (tickTask != null) { tickTask.cancel(); tickTask = null; }
+        // playerTasks.values().forEach(BukkitTask::cancel);
+        // playerTasks.clear();
+        // fishingSessions.clear();
+    }
 }
