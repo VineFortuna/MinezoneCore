@@ -122,7 +122,7 @@ public class Parkour implements Listener {
 
 					String formattedTime = formatTimeScoreboard(elapsedMillis);
 
-					b.get(player).updateLine(3, main.color("&r&lTime:&7 " + formattedTime));
+					b.get(player).updateLine(3, main.color("&fTime:&a " + formattedTime));
 				} else {
 					this.cancel();
 					runnables.remove(player);
@@ -137,22 +137,22 @@ public class Parkour implements Listener {
 	public void gameBoard(Player player) {
 		FastBoard b = new FastBoard(player);
 		b.updateTitle(main.color("&e&lPARKOUR"));
-		b.updateLines("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
+		b.updateLines("",
 				main.color(
-						"&r&lCheckpoints: &7" + (checkpoint.containsKey(player) ? checkpoint.get(player) + 1 : 0) +
+						"&fCheckpoints: &a" + (checkpoint.containsKey(player) ? checkpoint.get(player) + 1 : 0) +
 								"/" + players.get(player).getCheckpoints()),
-				"", main.color("&r&lTime:&7 0.0s"),
-				"" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-				main.color("&7minezone.club"));
+				"", main.color("&fTime:&a 0.0s"),
+				"",
+				main.color("&eminezone.club"));
 		this.b.put(player, b);
 	}
 
 	public void gameItems(Player player) {
 		player.getInventory().setItem(0,
-				ItemHelper.setDetails(new ItemStack(Material.BEACON), main.color("&bReturn to Checkpoint")));
+				ItemHelper.setDetails(new ItemStack(Material.BEACON), main.color("&eReturn to Checkpoint")));
 		player.getInventory().setItem(1,
-				ItemHelper.setDetails(new ItemStack(Material.SEA_LANTERN), main.color("&bRestart")));
-		player.getInventory().setItem(2, ItemHelper.setDetails(new ItemStack(Material.BARRIER), main.color("&cLeave")));
+				ItemHelper.setDetails(new ItemStack(Material.SEA_LANTERN), main.color("&eRestart")));
+		player.getInventory().setItem(2, ItemHelper.setDetails(new ItemStack(Material.BARRIER), main.color("&eLeave")));
 	}
 
 	public boolean hasPlayer(Player player) {
@@ -192,7 +192,7 @@ public class Parkour implements Listener {
 							long start = startTime.getOrDefault(player, currTime);
 							long elapsedTime = currTime - start;
 
-							b.get(player).updateLine(1, main.color("&r&lCheckpoints: &7" + (newCheckpointIndex + 1) + "/"
+							b.get(player).updateLine(1, main.color("&fCheckpoints: &a" + (newCheckpointIndex + 1) + "/"
 									+ players.get(player).getCheckpoints()));
 							player.sendMessage(main.color("&e&l(!) &rYou reached checkpoint &e#" + (newCheckpointIndex + 1) + "&r in &a" +
 									(formatTime(elapsedTime))));
@@ -274,7 +274,6 @@ public class Parkour implements Listener {
 
 	public void removePlayer(Player player) {
 		removeHolograms(player, players.get(player));
-
 		this.startTime.remove(player);
 		this.runnables.remove(player);
 		this.checkpoint.remove(player);

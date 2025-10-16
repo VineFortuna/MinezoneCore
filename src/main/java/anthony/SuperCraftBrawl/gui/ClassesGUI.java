@@ -85,7 +85,7 @@ public class ClassesGUI implements InventoryProvider {
 
 								if (instance != null && instance.state == GameState.WAITING) {
 									if (!data.customIntegers.isEmpty()) {
-										instance.boards.get(player).updateLine(5, " " + ChatColor.GRAY + "Random Fav");
+										instance.boards.get(player).updateLine(3, main.color("&fClass: &eRandom Fav"));
 										instance.favClassSelection.add(player);
                                         instance.classSelection.remove(player);
 										player.sendMessage(

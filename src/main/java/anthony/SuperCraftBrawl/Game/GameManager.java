@@ -145,6 +145,31 @@ public class GameManager implements Listener, PluginMessageListener {
         return newGame;
     }
 
+    public void shootProjectile(GameInstance instance, Player player, double dmg, Material mat, Sound s, int volume, Effect e, int pitch) {
+        ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
+            @Override
+            public void onHit(Player hit) {
+                if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
+                    Location hitLoc = this.getBaseProj().getEntity().getLocation();
+
+                    for (Player gamePlayer : this.getNearby(3.0)) {
+                        EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer, DamageCause.VOID, dmg);
+                        instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+                        gamePlayer.damage(dmg, player);
+                    }
+                   for (Player gamePlayer : instance.players) {
+                        gamePlayer.playSound(hitLoc, s, volume, pitch);
+                        gamePlayer.playEffect(hitLoc, e, 1);
+                    }
+                }
+
+            }
+
+        }, new ItemStack(mat));
+        instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+                player.getLocation().getDirection().multiply(2.0D));
+    }
+
     // EVENTS:
 
 	@EventHandler
@@ -1734,13 +1759,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			player.setGameMode(GameMode.ADVENTURE); // Edit if needed
 			player.spigot().setCollidesWithEntities(false);
 			player.getInventory().clear();
-			ItemStack spec = ItemHelper.setDetails(new ItemStack(Material.COMPASS),
-					"" + ChatColor.GREEN + "Spectate a Player",
-					ChatColor.GRAY + "Click to Spectate a specific player!");
-			player.getInventory().setItem(0, spec);
-			ItemStack leave = ItemHelper.setDetails(new ItemStack(Material.BARRIER), "" + ChatColor.RED + "Leave",
-					ChatColor.GRAY + "Click to leave game");
-			player.getInventory().setItem(8, leave);
+			main.getLobbyItems().spectatorItems(player);
 			break;
 
 		case ALREADY_IN:
