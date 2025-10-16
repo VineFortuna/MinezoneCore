@@ -18,6 +18,7 @@ import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
 import anthony.util.ItemHelper;
 import fr.mrmicky.fastboard.FastBoard;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
@@ -32,6 +33,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.*;
 import org.bukkit.util.Vector;
 
@@ -86,8 +88,10 @@ public class GameInstance {
 	public List<Player> favClassSelection = new ArrayList<>();
 	public List<ClassType> classList = generateClassList();
 	private SignManager sm;
+    private final List<BukkitTask> instanceTasks = new ArrayList<>();
+    private final Map<Player, List<BukkitTask>> perPlayerTasks = new HashMap<>();
 
-	// DUEL COMMAND
+    // DUEL COMMAND
 	public boolean isDuel = false;
 
 	// Constructors:
@@ -348,7 +352,7 @@ public class GameInstance {
 		classSelection.put(player, type);
 		if (gameType != GameType.FRENZY && gameType != GameType.GUNGAME) {
 			board = boards.get(player);
-			board.updateLine(5, " " + type.getTag());
+			board.updateLine(3,color("&fClass: &e" + type.toString()));
 
 			if (player.hasPermission("scb.chat"))
 				player.setDisplayName("" + player.getName() + " " + type.getTag());
@@ -409,8 +413,15 @@ public class GameInstance {
 			gameStartTime.runTaskTimer(gameManager.getMain(), 0, 20);
 		}
 	}
+    private void broadcastToWorld(World world, String plainMsg, BaseComponent... clickableMsg) {
+        if (world == null) return;
+        for (Player p : world.getPlayers()) {
+            if (plainMsg != null) p.sendMessage(plainMsg);
+            if (clickableMsg != null && clickableMsg.length > 0) p.spigot().sendMessage(clickableMsg);
+        }
+    }
 
-	public void StartGameTimer() {
+    public void StartGameTimer() {
 		SignManager sm = getGameManager().getMain().getSignManager();
 
 		if (gameStartTime == null) {
@@ -446,28 +457,29 @@ public class GameInstance {
 						else
 							mapName = duosMap.toString();
 
-						if (gameType == GameType.FRENZY) {
-							Bukkit.broadcastMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-									+ ChatColor.RESET + ChatColor.GREEN + ChatColor.BOLD + "A " + ChatColor.RESET
-									+ ChatColor.GRAY + ChatColor.ITALIC + "Frenzy " + ChatColor.GREEN + ChatColor.BOLD
-									+ "game on " + ChatColor.RESET + ChatColor.BOLD + mapName + ChatColor.RESET
-									+ ChatColor.GREEN + ChatColor.BOLD + " is starting in 30 seconds.");
-							TextComponent message = new TextComponent(
-									"" + "     " + ChatColor.GREEN + ChatColor.BOLD + "Click here to join!");
-							message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/join " + mapName));
-							Bukkit.spigot().broadcast(message);
-						} else if (gameType == GameType.CLASSIC) {
-							Bukkit.broadcastMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
-									+ ChatColor.RESET + ChatColor.GREEN + ChatColor.BOLD + "A game on "
-									+ ChatColor.RESET + ChatColor.BOLD + mapName + ChatColor.RESET + ChatColor.GREEN
-									+ ChatColor.BOLD + " is starting in 30 seconds.");
-							TextComponent message = new TextComponent(
-									"" + "     " + ChatColor.GREEN + ChatColor.BOLD + "Click here to join!");
-							message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/join " + mapName));
-							Bukkit.spigot().broadcast(message);
-						}
-						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-								+ "All players have joined. Game is now starting!");
+                        World lobby = getGameManager().getMain().getLobbyWorld();
+
+                        TextComponent join = new TextComponent("     " + ChatColor.GREEN + ChatColor.BOLD + "Click here to join!");
+                        join.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/join " + mapName));
+
+                        if (gameType == GameType.FRENZY) {
+                            String msg = ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                    + ChatColor.GREEN + "" + ChatColor.BOLD + "A " + ChatColor.RESET
+                                    + ChatColor.GRAY + "" + ChatColor.ITALIC + "Frenzy " + ChatColor.RESET
+                                    + ChatColor.GREEN + "" + ChatColor.BOLD + "game on " + ChatColor.RESET
+                                    + ChatColor.BOLD + mapName + ChatColor.RESET + ChatColor.GREEN + "" + ChatColor.BOLD
+                                    + " is starting in 30 seconds.";
+                            broadcastToWorld(lobby, msg, join);
+                        } else if (gameType == GameType.CLASSIC) {
+                            String msg = ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                    + ChatColor.GREEN + "" + ChatColor.BOLD + "A game on " + ChatColor.RESET
+                                    + ChatColor.BOLD + mapName + ChatColor.RESET + ChatColor.GREEN + "" + ChatColor.BOLD
+                                    + " is starting in 30 seconds.";
+                            broadcastToWorld(lobby, msg, join);
+                        }
+
+                        TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+								+ "Game is now starting!");
 
 						for (Player player : players)
 							player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1);
@@ -494,8 +506,7 @@ public class GameInstance {
 						if (players.size() >= 2) {
 							for (Player player : players) {
 								FastBoard board = boards.get(player);
-								board.updateLine(11, " " + ChatColor.GRAY + timeToStartSeconds + "s");
-								board.updateLine(10, "" + ChatColor.RESET + ChatColor.BOLD + "Starting In:");
+								board.updateLine(7, color("&fStarting In: &e" + timeToStartSeconds + "s"));
 								if (players.size() >= 2 && ticks > 5)
 									if (!(player.getInventory().contains(votePaper)))
 										player.getInventory().addItem(votePaper);
@@ -825,8 +836,9 @@ public class GameInstance {
 			}
 
 		};
-		runnable.runTaskTimer(gameManager.getMain(), 0, 1);
-		runnables.add(runnable);
+        BukkitTask task = runnable.runTaskTimer(gameManager.getMain(), 0, 1);
+        trackInstanceTask(task);
+        runnables.add(runnable);
 	}
 
 	/**
@@ -933,8 +945,9 @@ public class GameInstance {
 				}
 			}
 		};
-		runnable.runTaskTimer(gameManager.getMain(), 0, 20);
-		runnables.add(runnable);
+        BukkitTask task = runnable.runTaskTimer(gameManager.getMain(), 0, 20);
+        trackInstanceTask(task);
+        runnables.add(runnable);
 	}
 
 	public ItemStack getItemToDrop() {
@@ -968,6 +981,7 @@ public class GameInstance {
 			o.setDisplaySlot(DisplaySlot.SIDEBAR);
 
 			for (Player player : players) {
+                getGameManager().getMain().getScoreboardManager().removeLobbyBoard(player);
 				BaseClass playerClass = classes.get(player);
 				PlayerData data = gameManager.getMain().getDataManager().getPlayerData(player);
 
@@ -1111,6 +1125,12 @@ public class GameInstance {
 					}
 					if (finalBaseClass.getLives() > 0)
 						if (this.ticks == 0) {
+                            if (state != GameState.STARTED || !players.contains(player) || getWinnerList().contains(player)) {
+                                cancel();
+                                player.setAllowFlight(false);
+                                player.setAllowFlight(true);
+                                return;
+                            }
 							player.teleport(GameInstance.this.GetRespawnLoc());
 							player.setGameMode(GameMode.ADVENTURE);
 							player.setHealth(20.0D);
@@ -1154,8 +1174,9 @@ public class GameInstance {
 					this.ticks--;
 				}
 			};
-			runTimer.runTaskTimer(this.gameManager.getMain(), 0L, 20L);
-			this.runnables.add(runTimer);
+            BukkitTask task = runTimer.runTaskTimer(this.gameManager.getMain(), 0L, 20L);
+            trackPerPlayerTask(player, task);
+            this.runnables.add(runTimer);
 
 			player.setHealth(20.0D);
 			player.setAllowFlight(true);
@@ -1429,7 +1450,17 @@ public class GameInstance {
 		}
 	}
 
+    private void cancelTasks() {
+        for (Player p : new ArrayList<>(players)) {
+            cancelPerPlayerTasks(p);
+        }
+        for (Player p : new ArrayList<>(spectators)) {
+            cancelPerPlayerTasks(p);
+        }
+    }
+
 	public void WinGame(List<Player> winners) {
+        cancelTasks();
 		PlayerData data3 = null;
 		checkForMatchMvp();
 		for (Player winner : winners) {
@@ -2019,6 +2050,7 @@ public class GameInstance {
 
 	// UPDATE TO TAKE IN ACCOUNT FOR DUOS
 	public boolean RemovePlayer(Player player) {
+        getGameManager().getMain().getScoreboardManager().removeLobbyBoard(player);
 		BaseClass baseClass = this.classes.remove(player);
 		PlayerData data = this.gameManager.getMain().getDataManager().getPlayerData(player);
 
@@ -2083,8 +2115,7 @@ public class GameInstance {
 
 							FastBoard board = this.boards.get(gamePlayer);
 							updateCountOnBoard();
-							board.updateLine(10, "" + ChatColor.BOLD + "Status:");
-							board.updateLine(11, "" + ChatColor.GRAY + ChatColor.ITALIC + " Waiting...");
+							board.updateLine(7, color("&fStarting In: &e&oWaiting"));
 						}
 					}
 				}
@@ -2175,16 +2206,16 @@ public class GameInstance {
 	private void updateCountOnBoard() {
 		for (Player gamePlayer : this.players) {
 			FastBoard board = this.boards.get(gamePlayer);
-			board.updateLine(8,
-					" " + (((this.map.GetInstance()).gameType == GameType.FRENZY)
-							? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
-							: "")
-							+ (((this.map.GetInstance()).gameType == GameType.CLASSIC)
-							? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
-							: "")
-							+ (((this.map.GetInstance()).gameType == GameType.DUEL)
-							? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers())
-							: ""));
+			board.updateLine(5, color("Players: &e"
+                    + (getMap().GetInstance().gameType == GameType.FRENZY
+                    ? "" + ChatColor.YELLOW + players.size() + "/" + gameType.getMaxPlayers()
+                    : "")
+                    + (getMap().GetInstance().gameType == GameType.CLASSIC
+                    ? "" + ChatColor.YELLOW + players.size() + "/" + gameType.getMaxPlayers()
+                    : "")
+                    + (getMap().GetInstance().gameType == GameType.DUEL
+                    ? "" + ChatColor.YELLOW + players.size() + "/" + gameType.getMaxPlayers()
+                    : "")));
 		}
 	}
 
@@ -2464,4 +2495,73 @@ public class GameInstance {
 				player.removePotionEffect(type.getType());
 		}
 	}
+
+    public void teardown() {
+        // Cancel any repeating tasks started by this instance
+        for (BukkitTask t : instanceTasks) { // keep a List<BukkitTask> instanceTasks you fill as you schedule tasks
+            try { t.cancel(); } catch (Throwable ignored) {}
+        }
+        instanceTasks.clear();
+
+        // Delete any FastBoards you created per-player
+        for (Player p : new ArrayList<>(players)) {
+            try {
+                FastBoard b = boards.remove(p);
+                if (b != null) b.delete();
+            } catch (Throwable ignored) {}
+        }
+        for (FastBoard b : boards.values()) { try { b.delete(); } catch (Throwable ignored) {} }
+        boards.clear();
+
+        // Clear player structures
+        for (Player p : new ArrayList<>(players)) { clearForPlayer(p); }
+        for (Player p : new ArrayList<>(spectators)) { clearForPlayer(p); }
+
+        players.clear();
+        spectators.clear();
+
+        // clear effects/cooldowns/maps you maintain
+        // effects.clear(); cooldowns.clear(); etc.
+    }
+
+    public void clearForPlayer(Player p) {
+        // cancel and forget per-player tasks
+        List<BukkitTask> tasks = perPlayerTasks.remove(p);
+        if (tasks != null) {
+            for (BukkitTask t : tasks) {
+                try { t.cancel(); } catch (Throwable ignored) {}
+            }
+        }
+
+        // clean up that player's FastBoard, if any
+        FastBoard b = boards.remove(p);
+        if (b != null) {
+            try { b.delete(); } catch (Throwable ignored) {}
+        }
+    }
+
+    public void forceRemovePlayer(Player p) {
+        players.remove(p);
+        spectators.remove(p);
+        clearForPlayer(p);
+    }
+
+    private void trackInstanceTask(BukkitTask t) {
+        if (t != null) instanceTasks.add(t);
+    }
+
+    private void trackPerPlayerTask(Player p, BukkitTask t) {
+        if (p == null || t == null) return;
+        perPlayerTasks.computeIfAbsent(p, k -> new ArrayList<>()).add(t);
+        instanceTasks.add(t); // also track globally
+    }
+
+    private void cancelPerPlayerTasks(Player p) {
+        List<BukkitTask> list = perPlayerTasks.remove(p);
+        if (list != null) {
+            for (BukkitTask t : list) {
+                try { t.cancel(); } catch (Throwable ignored) {}
+            }
+        }
+    }
 }

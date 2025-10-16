@@ -24,7 +24,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 public class NPCManager implements Listener {
 
@@ -32,9 +35,9 @@ public class NPCManager implements Listener {
 	private NPCLib npcLib;
 
 	// NPCS HERE:
-	private NPC fishing, scbClassic, scbDuels, socialMedia, parkour;
+    private net.jitse.npclib.api.NPC fishing, scbClassic, scbDuels, socialMedia, parkour;
 
-	public NPCManager(Core main) {
+    public NPCManager(Core main) {
 		this.main = main;
 		this.npcLib = new NPCLib(main);
 		load();
@@ -195,7 +198,30 @@ public class NPCManager implements Listener {
 		// }
 	}
 
-	/*
+    public void shutdown() {
+        net.jitse.npclib.api.NPC[] all = { fishing, scbClassic, scbDuels, socialMedia, parkour };
+
+        for (net.jitse.npclib.api.NPC npc : all) {
+            if (npc == null) continue;
+
+            // Hide from all players first (no-op if already hidden)
+            try {
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    npc.hide(p);
+                }
+            } catch (Throwable ignored) {}
+
+            // Then destroy the underlying NPC
+            try {
+                npc.destroy(); // <-- use destroy(), not despawn()
+            } catch (Throwable ignored) {}
+        }
+
+        // If your NPCLib doesn’t have a disable() method, just don’t call it.
+        // (Nothing else needed here.)
+    }
+
+    /*
 	 * private Main main; private NPCLib npcLib; private List<MapNPC> npcs = new
 	 * ArrayList<>(); private List<FrenzyNPC> npcs2 = new ArrayList<>(); private
 	 * List<DuelNPC> npcs3 = new ArrayList<>(); public List<Maps> npcList = new
