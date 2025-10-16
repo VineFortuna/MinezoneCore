@@ -73,7 +73,7 @@ public final class Bars { //
         sb.append(net.md_5.bungee.api.ChatColor.DARK_GRAY).append(' ');
 
         if (showPercent) {
-            sb.append(ChatColor.AQUA)
+            sb.append(ChatColor.GREEN)
               .append((int) Math.round(pct * 100)).append('%'); // tight "79%"
         }
         return sb.toString();

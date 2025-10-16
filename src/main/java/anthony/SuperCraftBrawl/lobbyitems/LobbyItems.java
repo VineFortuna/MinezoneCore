@@ -58,17 +58,17 @@ public class LobbyItems {
 			player.getInventory().clear();
 
 			ItemStack classes = ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK),
-					"&bClasses &7(Right Click)", "", "&7Click to choose a class");
-			ItemStack cosmetics = ItemHelper.setDetails(new ItemStack(Material.CHEST), "&bCosmetics &7(Right Click)",
+					"&eClasses &7(Right Click)", "", "&7Click to choose a class");
+			ItemStack cosmetics = ItemHelper.setDetails(new ItemStack(Material.CHEST), "&eCosmetics &7(Right Click)",
 					"", "&7Click to open your cosmetics");
 			ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
-			ItemStack leaveGame = ItemHelper.setDetails(new ItemStack(Material.BARRIER), "&bLeave Game &7(Right Click)", "",
+			ItemStack leaveGame = ItemHelper.setDetails(new ItemStack(Material.BARRIER), "&eLeave Game &7(Right Click)", "",
 					"&7Click to leave your game");
 			
 			player.getInventory().setItem(0, classes);
 			player.getInventory().setItem(4, cosmetics);
 			player.getInventory().setItem(7,
-					ItemHelper.setDetails(stats, "&bMy Profile &7(Right Click)", "", "&7Click to see your profile"));
+					ItemHelper.setDetails(stats, "&eMy Profile &7(Right Click)", "", "&7Click to see your profile"));
 			player.getInventory().setItem(8, leaveGame);
 		}
 	}
@@ -87,10 +87,10 @@ public class LobbyItems {
 	 */
 	public void spectatorItems(Player player) {
 		ItemStack spec = ItemHelper.setDetails(new ItemStack(Material.COMPASS),
-				core.color("&bSpectate &7(Right Click)"), "", core.color("&7Click to spectate a player!"));
+				core.color("&eSpectate &7(Right Click)"), "", core.color("&7Click to spectate a player!"));
 		player.getInventory().setItem(0, spec);
 		ItemStack leave = ItemHelper.setDetails(new ItemStack(Material.BARRIER),
-				core.color("&bLeave &7(Right Click)"), "", core.color("&7Click to leave your game"));
+				core.color("&eLeave &7(Right Click)"), "", core.color("&7Click to leave your game"));
 		player.getInventory().setItem(8, leave);
 	}
 

@@ -65,6 +65,31 @@ public class PlayerListener implements Listener {
 		this.c = scoreManager.getNewScoreboard();
 	}
 
+    /*
+    * This function shows the server messages that appear every 5 minutes
+     */
+    public void messages() {
+        Random random = new Random();
+
+        BukkitRunnable runnable = new BukkitRunnable() {
+            Announcements msg = null;
+
+            @Override
+            public void run() {
+                msg = Announcements.values()[random.nextInt(Announcements.values().length)];
+                String msgToPlayers = msg.getName();
+                if (!Bukkit.getOnlinePlayers().isEmpty())
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        if (main.getGameManager().GetInstanceOfPlayer(player) != null)
+                            continue;
+
+                        player.sendMessage(msgToPlayers);
+                    }
+            }
+        };
+        runnable.runTaskTimer(main, 0, 5 * 60 * 20);
+    }
+
 	/**
 	 * This function just resets player double jump & sets gamemode to Adventure
 	 * 
@@ -153,8 +178,18 @@ public class PlayerListener implements Listener {
 		 * if (main.getTabManager() != null) main.getTabManager().setPlayerTeam(p);
 		 */
 	}
-	
-	public int getHalloweenEventProgress(Player player) {
+
+    // Track the follow task for each player's snowman so we can cancel it.
+    private final Map<UUID, Integer> snowmanTasks = new HashMap<>();
+
+    private void cancelSnowmanTask(UUID uuid) {
+        Integer id = snowmanTasks.remove(uuid);
+        if (id != null) {
+            try { Bukkit.getScheduler().cancelTask(id); } catch (Throwable ignored) {}
+        }
+    }
+
+    public int getHalloweenEventProgress(Player player) {
 		int progress = (main.getHalloweenManager() != null)
 				? main.getHalloweenManager().getFoundCount(player.getUniqueId())
 				: 0;
@@ -225,20 +260,50 @@ public class PlayerListener implements Listener {
 			snowmanPetPlayers.get(player).remove();
 		snowmanPetPlayers.remove(player);
 		elfCosmeticPlayers.remove(player);
-		// anthony.CrystalWars.game.GameInstance i =
-		// main.getCwManager().getInstanceOfPlayer(player);
-		// anthony.skywars.GameInstance i2 =
-		// main.getSWManager().getInstanceOfPlayer(player);
 
 		if (instance != null)
 			main.getGameManager().RemovePlayerFromAll(player);
-		// else if (i != null)
-		// main.getCwManager().removePlayer(player);
-		// else if (i2 != null)
-		// main.getSWManager().removePlayer(player);
-	}
 
-	@EventHandler
+        main.getScoreboardManager().removeLobbyBoard(player);
+        Player p = event.getPlayer();
+
+        // Scoreboards
+        main.getScoreboardManager().removeLobbyBoard(p);
+
+        // Holograms / packet armor stands
+        main.hologramCleanup(p);
+
+        // Fishing
+        safeFishingCleanup(p);
+
+        // Game instance (ensure game structures release this player)
+        GameInstance gi = main.getGameManager().GetInstanceOfPlayer(p);
+        if (gi != null) {
+            gi.forceRemovePlayer(p); // implement to clear maps/boards/cooldowns for this player
+        }
+
+        main.staffchat.remove(player);
+        main.globalchat.remove(player);
+
+        // Any Player->... maps in Core
+        main.forgetPlayerEverywhere(p);
+        cancelSnowmanTask(player.getUniqueId());
+        main.sentMysteryHolos.remove(player.getUniqueId());
+        main.sentParkourHolos.remove(player.getUniqueId());
+    }
+
+    private void safeFishingCleanup(Player p) {
+        try {
+            if (main.getFishing() != null) {
+                main.getFishing().cleanup(p);
+            }
+        } catch (Throwable t) {
+            // swallow – we never want a cleanup error to block logout flow
+            main.getLogger().warning("[Fishing] cleanup failed for " + p.getName() + ": " + t.getMessage());
+        }
+    }
+
+    @EventHandler
 	public void waterNoFlow(BlockFromToEvent e) {
 		if (main.getCommands() != null)
 			e.setCancelled(true);
@@ -355,47 +420,46 @@ public class PlayerListener implements Listener {
 		return (yaw >= 337.5 || yaw <= 22.5);
 	}
 
-	public void snowmanPet(Player player) {
-		if (this.snowmanPetPlayers.containsKey(player)) {
-			// Spawn a Snowman near the player
-			Snowman snowman = snowmanPetPlayers.get(player);
+    public void snowmanPet(Player player) {
+        UUID uid = player.getUniqueId();
 
-			// Convert the player to NMS EntityLiving
-			EntityLiving targetPlayer = (EntityLiving) ((CraftLivingEntity) player).getHandle();
+        // If we already had a task running for this player, stop it first.
+        cancelSnowmanTask(uid);
 
-			// Add follow behavior to the mob
-			PathfinderHelper.clearPathfinderGoals(snowman);
-			PathfinderHelper.addPathfinderGoal(snowman, 1, new PathfinderGoalFollowPlayer(
-					(EntityInsentient) ((CraftLivingEntity) snowman).getHandle(), targetPlayer, 1.75, 3.0, 4.0));
+        if (!this.snowmanPetPlayers.containsKey(player)) {
+            return; // nothing to follow right now
+        }
 
-			// Schedule a repeating task to "follow" the player by teleporting
-			Bukkit.getScheduler().runTaskTimer(main, () -> {
-				if (!player.isOnline() || !snowman.isValid() || player.getWorld() != snowman.getWorld())
-					return;
+        final Snowman snowman = snowmanPetPlayers.get(player);
+        final int taskId = Bukkit.getScheduler().runTaskTimer(main, () -> {
+            // End conditions: no player, no snowman, wrong world, or pet turned off
+            if (!player.isOnline()
+                    || !snowman.isValid()
+                    || player.getWorld() != snowman.getWorld()
+                    || !snowmanPetPlayers.containsKey(player)
+                    || player.getWorld() != main.getLobbyWorld()) {
 
-				Location playerLoc = player.getLocation();
-				double distance = playerLoc.distance(snowman.getLocation());
+                // remove pet entity if still around
+                try { snowman.remove(); } catch (Throwable ignored) {}
+                cancelSnowmanTask(uid); // <- kill the ticker
+                return;
+            }
 
-				// If the snowman is too far, teleport it closer to the player
-				if (distance > 15) {
-					// Teleport the snowman about 2 blocks behind the player
-					Location behindPlayer = playerLoc.clone().add(playerLoc.getDirection().multiply(-2));
-					behindPlayer.setY(
-							Math.min(playerLoc.getWorld().getHighestBlockYAt(behindPlayer), playerLoc.getY() + 10));
-					snowman.teleport(behindPlayer);
-				}
+            // Follow logic
+            Location playerLoc = player.getLocation();
+            double distance = playerLoc.distance(snowman.getLocation());
 
-				if (!this.snowmanPetPlayers.containsKey(player)) {
-					snowman.remove();
-				} else if (!player.isOnline() || player.getWorld() != main.getLobbyWorld()) {
-					this.snowmanPetPlayers.remove(player);
-					snowman.remove();
-				}
-			}, 20L, 20L); // Checks every second
-		}
-	}
+            if (distance > 15) {
+                Location behind = playerLoc.clone().add(playerLoc.getDirection().multiply(-2));
+                behind.setY(Math.min(playerLoc.getWorld().getHighestBlockYAt(behind), playerLoc.getY() + 10));
+                snowman.teleport(behind);
+            }
+        }, 20L, 20L).getTaskId();
 
-	// Angle used to rotate the swirl; we store it as a field so it persists across
+        snowmanTasks.put(uid, taskId);
+    }
+
+    // Angle used to rotate the swirl; we store it as a field so it persists across
 	// movements
 	private double angle = 0;
 
