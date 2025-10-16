@@ -16,6 +16,7 @@ import anthony.SuperCraftBrawl.Core;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
 import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
+import org.bukkit.scheduler.BukkitTask;
 
 import javax.annotation.Nullable;
 
@@ -23,6 +24,7 @@ public class ActionBarManager {
 
 	private final Core corePlugin;
 	private final Map<UUID, ActionBarData> actionBars = new HashMap<>();
+    private BukkitTask ticker;
 
 	public ActionBarManager(Core corePlugin) {
 		this.corePlugin = corePlugin;
@@ -152,4 +154,24 @@ public class ActionBarManager {
 		}
 	}
 
+    public void start(Core core) {
+        if (ticker != null) return;
+        ticker = new BukkitRunnable() {
+            @Override public void run() {
+                // your existing tick loop that prunes expired messages & sends bars
+            }
+        }.runTaskTimer(core, 0L, 1L);
+    }
+
+    public void onQuit(UUID uuid) {
+        actionBars.remove(uuid); // your map of pending/active messages
+    }
+
+    public void shutdown() {
+        if (ticker != null) {
+            try { ticker.cancel(); } catch (Throwable ignored) {}
+            ticker = null;
+        }
+        actionBars.clear();
+    }
 }
