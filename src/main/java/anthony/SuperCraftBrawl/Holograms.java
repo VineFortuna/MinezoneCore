@@ -135,7 +135,7 @@ public class Holograms {
 	 * This method gets rid of all the holograms from player if they aren't in the
 	 * lobby
 	 */
-	private void destroyBoards() {
+	public void destroyBoards() {
 		BukkitRunnable r = new BukkitRunnable() {
 
 			@Override
@@ -155,6 +155,17 @@ public class Holograms {
 		};
 		r.runTaskTimer(main, 0, 1);
 	}
+
+    public void destroy(Player player) {
+        Holograms h = main.holograms.remove(player);
+        if (h != null) h.destroyBoards();
+
+        EntityArmorStand stand = main.msHologram.remove(player);
+        if (stand != null) {
+            PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(stand.getId());
+            ((CraftPlayer) player).getHandle().playerConnection.sendPacket(destroy);
+        }
+    }
 
 	public String color(String c) {
 		return ChatColor.translateAlternateColorCodes('&', c);
