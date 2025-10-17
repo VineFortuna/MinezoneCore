@@ -144,6 +144,11 @@ public class Core extends JavaPlugin implements Listener {
     //NPCS:
 	public LobbyExplorerManager explorerManager;
 
+    //LEADERBOARDS:
+    public final java.util.Map<java.util.UUID, anthony.SuperCraftBrawl.leaderboards.LeaderboardScope>
+            leaderboardScopeByViewer = new java.util.HashMap<>();
+    public anthony.SuperCraftBrawl.leaderboards.StatSnapshotDAO snapshotDAO;
+
 	public Core() {
 		this.staffchat = new ArrayList<Player>();
 		this.globalchat = new ArrayList<Player>();
@@ -166,7 +171,7 @@ public class Core extends JavaPlugin implements Listener {
 	public CandyAuraManager getCandyAuraManager() {
 		return this.candyAura;
 	}
-	
+
 	public TrickTitleManager getTrickTitle() {
 		return this.trickTitleOld;
 	}
@@ -373,44 +378,191 @@ public class Core extends JavaPlugin implements Listener {
         spawnSelfStatsNPC();
         showNPCs();
         enableTitlesCosmetic();
+        enableLeaderboardSnapshotTables();
+        enableTablist();
+        //Spawn after world & chunks are ready. Delay 3 seconds
+        Bukkit.getScheduler().runTaskLater(this, this::spawnLeaderboardSettingsHologram, 60L);
+    }
 
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
-				Object header = new ChatComponentText(color("\n&f&lMinezone Network\n"));
-				Object footer = new ChatComponentText(
-						color("\n&7  /help&f for a list of commands" + "  \n&7/store&f to purchase a rank"
-								+ "  \n&7/discord&f to join our Discord" + "\n\n&bminezone.club\n"));
-				try {
-					Field a = packet.getClass().getDeclaredField("a");
-					a.setAccessible(true);
-					Field b = packet.getClass().getDeclaredField("b");
-					b.setAccessible(true);
+    // --- fields ---
+    private java.util.UUID lbSettingsStand;       // title line UUID
+    private java.util.UUID lbSettingsStandHint;   // hint line UUID
 
-					a.set(packet, header);
-					b.set(packet, footer);
+    // Location constants
+    private static final double LB_X = 193.377;
+    private static final double LB_Y = 107.6;     // raise above floor so text is visible
+    private static final double LB_Z = 702.500;
 
-					if (Bukkit.getOnlinePlayers().size() == 0)
-						return;
+    // Call this from onEnable() with a small delay (see below)
+    public void spawnLeaderboardSettingsHologram() {
+        org.bukkit.World w = getLobbyWorld();
+        if (w == null) {
+            getLogger().warning("[LB-Settings] Lobby world is null; will retry later.");
+            return;
+        }
 
-					for (Player player : Bukkit.getOnlinePlayers()) {
-						((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}.runTaskTimer(this, 0, 20);
+        // Ensure chunk is loaded (1.8-safe)
+        int cx = (int)Math.floor(LB_X) >> 4;
+        int cz = (int)Math.floor(LB_Z) >> 4;
+        try { w.getChunkAt(cx, cz).load(true); } catch (Throwable ignored) {}
 
-		new BukkitRunnable() {
+        // Remove any previous ones with same text (handles reloads)
+        for (org.bukkit.entity.ArmorStand as : w.getEntitiesByClass(org.bukkit.entity.ArmorStand.class)) {
+            String name = as.getCustomName();
+            if (name == null) continue;
+            String plain = org.bukkit.ChatColor.stripColor(name).trim().toLowerCase();
+            if (plain.equals("leaderboard settings") || plain.equals("right-click to change scope")
+                    || plain.equals("click to change settings")) {
+                try { as.remove(); } catch (Throwable ignored) {}
+            }
+        }
 
-			@Override
-			public void run() {
-				tickCounter++;
-			}
-		}.runTaskTimer(this, 0, 1);
-	}
+        // Title (clickable)
+        org.bukkit.Location titleLoc = new org.bukkit.Location(w, LB_X, LB_Y, LB_Z);
+        org.bukkit.entity.ArmorStand title = w.spawn(titleLoc, org.bukkit.entity.ArmorStand.class);
+        title.setGravity(false);
+        title.setVisible(false);
+        title.setSmall(true);
+        title.setBasePlate(false);
+        title.setCustomName(net.md_5.bungee.api.ChatColor.YELLOW + "" +
+                net.md_5.bungee.api.ChatColor.BOLD + "Leaderboard Settings");
+        title.setCustomNameVisible(true);
+        title.setRemoveWhenFarAway(false);
+        this.lbSettingsStand = title.getUniqueId();
+
+        // Hint (optional)
+        org.bukkit.entity.ArmorStand hint = w.spawn(titleLoc.clone().add(0, -0.28, 0), org.bukkit.entity.ArmorStand.class);
+        hint.setGravity(false);
+        hint.setVisible(false);
+        hint.setSmall(true);
+        hint.setBasePlate(false);
+        hint.setCustomName(net.md_5.bungee.api.ChatColor.GRAY + "" +
+                net.md_5.bungee.api.ChatColor.ITALIC + "Right-click to change scope");
+        hint.setCustomNameVisible(true);
+        hint.setRemoveWhenFarAway(false);
+        this.lbSettingsStandHint = hint.getUniqueId();
+
+        getLogger().info("[LB-Settings] Spawned at " + LB_X + ", " + LB_Y + ", " + LB_Z);
+    }
+
+    public void removeLeaderboardSettingsHologram() {
+        org.bukkit.World w = getLobbyWorld();
+        if (w == null) return;
+
+        for (org.bukkit.entity.ArmorStand as : w.getEntitiesByClass(org.bukkit.entity.ArmorStand.class)) {
+            java.util.UUID id = as.getUniqueId();
+            if (id != null && (id.equals(lbSettingsStand) || id.equals(lbSettingsStandHint))) {
+                try { as.remove(); } catch (Throwable ignored) {}
+            }
+        }
+        lbSettingsStand = null;
+        lbSettingsStandHint = null;
+    }
+
+    private void enableTablist() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
+                Object header = new ChatComponentText(color("\n&f&lMinezone Network\n"));
+                Object footer = new ChatComponentText(
+                        color("\n&7  /help&f for a list of commands" + "  \n&7/store&f to purchase a rank"
+                                + "  \n&7/discord&f to join our Discord" + "\n\n&bminezone.club\n"));
+                try {
+                    Field a = packet.getClass().getDeclaredField("a");
+                    a.setAccessible(true);
+                    Field b = packet.getClass().getDeclaredField("b");
+                    b.setAccessible(true);
+
+                    a.set(packet, header);
+                    b.set(packet, footer);
+
+                    if (Bukkit.getOnlinePlayers().size() == 0)
+                        return;
+
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }.runTaskTimer(this, 0, 20);
+
+        new BukkitRunnable() {
+
+            @Override
+            public void run() {
+                tickCounter++;
+            }
+        }.runTaskTimer(this, 0, 1);
+    }
+
+    private void enableLeaderboardSnapshotTables() {
+        getDatabaseManager().ensureSnapshotTable();
+        this.snapshotDAO = new anthony.SuperCraftBrawl.leaderboards.StatSnapshotDAO(this);
+        try {
+            // Wins
+            snapshotDAO.ensureSnapshotsForAll("Wins",         anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,   "Wins");
+            snapshotDAO.ensureSnapshotsForAll("Wins",         anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,  "Wins");
+            snapshotDAO.ensureSnapshotsForAll("Wins",         anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY, "Wins");
+
+            // Kills
+            snapshotDAO.ensureSnapshotsForAll("Kills",        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,   "Kills");
+            snapshotDAO.ensureSnapshotsForAll("Kills",        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,  "Kills");
+            snapshotDAO.ensureSnapshotsForAll("Kills",        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY, "Kills");
+
+            // Flawless wins
+            snapshotDAO.ensureSnapshotsForAll("FlawlessWins", anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,   "FlawlessWins");
+            snapshotDAO.ensureSnapshotsForAll("FlawlessWins", anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,  "FlawlessWins");
+            snapshotDAO.ensureSnapshotsForAll("FlawlessWins", anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY, "FlawlessWins");
+
+            // Fishing total caught
+            snapshotDAO.ensureSnapshotsForAll("TotalCaught",  anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,   "TotalCaught");
+            snapshotDAO.ensureSnapshotsForAll("TotalCaught",  anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,  "TotalCaught");
+            snapshotDAO.ensureSnapshotsForAll("TotalCaught",  anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY, "TotalCaught");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+            // 1) Refresh caches (async)
+            try { if (getKillsLeaderboard() != null) getKillsLeaderboard().asyncUpdate(); } catch (Throwable ignored) {}
+            // try { if (winsBoard      != null) winsBoard.asyncUpdate(); }      catch (Throwable ignored) {}
+            // try { if (flawlessBoard  != null) flawlessBoard.asyncUpdate(); }  catch (Throwable ignored) {}
+            // try { if (fishingBoard   != null) fishingBoard.asyncUpdate(); }   catch (Throwable ignored) {}
+
+            // 2) Paint on main thread
+            Bukkit.getScheduler().runTask(this, () -> {
+                try {
+                    // Draw global Lifetime once (so Lifetime viewers see the up-to-date list)
+                    if (getKillsLeaderboard() != null) getKillsLeaderboard().updateLeaderboard(false);
+                    // if (winsBoard     != null) winsBoard.updateLeaderboard(false);
+                    // if (flawlessBoard != null) flawlessBoard.updateLeaderboard(false);
+                    // if (fishingBoard  != null) fishingBoard.updateLeaderboard(false);
+
+                    // 3) Now enforce each viewer's chosen scope
+                    for (org.bukkit.entity.Player p : org.bukkit.Bukkit.getOnlinePlayers()) {
+                        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope =
+                                leaderboardScopeByViewer.getOrDefault(p.getUniqueId(),
+                                        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.LIFETIME);
+
+                        // Kills (what you're testing)
+                        try {
+                            anthony.SuperCraftBrawl.leaderboards.KillsBoard kb =
+                                    (anthony.SuperCraftBrawl.leaderboards.KillsBoard) getKillsLeaderboard();
+                            if (kb != null) kb.paintFor(p, scope);
+                        } catch (Throwable ignored) {}
+
+                        // When you convert the other boards, do the same:
+                        // if (winsBoard != null)     winsBoard.paintFor(p, scope);
+                        // if (flawlessBoard != null) flawlessBoard.paintFor(p, scope);
+                        // if (fishingBoard != null)  fishingBoard.paintFor(p, scope);
+                    }
+                } catch (Throwable ignored) {}
+            });
+        }, 20L, 20L * 60L); // run every 60s
+    }
 
     private void enableTitlesCosmetic() {
         trickTitleOld = new TrickTitleManager(this, "lobby-1");
@@ -477,6 +629,7 @@ public class Core extends JavaPlugin implements Listener {
         lobbyScoreBoard = Bukkit.getScoreboardManager().getNewScoreboard();
         explorerManager = new LobbyExplorerManager(this);
         npcManager = new NPCManager(this);
+        getDatabaseManager().ensureSnapshotTable();
 
         for (Arenas arena : Arenas.values()) {
             parkourBoards.add(new ParkourBoard(this, arena));
@@ -1779,6 +1932,11 @@ public class Core extends JavaPlugin implements Listener {
 		chatAnnouncementOnJoin(player);
 		getScoreboardManager().lobbyBoard(player); // Gives the lobby scoreboard to player
 		sendScoreboardUpdate(player); // This sets the rank next to player name above their head
+
+        for (Player other : Bukkit.getOnlinePlayers()) {
+            if (other == null || !other.isOnline() || other == player) continue;
+            sendScoreboardUpdate(other);
+        }
 		showNPCs(player);
 
 		// For join message:
@@ -1938,7 +2096,11 @@ public class Core extends JavaPlugin implements Listener {
 		Rank rank = getRankManager().getRank(player); // Gets the player's rank
 		String tag = rank.getTagWithSpace(); // Gets the player's rank tag
 
-		// this.packetMain.removePlayer(player);
+        if (getParkour() != null && getParkour().hasPlayer(player)) {
+            try { getParkour().removePlayer(player); } catch (Throwable ignored) {}
+        }
+
+        // this.packetMain.removePlayer(player);
 		Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
 			ByteArrayOutputStream b = new ByteArrayOutputStream();
 			DataOutputStream out = new DataOutputStream(b);
@@ -2016,6 +2178,12 @@ public class Core extends JavaPlugin implements Listener {
 			mysteryChestHologram(player);
 			parkourHolograms(player);
 			updateLeaderboards();
+            anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope =
+                    leaderboardScopeByViewer.getOrDefault(player.getUniqueId(),
+                            anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.LIFETIME);
+            try {
+                if (getKillsLeaderboard() != null) getKillsLeaderboard().paintFor(player, scope);
+            } catch (Throwable ignored) {}
 			getScoreboardManager().lobbyBoard(player);
 			sendScoreboardUpdate(player);
 
@@ -2112,6 +2280,7 @@ public class Core extends JavaPlugin implements Listener {
 			Bukkit.unloadWorld(world, false);
 		}
 
+        removeLeaderboardSettingsHologram();
         disableVariables();
         shutdownEverything();
 	}
@@ -2184,7 +2353,23 @@ public class Core extends JavaPlugin implements Listener {
 		}
 	}
 
-	public LobbyExplorerManager getExplorerManager() {
+    public void repaintLeaderboardsFor(org.bukkit.entity.Player p,
+                                       anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope) {
+        try {
+            if (this.getKillsLeaderboard() != null) {
+                // paintFor() hides the global lifetime for scoped views
+                this.getKillsLeaderboard().paintFor(p, scope);
+            }
+        } catch (Throwable ignored) {}
+
+    /* When you convert other boards, switch them to paintFor(...) too:
+    try { if (this.winsBoard != null)     this.winsBoard.paintFor(p, scope); } catch (Throwable ignored) {}
+    try { if (this.flawlessBoard != null) this.flawlessBoard.paintFor(p, scope); } catch (Throwable ignored) {}
+    try { if (this.getFishingLeaderboard() != null) this.getFishingLeaderboard().paintFor(p, scope); } catch (Throwable ignored) {}
+    */
+    }
+
+    public LobbyExplorerManager getExplorerManager() {
 		return this.explorerManager;
 	}
 
@@ -2238,5 +2423,9 @@ public class Core extends JavaPlugin implements Listener {
         if (getNPCManager() != null) {
             try { getNPCManager().shutdown(); } catch (Throwable ignored) {}
         }
+
+        try { if (getParkour() != null) getParkour().cleanupAll(); } catch (Throwable ignored) {}
+
+        getListener().cancelMessagesTask();
     }
 }

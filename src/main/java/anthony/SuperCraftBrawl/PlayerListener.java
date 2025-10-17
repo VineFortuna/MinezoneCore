@@ -6,6 +6,8 @@ import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.gui.christmas.ChristmasRewardsGUI;
 import anthony.SuperCraftBrawl.gui.cosmetics.CosmeticsGUI;
+import anthony.SuperCraftBrawl.leaderboards.LeaderboardScope;
+import anthony.SuperCraftBrawl.npcs.ChannelInjector;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.PathfinderGoalFollowPlayer;
@@ -15,6 +17,7 @@ import net.minecraft.server.v1_8_R3.*;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
@@ -41,11 +44,13 @@ import org.bukkit.material.Door;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.Vector;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class PlayerListener implements Listener {
 
@@ -58,6 +63,7 @@ public class PlayerListener implements Listener {
 	public List<Player> elfCosmeticPlayers = new ArrayList<Player>();
 	public List<Player> goldenOutfitPlayers = new ArrayList<>();
 	public List<Player> freddyOutfitPlayers = new ArrayList<>();
+    private BukkitTask announcementsTask;
 
 	public PlayerListener(Core main) {
 		this.main = main;
@@ -69,28 +75,35 @@ public class PlayerListener implements Listener {
     * This function shows the server messages that appear every 5 minutes
      */
     public void messages() {
-        Random random = new Random();
+        // Don’t schedule more than once
+        if (announcementsTask != null) return;
 
-        BukkitRunnable runnable = new BukkitRunnable() {
-            Announcements msg = null;
-
+        announcementsTask = new BukkitRunnable() {
             @Override
             public void run() {
-                msg = Announcements.values()[random.nextInt(Announcements.values().length)];
-                String msgToPlayers = msg.getName();
-                if (!Bukkit.getOnlinePlayers().isEmpty())
-                    for (Player player : Bukkit.getOnlinePlayers()) {
-                        if (main.getGameManager().GetInstanceOfPlayer(player) != null)
-                            continue;
+                Announcements[] all = Announcements.values();
+                Announcements msg = all[java.util.concurrent.ThreadLocalRandom.current().nextInt(all.length)];
 
-                        player.sendMessage(msgToPlayers);
-                    }
+                String toSend = msg.getName();
+                if (toSend == null || toSend.isEmpty()) return;
+
+                for (Player p : org.bukkit.Bukkit.getOnlinePlayers()) {
+                    if (main.getGameManager().GetInstanceOfPlayer(p) != null) continue;
+                    p.sendMessage(toSend);
+                }
             }
-        };
-        runnable.runTaskTimer(main, 0, 5 * 60 * 20);
+        }.runTaskTimer(main, 0L, 5L * 60L * 20L); // every 5 minutes
     }
 
-	/**
+    // Gets called in onDisable() in Core class
+    public void cancelMessagesTask() {
+        if (announcementsTask != null) {
+            announcementsTask.cancel();
+            announcementsTask = null;
+        }
+    }
+
+    /**
 	 * This function just resets player double jump & sets gamemode to Adventure
 	 * 
 	 * @param p to be reset
@@ -198,27 +211,34 @@ public class PlayerListener implements Listener {
 	}
 
 	// Clicking leaderboard settings in lobby
-	@EventHandler
-	public void onPlayerInteract(PlayerInteractAtEntityEvent event) {
-		if (!(event.getRightClicked() instanceof ArmorStand)) {
-			return; // Only proceed if it's an ArmorStand
-		}
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractAtEntityEvent event) {
+        if (!(event.getRightClicked() instanceof ArmorStand)) return;
 
-		ArmorStand armorStand = (ArmorStand) event.getRightClicked();
-		Player player = event.getPlayer();
+        ArmorStand stand = (ArmorStand) event.getRightClicked();
+        Player player = event.getPlayer();
 
-		if (armorStand.getCustomName() != null) {
-			if (armorStand.getCustomName().equals("Leaderboard Settings")) {
-				player.sendMessage("You clicked on the Leaderboard Settings!");
-			}
+        String raw = stand.getCustomName();
+        if (raw == null) return;
 
-			if (armorStand.getCustomName().equals("Click to change settings")) {
-				player.sendMessage("You clicked to change settings!");
-			}
-		}
-	}
+        // Strip colors so either colored or plain names work
+        String name = org.bukkit.ChatColor.stripColor(raw).trim().toLowerCase();
 
-	/**
+        // Open the scope picker when clicking your settings/title stands
+        if (name.equals("leaderboard settings")
+                || name.equals("click to change settings")
+                // OPTIONAL: also allow clicking board titles themselves:
+                || name.contains("wins")
+                || name.contains("kills")
+                || name.contains("flawless")
+                || name.contains("fishing")) {
+
+            new anthony.SuperCraftBrawl.gui.leaderboard.LeaderboardScopeGUI(main).inv().open(player);
+            event.setCancelled(true);
+        }
+    }
+
+    /**
 	 * This function checks if tournament mode is active on Player Join
 	 * 
 	 * @param p which is Player to add to the tournament
@@ -248,6 +268,51 @@ public class PlayerListener implements Listener {
 			event.getPlayer().getInventory().clear();
 			main.ResetPlayer(event.getPlayer());
 		}, 20);
+
+        Bukkit.getScheduler().runTaskLater(main, () -> {
+            Player p = event.getPlayer();
+
+            // Default their personal view to Lifetime (only set once)
+            main.leaderboardScopeByViewer.putIfAbsent(p.getUniqueId(), LeaderboardScope.LIFETIME);
+
+            // Get their current totals from PlayerData
+            PlayerData data = main.getDataManager().getPlayerData(p);
+            if (data == null) return; // safety
+
+            // If your fields are getters, swap to data.getWins() etc.
+            int wins         = data.wins;
+            int kills        = data.kills;
+            int flawlessWins = data.flawlessWins;
+            int totalCaught  = data.totalcaught;
+
+            // Seed snapshots for THIS player so daily/weekly/monthly = current - snapshot
+            try {
+                String uuid = p.getUniqueId().toString();
+
+                // Wins
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Wins", LeaderboardScope.DAILY,   wins);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Wins", LeaderboardScope.WEEKLY,  wins);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Wins", LeaderboardScope.MONTHLY, wins);
+
+                // Kills
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Kills", LeaderboardScope.DAILY,   kills);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Kills", LeaderboardScope.WEEKLY,  kills);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Kills", LeaderboardScope.MONTHLY, kills);
+
+                // Flawless Wins
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FlawlessWins", LeaderboardScope.DAILY,   flawlessWins);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FlawlessWins", LeaderboardScope.WEEKLY,  flawlessWins);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FlawlessWins", LeaderboardScope.MONTHLY, flawlessWins);
+
+                // Fishing total caught
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "TotalCaught", LeaderboardScope.DAILY,   totalCaught);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "TotalCaught", LeaderboardScope.WEEKLY,  totalCaught);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "TotalCaught", LeaderboardScope.MONTHLY, totalCaught);
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }, 40L); // ~2 seconds after join; adjust if your data load needs more/less time
 	}
 
 	@EventHandler
@@ -269,6 +334,8 @@ public class PlayerListener implements Listener {
 
         // Scoreboards
         main.getScoreboardManager().removeLobbyBoard(p);
+        try { Holograms h = main.holograms.remove(p); if (h != null) h.destroyBoards(); } catch (Throwable ignored) {}
+        try { main.getFishing().cleanupAll(); } catch (Throwable ignored) {}
 
         // Holograms / packet armor stands
         main.hologramCleanup(p);
@@ -290,6 +357,15 @@ public class PlayerListener implements Listener {
         cancelSnowmanTask(player.getUniqueId());
         main.sentMysteryHolos.remove(player.getUniqueId());
         main.sentParkourHolos.remove(player.getUniqueId());
+        ChannelInjector.uninject(player);
+        removeLeaderboards(event);
+    }
+
+    private void removeLeaderboards(PlayerQuitEvent event) {
+        try { if (main.getKillsLeaderboard() != null)    main.getKillsLeaderboard().clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
+        //try { if (main.winsBoard != null)     main.winsBoard.clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
+        //try { if (main.flawlessBoard != null) main.flawlessBoard.clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
+        //try { if (main.fishingBoard != null)  main.fishingBoard.clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
     }
 
     private void safeFishingCleanup(Player p) {
@@ -374,7 +450,54 @@ public class PlayerListener implements Listener {
 		}
 	}
 
-	@EventHandler
+    @EventHandler
+    public void onPlayerChangedWorld(PlayerChangedWorldEvent e) {
+        Player p = e.getPlayer();
+        Core main = this.main; // adjust if you use a different accessor
+
+        // 1) Remove lobby board if they left the lobby world
+        try {
+            World lobby = main.getLobbyWorld();
+            if (lobby != null && !p.getWorld().equals(lobby)) {
+                main.getScoreboardManager().removeLobbyBoard(p);
+            }
+        } catch (Throwable ignored) {}
+
+        // 2) Kill any per-player holograms
+        try {
+            Holograms h = main.holograms.get(p);
+            if (h != null) h.destroyBoards();
+            EntityArmorStand stand = main.msHologram.remove(p);
+            if (stand != null) {
+                PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(stand.getId());
+                ((CraftPlayer) p).getHandle().playerConnection.sendPacket(destroy);
+            }
+        } catch (Throwable ignored) {}
+
+        // 3) Fishing cleanup (no dangling hooks)
+        try {
+            main.getFishing().cleanupAll(); // safe no-op if nothing to do
+        } catch (Throwable ignored) {}
+
+        // 4) If the player left a game, ensure the instance drops references
+        try {
+            GameInstance gi = main.getGameManager().GetInstanceOfPlayer(p);
+            if (gi != null && gi.state != GameState.STARTED) {
+                // Remove any per-player tasks/boards/effects by UUID
+                UUID id = p.getUniqueId();
+                gi.boards.remove(id);
+                gi.effects.remove(id);
+            }
+        } catch (Throwable ignored) {}
+
+        main.getKillsLeaderboard().clearViewerHologram(p);
+        try { if (main.getKillsLeaderboard() != null)    main.getKillsLeaderboard().clearViewerHologram(e.getPlayer()); } catch (Throwable ignored) {}
+        //try { if (main.winsBoard != null)     main.winsBoard.clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
+        //try { if (main.flawlessBoard != null) main.flawlessBoard.clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
+        //try { if (main.fishingBoard != null)  main.fishingBoard.clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
+    }
+
+    @EventHandler
 	public void onEnterFishingArea(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
 		Location to = event.getTo();
