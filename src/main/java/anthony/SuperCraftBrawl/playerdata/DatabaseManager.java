@@ -81,7 +81,24 @@ public class DatabaseManager {
 		});
 	}
 
-	public void executeQueryCommand(String updateCommand, ExecuteFunction func) {
+    public void ensureSnapshotTable() {
+        // We already setCatalog("apexMC437310"), so no need to prefix the schema.
+        final String sql =
+                "CREATE TABLE IF NOT EXISTS scb_stat_snapshots (" +
+                        "  metric       VARCHAR(32)  NOT NULL," +           // 'Wins','Kills','FlawlessWins','TotalCaught', etc.
+                        "  uuid         VARCHAR(36)  NOT NULL," +
+                        "  period       ENUM('DAILY','WEEKLY','MONTHLY') NOT NULL," +
+                        "  period_start DATE         NOT NULL," +           // e.g., 2025-10-16 (daily), Monday of that week, or 1st of month
+                        "  total_value  INT          NOT NULL DEFAULT 0," + // snapshot of the player's total at the period start
+                        "  created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP," +
+                        "  PRIMARY KEY (metric, uuid, period, period_start)," +
+                        "  INDEX (period, period_start)," +
+                        "  INDEX (uuid, metric)" +
+                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+        executeUpdateCommand(sql);
+    }
+
+    public void executeQueryCommand(String updateCommand, ExecuteFunction func) {
 		try {
 			Statement stmt = getConnection().createStatement();
 			ResultSet set = stmt.executeQuery(updateCommand);

@@ -340,12 +340,20 @@ public abstract class BaseClass {
 		}
 	}
 
+    /*
+    * This function decreases lives on death and sets it
+    * on the scoreboard too
+     */
+    private void decreaseLives() {
+        if (instance.gameType != GameType.GUNGAME) {
+            lives--;
+        }
+        score.setScore(lives);
+    }
+
 	public void Death(PlayerDeathEvent e) {
 		if (player.getName() != null && lives > 0) {
-			if (instance.gameType != GameType.GUNGAME) {
-				lives--;
-			}
-			score.setScore(lives);
+			decreaseLives();
 
 			Player killer = player.getKiller();
 			Player p = player.getPlayer();
