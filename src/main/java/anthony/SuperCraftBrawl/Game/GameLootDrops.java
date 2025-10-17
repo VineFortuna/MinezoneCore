@@ -117,7 +117,9 @@ public enum GameLootDrops {
 			case NUKE:
 				item = ItemHelper.setDetails(new ItemStack(Material.TNT, 3),
 						"&4&lNUKE",
-						"&7Spawn TNTs where you're looking");
+						"&7Spawn TNTs where you're looking",
+						"",
+						"&2&lUNCOMMON");
 				ItemHelper.setGlowing(item, true);
 				break;
 
