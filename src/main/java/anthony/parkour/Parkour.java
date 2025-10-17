@@ -5,7 +5,6 @@ import anthony.SuperCraftBrawl.playerdata.ParkourDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
 import fr.mrmicky.fastboard.FastBoard;
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_8_R3.EntityArmorStand;
@@ -21,383 +20,482 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.BlockVector;
 
 import java.util.*;
 
 public class Parkour implements Listener {
 
-	private Core main;
-	public Map<Player, Arenas> players;
-	public Map<Player, Integer> checkpoint;
-	public Map<Player, FastBoard> b;
-	public Map<Player, BukkitRunnable> runnables;
-	public Map<Player, Long> startTime;
-	private final Map<Player, List<EntityArmorStand>> checkpointHolograms = new HashMap<>();
+    private final Core main;
 
+    // Per-player state
+    public final Map<Player, Arenas> players = new HashMap<>();
+    private final Map<Player, Integer> checkpoint = new HashMap<>();
+    private final Map<Player, FastBoard> boards = new HashMap<>();
+    private final Map<Player, BukkitTask> timers = new HashMap<>();
+    private final Map<Player, Long> startTimeNs = new HashMap<>();
+    private final Map<Player, List<EntityArmorStand>> checkpointHolograms = new HashMap<>();
 
-	public Parkour(Core main) {
-		this.main = main;
-		this.players = new HashMap<>();
-		this.checkpoint = new HashMap<>();
-		this.b = new HashMap<>();
-		this.startTime = new HashMap<>();
-		this.runnables = new HashMap<>();
-		this.main.getServer().getPluginManager().registerEvents(this, main);
-	}
+    public Parkour(Core main) {
+        this.main = main;
+        this.main.getServer().getPluginManager().registerEvents(this, main);
+    }
 
-	public void addPlayer(Player player, Arenas arena) {
-		if (!hasPlayer(player)) {
-			players.put(player, arena);
-			player.sendMessage(main.color("&e&l(!) &rYou have joined &r&l" + arena.getName()));
+    /* =========================
+       Public helpers
+       ========================= */
 
-			player.getInventory().clear();
-			gameBoard(player);
-			gameItems(player);
-			timeTicking(player);
-			player.setAllowFlight(false);
-			player.closeInventory();
+    public boolean hasPlayer(Player p) {
+        return players.containsKey(p);
+    }
 
-			for (PotionEffect effect : player.getActivePotionEffects()) {
-				player.removePotionEffect(effect.getType());
-			}
+    public void addPlayer(Player player, Arenas arena) {
+        if (hasPlayer(player)) {
+            player.sendMessage(main.color("&c&l(!) &rYou are already in parkour mode!"));
+            return;
+        }
 
-			addHolograms(player, arena);
-		} else {
-			player.sendMessage(main.color("&c&l(!) &rYou are already in parkour mode!"));
-		}
-	}
+        players.put(player, arena);
+        player.sendMessage(main.color("&e&l(!) &rYou have joined &r&l" + arena.getName()));
 
-	public void addHolograms(Player player, Arenas arena) {
-		List<EntityArmorStand> stands = new ArrayList<>();
-		checkpointHolograms.put(player, stands);
+        // Inventory/UI
+        player.getInventory().clear();
+        giveGameItems(player);
+        createOrUpdateBoard(player, /*resetTime*/ true);
+        player.setAllowFlight(false);
+        player.closeInventory();
 
-		WorldServer world = ((CraftWorld) main.getLobbyWorld()).getHandle();
+        // Remove effects
+        for (PotionEffect effect : player.getActivePotionEffects()) {
+            player.removePotionEffect(effect.getType());
+        }
 
-		int i = 1;
-		for (Location l : arena.getInstance().checkpoints) {
-			Location loc = new Location(main.getLobbyWorld(), l.getX() + 0.5, l.getY() - 0.75, l.getZ() + 0.5);
+        // Client-side checkpoint labels for THIS player (packet only)
+        addHolograms(player, arena);
+    }
 
-			EntityArmorStand stand = new EntityArmorStand(world);
-			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(main.color("&e&lCheckpoint &b&l#" + i));
-			stand.setCustomNameVisible(true);
-			stand.setInvisible(true);
-			stand.setGravity(false);
+    public void removePlayer(Player player) {
+        // Holograms (client-side: send destroy packets, then drop references)
+        removeHolograms(player);
 
-			PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
-			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+        // Cancel timer
+        BukkitTask t = timers.remove(player);
+        if (t != null) {
+            try { t.cancel(); } catch (Throwable ignored) {}
+        }
 
-			stands.add(stand);
-			i++;
-		}
-	}
+        // Scoreboard
+        FastBoard fb = boards.remove(player);
+        if (fb != null) {
+            try { fb.delete(); } catch (Throwable ignored) {}
+        }
 
-	public void removeHolograms(Player player, Arenas arena) {
-		List<EntityArmorStand> stands = checkpointHolograms.remove(player);
-		if (stands != null) {
-			for (EntityArmorStand stand : stands) {
-				PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(stand.getId());
-				((CraftPlayer) player).getHandle().playerConnection.sendPacket(destroy);
-			}
-		}
-	}
+        // Clear state maps
+        startTimeNs.remove(player);
+        checkpoint.remove(player);
+        players.remove(player);
 
-	private void timeTicking(Player player) {
-		long start = System.nanoTime();
-		startTime.put(player, start);
+        // Restore lobby state
+        main.getScoreboardManager().lobbyBoard(player);
+        player.getInventory().clear();
+        main.LobbyItems(player);
+        player.setAllowFlight(true);
+        player.setFireTicks(0);
+    }
 
-		BukkitRunnable r = new BukkitRunnable() {
-			@Override
-			public void run() {
-				if (runnables.get(player) != null) {
-					long currentTime = System.nanoTime();
-					long elapsedMillis = currentTime - startTime.get(player);
+    /** Cleanup everything (call onDisable) */
+    public void cleanupAll() {
+        for (Player p : new ArrayList<>(players.keySet())) {
+            // Avoid duplicate lobby UI if server is stopping; just internal cleanup:
+            removeHolograms(p);
 
-					String formattedTime = formatTimeScoreboard(elapsedMillis);
+            BukkitTask t = timers.remove(p);
+            if (t != null) {
+                try { t.cancel(); } catch (Throwable ignored) {}
+            }
 
-					b.get(player).updateLine(3, main.color("&fTime:&a " + formattedTime));
-				} else {
-					this.cancel();
-					runnables.remove(player);
-				}
-			}
-		};
+            FastBoard fb = boards.remove(p);
+            if (fb != null) {
+                try { fb.delete(); } catch (Throwable ignored) {}
+            }
+        }
+        checkpointHolograms.clear();
+        startTimeNs.clear();
+        checkpoint.clear();
+        players.clear();
+    }
 
-		r.runTaskTimer(main, 0, 2); // runs every 0.1 seconds
-		runnables.put(player, r);
-	}
+    /* =========================
+       Holograms (packet-only)
+       ========================= */
 
-	public void gameBoard(Player player) {
-		FastBoard b = new FastBoard(player);
-		b.updateTitle(main.color("&e&lPARKOUR"));
-		b.updateLines("",
-				main.color(
-						"&fCheckpoints: &a" + (checkpoint.containsKey(player) ? checkpoint.get(player) + 1 : 0) +
-								"/" + players.get(player).getCheckpoints()),
-				"", main.color("&fTime:&a 0.0s"),
-				"",
-				main.color("&eminezone.club"));
-		this.b.put(player, b);
-	}
+    private void addHolograms(Player player, Arenas arena) {
+        // Drop any previous list for safety
+        removeHolograms(player);
 
-	public void gameItems(Player player) {
-		player.getInventory().setItem(0,
-				ItemHelper.setDetails(new ItemStack(Material.BEACON), main.color("&eReturn to Checkpoint")));
-		player.getInventory().setItem(1,
-				ItemHelper.setDetails(new ItemStack(Material.SEA_LANTERN), main.color("&eRestart")));
-		player.getInventory().setItem(2, ItemHelper.setDetails(new ItemStack(Material.BARRIER), main.color("&eLeave")));
-	}
+        List<EntityArmorStand> stands = new ArrayList<>();
+        checkpointHolograms.put(player, stands);
 
-	public boolean hasPlayer(Player player) {
-		return players.containsKey(player);
-	}
+        WorldServer world = ((CraftWorld) main.getLobbyWorld()).getHandle();
+        int i = 1;
 
-	// Events
+        for (Location l : arena.getInstance().checkpoints) {
+            Location loc = new Location(main.getLobbyWorld(), l.getX() + 0.5, l.getY() - 0.75, l.getZ() + 0.5);
 
-	@EventHandler
-	public void onMove(PlayerMoveEvent event) {
-		Player player = event.getPlayer();
+            EntityArmorStand stand = new EntityArmorStand(world);
+            stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+            stand.setCustomName(main.color("&e&lCheckpoint &b&l#" + i));
+            stand.setCustomNameVisible(true);
+            stand.setInvisible(true);
+            stand.setGravity(false);
 
-		if (player.getWorld() == main.getLobbyWorld()) {
-			if (event.getTo() == null || event.getFrom() == null
-					|| event.getTo().toVector().toBlockVector().equals(event.getFrom().toVector().toBlockVector()))
-				return;
+            PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
+            ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 
-			if (hasPlayer(player)) {
-				ArenaInstance arenaInstance = players.get(player).getInstance();
-				if (event.getTo().getY() < 50)
-					teleportToCheckpoint(player);
+            stands.add(stand);
+            i++;
+        }
+    }
 
-				if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.BEACON) {
-					BlockVector blockVector = event.getTo().getBlock().getLocation().toVector().toBlockVector();
+    private void removeHolograms(Player player) {
+        List<EntityArmorStand> stands = checkpointHolograms.remove(player);
+        if (stands == null || stands.isEmpty()) return;
 
-					if (arenaInstance.checkpointBlocks.contains(blockVector)) { // Check if checkpoint exists
-						int newCheckpointIndex = arenaInstance.checkpointBlocks.indexOf(blockVector);
-						Integer currentCheckpointIndex = checkpoint.get(player);
+        CraftPlayer cp = (CraftPlayer) player;
+        for (EntityArmorStand stand : stands) {
+            try {
+                PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(stand.getId());
+                cp.getHandle().playerConnection.sendPacket(destroy);
+            } catch (Throwable ignored) {}
+        }
+        stands.clear();
+    }
 
-						if (currentCheckpointIndex == null && newCheckpointIndex == 0 ||
-								currentCheckpointIndex != null && newCheckpointIndex != currentCheckpointIndex
-										&& newCheckpointIndex == currentCheckpointIndex + 1) {
+    /* =========================
+       Scoreboard & Timer
+       ========================= */
 
-							checkpoint.put(player, newCheckpointIndex);
+    private void createOrUpdateBoard(Player player, boolean resetTime) {
+        // FastBoard: create once per run, delete on removal
+        FastBoard fb = boards.get(player);
+        if (fb == null) {
+            fb = new FastBoard(player);
+            boards.put(player, fb);
+        }
 
-							long currTime = System.nanoTime();
-							long start = startTime.getOrDefault(player, currTime);
-							long elapsedTime = currTime - start;
+        fb.updateTitle(main.color("&e&lPARKOUR"));
 
-							b.get(player).updateLine(1, main.color("&fCheckpoints: &a" + (newCheckpointIndex + 1) + "/"
-									+ players.get(player).getCheckpoints()));
-							player.sendMessage(main.color("&e&l(!) &rYou reached checkpoint &e#" + (newCheckpointIndex + 1) + "&r in &a" +
-									(formatTime(elapsedTime))));
-							player.playSound(player.getLocation(), Sound.CLICK, 1, 0.6f);
-						}
-					}
-				} else if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.GLOWSTONE) {
-					for (Arenas arena : Arenas.values()) {
-						if (event.getTo().toVector().toBlockVector().equals(arena.getInstance().endLoc.toVector().toBlockVector())
-								&& !event.getFrom().toVector().toBlockVector().equals(arena.getInstance().endLoc.toVector().toBlockVector())) {
-							if (checkpoint.containsKey(player) && checkpoint.get(player) == arena.getCheckpoints() - 1) {
+        int reached = checkpoint.containsKey(player) ? (checkpoint.get(player) + 1) : 0;
+        int total = players.get(player).getCheckpoints();
 
-								long endTime = System.nanoTime();
-								long start = startTime.getOrDefault(player, endTime);
-								long totalTime = endTime - start;
+        fb.updateLines(
+                "",
+                main.color("&fCheckpoints: &a" + reached + "/" + total),
+                "",
+                main.color("&fTime:&a 0.0s"),
+                "",
+                main.color("&eminezone.club")
+        );
 
-								player.sendTitle(main.color("&aPARKOUR COMPLETE!"), null);
-								player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
+        if (resetTime) startTimer(player);
+    }
 
-								PlayerData data = main.getDataManager().getPlayerData(player);
-								int arenaID = players.get(player).getId();
-								ParkourDetails details = data.playerParkour.get(arenaID);
-								if (details == null) {
-									details = new ParkourDetails();
-									data.playerParkour.put(arenaID, details);
+    private void startTimer(Player player) {
+        // Cancel old timer if any
+        BukkitTask old = timers.remove(player);
+        if (old != null) {
+            try { old.cancel(); } catch (Throwable ignored) {}
+        }
 
-									player.sendMessage(
-											main.color("&d&l(!) &rYou have earned &e" + arenaInstance.tokenReward + "Tokens &rfor clearing this parkour for the first time!"));
-									data.tokens += arenaInstance.tokenReward;
-								}
-								if (details.totalTime == 0 || totalTime < details.totalTime) {
-									details.completeParkour(totalTime);
-									main.getDataManager().saveData(data);
-									player.sendMessage(main.color("&e&l(!) &rParkour completed in &a" + formatTime(totalTime) +
-											"&r! &e&lNEW RECORD"));
-								} else {
-									player.sendMessage(main.color("&e&l(!) &rParkour completed in &e" + formatTime(totalTime) + "&r!"));
-									player.sendMessage(main.color("&e&l(!) &rYou did not beat your record of &a" +
-											formatTime(details.totalTime)));
-								}
-								sendTeleportMessage(player, arenaID);
+        long start = System.nanoTime();
+        startTimeNs.put(player, start);
 
-								removePlayer(player);
-							} else {
-								player.sendMessage(main.color("&c&l(!) &rYou must reach every checkpoint before completing the parkour!"));
-							}
-							return;
-						}
-					}
-				} else if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.SEA_LANTERN) {
-					if (event.getTo().toVector().toBlockVector().equals(
-							players.get(player).getInstance().startLoc.toVector().toBlockVector())) {
-						checkpoint.remove(player);
+        BukkitTask task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                // Stop if the player left parkour
+                if (!hasPlayer(player)) {
+                    cancel();
+                    timers.remove(player);
+                    return;
+                }
+                Long startNs = startTimeNs.get(player);
+                FastBoard fb = boards.get(player);
+                if (startNs == null || fb == null) return;
 
-						runnables.get(player).cancel();
-						runnables.remove(player);
+                long elapsed = System.nanoTime() - startNs;
+                String formatted = formatTimeScoreboard(elapsed);
+                fb.updateLine(3, main.color("&fTime:&a " + formatted));
+            }
+        }.runTaskTimer(main, 0L, 2L); // every 0.1s
 
-						timeTicking(player);
+        timers.put(player, task);
+    }
 
-						gameBoard(player);
-						player.sendMessage(main.color("&e&l(!) &rReset your time"));
-						player.playSound(player.getLocation(), Sound.CLICK, 1, 0.6f);
-					}
-				}
-			} else {
-				if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.SEA_LANTERN) {
-					for (Arenas arena : Arenas.values()) {
-						if (event.getTo().toVector().toBlockVector().equals(
-								arena.getInstance().startLoc.toVector().toBlockVector())) {
-							this.addPlayer(player, arena);
-							player.playSound(player.getLocation(), Sound.CLICK, 1, 0.6f);
-							return;
-						}
-					}
-				}
-			}
-		}
-	}
+    private void updateCheckpointLine(Player player, int indexNow) {
+        FastBoard fb = boards.get(player);
+        if (fb == null) return;
+        int total = players.get(player).getCheckpoints();
+        fb.updateLine(1, main.color("&fCheckpoints: &a" + (indexNow + 1) + "/" + total));
+    }
 
-	public void removePlayer(Player player) {
-		removeHolograms(player, players.get(player));
-		this.startTime.remove(player);
-		this.runnables.remove(player);
-		this.checkpoint.remove(player);
-		main.getParkour().players.remove(player);
-		main.getScoreboardManager().lobbyBoard(player);
-		player.getInventory().clear();
-		main.LobbyItems(player);
-		player.setAllowFlight(true);
-	}
+    /* =========================
+       Items & Teleport helpers
+       ========================= */
 
-	@EventHandler
-	public void interact(PlayerInteractEvent event) {
-		Player player = event.getPlayer();
-		Material item = event.getMaterial();
+    private void giveGameItems(Player player) {
+        player.getInventory().setItem(0,
+                ItemHelper.setDetails(new ItemStack(Material.BEACON), main.color("&eReturn to Checkpoint")));
+        player.getInventory().setItem(1,
+                ItemHelper.setDetails(new ItemStack(Material.SEA_LANTERN), main.color("&eRestart")));
+        player.getInventory().setItem(2,
+                ItemHelper.setDetails(new ItemStack(Material.BARRIER), main.color("&eLeave")));
+    }
 
-		if (hasPlayer(player)) {
-			if (item != null) {
-				switch (item) {
-					case BEACON:
-						teleportToCheckpoint(player);
-						if (checkpoint.containsKey(player))
-							player.sendMessage(main.color("&e&l(!) &rSent back to checkpoint &e#" + (checkpoint.get(player) + 1)));
-						else
-							player.sendMessage(main.color("&e&l(!) &rSent back to checkpoint"));
-						break;
-					case SEA_LANTERN:
-						teleportToStart(player);
-						checkpoint.remove(player);
+    private void teleportToStart(Player player) {
+        Location loc = players.get(player).getInstance().startLoc;
+        player.teleport(loc);
+        player.setFireTicks(0);
+    }
 
-						runnables.get(player).cancel();
-						runnables.remove(player);
+    private void teleportToCheckpoint(Player player) {
+        Integer idx = checkpoint.get(player);
+        if (idx != null) {
+            Location loc = players.get(player).getCheckpoint(idx);
+            player.teleport(loc);
+        } else {
+            teleportToStart(player);
+        }
+        player.setFireTicks(0);
+    }
 
-						timeTicking(player);
+    /* =========================
+       Events
+       ========================= */
 
-						gameBoard(player);
-						player.sendMessage(main.color("&e&l(!) &rSent back to start"));
-						break;
-					case BARRIER:
-						removePlayer(player);
-						player.sendMessage(main.color("&r&l(!) &rYou have left parkour mode"));
-				}
-			}
-		}
-	}
+    @EventHandler
+    public void onMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
 
-	public void teleportToStart(Player player) {
-		Location loc = players.get(player).getInstance().startLoc;
-		player.teleport(loc);
-		player.setFireTicks(0);
-	}
+        if (player.getWorld() != main.getLobbyWorld()) return;
+        if (event.getTo() == null || event.getFrom() == null) return;
+        if (event.getTo().toVector().toBlockVector().equals(event.getFrom().toVector().toBlockVector())) return;
 
-	public void teleportToCheckpoint(Player player) {
-		if (checkpoint.containsKey(player)) {
-			Location loc = players.get(player).getCheckpoint(checkpoint.get(player));
-			player.teleport(loc);
-			player.setFireTicks(0);
-		} else {
-			teleportToStart(player);
-		}
-	}
+        if (hasPlayer(player)) {
+            ArenaInstance arenaInstance = players.get(player).getInstance();
 
-	public String formatTime(long nanoseconds) {
-		double totalSeconds = nanoseconds / 1_000_000_000.0;
-		long minutes = (long) (totalSeconds / 60);
-		double seconds = totalSeconds % 60;
+            // Fell off
+            if (event.getTo().getY() < 50) {
+                teleportToCheckpoint(player);
+                return;
+            }
 
-		if (minutes > 0) {
-			return String.format("%dm %.3fs", minutes, seconds);
-		} else {
-			return String.format("%.3fs", seconds);
-		}
-	}
+            // Checkpoint on BEACON
+            if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.BEACON) {
+                BlockVector bv = event.getTo().getBlock().getLocation().toVector().toBlockVector();
+                if (arenaInstance.checkpointBlocks.contains(bv)) {
+                    int newIdx = arenaInstance.checkpointBlocks.indexOf(bv);
+                    Integer curIdx = checkpoint.get(player);
 
-	public String formatTimeScoreboard(long nanoseconds) {
-		double totalSeconds = nanoseconds / 1_000_000_000.0;
-		long minutes = (long) (totalSeconds / 60);
-		double seconds = totalSeconds % 60;
+                    boolean first = (curIdx == null && newIdx == 0);
+                    boolean next = (curIdx != null && newIdx == curIdx + 1);
 
-		if (minutes > 0) {
-			return String.format("%dm %.1fs", minutes, seconds);
-		} else {
-			return String.format("%.1fs", seconds);
-		}
-	}
+                    if (first || next) {
+                        checkpoint.put(player, newIdx);
 
-	public void sendTeleportMessage(Player player, int id) {
-		TextComponent message = new TextComponent(main.color("&a&lClick to try again"));
-		message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/_teleportstart " + id));
+                        long now = System.nanoTime();
+                        long start = startTimeNs.getOrDefault(player, now);
+                        long elapsed = now - start;
 
-		player.spigot().sendMessage(message);
-	}
+                        updateCheckpointLine(player, newIdx);
+                        player.sendMessage(main.color("&e&l(!) &rYou reached checkpoint &e#" + (newIdx + 1) + "&r in &a" + formatTime(elapsed)));
+                        player.playSound(player.getLocation(), Sound.CLICK, 1, 0.6f);
+                    }
+                }
+                return;
+            }
 
-	@EventHandler
-	public void onCommandPreprocess(PlayerCommandPreprocessEvent event) {
-		String msg = event.getMessage();
-		Player player = event.getPlayer();
+            // Finish on GLOWSTONE
+            if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.GLOWSTONE) {
+                for (Arenas arena : Arenas.values()) {
+                    if (event.getTo().toVector().toBlockVector().equals(arena.getInstance().endLoc.toVector().toBlockVector())
+                            && !event.getFrom().toVector().toBlockVector().equals(arena.getInstance().endLoc.toVector().toBlockVector())) {
 
-		if (msg.startsWith("/_teleportstart ")) {
-			event.setCancelled(true); // prevent command from reaching server
+                        if (checkpoint.containsKey(player) && checkpoint.get(player) == arena.getCheckpoints() - 1) {
+                            long end = System.nanoTime();
+                            long start = startTimeNs.getOrDefault(player, end);
+                            long total = end - start;
 
-			if (!players.containsKey(player)) {
-				String[] parts = msg.split(" ");
-				if (parts.length < 2) {
-					return;
-				}
+                            player.sendTitle(main.color("&aPARKOUR COMPLETE!"), null);
+                            player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
 
-				try {
-					int id = Integer.parseInt(parts[1]);
+                            PlayerData data = main.getDataManager().getPlayerData(player);
+                            int arenaID = players.get(player).getId();
+                            ArenaInstance inst = players.get(player).getInstance();
 
-					Arenas arena = Arenas.getById(id);
-					if (arena != null) {
-						Location targetLocation = arena.getInstance().startLoc;
-						if (targetLocation == null) {
-							return;
-						}
-						player.teleport(targetLocation);
-						addPlayer(player, arena);
-					}
+                            ParkourDetails details = data.playerParkour.get(arenaID);
+                            if (details == null) {
+                                details = new ParkourDetails();
+                                data.playerParkour.put(arenaID, details);
+                                player.sendMessage(main.color("&d&l(!) &rYou have earned &e" + inst.tokenReward + " Tokens &rfor clearing this parkour for the first time!"));
+                                data.tokens += inst.tokenReward;
+                            }
 
-				} catch (NumberFormatException ignored) {
-				}
-			} else {
-				player.sendMessage(main.color("&c&l(!) &rYou are already in parkour mode!"));
-			}
-		}
-	}
+                            if (details.totalTime == 0 || total < details.totalTime) {
+                                details.completeParkour(total);
+                                main.getDataManager().saveData(data);
+                                player.sendMessage(main.color("&e&l(!) &rParkour completed in &a" + formatTime(total) + "&r! &e&lNEW RECORD"));
+                            } else {
+                                player.sendMessage(main.color("&e&l(!) &rParkour completed in &e" + formatTime(total) + "&r!"));
+                                player.sendMessage(main.color("&e&l(!) &rYou did not beat your record of &a" + formatTime(details.totalTime)));
+                            }
+
+                            sendTeleportMessage(player, arenaID);
+                            removePlayer(player);
+                        } else {
+                            player.sendMessage(main.color("&c&l(!) &rYou must reach every checkpoint before completing the parkour!"));
+                        }
+                        return;
+                    }
+                }
+            }
+
+            // Restart on SEA_LANTERN (stand on start plate)
+            if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.SEA_LANTERN) {
+                if (event.getTo().toVector().toBlockVector().equals(players.get(player).getInstance().startLoc.toVector().toBlockVector())) {
+                    checkpoint.remove(player);
+                    createOrUpdateBoard(player, /*resetTime*/ true);
+                    player.sendMessage(main.color("&e&l(!) &rReset your time"));
+                    player.playSound(player.getLocation(), Sound.CLICK, 1, 0.6f);
+                }
+            }
+        } else {
+            // Not in a run: auto-join when stepping on SEA_LANTERN start pad
+            if (event.getTo().getBlock().getRelative(BlockFace.DOWN).getType() == Material.SEA_LANTERN) {
+                for (Arenas arena : Arenas.values()) {
+                    if (event.getTo().toVector().toBlockVector().equals(arena.getInstance().startLoc.toVector().toBlockVector())) {
+                        addPlayer(player, arena);
+                        player.playSound(player.getLocation(), Sound.CLICK, 1, 0.6f);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onInteract(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        Material item = event.getMaterial();
+        if (!hasPlayer(player) || item == null) return;
+
+        switch (item) {
+            case BEACON:
+                teleportToCheckpoint(player);
+                if (checkpoint.containsKey(player))
+                    player.sendMessage(main.color("&e&l(!) &rSent back to checkpoint &e#" + (checkpoint.get(player) + 1)));
+                else
+                    player.sendMessage(main.color("&e&l(!) &rSent back to checkpoint"));
+                break;
+
+            case SEA_LANTERN:
+                teleportToStart(player);
+                checkpoint.remove(player);
+                createOrUpdateBoard(player, /*resetTime*/ true);
+                player.sendMessage(main.color("&e&l(!) &rSent back to start"));
+                break;
+
+            case BARRIER:
+                removePlayer(player);
+                player.sendMessage(main.color("&r&l(!) &rYou have left parkour mode"));
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    @EventHandler
+    public void onCommandPreprocess(PlayerCommandPreprocessEvent event) {
+        String msg = event.getMessage();
+        Player player = event.getPlayer();
+
+        if (!msg.startsWith("/_teleportstart ")) return;
+        event.setCancelled(true); // prevent command from reaching server
+
+        if (hasPlayer(player)) {
+            player.sendMessage(main.color("&c&l(!) &rYou are already in parkour mode!"));
+            return;
+        }
+
+        String[] parts = msg.split(" ");
+        if (parts.length < 2) return;
+
+        try {
+            int id = Integer.parseInt(parts[1]);
+            Arenas arena = Arenas.getById(id);
+            if (arena == null) return;
+
+            Location targetLocation = arena.getInstance().startLoc;
+            if (targetLocation == null) return;
+
+            player.teleport(targetLocation);
+            addPlayer(player, arena);
+        } catch (NumberFormatException ignored) {}
+    }
+
+    // Extra safety: auto-clean on quit/kick/world change
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        Player p = e.getPlayer();
+        if (hasPlayer(p)) removePlayer(p);
+    }
+
+    @EventHandler
+    public void onKick(PlayerKickEvent e) {
+        Player p = e.getPlayer();
+        if (hasPlayer(p)) removePlayer(p);
+    }
+
+    @EventHandler
+    public void onWorldChange(PlayerChangedWorldEvent e) {
+        Player p = e.getPlayer();
+        if (hasPlayer(p)) removePlayer(p);
+    }
+
+    /* =========================
+       Messaging helpers
+       ========================= */
+
+    public String formatTime(long nanoseconds) {
+        double totalSeconds = nanoseconds / 1_000_000_000.0;
+        long minutes = (long) (totalSeconds / 60);
+        double seconds = totalSeconds % 60;
+        if (minutes > 0) return String.format("%dm %.3fs", minutes, seconds);
+        return String.format("%.3fs", seconds);
+    }
+
+    public String formatTimeScoreboard(long nanoseconds) {
+        double totalSeconds = nanoseconds / 1_000_000_000.0;
+        long minutes = (long) (totalSeconds / 60);
+        double seconds = totalSeconds % 60;
+        if (minutes > 0) return String.format("%dm %.1fs", minutes, seconds);
+        return String.format("%.1fs", seconds);
+    }
+
+    public void sendTeleportMessage(Player player, int id) {
+        TextComponent message = new TextComponent(main.color("&a&lClick to try again"));
+        message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/_teleportstart " + id));
+        player.spigot().sendMessage(message);
+    }
 }
