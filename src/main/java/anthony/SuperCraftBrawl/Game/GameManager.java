@@ -2778,6 +2778,8 @@ public class GameManager implements Listener, PluginMessageListener {
 			return "Spider";
 		case SLIME:
 			return "Slime";
+		case BLAZE:
+			return "Blaze";
 		}
 		return "Creature";
 	}
