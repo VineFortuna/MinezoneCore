@@ -3,6 +3,9 @@ package anthony.SuperCraftBrawl;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.entity.Player;
 
@@ -16,7 +19,7 @@ import net.md_5.bungee.api.ChatColor;
 public class ScoreboardManager {
 
 	private Core main;
-	public HashMap<Player, FastBoard> playersLobbyBoard = new HashMap<>();
+    public final Map<UUID, FastBoard> playersLobbyBoard = new ConcurrentHashMap<>();
 
 	public ScoreboardManager(Core main) {
 		this.main = main;
@@ -25,7 +28,7 @@ public class ScoreboardManager {
     public void lobbyBoard(Player player) {
         FastBoard board = new FastBoard(player);
         PlayerData data = main.getDataManager().getPlayerData(player);
-        this.playersLobbyBoard.put(player, board);
+        this.playersLobbyBoard.put(player.getUniqueId(), board);
         Rank rank = main.getRankManager().getRank(player);
         String rankName = "";
 
@@ -117,32 +120,25 @@ public class ScoreboardManager {
 	 */
 	public void waitingLobbyBoard(Player player, GameInstance game) {
 		FastBoard board = new FastBoard(player);
-		game.boards.put(player, board);
+		game.boards.put(player.getUniqueId(), board);
 
 		if (game.getMap() != null) {
 			board.updateTitle(main.color("&e&l" + game.getMap()));
-			board.updateLines("", main.color("&fMode: &e" + game.gameType.getName()),
+			board.updateLines("", main.color("&fMode: &a" + game.gameType.getName()),
 					"", main.color("&fClass: &cR&6a&en&ad&bo&3m"), "",
 					main.color("Players: &e"
                             + (game.getMap().GetInstance().gameType == GameType.FRENZY
-                            ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.gameType.getMaxPlayers()
+                            ? "" + ChatColor.GREEN + game.players.size() + "/" + game.gameType.getMaxPlayers()
                             : "")
                             + (game.getMap().GetInstance().gameType == GameType.CLASSIC
-                            ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.gameType.getMaxPlayers()
+                            ? "" + ChatColor.GREEN + game.players.size() + "/" + game.gameType.getMaxPlayers()
                             : "")
                             + (game.getMap().GetInstance().gameType == GameType.DUEL
-                            ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.gameType.getMaxPlayers()
+                            ? "" + ChatColor.GREEN + game.players.size() + "/" + game.gameType.getMaxPlayers()
                             : "")),
-					"", main.color("&fStarting In: &e&oWaiting"), "", main.color("&eminezone.club"));
+					"", main.color("&7&oWaiting for &a1 &7&oplayer"), "", main.color("&eminezone.club"));
 
-			game.boards.get(player).updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + game.getMap().toString());
-		} else {
-			board.updateTitle("" + ChatColor.YELLOW + ChatColor.BOLD + game.duosMap.toString());
-			board.updateLines("", "" + ChatColor.RESET + ChatColor.BOLD + "Class:", " " + ChatColor.GOLD + "Random", "",
-					"" + ChatColor.RESET + ChatColor.BOLD + "Players:",
-					" " + ChatColor.RESET + game.players.size() + "/6", "",
-					"" + ChatColor.RESET + ChatColor.BOLD + "Status:",
-					"" + ChatColor.RESET + ChatColor.ITALIC + " Waiting...");
+			game.boards.get(player.getUniqueId()).updateTitle(main.color("&e&l" + game.getMap()));
 		}
 	}
 
@@ -152,7 +148,7 @@ public class ScoreboardManager {
 			int playerSize = game.players.size();
 			int maxSize = game.gameType.getMaxPlayers();
 
-			game.boards.get(player).updateLine(5,
+			game.boards.get(player.getUniqueId()).updateLine(5,
                     main.color("Players: &e"
                             + (game.getMap().GetInstance().gameType == GameType.FRENZY
                             ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.gameType.getMaxPlayers()
@@ -166,14 +162,14 @@ public class ScoreboardManager {
 		}
 	}
     public void removeLobbyBoard(Player p) {
-        FastBoard b = playersLobbyBoard.remove(p);
+        FastBoard b = playersLobbyBoard.remove(p.getUniqueId());
         if (b != null) b.delete();
     }
 
     public void removeAllBoards() {
-        for (FastBoard b : playersLobbyBoard.values()) b.delete();
+        for (FastBoard b : playersLobbyBoard.values()) {
+            try { b.delete(); } catch (Throwable ignored) {}
+        }
         playersLobbyBoard.clear();
     }
-
-
 }
