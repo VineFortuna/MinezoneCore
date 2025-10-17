@@ -17,7 +17,6 @@ import anthony.util.ItemHelper;
 import anthony.util.PathfinderGoalFollowPlayer;
 import anthony.util.PathfinderHelper;
 import com.comphenix.protocol.wrappers.EnumWrappers;
-import me.itzzmic.minezone.api.PunishAPI;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.*;
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +48,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Door;
 import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
@@ -644,59 +644,116 @@ public class PlayerListener implements Listener {
 		e.setCancelled(true);
 	}
 
-	@EventHandler
-	public void onChat(AsyncPlayerChatEvent event) {
-		// StaffChat
-		event.setCancelled(true);
-		if (main.staffchat.contains(event.getPlayer())) {
-			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
-			String message = tag + event.getPlayer().getDisplayName() + ": " + event.getMessage();
+    private boolean cancelIfMuted(Player p) {
+        Plugin pun = Bukkit.getPluginManager().getPlugin("MinezonePunish");
+        if (pun == null || !pun.isEnabled()) return false;
 
-			for (Player staff : main.staffchat) {
-				TellAll(message);
-				return;
-			}
-		} else {
-			// Chat filter
-			List<String> filteredWords = new ArrayList<>(Arrays.asList("nibba", "nigga", "niggas", "nigger", "niggers",
-					"porn", "pornhub", "cum", "fuck you", "fuckyou", "fuck", "bitch", "pussy", "fucker", "motherfucker",
-					"kys", "pu$$y", "fag", "faggot", "bitchass", "cunt", "retard", "penis", "fucker", "twat", "cock",
-					"dick", "cumming", "fuckass", "vagina", "fuckers", "shit", "shitter", "shitters", "fucking"));
-			PlayerData data = main.getDataManager().getPlayerData(event.getPlayer());
-			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
-			String message = event.getMessage();
+        try {
+            // PunishPlugin#dao()
+            Object dao = pun.getClass().getMethod("dao").invoke(pun);
 
-			event.setFormat(ChatColor.YELLOW + main.color("" + data.checkPlayerLevel(event.getPlayer(), data) + "✧")
-					+ data.level + " " + tag);
-			String displayName = main.getRankManager().getRank(event.getPlayer()).getColorForNames(event.getPlayer(),
-					main.getRankManager().getRank(event.getPlayer()));
+            // PunishmentDao#getActiveMute(String)
+            Object rec = dao.getClass().getMethod("getActiveMute", String.class)
+                    .invoke(dao, p.getUniqueId().toString());
+            if (rec == null) return false;
 
-			if (!data.color.isEmpty() && !data.color.equals("0"))
-				displayName = ChatColor.valueOf(data.color) + event.getPlayer().getDisplayName();
+            Class<?> R = rec.getClass();
+            boolean active = (boolean) R.getField("active").get(rec);
+            if (!active) return false;
 
-			if (event.getPlayer().hasPermission("scb.chat"))
-				event.setFormat(main.color(event.getFormat() + displayName + ":&r "));
-			else {
-				event.setFormat(main.color(event.getFormat() + "&7" + displayName + ":&r "));
-			}
+            Long endEpoch = (Long) R.getField("endEpoch").get(rec);
+            String reason  = (String) R.getField("reason").get(rec);
 
-			String tempmsg = "";
-			for (String msgWord : message.split(" ")) { // Loop through each word and check if it is a banned word
-				if (filteredWords.contains(msgWord.toLowerCase())) {
-					tempmsg += StringUtils.repeat('*', msgWord.length()) + " ";
-				} else
-					tempmsg += msgWord + " ";
-			}
-			message = tempmsg.trim();
+            long now = System.currentTimeMillis() / 1000L;
+            if (endEpoch != null && now >= endEpoch) return false; // expired
 
-			if (event.getPlayer().hasPermission("scb.colorChat"))
-				event.setMessage(main.color(message));
-			else
-				event.setMessage(message);
+            return true; // muted -> cancel caller’s chat
+        } catch (Throwable t) {
+            return false; // fail open if anything goes wrong
+        }
+    }
 
-			Bukkit.broadcastMessage(event.getFormat() + event.getMessage());
-		}
-	}
+    private static String prettyRemaining(long seconds) {
+        double days = seconds / 86400.0;
+        if (days >= 1.0) {
+            double d = Math.round(days * 10.0) / 10.0;
+            return format1(d, "Day");
+        }
+        double hours = seconds / 3600.0;
+        if (hours >= 1.0) {
+            double h = Math.round(hours * 10.0) / 10.0;
+            return format1(h, "Hour");
+        }
+        int minutes = Math.max(1, (int) Math.ceil(seconds / 60.0));
+        return minutes + (minutes == 1 ? " Minute" : " Minutes");
+    }
+
+    private static String format1(double val, String unitSingular) {
+        boolean isInt = Math.abs(val - Math.rint(val)) < 1e-9;
+        String num = isInt ? String.format("%.0f", val) : String.format("%.1f", val);
+        String unit = (Math.abs(val - 1.0) < 1e-9) ? unitSingular : unitSingular + "s";
+        return num + " " + unit;
+    }
+
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent event) {
+        if (cancelIfMuted(event.getPlayer())) {
+            event.setCancelled(true);
+            event.getRecipients().clear(); // extra safety
+            return;
+        }
+
+        // StaffChat
+        event.setCancelled(true);
+        if (main.staffchat.contains(event.getPlayer())) {
+            String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
+            String message = tag + event.getPlayer().getDisplayName() + ": " + event.getMessage();
+
+            for (Player staff : main.staffchat) {
+                TellAll(message);
+                return;
+            }
+        } else {
+            // Chat filter
+            List<String> filteredWords = new ArrayList<>(Arrays.asList("nibba", "nigga", "niggas", "nigger", "niggers",
+                    "porn", "pornhub", "cum", "fuck you", "fuckyou", "fuck", "bitch", "pussy", "fucker", "motherfucker",
+                    "kys", "pu$$y", "fag", "faggot", "bitchass", "cunt", "retard", "penis", "fucker", "twat", "cock",
+                    "dick", "cumming", "fuckass", "vagina", "fuckers", "shit", "shitter", "shitters", "fucking"));
+            PlayerData data = main.getDataManager().getPlayerData(event.getPlayer());
+            String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
+            String message = event.getMessage();
+
+            event.setFormat(ChatColor.YELLOW + main.color("" + data.checkPlayerLevel(event.getPlayer(), data) + "✧")
+                    + data.level + " " + tag);
+            String displayName = main.getRankManager().getRank(event.getPlayer()).getColorForNames(event.getPlayer(),
+                    main.getRankManager().getRank(event.getPlayer()));
+
+            if (!data.color.isEmpty() && !data.color.equals("0"))
+                displayName = ChatColor.valueOf(data.color) + event.getPlayer().getDisplayName();
+
+            if (event.getPlayer().hasPermission("scb.chat"))
+                event.setFormat(main.color(event.getFormat() + displayName + ":&r "));
+            else {
+                event.setFormat(main.color(event.getFormat() + "&7" + displayName + ":&r "));
+            }
+
+            String tempmsg = "";
+            for (String msgWord : message.split(" ")) { // Loop through each word and check if it is a banned word
+                if (filteredWords.contains(msgWord.toLowerCase())) {
+                    tempmsg += StringUtils.repeat('*', msgWord.length()) + " ";
+                } else
+                    tempmsg += msgWord + " ";
+            }
+            message = tempmsg.trim();
+
+            if (event.getPlayer().hasPermission("scb.colorChat"))
+                event.setMessage(main.color(message));
+            else
+                event.setMessage(message);
+
+            Bukkit.broadcastMessage(event.getFormat() + event.getMessage());
+        }
+    }
 
 	public void TellAll(String message) {
 		for (Player staff : main.staffchat)
