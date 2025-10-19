@@ -22,7 +22,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -38,9 +37,10 @@ public class Fishing implements Listener {
     
     public Core main;
     private final Random rand = new Random();
-    private final int size = FishType.values().length;
     private ArrayList<Item> fishItems = new ArrayList<>();
     private final ArrayList<FishType> fishTypes = new ArrayList<>();
+    private Map<Player, Integer> caughtRecent = new HashMap<>();
+
     private final int common = FishRarity.COMMON.getChance();
     private final int rare = FishRarity.RARE.getChance();
     private final int epic = FishRarity.EPIC.getChance();
@@ -48,9 +48,6 @@ public class Fishing implements Listener {
     private final int legendary = FishRarity.LEGENDARY.getChance();
     private final int junk = FishRarity.JUNK.getChance();
     private final int treasure = FishRarity.TREASURE.getChance();
-    private HashMap<Player, Integer> caughtRecent = new HashMap<>();
-
-    public Block treasureBlock;
     
     public Fishing(Core main) {
         this.main = main;
@@ -61,10 +58,11 @@ public class Fishing implements Listener {
     @EventHandler
     public void onFish(PlayerFishEvent event) {
         if (event.getState().equals(PlayerFishEvent.State.CAUGHT_FISH) && event.getCaught() instanceof Item) {
-            Item i = (Item) event.getCaught();
-            event.setExpToDrop(0);
             Player p = event.getPlayer();
             PlayerData data = main.getDataManager().getPlayerData(p);
+
+            Item i = (Item) event.getCaught();
+            event.setExpToDrop(0);
             FishType fish = getFish(main.getFishingArea(event.getHook().getLocation()));
             FishingDetails details = data.playerFishing.get(fish.getId());
             
@@ -87,31 +85,14 @@ public class Fishing implements Listener {
             // When caught for the first time
             if (details.timesCaught == 0) {
                 // Message
-                p.sendMessage(main.color("&2&l============================================="));
-                p.sendMessage(main.color("&2&l||"));
-                if (fish.isFish()) {
-                    p.sendMessage(main.color("&2&l|| &e&lCAUGHT " + fish.getRarity().getColor() + "&l"
-                            + fish.getRarity().getName().toUpperCase() + " &e&lSEA CREATURE: " + fish.getName()));
-                } else {
-                    p.sendMessage(main.color("&2&l|| &e&lCAUGHT " + fish.getRarity().getColor() + "&l"
-                            + fish.getRarity().getName().toUpperCase() + "&e&l: " + fish.getName()));
-                }
-                p.sendMessage(main.color("&2&l|| &7" + fish.getDesc()));
-                p.sendMessage(main.color("&2&l||"));
-                p.sendMessage(main.color("&2&l============================================="));
+                showFirstCatchMessage(p, fish);
                 
-                // Firework
+                // Fireworks when all types have been caught
                 if (getTotalFish(p) == FishType.values().length) {
-                    p.playSound(p.getLocation(), Sound.FIREWORK_TWINKLE, 1, 1);
-                    p.sendMessage(main.color("&3&l(!) &rCongratulations! You caught everything!"));
-                    Firework fw = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
-                    FireworkMeta fwm = fw.getFireworkMeta();
-                    fwm.setPower(1);
-                    fwm.addEffect(FireworkEffect.builder().withColor(Color.AQUA).with(FireworkEffect.Type.BALL_LARGE)
-                            .flicker(true).build());
-                    fw.setFireworkMeta(fwm);
+                    completionFireworks(p);
                 }
             }
+
             if (fish == FishType.CRATE) {
                 p.sendMessage(main.color("&3&l(!) &rYou have found &e1 MysteryChest&r!"));
                 data.mysteryChests++;
@@ -119,17 +100,7 @@ public class Fishing implements Listener {
                 int r = rand.nextInt(40) + 481;
                 data.exp += r;
                 p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + r + " EXP&r!"));
-                if (data.exp >= 2500) {
-                    data.level++;
-                    data.exp -= 2500;
-                    p.sendMessage(main.color("&8&m----------------------------------------"));
-					p.sendMessage(main.color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
-					p.sendMessage(main.color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
-					p.sendMessage(main.color("&8&m----------------------------------------"));
-
-					// (optional but fun) little audio feedback on 1.8:
-					p.playSound(p.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
-                }
+                handleLevelUp(p, data);
                 updateScoreboard = true;
             } else if (fish == FishType.TOKENS) {
                 int r = rand.nextInt(20) + 41;
@@ -145,7 +116,10 @@ public class Fishing implements Listener {
                 }
                 p.sendMessage(main.color("&3&l(!) &rTreasure Map added to collection!"));
             }
-            reward(p, fish.getRarity());
+
+            playRewardEffect(p, fish.getRarity());
+
+            // Update player data
             data.totalcaught++;
             data.caught++;
             details.addCaught(1);
@@ -164,76 +138,87 @@ public class Fishing implements Listener {
             	main.getScoreboardManager().lobbyBoard(p);
         }
     }
-    
+
+    private void handleLevelUp(Player player, PlayerData data) {
+        if (data.exp >= 2500) {
+            data.level++;
+            data.exp -= 2500;
+            player.sendMessage(main.color("&8&m----------------------------------------"));
+            player.sendMessage(main.color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
+            player.sendMessage(main.color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
+            player.sendMessage(main.color("&8&m----------------------------------------"));
+            player.playSound(player.getLocation(), Sound.LEVEL_UP, 1f, 1.15f);
+        }
+    }
+
+    private void showFirstCatchMessage(Player p, FishType fish) {
+        p.sendMessage(main.color("&2&l============================================="));
+        p.sendMessage(main.color("&2&l||"));
+        if (fish.isFish()) {
+            p.sendMessage(main.color("&2&l|| &e&lCAUGHT " + fish.getRarity().getColor() + "&l"
+                    + fish.getRarity().getName().toUpperCase() + " &e&lSEA CREATURE: " + fish.getName()));
+        } else {
+            p.sendMessage(main.color("&2&l|| &e&lCAUGHT " + fish.getRarity().getColor() + "&l"
+                    + fish.getRarity().getName().toUpperCase() + "&e&l: " + fish.getName()));
+        }
+        p.sendMessage(main.color("&2&l|| &7" + fish.getDesc()));
+        p.sendMessage(main.color("&2&l||"));
+        p.sendMessage(main.color("&2&l============================================="));
+    }
+
+    private void completionFireworks(Player p) {
+        p.playSound(p.getLocation(), Sound.FIREWORK_TWINKLE, 1, 1);
+        p.sendMessage(main.color("&3&l(!) &rCongratulations! You caught everything!"));
+        Firework fw = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
+        FireworkMeta fwm = fw.getFireworkMeta();
+        fwm.setPower(1);
+        fwm.addEffect(FireworkEffect.builder().withColor(Color.AQUA).with(FireworkEffect.Type.BALL_LARGE)
+                .flicker(true).build());
+        fw.setFireworkMeta(fwm);
+    }
+
+    public FishType getFish(FishArea area) {
+        int r = rand.nextInt(100)+1;
+        if (r <= treasure) return getRandomLoot(FishRarity.TREASURE, area);
+        else if (r <= treasure + junk) return getRandomLoot(FishRarity.JUNK, area);
+        return getRandomFish(area);
+    }
+
+    // Get fish from area
     private FishType getRandomFish(FishArea area) {
-        ArrayList<FishType> fishes = new ArrayList<>();
-        
-        FishRarity rarity;
-        int r = rand.nextInt(100) + 1;
-        
-        if (r <= legendary)
-            rarity = FishRarity.LEGENDARY;
-        else if (r <= legendary + mythic)
-            rarity = FishRarity.MYTHIC;
-        else if (r <= legendary + mythic + epic)
-            rarity = FishRarity.EPIC;
-        else if (r <= legendary + mythic + epic + rare)
-            rarity = FishRarity.RARE;
-        else
-            rarity = FishRarity.COMMON;
-        
-        for (FishType t : fishTypes) {
-            if (t.getRarity() == rarity) {
-                if (area != null && t.getAreas() != null && !t.getAreas().isEmpty()) {
-                    if (t.getAreas().contains(area))
-                        fishes.add(t);
-                } else {
-                    fishes.add(t);
-                }
+        FishRarity rarity = getRarity(rand.nextInt(100) + 1);
+        ArrayList<FishType> filtered = new ArrayList<>();
+
+        for (FishType type : fishTypes) {
+            if (type.getRarity() == rarity &&
+                    (area == null || type.getAreas() == null || type.getAreas().isEmpty() || type.getAreas().contains(area))) {
+                        filtered.add(type);
             }
         }
-        return fishes.get(rand.nextInt(fishes.size()));
+        return filtered.get(rand.nextInt(filtered.size()));
     }
-    
-    @EventHandler
-    public void onDisable(PluginDisableEvent event) {
-        for (Item i : fishItems) {
-            i.remove();
-        }
-    }
-    private void removeFish(Item i) {
-        Bukkit.getServer().getScheduler().runTaskLater(main, new Runnable(){
-            public void run() {
-                fishItems.remove(i);
-                i.remove();
-            }
-        }, 80L);
-    }
+
+    // Get junk or treasure from area
     private FishType getRandomLoot(FishRarity rarity, FishArea area) {
         ArrayList<FishType> loot = new ArrayList<>();
-        for (FishType l : fishTypes) {
-            if (l.getRarity() == rarity) {
-                if (area != null && l.getAreas() != null && !l.getAreas().isEmpty()) {
-                    if (l.getAreas().contains(area))
-                        loot.add(l);
-                } else {
-                    loot.add(l);
-                }
+        for (FishType type : fishTypes) {
+            if (type.getRarity() == rarity &&
+                    (area == null || type.getAreas() == null || type.getAreas().isEmpty() || type.getAreas().contains(area))) {
+                loot.add(type);
             }
         }
         return loot.get(rand.nextInt(loot.size()));
     }
-    public FishType getFish(FishArea area) {
-        int r = rand.nextInt(100)+1;
-        if (r <= treasure)
-            return getRandomLoot(FishRarity.TREASURE, area);
-        else if (r <= treasure + junk)
-            return getRandomLoot(FishRarity.JUNK, area);
-        
-        return getRandomFish(area);
+
+    private FishRarity getRarity(int r) {
+        if (r <= legendary) return FishRarity.LEGENDARY;
+        if (r <= legendary + mythic) return FishRarity.MYTHIC;
+        if (r <= legendary + mythic + epic) return FishRarity.EPIC;
+        if (r <= legendary + mythic + epic + rare) return FishRarity.RARE;
+        return FishRarity.COMMON;
     }
-    
-    private void reward(Player p, FishRarity rarity) {
+
+    private void playRewardEffect(Player p, FishRarity rarity) {
         switch (rarity) {
             case JUNK:
                 p.playSound(p.getLocation(), Sound.ZOMBIE_PIG_HURT, 1, 0);
@@ -260,11 +245,14 @@ public class Fishing implements Listener {
                 break;
                 
         }
-        particles(p, rarity);
     }
     
     private void friendship(Player p, int level) {
-        int radius = 0, times = 0, exp = 0;
+        int radius = 0;
+        int times = 0;
+        int exp = 0;
+
+        // Level settings
         switch (level) {
             case 1:
                 radius = 4;
@@ -287,11 +275,17 @@ public class Fishing implements Listener {
                 exp = 15;
                 break;
         }
+
         if (caughtRecent.get(p) % times == 0) {
-            for (int t = 0; t < 2 * Math.PI * radius; t += 1) {
-                p.playEffect(p.getLocation().add(radius * Math.cos(t), 0,
-                        radius * Math.sin((t))), Effect.HAPPY_VILLAGER, 1);
+            // Particle circle around player
+            Location loc = p.getLocation();
+            for (double angle = 0; angle < 2 * Math.PI; angle += 0.5) { // smoother circle
+                double x = radius * Math.cos(angle);
+                double z = radius * Math.sin(angle);
+                p.playEffect(loc.clone().add(x, 0, z), Effect.HAPPY_VILLAGER, 1);
             }
+
+            // Check for nearby players
             boolean found = false;
             for (Entity e : p.getNearbyEntities(radius, radius, radius)) {
                 if (e instanceof Player && e != p) {
@@ -303,45 +297,10 @@ public class Fishing implements Listener {
                 PlayerData data = main.getDataManager().getPlayerData(p);
                 data.exp += exp;
                 p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + exp + " EXP!"));
-                if (data.exp >= 2500) {
-                    data.level++;
-                    data.exp -= 2500;
-                    p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
-                    p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "!"));
-                }
+                handleLevelUp(p, data);
                 if (main.getGameManager().GetInstanceOfPlayer(p) == null)
                     main.getScoreboardManager().lobbyBoard(p);
             }
-        }
-    }
-    
-    private void particles(Player p, FishRarity r) {
-        Color c;
-        switch (r) {
-            case COMMON:
-                c = Color.GRAY;
-                break;
-            case RARE:
-                c = Color.LIME;
-                break;
-            case EPIC:
-                c = Color.PURPLE;
-                break;
-            case MYTHIC:
-                c = Color.RED;
-                break;
-            case LEGENDARY:
-                c = Color.ORANGE;
-                break;
-            case JUNK:
-                c = Color.BLACK;
-                break;
-            case TREASURE:
-                c = Color.YELLOW;
-                break;
-            default:
-                c = Color.NAVY;
-                break;
         }
     }
 
@@ -360,7 +319,7 @@ public class Fishing implements Listener {
     }
 
     public int getTotalFish(Player player) {
-        return getTotalFish(player, null);
+        return getTotalFish(player, (FishRarity) null);
     }
 
     public boolean hasAllFish(Player player) {
@@ -490,7 +449,6 @@ public class Fishing implements Listener {
                 Bukkit.getScheduler().runTaskLater(main, () -> {
                     loc.getWorld().playSound(loc, Sound.CHEST_CLOSE, 1f, 1f);
 
-                    // use 1.8 particle (CLOUD doesn't exist yet, so use SMOKE_NORMAL or EXPLOSION_NORMAL)
                     loc.getWorld().playEffect(loc.clone().add(0, 0.5, 0), Effect.SMOKE, 4);
 
                     stand.remove();
@@ -534,13 +492,8 @@ public class Fishing implements Listener {
             reward = FishType.EXP;
             amount = rand.nextInt(40) + 481;
             data.exp += amount;
-            p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + r + " EXP&r!"));
-            if (data.exp >= 2500) {
-                data.level++;
-                data.exp -= 2500;
-                p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
-                p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "&r!"));
-            }
+            p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + amount + " EXP&r!"));
+            handleLevelUp(p, data);
             updateScoreboard = true;
         } else if (r <= 50) {
             reward = FishType.TOKENS;
@@ -553,12 +506,7 @@ public class Fishing implements Listener {
             amount = rand.nextInt(40) + 81;
             data.exp += amount;
             p.sendMessage(main.color("&3&l(!) &rYou have gained &e" + amount + " EXP&r!"));
-            if (data.exp >= 2500) {
-                data.level++;
-                data.exp -= 2500;
-                p.sendMessage(main.color("&e&lLEVEL UPGRADED!"));
-                p.sendMessage(main.color("&r&l(!) &rYou are now Level " + data.level + "&r!"));
-            }
+            handleLevelUp(p, data);
             updateScoreboard = true;
         } else {
             reward = FishType.CRATE;
@@ -603,6 +551,15 @@ public class Fishing implements Listener {
         }
     }
 
+    private void removeFish(Item i) {
+        Bukkit.getServer().getScheduler().runTaskLater(main, new Runnable(){
+            public void run() {
+                fishItems.remove(i);
+                i.remove();
+            }
+        }, 80L);
+    }
+
     public void cleanup(Player p) {
         if (p == null) return;
 
@@ -637,5 +594,13 @@ public class Fishing implements Listener {
         // playerTasks.values().forEach(BukkitTask::cancel);
         // playerTasks.clear();
         // fishingSessions.clear();
+    }
+
+    @EventHandler
+    public void onDisable(PluginDisableEvent event) {
+        for (Item i : fishItems) {
+            i.remove();
+        }
+        fishItems.clear();
     }
 }
