@@ -57,10 +57,8 @@ public class BunnyClass extends BaseClass {
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void Tick(int gameTicks) {
-		System.out.println("Re-applying speed");
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED))) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2));
-			System.out.println("Re-applying speed again");
 		}
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
 			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 2));
