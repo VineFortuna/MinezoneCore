@@ -51,7 +51,6 @@ public class FreddyClass extends BaseClass {
 		playerInv.setItem(0, getAttackWeapon());
 		playerInv.setItem(1, getStunAbility());
 		playerInv.setItem(2, getScareAbility());
-		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 0));
 	}
 
 	@Override
@@ -101,24 +100,19 @@ public class FreddyClass extends BaseClass {
 							if (!target.getWorld().equals(w))
 								continue;
 
-							// Check XZ distance
-							double dx = target.getLocation().getX() - cLoc.getX();
-							double dz = target.getLocation().getZ() - cLoc.getZ();
-							double distXZ = Math.hypot(dx, dz);
-							if (distXZ > 6.0)
-								continue;
+                            // Check XZ distance (unchanged)
+                            double dx = target.getLocation().getX() - cLoc.getX();
+                            double dz = target.getLocation().getZ() - cLoc.getZ();
+                            double distXZ = Math.hypot(dx, dz);
+                            if (distXZ > 6.0) continue;
 
-							// Check Y difference (target up to +2 blocks above)
-							double dy = target.getLocation().getY() - cLoc.getY();
-							if (dy < 0.0 || dy > 2.0)
-								continue;
+                            double dy = Math.abs(target.getLocation().getY() - cLoc.getY());
+                            if (dy > 4.0) continue;
 
-							// Apply stun effects
-							target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 20 * 5, 0, true, false));
-							target.addPotionEffect(
-									new PotionEffect(PotionEffectType.CONFUSION, 20 * 10, 2, true, false));
-							target.playSound(target.getLocation(), Sound.GHAST_SCREAM, 0.6f, 1.2f);
-						}
+                            target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 20 * 5, 0, true, false));
+                            target.addPotionEffect(new PotionEffect(PotionEffectType.CONFUSION, 20 * 10, 2, true, false));
+                            target.playSound(target.getLocation(), Sound.GHAST_SCREAM, 0.6f, 1.2f);
+                        }
 					}
 					spawnSubtleRing(w, cLoc);
 					w.playSound(cLoc, Sound.ENDERMAN_SCREAM, 0.8f, 1.0f);
@@ -211,9 +205,9 @@ public class FreddyClass extends BaseClass {
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.setUnbreakable(ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.IRON_AXE), instance.color("&2&lFreddy's Axe")),
-				Enchantment.KNOCKBACK, 1));
+		ItemStack item = ItemHelper.setUnbreakable(ItemHelper.addEnchant(ItemHelper.addEnchant(
+				ItemHelper.setDetails(new ItemStack(Material.STONE_SPADE), instance.color("&2&lFreddy's Mic")),
+				Enchantment.DAMAGE_ALL, 1), Enchantment.KNOCKBACK, 1));
 		return item;
 	}
 
