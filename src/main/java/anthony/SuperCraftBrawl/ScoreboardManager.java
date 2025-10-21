@@ -18,14 +18,22 @@ import net.md_5.bungee.api.ChatColor;
 
 public class ScoreboardManager {
 
-	private Core main;
+    private Core main;
     public final Map<UUID, FastBoard> playersLobbyBoard = new ConcurrentHashMap<>();
 
-	public ScoreboardManager(Core main) {
-		this.main = main;
-	}
+    public ScoreboardManager(Core main) {
+        this.main = main;
+    }
+
+    // NEW: animator needs this
+    public boolean hasLobbyBoard(Player p) {                        // NEW
+        return playersLobbyBoard.containsKey(p.getUniqueId());      // NEW
+    }                                                               // NEW
 
     public void lobbyBoard(Player player) {
+        // Stop any previous animation and board (prevents duplicates)          // NEW
+        try { main.getTitleAnimationManager().stop(player); } catch (Throwable ignored) {} // NEW
+
         FastBoard board = new FastBoard(player);
         PlayerData data = main.getDataManager().getPlayerData(player);
         this.playersLobbyBoard.put(player.getUniqueId(), board);
@@ -52,6 +60,9 @@ public class ScoreboardManager {
         );
 
         if (main.getCommands() == null) {
+            // Animated title for null-commands path too                        // NEW
+            try { main.getTitleAnimationManager().start(player, board); } catch (Throwable ignored) {} // NEW
+
             board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + "MINEZONE");
             if (data != null) {
                 board.updateLines(
@@ -73,6 +84,10 @@ public class ScoreboardManager {
 
         if (!main.tournament) {
             String gameServer = "MINEZONE";
+
+            // Start the GOLD→AQUA fill + flash animation for the title          // NEW
+            try { main.getTitleAnimationManager().start(player, board); } catch (Throwable ignored) {} // NEW
+
             board.updateTitle(main.color("&e&l" + gameServer));
             if (data != null) {
                 board.updateLines(
@@ -89,6 +104,9 @@ public class ScoreboardManager {
                 );
             }
         } else {
+            // Tournament uses static title → ensure animation is STOPPED        // NEW
+            try { main.getTitleAnimationManager().stop(player); } catch (Throwable ignored) {} // NEW
+
             board.updateTitle("" + ChatColor.AQUA + ChatColor.BOLD + "MINEZONE");
             if (data != null) {
                 board.updateLines(
@@ -110,23 +128,25 @@ public class ScoreboardManager {
         return NumberFormat.getIntegerInstance(Locale.US).format(n);
     }
 
-
     /**
-	 * This function sets the waiting lobby scoreboard for when a player joins the
-	 * game
-	 * 
-	 * @param player to give the scoreboard to
-	 * @param game   which is the instance of the game player is in
-	 */
-	public void waitingLobbyBoard(Player player, GameInstance game) {
-		FastBoard board = new FastBoard(player);
-		game.boards.put(player.getUniqueId(), board);
+     * This function sets the waiting lobby scoreboard for when a player joins the
+     * game
+     *
+     * @param player to give the scoreboard to
+     * @param game   which is the instance of the game player is in
+     */
+    public void waitingLobbyBoard(Player player, GameInstance game) {
+        // Waiting board should be STATIC → stop animator                    // NEW
+        try { main.getTitleAnimationManager().stop(player); } catch (Throwable ignored) {} // NEW
 
-		if (game.getMap() != null) {
-			board.updateTitle(main.color("&e&l" + game.getMap()));
-			board.updateLines("", main.color("&fMode: &a" + game.gameType.getName()),
-					"", main.color("&fClass: &cR&6a&en&ad&bo&3m"), "",
-					main.color("Players: &e"
+        FastBoard board = new FastBoard(player);
+        game.boards.put(player.getUniqueId(), board);
+
+        if (game.getMap() != null) {
+            board.updateTitle(main.color("&e&l" + game.getMap()));
+            board.updateLines("", main.color("&fMode: &a" + game.gameType.getName()),
+                    "", main.color("&fClass: &cR&6a&en&ad&bo&3m"), "",
+                    main.color("Players: &e"
                             + (game.getMap().GetInstance().gameType == GameType.FRENZY
                             ? "" + ChatColor.GREEN + game.players.size() + "/" + game.gameType.getMaxPlayers()
                             : "")
@@ -136,19 +156,19 @@ public class ScoreboardManager {
                             + (game.getMap().GetInstance().gameType == GameType.DUEL
                             ? "" + ChatColor.GREEN + game.players.size() + "/" + game.gameType.getMaxPlayers()
                             : "")),
-					"", main.color("&7&oWaiting for &a1 &7&oplayer"), "", main.color("&eminezone.club"));
+                    "", main.color("&7&oWaiting for &a1 &7&oplayer"), "", main.color("&eminezone.club"));
 
-			game.boards.get(player.getUniqueId()).updateTitle(main.color("&e&l" + game.getMap()));
-		}
-	}
+            game.boards.get(player.getUniqueId()).updateTitle(main.color("&e&l" + game.getMap()));
+        }
+    }
 
-	public void updatePlayerCountBoard(Player player, GameInstance game) {
-		if (game != null) {
-			GameType gameType = game.getMap().GetInstance().gameType;
-			int playerSize = game.players.size();
-			int maxSize = game.gameType.getMaxPlayers();
+    public void updatePlayerCountBoard(Player player, GameInstance game) {
+        if (game != null) {
+            GameType gameType = game.getMap().GetInstance().gameType;
+            int playerSize = game.players.size();
+            int maxSize = game.gameType.getMaxPlayers();
 
-			game.boards.get(player.getUniqueId()).updateLine(5,
+            game.boards.get(player.getUniqueId()).updateLine(5,
                     main.color("Players: &e"
                             + (game.getMap().GetInstance().gameType == GameType.FRENZY
                             ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.gameType.getMaxPlayers()
@@ -159,9 +179,13 @@ public class ScoreboardManager {
                             + (game.getMap().GetInstance().gameType == GameType.DUEL
                             ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.gameType.getMaxPlayers()
                             : "")));
-		}
-	}
+        }
+    }
+
     public void removeLobbyBoard(Player p) {
+        // Always stop the animation before deleting                         // NEW
+        try { main.getTitleAnimationManager().stop(p); } catch (Throwable ignored) {} // NEW
+
         FastBoard b = playersLobbyBoard.remove(p.getUniqueId());
         if (b != null) b.delete();
     }
