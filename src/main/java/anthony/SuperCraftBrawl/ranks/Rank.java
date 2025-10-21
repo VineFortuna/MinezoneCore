@@ -122,30 +122,6 @@ public enum Rank {
     	return arrowColor;
     }
 
-    public int getTabListIndex(){
-        //Lower numbers will show higher up in the tab list
-        switch (this){
-            case OWNER: return 0;
-            case DIRECTOR: return 1;
-            case SUPERVISOR: return 2;
-            case ADMIN: return 3;
-            case DEVELOPER: return 4;
-            case BUILDER: return 5;
-            case SR_MODERATOR: return 6;
-            case STAFF_MANAGER: return 7;
-            case MODERATOR: return 8;
-            case TRAINEE: return 9;
-            case QA: return 10;
-            case MEDIA: return 11;
-            case SUPREME: return 12;
-            case CAPTAIN: return 13;
-            case VIP: return 14;
-            case PARTNER: return 15;
-            case DEFAULT:
-            default: return Rank.values().length;
-        }
-    }
-
     public String getTagWithSpace() {
         if (this == DEFAULT)
             return "";   //GIVES TAG A SPACE;
@@ -184,6 +160,25 @@ public enum Rank {
 
 		return msg + player.getDisplayName();
 	}
+
+    public int getTabListIndex() {
+        switch (this) {
+            case OWNER:         return 0;
+            case ADMIN:         return 1;
+            case DEVELOPER:     return 2;
+            case SR_MODERATOR:  return 3;
+            case MODERATOR:     return 4;
+            case TRAINEE:       return 5;
+            case QA:            return 6;
+            case BUILDER:       return 7;
+            case MEDIA:         return 8;
+            case SUPREME:       return 9;
+            case CAPTAIN:       return 10;
+            case VIP:           return 11;
+            case DEFAULT:
+            default:            return 12;
+        }
+    }
 
     public static Rank getRankFromName(String name) {
         for (Rank rank : Rank.values()) {
