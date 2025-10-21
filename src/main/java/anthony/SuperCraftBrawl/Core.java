@@ -29,6 +29,7 @@ import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
 import anthony.SuperCraftBrawl.practice.BowPractice;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.ranks.RankManager;
+import anthony.SuperCraftBrawl.ScoreboardManager;
 import anthony.SuperCraftBrawl.signs.SignManager;
 import anthony.SuperCraftBrawl.tablist.TablistManager;
 import anthony.parkour.Arenas;
@@ -149,6 +150,9 @@ public class Core extends JavaPlugin implements Listener {
             leaderboardScopeByViewer = new java.util.HashMap<>();
     public anthony.SuperCraftBrawl.leaderboards.StatSnapshotDAO snapshotDAO;
 
+    //SCOREBOARDS:
+    private anthony.SuperCraftBrawl.scoreboards.TitleAnimationManager titleAnimationManager;
+
 	public Core() {
 		this.staffchat = new ArrayList<Player>();
 		this.globalchat = new ArrayList<Player>();
@@ -167,6 +171,8 @@ public class Core extends JavaPlugin implements Listener {
 	public ActionBarManager getActionBarManager() {
 		return this.actionBarManager;
 	}
+
+    public anthony.SuperCraftBrawl.scoreboards.TitleAnimationManager getTitleAnimationManager() { return titleAnimationManager; }
 
 	public CandyAuraManager getCandyAuraManager() {
 		return this.candyAura;
@@ -603,6 +609,7 @@ public class Core extends JavaPlugin implements Listener {
         listener = new PlayerListener(this);
         gameManager = new GameManager(this);
         scoreboardManager = new ScoreboardManager(this);
+        titleAnimationManager = new anthony.SuperCraftBrawl.scoreboards.TitleAnimationManager(this);
         tabManager = new TablistManager(this);
         commands = new Commands(this);
         djManager = new DoubleJumpManager(this);
@@ -1823,83 +1830,10 @@ public class Core extends JavaPlugin implements Listener {
 		player.sendMessage(color("&f&l----------------------------------------"));
 	}
 
-    public void sendScoreboardUpdate(Player player) {
-        Rank rank = this.getRankManager().getRank(player);
-        if (rank == null || !player.isOnline()) return;
-
-        // Make sure the player has a scoreboard (not strictly necessary for the loop below,
-        // but consistent with your original intent of assigning lobby board to the triggering player)
-        if (player.getScoreboard() == null || player.getScoreboard() == Bukkit.getScoreboardManager().getMainScoreboard()) {
+    public void sendScoreboardUpdate(Player trigger) {
+        for (Player p : Bukkit.getOnlinePlayers()) {
             try {
-                player.setScoreboard(Bukkit.getScoreboardManager().getNewScoreboard());
-            } catch (Throwable ignored) {}
-        }
-
-        // Organized tab list for all online players
-        for (Player pl : Bukkit.getOnlinePlayers()) {
-            if (pl == null || !pl.isOnline()) continue;
-
-            // Try to use the lobby board if present, else use pl's current board, else create one.
-            org.bukkit.scoreboard.Scoreboard board = null;
-            try {
-                // playersLobbyBoard might not have an entry for this player (e.g., in game / just removed)
-                if (getScoreboardManager() != null
-                        && getScoreboardManager().playersLobbyBoard != null
-                        && getScoreboardManager().playersLobbyBoard.get(pl) != null
-                        && getScoreboardManager().playersLobbyBoard.get(pl).getPlayer() != null
-                        && getScoreboardManager().playersLobbyBoard.get(pl).getPlayer().getScoreboard() != null) {
-
-                    board = getScoreboardManager().playersLobbyBoard.get(pl).getPlayer().getScoreboard();
-                }
-            } catch (Throwable ignored) {}
-
-            if (board == null) {
-                board = pl.getScoreboard();
-                if (board == null || board == Bukkit.getScoreboardManager().getMainScoreboard()) {
-                    try {
-                        board = Bukkit.getScoreboardManager().getNewScoreboard();
-                        pl.setScoreboard(board);
-                    } catch (Throwable ignored) {}
-                }
-            }
-
-            // Build a valid team name (<= 16 chars in 1.8)
-            String rawTeamName = rank.getTabListIndex() + "_" + rank.name(); // e.g. "01_OWNER"
-            String teamName = rawTeamName;
-            if (teamName.length() > 16) {
-                teamName = teamName.substring(0, 16);
-            }
-
-            org.bukkit.scoreboard.Team team = board.getTeam(teamName);
-            if (team == null) {
-                try { team = board.registerNewTeam(teamName); }
-                catch (IllegalArgumentException ignored) {
-                    // If somehow the truncated name still collides, add a small hash suffix
-                    String fallback = (teamName.substring(0, Math.min(12, teamName.length())) + Integer.toHexString(rawTeamName.hashCode())).substring(0, Math.min(16, teamName.length()));
-                    team = board.getTeam(fallback);
-                    if (team == null) {
-                        try { team = board.registerNewTeam(fallback); } catch (Throwable ignored2) {}
-                    }
-                } catch (Throwable ignored) {}
-            }
-            if (team == null) continue; // nothing more we can do safely
-
-            // Ensure player entry is on that team
-            if (!team.hasEntry(player.getName())) {
-                try { team.addEntry(player.getName()); } catch (Throwable ignored) {}
-            }
-
-            // Set prefix based on rank (16-char limit including color codes)
-            String rankTag = rank.getTagWithSpace(); // already colorized elsewhere
-            // In 1.8, team prefix can be at most 16 characters (including color codes)
-            // Your original code used 12 to be safe; keep similar logic:
-            try {
-                if (rankTag.length() > 12) {
-                    String shortened = rank.getTag().length() > 11 ? rank.getTag().substring(0, 11).trim() : rank.getTag();
-                    team.setPrefix(shortened + " " + ChatColor.RESET);
-                } else {
-                    team.setPrefix(rankTag);
-                }
+                getTabManager().setPlayerTeam(p);
             } catch (Throwable ignored) {}
         }
     }
