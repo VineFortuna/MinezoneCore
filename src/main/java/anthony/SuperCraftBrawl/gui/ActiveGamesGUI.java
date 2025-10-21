@@ -35,8 +35,8 @@ public class ActiveGamesGUI implements InventoryProvider {
 
 		if (main.getGameManager().getNumOfGames() == 0) {
 			contents.set(1, 4, ClickableItem.of(
-					ItemHelper.setDetails(new ItemStack(Material.BARRIER), main.color("&7There are no active games at"),
-							main.color("&7the moment! Join a game with"), main.color("&7the Game Selector")),
+					ItemHelper.setDetails(new ItemStack(Material.BARRIER), main.color("&c&lNo games!"),
+							main.color("&7Start a game by using"), main.color("&7the Game Selector")),
 					e -> {
 
 					}));

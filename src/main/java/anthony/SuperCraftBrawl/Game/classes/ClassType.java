@@ -401,7 +401,7 @@ public enum ClassType {
 			case Skeleton:
 				return "" + ChatColor.GRAY + "Skeleton" + ChatColor.RESET;
 			case Slime:
-				return "" + ChatColor.GREEN + ChatColor.BOLD + "Slime" + ChatColor.RESET;
+				return "" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.ITALIC + "Slime" + ChatColor.RESET;
 			case SnowGolem:
 				return "" + ChatColor.WHITE + ChatColor.BOLD + "SnowGolem" + ChatColor.RESET;
 			case TNT:
