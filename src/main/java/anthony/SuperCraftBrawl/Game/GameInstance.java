@@ -285,17 +285,17 @@ public class GameInstance {
     private boolean isLobbyFull(Player player) {
         if (this.map != null) {
             if (this.gameType == GameType.DUEL && players.size() >= 2) {
-                player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is full!");
+                player.sendMessage(color("&c&l(!) &fThis game is full!"));
                 return true;
             }
             if (!(player.hasPermission("scb.bypassFull")) && gameType == GameType.CLASSIC && players.size() >= 6) {
-                player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is full!");
+                player.sendMessage(color("&c&l(!) &fThis game is full! Purchase a rank at &e&nminezone.club&f to bypass this restriction"));
                 return true;
             }
             return false;
         } else {
             if (players.size() >= 7) {
-                player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is full!");
+                player.sendMessage(color("&c&l(!) &fThis game is full!"));
                 return true;
             }
             players.add(player);
