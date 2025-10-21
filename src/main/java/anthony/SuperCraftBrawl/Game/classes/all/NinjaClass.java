@@ -10,9 +10,11 @@ import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -21,6 +23,8 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
+
+import static sun.jvm.hotspot.oops.CellTypeState.ref;
 
 public class NinjaClass extends BaseClass {
 
@@ -53,18 +57,81 @@ public class NinjaClass extends BaseClass {
 				ChatColor.YELLOW + "Right click to throw a deadly star!");
 	}
 
-	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
-		if (player.getItemInHand() != null && player.getItemInHand().getType() == Material.GHAST_TEAR) {
-			if (player.getLocation().distanceSquared(event.getEntity().getLocation()) > 1.2)
-				event.setCancelled(true);
-			else {
-				player.getWorld().playSound(event.getEntity().getLocation(), Sound.BAT_DEATH, 1, 2);
-			}
-		}
-	}
+    @Override
+    public void DoDamage(EntityDamageByEntityEvent event) {
+        ItemStack hand = player.getItemInHand();
+        if (hand == null || hand.getType() != Material.GHAST_TEAR) return;
 
-	@Override
+        final Entity target = event.getEntity();
+        final Location eye = player.getEyeLocation();
+        final Vector dir = eye.getDirection().normalize();
+        final Vector start = eye.toVector();
+        final Vector end   = start.clone().add(dir.clone().multiply(1.2));
+        final Location tl = target.getLocation();
+        final double halfWidth = 0.3;
+        final double height    = 1.8;
+
+        final Vector aabbMin = new Vector(tl.getX() - halfWidth, tl.getY(),          tl.getZ() - halfWidth);
+        final Vector aabbMax = new Vector(tl.getX() + halfWidth, tl.getY() + height, tl.getZ() + halfWidth);
+
+        if (!segmentIntersectsAABB(start, end, aabbMin, aabbMax)) {
+            event.setCancelled(true);
+            return;
+        }
+
+        player.getWorld().playSound(target.getLocation(), Sound.BAT_DEATH, 1f, 2f);
+    }
+
+    /**
+     * Robust segment–AABB test (slab method) without refs.
+     * Returns true if segment [p0,p1] intersects axis-aligned box [min,max].
+     */
+    private static boolean segmentIntersectsAABB(Vector p0, Vector p1, Vector min, Vector max) {
+        final double EPS = 1e-9;
+        double tMin = 0.0;
+        double tMax = 1.0;
+        Vector d = p1.clone().subtract(p0);
+
+        if (Math.abs(d.getX()) < EPS) {
+            if (p0.getX() < min.getX() || p0.getX() > max.getX()) return false;
+        } else {
+            double inv = 1.0 / d.getX();
+            double t1 = (min.getX() - p0.getX()) * inv;
+            double t2 = (max.getX() - p0.getX()) * inv;
+            if (t1 > t2) { double tmp = t1; t1 = t2; t2 = tmp; }
+            if (t1 > tMin) tMin = t1;
+            if (t2 < tMax) tMax = t2;
+            if (tMax < tMin) return false;
+        }
+
+        if (Math.abs(d.getY()) < EPS) {
+            if (p0.getY() < min.getY() || p0.getY() > max.getY()) return false;
+        } else {
+            double inv = 1.0 / d.getY();
+            double t1 = (min.getY() - p0.getY()) * inv;
+            double t2 = (max.getY() - p0.getY()) * inv;
+            if (t1 > t2) { double tmp = t1; t1 = t2; t2 = tmp; }
+            if (t1 > tMin) tMin = t1;
+            if (t2 < tMax) tMax = t2;
+            if (tMax < tMin) return false;
+        }
+
+        if (Math.abs(d.getZ()) < EPS) {
+            if (p0.getZ() < min.getZ() || p0.getZ() > max.getZ()) return false;
+        } else {
+            double inv = 1.0 / d.getZ();
+            double t1 = (min.getZ() - p0.getZ()) * inv;
+            double t2 = (max.getZ() - p0.getZ()) * inv;
+            if (t1 > t2) { double tmp = t1; t1 = t2; t2 = tmp; }
+            if (t1 > tMin) tMin = t1;
+            if (t2 < tMax) tMax = t2;
+            if (tMax < tMin) return false;
+        }
+
+        return tMax >= 0.0 && tMin <= 1.0 && tMax >= tMin;
+    }
+
+    @Override
 	public void SetItems(Inventory playerInv) {
 		ninja.startTime = System.currentTimeMillis() - 100000;
 		this.regenStars = 0;
