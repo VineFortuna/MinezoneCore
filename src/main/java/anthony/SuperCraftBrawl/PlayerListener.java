@@ -349,6 +349,7 @@ public class PlayerListener implements Listener {
             gi.forceRemovePlayer(p); // implement to clear maps/boards/cooldowns for this player
         }
 
+        main.getScoreboardManager().removeLobbyBoard(player);
         main.staffchat.remove(player);
         main.globalchat.remove(player);
 
