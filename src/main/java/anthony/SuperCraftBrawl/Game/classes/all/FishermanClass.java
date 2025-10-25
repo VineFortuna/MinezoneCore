@@ -295,23 +295,26 @@ public class FishermanClass extends BaseClass {
             ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
                 @Override
                 public void onHit(Player hit) {
-                    if (instance.duosMap != null)
-                        if (instance.team.get(hit).equals(instance.team.get(player))) return;
+                    if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
+                        if (instance.duosMap != null)
+                            if (instance.team.get(hit).equals(instance.team.get(player))) return;
 
-                    if (instance.getGameManager().spawnProt.containsKey(hit)) return;
+                        if (hit != null) {
+                            if (instance.getGameManager().spawnProt.containsKey(hit)) return;
 
-                    player.playSound(hit.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
+                            player.playSound(hit.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
 
-                    Vector v = player.getLocation().getDirection();
-                    EntityDamageEvent damageEvent = new EntityDamageEvent(hit, EntityDamageEvent.DamageCause.PROJECTILE, 4.5);
-                    instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
-                    hit.damage(2, player);
-                    v.setY(0.9);
-                    hit.setVelocity(v);
+                            Vector v = player.getLocation().getDirection();
+                            EntityDamageEvent damageEvent = new EntityDamageEvent(hit, EntityDamageEvent.DamageCause.PROJECTILE, 4.5);
+                            instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+                            hit.damage(2, player);
+                            v.setY(0.9);
+                            hit.setVelocity(v);
 
-                    player.getWorld().playSound(hit.getLocation(), Sound.SPLASH, 1, 1);
+                            player.getWorld().playSound(hit.getLocation(), Sound.SPLASH, 1, 1);
+                        }
+                    }
                 }
-
             }, new ItemStack(Material.RAW_FISH));
             instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
                     player.getLocation().getDirection().multiply(2.0D));
