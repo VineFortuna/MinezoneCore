@@ -668,7 +668,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		} else {
 			player.sendMessage(
 					"" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
-							+ ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN " + ChatColor.RESET + "to use this command");
+							+ ChatColor.BLUE + ChatColor.BOLD + "PRO " + ChatColor.RESET + "to use this command");
 		}
 	}
 
@@ -827,7 +827,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 
 		if (!player.hasPermission("scb.fly")) {
-			player.sendMessage(main.color("&c&l(!) &rYou need the rank &9&lCAPTAIN &rto use this command!"));
+			player.sendMessage(main.color("&c&l(!) &rYou need the rank &9&lPRO &rto use this command!"));
 			return;
 		}
 

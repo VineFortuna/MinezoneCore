@@ -360,11 +360,12 @@ public class PlayerListener implements Listener {
         main.sentParkourHolos.remove(player.getUniqueId());
         ChannelInjector.uninject(player);
         removeLeaderboards(event);
+        main.getTitleAnimationManager().stop(player);
     }
 
     private void removeLeaderboards(PlayerQuitEvent event) {
         try { if (main.getKillsLeaderboard() != null)    main.getKillsLeaderboard().clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
-        //try { if (main.winsBoard != null)     main.winsBoard.clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
+        try { if (main.getLeaderboard() != null)     main.getLeaderboard().clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
         //try { if (main.flawlessBoard != null) main.flawlessBoard.clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
         //try { if (main.fishingBoard != null)  main.fishingBoard.clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
     }
@@ -493,7 +494,7 @@ public class PlayerListener implements Listener {
 
         main.getKillsLeaderboard().clearViewerHologram(p);
         try { if (main.getKillsLeaderboard() != null)    main.getKillsLeaderboard().clearViewerHologram(e.getPlayer()); } catch (Throwable ignored) {}
-        //try { if (main.winsBoard != null)     main.winsBoard.clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
+        try { if (main.getLeaderboard() != null)     main.getLeaderboard().clearViewerHologram(e.getPlayer()); } catch (Throwable ignored) {}
         //try { if (main.flawlessBoard != null) main.flawlessBoard.clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
         //try { if (main.fishingBoard != null)  main.fishingBoard.clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
     }

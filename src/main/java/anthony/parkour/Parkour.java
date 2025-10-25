@@ -194,12 +194,15 @@ public class Parkour implements Listener {
             boards.put(player, fb);
         }
 
-        fb.updateTitle(main.color("&e&lPARKOUR"));
+        fb.updateTitle(main.color("&6&lPARKOUR"));
 
         int reached = checkpoint.containsKey(player) ? (checkpoint.get(player) + 1) : 0;
         int total = players.get(player).getCheckpoints();
+        String arenaName = this.players.get(player).getName();
 
         fb.updateLines(
+                "",
+                main.color("&fArena: &a" + arenaName),
                 "",
                 main.color("&fCheckpoints: &a" + reached + "/" + total),
                 "",
@@ -236,7 +239,7 @@ public class Parkour implements Listener {
 
                 long elapsed = System.nanoTime() - startNs;
                 String formatted = formatTimeScoreboard(elapsed);
-                fb.updateLine(3, main.color("&fTime:&a " + formatted));
+                fb.updateLine(5, main.color("&fTime:&a " + formatted));
             }
         }.runTaskTimer(main, 0L, 2L); // every 0.1s
 
@@ -247,7 +250,7 @@ public class Parkour implements Listener {
         FastBoard fb = boards.get(player);
         if (fb == null) return;
         int total = players.get(player).getCheckpoints();
-        fb.updateLine(1, main.color("&fCheckpoints: &a" + (indexNow + 1) + "/" + total));
+        fb.updateLine(3, main.color("&fCheckpoints: &a" + (indexNow + 1) + "/" + total));
     }
 
     /* =========================

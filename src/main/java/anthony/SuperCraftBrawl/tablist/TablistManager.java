@@ -39,7 +39,7 @@ public class TablistManager {
             case BUILDER:      return 7;
             case MEDIA:        return 8;
             case SUPREME:      return 9;
-            case CAPTAIN:      return 10;
+            case PRO:      return 10;
             case VIP:          return 11;
             case DEFAULT:
             default:           return 12;
