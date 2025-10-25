@@ -7,6 +7,7 @@ import anthony.SuperCraftBrawl.gui.fishing.FishingGUI;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.ParkourDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.parkour.Arenas;
 import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
@@ -51,31 +52,30 @@ public class StatsGUI implements InventoryProvider {
 		contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(
 				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 		
-		contents.set(4, 3, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.REDSTONE_COMPARATOR),
+		contents.set(4, 0, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.REDSTONE_COMPARATOR),
 				"" + ChatColor.RESET + ChatColor.YELLOW + "Preferences"), e -> {
 			new PrefsGUI(main).inv.open(player);
 		}));
-		contents.set(4, 5, ClickableItem.of(ItemHelper.setGlowing(ItemHelper.setDetails(new ItemStack(Material.BOOK),
+		contents.set(4, 4, ClickableItem.of(ItemHelper.setGlowing(ItemHelper.setDetails(new ItemStack(Material.BOOK),
 				"" + ChatColor.RESET + ChatColor.YELLOW + "My Stats"),
 				data.playerName.equals(player.getName())), e -> {
 			if (this.target != null && this.target != player)
 				new StatsGUI(main).inv.open(player);
 		}));
-		
-		String texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmFkYzA0OGE3Y2U3OGY3ZGFkNzJhMDdkYTI3ZDg1YzA5MTY4ODFlNTUyMmVlZWQxZTNkYWYyMTdhMzhjMWEifX19";
-		contents.set(4, 8, ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(texture),
-				main.color("&2&l(!)"), main.color("&7Use &a/stats <player>"),
-				main.color("&7to view another player's stats!")), e -> {}));
+
+		String rankName = "";
+		Rank rank = data.getRank();
+
+		if (rank != null && rank.getTag() != null)
+			rankName = rank == Rank.DEFAULT ? main.color("&7Default") : rank.getTag();
 		
 		if (data != null) {
 			contents.set(0, 4,
 					ClickableItem.of(ItemHelper.createSkullHeadPlayer(1, data.playerName, main.color("&e" + data.playerName),
-							Arrays.asList(main.color("&aRank: &r" + data.getRank().getTag()),
+							Arrays.asList(main.color("&aRank: &r" + rankName),
 									main.color("&aLevel: &r" + data.level),
 									main.color("&aEXP: &r" + data.exp + "/2500"),
 									main.color("&aMatches Played: &r" + (data.wins + data.losses)))), e-> {}));
-			/*contents.set(2, 2,
-					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FEATHER), "&cComing soon..."), e-> {}));*/
 			contents.set(2, 4,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
 							main.color("&e&lSCB Stats"),
@@ -116,6 +116,8 @@ public class StatsGUI implements InventoryProvider {
 				ParkourDetails details = data.playerParkour.get(arenas.getId());
 				if (details != null && details.totalTime > 0) {
 					parkourLore.add(main.color("&a" + arenas.getName() + ": &r" + main.getParkour().formatTime(details.totalTime)));
+				} else {
+					parkourLore.add(main.color("&a" + arenas.getName() + ": &rN/A"));
 				}
 			}
 
@@ -125,7 +127,7 @@ public class StatsGUI implements InventoryProvider {
 					}));
 
 			String fishingTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTk2YTQ4ZGNkYWY0MThmMjJjZDE4NjdjMWViMGFlMjgyYzI4NGI2Nzk5MDZiNzk3ODFkOGQyYjJlZWJhMjEwMiJ9fX0=";
-			contents.set(4, 0,
+			contents.set(4, 8,
 					ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(fishingTexture),
 							main.color("&eFishingpedia")), e-> {
 						if (target != null)
@@ -133,7 +135,6 @@ public class StatsGUI implements InventoryProvider {
 						else
 							new FishingGUI(main, inv).inv.open(player);
 					}));
-
 		}
 	}
 
