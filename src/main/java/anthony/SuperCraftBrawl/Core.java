@@ -8,6 +8,8 @@ import anthony.SuperCraftBrawl.commands.Commands;
 import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.fishing.Fishing;
+import anthony.SuperCraftBrawl.floatingblock.FloatingBlockManager;
+import anthony.SuperCraftBrawl.floatingblock.FloatingBlocks;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.halloween.BasketItemUtil;
 import anthony.SuperCraftBrawl.halloween.CandyAuraManager;
@@ -31,6 +33,7 @@ import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.ranks.RankManager;
 import anthony.SuperCraftBrawl.ScoreboardManager;
 import anthony.SuperCraftBrawl.signs.SignManager;
+import anthony.SuperCraftBrawl.tablist.TablistAnimationManager;
 import anthony.SuperCraftBrawl.tablist.TablistManager;
 import anthony.parkour.Arenas;
 import anthony.parkour.Parkour;
@@ -153,7 +156,15 @@ public class Core extends JavaPlugin implements Listener {
     //SCOREBOARDS:
     private anthony.SuperCraftBrawl.scoreboards.TitleAnimationManager titleAnimationManager;
 
-	public Core() {
+    //TABLIST:
+    private TablistAnimationManager tablistAnim;
+
+    //FLOATING BLOCK:
+    private FloatingBlockManager floating;
+    private FloatingBlocks floatingBlocks;
+
+
+    public Core() {
 		this.staffchat = new ArrayList<Player>();
 		this.globalchat = new ArrayList<Player>();
 	}
@@ -385,9 +396,44 @@ public class Core extends JavaPlugin implements Listener {
         showNPCs();
         enableTitlesCosmetic();
         enableLeaderboardSnapshotTables();
-        enableTablist();
+        spawnFloatingBlocks();
+        //enableTablist();
         //Spawn after world & chunks are ready. Delay 3 seconds
         Bukkit.getScheduler().runTaskLater(this, this::spawnLeaderboardSettingsHologram, 60L);
+    }
+
+    /*
+     * This function spawns the floating blocks in the lobby, for
+     * Socials and Daily Rewards
+     */
+    private void spawnFloatingBlocks() {
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            World w = Bukkit.getWorld("lobby-1");
+
+            // 1) DAILY REWARD at 186.5,116,633.5
+            floatingBlocks.add(
+                    new Location(w, 186.5, 116.0, 633.5),
+                    new ItemStack(Material.WOOL, 1, (short)0), // white wool
+                    "&6&lDAILY REWARD",
+                    "&aRight Click",
+                    (player) -> {
+                        player.sendMessage(color("&aOpening Daily Reward..."));
+                    }
+            );
+
+            // 2) SOCIALS at 192.843,116,632.825
+            floatingBlocks.add(
+                    new Location(w, 192.843, 116.0, 632.825),
+                    new ItemStack(Material.WOOL, 1, (short)0),
+                    "&6&lSOCIALS",
+                    "&aRight Click",
+                    (player) -> {
+                        player.performCommand("socials");
+                    }
+            );
+
+            floatingBlocks.spawnAll();
+        }, 40L);
     }
 
     // --- fields ---
@@ -470,10 +516,10 @@ public class Core extends JavaPlugin implements Listener {
             @Override
             public void run() {
                 PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
-                Object header = new ChatComponentText(color("\n&f&lMinezone Network\n"));
+                Object header = new ChatComponentText(color("\n&6&lMINEZONE NETWORK\n"));
                 Object footer = new ChatComponentText(
                         color("\n&7  /help&f for a list of commands" + "  \n&7/store&f to purchase a rank"
-                                + "  \n&7/discord&f to join our Discord" + "\n\n&bminezone.club\n"));
+                                + "  \n&7/discord&f to join our Discord" + "\n\n&eminezone.club\n"));
                 try {
                     Field a = packet.getClass().getDeclaredField("a");
                     a.setAccessible(true);
@@ -637,6 +683,10 @@ public class Core extends JavaPlugin implements Listener {
         explorerManager = new LobbyExplorerManager(this);
         npcManager = new NPCManager(this);
         getDatabaseManager().ensureSnapshotTable();
+        tablistAnim = new TablistAnimationManager(this);
+        tablistAnim.start();
+        floating = new FloatingBlockManager(this);
+        floatingBlocks = new FloatingBlocks(this);
 
         for (Arenas arena : Arenas.values()) {
             parkourBoards.add(new ParkourBoard(this, arena));
@@ -701,21 +751,21 @@ public class Core extends JavaPlugin implements Listener {
 	    );
 
 	    npcs.add(amy);
-	    amy.showToAll(); // send spawn packets to everyone currently online
+	    amy.showToAll();
 
-	    // Example 2: a custom-click NPC (no explorer enum, inline Consumer)
-	    Location infoLoc = loc.clone().add(3, 0, 0);
-	    NPC greeter = new NPC(
+	    Location dailyRewardNPC = loc.clone().add(3, 0, 0);
+	    NPC mailman = new NPC(
 	            this,
-	            "Greeter",
-	            infoLoc,
-	            null, null, // no skin -> uses default Steve
-	            (player) -> player.sendMessage(color("&aWelcome! Use &e/menu &afor options.")),
+	            color("&bThe Mailman"),
+	            dailyRewardNPC,
+	            null, null,
+	            (player) -> player.sendMessage(color("&a[Mailman] &fHello &e" + player.getName() +
+                        "! &rI have some deliveries for you")),
 	            null
-	    ).setNameLines("&a&lINFO", "&7Right-click");
+	    ).setNameLines("&a&lDAILY REWARDS", "&eRight Click");
 
-	    npcs.add(greeter);
-	    greeter.showToAll();
+	    npcs.add(mailman);
+	    mailman.showToAll();
 
 	}
 
@@ -1198,16 +1248,16 @@ public class Core extends JavaPlugin implements Listener {
 //						+ "for more information");
 			}
 			if (cmd.getName().equalsIgnoreCase("help") && sender instanceof Player) {
-				player.sendMessage(color("&b&lSCB COMMANDS"));
-				player.sendMessage(color("&r/join -> &7Join a game"));
-				player.sendMessage(color("&r/maps -> &7See all playable maps"));
-				player.sendMessage(color("&r/classes -> &7See all playable classes"));
-				player.sendMessage(color("&r/class -> &7Choose a class"));
-				player.sendMessage(color("&r/spectate -> &7Spectate a game"));
-				player.sendMessage(color("&r/leave -> &7Leave your game"));
+				player.sendMessage(color("&6&lSCB COMMANDS"));
+				player.sendMessage(color("&e/join -> &rJoin a game"));
+				player.sendMessage(color("&e/maps -> &rSee all playable maps"));
+				player.sendMessage(color("&e/classes -> &rSee all playable classes"));
+				player.sendMessage(color("&e/class -> &rChoose a class"));
+				player.sendMessage(color("&e/spectate -> &rSpectate a game"));
+				player.sendMessage(color("&e/leave -> &rLeave your game"));
 				player.sendMessage("");
-				player.sendMessage(color("&b&lFISHING COMMANDS"));
-				player.sendMessage(color("&r/fishing -> &7Opens Fishing menu"));
+				player.sendMessage(color("&6&lFISHING COMMANDS"));
+				player.sendMessage(color("&e/fishing -> &rOpens Fishing menu"));
 			}
 
 			if (cmd.getName().equalsIgnoreCase("exp")) {
@@ -1290,7 +1340,7 @@ public class Core extends JavaPlugin implements Listener {
 					}
 				} else {
 					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
-							+ ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN " + ChatColor.RESET + "to use this command");
+							+ ChatColor.BLUE + ChatColor.BOLD + "PRO " + ChatColor.RESET + "to use this command");
 				}
 			}
 
@@ -1876,8 +1926,7 @@ public class Core extends JavaPlugin implements Listener {
 		// For join message:
 		Rank rank = getRankManager().getRank(player); // Gets the player's rank
 		String tag = rank.getTagWithSpace(); // Gets the player's rank tag
-		// e.setJoinMessage(color("&r&l[&a&l+&r&l] &r" + rank + "&b" + name + "&a
-		// connected"));
+
 		e.setJoinMessage(color("" + rank.getArrowColor() + "► " + tag
 				+ getColorForNames(player, getRankManager().getRank(player)) + " &7has joined!"));
 
@@ -1901,6 +1950,9 @@ public class Core extends JavaPlugin implements Listener {
 			if (update)
 				this.getDataManager().saveData(data);
 		}
+
+        if (tablistAnim != null) tablistAnim.applyTo(e.getPlayer());
+
 		player.setHealth(20);
 		player.setFoodLevel(20);
 	}
@@ -1910,7 +1962,7 @@ public class Core extends JavaPlugin implements Listener {
 
 		if (rank == Rank.OWNER || rank == Rank.ADMIN)
 			msg = color("&c");
-		else if (rank == Rank.CAPTAIN)
+		else if (rank == Rank.PRO)
 			msg = color("&9");
 		else if (rank == Rank.VIP)
 			msg = color("&e");
@@ -1922,7 +1974,7 @@ public class Core extends JavaPlugin implements Listener {
 	private void chatAnnouncementOnJoin(Player p) {
 		p.sendMessage("----------------------------------------------");
 		p.sendMessage("");
-		p.sendMessage(color("          &b&lWELCOME TO MINEZONE"));
+		p.sendMessage(color("          &6&lMINEZONE NETWORK"));
 		p.sendMessage("");
 		p.sendMessage("" + "         Enjoy Super Craft Bros!");
 		p.sendMessage("");
@@ -2214,6 +2266,15 @@ public class Core extends JavaPlugin implements Listener {
 			Bukkit.unloadWorld(world, false);
 		}
 
+        Bukkit.getScheduler().cancelTasks(this);
+        titleAnimationManager.stopAll();
+
+        if (tablistAnim != null) tablistAnim.stop();
+
+        if (floating != null) floating.remove();
+
+        if (floatingBlocks != null) floatingBlocks.removeAll();
+
         removeLeaderboardSettingsHologram();
         disableVariables();
         shutdownEverything();
@@ -2296,9 +2357,8 @@ public class Core extends JavaPlugin implements Listener {
             }
         } catch (Throwable ignored) {}
 
-    /* When you convert other boards, switch them to paintFor(...) too:
-    try { if (this.winsBoard != null)     this.winsBoard.paintFor(p, scope); } catch (Throwable ignored) {}
-    try { if (this.flawlessBoard != null) this.flawlessBoard.paintFor(p, scope); } catch (Throwable ignored) {}
+    try { if (this.getLeaderboard() != null)     this.getLeaderboard().paintFor(p, scope); } catch (Throwable ignored) {}
+    /*try { if (this.flawlessBoard != null) this.flawlessBoard.paintFor(p, scope); } catch (Throwable ignored) {}
     try { if (this.getFishingLeaderboard() != null) this.getFishingLeaderboard().paintFor(p, scope); } catch (Throwable ignored) {}
     */
     }
