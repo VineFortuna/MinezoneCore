@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.gui.fishing.FishingGUI;
 import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.RankManager;
@@ -37,12 +38,18 @@ public class PrefsGUI implements InventoryProvider {
 		contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(
 				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 		
-		contents.set(4, 3, ClickableItem.of(ItemHelper.setGlowing(ItemHelper.setDetails(new ItemStack(Material.REDSTONE_COMPARATOR),
+		contents.set(4, 0, ClickableItem.of(ItemHelper.setGlowing(ItemHelper.setDetails(new ItemStack(Material.REDSTONE_COMPARATOR),
 				"" + ChatColor.RESET + ChatColor.YELLOW + "Preferences"), true), e -> {}));
-		contents.set(4, 5, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BOOK),
+		contents.set(4, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BOOK),
 				"" + ChatColor.RESET + ChatColor.YELLOW + "My Stats"), e -> {
 			new StatsGUI(main).inv.open(player);
 		}));
+		String fishingTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTk2YTQ4ZGNkYWY0MThmMjJjZDE4NjdjMWViMGFlMjgyYzI4NGI2Nzk5MDZiNzk3ODFkOGQyYjJlZWJhMjEwMiJ9fX0=";
+		contents.set(4, 8,
+				ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(fishingTexture),
+						main.color("&eFishingpedia")), e-> {
+						new FishingGUI(main, inv).inv.open(player);
+				}));
 
 		if (data != null) {
 			if (data.cwm == 0) {
