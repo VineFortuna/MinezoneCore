@@ -40,7 +40,7 @@ public class GadgetsGUI implements InventoryProvider {
 		List<String> broomList = new ArrayList<>();
 		broomList.add(ChatColor.DARK_GRAY + "Fly around like a Witch!");
 		broomList.add("");
-		broomList.add(Rank.CAPTAIN.getTag() + ChatColor.RESET + "+ exclusive!");
+		broomList.add(Rank.PRO.getTag() + ChatColor.RESET + "+ exclusive!");
 		ItemStack broom = ItemHelper.create(Material.WHEAT,
 				ChatColor.DARK_GREEN.toString() + ChatColor.BOLD + "Magic Broom", broomList);
 
@@ -96,7 +96,7 @@ public class GadgetsGUI implements InventoryProvider {
 				}
 			} else {
 				player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
-						+ Rank.CAPTAIN.getTag() + ChatColor.RESET + " to use this item!");
+						+ Rank.PRO.getTag() + ChatColor.RESET + " to use this item!");
 			}
 		}));
 
