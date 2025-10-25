@@ -191,7 +191,7 @@ public class NPCManager implements Listener {
 		Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(main, () -> {
 			Bukkit.getScheduler().runTask(main, () -> fishing.show(e.getPlayer()));
 			Bukkit.getScheduler().runTask(main, () -> scbClassic.show(e.getPlayer()));
-			Bukkit.getScheduler().runTask(main, () -> socialMedia.show(e.getPlayer()));
+			//Bukkit.getScheduler().runTask(main, () -> socialMedia.show(e.getPlayer()));
 			Bukkit.getScheduler().runTask(main, () -> scbDuels.show(e.getPlayer()));
 			Bukkit.getScheduler().runTask(main, () -> parkour.show(e.getPlayer()));
 		}, 20L);
