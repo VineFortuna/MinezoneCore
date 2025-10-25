@@ -5,21 +5,21 @@ import org.bukkit.entity.Player;
 
 public enum Rank {
     DEFAULT(0, "", color("&7")), //RANK GIVEN TO ALL NEW PLAYERS
-    VIP(6, color("&e&lVIP"), color("&e")), //FIRST DONATION RANK
-    CAPTAIN(8, color("&9&lCAPTAIN"), color("&9")), //SECOND DONATION RANK
+    VIP(6, color("&a&lVIP"), color("&a")), //FIRST DONATION RANK
+    PRO(8, color("&9&lPRO"), color("&9")), //SECOND DONATION RANK
     TRAINEE(3, color("&2&lTRAINEE"), color("&6")),
     /* Trainee:
      * Obtainable: Players who applied and have been accepted. They are under training and shall only have
      * Job: Learn from staff and helper players, with a little bit of chat moderation.
      * Limited permissions.
      */
-    MODERATOR(4, color("&6&lMOD"), color("&3")),
+    MODERATOR(4, color("&6&lMOD"), color("&6")),
     /*
      * Moderator:
      * Obtainable: Promotion from trainee (Passed final exam)
      * Job: Moderate gameplay chat and discord of the server to provide a safe place for players.
      */
-    SR_MODERATOR(16,color("&6&lSR.MOD"), color("&3")),
+    SR_MODERATOR(16,color("&6&lSR.MOD"), color("&6")),
     /*
      * SrMod:
      * Obtainable: Promotion from Moderator
@@ -82,7 +82,7 @@ public enum Rank {
      * Obtainable: Admin, leadership or Staff Manager Promotion/selection
      * Job: Director of their subsection (Community Management, Appeals, QA ect) (Overseers)
      */
-    BUILDER(14, color("&b&lBUILDER"), color("&2")),
+    BUILDER(14, color("&2&lBUILDER"), color("&2")),
     /*toh
      * Builder:
      * Obtainable: Application
@@ -143,16 +143,16 @@ public enum Rank {
 
 		if (rank == Rank.OWNER || rank == Rank.ADMIN)
 			msg = color("&c");
-		else if (rank == Rank.CAPTAIN)
+		else if (rank == Rank.PRO)
 			msg = color("&9");
 		else if (rank == Rank.VIP)
-			msg = color("&e");
+			msg = color("&a");
         else if (rank == Rank.QA)
             msg = color("&a");
         else if (rank == Rank.DEVELOPER)
             msg = color("&6");
         else if (rank == Rank.MODERATOR)
-            msg = color("&3");
+            msg = color("&6");
         else if (rank == Rank.BUILDER)
             msg = color("&2");
 		else
@@ -173,7 +173,7 @@ public enum Rank {
             case BUILDER:       return 7;
             case MEDIA:         return 8;
             case SUPREME:       return 9;
-            case CAPTAIN:       return 10;
+            case PRO:       return 10;
             case VIP:           return 11;
             case DEFAULT:
             default:            return 12;
