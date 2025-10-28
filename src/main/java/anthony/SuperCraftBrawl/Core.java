@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Game.*;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.armorstands.ArmorStandManager;
 import anthony.SuperCraftBrawl.commands.Commands;
 import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.fishing.FishArea;
@@ -11,7 +12,6 @@ import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.floatingblock.FloatingBlockManager;
 import anthony.SuperCraftBrawl.floatingblock.FloatingBlocks;
 import anthony.SuperCraftBrawl.gui.*;
-import anthony.SuperCraftBrawl.halloween.BasketItemUtil;
 import anthony.SuperCraftBrawl.halloween.CandyAuraManager;
 import anthony.SuperCraftBrawl.halloween.HalloweenHuntManager;
 import anthony.SuperCraftBrawl.halloween.TreatsAdminCommand;
@@ -31,10 +31,11 @@ import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
 import anthony.SuperCraftBrawl.practice.BowPractice;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.ranks.RankManager;
-import anthony.SuperCraftBrawl.ScoreboardManager;
 import anthony.SuperCraftBrawl.signs.SignManager;
 import anthony.SuperCraftBrawl.tablist.TablistAnimationManager;
 import anthony.SuperCraftBrawl.tablist.TablistManager;
+import anthony.SuperCraftBrawl.titles.TitleSequence;
+import anthony.SuperCraftBrawl.titles.TitleUtil;
 import anthony.parkour.Arenas;
 import anthony.parkour.Parkour;
 import anthony.util.ItemHelper;
@@ -55,8 +56,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.EntityBlockFormEvent;
-import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -66,8 +65,6 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
-import org.bukkit.util.Vector;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -112,7 +109,6 @@ public class Core extends JavaPlugin implements Listener {
 	public HashMap<Player, Boolean> so = new HashMap<>();
 	public HashMap<Player, Boolean> po = new HashMap<>();
 	public Parkour p;
-	// public AntiCheat cheat;
 	public Leaderboard lb;
 	public FishingBoard fb;
 	public KillsBoard kb;
@@ -124,9 +120,11 @@ public class Core extends JavaPlugin implements Listener {
 	public Fishing fishing;
 	private ArrayList<String> msg;
 	public Map<Player, Player> wagers = new HashMap<Player, Player>();
-	public SignManager signManager;
 	public anthony.SuperCraftBrawl.lobbyitems.LobbyItems lobbyItems;
 	public CandyAuraManager candyAura;
+
+    //GAME SIGNS MANAGER
+    public SignManager signManager;
 
 	// Player's game stats
 	public Map<Player, GameInstance> gameStats = new HashMap<Player, GameInstance>();
@@ -141,7 +139,6 @@ public class Core extends JavaPlugin implements Listener {
 	private TrickTitlePackets trickTitle;
 
     //PARKOUR VARIABLES:
-    // Prevent duplicate packet-holograms per session (client-side spam)
     public final Set<UUID> sentMysteryHolos = new HashSet<>();
     public final Set<UUID> sentParkourHolos = new HashSet<>();
 
@@ -152,6 +149,7 @@ public class Core extends JavaPlugin implements Listener {
     public final java.util.Map<java.util.UUID, anthony.SuperCraftBrawl.leaderboards.LeaderboardScope>
             leaderboardScopeByViewer = new java.util.HashMap<>();
     public anthony.SuperCraftBrawl.leaderboards.StatSnapshotDAO snapshotDAO;
+    public SettingsHologram lbSettingsHolo;
 
     //SCOREBOARDS:
     private anthony.SuperCraftBrawl.scoreboards.TitleAnimationManager titleAnimationManager;
@@ -163,6 +161,11 @@ public class Core extends JavaPlugin implements Listener {
     private FloatingBlockManager floating;
     private FloatingBlocks floatingBlocks;
 
+    //ARMOR STANDS
+    public ArmorStandManager armorStandManager;
+
+    //MYSTERY CHESTS:
+    public Map<Player, EntityArmorStand> msHologram = new HashMap<Player, EntityArmorStand>();
 
     public Core() {
 		this.staffchat = new ArrayList<Player>();
@@ -182,6 +185,12 @@ public class Core extends JavaPlugin implements Listener {
 	public ActionBarManager getActionBarManager() {
 		return this.actionBarManager;
 	}
+
+    public SettingsHologram getLbSettingsHologram() {
+        return this.lbSettingsHolo;
+    }
+
+    public ArmorStandManager getArmorStandManager() { return this.armorStandManager; }
 
     public anthony.SuperCraftBrawl.scoreboards.TitleAnimationManager getTitleAnimationManager() { return titleAnimationManager; }
 
@@ -399,7 +408,7 @@ public class Core extends JavaPlugin implements Listener {
         spawnFloatingBlocks();
         //enableTablist();
         //Spawn after world & chunks are ready. Delay 3 seconds
-        Bukkit.getScheduler().runTaskLater(this, this::spawnLeaderboardSettingsHologram, 60L);
+        Bukkit.getScheduler().runTaskLater(this, () -> getLbSettingsHologram().spawnLeaderboardSettingsHologram(), 60L);
     }
 
     /*
@@ -436,79 +445,20 @@ public class Core extends JavaPlugin implements Listener {
         }, 40L);
     }
 
-    // --- fields ---
-    private java.util.UUID lbSettingsStand;       // title line UUID
-    private java.util.UUID lbSettingsStandHint;   // hint line UUID
-
-    // Location constants
-    private static final double LB_X = 193.377;
-    private static final double LB_Y = 107.6;     // raise above floor so text is visible
-    private static final double LB_Z = 702.500;
-
-    // Call this from onEnable() with a small delay (see below)
-    public void spawnLeaderboardSettingsHologram() {
-        org.bukkit.World w = getLobbyWorld();
-        if (w == null) {
-            getLogger().warning("[LB-Settings] Lobby world is null; will retry later.");
-            return;
-        }
-
-        // Ensure chunk is loaded (1.8-safe)
-        int cx = (int)Math.floor(LB_X) >> 4;
-        int cz = (int)Math.floor(LB_Z) >> 4;
-        try { w.getChunkAt(cx, cz).load(true); } catch (Throwable ignored) {}
-
-        // Remove any previous ones with same text (handles reloads)
-        for (org.bukkit.entity.ArmorStand as : w.getEntitiesByClass(org.bukkit.entity.ArmorStand.class)) {
-            String name = as.getCustomName();
-            if (name == null) continue;
-            String plain = org.bukkit.ChatColor.stripColor(name).trim().toLowerCase();
-            if (plain.equals("leaderboard settings") || plain.equals("right-click to change scope")
-                    || plain.equals("click to change settings")) {
-                try { as.remove(); } catch (Throwable ignored) {}
-            }
-        }
-
-        // Title (clickable)
-        org.bukkit.Location titleLoc = new org.bukkit.Location(w, LB_X, LB_Y, LB_Z);
-        org.bukkit.entity.ArmorStand title = w.spawn(titleLoc, org.bukkit.entity.ArmorStand.class);
-        title.setGravity(false);
-        title.setVisible(false);
-        title.setSmall(true);
-        title.setBasePlate(false);
-        title.setCustomName(net.md_5.bungee.api.ChatColor.YELLOW + "" +
-                net.md_5.bungee.api.ChatColor.BOLD + "Leaderboard Settings");
-        title.setCustomNameVisible(true);
-        title.setRemoveWhenFarAway(false);
-        this.lbSettingsStand = title.getUniqueId();
-
-        // Hint (optional)
-        org.bukkit.entity.ArmorStand hint = w.spawn(titleLoc.clone().add(0, -0.28, 0), org.bukkit.entity.ArmorStand.class);
-        hint.setGravity(false);
-        hint.setVisible(false);
-        hint.setSmall(true);
-        hint.setBasePlate(false);
-        hint.setCustomName(net.md_5.bungee.api.ChatColor.GRAY + "" +
-                net.md_5.bungee.api.ChatColor.ITALIC + "Right-click to change scope");
-        hint.setCustomNameVisible(true);
-        hint.setRemoveWhenFarAway(false);
-        this.lbSettingsStandHint = hint.getUniqueId();
-
-        getLogger().info("[LB-Settings] Spawned at " + LB_X + ", " + LB_Y + ", " + LB_Z);
-    }
-
     public void removeLeaderboardSettingsHologram() {
         org.bukkit.World w = getLobbyWorld();
         if (w == null) return;
 
         for (org.bukkit.entity.ArmorStand as : w.getEntitiesByClass(org.bukkit.entity.ArmorStand.class)) {
-            java.util.UUID id = as.getUniqueId();
-            if (id != null && (id.equals(lbSettingsStand) || id.equals(lbSettingsStandHint))) {
+            String name = as.getCustomName();
+            if (name == null) continue;
+
+            // Strip colors and compare against the known lines we spawn
+            String plain = org.bukkit.ChatColor.stripColor(name).trim().toLowerCase();
+            if (plain.equals("leaderboard settings") || plain.equals("click to change settings")) {
                 try { as.remove(); } catch (Throwable ignored) {}
             }
         }
-        lbSettingsStand = null;
-        lbSettingsStandHint = null;
     }
 
     private void enableTablist() {
@@ -687,6 +637,8 @@ public class Core extends JavaPlugin implements Listener {
         tablistAnim.start();
         floating = new FloatingBlockManager(this);
         floatingBlocks = new FloatingBlocks(this);
+        armorStandManager = new ArmorStandManager(this);
+        lbSettingsHolo = new SettingsHologram(this);
 
         for (Arenas arena : Arenas.values()) {
             parkourBoards.add(new ParkourBoard(this, arena));
@@ -1883,7 +1835,14 @@ public class Core extends JavaPlugin implements Listener {
     public void sendScoreboardUpdate(Player trigger) {
         for (Player p : Bukkit.getOnlinePlayers()) {
             try {
-                getTabManager().setPlayerTeam(p);
+                boolean inGame =
+                        getGameManager().GetInstanceOfPlayer(p) != null
+                                || getGameManager().GetInstanceOfSpectator(p) != null;
+
+                if (!inGame) {
+                    getTabManager().setPlayerTeam(p);
+                }
+                // else: the game scoreboard owns nametag/class; do nothing.
             } catch (Throwable ignored) {}
         }
     }
@@ -1898,7 +1857,7 @@ public class Core extends JavaPlugin implements Listener {
 
 	/**
 	 * This function handles when a player joins the server
-	 * 
+	 *
 	 * @param e
 	 */
 	@SuppressWarnings("deprecation")
@@ -1955,6 +1914,11 @@ public class Core extends JavaPlugin implements Listener {
 
 		player.setHealth(20);
 		player.setFoodLevel(20);
+
+        TitleSequence.sendChained(this, player,
+                new TitleSequence.TitleSpec("&6&lMINEZONE", "&e&lNEW LOBBY", 10, 70, 0),
+                new TitleSequence.TitleSpec("&6&lMINEZONE", "&c&lDaily/Monthly/Weekly &e&lLEADERBOARDS", 0, 70, 10)
+        );
 	}
 
 	public String getColorForNames(Player player, Rank rank) {
@@ -1984,38 +1948,18 @@ public class Core extends JavaPlugin implements Listener {
 		p.sendMessage("");
 	}
 
-	public Map<Player, EntityArmorStand> msHologram = new HashMap<Player, EntityArmorStand>();
-
 	public void mysteryChestHologram(Player p) {
 		PlayerData data = this.getDataManager().getPlayerData(p);
 
-		// if (!(this.msHologram.containsKey(p))) {
 		if (data != null) {
 			Location loc = new Location(this.getLobbyWorld(), 196.5, 105.5, 648.5);
-			WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
-			EntityArmorStand stand = new EntityArmorStand(s);
-
-			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Mystery Chests");
-			stand.setCustomNameVisible(true);
-			stand.setGravity(false);
-			stand.setInvisible(true);
-			PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
-			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
+            String name = color("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Mystery Chests");
+            this.armorStandManager.addMysteryChestHologram(p, loc, name);
 
 			loc = new Location(this.getLobbyWorld(), 196.5, 105.2, 648.5);
-			stand = new EntityArmorStand(s);
-
-			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&e&l" + data.mysteryChests + " &eto open!"));
-			stand.setCustomNameVisible(true);
-			stand.setGravity(false);
-			stand.setInvisible(true);
-			packet = new PacketPlayOutSpawnEntityLiving(stand);
-			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
-			this.msHologram.put(p, stand);
+            name = color("&e&l" + data.mysteryChests + " &eto open!");
+            this.armorStandManager.addMysteryChestHologram(p, loc, name);
 		}
-		// }
 	}
 
 	public void parkourHolograms(Player p) {

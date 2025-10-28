@@ -14,6 +14,7 @@ import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.signs.SignManager;
+import anthony.SuperCraftBrawl.titles.TitleUtil;
 import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
 import anthony.util.ItemHelper;
 import fr.mrmicky.fastboard.FastBoard;
@@ -245,11 +246,9 @@ public class GameInstance {
                 players.add(player);
                 player.sendMessage(color("&2&l(!) &rYou have joined &r&l" + map.toString()));
                 if (this.gameType == GameType.FRENZY)
-                    player.sendTitle("" + ChatColor.YELLOW + ChatColor.BOLD + map.toString(),
-                            "" + ChatColor.GREEN + "Your class will be randomly selected!");
+                    TitleUtil.sendTitle(player, "&e&l" + map.toString(), "&fYour class will be randomly selected", 10, 60, 5);
                 else
-                    player.sendTitle(color("&b&l" + map.toString()),
-                            color("&bChoose your class!"));
+                    TitleUtil.sendTitle(player, "&e&l" + map.toString(), "&fChoose your class", 10, 60, 5);
 
                 listener.resetDoubleJump(player);
                 listener.resetArmor(player);
@@ -406,7 +405,8 @@ public class GameInstance {
 
                 for (Player p : players) {
                     p.setLevel(ticks);
-                    if (ticks <= 5 && ticks >= 1) p.sendTitle("" + ChatColor.GREEN + ticks, "");
+                    if (ticks <= 5 && ticks >= 1)
+                        TitleUtil.sendTitle(p, "&a" + ticks, "", 0, 20, 0);
 
                     if (ticks <= 60 && ticks >= 1 && players.size() >= 2) {
                         FastBoard board = boards.get(p.getUniqueId());
@@ -910,14 +910,9 @@ public class GameInstance {
                                 finalBaseClass.loadPlayer();
                                 if (GameInstance.this.gameType == GameType.FRENZY
                                         || GameInstance.this.gameType == GameType.GUNGAME) {
-                                    player.sendTitle(color("&b&lNew Class:"), "" + finalBaseClass.getType().getTag());
-                                    new BukkitRunnable() { // hide title after 1.5s
-                                        @Override public void run() { player.sendTitle("", ""); }
-                                    }.runTaskLater(getGameManager().getMain(), 30);
+                                    TitleUtil.sendTitle(player, "&eNew Class", "" + finalBaseClass.getType().getTag(), 0, 30, 10);
                                 } else {
-                                    player.sendTitle(color("&b&lRespawned"), "");
-                                    new BukkitRunnable() { @Override public void run() { player.sendTitle("", ""); }
-                                    }.runTaskLater(getGameManager().getMain(), 30);
+                                    TitleUtil.sendTitle(player, "&eRespawned", "", 0, 30, 10);
                                 }
                                 finalBaseClass.isDead = false;
                             }
@@ -926,7 +921,7 @@ public class GameInstance {
                             if (!players.contains(player)) {
                                 cancel();
                             } else {
-                                player.sendTitle(color("&b&lRespawning In:"), color("&e" + this.ticks));
+                                TitleUtil.sendTitle(player, "&eRespawning In", "&c" + this.ticks, 0, 20, 0);
                                 player.setGameMode(GameMode.SPECTATOR);
                             }
                         }
@@ -943,8 +938,7 @@ public class GameInstance {
             if (finalBaseClass.getLives() == 0) {
                 this.playerPosition.add(player);
                 if (this.players.size() > 2) {
-                    player.sendTitle("" + ChatColor.RED + "You have died!",
-                            "" + ChatColor.RESET + "You are now a Spectator");
+                    TitleUtil.sendTitle(player, "&cYou have died!", "&fYou are now a Spectator", 0, 50, 10);
                     player.teleport(GetSpecLoc());
                 }
                 player.getPlayer().setGameMode(GameMode.ADVENTURE);

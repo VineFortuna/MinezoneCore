@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.gui.leaderboard;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.leaderboards.LeaderboardScope;
 import anthony.util.ChatColorHelper;
+import anthony.util.SoundManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -50,8 +51,6 @@ public class LeaderboardScopeGUI implements InventoryProvider {
     @Override
     public void update(Player player, InventoryContents contents) { }
 
-    /* ---------- Clock + repaint ---------- */
-
     private void setClock(InventoryContents contents, Player player) {
         LeaderboardScope current = main.leaderboardScopeByViewer
                 .getOrDefault(player.getUniqueId(), LeaderboardScope.LIFETIME);
@@ -63,12 +62,9 @@ public class LeaderboardScopeGUI implements InventoryProvider {
 
             // Save choice
             main.leaderboardScopeByViewer.put(player.getUniqueId(), next);
-            player.sendMessage(ChatColor.YELLOW + "Showing " + next.display() + " leaderboards.");
-
-            // Update the item in place (keep it clickable)
+            SoundManager.playClickSound(player);
+            player.sendMessage(main.color("&eShowing " + next.display() + " leaderboards"));
             setClock(contents, player);
-
-            // Repaint THIS viewer’s boards to match the new scope
             repaintFor(player, next);
         }));
     }

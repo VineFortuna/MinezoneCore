@@ -12,6 +12,7 @@ import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.PathfinderGoalFollowPlayer;
 import anthony.util.PathfinderHelper;
+import anthony.util.SoundManager;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.*;
 import org.apache.commons.lang3.StringUtils;
@@ -227,12 +228,12 @@ public class PlayerListener implements Listener {
         // Open the scope picker when clicking your settings/title stands
         if (name.equals("leaderboard settings")
                 || name.equals("click to change settings")
-                // OPTIONAL: also allow clicking board titles themselves:
                 || name.contains("wins")
                 || name.contains("kills")
                 || name.contains("flawless")
                 || name.contains("fishing")) {
 
+            SoundManager.playClickSound(player);
             new anthony.SuperCraftBrawl.gui.leaderboard.LeaderboardScopeGUI(main).inv().open(player);
             event.setCancelled(true);
         }
