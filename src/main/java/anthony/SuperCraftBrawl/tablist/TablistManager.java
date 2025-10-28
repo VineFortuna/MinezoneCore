@@ -75,16 +75,10 @@ public class TablistManager {
     public void setPlayerTeam(Player player) {
         Rank rank = main.getRankManager().getRank(player);
 
-        // Remove from any previous team
         for (Team t : c.getTeams()) t.removePlayer(player);
 
-        // Add to the correct ordered team
         Team team = teamsByRank.get(rank);
         if (team != null) team.addPlayer(player);
-
-        // IMPORTANT: Do NOT set a long PlayerListName in 1.8 (16-char cap).
-        // If you want color on the name, do at most a short color prefix:
-        // player.setPlayerListName(cut16(main.getColorForNames(player, rank)));
 
         player.setScoreboard(c);
     }
