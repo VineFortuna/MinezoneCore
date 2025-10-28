@@ -52,21 +52,21 @@ public class NPCManager implements Listener {
 				"ewogICJ0aW1lc3RhbXAiIDogMTYxNDE3ODA2NzIzNywKICAicHJvZmlsZUlkIiA6ICJmZDYwZjM2ZjU4NjE0ZjEyYjNjZDQ3YzJkODU1Mjk5YSIsCiAgInByb2ZpbGVOYW1lIiA6ICJSZWFkIiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlL2I2MTY0YTNjM2JlYjFiYzAzMTAwMzBmMjgxNTU4OTE5ODEzZjBhMTVjMmQ3Y2I3NzIyNGMxZDk0ZmZmMjE0NDQiCiAgICB9CiAgfQp9",
 				"GsrpTxzgihotEuasiq0cefZtiIzhyASNyAcXiHfFI+HqsC8aAZP/P6HYRa7zC3iQqMvDaVMZYFnmBui3B4KC49STqXy7UheGPT5xylV3dfjurinwpOUYJMNRcJYW9pLb98jVZ+bQW9LKHUdRbxgkGJxpJQQ+LQlROfpZ9DaM/fdVjImiMSUyUeCF5WyMxadRrEWeo+a1Cn25IrNWo+KWQy7OWLJONeZcuboZGqobuckZKfIRvW1Vtt2v45PXRI5ec/6YO6kr+yGVS51xlAZOzxjaaGACA+/5gHLeEu0Oka/hdGY0HdukqKcg3TXf1cZZ7qB/VCpnAuWOguTfXU09gh2BGRvOizsQpL5tRpg4lA/l5Q70t2jtj+79M2yRYC7LQs/SrUUIX6VJ3w8ylKKqTjLE+PVCmgwgW1bYX3tpt9xEhRJ5kPv47iX0DkVcGxE2QW3xd8gyJfE5BzeKhcXjEV+GJNa2NOiHnVIKJPuj+trJnOiKDainhcR00+Ncna5I9TomGm2r0TGUrO/bPqW7b2yvpBNUnAweUYjU/eG2E9uY5IzVPwO9M+PqulqD5Reqq3MW32WAcmLkO417Tn48tZnAmYjVoM5zb16ZN/J9LQgHMf9L0/ZgguBgKOx0UQeedJjwgkA9BZdL6LuTiLwfcEt2ZxSwvvAXfBWVmrSlVns=");
 
-		scbClassic = npcLib.createNPC(Arrays.asList(main.color("&b&lSUPER CRAFT BROS"), main.color("&eMode: &bClassic"),
-				main.color("&7Click to Play!")));
+		scbClassic = npcLib.createNPC(Arrays.asList(main.color("&e&lSUPER CRAFT BROS"), main.color("&fMode: &aClassic"),
+				main.color("&eClick to Play!")));
 		scbClassic.setLocation(new Location(main.getLobbyWorld(), 191.5, 106, 657.5, 174, 2));
 		scbClassic.setSkin(sethblingSkin);
 		scbClassic.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));
 		scbClassic.create();
 
-		scbDuels = npcLib.createNPC(Arrays.asList(main.color("&b&lSUPER CRAFT BROS"), main.color("&eMode: &bDuels"),
-				main.color("&7Click to Play!")));
+		scbDuels = npcLib.createNPC(Arrays.asList(main.color("&e&lSUPER CRAFT BROS"), main.color("&fMode: &aDuels"),
+				main.color("&eClick to Play!")));
 		scbDuels.setLocation(new Location(main.getLobbyWorld(), 187.5, 106, 657.5, -174, 3));
 		scbDuels.setSkin(sethblingSkin);
 		scbDuels.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));
 		scbDuels.create();
 
-		parkour = npcLib.createNPC(Arrays.asList(main.color("&b&lPARKOUR"), main.color("&7Click to Play!")));
+		parkour = npcLib.createNPC(Arrays.asList(main.color("&e&lPARKOUR"), main.color("&eClick to Play!")));
 		parkour.setLocation(new Location(main.getLobbyWorld(), 183.5, 106, 655.5, -158, 2));
 		parkour.setSkin(sethblingSkin);
 		parkour.create();
@@ -77,7 +77,7 @@ public class NPCManager implements Listener {
 		socialMedia.setSkin(sethblingSkin);
 		socialMedia.create();
 
-		fishing = npcLib.createNPC(Arrays.asList(main.color("&b&lFISHING"), main.color("&7Click to go fishing")));
+		fishing = npcLib.createNPC(Arrays.asList(main.color("&e&lFISHING"), main.color("&eClick to Play!")));
 		fishing.setLocation(new Location(main.getLobbyWorld(), 195.5, 106, 655.5, 162, 3));
 		fishing.setSkin(fishermanSkin);
 		fishing.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.FISHING_ROD));
