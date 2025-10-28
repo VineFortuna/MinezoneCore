@@ -319,7 +319,8 @@ public class Fishing implements Listener {
     }
 
     public int getTotalFish(Player player) {
-        return getTotalFish(player, (FishRarity) null);
+        PlayerData data = main.getDataManager().getPlayerData(player);
+        return data.playerFishing.size();
     }
 
     public boolean hasAllFish(Player player) {
