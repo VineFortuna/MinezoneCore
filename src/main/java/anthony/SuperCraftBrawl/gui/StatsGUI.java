@@ -72,21 +72,25 @@ public class StatsGUI implements InventoryProvider {
 		if (data != null) {
 			contents.set(0, 4,
 					ClickableItem.of(ItemHelper.createSkullHeadPlayer(1, data.playerName, main.color("&e" + data.playerName),
-							Arrays.asList(main.color("&aRank: &r" + rankName),
-									main.color("&aLevel: &r" + data.level),
-									main.color("&aEXP: &r" + data.exp + "/2500"),
-									main.color("&aMatches Played: &r" + (data.wins + data.losses)))), e-> {}));
+							Arrays.asList(main.color("&fRank: &a" + rankName),
+									main.color("&fLevel: &a" + data.level),
+									main.color("&fEXP: &a" + data.exp + "/2500"),
+									main.color("&fMatches Played: &a" + (data.wins + data.losses)))), e-> {}));
 			contents.set(2, 4,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
 							main.color("&e&lSCB Stats"),
-							"" + ChatColor.RESET + ChatColor.GREEN + "Wins: " + ChatColor.RESET + data.wins,
-							"" + ChatColor.RESET + ChatColor.GREEN + "Winstreak: " + ChatColor.RESET + data.winstreak,
-							"" + ChatColor.RESET + ChatColor.GREEN + "Flawless Wins: " + ChatColor.RESET
-									+ data.flawlessWins,
-							"" + ChatColor.RESET + ChatColor.GREEN + "Losses: " + ChatColor.RESET + data.losses,
-							"" + ChatColor.RESET + ChatColor.GREEN + "Match MVPs: " + ChatColor.RESET + data.matchMvps,
-							"", "" + ChatColor.RESET + ChatColor.GREEN + "Kills: " + ChatColor.RESET + data.kills,
-							"" + ChatColor.RESET + ChatColor.GREEN + "Deaths: " + ChatColor.RESET + data.deaths), e -> {
+                            main.color("&fWins: &a" + data.wins),
+                            main.color("&fFlawless Wins: &a" + data.flawlessWins),
+                            main.color("&fMatch MVPs: &a" + data.matchMvps),
+                            main.color("&fLosses: &a" +  data.losses),
+                            "",
+                                    main.color("&fCurrent Winstreak: &a" + data.winstreak),
+                                    main.color("&fBest Winstreak: &a" + data.bestWinstreak),
+                            "",
+                            main.color("&fKills: &a" + data.kills),
+                            main.color("&fDeaths: &a" + data.deaths)),
+                            e -> {
+                                //Do nothing when clicked
 							}));
 			
 			int treasure = 0;
@@ -105,9 +109,9 @@ public class StatsGUI implements InventoryProvider {
 			contents.set(2, 6,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
 							main.color("&e&lFishing Stats"),
-							main.color("&aCaught: &r" + data.totalcaught),
-							main.color("&aUnique Caught: &r" + uniqueCaught + "/" + FishType.values().length),
-							main.color("&aTreasure Caught: &r" + treasure)), e -> {
+							main.color("&fCaught: &a" + data.totalcaught),
+							main.color("&fUnique Caught: &a" + uniqueCaught + "/" + FishType.values().length),
+							main.color("&fTreasure Caught: &a" + treasure)), e -> {
 					}));
 
 
@@ -115,9 +119,9 @@ public class StatsGUI implements InventoryProvider {
 			for (Arenas arenas : Arenas.values()) {
 				ParkourDetails details = data.playerParkour.get(arenas.getId());
 				if (details != null && details.totalTime > 0) {
-					parkourLore.add(main.color("&a" + arenas.getName() + ": &r" + main.getParkour().formatTime(details.totalTime)));
+					parkourLore.add(main.color("&f" + arenas.getName() + ": &a" + main.getParkour().formatTime(details.totalTime)));
 				} else {
-					parkourLore.add(main.color("&a" + arenas.getName() + ": &rN/A"));
+					parkourLore.add(main.color("&f" + arenas.getName() + ": &aN/A"));
 				}
 			}
 

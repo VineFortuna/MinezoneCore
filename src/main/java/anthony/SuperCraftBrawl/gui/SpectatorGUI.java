@@ -58,10 +58,10 @@ public class SpectatorGUI implements InventoryProvider {
 					DecimalFormat decimalFormat = new DecimalFormat("#.#");
 					String formatHealth = decimalFormat.format(health);
 					contents.set(0, count,
-							ClickableItem.of(ItemHelper.setDetails(p, main.color("&ePlayer: &r" + gamePlayer.getName()),
-									main.color("&eClass: &r" + i.classes.get(gamePlayer).getType()),
-									main.color("&eLives: &r" + i.classes.get(gamePlayer).getLives()),
-									main.color("&eHealth: &r" + formatHealth + "/20")), e -> {
+							ClickableItem.of(ItemHelper.setDetails(p, main.color("&fPlayer: &a" + gamePlayer.getName()),
+									main.color("&fClass: &a" + i.classes.get(gamePlayer).getType()),
+									main.color("&fLives: &a" + i.classes.get(gamePlayer).getLives()),
+									main.color("&fHealth: &a" + formatHealth + "/20")), e -> {
 										player.teleport(gamePlayer);
 										inv.close(player);
 									}));
