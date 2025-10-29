@@ -19,6 +19,9 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.text.NumberFormat;
+import java.util.Locale;
+
 public class ClassesGUI implements InventoryProvider {
 
 	public Core main;
@@ -65,8 +68,11 @@ public class ClassesGUI implements InventoryProvider {
             contents.set(1, 6,
                     ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.EMERALD),
                             main.color("&eToken Classes"),
-                            main.color("&7Classes unlocked with Tokens!"), "",
-                            main.color("&fMy Tokens: &a" + data.tokens)), e -> {
+                            main.color("&7Classes unlocked with Tokens!"),
+                            "",
+                            main.color("&fUnlocked: &a" + main.getGameManager().numOfUnlockedTokenClasses(player)
+                                    + "/" + main.getGameManager().totalNumOfTokenClasses()),
+                            main.color("&fMy Tokens: &a" + fmt(data.tokens))), e -> {
                         SoundManager.playClickSound(player);
                         new TokenClassesGUI(main).inv.open(player);
                     }));
@@ -74,7 +80,10 @@ public class ClassesGUI implements InventoryProvider {
             contents.set(2, 4,
                     ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR),
                             main.color("&eLevel Classes"),
-                            main.color("&7Classes unlocked with Levels"), "",
+                            main.color("&7Classes unlocked with Levels"),
+                            "",
+                            main.color("&fUnlocked: &a" + main.getGameManager().numOfUnlockedLevelClasses(player)
+                                    + "/" + main.getGameManager().totalNumOfLevelClasses()),
                             main.color("&fMy Level: &a" + data.level)), e -> {
                         SoundManager.playClickSound(player);
                         new LevelClassesGUI(main).inv.open(player);
@@ -116,6 +125,10 @@ public class ClassesGUI implements InventoryProvider {
 							}
 						}));
 	}
+
+    private String fmt(long n) {
+        return NumberFormat.getIntegerInstance(Locale.US).format(n);
+    }
 
 	@Override
 	public void update(Player player, InventoryContents contents) {

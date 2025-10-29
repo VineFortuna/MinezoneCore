@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.gui.fishing.FishingGUI;
+import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.RankManager;
@@ -53,9 +54,9 @@ public class PrefsGUI implements InventoryProvider {
 
 		if (data != null) {
 			if (data.cwm == 0) {
-				line = main.color("&c&lDISABLED");
+				line = main.color("&cDisabled");
 			} else {
-				line = main.color("&a&lENABLED");
+				line = main.color("&aEnabled");
 			}
 			contents.set(2, 2, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
 					main.color("&eCustom Win Messages"), "", line), e -> {
@@ -71,14 +72,14 @@ public class PrefsGUI implements InventoryProvider {
 							}
 						} else {
 							player.sendMessage(main.color("&c&l(!) &rYou need the rank " + ChatColor.BLUE
-									+ ChatColor.BOLD + "CAPTAIN " + "&rto use this feature!"));
+									+ ChatColor.BOLD + Rank.PRO.getTag() + "&rto use this feature!"));
 						}
 						inv.close(player);
 					}));
 			if (data.pm == 1) {
-				line = main.color("&c&lDISABLED");
+				line = main.color("&cDisabled");
 			} else {
-				line = main.color("&a&lENABLED");
+				line = main.color("&aEnabled");
 			}
 			contents.set(2, 6,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.PAPER),
@@ -97,9 +98,9 @@ public class PrefsGUI implements InventoryProvider {
 							}));
 
 			if (data.killMsgs == 0) {
-				line = main.color("&c&lDISABLED");
+				line = main.color("&cDisabled");
 			} else {
-				line = main.color("&a&lENABLED");
+				line = main.color("&aEnabled");
 			}
 			contents.set(2, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
 					main.color("&eCustom Kill Messages"), "", line), e -> {
@@ -112,8 +113,7 @@ public class PrefsGUI implements InventoryProvider {
 								data.killMsgs = 0;
 							}
 						} else {
-							player.sendMessage(main.color("&c&l(!) &rYou need the rank " + ChatColor.BLUE
-									+ ChatColor.BOLD + "CAPTAIN " + "&rto use this feature!"));
+                            player.sendMessage(main.color("&c&l(!) &rYou need the rank " + Rank.PRO.getTag() + " &fto use this!"));
 						}
 						inv.close(player);
 					}));
