@@ -12,6 +12,7 @@ import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -88,14 +89,15 @@ public class DonorClassesGUI implements InventoryProvider {
 								player.sendMessage(main.color("&2&l|| "));
 								player.sendMessage(main.color("&2&l|| "));
 								player.sendMessage(main.color("&2&l============================================="));
+                                player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
 								inv.close(player);
 							} else if (e.isRightClick()) {
 								new ClassMasteryGUI(main, type, inv).inv.open(player);
 							}
 						} else {
-							player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD
-									+ "(!) " + ChatColor.RESET + "You need a rank to use this class");
-							inv.close(player);
+                            player.sendMessage(main.color("&c&l(!) &rYou need a rank to use this class!"));
+                            player.playSound(player.getLocation(), Sound.NOTE_PLING, 1.0f, 0f);
+                            inv.close(player);
 						}
 					}));
 			b++;
