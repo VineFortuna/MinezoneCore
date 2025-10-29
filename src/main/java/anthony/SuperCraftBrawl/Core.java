@@ -1919,7 +1919,7 @@ public class Core extends JavaPlugin implements Listener {
                 new TitleSequence.TitleSpec("&6&lMINEZONE", "&e&lNEW LOBBY", 10, 70, 0),
                 new TitleSequence.TitleSpec("&6&lMINEZONE", "&c&lDaily/Monthly/Weekly &e&lLEADERBOARDS", 0, 70, 10)
         );
-	}
+    }
 
 	public String getColorForNames(Player player, Rank rank) {
 		String msg = "";
@@ -2231,8 +2231,8 @@ public class Core extends JavaPlugin implements Listener {
 	public ItemStack getFishingRod(Player player) {
 		PlayerData data = getDataManager().getPlayerData(player);
 
-		ItemStack fishingRod = ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD), "&3&lGo Fishing!",
-				"&fAnywhere with water", "&fFish for junk, fish and treasure", "&fEarn unique rewards");
+		ItemStack fishingRod = ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD), "&3Go Fishing!",
+				"&7Anywhere with water", "&7Fish for junk, fish and treasure", "&7Earn unique rewards");
 		ItemHelper.setUnbreakable(fishingRod);
 		if (data != null) {
 			if (data.lure == 1 && data.lureLevel > 0) {

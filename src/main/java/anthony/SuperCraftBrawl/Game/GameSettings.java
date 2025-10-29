@@ -96,7 +96,7 @@ public class GameSettings {
 	
 	private void updateModeOnBoard() {
 		for (Player gamePlayer : game.players) {
-			game.boards.get(gamePlayer).updateLine(2, " " + ChatColor.GRAY + game.gameType.getName());
+			game.boards.get(gamePlayer.getUniqueId()).updateLine(1, game.color("&fMode: &a" + game.gameType.getName()));
 		}
 	}
 

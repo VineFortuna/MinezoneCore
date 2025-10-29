@@ -38,41 +38,40 @@ public class GadgetsGUI implements InventoryProvider {
 		// Icon Items
 		// Broom
 		List<String> broomList = new ArrayList<>();
-		broomList.add(ChatColor.DARK_GRAY + "Fly around like a Witch!");
+		broomList.add(main.color("&7Fly around like a Witch!"));
 		broomList.add("");
-		broomList.add(Rank.PRO.getTag() + ChatColor.RESET + "+ exclusive!");
+		broomList.add(Rank.PRO.getTag() + ChatColor.RESET + " exclusive!");
 		ItemStack broom = ItemHelper.create(Material.WHEAT,
-				ChatColor.DARK_GREEN.toString() + ChatColor.BOLD + "Magic Broom", broomList);
+				main.color("&6Magic Broom"), broomList);
 
 		// Melon
 		List<String> melonList = new ArrayList<>();
-		melonList.add(ChatColor.DARK_GRAY + "A delicious melon that gives you...");
-		melonList.add(ChatColor.DARK_GRAY + "                  Superpowers!");
+		melonList.add(main.color("&7A delicious melon that gives you..."));
+		melonList.add(main.color("&7Superpowers!"));
 		melonList.add("");
-		melonList.add(ChatColor.RESET + "You have " + ChatColor.YELLOW + data.melon + ChatColor.RESET + " Melons");
-		ItemStack melon = ItemHelper.create(Material.MELON, ChatColor.YELLOW.toString() + ChatColor.BOLD + "Melons",
-				melonList);
+        melonList.add(main.color("&fYou have &a" + data.melon + "&f melons"));
+        ItemStack melon = ItemHelper.create(Material.MELON,main.color("&aMelons"),
+                melonList);
 
 		// Paintball
 		List<String> paintballList = new ArrayList<>();
-		paintballList.add(ChatColor.DARK_GRAY + "Shoot paintballs as you want");
+		paintballList.add(main.color("&7Shoot paintballs as you want"));
 		paintballList.add("");
-		paintballList.add(
-				ChatColor.RESET + "You have " + ChatColor.YELLOW + data.paintball + ChatColor.RESET + " Paintballs");
-		ItemStack paintball = ItemHelper.create(Material.GOLD_BARDING,
-				ChatColor.YELLOW.toString() + ChatColor.BOLD + "Paintball Gun", paintballList);
+        paintballList.add(main.color("&fYou have &a" +  data.paintball + "&f paintballs"));
+        ItemStack paintball = ItemHelper.create(Material.GOLD_BARDING,
+                main.color("&9Paintball Gun"), paintballList);
 
 		// Fishing
 		ItemStack fishingRod = main.getFishingRod(player);
 
-		ItemStack snowball = ItemHelper.setDetails(ItemHelper.create(Material.SNOW_BALL), "&r&lSnow Particles", "",
+		ItemStack snowball = ItemHelper.setDetails(ItemHelper.create(Material.SNOW_BALL), "&bSnow Particles", "",
 				"&cChristmas 2024 exclusive");
 
-		ItemStack snowmanPet = ItemHelper.setDetails(ItemHelper.create(Material.MONSTER_EGG), "&e&lSnowman Pet", "",
+		ItemStack snowmanPet = ItemHelper.setDetails(ItemHelper.create(Material.MONSTER_EGG), "&bSnowman Pet", "",
 				"&cChristmas 2024 exclusive");
 
 		String candyCaneTexture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWM4M2E0MmU4MmNkNmE3MGUyMTZkOWE4YzJmZjZmMWU1ZTViMjU2Y2VhM2I4Y2QyMjU0NzIzOTNhYTNlY2E1YSJ9fX0=";
-		ItemStack candyCane = ItemHelper.createSkullTexture(candyCaneTexture, "&c&lCandy &r&lCane &c&lSwirl", "",
+		ItemStack candyCane = ItemHelper.createSkullTexture(candyCaneTexture, "&cCandy &fCane &cSwirl", "",
 				"&cChristmas 2024 exclusive");
 
 		// Setting Items
@@ -85,40 +84,32 @@ public class GadgetsGUI implements InventoryProvider {
 			if (player.hasPermission("scb.wheat")) {
 				if (!(player.getInventory().contains(broom))) {
 					player.getInventory().setItem(5, broom);
-					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "You have equipped " + ChatColor.DARK_GREEN + ChatColor.BOLD + "Magic Broom");
+                    player.sendMessage(main.color("&9&l(!) &rYou have equipped &6Magic Broom"));
 					inv.close(player);
 				} else if (player.getInventory().contains(broom)) {
 					player.getInventory().remove(broom);
-					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "You have unequipped " + ChatColor.DARK_GREEN + ChatColor.BOLD + "Magic Broom");
+                    player.sendMessage(main.color("&9&l(!) &rYou have unequipped &6Magic Broom"));
 					inv.close(player);
 				}
-			} else {
-				player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
-						+ Rank.PRO.getTag() + ChatColor.RESET + " to use this item!");
-			}
+			} else
+                player.sendMessage(main.color("&c&l(!) &rYou need the rank " + Rank.PRO.getTag() + "&f to use this!"));
 		}));
 
 		// Paintball Gadget
 		contents.set(1, 2, ClickableItem.of(paintball, e -> {
 			if (data.paintball > 0) {
 				if (!(player.getInventory().contains(Material.GOLD_BARDING))) {
-					ItemStack p = ItemHelper.setDetails(new ItemStack(Material.GOLD_BARDING),
-							"" + ChatColor.RESET + ChatColor.GREEN + "Paintball Gun", "",
-							"" + ChatColor.RESET + ChatColor.GRAY + "Right click to shoot a paintball!");
+                    ItemStack p = ItemHelper.setDetails(new ItemStack(Material.GOLD_BARDING),
+                            main.color("&9Paintball Gun"),
+                            main.color("&7Right click to shoot a paintball!"));
 					player.getInventory().setItem(5, p);
-					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "You have equipped " + ChatColor.GREEN + "Paintball Gun");
+                    player.sendMessage(main.color("&9&l(!) &rYou have equipped &9Paintball Gun"));
 				} else {
 					player.getInventory().remove(Material.GOLD_BARDING);
-					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "You have unequipped " + ChatColor.GREEN + "Paintball Gun");
+                    player.sendMessage(main.color("&9&l(!) &rYou have unequipped &9Paintball Gun"));
 				}
-			} else {
-				player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-						+ "You do not have enough paintballs!");
-			}
+			} else
+                player.sendMessage(main.color("&c&l(!) &rYou do not have any paintballs! Go collect from MysteryChests"));
 			inv.close(player);
 		}));
 
@@ -127,17 +118,14 @@ public class GadgetsGUI implements InventoryProvider {
 			if (data.melon > 0) {
 				if (!(player.getInventory().contains(melon))) {
 					player.getInventory().setItem(5, melon);
-					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "You have equipped " + ChatColor.YELLOW + "Melons");
+                    player.sendMessage(main.color("&9&l(!) &rYou have equipped &aMelons"));
 					inv.close(player);
 				} else if (player.getInventory().contains(melon)) {
 					player.getInventory().remove(melon);
-					player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "You have unequipped " + ChatColor.YELLOW + "Melons");
+                    player.sendMessage(main.color("&9&l(!) &rYou have unequipped &aMelons"));
 				}
 			} else {
-				player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-						+ "You do not have enough melons!");
+                player.sendMessage(main.color("&c&l(!) &rYou do not have any melons! Go collect from MysteryChests"));
 			}
 			inv.close(player);
 		}));
@@ -145,13 +133,11 @@ public class GadgetsGUI implements InventoryProvider {
 		contents.set(1, 4, ClickableItem.of(fishingRod, e -> {
 			if (!(player.getInventory().contains(fishingRod))) {
 				player.getInventory().setItem(5, fishingRod);
-				player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-						+ "You have equipped " + ChatColor.DARK_AQUA + ChatColor.BOLD + "Fishing Rod");
+                player.sendMessage(main.color("&9&l(!) &rYou have equipped &bFishing Rod"));
 				inv.close(player);
 			} else if (player.getInventory().contains(fishingRod)) {
 				player.getInventory().remove(fishingRod);
-				player.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-						+ "You have unequipped " + ChatColor.DARK_AQUA + ChatColor.BOLD + "Fishing Rod");
+                player.sendMessage(main.color("&9&l(!) &rYou have unequipped &bFishing Rod"));
 				inv.close(player);
 			}
 		}));
@@ -159,48 +145,48 @@ public class GadgetsGUI implements InventoryProvider {
 		contents.set(1, 5, ClickableItem.of(snowball, e -> {
 			if (data.snowParticles == 1) {
 				if (!(main.getListener().snowParticlePlayers.contains(player))) {
-					player.sendMessage(main.color("&r&l(!) &rYou equipped &eSnow Particles &rgadget"));
+					player.sendMessage(main.color("&r&l(!) &fYou equipped &bSnow Particles &fgadget"));
 					main.getListener().snowParticlePlayers.add(player);
 				} else {
-					player.sendMessage(main.color("&r&l(!) &rYou removed &eSnow Particles &rgadget"));
+					player.sendMessage(main.color("&r&l(!) &rYou unequipped &bSnow Particles &rgadget"));
 					main.getListener().snowParticlePlayers.remove(player);
 				}
 			} else {
-				player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this gadget yet!"));
+				player.sendMessage(main.color("&c&l(!) &rYou do not have this gadget!"));
 			}
 		}));
 
 		contents.set(1, 6, ClickableItem.of(snowmanPet, e -> {
 			if (data.snowmanPet == 1) {
 				if (!(main.getListener().snowmanPetPlayers.containsKey(player))) {
-					player.sendMessage(main.color("&r&l(!) &rYou equipped &eSnowman &rpet"));
+					player.sendMessage(main.color("&9&l(!) &fYou equipped &bSnowman &fpet"));
 					Location spawnLoc = player.getLocation().add(1, 0, 1);
 					Snowman snowman = player.getWorld().spawn(spawnLoc, Snowman.class);
 					snowman.setCustomName(ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Snowman");
 					main.getListener().snowmanPetPlayers.put(player, snowman);
 					main.getListener().snowmanPet(player);
 				} else {
-					player.sendMessage(main.color("&r&l(!) &rYou removed &eSnowman &rpet"));
+					player.sendMessage(main.color("&9&l(!) &fYou removed &bSnowman &fpet"));
 					main.getListener().snowmanPetPlayers.get(player).remove();
 					main.getListener().snowmanPetPlayers.remove(player);
 				}
 			} else {
-				player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this gadget yet!"));
+				player.sendMessage(main.color("&c&l(!) &rYou do not have this gadget!"));
 			}
 		}));
 
 		contents.set(1, 7, ClickableItem.of(candyCane, e -> {
 			if (data.candycaneParticles == 1) {
 				if (!(main.getListener().candyCaneSwirlPlayers.contains(player))) {
-					player.sendMessage(main.color("&r&l(!) &rYou equipped &eCandy Cane Swirl &rgadget"));
+					player.sendMessage(main.color("&9&l(!) &fYou equipped &cCandy &fCane &cSwirl &fgadget"));
 					main.getListener().candyCaneSwirlPlayers.add(player);
 					main.getListener().candyCaneSwirlCosmetic(player);
 				} else {
-					player.sendMessage(main.color("&r&l(!) &rYou removed &eCandy Cane Swirl &rgadget"));
+					player.sendMessage(main.color("&9&l(!) &fYou removed &cCandy &fCane &cSwirl &fgadget"));
 					main.getListener().candyCaneSwirlPlayers.remove(player);
 				}
 			} else {
-				player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this gadget yet!"));
+				player.sendMessage(main.color("&c&l(!) &rYou do not have this gadget!"));
 			}
 		}));
 
@@ -212,14 +198,15 @@ public class GadgetsGUI implements InventoryProvider {
 		List<String> candyAuraLore = new ArrayList<>();
 		candyAuraLore.add(main.color("&7Unlock by finding 4 baskets in the lobby!"));
 		candyAuraLore.add("");
-		candyAuraLore.add(main.color("&7Progress: &e" + basketsFoundForLore + "&7/4"));
+		candyAuraLore.add(main.color("&fProgress: &a" + basketsFoundForLore + "/4"));
+        candyAuraLore.add("");
 		candyAuraLore.add(main.color("&cHalloween 2025 exclusive"));
 
         // Icon & name
 		ItemStack candyAuraIcon = ItemHelper.setDetails(ItemHelper.create(Material.SUGAR),
-				main.color("&d&lCandy Aura"), "",
+				main.color("&dCandy Aura"), "",
 				main.color("&7Unlock by finding 4 baskets in the lobby!"),
-				main.color("&7Progress: &e" + Math.min(basketsFoundForLore, 4) + "&7/4"),
+				main.color("&fProgress: &a" + Math.min(basketsFoundForLore, 4) + "/4"),
 				"",
 				main.color("&cHalloween 2025 exclusive"));
 
@@ -232,7 +219,7 @@ public class GadgetsGUI implements InventoryProvider {
 
 			if (current < 4) {
 				player.sendMessage(main.color("&c&l(!) &rYou need to find &e4 baskets &rto use &dCandy Aura&r."));
-				player.sendMessage(main.color("&7Progress: &e" + current + "&7/10"));
+				player.sendMessage(main.color("&fProgress: &a" + current + "/10"));
 				return;
 			}
 

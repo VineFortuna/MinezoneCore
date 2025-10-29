@@ -106,6 +106,65 @@ public class GameManager implements Listener, PluginMessageListener {
         }
     }
 
+    public int numOfUnlockedTokenClasses (Player player) {
+        int num = 0;
+        PlayerData data = main.getDataManager().getPlayerData(player);
+
+        if (data != null) {
+            for (ClassType type : ClassType.values()) {
+                if (type.getTokenCost() > 0) {
+                    if (data.playerClasses.get(type.getID()) != null
+                            && data.playerClasses.get(type.getID()).purchased) {
+                        num++;
+                    }
+                }
+            }
+        }
+
+        return num;
+    }
+
+    public int totalNumOfTokenClasses() {
+        int num = 0;
+
+        for (ClassType type : ClassType.values()) {
+            if (type.getTokenCost() > 0) {
+                num++;
+            }
+        }
+
+        return num;
+    }
+
+    public int numOfUnlockedLevelClasses(Player player) {
+        int num = 0;
+        PlayerData data = main.getDataManager().getPlayerData(player);
+
+        if (data != null) {
+            for (ClassType type : ClassType.values()) {
+                if (type.getLevel() > 0) {
+                    if (data.level >= type.getLevel()) {
+                        num++;
+                    }
+                }
+            }
+        }
+
+        return num;
+    }
+    public int totalNumOfLevelClasses() {
+        int num = 0;
+
+        for (ClassType type : ClassType.values()) {
+            if (type.getLevel() > 0 && !type.isVaulted()) {
+                num++;
+            }
+        }
+
+        return num;
+    }
+
+
     public boolean checkIfFull(Player player, GameInstance game, GameType type) {
         if (type == GameType.DUEL && game.players.size() == 2) {
             return true;
@@ -1713,9 +1772,8 @@ public class GameManager implements Listener, PluginMessageListener {
 
 		switch (result) {
 		case SPECTATOR:
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You are now spectating " + ""
-					+ ChatColor.GREEN + map.toString() + "." + ChatColor.RESET + " Use " + ChatColor.GREEN + "/leave "
-					+ ChatColor.RESET + "to leave");
+            player.sendMessage(main.color("&2&l(!) &rYou are spectating on &e" + map.toString() +
+                    ".&f Use &e/leave&f to leave"));
 			player.setGameMode(GameMode.SPECTATOR);
 			break;
 

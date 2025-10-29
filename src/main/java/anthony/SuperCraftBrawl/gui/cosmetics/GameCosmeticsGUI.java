@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.gui.cosmetics;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.util.ItemHelper;
+import anthony.util.SoundManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -38,6 +39,7 @@ public class GameCosmeticsGUI implements InventoryProvider {
 
 		contents.set(1, 2, ClickableItem.of(winEffects, e -> {
 			new WinEffectsGUI(main, inv).inv.open(player);
+            SoundManager.playClickSound(player);
 
 			/*if (player.hasPermission("scb.winEffects"))
 				new WinEffectsGUI(main, inv).inv.open(player);
@@ -48,11 +50,13 @@ public class GameCosmeticsGUI implements InventoryProvider {
 
 		contents.set(1, 6, ClickableItem.of(deathEffects, e -> {
 			new DeathEffectsGUI(main, inv).inv.open(player);
+            SoundManager.playClickSound(player);
 		}));
 
 		contents.set(2, 8, ClickableItem.of(
 				ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
 					inv.getParent().get().open(player);
+                    SoundManager.playClickSound(player);
 				}
 		));
 	}
