@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.gui.cosmetics;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.util.ItemHelper;
+import anthony.util.SoundManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -43,23 +44,27 @@ public class LobbyCosmeticsGUI implements InventoryProvider {
                 gadgets,
                 e -> {
                     new GadgetsGUI(main, inv).inv.open(player);
+                    SoundManager.playClickSound(player);
                 }));
         
         contents.set(1, 4, ClickableItem.of(
 				titles,
 				e -> {
 					new TitlesCosmeticsGUI(main, inv).inv.open(player);
+                    SoundManager.playClickSound(player);
 				}));
 
         contents.set(1, 6, ClickableItem.of(
                 lobbyOutfits,
                 e -> {
                     new SuitsGUI(main, inv).inv.open(player);
+                    SoundManager.playClickSound(player);
                 }));
 
         contents.set(2, 8, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
                     inv.getParent().get().open(player);
+                    SoundManager.playClickSound(player);
                 }
         ));
     }
