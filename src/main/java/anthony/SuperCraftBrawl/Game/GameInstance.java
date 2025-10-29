@@ -79,7 +79,7 @@ public class GameInstance {
     List<BukkitRunnable> runnables = new ArrayList<>();
     public int blindness = 0;
     public ItemStack votePaper = ItemHelper.setDetails(new ItemStack(Material.PAPER),
-            "" + ChatColor.YELLOW + ChatColor.BOLD + "Vote");
+            color("&eVote &7(Right Click)"));
     public int alivePlayers = 0;
     public int aliveTeams = 0;
     public Sign s;
@@ -244,7 +244,7 @@ public class GameInstance {
                 if (isLobbyFull(player)) return GameReason.FULL;
 
                 players.add(player);
-                player.sendMessage(color("&2&l(!) &rYou have joined &r&l" + map.toString()));
+                player.sendMessage(color("&2&l(!) &rYou have joined &e&l" + map.toString()));
                 if (this.gameType == GameType.FRENZY)
                     TitleUtil.sendTitle(player, "&e&l" + map.toString(), "&fYour class will be randomly selected", 10, 60, 5);
                 else
@@ -268,17 +268,26 @@ public class GameInstance {
                         }
                     }
 
-                    gamePlayer.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                            + player.getName() + ChatColor.GREEN + " joined " + ChatColor.RED + "(" + ChatColor.GREEN
-                            + (map.GetInstance().gameType == GameType.FRENZY ? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers() : "")
-                            + (map.GetInstance().gameType == GameType.CLASSIC ? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers() : "")
-                            + (map.GetInstance().gameType == GameType.DUEL ? "" + ChatColor.RESET + players.size() + "/" + gameType.getMaxPlayers() : "")
-                            + ChatColor.RED + ")");
+                    gamePlayer.sendMessage(color("&2&l(!) &f" + player.getName() +
+                            "&a joined &f(&a" + this.players.size() + "/" + getMaxPlayers() + "&f)"));
                 }
 
                 return GameReason.SUCCESS;
             } else return GameReason.ALREADY_IN;
         } else return GameReason.ALREADYPLAYING;
+    }
+
+    /*
+     * This helper function checks if the game is either frenzy,
+     * classic or duels to see what the max players for that
+     * category are allowed
+     */
+    private String getMaxPlayers() {
+        String maxPlayers = ""
+                + (map.GetInstance().gameType == GameType.FRENZY ? "" + gameType.getMaxPlayers() : "")
+                + (map.GetInstance().gameType == GameType.CLASSIC ? "" + gameType.getMaxPlayers() : "")
+                + (map.GetInstance().gameType == GameType.DUEL ? "" + gameType.getMaxPlayers() : "");
+        return maxPlayers;
     }
 
     private boolean isLobbyFull(Player player) {
@@ -640,7 +649,7 @@ public class GameInstance {
             public void run() {
                 if (gameTicks % (60 * 20) == 0) {
                     time.getScoreboard().resetScores(time.getEntry());
-                    time = o.getScore(color("&eGame Time: &f" + gameTime + "m"));
+                    time = o.getScore(color("&fGame Time: &a" + gameTime + "m"));
                     time.setScore(0);
                     gameTime++;
                 }
@@ -791,9 +800,9 @@ public class GameInstance {
                 }
                 Score line = o.getScore("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "--------------------");
                 line.setScore(0);
-                Score game = o.getScore(color("&eGame Mode: &r&o" + this.gameType.getName()));
+                Score game = o.getScore(color("&fGame Mode: &a" + this.gameType.getName()));
                 game.setScore(0);
-                time = o.getScore(color("&eGame Time: &r" + gameTime + "m"));
+                time = o.getScore(color("&fGame Time: &a" + gameTime + "m"));
                 time.setScore(0);
                 player.setScoreboard(c);
             }
@@ -872,75 +881,109 @@ public class GameInstance {
         PlayerDeathEvent event = new PlayerDeathEvent(player, null, 0, null);
         baseClassBeforeChecks.isDead = true;
         baseClassBeforeChecks.Death(event);
+
         final BaseClass baseClass = this.classes.get(player);
         if (baseClass == null) return;
 
         try {
+            // Immediate death handling
             player.getInventory().clear();
             player.setGameMode(GameMode.SPECTATOR);
             player.teleport(GetSpecLoc());
 
-            if (this.gameType == GameType.FRENZY && baseClass.getLives() > 0) reRandomizeClass(player);
-            else if (this.gameType == GameType.GUNGAME && baseClass.getLives() > 0) nextClass(player);
+            // Handle class changes (Frenzy/GunGame) while dead
+            if (this.gameType == GameType.FRENZY && baseClass.getLives() > 0) {
+                reRandomizeClass(player);
+            } else if (this.gameType == GameType.GUNGAME && baseClass.getLives() > 0) {
+                nextClass(player);
+            }
             final BaseClass finalBaseClass = this.classes.get(player);
 
+            // Countdown & respawn
             BukkitRunnable runTimer = new BukkitRunnable() {
                 int ticks = 3;
+                boolean timesSent = false;
+
                 @SuppressWarnings("deprecation")
                 public void run() {
                     if (GameInstance.this.state == GameState.ENDED) {
                         cancel();
+                        return;
                     }
-                    if (finalBaseClass.getLives() > 0)
+
+                    if (finalBaseClass.getLives() > 0) {
                         if (this.ticks == 0) {
+                            // Finish countdown -> respawn if still valid
                             if (state != GameState.STARTED || !players.contains(player) || getWinnerList().contains(player)) {
                                 cancel();
                                 player.setAllowFlight(false);
                                 player.setAllowFlight(true);
                                 return;
                             }
+
                             player.teleport(GameInstance.this.GetRespawnLoc());
                             player.setGameMode(GameMode.ADVENTURE);
                             player.setHealth(20.0D);
                             player.setAllowFlight(true);
                             GameInstance.this.getGameManager().addSpawnProtection(player);
+
                             if (!GameInstance.this.players.contains(player)) {
                                 GameInstance.this.getGameManager().getMain().ResetPlayer(player);
                             } else {
                                 finalBaseClass.loadPlayer();
+
                                 if (GameInstance.this.gameType == GameType.FRENZY
                                         || GameInstance.this.gameType == GameType.GUNGAME) {
-                                    TitleUtil.sendTitle(player, "&eNew Class", "" + finalBaseClass.getType().getTag(), 0, 30, 10);
+                                    TitleUtil.sendTitle(player, "&eNew Class", "" + finalBaseClass.getType().getTag(), 1, 30, 10);
                                 } else {
-                                    TitleUtil.sendTitle(player, "&eRespawned", "", 0, 30, 10);
+                                    TitleUtil.sendTimes(player, 1, 30, 10);
+                                    TitleUtil.setSubtitle(player, "");
+                                    TitleUtil.setTitle(player, "&eRespawned");
                                 }
                                 finalBaseClass.isDead = false;
                             }
                             cancel();
-                        } else if (this.ticks <= 3 && GameInstance.this.state == GameState.STARTED) {
+                            return;
+                        }
+
+                        // During countdown
+                        if (this.ticks <= 3 && GameInstance.this.state == GameState.STARTED) {
                             if (!players.contains(player)) {
                                 cancel();
+                                return;
+                            }
+                            player.setGameMode(GameMode.SPECTATOR);
+
+                            if (!timesSent) {
+                                TitleUtil.sendTitle(player, "&eRespawning In", "&c" + this.ticks, 1, 60, 1);
+                                timesSent = true;
                             } else {
-                                TitleUtil.sendTitle(player, "&eRespawning In", "&c" + this.ticks, 0, 20, 0);
-                                player.setGameMode(GameMode.SPECTATOR);
+                                TitleUtil.updateTitleText(player, null, "&c" + this.ticks);
                             }
                         }
+                    }
                     this.ticks--;
                 }
             };
+
             BukkitTask task = runTimer.runTaskTimer(this.gameManager.getMain(), 0L, 20L);
             trackPerPlayerTask(player.getUniqueId(), task);
             this.runnables.add(runTimer);
 
+            // Post-death housekeeping
             player.setHealth(20.0D);
             player.setAllowFlight(true);
             player.setGameMode(GameMode.ADVENTURE);
+
+            // If out of lives -> convert to spectator permanently
             if (finalBaseClass.getLives() == 0) {
                 this.playerPosition.add(player);
+
                 if (this.players.size() > 2) {
                     TitleUtil.sendTitle(player, "&cYou have died!", "&fYou are now a Spectator", 0, 50, 10);
                     player.teleport(GetSpecLoc());
                 }
+
                 player.getPlayer().setGameMode(GameMode.ADVENTURE);
                 player.spigot().setCollidesWithEntities(false);
                 player.setAllowFlight(false);
@@ -950,6 +993,7 @@ public class GameInstance {
 
                 for (Player gamePlayer : this.players) gamePlayer.hidePlayer(player);
                 for (Player spectator : this.spectators) spectator.showPlayer(player);
+
                 try { finalBaseClass.score.getScoreboard().resetScores(finalBaseClass.score.getEntry()); }
                 catch (Exception e) { e.printStackTrace(); }
 
@@ -1270,8 +1314,8 @@ public class GameInstance {
                     }
                     winner.sendMessage("" + ChatColor.BOLD + "||");
                     winner.sendMessage("" + ChatColor.BOLD + "===========================");
-                    winner.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You have earned "
-                            + ChatColor.GREEN + baseClass.totalTokens + " Tokens!");
+                    winner.sendMessage(color("&2&l(!) &rYou earned &a" + baseClass.totalTokens +
+                            " &fTokens and &a" + baseClass.totalExp + "&f EXP!"));
 
                     if (data != null) data.tokens += baseClass.totalTokens;
                 } else {
@@ -1323,8 +1367,8 @@ public class GameInstance {
                             baseClass.totalTokens *= 2;
                         }
                     }
-                    winner.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You have earned "
-                            + ChatColor.GREEN + baseClass.totalTokens + " Tokens!");
+                    winner.sendMessage(color("&2&l(!) &rYou earned &a" + baseClass.totalTokens +
+                            " &fTokens and &a" + baseClass.totalExp + "&f EXP!"));
 
                     if (data != null) data.tokens += baseClass.totalTokens;
                 }
@@ -1373,19 +1417,19 @@ public class GameInstance {
                 if (winnerList.get(0).hasPermission("scb.customWin")) {
                     if (data.cwm == 1) customFlawWinMsg(winnerList.get(0));
                     else Bukkit.broadcastMessage(color("&2&l(!) &e" + winnerList.get(0).getName()
-                            + " &rjust &r&lFLAWLESSLY &rwon on &b&l" + map.toString()));
+                            + " &rjust &r&lFLAWLESSLY &rwon on &e&l" + map.toString()));
                 } else {
                     Bukkit.broadcastMessage(color("&2&l(!) &e" + winnerList.get(0).getName()
-                            + " &rjust &r&lFLAWLESSLY &rwon on &b&l" + map.toString()));
+                            + " &rjust &r&lFLAWLESSLY &rwon on &e&l" + map.toString()));
                 }
             } else {
                 if (winnerList.get(0).hasPermission("scb.customWin")) {
                     if (data.cwm == 1) customWinMsg(winnerList.get(0));
                     else Bukkit.broadcastMessage(color("&2&l(!) &e" + winnerList.get(0).getName()
-                            + " &rjust won on &b&l" + map.toString()));
+                            + " &rjust won on &e&l" + map.toString()));
                 } else {
                     Bukkit.broadcastMessage(color("&2&l(!) &e" + winnerList.get(0).getName()
-                            + " &rjust won on &b&l" + map.toString()));
+                            + " &rjust won on &e&l" + map.toString()));
                 }
             }
         } else {
@@ -1439,13 +1483,13 @@ public class GameInstance {
         if (map != null) {
             if (chance == 0) {
                 Bukkit.broadcastMessage(
-                        color("&2&l(!) &e" + winner.getName() + " &rgot a Victory Royale on &b&l" + map.toString()));
+                        color("&2&l(!) &e" + winner.getName() + " &rgot a Victory Royale on &e&l" + map.toString()));
             } else if (chance == 1) {
                 Bukkit.broadcastMessage(color("&2&l(!) &e" + winner.getName()
                         + " &rjust showed the entire lobby who's boss on &b&l" + map.toString()));
             } else if (chance == 2) {
                 Bukkit.broadcastMessage(
-                        color("&2&l(!) &e" + winner.getName() + " &rjust won on &b&l" + map.toString()));
+                        color("&2&l(!) &e" + winner.getName() + " &rjust won on &e&l" + map.toString()));
             }
         } else {
             if (chance == 0) {
@@ -1472,16 +1516,16 @@ public class GameInstance {
         if (map != null) {
             if (chance == 0) {
                 Bukkit.broadcastMessage(color("&2&l(!) &e" + winner.getName()
-                        + " &rjust &r&lABSOLUTELY DESTROYED &ron &b&l" + map.toString()));
+                        + " &rjust &r&lABSOLUTELY DESTROYED &ron &e&l" + map.toString()));
             } else if (chance == 1) {
                 Bukkit.broadcastMessage(
-                        color("&2&l(!) &e" + winner.getName() + " &rjust &r&lFLAWLESSLY &ron &b&l" + map.toString()));
+                        color("&2&l(!) &e" + winner.getName() + " &rjust &r&lFLAWLESSLY &ron &e&l" + map.toString()));
             } else if (chance == 2) {
-                Bukkit.broadcastMessage(color("&2&l(!) &rThe game on &b&l" + map.toString()
+                Bukkit.broadcastMessage(color("&2&l(!) &rThe game on &e&l" + map.toString()
                         + " &rwas too easy for &e" + winner.getName()));
             } else if (chance == 3) {
                 Bukkit.broadcastMessage(color("&2&l(!) &rGet &r&lOUTTA THE WAY &rfor &e" + winner.getName()
-                        + "&r. They dominated on &b&l" + map.toString()));
+                        + "&r. They dominated on &e&l" + map.toString()));
             }
         } else {
             if (chance == 0) {
@@ -1533,8 +1577,7 @@ public class GameInstance {
             allClasses.put(player, newBaseClass);
             sendScoreboardUpdate(player);
 
-            player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                    + "Your class has been randomly selected to " + classType.getTag());
+            player.sendMessage(color("&2&l(!) &rYour class was randomly selected to " + classType.getTag()));
 
             if (player.hasPermission("scb.chat"))
                 player.setDisplayName("" + player.getName() + " " + classType.getTag());
@@ -1700,12 +1743,8 @@ public class GameInstance {
             if (this.state == GameState.WAITING) {
                 if (this.map != null) {
                     updateCountOnBoard();
-                    TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + player.getName()
-                            + ChatColor.RED + " left " + ChatColor.RED + "(" + ChatColor.GREEN + (
-                            ((this.map.GetInstance()).gameType == GameType.FRENZY) ? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers()) : "")
-                            + (((this.map.GetInstance()).gameType == GameType.CLASSIC) ? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers()) : "")
-                            + (((this.map.GetInstance()).gameType == GameType.DUEL) ? ("" + ChatColor.RESET + this.players.size() + "/" + this.gameType.getMaxPlayers()) : "")
-                            + ChatColor.RED + ")");
+                    TellAll(color("&2&l(!) &f" + player.getName() +
+                            "&c left &f(&a" + this.players.size() + "/" + getMaxPlayers() + "&f)"));
 
                     if (checkIfMinPlayers() && this.gameStartTime != null) {
                         this.state = GameState.WAITING;
