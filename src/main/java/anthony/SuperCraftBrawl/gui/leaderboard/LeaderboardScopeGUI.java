@@ -29,7 +29,7 @@ public class LeaderboardScopeGUI implements InventoryProvider {
                 .id("scb-leaderboard-scope")
                 .provider(this)
                 .size(3, 9)
-                .title(ChatColorHelper.color("&eLeaderboard Scope"))
+                .title(ChatColorHelper.color("&8Leaderboard Scope"))
                 .build();
     }
 
@@ -74,7 +74,7 @@ public class LeaderboardScopeGUI implements InventoryProvider {
         ItemStack it = new ItemStack(Material.WATCH);
         ItemMeta meta = it.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(ChatColor.GOLD + "" + ChatColor.BOLD + "Leaderboard Scope");
+            meta.setDisplayName(main.color("&eLeaderboard Scope"));
             String check = ChatColor.GREEN + "✔ ";
             String dot   = ChatColor.DARK_GRAY + "• ";
 

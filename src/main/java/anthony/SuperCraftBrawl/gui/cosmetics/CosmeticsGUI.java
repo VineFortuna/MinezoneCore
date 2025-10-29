@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.gui.cosmetics;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.ranks.RankManager;
 import anthony.util.ItemHelper;
+import anthony.util.SoundManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -49,12 +50,14 @@ public class CosmeticsGUI implements InventoryProvider {
 		contents.set(1, 2, ClickableItem.of(
 				lobby,
 				e -> {
+                    SoundManager.playClickSound(player);
 					new LobbyCosmeticsGUI(main, inv).inv.open(player);
 				}));
 
 		contents.set(1, 6, ClickableItem.of(
 				ingame,
 				e -> {
+                    SoundManager.playClickSound(player);
 					new GameCosmeticsGUI(main, inv).inv.open(player);
 				}));
 	}

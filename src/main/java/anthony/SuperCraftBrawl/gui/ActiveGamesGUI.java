@@ -58,10 +58,10 @@ public class ActiveGamesGUI implements InventoryProvider {
 					contents.set(count, i, ClickableItem.of(
 							ItemHelper.setDetails(displayItem,
 									"&e&l" + mapName,
-									"&eMode: &f" + mode,
+									"&fMode: &a" + mode,
 									"",
-									"&rStarting In: &e" + entry.getValue().timeToStartSeconds + "s",
-									"&rPlayers: &e" + entry.getValue().players.size() + "/"
+									"&fStarting In: &a" + entry.getValue().timeToStartSeconds + "s",
+									"&fPlayers: &a" + entry.getValue().players.size() + "/"
 											+ entry.getValue().gameType.getMaxPlayers(),
 									"", "&r&nClick to join!"),
 							e -> {
@@ -72,10 +72,10 @@ public class ActiveGamesGUI implements InventoryProvider {
 					contents.set(count, i, ClickableItem.of(
 							ItemHelper.setDetails(displayItem,
 									"&e&l" + mapName,
-									"&eMode: &f" + mode,
+									"&fMode: &a" + mode,
 									"",
-									"&eWaiting for Players",
-									"&rPlayers: &e" + entry.getValue().players.size() + "/"
+									"&6Waiting for Players",
+									"&fPlayers: &a" + entry.getValue().players.size() + "/"
 											+ entry.getValue().gameType.getMaxPlayers(),
 									"", "&r&nClick to join!"),
 							e -> {
@@ -88,12 +88,12 @@ public class ActiveGamesGUI implements InventoryProvider {
 				contents.set(count, i, ClickableItem.of(
 						ItemHelper.setDetails(ItemHelper.setGlowing(displayItem, true),
 								"&e&l" + mapName,
-								"&eMode: &f" + mode,
+								"&fMode: &a" + mode,
 								"",
-								"&a" + state,
-								"&rPlayers: &e" + entry.getValue().players.size() + "/"
+								"&6" + state,
+								"&fPlayers: &a" + entry.getValue().players.size() + "/"
 										+ entry.getValue().gameType.getMaxPlayers(),
-								"&rSpectators: &e" + entry.getValue().spectators.size(), "", "&r&nClick to spectate!"),
+								"&fSpectators: &a" + entry.getValue().spectators.size(), "", "&r&nClick to spectate!"),
 						e -> {
 							main.getGameManager().SpectatorJoinMap(player, entry.getValue().getMap());
 							inv.close(player);

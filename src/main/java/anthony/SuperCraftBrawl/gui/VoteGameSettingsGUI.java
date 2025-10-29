@@ -62,12 +62,14 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 	 * @param game     The current game instance in which the player is involved.
 	 */
 	private void addVoteGameStartButton(InventoryContents contents, Player player, GameInstance game) {
-		ItemStack voteGameStart = ItemHelper.setDetails(new ItemStack(Material.BEACON), ChatColor.YELLOW + "Game Start",
-				"", "" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().totalStartVotes : "0") + "/"
-						+ (game != null ? game.players.size() : "0") + ")",
-				"",
-				"&7Start the game immediately",
-				"&7when all players are ready");
+		ItemStack voteGameStart = ItemHelper.setDetails(new ItemStack(Material.BEACON),
+                main.color("&eGame Start"),
+                "&7Start the game immediately",
+                "&7when all players are ready",
+                "",
+                main.color("&fVotes: &a" + "(" + (game != null ? game.getGameSettings().totalStartVotes : "0") + "/"
+						+ (game != null ? game.players.size() : "0") + ")"));
+
 		contents.set(1, 3, ClickableItem.of(voteGameStart, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
@@ -94,12 +96,13 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 			timeSetting = "Day";
 
 		ItemStack voteTime = ItemHelper.setDetails(new ItemStack(Material.WATCH),
-				ChatColor.YELLOW + "Time Of Day -> " + timeSetting, "",
-				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().totalTimeVotes : "0") + "/"
-						+ (game != null ? game.players.size() : "0") + ")",
-				"",
-				"&7Change the time of day to",
-				"&7" + timeSetting.toLowerCase() + " for the entire game");
+				main.color("&eTime Of Day -> " + timeSetting),
+                "&7Change the time of day to",
+                "&7" + timeSetting.toLowerCase() + " for the entire game",
+                "",
+				main.color("&fVotes: &a" + "(" + (game != null ? game.getGameSettings().totalTimeVotes : "0") + "/"
+						+ (game != null ? game.players.size() : "0") + ")"));
+
 		contents.set(1, 5, ClickableItem.of(voteTime, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				SoundManager.playSuccessfulHit(player);
@@ -125,31 +128,20 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 	    int total = (game != null) ? Math.max(game.players.size(), 1) : 1; // avoid /0
 	    int percent = Math.min(100, Math.max(0, (int) Math.round((votes * 100.0) / total)));
 
-	    // Pick a material that “reads” the mode
 	    Material icon = (nextType == GameType.FRENZY) ? Material.TNT : Material.COMPASS;
+	    String title = main.color("&eChange Game Type -> Frenzy");
 
-	    // Title + subtitle line
-	    String title = ChatColor.GOLD + "" + ChatColor.BOLD + "Change Game Type";
-	    String subtitle = ChatColor.YELLOW + "→ " + ChatColor.WHITE + nextType.getName();
-
-	    // Pretty progress bar: keep [ ] and % just like you wanted
-	    String bar = Bars.progressBar(votes, total, 12, org.bukkit.ChatColor.GREEN, org.bukkit.ChatColor.DARK_GRAY, '■', true);
-
-	    // Build lore (center-ish spacing with subtle separators)
-	    List<String> lore = Arrays.asList(
-	        ChatColor.DARK_GRAY + "" + ChatColor.STRIKETHROUGH + "------------------------",
-	        ChatColor.GRAY + "Votes: " + ChatColor.WHITE + "(" + votes + "/" + total + ")",
-	        "",
-	        ChatColor.GRAY + "Mode Details:",
-	        ChatColor.DARK_AQUA + "  • " + ChatColor.WHITE + "Random class each life, even ones",
-	        ChatColor.DARK_AQUA + "  • " + ChatColor.WHITE + "you have not unlocked yet",
-	        ChatColor.DARK_GRAY + "" + ChatColor.STRIKETHROUGH + "------------------------",
-	        ChatColor.GREEN + "" + ChatColor.BOLD + "Click to cast your vote"
-	    );
+	    List<String> lore = Arrays.asList("" +
+                "",
+                main.color("&fMode Details:"),
+                "  " + ChatColor.GRAY + "Random class each life, even ones",
+                "  " + ChatColor.GRAY + "you have not unlocked yet",
+                "",
+	            main.color("&fVotes: &a" + "(" + votes + "/" + total + ")"));
 
 	    ItemStack stack = new ItemStack(icon);
 	    ItemMeta meta = stack.getItemMeta();
-	    meta.setDisplayName(title + ChatColor.RESET + "  " + subtitle);
+	    meta.setDisplayName(title);
 	    meta.setLore(lore);
 	    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
 	    stack.setItemMeta(meta);
@@ -186,13 +178,14 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 	 * @param game     The current game instance in which the player is involved.
 	 */
 	private void addLightningRateButton(InventoryContents contents, Player player, GameInstance game) {
-		ItemStack lightningRate = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR),
-				ChatColor.YELLOW + "Lightning Drop Rate -> 2x", "",
-				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().getLightningVotes() : "0") + "/"
-						+ (game != null ? game.players.size() : "0") + ")",
-				"",
-				"&7Items spawn every 15 seconds",
-				"&7instead of every 30");
+		ItemStack lightningRate = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE),
+				main.color("&eLightning Drop Rate -> 2x"),
+                "&7Items spawn every 15 seconds",
+                "&7instead of every 30",
+                "",
+				main.color("&fVotes: &a" + "(" + (game != null ? game.getGameSettings().getLightningVotes() : "0") + "/"
+						+ (game != null ? game.players.size() : "0") + ")"));
+
 		contents.set(3, 3, ClickableItem.of(lightningRate, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				SoundManager.playSuccessfulHit(player);
