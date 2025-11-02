@@ -64,9 +64,9 @@ public class FadeClass extends BaseClass {
 	public void Tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Fade
 				&& instance.classes.get(player).getLives() > 0) {
-			this.cooldownSec = (25000 - fadeAbility.getTime()) / 1000 + 1;
+			this.cooldownSec = (35000 - fadeAbility.getTime()) / 1000 + 1;
 
-			if (fadeAbility.getTime() < 25000) {
+			if (fadeAbility.getTime() < 35000) {
 				String msg = instance.getGameManager().getMain()
 						.color("&rFade Ability regenerates in: &e" + cooldownSec + "s");
 				getActionBarManager().setActionBar(player, "fade.cooldown", msg, 2);
@@ -104,11 +104,11 @@ public class FadeClass extends BaseClass {
 		ItemStack item = event.getItem();
 		if (item != null && item.equals(this.string)
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK
-						|| event.getAction() == Action.LEFT_CLICK_AIR
-						|| event.getAction() == Action.LEFT_CLICK_BLOCK)) {
+				|| event.getAction() == Action.LEFT_CLICK_AIR
+				|| event.getAction() == Action.LEFT_CLICK_BLOCK)) {
 			if (player.getGameMode() != GameMode.SPECTATOR) {
-				if (fadeAbility.getTime() < 25000) {
-					int seconds = (25000 - fadeAbility.getTime()) / 1000 + 1;
+				if (fadeAbility.getTime() < 35000) {
+					int seconds = (35000 - fadeAbility.getTime()) / 1000 + 1;
 					event.setCancelled(true);
 					player.sendMessage(instance.getGameManager().getMain()
 							.color("&r&l(!) &rYour Fade Ability is on cooldown for &e" + seconds + "s"));
