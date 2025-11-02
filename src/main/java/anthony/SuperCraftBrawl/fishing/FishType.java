@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.util.ItemHelper;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Fish;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 
@@ -30,7 +31,7 @@ public enum FishType {
     CAVEFISH(99, "Blind Cave Fish", FishRarity.COMMON, Arrays.asList(FishArea.Cavern)),
     SEWERFISH(53, "Sewer Fish", FishRarity.COMMON, Arrays.asList(FishArea.Sewers)),
     SLIMYJELLYFISH(89, "Slimy Jellyfish", FishRarity.COMMON, Arrays.asList(FishArea.Sewers)),
-    ROCKFISH(63, "Brown Rockfish", FishRarity.COMMON, null),
+    ROCKFISH(63, "Brown Rockfish", FishRarity.COMMON, Arrays.asList(FishArea.Woods, FishArea.Cavern)),
     FLOUNDER(65, "Flounder", FishRarity.COMMON, null),
     KOI(69, "Koi", FishRarity.COMMON, Arrays.asList(FishArea.Pond, FishArea.Park)),
     GROUPER(93, "Grouper", FishRarity.COMMON, null),
@@ -86,14 +87,14 @@ public enum FishType {
     MANATEE(60, "Manatee", FishRarity.MYTHIC, Arrays.asList(FishArea.Pond)),
     ANEMONE(50, "Sea Anemone", FishRarity.MYTHIC, null),
     FLAPJACK(62, "Flapjack Octopus", FishRarity.MYTHIC, null),
-    CROCODILE(64, "Crocodile", FishRarity.MYTHIC, Arrays.asList(FishArea.Pond, FishArea.Sewers)),
+    CROCODILE(64, "Crocodile", FishRarity.MYTHIC, Arrays.asList(FishArea.Woods, FishArea.Sewers)),
     BEARDFISH(77, "Beardfish", FishRarity.MYTHIC, Arrays.asList(FishArea.Cavern)),
     GUARDIAN(55, "Guardian", FishRarity.MYTHIC, null),
     KINGSALMON(73, "King Salmon", FishRarity.MYTHIC, Arrays.asList(FishArea.Woods)),
     BLOBFISH(23, "Blobfish", FishRarity.LEGENDARY, null),
     COELACANTH(86, "Coelacanth", FishRarity.LEGENDARY, null),
     DOLPHIN(46, "Dolphin", FishRarity.LEGENDARY, Arrays.asList(FishArea.Pond)),
-    LEVIATHAN(24, "Swamp Monster", FishRarity.LEGENDARY, Arrays.asList(FishArea.LushCave)),
+    LEVIATHAN(24, "Swamp Monster", FishRarity.LEGENDARY, Arrays.asList(FishArea.LushCave, FishArea.Sewers)),
     SHARK(25, "Shark", FishRarity.LEGENDARY, Arrays.asList(FishArea.Pond)),
     WHALE(26, "Whale", FishRarity.LEGENDARY, Arrays.asList(FishArea.Pond)),
     WHALESHARK(58, "Whale Shark", FishRarity.LEGENDARY, Arrays.asList(FishArea.Pond)),
@@ -102,7 +103,7 @@ public enum FishType {
     STRING(28, "Fishing Line", FishRarity.JUNK, null),
     BUCKET(29, "Bucket", FishRarity.JUNK, null),
     BOTTLE(30, "Empty Bottle", FishRarity.JUNK, Arrays.asList(FishArea.Pond, FishArea.Park, FishArea.Woods)),
-    BOOTS(31, "Old Boots", FishRarity.JUNK, Arrays.asList(FishArea.Pond, FishArea.Park, FishArea.Woods)),
+    BOOTS(31, "Old Boots", FishRarity.JUNK, Arrays.asList(FishArea.Park, FishArea.Woods)),
     NAUTILUSSHELL(32, "Nautilus Shell", FishRarity.JUNK, null),
     BOAT(37, "Broken Boat", FishRarity.JUNK, null),
     CLAY(57, "Lump of Clay", FishRarity.JUNK, null),
