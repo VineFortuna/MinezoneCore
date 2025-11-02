@@ -32,8 +32,7 @@ import anthony.parkour.Parkour;
 import anthony.util.ItemHelper;
 import me.itzzmic.minezone.api.PunishAPI;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.*;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -1743,30 +1742,58 @@ public class Core extends JavaPlugin implements Listener {
 	}
 
 	@SuppressWarnings("deprecation")
-	private void chatAnnouncementOnJoin(Player p) {
-		p.sendMessage("----------------------------------------------");
-		p.sendMessage("");
-		p.sendMessage(color("          &b&lWELCOME TO MINEZONE"));
-		p.sendMessage("");
-		p.sendMessage("" + "         Enjoy Super Craft Bros!");
-		p.sendMessage("");
-		p.sendMessage("" + " Be sure to join our Discord Server with " + ChatColor.GREEN + "/socials");
-		p.sendMessage("");
-		p.sendMessage("----------------------------------------------");
-		p.sendMessage("");
+    private void chatAnnouncementOnJoin(Player p) {
+        p.sendMessage("----------------------------------------------");
+        p.sendMessage("");
+        p.sendMessage(color("          &b&lWELCOME TO MINEZONE"));
+        p.sendMessage("");
+        p.sendMessage("" + "         Enjoy Super Craft Bros!");
+        p.sendMessage("");
+        p.sendMessage("" + " Be sure to join our Discord Server with " + ChatColor.GREEN + "/socials");
+        p.sendMessage("");
+        p.sendMessage("----------------------------------------------");
+        p.sendMessage("");
 
-		Bukkit.getScheduler().runTaskLater(this, () -> {
-			p.sendMessage("----------------------------------------------");
-			p.sendMessage(color("            &6&lHALLOWEEN HUNT"));
-			p.sendMessage("");
-			p.sendMessage(color("" + "     &6Check out the Halloween NPC in"));
-			p.sendMessage(color("" + "       &6spawn for amazing rewards!"));
-			p.sendMessage("");
-			p.sendMessage("----------------------------------------------");
-		}, 40L);
-	}
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            p.sendMessage("----------------------------------------------");
+            p.sendMessage(color("            &6&lHALLOWEEN HUNT"));
+            p.sendMessage("");
+            p.sendMessage(color("" + "     &6Check out the Halloween NPC in"));
+            p.sendMessage(color("" + "       &6spawn for amazing rewards!"));
+            p.sendMessage("");
+            p.sendMessage("----------------------------------------------");
+        }, 40L);
 
-	public Map<Player, EntityArmorStand> msHologram = new HashMap<Player, EntityArmorStand>();
+        if (Bukkit.getOnlinePlayers().size() == 1) {
+            p.sendMessage("");
+            Bukkit.getScheduler().runTaskLater(this, () -> {
+
+                BaseComponent[] tip = new ComponentBuilder("TIP ")
+                        .color(net.md_5.bungee.api.ChatColor.YELLOW).bold(true) // &e&l
+                        .append("No players online? Join our ")
+                        .color(net.md_5.bungee.api.ChatColor.WHITE).bold(false)
+                        .append("Discord")
+                        .color(net.md_5.bungee.api.ChatColor.DARK_BLUE)     // &9
+                        .underlined(true)                                   // &n
+                        .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/653vJzmrPz"))
+                        .event(new HoverEvent(
+                                HoverEvent.Action.SHOW_TEXT,
+                                new ComponentBuilder("Click here to join the Discord!")
+                                        .color(net.md_5.bungee.api.ChatColor.DARK_BLUE) // &9
+                                        .create()))
+                        .append(" with 400+ members!")
+                        .color(net.md_5.bungee.api.ChatColor.WHITE)
+                        .underlined(false)
+                        .create();
+
+                p.playSound(p.getLocation(), Sound.NOTE_PLING, 1, 1);
+                p.spigot().sendMessage(tip);
+                p.sendMessage("");
+            }, 60L);
+        }
+    }
+
+    public Map<Player, EntityArmorStand> msHologram = new HashMap<Player, EntityArmorStand>();
 
 	public void mysteryChestHologram(Player p) {
 		PlayerData data = this.getDataManager().getPlayerData(p);
