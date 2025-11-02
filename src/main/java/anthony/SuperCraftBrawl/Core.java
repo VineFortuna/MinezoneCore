@@ -9,7 +9,6 @@ import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
-import anthony.SuperCraftBrawl.halloween.BasketItemUtil;
 import anthony.SuperCraftBrawl.halloween.CandyAuraManager;
 import anthony.SuperCraftBrawl.halloween.HalloweenHuntManager;
 import anthony.SuperCraftBrawl.halloween.TreatsAdminCommand;
@@ -30,7 +29,6 @@ import anthony.SuperCraftBrawl.tablist.TablistManager;
 import anthony.parkour.Arenas;
 import anthony.parkour.Parkour;
 import anthony.util.ItemHelper;
-import me.itzzmic.minezone.api.PunishAPI;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.*;
 import net.minecraft.server.v1_8_R3.*;
@@ -47,8 +45,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.EntityBlockFormEvent;
-import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -1765,15 +1761,15 @@ public class Core extends JavaPlugin implements Listener {
         }, 40L);
 
         if (Bukkit.getOnlinePlayers().size() == 1) {
-            p.sendMessage("");
             Bukkit.getScheduler().runTaskLater(this, () -> {
+				p.sendMessage("");
 
-                BaseComponent[] tip = new ComponentBuilder("TIP ")
+				BaseComponent[] tip = new ComponentBuilder("TIP ")
                         .color(net.md_5.bungee.api.ChatColor.YELLOW).bold(true) // &e&l
                         .append("No players online? Join our ")
                         .color(net.md_5.bungee.api.ChatColor.WHITE).bold(false)
                         .append("Discord")
-                        .color(net.md_5.bungee.api.ChatColor.DARK_BLUE)     // &9
+                        .color(ChatColor.BLUE)     // &9
                         .underlined(true)                                   // &n
                         .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/653vJzmrPz"))
                         .event(new HoverEvent(
