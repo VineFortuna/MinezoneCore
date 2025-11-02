@@ -40,8 +40,7 @@ import anthony.parkour.Arenas;
 import anthony.parkour.Parkour;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.*;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -1946,6 +1945,34 @@ public class Core extends JavaPlugin implements Listener {
 		p.sendMessage("");
 		p.sendMessage("----------------------------------------------");
 		p.sendMessage("");
+
+		if (Bukkit.getOnlinePlayers().size() == 1) {
+			Bukkit.getScheduler().runTaskLater(this, () -> {
+				p.sendMessage("");
+
+				BaseComponent[] tip = new ComponentBuilder("TIP ")
+						.color(net.md_5.bungee.api.ChatColor.YELLOW).bold(true) // &e&l
+						.append("No players online? Join our ")
+						.color(net.md_5.bungee.api.ChatColor.WHITE).bold(false)
+						.append("Discord")
+						.color(net.md_5.bungee.api.ChatColor.BLUE)     // &9
+						.underlined(true)                                   // &n
+						.event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/653vJzmrPz"))
+						.event(new HoverEvent(
+								HoverEvent.Action.SHOW_TEXT,
+								new ComponentBuilder("Click here to join the Discord!")
+										.color(net.md_5.bungee.api.ChatColor.DARK_BLUE) // &9
+										.create()))
+						.append(" with 400+ members!")
+						.color(net.md_5.bungee.api.ChatColor.WHITE)
+						.underlined(false)
+						.create();
+
+				p.playSound(p.getLocation(), Sound.NOTE_PLING, 1, 1);
+				p.spigot().sendMessage(tip);
+				p.sendMessage("");
+			}, 60L);
+		}
 	}
 
 	public void mysteryChestHologram(Player p) {
