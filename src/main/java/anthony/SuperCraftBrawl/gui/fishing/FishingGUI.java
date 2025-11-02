@@ -74,7 +74,7 @@ public class FishingGUI implements InventoryProvider {
                         item.getItemMeta().getLore(), "", main.color("&7Times caught: " + details.timesCaught));
             }
             ItemHelper.setDetails(item, item.getItemMeta().getDisplayName(),
-                    item.getItemMeta().getLore(), main.color("&7Found in: "), main.color(generateAreas(type)));
+                    item.getItemMeta().getLore(), main.color("&7Found: "), main.color(generateAreas(type)));
 
             items[i] = ClickableItem.empty(item);
             i++;
@@ -214,7 +214,7 @@ public class FishingGUI implements InventoryProvider {
     private String generateAreas(FishType type) {
         StringBuilder areas = new StringBuilder();
         if (type.getAreas() == null || type.getAreas().isEmpty()) {
-            areas.append("All");
+            areas.append("Everywhere");
         } else {
             for (int i = 0; i < type.getAreas().size(); i++) {
                 areas.append(type.getAreas().get(i).getName());
