@@ -163,6 +163,8 @@ commands:
       description: a
    lactate:
       description: Lactate command!
+   nitrocraft:
+      description: NitroCraft!!!!
 
 permissions:
    scb.admin:
