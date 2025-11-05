@@ -2103,7 +2103,7 @@ public class Core extends JavaPlugin implements Listener {
 		// return new Location(lobbyWorld, -58.507, 125, -18.519, -179, -1);
 
 		// if (this.getCommands() != null || this.getSWCommands() != null)
-		return new Location(lobbyWorld, 189.495, 115, 629.438, -0, 1);
+		return new Location(lobbyWorld, 106.5, 112, -41.5, 180, 0);
 		// else
 		// return new Location(lobbyWorld, 0.478, 51, 0.550);
 	}
