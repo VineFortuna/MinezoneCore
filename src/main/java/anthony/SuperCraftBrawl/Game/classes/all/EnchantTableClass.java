@@ -6,10 +6,12 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
@@ -17,12 +19,15 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import net.md_5.bungee.api.ChatColor;
 
+import java.util.Random;
+
 public class EnchantTableClass extends BaseClass {
 
-	private Ability enchantAbility = new Ability("Enchant Ability", 0, player);
+	private final Ability enchantAbility = new Ability("&d&lEnchant", 0, player);
 	private ItemStack weapon;
 	private int xpLevelsAmount = 0;
-	int levelEnchanted = 0;
+	private int levelEnchanted = 0;
+	private int xpHit = 1;
 
 	public EnchantTableClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -46,168 +51,147 @@ public class EnchantTableClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
-
-	}
+	public void SetNameTag() {}
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		// Weapon
-		ItemStack weapon = ItemHelper.create(Material.WOOD_SWORD, ChatColorHelper.color("&dNot so great of a Sword"));
+		// Base weapon
+		weapon = ItemHelper.setDetails(ItemHelper.create(Material.WOOD_SWORD),
+				"&dNot so great of a Sword",
+				"",
+				"&7Gain:",
+				"&7▶ &b&o1 XP &eon hit",
+				"&7▶ &a&o1 Level &eon kill");
 		ItemHelper.setUnbreakable(weapon);
 
-		this.weapon = weapon;
-
-		// Enchant Ability
-		ItemStack enchantItem = ItemHelper.create(Material.ENCHANTMENT_TABLE, ChatColorHelper.color("&dEnchant Weapon"),
+		// Enchant item
+		ItemStack enchantItem = ItemHelper.setDetails(ItemHelper.create(Material.ENCHANTMENT_TABLE),
+				enchantAbility.getAbilityNameRightClickMessage(),
 				ChatColorHelper.color("&7Right click to enchant your sword"),
-				ChatColorHelper.color("&7Get level by getting kills"));
+				"",
+				ChatColorHelper.color("&7Left click to view enchantments")
+		);
 
-		// Settings Items
 		playerInv.setItem(0, weapon);
 		playerInv.setItem(1, enchantItem);
 
-		player.setTotalExperience(0);
+		// Reset player XP
 		player.setExp(0);
 
-		if (xpLevelsAmount> 0) {
-			player.giveExpLevels(xpLevelsAmount);
-		}
-
+		player.setLevel(xpLevelsAmount);
 		levelEnchanted = 0;
 
+		// Help message
+		infoMessage();
+	}
+
+	public void infoMessage() {
 		player.sendMessage("" + ChatColor.BOLD + "===============================");
 		player.sendMessage("" + ChatColor.BOLD + "||");
-		player.sendMessage("" + ChatColor.BOLD + "|| " + ChatColor.AQUA + "      Get experience by killing players");
+		player.sendMessage("" + ChatColor.BOLD + "|| " + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.UNDERLINE + "  Enchantments:");
 		player.sendMessage("" + ChatColor.BOLD + "||");
-		player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.UNDERLINE + "  Enchantments:");
-		player.sendMessage("" + ChatColor.BOLD + "||");
-		player.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  1 Level: Sharpness 1");
-		player.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  2 Levels: Sharpness 1 & Knockback 1");
-		player.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  3 Levels: Sharpness 1 & Knockback 2");
-		player.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  5 Levels: Sharpness 1 & Knockback 1 & Fire Aspect 1");
-		player.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  8 Levels: Sharpness 2 & Knockback 1 & Fire Aspect 1");
-		player.sendMessage("" + ChatColor.BOLD + "||");
+		player.sendMessage("" + ChatColor.BOLD + "|| " + ChatColor.YELLOW + "  1 Level: Knockback I");
+		player.sendMessage("" + ChatColor.BOLD + "|| " + ChatColor.YELLOW + "  2 Levels: Sharpness I & Knockback I");
+		player.sendMessage("" + ChatColor.BOLD + "|| " + ChatColor.YELLOW + "  3 Levels: Sharpness I & Knockback II");
+		player.sendMessage("" + ChatColor.BOLD + "|| " + ChatColor.YELLOW + "  5 Levels: Sharpness I & Knockback I & Fire Aspect I");
+		player.sendMessage("" + ChatColor.BOLD + "|| " + ChatColor.YELLOW + "  8 Levels: Sharpness I & Knockback II & Fire Aspect I");
 		player.sendMessage("" + ChatColor.BOLD + "||");
 		player.sendMessage("" + ChatColor.BOLD + "===============================");
+	}
+
+	@Override
+	public void DoDamage(EntityDamageByEntityEvent event) {
+		BaseClass bc = instance.classes.get(player);
+		if (bc != null && bc.getLives() <= 0)
+			return;
+		int levelBefore = player.getLevel();
+		player.giveExp(xpHit);
+		int levelAfter = player.getLevel();
+
+		if (levelAfter > levelBefore) {
+			xpLevelsAmount++;
+			player.sendMessage(ChatColorHelper.color("&b&l(!) &r&eYou gained an XP level"));
+		}
 	}
 
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
-		BaseClass bc = instance.classes.get(player);
-		Inventory inventory = player.getInventory();
-		int xpSpent = 0;
+		if (item == null) return;
 
-		// Enchant Ability
-		if (item != null && item.getType() == Material.ENCHANTMENT_TABLE
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+		if (item.getType() == Material.ENCHANTMENT_TABLE) {
+			if (event.getAction().name().contains("RIGHT_CLICK")) {
 
-			// Checks if player has experience
-			if (xpLevelsAmount == 0) {
-				enchantAbility.sendCustomMessage("&c&l(!) &rYou do not have enough levels to enchant");
-				// 1 Level
-			} else if (xpLevelsAmount == 1) {
-				if (levelEnchanted == 1) {
-					enchantAbility.sendCustomMessage("&a&l(!) &rYou already have that enchantment");
+				int playerXP = xpLevelsAmount;
+				int xpSpent;
+
+				if (playerXP < 1) {
+					enchantAbility.sendCustomMessage("&c&l(!) &rYou do not have enough levels to enchant");
 					return;
-				} else {
-					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
-					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 1");
-
-					xpSpent = 1;
-					xpLevelsAmount -= 1;
-					levelEnchanted = 1;
-				}
-				// 2 Levels
-			} else if (xpLevelsAmount == 2) {
-				if (levelEnchanted == 2) {
-					enchantAbility.sendCustomMessage("&a&l(!) &rYou already have that enchantment");
-					return;
-				} else {
-					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
-					weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
-					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 1");
-					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback 1");
-
-					xpSpent = 2;
-					xpLevelsAmount -= 2;
-					levelEnchanted = 2;
 				}
 
-				// 3 and 4 Levels
-			} else if (xpLevelsAmount == 3 || xpLevelsAmount == 4) {
-				if (levelEnchanted == 3) {
-					enchantAbility.sendCustomMessage("&a&l(!) &rYou already have that enchantment");
-					return;
-				} else {
-					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
-					weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
-					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 1");
-					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback 2");
-
-					xpSpent = 3;
-					xpLevelsAmount -= 3;
-					levelEnchanted = 3;
-				}
-
-				// 5, 6 and 7 Levels
-			} else if (xpLevelsAmount == 5 || xpLevelsAmount == 6 || xpLevelsAmount == 7) {
-				if (levelEnchanted == 5) {
-					enchantAbility.sendCustomMessage("&a&l(!) &rYou already have that enchantment");
-					return;
-				} else {
-					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
-					weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
-					weapon.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
-					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 1");
-					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback 1");
-					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &6&lFire Aspect 1");
-
-					xpSpent = 4;
-					xpLevelsAmount -= 5;
-					levelEnchanted = 5;
-				}
-
-			} else {
-				if (levelEnchanted == 8) {
-					enchantAbility.sendCustomMessage("&a&l(!) &rYou already have that enchantment");
-					return;
-				} else {
-					weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
-					weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
-					weapon.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
-					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness 2");
-					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback 1");
-					enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &6&lFire Aspect 1");
-
+				// Enchant tiers (≥ thresholds)
+				if (playerXP >= 8 && levelEnchanted < 8) {
+					applyEnchantments(1, 2, 1);
 					xpSpent = 8;
-					xpLevelsAmount -= 8;
 					levelEnchanted = 8;
+				} else if (playerXP >= 5 && levelEnchanted < 5) {
+					applyEnchantments(1, 1, 1);
+					xpSpent = 5;
+					levelEnchanted = 5;
+				} else if (playerXP >= 3 && levelEnchanted < 3) {
+					applyEnchantments(1, 2, 0);
+					xpSpent = 3;
+					levelEnchanted = 3;
+				} else if (playerXP >= 2 && levelEnchanted < 2) {
+					applyEnchantments(1, 1, 0);
+					xpSpent = 2;
+					levelEnchanted = 2;
+				} else if (playerXP >= 1 && levelEnchanted < 1) {
+					applyEnchantments(0, 1, 0);
+					xpSpent = 1;
+					levelEnchanted = 1;
+				} else {
+					enchantAbility.sendCustomMessage("&a&l(!) &rYou already have that enchantment");
+					return;
 				}
+
+				// Set weapon name
+				ItemHelper.setDetails(weapon, "&dNow that is something");
+
+				// Update weapon in inventory
+				player.getInventory().setItem(0, weapon);
+
+				// Remove used XP levels
+				player.giveExpLevels(-xpSpent);
+				xpLevelsAmount = Math.max(0, xpLevelsAmount - xpSpent);
+			} else if (event.getAction().name().contains("LEFT_CLICK")) {
+				infoMessage();
 			}
-			// Changing sword display name
-			weapon.getItemMeta().setDisplayName(ChatColorHelper.color("&dNow that is something"));
-
-			// Setting Weapon
-			inventory.setItem(0, weapon);
-
-			// Setting updated xp value
-			player.giveExpLevels(-xpSpent);
 		}
 	}
 
-
+	private void applyEnchantments(int sharpness, int knockback, int fireAspect) {
+		if (sharpness > 0) {
+			weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, sharpness);
+			enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &c&lSharpness " + sharpness);
+		}
+		if (knockback > 0) {
+			weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, knockback);
+			enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &b&lKnockback " + knockback);
+		}
+		if (fireAspect > 0) {
+			weapon.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, fireAspect);
+			enchantAbility.sendCustomMessage("&a&l(!) &rWeapon enchanted with &6&lFire Aspect " + fireAspect);
+		}
+	}
 
 	@Override
 	public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
 		if (instance.classes.containsKey(damagerPlayer)) {
 			xpLevelsAmount++;
 			damagerPlayer.giveExpLevels(1);
-
-			// Playing XP Sound
-
-			damagerPlayer.sendMessage(ChatColorHelper.color("&b&l(!) &r&eYou got rewarded with a XP level"));
+			damagerPlayer.sendMessage(ChatColorHelper.color("&b&l(!) &r&eYou gained an XP level"));
 		}
 	}
 
@@ -215,5 +199,4 @@ public class EnchantTableClass extends BaseClass {
 	public ItemStack getAttackWeapon() {
 		return weapon;
 	}
-
 }
