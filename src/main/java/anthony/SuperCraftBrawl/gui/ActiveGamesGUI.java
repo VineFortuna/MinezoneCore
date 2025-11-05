@@ -74,7 +74,7 @@ public class ActiveGamesGUI implements InventoryProvider {
 									"&e&l" + mapName,
 									"&fMode: &a" + mode,
 									"",
-									"&6Waiting for Players",
+									"&fWaiting for Players",
 									"&fPlayers: &a" + entry.getValue().players.size() + "/"
 											+ entry.getValue().gameType.getMaxPlayers(),
 									"", "&r&nClick to join!"),
@@ -90,7 +90,7 @@ public class ActiveGamesGUI implements InventoryProvider {
 								"&e&l" + mapName,
 								"&fMode: &a" + mode,
 								"",
-								"&6" + state,
+								"&f" + state,
 								"&fPlayers: &a" + entry.getValue().players.size() + "/"
 										+ entry.getValue().gameType.getMaxPlayers(),
 								"&fSpectators: &a" + entry.getValue().spectators.size(), "", "&r&nClick to spectate!"),
