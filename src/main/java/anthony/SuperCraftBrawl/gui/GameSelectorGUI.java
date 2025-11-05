@@ -46,7 +46,7 @@ public class GameSelectorGUI implements InventoryProvider {
 		contents.set(1, 3,
 				ClickableItem.of(
 						ItemHelper.setDetails(scbClassic,
-								"&eSuper Craft Brothers",
+								"&e&lSuper Craft Brothers",
 								"&eMode: &rClassic",
 								"",
 								"&7Free for all, kill everyone",
@@ -68,7 +68,7 @@ public class GameSelectorGUI implements InventoryProvider {
 		contents.set(1, 5,
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD),
-								"&eSuper Craft Brothers",
+								"&e&lSuper Craft Brothers",
 								"&eMode: &rDuels",
 								"",
 								"&71v1 someone to the death",
@@ -90,7 +90,7 @@ public class GameSelectorGUI implements InventoryProvider {
 		contents.set(1, 1,
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
-								"&eFishing",
+								"&e&lFishing",
 								"&7Fish for junk, fish and treasures",
 								"",
 								"&7Earn unique rewards",
@@ -113,7 +113,7 @@ public class GameSelectorGUI implements InventoryProvider {
 		contents.set(1, 7,
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.GRASS),
-								"&eParkour",
+								"&e&lParkour",
 								"&7How fast are you?",
 								"",
 								"&7Earn rewards for completing the parkour",
