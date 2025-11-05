@@ -47,7 +47,7 @@ public class GameSelectorGUI implements InventoryProvider {
 				ClickableItem.of(
 						ItemHelper.setDetails(scbClassic,
 								"&e&lSuper Craft Brothers",
-								"&eMode: &rClassic",
+								"&fMode: &aClassic",
 								"",
 								"&7Free for all, kill everyone",
 								"",
@@ -69,7 +69,7 @@ public class GameSelectorGUI implements InventoryProvider {
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD),
 								"&e&lSuper Craft Brothers",
-								"&eMode: &rDuels",
+								"&fMode: &aDuels",
 								"",
 								"&71v1 someone to the death",
 								"",
@@ -118,7 +118,7 @@ public class GameSelectorGUI implements InventoryProvider {
 								"",
 								"&7Earn rewards for completing the parkour",
 								"",
-								"&e&nClick&r&e to teleport"
+								"&eClick to teleport"
 						),
 						e -> {
 							player.teleport(new Location(main.getLobbyWorld(), 189.5, 106, 571.5, 180, 0));
