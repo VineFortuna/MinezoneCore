@@ -1765,9 +1765,9 @@ public class Core extends JavaPlugin implements Listener {
 				p.sendMessage("");
 
 				BaseComponent[] tip = new ComponentBuilder("TIP ")
-                        .color(net.md_5.bungee.api.ChatColor.YELLOW).bold(true) // &e&l
+                        .color(ChatColor.YELLOW).bold(true) // &e&l
                         .append("No players online? Join our ")
-                        .color(net.md_5.bungee.api.ChatColor.WHITE).bold(false)
+                        .color(ChatColor.WHITE).bold(false)
                         .append("Discord")
                         .color(ChatColor.BLUE)     // &9
                         .underlined(true)                                   // &n
@@ -1775,10 +1775,10 @@ public class Core extends JavaPlugin implements Listener {
                         .event(new HoverEvent(
                                 HoverEvent.Action.SHOW_TEXT,
                                 new ComponentBuilder("Click here to join the Discord!")
-                                        .color(net.md_5.bungee.api.ChatColor.DARK_BLUE) // &9
+                                        .color(ChatColor.BLUE) // &9
                                         .create()))
                         .append(" with 400+ members!")
-                        .color(net.md_5.bungee.api.ChatColor.WHITE)
+                        .color(ChatColor.WHITE)
                         .underlined(false)
                         .create();
 
