@@ -78,6 +78,14 @@ public class SuitsGUI implements InventoryProvider {
 				"",
 				main.color("&cHalloween 2025 exclusive"));
 
+		// Rudolph Outfit
+		texture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWJkNDZiMzhiMjFiMzQyY2FmOTE3YWQ5Y2E0MmFmYjY4Mzg4YTU1OTFiY2M5YWRlZDFlOGUzNDZlMTg4OTAifX19";
+		ItemStack rudolphOutfit = ItemHelper.createSkullTexture(texture,
+				main.color("&c&6Rudolph Outfit"), "",
+				main.color("&7Unlock through the advent calendar!"),
+				"",
+				main.color("&cChristmas 2025 exclusive"));
+
 		// Setting Items
 		contents.fillBorders(ClickableItem
 				.of(ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e -> {
@@ -245,6 +253,30 @@ public class SuitsGUI implements InventoryProvider {
 			inv.close(player);
 		}));
 
+		contents.set(1, 7, ClickableItem.of(rudolphOutfit, e -> {
+			if (!(main.getListener().rudolphOutfitPlayers.contains(player))) {
+				if (data.rudolphOutfit == 1) {
+					removeOutfits(player);
+					createArmor(player,
+							"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWJkNDZiMzhiMjFiMzQyY2FmOTE3YWQ5Y2E0MmFmYjY4Mzg4YTU1OTFiY2M5YWRlZDFlOGUzNDZlMTg4OTAifX19",
+							"7F3A1A",
+							0,
+							"Rudolph"
+					);
+					main.getListener().rudolphOutfitPlayers.add(player);
+					player.sendMessage(main.color("&9&l(!) &rYou have equipped &c&lRudolph&r outfit"));
+				} else {
+					player.sendMessage(main.color("&c&l(!) &rYou must claim the &eDay 4 reward &rto use this!"));
+					return;
+				}
+			} else {
+				removeOutfits(player);
+				player.sendMessage(main.color("&9&l(!) &rYou have unequipped &c&lRudolph&r outfit"));
+				main.getListener().resetArmor(player);
+			}
+			inv.close(player);
+		}));
+
 		contents.set(2, 8, ClickableItem
 				.of(ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
 					inv.getParent().get().open(player);
@@ -272,6 +304,7 @@ public class SuitsGUI implements InventoryProvider {
 		main.getListener().elfCosmeticPlayers.remove(player);
 		main.getListener().goldenOutfitPlayers.remove(player);
 		main.getListener().freddyOutfitPlayers.remove(player);
+		main.getListener().rudolphOutfitPlayers.remove(player);
 	}
 
 	/**
