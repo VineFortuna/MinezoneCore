@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.gui.cosmetics;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -8,6 +9,7 @@ import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -24,6 +26,8 @@ public class TitlesCosmeticsGUI implements InventoryProvider {
 
 	@Override
 	public void init(Player player, InventoryContents contents) {
+		PlayerData data = main.getDataManager().getPlayerData(player);
+
 		contents.fill(ClickableItem
 				.of(ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e -> {
 				}));
@@ -86,11 +90,46 @@ public class TitlesCosmeticsGUI implements InventoryProvider {
 			inv.close(player);
 		}));
 
+		ItemStack merry = ItemHelper.setDetails(new ItemStack(Material.LONG_GRASS, 1, (byte) 2), "&c&lMerry",
+				"&7Unlock through the advent calendar!",
+				"",
+				"&cChristmas 2025 Exclusive");
+
+		contents.set(1, 5, ClickableItem.of(merry, e -> {
+			if (data.merryTitle == 0) {
+				player.sendMessage(main.color(
+						"&c&l(!) &rYou must claim the &eDay 6 reward &rto use the &c&lMerry &rtitle."
+				));
+				return;
+			}
+
+			enableDisableTitle(player, "Merry");
+			inv.close(player);
+		}));
+
+		String hohohoTexture = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19";
+		ItemStack hohoho = ItemHelper.createSkullTexture(hohohoTexture, "&c&lHO &2&lHO &c&lHO",
+				"&7Unlock through the advent calendar!",
+				"",
+				"&cChristmas 2025 Exclusive");
+
+		contents.set(1, 6, ClickableItem.of(hohoho, e -> {
+			if (data.hohohoTitle == 0) {
+				player.sendMessage(main.color(
+						"&c&l(!) &rYou must claim the &eChristmas Day reward &rto use the &c&lHO &2&lHO &c&lHO &rtitle."
+				));
+				return;
+			}
+
+			enableDisableTitle(player, "Ho Ho Ho");
+			inv.close(player);
+		}));
+
 		if (player.getName().equals("Wabyink")) {
 			ItemStack wabyink = ItemHelper.setDetails(new ItemStack(Material.LAPIS_BLOCK), main.color("&f&lThe Wabyink Title"),
 					main.color("&7The Wabyink Title, the one, and the only."), "", main.color("&8Must be Wabyink."));
 
-			contents.set(1, 5, ClickableItem.of(wabyink, e -> {
+			contents.add(ClickableItem.of(wabyink, e -> {
 				if (!player.getName().equals("Wabyink")) {
 					player.sendMessage(main.color("&c&l(!) &rYou need to be Wabyink for this!"));
 					return;
