@@ -29,20 +29,24 @@ public class GingerBreadManClass extends BaseClass {
 
 	public GingerBreadManClass(GameInstance instance, Player player) {
 		super(instance, player);
-		createArmor(null,
+		createArmor(
+				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDk0MDQzYWIxNjIzOGUzYTFhODhhMmVlZjQ5MGIwZWY4MGY5NTM4MGY3MzhkMWExZWNjNTMzNGRhZDZhYjE1In19fQ==",
-				"D2691E", 6, "GingerBreadMan");
+				"D2691E",
+				6,
+				"GingerBreadMan"
+		);
 	}
 
-	/// give @p
-	/// minecraft:player_head[profile={id:[I;-1018782635,-411413609,-1156889585,1818606862],properties:[{name:"textures",value:"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19"}]},minecraft:lore=['{"text":"https://namemc.com/skin/83d9eb9c21c9b152"}']]
+	// give @p
+	// minecraft:player_head[profile={id:[I;-1018782635,-411413609,-1156889585,1818606862],properties:[{name:"textures",value:"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19"}]},minecraft:lore=['{"text":"https://namemc.com/skin/83d9eb9c21c9b152"}']]
 
-	/// give @p
-	/// minecraft:player_head[profile={id:[I;-1988614113,583621619,-1936790339,-1531314711],properties:[{name:"textures",value:"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDk0MDQzYWIxNjIzOGUzYTFhODhhMmVlZjQ5MGIwZWY4MGY5NTM4MGY3MzhkMWExZWNjNTMzNGRhZDZhYjE1In19fQ=="}]},minecraft:lore=['{"text":"https://namemc.com/skin/ba6e4fb32fe347c9"}']]
+	// give @p
+	// minecraft:player_head[profile={id:[I;-1988614113,583621619,-1936790339,-1531314711],properties:[{name:"textures",value:"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDk0MDQzYWIxNjIzOGUzYTFhODhhMmVlZjQ5MGIwZWY4MGY5NTM4MGY3MzhkMWExZWNjNTMzNGRhZDZhYjE1In19fQ=="}]},minecraft:lore=['{"text":"https://namemc.com/skin/ba6e4fb32fe347c9"}']]
 
 	@Override
 	public ClassType getType() {
-		return null;
+		return ClassType.GingerBreadMan;
 	}
 
 	@Override

@@ -30,7 +30,7 @@ public enum ClassType {
 	Blaze(31, 0, 0),
 	Wither(33, 0, 0),
 	Creeper(35, 0, 0),
-	Present(38, 0, 0, true),
+	Present(38, 0, 0, false),
 	Dweller(43, 0, 0, true),
 	Zombie(44, 0, 0),
 	Silverfish(45, 0, 0),
@@ -87,7 +87,7 @@ public enum ClassType {
 	Mooshroom(22, 0, Rank.VIP),
 	Herobrine(23, 0, Rank.VIP),
 	Wizard(41, 0, Rank.VIP),
-	MagmaCube(48, 0, Rank.VIP, false),
+	MagmaCube(48, 0, Rank.VIP),
 	Bedrock(61, 0, Rank.VIP),
 	Firework(62, 0, Rank.VIP),
 	Vindicator(65, 0, Rank.VIP, true),
@@ -95,11 +95,11 @@ public enum ClassType {
 	Endermite(70, 0, Rank.VIP),
 
 	// Holiday Classes
-	Elf(101, 0, 0, true),
-	GingerBreadMan(102, 0, 0, true),
-	Santa(103, 0, 0, true),
+	Elf(101, 0, 0, false),
+	GingerBreadMan(102, 0, 0, false),
+	Santa(103, 0, 0, false),
 	GrimReaper(104, 0, 0, true),
-	Freddy(105, 0, 0);
+	Freddy(105, 0, 0, true);
 
 	private final int id;
 	private int tokenCost = 0;
