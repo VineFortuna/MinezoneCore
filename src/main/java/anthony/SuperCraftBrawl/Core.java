@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Game.*;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.christmas.ChristmasRewardDAO;
 import anthony.SuperCraftBrawl.commands.Commands;
 import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.fishing.FishArea;
@@ -128,6 +129,8 @@ public class Core extends JavaPlugin implements Listener {
 	private TrickTitleManager trickTitleOld;
 	private TrickTitlePackets trickTitle;
 
+	private ChristmasRewardDAO christmasRewardDAO;
+
 	public Core() {
 		this.staffchat = new ArrayList<Player>();
 		this.globalchat = new ArrayList<Player>();
@@ -157,6 +160,10 @@ public class Core extends JavaPlugin implements Listener {
 
 	public HalloweenHuntManager getHalloweenManager() {
 		return this.halloweenHunt;
+	}
+
+	public ChristmasRewardDAO getChristmasRewardDAO() {
+		return this.christmasRewardDAO;
 	}
 
 	public LevelBoard getLevelBoard() {
@@ -444,6 +451,7 @@ public class Core extends JavaPlugin implements Listener {
 		lobbyItems = new anthony.SuperCraftBrawl.lobbyitems.LobbyItems(this);
 		halloweenHunt = new HalloweenHuntManager(this);
 		candyAura = new CandyAuraManager(this, "lobby-1");
+		christmasRewardDAO = new ChristmasRewardDAO(this);
 
 		for (Arenas arena : Arenas.values()) {
 			parkourBoards.add(new ParkourBoard(this, arena));
@@ -483,6 +491,8 @@ public class Core extends JavaPlugin implements Listener {
 		this.trickTitle.registerTitle("Freddy Fazbear", color("&6&lFreddy Fazbear"), 0.2);
 		this.trickTitle.registerTitle("Fiesta De La Noche", color("&b&lFIESTA DE LA NOCHE"), 0.2);
 		this.trickTitle.registerTitle("i'm gay btw...", color("&di'm gay btw..."), 0.2);
+		this.trickTitle.registerTitle("Merry", color("&c&lMerry"), 0.2);
+		this.trickTitle.registerTitle("Ho Ho Ho", color("&c&lHO &2&lHO &c&lHO"), 0.2);
 		getCommand("tricktitle").setExecutor(new TrickTitleCommand(trickTitle));
 
 		new BukkitRunnable() {
@@ -1698,7 +1708,7 @@ public class Core extends JavaPlugin implements Listener {
 		// e.setJoinMessage(color("&r&l[&a&l+&r&l] &r" + rank + "&b" + name + "&a
 		// connected"));
 		e.setJoinMessage(color("" + rank.getArrowColor() + "► " + tag
-				+ getColorForNames(player, getRankManager().getRank(player)) + " &6spooked into the server!"));
+				+ getColorForNames(player, getRankManager().getRank(player)) + " &cjingled into the server!"));
 
 		if (data != null) {
 			player.setLevel(data.level); // Indication what the player's level is
@@ -1750,15 +1760,15 @@ public class Core extends JavaPlugin implements Listener {
         p.sendMessage("----------------------------------------------");
         p.sendMessage("");
 
-        Bukkit.getScheduler().runTaskLater(this, () -> {
-            p.sendMessage("----------------------------------------------");
-            p.sendMessage(color("            &6&lHALLOWEEN HUNT"));
-            p.sendMessage("");
-            p.sendMessage(color("" + "     &6Check out the Halloween NPC in"));
-            p.sendMessage(color("" + "       &6spawn for amazing rewards!"));
-            p.sendMessage("");
-            p.sendMessage("----------------------------------------------");
-        }, 40L);
+//        Bukkit.getScheduler().runTaskLater(this, () -> {
+//            p.sendMessage("----------------------------------------------");
+//            p.sendMessage(color("            &6&lHALLOWEEN HUNT"));
+//            p.sendMessage("");
+//            p.sendMessage(color("" + "     &6Check out the Halloween NPC in"));
+//            p.sendMessage(color("" + "       &6spawn for amazing rewards!"));
+//            p.sendMessage("");
+//            p.sendMessage("----------------------------------------------");
+//        }, 40L);
 
         if (Bukkit.getOnlinePlayers().size() == 1) {
             Bukkit.getScheduler().runTaskLater(this, () -> {
@@ -1923,7 +1933,7 @@ public class Core extends JavaPlugin implements Listener {
 		// getRankManager().getRank(player).getTagWithSpace() + "&b"
 		// + player.getName() + "&c disconnected"));
 		e.setQuitMessage(color("" + rank.getArrowColor() + "► " + tag
-				+ getColorForNames(player, getRankManager().getRank(player)) + " &6faded away!"));
+				+ getColorForNames(player, getRankManager().getRank(player)) + " &cmelted away!"));
 	}
 
 	public Location hologramLoc(Player player) {

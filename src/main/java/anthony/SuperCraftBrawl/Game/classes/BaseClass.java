@@ -1866,7 +1866,7 @@ public abstract class BaseClass {
 				}
 			} else if (baseClass.getType() == ClassType.Present) {
 				damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
-						"&r&l(!) &rYour &r&lAggressive Gift has regenerated and you can get a new weapon if you'damagerPlayer like!"));
+						"&r&l(!) &rYour &r&lAggressive Gift has regenerated and you can get a new weapon if you'd like!"));
 				damagerPlayer.getInventory().addItem(ItemHelper.setDetails(new ItemStack(Material.CHEST, 1),
 						String.valueOf(ChatColor.RESET) + ChatColor.ITALIC + "Agressive Gift", "",
 						String.valueOf(ChatColor.RESET) + ChatColor.YELLOW + "Steals another player's main item"));

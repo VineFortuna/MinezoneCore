@@ -175,6 +175,9 @@ public class PlayerDataManager implements Listener {
 			String treasureLoc = set.getString("TreasureLoc");
 			int pumpkinPie = set.getInt("PumpkinPie");
 			int ritualEffect = set.getInt("RitualEffect");
+			int rudolphOutfit = set.getInt("RudolphOutfit");
+			int merryTitle = set.getInt("MerryTitle");
+			int hohohoTitle = set.getInt("HoHoHoTitle");
 
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
@@ -186,7 +189,7 @@ public class PlayerDataManager implements Listener {
 					bestWinstreak, december15, december16, december17, december18, december19, december20, december21,
 					december22, december23, december24, december25, snowParticles, snowballDeathEffect, elfCosmetic,
 					snowmanPet, candycaneParticles, snowball, floodEffect, treasureEffect, treasureOpened, color,
-					fishingWarps, treasureLoc, pumpkinPie, ritualEffect);
+					fishingWarps, treasureLoc, pumpkinPie, ritualEffect, rudolphOutfit, merryTitle, hohohoTitle);
 		}
 		set.close();
 		stmt.close();
@@ -299,7 +302,9 @@ public class PlayerDataManager implements Listener {
 				+ ", FishRainEffect = " + data.fishRainEffect + ", Snowball = " + data.snowball + ", FloodEffect = "
 				+ data.floodEffect + ", TreasureEffect = " + data.treasureEffect + ", TreasureOpened = "
 				+ data.treasureOpened + ", Color = '" + data.color + "', FishingWarps = '" + data.fishingWarps
-				+ "', TreasureLoc = '" + data.treasureLoc + "' WHERE UUID = '" + data.playerUUID.toString() + "';");
+				+ "', TreasureLoc = '" + data.treasureLoc + "', PumpkinPie = " + data.pumpkinPie + ", RitualEffect = "
+				+ data.ritualEffect + ", RudolphOutfit = " + data.rudolphOutfit + ", MerryTitle = " + data.merryTitle
+				+ ", HoHoHoTitle = " + data.hohohoTitle + " WHERE UUID = '" + data.playerUUID.toString() + "';");
 		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon, "
 				+ "Reward1, Reward2, Reward3, Reward4, Reward5) VALUES ";
 		int index = 0;

@@ -68,6 +68,7 @@ public class PlayerListener implements Listener {
 	public List<Player> elfCosmeticPlayers = new ArrayList<Player>();
 	public List<Player> goldenOutfitPlayers = new ArrayList<>();
 	public List<Player> freddyOutfitPlayers = new ArrayList<>();
+	public List<Player> rudolphOutfitPlayers = new ArrayList<>();
 
 	public PlayerListener(Core main) {
 		this.main = main;

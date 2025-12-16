@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.all.LargeFernClass;
 import anthony.SuperCraftBrawl.Game.classes.all.ParrotClass;
+import anthony.SuperCraftBrawl.Game.events.SantaFlyoverEvent;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -741,6 +742,8 @@ public class GameInstance {
 
 		setTeams(); // Sets teams if mode is Duos
 		startLightningDropsTimer(); // Loot drops will start spawning every 45 seconds
+		if (gameSettings.santaFlyover)
+			new SantaFlyoverEvent(this).startEvent(45); // every 45 seconds
 
 		TellAll(color("&e&l----------------------------------------"));
 		TellAll("" + ChatColor.AQUA + ChatColor.BOLD + "          Super Craft Brothers");

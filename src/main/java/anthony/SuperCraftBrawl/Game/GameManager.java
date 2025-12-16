@@ -768,7 +768,8 @@ public class GameManager implements Listener, PluginMessageListener {
 		List<EntityType> entities = new ArrayList<>(Arrays.asList(EntityType.ZOMBIE, EntityType.SKELETON,
 				EntityType.CREEPER, EntityType.PIG_ZOMBIE, EntityType.MAGMA_CUBE, EntityType.SILVERFISH,
 				EntityType.WITCH, EntityType.ENDERMITE, EntityType.CHICKEN, EntityType.BLAZE, EntityType.PIG,
-				EntityType.MUSHROOM_COW, EntityType.COW, EntityType.WOLF, EntityType.SPIDER, EntityType.SLIME));
+				EntityType.MUSHROOM_COW, EntityType.COW, EntityType.WOLF, EntityType.SPIDER, EntityType.SLIME,
+				EntityType.HORSE));
 		if (entities.contains(entityType)) {
 			event.getDrops().clear();
 			event.setDroppedExp(0);
@@ -2053,6 +2054,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			instance.getGameSettings().removeFromLightningVotes(player);
 			instance.getGameSettings().removeFromGameTypeVotes(player);
 			instance.getGameSettings().removeFromTimeVotes(player);
+			instance.getGameSettings().removeFromSantaVotes(player);
 		}
 
 		return found;
