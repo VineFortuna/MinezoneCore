@@ -33,7 +33,7 @@ public class GenericModeGUI implements InventoryProvider {
 	private Maps randomMap = null;
 	private Maps previousRandomMap = null;
 
-	Maps.Category[] categories = {Maps.Category.CURATED, Maps.Category.CASUAL, Maps.Category.VAULTED, Maps.Category.HALLOWEEN, null};
+	Maps.Category[] categories = {Maps.Category.CURATED, Maps.Category.CASUAL, Maps.Category.VAULTED, Maps.Category.CHRISTMAS, null};
 	private Maps.Category currentCategory = Maps.Category.CURATED;
 	private Maps.Category nextCategory = Maps.Category.CASUAL;
 
@@ -184,6 +184,8 @@ public class GenericModeGUI implements InventoryProvider {
 				case HALLOWEEN:
 					material = Material.RECORD_7;
 					break;
+				case CHRISTMAS:
+					material = Material.GOLD_RECORD;
 			}
 		}
 
