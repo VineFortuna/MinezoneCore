@@ -66,7 +66,7 @@ public class GadgetsGUI implements InventoryProvider {
 		ItemStack fishingRod = main.getFishingRod(player);
 
 		ItemStack snowball = ItemHelper.setDetails(ItemHelper.create(Material.SNOW_BALL), "&r&lSnow Particles", "",
-				"&cChristmas 2024 exclusive");
+				"&cChristmas exclusive");
 
 		ItemStack snowmanPet = ItemHelper.setDetails(ItemHelper.create(Material.MONSTER_EGG), "&e&lSnowman Pet", "",
 				"&cChristmas 2024 exclusive");
