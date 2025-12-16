@@ -158,6 +158,23 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 		}));
 	}
 
+	private void addSantaFlyoverButton(InventoryContents contents, Player player, GameInstance game) {
+		ItemStack lightningRate = ItemHelper.setDetails(new ItemStack(Material.CHEST),
+				ChatColor.YELLOW + "Santa Flyover -> Enabled", "",
+				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().getSantaVotes() : "0") + "/"
+						+ (game != null ? game.players.size() : "0") + ")",
+				"",
+				"&7Santa flies over the map and delivers presents",
+				"&7every 45 seconds");
+		contents.set(2, 4, ClickableItem.of(lightningRate, event -> {
+			if (event.getWhoClicked() instanceof Player) {
+				SoundManager.playSuccessfulHit(player);
+				game.getGameSettings().handleVoteSanta(player, game);
+				openForAll(game);
+			}
+		}));
+	}
+
 	@Override
 	public void update(Player player, InventoryContents contents) {
 
