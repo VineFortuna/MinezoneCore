@@ -12,24 +12,30 @@ public class GameSettings {
 	public int totalStartVotes;
 	public int totalTimeVotes;
 	public int totalGameTypeVotes;
+	public int totalSantaVotes;
 	public int lightningDropSec;
 	public int dropTimer;
+	public boolean santaFlyover;
 	public List<Player> startVotes;
 	public List<Player> timeVotes;
 	public List<Player> gameTypeVotes;
 	public List<Player> lightningVotes;
+	public List<Player> santaVotes;
 
 	public GameSettings(GameInstance game) {
 		this.game = game;
 		this.totalStartVotes = 0;
 		this.totalTimeVotes = 0;
 		this.totalGameTypeVotes = 0;
+		this.totalSantaVotes = 0;
 		this.lightningDropSec = 0;
 		this.dropTimer = 30; // Default lightning drop time
+		this.santaFlyover = false;
 		this.startVotes = new ArrayList<Player>();
 		this.timeVotes = new ArrayList<Player>();
 		this.gameTypeVotes = new ArrayList<Player>();
 		this.lightningVotes = new ArrayList<Player>();
+		this.santaVotes = new ArrayList<Player>();
 	}
 
 	// GETTER METHODS:
@@ -48,6 +54,10 @@ public class GameSettings {
 
 	public int getLightningVotes() {
 		return this.lightningDropSec;
+	}
+
+	public int getSantaVotes() {
+		return this.totalSantaVotes;
 	}
 
 	/**
@@ -109,6 +119,15 @@ public class GameSettings {
 			if (getLightningVotes() >= game.players.size() / 2 + 1) {
 				this.dropTimer /= 2;
 				game.TellAll(color("&2&l(!) &rLoot drops spawn rate is now &e&l2x"));
+			}
+		}
+	}
+
+	public void enableSantaFlyover() {
+		if (game != null) {
+			if (getSantaVotes() >= game.players.size() / 2 + 1) {
+				this.santaFlyover = true;
+				game.TellAll(color("&2&l(!) &e&lSanta &rwill fly over the map and deliver items"));
 			}
 		}
 	}
@@ -175,6 +194,21 @@ public class GameSettings {
 		}
 	}
 
+	public void handleVoteSanta(Player player, GameInstance game) {
+		GameSettings gs = null;
+
+		if (game != null && game.getGameSettings() != null) {
+			gs = game.getGameSettings();
+			if (!(gs.santaVotes.contains(player))) {
+				gs.totalSantaVotes++;
+				gs.santaVotes.add(player);
+			} else {
+				gs.totalSantaVotes--;
+				gs.santaVotes.remove(player);
+			}
+		}
+	}
+
 	public void updateGameStartVoteStatus(Player player, GameInstance game, ChatColor color) {
 		String status = color + (color == ChatColor.GREEN ? " is Ready " : " is no longer Ready ");
 		String message = ChatColor.DARK_GREEN + ChatColor.BOLD.toString() + "(!) " + ChatColor.RESET + ChatColor.YELLOW
@@ -194,6 +228,7 @@ public class GameSettings {
 		changeGameType(false);
 		increaseLightningRate();
 		setTimeOfDay();
+		enableSantaFlyover();
 	}
 
 	/*
@@ -252,6 +287,17 @@ public class GameSettings {
 			if (gs.timeVotes.contains(player)) {
 				gs.totalTimeVotes--;
 				gs.timeVotes.remove(player);
+			}
+		}
+	}
+
+	public void removeFromSantaVotes(Player player) {
+		if (game != null && game.getGameSettings() != null) {
+			GameSettings gs = game.getGameSettings();
+
+			if (gs.santaVotes.contains(player)) {
+				gs.totalSantaVotes--;
+				gs.santaVotes.remove(player);
 			}
 		}
 	}
