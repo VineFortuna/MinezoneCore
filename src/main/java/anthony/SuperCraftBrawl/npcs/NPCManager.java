@@ -81,11 +81,11 @@ public class NPCManager implements Listener {
 		fishing.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.FISHING_ROD));
 		fishing.create();
 
-		halloweenNPC = npcLib.createNPC(
-				Arrays.asList(main.color("&6&lHALLOWEEN HUNT"), "", main.color("&7Click to go on the hunt!")));
-		halloweenNPC.setLocation(new Location(main.getLobbyWorld(), 186.457, 111.5, 632.477, -134, -1));
-		halloweenNPC.setSkin(halloweenSkin);
-		halloweenNPC.create();
+//		halloweenNPC = npcLib.createNPC(
+//				Arrays.asList(main.color("&6&lHALLOWEEN HUNT"), "", main.color("&7Click to go on the hunt!")));
+//		halloweenNPC.setLocation(new Location(main.getLobbyWorld(), 186.457, 111.5, 632.477, -134, -1));
+//		halloweenNPC.setSkin(halloweenSkin);
+//		halloweenNPC.create();
 	}
 
 	private void update() { // Updates NPCs

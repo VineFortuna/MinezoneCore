@@ -14,7 +14,10 @@ public enum Announcements {
 	Store(color(
 			"&2&l(!) &rConsider purchasing a rank at &e&nminezone.club&r to support the server and for some awesome perks!")),
 	
-	Halloween(color("&2&l(!) &rCheck out the Halloween NPC in lobby for some amazing &e&lEXCLUSIVE &rrewards!"));
+	//Halloween(color("&2&l(!) &rCheck out the Halloween NPC in lobby for some amazing &e&lEXCLUSIVE &rrewards!")),
+
+	Christmas(color("&2&l(!) &rCheck out the Ender Chest in lobby for some amazing &e&lEXCLUSIVE &rrewards!"));
+
 
 	public String name;
 
