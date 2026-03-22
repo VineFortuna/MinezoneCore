@@ -741,9 +741,9 @@ public class GameInstance {
 			this.sm.updateSignInProgress(s); // Updates the sign in lobby to show match In Progress
 
 		setTeams(); // Sets teams if mode is Duos
-		startLightningDropsTimer(); // Loot drops will start spawning every 45 seconds
+		startLightningDropsTimer(); // Loot drops will start spawning every 30 seconds
 		if (gameSettings.santaFlyover)
-			new SantaFlyoverEvent(this).startEvent(45); // every 45 seconds
+			new SantaFlyoverEvent(this).startEvent(30); // every 45 seconds
 
 		TellAll(color("&e&l----------------------------------------"));
 		TellAll("" + ChatColor.AQUA + ChatColor.BOLD + "          Super Craft Brothers");
