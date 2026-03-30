@@ -1,6 +1,6 @@
 # Minezone-Core
 
-**Minezone-Core** is a custom Minecraft server project built around a fast-paced PvP experience inspired by **Minecade’s Super Craft Bros**.  
+**Minezone-Core** is a custom Minecraft server project built around a fast-paced PvP experience inspired by **Minecade’s Super Craft Bros**. This is a project I started in July 2020 and have been working on ever since.  
 The main focus of the project is **SuperCraftBros**, a class-based combat gamemode where players fight using unique kits, special abilities, movement mechanics, and map-based strategy.
 
 This project also contains additional game packages and systems that support the wider server network.
