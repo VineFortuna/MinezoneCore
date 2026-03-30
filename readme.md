@@ -1,6 +1,6 @@
-# TheArchive-Core
+# Minezone-Core
 
-**TheArchive-Core** is a custom Minecraft server project built around a fast-paced PvP experience inspired by **Minecade’s Super Craft Bros**.  
+**Minezone-Core** is a custom Minecraft server project built around a fast-paced PvP experience inspired by **Minecade’s Super Craft Bros**.  
 The main focus of the project is **SuperCraftBros**, a class-based combat gamemode where players fight using unique kits, special abilities, movement mechanics, and map-based strategy.
 
 This project also contains additional game packages and systems that support the wider server network.
@@ -9,7 +9,7 @@ This project also contains additional game packages and systems that support the
 
 ## Overview
 
-TheArchive-Core is designed as the core plugin structure for a custom Minecraft minigame server.  
+Minezone-Core is designed as the core plugin structure for a custom Minecraft minigame server.  
 It includes multiple gamemode packages, shared systems, and the main flagship mode:
 
 - **CrystalWars**
@@ -72,7 +72,7 @@ A custom gamemode package intended to add more variety to the server network wit
 
 ## Project Goals
 
-The goal of TheArchive-Core is to recreate the feeling of older, iconic Minecraft minigame servers while adding custom improvements, cleaner systems, and original kit design.
+The goal of Minezone-Core is to recreate the feeling of older, iconic Minecraft minigame servers while adding custom improvements, cleaner systems, and original kit design.
 
 This project aims to:
 - capture the fun of classic Minecraft PvP minigames
@@ -126,7 +126,7 @@ Built for a **Spigot/Bukkit-based Minecraft server** with custom plugin developm
 
 ## Vision
 
-TheArchive-Core is meant to be more than just a single minigame plugin.  
+Minezone-Core is meant to be more than just a single minigame plugin.  
 It is the core of a server project built around custom PvP experiences, nostalgic inspiration, and unique gamemode design.
 
 At its center is **SuperCraftBros** — a Minecade-inspired class fighter built to bring back the kind of chaotic, creative, and competitive gameplay that made classic Minecraft servers memorable.
