@@ -26,11 +26,11 @@ public enum ClassType {
 	Rabbit(26, 0, 0),
 	Squid(20, 0, 0),
 	Spider(21, 0, 0),
-	Pig(30, 0, 0, true),
+	Pig(30, 0, 0),
 	Blaze(31, 0, 0),
 	Wither(33, 0, 0),
 	Creeper(35, 0, 0),
-	Present(38, 0, 0, false),
+	Present(38, 0, 0, true),
 	Dweller(43, 0, 0, true),
 	Zombie(44, 0, 0),
 	Silverfish(45, 0, 0),
@@ -95,9 +95,9 @@ public enum ClassType {
 	Endermite(70, 0, Rank.VIP),
 
 	// Holiday Classes
-	Elf(101, 0, 0, false),
-	GingerBreadMan(102, 0, 0, false),
-	Santa(103, 0, 0, false),
+	Elf(101, 0, 0, true),
+	GingerBreadMan(102, 0, 0, true),
+	Santa(103, 0, 0, true),
 	GrimReaper(104, 0, 0, true),
 	Freddy(105, 0, 0, true);
 
