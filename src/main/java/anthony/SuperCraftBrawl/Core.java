@@ -35,7 +35,6 @@ import anthony.SuperCraftBrawl.signs.SignManager;
 import anthony.SuperCraftBrawl.tablist.TablistAnimationManager;
 import anthony.SuperCraftBrawl.tablist.TablistManager;
 import anthony.SuperCraftBrawl.titles.TitleSequence;
-import anthony.SuperCraftBrawl.titles.TitleUtil;
 import anthony.parkour.Arenas;
 import anthony.parkour.Parkour;
 import anthony.util.ItemHelper;
@@ -1925,7 +1924,7 @@ public class Core extends JavaPlugin implements Listener {
 
 		if (rank == Rank.OWNER || rank == Rank.ADMIN)
 			msg = color("&c");
-		else if (rank == Rank.PRO)
+		else if (rank == Rank.CAPTAIN)
 			msg = color("&9");
 		else if (rank == Rank.VIP)
 			msg = color("&e");
@@ -2103,7 +2102,8 @@ public class Core extends JavaPlugin implements Listener {
 		// return new Location(lobbyWorld, -58.507, 125, -18.519, -179, -1);
 
 		// if (this.getCommands() != null || this.getSWCommands() != null)
-		return new Location(lobbyWorld, 106.5, 112, -41.5, 180, 0);
+		//return new Location(lobbyWorld, 106.5, 112, -41.5, 180, 0);
+		return GetHubLoc();
 		// else
 		// return new Location(lobbyWorld, 0.478, 51, 0.550);
 	}
