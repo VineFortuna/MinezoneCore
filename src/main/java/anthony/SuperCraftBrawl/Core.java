@@ -657,7 +657,7 @@ public class Core extends JavaPlugin implements Listener {
 
     private void spawnSelfStatsNPC() {
         World w = lobbyWorld;
-        Location loc = new Location(w, 207.5, 105.0, 643.5, 0f, 1f); // where the NPC stands
+        Location loc = new Location(w, 196.5, 105, 666.5, 0f, 1f); // where the NPC stands
 
         NPC selfNPC = new NPC(
                 this,
