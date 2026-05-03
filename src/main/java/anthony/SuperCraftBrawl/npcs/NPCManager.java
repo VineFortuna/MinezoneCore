@@ -54,20 +54,20 @@ public class NPCManager implements Listener {
 
 		scbClassic = npcLib.createNPC(Arrays.asList(main.color("&6&lSUPER CRAFT BROS"), main.color("&fMode: &aClassic"),
 				main.color("&eClick to Play!")));
-		scbClassic.setLocation(new Location(main.getLobbyWorld(), 191.5, 106, 657.5, 174, 2));
+		scbClassic.setLocation(new Location(main.getLobbyWorld(), 192.5, 109, 649.5, 174, 2));
 		scbClassic.setSkin(sethblingSkin);
 		scbClassic.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));
 		scbClassic.create();
 
 		scbDuels = npcLib.createNPC(Arrays.asList(main.color("&6&lSUPER CRAFT BROS"), main.color("&fMode: &aDuels"),
 				main.color("&eClick to Play!")));
-		scbDuels.setLocation(new Location(main.getLobbyWorld(), 187.5, 106, 657.5, -174, 3));
+		scbDuels.setLocation(new Location(main.getLobbyWorld(), 186.5, 109, 649.5, -174, 3));
 		scbDuels.setSkin(sethblingSkin);
 		scbDuels.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));
 		scbDuels.create();
 
 		parkour = npcLib.createNPC(Arrays.asList(main.color("&6&lPARKOUR"), main.color("&eClick to Play!")));
-		parkour.setLocation(new Location(main.getLobbyWorld(), 183.5, 106, 655.5, -158, 2));
+		parkour.setLocation(new Location(main.getLobbyWorld(), 183.5, 109, 648.5, -158, 2));
 		parkour.setSkin(sethblingSkin);
 		parkour.create();
 
@@ -78,7 +78,7 @@ public class NPCManager implements Listener {
 		socialMedia.create();
 
 		fishing = npcLib.createNPC(Arrays.asList(main.color("&6&lFISHING"), main.color("&eClick to Play!")));
-		fishing.setLocation(new Location(main.getLobbyWorld(), 195.5, 106, 655.5, 162, 3));
+		fishing.setLocation(new Location(main.getLobbyWorld(), 195.5, 109, 648.5, 162, 3));
 		fishing.setSkin(fishermanSkin);
 		fishing.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.FISHING_ROD));
 		fishing.create();
