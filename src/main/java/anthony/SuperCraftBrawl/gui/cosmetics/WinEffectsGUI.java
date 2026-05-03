@@ -60,7 +60,7 @@ public class WinEffectsGUI implements InventoryProvider {
 			contents.set(1, 2,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.WHEAT), main.color("&eMagic Broom"),
 							"", main.color("&7Fly around the map with"), main.color("&7this when you win!"), "",
-							Rank.PRO.getTag() + ChatColor.RESET + "&c exclusive!"),e -> {
+							Rank.CAPTAIN.getTag() + ChatColor.RESET + "&c exclusive!"), e -> {
 						if (player.hasPermission("scb.winEffects")) {
 							resetWinEffects(data);
 							data.broomWinEffect = 1;
@@ -68,7 +68,7 @@ public class WinEffectsGUI implements InventoryProvider {
 							player.sendMessage(main.color("&e&l(!) &rYou have enabled &eMagic Broom &rwin effect"));
 						} else {
 							player.sendMessage(main.color(
-									"&c&l(!) &rYou need the rank " + Rank.PRO.getTag() + "&r to use this!"));
+									"&c&l(!) &rYou need the rank " + Rank.CAPTAIN.getTag() + "&r to use this!"));
 						}
 					}));
 			
@@ -78,7 +78,7 @@ public class WinEffectsGUI implements InventoryProvider {
 									.setDetails(new ItemStack(Material.DRAGON_EGG), main.color("&eEnderDragon"), "",
 											main.color("&7Fly around the map with an"),
 											main.color("&7EnderDragon when you win!"), "",
-											Rank.PRO.getTag() + ChatColor.RESET + "&c exclusive!"),
+											Rank.CAPTAIN.getTag() + ChatColor.RESET + "&c exclusive!"),
 							e -> {
 								if (player.hasPermission("scb.winEffects")) {
 									resetWinEffects(data);
@@ -87,14 +87,14 @@ public class WinEffectsGUI implements InventoryProvider {
 									player.sendMessage(main.color("&e&l(!) &rYou have enabled &eEnderDragon &rwin effect"));
 								} else {
 									player.sendMessage(main.color(
-											"&c&l(!) &rYou need the rank " + Rank.PRO.getTag() + "&r to use this!"));
+											"&c&l(!) &rYou need the rank " + Rank.CAPTAIN.getTag() + "&r to use this!"));
 								}
 							}));
 			
 			contents.set(1, 3,
 					ClickableItem.of(ItemHelper.setDetails(santa, main.color("&eSanta Claus"), "",
 							main.color("&7Become old Saint Nick himself"), main.color("&7and ride along!"), "",
-							Rank.PRO.getTag() + ChatColor.RESET + "&c exclusive!"), e -> {
+							Rank.CAPTAIN.getTag() + ChatColor.RESET + "&c exclusive!"), e -> {
 						if (player.hasPermission("scb.winEffects")) {
 							resetWinEffects(data);
 							data.santaEffect = 1;
@@ -102,7 +102,7 @@ public class WinEffectsGUI implements InventoryProvider {
 							player.sendMessage(main.color("&e&l(!) &rYou have enabled &eSanta Claus &rwin effect"));
 						} else {
 							player.sendMessage(main.color(
-									"&c&l(!) &rYou need the rank " + Rank.PRO.getTag() + "&r to use this!"));
+									"&c&l(!) &rYou need the rank " + Rank.CAPTAIN.getTag() + "&r to use this!"));
 						}
 					}));
 			contents.set(1, 5,
