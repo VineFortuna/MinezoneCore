@@ -5,8 +5,8 @@ import org.bukkit.entity.Player;
 
 public enum Rank {
     DEFAULT(0, "", color("&7")), //RANK GIVEN TO ALL NEW PLAYERS
-    VIP(6, color("&a&lVIP"), color("&a")), //FIRST DONATION RANK
-    PRO(8, color("&9&lPRO"), color("&9")), //SECOND DONATION RANK
+    VIP(6, color("&e&lVIP"), color("&e")), //FIRST DONATION RANK
+    CAPTAIN(8, color("&9&lCAPTAIN"), color("&9")), //SECOND DONATION RANK
     TRAINEE(3, color("&2&lTRAINEE"), color("&6")),
     /* Trainee:
      * Obtainable: Players who applied and have been accepted. They are under training and shall only have
@@ -143,7 +143,7 @@ public enum Rank {
 
 		if (rank == Rank.OWNER || rank == Rank.ADMIN)
 			msg = color("&c");
-		else if (rank == Rank.PRO)
+		else if (rank == Rank.CAPTAIN)
 			msg = color("&9");
 		else if (rank == Rank.VIP)
 			msg = color("&a");
@@ -173,7 +173,7 @@ public enum Rank {
             case BUILDER:       return 7;
             case MEDIA:         return 8;
             case SUPREME:       return 9;
-            case PRO:       return 10;
+            case CAPTAIN:       return 10;
             case VIP:           return 11;
             case DEFAULT:
             default:            return 12;
