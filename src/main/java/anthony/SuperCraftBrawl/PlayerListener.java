@@ -10,8 +10,6 @@ import anthony.SuperCraftBrawl.leaderboards.LeaderboardScope;
 import anthony.SuperCraftBrawl.npcs.ChannelInjector;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
-import anthony.util.PathfinderGoalFollowPlayer;
-import anthony.util.PathfinderHelper;
 import anthony.util.SoundManager;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.*;
@@ -21,7 +19,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.*;
 import org.bukkit.entity.Entity;
@@ -51,7 +48,6 @@ import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.Vector;
 
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class PlayerListener implements Listener {
 
@@ -64,7 +60,8 @@ public class PlayerListener implements Listener {
 	public List<Player> elfCosmeticPlayers = new ArrayList<Player>();
 	public List<Player> goldenOutfitPlayers = new ArrayList<>();
 	public List<Player> freddyOutfitPlayers = new ArrayList<>();
-    private BukkitTask announcementsTask;
+	public List<Player> rudolphOutfitPlayers = new ArrayList<>();
+	private BukkitTask announcementsTask;
 
 	public PlayerListener(Core main) {
 		this.main = main;
