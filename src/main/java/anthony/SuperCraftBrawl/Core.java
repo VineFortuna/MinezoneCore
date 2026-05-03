@@ -398,7 +398,7 @@ public class Core extends JavaPlugin implements Listener {
 		getListener().messages();
         enableCommands();
 		enablePracticeModes();
-		spawnLobbyNPCs();
+		//spawnLobbyNPCs();
         spawnSelfStatsNPC();
         showNPCs();
         enableTitlesCosmetic();
@@ -418,7 +418,7 @@ public class Core extends JavaPlugin implements Listener {
             World w = Bukkit.getWorld("lobby-1");
 
             // 1) DAILY REWARD at 186.5,116,633.5
-            floatingBlocks.add(
+            /*floatingBlocks.add(
                     new Location(w, 186.5, 116.0, 633.5),
                     new ItemStack(Material.WOOL, 1, (short)0), // white wool
                     "&6&lDAILY REWARD",
@@ -426,12 +426,12 @@ public class Core extends JavaPlugin implements Listener {
                     (player) -> {
                         player.sendMessage(color("&aOpening Daily Reward..."));
                     }
-            );
+            );*/
 
             // 2) SOCIALS at 192.843,116,632.825
             floatingBlocks.add(
-                    new Location(w, 192.843, 116.0, 632.825),
-                    new ItemStack(Material.WOOL, 1, (short)0),
+                    new Location(w, 192.5, 111.0, 632.5),
+                    new ItemStack(Material.BOOKSHELF, 1, (short)0),
                     "&6&lSOCIALS",
                     "&aRight Click",
                     (player) -> {
