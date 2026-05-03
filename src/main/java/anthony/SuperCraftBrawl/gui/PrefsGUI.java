@@ -72,7 +72,7 @@ public class PrefsGUI implements InventoryProvider {
 							}
 						} else {
 							player.sendMessage(main.color("&c&l(!) &rYou need the rank " + ChatColor.BLUE
-									+ ChatColor.BOLD + Rank.PRO.getTag() + "&rto use this feature!"));
+									+ ChatColor.BOLD + Rank.CAPTAIN.getTag() + "&rto use this feature!"));
 						}
 						inv.close(player);
 					}));
@@ -113,7 +113,7 @@ public class PrefsGUI implements InventoryProvider {
 								data.killMsgs = 0;
 							}
 						} else {
-                            player.sendMessage(main.color("&c&l(!) &rYou need the rank " + Rank.PRO.getTag() + " &fto use this!"));
+                            player.sendMessage(main.color("&c&l(!) &rYou need the rank " + Rank.CAPTAIN.getTag() + " &fto use this!"));
 						}
 						inv.close(player);
 					}));
