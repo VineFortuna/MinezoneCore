@@ -169,12 +169,12 @@ public class PlayerListener implements Listener {
 
 		if (rank.length() >= 16) {
 			String s = rank.substring(0, 9);
-			p.setPlayerListName("" + s + " " + r.getColorForNames(p, r));
+			p.setPlayerListName(s + " " + r.getColorForNames(p, r));
 		} else
-			p.setPlayerListName("" + rank + r.getColorForNames(p, r));
+			p.setPlayerListName(rank + r.getColorForNames(p, r));
 
 		if (main.getRankManager().getRank(p) == Rank.DEFAULT)
-			p.setPlayerListName("" + rank + r.getColorForNames(p, r));
+			p.setPlayerListName(rank + r.getColorForNames(p, r));
 
 		/*
 		 * Team captain = c.registerNewTeam("b_captain");
