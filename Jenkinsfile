@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        maven 'Maven'
-        jdk 'JDK8'
-    }
-
     stages {
 
         stage('Checkout') {
@@ -20,10 +15,26 @@ pipeline {
             }
         }
 
-        stage('Archive') {
+        stage('Test (optional)') {
             steps {
-                archiveArtifacts artifacts: 'target/*.jar'
+                sh 'mvn test'
             }
+        }
+
+        stage('Archive Artifact') {
+            steps {
+                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build succeeded ✔'
+        }
+
+        failure {
+            echo 'Build failed'
         }
     }
 }
