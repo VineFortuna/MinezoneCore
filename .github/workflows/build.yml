@@ -1,0 +1,32 @@
+name: Build Minecraft Plugin
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 8
+
+      - name: Build Plugin
+        run: mvn clean package
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: minezone-plugin
+          path: target/*.jar
