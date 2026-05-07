@@ -1,8 +1,9 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.9.6-eclipse-temurin-8'
-        }
+    agent any
+
+    tools {
+        maven 'Maven'
+        jdk 'JDK8'
     }
 
     stages {
@@ -13,13 +14,13 @@ pipeline {
             }
         }
 
-        stage('Build Plugin') {
+        stage('Build') {
             steps {
                 sh 'mvn clean package'
             }
         }
 
-        stage('Archive Build') {
+        stage('Archive') {
             steps {
                 archiveArtifacts artifacts: 'target/*.jar'
             }
