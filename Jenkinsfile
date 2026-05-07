@@ -1,15 +1,20 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.9.6-eclipse-temurin-8'
-        }
+    agent any
+
+    tools {
+        maven 'Maven'
     }
 
     stages {
 
-        stage('Build') {
+        stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
                 sh 'mvn clean package'
             }
         }
