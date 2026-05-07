@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.all.LargeFernClass;
 import anthony.SuperCraftBrawl.Game.classes.all.ParrotClass;
+import anthony.SuperCraftBrawl.Game.events.SantaFlyoverEvent;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -431,6 +432,7 @@ public class GameInstance {
                     getGameSettings().changeGameType(false);
                     getGameSettings().increaseLightningRate();
                     getGameSettings().setTimeOfDay();
+                    getGameSettings().enableSantaFlyover();
                     removeVotePaper();
                 }
 
@@ -606,6 +608,9 @@ public class GameInstance {
 
         setTeams();
         startLightningDropsTimer();
+
+        if (gameSettings.santaFlyover)
+            new SantaFlyoverEvent(this).startEvent(30);
 
         TellAll(color("&e&l----------------------------------------"));
         TellAll("" + ChatColor.AQUA + ChatColor.BOLD + "          Super Craft Brothers");
