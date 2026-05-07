@@ -1,40 +1,23 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'maven:3.9.6-eclipse-temurin-8'
+        }
+    }
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Build') {
             steps {
+                checkout scm
                 sh 'mvn clean package'
             }
         }
 
-        stage('Test (optional)') {
+        stage('Archive') {
             steps {
-                sh 'mvn test'
+                archiveArtifacts artifacts: 'target/*.jar'
             }
-        }
-
-        stage('Archive Artifact') {
-            steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Build succeeded ✔'
-        }
-
-        failure {
-            echo 'Build failed'
         }
     }
 }
