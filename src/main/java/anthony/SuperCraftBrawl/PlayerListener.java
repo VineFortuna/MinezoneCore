@@ -245,10 +245,7 @@ public class PlayerListener implements Listener {
 		if (main.tournament) {
 			PlayerData data = main.getDataManager().getPlayerData(p);
 			if (main.tourneyreset) {
-				if (!main.tourney.containsKey(p.getName()))
-					data.points = 0;
-				else
-					data.points = main.tourney.get(p.getName());
+                data.points = main.tourney.getOrDefault(p.getName(), 0);
 			}
 			main.tourney.put(p.getName(), data.points);
 		}
