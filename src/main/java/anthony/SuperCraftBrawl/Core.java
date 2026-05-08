@@ -661,14 +661,15 @@ public class Core extends JavaPlugin implements Listener {
 
         NPC selfNPC = new NPC(
                 this,
-                "",
+                color("&7Click to view"),
                 loc,
                 null, null,
                 (clicker) -> new StatsGUI(this).inv.open(clicker),
                 null
         )
                 .mimicViewerSkin()
-                .disableHeadTracking()
+//                .disableHeadTracking()
+				.enableHeadTracking()
                 .perViewerLines(p -> Collections.emptyList());  // does nothing
 
         npcs.add(selfNPC);
@@ -1978,11 +1979,11 @@ public class Core extends JavaPlugin implements Listener {
 		PlayerData data = this.getDataManager().getPlayerData(p);
 
 		if (data != null) {
-			Location loc = new Location(this.getLobbyWorld(), 196.5, 105.5, 648.5);
+			Location loc = new Location(this.getLobbyWorld(), 194.5, 111.5, 641.5);
             String name = color("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Mystery Chests");
             this.armorStandManager.addMysteryChestHologram(p, loc, name);
 
-			loc = new Location(this.getLobbyWorld(), 196.5, 105.2, 648.5);
+			loc = new Location(this.getLobbyWorld(), 194.5, 111.2, 641.5);
             name = color("&e&l" + data.mysteryChests + " &eto open!");
             this.armorStandManager.addMysteryChestHologram(p, loc, name);
 		}
