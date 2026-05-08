@@ -367,7 +367,7 @@ public class WinEffects {
                 herobrineNPC.setSmall(false);
                 herobrineNPC.setRemoveWhenFarAway(false);
 
-                ItemStack head = createHerobrineHead();
+                ItemStack head = ItemHelper.createSkullTexture("e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTM1YmRkN2VmZjExYzg3ZDUyYTExM2MyZWZiNGNhNDU3NzVlNTY3MzVkYzRiMzhkN2ZhMWRiNzA4NDU4In19fQ");
                 herobrineNPC.setHelmet(head);
 
                 ItemStack chest = new ItemStack(Material.LEATHER_CHESTPLATE);
@@ -500,33 +500,5 @@ public class WinEffects {
             }
             this.ritualEffect = false;
         }
-    }
-
-    // =========================
-    // Head texture helpers
-    // =========================
-
-    private ItemStack createHerobrineHead() {
-        ItemStack head = new ItemStack(Material.SKULL_ITEM, 1, (short) SkullType.PLAYER.ordinal());
-        SkullMeta sm = (SkullMeta) head.getItemMeta();
-
-        if (HEROBRINE_TEXTURE_VALUE != null && !HEROBRINE_TEXTURE_VALUE.isEmpty()) {
-            applyTexture(sm, HEROBRINE_TEXTURE_VALUE);
-        } else {
-            // Fallback: try the classic username (many servers resolve a Herobrine skin with white eyes)
-            sm.setOwner("AR4i_");
-        }
-        head.setItemMeta(sm);
-        return head;
-    }
-
-    private void applyTexture(SkullMeta meta, String textureValue) {
-        try {
-            GameProfile profile = new GameProfile(UUID.randomUUID(), "AR4i_");
-            profile.getProperties().put("textures", new Property("textures", textureValue));
-            Field f = meta.getClass().getDeclaredField("profile");
-            f.setAccessible(true);
-            f.set(meta, profile);
-        } catch (Exception ignored) {}
     }
 }
