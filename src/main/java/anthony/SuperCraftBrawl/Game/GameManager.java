@@ -112,7 +112,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
         if (data != null) {
             for (ClassType type : ClassType.values()) {
-                if (type.getTokenCost() > 0) {
+                if (type.getTokenCost() > 0 && !type.isVaulted()) {
                     if (data.playerClasses.get(type.getID()) != null
                             && data.playerClasses.get(type.getID()).purchased) {
                         num++;
@@ -128,7 +128,7 @@ public class GameManager implements Listener, PluginMessageListener {
         int num = 0;
 
         for (ClassType type : ClassType.values()) {
-            if (type.getTokenCost() > 0) {
+            if (type.getTokenCost() > 0 && !type.isVaulted()) {
                 num++;
             }
         }
@@ -142,7 +142,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
         if (data != null) {
             for (ClassType type : ClassType.values()) {
-                if (type.getLevel() > 0) {
+                if (type.getLevel() > 0 && !type.isVaulted()) {
                     if (data.level >= type.getLevel()) {
                         num++;
                     }
