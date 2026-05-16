@@ -16,7 +16,9 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class LeaderboardScopeGUI implements InventoryProvider {
 
@@ -63,7 +65,7 @@ public class LeaderboardScopeGUI implements InventoryProvider {
             // Save choice
             main.leaderboardScopeByViewer.put(player.getUniqueId(), next);
             SoundManager.playClickSound(player);
-            player.sendMessage(main.color("&eShowing " + next.display() + " leaderboards"));
+            player.sendMessage(main.color("&f&l(!) &rShowing &e" + next.display() + "&r leaderboards"));
             setClock(contents, player);
             repaintFor(player, next);
         }));
@@ -99,40 +101,51 @@ public class LeaderboardScopeGUI implements InventoryProvider {
         }
     }
 
-    /** Repaint THIS viewer’s leaderboards. Uses reflection so it compiles even if some boards aren’t converted yet. */
     private void repaintFor(Player player, LeaderboardScope scope) {
-        Object kills = main.getKillsLeaderboard();
-        Object wins  = main.getLeaderboard();       // your Wins board
-        Object flaw  = main.getFlawlessWinsBoard(); // may or may not have paintFor/clearViewerHologram yet
+        Object kills     = main.getKillsLeaderboard();
+        Object wins      = main.getLeaderboard();
+        Object flaw      = main.getFlawlessWinsBoard();
+        Object fishing   = main.getFishingLeaderboard();
+        Object winstreak = main.getWinstreakBoard();
+        List<Object> parkourBoards = new ArrayList<>();
+        if (main.getParkourLeaderboards() != null) {
+            parkourBoards.addAll(main.getParkourLeaderboards());
+        }
 
         if (scope == LeaderboardScope.LIFETIME) {
             Bukkit.getScheduler().runTask(main, () -> {
-                // clear per-viewer overlays (if those methods exist)
-                invokeIfExists(kills, "clearViewerHologram", new Class[]{Player.class}, new Object[]{player});
-                invokeIfExists(wins,  "clearViewerHologram", new Class[]{Player.class}, new Object[]{player});
-                invokeIfExists(flaw,  "clearViewerHologram", new Class[]{Player.class}, new Object[]{player});
+                invokeIfExists(kills,     "clearViewerHologram", new Class[]{Player.class}, new Object[]{player});
+                invokeIfExists(wins,      "clearViewerHologram", new Class[]{Player.class}, new Object[]{player});
+                invokeIfExists(flaw,      "clearViewerHologram", new Class[]{Player.class}, new Object[]{player});
+                invokeIfExists(fishing,   "clearViewerHologram", new Class[]{Player.class}, new Object[]{player});
+                invokeIfExists(winstreak, "clearViewerHologram", new Class[]{Player.class}, new Object[]{player});
+                for (Object pb : parkourBoards) invokeIfExists(pb, "clearViewerHologram", new Class[]{Player.class}, new Object[]{player});
 
-                // redraw global (only shows to Lifetime viewers)
-                invokeIfExists(kills, "updateLeaderboard", new Class[]{boolean.class}, new Object[]{false});
-                invokeIfExists(wins,  "updateLeaderboard", new Class[]{boolean.class}, new Object[]{false});
-                invokeIfExists(flaw,  "updateLeaderboard", new Class[]{boolean.class}, new Object[]{false});
+                invokeIfExists(kills,     "updateLeaderboard", new Class[]{boolean.class}, new Object[]{false});
+                invokeIfExists(wins,      "updateLeaderboard", new Class[]{boolean.class}, new Object[]{false});
+                invokeIfExists(flaw,      "updateLeaderboard", new Class[]{boolean.class}, new Object[]{false});
+                invokeIfExists(fishing,   "updateLeaderboard", new Class[]{boolean.class}, new Object[]{false});
+                invokeIfExists(winstreak, "updateLeaderboard", new Class[]{boolean.class}, new Object[]{false});
+                for (Object pb : parkourBoards) invokeIfExists(pb, "updateLeaderboard", new Class[]{boolean.class}, new Object[]{false});
             });
             return;
         }
 
-        // Scoped: refresh caches async, then paint per-viewer on main thread
         Bukkit.getScheduler().runTaskAsynchronously(main, () -> {
-            invokeIfExists(kills, "asyncUpdate", new Class[]{}, new Object[]{});
-            invokeIfExists(wins,  "asyncUpdate", new Class[]{}, new Object[]{});
-            invokeIfExists(flaw,  "asyncUpdate", new Class[]{}, new Object[]{});
+            invokeIfExists(kills,     "asyncUpdate", new Class[]{}, new Object[]{});
+            invokeIfExists(wins,      "asyncUpdate", new Class[]{}, new Object[]{});
+            invokeIfExists(flaw,      "asyncUpdate", new Class[]{}, new Object[]{});
+            invokeIfExists(fishing,   "asyncUpdate", new Class[]{}, new Object[]{});
+            invokeIfExists(winstreak, "asyncUpdate", new Class[]{}, new Object[]{});
+            for (Object pb : parkourBoards) invokeIfExists(pb, "asyncUpdate", new Class[]{}, new Object[]{});
 
             Bukkit.getScheduler().runTask(main, () -> {
-                invokeIfExists(kills, "paintFor",
-                        new Class[]{Player.class, LeaderboardScope.class}, new Object[]{player, scope});
-                invokeIfExists(wins,  "paintFor",
-                        new Class[]{Player.class, LeaderboardScope.class}, new Object[]{player, scope});
-                invokeIfExists(flaw,  "paintFor",
-                        new Class[]{Player.class, LeaderboardScope.class}, new Object[]{player, scope});
+                invokeIfExists(kills,     "paintFor", new Class[]{Player.class, LeaderboardScope.class}, new Object[]{player, scope});
+                invokeIfExists(wins,      "paintFor", new Class[]{Player.class, LeaderboardScope.class}, new Object[]{player, scope});
+                invokeIfExists(flaw,      "paintFor", new Class[]{Player.class, LeaderboardScope.class}, new Object[]{player, scope});
+                invokeIfExists(fishing,   "paintFor", new Class[]{Player.class, LeaderboardScope.class}, new Object[]{player, scope});
+                invokeIfExists(winstreak, "paintFor", new Class[]{Player.class, LeaderboardScope.class}, new Object[]{player, scope});
+                for (Object pb : parkourBoards) invokeIfExists(pb, "paintFor", new Class[]{Player.class, LeaderboardScope.class}, new Object[]{player, scope});
             });
         });
     }
