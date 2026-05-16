@@ -1914,9 +1914,9 @@ public class Core extends JavaPlugin implements Listener {
 		player.setHealth(20);
 		player.setFoodLevel(20);
 
-        TitleSequence.sendChained(this, player,
-                new TitleSequence.TitleSpec("&6&lMINEZONE", "&e&lNEW LOBBY", 10, 70, 0),
-                new TitleSequence.TitleSpec("&6&lMINEZONE", "&c&lDaily/Monthly/Weekly &e&lLEADERBOARDS", 0, 70, 10)
+        TitleSequence.sendSequence(this, player,
+                //new TitleSequence.TitleSpec("&6&lMINEZONE", "&e&lNEW LOBBY", 10, 70, 0),
+                Collections.singletonList(new TitleSequence.TitleSpec("&6&lMINEZONE", "&c&lDaily/Monthly/Weekly &e&lLEADERBOARDS", 0, 70, 10))
         );
     }
 
@@ -2042,7 +2042,7 @@ public class Core extends JavaPlugin implements Listener {
 	@EventHandler
 	public void serverMotd(ServerListPingEvent p) {
 		String msg = color(
-				"                     &eMinezone &7[1.8-1.21] \n      &c&lSUPER CRAFT BROS &7- &b&lLOBBY UPDATE!");
+				"                     &eMinezone &7[1.8-26.1] \n      &c&lSUPER CRAFT BROS &7- &b&lNEW UPDATE!");
 		p.setMotd(msg);
 		p.setMaxPlayers(1);
 	}
@@ -2315,25 +2315,26 @@ public class Core extends JavaPlugin implements Listener {
 		getWinstreakBoard().updateLeaderboard(true);
 		getFlawlessWinsBoard().updateLeaderboard(true);
 		getLevelBoard().updateLeaderboard(true);
-		for (ParkourBoard parkourBoard : getParkourLeaderboards()) {
-			parkourBoard.updateLeaderboard(true);
+		for (ParkourBoard pb : getParkourLeaderboards()) {
+			pb.updateLeaderboard(true);
 		}
 	}
 
-    public void repaintLeaderboardsFor(org.bukkit.entity.Player p,
-                                       anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope) {
-        try {
-            if (this.getKillsLeaderboard() != null) {
-                // paintFor() hides the global lifetime for scoped views
-                this.getKillsLeaderboard().paintFor(p, scope);
-            }
-        } catch (Throwable ignored) {}
-
-    try { if (this.getLeaderboard() != null)     this.getLeaderboard().paintFor(p, scope); } catch (Throwable ignored) {}
-    /*try { if (this.flawlessBoard != null) this.flawlessBoard.paintFor(p, scope); } catch (Throwable ignored) {}
-    try { if (this.getFishingLeaderboard() != null) this.getFishingLeaderboard().paintFor(p, scope); } catch (Throwable ignored) {}
-    */
-    }
+	public void repaintLeaderboardsFor(org.bukkit.entity.Player p,
+									   anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope) {
+		try { if (this.getKillsLeaderboard() != null)    this.getKillsLeaderboard().paintFor(p, scope);    } catch (Throwable ignored) {}
+		try { if (this.getLeaderboard() != null)          this.getLeaderboard().paintFor(p, scope);          } catch (Throwable ignored) {}
+		try { if (this.getFlawlessWinsBoard() != null)             this.getFlawlessWinsBoard().paintFor(p, scope);             } catch (Throwable ignored) {}
+		try { if (this.getFishingLeaderboard() != null)   this.getFishingLeaderboard().paintFor(p, scope);   } catch (Throwable ignored) {}
+		try { if (this.getWinstreakBoard() != null) this.getWinstreakBoard().paintFor(p, scope); } catch (Throwable ignored) {}
+		try {
+			if (this.getParkourLeaderboards() != null) {
+				for (anthony.SuperCraftBrawl.leaderboards.ParkourBoard pb : this.getParkourLeaderboards()) {
+					try { if (pb != null) pb.paintFor(p, scope); } catch (Throwable ignored) {}
+				}
+			}
+		} catch (Throwable ignored) {}
+	}
 
     public LobbyExplorerManager getExplorerManager() {
 		return this.explorerManager;
