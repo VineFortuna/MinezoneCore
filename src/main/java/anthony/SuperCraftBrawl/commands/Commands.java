@@ -653,11 +653,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 					if (args.length == 0 || !colors.contains(ChatColor.valueOf(args[0].toUpperCase()))) {
 						colorMessage(player, colors);
 					} else if (args[0].equalsIgnoreCase("reset")) {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
+						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your display name to "
 								+ ChatColor.RESET + player.getName());
 						data.color = "";
 					} else {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
+						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your display name to "
 								+ ChatColor.valueOf(args[0].toUpperCase()) + player.getName());
 						data.color = args[0].toUpperCase();
 					}
