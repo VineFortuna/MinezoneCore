@@ -10,9 +10,9 @@ public class SettingsHologram {
     private java.util.UUID lbSettingsStandHint;   // hint line UUID
 
     //Location constants
-    private static final double LB_X = 193.377;
-    private static final double LB_Y = 107.6;     // raise above floor so text is visible
-    private static final double LB_Z = 702.500;
+    private static final double LB_X = 193.5;
+    private static final double LB_Y = 105.5;
+    private static final double LB_Z = 702.5;
 
     public SettingsHologram(Core core) {
         this.core = core;
