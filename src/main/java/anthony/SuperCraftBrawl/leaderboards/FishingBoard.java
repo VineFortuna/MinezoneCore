@@ -35,7 +35,7 @@ public class FishingBoard extends LeaderboardBase {
 	private static final AtomicInteger ENTITY_ID = new AtomicInteger(600000); // custom id base, offset from other boards
 
 	// Board title location (Fishing)
-	private static final Location FISHING_TITLE_LOC = new Location(null, 305.5, 93.5, 531.5);
+	private static final Location FISHING_TITLE_LOC = new Location(null, 305.5, 93, 531.5);
 
 	public FishingBoard(Core main) {
 		super(main);
