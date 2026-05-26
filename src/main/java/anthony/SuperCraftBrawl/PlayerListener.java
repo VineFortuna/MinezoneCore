@@ -231,7 +231,8 @@ public class PlayerListener implements Listener {
                 || name.contains("wins")
                 || name.contains("kills")
                 || name.contains("flawless")
-                || name.contains("winstreak")) {
+                || name.contains("winstreak")
+                || name.contains("parkour")) {
 
             SoundManager.playClickSound(player);
             new anthony.SuperCraftBrawl.gui.leaderboard.LeaderboardScopeGUI(main).inv().open(player);

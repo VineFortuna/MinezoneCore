@@ -57,7 +57,9 @@ public class WinstreakBoard extends LeaderboardBase {
     private String sqlForScope(LeaderboardScope scope) {
         if (scope == LeaderboardScope.LIFETIME) {
             return "SELECT UUID, LastPlayerName, BestWinstreak AS WinstreakVal, RoleID " +
-                    "FROM PlayerData ORDER BY WinstreakVal DESC LIMIT 10";
+                    "FROM PlayerData " +
+                    "WHERE BestWinstreak > 0 " +
+                    "ORDER BY WinstreakVal DESC LIMIT 10";
         }
 
         java.sql.Date periodStart = main.snapshotDAO.startFor(scope);
@@ -68,6 +70,7 @@ public class WinstreakBoard extends LeaderboardBase {
                 "ON ws.uuid = pd.UUID " +
                 "AND ws.period = '" + scope.name() + "' " +
                 "AND ws.period_start = '" + periodStart + "' " +
+                "HAVING WinstreakVal > 0 " +
                 "ORDER BY WinstreakVal DESC LIMIT 10";
     }
 
@@ -149,7 +152,7 @@ public class WinstreakBoard extends LeaderboardBase {
 
             PlayerData data = main.getDataManager().getPlayerData(player);
 
-            if (data != null && !lifetimeTopIds.contains(data.playerUUID)) {
+            if (data != null && data.bestWinstreak > 0 && !lifetimeTopIds.contains(data.playerUUID)) {
                 Location line1 = base.clone().add(0, -0.24, 0);
                 sendLineToViewer(player, line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------");
 
@@ -228,7 +231,7 @@ public class WinstreakBoard extends LeaderboardBase {
 
         int yourVal = getScopedValueFor(viewer, scope);
 
-        if (!ids.contains(viewer.getUniqueId())) {
+        if (yourVal > 0 && !ids.contains(viewer.getUniqueId())) {
             Location sep = new Location(title.getWorld(), title.getX(), y - 0.20, title.getZ());
             sendLineToViewer(viewer, sep, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------");
 

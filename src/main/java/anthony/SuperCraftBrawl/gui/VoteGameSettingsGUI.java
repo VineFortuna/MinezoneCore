@@ -48,7 +48,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 			addVoteGameStartButton(contents, player, game);
 			addVoteTimeButton(contents, player, game);
 			addLightningRateButton(contents, player, game);
-			addSantaFlyoverButton(contents, player, game);
+			//addSantaFlyoverButton(contents, player, game);
 
 			if (game.gameType != GameType.DUEL) // Don't let players change game mode if duels
 				addVoteGameTypeButton(contents, player, data, game);
@@ -196,7 +196,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 		}));
 	}
 
-	private void addSantaFlyoverButton(InventoryContents contents, Player player, GameInstance game) {
+	/*private void addSantaFlyoverButton(InventoryContents contents, Player player, GameInstance game) {
 		ItemStack santaFlyover = ItemHelper.setDetails(new ItemStack(Material.CHEST),
 				ChatColor.YELLOW + "Santa Flyover -> Enabled", "",
 				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().getSantaVotes() : "0") + "/"
@@ -211,7 +211,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 				openForAll(game);
 			}
 		}));
-	}
+	}*/
 
 	@Override
 	public void update(Player player, InventoryContents contents) {
