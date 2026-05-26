@@ -1384,7 +1384,19 @@ public class GameInstance {
                 data.winstreak += 1;
                 data.exp += 113;
 
-                if (data.winstreak >= data.bestWinstreak) data.bestWinstreak = data.winstreak;
+                if (data.winstreak >= data.bestWinstreak) {
+                    data.bestWinstreak = data.winstreak;
+                }
+
+                try {
+                    if (gameManager.getMain().snapshotDAO != null) {
+                        gameManager.getMain().snapshotDAO.recordPeriodWinstreak(
+                                winner.getUniqueId().toString(),
+                                data.winstreak
+                        );
+                    }
+                } catch (Throwable ignored) {
+                }
 
                 if (data.exp >= 2500) {
                     data.level++;
