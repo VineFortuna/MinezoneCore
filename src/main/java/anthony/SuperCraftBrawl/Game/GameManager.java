@@ -907,22 +907,14 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	/**
-	 * This function gets rid of loot drops & exp that certain mobs can drop
+	 * This function gets rid of loot drops & exp that mobs can drop
 	 *
 	 * @param event to remove loot drops/exp from
 	 */
 	@EventHandler
 	public void EntityDeathEvent(EntityDeathEvent event) {
-		EntityType entityType = event.getEntityType();
-		List<EntityType> entities = new ArrayList<>(Arrays.asList(EntityType.ZOMBIE, EntityType.SKELETON,
-				EntityType.CREEPER, EntityType.PIG_ZOMBIE, EntityType.MAGMA_CUBE, EntityType.SILVERFISH,
-				EntityType.WITCH, EntityType.ENDERMITE, EntityType.CHICKEN, EntityType.BLAZE, EntityType.PIG,
-				EntityType.MUSHROOM_COW, EntityType.COW, EntityType.WOLF, EntityType.SPIDER, EntityType.SLIME,
-				EntityType.HORSE));
-		if (entities.contains(entityType)) {
-			event.getDrops().clear();
-			event.setDroppedExp(0);
-		}
+		event.getDrops().clear();
+		event.setDroppedExp(0);
 	}
 
 	/**
@@ -2664,6 +2656,32 @@ public class GameManager implements Listener, PluginMessageListener {
 						gameInstance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
 								player.getLocation().getDirection().multiply(2.0D));
 					}
+				} else if (meta.getDisplayName().toLowerCase().contains("cave spider")) {
+					int amount = item.getAmount();
+
+					if (amount > 0) {
+						if (amount == 1)
+							player.getInventory().clear(player.getInventory().getHeldItemSlot());
+						else {
+							amount--;
+							item.setAmount(amount);
+						}
+						ItemProjectile proj = new ItemProjectile(gameInstance, player, new ProjectileOnHit() {
+							@Override
+							public void onHit(Player hit) {
+								Location hitLoc = this.getBaseProj().getEntity().getLocation();
+
+								// Spawning Spider
+								CaveSpider mob = (CaveSpider) player.getWorld().spawnCreature(hitLoc, EntityType.CAVE_SPIDER);
+								customizeMob(mob, player);
+								customizeCaveSpider(mob);
+								mob.setTarget(gameInstance.getNearestPlayer(player, mob, 150));
+							}
+
+						}, ItemHelper.createMonsterEgg(EntityType.CAVE_SPIDER, 1));
+						gameInstance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+								player.getLocation().getDirection().multiply(2.0D));
+					}
 				} else if (meta.getDisplayName().toLowerCase().contains("spider")) {
 					int amount = item.getAmount();
 
@@ -2805,6 +2823,10 @@ public class GameManager implements Listener, PluginMessageListener {
 		spider.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999, 0, false, false));
 	}
 
+	private void customizeCaveSpider(CaveSpider caveSpider) {
+		caveSpider.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999, 0, false, false));
+	}
+
 	private void customizeMob(Creature mob, Player player) {
 		// Setting Mob to not de-spawn when far away
 		mob.setRemoveWhenFarAway(false);
@@ -2836,6 +2858,8 @@ public class GameManager implements Listener, PluginMessageListener {
 			return "Zombie Pigman";
 		case SPIDER:
 			return "Spider";
+		case CAVE_SPIDER:
+			return "Cave Spider";
 		case SLIME:
 			return "Slime";
 		case BLAZE:
