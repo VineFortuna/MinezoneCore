@@ -16,9 +16,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class LeaderboardScopeGUI implements InventoryProvider {
 
@@ -35,128 +33,167 @@ public class LeaderboardScopeGUI implements InventoryProvider {
                 .build();
     }
 
-    /** Use to open: new LeaderboardScopeGUI(main).inv().open(player); */
-    public SmartInventory inv() { return this.inv; }
+    public SmartInventory inv() {
+        return this.inv;
+    }
 
     @Override
     public void init(Player player, InventoryContents contents) {
-        // Nice frame
-        ItemStack pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short)7);
-        for (int r = 0; r < 3; r++) for (int c = 0; c < 9; c++) {
-            if (r == 1 && c == 4) continue;
-            contents.set(r, c, ClickableItem.empty(pane));
+        ItemStack pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7);
+
+        for (int r = 0; r < 3; r++) {
+            for (int c = 0; c < 9; c++) {
+                if (r == 1 && c == 4) {
+                    continue;
+                }
+
+                contents.set(r, c, ClickableItem.empty(pane));
+            }
         }
-        // place the clock
+
         setClock(contents, player);
     }
 
     @Override
-    public void update(Player player, InventoryContents contents) { }
+    public void update(Player player, InventoryContents contents) {
+    }
 
     private void setClock(InventoryContents contents, Player player) {
-        LeaderboardScope current = main.leaderboardScopeByViewer
-                .getOrDefault(player.getUniqueId(), LeaderboardScope.LIFETIME);
+        LeaderboardScope current = main.leaderboardScopeByViewer.getOrDefault(
+                player.getUniqueId(),
+                LeaderboardScope.LIFETIME
+        );
 
         ItemStack clock = buildClock(current);
-        contents.set(1, 4, ClickableItem.of(clock, (InventoryClickEvent e) -> {
-            LeaderboardScope next = nextScope(
-                    main.leaderboardScopeByViewer.getOrDefault(player.getUniqueId(), LeaderboardScope.LIFETIME));
 
-            // Save choice
+        contents.set(1, 4, ClickableItem.of(clock, (InventoryClickEvent e) -> {
+            LeaderboardScope next = nextScope(main.leaderboardScopeByViewer.getOrDefault(
+                    player.getUniqueId(),
+                    LeaderboardScope.LIFETIME
+            ));
+
             main.leaderboardScopeByViewer.put(player.getUniqueId(), next);
+
             SoundManager.playClickSound(player);
-            player.sendMessage(main.color("&f&l(!) &rShowing &e" + next.display() + "&r leaderboards"));
+            player.sendMessage(main.color("&eShowing " + next.display() + " leaderboards"));
+
             setClock(contents, player);
-            repaintFor(player, next);
+            repaintAllBoardsFor(player, next);
         }));
     }
 
-    /** Build a WATCH with checkmarks in lore. */
     private ItemStack buildClock(LeaderboardScope selected) {
         ItemStack it = new ItemStack(Material.WATCH);
         ItemMeta meta = it.getItemMeta();
+
         if (meta != null) {
             meta.setDisplayName(main.color("&eLeaderboard Scope"));
-            String check = ChatColor.GREEN + "✔ ";
-            String dot   = ChatColor.DARK_GRAY + "• ";
 
-            String l1 = (selected == LeaderboardScope.DAILY   ? check : dot) + ChatColor.YELLOW + "Daily";
-            String l2 = (selected == LeaderboardScope.WEEKLY  ? check : dot) + ChatColor.YELLOW + "Weekly";
+            String check = ChatColor.GREEN + "✔ ";
+            String dot = ChatColor.DARK_GRAY + "• ";
+
+            String l1 = (selected == LeaderboardScope.DAILY ? check : dot) + ChatColor.YELLOW + "Daily";
+            String l2 = (selected == LeaderboardScope.WEEKLY ? check : dot) + ChatColor.YELLOW + "Weekly";
             String l3 = (selected == LeaderboardScope.MONTHLY ? check : dot) + ChatColor.YELLOW + "Monthly";
-            String l4 = (selected == LeaderboardScope.LIFETIME? check : dot) + ChatColor.YELLOW + "Lifetime";
+            String l4 = (selected == LeaderboardScope.LIFETIME ? check : dot) + ChatColor.YELLOW + "Lifetime";
 
             meta.setLore(Arrays.asList(ChatColor.GRAY + "Click to cycle", "", l1, l2, l3, l4));
             it.setItemMeta(meta);
         }
+
         return it;
     }
 
-    /** Cycle order: DAILY → WEEKLY → MONTHLY → LIFETIME → DAILY */
     private LeaderboardScope nextScope(LeaderboardScope s) {
         switch (s) {
-            case DAILY:   return LeaderboardScope.WEEKLY;
-            case WEEKLY:  return LeaderboardScope.MONTHLY;
-            case MONTHLY: return LeaderboardScope.LIFETIME;
-            default:      return LeaderboardScope.DAILY;
+            case DAILY:
+                return LeaderboardScope.WEEKLY;
+            case WEEKLY:
+                return LeaderboardScope.MONTHLY;
+            case MONTHLY:
+                return LeaderboardScope.LIFETIME;
+            default:
+                return LeaderboardScope.DAILY;
         }
     }
 
-    private void repaintFor(Player player, LeaderboardScope scope) {
-        Object kills     = main.getKillsLeaderboard();
-        Object wins      = main.getLeaderboard();
-        Object flaw      = main.getFlawlessWinsBoard();
-        Object fishing   = main.getFishingLeaderboard();
-        Object winstreak = main.getWinstreakBoard();
-        List<Object> parkourBoards = new ArrayList<>();
-        if (main.getParkourLeaderboards() != null) {
-            parkourBoards.addAll(main.getParkourLeaderboards());
-        }
-
-        if (scope == LeaderboardScope.LIFETIME) {
-            Bukkit.getScheduler().runTask(main, () -> {
-                invokeIfExists(kills,     "clearViewerHologram", new Class[]{Player.class}, new Object[]{player});
-                invokeIfExists(wins,      "clearViewerHologram", new Class[]{Player.class}, new Object[]{player});
-                invokeIfExists(flaw,      "clearViewerHologram", new Class[]{Player.class}, new Object[]{player});
-                invokeIfExists(fishing,   "clearViewerHologram", new Class[]{Player.class}, new Object[]{player});
-                invokeIfExists(winstreak, "clearViewerHologram", new Class[]{Player.class}, new Object[]{player});
-                for (Object pb : parkourBoards) invokeIfExists(pb, "clearViewerHologram", new Class[]{Player.class}, new Object[]{player});
-
-                invokeIfExists(kills,     "updateLeaderboard", new Class[]{boolean.class}, new Object[]{false});
-                invokeIfExists(wins,      "updateLeaderboard", new Class[]{boolean.class}, new Object[]{false});
-                invokeIfExists(flaw,      "updateLeaderboard", new Class[]{boolean.class}, new Object[]{false});
-                invokeIfExists(fishing,   "updateLeaderboard", new Class[]{boolean.class}, new Object[]{false});
-                invokeIfExists(winstreak, "updateLeaderboard", new Class[]{boolean.class}, new Object[]{false});
-                for (Object pb : parkourBoards) invokeIfExists(pb, "updateLeaderboard", new Class[]{boolean.class}, new Object[]{false});
-            });
-            return;
-        }
-
+    private void repaintAllBoardsFor(Player player, LeaderboardScope scope) {
         Bukkit.getScheduler().runTaskAsynchronously(main, () -> {
-            invokeIfExists(kills,     "asyncUpdate", new Class[]{}, new Object[]{});
-            invokeIfExists(wins,      "asyncUpdate", new Class[]{}, new Object[]{});
-            invokeIfExists(flaw,      "asyncUpdate", new Class[]{}, new Object[]{});
-            invokeIfExists(fishing,   "asyncUpdate", new Class[]{}, new Object[]{});
-            invokeIfExists(winstreak, "asyncUpdate", new Class[]{}, new Object[]{});
-            for (Object pb : parkourBoards) invokeIfExists(pb, "asyncUpdate", new Class[]{}, new Object[]{});
+            asyncUpdateAllBoards();
 
             Bukkit.getScheduler().runTask(main, () -> {
-                invokeIfExists(kills,     "paintFor", new Class[]{Player.class, LeaderboardScope.class}, new Object[]{player, scope});
-                invokeIfExists(wins,      "paintFor", new Class[]{Player.class, LeaderboardScope.class}, new Object[]{player, scope});
-                invokeIfExists(flaw,      "paintFor", new Class[]{Player.class, LeaderboardScope.class}, new Object[]{player, scope});
-                invokeIfExists(fishing,   "paintFor", new Class[]{Player.class, LeaderboardScope.class}, new Object[]{player, scope});
-                invokeIfExists(winstreak, "paintFor", new Class[]{Player.class, LeaderboardScope.class}, new Object[]{player, scope});
-                for (Object pb : parkourBoards) invokeIfExists(pb, "paintFor", new Class[]{Player.class, LeaderboardScope.class}, new Object[]{player, scope});
+                /*
+                 * Important:
+                 * First rebuild the global lifetime packet holograms.
+                 * updateLeaderboard only sends lifetime holograms to players whose scope is LIFETIME.
+                 * Since this player's scope has already changed, Daily/Weekly/Monthly players will not
+                 * receive the lifetime stands again.
+                 *
+                 * Then repaintLeaderboardsFor paints the selected scoped holograms for this player.
+                 */
+                redrawGlobalBoards();
+                main.repaintLeaderboardsFor(player, scope);
             });
         });
     }
 
-    /* Small reflection helper: call a method if it exists; ignore if not. */
-    private void invokeIfExists(Object target, String name, Class<?>[] sig, Object[] args) {
-        if (target == null) return;
+    private void asyncUpdateAllBoards() {
         try {
-            java.lang.reflect.Method m = target.getClass().getMethod(name, sig);
-            m.setAccessible(true);
-            m.invoke(target, args);
-        } catch (Throwable ignored) { }
+            if (main.getLeaderboard() != null) {
+                main.getLeaderboard().asyncUpdate();
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (main.getKillsLeaderboard() != null) {
+                main.getKillsLeaderboard().asyncUpdate();
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (main.getFlawlessWinsBoard() != null) {
+                main.getFlawlessWinsBoard().asyncUpdate();
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (main.getWinstreakBoard() != null) {
+                main.getWinstreakBoard().asyncUpdate();
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    private void redrawGlobalBoards() {
+        try {
+            if (main.getLeaderboard() != null) {
+                main.getLeaderboard().updateLeaderboard(false);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (main.getKillsLeaderboard() != null) {
+                main.getKillsLeaderboard().updateLeaderboard(false);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (main.getFlawlessWinsBoard() != null) {
+                main.getFlawlessWinsBoard().updateLeaderboard(false);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (main.getWinstreakBoard() != null) {
+                main.getWinstreakBoard().updateLeaderboard(false);
+            }
+        } catch (Throwable ignored) {
+        }
     }
 }

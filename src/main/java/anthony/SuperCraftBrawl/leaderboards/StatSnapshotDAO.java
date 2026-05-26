@@ -101,4 +101,28 @@ public class StatSnapshotDAO {
 
         core.getDatabaseManager().executeUpdateCommand(sql);
     }
+
+    public void recordPeriodWinstreak(String uuid, int currentWinstreak) {
+        if (uuid == null) {
+            return;
+        }
+
+        for (LeaderboardScope scope : new LeaderboardScope[]{
+                LeaderboardScope.DAILY,
+                LeaderboardScope.WEEKLY,
+                LeaderboardScope.MONTHLY
+        }) {
+            java.sql.Date periodStart = startFor(scope);
+
+            String sql =
+                    "INSERT INTO scb_period_winstreaks(uuid, period, period_start, best_value) VALUES (" +
+                            "'" + uuid + "'," +
+                            "'" + scope.name() + "'," +
+                            "'" + periodStart + "'," +
+                            currentWinstreak +
+                            ") ON DUPLICATE KEY UPDATE best_value = GREATEST(best_value, VALUES(best_value))";
+
+            core.getDatabaseManager().executeUpdateCommand(sql);
+        }
+    }
 }

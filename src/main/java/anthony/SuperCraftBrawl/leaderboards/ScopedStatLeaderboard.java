@@ -8,6 +8,7 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 import java.sql.PreparedStatement;
@@ -24,9 +25,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class WinstreakBoard extends LeaderboardBase {
-
-    private final Core main;
+public abstract class ScopedStatLeaderboard extends LeaderboardBase {
+    protected final Core main;
 
     private final List<UUID> lifetimeTopIds = new ArrayList<>();
     private final List<String> lifetimeTopNames = new ArrayList<>();
@@ -39,11 +39,9 @@ public class WinstreakBoard extends LeaderboardBase {
     private final Map<LeaderboardScope, Map<UUID, Integer>> topValues = new EnumMap<>(LeaderboardScope.class);
 
     private final Map<UUID, List<Integer>> viewerEntityIds = new HashMap<>();
-    private static final AtomicInteger ENTITY_ID = new AtomicInteger(600000);
+    private static final AtomicInteger ENTITY_ID = new AtomicInteger(400000);
 
-    private static final Location TITLE_LOC = new Location(null, 209.5, 107.5, 704.4);
-
-    public WinstreakBoard(Core main) {
+    protected ScopedStatLeaderboard(Core main) {
         super(main);
         this.main = main;
 
@@ -54,21 +52,39 @@ public class WinstreakBoard extends LeaderboardBase {
         }
     }
 
+    protected abstract String columnName();
+
+    protected abstract String metricName();
+
+    protected abstract String statLabel();
+
+    protected abstract String lifetimeTitle();
+
+    protected abstract Location titleLocation();
+
+    protected abstract int getPlayerValue(PlayerData data);
+
+    private String valueAlias() {
+        return metricName() + "Val";
+    }
+
     private String sqlForScope(LeaderboardScope scope) {
+        String alias = valueAlias();
+
         if (scope == LeaderboardScope.LIFETIME) {
-            return "SELECT UUID, LastPlayerName, BestWinstreak AS WinstreakVal, RoleID " +
-                    "FROM PlayerData ORDER BY WinstreakVal DESC LIMIT 10";
+            return "SELECT UUID, LastPlayerName, " + columnName() + " AS " + alias + ", RoleID " +
+                    "FROM PlayerData ORDER BY " + alias + " DESC LIMIT 10";
         }
 
         java.sql.Date periodStart = main.snapshotDAO.startFor(scope);
 
-        return "SELECT pd.UUID, pd.LastPlayerName, IFNULL(ws.best_value, 0) AS WinstreakVal, pd.RoleID " +
+        return "SELECT pd.UUID, pd.LastPlayerName, " +
+                "(pd." + columnName() + " - IFNULL(s.total_value, 0)) AS " + alias + ", pd.RoleID " +
                 "FROM PlayerData pd " +
-                "LEFT JOIN scb_period_winstreaks ws " +
-                "ON ws.uuid = pd.UUID " +
-                "AND ws.period = '" + scope.name() + "' " +
-                "AND ws.period_start = '" + periodStart + "' " +
-                "ORDER BY WinstreakVal DESC LIMIT 10";
+                "LEFT JOIN scb_stat_snapshots s " +
+                "ON s.uuid = pd.UUID AND s.metric = '" + metricName() + "' " +
+                "AND s.period = '" + scope.name() + "' AND s.period_start = '" + periodStart + "' " +
+                "ORDER BY " + alias + " DESC LIMIT 10";
     }
 
     @Override
@@ -91,7 +107,7 @@ public class WinstreakBoard extends LeaderboardBase {
                         UUID id = UUID.fromString(uuid);
                         ids.add(id);
                         names.add(name);
-                        vals.put(id, rs.getInt("WinstreakVal"));
+                        vals.put(id, rs.getInt(valueAlias()));
                     }
                 }
 
@@ -114,10 +130,11 @@ public class WinstreakBoard extends LeaderboardBase {
     public void updateLeaderboard(boolean init) {
         removeOldLeaderboards();
 
-        Location title = ensureWorld(TITLE_LOC);
+        Location title = ensureWorld(titleLocation(), main.getLobbyWorld());
+
         sendArmorStandPacketGlobalSelective(
                 title,
-                ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + "Best Winstreak"
+                ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + lifetimeTitle()
         );
 
         double y = title.getY() - 0.40;
@@ -154,7 +171,7 @@ public class WinstreakBoard extends LeaderboardBase {
                 sendLineToViewer(player, line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------");
 
                 Location line2 = base.clone().add(0, -0.44, 0);
-                sendLineToViewer(player, line2, ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + data.bestWinstreak);
+                sendLineToViewer(player, line2, ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + getPlayerValue(data));
             }
         }
 
@@ -186,12 +203,12 @@ public class WinstreakBoard extends LeaderboardBase {
 
         hideGlobalForViewer(viewer);
 
-        Location title = ensureWorld(TITLE_LOC);
+        Location title = ensureWorld(titleLocation(), main.getLobbyWorld());
 
         sendLineToViewer(
                 viewer,
                 title,
-                ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + scope.display() + " Winstreak"
+                ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + scope.display() + " " + statLabel()
         );
 
         double y = title.getY() - 0.40;
@@ -256,31 +273,52 @@ public class WinstreakBoard extends LeaderboardBase {
 
     private int getScopedValueFor(Player viewer, LeaderboardScope scope) {
         try {
-            if (scope == LeaderboardScope.LIFETIME) {
-                PlayerData data = main.getDataManager().getPlayerData(viewer);
-                return data != null ? data.bestWinstreak : 0;
-            }
+            PlayerData data = main.getDataManager().getPlayerData(viewer);
+            int current = data != null ? getPlayerValue(data) : 0;
 
-            java.sql.Date periodStart = main.snapshotDAO.startFor(scope);
+            if (data == null) {
+                try (PreparedStatement ps = main.getDatabaseManager().getConnection()
+                        .prepareStatement("SELECT " + columnName() + " FROM PlayerData WHERE UUID=? LIMIT 1")) {
 
-            try (PreparedStatement ps = main.getDatabaseManager().getConnection().prepareStatement(
-                    "SELECT best_value FROM scb_period_winstreaks WHERE uuid=? AND period=? AND period_start=? LIMIT 1"
-            )) {
-                ps.setString(1, viewer.getUniqueId().toString());
-                ps.setString(2, scope.name());
-                ps.setDate(3, periodStart);
+                    ps.setString(1, viewer.getUniqueId().toString());
 
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) {
-                        return rs.getInt(1);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next()) {
+                            current = rs.getInt(1);
+                        }
                     }
                 }
             }
+
+            if (scope == LeaderboardScope.LIFETIME) {
+                return current;
+            }
+
+            java.sql.Date periodStart = main.snapshotDAO.startFor(scope);
+            int snapshot = 0;
+
+            try (PreparedStatement ps = main.getDatabaseManager().getConnection().prepareStatement(
+                    "SELECT total_value FROM scb_stat_snapshots WHERE uuid=? AND metric=? AND period=? AND period_start=? LIMIT 1"
+            )) {
+                ps.setString(1, viewer.getUniqueId().toString());
+                ps.setString(2, metricName());
+                ps.setString(3, scope.name());
+                ps.setDate(4, periodStart);
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        snapshot = rs.getInt(1);
+                    }
+                }
+            }
+
+            return Math.max(0, current - snapshot);
         } catch (Exception e) {
             e.printStackTrace();
-        }
 
-        return 0;
+            PlayerData data = main.getDataManager().getPlayerData(viewer);
+            return data != null ? getPlayerValue(data) : 0;
+        }
     }
 
     private String resetLine(LeaderboardScope scope) {
@@ -395,7 +433,7 @@ public class WinstreakBoard extends LeaderboardBase {
     }
 
     private EntityArmorStand makeStand(Location loc, String name) {
-        Location fixed = ensureWorld(loc);
+        Location fixed = ensureWorld(loc, main.getLobbyWorld());
 
         EntityArmorStand armorStand = new EntityArmorStand(
                 ((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) fixed.getWorld()).getHandle()
@@ -410,9 +448,9 @@ public class WinstreakBoard extends LeaderboardBase {
         return armorStand;
     }
 
-    private Location ensureWorld(Location base) {
-        if (base.getWorld() == null && main.getLobbyWorld() != null) {
-            return new Location(main.getLobbyWorld(), base.getX(), base.getY(), base.getZ(), base.getYaw(), base.getPitch());
+    private Location ensureWorld(Location base, World world) {
+        if (base.getWorld() == null && world != null) {
+            return new Location(world, base.getX(), base.getY(), base.getZ(), base.getYaw(), base.getPitch());
         }
 
         return base;
@@ -452,7 +490,11 @@ public class WinstreakBoard extends LeaderboardBase {
     }
 
     private boolean isViewerLifetime(Player player) {
-        return getViewerScopeOrLifetime(player) == LeaderboardScope.LIFETIME;
+        try {
+            return getViewerScopeOrLifetime(player) == LeaderboardScope.LIFETIME;
+        } catch (Throwable t) {
+            return true;
+        }
     }
 
     private LeaderboardScope getViewerScopeOrLifetime(Player player) {

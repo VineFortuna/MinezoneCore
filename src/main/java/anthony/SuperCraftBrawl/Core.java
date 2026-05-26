@@ -500,68 +500,119 @@ public class Core extends JavaPlugin implements Listener {
 
     private void enableLeaderboardSnapshotTables() {
         getDatabaseManager().ensureSnapshotTable();
+        getDatabaseManager().ensurePeriodWinstreakTable();
+
         this.snapshotDAO = new anthony.SuperCraftBrawl.leaderboards.StatSnapshotDAO(this);
+
+        ensureAllLeaderboardSnapshots();
+
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+            ensureAllLeaderboardSnapshots();
+
+            try {
+                if (getLeaderboard() != null) getLeaderboard().asyncUpdate();
+            } catch (Throwable ignored) {
+            }
+
+            try {
+                if (getKillsLeaderboard() != null) getKillsLeaderboard().asyncUpdate();
+            } catch (Throwable ignored) {
+            }
+
+            try {
+                if (getFlawlessWinsBoard() != null) getFlawlessWinsBoard().asyncUpdate();
+            } catch (Throwable ignored) {
+            }
+
+            try {
+                if (getWinstreakBoard() != null) getWinstreakBoard().asyncUpdate();
+            } catch (Throwable ignored) {
+            }
+
+            Bukkit.getScheduler().runTask(this, () -> {
+                try {
+                    if (getLeaderboard() != null) getLeaderboard().updateLeaderboard(false);
+                    if (getKillsLeaderboard() != null) getKillsLeaderboard().updateLeaderboard(false);
+                    if (getFlawlessWinsBoard() != null) getFlawlessWinsBoard().updateLeaderboard(false);
+                    if (getWinstreakBoard() != null) getWinstreakBoard().updateLeaderboard(false);
+
+                    for (org.bukkit.entity.Player p : org.bukkit.Bukkit.getOnlinePlayers()) {
+                        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope =
+                                leaderboardScopeByViewer.getOrDefault(
+                                        p.getUniqueId(),
+                                        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.LIFETIME
+                                );
+
+                        repaintLeaderboardsFor(p, scope);
+                    }
+                } catch (Throwable ignored) {
+                }
+            });
+        }, 20L, 20L * 60L);
+    }
+
+    private void ensureAllLeaderboardSnapshots() {
+        if (snapshotDAO == null) {
+            return;
+        }
+
         try {
-            // Wins
-            snapshotDAO.ensureSnapshotsForAll("Wins",         anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,   "Wins");
-            snapshotDAO.ensureSnapshotsForAll("Wins",         anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,  "Wins");
-            snapshotDAO.ensureSnapshotsForAll("Wins",         anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY, "Wins");
+            snapshotDAO.ensureSnapshotsForAll(
+                    "Wins",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,
+                    "Wins"
+            );
 
-            // Kills
-            snapshotDAO.ensureSnapshotsForAll("Kills",        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,   "Kills");
-            snapshotDAO.ensureSnapshotsForAll("Kills",        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,  "Kills");
-            snapshotDAO.ensureSnapshotsForAll("Kills",        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY, "Kills");
+            snapshotDAO.ensureSnapshotsForAll(
+                    "Wins",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,
+                    "Wins"
+            );
 
-            // Flawless wins
-            snapshotDAO.ensureSnapshotsForAll("FlawlessWins", anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,   "FlawlessWins");
-            snapshotDAO.ensureSnapshotsForAll("FlawlessWins", anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,  "FlawlessWins");
-            snapshotDAO.ensureSnapshotsForAll("FlawlessWins", anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY, "FlawlessWins");
+            snapshotDAO.ensureSnapshotsForAll(
+                    "Wins",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY,
+                    "Wins"
+            );
 
-            // Fishing total caught
-            snapshotDAO.ensureSnapshotsForAll("TotalCaught",  anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,   "TotalCaught");
-            snapshotDAO.ensureSnapshotsForAll("TotalCaught",  anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,  "TotalCaught");
-            snapshotDAO.ensureSnapshotsForAll("TotalCaught",  anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY, "TotalCaught");
+            snapshotDAO.ensureSnapshotsForAll(
+                    "Kills",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,
+                    "Kills"
+            );
+
+            snapshotDAO.ensureSnapshotsForAll(
+                    "Kills",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,
+                    "Kills"
+            );
+
+            snapshotDAO.ensureSnapshotsForAll(
+                    "Kills",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY,
+                    "Kills"
+            );
+
+            snapshotDAO.ensureSnapshotsForAll(
+                    "FlawlessWins",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,
+                    "FlawlessWins"
+            );
+
+            snapshotDAO.ensureSnapshotsForAll(
+                    "FlawlessWins",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,
+                    "FlawlessWins"
+            );
+
+            snapshotDAO.ensureSnapshotsForAll(
+                    "FlawlessWins",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY,
+                    "FlawlessWins"
+            );
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
-            // 1) Refresh caches (async)
-            try { if (getKillsLeaderboard() != null) getKillsLeaderboard().asyncUpdate(); } catch (Throwable ignored) {}
-            // try { if (winsBoard      != null) winsBoard.asyncUpdate(); }      catch (Throwable ignored) {}
-            // try { if (flawlessBoard  != null) flawlessBoard.asyncUpdate(); }  catch (Throwable ignored) {}
-            // try { if (fishingBoard   != null) fishingBoard.asyncUpdate(); }   catch (Throwable ignored) {}
-
-            // 2) Paint on main thread
-            Bukkit.getScheduler().runTask(this, () -> {
-                try {
-                    // Draw global Lifetime once (so Lifetime viewers see the up-to-date list)
-                    if (getKillsLeaderboard() != null) getKillsLeaderboard().updateLeaderboard(false);
-                    // if (winsBoard     != null) winsBoard.updateLeaderboard(false);
-                    // if (flawlessBoard != null) flawlessBoard.updateLeaderboard(false);
-                    // if (fishingBoard  != null) fishingBoard.updateLeaderboard(false);
-
-                    // 3) Now enforce each viewer's chosen scope
-                    for (org.bukkit.entity.Player p : org.bukkit.Bukkit.getOnlinePlayers()) {
-                        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope =
-                                leaderboardScopeByViewer.getOrDefault(p.getUniqueId(),
-                                        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.LIFETIME);
-
-                        // Kills (what you're testing)
-                        try {
-                            anthony.SuperCraftBrawl.leaderboards.KillsBoard kb =
-                                    (anthony.SuperCraftBrawl.leaderboards.KillsBoard) getKillsLeaderboard();
-                            if (kb != null) kb.paintFor(p, scope);
-                        } catch (Throwable ignored) {}
-
-                        // When you convert the other boards, do the same:
-                        // if (winsBoard != null)     winsBoard.paintFor(p, scope);
-                        // if (flawlessBoard != null) flawlessBoard.paintFor(p, scope);
-                        // if (fishingBoard != null)  fishingBoard.paintFor(p, scope);
-                    }
-                } catch (Throwable ignored) {}
-            });
-        }, 20L, 20L * 60L); // run every 60s
     }
 
     private void enableTitlesCosmetic() {
@@ -1914,9 +1965,9 @@ public class Core extends JavaPlugin implements Listener {
 		player.setHealth(20);
 		player.setFoodLevel(20);
 
-        TitleSequence.sendSequence(this, player,
-                //new TitleSequence.TitleSpec("&6&lMINEZONE", "&e&lNEW LOBBY", 10, 70, 0),
-                Collections.singletonList(new TitleSequence.TitleSpec("&6&lMINEZONE", "&c&lDaily/Monthly/Weekly &e&lLEADERBOARDS", 0, 70, 10))
+        TitleSequence.sendChained(this, player,
+                new TitleSequence.TitleSpec("&6&lMINEZONE", "&e&lNEW UPDATE!", 10, 70, 0),
+                new TitleSequence.TitleSpec("&6&lMINEZONE", "&c&lDaily/Monthly/Weekly &e&lLEADERBOARDS", 0, 70, 10)
         );
     }
 
@@ -2042,7 +2093,7 @@ public class Core extends JavaPlugin implements Listener {
 	@EventHandler
 	public void serverMotd(ServerListPingEvent p) {
 		String msg = color(
-				"                     &eMinezone &7[1.8-26.1] \n      &c&lSUPER CRAFT BROS &7- &b&lNEW UPDATE!");
+				"                     &eMinezone &7[1.8-1.21] \n      &c&lSUPER CRAFT BROS &7- &b&lLOBBY UPDATE!");
 		p.setMotd(msg);
 		p.setMaxPlayers(1);
 	}
@@ -2121,34 +2172,38 @@ public class Core extends JavaPlugin implements Listener {
 		getLobbyItems().mainLobbyItems(player);
 	}
 
-	public void ResetPlayer(Player player) {
-		PlayerData playerData = this.getDataManager().getPlayerData(player);
+    public void ResetPlayer(Player player) {
+        PlayerData playerData = this.getDataManager().getPlayerData(player);
 
-		if (player != null && playerData != null) {
-			player.getInventory().clear();
-			player.teleport(LobbyLoc());
-			LobbyItems(player);
-			player.setHealth(20.0f);
-			player.setFireTicks(0);
-			player.setLevel(playerData.level);
-			player.setGameMode(GameMode.ADVENTURE);
-			player.setAllowFlight(true);
-			mysteryChestHologram(player);
-			parkourHolograms(player);
-			updateLeaderboards();
+        if (player != null && playerData != null) {
+            player.getInventory().clear();
+            player.teleport(LobbyLoc());
+            LobbyItems(player);
+            player.setHealth(20.0f);
+            player.setFireTicks(0);
+            player.setLevel(playerData.level);
+            player.setGameMode(GameMode.ADVENTURE);
+            player.setAllowFlight(true);
+            mysteryChestHologram(player);
+            parkourHolograms(player);
+            updateLeaderboards();
+
             anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope =
                     leaderboardScopeByViewer.getOrDefault(player.getUniqueId(),
                             anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.LIFETIME);
-            try {
-                if (getKillsLeaderboard() != null) getKillsLeaderboard().paintFor(player, scope);
-            } catch (Throwable ignored) {}
-			getScoreboardManager().lobbyBoard(player);
-			sendScoreboardUpdate(player);
 
-			if (!(holograms.containsKey(player)))
-				holograms.put(player, new Holograms(this, player)); // All players' holograms
-		}
-	}
+            try {
+                repaintLeaderboardsFor(player, scope);
+            } catch (Throwable ignored) {
+            }
+
+            getScoreboardManager().lobbyBoard(player);
+            sendScoreboardUpdate(player);
+
+            if (!(holograms.containsKey(player)))
+                holograms.put(player, new Holograms(this, player));
+        }
+    }
 
 	public Location GetSpawnLocation() {
 		// return new Location(lobbyWorld, -199.517, 89.98466, -7.519);
@@ -2315,26 +2370,41 @@ public class Core extends JavaPlugin implements Listener {
 		getWinstreakBoard().updateLeaderboard(true);
 		getFlawlessWinsBoard().updateLeaderboard(true);
 		getLevelBoard().updateLeaderboard(true);
-		for (ParkourBoard pb : getParkourLeaderboards()) {
-			pb.updateLeaderboard(true);
+		for (ParkourBoard parkourBoard : getParkourLeaderboards()) {
+			parkourBoard.updateLeaderboard(true);
 		}
 	}
 
-	public void repaintLeaderboardsFor(org.bukkit.entity.Player p,
-									   anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope) {
-		try { if (this.getKillsLeaderboard() != null)    this.getKillsLeaderboard().paintFor(p, scope);    } catch (Throwable ignored) {}
-		try { if (this.getLeaderboard() != null)          this.getLeaderboard().paintFor(p, scope);          } catch (Throwable ignored) {}
-		try { if (this.getFlawlessWinsBoard() != null)             this.getFlawlessWinsBoard().paintFor(p, scope);             } catch (Throwable ignored) {}
-		try { if (this.getFishingLeaderboard() != null)   this.getFishingLeaderboard().paintFor(p, scope);   } catch (Throwable ignored) {}
-		try { if (this.getWinstreakBoard() != null) this.getWinstreakBoard().paintFor(p, scope); } catch (Throwable ignored) {}
-		try {
-			if (this.getParkourLeaderboards() != null) {
-				for (anthony.SuperCraftBrawl.leaderboards.ParkourBoard pb : this.getParkourLeaderboards()) {
-					try { if (pb != null) pb.paintFor(p, scope); } catch (Throwable ignored) {}
-				}
-			}
-		} catch (Throwable ignored) {}
-	}
+    public void repaintLeaderboardsFor(org.bukkit.entity.Player p,
+                                       anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope) {
+        try {
+            if (this.getLeaderboard() != null) {
+                this.getLeaderboard().paintFor(p, scope);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (this.getKillsLeaderboard() != null) {
+                this.getKillsLeaderboard().paintFor(p, scope);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (this.getFlawlessWinsBoard() != null) {
+                this.getFlawlessWinsBoard().paintFor(p, scope);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (this.getWinstreakBoard() != null) {
+                this.getWinstreakBoard().paintFor(p, scope);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
 
     public LobbyExplorerManager getExplorerManager() {
 		return this.explorerManager;
