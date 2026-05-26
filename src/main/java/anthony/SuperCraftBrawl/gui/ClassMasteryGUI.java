@@ -165,7 +165,10 @@ public class ClassMasteryGUI implements InventoryProvider {
             if (data.exp >= 2500) {
                 data.level++;
                 data.exp -= 2500;
-                player.sendMessage("Level upgraded to " + data.level + "!");
+                player.sendMessage(main.color("&8&m----------------------------------------"));
+                player.sendMessage(main.color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
+                player.sendMessage(main.color("&7You are now &e&lLevel &6&l" + data.level + " &7- nice work!"));
+                player.sendMessage(main.color("&8&m----------------------------------------"));
             }
             if (main.getGameManager().GetInstanceOfPlayer(player) == null)
                 main.getScoreboardManager().lobbyBoard(player);
