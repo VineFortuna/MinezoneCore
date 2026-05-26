@@ -98,6 +98,22 @@ public class DatabaseManager {
         executeUpdateCommand(sql);
     }
 
+    public void ensurePeriodWinstreakTable() {
+        final String sql =
+                "CREATE TABLE IF NOT EXISTS scb_period_winstreaks (" +
+                        "  uuid         VARCHAR(36) NOT NULL," +
+                        "  period       ENUM('DAILY','WEEKLY','MONTHLY') NOT NULL," +
+                        "  period_start DATE NOT NULL," +
+                        "  best_value   INT NOT NULL DEFAULT 0," +
+                        "  updated_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
+                        "  PRIMARY KEY (uuid, period, period_start)," +
+                        "  INDEX (period, period_start)," +
+                        "  INDEX (uuid)" +
+                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+
+        executeUpdateCommand(sql);
+    }
+
     public void executeQueryCommand(String updateCommand, ExecuteFunction func) {
 		try {
 			Statement stmt = getConnection().createStatement();
