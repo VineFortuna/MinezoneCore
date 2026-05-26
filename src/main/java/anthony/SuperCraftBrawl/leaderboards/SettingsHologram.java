@@ -1,70 +1,103 @@
 package anthony.SuperCraftBrawl.leaderboards;
 
 import anthony.SuperCraftBrawl.Core;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.ArmorStand;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class SettingsHologram {
 
-    private Core core;
-    private java.util.UUID lbSettingsStand;       // title line UUID
-    private java.util.UUID lbSettingsStandHint;   // hint line UUID
+    private final Core core;
 
-    //Location constants
-    private static final double LB_X = 193.5;
-    private static final double LB_Y = 105.5;
-    private static final double LB_Z = 702.5;
+    private final List<UUID> hologramEntities = new ArrayList<>();
 
     public SettingsHologram(Core core) {
         this.core = core;
     }
 
-    public void spawnLeaderboardSettingsHologram() {
-        org.bukkit.World w = core.getLobbyWorld();
+    // Removes old holograms left from reloads
+    public void cleanupOldHolograms() {
+
+        World w = core.getLobbyWorld();
+
+        if (w == null) return;
+
+        for (ArmorStand as : w.getEntitiesByClass(ArmorStand.class)) {
+
+            String name = as.getCustomName();
+
+            if (name == null) continue;
+
+            String plain = ChatColor.stripColor(name)
+                    .trim()
+                    .toLowerCase();
+
+            if (plain.equals("leaderboard settings")
+                    || plain.equals("right-click to change scope")
+                    || plain.equals("click to change settings")) {
+
+                try {
+                    as.remove();
+                } catch (Throwable ignored) {}
+            }
+        }
+    }
+
+    public void spawnLeaderboardSettingsHologram(double x, double y, double z) {
+
+        World w = core.getLobbyWorld();
+
         if (w == null) {
-            core.getLogger().warning("[LB-Settings] Lobby world is null; will retry later.");
+            core.getLogger().warning("[LB-Settings] Lobby world is null.");
             return;
         }
 
-        //To ensure chunk is loaded
-        int cx = (int)Math.floor(LB_X) >> 4;
-        int cz = (int)Math.floor(LB_Z) >> 4;
-        try { w.getChunkAt(cx, cz).load(true); } catch (Throwable ignored) {}
+        // Ensure chunk loaded
+        int cx = (int) Math.floor(x) >> 4;
+        int cz = (int) Math.floor(z) >> 4;
 
-        // Remove any previous ones with same text (handles reloads)
-        for (org.bukkit.entity.ArmorStand as : w.getEntitiesByClass(org.bukkit.entity.ArmorStand.class)) {
-            String name = as.getCustomName();
-            if (name == null) continue;
-            String plain = org.bukkit.ChatColor.stripColor(name).trim().toLowerCase();
-            if (plain.equals("leaderboard settings") || plain.equals("right-click to change scope")
-                    || plain.equals("click to change settings")) {
-                try { as.remove(); } catch (Throwable ignored) {}
-            }
-        }
+        try {
+            w.getChunkAt(cx, cz).load(true);
+        } catch (Throwable ignored) {}
 
-        // Hologram to click to change settings
-        org.bukkit.Location titleLoc = new org.bukkit.Location(w, LB_X, LB_Y, LB_Z);
-        org.bukkit.entity.ArmorStand title = w.spawn(titleLoc, org.bukkit.entity.ArmorStand.class);
-        String name = core.color("&e&nLeaderboard Settings");
+        Location loc = new Location(w, x, y, z);
+
+        // Title line
+        ArmorStand title = w.spawn(loc, ArmorStand.class);
+
         title.setGravity(false);
         title.setVisible(false);
         title.setSmall(true);
         title.setBasePlate(false);
-        title.setCustomName(name);
+        title.setCustomName(core.color("&e&nLeaderboard Settings"));
         title.setCustomNameVisible(true);
         title.setRemoveWhenFarAway(false);
-        this.lbSettingsStand = title.getUniqueId();
 
-        ArmorStand hint = w.spawn(titleLoc.clone().add(0, -0.40, 0), ArmorStand.class);
-        String footer = core.color("&bClick to change settings");
-        hint.setGravity(false);
-        hint.setVisible(false);
-        hint.setSmall(true);
-        hint.setBasePlate(false);
-        hint.setCustomName(footer);
-        hint.setCustomNameVisible(true);
-        hint.setRemoveWhenFarAway(false);
-        this.lbSettingsStandHint = hint.getUniqueId();
+        hologramEntities.add(title.getUniqueId());
 
-        core.getLogger().info("[LB-Settings] Spawned at " + LB_X + ", " + LB_Y + ", " + LB_Z);
+        // Footer line
+        ArmorStand footer = w.spawn(loc.clone().add(0, -0.40, 0), ArmorStand.class);
+
+        footer.setGravity(false);
+        footer.setVisible(false);
+        footer.setSmall(true);
+        footer.setBasePlate(false);
+        footer.setCustomName(core.color("&bClick to change settings"));
+        footer.setCustomNameVisible(true);
+        footer.setRemoveWhenFarAway(false);
+
+        hologramEntities.add(footer.getUniqueId());
+
+        core.getLogger().info("[LB-Settings] Spawned hologram at "
+                + x + ", " + y + ", " + z);
+    }
+
+    public boolean isSettingsHologram(UUID entityId) {
+        return hologramEntities.contains(entityId);
     }
 }

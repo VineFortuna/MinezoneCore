@@ -406,7 +406,11 @@ public class Core extends JavaPlugin implements Listener {
         spawnFloatingBlocks();
         //enableTablist();
         //Spawn after world & chunks are ready. Delay 3 seconds
-        Bukkit.getScheduler().runTaskLater(this, () -> getLbSettingsHologram().spawnLeaderboardSettingsHologram(), 60L);
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+			getLbSettingsHologram().spawnLeaderboardSettingsHologram(193.5, 105, 702.5); // main
+			getLbSettingsHologram().spawnLeaderboardSettingsHologram(184.5, 106, 568.5); // parkour
+			getLbSettingsHologram().spawnLeaderboardSettingsHologram(300.5, 91, 530.5); // fishing pond
+		}, 60L);
     }
 
     /*
