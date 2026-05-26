@@ -31,7 +31,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 
 	public VoteGameSettingsGUI(Core main) {
 		this.main = main;
-		this.inv = SmartInventory.builder().id("voteGameSettings").provider(this).size(4, 9)
+		this.inv = SmartInventory.builder().id("voteGameSettings").provider(this).size(3, 9)
 				.title(ChatColor.DARK_GRAY.toString() + ChatColor.BOLD + "Vote").build();
 	}
 
@@ -71,7 +71,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
                 main.color("&fVotes: &a" + "(" + (game != null ? game.getGameSettings().totalStartVotes : "0") + "/"
 						+ (game != null ? game.players.size() : "0") + ")"));
 
-		contents.set(1, 3, ClickableItem.of(voteGameStart, event -> {
+		contents.set(0, 3, ClickableItem.of(voteGameStart, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
 				SoundManager.playSuccessfulHit(player);
@@ -104,7 +104,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 				main.color("&fVotes: &a" + "(" + (game != null ? game.getGameSettings().totalTimeVotes : "0") + "/"
 						+ (game != null ? game.players.size() : "0") + ")"));
 
-		contents.set(1, 5, ClickableItem.of(voteTime, event -> {
+		contents.set(0, 5, ClickableItem.of(voteTime, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				SoundManager.playSuccessfulHit(player);
 				game.getGameSettings().handleVoteTime(player, game);
@@ -150,7 +150,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 	    // Add a subtle glow
 	    makeGlow(stack);
 
-	    contents.set(3, 5, ClickableItem.of(stack, event -> {
+	    contents.set(2, 5, ClickableItem.of(stack, event -> {
 	        if (event.getWhoClicked() instanceof Player) {
 	            SoundManager.playSuccessfulHit(player);
 	            if (game != null) {
@@ -187,7 +187,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 				main.color("&fVotes: &a" + "(" + (game != null ? game.getGameSettings().getLightningVotes() : "0") + "/"
 						+ (game != null ? game.players.size() : "0") + ")"));
 
-		contents.set(3, 3, ClickableItem.of(lightningRate, event -> {
+		contents.set(2, 3, ClickableItem.of(lightningRate, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				SoundManager.playSuccessfulHit(player);
 				game.getGameSettings().handleLightningRate(player, game);

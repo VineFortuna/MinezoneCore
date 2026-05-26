@@ -2460,6 +2460,13 @@ public class Core extends JavaPlugin implements Listener {
         }
 
         try {
+            if (this.getFishingLeaderboard() != null) {
+                this.getFishingLeaderboard().paintFor(p, scope);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
             if (this.getParkourLeaderboards() != null) {
                 for (anthony.SuperCraftBrawl.leaderboards.ParkourBoard parkourBoard : this.getParkourLeaderboards()) {
                     if (parkourBoard != null) {

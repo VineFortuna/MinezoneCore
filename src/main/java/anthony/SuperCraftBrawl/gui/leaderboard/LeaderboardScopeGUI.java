@@ -167,6 +167,13 @@ public class LeaderboardScopeGUI implements InventoryProvider {
         }
 
         try {
+            if (main.getFishingLeaderboard() != null) {
+                main.getFishingLeaderboard().asyncUpdate();
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
             if (main.getParkourLeaderboards() != null) {
                 for (anthony.SuperCraftBrawl.leaderboards.ParkourBoard parkourBoard : main.getParkourLeaderboards()) {
                     if (parkourBoard != null) {
@@ -206,6 +213,14 @@ public class LeaderboardScopeGUI implements InventoryProvider {
             }
         } catch (Throwable ignored) {
         }
+
+        try {
+            if (main.getFishingLeaderboard() != null) {
+                main.getFishingLeaderboard().updateLeaderboard(false);
+            }
+        } catch (Throwable ignored) {
+        }
+
         try {
             if (main.getParkourLeaderboards() != null) {
                 for (anthony.SuperCraftBrawl.leaderboards.ParkourBoard parkourBoard : main.getParkourLeaderboards()) {
@@ -216,6 +231,5 @@ public class LeaderboardScopeGUI implements InventoryProvider {
             }
         } catch (Throwable ignored) {
         }
-
     }
 }
