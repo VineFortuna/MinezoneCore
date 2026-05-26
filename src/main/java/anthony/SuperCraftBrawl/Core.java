@@ -501,6 +501,7 @@ public class Core extends JavaPlugin implements Listener {
     private void enableLeaderboardSnapshotTables() {
         getDatabaseManager().ensureSnapshotTable();
         getDatabaseManager().ensurePeriodWinstreakTable();
+        getDatabaseManager().ensurePeriodParkourTable();
 
         this.snapshotDAO = new anthony.SuperCraftBrawl.leaderboards.StatSnapshotDAO(this);
 
@@ -510,31 +511,80 @@ public class Core extends JavaPlugin implements Listener {
             ensureAllLeaderboardSnapshots();
 
             try {
-                if (getLeaderboard() != null) getLeaderboard().asyncUpdate();
+                if (getLeaderboard() != null) {
+                    getLeaderboard().asyncUpdate();
+                }
             } catch (Throwable ignored) {
             }
 
             try {
-                if (getKillsLeaderboard() != null) getKillsLeaderboard().asyncUpdate();
+                if (getKillsLeaderboard() != null) {
+                    getKillsLeaderboard().asyncUpdate();
+                }
             } catch (Throwable ignored) {
             }
 
             try {
-                if (getFlawlessWinsBoard() != null) getFlawlessWinsBoard().asyncUpdate();
+                if (getFlawlessWinsBoard() != null) {
+                    getFlawlessWinsBoard().asyncUpdate();
+                }
             } catch (Throwable ignored) {
             }
 
             try {
-                if (getWinstreakBoard() != null) getWinstreakBoard().asyncUpdate();
+                if (getWinstreakBoard() != null) {
+                    getWinstreakBoard().asyncUpdate();
+                }
+            } catch (Throwable ignored) {
+            }
+
+            try {
+                if (getFishingLeaderboard() != null) {
+                    getFishingLeaderboard().asyncUpdate();
+                }
+            } catch (Throwable ignored) {
+            }
+
+            try {
+                if (getParkourLeaderboards() != null) {
+                    for (anthony.SuperCraftBrawl.leaderboards.ParkourBoard parkourBoard : getParkourLeaderboards()) {
+                        if (parkourBoard != null) {
+                            parkourBoard.asyncUpdate();
+                        }
+                    }
+                }
             } catch (Throwable ignored) {
             }
 
             Bukkit.getScheduler().runTask(this, () -> {
                 try {
-                    if (getLeaderboard() != null) getLeaderboard().updateLeaderboard(false);
-                    if (getKillsLeaderboard() != null) getKillsLeaderboard().updateLeaderboard(false);
-                    if (getFlawlessWinsBoard() != null) getFlawlessWinsBoard().updateLeaderboard(false);
-                    if (getWinstreakBoard() != null) getWinstreakBoard().updateLeaderboard(false);
+                    if (getLeaderboard() != null) {
+                        getLeaderboard().updateLeaderboard(false);
+                    }
+
+                    if (getKillsLeaderboard() != null) {
+                        getKillsLeaderboard().updateLeaderboard(false);
+                    }
+
+                    if (getFlawlessWinsBoard() != null) {
+                        getFlawlessWinsBoard().updateLeaderboard(false);
+                    }
+
+                    if (getWinstreakBoard() != null) {
+                        getWinstreakBoard().updateLeaderboard(false);
+                    }
+
+                    if (getFishingLeaderboard() != null) {
+                        getFishingLeaderboard().updateLeaderboard(false);
+                    }
+
+                    if (getParkourLeaderboards() != null) {
+                        for (anthony.SuperCraftBrawl.leaderboards.ParkourBoard parkourBoard : getParkourLeaderboards()) {
+                            if (parkourBoard != null) {
+                                parkourBoard.updateLeaderboard(false);
+                            }
+                        }
+                    }
 
                     for (org.bukkit.entity.Player p : org.bukkit.Bukkit.getOnlinePlayers()) {
                         anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope =
@@ -2093,7 +2143,7 @@ public class Core extends JavaPlugin implements Listener {
 	@EventHandler
 	public void serverMotd(ServerListPingEvent p) {
 		String msg = color(
-				"                     &eMinezone &7[1.8-1.21] \n      &c&lSUPER CRAFT BROS &7- &b&lLOBBY UPDATE!");
+				"                     &eMinezone &7[1.8-1.21] \n        &c&lSUPER CRAFT BROS &7- &6&lNEW UPDATE!");
 		p.setMotd(msg);
 		p.setMaxPlayers(1);
 	}
@@ -2401,6 +2451,17 @@ public class Core extends JavaPlugin implements Listener {
         try {
             if (this.getWinstreakBoard() != null) {
                 this.getWinstreakBoard().paintFor(p, scope);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (this.getParkourLeaderboards() != null) {
+                for (anthony.SuperCraftBrawl.leaderboards.ParkourBoard parkourBoard : this.getParkourLeaderboards()) {
+                    if (parkourBoard != null) {
+                        parkourBoard.paintFor(p, scope);
+                    }
+                }
             }
         } catch (Throwable ignored) {
         }

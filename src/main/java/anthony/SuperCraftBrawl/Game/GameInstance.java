@@ -613,7 +613,7 @@ public class GameInstance {
             new SantaFlyoverEvent(this).startEvent(30);
 
         TellAll(color("&e&l----------------------------------------"));
-        TellAll("" + ChatColor.AQUA + ChatColor.BOLD + "          Super Craft Brothers");
+        TellAll(color("            &6&lSUPER CRAFT BROTHERS"));
         TellAll("");
         TellAll(color("&r  5 lives each with different classes & unique"));
         TellAll(color("&r    abilities. Look out for lightning drops as"));

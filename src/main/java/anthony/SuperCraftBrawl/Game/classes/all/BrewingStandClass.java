@@ -28,7 +28,7 @@ public class BrewingStandClass extends BaseClass {
 	private ItemStack weapon;
 	private ItemStack brewingItem;
 	private ItemStack barrierItem;
-	private final Ability brewAbility = new Ability("&e&lBrewing", 3, player);
+	private final Ability brewAbility = new Ability("&e&lBrewing", 2, player);
 	private final PotionEffect jump = new PotionEffect(PotionEffectType.JUMP, 12 * 20, 7, true);
 	private final PotionEffect speed = new PotionEffect(PotionEffectType.SPEED, 10 * 20, 1, true);
 	private final PotionEffect strength = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 8 * 20, 0, true);
