@@ -130,7 +130,7 @@ public class ParkourBoard extends LeaderboardBase {
         double y = title.getY() - 0.40;
         int rank = 1;
 
-        for (int i = 0; i < lifetimeTopIds.size() && rank <= 10; i++, rank++) {
+        for (int i = 0; i < lifetimeTopIds.size() && rank <= 10; i++) {
             UUID id = lifetimeTopIds.get(i);
             String name = i < lifetimeTopNames.size() ? lifetimeTopNames.get(i) : "#";
             long value = lifetimeTimes.getOrDefault(id, 0L);
@@ -517,6 +517,10 @@ public class ParkourBoard extends LeaderboardBase {
     }
 
     public String formatTime(long nanoseconds) {
+        if (nanoseconds <= 0) {
+            return "";
+        }
+
         double totalSeconds = nanoseconds / 1_000_000_000.0;
         long minutes = (long) (totalSeconds / 60);
         double seconds = totalSeconds % 60;
