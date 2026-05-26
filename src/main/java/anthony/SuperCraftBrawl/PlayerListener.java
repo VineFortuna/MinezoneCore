@@ -224,15 +224,7 @@ public class PlayerListener implements Listener {
             return;
         }
 
-        String name = org.bukkit.ChatColor.stripColor(raw).trim().toLowerCase();
-
-        if (name.equals("leaderboard settings")
-                || name.equals("click to change settings")
-                || name.contains("wins")
-                || name.contains("kills")
-                || name.contains("flawless")
-                || name.contains("winstreak")
-                || name.contains("parkour")) {
+        if (main.getLbSettingsHologram().isSettingsHologram(event.getRightClicked().getUniqueId())) {
 
             SoundManager.playClickSound(player);
             new anthony.SuperCraftBrawl.gui.leaderboard.LeaderboardScopeGUI(main).inv().open(player);
