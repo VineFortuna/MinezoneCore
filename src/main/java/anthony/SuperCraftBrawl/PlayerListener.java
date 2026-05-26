@@ -147,7 +147,7 @@ public class PlayerListener implements Listener {
 				data.exp -= 2500;
 				player.sendMessage(main.color("&8&m----------------------------------------"));
 				player.sendMessage(main.color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
-				player.sendMessage(main.color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
+				player.sendMessage(main.color("&7You are now &e&lLevel &6&l" + data.level + " &7- nice work!"));
 				player.sendMessage(main.color("&8&m----------------------------------------"));
 				player.playSound(player.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
 				
