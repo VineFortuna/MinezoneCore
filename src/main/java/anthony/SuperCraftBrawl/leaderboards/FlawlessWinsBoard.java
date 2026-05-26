@@ -61,7 +61,9 @@ public class FlawlessWinsBoard extends LeaderboardBase {
 
         if (scope == LeaderboardScope.LIFETIME) {
             return "SELECT UUID, LastPlayerName, " + col + " AS " + label + ", RoleID " +
-                    "FROM PlayerData ORDER BY " + label + " DESC LIMIT 10";
+                    "FROM PlayerData " +
+                    "WHERE " + col + " > 0 " +
+                    "ORDER BY " + label + " DESC LIMIT 10";
         }
 
         java.sql.Date periodStart = main.snapshotDAO.startFor(scope);
@@ -72,6 +74,7 @@ public class FlawlessWinsBoard extends LeaderboardBase {
                 "LEFT JOIN scb_stat_snapshots s " +
                 "ON s.uuid = pd.UUID AND s.metric = '" + metric + "' " +
                 "AND s.period = '" + scope.name() + "' AND s.period_start = '" + periodStart + "' " +
+                "HAVING " + label + " > 0 " +
                 "ORDER BY " + label + " DESC LIMIT 10";
     }
 
@@ -153,7 +156,7 @@ public class FlawlessWinsBoard extends LeaderboardBase {
 
             PlayerData data = main.getDataManager().getPlayerData(player);
 
-            if (data != null && !lifetimeTopIds.contains(data.playerUUID)) {
+            if (data != null && data.flawlessWins > 0 && !lifetimeTopIds.contains(data.playerUUID)) {
                 Location line1 = base.clone().add(0, -0.24, 0);
                 sendLineToViewer(player, line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------");
 
@@ -232,7 +235,7 @@ public class FlawlessWinsBoard extends LeaderboardBase {
 
         int yourVal = getScopedValueFor(viewer, scope);
 
-        if (!ids.contains(viewer.getUniqueId())) {
+        if (yourVal > 0 && !ids.contains(viewer.getUniqueId())) {
             Location sep = new Location(title.getWorld(), title.getX(), y - 0.20, title.getZ());
             sendLineToViewer(viewer, sep, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------");
 

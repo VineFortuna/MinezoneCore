@@ -55,7 +55,9 @@ public class KillsBoard extends LeaderboardBase {
 
         if (scope == LeaderboardScope.LIFETIME) {
             return "SELECT UUID, LastPlayerName, " + col + " AS " + label + ", RoleID " +
-                    "FROM PlayerData ORDER BY " + label + " DESC LIMIT 10";
+                    "FROM PlayerData " +
+                    "WHERE " + col + " > 0 " +
+                    "ORDER BY " + label + " DESC LIMIT 10";
         }
 
         java.sql.Date ps = main.snapshotDAO.startFor(scope);
@@ -66,6 +68,7 @@ public class KillsBoard extends LeaderboardBase {
                 "LEFT JOIN scb_stat_snapshots s " +
                 "  ON s.uuid = pd.UUID AND s.metric = '" + metric + "' " +
                 " AND s.period = '" + scope.name() + "' AND s.period_start = '" + ps + "' " +
+                "HAVING " + label + " > 0 " +
                 "ORDER BY " + label + " DESC LIMIT 10";
     }
 
@@ -138,10 +141,12 @@ public class KillsBoard extends LeaderboardBase {
 
             PlayerData data = main.getDataManager().getPlayerData(player);
             if (data == null) continue;
-            if (!lifetimeTopIds.contains(data.playerUUID)) {
-                int val = data.kills;
+            int val = data.kills;
+
+            if (val > 0 && !lifetimeTopIds.contains(data.playerUUID)) {
                 Location line1 = base.clone().add(0, -0.24, 0);
                 sendStandToOnePlayerLifetimeOnly(line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------", player);
+
                 Location line2 = base.clone().add(0, -0.44, 0);
                 sendStandToOnePlayerLifetimeOnly(line2, "" + ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + val, player);
             }
@@ -209,10 +214,12 @@ public class KillsBoard extends LeaderboardBase {
         // --- your own value for this scope, even if not in top 10 ---
         int yourVal = getScopedKillsFor(viewer, scope);
         boolean youInTop = ids.contains(viewer.getUniqueId());
-        if (!youInTop) {
+        if (yourVal > 0 && !youInTop) {
             Location sep = new Location(title.getWorld(), title.getX(), y - 0.20, title.getZ());
             sendLineToViewer(viewer, sep, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------");
+
             y -= 0.24;
+
             Location yours = new Location(title.getWorld(), title.getX(), y - 0.20, title.getZ());
             sendLineToViewer(viewer, yours, ChatColor.YELLOW + viewer.getName() + ChatColor.RESET + " - " + yourVal);
         }
