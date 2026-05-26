@@ -112,9 +112,9 @@ public class WolfClass extends BaseClass {
 		}
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Wolf
 				&& instance.classes.get(player).getLives() > 0) {
-			this.biteCooldownSec = (12000 - wolfBite.getTime()) / 1000 + 1;
+			this.biteCooldownSec = (8000 - wolfBite.getTime()) / 1000 + 1;
 			
-			if (wolfBite.getTime() < 12000) {
+			if (wolfBite.getTime() < 8000) {
 				String msg = instance.getGameManager().getMain()
 						.color("&eBite &rregenerates in: &e" + biteCooldownSec + "s");
 				getActionBarManager().setActionBar(player, "wolf.cooldown", msg, 2);
@@ -162,8 +162,8 @@ public class WolfClass extends BaseClass {
 					player.getInventory().clear(1);
 				}
 			} else if (item.getType() == Material.BONE) {
-				if (wolfBite.getTime() < 12000) {
-					int seconds = (12000 - wolfBite.getTime()) / 1000 + 1;
+				if (wolfBite.getTime() < 8000) {
+					int seconds = (8000 - wolfBite.getTime()) / 1000 + 1;
 					event.setCancelled(true);
 					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
 							+ "Your Bite Attack is still regenerating for " + ChatColor.YELLOW + seconds + " more seconds ");

@@ -39,7 +39,7 @@ public enum FishArea {
 
     Sewers("Sewers",
             new Vector(90, 99, 832),
-            105, 9, 105,
+            105, 8, 105,
             new Vector(70.5, 98, 782.5),
             new ItemStack(Material.IRON_FENCE)),
 

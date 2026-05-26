@@ -6,32 +6,32 @@ import org.bukkit.entity.Player;
 public enum Rank {
     DEFAULT(0, "", color("&7")), //RANK GIVEN TO ALL NEW PLAYERS
     VIP(6, color("&e&lVIP"), color("&e")), //FIRST DONATION RANK
-    CAPTAIN(8, color("&9&lCaptain"), color("&9")), //SECOND DONATION RANK
-    TRAINEE(3, color("&6&lTrainee"), color("&6")),
+    CAPTAIN(8, color("&9&lCAPTAIN"), color("&9")), //SECOND DONATION RANK
+    TRAINEE(3, color("&2&lTRAINEE"), color("&6")),
     /* Trainee:
      * Obtainable: Players who applied and have been accepted. They are under training and shall only have
      * Job: Learn from staff and helper players, with a little bit of chat moderation.
      * Limited permissions.
      */
-    MODERATOR(4, color("&3&lMOD"), color("&3")),
+    MODERATOR(4, color("&6&lMOD"), color("&6")),
     /*
      * Moderator:
      * Obtainable: Promotion from trainee (Passed final exam)
      * Job: Moderate gameplay chat and discord of the server to provide a safe place for players.
      */
-    SR_MODERATOR(16,color("&3&lSR.MOD"), color("&3")),
+    SR_MODERATOR(16,color("&6&lSR.MOD"), color("&6")),
     /*
      * SrMod:
      * Obtainable: Promotion from Moderator
      * Job: Appeals, Events, IP Punishments and community management
      */
-    ADMIN(1, color("&c&lAdmin"), color("&c")),
+    ADMIN(1, color("&c&lADMIN"), color("&c")),
     /*
      * Admin:
      * Obtainable: Applied or selected from SrMod
      * Job: Oversee their subsection they are assigned too (Appeals Events Ip punishments and community management)
      */
-    DEVELOPER(5, color("&6&lDev"), color("&6")),
+    DEVELOPER(5, color("&6&lDEV"), color("&6")),
     /*
      * Developer:
      * Obtainable: Application with a code test
@@ -44,7 +44,7 @@ public enum Rank {
      * LIMIT: only 1-3 Supervisors at a time
      * Job: Supervisors of all decisions on the servers and overseers of the admin team. They are LEADERSHIP
      */
-    OWNER(2, color("&c&lOwner"), color("&c")),
+    OWNER(2, color("&c&lOWNER"), color("&c")),
     /*
      * Owner:
      * Obtainable: NO
@@ -57,7 +57,7 @@ public enum Rank {
      * Job: Playtest early version of updates in the dev server and provide feedback
      *      on gameplay, mechanics, balance, and overall experience.
      */
-    MEDIA(10,color("&b&lMedia"), color("&b")),
+    MEDIA(10,color("&b&lMEDIA"), color("&b")),
     /*
      * Media:
      * Obtainable: Application
@@ -82,13 +82,13 @@ public enum Rank {
      * Obtainable: Admin, leadership or Staff Manager Promotion/selection
      * Job: Director of their subsection (Community Management, Appeals, QA ect) (Overseers)
      */
-    BUILDER(14, color("&2&lBuilder"), color("&2")),
+    BUILDER(14, color("&2&lBUILDER"), color("&2")),
     /*toh
      * Builder:
      * Obtainable: Application
      * Job: Build and design new maps
      */
-    SUPREME(17, color("&5&lSupreme"), color("&5")),
+    SUPREME(17, color("&5&lSUPREME"), color("&5")),
     
     HR(18, color("&5&lHR"), color("&5"));
 	/*
@@ -122,30 +122,6 @@ public enum Rank {
     	return arrowColor;
     }
 
-    public int getTabListIndex(){
-        //Lower numbers will show higher up in the tab list
-        switch (this){
-            case OWNER: return 0;
-            case DIRECTOR: return 1;
-            case SUPERVISOR: return 2;
-            case ADMIN: return 3;
-            case DEVELOPER: return 4;
-            case BUILDER: return 5;
-            case SR_MODERATOR: return 6;
-            case STAFF_MANAGER: return 7;
-            case MODERATOR: return 8;
-            case TRAINEE: return 9;
-            case QA: return 10;
-            case MEDIA: return 11;
-            case SUPREME: return 12;
-            case CAPTAIN: return 13;
-            case VIP: return 14;
-            case PARTNER: return 15;
-            case DEFAULT:
-            default: return Rank.values().length;
-        }
-    }
-
     public String getTagWithSpace() {
         if (this == DEFAULT)
             return "";   //GIVES TAG A SPACE;
@@ -170,13 +146,13 @@ public enum Rank {
 		else if (rank == Rank.CAPTAIN)
 			msg = color("&9");
 		else if (rank == Rank.VIP)
-			msg = color("&e");
+			msg = color("&a");
         else if (rank == Rank.QA)
             msg = color("&a");
         else if (rank == Rank.DEVELOPER)
             msg = color("&6");
         else if (rank == Rank.MODERATOR)
-            msg = color("&3");
+            msg = color("&6");
         else if (rank == Rank.BUILDER)
             msg = color("&2");
 		else
@@ -184,6 +160,25 @@ public enum Rank {
 
 		return msg + player.getDisplayName();
 	}
+
+    public int getTabListIndex() {
+        switch (this) {
+            case OWNER:         return 0;
+            case ADMIN:         return 1;
+            case DEVELOPER:     return 2;
+            case SR_MODERATOR:  return 3;
+            case MODERATOR:     return 4;
+            case TRAINEE:       return 5;
+            case QA:            return 6;
+            case BUILDER:       return 7;
+            case MEDIA:         return 8;
+            case SUPREME:       return 9;
+            case CAPTAIN:       return 10;
+            case VIP:           return 11;
+            case DEFAULT:
+            default:            return 12;
+        }
+    }
 
     public static Rank getRankFromName(String name) {
         for (Rank rank : Rank.values()) {

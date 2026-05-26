@@ -2,34 +2,41 @@ package anthony.SuperCraftBrawl.commands;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameLootDrops;
 import anthony.SuperCraftBrawl.Game.GameSettings;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
 import anthony.SuperCraftBrawl.gui.GameStatsGUI;
+import anthony.SuperCraftBrawl.gui.cosmetics.CosmeticsGUI;
+import anthony.SuperCraftBrawl.gui.fishing.FishingGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.practice.Game;
+import anthony.SuperCraftBrawl.practice.SCBPractice;
 import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.util.SoundManager;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.minecraft.server.v1_8_R3.EnumParticle;
-import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
+import net.minecraft.server.v1_8_R3.*;
 import org.apache.commons.lang.WordUtils;
 
 import com.google.common.collect.Lists;
 import org.bukkit.*;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scoreboard.Score;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +48,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 	private final Core main;
 	public List<Player> players;
+	private final java.util.Set<java.util.UUID> candyAuraEnabled = new java.util.HashSet<>();
+	private int candyAuraTaskId = -1;
+
+	// how often to render (ticks). 5 = 4x/sec
+	private static final long CANDY_AURA_PERIOD_TICKS = 5L;
 
 	public Commands(Core main) {
 		this.main = main;
@@ -57,8 +69,24 @@ public class Commands implements CommandExecutor, TabCompleter {
 				purchaseCommand(args, player);
 				break;
 
+			case "fishing":
+				fishingCommand(args, player);
+				break;
+
+			case "cosmetics":
+				cosmeticsCommand(args, player);
+				break;
+
 			case "startgame":
 				startGameCommand(player);
+				break;
+
+			case "frenzy":
+				setFrenzyCommand(player);
+				break;
+
+			case "server":
+				serverCommand(player);
 				break;
 
 			case "fly":
@@ -124,13 +152,108 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "sound":
 				soundCommand(args, player);
 				break;
+
+			case "soundnms":
+				soundNMSCommand(args, player);
+				break;
+
 			case "heal":
 				healCommand(player, args);
+				break;
+
+			case "forceclass":
+				forceClassCommand(player, args);
+				break;
+
+			case "practice":
+				new SCBPractice(player, Game.BowPractice, main);
+				break;
+
+			case "candyaura":
+				candyAuraCommand(args, player);
 				break;
 			}
 		} else
 			sender.sendMessage("Hey! You can't use this in the terminal!");
 		return true;
+	}
+
+	private void candyAuraCommand(String[] args, Player player) {
+		// Optional permission – remove this block if you want everyone to use it
+		if (!player.hasPermission("cosmetic.candyaura")) {
+			player.sendMessage(main.color("&c&l(!) &rYou don't have access to &dCandy Aura&r."));
+			return;
+		}
+
+		String mode = (args.length == 0) ? "toggle" : args[0].toLowerCase();
+		switch (mode) {
+		case "on":
+			candyAuraEnabled.add(player.getUniqueId());
+			player.sendMessage(main.color("&dCandy Aura &aenabled&d. Sweet!"));
+			ensureCandyAuraTaskRunning();
+			break;
+		case "off":
+			candyAuraEnabled.remove(player.getUniqueId());
+			player.sendMessage(main.color("&dCandy Aura &cdisabled&d."));
+			break;
+		case "toggle":
+		default:
+			if (candyAuraEnabled.contains(player.getUniqueId())) {
+				candyAuraEnabled.remove(player.getUniqueId());
+				player.sendMessage(main.color("&dCandy Aura &cdisabled&d."));
+			} else {
+				candyAuraEnabled.add(player.getUniqueId());
+				player.sendMessage(main.color("&dCandy Aura &aenabled&d. Sweet!"));
+				ensureCandyAuraTaskRunning();
+			}
+			break;
+		}
+	}
+
+	private void ensureCandyAuraTaskRunning() {
+		if (candyAuraTaskId != -1)
+			return; // already running
+		candyAuraTaskId = Bukkit.getScheduler().runTaskTimer(main, new Runnable() {
+			@Override
+			public void run() {
+				if (candyAuraEnabled.isEmpty())
+					return;
+				for (java.util.UUID id : new java.util.HashSet<>(candyAuraEnabled)) {
+					Player p = Bukkit.getPlayer(id);
+					if (p == null || !p.isOnline())
+						continue;
+					renderCandyAura(p);
+				}
+			}
+		}, CANDY_AURA_PERIOD_TICKS, CANDY_AURA_PERIOD_TICKS).getTaskId();
+	}
+
+	/** Draw a small “candy” swirl around the player (1.8-safe Effects). */
+	private void renderCandyAura(Player p) {
+		Location base = p.getLocation().add(0, 0.1, 0);
+
+		// light sparkles around feet
+		p.getWorld().playEffect(base, Effect.HAPPY_VILLAGER, 0, 16);
+		p.getWorld().playEffect(base, Effect.CRIT, 0, 16);
+
+		// purple-ish magic near waist
+		Location waist = base.clone().add(0, 0.7, 0);
+		p.getWorld().playEffect(waist, Effect.WITCH_MAGIC, 0, 16);
+
+		// tiny swirl ring
+		final double r = 0.45;
+		long t = System.currentTimeMillis();
+		for (int i = 0; i < 6; i++) {
+			double a = (t / 120.0 + i * Math.PI / 3.0);
+			double x = Math.cos(a) * r;
+			double z = Math.sin(a) * r;
+			Location ring = waist.clone().add(x, 0.1, z);
+			p.getWorld().playEffect(ring, Effect.HAPPY_VILLAGER, 0, 8);
+		}
+	}
+
+	private void serverCommand(Player player) {
+		player.sendMessage(main.color("&b&l(!) &rYou are currently connected to &2SCB-1"));
 	}
 
 	private void socialsCommand(Player player) {
@@ -142,6 +265,105 @@ public class Commands implements CommandExecutor, TabCompleter {
 //				player.sendMessage(main.color("&f&lTwitter: &ahttps://twitter.com/MinezoneMC"));
 		player.sendMessage("");
 		player.sendMessage(main.color("&7&m----------------------------"));
+	}
+
+	private void forceClassCommand(Player player, String[] args) {
+		if (!player.hasPermission("scb.forceclass")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
+		Player targetPlayer;
+
+		if (args.length == 1) {
+			// /fc className - apply to self
+			targetPlayer = player;
+		} else if (args.length == 2) {
+			// /fc className player - apply to specified player
+			targetPlayer = Bukkit.getPlayer(args[1]);
+
+			if (targetPlayer == null) {
+				player.sendMessage(main.color("&c&l(!) &rPlayer not found!"));
+				return;
+			}
+		} else {
+			player.sendMessage(main.color("&c&l(!) &rUsage: /fc <className> [player]"));
+			return;
+		}
+
+		GameInstance game = main.getGameManager().GetInstanceOfPlayer(targetPlayer);
+
+		if (game == null) {
+			player.sendMessage(main.color("&c&l(!) &r" + (targetPlayer == player ? "You are" : targetPlayer.getName() + " is") + " not in a game!"));
+			return;
+		}
+
+		ClassType[] classes = ClassType.values();
+		ClassType selectedClass = Arrays.stream(classes)
+				.filter(clazz -> clazz.toString().equalsIgnoreCase(args[0]))
+				.findFirst()
+				.orElse(null);
+
+		if (selectedClass == null) {
+			player.sendMessage(main.color("&c&l(!) &rClass not found"));
+			return;
+		}
+
+		BaseClass oldBaseClass = game.classes.get(targetPlayer);
+
+		if (oldBaseClass == null) {
+			player.sendMessage(main.color("&c&l(!) &r" + (targetPlayer == player ? "You don't" : targetPlayer.getName() + " doesn't") + " have a current class!"));
+			return;
+		}
+
+		// Store old class in oldClasses map
+		game.oldClasses.put(targetPlayer, oldBaseClass);
+
+		// Reset old score if it exists
+		if (oldBaseClass.score != null) {
+			try {
+				oldBaseClass.score.getScoreboard().resetScores(oldBaseClass.score.getEntry());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		// Create new class instance
+		BaseClass newBaseClass = selectedClass.GetClassInstance(game, targetPlayer);
+
+		// Transfer all stats from old class
+		newBaseClass.lives = oldBaseClass.lives;
+		newBaseClass.tokens = oldBaseClass.tokens;
+		newBaseClass.totalTokens = oldBaseClass.totalTokens;
+		newBaseClass.totalExp = oldBaseClass.totalExp;
+		newBaseClass.totalKills = oldBaseClass.totalKills;
+		newBaseClass.bountyTarget = oldBaseClass.bountyTarget;
+
+		// Create new scoreboard entry
+		String scoreEntry = game.truncateString("" + selectedClass.getTag() + " " + ChatColor.WHITE + targetPlayer.getName(), 40);
+		Score newScore = game.livesObjective.getScore(scoreEntry);
+		newBaseClass.score = newScore;
+		newScore.setScore(newBaseClass.lives);
+
+		// Update class mappings
+		game.classes.put(targetPlayer, newBaseClass);
+		game.allClasses.put(targetPlayer, newBaseClass);
+
+		// Update scoreboard
+		game.sendScoreboardUpdate(targetPlayer);
+
+		// Update display name
+		if (targetPlayer.hasPermission("scb.chat"))
+			targetPlayer.setDisplayName("" + targetPlayer.getName() + " " + selectedClass.getTag());
+		else targetPlayer.setDisplayName("" + targetPlayer.getName() + " " + selectedClass.getTag() + ChatColor.GRAY);
+
+		// Clear inventory and load new class
+		for (PotionEffect type : targetPlayer.getActivePotionEffects()) targetPlayer.removePotionEffect(type.getType());
+		targetPlayer.getInventory().clear();
+		newBaseClass.loadPlayer();
+
+		String message = "&a&l(!) &r&e" + targetPlayer.getName() + "&r's class was set to " + selectedClass.getTag();
+		newBaseClass.TellAll(main.color(message));
 	}
 
 	private void healCommand(Player player, String[] args) {
@@ -241,7 +463,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 			player.sendMessage(main.color("&c&l(!) &rYou need the rank &5&lSUPREME &rto use this command!"));
 		}
 	}
-
+	
 	public static void sendParticle(Player player, Location location, EnumParticle particle, int amount, float speed,
 			float offsetX, float offsetY, float offsetZ) {
 		PacketPlayOutWorldParticles particles = new PacketPlayOutWorldParticles(particle, true, (float) location.getX(),
@@ -249,6 +471,172 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 		for (Player players : Bukkit.getOnlinePlayers())
 			((CraftPlayer) players).getHandle().playerConnection.sendPacket(particles);
+	}
+
+	private void soundNMSCommand(String[] args, Player player) {
+		if (!player.hasPermission("scb.soundnms")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
+		// Handle list command
+		if (args.length > 0 && args[0].equalsIgnoreCase("list")) {
+			List<String> allSounds = getAllNMSSounds();
+			int page = args.length > 1 ? tryParseInt(args[1], 1) : 1;
+			displayPaginatedSoundList(player, allSounds, page);
+			return;
+		}
+
+		// Handle sound playing
+		if (args.length < 1) {
+			player.sendMessage(ChatColor.RED + "Usage: /soundnms (sn) <name> [pitch] [volume]");
+			player.sendMessage(ChatColor.GRAY + "Or /soundnms (sn) list [page] to see all sounds");
+			return;
+		}
+
+		try {
+			float volume = 10.0f;
+			float pitch = 1.0f;
+
+			if (args.length >= 2)
+				pitch = Float.parseFloat(args[1]);
+			if (args.length >= 3)
+				volume = Float.parseFloat(args[2]);
+
+			// Play sound using NMS
+			String soundName = args[0].toLowerCase();
+			SoundManager.playNMSSoundToAll(player, soundName, volume, pitch);
+
+			player.sendMessage(
+					ChatColor.GREEN + "Played sound: " + soundName + " (Pitch: " + pitch + ", Volume: " + volume + ")");
+
+		} catch (NumberFormatException e) {
+			player.sendMessage(ChatColor.RED + "Invalid number format for pitch/volume");
+		} catch (Exception e) {
+			player.sendMessage(ChatColor.RED + "Error playing sound: " + e.getMessage());
+			if (player.hasPermission("scb.sound.debug")) {
+				player.sendMessage(ChatColor.GRAY + "Technical: " + e);
+			}
+		}
+	}
+
+	private void displayPaginatedSoundList(Player player, List<String> sounds, int page) {
+		if (sounds.isEmpty()) {
+			player.sendMessage(ChatColor.RED + "No sounds found in registry!");
+			return;
+		}
+
+		int perPage = 25;
+		int totalPages = (int) Math.ceil((double) sounds.size() / perPage);
+		page = Math.max(1, Math.min(page, totalPages));
+
+		player.sendMessage(ChatColor.GOLD + "=== Available Sounds (Page " + page + "/" + totalPages + ") ===");
+
+		int start = (page - 1) * perPage;
+		int end = Math.min(start + perPage, sounds.size());
+
+		for (int i = start; i < end; i++) {
+			// Create a clickable TextComponent for each sound
+			TextComponent soundMessage = new TextComponent(ChatColor.YELLOW + "- " + sounds.get(i));
+			soundMessage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/soundnms " + sounds.get(i)));
+
+			// Send the clickable message to the player
+			player.spigot().sendMessage(soundMessage);
+		}
+
+		player.sendMessage(ChatColor.GOLD + "=====================");
+		player.sendMessage(ChatColor.GRAY + "Use /soundnms list <page> to see more sounds");
+	}
+
+	public List<String> getAllNMSSounds() {
+		return Arrays.asList(
+				// Ambient sounds
+				"ambient.cave.cave", "ambient.weather.rain", "ambient.weather.thunder",
+
+				// Player/entity hurt sounds
+				"game.player.hurt.fall.big", "game.neutral.hurt.fall.big", "game.hostile.hurt.fall.big",
+				"game.player.hurt.fall.small", "game.neutral.hurt.fall.small", "game.hostile.hurt.fall.small",
+				"game.player.hurt", "game.neutral.hurt", "game.hostile.hurt", "game.player.die", "game.neutral.die",
+				"game.hostile.die",
+
+				// Dig/break sounds
+				"dig.cloth", "dig.glass", "game.potion.smash", "dig.grass", "dig.gravel", "dig.sand", "dig.snow",
+				"dig.stone", "dig.wood",
+
+				// Fire sounds
+				"fire.fire", "fire.ignite", "item.fireCharge.use",
+
+				// Firework sounds
+				"fireworks.blast", "fireworks.blast_far", "fireworks.largeBlast", "fireworks.largeBlast_far",
+				"fireworks.launch", "fireworks.twinkle", "fireworks.twinkle_far",
+
+				// Swim sounds
+				"game.player.swim.splash", "game.neutral.swim.splash", "game.hostile.swim.splash", "game.player.swim",
+				"game.neutral.swim", "game.hostile.swim",
+
+				// Liquid sounds
+				"liquid.lava", "liquid.lavapop", "liquid.water",
+
+				// Minecart sounds
+				"minecart.base", "minecart.inside",
+
+				// Note block sounds
+				"note.bass", "note.bassattack", "note.bd", "note.harp", "note.hat", "note.pling", "note.snare",
+
+				// Portal sounds
+				"portal.portal", "portal.travel", "portal.trigger",
+
+				// Random sounds
+				"random.anvil_break", "random.anvil_land", "random.anvil_use", "random.bow", "random.bowhit",
+				"random.break", "random.burp", "random.chestclosed", "random.chestopen", "gui.button.press",
+				"random.click", "random.door_open", "random.door_close", "random.drink", "random.eat", "random.explode",
+				"random.fizz", "game.tnt.primed", "creeper.primed", "random.levelup", "random.orb", "random.pop",
+				"random.splash", "random.successful_hit", "random.wood_click",
+
+				// Step sounds
+				"step.cloth", "step.grass", "step.gravel", "step.ladder", "step.sand", "step.snow", "step.stone",
+				"step.wood",
+
+				// Piston sounds
+				"tile.piston.in", "tile.piston.out",
+
+				// Mob sounds
+				"mob.bat.death", "mob.bat.hurt", "mob.bat.idle", "mob.bat.loop", "mob.bat.takeoff", "mob.blaze.breathe",
+				"mob.blaze.death", "mob.blaze.hit", "mob.cat.hiss", "mob.cat.hitt", "mob.cat.meow", "mob.cat.purr",
+				"mob.cat.purreow", "mob.chicken.hurt", "mob.chicken.plop", "mob.chicken.say", "mob.chicken.step",
+				"mob.cow.hurt", "mob.cow.say", "mob.cow.step", "mob.creeper.death", "mob.creeper.say",
+				"mob.enderdragon.end", "mob.enderdragon.growl", "mob.enderdragon.hit", "mob.enderdragon.wings",
+				"mob.endermen.death", "mob.endermen.hit", "mob.endermen.idle", "mob.endermen.portal",
+				"mob.endermen.scream", "mob.endermen.stare", "mob.ghast.affectionate_scream", "mob.ghast.charge",
+				"mob.ghast.death", "mob.ghast.fireball", "mob.ghast.moan", "mob.ghast.scream", "mob.guardian.hit",
+				"mob.guardian.idle", "mob.guardian.death", "mob.guardian.elder.hit", "mob.guardian.elder.idle",
+				"mob.guardian.elder.death", "mob.guardian.land.hit", "mob.guardian.land.idle",
+				"mob.guardian.land.death", "mob.guardian.curse", "mob.guardian.attack", "mob.guardian.flop",
+				"mob.horse.angry", "mob.horse.armor", "mob.horse.breathe", "mob.horse.death", "mob.horse.donkey.angry",
+				"mob.horse.donkey.death", "mob.horse.donkey.hit", "mob.horse.donkey.idle", "mob.horse.gallop",
+				"mob.horse.hit", "mob.horse.idle", "mob.horse.jump", "mob.horse.land", "mob.horse.leather",
+				"mob.horse.skeleton.death", "mob.horse.skeleton.hit", "mob.horse.skeleton.idle", "mob.horse.soft",
+				"mob.horse.wood", "mob.horse.zombie.death", "mob.horse.zombie.hit", "mob.horse.zombie.idle",
+				"mob.irongolem.death", "mob.irongolem.hit", "mob.irongolem.throw", "mob.irongolem.walk",
+				"mob.magmacube.big", "mob.magmacube.jump", "mob.magmacube.small", "mob.pig.death", "mob.pig.say",
+				"mob.pig.step", "mob.rabbit.hurt", "mob.rabbit.idle", "mob.rabbit.hop", "mob.rabbit.death",
+				"mob.sheep.say", "mob.sheep.shear", "mob.sheep.step", "mob.silverfish.hit", "mob.silverfish.kill",
+				"mob.silverfish.say", "mob.silverfish.step", "mob.skeleton.death", "mob.skeleton.hurt",
+				"mob.skeleton.say", "mob.skeleton.step", "mob.slime.attack", "mob.slime.big", "mob.slime.small",
+				"mob.spider.death", "mob.spider.say", "mob.spider.step", "mob.villager.death", "mob.villager.haggle",
+				"mob.villager.hit", "mob.villager.idle", "mob.villager.no", "mob.villager.yes", "mob.wither.death",
+				"mob.wither.hurt", "mob.wither.idle", "mob.wither.shoot", "mob.wither.spawn", "mob.wolf.bark",
+				"mob.wolf.death", "mob.wolf.growl", "mob.wolf.howl", "mob.wolf.hurt", "mob.wolf.panting",
+				"mob.wolf.shake", "mob.wolf.step", "mob.wolf.whine", "mob.zombie.death", "mob.zombie.hurt",
+				"mob.zombie.infect", "mob.zombie.metal", "mob.zombie.remedy", "mob.zombie.say", "mob.zombie.step",
+				"mob.zombie.unfect", "mob.zombie.wood", "mob.zombie.woodbreak", "mob.zombiepig.zpig",
+				"mob.zombiepig.zpigangry", "mob.zombiepig.zpigdeath", "mob.zombiepig.zpighurt",
+
+				// Music/record sounds
+				"records.11", "records.13", "records.blocks", "records.cat", "records.chirp", "records.far",
+				"records.mall", "records.mellohi", "records.stal", "records.strad", "records.wait", "records.ward",
+				"music.menu", "music.game", "music.game.creative", "music.game.end", "music.game.end.dragon",
+				"music.game.end.credits", "music.game.nether");
 	}
 
 	public void colorCommand(String[] args, Player player) {
@@ -265,11 +653,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 					if (args.length == 0 || !colors.contains(ChatColor.valueOf(args[0].toUpperCase()))) {
 						colorMessage(player, colors);
 					} else if (args[0].equalsIgnoreCase("reset")) {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
+						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your display name to "
 								+ ChatColor.RESET + player.getName());
 						data.color = "";
 					} else {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your prefix to "
+						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Changed your display name to "
 								+ ChatColor.valueOf(args[0].toUpperCase()) + player.getName());
 						data.color = args[0].toUpperCase();
 					}
@@ -280,7 +668,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		} else {
 			player.sendMessage(
 					"" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
-							+ ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN " + ChatColor.RESET + "to use this command");
+							+ ChatColor.BLUE + ChatColor.BOLD + "PRO " + ChatColor.RESET + "to use this command");
 		}
 	}
 
@@ -400,6 +788,30 @@ public class Commands implements CommandExecutor, TabCompleter {
 		game.getGameSettings().forceStartGame(true);
 	}
 
+	private void setFrenzyCommand(Player player) {
+		if (!player.hasPermission("scb.frenzy")) {
+			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
+			return;
+		}
+
+		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+
+		if (game == null) {
+			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
+			return;
+		}
+
+		if (game.state != GameState.WAITING) {
+			if (game.state == GameState.STARTED)
+				player.sendMessage(main.color("&c&l(!) &rGame is already in progress!"));
+			else if (game.state == GameState.ENDED)
+				player.sendMessage(main.color("&c&l(!) &rGame has already ended!"));
+			return;
+		}
+
+		game.getGameSettings().changeGameType(true);
+	}
+
 	private void flyCommand(Player player) {
 		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 		PlayerData flyData = main.getDataManager().getPlayerData(player);
@@ -415,7 +827,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 
 		if (!player.hasPermission("scb.fly")) {
-			player.sendMessage(main.color("&c&l(!) &rYou need the rank &9&lCAPTAIN &rto use this command!"));
+			player.sendMessage(main.color("&c&l(!) &rYou need the rank &9&lPRO &rto use this command!"));
 			return;
 		}
 
@@ -450,8 +862,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
-		for (ItemStack itemStack : game.allItemDrops) {
-			player.getInventory().addItem(itemStack);
+		for (GameLootDrops loot : GameLootDrops.values()) {
+			player.getInventory().addItem(loot.getItem());
 		}
 	}
 
@@ -553,6 +965,24 @@ public class Commands implements CommandExecutor, TabCompleter {
 //		player.sendMessage(ChatColorHelper.color(createMapsString()));
 	}
 
+	private void fishingCommand(String[] args, Player player) {
+		if (args.length != 0) {
+			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/fishing"));
+			return;
+		}
+
+		new FishingGUI(main, null).inv.open(player);
+	}
+
+	private void cosmeticsCommand(String[] args, Player player) {
+		if (args.length != 0) {
+			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/cosmetics"));
+			return;
+		}
+
+		new CosmeticsGUI(main).inv.open(player);
+	}
+
 	private String createMapsString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		String HEADERCOLOR = "&e&l";
@@ -639,7 +1069,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 		if (targetPlayer != null) {
 			if (targetPlayer != player) {
-				
+
 			} else
 				player.sendMessage(main.color("&c&l(!) &rSilly you! You can't duel yourself!"));
 		} else
@@ -665,6 +1095,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		for (Maps maps : Maps.values()) {
 			if (maps.toString().equalsIgnoreCase(mapName)) {
 				map = maps;
+				main.getListener().removeCosmetics(player);
 				break;
 			}
 		}
@@ -727,9 +1158,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 	private void classCommand(String[] args, Player player) {
 		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 
-		if (!isGameStateWaiting(game, player))
-			return;
-
 		PlayerData playerData = main.getDataManager().getPlayerData(player);
 
 		if (args.length == 0) {
@@ -738,7 +1166,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 
 		String className = args[0];
-		if (className.equalsIgnoreCase("random")) {
+		if (className.equalsIgnoreCase("random") && game != null && game.state == GameState.WAITING) {
 			selectRandomClass(player, playerData);
 			player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
 			return;
@@ -758,27 +1186,23 @@ public class Commands implements CommandExecutor, TabCompleter {
 		ClassDetails classDetails = playerData.playerClasses.get(type.getID());
 
 		if (!isClassUnlocked(player, classDetails, type) || !isLevelUnlocked(player, playerData, type)
-				|| !isFishermanClassUnlocked(player, type) || !isRankRequirementMet(player, type)
-				|| !isPlayerInGame(player, game) || !isGameStateWaiting(game, player)
-				|| !isFrenzyGameType(game, player)) {
+				|| !isFishermanClassUnlocked(player, type) || !isFreddyUnlocked(player, type)
+				|| !isRankRequirementMet(player, type) || (game != null && !isGameStateWaiting(game, player))
+				|| (game != null && !isFrenzyGameType(game, player))) {
 			return;
 		}
 
 		displayClassSelectionMessage(player, type);
-		main.getGameManager().playerSelectClass(player, type);
-		player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
+
+		if (game != null) {
+			main.getGameManager().playerSelectClass(player, type);
+			player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
+		}
 	}
 
 	private void displayClassSelectionMessage(Player player, ClassType type) {
-		player.sendMessage(main.color("&2&l============================================="));
-		player.sendMessage(main.color("&2&l|| "));
-		player.sendMessage(main.color("&2&l|| "));
-		player.sendMessage(main.color("&2&l|| " + "&e&lSelected Class: " + type.getTag()));
-		player.sendMessage(main.color("&2&l|| " + "&e&lClass Desc: &e" + type.getClassDesc()));
-		player.sendMessage(main.color("&2&l|| "));
-		player.sendMessage(main.color("&2&l|| "));
-		player.sendMessage(main.color("&2&l============================================="));
-	}
+        player.sendMessage(main.color("&2&l(!) &rYou have selected the " + type.getTag() + "&f class!"));
+    }
 
 	private void selectRandomClass(Player player, PlayerData playerData) {
 		Random random = new Random();
@@ -792,7 +1216,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 				player.sendMessage(main.color("&2&l(!) " + "&eYou have selected to go a &lRandom class"));
 				main.getGameManager().playerSelectClass(player, classType);
 				GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
-				game.board.updateLine(5, main.color(" &cR&6a&en&ad&bo&3m"));
+                game.board.updateLine(3, main.color("&fClass: &cR&6a&en&ad&bo&3m"));
 				player.setDisplayName(player.getName());
 			}
 		}
@@ -810,6 +1234,14 @@ public class Commands implements CommandExecutor, TabCompleter {
 	private boolean isLevelUnlocked(Player player, PlayerData playerData, ClassType type) {
 		// Level Classes
 		if (type.getLevel() > 0 && playerData.level < type.getLevel()) {
+			player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
+			return false;
+		}
+		return true;
+	}
+	
+	private boolean isFreddyUnlocked(Player player, ClassType type) {
+		if (type == ClassType.Freddy && !main.getHalloweenManager().hasUnlockedFreddy(player) && !player.isOp()) {
 			player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
 			return false;
 		}
@@ -966,5 +1398,13 @@ public class Commands implements CommandExecutor, TabCompleter {
 	private void resetDoubleJump(Player player) {
 		player.setAllowFlight(false);
 		player.setAllowFlight(true);
+	}
+
+	private int tryParseInt(String value, int defaultValue) {
+		try {
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e) {
+			return defaultValue;
+		}
 	}
 }

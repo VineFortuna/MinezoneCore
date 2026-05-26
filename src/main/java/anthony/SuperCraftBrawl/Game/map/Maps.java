@@ -179,7 +179,7 @@ public enum Maps {
 			"HauntedMansion",
 			new Gameplay[]{Gameplay.INDOOR},
 			Size.MEDIUM,
-			Category.HOLIDAY,
+			Category.HALLOWEEN,
 			new ItemStack(Material.WOOD, 1, (short) 5), // Dark Oak Wood
 			new MapInstance(
 					"hauntedmansion")
@@ -248,7 +248,7 @@ public enum Maps {
 			"WitchesBrew",
 			new Gameplay[]{Gameplay.VOIDY},
 			Size.SMALL,
-			Category.HOLIDAY,
+			Category.HALLOWEEN,
 			new ItemStack(Material.SLIME_BLOCK), // Slime Block
 			new MapInstance(
 					"witchesbrew")
@@ -499,8 +499,8 @@ public enum Maps {
 			"TheCraftOf87",
 			new Gameplay[]{Gameplay.INDOOR},
 			Size.SMALL,
-			Category.HOLIDAY,
-			new ItemStack(Material.REDSTONE_LAMP_ON),
+			Category.HALLOWEEN,
+			new ItemStack(Material.REDSTONE_LAMP_OFF),
 			new MapInstance(
 					"thecraftof87")
 					.setSpawnPos(
@@ -705,7 +705,7 @@ public enum Maps {
 			"SnowGlobe",
 			new Gameplay[]{Gameplay.INDOOR},
 			Size.SMALL,
-			Category.HOLIDAY,
+			Category.CHRISTMAS,
 			new ItemStack(Material.STAINED_GLASS, 1, (short) 0), // White Glass
 			new MapInstance(
 					"snowglobe")
@@ -1051,7 +1051,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(5088.459, 157, 626.472))
 					.setSpecLoc(new Vector(5031.500, 148, 622.500))
 					.setBounds(new Vector(5027.500, 157, 628.500), 30, 50)
-					.setSignLoc(new Vector(168.300, 107, 669.523))
+					.setSignLoc(new Vector(163.486, 106, 690.700))
 					.setSource(MapSource.COMMUNITY)
 					.setGameType(GameType.DUEL)
 	),
@@ -1163,7 +1163,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(12.536, 186, -150.517))
 					.setSpecLoc(new Vector(10.500, 176, -84.500))
 					.setBounds(new Vector(10.500, 176, -84.500), 50, 35)
-					.setSignLoc(new Vector(168.300, 107, 667.546))
+					.setSignLoc(new Vector(163.524, 106, 690.700))
 					.setSource(MapSource.COMMUNITY)
 					.setGameType(GameType.DUEL)
 	),
@@ -1296,7 +1296,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(4907.468, 150, 944.508))
 					.setSpecLoc(new Vector(4909.448, 195, 876.408))
 					.setBounds(new Vector(4909.448, 195, 876.408), 40, 40)
-					.setSignLoc(new Vector(163.517, 106, 690.700))
+					.setSignLoc(new Vector(164.563, 107, 690.700))
 					.setSource(MapSource.MINECADE)
 					.setGameType(GameType.DUEL)
 	),
@@ -1534,7 +1534,7 @@ public enum Maps {
 			"SantasWorkshop",
 			new Gameplay[]{Gameplay.INDOOR, Gameplay.FLAT},
 			Size.MEDIUM,
-			Category.HOLIDAY,
+			Category.CHRISTMAS,
 			new ItemStack(Material.WOOD), // Oak Wood
 			new MapInstance(
 					"santafactory")
@@ -1618,7 +1618,7 @@ public enum Maps {
 					.setLobbyLoc(new Vector(-7.5, 145, -66.5))
 					.setSpecLoc(new Vector(-3.5, 137, -128.5))
 					.setBounds(new Vector(-3.5, 137, -128.5), 45, 45)
-					.setSignLoc(new Vector(174.558, 107, 690.700))
+					.setSignLoc(new Vector(162.480, 107, 690.700))
 					.setSource(MapSource.COMMUNITY)
 					.setGameType(GameType.DUEL)
 	),
@@ -1732,7 +1732,7 @@ public enum Maps {
 		// Filter by Type
 		if (category == null) {
 			filteredMaps = filteredMaps.stream()
-					.filter(map -> map.getCategory() != Category.HOLIDAY) // Exclude Holiday maps
+					.filter(map -> map.getCategory() != Category.CHRISTMAS) // Exclude Christmas maps
 					.collect(Collectors.toList());
 		} else {
 			filteredMaps = filteredMaps.stream()
@@ -1874,7 +1874,8 @@ public enum Maps {
 		CURATED,
 		CASUAL,
 		VAULTED,
-		HOLIDAY;
+		HALLOWEEN,
+		CHRISTMAS;
 		
 		@Override
 		public String toString() {
@@ -1885,8 +1886,10 @@ public enum Maps {
 					return "Casual";
 				case VAULTED:
 					return "Vaulted";
-				case HOLIDAY:
-					return "Holiday";
+				case HALLOWEEN:
+					return "Halloween";
+				case CHRISTMAS:
+					return "Christmas";
 			}
 			return "Unknown Map " + this.getClass();
 		}

@@ -9,6 +9,7 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
 import net.minecraft.server.v1_8_R3.WorldServer;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -43,7 +44,7 @@ public class Holograms {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 
 		if (data != null) {
-			Location loc = new Location(main.getLobbyWorld(), 193.500, 106, 660.500);
+			Location loc = new Location(main.getLobbyWorld(), 196.5, 107.0, 666.5);
 			WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
 			EntityArmorStand stand = new EntityArmorStand(s);
 
@@ -56,11 +57,11 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 193.500, 105.7, 660.500);
+			loc = new Location(main.getLobbyWorld(), 196.5, 106.7, 666.5);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName("" + ChatColor.AQUA + ChatColor.BOLD + "SuperCraftBlocks");
+            stand.setCustomName(main.color("&6&lSUPER CRAFT BROS"));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -68,11 +69,11 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 193.500, 105.3, 660.500);
+			loc = new Location(main.getLobbyWorld(), 196.5, 106.3, 666.5);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&eLevel: &r" + data.level));
+			stand.setCustomName(color("&rLevel: &a" + data.level));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -80,11 +81,11 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 193.500, 105.0, 660.500);
+			loc = new Location(main.getLobbyWorld(), 196.5, 106, 666.5);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&eWins: &r" + data.wins));
+			stand.setCustomName(color("&rWins: &a" + data.wins));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -92,11 +93,11 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 193.500, 104.7, 660.500);
+			loc = new Location(main.getLobbyWorld(), 196.5, 105.7, 666.5);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&eFlawless Wins: &r" + data.flawlessWins));
+			stand.setCustomName(color("&rFlawless Wins: &a" + data.flawlessWins));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -104,11 +105,11 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 193.500, 104.4, 660.500);
+			loc = new Location(main.getLobbyWorld(), 196.5, 105.4, 666.5);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&eKills: &r" + data.kills));
+			stand.setCustomName(color("&rKills: &a" + data.kills));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -116,11 +117,11 @@ public class Holograms {
 			((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
 			playerStats.add(stand);
 
-			loc = new Location(main.getLobbyWorld(), 193.500, 104.1, 660.500);
+			loc = new Location(main.getLobbyWorld(), 196.5, 105.1, 666.5);
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&eMatch MVPs: &r" + data.matchMvps));
+			stand.setCustomName(color("&rMatch MVPs: &a" + data.matchMvps));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -134,7 +135,7 @@ public class Holograms {
 	 * This method gets rid of all the holograms from player if they aren't in the
 	 * lobby
 	 */
-	private void destroyBoards() {
+	public void destroyBoards() {
 		BukkitRunnable r = new BukkitRunnable() {
 
 			@Override
@@ -147,12 +148,24 @@ public class Holograms {
 						PacketPlayOutEntityDestroy destroyPacket = new PacketPlayOutEntityDestroy(stand.getId());
 						((CraftPlayer) player).getHandle().playerConnection.sendPacket(destroyPacket);
 					}
+					
 					playerStats.clear();
 				}
 			}
 		};
 		r.runTaskTimer(main, 0, 1);
 	}
+
+    public void destroy(Player player) {
+        Holograms h = main.holograms.remove(player);
+        if (h != null) h.destroyBoards();
+
+        EntityArmorStand stand = main.msHologram.remove(player);
+        if (stand != null) {
+            PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(stand.getId());
+            ((CraftPlayer) player).getHandle().playerConnection.sendPacket(destroy);
+        }
+    }
 
 	public String color(String c) {
 		return ChatColor.translateAlternateColorCodes('&', c);

@@ -84,41 +84,8 @@ public class SlimeClass extends BaseClass {
 							+ "Your goo is still regenerating for " + ChatColor.YELLOW + seconds + " more seconds ");
 				} else {
 					slimeBall.restart();
-					ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
-						@Override
-						public void onHit(Player hit) {
-							if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
-								Location hitLoc = this.getBaseProj().getEntity().getLocation();
-
-								for (Player gamePlayer : this.getNearby(3.0)) {
-									if (instance.duosMap != null) {
-										if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
-											@SuppressWarnings("deprecation")
-											EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-													DamageCause.VOID, 5.0);
-											instance.getGameManager().getMain().getServer().getPluginManager()
-													.callEvent(damageEvent);
-											gamePlayer.damage(5.0, player);
-										}
-									} else {
-										EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-												DamageCause.VOID, 5.0);
-										instance.getGameManager().getMain().getServer().getPluginManager()
-												.callEvent(damageEvent);
-										gamePlayer.damage(5.0, player);
-									}
-								}
-								for (Player gamePlayer : instance.players) {
-									gamePlayer.playSound(hitLoc, Sound.SLIME_ATTACK, 2, 1);
-									gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_LARGE, 1);
-								}
-							}
-
-						}
-
-					}, new ItemStack(Material.SLIME_BALL));
-					instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-							player.getLocation().getDirection().multiply(2.0D));
+                    instance.getGameManager().shootProjectile(instance, player, 5.0,
+                            Material.SLIME_BALL, Sound.SLIME_ATTACK, 2, Effect.EXPLOSION_LARGE, 1);
 				}
 				event.setCancelled(true);
 			}

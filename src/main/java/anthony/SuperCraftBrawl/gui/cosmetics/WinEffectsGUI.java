@@ -22,7 +22,7 @@ public class WinEffectsGUI implements InventoryProvider {
 		inv = SmartInventory.builder()
 				.id("myInventory")
 				.provider(this)
-				.size(3, 9)
+				.size(4, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Win Effects")
 				.parent(parent)
 				.build();
@@ -39,6 +39,7 @@ public class WinEffectsGUI implements InventoryProvider {
 		data.fishRainEffect = 0;
 		data.floodEffect = 0;
 		data.treasureEffect = 0;
+		data.ritualEffect = 0;
 	}
 
 	@Override
@@ -57,9 +58,9 @@ public class WinEffectsGUI implements InventoryProvider {
 		
 		if (data != null) {
 			contents.set(1, 2,
-					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.WHEAT), main.color("&cMagic Broom"),
-							"", main.color("&rFly around the map with this"), main.color("&rwhen you win!"), "",
-							Rank.CAPTAIN.getTag() + ChatColor.RESET + "+ exclusive!"),e -> {
+					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.WHEAT), main.color("&eMagic Broom"),
+							"", main.color("&7Fly around the map with"), main.color("&7this when you win!"), "",
+							Rank.CAPTAIN.getTag() + ChatColor.RESET + "&c exclusive!"), e -> {
 						if (player.hasPermission("scb.winEffects")) {
 							resetWinEffects(data);
 							data.broomWinEffect = 1;
@@ -74,10 +75,10 @@ public class WinEffectsGUI implements InventoryProvider {
 			contents.set(1, 4,
 					ClickableItem.of(
 							ItemHelper
-									.setDetails(new ItemStack(Material.DRAGON_EGG), main.color("&cEnderDragon"), "",
-											main.color("&rFly around the map with an"),
-											main.color("&rEnderDragon when you win!"), "",
-											Rank.CAPTAIN.getTag() + ChatColor.RESET + "+ exclusive!"),
+									.setDetails(new ItemStack(Material.DRAGON_EGG), main.color("&eEnderDragon"), "",
+											main.color("&7Fly around the map with an"),
+											main.color("&7EnderDragon when you win!"), "",
+											Rank.CAPTAIN.getTag() + ChatColor.RESET + "&c exclusive!"),
 							e -> {
 								if (player.hasPermission("scb.winEffects")) {
 									resetWinEffects(data);
@@ -91,9 +92,9 @@ public class WinEffectsGUI implements InventoryProvider {
 							}));
 			
 			contents.set(1, 3,
-					ClickableItem.of(ItemHelper.setDetails(santa, main.color("&cSanta Claus"), "",
-							main.color("&rBecome old Saint Nick himself"), main.color("&rand ride along!"), "",
-							Rank.CAPTAIN.getTag() + ChatColor.RESET + "+ exclusive!"), e -> {
+					ClickableItem.of(ItemHelper.setDetails(santa, main.color("&eSanta Claus"), "",
+							main.color("&7Become old Saint Nick himself"), main.color("&7and ride along!"), "",
+							Rank.CAPTAIN.getTag() + ChatColor.RESET + "&c exclusive!"), e -> {
 						if (player.hasPermission("scb.winEffects")) {
 							resetWinEffects(data);
 							data.santaEffect = 1;
@@ -107,9 +108,9 @@ public class WinEffectsGUI implements InventoryProvider {
 			contents.set(1, 5,
 					ClickableItem.of(
 							ItemHelper
-									.setDetails(new ItemStack(Material.RAW_FISH), main.color("&cFish Rain"), "",
-											main.color("&rCover the map with fish"), main.color("&rfalling from the sky"),
-											"", main.color("&aFishing reward!")),
+									.setDetails(new ItemStack(Material.RAW_FISH), main.color("&eFish Rain"), "",
+											main.color("&7Cover the map with fish"), main.color("&7falling from the sky"),
+											"", main.color("&cFishing reward!")),
 							e -> {
 								if (data.rewardLevel >= 4) {
 									resetWinEffects(data);
@@ -117,16 +118,15 @@ public class WinEffectsGUI implements InventoryProvider {
 									inv.close(player);
 									player.sendMessage(main.color("&e&l(!) &rYou have enabled &eFish Rain &rwin effect"));
 								} else {
-									player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ "You have not unlocked this cosmetic yet!");
+                                    player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this yet! Better get fishin'"));
 								}
 							}));
 			contents.set(1, 6,
 					ClickableItem.of(
 							ItemHelper
-									.setDetails(new ItemStack(Material.BOAT), main.color("&cFlood"), "",
-											main.color("&rFlood the map and"), main.color("&rride a boat to safety"),
-											"", main.color("&aFishing reward!")),
+									.setDetails(new ItemStack(Material.BOAT), main.color("&eFlood"), "",
+											main.color("&7Flood the map and"), main.color("&7ride a boat to safety"),
+											"", main.color("&cFishing reward!")),
 							e -> {
 								if (main.getFishing().hasAllFish(player)) {
 									resetWinEffects(data);
@@ -134,16 +134,15 @@ public class WinEffectsGUI implements InventoryProvider {
 									inv.close(player);
 									player.sendMessage(main.color("&e&l(!) &rYou have enabled &eFlood &rwin effect"));
 								} else {
-									player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ "You have not unlocked this cosmetic yet!");
+                                    player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this yet! Better get fishin'"));
 								}
 							}));
 			contents.set(1, 7,
 					ClickableItem.of(
 							ItemHelper
-									.setDetails(new ItemStack(Material.GOLD_BLOCK), main.color("&cTreasure Hoard"), "",
-											main.color("&rPlunder shiny riches"), main.color("&rlike a true pirate"),
-											"", main.color("&aFishing reward!")),
+									.setDetails(new ItemStack(Material.GOLD_BLOCK), main.color("&eTreasure Hoard"), "",
+											main.color("&7Plunder shiny riches"), main.color("&7like a true pirate"),
+											"", main.color("&cFishing reward!")),
 							e -> {
 								if (data.treasureOpened == 1) {
 									resetWinEffects(data);
@@ -151,20 +150,37 @@ public class WinEffectsGUI implements InventoryProvider {
 									inv.close(player);
 									player.sendMessage(main.color("&e&l(!) &rYou have enabled &eTreasure Hoard &rwin effect"));
 								} else {
-									player.sendMessage("" + ChatColor.RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ "You have not unlocked this cosmetic yet!");
+                                    player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this yet! Better get fishin'"));
+								}
+							}));
+			
+			contents.set(2, 1,
+					ClickableItem.of(
+							ItemHelper
+									.setDetails(new ItemStack(Material.NETHERRACK), main.color("&eRitual"), "",
+											main.color("&7Herobrine totem and bats"), main.color("&7take over the map..."),
+											"", main.color("&cHalloween 2025 exclusive")),
+							e -> {
+								if (main.getListener().getHalloweenEventProgress(player) >= 3) {
+									resetWinEffects(data);
+									data.ritualEffect = 1;
+									inv.close(player);
+									player.sendMessage(main.color("&e&l(!) &rYou have enabled &eRitual &rwin effect"));
+								} else {
+                                    player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this cosmetic!"));
 								}
 							}));
 
 
-			contents.set(1, 1, ClickableItem.of(ItemHelper.setDetails(playerskull, main.color("&cDefault Effect"), "",
-					main.color("&rFireworks shoot up when winning"), main.color("&ra game!")), e -> {
+
+			contents.set(1, 1, ClickableItem.of(ItemHelper.setDetails(playerskull, main.color("&eDefault Effect"), "",
+					main.color("&7Fireworks shoot up when"), main.color("&7winning a game!")), e -> {
 				resetWinEffects(data);
 				inv.close(player);
 				player.sendMessage(main.color("&e&l(!) &rYou have enabled &eDefault &rwin effect"));
 			}));
 
-			contents.set(2, 8, ClickableItem.of(
+			contents.set(3, 8, ClickableItem.of(
 					ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
 						inv.getParent().get().open(player);
 					}

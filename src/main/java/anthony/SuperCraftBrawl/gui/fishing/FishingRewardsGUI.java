@@ -42,12 +42,13 @@ public class FishingRewardsGUI implements InventoryProvider {
         List<String> rewardStrings = new ArrayList<>();
         rewardStrings.add(main.color("&7Claim these as many times as you'd like"));
         rewardStrings.add(main.color("&eNext reward:"));
+        rewardStrings.add("");
         rewardStrings.add(main.progressBar(data.caught, next, 25));
         if (data.caught >= next) {
             rewardStrings.add(main.color("&aLeft Click to claim 15 Tokens"));
-            rewardStrings.add(main.color("&aRight Click to claim 125 EXP"));
+            rewardStrings.add(main.color("&aRight Click to claim 75 EXP"));
         } else {
-            rewardStrings.add(main.color("&e15 Tokens or 125 EXP"));
+            rewardStrings.add(main.color("&e15 Tokens or 75 EXP"));
         }
         rewardStrings.add("");
 
@@ -138,9 +139,9 @@ public class FishingRewardsGUI implements InventoryProvider {
                                 player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
                                         + "You have earned " + ChatColor.GREEN + 15 + " Tokens!");
                             } else if (e.isRightClick()){
-                                data.exp += 125;
+                                data.exp += 75;
                                 player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                        + "You have gained " + ChatColor.GREEN + 125 + " EXP!");
+                                        + "You have gained " + ChatColor.GREEN + 75 + " EXP!");
                                 if (data.exp >= 2500) {
                                     data.level++;
                                     data.exp -= 2500;

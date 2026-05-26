@@ -78,7 +78,7 @@ public class SpiderClass extends BaseClass {
 				"&7▶ &d&oRegeneration &e" + (regen.getAmplifier() + 1) + " &7for &e" + regen.getDuration() / 20 + "s",
 				"&7▶ &f&oInvisibility &e" + (invis.getAmplifier() + 1) + " &7for &e" + invis.getDuration() / 20 + "s"
 		);
-		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
+		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
 
 		// Web Ability
 		String durationDisplay = ItemHelper.formatDouble(WEB_ABILITY_DURATION);
