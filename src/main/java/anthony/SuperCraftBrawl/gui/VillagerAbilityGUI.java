@@ -86,14 +86,14 @@ public class VillagerAbilityGUI implements InventoryProvider {
 
         if (type == Material.MILK_BUCKET) {
             return 2;
-        } else if (type == Material.SNOW_BALL) {
+        } else if (type == Material.RED_ROSE) {
             return 3;
         } else if (type == Material.TNT) {
             return 4;
         } else if (item.getItemMeta().getDisplayName().toLowerCase().contains("speed")) {
             return 5;
         } else if (type == Material.ENDER_PEARL) {
-            return 5;
+            return 4;
         } else if (type == Material.GOLD_HOE) {
             return 6;
         } else if (type == Material.WHEAT) {

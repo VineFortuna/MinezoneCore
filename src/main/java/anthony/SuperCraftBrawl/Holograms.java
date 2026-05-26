@@ -61,7 +61,7 @@ public class Holograms {
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName("" + ChatColor.AQUA + ChatColor.BOLD + "Super Craft Bros");
+            stand.setCustomName(main.color("&6&lSUPER CRAFT BROS"));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -73,7 +73,7 @@ public class Holograms {
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&eLevel: &r" + data.level));
+			stand.setCustomName(color("&rLevel: &a" + data.level));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -85,7 +85,7 @@ public class Holograms {
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&eWins: &r" + data.wins));
+			stand.setCustomName(color("&rWins: &a" + data.wins));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -97,7 +97,7 @@ public class Holograms {
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&eFlawless Wins: &r" + data.flawlessWins));
+			stand.setCustomName(color("&rFlawless Wins: &a" + data.flawlessWins));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -109,7 +109,7 @@ public class Holograms {
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&eKills: &r" + data.kills));
+			stand.setCustomName(color("&rKills: &a" + data.kills));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
@@ -121,7 +121,7 @@ public class Holograms {
 			stand = new EntityArmorStand(s);
 
 			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&eMatch MVPs: &r" + data.matchMvps));
+			stand.setCustomName(color("&rMatch MVPs: &a" + data.matchMvps));
 			stand.setCustomNameVisible(true);
 			stand.setGravity(false);
 			stand.setInvisible(true);
