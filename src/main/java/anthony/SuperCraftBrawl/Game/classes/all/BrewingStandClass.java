@@ -246,7 +246,7 @@ public class BrewingStandClass extends BaseClass {
 
 	private ItemStack createPotionWithDynamicName(PotionEffect effect, String displayNamePrefix) {
 		// Dynamically generate the display name with amplifier and duration
-		String displayName = displayNamePrefix + " " + getRomanNumeral(effect.getAmplifier() + 1) +
+		String displayName = displayNamePrefix + " " + ItemHelper.getRomanNumeral(effect.getAmplifier() + 1) +
 				" &7(" + (effect.getDuration() / 20) + " sec)";
 
 		// Create the potion item with the dynamic display name
@@ -254,22 +254,6 @@ public class BrewingStandClass extends BaseClass {
 				ItemHelper.createPotionItem(effect, true, true),
 				displayName
 		);
-	}
-
-	private String getRomanNumeral(int number) {
-		switch (number) {
-			case 1: return "I";
-			case 2: return "II";
-			case 3: return "III";
-			case 4: return "IV";
-			case 5: return "V";
-			case 6: return "VI";
-			case 7: return "VII";
-			case 8: return "VIII";
-			case 9: return "IX";
-			case 10: return "X";
-			default: return "" + number; // Fallback for numbers > 10
-		}
 	}
 
 	@Override
@@ -280,25 +264,5 @@ public class BrewingStandClass extends BaseClass {
 	@Override
 	public ItemStack getAttackWeapon() {
 		return weapon;
-	}
-
-	private ItemStack getBrewingStand() {
-		ItemStack brewingStand = ItemHelper.setDetails(new ItemStack(Material.BREWING_STAND_ITEM),
-				color("&eBrewing Stand"),
-				"",
-				color("&rHit players to obtain Brewing items"),
-				color("&rthen right click to get a potion"),
-
-				color("&7 - 1 Powder: &eSlowness II (15 sec)"),
-				color("&7 - 2 Powder: &eJump 8 (10 sec)"),
-				color("&7 - 3 Powder: &eSpeed II (20 sec)"),
-				color("&7 - 4 Powder: &eRegen III (5 sec)"),
-				color("&7 - 5 Powder: &eResistance I (15 sec)"),
-				color("&7 - 6 Powder: &eStrength I (5 sec)"));
-		return brewingStand;
-	}
-
-	private String color(String c) {
-		return ChatColor.translateAlternateColorCodes('&', c);
 	}
 }
