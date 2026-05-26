@@ -1,5 +1,6 @@
 package anthony.SuperCraftBrawl.gui;
 
+import anthony.SuperCraftBrawl.Bars;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
@@ -13,10 +14,14 @@ import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class VoteGameSettingsGUI implements InventoryProvider {
@@ -26,7 +31,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 
 	public VoteGameSettingsGUI(Core main) {
 		this.main = main;
-		this.inv = SmartInventory.builder().id("voteGameSettings").provider(this).size(4, 9)
+		this.inv = SmartInventory.builder().id("voteGameSettings").provider(this).size(3, 9)
 				.title(ChatColor.DARK_GRAY.toString() + ChatColor.BOLD + "Vote").build();
 	}
 
@@ -43,6 +48,7 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 			addVoteGameStartButton(contents, player, game);
 			addVoteTimeButton(contents, player, game);
 			addLightningRateButton(contents, player, game);
+			//addSantaFlyoverButton(contents, player, game);
 
 			if (game.gameType != GameType.DUEL) // Don't let players change game mode if duels
 				addVoteGameTypeButton(contents, player, data, game);
@@ -57,13 +63,15 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 	 * @param game     The current game instance in which the player is involved.
 	 */
 	private void addVoteGameStartButton(InventoryContents contents, Player player, GameInstance game) {
-		ItemStack voteGameStart = ItemHelper.setDetails(new ItemStack(Material.BEACON), ChatColor.YELLOW + "Game Start",
-				"", "" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().totalStartVotes : "0") + "/"
-						+ (game != null ? game.players.size() : "0") + ")",
-				"",
-				"&7Start the game immediately",
-				"&7when all players are ready");
-		contents.set(1, 3, ClickableItem.of(voteGameStart, event -> {
+		ItemStack voteGameStart = ItemHelper.setDetails(new ItemStack(Material.BEACON),
+                main.color("&eGame Start"),
+                "&7Start the game immediately",
+                "&7when all players are ready",
+                "",
+                main.color("&fVotes: &a" + "(" + (game != null ? game.getGameSettings().totalStartVotes : "0") + "/"
+						+ (game != null ? game.players.size() : "0") + ")"));
+
+		contents.set(0, 3, ClickableItem.of(voteGameStart, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				Player clickingPlayer = (Player) event.getWhoClicked();
 				SoundManager.playSuccessfulHit(player);
@@ -89,13 +97,14 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 			timeSetting = "Day";
 
 		ItemStack voteTime = ItemHelper.setDetails(new ItemStack(Material.WATCH),
-				ChatColor.YELLOW + "Time Of Day -> " + timeSetting, "",
-				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().totalTimeVotes : "0") + "/"
-						+ (game != null ? game.players.size() : "0") + ")",
-				"",
-				"&7Change the time of day to",
-				"&7" + timeSetting.toLowerCase() + " for the entire game");
-		contents.set(1, 5, ClickableItem.of(voteTime, event -> {
+				main.color("&eTime Of Day -> " + timeSetting),
+                "&7Change the time of day to",
+                "&7" + timeSetting.toLowerCase() + " for the entire game",
+                "",
+				main.color("&fVotes: &a" + "(" + (game != null ? game.getGameSettings().totalTimeVotes : "0") + "/"
+						+ (game != null ? game.players.size() : "0") + ")"));
+
+		contents.set(0, 5, ClickableItem.of(voteTime, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				SoundManager.playSuccessfulHit(player);
 				game.getGameSettings().handleVoteTime(player, game);
@@ -112,26 +121,54 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 	 * @param game     The current game instance in which the player is involved.
 	 */
 	private void addVoteGameTypeButton(InventoryContents contents, Player player, PlayerData data, GameInstance game) {
-		GameType type = null;
-		
-		if (game.gameType == GameType.CLASSIC)
-			type = GameType.FRENZY;
-		else
-			type = GameType.CLASSIC;
-		
-		ItemStack voteGameType = ItemHelper.setDetails(new ItemStack(Material.TNT),
-				ChatColor.YELLOW + "Game Type -> " + type.getName(), "",
-				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().totalGameTypeVotes : "0") + "/"
-						+ (game != null ? game.players.size() : "0") + ")",
-				"",
-				"&7Receive a random class each life");
-		contents.set(3, 5, ClickableItem.of(voteGameType, event -> {
-			if (event.getWhoClicked() instanceof Player) {
-				SoundManager.playSuccessfulHit(player);
-				game.getGameSettings().handleVoteGameType(player, game);
-				openForAll(game);
-			}
-		}));
+	    // Determine the "next" type the player would vote for
+	    GameType nextType = (game != null && game.gameType == GameType.CLASSIC) ? GameType.FRENZY : GameType.CLASSIC;
+
+	    // Basic counts (safe if game is null)
+	    int votes = (game != null) ? game.getGameSettings().totalGameTypeVotes : 0;
+	    int total = (game != null) ? Math.max(game.players.size(), 1) : 1; // avoid /0
+	    int percent = Math.min(100, Math.max(0, (int) Math.round((votes * 100.0) / total)));
+
+	    Material icon = (nextType == GameType.FRENZY) ? Material.TNT : Material.COMPASS;
+	    String title = main.color("&eChange Game Type -> Frenzy");
+
+	    List<String> lore = Arrays.asList("" +
+                "",
+                main.color("&fMode Details:"),
+                "  " + ChatColor.GRAY + "Random class each life, even ones",
+                "  " + ChatColor.GRAY + "you have not unlocked yet",
+                "",
+	            main.color("&fVotes: &a" + "(" + votes + "/" + total + ")"));
+
+	    ItemStack stack = new ItemStack(icon);
+	    ItemMeta meta = stack.getItemMeta();
+	    meta.setDisplayName(title);
+	    meta.setLore(lore);
+	    meta.addItemFlags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
+	    stack.setItemMeta(meta);
+
+	    // Add a subtle glow
+	    makeGlow(stack);
+
+	    contents.set(2, 5, ClickableItem.of(stack, event -> {
+	        if (event.getWhoClicked() instanceof Player) {
+	            SoundManager.playSuccessfulHit(player);
+	            if (game != null) {
+	                game.getGameSettings().handleVoteGameType(player, game);
+	                openForAll(game);
+	            }
+	        }
+	    }));
+	}
+
+	/** Adds a cosmetic glow without showing enchant text (we hide it with ItemFlag). */
+	private void makeGlow(ItemStack item) {
+	    try {
+	        item.addUnsafeEnchantment(Enchantment.LUCK, 1); // any low-level enchant works
+	        ItemMeta m = item.getItemMeta();
+	        m.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+	        item.setItemMeta(m);
+	    } catch (Exception ignored) {}
 	}
 
 	/**
@@ -142,14 +179,15 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 	 * @param game     The current game instance in which the player is involved.
 	 */
 	private void addLightningRateButton(InventoryContents contents, Player player, GameInstance game) {
-		ItemStack lightningRate = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR),
-				ChatColor.YELLOW + "Lightning Drop Rate -> 2x", "",
-				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().getLightningVotes() : "0") + "/"
-						+ (game != null ? game.players.size() : "0") + ")",
-				"",
-				"&7Items spawn every 15 seconds",
-				"&7instead of every 30");
-		contents.set(3, 3, ClickableItem.of(lightningRate, event -> {
+		ItemStack lightningRate = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE),
+				main.color("&eLightning Drop Rate -> 2x"),
+                "&7Items spawn every 15 seconds",
+                "&7instead of every 30",
+                "",
+				main.color("&fVotes: &a" + "(" + (game != null ? game.getGameSettings().getLightningVotes() : "0") + "/"
+						+ (game != null ? game.players.size() : "0") + ")"));
+
+		contents.set(2, 3, ClickableItem.of(lightningRate, event -> {
 			if (event.getWhoClicked() instanceof Player) {
 				SoundManager.playSuccessfulHit(player);
 				game.getGameSettings().handleLightningRate(player, game);
@@ -157,6 +195,23 @@ public class VoteGameSettingsGUI implements InventoryProvider {
 			}
 		}));
 	}
+
+	/*private void addSantaFlyoverButton(InventoryContents contents, Player player, GameInstance game) {
+		ItemStack santaFlyover = ItemHelper.setDetails(new ItemStack(Material.CHEST),
+				ChatColor.YELLOW + "Santa Flyover -> Enabled", "",
+				"" + ChatColor.RESET + "(" + (game != null ? game.getGameSettings().getSantaVotes() : "0") + "/"
+						+ (game != null ? game.players.size() : "0") + ")",
+				"",
+				"&7Santa flies over the map and delivers",
+				"&7presents every 30 seconds");
+		contents.set(2, 4, ClickableItem.of(santaFlyover, event -> {
+			if (event.getWhoClicked() instanceof Player) {
+				SoundManager.playSuccessfulHit(player);
+				game.getGameSettings().handleVoteSanta(player, game);
+				openForAll(game);
+			}
+		}));
+	}*/
 
 	@Override
 	public void update(Player player, InventoryContents contents) {

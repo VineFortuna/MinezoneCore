@@ -1,0 +1,164 @@
+package anthony.SuperCraftBrawl.leaderboards;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+
+import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.ranks.Rank;
+import net.md_5.bungee.api.ChatColor;
+import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
+import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
+import net.minecraft.server.v1_8_R3.EntityArmorStand;
+
+public class LevelBoard extends LeaderboardBase {
+	
+	private Core main;
+	private HashMap<UUID, Integer> level;
+	private HashMap<UUID, Rank> roleID;
+	private ArrayList<UUID> lead;
+	private ArrayList<String> lead2;
+	private ResultSet set;
+	private Connection c;
+	private List<Integer> entityIds = new ArrayList<>();
+
+	public LevelBoard(Core main) {
+		super(main);
+		this.main = main;
+	}
+
+	@Override
+	public void asyncUpdate() throws SQLException {
+		roleID = new HashMap<>();
+		level = new HashMap<>();
+		lead = new ArrayList<>();
+		lead2 = new ArrayList<>();
+		c = main.getDatabaseManager().getConnection();
+		level.clear();
+		lead.clear();
+		roleID.clear();
+
+		Statement s = c.createStatement();
+		int a = 0;
+		set = s.executeQuery("SELECT UUID, LastPlayerName, Level, RoleID FROM PlayerData ORDER BY Level DESC");
+		while (set.next()) {
+			if (a == 10) {
+				break;
+			}
+			UUID id = UUID.fromString(set.getString("UUID"));
+			String name = set.getString("LastPlayerName");
+			if (name == null) {
+				continue;
+			}
+			a++;
+			lead.add(id);
+			lead2.add(name);
+			level.put(id, set.getInt("Level"));
+			roleID.put(id, Rank.getRankFromID(set.getInt("RoleID")));
+		}
+	}
+
+	@Override
+	public void updateLeaderboard(boolean init) {
+		removeOldLeaderboards();
+
+		Location loc = new Location(main.getLobbyWorld(), 189.5, 107.5, 711.5);
+		sendArmorStandPacket(loc, ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + "Top Levels");
+		loc.setY(loc.getY() - 0.4);
+
+		int count = 1;
+		for (UUID id : lead) {
+			loc.setY(loc.getY() - 0.24);
+			String name = lead2.get(count - 1);
+			Integer win = level.get(id);
+			sendArmorStandPacket(loc,
+					ChatColor.AQUA + "#" + count + ": " + ChatColor.YELLOW + name + ChatColor.RESET + " - " + win);
+			count++;
+		}
+		
+		// after you've finished drawing the top 10 using 'loc'
+		Location base = loc.clone(); // freeze the baseline after the top list
+
+		for (Player player : Bukkit.getOnlinePlayers()) {
+		    PlayerData data = main.getDataManager().getPlayerData(player);
+		    if (data != null && !lead.contains(data.playerUUID)) {
+		        int win = data.level;
+
+		        // draw the separator for THIS player at a fixed offset from base
+		        Location line1 = base.clone().add(0, -0.24, 0);
+		        sendStandToOnePlayer(line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------", player);
+
+		        // draw the player's own line just below it
+		        Location line2 = base.clone().add(0, -0.44, 0);
+		        sendStandToOnePlayer(line2, "" + ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + win, player);
+		    }
+		}
+	}
+
+	private void sendArmorStandPacket(Location loc, String customName) {
+		EntityArmorStand armorStand = new EntityArmorStand(
+				((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) loc.getWorld()).getHandle());
+		armorStand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+		armorStand.setCustomName(customName);
+		armorStand.setCustomNameVisible(true);
+		armorStand.setInvisible(true);
+		armorStand.setGravity(false);
+
+		int entityId = armorStand.getId();
+		entityIds.add(entityId);
+
+		PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(armorStand);
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection
+					.sendPacket(packet);
+		}
+	}
+
+	private void sendStandToOnePlayer(Location loc, String customName, Player player) {
+		EntityArmorStand armorStand = new EntityArmorStand(
+				((org.bukkit.craftbukkit.v1_8_R3.CraftWorld) loc.getWorld()).getHandle());
+		armorStand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
+		armorStand.setCustomName(customName);
+		armorStand.setCustomNameVisible(true);
+		armorStand.setInvisible(true);
+		armorStand.setGravity(false);
+
+		int entityId = armorStand.getId();
+		entityIds.add(entityId);
+
+		PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(armorStand);
+		((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+	}
+
+	private void removeOldLeaderboards() {
+		if (!entityIds.isEmpty()) {
+			for (int entityId : entityIds) {
+				PacketPlayOutEntityDestroy packet = new PacketPlayOutEntityDestroy(entityId);
+				for (Player player : Bukkit.getOnlinePlayers()) {
+					((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection
+							.sendPacket(packet);
+				}
+			}
+			entityIds.clear();
+		}
+	}
+
+	@Override
+	public void close() {
+		removeOldLeaderboards();
+		level.clear();
+		lead.clear();
+		c = null;
+		roleID.clear();
+	}
+}

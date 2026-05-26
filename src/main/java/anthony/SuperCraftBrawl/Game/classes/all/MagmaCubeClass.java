@@ -11,10 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.MagmaCube;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
@@ -108,8 +105,15 @@ public class MagmaCubeClass extends BaseClass {
 									player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
 									MagmaCube en = (MagmaCube) player.getWorld().spawnCreature(hitLoc,
 											EntityType.MAGMA_CUBE);
+									for (int i = 0; i < 50; i++) {
+										if (en.isDead() || !en.isValid()) {
+											en = (MagmaCube) player.getWorld().spawnEntity(hitLoc, EntityType.MAGMA_CUBE);
+										} else {
+											break;
+										}
+									}
 									en.setSize(3);
-									en.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW
+									en.setCustomName(ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW
 											+ "MagmaCube");
 									en.setCustomNameVisible(true);
 								}

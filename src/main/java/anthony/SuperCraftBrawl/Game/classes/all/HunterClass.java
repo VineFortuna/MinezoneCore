@@ -3,7 +3,9 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
+import anthony.util.SoundManager;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -11,6 +13,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
@@ -23,11 +26,21 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 public class HunterClass extends BaseClass {
 
-	private int count = 0;
+	private final ItemStack weapon;
+	private final ItemStack bloodLustItem;
+	private final ItemStack dashItem;
+	private static final int MAX_BLOODLUST_AMOUNT = 8;
+	private final PotionEffect strength = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 5 * 20, 0, true);
+	private final PotionEffect resistance = new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 15 * 20, 1, false, true);
+
+	private int bloodLust = 0;
 
 	public HunterClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -39,120 +52,120 @@ public class HunterClass extends BaseClass {
 				6,
 				"Hunter"
 		);
-	}
 
-	@Override
-	public ClassType getType() {
-		return ClassType.Hunter;
-	}
+		// Weapon
+		String strengthString = "&4&oStrength &e" + (strength.getAmplifier() + 1) + " &7for &e" + strength.getDuration() / 20 + "s";
+		String resistanceString = "&f&oResistance &e" + (resistance.getAmplifier() + 1) + " &7for &e" + resistance.getDuration() / 20 + "s";
 
+		List<String> lore = new ArrayList<>();
+		lore.add("&7At &a" + MAX_BLOODLUST_AMOUNT + " &7Bloodlust, gain one of two potions:");
+		lore.add(strengthString);
+		lore.add(resistanceString);
 
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
-	}
+		weapon = ItemHelper.setDetails(
+				new ItemStack(Material.GOLD_SWORD),
+				"&6&lHunter's Sword",
+				"",
+				"&7Hit enemies to gain Bloodlust",
+				"",
+				lore.get(0),
+				lore.get(1),
+				lore.get(2)
+		);
+		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
+		ItemHelper.setUnbreakable(weapon);
 
-	@Override
-	public ItemStack getAttackWeapon() {
-		ItemStack sword = ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.GOLD_SWORD),
-				instance.getGameManager().getMain().color("&c&lFighter Sword")), Enchantment.KNOCKBACK, 2);
-		ItemMeta meta = sword.getItemMeta();
-		meta.spigot().setUnbreakable(true);
-		sword.setItemMeta(meta);
-		return sword;
-	}
+		// Dash Item
+		dashItem = ItemHelper.setDetails(
+				new ItemStack(Material.FEATHER),
+				"&6&lDash",
+				"&7A fast escape or ambush"
+		);
+		ItemHelper.setGlowing(dashItem, true);
 
-	public ItemStack getDash() {
-		ItemStack dash = ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.FEATHER),
-						instance.getGameManager().getMain().color("&b&lDash"),
-						instance.getGameManager().getMain().color("&7A quick escape or attack")),
-				Enchantment.PROTECTION_ENVIRONMENTAL, 1);
-		return dash;
+		// BloodLust Item
+		bloodLustItem = ItemHelper.setDetails(
+				new ItemStack(Material.REDSTONE),
+				"&4&lBloodLust",
+				lore.get(0),
+				lore.get(1),
+				lore.get(2)
+		);
 	}
 
 	@Override
 	public void DoDamage(EntityDamageByEntityEvent event) {
-		Random rand = new Random();
-		int chance = rand.nextInt(100);
-		int chance2 = rand.nextInt(2);
-		
-		if (chance >= 0) {
-			if (event.getEntity() instanceof Player) {
-				Player p = (Player) event.getEntity();
-				if (instance.duosMap != null)
-					if (instance.team.get(p).equals(instance.team.get(player)))
-						return;
-				
-				if (instance.getGameManager().spawnProt.containsKey(p)
-						|| instance.getGameManager().spawnProt.containsKey(player))
-					return;
-				
-				BaseClass bc = instance.classes.get(player);
-				if (bc != null && bc.getLives() <= 0)
-					return;
-				
-				count++;
-				player.getInventory().setItem(8,
-						ItemHelper.setDetails(new ItemStack(Material.REDSTONE, count),
-								instance.getGameManager().getMain().color("&c&lBlood Lust"), "",
-								instance.getGameManager().getMain().color("&7Get 8 of this to get an OP potion!")));
-				
-				if (count >= 8) {
-					player.getInventory().remove(Material.REDSTONE);
-					
-					if (chance2 == 0) {
-						player.sendMessage(instance.getGameManager().getMain()
-								.color("&2&l(!) &rYour 8 Blood Lust rewarded you with a Strength I potion"));
-						ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-								instance.getGameManager().getMain().color("&eStrength Potion &7(5 sec)"));
-						Potion pot = new Potion(1);
-						pot.setType(PotionType.STRENGTH);
-						pot.setSplash(true);
-						PotionMeta meta = (PotionMeta) item.getItemMeta();
-						meta.addCustomEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 5 * 20, 0), true);
-						item.setItemMeta(meta);
-						pot.apply(item);
-						player.getInventory().addItem(item);
-						count = 0;
-					} else {
-						player.sendMessage(instance.getGameManager().getMain()
-								.color("&2&l(!) &rYour 8 Blood Lust rewarded you with a Resistance II potion"));
-						ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-								instance.getGameManager().getMain().color("&eResistance Potion &7(15 sec)"));
-						Potion pot = new Potion(1);
-						pot.setType(PotionType.NIGHT_VISION);
-						pot.setSplash(true);
-						PotionMeta meta = (PotionMeta) item.getItemMeta();
-						meta.addCustomEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 15  * 20, 1), true);
-						item.setItemMeta(meta);
-						pot.apply(item);
-						player.getInventory().addItem(item);
-						count = 0;
-					}
-				}
-			}
-		}
+		if (!isPlayerAlive()) return;
+		if (!(event.getEntity() instanceof Player)) return;
+
+		checkToAddBloodLust(event);
 	}
 
-	@Override
-	public void SetNameTag() {
+	private void checkToAddBloodLust(EntityDamageByEntityEvent event) {
+		ItemStack heldItem = player.getInventory().getItem(player.getInventory().getHeldItemSlot());
 
+		boolean isWeaponMelee =
+				event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
+						&& heldItem != null
+						&& heldItem.equals(weapon);
+
+		if (!isWeaponMelee) return;
+
+		bloodLust++;
+		bloodLustItem.setAmount(bloodLust);
+		player.getInventory().setItem(8, bloodLustItem);
+
+		if (bloodLust < 8) return;
+		player.getInventory().remove(Material.REDSTONE);
+
+		Random rand = new Random();
+		int chance = rand.nextInt(2);
+
+		ItemStack potion;
+		String potionString;
+
+		if (chance == 0) {
+			potion = createPotionWithDynamicName(strength, "&4&lStrength");
+			potionString = "&4Strength";
+		} else {
+			potion = createPotionWithDynamicName(resistance, "&f&lResistance");
+			potionString = "&1Resistance";
+		}
+
+		player.getInventory().addItem(potion);
+		bloodLust = 0;
+
+		SoundManager.playSuccessfulHit(player);
+		player.sendMessage(ChatColorHelper.color(
+				"&2&l(!) &rYour Bloodlust rewarded you with a " + potionString + "&7 potion"
+		));
+	}
+
+	private ItemStack createPotionWithDynamicName(PotionEffect effect, String displayNamePrefix) {
+		// Dynamically generate the display name with amplifier and duration
+		String displayName = displayNamePrefix + " " + ItemHelper.getRomanNumeral(effect.getAmplifier() + 1) +
+				" &7(" + (effect.getDuration() / 20) + " sec)";
+
+		// Create the potion item with the dynamic display name
+		return ItemHelper.setDetails(
+				ItemHelper.createPotionItem(effect, true, false),
+				displayName
+		);
 	}
 
 	@Override
 	public void SetItems(Inventory playerInv) {
-		count = 0;
+		bloodLust = 0;
 		hunterDash = true;
 		player.sendMessage("" + ChatColor.BOLD + "===============================");
 		player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RED + ChatColor.BOLD
 				+ ChatColor.UNDERLINE + "  Hunter:");
 		player.sendMessage("" + ChatColor.BOLD + "||");
-		player.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  Hit players to gain Blood Lust");
+		player.sendMessage("" + ChatColor.BOLD + "|| " + "   " + ChatColor.YELLOW + "  Hit players to gain Bloodlust");
 		player.sendMessage("" + ChatColor.BOLD + "||");
 		player.sendMessage("" + ChatColor.BOLD + "===============================");
-		player.getInventory().setItem(0, this.getAttackWeapon());
-		player.getInventory().setItem(1, getDash());
+		player.getInventory().setItem(0, weapon);
+		player.getInventory().setItem(1, dashItem);
 	}
 
 	@Override
@@ -177,5 +190,15 @@ public class HunterClass extends BaseClass {
 				}
 			}
 		}
+	}
+
+	@Override
+	public ClassType getType() {
+		return ClassType.Hunter;
+	}
+
+	@Override
+	public ItemStack getAttackWeapon() {
+		return weapon;
 	}
 }

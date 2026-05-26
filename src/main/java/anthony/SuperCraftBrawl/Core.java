@@ -4,13 +4,26 @@ import anthony.SuperCraftBrawl.Game.*;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.armorstands.ArmorStandManager;
 import anthony.SuperCraftBrawl.commands.Commands;
 import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.fishing.Fishing;
+import anthony.SuperCraftBrawl.floatingblock.FloatingBlockManager;
+import anthony.SuperCraftBrawl.floatingblock.FloatingBlocks;
 import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.halloween.CandyAuraManager;
+import anthony.SuperCraftBrawl.halloween.HalloweenHuntManager;
+import anthony.SuperCraftBrawl.halloween.TreatsAdminCommand;
+import anthony.SuperCraftBrawl.halloween.TrickTitleCommand;
+import anthony.SuperCraftBrawl.halloween.TrickTitleManager;
+import anthony.SuperCraftBrawl.halloween.TrickTitlePackets;
 import anthony.SuperCraftBrawl.leaderboards.*;
+import anthony.SuperCraftBrawl.lobbyexplorer.LobbyExplorerManager;
+import anthony.SuperCraftBrawl.lobbyexplorer.LobbyExplorers;
+import anthony.SuperCraftBrawl.npcs.NPC;
 import anthony.SuperCraftBrawl.npcs.NPCManager;
+import anthony.SuperCraftBrawl.npcs.VisibleHook;
 import anthony.SuperCraftBrawl.packets.PacketMain;
 import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -18,14 +31,15 @@ import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
 import anthony.SuperCraftBrawl.practice.BowPractice;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.ranks.RankManager;
+import anthony.SuperCraftBrawl.signs.SignManager;
+import anthony.SuperCraftBrawl.tablist.TablistAnimationManager;
 import anthony.SuperCraftBrawl.tablist.TablistManager;
+import anthony.SuperCraftBrawl.titles.TitleSequence;
 import anthony.parkour.Arenas;
 import anthony.parkour.Parkour;
 import anthony.util.ItemHelper;
-import me.itzzmic.minezone.api.PunishAPI;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.*;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -40,8 +54,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.EntityBlockFormEvent;
-import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -51,8 +63,6 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.Team;
-import org.bukkit.util.Vector;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -97,10 +107,10 @@ public class Core extends JavaPlugin implements Listener {
 	public HashMap<Player, Boolean> so = new HashMap<>();
 	public HashMap<Player, Boolean> po = new HashMap<>();
 	public Parkour p;
-	// public AntiCheat cheat;
 	public Leaderboard lb;
 	public FishingBoard fb;
 	public KillsBoard kb;
+	public LevelBoard levelBoard;
 	public BoardSettings boardSettings;
 	public WinstreakBoard streakBoard;
 	public FlawlessWinsBoard flawlessWinsBoard;
@@ -108,6 +118,11 @@ public class Core extends JavaPlugin implements Listener {
 	public Fishing fishing;
 	private ArrayList<String> msg;
 	public Map<Player, Player> wagers = new HashMap<Player, Player>();
+	public anthony.SuperCraftBrawl.lobbyitems.LobbyItems lobbyItems;
+	public CandyAuraManager candyAura;
+
+    //GAME SIGNS MANAGER
+    public SignManager signManager;
 
 	// Player's game stats
 	public Map<Player, GameInstance> gameStats = new HashMap<Player, GameInstance>();
@@ -116,7 +131,41 @@ public class Core extends JavaPlugin implements Listener {
 
 	private long tickCounter = 0;
 
-	public Core() {
+	// HALLOWEEN CLASSES:
+	private HalloweenHuntManager halloweenHunt;
+	private TrickTitleManager trickTitleOld;
+	private TrickTitlePackets trickTitle;
+
+    //PARKOUR VARIABLES:
+    public final Set<UUID> sentMysteryHolos = new HashSet<>();
+    public final Set<UUID> sentParkourHolos = new HashSet<>();
+
+    //NPCS:
+	public LobbyExplorerManager explorerManager;
+
+    //LEADERBOARDS:
+    public final java.util.Map<java.util.UUID, anthony.SuperCraftBrawl.leaderboards.LeaderboardScope>
+            leaderboardScopeByViewer = new java.util.HashMap<>();
+    public anthony.SuperCraftBrawl.leaderboards.StatSnapshotDAO snapshotDAO;
+    public SettingsHologram lbSettingsHolo;
+
+    //SCOREBOARDS:
+    private anthony.SuperCraftBrawl.scoreboards.TitleAnimationManager titleAnimationManager;
+
+    //TABLIST:
+    private TablistAnimationManager tablistAnim;
+
+    //FLOATING BLOCK:
+    private FloatingBlockManager floating;
+    private FloatingBlocks floatingBlocks;
+
+    //ARMOR STANDS
+    public ArmorStandManager armorStandManager;
+
+    //MYSTERY CHESTS:
+    public Map<Player, EntityArmorStand> msHologram = new HashMap<Player, EntityArmorStand>();
+
+    public Core() {
 		this.staffchat = new ArrayList<Player>();
 		this.globalchat = new ArrayList<Player>();
 	}
@@ -125,18 +174,58 @@ public class Core extends JavaPlugin implements Listener {
 		return plugin;
 	}
 
-	// Getters:
+    public List<NPC> getAllNPCs() {
+        return npcs;
+    }
+
+    // Getters:
 
 	public ActionBarManager getActionBarManager() {
 		return this.actionBarManager;
+	}
+
+    public SettingsHologram getLbSettingsHologram() {
+        return this.lbSettingsHolo;
+    }
+
+    public ArmorStandManager getArmorStandManager() { return this.armorStandManager; }
+
+    public anthony.SuperCraftBrawl.scoreboards.TitleAnimationManager getTitleAnimationManager() { return titleAnimationManager; }
+
+	public CandyAuraManager getCandyAuraManager() {
+		return this.candyAura;
+	}
+
+	public TrickTitleManager getTrickTitle() {
+		return this.trickTitleOld;
+	}
+
+	public TrickTitlePackets getTrickPacket() {
+		return this.trickTitle;
+	}
+
+	public HalloweenHuntManager getHalloweenManager() {
+		return this.halloweenHunt;
+	}
+
+	public LevelBoard getLevelBoard() {
+		return this.levelBoard;
 	}
 
 	public ScoreboardManager getScoreboardManager() {
 		return this.scoreboardManager;
 	}
 
+	public anthony.SuperCraftBrawl.lobbyitems.LobbyItems getLobbyItems() {
+		return this.lobbyItems;
+	}
+
 	public TablistManager getTabManager() {
 		return this.tabManager;
+	}
+
+	public SignManager getSignManager() {
+		return this.signManager;
 	}
 
 	public long getCurrentTick() {
@@ -202,10 +291,6 @@ public class Core extends JavaPlugin implements Listener {
 	public ActiveGamesGUI getActiveGames() {
 		return ag;
 	}
-
-	// public AntiCheat getAntiCheat() {
-	// return cheat;
-	// }
 
 	public DatabaseManager getDatabaseManager() {
 		return databaseManager;
@@ -295,178 +380,451 @@ public class Core extends JavaPlugin implements Listener {
 		return rankManager;
 	}
 
-	// private AntiCheat cheat;
-
-	/*
-	 * public AntiCheat getAntiCheat() { return cheat; }
-	 */
-
-	/*
-	 * @EventHandler public void onMove(PlayerMoveEvent e) { Player p =
-	 * e.getPlayer(); Location eye = p.getEyeLocation(); Vector vec =
-	 * eye.getDirection(); vec.normalize(); for (int i = 0; i < 100; i++) {
-	 * eye.add(vec); PacketPlayOutWorldParticles packet = new
-	 * PacketPlayOutWorldParticles(EnumParticle.FLAME, true, (float) eye.getX(),
-	 * (float) (float) eye.getY(), (float) (float) eye.getZ(), 0.75F, 0.75F, 0.75F,
-	 * 0F, 25); ((CraftPlayer)p).getHandle().playerConnection.sendPacket(packet); }
-	 * 
-	 * }
-	 */
-
-	public void messages() {
-		Random random = new Random();
-
-		BukkitRunnable runnable = new BukkitRunnable() {
-			Announcements msg = null;
-
-			@Override
-			public void run() {
-				msg = Announcements.values()[random.nextInt(Announcements.values().length)];
-				String msgToPlayers = msg.getName();
-				if (Bukkit.getOnlinePlayers().size() > 0)
-					for (Player player : Bukkit.getOnlinePlayers()) {
-						if (getGameManager().GetInstanceOfPlayer(player) != null)
-							continue;
-
-						player.sendMessage(msgToPlayers);
-					}
-			}
-		};
-		runnable.runTaskTimer(this, 0, 5 * 60 * 20);
-	}
-
 	// For tab organization.
 	private Scoreboard lobbyScoreBoard;
 
 	@Override
 	public void onEnable() {
-		plugin = this;
-		msg = new ArrayList<>();
-//		msg.add(color("&4&lREMEMBER TO TELL ITZZMIC (I LOVE YOU)"));
-//		msg.add(color("&3ItzzMic coded this btw..."));
-//		msg.add(color("&cItzzMic wants to remind you to have a good day!"));
-//		msg.add(color("&3&lWho is Adwyr?"));
-//		msg.add(color("&9&lAnthonyFortuna is so cool"));
-//		msg.add(color("&3astro is &b&l20% &3better than you"));
-//		msg.add(color("&c&lHOW DO YOU SPELL SCB AGAIN?"));
-//		msg.add(color("&e&lTacos are really good!"));
-//		msg.add(color("&cIdek what to put here"));
-//		msg.add(color("&cI be sweatin since 2002 baby"));
-//		msg.add(color("&cSheep kit is probably the best!"));
-//		msg.add(color("&cLove you!"));
-//		msg.add(color("&a&lReminder to thank the Staff of &e&l&oMINEZONE"));
-//		msg.add(color("&dSubscribe to &e&l&oMINEZONE &don &cYou&fTube&d!"));
+		initVariables(); //Initializes all class variables
 
 		msg.add(color("&lReminder to thank the staff"));
 		msg.add(color("&lThank you for playing, you're awesome"));
 		msg.add(color("&lShare Minezone with your friends"));
 
-		getLogger().info("(!) You have enabled Minezone-Core");
-		// lobbyWorld = getServer().createWorld(new WorldCreator("lobby"));
-		lobbyWorld = getServer().createWorld(new WorldCreator("lobby-1")); // Game servers
-		// lobbyWorld = getServer().createWorld(new WorldCreator("lobbies")); //Hub
-		// server
-		// getServer().createWorld(new WorldCreator("name"));
-		lobbyScoreBoard = Bukkit.getScoreboardManager().getNewScoreboard();
-
 		for (Player onlinePlayer : this.getServer().getOnlinePlayers())
 			this.ResetPlayer(onlinePlayer);
 
-		// Bukkit.getScheduler().runTaskLater(this, this::removeOldLeaderboards, 8 *
-		// 20L);
-
-		listener = new PlayerListener(this);
-		// smmmanager = new SmmManager(this);
-		gameManager = new GameManager(this);
-		scoreboardManager = new ScoreboardManager(this);
-		tabManager = new TablistManager(this);
-		commands = new Commands(this);
-		// cmd = new anthony.skywars.commands.Commands(this);
-		djManager = new DoubleJumpManager(this);
-		databaseManager = new DatabaseManager(this);
-		packetMain = new PacketMain(this);
-		dataManager = new PlayerDataManager(this);
-		npcManager = new NPCManager(this);
-		rankManager = new RankManager(this);
-		actionBarManager = new ActionBarManager(this);
-		// gm = new anthony.CrystalWars.game.GameManager(this);
-		ag = new ActiveGamesGUI(this);
-		p = new Parkour(this);
-		lb = new Leaderboard(this);
-		kb = new KillsBoard(this);
-		fb = new FishingBoard(this);
-		boardSettings = new BoardSettings(this);
-		streakBoard = new WinstreakBoard(this);
-		flawlessWinsBoard = new FlawlessWinsBoard(this);
-		fishing = new Fishing(this);
-
-		for (Arenas arena : Arenas.values()) {
-			parkourBoards.add(new ParkourBoard(this, arena));
-		}
-		// kb = new KillsBoard(this);
-		// swManager = new anthony.skywars.GameManager(this);
-		// abilityManager = new anthony.skywars.AbilityManager(this);
-		// cheat = new AntiCheat(this);
-
-		Bukkit.getServer().getPluginManager().registerEvents(this, this);
-		Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-		Bukkit.getMessenger().registerIncomingPluginChannel(this, "BungeeCord", gameManager);
-		messages();
-
-		if (this.getCommands() != null) {
-			String[] commandTypes = { "maps", "join", "fly", "leave", "players", "class", "socials", "spectate",
-					"startgame", "gamestats", "setlives", "lactate", "purchases", "kit", "items", "color", "sound",
-					"heal" };
-
-			for (String command : commandTypes) {
-				PluginCommand pluginCommand = this.getCommand(command);
-				if (pluginCommand != null) {
-					pluginCommand.setExecutor(commands);
-					pluginCommand.setTabCompleter(commands);
-				} else
-					System.out.print(command + " was null!");
-			}
-		}
-
+		registrations();
+		getListener().messages();
+        enableCommands();
 		enablePracticeModes();
+		//spawnLobbyNPCs();
+        spawnSelfStatsNPC();
+        showNPCs();
+        enableTitlesCosmetic();
+        enableLeaderboardSnapshotTables();
+        spawnFloatingBlocks();
+        //enableTablist();
+        //Spawn after world & chunks are ready. Delay 3 seconds
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+			getLbSettingsHologram().spawnLeaderboardSettingsHologram(193.5, 105.5, 702.5); // main
+			getLbSettingsHologram().spawnLeaderboardSettingsHologram(184.5, 106, 568.5); // parkour
+			getLbSettingsHologram().spawnLeaderboardSettingsHologram(300.5, 91.5, 530.5); // fishing pond
+		}, 60L);
+    }
 
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
-				Object header = new ChatComponentText(color("\n&f&lMinezone Network\n"));
-				Object footer = new ChatComponentText(
-						color("\n&7  /help&f for a list of commands" + "  \n&7/store&f to purchase a rank"
-								+ "  \n&7/discord&f to join our Discord" + "\n\n&bminezone.club\n"));
-				try {
-					Field a = packet.getClass().getDeclaredField("a");
-					a.setAccessible(true);
-					Field b = packet.getClass().getDeclaredField("b");
-					b.setAccessible(true);
+    /*
+     * This function spawns the floating blocks in the lobby, for
+     * Socials and Daily Rewards
+     */
+    private void spawnFloatingBlocks() {
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            World w = Bukkit.getWorld("lobby-1");
 
-					a.set(packet, header);
-					b.set(packet, footer);
+            // 1) DAILY REWARD at 186.5,116,633.5
+            /*floatingBlocks.add(
+                    new Location(w, 186.5, 116.0, 633.5),
+                    new ItemStack(Material.WOOL, 1, (short)0), // white wool
+                    "&6&lDAILY REWARD",
+                    "&aRight Click",
+                    (player) -> {
+                        player.sendMessage(color("&aOpening Daily Reward..."));
+                    }
+            );*/
 
-					if (Bukkit.getOnlinePlayers().size() == 0)
-						return;
+            // 2) SOCIALS at 192.843,116,632.825
+            floatingBlocks.add(
+                    new Location(w, 192.5, 111.0, 632.5),
+                    new ItemStack(Material.BOOKSHELF, 1, (short)0),
+                    "&6&lSOCIALS",
+                    "&aRight Click",
+                    (player) -> {
+                        player.performCommand("socials");
+                    }
+            );
 
-					for (Player player : Bukkit.getOnlinePlayers()) {
-						((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}.runTaskTimer(this, 0, 20);
+            floatingBlocks.spawnAll();
+        }, 40L);
+    }
 
-		new BukkitRunnable() {
+    public void removeLeaderboardSettingsHologram() {
+        org.bukkit.World w = getLobbyWorld();
+        if (w == null) return;
 
-			@Override
-			public void run() {
-				tickCounter++;
-			}
-		}.runTaskTimer(this, 0, 1);
+        for (org.bukkit.entity.ArmorStand as : w.getEntitiesByClass(org.bukkit.entity.ArmorStand.class)) {
+            String name = as.getCustomName();
+            if (name == null) continue;
+
+            // Strip colors and compare against the known lines we spawn
+            String plain = org.bukkit.ChatColor.stripColor(name).trim().toLowerCase();
+            if (plain.equals("leaderboard settings") || plain.equals("click to change settings")) {
+                try { as.remove(); } catch (Throwable ignored) {}
+            }
+        }
+    }
+
+    private void enableTablist() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                PacketPlayOutPlayerListHeaderFooter packet = new PacketPlayOutPlayerListHeaderFooter();
+                Object header = new ChatComponentText(color("\n&6&lMINEZONE NETWORK\n"));
+                Object footer = new ChatComponentText(
+                        color("\n&7  /help&f for a list of commands" + "  \n&7/store&f to purchase a rank"
+                                + "  \n&7/discord&f to join our Discord" + "\n\n&eminezone.club\n"));
+                try {
+                    Field a = packet.getClass().getDeclaredField("a");
+                    a.setAccessible(true);
+                    Field b = packet.getClass().getDeclaredField("b");
+                    b.setAccessible(true);
+
+                    a.set(packet, header);
+                    b.set(packet, footer);
+
+                    if (Bukkit.getOnlinePlayers().size() == 0)
+                        return;
+
+                    for (Player player : Bukkit.getOnlinePlayers()) {
+                        ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }.runTaskTimer(this, 0, 20);
+
+        new BukkitRunnable() {
+
+            @Override
+            public void run() {
+                tickCounter++;
+            }
+        }.runTaskTimer(this, 0, 1);
+    }
+
+    private void enableLeaderboardSnapshotTables() {
+        getDatabaseManager().ensureSnapshotTable();
+        getDatabaseManager().ensurePeriodWinstreakTable();
+        getDatabaseManager().ensurePeriodParkourTable();
+
+        this.snapshotDAO = new anthony.SuperCraftBrawl.leaderboards.StatSnapshotDAO(this);
+
+        ensureAllLeaderboardSnapshots();
+
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+            ensureAllLeaderboardSnapshots();
+
+            try {
+                if (getLeaderboard() != null) {
+                    getLeaderboard().asyncUpdate();
+                }
+            } catch (Throwable ignored) {
+            }
+
+            try {
+                if (getKillsLeaderboard() != null) {
+                    getKillsLeaderboard().asyncUpdate();
+                }
+            } catch (Throwable ignored) {
+            }
+
+            try {
+                if (getFlawlessWinsBoard() != null) {
+                    getFlawlessWinsBoard().asyncUpdate();
+                }
+            } catch (Throwable ignored) {
+            }
+
+            try {
+                if (getWinstreakBoard() != null) {
+                    getWinstreakBoard().asyncUpdate();
+                }
+            } catch (Throwable ignored) {
+            }
+
+            try {
+                if (getFishingLeaderboard() != null) {
+                    getFishingLeaderboard().asyncUpdate();
+                }
+            } catch (Throwable ignored) {
+            }
+
+            try {
+                if (getParkourLeaderboards() != null) {
+                    for (anthony.SuperCraftBrawl.leaderboards.ParkourBoard parkourBoard : getParkourLeaderboards()) {
+                        if (parkourBoard != null) {
+                            parkourBoard.asyncUpdate();
+                        }
+                    }
+                }
+            } catch (Throwable ignored) {
+            }
+
+            Bukkit.getScheduler().runTask(this, () -> {
+                try {
+                    if (getLeaderboard() != null) {
+                        getLeaderboard().updateLeaderboard(false);
+                    }
+
+                    if (getKillsLeaderboard() != null) {
+                        getKillsLeaderboard().updateLeaderboard(false);
+                    }
+
+                    if (getFlawlessWinsBoard() != null) {
+                        getFlawlessWinsBoard().updateLeaderboard(false);
+                    }
+
+                    if (getWinstreakBoard() != null) {
+                        getWinstreakBoard().updateLeaderboard(false);
+                    }
+
+                    if (getFishingLeaderboard() != null) {
+                        getFishingLeaderboard().updateLeaderboard(false);
+                    }
+
+                    if (getParkourLeaderboards() != null) {
+                        for (anthony.SuperCraftBrawl.leaderboards.ParkourBoard parkourBoard : getParkourLeaderboards()) {
+                            if (parkourBoard != null) {
+                                parkourBoard.updateLeaderboard(false);
+                            }
+                        }
+                    }
+
+                    for (org.bukkit.entity.Player p : org.bukkit.Bukkit.getOnlinePlayers()) {
+                        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope =
+                                leaderboardScopeByViewer.getOrDefault(
+                                        p.getUniqueId(),
+                                        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.LIFETIME
+                                );
+
+                        repaintLeaderboardsFor(p, scope);
+                    }
+                } catch (Throwable ignored) {
+                }
+            });
+        }, 20L, 20L * 60L);
+    }
+
+    private void ensureAllLeaderboardSnapshots() {
+        if (snapshotDAO == null) {
+            return;
+        }
+
+        try {
+            snapshotDAO.ensureSnapshotsForAll(
+                    "Wins",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,
+                    "Wins"
+            );
+
+            snapshotDAO.ensureSnapshotsForAll(
+                    "Wins",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,
+                    "Wins"
+            );
+
+            snapshotDAO.ensureSnapshotsForAll(
+                    "Wins",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY,
+                    "Wins"
+            );
+
+            snapshotDAO.ensureSnapshotsForAll(
+                    "Kills",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,
+                    "Kills"
+            );
+
+            snapshotDAO.ensureSnapshotsForAll(
+                    "Kills",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,
+                    "Kills"
+            );
+
+            snapshotDAO.ensureSnapshotsForAll(
+                    "Kills",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY,
+                    "Kills"
+            );
+
+            snapshotDAO.ensureSnapshotsForAll(
+                    "FlawlessWins",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,
+                    "FlawlessWins"
+            );
+
+            snapshotDAO.ensureSnapshotsForAll(
+                    "FlawlessWins",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,
+                    "FlawlessWins"
+            );
+
+            snapshotDAO.ensureSnapshotsForAll(
+                    "FlawlessWins",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY,
+                    "FlawlessWins"
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void enableTitlesCosmetic() {
+        trickTitleOld = new TrickTitleManager(this, "lobby-1");
+        this.trickTitle = new TrickTitlePackets(this, "lobby-1"); // change world name if needed
+        this.trickTitle.registerTitle("Trick-or-Treater", color("&6&lTrick-or-Treater"), 0.2);
+        this.trickTitle.registerTitle("Freddy Fazbear", color("&6&lFreddy Fazbear"), 0.2);
+        this.trickTitle.registerTitle("Fiesta De La Noche", color("&b&lFIESTA DE LA NOCHE"), 0.2);
+        this.trickTitle.registerTitle("i'm gay btw...", color("&di'm gay btw..."), 0.2);
+        getCommand("tricktitle").setExecutor(new TrickTitleCommand(trickTitle));
+    }
+
+    private void enableCommands() {
+        String[] commandTypes = { "maps", "join", "cosmetics", "fishing", "server", "fly", "leave", "players",
+                "class", "socials", "spectate", "startgame", "frenzy", "gamestats", "setlives", "purchases", "kit",
+                "items", "color", "sound", "heal", "forceclass", "lactate" };
+
+        for (String command : commandTypes) {
+            PluginCommand pluginCommand = this.getCommand(command);
+            if (pluginCommand != null) {
+                pluginCommand.setExecutor(commands);
+                pluginCommand.setTabCompleter(commands);
+            } else
+                System.out.print(command + " was null!");
+        }
+
+        getCommand("treatsadmin").setExecutor(new TreatsAdminCommand(halloweenHunt));
+    }
+
+    private void registrations() {
+        Bukkit.getServer().getPluginManager().registerEvents(this, this);
+        Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+        Bukkit.getMessenger().registerIncomingPluginChannel(this, "BungeeCord", gameManager);
+    }
+
+    private void initVariables() {
+        plugin = this;
+        msg = new ArrayList<>();
+        listener = new PlayerListener(this);
+        gameManager = new GameManager(this);
+        scoreboardManager = new ScoreboardManager(this);
+        titleAnimationManager = new anthony.SuperCraftBrawl.scoreboards.TitleAnimationManager(this);
+        tabManager = new TablistManager(this);
+        commands = new Commands(this);
+        djManager = new DoubleJumpManager(this);
+        databaseManager = new DatabaseManager(this);
+        packetMain = new PacketMain(this);
+        dataManager = new PlayerDataManager(this);
+        rankManager = new RankManager(this);
+        actionBarManager = new ActionBarManager(this);
+        ag = new ActiveGamesGUI(this);
+        p = new Parkour(this);
+        lb = new Leaderboard(this);
+        kb = new KillsBoard(this);
+        fb = new FishingBoard(this);
+        levelBoard = new LevelBoard(this);
+        boardSettings = new BoardSettings(this);
+        streakBoard = new WinstreakBoard(this);
+        flawlessWinsBoard = new FlawlessWinsBoard(this);
+        fishing = new Fishing(this);
+        signManager = new SignManager(this);
+        lobbyItems = new anthony.SuperCraftBrawl.lobbyitems.LobbyItems(this);
+        halloweenHunt = new HalloweenHuntManager(this);
+        candyAura = new CandyAuraManager(this, "lobby-1");
+        lobbyWorld = getServer().createWorld(new WorldCreator("lobby-1"));
+        lobbyScoreBoard = Bukkit.getScoreboardManager().getNewScoreboard();
+        explorerManager = new LobbyExplorerManager(this);
+        npcManager = new NPCManager(this);
+        getDatabaseManager().ensureSnapshotTable();
+        tablistAnim = new TablistAnimationManager(this);
+        tablistAnim.start();
+        floating = new FloatingBlockManager(this);
+        floatingBlocks = new FloatingBlocks(this);
+        armorStandManager = new ArmorStandManager(this);
+        lbSettingsHolo = new SettingsHologram(this);
+
+        for (Arenas arena : Arenas.values()) {
+            parkourBoards.add(new ParkourBoard(this, arena));
+        }
+
+        getLogger().info("(!) You have enabled Minezone-Core");
+    }
+
+    private void showNPCs() {
+        Bukkit.getPluginManager().registerEvents(new VisibleHook(() -> getAllNPCs()), this);
+
+        // Ensure already-online players (e.g., on /reload) are injected and see NPCs
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            anthony.SuperCraftBrawl.npcs.ChannelInjector.inject(p);
+            for (NPC n : npcs) n.showTo(p);
+        }
+    }
+
+    private void spawnSelfStatsNPC() {
+        World w = lobbyWorld;
+        Location loc = new Location(w, 196.5, 105, 666.5, 0f, 1f); // where the NPC stands
+
+        NPC selfNPC = new NPC(
+                this,
+                color("&7Click to view"),
+                loc,
+                null, null,
+                (clicker) -> new StatsGUI(this).inv.open(clicker),
+                null
+        )
+                .mimicViewerSkin()
+//                .disableHeadTracking()
+				.enableHeadTracking()
+                .perViewerLines(p -> Collections.emptyList());  // does nothing
+
+        npcs.add(selfNPC);
+        selfNPC.showToAll(); // spawn now for everyone online; VisibleHook will handle future joins
+    }
+
+    private final List<NPC> npcs = new ArrayList<>();
+	
+	private void spawnLobbyNPCs() {
+	    // Example location – replace with your actual world/coords
+	    org.bukkit.World w = this.lobbyWorld;
+	    Location loc = new Location(w, 164.347, 105, 657.741, -126, -0);
+
+	    // Skin (Base64 value + signature). Put yours here or read from config.
+	    String SKIN_VALUE = getConfig().getString("npc.amy.skin.value");
+	    String SKIN_SIG   = getConfig().getString("npc.amy.skin.signature");
+
+	    // Example 1: “Explorer Amy” uses the default explorer behavior (calls ExplorerManager)
+	    NPC amy = new NPC(
+	            this,
+	            "Amy",              // max 16 chars (class trims if longer)
+	            loc,
+	            SKIN_VALUE,
+	            SKIN_SIG,
+	            null,               // no custom onRightClick -> uses explorer fallback
+	            LobbyExplorers.Amy  // this triggers core.getExplorerManager().checkSelectedExplorer(...)
+	    ).setNameLines(
+	            "&d&lAMY",
+	            "&7Click to explore"
+	    );
+
+	    npcs.add(amy);
+	    amy.showToAll();
+
+	    Location dailyRewardNPC = loc.clone().add(3, 0, 0);
+	    NPC mailman = new NPC(
+	            this,
+	            color("&bThe Mailman"),
+	            dailyRewardNPC,
+	            null, null,
+	            (player) -> player.sendMessage(color("&a[Mailman] &fHello &e" + player.getName() +
+                        "! &rI have some deliveries for you")),
+	            null
+	    ).setNameLines("&a&lDAILY REWARDS", "&eRight Click");
+
+	    npcs.add(mailman);
+	    mailman.showToAll();
+
 	}
+
 
 	public static BowPractice bowPractice;
 
@@ -533,7 +891,6 @@ public class Core extends JavaPlugin implements Listener {
 	@SuppressWarnings({ "null", "deprecation" })
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-
 		if (cmd.getName().equalsIgnoreCase("setrank")) {
 			if (sender.hasPermission("scb.setrank")) {
 				if (args.length > 1) {
@@ -661,13 +1018,13 @@ public class Core extends JavaPlugin implements Listener {
 						}
 
 						for (Player allPlayers : Bukkit.getOnlinePlayers()) {
-                            allPlayers.sendTitle(
-                                    "" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.UNDERLINE + "ANNOUNCEMENT",
-                                    "" + ChatColor.RESET + message.trim() + " - " + ChatColor.YELLOW
-                                            + player.getName().substring(0, 3));
-                            allPlayers.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                    + message.trim() + " - " + ChatColor.YELLOW + player.getName());
-                        }
+							allPlayers.sendTitle(
+									"" + ChatColor.GREEN + ChatColor.BOLD + ChatColor.UNDERLINE + "ANNOUNCEMENT",
+									"" + ChatColor.RESET + message.trim() + " - " + ChatColor.YELLOW
+											+ player.getName().substring(0, 3));
+							allPlayers.sendMessage("" + ChatColor.BLUE + ChatColor.BOLD + "(!) " + ChatColor.RESET
+									+ message.trim() + " - " + ChatColor.YELLOW + player.getName());
+						}
 					}
 				} else
 					player.sendMessage(color("&c&l(!) &rYou need the rank &c&lADMIN &rto use this command!"));
@@ -947,13 +1304,16 @@ public class Core extends JavaPlugin implements Listener {
 //						+ "for more information");
 			}
 			if (cmd.getName().equalsIgnoreCase("help") && sender instanceof Player) {
-				player.sendMessage("" + ChatColor.GREEN + ChatColor.BOLD + "GENERAL SCB COMMANDS");
-				player.sendMessage("" + ChatColor.WHITE + "/join -> " + ChatColor.GREEN + "Join a game");
-				player.sendMessage("" + ChatColor.WHITE + "/maps -> " + ChatColor.GREEN + "See all maps");
-				player.sendMessage("" + ChatColor.WHITE + "/classes -> " + ChatColor.GREEN + "See all classes");
-				player.sendMessage("" + ChatColor.WHITE + "/class -> " + ChatColor.GREEN + "Choose a class");
-				player.sendMessage("" + ChatColor.WHITE + "/spectate -> " + ChatColor.GREEN + "Spectate a game");
-				player.sendMessage("" + ChatColor.WHITE + "/leave -> " + ChatColor.GREEN + "Leave your game");
+				player.sendMessage(color("&6&lSCB COMMANDS"));
+				player.sendMessage(color("&e/join -> &rJoin a game"));
+				player.sendMessage(color("&e/maps -> &rSee all playable maps"));
+				player.sendMessage(color("&e/classes -> &rSee all playable classes"));
+				player.sendMessage(color("&e/class -> &rChoose a class"));
+				player.sendMessage(color("&e/spectate -> &rSpectate a game"));
+				player.sendMessage(color("&e/leave -> &rLeave your game"));
+				player.sendMessage("");
+				player.sendMessage(color("&6&lFISHING COMMANDS"));
+				player.sendMessage(color("&e/fishing -> &rOpens Fishing menu"));
 			}
 
 			if (cmd.getName().equalsIgnoreCase("exp")) {
@@ -965,12 +1325,19 @@ public class Core extends JavaPlugin implements Listener {
 						int num = Integer.parseInt(args[0]);
 						PlayerData data = this.getDataManager().getPlayerData(player);
 						data.exp += num;
-						player.sendMessage("Added " + num + " to your account");
+						player.sendMessage(color("&6&l(!) &rAdded &e" + num + " EXP &rto your account"));
 
 						if (data.exp >= 2500) {
 							data.level++;
 							data.exp -= 2500;
-							player.sendMessage("Level upgraded to " + data.level + "!");
+							player.sendMessage(color("&8&m----------------------------------------"));
+							player.sendMessage(color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
+							player.sendMessage(color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
+							player.sendMessage(color("&8&m----------------------------------------"));
+
+							// (optional but fun) little audio feedback on 1.8:
+							player.playSound(player.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
+
 						}
 						if (this.getGameManager().GetInstanceOfPlayer(player) == null)
 							getScoreboardManager().lobbyBoard(player);
@@ -1029,7 +1396,7 @@ public class Core extends JavaPlugin implements Listener {
 					}
 				} else {
 					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
-							+ ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN " + ChatColor.RESET + "to use this command");
+							+ ChatColor.BLUE + ChatColor.BOLD + "PRO " + ChatColor.RESET + "to use this command");
 				}
 			}
 
@@ -1051,7 +1418,7 @@ public class Core extends JavaPlugin implements Listener {
 			if (cmd.getName().equalsIgnoreCase("store")) {
 				player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
 						+ "Want to help support the server? Purchase a rank at " + ChatColor.GREEN
-						+ "https://minezone.tebex.io/");
+						+ "https://minezone.club/");
 			}
 
 			if (cmd.getName().equalsIgnoreCase("token") && sender instanceof Player) {
@@ -1569,47 +1936,32 @@ public class Core extends JavaPlugin implements Listener {
 		player.sendMessage(color("&f&l----------------------------------------"));
 	}
 
-	public void sendScoreboardUpdate(Player player) {
-		Rank rank = this.getRankManager().getRank(player);
-		if (rank == null)
-			return;
-		player.setScoreboard(lobbyScoreBoard);
+    public void sendScoreboardUpdate(Player trigger) {
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            try {
+                boolean inGame =
+                        getGameManager().GetInstanceOfPlayer(p) != null
+                                || getGameManager().GetInstanceOfSpectator(p) != null;
 
-		// Organized tab list for all online players
-		for (Player pl : Bukkit.getOnlinePlayers()) {
-			// Build team name
-			StringBuilder teamName = new StringBuilder();
-			teamName.append(rank.getTabListIndex());
-			teamName.append("_").append(rank.name());
+                if (!inGame) {
+                    getTabManager().setPlayerTeam(p);
+                }
+                // else: the game scoreboard owns nametag/class; do nothing.
+            } catch (Throwable ignored) {}
+        }
+    }
 
-			// Retrieve or create team
-			Scoreboard board = getScoreboardManager().playersLobbyBoard.get(pl).getPlayer().getScoreboard();
-
-			Team team = board.getTeam(teamName.toString());
-			if (team == null) {
-				team = board.registerNewTeam(teamName.toString());
-			}
-
-			// Add player to team if not already added
-			if (!team.hasEntry(player.getName())) {
-				team.addEntry(player.getName());
-			}
-
-			// Set prefix based on rank
-			String rankTag = rank.getTagWithSpace();
-			if (rankTag.length() > 12) {
-				team.setPrefix(rank.getTag().substring(0, 11).trim() + " " + ChatColor.RESET);
-			} else {
-				team.setPrefix(rankTag);
-			}
-		}
+    private void showNPCs(Player player) {
+		for (NPC npc : npcs) {
+	        npc.showTo(player);
+	    }
 	}
 
 	public Map<Player, Holograms> holograms = new HashMap<Player, Holograms>();
 
 	/**
 	 * This function handles when a player joins the server
-	 * 
+	 *
 	 * @param e
 	 */
 	@SuppressWarnings("deprecation")
@@ -1628,11 +1980,16 @@ public class Core extends JavaPlugin implements Listener {
 		getScoreboardManager().lobbyBoard(player); // Gives the lobby scoreboard to player
 		sendScoreboardUpdate(player); // This sets the rank next to player name above their head
 
+        for (Player other : Bukkit.getOnlinePlayers()) {
+            if (other == null || !other.isOnline() || other == player) continue;
+            sendScoreboardUpdate(other);
+        }
+		showNPCs(player);
+
 		// For join message:
 		Rank rank = getRankManager().getRank(player); // Gets the player's rank
 		String tag = rank.getTagWithSpace(); // Gets the player's rank tag
-		// e.setJoinMessage(color("&r&l[&a&l+&r&l] &r" + rank + "&b" + name + "&a
-		// connected"));
+
 		e.setJoinMessage(color("" + rank.getArrowColor() + "► " + tag
 				+ getColorForNames(player, getRankManager().getRank(player)) + " &7has joined!"));
 
@@ -1656,9 +2013,17 @@ public class Core extends JavaPlugin implements Listener {
 			if (update)
 				this.getDataManager().saveData(data);
 		}
+
+        if (tablistAnim != null) tablistAnim.applyTo(e.getPlayer());
+
 		player.setHealth(20);
 		player.setFoodLevel(20);
-	}
+
+        TitleSequence.sendChained(this, player,
+                new TitleSequence.TitleSpec("&6&lMINEZONE", "&e&lNEW UPDATE!", 10, 70, 0),
+                new TitleSequence.TitleSpec("&6&lMINEZONE", "&c&lDaily/Monthly/Weekly &e&lLEADERBOARDS", 0, 70, 10)
+        );
+    }
 
 	public String getColorForNames(Player player, Rank rank) {
 		String msg = "";
@@ -1677,85 +2042,56 @@ public class Core extends JavaPlugin implements Listener {
 	private void chatAnnouncementOnJoin(Player p) {
 		p.sendMessage("----------------------------------------------");
 		p.sendMessage("");
+		p.sendMessage(color("          &6&lMINEZONE NETWORK"));
 		p.sendMessage("");
-		p.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "        WELCOME TO MINEZONE");
+		p.sendMessage("" + "         Enjoy Super Craft Bros!");
 		p.sendMessage("");
-		p.sendMessage("" + "         Enjoy Super Craft Blocks!");
-		p.sendMessage("");
-		p.sendMessage("" + "     Be sure to join our Discord Server with " + ChatColor.GREEN + "/socials");
-		p.sendMessage("");
+		p.sendMessage("" + " Be sure to join our Discord Server with " + ChatColor.GREEN + "/socials");
 		p.sendMessage("");
 		p.sendMessage("----------------------------------------------");
+		p.sendMessage("");
 
-//		new BukkitRunnable() {
-//			@Override
-//			public void run() { // Runs after 4 seconds
-//				p.sendMessage("----------------------------------------------");
-//				p.sendMessage("");
-//				p.sendMessage(color("          &e&lFISHING &2&lLOBBY ACTIVITY"));
-//				p.sendMessage("" + "     Try out fishing to get some amazing rewards");
-//				p.sendMessage("" + "     by checking out the Fisherman in the lobby!");
-//				p.sendMessage("");
-//				p.sendMessage("----------------------------------------------");
-//				p.playSound(p.getLocation(), Sound.LEVEL_UP, 1, 1);
-//				p.sendTitle(color("&e&lFISHING"),
-//						color("&eVersion " + Version.FISHING.getVersion() + " available now!"));
-//			}
-//		}.runTaskLater(this, 80); // 80 ticks = 4 seconds (20 ticks per second)
+		if (Bukkit.getOnlinePlayers().size() == 1) {
+			Bukkit.getScheduler().runTaskLater(this, () -> {
+				p.sendMessage("");
 
-//		new BukkitRunnable() {
-//			@Override
-//			public void run() { // Runs after 20 seconds
-//				p.sendMessage("----------------------------------------------");
-//				p.sendMessage("");
-//				p.sendMessage("" + ChatColor.AQUA + ChatColor.BOLD + "             Super Craft Blocks");
-//				p.sendMessage("");
-//				p.sendMessage(color("&f  Welcome to Super Craft Blocks! A custom suite of"));
-//				p.sendMessage(color("" + ChatColor.AQUA + "  Class PvP &7based gamemodes hosted exclusively on"));
-//				p.sendMessage("                    " + ChatColor.AQUA + ChatColor.UNDERLINE + "minezone.club");
-//				p.sendMessage("");
-//				if (p.hasPermission("scb.bonusTokens"))
-//					p.sendMessage(color("&c&l>> &rThanks for being a "
-//							+ (getRankManager().getRank(p) == Rank.VIP ? Rank.VIP.getTag() : Rank.CAPTAIN.getTag())
-//							+ "&r Supporter!"));
-//
-//				p.sendMessage("----------------------------------------------");
-//			}
-//		}.runTaskLater(this, 400); // 400 ticks = 20 seconds (20 ticks per second)
+				BaseComponent[] tip = new ComponentBuilder("TIP ")
+						.color(net.md_5.bungee.api.ChatColor.YELLOW).bold(true) // &e&l
+						.append("No players online? Join our ")
+						.color(net.md_5.bungee.api.ChatColor.WHITE).bold(false)
+						.append("Discord")
+						.color(net.md_5.bungee.api.ChatColor.BLUE)     // &9
+						.underlined(true)                                   // &n
+						.event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/653vJzmrPz"))
+						.event(new HoverEvent(
+								HoverEvent.Action.SHOW_TEXT,
+								new ComponentBuilder("Click here to join the Discord!")
+										.color(ChatColor.BLUE) // &9
+										.create()))
+						.append(" with 400+ members!")
+						.color(net.md_5.bungee.api.ChatColor.WHITE)
+						.underlined(false)
+						.create();
+
+				p.playSound(p.getLocation(), Sound.NOTE_PLING, 1, 1);
+				p.spigot().sendMessage(tip);
+				p.sendMessage("");
+			}, 60L);
+		}
 	}
-
-	public Map<Player, EntityArmorStand> msHologram = new HashMap<Player, EntityArmorStand>();
 
 	public void mysteryChestHologram(Player p) {
 		PlayerData data = this.getDataManager().getPlayerData(p);
 
-		// if (!(this.msHologram.containsKey(p))) {
 		if (data != null) {
-			Location loc = new Location(this.getLobbyWorld(), 194.520, 116, 641.500);
-			WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
-			EntityArmorStand stand = new EntityArmorStand(s);
+			Location loc = new Location(this.getLobbyWorld(), 194.5, 111.5, 641.5);
+            String name = color("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Mystery Chests");
+            this.armorStandManager.addMysteryChestHologram(p, loc, name);
 
-			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MYSTERYCHESTS");
-			stand.setCustomNameVisible(true);
-			stand.setGravity(false);
-			stand.setInvisible(true);
-			PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
-			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
-
-			loc = new Location(this.getLobbyWorld(), 194.520, 115.7, 641.500);
-			stand = new EntityArmorStand(s);
-
-			stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-			stand.setCustomName(color("&e&l" + data.mysteryChests + " &eto open!"));
-			stand.setCustomNameVisible(true);
-			stand.setGravity(false);
-			stand.setInvisible(true);
-			packet = new PacketPlayOutSpawnEntityLiving(stand);
-			((CraftPlayer) p).getHandle().playerConnection.sendPacket(packet);
-			this.msHologram.put(p, stand);
+			loc = new Location(this.getLobbyWorld(), 194.5, 111.2, 641.5);
+            name = color("&e&l" + data.mysteryChests + " &eto open!");
+            this.armorStandManager.addMysteryChestHologram(p, loc, name);
 		}
-		// }
 	}
 
 	public void parkourHolograms(Player p) {
@@ -1810,7 +2146,8 @@ public class Core extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void serverMotd(ServerListPingEvent p) {
-		String msg = color("                   &eMinezone &7[1.8-1.21] \n          &2&lHOME OF &c&lSUPER CRAFT BLOCKS");
+		String msg = color(
+				"                     &eMinezone &7[1.8-1.21] \n        &c&lSUPER CRAFT BROS &7- &6&lNEW UPDATE!");
 		p.setMotd(msg);
 		p.setMaxPlayers(1);
 	}
@@ -1821,7 +2158,11 @@ public class Core extends JavaPlugin implements Listener {
 		Rank rank = getRankManager().getRank(player); // Gets the player's rank
 		String tag = rank.getTagWithSpace(); // Gets the player's rank tag
 
-		// this.packetMain.removePlayer(player);
+        if (getParkour() != null && getParkour().hasPlayer(player)) {
+            try { getParkour().removePlayer(player); } catch (Throwable ignored) {}
+        }
+
+        // this.packetMain.removePlayer(player);
 		Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, () -> {
 			ByteArrayOutputStream b = new ByteArrayOutputStream();
 			DataOutputStream out = new DataOutputStream(b);
@@ -1844,39 +2185,10 @@ public class Core extends JavaPlugin implements Listener {
 			}
 			player.sendPluginMessage(this, "BungeeCord", b.toByteArray());
 		}, 10L);
-		GameInstance game = this.getGameManager().GetInstanceOfPlayer(player);
-		PunishAPI pu = PunishAPI.get();
 
-		String IP = e.getPlayer().getAddress().getAddress().toString();
-		if (pu.isPlayerNetworkBanned(player.getUniqueId())) {
-			e.setQuitMessage(null);
-			return;
-		}
-		if (pu.isIPBanned(IP)) {
-			e.setQuitMessage(null);
-			return;
-		}
-		if (pu.isPlayerBannedNoUnban(player.getUniqueId())) {
-			e.setQuitMessage(null);
-			return;
-		}
-
-		if (game != null && game.getGameSettings() != null) {
-			game.getGameSettings().removeFromStartVotes(player);
-			game.getGameSettings().removeFromGameTypeVotes(player);
-			game.getGameSettings().removeFromLightningVotes(player);
-			game.getGameSettings().removeFromTimeVotes(player);
-		}
-
-		// e.setQuitMessage(color("&r&l[&c&l-&r&l] &r" +
-		// getRankManager().getRank(player).getTagWithSpace() + "&b"
-		// + player.getName() + "&c disconnected"));
+        getGameManager().removePlayerFromVotes(player);
 		e.setQuitMessage(color("" + rank.getArrowColor() + "► " + tag
 				+ getColorForNames(player, getRankManager().getRank(player)) + " &7has left!"));
-	}
-
-	public Location hologramLoc(Player player) {
-		return new Location(lobbyWorld, 288.557, 114, 2362.646);
 	}
 
 	public static <K, V extends Comparable<? super V>> Map<K, V> sortMapByValueDescending(Map<K, V> map) {
@@ -1896,7 +2208,8 @@ public class Core extends JavaPlugin implements Listener {
 		// return new Location(lobbyWorld, -58.507, 125, -18.519, -179, -1);
 
 		// if (this.getCommands() != null || this.getSWCommands() != null)
-		return new Location(lobbyWorld, 189.495, 115, 629.438, -0, 1);
+		//return new Location(lobbyWorld, 106.5, 112, -41.5, 180, 0);
+		return GetHubLoc();
 		// else
 		// return new Location(lobbyWorld, 0.478, 51, 0.550);
 	}
@@ -1905,55 +2218,46 @@ public class Core extends JavaPlugin implements Listener {
 		return lobbyWorld;
 	}
 
+   /*
+    * This function gives a player the main lobby
+    * items when in lobby
+    */
 	public void LobbyItems(Player player) {
-		if (this.getCommands() != null) {
-			player.getInventory().setItem(1,
-					ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER), "&bActive Games &7(Right Click)"));
-			player.getInventory().setItem(3,
-					ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), "&bClasses &7(Right Click)"));
-			player.getInventory().setItem(8,
-					ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), "&bChallenges &7(Right Click)"));
-		}
-		player.getInventory().setItem(0,
-				ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&bGame Selector &7(Right Click)"));
-		player.getInventory().setItem(4,
-				ItemHelper.setDetails(new ItemStack(Material.CHEST), "&bCosmetics &7(Right Click)"));
-		ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
-		player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&bProfile &7(Right Click)"));
-
-		player.getInventory().setItem(5, getFishingRod(player));
-
-		if (tournament) {
-			ItemStack tournament = ItemHelper.createSkullTexture(
-					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTM0YTU5MmE3OTM5N2E4ZGYzOTk3YzQzMDkxNjk0ZmMyZmI3NmM4ODNhNzZjY2U4OWYwMjI3ZTVjOWYxZGZlIn19fQ==");
-			player.getInventory().setItem(2, ItemHelper.setDetails(tournament, "&7>&f>&6&lTournament&f<&7<"));
-		}
-		player.setAllowFlight(true);
+		getLobbyItems().mainLobbyItems(player);
 	}
 
-	public void ResetPlayer(Player player) {
-		PlayerData playerData = this.getDataManager().getPlayerData(player);
-		
-		if (player != null && playerData != null) {
-			player.getInventory().clear();
-			player.teleport(LobbyLoc());
-			LobbyItems(player);
-			player.setHealth(20.0f);
-			player.setFireTicks(0);
-			player.setLevel(playerData.level);
-			player.setGameMode(GameMode.ADVENTURE);
-			player.setAllowFlight(true);
-			mysteryChestHologram(player);
-			parkourHolograms(player);
-			updateLeaderboards();
-			getScoreboardManager().lobbyBoard(player);
-			sendScoreboardUpdate(player);
+    public void ResetPlayer(Player player) {
+        PlayerData playerData = this.getDataManager().getPlayerData(player);
 
-			if (!(holograms.containsKey(player)))
-				holograms.put(player, new Holograms(this, player)); // All players' holograms
+        if (player != null && playerData != null) {
+            player.getInventory().clear();
+            player.teleport(LobbyLoc());
+            LobbyItems(player);
+            player.setHealth(20.0f);
+            player.setFireTicks(0);
+            player.setLevel(playerData.level);
+            player.setGameMode(GameMode.ADVENTURE);
+            player.setAllowFlight(true);
+            mysteryChestHologram(player);
+            parkourHolograms(player);
+            updateLeaderboards();
 
-		}
-	}
+            anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope =
+                    leaderboardScopeByViewer.getOrDefault(player.getUniqueId(),
+                            anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.LIFETIME);
+
+            try {
+                repaintLeaderboardsFor(player, scope);
+            } catch (Throwable ignored) {
+            }
+
+            getScoreboardManager().lobbyBoard(player);
+            sendScoreboardUpdate(player);
+
+            if (!(holograms.containsKey(player)))
+                holograms.put(player, new Holograms(this, player));
+        }
+    }
 
 	public Location GetSpawnLocation() {
 		// return new Location(lobbyWorld, -199.517, 89.98466, -7.519);
@@ -1961,18 +2265,6 @@ public class Core extends JavaPlugin implements Listener {
 
 		// return new Location(lobbyWorld, -58.507, 125, -18.519, -179, -1);
 		return new Location(lobbyWorld, 189.495, 115, 629.438, -0, 1);
-	}
-
-	public boolean isInBounds(Location loc) {
-		Vector v = new Vector(189.533, 115, 629.513);
-		Location centre = new Location(lobbyWorld, v.getX(), v.getY(), v.getZ());
-		double boundsX = 150, boundsZ = 160;
-
-		if (Math.abs(centre.getX() - loc.getX()) > boundsX)
-			return false;
-		if (Math.abs(centre.getZ() - loc.getZ()) > boundsZ)
-			return false;
-		return true;
 	}
 
 	public String progressBar(int progress, int nextLevel, int segments) {
@@ -2004,8 +2296,18 @@ public class Core extends JavaPlugin implements Listener {
 		player.sendPluginMessage(this, "BungeeCord", b.toByteArray());
 	}
 
+    private void disablePacketNPCs() {
+        try {
+            for (anthony.SuperCraftBrawl.npcs.NPC n : npcs) {
+                try { n.hideFromAll(); } catch (Throwable ignored) {}
+            }
+            npcs.clear();
+        } catch (Throwable ignored) {}
+    }
+
 	@Override
 	public void onDisable() {
+        disablePacketNPCs();
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
 		DataOutputStream out = new DataOutputStream(b);
 
@@ -2044,13 +2346,30 @@ public class Core extends JavaPlugin implements Listener {
 		for (World world : Bukkit.getWorlds()) {
 			Bukkit.unloadWorld(world, false);
 		}
+
+        Bukkit.getScheduler().cancelTasks(this);
+        titleAnimationManager.stopAll();
+
+        if (tablistAnim != null) tablistAnim.stop();
+
+        if (floating != null) floating.remove();
+
+        if (floatingBlocks != null) floatingBlocks.removeAll();
+
+        removeLeaderboardSettingsHologram();
+        disableVariables();
+        shutdownEverything();
 	}
+
+    private void disableVariables() {
+        getScoreboardManager().removeAllBoards();
+    }
 
 	public ItemStack getFishingRod(Player player) {
 		PlayerData data = getDataManager().getPlayerData(player);
 
-		ItemStack fishingRod = ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD), "&3&lGo Fishing!",
-				"&fAnywhere with water", "&fFish for junk, fish and treasure", "&fEarn unique rewards");
+		ItemStack fishingRod = ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD), "&3Go Fishing!",
+				"&7Anywhere with water", "&7Fish for junk, fish and treasure", "&7Earn unique rewards");
 		ItemHelper.setUnbreakable(fishingRod);
 		if (data != null) {
 			if (data.lure == 1 && data.lureLevel > 0) {
@@ -2082,25 +2401,140 @@ public class Core extends JavaPlugin implements Listener {
 		return null;
 	}
 
-	public void closeLeaderboards() {
-		getLeaderboard().close();
-		getFishingLeaderboard().close();
-		getKillsLeaderboard().close();
-		getWinstreakBoard().close();
-		getFlawlessWinsBoard().close();
-		for (ParkourBoard parkourBoard : getParkourLeaderboards()) {
-			parkourBoard.close();
-		}
-	}
+    public void closeLeaderboards() {
+        if (lb != null) lb.close();
+        if (fb != null) fb.close();
+        if (kb != null) kb.close();
+        if (streakBoard != null) streakBoard.close();
+        if (flawlessWinsBoard != null) flawlessWinsBoard.close();
+        if (levelBoard != null) {
+            try { levelBoard.updateLeaderboard(true); } catch (Throwable ignored) {}
+        }
+        if (parkourBoards != null) {
+            for (ParkourBoard pb : parkourBoards) {
+                if (pb != null) pb.close();
+            }
+        }
+    }
 
-	public void updateLeaderboards() {
+    public void updateLeaderboards() {
 		getLeaderboard().updateLeaderboard(true);
 		getFishingLeaderboard().updateLeaderboard(true);
 		getKillsLeaderboard().updateLeaderboard(true);
 		getWinstreakBoard().updateLeaderboard(true);
 		getFlawlessWinsBoard().updateLeaderboard(true);
+		getLevelBoard().updateLeaderboard(true);
 		for (ParkourBoard parkourBoard : getParkourLeaderboards()) {
 			parkourBoard.updateLeaderboard(true);
 		}
 	}
+
+    public void repaintLeaderboardsFor(org.bukkit.entity.Player p,
+                                       anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope) {
+        try {
+            if (this.getLeaderboard() != null) {
+                this.getLeaderboard().paintFor(p, scope);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (this.getKillsLeaderboard() != null) {
+                this.getKillsLeaderboard().paintFor(p, scope);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (this.getFlawlessWinsBoard() != null) {
+                this.getFlawlessWinsBoard().paintFor(p, scope);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (this.getWinstreakBoard() != null) {
+                this.getWinstreakBoard().paintFor(p, scope);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (this.getFishingLeaderboard() != null) {
+                this.getFishingLeaderboard().paintFor(p, scope);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (this.getParkourLeaderboards() != null) {
+                for (anthony.SuperCraftBrawl.leaderboards.ParkourBoard parkourBoard : this.getParkourLeaderboards()) {
+                    if (parkourBoard != null) {
+                        parkourBoard.paintFor(p, scope);
+                    }
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+    public LobbyExplorerManager getExplorerManager() {
+		return this.explorerManager;
+	}
+
+    public void hologramCleanup(Player p) {
+        Holograms h = holograms != null ? holograms.remove(p) : null;
+        if (h != null) {
+            try { h.destroyBoards(); } catch (Throwable ignored) {}
+        }
+
+        EntityArmorStand stand = msHologram != null ? msHologram.remove(p) : null;
+        if (stand != null) {
+            try {
+                PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(stand.getId());
+                ((CraftPlayer) p).getHandle().playerConnection.sendPacket(destroy);
+            } catch (Throwable ignored) {}
+        }
+    }
+
+    public void forgetPlayerEverywhere(Player p) {
+        // Example toggles / wagers / stats maps keyed by Player:
+        if (gameStats != null) gameStats.remove(p);
+        if (ao != null) ao.remove(p); // ability toggles
+        if (so != null) so.remove(p);
+        if (po != null) po.remove(p);
+        if (wagers != null) wagers.remove(p);
+    }
+
+    public void shutdownEverything() {
+        try { getScoreboardManager().removeAllBoards(); } catch (Throwable ignored) {}
+
+        if (getActionBarManager() != null) {
+            try { getActionBarManager().shutdown(); } catch (Throwable ignored) {}
+        }
+
+        // Holograms/packet stands
+        if (holograms != null) {
+            for (Holograms h : holograms.values()) {
+                try { h.destroyBoards(); } catch (Throwable ignored) {}
+            }
+            holograms.clear();
+        }
+        if (msHologram != null) {
+            msHologram.clear(); // we only sent destroy packets per-player; nothing server-side to kill
+        }
+
+        // Fishing
+        if (getFishing() != null) {
+            try { getFishing().cleanupAll(); } catch (Throwable ignored) {}
+        }
+
+        if (getNPCManager() != null) {
+            try { getNPCManager().shutdown(); } catch (Throwable ignored) {}
+        }
+
+        try { if (getParkour() != null) getParkour().cleanupAll(); } catch (Throwable ignored) {}
+
+        getListener().cancelMessagesTask();
+    }
 }

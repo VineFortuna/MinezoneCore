@@ -127,6 +127,7 @@ public class SantaClass extends BaseClass {
 				}
 			}
 		} else if (item != null && item.getType() == Material.MILK_BUCKET) {
+			event.setCancelled(true);
 			if (player.getGameMode() != GameMode.SPECTATOR) {
 				List<PotionEffectType> effectsToRemove = new ArrayList<>();
 				for (PotionEffect effect : player.getActivePotionEffects()) {
@@ -154,7 +155,7 @@ public class SantaClass extends BaseClass {
 
 	@Override
 	public ClassType getType() {
-		return null;
+		return ClassType.Santa;
 	}
 
 	@Override

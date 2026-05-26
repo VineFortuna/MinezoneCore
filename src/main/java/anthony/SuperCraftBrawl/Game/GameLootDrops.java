@@ -1,0 +1,246 @@
+package anthony.SuperCraftBrawl.Game;
+
+import java.util.Random;
+
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionType;
+
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ItemHelper;
+
+public enum GameLootDrops {
+
+	// COMMON:
+	SLOWNESS(Rarity.COMMON), SLOWBALLS(Rarity.COMMON), BLOOPER(Rarity.COMMON), ZOMBIE_EGG(Rarity.COMMON),
+	SKELE_EGG(Rarity.COMMON), MILK(Rarity.COMMON), SLIME_EGG(Rarity.COMMON), SILVERFISH_EGG(Rarity.COMMON),
+
+	// UNCOMMON:
+	NUKE(Rarity.RARE), SPEED2(Rarity.RARE), INSTAGIB(Rarity.RARE), BAZOOKA(Rarity.RARE),
+	WITCH_EGG(Rarity.RARE), CREEPER_EGG(Rarity.RARE), FIRE_FLOWER(Rarity.RARE), CAVE_SPIDER_EGG(Rarity.RARE),
+
+	// RARE:
+	HEALTH2(Rarity.MYTHIC), BROOMS(Rarity.MYTHIC), HAMMER(Rarity.MYTHIC), ENDER_PEARL(Rarity.MYTHIC), BOUNTY(Rarity.MYTHIC),
+	GOLDEN_APPLE(Rarity.MYTHIC),
+
+	// LEGENDARY:
+	BOMB(Rarity.LEGENDARY), NOTCH_APPLE(Rarity.LEGENDARY), EXTRA_LIFE(Rarity.LEGENDARY);
+
+	private Rarity r;
+
+	GameLootDrops(Rarity r) {
+		this.r = r;
+	}
+
+	public Rarity getRarity() {
+		return this.r;
+	}
+
+	public static GameLootDrops getDrop() {
+		Random r = new Random();
+		int chance = r.nextInt(100);
+		GameLootDrops[] drops = GameLootDrops.values();
+		GameLootDrops randomDrop = null; // Default value
+
+		if (chance >= 50 && chance <= 100) {
+			randomDrop = helper(Rarity.COMMON, randomDrop, drops, r);
+		} else if (chance < 50 && chance >= 15) {
+			randomDrop = helper(Rarity.RARE, randomDrop, drops, r);
+		} else if (chance < 15 && chance >= 3) {
+			randomDrop = helper(Rarity.MYTHIC, randomDrop, drops, r);
+		} else if (chance >= 0 && chance < 3) {
+			randomDrop = helper(Rarity.LEGENDARY, randomDrop, drops, r);
+		}
+
+		return randomDrop;
+	}
+
+	public static GameLootDrops helper(Rarity rarity, GameLootDrops randomDrop, GameLootDrops[] drops, Random r) {
+		boolean found = false;
+
+		while (found == false) {
+			randomDrop = drops[r.nextInt(drops.length)];
+
+			if (randomDrop.getRarity() == rarity)
+				found = true;
+		}
+
+		return randomDrop;
+	}
+
+	public ItemStack getItem() {
+	    ItemStack item = null;
+
+	    switch (this) {
+	        // ===== COMMON =====
+	        case SLOWNESS:
+	            item = ItemHelper.createPotionItem(PotionType.SLOWNESS, 1, 15, true, true, true);
+	            ItemHelper.setDetails(item, "&8&lSLOWNESS II &7(15 sec)", "", "&7&lCOMMON");
+	            break;
+
+	        case SLOWBALLS:
+	            item = ItemHelper.setDetails(new ItemStack(Material.SNOW_BALL, 8),
+	                    "&f&lSLOWBALLS",
+	                    "&7Give Slowness 1 for 3s to an enemy", "", "&7&lCOMMON");
+	            break;
+
+	        case BLOOPER:
+	            item = ItemHelper.setDetails(new ItemStack(Material.RABBIT_FOOT),
+	                    "&e&lBLOOPER",
+	                    "&7Give Blindness or Nausea to an enemy", "", "&7&lCOMMON");
+	            break;
+
+	        case ZOMBIE_EGG:
+	            item = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1);
+	            ItemHelper.setDetails(item, "&2&lZOMBIE POKEBALL", "&7Spawns an armored Zombie", "", "&7&lCOMMON");
+	            break;
+
+	        case SKELE_EGG:
+	            item = ItemHelper.createMonsterEgg(EntityType.SKELETON, 1);
+	            ItemHelper.setDetails(item, "&7&lSKELETON POKEBALL", "&7Spawns a Skeleton with Punch 2", "", "&7&lCOMMON");
+	            break;
+
+	        case MILK:
+	            item = ItemHelper.setDetails(new ItemStack(Material.MILK_BUCKET),
+	                    "&f&lMILK",
+	                    "&7Removes fire and all negative effects", "", "&7&lCOMMON");
+	            break;
+	            
+	        case SLIME_EGG:
+	        	item = ItemHelper.createMonsterEgg(EntityType.SLIME, 1);
+	            ItemHelper.setDetails(item, "&2&lSLIME POKEBALL", "&7Spawns a big Slime", "", "&7&lCOMMON");
+	            break;
+
+			case SILVERFISH_EGG:
+				item = ItemHelper.createMonsterEgg(EntityType.SILVERFISH, 1);
+				ItemHelper.setDetails(item, "&7&lSILVERFISH POKEBALL", "&7Spawns 3 Silverfish", "", "&7&lCOMMON");
+				break;
+
+	        // ===== UNCOMMON =====
+			case NUKE:
+				item = ItemHelper.setDetails(new ItemStack(Material.TNT, 3),
+						"&4&lNUKE",
+						"&7Spawn TNTs where you're looking",
+						"",
+						"&2&lUNCOMMON");
+				ItemHelper.setGlowing(item, true);
+				break;
+
+	        case SPEED2:
+	            item = ItemHelper.createPotionItem(PotionType.SPEED, 1, 30, true, true, true);
+	            ItemHelper.setDetails(item, "&b&lSPEED II &7(30 sec)", "", "&2&lUNCOMMON");
+	            break;
+
+	        case INSTAGIB:
+	            item = ItemHelper.setDetails(new ItemStack(Material.GOLD_HOE, 5, (short) 1),
+	                    "&e&lINSTAGIB",
+	                    "&7Do damage and send your enemies to the sky!", "", "&2&lUNCOMMON");
+	            break;
+
+	        case BAZOOKA:
+	            item = ItemHelper.setDetails(new ItemStack(Material.DIAMOND_HOE, 3, (short) 1),
+	                    "&b&lBAZOOKA",
+	                    "&7Explode the area it lands", "", "&2&lUNCOMMON");
+	            ItemHelper.setHideFlags(item, true);
+	            break;
+
+	        case WITCH_EGG:
+	            item = ItemHelper.createMonsterEgg(EntityType.WITCH, 1);
+	            ItemHelper.setDetails(item, "&5&lWITCH POKEBALL", "&7Spawns a Witch to help you", "", "&2&lUNCOMMON");
+	            break;
+
+	        case CREEPER_EGG:
+	            item = ItemHelper.createMonsterEgg(EntityType.CREEPER, 1);
+	            ItemHelper.setDetails(item,
+	                    "&a&lCREEPER POKEBALL",
+	                    "&7Spawns a Creeper",
+	                    "&7Be careful!", "", "&2&lUNCOMMON");
+	            break;
+	            
+	        case FIRE_FLOWER:
+	        	 item = ItemHelper.setDetails(new ItemStack(Material.RED_ROSE, 3),
+		                    "&c&lFIRE &e&lFLOWER",
+		                    "&7Throw a fire flower at an enemy to set", "&7them on fire!", "", "&2&lUNCOMMON");
+	        	 break;
+
+			case CAVE_SPIDER_EGG:
+				item = ItemHelper.createMonsterEgg(EntityType.SPIDER, 1);
+				ItemHelper.setDetails(item, "&c&lCAVE SPIDER POKEBALL", "&7Spawns a Cave Spider",
+						"", "&2&lUNCOMMON");
+				break;
+
+	        // ===== RARE =====
+	        case HEALTH2:
+	            item = ItemHelper.createPotionItem(PotionType.INSTANT_HEAL, 1, 0, true, true, true);
+	            ItemHelper.setDetails(item, "&c&lHEALING II", "", "&9&lRARE");
+	            break;
+
+	        case BROOMS:
+	            item = ItemHelper.setDetails(new ItemStack(Material.WHEAT, 4),
+	                    "&5&lBROOM",
+	                    "&7Sends you up and saves you from the void", "", "&9&lRARE");
+	            break;
+
+	        case HAMMER:
+	            item = ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD, 1, (short) 250),
+	                    "&d&lHAMMER", "", "&9&lRARE");
+	            item.addUnsafeEnchantment(Enchantment.KNOCKBACK, 10);
+	            break;
+
+	        case ENDER_PEARL:
+	            item = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL),
+	                    "&5&lENDER PEARL", "", "&9&lRARE");
+	            break;
+
+	        case BOUNTY:
+	            item = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR, 1),
+	                    "&a&lBOUNTY",
+	                    "&7Set a bounty on a random player",
+	                    "&7Kill them to claim extra tokens", "", "&9&lRARE");
+	            break;
+
+	        case GOLDEN_APPLE:
+	            item = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE),
+	                    "&6&lGOLDEN APPLE", "", "&9&lRARE");
+	            break;
+
+	        // ===== LEGENDARY =====
+	        case BOMB:
+	            item = ItemHelper.createPotionItem(PotionType.INSTANT_DAMAGE, 1000, 0, true, true, true);
+	            ItemHelper.setDetails(item, "&4&lBOMB", "&7Be careful!", "&7Instantly kills... anyone", "", "&6&lLEGENDARY");
+	            break;
+
+	        case NOTCH_APPLE:
+	            item = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE, 1, (short) 1),
+	                    "&d&lNOTCH APPLE", "", "&6&lLEGENDARY");
+	            break;
+
+	        case EXTRA_LIFE:
+	            item = ItemHelper.setDetails(new ItemStack(Material.PRISMARINE_SHARD),
+	                    "&3&lEXTRA LIFE",
+	                    "&7Receive an extra life", "", "&6&lLEGENDARY");
+	            break;
+
+	        default:
+	            throw new IllegalStateException("getItem() not implemented for " + this.name());
+	    }
+
+	    return item;
+	}
+
+	public enum Rarity {
+		COMMON(60), RARE(25), MYTHIC(12), LEGENDARY(3);
+
+		private final int weight;
+
+		Rarity(int weight) {
+			this.weight = weight;
+		}
+
+		public int weight() {
+			return weight;
+		}
+	}
+}

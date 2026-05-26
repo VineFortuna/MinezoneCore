@@ -57,8 +57,9 @@ public class BunnyClass extends BaseClass {
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void Tick(int gameTicks) {
-		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
+		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED))) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2));
+		}
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
 			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 2));
 	}
@@ -69,6 +70,8 @@ public class BunnyClass extends BaseClass {
 
 			@Override
 			public void run() {
+				if (!isPlayerAlive())
+					this.cancel();
 				if (ticks == 5) {
 					player.removePotionEffect(PotionEffectType.SPEED);
 					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 110, 4));

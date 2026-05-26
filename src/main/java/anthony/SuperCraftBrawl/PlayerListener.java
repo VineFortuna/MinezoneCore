@@ -3,32 +3,25 @@ package anthony.SuperCraftBrawl;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.fishing.FishArea;
-import anthony.SuperCraftBrawl.fishing.FishRarity;
-import anthony.SuperCraftBrawl.fishing.FishType;
-import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.gui.christmas.ChristmasRewardsGUI;
 import anthony.SuperCraftBrawl.gui.cosmetics.CosmeticsGUI;
-import anthony.SuperCraftBrawl.playerdata.FishingDetails;
+import anthony.SuperCraftBrawl.leaderboards.LeaderboardScope;
+import anthony.SuperCraftBrawl.npcs.ChannelInjector;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
-import anthony.util.ItemHelper;
-import anthony.util.PathfinderGoalFollowPlayer;
-import anthony.util.PathfinderHelper;
-import com.comphenix.protocol.wrappers.EnumWrappers;
-import me.itzzmic.minezone.api.PunishAPI;
+import anthony.util.SoundManager;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.*;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.*;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -49,6 +42,7 @@ import org.bukkit.material.Door;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.Vector;
@@ -65,6 +59,9 @@ public class PlayerListener implements Listener {
 	public List<Player> candyCaneSwirlPlayers = new ArrayList<Player>();
 	public List<Player> elfCosmeticPlayers = new ArrayList<Player>();
 	public List<Player> goldenOutfitPlayers = new ArrayList<>();
+	public List<Player> freddyOutfitPlayers = new ArrayList<>();
+	public List<Player> rudolphOutfitPlayers = new ArrayList<>();
+	private BukkitTask announcementsTask;
 
 	public PlayerListener(Core main) {
 		this.main = main;
@@ -72,7 +69,39 @@ public class PlayerListener implements Listener {
 		this.c = scoreManager.getNewScoreboard();
 	}
 
-	/**
+    /*
+    * This function shows the server messages that appear every 5 minutes
+     */
+    public void messages() {
+        // Don’t schedule more than once
+        if (announcementsTask != null) return;
+
+        announcementsTask = new BukkitRunnable() {
+            @Override
+            public void run() {
+                Announcements[] all = Announcements.values();
+                Announcements msg = all[java.util.concurrent.ThreadLocalRandom.current().nextInt(all.length)];
+
+                String toSend = msg.getName();
+                if (toSend == null || toSend.isEmpty()) return;
+
+                for (Player p : org.bukkit.Bukkit.getOnlinePlayers()) {
+                    if (main.getGameManager().GetInstanceOfPlayer(p) != null) continue;
+                    p.sendMessage(toSend);
+                }
+            }
+        }.runTaskTimer(main, 0L, 5L * 60L * 20L); // every 5 minutes
+    }
+
+    // Gets called in onDisable() in Core class
+    public void cancelMessagesTask() {
+        if (announcementsTask != null) {
+            announcementsTask.cancel();
+            announcementsTask = null;
+        }
+    }
+
+    /**
 	 * This function just resets player double jump & sets gamemode to Adventure
 	 * 
 	 * @param p to be reset
@@ -81,6 +110,10 @@ public class PlayerListener implements Listener {
 		p.setAllowFlight(false);
 		p.setAllowFlight(true);
 		p.setGameMode(GameMode.ADVENTURE);
+	}
+	
+	public void removeCosmetics(Player player) {
+		main.getTrickTitle().disable(player);
 	}
 
 	/**
@@ -104,6 +137,25 @@ public class PlayerListener implements Listener {
 		for (PotionEffect type : p.getActivePotionEffects()) // Loop through all active effects
 			p.removePotionEffect(type.getType());
 	}
+	
+	public void checkIfLevelUp(Player player) {
+		PlayerData data = main.getDataManager().getPlayerData(player);
+		
+		if (data != null) {
+			if (data.exp >= 2500) {
+				data.level++;
+				data.exp -= 2500;
+				player.sendMessage(main.color("&8&m----------------------------------------"));
+				player.sendMessage(main.color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
+				player.sendMessage(main.color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
+				player.sendMessage(main.color("&8&m----------------------------------------"));
+				player.playSound(player.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
+				
+				if (player.getWorld() == main.getLobbyWorld())
+					main.getScoreboardManager().lobbyBoard(player);
+			}
+		}
+	}
 
 	/**
 	 * This function sets the player's rank on the tablist to the left of their name
@@ -117,12 +169,12 @@ public class PlayerListener implements Listener {
 
 		if (rank.length() >= 16) {
 			String s = rank.substring(0, 9);
-			p.setPlayerListName("" + s + " " + r.getColorForNames(p, r));
+			p.setPlayerListName(s + " " + r.getColorForNames(p, r));
 		} else
-			p.setPlayerListName("" + rank + r.getColorForNames(p, r));
+			p.setPlayerListName(rank + r.getColorForNames(p, r));
 
 		if (main.getRankManager().getRank(p) == Rank.DEFAULT)
-			p.setPlayerListName("" + rank + r.getColorForNames(p, r));
+			p.setPlayerListName(rank + r.getColorForNames(p, r));
 
 		/*
 		 * Team captain = c.registerNewTeam("b_captain");
@@ -138,28 +190,49 @@ public class PlayerListener implements Listener {
 		 */
 	}
 
-	// Clicking leaderboard settings in lobby
-	@EventHandler
-	public void onPlayerInteract(PlayerInteractAtEntityEvent event) {
-		if (!(event.getRightClicked() instanceof ArmorStand)) {
-			return; // Only proceed if it's an ArmorStand
-		}
+    // Track the follow task for each player's snowman so we can cancel it.
+    private final Map<UUID, Integer> snowmanTasks = new HashMap<>();
 
-		ArmorStand armorStand = (ArmorStand) event.getRightClicked();
-		Player player = event.getPlayer();
+    private void cancelSnowmanTask(UUID uuid) {
+        Integer id = snowmanTasks.remove(uuid);
+        if (id != null) {
+            try { Bukkit.getScheduler().cancelTask(id); } catch (Throwable ignored) {}
+        }
+    }
 
-		if (armorStand.getCustomName() != null) {
-			if (armorStand.getCustomName().equals("Leaderboard Settings")) {
-				player.sendMessage("You clicked on the Leaderboard Settings!");
-			}
-
-			if (armorStand.getCustomName().equals("Click to change settings")) {
-				player.sendMessage("You clicked to change settings!");
-			}
-		}
+    public int getHalloweenEventProgress(Player player) {
+		int progress = (main.getHalloweenManager() != null)
+				? main.getHalloweenManager().getFoundCount(player.getUniqueId())
+				: 0;
+		
+		return progress;
 	}
 
-	/**
+    // Clicking leaderboard settings in lobby
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractAtEntityEvent event) {
+        if (!(event.getRightClicked() instanceof ArmorStand)) {
+            return;
+        }
+
+        ArmorStand stand = (ArmorStand) event.getRightClicked();
+        Player player = event.getPlayer();
+
+        String raw = stand.getCustomName();
+
+        if (raw == null) {
+            return;
+        }
+
+        if (main.getLbSettingsHologram().isSettingsHologram(event.getRightClicked().getUniqueId())) {
+
+            SoundManager.playClickSound(player);
+            new anthony.SuperCraftBrawl.gui.leaderboard.LeaderboardScopeGUI(main).inv().open(player);
+            event.setCancelled(true);
+        }
+    }
+
+    /**
 	 * This function checks if tournament mode is active on Player Join
 	 * 
 	 * @param p which is Player to add to the tournament
@@ -168,10 +241,7 @@ public class PlayerListener implements Listener {
 		if (main.tournament) {
 			PlayerData data = main.getDataManager().getPlayerData(p);
 			if (main.tourneyreset) {
-				if (!main.tourney.containsKey(p.getName()))
-					data.points = 0;
-				else
-					data.points = main.tourney.get(p.getName());
+                data.points = main.tourney.getOrDefault(p.getName(), 0);
 			}
 			main.tourney.put(p.getName(), data.points);
 		}
@@ -189,6 +259,48 @@ public class PlayerListener implements Listener {
 			event.getPlayer().getInventory().clear();
 			main.ResetPlayer(event.getPlayer());
 		}, 20);
+
+        Bukkit.getScheduler().runTaskLater(main, () -> {
+            Player p = event.getPlayer();
+
+            // Default their personal view to Lifetime (only set once)
+            main.leaderboardScopeByViewer.putIfAbsent(p.getUniqueId(), LeaderboardScope.LIFETIME);
+
+            // Get their current totals from PlayerData
+            PlayerData data = main.getDataManager().getPlayerData(p);
+            if (data == null) return; // safety
+
+            // If your fields are getters, swap to data.getWins() etc.
+            int wins = data.wins;
+            int kills = data.kills;
+            int flawlessWins = data.flawlessWins;
+
+            try {
+                if (main.snapshotDAO == null) {
+                    return;
+                }
+
+                String uuid = p.getUniqueId().toString();
+
+                // Wins
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Wins", LeaderboardScope.DAILY, wins);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Wins", LeaderboardScope.WEEKLY, wins);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Wins", LeaderboardScope.MONTHLY, wins);
+
+                // Kills
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Kills", LeaderboardScope.DAILY, kills);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Kills", LeaderboardScope.WEEKLY, kills);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Kills", LeaderboardScope.MONTHLY, kills);
+
+                // Flawless Wins
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FlawlessWins", LeaderboardScope.DAILY, flawlessWins);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FlawlessWins", LeaderboardScope.WEEKLY, flawlessWins);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FlawlessWins", LeaderboardScope.MONTHLY, flawlessWins);
+
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }, 40L); // ~2 seconds after join; adjust if your data load needs more/less time
 	}
 
 	@EventHandler
@@ -201,20 +313,91 @@ public class PlayerListener implements Listener {
 			snowmanPetPlayers.get(player).remove();
 		snowmanPetPlayers.remove(player);
 		elfCosmeticPlayers.remove(player);
-		// anthony.CrystalWars.game.GameInstance i =
-		// main.getCwManager().getInstanceOfPlayer(player);
-		// anthony.skywars.GameInstance i2 =
-		// main.getSWManager().getInstanceOfPlayer(player);
 
 		if (instance != null)
 			main.getGameManager().RemovePlayerFromAll(player);
-		// else if (i != null)
-		// main.getCwManager().removePlayer(player);
-		// else if (i2 != null)
-		// main.getSWManager().removePlayer(player);
-	}
 
-	@EventHandler
+        main.getScoreboardManager().removeLobbyBoard(player);
+        Player p = event.getPlayer();
+
+        // Scoreboards
+        main.getScoreboardManager().removeLobbyBoard(p);
+        try { Holograms h = main.holograms.remove(p); if (h != null) h.destroyBoards(); } catch (Throwable ignored) {}
+        try { main.getFishing().cleanupAll(); } catch (Throwable ignored) {}
+
+        // Holograms / packet armor stands
+        main.hologramCleanup(p);
+
+        // Fishing
+        safeFishingCleanup(p);
+
+        // Game instance (ensure game structures release this player)
+        GameInstance gi = main.getGameManager().GetInstanceOfPlayer(p);
+        if (gi != null) {
+            gi.forceRemovePlayer(p); // implement to clear maps/boards/cooldowns for this player
+        }
+
+        main.getScoreboardManager().removeLobbyBoard(player);
+        main.staffchat.remove(player);
+        main.globalchat.remove(player);
+
+        // Any Player->... maps in Core
+        main.forgetPlayerEverywhere(p);
+        cancelSnowmanTask(player.getUniqueId());
+        main.sentMysteryHolos.remove(player.getUniqueId());
+        main.sentParkourHolos.remove(player.getUniqueId());
+        ChannelInjector.uninject(player);
+        removeLeaderboards(event);
+        main.getTitleAnimationManager().stop(player);
+    }
+
+    private void removeLeaderboards(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        clearLeaderboardHolograms(player);
+    }
+    private void clearLeaderboardHolograms(Player player) {
+        try {
+            if (main.getKillsLeaderboard() != null) {
+                main.getKillsLeaderboard().clearViewerHologram(player);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (main.getLeaderboard() != null) {
+                main.getLeaderboard().clearViewerHologram(player);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (main.getFlawlessWinsBoard() != null) {
+                main.getFlawlessWinsBoard().clearViewerHologram(player);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (main.getWinstreakBoard() != null) {
+                main.getWinstreakBoard().clearViewerHologram(player);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
+
+    private void safeFishingCleanup(Player p) {
+        try {
+            if (main.getFishing() != null) {
+                main.getFishing().cleanup(p);
+            }
+        } catch (Throwable t) {
+            // swallow – we never want a cleanup error to block logout flow
+            main.getLogger().warning("[Fishing] cleanup failed for " + p.getName() + ": " + t.getMessage());
+        }
+    }
+
+    @EventHandler
 	public void waterNoFlow(BlockFromToEvent e) {
 		if (main.getCommands() != null)
 			e.setCancelled(true);
@@ -285,7 +468,50 @@ public class PlayerListener implements Listener {
 		}
 	}
 
-	@EventHandler
+    @EventHandler
+    public void onPlayerChangedWorld(PlayerChangedWorldEvent e) {
+        Player p = e.getPlayer();
+        Core main = this.main; // adjust if you use a different accessor
+
+        // 1) Remove lobby board if they left the lobby world
+        try {
+            World lobby = main.getLobbyWorld();
+            if (lobby != null && !p.getWorld().equals(lobby)) {
+                main.getScoreboardManager().removeLobbyBoard(p);
+            }
+        } catch (Throwable ignored) {}
+
+        // 2) Kill any per-player holograms
+        try {
+            Holograms h = main.holograms.get(p);
+            if (h != null) h.destroyBoards();
+            EntityArmorStand stand = main.msHologram.remove(p);
+            if (stand != null) {
+                PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(stand.getId());
+                ((CraftPlayer) p).getHandle().playerConnection.sendPacket(destroy);
+            }
+        } catch (Throwable ignored) {}
+
+        // 3) Fishing cleanup (no dangling hooks)
+        try {
+            main.getFishing().cleanupAll(); // safe no-op if nothing to do
+        } catch (Throwable ignored) {}
+
+        // 4) If the player left a game, ensure the instance drops references
+        try {
+            GameInstance gi = main.getGameManager().GetInstanceOfPlayer(p);
+            if (gi != null && gi.state != GameState.STARTED) {
+                // Remove any per-player tasks/boards/effects by UUID
+                UUID id = p.getUniqueId();
+                gi.boards.remove(id);
+                gi.effects.remove(id);
+            }
+        } catch (Throwable ignored) {}
+
+        clearLeaderboardHolograms(p);
+    }
+
+    @EventHandler
 	public void onEnterFishingArea(PlayerMoveEvent event) {
 		Player player = event.getPlayer();
 		Location to = event.getTo();
@@ -331,47 +557,46 @@ public class PlayerListener implements Listener {
 		return (yaw >= 337.5 || yaw <= 22.5);
 	}
 
-	public void snowmanPet(Player player) {
-		if (this.snowmanPetPlayers.containsKey(player)) {
-			// Spawn a Snowman near the player
-			Snowman snowman = snowmanPetPlayers.get(player);
+    public void snowmanPet(Player player) {
+        UUID uid = player.getUniqueId();
 
-			// Convert the player to NMS EntityLiving
-			EntityLiving targetPlayer = (EntityLiving) ((CraftLivingEntity) player).getHandle();
+        // If we already had a task running for this player, stop it first.
+        cancelSnowmanTask(uid);
 
-			// Add follow behavior to the mob
-			PathfinderHelper.clearPathfinderGoals(snowman);
-			PathfinderHelper.addPathfinderGoal(snowman, 1, new PathfinderGoalFollowPlayer(
-					(EntityInsentient) ((CraftLivingEntity) snowman).getHandle(), targetPlayer, 1.75, 3.0, 4.0));
+        if (!this.snowmanPetPlayers.containsKey(player)) {
+            return; // nothing to follow right now
+        }
 
-			// Schedule a repeating task to "follow" the player by teleporting
-			Bukkit.getScheduler().runTaskTimer(main, () -> {
-				if (!player.isOnline() || !snowman.isValid() || player.getWorld() != snowman.getWorld())
-					return;
+        final Snowman snowman = snowmanPetPlayers.get(player);
+        final int taskId = Bukkit.getScheduler().runTaskTimer(main, () -> {
+            // End conditions: no player, no snowman, wrong world, or pet turned off
+            if (!player.isOnline()
+                    || !snowman.isValid()
+                    || player.getWorld() != snowman.getWorld()
+                    || !snowmanPetPlayers.containsKey(player)
+                    || player.getWorld() != main.getLobbyWorld()) {
 
-				Location playerLoc = player.getLocation();
-				double distance = playerLoc.distance(snowman.getLocation());
+                // remove pet entity if still around
+                try { snowman.remove(); } catch (Throwable ignored) {}
+                cancelSnowmanTask(uid); // <- kill the ticker
+                return;
+            }
 
-				// If the snowman is too far, teleport it closer to the player
-				if (distance > 15) {
-					// Teleport the snowman about 2 blocks behind the player
-					Location behindPlayer = playerLoc.clone().add(playerLoc.getDirection().multiply(-2));
-					behindPlayer.setY(
-							Math.min(playerLoc.getWorld().getHighestBlockYAt(behindPlayer), playerLoc.getY() + 10));
-					snowman.teleport(behindPlayer);
-				}
+            // Follow logic
+            Location playerLoc = player.getLocation();
+            double distance = playerLoc.distance(snowman.getLocation());
 
-				if (!this.snowmanPetPlayers.containsKey(player)) {
-					snowman.remove();
-				} else if (!player.isOnline() || player.getWorld() != main.getLobbyWorld()) {
-					this.snowmanPetPlayers.remove(player);
-					snowman.remove();
-				}
-			}, 20L, 20L); // Checks every second
-		}
-	}
+            if (distance > 15) {
+                Location behind = playerLoc.clone().add(playerLoc.getDirection().multiply(-2));
+                behind.setY(Math.min(playerLoc.getWorld().getHighestBlockYAt(behind), playerLoc.getY() + 10));
+                snowman.teleport(behind);
+            }
+        }, 20L, 20L).getTaskId();
 
-	// Angle used to rotate the swirl; we store it as a field so it persists across
+        snowmanTasks.put(uid, taskId);
+    }
+
+    // Angle used to rotate the swirl; we store it as a field so it persists across
 	// movements
 	private double angle = 0;
 
@@ -627,19 +852,10 @@ public class PlayerListener implements Listener {
 			List<String> filteredWords = new ArrayList<>(Arrays.asList("nibba", "nigga", "niggas", "nigger", "niggers",
 					"porn", "pornhub", "cum", "fuck you", "fuckyou", "fuck", "bitch", "pussy", "fucker", "motherfucker",
 					"kys", "pu$$y", "fag", "faggot", "bitchass", "cunt", "retard", "penis", "fucker", "twat", "cock",
-					"dick", "cumming", "fuckass", "vagina", "fuckers"));
+					"dick", "cumming", "fuckass", "vagina", "fuckers", "shit", "shitter", "shitters", "fucking"));
 			PlayerData data = main.getDataManager().getPlayerData(event.getPlayer());
 			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
 			String message = event.getMessage();
-
-//			if (event.getPlayer().hasPermission("scb.chat"))
-//				message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
-//						+ ChatColor.YELLOW + "] " + tag + event.getPlayer().getDisplayName() + ChatColor.RESET + ": ";
-//			else
-//				message = "" + ChatColor.YELLOW + "[" + ChatColor.YELLOW + ChatColor.BOLD + data.level + ChatColor.RESET
-//						+ ChatColor.YELLOW + "] " + tag + ChatColor.GRAY + event.getPlayer().getDisplayName() + ": ";
-
-			// &6&l✧&6262 &4Owner&c anthsauce: &fLorem ipsum...
 
 			event.setFormat(ChatColor.YELLOW + main.color("" + data.checkPlayerLevel(event.getPlayer(), data) + "✧")
 					+ data.level + " " + tag);
@@ -669,12 +885,6 @@ public class PlayerListener implements Listener {
 			else
 				event.setMessage(message);
 
-			PunishAPI pu = PunishAPI.get();
-			if (pu.isPlayerMuted(event.getPlayer().getUniqueId())) {
-				String muteMsg = pu.getMuteMessage(event.getPlayer().getUniqueId());
-				event.getPlayer().sendMessage(muteMsg);
-				return;
-			}
 			Bukkit.broadcastMessage(event.getFormat() + event.getMessage());
 		}
 	}
@@ -795,7 +1005,7 @@ public class PlayerListener implements Listener {
 				&& !(block.getState() instanceof InventoryHolder) && !(block.getState() instanceof Banner)
 				&& block.getType() != Material.SKULL && block.getType() != Material.SOIL
 				&& block.getType() != Material.SEA_LANTERN && block.getType() != Material.BEACON
-				&& block.getType() != Material.GLOWSTONE) {
+				&& block.getType() != Material.GLOWSTONE && block.getType() != Material.LADDER) {
 			Material og = block.getType();
 			Byte data = block.getData();
 			if (og == Material.WOOL) {
