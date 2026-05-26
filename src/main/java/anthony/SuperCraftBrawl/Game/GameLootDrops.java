@@ -15,11 +15,11 @@ public enum GameLootDrops {
 
 	// COMMON:
 	SLOWNESS(Rarity.COMMON), SLOWBALLS(Rarity.COMMON), BLOOPER(Rarity.COMMON), ZOMBIE_EGG(Rarity.COMMON),
-	SKELE_EGG(Rarity.COMMON), MILK(Rarity.COMMON), SLIME_EGG(Rarity.COMMON),
+	SKELE_EGG(Rarity.COMMON), MILK(Rarity.COMMON), SLIME_EGG(Rarity.COMMON), SILVERFISH_EGG(Rarity.COMMON),
 
 	// UNCOMMON:
 	NUKE(Rarity.RARE), SPEED2(Rarity.RARE), INSTAGIB(Rarity.RARE), BAZOOKA(Rarity.RARE),
-	WITCH_EGG(Rarity.RARE), CREEPER_EGG(Rarity.RARE), FIRE_FLOWER(Rarity.RARE),
+	WITCH_EGG(Rarity.RARE), CREEPER_EGG(Rarity.RARE), FIRE_FLOWER(Rarity.RARE), CAVE_SPIDER_EGG(Rarity.RARE),
 
 	// RARE:
 	HEALTH2(Rarity.MYTHIC), BROOMS(Rarity.MYTHIC), HAMMER(Rarity.MYTHIC), ENDER_PEARL(Rarity.MYTHIC), BOUNTY(Rarity.MYTHIC),
@@ -94,12 +94,12 @@ public enum GameLootDrops {
 
 	        case ZOMBIE_EGG:
 	            item = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1);
-	            ItemHelper.setDetails(item, "&2&lZOMBIE POKEBALL", "&7Spawns an equipped zombie", "", "&7&lCOMMON");
+	            ItemHelper.setDetails(item, "&2&lZOMBIE POKEBALL", "&7Spawns an armored Zombie", "", "&7&lCOMMON");
 	            break;
 
 	        case SKELE_EGG:
 	            item = ItemHelper.createMonsterEgg(EntityType.SKELETON, 1);
-	            ItemHelper.setDetails(item, "&7&lSKELETON POKEBALL", "&7Spawns a skeleton with punch 2", "", "&7&lCOMMON");
+	            ItemHelper.setDetails(item, "&7&lSKELETON POKEBALL", "&7Spawns a Skeleton with Punch 2", "", "&7&lCOMMON");
 	            break;
 
 	        case MILK:
@@ -110,8 +110,13 @@ public enum GameLootDrops {
 	            
 	        case SLIME_EGG:
 	        	item = ItemHelper.createMonsterEgg(EntityType.SLIME, 1);
-	            ItemHelper.setDetails(item, "&2&lSLIME POKEBALL", "&7Right click to throw a Slime spawn egg", "", "&7&lCOMMON");
+	            ItemHelper.setDetails(item, "&2&lSLIME POKEBALL", "&7Spawns a big Slime", "", "&7&lCOMMON");
 	            break;
+
+			case SILVERFISH_EGG:
+				item = ItemHelper.createMonsterEgg(EntityType.SILVERFISH, 1);
+				ItemHelper.setDetails(item, "&7&lSILVERFISH POKEBALL", "&7Spawns 3 Silverfish", "", "&7&lCOMMON");
+				break;
 
 	        // ===== UNCOMMON =====
 			case NUKE:
@@ -143,14 +148,14 @@ public enum GameLootDrops {
 
 	        case WITCH_EGG:
 	            item = ItemHelper.createMonsterEgg(EntityType.WITCH, 1);
-	            ItemHelper.setDetails(item, "&5&lWITCH POKEBALL", "&7Spawns a witch to help you", "", "&2&lUNCOMMON");
+	            ItemHelper.setDetails(item, "&5&lWITCH POKEBALL", "&7Spawns a Witch to help you", "", "&2&lUNCOMMON");
 	            break;
 
 	        case CREEPER_EGG:
 	            item = ItemHelper.createMonsterEgg(EntityType.CREEPER, 1);
 	            ItemHelper.setDetails(item,
 	                    "&a&lCREEPER POKEBALL",
-	                    "&7Spawns a creeper",
+	                    "&7Spawns a Creeper",
 	                    "&7Be careful!", "", "&2&lUNCOMMON");
 	            break;
 	            
@@ -159,6 +164,12 @@ public enum GameLootDrops {
 		                    "&c&lFIRE &e&lFLOWER",
 		                    "&7Throw a fire flower at an enemy to set", "&7them on fire!", "", "&2&lUNCOMMON");
 	        	 break;
+
+			case CAVE_SPIDER_EGG:
+				item = ItemHelper.createMonsterEgg(EntityType.SPIDER, 1);
+				ItemHelper.setDetails(item, "&c&lCAVE SPIDER POKEBALL", "&7Spawns a Cave Spider",
+						"", "&2&lUNCOMMON");
+				break;
 
 	        // ===== RARE =====
 	        case HEALTH2:
