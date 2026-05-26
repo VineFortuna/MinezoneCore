@@ -165,12 +165,6 @@ public class ParkourBoard extends LeaderboardBase {
                 continue;
             }
 
-            ParkourDetails details = data.playerParkour.get(arena.getId());
-
-            if (details == null || details.totalTime <= 0) {
-                continue;
-            }
-
             Location line1 = base.clone().add(0, -0.24, 0);
             sendStandToOnePlayerLifetimeOnly(
                     line1,
@@ -181,7 +175,7 @@ public class ParkourBoard extends LeaderboardBase {
             Location line2 = base.clone().add(0, -0.44, 0);
             sendStandToOnePlayerLifetimeOnly(
                     line2,
-                    ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + formatTime(details.totalTime),
+                    ChatColor.GREEN + player.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + "N/A",
                     player
             );
         }
@@ -259,9 +253,7 @@ public class ParkourBoard extends LeaderboardBase {
             y -= 0.24;
         }
 
-        long yourVal = getScopedValueFor(viewer, scope);
-
-        if (yourVal > 0 && !ids.contains(viewer.getUniqueId())) {
+        if (!ids.contains(viewer.getUniqueId())) {
             Location sep = new Location(title.getWorld(), title.getX(), y - 0.20, title.getZ());
             sendLineToViewer(viewer, sep, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------");
 
@@ -271,7 +263,7 @@ public class ParkourBoard extends LeaderboardBase {
             sendLineToViewer(
                     viewer,
                     yours,
-                    ChatColor.YELLOW + viewer.getName() + ChatColor.RESET + " - " + formatTime(yourVal)
+                    ChatColor.GREEN + viewer.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + "N/A"
             );
         }
     }
