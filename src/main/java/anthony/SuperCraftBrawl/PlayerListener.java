@@ -208,27 +208,30 @@ public class PlayerListener implements Listener {
 		return progress;
 	}
 
-	// Clicking leaderboard settings in lobby
+    // Clicking leaderboard settings in lobby
     @EventHandler
     public void onPlayerInteract(PlayerInteractAtEntityEvent event) {
-        if (!(event.getRightClicked() instanceof ArmorStand)) return;
+        if (!(event.getRightClicked() instanceof ArmorStand)) {
+            return;
+        }
 
         ArmorStand stand = (ArmorStand) event.getRightClicked();
         Player player = event.getPlayer();
 
         String raw = stand.getCustomName();
-        if (raw == null) return;
 
-        // Strip colors so either colored or plain names work
+        if (raw == null) {
+            return;
+        }
+
         String name = org.bukkit.ChatColor.stripColor(raw).trim().toLowerCase();
 
-        // Open the scope picker when clicking your settings/title stands
         if (name.equals("leaderboard settings")
                 || name.equals("click to change settings")
                 || name.contains("wins")
                 || name.contains("kills")
                 || name.contains("flawless")
-                || name.contains("fishing")) {
+                || name.contains("winstreak")) {
 
             SoundManager.playClickSound(player);
             new anthony.SuperCraftBrawl.gui.leaderboard.LeaderboardScopeGUI(main).inv().open(player);
@@ -275,34 +278,31 @@ public class PlayerListener implements Listener {
             if (data == null) return; // safety
 
             // If your fields are getters, swap to data.getWins() etc.
-            int wins         = data.wins;
-            int kills        = data.kills;
+            int wins = data.wins;
+            int kills = data.kills;
             int flawlessWins = data.flawlessWins;
-            int totalCaught  = data.totalcaught;
 
-            // Seed snapshots for THIS player so daily/weekly/monthly = current - snapshot
             try {
+                if (main.snapshotDAO == null) {
+                    return;
+                }
+
                 String uuid = p.getUniqueId().toString();
 
                 // Wins
-                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Wins", LeaderboardScope.DAILY,   wins);
-                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Wins", LeaderboardScope.WEEKLY,  wins);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Wins", LeaderboardScope.DAILY, wins);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Wins", LeaderboardScope.WEEKLY, wins);
                 main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Wins", LeaderboardScope.MONTHLY, wins);
 
                 // Kills
-                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Kills", LeaderboardScope.DAILY,   kills);
-                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Kills", LeaderboardScope.WEEKLY,  kills);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Kills", LeaderboardScope.DAILY, kills);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Kills", LeaderboardScope.WEEKLY, kills);
                 main.snapshotDAO.ensureSnapshotForPlayer(uuid, "Kills", LeaderboardScope.MONTHLY, kills);
 
                 // Flawless Wins
-                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FlawlessWins", LeaderboardScope.DAILY,   flawlessWins);
-                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FlawlessWins", LeaderboardScope.WEEKLY,  flawlessWins);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FlawlessWins", LeaderboardScope.DAILY, flawlessWins);
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FlawlessWins", LeaderboardScope.WEEKLY, flawlessWins);
                 main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FlawlessWins", LeaderboardScope.MONTHLY, flawlessWins);
-
-                // Fishing total caught
-                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "TotalCaught", LeaderboardScope.DAILY,   totalCaught);
-                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "TotalCaught", LeaderboardScope.WEEKLY,  totalCaught);
-                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "TotalCaught", LeaderboardScope.MONTHLY, totalCaught);
 
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -359,11 +359,39 @@ public class PlayerListener implements Listener {
     }
 
     private void removeLeaderboards(PlayerQuitEvent event) {
-        try { if (main.getKillsLeaderboard() != null)    main.getKillsLeaderboard().clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
-        try { if (main.getLeaderboard() != null)     main.getLeaderboard().clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
-        //try { if (main.flawlessBoard != null) main.flawlessBoard.clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
-        //try { if (main.fishingBoard != null)  main.fishingBoard.clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
+        Player player = event.getPlayer();
+        clearLeaderboardHolograms(player);
     }
+    private void clearLeaderboardHolograms(Player player) {
+        try {
+            if (main.getKillsLeaderboard() != null) {
+                main.getKillsLeaderboard().clearViewerHologram(player);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (main.getLeaderboard() != null) {
+                main.getLeaderboard().clearViewerHologram(player);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (main.getFlawlessWinsBoard() != null) {
+                main.getFlawlessWinsBoard().clearViewerHologram(player);
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            if (main.getWinstreakBoard() != null) {
+                main.getWinstreakBoard().clearViewerHologram(player);
+            }
+        } catch (Throwable ignored) {
+        }
+    }
+
 
     private void safeFishingCleanup(Player p) {
         try {
@@ -487,11 +515,7 @@ public class PlayerListener implements Listener {
             }
         } catch (Throwable ignored) {}
 
-        main.getKillsLeaderboard().clearViewerHologram(p);
-        try { if (main.getKillsLeaderboard() != null)    main.getKillsLeaderboard().clearViewerHologram(e.getPlayer()); } catch (Throwable ignored) {}
-        try { if (main.getLeaderboard() != null)     main.getLeaderboard().clearViewerHologram(e.getPlayer()); } catch (Throwable ignored) {}
-        //try { if (main.flawlessBoard != null) main.flawlessBoard.clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
-        //try { if (main.fishingBoard != null)  main.fishingBoard.clearViewerHologram(event.getPlayer()); } catch (Throwable ignored) {}
+        clearLeaderboardHolograms(p);
     }
 
     @EventHandler
