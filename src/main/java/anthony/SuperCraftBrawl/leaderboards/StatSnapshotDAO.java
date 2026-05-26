@@ -102,6 +102,31 @@ public class StatSnapshotDAO {
         core.getDatabaseManager().executeUpdateCommand(sql);
     }
 
+    public void recordPeriodParkourTime(String uuid, int parkourId, long totalTime) {
+        if (uuid == null || totalTime <= 0) {
+            return;
+        }
+
+        for (LeaderboardScope scope : new LeaderboardScope[]{
+                LeaderboardScope.DAILY,
+                LeaderboardScope.WEEKLY,
+                LeaderboardScope.MONTHLY
+        }) {
+            java.sql.Date periodStart = startFor(scope);
+
+            String sql =
+                    "INSERT INTO scb_period_parkour_times(uuid, parkour_id, period, period_start, best_time) VALUES (" +
+                            "'" + uuid + "'," +
+                            parkourId + "," +
+                            "'" + scope.name() + "'," +
+                            "'" + periodStart + "'," +
+                            totalTime +
+                            ") ON DUPLICATE KEY UPDATE best_time = LEAST(best_time, VALUES(best_time))";
+
+            core.getDatabaseManager().executeUpdateCommand(sql);
+        }
+    }
+
     public void recordPeriodWinstreak(String uuid, int currentWinstreak) {
         if (uuid == null) {
             return;

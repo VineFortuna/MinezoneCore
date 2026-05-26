@@ -75,7 +75,7 @@ public class LeaderboardScopeGUI implements InventoryProvider {
             main.leaderboardScopeByViewer.put(player.getUniqueId(), next);
 
             SoundManager.playClickSound(player);
-            player.sendMessage(main.color("&eShowing " + next.display() + " leaderboards"));
+            player.sendMessage(main.color("&r&l(!) &rShowing &e" + next.display() + " &rleaderboards"));
 
             setClock(contents, player);
             repaintAllBoardsFor(player, next);
@@ -165,6 +165,17 @@ public class LeaderboardScopeGUI implements InventoryProvider {
             }
         } catch (Throwable ignored) {
         }
+
+        try {
+            if (main.getParkourLeaderboards() != null) {
+                for (anthony.SuperCraftBrawl.leaderboards.ParkourBoard parkourBoard : main.getParkourLeaderboards()) {
+                    if (parkourBoard != null) {
+                        parkourBoard.asyncUpdate();
+                    }
+                }
+            }
+        } catch (Throwable ignored) {
+        }
     }
 
     private void redrawGlobalBoards() {
@@ -195,5 +206,16 @@ public class LeaderboardScopeGUI implements InventoryProvider {
             }
         } catch (Throwable ignored) {
         }
+        try {
+            if (main.getParkourLeaderboards() != null) {
+                for (anthony.SuperCraftBrawl.leaderboards.ParkourBoard parkourBoard : main.getParkourLeaderboards()) {
+                    if (parkourBoard != null) {
+                        parkourBoard.updateLeaderboard(false);
+                    }
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+
     }
 }

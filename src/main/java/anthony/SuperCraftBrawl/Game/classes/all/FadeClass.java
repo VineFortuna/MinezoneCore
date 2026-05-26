@@ -64,9 +64,9 @@ public class FadeClass extends BaseClass {
 	public void Tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Fade
 				&& instance.classes.get(player).getLives() > 0) {
-			this.cooldownSec = (35000 - fadeAbility.getTime()) / 1000 + 1;
+			this.cooldownSec = (30000 - fadeAbility.getTime()) / 1000 + 1;
 
-			if (fadeAbility.getTime() < 35000) {
+			if (fadeAbility.getTime() < 30000) {
 				String msg = instance.getGameManager().getMain()
 						.color("&rFade Ability regenerates in: &e" + cooldownSec + "s");
 				getActionBarManager().setActionBar(player, "fade.cooldown", msg, 2);
@@ -107,8 +107,8 @@ public class FadeClass extends BaseClass {
 				|| event.getAction() == Action.LEFT_CLICK_AIR
 				|| event.getAction() == Action.LEFT_CLICK_BLOCK)) {
 			if (player.getGameMode() != GameMode.SPECTATOR) {
-				if (fadeAbility.getTime() < 35000) {
-					int seconds = (35000 - fadeAbility.getTime()) / 1000 + 1;
+				if (fadeAbility.getTime() < 30000) {
+					int seconds = (30000 - fadeAbility.getTime()) / 1000 + 1;
 					event.setCancelled(true);
 					player.sendMessage(instance.getGameManager().getMain()
 							.color("&r&l(!) &rYour Fade Ability is on cooldown for &e" + seconds + "s"));
@@ -128,7 +128,7 @@ public class FadeClass extends BaseClass {
 		player.getWorld().playSound(player.getLocation(), Sound.PORTAL_TRAVEL, 1, 1);
 		player.sendMessage(
 				instance.getGameManager().getMain().color("&r&l(!) &rYou are now fading out of existence..."));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 180, 0));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 100, 0));
 		fadeAbilityActive = true;
 
 		r = new BukkitRunnable() {
@@ -189,6 +189,6 @@ public class FadeClass extends BaseClass {
 				fadeAbilityActive = false;
 			}
 		};
-		r.runTaskLater(instance.getGameManager().getMain(), 20 * 8);
+		r.runTaskLater(instance.getGameManager().getMain(), 20 * 5);
 	}
 }

@@ -347,6 +347,17 @@ public class Parkour implements Listener {
                             int arenaID = players.get(player).getId();
                             ArenaInstance inst = players.get(player).getInstance();
 
+                            try {
+                                if (main.snapshotDAO != null) {
+                                    main.snapshotDAO.recordPeriodParkourTime(
+                                            player.getUniqueId().toString(),
+                                            arenaID,
+                                            total
+                                    );
+                                }
+                            } catch (Throwable ignored) {
+                            }
+
                             ParkourDetails details = data.playerParkour.get(arenaID);
                             if (details == null) {
                                 details = new ParkourDetails();

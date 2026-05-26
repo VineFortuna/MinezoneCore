@@ -73,7 +73,9 @@ public abstract class ScopedStatLeaderboard extends LeaderboardBase {
 
         if (scope == LeaderboardScope.LIFETIME) {
             return "SELECT UUID, LastPlayerName, " + columnName() + " AS " + alias + ", RoleID " +
-                    "FROM PlayerData ORDER BY " + alias + " DESC LIMIT 10";
+                    "FROM PlayerData " +
+                    "WHERE " + columnName() + " > 0 " +
+                    "ORDER BY " + alias + " DESC LIMIT 10";
         }
 
         java.sql.Date periodStart = main.snapshotDAO.startFor(scope);
@@ -84,6 +86,7 @@ public abstract class ScopedStatLeaderboard extends LeaderboardBase {
                 "LEFT JOIN scb_stat_snapshots s " +
                 "ON s.uuid = pd.UUID AND s.metric = '" + metricName() + "' " +
                 "AND s.period = '" + scope.name() + "' AND s.period_start = '" + periodStart + "' " +
+                "HAVING " + alias + " > 0 " +
                 "ORDER BY " + alias + " DESC LIMIT 10";
     }
 
@@ -166,7 +169,7 @@ public abstract class ScopedStatLeaderboard extends LeaderboardBase {
 
             PlayerData data = main.getDataManager().getPlayerData(player);
 
-            if (data != null && !lifetimeTopIds.contains(data.playerUUID)) {
+            if (data != null && getPlayerValue(data) > 0 && !lifetimeTopIds.contains(data.playerUUID)) {
                 Location line1 = base.clone().add(0, -0.24, 0);
                 sendLineToViewer(player, line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------");
 
@@ -245,7 +248,7 @@ public abstract class ScopedStatLeaderboard extends LeaderboardBase {
 
         int yourVal = getScopedValueFor(viewer, scope);
 
-        if (!ids.contains(viewer.getUniqueId())) {
+        if (yourVal > 0 && !ids.contains(viewer.getUniqueId())) {
             Location sep = new Location(title.getWorld(), title.getX(), y - 0.20, title.getZ());
             sendLineToViewer(viewer, sep, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------");
 
