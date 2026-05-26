@@ -152,12 +152,16 @@ public class WinstreakBoard extends LeaderboardBase {
 
             PlayerData data = main.getDataManager().getPlayerData(player);
 
-            if (data != null && data.bestWinstreak > 0 && !lifetimeTopIds.contains(data.playerUUID)) {
+            if (data != null && !lifetimeTopIds.contains(data.playerUUID)) {
                 Location line1 = base.clone().add(0, -0.24, 0);
                 sendLineToViewer(player, line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------");
 
                 Location line2 = base.clone().add(0, -0.44, 0);
-                sendLineToViewer(player, line2, ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + data.bestWinstreak);
+                sendLineToViewer(
+                        player,
+                        line2,
+                        ChatColor.GREEN + player.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + "N/A"
+                );
             }
         }
 
@@ -229,16 +233,18 @@ public class WinstreakBoard extends LeaderboardBase {
             y -= 0.24;
         }
 
-        int yourVal = getScopedValueFor(viewer, scope);
-
-        if (yourVal > 0 && !ids.contains(viewer.getUniqueId())) {
+        if (!ids.contains(viewer.getUniqueId())) {
             Location sep = new Location(title.getWorld(), title.getX(), y - 0.20, title.getZ());
             sendLineToViewer(viewer, sep, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------");
 
             y -= 0.24;
 
             Location yours = new Location(title.getWorld(), title.getX(), y - 0.20, title.getZ());
-            sendLineToViewer(viewer, yours, ChatColor.YELLOW + viewer.getName() + ChatColor.RESET + " - " + yourVal);
+            sendLineToViewer(
+                    viewer,
+                    yours,
+                    ChatColor.GREEN + viewer.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + "N/A"
+            );
         }
     }
 
