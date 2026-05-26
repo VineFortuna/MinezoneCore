@@ -114,6 +114,23 @@ public class DatabaseManager {
         executeUpdateCommand(sql);
     }
 
+    public void ensurePeriodParkourTable() {
+        final String sql =
+                "CREATE TABLE IF NOT EXISTS scb_period_parkour_times (" +
+                        "  uuid         VARCHAR(36) NOT NULL," +
+                        "  parkour_id   INT NOT NULL," +
+                        "  period       ENUM('DAILY','WEEKLY','MONTHLY') NOT NULL," +
+                        "  period_start DATE NOT NULL," +
+                        "  best_time    BIGINT NOT NULL," +
+                        "  updated_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
+                        "  PRIMARY KEY (uuid, parkour_id, period, period_start)," +
+                        "  INDEX (parkour_id, period, period_start)," +
+                        "  INDEX (uuid)" +
+                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+
+        executeUpdateCommand(sql);
+    }
+
     public void executeQueryCommand(String updateCommand, ExecuteFunction func) {
 		try {
 			Statement stmt = getConnection().createStatement();

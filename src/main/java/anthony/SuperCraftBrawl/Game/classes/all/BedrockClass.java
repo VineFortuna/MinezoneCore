@@ -33,8 +33,8 @@ public class BedrockClass extends BaseClass {
 	private final ItemStack lavaItem;
 	private final Ability invincibilityAbility = new Ability("&8&lInvincibility", INVINCIBILITY_COOLDOWN, player);
 	private final Ability lavaAbility = new Ability("&6&lLava", player);
-	private static final double INVINCIBILITY_DURATION = 3;
-	private static final double INVINCIBILITY_COOLDOWN = 12;
+	private static final double INVINCIBILITY_DURATION = 2;
+	private static final double INVINCIBILITY_COOLDOWN = 10;
 	private static final double LAVA_ABILITY_RANGE = 10;
 
 	private ItemStack[] originalArmor;
