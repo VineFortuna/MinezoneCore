@@ -35,7 +35,7 @@ public class Leaderboard extends LeaderboardBase {
     private static final AtomicInteger ENTITY_ID = new AtomicInteger(200000); // custom id range for Wins
 
     // Board location for Wins
-    private static final Location TITLE_LOC = new Location(null, 183.5, 107.5, 710.5);
+    private static final Location TITLE_LOC = new Location(null, 183.5, 107, 710.5);
 
     public Leaderboard(Core main) {
         super(main);
