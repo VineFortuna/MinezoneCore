@@ -41,7 +41,7 @@ public class WinstreakBoard extends LeaderboardBase {
     private final Map<UUID, List<Integer>> viewerEntityIds = new HashMap<>();
     private static final AtomicInteger ENTITY_ID = new AtomicInteger(600000);
 
-    private static final Location TITLE_LOC = new Location(null, 199.5, 107.5, 709.5);
+    private static final Location TITLE_LOC = new Location(null, 199.5, 107, 709.5);
 
     public WinstreakBoard(Core main) {
         super(main);
