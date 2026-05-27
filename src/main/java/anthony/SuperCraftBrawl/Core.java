@@ -26,6 +26,7 @@ import anthony.SuperCraftBrawl.npcs.NPCManager;
 import anthony.SuperCraftBrawl.npcs.VisibleHook;
 import anthony.SuperCraftBrawl.packets.PacketMain;
 import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
+import anthony.SuperCraftBrawl.playerdata.GameDataManager;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
 import anthony.SuperCraftBrawl.practice.BowPractice;
@@ -95,6 +96,7 @@ public class Core extends JavaPlugin implements Listener {
 	public List<Player> staffchat;
 	public List<Player> globalchat;
 	public PlayerDataManager dataManager;
+	public GameDataManager gameDataManager;
 	public DatabaseManager databaseManager;
 	public PacketMain packetMain;
 	public NPCManager npcManager;
@@ -254,6 +256,10 @@ public class Core extends JavaPlugin implements Listener {
 
 	public PlayerDataManager getDataManager() {
 		return dataManager;
+	}
+
+	public GameDataManager getGameDataManager() {
+		return gameDataManager;
 	}
 
 	public Fishing getFishing() {
@@ -715,6 +721,7 @@ public class Core extends JavaPlugin implements Listener {
         databaseManager = new DatabaseManager(this);
         packetMain = new PacketMain(this);
         dataManager = new PlayerDataManager(this);
+		gameDataManager = new GameDataManager(this);
         rankManager = new RankManager(this);
         actionBarManager = new ActionBarManager(this);
         ag = new ActiveGamesGUI(this);
@@ -736,6 +743,7 @@ public class Core extends JavaPlugin implements Listener {
         explorerManager = new LobbyExplorerManager(this);
         npcManager = new NPCManager(this);
         getDatabaseManager().ensureSnapshotTable();
+		getDatabaseManager().ensureGameTables();
         tablistAnim = new TablistAnimationManager(this);
         tablistAnim.start();
         floating = new FloatingBlockManager(this);
