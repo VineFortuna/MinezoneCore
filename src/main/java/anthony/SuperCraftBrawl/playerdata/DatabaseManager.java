@@ -131,6 +131,36 @@ public class DatabaseManager {
         executeUpdateCommand(sql);
     }
 
+	public void ensureGameTables() {
+
+		String gamesTable =
+				"CREATE TABLE IF NOT EXISTS scb_games (" +
+						"game_id INT AUTO_INCREMENT PRIMARY KEY," +
+						"game_type VARCHAR(16) NOT NULL," +
+						"map_name VARCHAR(32) NOT NULL," +
+						"end_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP," +
+						"game_duration_minutes INT NOT NULL DEFAULT 0" +
+						")";
+
+		String playersTable =
+				"CREATE TABLE IF NOT EXISTS scb_game_players (" +
+						"game_id INT NOT NULL," +
+						"uuid VARCHAR(36) NOT NULL," +
+						"class_id INT NOT NULL," +
+						"placement INT NOT NULL," +
+						"kills INT DEFAULT 0," +
+						"deaths INT DEFAULT 0," +
+						"lives INT DEFAULT 0," +
+						"winner BOOLEAN DEFAULT FALSE," +
+
+						"PRIMARY KEY (game_id, uuid)," +
+
+						"INDEX idx_game_id (game_id)," +
+						"INDEX idx_uuid (uuid)" +
+						")";
+		multiExecuteUpdateCommand(gamesTable, playersTable);
+	}
+
     public void executeQueryCommand(String updateCommand, ExecuteFunction func) {
 		try {
 			Statement stmt = getConnection().createStatement();
