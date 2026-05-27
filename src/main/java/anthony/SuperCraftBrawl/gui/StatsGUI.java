@@ -28,12 +28,20 @@ public class StatsGUI implements InventoryProvider {
 	public Core main;
 	public SmartInventory inv;
 	private Player target;
+    private PlayerData targetData;
 
 	public StatsGUI(Core main) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(5, 9)
 				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Your Statistics").build();
 		this.main = main;
 	}
+
+    public StatsGUI(Core main, PlayerData targetData) {
+        inv = SmartInventory.builder().id("myInventory").provider(this).size(5, 9)
+                .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + targetData.playerName + "'s Statistics").build();
+        this.main = main;
+        this.targetData = targetData;
+    }
 
 	public StatsGUI(Core main, Player target) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(5, 9)
@@ -44,10 +52,13 @@ public class StatsGUI implements InventoryProvider {
 
 	@Override
 	public void init(Player player, InventoryContents contents) {
-		
-		PlayerData data = main.getDataManager().getPlayerData(player);
-		if (this.target != null)
-			data = main.getDataManager().getPlayerData(target);
+        PlayerData data = main.getDataManager().getPlayerData(player);
+
+        if (this.targetData != null) {
+            data = this.targetData;
+        } else if (this.target != null) {
+            data = main.getDataManager().getPlayerData(target);
+        }
 		
 		contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(
 				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
@@ -102,9 +113,7 @@ public class StatsGUI implements InventoryProvider {
 					}
 				}
 			}
-			int uniqueCaught = main.fishing.getTotalFish(player);
-			if (target != null)
-				uniqueCaught = main.fishing.getTotalFish(target);
+            int uniqueCaught = data.playerFishing.size();
 			
 			contents.set(2, 6,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
