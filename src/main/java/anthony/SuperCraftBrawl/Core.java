@@ -681,12 +681,18 @@ public class Core extends JavaPlugin implements Listener {
         this.trickTitle.registerTitle("Trick-or-Treater", color("&6&lTrick-or-Treater"), 0.2);
         this.trickTitle.registerTitle("Freddy Fazbear", color("&6&lFreddy Fazbear"), 0.2);
         this.trickTitle.registerTitle("Fiesta De La Noche", color("&b&lFIESTA DE LA NOCHE"), 0.2);
-        this.trickTitle.registerTitle("i'm gay btw...", color("&di'm gay btw..."), 0.2);
+
+        this.trickTitle.registerTitle("SCB Summer Champ 2021", color("&b&lSCB SUMMER CHAMP (2021)"), 0.2);
+        this.trickTitle.registerTitle("SCB Summer Champ 2022", color("&b&lSCB SUMMER CHAMP (2022)"), 0.2);
+        this.trickTitle.registerTitle("SCB Cash Cup Champ 2023", color("&a&lSCB CASH CUP CHAMP (2023)"), 0.2);
+        this.trickTitle.registerTitle("SCB Halloween Champ 2024", color("&6&lSCB HALLOWEEN CHAMP (2024)"), 0.2);
+        this.trickTitle.registerTitle("SCB Winter Champ 2025", color("&b&lSCB WINTER CHAMP (2025)"), 0.2);
+
         getCommand("tricktitle").setExecutor(new TrickTitleCommand(trickTitle));
     }
 
     private void enableCommands() {
-        String[] commandTypes = { "maps", "join", "cosmetics", "fishing", "server", "fly", "leave", "players",
+        String[] commandTypes = { "maps", "join", "token", "cosmetics", "fishing", "server", "fly", "leave", "players",
                 "class", "socials", "spectate", "startgame", "frenzy", "gamestats", "setlives", "purchases", "kit",
                 "items", "color", "sound", "heal", "forceclass", "lactate" };
 
@@ -1429,56 +1435,6 @@ public class Core extends JavaPlugin implements Listener {
 						+ "https://minezone.club/");
 			}
 
-			if (cmd.getName().equalsIgnoreCase("token") && sender instanceof Player) {
-				if (player.hasPermission("scb.giveTokens")) {
-					if (args.length == 0) {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-								+ "Incorrect usage! Try doing: " + ChatColor.GREEN + "/token add <player> <amount>");
-					} else if (args[0].equalsIgnoreCase("add")) {
-						if (args.length == 1) {
-							player.sendMessage(
-									"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-											+ ChatColor.GREEN + "/token add <player> <amount>");
-						} else if (args.length == 2) {
-							player.sendMessage(
-									"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-											+ ChatColor.GREEN + "/token add <player> <amount>");
-						} else if (args.length == 3) {
-							Player target = Bukkit.getServer().getPlayerExact(args[1]);
-							try {
-								int num = Integer.parseInt(args[2]);
-
-								PlayerData data = this.getDataManager().getPlayerData(target);
-								if (target != null) {
-									data.tokens += num;
-
-									player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You gave "
-											+ ChatColor.GREEN + target.getName() + ChatColor.RESET + " " + num
-											+ " Tokens!");
-									target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ "You were given " + num + " Tokens!");
-									if (this.getGameManager().GetInstanceOfPlayer(player) == null)
-										getScoreboardManager().lobbyBoard(target);
-									this.getDataManager().saveData(data);
-								} else {
-									player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ "Please specify a player!");
-								}
-							} catch (Exception e) {
-								player.sendMessage(
-										"" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Please enter a number!");
-							}
-						}
-					} else {
-						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-								+ "Incorrect usage! Try doing: " + ChatColor.GREEN + "/token add <player> <amount>");
-					}
-				} else {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
-							+ ChatColor.RED + ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to use this command!");
-				}
-			}
-
 			if (cmd.getName().equalsIgnoreCase("tp")) {
 				if (player.hasPermission("scb.tp")) {
 					if (args.length == 0) {
@@ -1847,17 +1803,45 @@ public class Core extends JavaPlugin implements Listener {
 				else {
 					if (args.length == 0 || args[0].equals(player.getName())) {
 						new StatsGUI(this).inv.open(player);
-					} else if (args.length == 1) {
-						Player target = Bukkit.getServer().getPlayerExact(args[0]);
-						if (target != null) {
-							new StatsGUI(this, target).inv.open(player);
-							player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ "Opening " + ChatColor.YELLOW + target.getName() + "'s" + ChatColor.RESET
-									+ " statistics");
-						} else
-							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ "The specified target is not online!");
-					}
+                    } else if (args.length == 1) {
+                        Player target = Bukkit.getServer().getPlayerExact(args[0]);
+
+                        if (target != null) {
+                            new StatsGUI(this, target).inv.open(player);
+                            player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                    + "Opening " + ChatColor.YELLOW + target.getName() + "'s" + ChatColor.RESET
+                                    + " statistics");
+                            return true;
+                        }
+
+                        final String targetName = args[0];
+
+                        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+                            try {
+                                PlayerData offlineData = this.getDataManager().getSavedDataByName(targetName);
+
+                                Bukkit.getScheduler().runTask(this, () -> {
+                                    if (offlineData == null) {
+                                        player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                                + "That player has never joined the server!");
+                                        return;
+                                    }
+
+                                    new StatsGUI(this, offlineData).inv.open(player);
+                                    player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                            + "Opening " + ChatColor.YELLOW + offlineData.playerName + "'s" + ChatColor.RESET
+                                            + " statistics");
+                                });
+                            } catch (Exception e) {
+                                e.printStackTrace();
+
+                                Bukkit.getScheduler().runTask(this, () -> {
+                                    player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                            + "Could not load that player's stats.");
+                                });
+                            }
+                        });
+                    }
 				}
 			}
 			if (cmd.getName().equalsIgnoreCase("seen")) {
@@ -2038,7 +2022,7 @@ public class Core extends JavaPlugin implements Listener {
 
 		if (rank == Rank.OWNER || rank == Rank.ADMIN)
 			msg = color("&c");
-		else if (rank == Rank.CAPTAIN)
+		else if (rank == Rank.PRO)
 			msg = color("&9");
 		else if (rank == Rank.VIP)
 			msg = color("&e");

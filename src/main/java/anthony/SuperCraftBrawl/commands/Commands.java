@@ -61,6 +61,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 	@SuppressWarnings("unused")
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (cmd.getName().equalsIgnoreCase("token")) {
+            tokenCommand(sender, args);
+            return true;
+        }
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
 
@@ -209,6 +213,92 @@ public class Commands implements CommandExecutor, TabCompleter {
 			break;
 		}
 	}
+
+    private void tokenCommand(CommandSender sender, String[] args) {
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+
+            if (!player.hasPermission("scb.giveTokens")) {
+                player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
+                        + ChatColor.RED + ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to use this command!");
+                return;
+            }
+        }
+
+        if (args.length != 3 || !args[0].equalsIgnoreCase("add")) {
+            sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                    + "Incorrect usage! Try doing: " + ChatColor.GREEN + "/token add <player> <amount>");
+            return;
+        }
+
+        String targetName = args[1];
+        int num;
+
+        try {
+            num = Integer.parseInt(args[2]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Please enter a number!");
+            return;
+        }
+
+        if (num <= 0) {
+            sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Please enter a positive number!");
+            return;
+        }
+
+        Player target = Bukkit.getServer().getPlayerExact(targetName);
+
+        if (target != null) {
+            PlayerData data = main.getDataManager().getPlayerData(target);
+
+            if (data == null) {
+                sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                        + "Could not load that player's data.");
+                return;
+            }
+
+            data.tokens += num;
+
+            sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You gave "
+                    + ChatColor.GREEN + target.getName() + ChatColor.RESET + " " + num + " Tokens!");
+
+            target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                    + "You were given " + num + " Tokens!");
+
+            if (main.getGameManager().GetInstanceOfPlayer(target) == null) {
+                main.getScoreboardManager().lobbyBoard(target);
+            }
+
+            main.getDataManager().saveData(data);
+            return;
+        }
+
+        final int amount = num;
+
+        Bukkit.getScheduler().runTaskAsynchronously(main, () -> {
+            try {
+                boolean updated = main.getDataManager().addTokensToOfflinePlayer(targetName, amount);
+
+                Bukkit.getScheduler().runTask(main, () -> {
+                    if (updated) {
+                        sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You gave "
+                                + ChatColor.GREEN + targetName + ChatColor.RESET + " " + amount
+                                + " Tokens while they were offline!");
+                    } else {
+                        sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                + "That player has never joined the server!");
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+
+                Bukkit.getScheduler().runTask(main, () -> {
+                    sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                            + "Could not give tokens to that player.");
+                });
+            }
+        });
+    }
 
 	private void ensureCandyAuraTaskRunning() {
 		if (candyAuraTaskId != -1)
