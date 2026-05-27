@@ -113,7 +113,7 @@ public class EndermiteClass extends BaseClass {
         if (!isPlayerAlive()) return;
         phaseAbility.updateActionBar(player, this);
         if (!player.getInventory().contains(weapon)) {
-            player.getInventory().setItem(1, weapon);
+            player.getInventory().setItem(0, weapon);
         }
 
         if (endermites.isEmpty()) return;
