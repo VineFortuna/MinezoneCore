@@ -511,13 +511,11 @@ public class PlayerListener implements Listener {
 
 		// 5) Hide or show NPCS
 		for (NPC npc : main.getAllNPCs()) {
-
 			// Leaving NPC world
 			if (!p.getWorld().equals(npc.getLocation().getWorld())) {
 				npc.hideFrom(p);
 				continue;
 			}
-
 			// Returning to NPC world
 			Bukkit.getScheduler().runTaskLater(main, () -> {
 				npc.showTo(p);

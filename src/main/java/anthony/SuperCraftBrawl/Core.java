@@ -2155,7 +2155,7 @@ public class Core extends JavaPlugin implements Listener {
 	@EventHandler
 	public void serverMotd(ServerListPingEvent p) {
 		String msg = color(
-				"                     &eMinezone &7[1.8-1.21] \n        &c&lSUPER CRAFT BROS &7- &6&lNEW UPDATE!");
+				"                     &eMinezone &7[1.8-26.1] \n        &c&lSUPER CRAFT BROS &7- &6&lNEW UPDATE!");
 		p.setMotd(msg);
 		p.setMaxPlayers(1);
 	}
