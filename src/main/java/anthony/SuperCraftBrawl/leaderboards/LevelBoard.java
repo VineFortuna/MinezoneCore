@@ -91,17 +91,19 @@ public class LevelBoard extends LeaderboardBase {
 
 		for (Player player : Bukkit.getOnlinePlayers()) {
 		    PlayerData data = main.getDataManager().getPlayerData(player);
-		    if (data != null && !lead.contains(data.playerUUID)) {
-		        int win = data.level;
+            if (data != null && !lead.contains(data.playerUUID)) {
+                int level = data.level;
 
-		        // draw the separator for THIS player at a fixed offset from base
-		        Location line1 = base.clone().add(0, -0.24, 0);
-		        sendStandToOnePlayer(line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------", player);
+                Location line1 = base.clone().add(0, -0.24, 0);
+                sendStandToOnePlayer(line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------", player);
 
-		        // draw the player's own line just below it
-		        Location line2 = base.clone().add(0, -0.44, 0);
-		        sendStandToOnePlayer(line2, "" + ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + win, player);
-		    }
+                Location line2 = base.clone().add(0, -0.44, 0);
+                sendStandToOnePlayer(
+                        line2,
+                        "" + ChatColor.GREEN + player.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + level,
+                        player
+                );
+            }
 		}
 	}
 
