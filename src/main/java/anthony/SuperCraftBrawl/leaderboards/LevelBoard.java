@@ -78,11 +78,11 @@ public class LevelBoard extends LeaderboardBase {
 
 		int count = 1;
 		for (UUID id : lead) {
-			loc.setY(loc.getY() - 0.24);
 			String name = lead2.get(count - 1);
 			Integer win = level.get(id);
 			sendArmorStandPacket(loc,
 					ChatColor.AQUA + "#" + count + ": " + ChatColor.YELLOW + name + ChatColor.RESET + " - " + win);
+			loc.setY(loc.getY() - 0.24);
 			count++;
 		}
 		

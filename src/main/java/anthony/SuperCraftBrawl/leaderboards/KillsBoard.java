@@ -35,7 +35,7 @@ public class KillsBoard extends LeaderboardBase {
     private static final AtomicInteger ENTITY_ID = new AtomicInteger(300000); // custom id base for 1.8
 
     // Board title location (Kills)
-    private static final Location KILLS_TITLE_LOC = new Location(null, 199.5, 107.5, 709.4);
+    private static final Location KILLS_TITLE_LOC = new Location(null, 194.5, 107.5, 710.5);
 
     public KillsBoard(Core main) {
         super(main);
