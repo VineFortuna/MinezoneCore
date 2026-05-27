@@ -1050,6 +1050,9 @@ public class GameInstance {
             }
         }
 
+        // Save game data
+        gameManager.getMain().getGameDataManager().saveMatch(gameType, map.getName(), gameTime, winnerList, players, classes);
+
         endGameAnimation = new BukkitRunnable() {
             int ticks = 12;
             @Override
@@ -1104,6 +1107,7 @@ public class GameInstance {
                         BaseClass bc = classes.get(player);
                         bc.GameEnd();
                         SetLobbyScoreboard(player);
+                        player.setDisplayName(player.getName());
                         gameManager.getMain().sendScoreboardUpdate(player);
                         for (PotionEffect type : player.getActivePotionEffects())
                             player.removePotionEffect(type.getType());
@@ -1332,6 +1336,7 @@ public class GameInstance {
                         data.exp += 133;
                     }
                     baseClass.totalExp += 133;
+                    baseClass.placement = 1;
 
                     winner.sendMessage("" + ChatColor.BOLD + "===========================");
                     winner.sendMessage("" + ChatColor.BOLD + "||");
