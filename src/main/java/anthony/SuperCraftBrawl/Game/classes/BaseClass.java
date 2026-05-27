@@ -304,7 +304,7 @@ public abstract class BaseClass {
 		}, 5 * 20);
 
 		if (baseClass != null) {
-			if (baseClass.getType() == ClassType.Enderdragon) {
+			if (baseClass.getType() == ClassType.EnderDragon) {
 				if (killer != null) {
 					Location pLoc = p.getLocation();
 					EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc, EntityType.ENDER_CRYSTAL);
@@ -1198,7 +1198,7 @@ public abstract class BaseClass {
 
                 // END CRYSTAL
                 if (baseClassKiller != null) {
-                    if (baseClassKiller.getType() == ClassType.Enderdragon) {
+                    if (baseClassKiller.getType() == ClassType.EnderDragon) {
                         if (killer != null) {
                             Location pLoc = p.getLocation();
                             EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc,
@@ -1714,7 +1714,7 @@ public abstract class BaseClass {
 
 	private void enderDragonCrystal(BaseClass pClass, Player killer, Player p) {
 		if (pClass != null) {
-			if (pClass.getType() == ClassType.Enderdragon) {
+			if (pClass.getType() == ClassType.EnderDragon) {
 				if (killer != null) {
 					Location pLoc = p.getLocation();
 					EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc, EntityType.ENDER_CRYSTAL);

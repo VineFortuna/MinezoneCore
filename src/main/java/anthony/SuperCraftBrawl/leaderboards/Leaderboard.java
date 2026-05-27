@@ -143,12 +143,16 @@ public class Leaderboard extends LeaderboardBase {
             if (data == null) continue;
             int val = data.wins;
 
-            if (val > 0 && !lifetimeTopIds.contains(data.playerUUID)) {
+            if (!lifetimeTopIds.contains(data.playerUUID)) {
                 Location line1 = base.clone().add(0, -0.24, 0);
                 sendStandToOnePlayerLifetimeOnly(line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------", player);
 
                 Location line2 = base.clone().add(0, -0.44, 0);
-                sendStandToOnePlayerLifetimeOnly(line2, "" + ChatColor.YELLOW + player.getName() + ChatColor.RESET + " - " + val, player);
+                sendStandToOnePlayerLifetimeOnly(
+                        line2,
+                        "" + ChatColor.GREEN + player.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + val,
+                        player
+                );
             }
         }
 
@@ -209,14 +213,19 @@ public class Leaderboard extends LeaderboardBase {
         // Your own value for this scope if not in top 10
         int yourVal = getScopedWinsFor(viewer, scope);
         boolean youInTop = ids.contains(viewer.getUniqueId());
-        if (yourVal > 0 && !youInTop) {
+
+        if (!youInTop) {
             Location sep = new Location(title.getWorld(), title.getX(), y - 0.20, title.getZ());
             sendLineToViewer(viewer, sep, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------");
 
             y -= 0.24;
 
             Location yours = new Location(title.getWorld(), title.getX(), y - 0.20, title.getZ());
-            sendLineToViewer(viewer, yours, ChatColor.YELLOW + viewer.getName() + ChatColor.RESET + " - " + yourVal);
+            sendLineToViewer(
+                    viewer,
+                    yours,
+                    ChatColor.GREEN + viewer.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + yourVal
+            );
         }
     }
 
