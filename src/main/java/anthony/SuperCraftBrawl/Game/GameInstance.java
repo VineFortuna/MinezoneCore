@@ -69,7 +69,7 @@ public class GameInstance {
 
     public List<Player> playerPosition = new ArrayList<>();
 
-    // ✅ FIXED: Use UUID keys to avoid pinning Player (and the whole world graph)
+    // Use UUID keys to avoid pinning Player (and the whole world graph)
     public Map<UUID, FastBoard> boards = new HashMap<>();
 
     public final HashMap<Player, ClassType> classSelection = new HashMap<>();
@@ -98,9 +98,9 @@ public class GameInstance {
     public List<ClassType> classList = generateClassList();
     private SignManager sm;
 
-    // ✅ FIXED: Track all tasks to cancel reliably
+    // Track all tasks to cancel reliably
     private final List<BukkitTask> instanceTasks = new ArrayList<>();
-    // ✅ FIXED: Per-player tasks keyed by UUID (not Player)
+    // Per-player tasks keyed by UUID (not Player)
     private final Map<UUID, List<BukkitTask>> perPlayerTasks = new HashMap<>();
 
     // DUEL COMMAND
@@ -193,6 +193,8 @@ public class GameInstance {
 
         if (getMap() != Maps.WitchesBrew)
             mapWorld.setTime(1000);
+
+        mapWorld.setDifficulty(Difficulty.NORMAL);
     }
 
     /**
@@ -1409,7 +1411,7 @@ public class GameInstance {
                     winner.sendMessage(getGameManager().getMain().color("&8&m----------------------------------------"));
                     winner.sendMessage(getGameManager().getMain().color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
                     winner.sendMessage(getGameManager().getMain()
-                            .color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
+                            .color("&7You are now &e&lLevel &6&l" + data.level + " &7- nice work!"));
                     winner.sendMessage(getGameManager().getMain().color("&8&m----------------------------------------"));
                     winner.playSound(winner.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
                 }
