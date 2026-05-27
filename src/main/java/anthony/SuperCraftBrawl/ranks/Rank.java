@@ -146,7 +146,7 @@ public enum Rank {
 		else if (rank == Rank.CAPTAIN)
 			msg = color("&9");
 		else if (rank == Rank.VIP)
-			msg = color("&a");
+			msg = color("&e");
         else if (rank == Rank.QA)
             msg = color("&a");
         else if (rank == Rank.DEVELOPER)
