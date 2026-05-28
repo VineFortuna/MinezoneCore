@@ -11,6 +11,7 @@ import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.fishing.Fishing;
 import anthony.SuperCraftBrawl.floatingblock.FloatingBlockManager;
 import anthony.SuperCraftBrawl.floatingblock.FloatingBlocks;
+import anthony.SuperCraftBrawl.friends.FriendsManager;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.halloween.CandyAuraManager;
 import anthony.SuperCraftBrawl.halloween.HalloweenHuntManager;
@@ -167,6 +168,9 @@ public class Core extends JavaPlugin implements Listener {
     //MYSTERY CHESTS:
     public Map<Player, EntityArmorStand> msHologram = new HashMap<Player, EntityArmorStand>();
 
+    //FRIENDS:
+    public FriendsManager friendsManager;
+
     public Core() {
 		this.staffchat = new ArrayList<Player>();
 		this.globalchat = new ArrayList<Player>();
@@ -181,6 +185,10 @@ public class Core extends JavaPlugin implements Listener {
     }
 
     // Getters:
+
+    public FriendsManager getFriendsManager() {
+        return friendsManager;
+    }
 
 	public ActionBarManager getActionBarManager() {
 		return this.actionBarManager;
@@ -670,6 +678,24 @@ public class Core extends JavaPlugin implements Listener {
                     anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY,
                     "FlawlessWins"
             );
+
+            snapshotDAO.ensureSnapshotsForAll(
+                    "TotalCaught",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,
+                    "TotalCaught"
+            );
+
+            snapshotDAO.ensureSnapshotsForAll(
+                    "TotalCaught",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,
+                    "TotalCaught"
+            );
+
+            snapshotDAO.ensureSnapshotsForAll(
+                    "TotalCaught",
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY,
+                    "TotalCaught"
+            );
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -692,7 +718,7 @@ public class Core extends JavaPlugin implements Listener {
     }
 
     private void enableCommands() {
-        String[] commandTypes = { "maps", "join", "token", "cosmetics", "fishing", "server", "fly", "leave", "players",
+        String[] commandTypes = { "maps", "join", "friends", "token", "cosmetics", "fishing", "server", "fly", "leave", "players",
                 "class", "socials", "spectate", "startgame", "frenzy", "gamestats", "setlives", "purchases", "kit",
                 "items", "color", "sound", "heal", "forceclass", "lactate" };
 
@@ -750,6 +776,8 @@ public class Core extends JavaPlugin implements Listener {
         npcManager = new NPCManager(this);
         getDatabaseManager().ensureSnapshotTable();
 		getDatabaseManager().ensureGameTables();
+        friendsManager = new FriendsManager(this);
+        friendsManager.ensureTables();
         tablistAnim = new TablistAnimationManager(this);
         tablistAnim.start();
         floating = new FloatingBlockManager(this);
@@ -2012,10 +2040,41 @@ public class Core extends JavaPlugin implements Listener {
 		player.setFoodLevel(20);
 
         TitleSequence.sendChained(this, player,
-                new TitleSequence.TitleSpec("&6&lMINEZONE", "&e&lNEW UPDATE!", 10, 70, 0),
+                new TitleSequence.TitleSpec("&6&lMINEZONE", "&e&lFRIENDS LIST &r-> &a/friends!", 10, 70, 0),
                 new TitleSequence.TitleSpec("&6&lMINEZONE", "&c&lDaily/Monthly/Weekly &e&lLEADERBOARDS", 0, 70, 10)
         );
+
+        listFriendsOnline(player);
     }
+
+    private void listFriendsOnline(Player player) {
+        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
+            int onlineFriends = getFriendsManager().getOnlineFriendsCount(player.getUniqueId());
+            int incomingRequests = getFriendsManager().getPendingRequestCount(player.getUniqueId());
+            List<UUID> friendUuids = getFriendsManager().getFriendUuids(player.getUniqueId());
+
+            Bukkit.getScheduler().runTask(this, () -> {
+                if (!player.isOnline()) {
+                    return;
+                }
+
+                player.sendMessage(color("&rYou have &a" + onlineFriends + " &rfriends online"));
+
+                if (incomingRequests > 0) {
+                    player.sendMessage(color("&rYou have &a" + incomingRequests + " &rincoming friend requests"));
+                }
+
+                for (UUID friendUuid : friendUuids) {
+                    Player friend = Bukkit.getPlayer(friendUuid);
+
+                    if (friend != null && friend.isOnline() && !friend.getUniqueId().equals(player.getUniqueId())) {
+                        friend.sendMessage(color("&rYour friend &a" + player.getName() + " &ris online!"));
+                    }
+                }
+            });
+        });
+    }
+
 
 	public String getColorForNames(Player player, Rank rank) {
 		String msg = "";
