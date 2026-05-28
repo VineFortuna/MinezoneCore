@@ -272,7 +272,7 @@ public class GameInstance {
                     }
 
                     gamePlayer.sendMessage(color("&2&l(!) &f" + player.getName() +
-                            "&a joined &f(&a" + this.players.size() + "/" + getMaxPlayers() + "&f)"));
+                            "&a joined (" + this.players.size() + "/" + getMaxPlayers() + ")"));
                 }
 
                 return GameReason.SUCCESS;
@@ -1768,7 +1768,7 @@ public class GameInstance {
                 if (this.map != null) {
                     updateCountOnBoard();
                     TellAll(color("&2&l(!) &f" + player.getName() +
-                            "&c left &f(&a" + this.players.size() + "/" + getMaxPlayers() + "&f)"));
+                            "&c left &a(" + this.players.size() + "/" + getMaxPlayers() + ")"));
 
                     if (checkIfMinPlayers() && this.gameStartTime != null) {
                         this.state = GameState.WAITING;

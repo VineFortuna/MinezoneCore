@@ -256,11 +256,14 @@ public abstract class ScopedStatLeaderboard extends LeaderboardBase {
 
             y -= 0.24;
 
+            int value = getScopedValueFor(viewer, scope);
+            String display = value > 0 ? String.valueOf(value) : "N/A";
+
             Location yours = new Location(title.getWorld(), title.getX(), y - 0.20, title.getZ());
             sendLineToViewer(
                     viewer,
                     yours,
-                    ChatColor.GREEN + viewer.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + "N/A"
+                    ChatColor.GREEN + viewer.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + display
             );
         }
     }

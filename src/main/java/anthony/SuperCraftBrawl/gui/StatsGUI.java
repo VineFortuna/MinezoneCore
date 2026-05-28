@@ -18,6 +18,7 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,7 +64,7 @@ public class StatsGUI implements InventoryProvider {
 		contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(
 				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 		
-		contents.set(4, 0, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.REDSTONE_COMPARATOR),
+		contents.set(4, 6, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.REDSTONE_COMPARATOR),
 				"" + ChatColor.RESET + ChatColor.YELLOW + "Preferences"), e -> {
 			new PrefsGUI(main).inv.open(player);
 		}));
@@ -140,14 +141,30 @@ public class StatsGUI implements InventoryProvider {
 					}));
 
 			String fishingTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTk2YTQ4ZGNkYWY0MThmMjJjZDE4NjdjMWViMGFlMjgyYzI4NGI2Nzk5MDZiNzk3ODFkOGQyYjJlZWJhMjEwMiJ9fX0=";
-			contents.set(4, 8,
+			contents.set(2, 6,
 					ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(fishingTexture),
-							main.color("&eFishingpedia")), e-> {
+                            main.color("&e&lFishing Stats"),
+                            main.color("&fCaught: &a" + data.totalcaught),
+                            main.color("&fUnique Caught: &a" + uniqueCaught + "/" + FishType.values().length),
+                            main.color("&fTreasure Caught: &a" + treasure),
+                            "",
+                            main.color("&aClick to open Fishingpedia")), e -> {
 						if (target != null)
 							new FishingGUI(main, target, inv).inv.open(player);
 						else
 							new FishingGUI(main, inv).inv.open(player);
 					}));
+
+            ItemStack steveHead = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+            SkullMeta steveMeta = (SkullMeta) steveHead.getItemMeta();
+            steveMeta.setDisplayName(main.color("&eFriends"));
+            steveHead.setItemMeta(steveMeta);
+
+            contents.set(4, 2,
+                    ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.SKULL_ITEM, 1, (short) 3),
+                            main.color("&eFriends")), e -> {
+                        new FriendsGUI(main, contents.inventory()).inv.open(player);
+                    }));
 		}
 	}
 

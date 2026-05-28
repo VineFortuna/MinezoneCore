@@ -138,6 +138,32 @@ public class Fishing implements Listener {
             playRewardEffect(p, fish.getRarity());
 
             // Update player data
+            // Make sure fishing period snapshots exist BEFORE increasing TotalCaught.
+// This prevents Daily/Weekly/Monthly fishing leaderboards from showing lifetime values.
+            if (main.snapshotDAO != null) {
+                main.snapshotDAO.ensureSnapshotForPlayer(
+                        p.getUniqueId().toString(),
+                        "TotalCaught",
+                        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,
+                        data.totalcaught
+                );
+
+                main.snapshotDAO.ensureSnapshotForPlayer(
+                        p.getUniqueId().toString(),
+                        "TotalCaught",
+                        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,
+                        data.totalcaught
+                );
+
+                main.snapshotDAO.ensureSnapshotForPlayer(
+                        p.getUniqueId().toString(),
+                        "TotalCaught",
+                        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY,
+                        data.totalcaught
+                );
+            }
+
+            // Update player data
             data.totalcaught++;
             data.caught++;
             details.addCaught(1);
