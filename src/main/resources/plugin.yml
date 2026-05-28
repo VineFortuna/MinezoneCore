@@ -163,6 +163,8 @@ commands:
       description: a
    lactate:
       description: Lactate command!
+   friends:
+      description: Friends command
 
 permissions:
    scb.admin:

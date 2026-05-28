@@ -14,6 +14,7 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 
 public class PrefsGUI implements InventoryProvider {
 
@@ -39,18 +40,12 @@ public class PrefsGUI implements InventoryProvider {
 		contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(
 				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 		
-		contents.set(4, 0, ClickableItem.of(ItemHelper.setGlowing(ItemHelper.setDetails(new ItemStack(Material.REDSTONE_COMPARATOR),
+		contents.set(4, 6, ClickableItem.of(ItemHelper.setGlowing(ItemHelper.setDetails(new ItemStack(Material.REDSTONE_COMPARATOR),
 				"" + ChatColor.RESET + ChatColor.YELLOW + "Preferences"), true), e -> {}));
 		contents.set(4, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BOOK),
 				"" + ChatColor.RESET + ChatColor.YELLOW + "My Stats"), e -> {
 			new StatsGUI(main).inv.open(player);
 		}));
-		String fishingTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTk2YTQ4ZGNkYWY0MThmMjJjZDE4NjdjMWViMGFlMjgyYzI4NGI2Nzk5MDZiNzk3ODFkOGQyYjJlZWJhMjEwMiJ9fX0=";
-		contents.set(4, 8,
-				ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(fishingTexture),
-						main.color("&eFishingpedia")), e-> {
-						new FishingGUI(main, inv).inv.open(player);
-				}));
 
 		if (data != null) {
 			if (data.cwm == 0) {
@@ -117,6 +112,17 @@ public class PrefsGUI implements InventoryProvider {
 						}
 						inv.close(player);
 					}));
+
+            ItemStack steveHead = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
+            SkullMeta steveMeta = (SkullMeta) steveHead.getItemMeta();
+            steveMeta.setDisplayName(main.color("&eFriends"));
+            steveHead.setItemMeta(steveMeta);
+
+            contents.set(4, 2,
+                    ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.SKULL_ITEM, 1, (short) 3),
+                            main.color("&eFriends")), e -> {
+                        new FriendsGUI(main, contents.inventory()).inv.open(player);
+                    }));
 		}
 	}
 
