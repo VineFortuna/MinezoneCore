@@ -90,7 +90,7 @@ public class Fishing implements Listener {
                             fish.getRarity().getColor() + "&l" + fish.getRarity().getName().toUpperCase() +
                                     (fish.isFish() ? " &e&lSEA CREATURE\n" : "\n") +
                                     "&8" + fish.getDesc() + "\n" +
-                                    "&7Times caught: " + details.timesCaught
+                                    "&7Times caught: " + (details.timesCaught + 1)
                     )).create()
             ));
 
@@ -139,7 +139,7 @@ public class Fishing implements Listener {
 
             // Update player data
             // Make sure fishing period snapshots exist BEFORE increasing TotalCaught.
-// This prevents Daily/Weekly/Monthly fishing leaderboards from showing lifetime values.
+            // This prevents Daily/Weekly/Monthly fishing leaderboards from showing lifetime values.
             if (main.snapshotDAO != null) {
                 main.snapshotDAO.ensureSnapshotForPlayer(
                         p.getUniqueId().toString(),
