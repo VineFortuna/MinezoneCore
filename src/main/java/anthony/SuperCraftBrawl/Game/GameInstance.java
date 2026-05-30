@@ -293,7 +293,7 @@ public class GameInstance {
         return maxPlayers;
     }
 
-    private boolean isLobbyFull(Player player) {
+    public boolean isLobbyFull(Player player) {
         if (this.map != null) {
             if (this.gameType == GameType.DUEL && players.size() >= 2) {
                 player.sendMessage(color("&c&l(!) &fThis game is full!"));

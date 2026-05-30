@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.ActionBarManager;
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
@@ -50,34 +51,39 @@ public class PigClass extends BaseClass {
 		playerInv.setItem(0, this.getAttackWeapon());
 	}
 
-	@Override
-	public void Tick(int gameTicks) {
-		System.out.println("Re-applying speed");
-	    if (!isPlayerAlive() && instance.classes.get(player).getType() != ClassType.Pig) return;
+    @Override
+    public void Tick(int gameTicks) {
+        // Stop Pig logic if game is not actively running
+        if (instance.state != GameState.STARTED) return;
 
-	    System.out.println("Re-applying speed 2!");
-	    // Fire overrides speed
-	    boolean onFire = player.getFireTicks() > 0; // 1.8-friendly "is burning" check
-	    boolean hasSpeed = player.hasPotionEffect(PotionEffectType.SPEED);
+        // Stop if player is dead, spectator, out of lives, or not Pig anymore
+        if (!isPlayerAlive()) return;
 
-	    ItemStack desired = onFire
-	            ? this.firePork
-	            : (hasSpeed ? this.speedPork : this.pork);
+        BaseClass currentClass = instance.classes.get(player);
+        if (currentClass == null || currentClass.getType() != ClassType.Pig) return;
 
-	    if (desired == null) return; // defensive
+        // Fire overrides speed
+        boolean onFire = player.getFireTicks() > 0;
+        boolean hasSpeed = player.hasPotionEffect(PotionEffectType.SPEED);
 
-	    PlayerInventory inv = player.getInventory();
-	    ItemStack current = inv.getItem(0);
+        ItemStack desired = onFire
+                ? this.firePork
+                : (hasSpeed ? this.speedPork : this.pork);
 
-	    boolean needsSwap =
-	        current == null ||
-	        !current.isSimilar(desired) ||              // same type/meta?
-	        current.getAmount() != desired.getAmount(); // keep amount consistent
+        if (desired == null) return;
 
-	    if (needsSwap) {
-	        inv.setItem(0, desired.clone()); // avoid mutating your stored reference
-	    }
-	}
+        PlayerInventory inv = player.getInventory();
+        ItemStack current = inv.getItem(0);
+
+        boolean needsSwap =
+                current == null ||
+                        !current.isSimilar(desired) ||
+                        current.getAmount() != desired.getAmount();
+
+        if (needsSwap) {
+            inv.setItem(0, desired.clone());
+        }
+    }
 
 	@Override
 	public void TakeDamage(EntityDamageEvent event) {
@@ -87,16 +93,24 @@ public class PigClass extends BaseClass {
 		}
 	}
 
-	private boolean checkSpeedPork(EntityDamageEvent event) {
-		if (!isPlayerAlive())
-			return false;
-		else if (instance.getGameManager().spawnProt.containsKey(player))
-			return false;
-		if (!(event.getEntity().equals(player)))
-			return false;
+    private boolean checkSpeedPork(EntityDamageEvent event) {
+        if (instance.state != GameState.STARTED)
+            return false;
 
-		return true;
-	}
+        if (event.isCancelled())
+            return false;
+
+        if (!isPlayerAlive())
+            return false;
+
+        if (instance.getGameManager().spawnProt.containsKey(player))
+            return false;
+
+        if (!event.getEntity().equals(player))
+            return false;
+
+        return true;
+    }
 
 	private void giveSpeedPork() {
 	    player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 5, 2));
