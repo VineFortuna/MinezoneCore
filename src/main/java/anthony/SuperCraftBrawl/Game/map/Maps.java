@@ -1732,7 +1732,7 @@ public enum Maps {
 		// Filter by Type
 		if (category == null) {
 			filteredMaps = filteredMaps.stream()
-					.filter(map -> map.getCategory() != Category.CHRISTMAS) // Exclude Christmas maps
+					.filter(map -> map.getCategory() != Category.CHRISTMAS && map.getCategory() != Category.HALLOWEEN) // Exclude Holiday maps
 					.collect(Collectors.toList());
 		} else {
 			filteredMaps = filteredMaps.stream()
