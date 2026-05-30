@@ -18,7 +18,6 @@ commands:
       description: Stats after a game
    fly:
       description: Fly command
-      aliases: f
    list:
       description: List of online players
    tournament:
@@ -165,6 +164,7 @@ commands:
       description: Lactate command!
    friends:
       description: Friends command
+      aliases: [f, friend]
 
 permissions:
    scb.admin:

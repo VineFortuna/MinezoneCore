@@ -9,6 +9,7 @@ import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.friends.FriendProfile;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
@@ -210,6 +211,16 @@ public class Commands implements CommandExecutor, TabCompleter {
             return;
         }
 
+        if (sub.equals("list")) {
+            sendFriendsList(player);
+            return;
+        }
+
+        if (args.length < 2) {
+            sendFriendsHelp(player);
+            return;
+        }
+
         if (args.length < 2) {
             sendFriendsHelp(player);
             return;
@@ -319,9 +330,55 @@ public class Commands implements CommandExecutor, TabCompleter {
         sendFriendsHelp(player);
     }
 
+    private void sendFriendsList(Player player) {
+        List<FriendProfile> friends = main.getFriendsManager().getFriends(player.getUniqueId());
+
+        friends.sort((first, second) -> {
+            if (first.isOnline() && !second.isOnline()) {
+                return -1;
+            }
+
+            if (!first.isOnline() && second.isOnline()) {
+                return 1;
+            }
+
+            return first.getName().compareToIgnoreCase(second.getName());
+        });
+
+        player.sendMessage(main.color("&8&m--------------------------------"));
+        player.sendMessage(main.color("&a&lFriends List &7(" + friends.size() + ")"));
+
+        if (friends.isEmpty()) {
+            player.sendMessage(main.color("&7You do not have any friends yet."));
+            player.sendMessage(main.color("&7Add someone with &e/friends add <player>&7."));
+            player.sendMessage(main.color("&8&m--------------------------------"));
+            return;
+        }
+
+        StringBuilder list = new StringBuilder();
+
+        for (int i = 0; i < friends.size(); i++) {
+            FriendProfile friend = friends.get(i);
+
+            if (i > 0) {
+                list.append(main.color("&7, "));
+            }
+
+            if (friend.isOnline()) {
+                list.append(main.color("&a")).append(friend.getName());
+            } else {
+                list.append(main.color("&7")).append(friend.getName());
+            }
+        }
+
+        player.sendMessage(list.toString());
+        player.sendMessage(main.color("&8&m--------------------------------"));
+    }
+
     private void sendFriendsHelp(Player player) {
         player.sendMessage(main.color("&a&lFriends Commands"));
         player.sendMessage(main.color("&e/friends &7- Open your friends list"));
+        player.sendMessage(main.color("&e/friends list &7- List your friends in chat"));
         player.sendMessage(main.color("&e/friends add <player> &7- Send a friend request"));
         player.sendMessage(main.color("&e/friends accept <player> &7- Accept a request"));
         player.sendMessage(main.color("&e/friends reject <player> &7- Reject a request"));
@@ -1451,7 +1508,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 			Rank donor = classType.getMinRank();
 
 			if (donor == null || player.hasPermission("scb." + donor.toString().toLowerCase())) {
-				player.sendMessage(main.color("&2&l(!) " + "&eYou have selected to go a &lRandom class"));
+				player.sendMessage(main.color("&2&l(!) " + "&rYou have selected to go a &aRandom &rclass"));
 				main.getGameManager().playerSelectClass(player, classType);
 				GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
                 game.board.updateLine(3, main.color("&fClass: &cR&6a&en&ad&bo&3m"));
@@ -1606,7 +1663,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 
         } else if (cmd.getName().equalsIgnoreCase("friends")) {
             if (args.length == 1) {
-                List<String> options = Arrays.asList("add", "accept", "reject", "remove", "requests", "help");
+                List<String> options = Arrays.asList("add", "accept", "reject", "remove", "requests", "list", "help");
                 List<String> matches = new ArrayList<>();
 
                 for (String option : options) {
