@@ -249,7 +249,7 @@ public enum Maps {
 			new Gameplay[]{Gameplay.VOIDY},
 			Size.SMALL,
 			Category.HALLOWEEN,
-			new ItemStack(Material.SLIME_BLOCK), // Slime Block
+			new ItemStack(Material.CAULDRON_ITEM), // Slime Block
 			new MapInstance(
 					"witchesbrew")
 					.setSpawnPos(new Vector(-1347.494, 157, 982.477),
@@ -948,7 +948,7 @@ public enum Maps {
 			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
 			Size.SMALL,
 			Category.CURATED,
-			new ItemStack(Material.WOOD, 1, (short) 3), // Jungle Wood
+			new ItemStack(Material.LEAVES, 1, (short) 3), // Jungle Leaves
 			new MapInstance(
 					"jungleboogie")
 					.setSpawnPos(
