@@ -1,6 +1,8 @@
 package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.friends.FriendProfile;
 import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
@@ -40,6 +42,31 @@ public class FriendsGUI implements InventoryProvider {
         this.inv = builder.build();
     }
 
+    private String checkIfInGame(Player onlineFriend) {
+        String msg = main.color("&e&nLeft-Click&e to ");
+        GameInstance game = main.getGameManager().GetInstanceOfPlayer(onlineFriend);
+
+        if (game != null) {
+            if (game.state == GameState.WAITING)
+                msg += "Join";
+            else if (game.state == GameState.STARTED)
+                msg += "Spectate";
+        }
+
+        game = main.getGameManager().GetInstanceOfSpectator(onlineFriend);
+
+        if (game != null) {
+            if (game.state == GameState.STARTED)
+                msg += "Spectate";
+        }
+
+        if (onlineFriend.getWorld() == main.getLobbyWorld()) {
+            msg += "Teleport";
+        }
+
+        return msg;
+    }
+
     @Override
     public void init(Player player, InventoryContents contents) {
         ClickableItem border = ClickableItem.of(ItemHelper.setDetails(
@@ -54,6 +81,20 @@ public class FriendsGUI implements InventoryProvider {
         }
 
         List<FriendProfile> friends = main.getFriendsManager().getFriends(player.getUniqueId());
+
+        //Sorting friends online first in GUI
+        friends.sort((first, second) -> {
+            if (first.isOnline() && !second.isOnline()) {
+                return -1;
+            }
+
+            if (!first.isOnline() && second.isOnline()) {
+                return 1;
+            }
+
+            return first.getName().compareToIgnoreCase(second.getName());
+        });
+
         int onlineCount = 0;
 
         for (FriendProfile friend : friends) {
@@ -79,17 +120,41 @@ public class FriendsGUI implements InventoryProvider {
             slot++;
 
             String status = friend.isOnline() ? "&aOnline" : "&7Offline";
+            Player onlineFriend = org.bukkit.Bukkit.getPlayer(friend.getUuid());
 
             List<String> lore = new java.util.ArrayList<>();
 
             lore.add(main.color("&fStatus: " + status));
+
+            //This below checks if friend is in a game to display to player
+            if (friend.isOnline()) {
+                GameInstance game = main.getGameManager().GetInstanceOfPlayer(onlineFriend);
+
+                if (game != null) {
+                    if (game.state == GameState.STARTED)
+                        lore.add(main.color("&rPlaying: &a" + game.getMap().getName()));
+                    else if (game.state == GameState.WAITING)
+                        lore.add(main.color("&rWaiting: &a" + game.getMap().getName()));
+                }
+
+                game = main.getGameManager().GetInstanceOfSpectator(onlineFriend);
+
+                if (game != null) {
+                    lore.add(main.color("&rSpectating: &a" + game.getMap().getName()));
+                }
+
+                if (onlineFriend.getWorld() == main.getLobbyWorld()) {
+                    lore.add(main.color("&rIn Lobby"));
+                }
+            }
+
             lore.add("");
 
             if (friend.isOnline()) {
-                lore.add(main.color("&eLeft-click &7to message"));
+                lore.add(checkIfInGame(onlineFriend)); //Checks where player is if in lobby or a game
             }
 
-            lore.add(main.color("&cRight-click &7to remove"));
+            lore.add(main.color("&e&nRight-click&e to remove friend"));
 
             ItemStack skull = ItemHelper.createSkullHeadPlayer(1, friend.getName(),
                     main.color((friend.isOnline() ? "&a" : "&7") + friend.getName()),
@@ -109,15 +174,51 @@ public class FriendsGUI implements InventoryProvider {
                     return;
                 }
 
-                Player onlineFriend = org.bukkit.Bukkit.getPlayer(friend.getUuid());
-
                 if (onlineFriend == null) {
                     player.sendMessage(main.color("&c&l(!) &rThat friend is currently offline."));
                     return;
                 }
 
                 player.closeInventory();
-                player.sendMessage(main.color("&r&l(!) &rUsage: &a/tell <player> <message>"));
+
+                GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+
+                if (onlineFriend.getWorld() == main.getLobbyWorld()) {
+                    if (game != null) {
+                        player.sendMessage(main.color("&c&l(!) &rYou cannot teleport to friends while in game!"));
+                        return;
+                    }
+                    if (main.getParkour().hasPlayer(onlineFriend)) {
+                        player.sendMessage(main.color("&c&l(!) &rYou cannot teleport to &a" + onlineFriend.getName() +
+                                " &rwhile in parkour!"));
+                        return;
+                    }
+                    if (main.getParkour().hasPlayer(player)) {
+                        player.sendMessage(main.color("&c&l(!) &rYou cannot teleport while in parkour!"));
+                        return;
+                    }
+                    player.teleport(onlineFriend.getLocation());
+                }
+
+                game = main.getGameManager().GetInstanceOfPlayer(onlineFriend);
+
+                if (game != null) {
+                    if (game.state == GameState.STARTED)
+                        main.getGameManager().SpectatorJoinMap(player, game.getMap());
+                    else if (game.state == GameState.WAITING)
+                        if (!game.isLobbyFull(player))
+                            main.getGameManager().JoinMap(player, game.getMap());
+
+                    return;
+                }
+
+                game = main.getGameManager().GetInstanceOfSpectator(onlineFriend);
+
+                if (game != null) {
+                    if (game.state == GameState.STARTED) {
+                        main.getGameManager().SpectatorJoinMap(player, game.getMap());
+                    }
+                }
             }));
         }
 

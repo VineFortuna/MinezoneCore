@@ -141,19 +141,22 @@ public class StatsGUI implements InventoryProvider {
 					}));
 
 			String fishingTexture = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTk2YTQ4ZGNkYWY0MThmMjJjZDE4NjdjMWViMGFlMjgyYzI4NGI2Nzk5MDZiNzk3ODFkOGQyYjJlZWJhMjEwMiJ9fX0=";
-			contents.set(2, 6,
-					ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(fishingTexture),
+            contents.set(2, 6,
+                    ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(fishingTexture),
                             main.color("&e&lFishing Stats"),
                             main.color("&fCaught: &a" + data.totalcaught),
                             main.color("&fUnique Caught: &a" + uniqueCaught + "/" + FishType.values().length),
                             main.color("&fTreasure Caught: &a" + treasure),
                             "",
                             main.color("&aClick to open Fishingpedia")), e -> {
-						if (target != null)
-							new FishingGUI(main, target, inv).inv.open(player);
-						else
-							new FishingGUI(main, inv).inv.open(player);
-					}));
+                        if (targetData != null) {
+                            new FishingGUI(main, targetData, inv).inv.open(player);
+                        } else if (target != null) {
+                            new FishingGUI(main, target, inv).inv.open(player);
+                        } else {
+                            new FishingGUI(main, inv).inv.open(player);
+                        }
+                    }));
 
             ItemStack steveHead = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
             SkullMeta steveMeta = (SkullMeta) steveHead.getItemMeta();
