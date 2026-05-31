@@ -1649,6 +1649,31 @@ public enum Maps {
 					
 					
 	),
+	Verdant(
+			"Verdant",
+			new Gameplay[]{Gameplay.VOIDY, Gameplay.ELEVATED},
+			Size.SMALL,
+			Category.CURATED,
+			new ItemStack(Material.LEAVES, 1, (short) 3), // Jungle Leaves
+			new MapInstance(
+					"Verdant")
+					.setSpawnPos(
+							new Vector(9.5, 162, 64.5),
+							new Vector(9.5, 170, 45.5),
+							new Vector(-1.5, 172, 45.5),
+							new Vector(12.5, 174, 70.5),
+							new Vector(13.5, 179, 55.5),
+							new Vector(-14.5, 180, 75.5),
+							new Vector(-16.5, 183, 49.5)
+					)
+					.setLobbyLoc(new Vector(0, 172, 0))
+					.setSpecLoc(new Vector(-1, 184, 63))
+					.setBounds(new Vector(1, 184, 63), 40, 40)
+					.setSource(MapSource.COMMUNITY)
+					.setGameType(GameType.DUEL)
+
+
+	),
 /*	WizardTower(
 			"WizardTower",
 			new Gameplay[]{Gameplay.FLAT, Gameplay.ELEVATED},
@@ -1761,7 +1786,7 @@ public enum Maps {
 		Comparator<Maps> sortByName = Comparator.comparing(Maps::getName);
 		Comparator<Maps> sortBySize = Comparator.comparing(Maps::getSize);
 		Comparator<Maps> sortByGameplay = (map1, map2) -> {
-			Maps.Gameplay[] gameplay1 = map1.getGameplay();  // Assume getGameplay() returns an array
+			Maps.Gameplay[] gameplay1 = map1.getGameplay();
 			Maps.Gameplay[] gameplay2 = map2.getGameplay();
 			
 			// Compare each gameplay type one by one, using the natural order of enums
