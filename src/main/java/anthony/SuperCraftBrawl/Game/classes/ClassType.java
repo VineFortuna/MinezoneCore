@@ -838,6 +838,13 @@ public enum ClassType {
 		return lines;
 	}
 
+	public static ClassType getById(int id) {
+		for (ClassType type : values()) {
+			if (type.id == id) return type;
+		}
+		return null;
+	}
+
 	public String color(String c) {
 		return ChatColor.translateAlternateColorCodes('&', c);
 	}
