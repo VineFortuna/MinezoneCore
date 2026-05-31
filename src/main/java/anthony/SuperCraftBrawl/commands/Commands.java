@@ -1456,7 +1456,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 
 		if (map == null) {
-			player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maps &rfor a list of maps"));
+			player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maps &rto see all maps"));
 			return;
 		}
 
@@ -1693,18 +1693,14 @@ public class Commands implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-        if (cmd.getName().equalsIgnoreCase("join") || cmd.getName().equalsIgnoreCase("spectate")) {
-            List<Maps> maps = Arrays.asList(Maps.values());
-            List<String> mapsString = Lists.newArrayList();
-
+        if (cmd.getName().equalsIgnoreCase("join")
+                || cmd.getName().equalsIgnoreCase("spectate")) {
             if (args.length == 1) {
-                for (Maps map : maps) {
-                    if (map.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
-                        mapsString.add(map.getName());
-                    }
-                }
+                List<String> mapNames = Arrays.stream(Maps.values())
+                        .map(Enum::name)
+                        .collect(Collectors.toList());
 
-                return mapsString;
+                return StringUtil.copyPartialMatches(args[0], mapNames, new ArrayList<>());
             }
         } else if (cmd.getName().equalsIgnoreCase("class")
                 || cmd.getName().equalsIgnoreCase("purchases")
@@ -1714,41 +1710,28 @@ public class Commands implements CommandExecutor, TabCompleter {
                     .collect(Collectors.toList());
 
             boolean isClassCmd = cmd.getName().equalsIgnoreCase("class") && args.length == 1;
+            boolean isForceClassCmd = cmd.getName().equalsIgnoreCase("forceclass") && args.length == 1;
             boolean isPurchasesCmd = cmd.getName().equalsIgnoreCase("purchases")
                     && args.length == 2
                     && args[0].equalsIgnoreCase("get");
 
-            if (isClassCmd || isPurchasesCmd) {
-                String partial = isClassCmd ? args[0] : args[1];
+            if (isClassCmd || isPurchasesCmd || isForceClassCmd) {
+                String partial = isPurchasesCmd ? args[1] : args[0];
                 return StringUtil.copyPartialMatches(partial, classNames, new ArrayList<>());
             }
-
         } else if (cmd.getName().equalsIgnoreCase("friends")) {
             if (args.length == 1) {
                 List<String> options = Arrays.asList("add", "accept", "reject", "remove", "requests", "list", "help");
-                List<String> matches = new ArrayList<>();
-
-                for (String option : options) {
-                    if (option.toLowerCase().startsWith(args[0].toLowerCase())) {
-                        matches.add(option);
-                    }
-                }
-
-                return matches;
+                return StringUtil.copyPartialMatches(args[0], options, new ArrayList<>());
             }
 
             if (args.length == 2) {
-                List<String> names = new ArrayList<>();
-
-                for (Player online : Bukkit.getOnlinePlayers()) {
-                    if (online.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
-                        names.add(online.getName());
-                    }
-                }
-
-                return names;
+                List<String> names = Bukkit.getOnlinePlayers()
+                        .stream()
+                        .map(player -> player.getName())
+                        .collect(Collectors.toList());
+                return StringUtil.copyPartialMatches(args[0], names, new ArrayList<>());
             }
-
         } else if (cmd.getName().equalsIgnoreCase("sound")) {
             if (args.length == 1) {
                 List<String> soundNames = Arrays.stream(Sound.values())
