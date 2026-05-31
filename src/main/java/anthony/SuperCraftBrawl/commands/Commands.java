@@ -1689,18 +1689,16 @@ public class Commands implements CommandExecutor, TabCompleter {
 
         } else if (cmd.getName().equalsIgnoreCase("sound")) {
             if (args.length == 1) {
-                List<String> soundNames = new ArrayList<>();
-
-                for (Sound sound : Sound.values()) {
-                    if (sound.name().toLowerCase().startsWith(args[0].toLowerCase())) {
-                        soundNames.add(sound.name());
-                    }
-                }
-
-                return soundNames;
+                List<String> soundNames = Arrays.stream(Sound.values())
+                        .map(Sound::name)
+                        .collect(Collectors.toList());
+                return StringUtil.copyPartialMatches(args[0], soundNames, new ArrayList<>());
+            }
+        } else if (cmd.getName().equalsIgnoreCase("soundnms")) {
+            if (args.length == 1) {
+                return StringUtil.copyPartialMatches(args[0], getAllNMSSounds(), new ArrayList<>());
             }
         }
-
         return null;
     }
 
