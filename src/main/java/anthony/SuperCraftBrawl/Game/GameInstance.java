@@ -1590,6 +1590,7 @@ public class GameInstance {
             newBaseClass.totalTokens = oldBaseClass.totalTokens;
             newBaseClass.totalExp = oldBaseClass.totalExp;
             newBaseClass.totalKills = oldBaseClass.totalKills;
+            newBaseClass.totalDeaths = oldBaseClass.totalDeaths;
             newBaseClass.bountyTarget = oldBaseClass.bountyTarget;
 
             String scoreEntry = truncateString("" + classType.getTag() + " " + ChatColor.WHITE + player.getName(), 40);
