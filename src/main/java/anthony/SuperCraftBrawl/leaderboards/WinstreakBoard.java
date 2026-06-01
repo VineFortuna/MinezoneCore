@@ -41,7 +41,7 @@ public class WinstreakBoard extends LeaderboardBase {
     private final Map<UUID, List<Integer>> viewerEntityIds = new HashMap<>();
     private static final AtomicInteger ENTITY_ID = new AtomicInteger(600000);
 
-    private static final Location TITLE_LOC = new Location(null, 209.5, 107.5, 704.4);
+    private static final Location TITLE_LOC = new Location(null, 199.5, 107, 709.5);
 
     public WinstreakBoard(Core main) {
         super(main);
@@ -160,7 +160,7 @@ public class WinstreakBoard extends LeaderboardBase {
                 sendLineToViewer(
                         player,
                         line2,
-                        ChatColor.GREEN + player.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + "N/A"
+                        ChatColor.GREEN + player.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + data.bestWinstreak
                 );
             }
         }
@@ -233,6 +233,8 @@ public class WinstreakBoard extends LeaderboardBase {
             y -= 0.24;
         }
 
+        int yourVal = getScopedValueFor(viewer, scope);
+
         if (!ids.contains(viewer.getUniqueId())) {
             Location sep = new Location(title.getWorld(), title.getX(), y - 0.20, title.getZ());
             sendLineToViewer(viewer, sep, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------");
@@ -243,7 +245,7 @@ public class WinstreakBoard extends LeaderboardBase {
             sendLineToViewer(
                     viewer,
                     yours,
-                    ChatColor.GREEN + viewer.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + "N/A"
+                    ChatColor.GREEN + viewer.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + yourVal
             );
         }
     }

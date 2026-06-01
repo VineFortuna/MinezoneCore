@@ -40,7 +40,7 @@ public class GadgetsGUI implements InventoryProvider {
 		List<String> broomList = new ArrayList<>();
 		broomList.add(main.color("&7Fly around like a Witch!"));
 		broomList.add("");
-		broomList.add(Rank.CAPTAIN.getTag() + ChatColor.RESET + " exclusive!");
+		broomList.add(Rank.PRO.getTag() + ChatColor.RESET + " exclusive!");
 		ItemStack broom = ItemHelper.create(Material.WHEAT,
 				main.color("&6Magic Broom"), broomList);
 
@@ -92,7 +92,7 @@ public class GadgetsGUI implements InventoryProvider {
 					inv.close(player);
 				}
 			} else
-                player.sendMessage(main.color("&c&l(!) &rYou need the rank " + Rank.CAPTAIN.getTag() + "&f to use this!"));
+                player.sendMessage(main.color("&c&l(!) &rYou need the rank " + Rank.PRO.getTag() + "&f to use this!"));
 		}));
 
 		// Paintball Gadget

@@ -76,7 +76,7 @@ public enum ClassType {
 	Guardian(69, 0, 30, true),
 
 	// Donor Classes
-	Enderdragon(3, 0, Rank.VIP),
+	EnderDragon(3, 0, Rank.VIP),
 	IronGolem(6, 0, Rank.VIP),
 	Ghast(8, 0, Rank.VIP),
 	Slime(10, 0, Rank.VIP),
@@ -219,7 +219,7 @@ public enum ClassType {
 				return "Mine minerals to upgrade your pickaxe and get special items";
 			case Skeleton:
 				return "Effective shooter at taking down their targets";
-			case Enderdragon:
+			case EnderDragon:
 				return "Move around your opponents and heal from your ender crystals!";
 			case Enderman:
 				return "Stare into the souls of your enemies whilst teleporting around them";
@@ -384,7 +384,7 @@ public enum ClassType {
 				return "" + ChatColor.YELLOW + ChatColor.BOLD + "Chicken" + ChatColor.RESET;
 			case DarkSethBling:
 				return "" + ChatColor.DARK_GRAY + ChatColor.BOLD + ChatColor.ITALIC + "DarkSethBling" + ChatColor.RESET;
-			case Enderdragon:
+			case EnderDragon:
 				return "" + ChatColor.DARK_PURPLE + ChatColor.BOLD + "Ender" + ChatColor.RESET + ChatColor.DARK_GRAY + ChatColor.BOLD + "Dragon" + ChatColor.RESET;
 			case Enderman:
 				return "" + ChatColor.DARK_PURPLE + "Enderman" + ChatColor.RESET;
@@ -570,7 +570,7 @@ public enum ClassType {
 			return new ItemStack(new ItemStack(Material.SLIME_BALL));
 		case PiglinBrute:
 			return new ItemStack(new ItemStack(Material.GOLD_AXE));
-		case Enderdragon:
+		case EnderDragon:
 			return new ItemStack(new ItemStack(Material.DRAGON_EGG));
 		case Bat:
 			return ItemHelper.createSkullTexture(
@@ -712,7 +712,7 @@ public enum ClassType {
 				return new PotatoClass(instance, player);
 			case Steve:
 				return new SteveClass(instance, player);
-			case Enderdragon:
+			case EnderDragon:
 				return new EnderdragonClass(instance, player);
 			case Skeleton:
 				return new SkeletonClass(instance, player);

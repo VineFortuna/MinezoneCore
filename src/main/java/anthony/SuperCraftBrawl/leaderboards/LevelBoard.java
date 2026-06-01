@@ -72,17 +72,17 @@ public class LevelBoard extends LeaderboardBase {
 	public void updateLeaderboard(boolean init) {
 		removeOldLeaderboards();
 
-		Location loc = new Location(main.getLobbyWorld(), 189.5, 107.5, 711.5);
+		Location loc = new Location(main.getLobbyWorld(), 189.5, 107, 711.5);
 		sendArmorStandPacket(loc, ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + "Top Levels");
 		loc.setY(loc.getY() - 0.4);
 
 		int count = 1;
 		for (UUID id : lead) {
-			loc.setY(loc.getY() - 0.24);
 			String name = lead2.get(count - 1);
 			Integer win = level.get(id);
 			sendArmorStandPacket(loc,
 					ChatColor.AQUA + "#" + count + ": " + ChatColor.YELLOW + name + ChatColor.RESET + " - " + win);
+			loc.setY(loc.getY() - 0.24);
 			count++;
 		}
 		
@@ -92,13 +92,15 @@ public class LevelBoard extends LeaderboardBase {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 		    PlayerData data = main.getDataManager().getPlayerData(player);
             if (data != null && !lead.contains(data.playerUUID)) {
+                int level = data.level;
+
                 Location line1 = base.clone().add(0, -0.24, 0);
                 sendStandToOnePlayer(line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------", player);
 
                 Location line2 = base.clone().add(0, -0.44, 0);
                 sendStandToOnePlayer(
                         line2,
-                        "" + ChatColor.GREEN + player.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + "N/A",
+                        "" + ChatColor.GREEN + player.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + level,
                         player
                 );
             }

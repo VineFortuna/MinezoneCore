@@ -172,10 +172,13 @@ public class ParkourBoard extends LeaderboardBase {
                     player
             );
 
+            long playerTime = getScopedValueFor(player, LeaderboardScope.LIFETIME);
+            String display = playerTime > 0 ? formatTime(playerTime) : "N/A";
+
             Location line2 = base.clone().add(0, -0.44, 0);
             sendStandToOnePlayerLifetimeOnly(
                     line2,
-                    ChatColor.GREEN + player.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + "N/A",
+                    ChatColor.GREEN + player.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + display,
                     player
             );
         }
@@ -259,11 +262,14 @@ public class ParkourBoard extends LeaderboardBase {
 
             y -= 0.24;
 
+            long playerTime = getScopedValueFor(viewer, scope);
+            String display = playerTime > 0 ? formatTime(playerTime) : "N/A";
+
             Location yours = new Location(title.getWorld(), title.getX(), y - 0.20, title.getZ());
             sendLineToViewer(
                     viewer,
                     yours,
-                    ChatColor.GREEN + viewer.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + "N/A"
+                    ChatColor.GREEN + viewer.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + display
             );
         }
     }

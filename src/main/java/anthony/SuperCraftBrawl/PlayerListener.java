@@ -8,6 +8,7 @@ import anthony.SuperCraftBrawl.gui.christmas.ChristmasRewardsGUI;
 import anthony.SuperCraftBrawl.gui.cosmetics.CosmeticsGUI;
 import anthony.SuperCraftBrawl.leaderboards.LeaderboardScope;
 import anthony.SuperCraftBrawl.npcs.ChannelInjector;
+import anthony.SuperCraftBrawl.npcs.NPC;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.SoundManager;
@@ -103,7 +104,7 @@ public class PlayerListener implements Listener {
 
     /**
 	 * This function just resets player double jump & sets gamemode to Adventure
-	 * 
+	 *
 	 * @param p to be reset
 	 */
 	public void resetDoubleJump(Player p) {
@@ -111,14 +112,14 @@ public class PlayerListener implements Listener {
 		p.setAllowFlight(true);
 		p.setGameMode(GameMode.ADVENTURE);
 	}
-	
+
 	public void removeCosmetics(Player player) {
 		main.getTrickTitle().disable(player);
 	}
 
 	/**
 	 * This function resets the armor of a player
-	 * 
+	 *
 	 * @param p which is Player to remove armor
 	 */
 	public void resetArmor(Player p) {
@@ -130,17 +131,17 @@ public class PlayerListener implements Listener {
 
 	/**
 	 * This function resets the Player's potion effects if any is active
-	 * 
+	 *
 	 * @param p which is Player to remove effects
 	 */
 	public void resetPotionEffects(Player p) {
 		for (PotionEffect type : p.getActivePotionEffects()) // Loop through all active effects
 			p.removePotionEffect(type.getType());
 	}
-	
+
 	public void checkIfLevelUp(Player player) {
 		PlayerData data = main.getDataManager().getPlayerData(player);
-		
+
 		if (data != null) {
 			if (data.exp >= 2500) {
 				data.level++;
@@ -150,7 +151,7 @@ public class PlayerListener implements Listener {
 				player.sendMessage(main.color("&7You are now &e&lLevel &6&l" + data.level + " &7- nice work!"));
 				player.sendMessage(main.color("&8&m----------------------------------------"));
 				player.playSound(player.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
-				
+
 				if (player.getWorld() == main.getLobbyWorld())
 					main.getScoreboardManager().lobbyBoard(player);
 			}
@@ -159,7 +160,7 @@ public class PlayerListener implements Listener {
 
 	/**
 	 * This function sets the player's rank on the tablist to the left of their name
-	 * 
+	 *
 	 * @param p which is Player to set rank on tablist
 	 */
 	@SuppressWarnings("deprecation")
@@ -180,12 +181,12 @@ public class PlayerListener implements Listener {
 		 * Team captain = c.registerNewTeam("b_captain");
 		 * captain.setPrefix(Rank.CAPTAIN.getTagWithSpace()); Team owner =
 		 * c.registerNewTeam("a_owner"); owner.setPrefix(Rank.OWNER.getTagWithSpace());
-		 * 
+		 *
 		 * if (main.getRankManager().getRank(p) == Rank.CAPTAIN) captain.addPlayer(p);
 		 * else if (main.getRankManager().getRank(p) == Rank.OWNER) owner.addPlayer(p);
-		 * 
+		 *
 		 * p.setScoreboard(c);
-		 * 
+		 *
 		 * if (main.getTabManager() != null) main.getTabManager().setPlayerTeam(p);
 		 */
 	}
@@ -204,7 +205,7 @@ public class PlayerListener implements Listener {
 		int progress = (main.getHalloweenManager() != null)
 				? main.getHalloweenManager().getFoundCount(player.getUniqueId())
 				: 0;
-		
+
 		return progress;
 	}
 
@@ -234,7 +235,7 @@ public class PlayerListener implements Listener {
 
     /**
 	 * This function checks if tournament mode is active on Player Join
-	 * 
+	 *
 	 * @param p which is Player to add to the tournament
 	 */
 	public void checkIfTournament(Player p) {
@@ -508,6 +509,19 @@ public class PlayerListener implements Listener {
             }
         } catch (Throwable ignored) {}
 
+		// 5) Hide or show NPCS
+		for (NPC npc : main.getAllNPCs()) {
+			// Leaving NPC world
+			if (!p.getWorld().equals(npc.getLocation().getWorld())) {
+				npc.hideFrom(p);
+				continue;
+			}
+			// Returning to NPC world
+			Bukkit.getScheduler().runTaskLater(main, () -> {
+				npc.showTo(p);
+			}, 5L);
+		}
+
         clearLeaderboardHolograms(p);
     }
 
@@ -711,15 +725,15 @@ public class PlayerListener implements Listener {
 		/*
 		 * anthony.CrystalWars.game.GameInstance i =
 		 * main.getCwManager().getInstanceOfPlayer(player);
-		 * 
+		 *
 		 * if (i != null) { if (i.getState() == GameState.IN_PROGRESS) {
 		 * event.setCancelled(false);
 		 * i.blocksPlaced.add(event.getBlockPlaced().getLocation().toVector()); return;
 		 * } } i = null;
-		 * 
+		 *
 		 * anthony.skywars.GameInstance i2 =
 		 * main.getSWManager().getInstanceOfPlayer(player);
-		 * 
+		 *
 		 * if (i2 != null) { if (i2.getState() == anthony.skywars.GameState.STARTED) {
 		 * event.setCancelled(false); return; } }
 		 */

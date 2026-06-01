@@ -274,6 +274,7 @@ public class FishermanClass extends BaseClass {
         } else {
             player.sendMessage(instance.getGameManager().getMain()
                     .color("&c&l(!) &rYou are already full of health!"));
+            player.getInventory().addItem(healFish);
         }
     }
 

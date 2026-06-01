@@ -41,7 +41,7 @@ public class FlawlessWinsBoard extends LeaderboardBase {
     private final Map<UUID, List<Integer>> viewerEntityIds = new HashMap<>();
     private static final AtomicInteger ENTITY_ID = new AtomicInteger(500000);
 
-    private static final Location TITLE_LOC = new Location(null, 169.5, 107.5, 704.5);
+    private static final Location TITLE_LOC = new Location(null, 179.5, 107, 709.5);
 
     public FlawlessWinsBoard(Core main) {
         super(main);
@@ -164,7 +164,7 @@ public class FlawlessWinsBoard extends LeaderboardBase {
                 sendLineToViewer(
                         player,
                         line2,
-                        ChatColor.GREEN + player.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + "N/A"
+                        ChatColor.GREEN + player.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + data.flawlessWins
                 );
             }
         }
@@ -237,6 +237,8 @@ public class FlawlessWinsBoard extends LeaderboardBase {
             y -= 0.24;
         }
 
+        int yourVal = getScopedValueFor(viewer, scope);
+
         if (!ids.contains(viewer.getUniqueId())) {
             Location sep = new Location(title.getWorld(), title.getX(), y - 0.20, title.getZ());
             sendLineToViewer(viewer, sep, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------");
@@ -247,7 +249,7 @@ public class FlawlessWinsBoard extends LeaderboardBase {
             sendLineToViewer(
                     viewer,
                     yours,
-                    ChatColor.GREEN + viewer.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + "N/A"
+                    ChatColor.GREEN + viewer.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + yourVal
             );
         }
     }

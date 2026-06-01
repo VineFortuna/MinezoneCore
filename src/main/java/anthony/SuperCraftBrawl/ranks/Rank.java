@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 public enum Rank {
     DEFAULT(0, "", color("&7")), //RANK GIVEN TO ALL NEW PLAYERS
     VIP(6, color("&e&lVIP"), color("&e")), //FIRST DONATION RANK
-    CAPTAIN(8, color("&9&lCAPTAIN"), color("&9")), //SECOND DONATION RANK
+    PRO(8, color("&9&lPRO"), color("&9")), //SECOND DONATION RANK
     TRAINEE(3, color("&2&lTRAINEE"), color("&6")),
     /* Trainee:
      * Obtainable: Players who applied and have been accepted. They are under training and shall only have
@@ -90,11 +90,17 @@ public enum Rank {
      */
     SUPREME(17, color("&5&lSUPREME"), color("&5")),
     
-    HR(18, color("&5&lHR"), color("&5"));
+    HR(18, color("&5&lHR"), color("&5")),
 	/*
 	 * Human Resources:
 	 * Job: Oversee both the community and staff, ensuring smooth operations across the board
 	 */
+
+    TW(19, color("&5&lTW"), color("&5"));
+    /*
+     * Tournament Winner:
+     * Job: Rank for tournament winners
+     */
 
     private final int roleID;
     private final String tag;
@@ -143,10 +149,12 @@ public enum Rank {
 
 		if (rank == Rank.OWNER || rank == Rank.ADMIN)
 			msg = color("&c");
-		else if (rank == Rank.CAPTAIN)
+        else if (rank == Rank.TW)
+            msg = color("&5");
+		else if (rank == Rank.PRO)
 			msg = color("&9");
 		else if (rank == Rank.VIP)
-			msg = color("&a");
+			msg = color("&e");
         else if (rank == Rank.QA)
             msg = color("&a");
         else if (rank == Rank.DEVELOPER)
@@ -172,8 +180,8 @@ public enum Rank {
             case QA:            return 6;
             case BUILDER:       return 7;
             case MEDIA:         return 8;
-            case SUPREME:       return 9;
-            case CAPTAIN:       return 10;
+            case TW:       return 9;
+            case PRO:       return 10;
             case VIP:           return 11;
             case DEFAULT:
             default:            return 12;

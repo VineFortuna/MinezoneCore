@@ -29,6 +29,7 @@ public class FishingGUI implements InventoryProvider {
     public Core main;
     public SmartInventory inv;
     private Player target;
+    private PlayerData targetData;
     private int currentInfo = 0;
     
     public FishingGUI(Core main, SmartInventory parent) {
@@ -43,14 +44,25 @@ public class FishingGUI implements InventoryProvider {
         this.main = main;
         this.target = target;
     }
-    
+
+    public FishingGUI(Core main, PlayerData targetData, SmartInventory parent) {
+        inv = SmartInventory.builder().id("myInventory").provider(this).size(5, 9)
+                .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Fishing").parent(parent).build();
+        this.main = main;
+        this.targetData = targetData;
+    }
+
     @Override
     public void init(Player player, InventoryContents contents) {
         Pagination pagination = contents.pagination();
 
         PlayerData data = main.getDataManager().getPlayerData(player);
-        if (this.target != null)
+
+        if (this.targetData != null) {
+            data = this.targetData;
+        } else if (this.target != null) {
             data = main.getDataManager().getPlayerData(target);
+        }
         
         contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(
                 new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
