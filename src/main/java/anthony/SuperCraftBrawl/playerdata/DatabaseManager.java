@@ -152,6 +152,7 @@ public class DatabaseManager {
 						"deaths INT DEFAULT 0," +
 						"lives INT DEFAULT 0," +
 						"winner BOOLEAN DEFAULT FALSE," +
+						"firstblood BOOLEAN DEFAULT FALSE," +
 
 						"PRIMARY KEY (game_id, uuid)," +
 
