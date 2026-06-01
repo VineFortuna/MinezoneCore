@@ -10,6 +10,7 @@ import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileManager;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.party.Party;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ChatColorHelper;
@@ -106,6 +107,10 @@ public class GameManager implements Listener, PluginMessageListener {
         }
     }
 
+    /*
+    * This function returns an integer of the number of token classes
+    * a player has unlocked
+     */
     public int numOfUnlockedTokenClasses (Player player) {
         int num = 0;
         PlayerData data = main.getDataManager().getPlayerData(player);
@@ -124,6 +129,9 @@ public class GameManager implements Listener, PluginMessageListener {
         return num;
     }
 
+    /*
+    * This function checks how many token classes there are total
+     */
     public int totalNumOfTokenClasses() {
         int num = 0;
 
@@ -136,6 +144,10 @@ public class GameManager implements Listener, PluginMessageListener {
         return num;
     }
 
+    /*
+    * This function returns an integer of how many level classes
+    * a player has unlocked
+     */
     public int numOfUnlockedLevelClasses(Player player) {
         int num = 0;
         PlayerData data = main.getDataManager().getPlayerData(player);
@@ -152,6 +164,10 @@ public class GameManager implements Listener, PluginMessageListener {
 
         return num;
     }
+
+    /*
+     * This function checks how many level classes there are total
+     */
     public int totalNumOfLevelClasses() {
         int num = 0;
 
@@ -165,6 +181,11 @@ public class GameManager implements Listener, PluginMessageListener {
     }
 
 
+    /*
+    * This function returns a boolean to check if a game is full, but
+    * if a player has a rank, they can bypass the full restriction
+    * unless the gamemode is duels
+     */
     public boolean checkIfFull(Player player, GameInstance game, GameType type) {
         if (type == GameType.DUEL && game.players.size() == 2) {
             return true;
@@ -231,6 +252,11 @@ public class GameManager implements Listener, PluginMessageListener {
 
     // EVENTS:
 
+    /*
+    * This function checks multiple cases to disable players from hitting other
+    * entities if they're a spectator, or if a player tries attacking one of
+    * their own creatures they spawned, then the event will be cancelled
+     */
 	@EventHandler
 	public void Target(EntityTargetLivingEntityEvent event) {
 		if (event.getTarget() instanceof Player) {
@@ -246,21 +272,6 @@ public class GameManager implements Listener, PluginMessageListener {
 						if (i.getMap() != null) {
 							if (event.getEntity().getName().contains(player.getName()))
 								event.setCancelled(true);
-						} else {
-							List<Player> p = new ArrayList<Player>();
-							if (i.team.get(player).equals("Red"))
-								for (Player pl : i.redTeam)
-									p.add(pl);
-							else if (i.team.get(player).equals("Blue"))
-								for (Player pl : i.blueTeam)
-									p.add(pl);
-							else if (i.team.get(player).equals("Black"))
-								for (Player pl : i.blackTeam)
-									p.add(pl);
-
-							for (Player pl : p)
-								if (event.getEntity().getName().contains(pl.getName()))
-									event.setCancelled(true);
 						}
 					}
 				}
@@ -616,7 +627,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 		if (instance != null) {
 			if (instance.state == GameState.STARTED) {
-				// On Tropical, void level is 70 because of the water
+				// On the map 'Tropical', void level is 70 because of the water
 				if (instance.getMap() == Maps.Tropical) {
 					if (e.getPlayer().getLocation().getY() <= 71 && e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
 						EntityDamageEvent damageEvent = new EntityDamageEvent(e.getPlayer(), DamageCause.VOID, 1000);
@@ -706,54 +717,13 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	public boolean chestCanOpen = false;
-
+    /*
+    * This function deals with the 'Instagib' lightning drop item. When you right click, it
+    * captures anyone within a 30 block range that you're clicking towards and will set an
+    * upward velocity and do damage.
+     */
 	@EventHandler
-	public void mysteryChest(PlayerInteractEvent e) {
-		Player player = e.getPlayer();
-		List<Material> list = new ArrayList<>(Arrays.asList(Material.CHEST));
-
-		if (player.getWorld() == main.getLobbyWorld()) {
-			if (e.getAction() == Action.RIGHT_CLICK_BLOCK && list.contains(e.getClickedBlock().getType())) {
-				if (chestCanOpen == false) {
-					e.setCancelled(true);
-					new MysteryChestsGUI(main, e.getClickedBlock().getLocation()).inv.open(player);
-				} else {
-					e.setCancelled(true);
-					player.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "This MysteryChest is already in use!");
-				}
-			}
-		} else {
-			if (e.getAction() == Action.RIGHT_CLICK_BLOCK && list.contains(e.getClickedBlock().getType())) {
-				// e.setCancelled(true);
-				// REMOVE LATER
-			}
-		}
-
-	}
-
-	@EventHandler
-	public void UseItem(PlayerInteractEvent event) {
-		ItemStack item = event.getItem();
-		Player player = event.getPlayer();
-		PlayerData data = main.getDataManager().getPlayerData(player);
-		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
-
-		if ((player.getWorld() == main.getLobbyWorld())
-				|| (i != null && (i.state == GameState.WAITING || i.state == GameState.ENDED))) {
-			if (item != null && item.getType() == Material.WHEAT
-					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-				double boosterStrength = 2.0;
-				Vector vel = player.getLocation().getDirection().multiply(boosterStrength);
-				player.setVelocity(vel);
-				data.magicbroom = 1;
-			}
-		}
-	}
-
-	@EventHandler
-	public void instagib(PlayerInteractEvent event) {
+	public void instagibItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		Player player = event.getPlayer();
 		GameInstance i = this.GetInstanceOfPlayer(player);
@@ -870,24 +840,6 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	@EventHandler
-	public void shieldPotions(PlayerItemConsumeEvent event) {
-		Player player = event.getPlayer();
-		ItemStack item = event.getItem();
-		ItemMeta meta = item.getItemMeta();
-
-		if (item != null) {
-			if (item.getType() == Material.POTION) {
-				if (meta.getDisplayName().toLowerCase().contains("mini-shield")) {
-					player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 1000, 0));
-					player.playSound(player.getLocation(), Sound.LAVA, 1, 1);
-					event.setCancelled(true);
-					player.getInventory().clear(player.getInventory().getHeldItemSlot());
-				}
-			}
-		}
-	}
-
 	/**
 	 * This event listens to when a creature spawns This method removes all small
 	 * magma cubes that spawns
@@ -973,6 +925,10 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
+    /*
+    * These 3 functions below disables the default minecraft bone interactivity
+    * with a Wolf so your bone doesn't get consumed
+     */
 	@EventHandler
 	public void onWolfInteract(PlayerInteractEntityEvent event) {
 		if (event.getRightClicked() instanceof Wolf) {
@@ -997,6 +953,10 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
+    /*
+    * This function handles the interactivity with the 'Vote' paper
+    * in a game lobby, and will open a GUI if the item is a paper
+     */
 	@EventHandler
 	public void votePaper(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
@@ -1008,8 +968,12 @@ public class GameManager implements Listener, PluginMessageListener {
 				new VoteGameSettingsGUI(main).inv.open(player);
 	}
 
+    /*
+    * This function handles the interactivity with the 'Extra Life' item. When
+    * used, a player will receieve an additional life in a game
+     */
 	@EventHandler
-	public void extraLife(PlayerInteractEvent event) {
+	public void extraLifeItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		Player player = event.getPlayer();
 		PlayerData data = getMain().getDataManager().getPlayerData(player);
@@ -1021,6 +985,7 @@ public class GameManager implements Listener, PluginMessageListener {
 						&& (event.getAction() == Action.RIGHT_CLICK_AIR
 								|| event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 					if (data != null) {
+                        //This below checks if a player has completed the challenge of finding & using an extra life
 						if (data.challenge3 == 0) {
 							player.sendMessage(getMain()
 									.color("&9&l(!) &rYou used an extra life and now rewarded with &e1 Bonus Level"));
@@ -1035,9 +1000,9 @@ public class GameManager implements Listener, PluginMessageListener {
 					int amount = item.getAmount();
 					baseClass.lives += 1;
 					baseClass.score.setScore(baseClass.lives);
-					baseClass.TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ ChatColor.YELLOW + player.getName() + ChatColor.RESET + " used an extra life!");
+                    baseClass.TellAll(main.color("&2&l(!) &a" + player.getName() + "&r used an extra life!"));
 					player.getWorld().playSound(player.getLocation(), Sound.LEVEL_UP, 1, 2);
+
 					if (amount > 0) {
 						amount--;
 						if (amount == 0)
@@ -1050,36 +1015,9 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	@EventHandler
-	public void cosmeticMelon(PlayerInteractEvent e) {
-		Player player = e.getPlayer();
-		ItemStack item = e.getItem();
-		PlayerData data = main.getDataManager().getPlayerData(player);
-		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
-
-		if ((player.getWorld() == main.getLobbyWorld()) || (i != null && i.state == GameState.WAITING)) {
-			if (item != null && item.getType() == Material.MELON) {
-				if (player.getGameMode() != GameMode.SPECTATOR) {
-					if (data.melon > 0) {
-						data.melon--;
-						main.getDataManager().saveData(data);
-						String msg = main.color("&9&l(!) &rYou have &e" + data.melon + " melons");
-						PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-								(byte) 2);
-						CraftPlayer craft = (CraftPlayer) player;
-						craft.getHandle().playerConnection.sendPacket(packet);
-						player.playSound(player.getLocation(), Sound.EAT, 2, 1);
-						player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 110, 3));
-						player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 110, 3));
-						if (data.melon == 0)
-							player.getInventory().clear(player.getInventory().getHeldItemSlot());
-					}
-					e.setCancelled(true);
-				}
-			}
-		}
-	}
-
+    /*
+    * This function disables fire arrows from igniting TNT
+     */
 	@EventHandler
 	public void tntChange(EntityChangeBlockEvent event) {
 		Entity e = event.getEntity();
@@ -1087,19 +1025,6 @@ public class GameManager implements Listener, PluginMessageListener {
 		if (e instanceof Arrow)
 			if (event.getBlock().getType() == Material.TNT)
 				event.setCancelled(true);
-	}
-
-	/**
-	 * This function disables players from moving items in their inventory
-	 *
-	 * @param e
-	 */
-	@EventHandler
-	public void onInv(InventoryClickEvent e) {
-		Player player = (Player) e.getWhoClicked();
-
-		if (!(player.isOp()))
-			e.setCancelled(true);
 	}
 
 	/**
@@ -1113,7 +1038,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	@EventHandler
-	public void bazooka(PlayerInteractEvent event) {
+	public void bazookaItem(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
 		ItemStack item = event.getItem();
 		GameInstance instance = this.GetInstanceOfPlayer(player);
@@ -1131,11 +1056,11 @@ public class GameManager implements Listener, PluginMessageListener {
 				if (meta.getDisplayName().toLowerCase().contains("bazooka")
 						&& player.getGameMode() != GameMode.SPECTATOR) {
 					if (bc != null) {
-						if (bc.bazooka.getTime() < 3000) {
+						if (bc.bazooka.getTime() < 3000) { //3 second usage cooldown
 							int seconds = (3000 - bc.bazooka.getTime()) / 1000 + 1;
 							event.setCancelled(true);
-							player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ "Your Bazooka is still regenerating for " + ChatColor.YELLOW + seconds + "s");
+                            player.sendMessage(main.color("&2&l(!) &rYour Bazooka is still regenerating for &a" +
+                                    seconds + "s"));
 						} else {
 							int amount = item.getAmount();
 							if (amount > 0) {
@@ -1304,19 +1229,6 @@ public class GameManager implements Listener, PluginMessageListener {
 		i = null;
 	}
 
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void activeGames(PlayerInteractEvent event) {
-		Player player = event.getPlayer();
-		GameInstance i = this.GetInstanceOfPlayer(player);
-
-		if (event.getItem() != null && event.getItem().getType() == Material.EYE_OF_ENDER) {
-			event.setCancelled(true);
-			if (player.getWorld() == main.getLobbyWorld())
-				new ActiveGamesGUI(getMain()).inv.open(player);
-		}
-
-	}
-
 	/**
 	 * This function cancels item pickup if the item is a projectile thrown by a
 	 * player in game
@@ -1338,7 +1250,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	@EventHandler
-	public void snowballs(EntityDamageByEntityEvent event) {
+	public void snowballsItem(EntityDamageByEntityEvent event) {
 		if (event.getDamager() instanceof Snowball) {
 			Snowball snowball = (Snowball) event.getDamager();
 			if (snowball.getShooter() instanceof Player) {
@@ -1374,28 +1286,52 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	public void joinRandomGame(Player player, GameType type) {
-		// Loop through each map & find map that is open
-		List<Maps> existingMaps = new ArrayList<>();
+    public void joinRandomGame(Player player, GameType type) {
+        int neededSlots = 1;
 
-		for (Entry<Maps, GameInstance> entry : this.gameMap.entrySet()) {
-			if (entry.getKey().GetInstance().gameType == type) {
-				if (entry.getValue().isOpen()) {
-					this.JoinMap(player, entry.getKey());
-					return;
-				}
-				existingMaps.add(entry.getKey());
-			}
-		}
+        if (main.getPartyManager() != null) {
+            Party party = main.getPartyManager().getParty(player);
 
-		List<Maps> maps = Maps.getGameType(type);
-		maps.removeAll(existingMaps);
-		if (maps.size() > 0) {
-			Maps map = maps.get(new Random().nextInt(maps.size()));
-			this.JoinMap(player, map);
-		} else
-			player.sendMessage(main.color("&c&l(!) &rAll games are full! Try again later"));
-	}
+            if (party != null) {
+                if (!party.isLeader(player.getUniqueId())) {
+                    player.sendMessage(main.color("&c&l(!) &rOnly the party leader can join games for the party."));
+                    return;
+                }
+
+                neededSlots = party.getOnlineMembers().size();
+            }
+        }
+
+        List<Maps> existingMaps = new ArrayList<>();
+
+        for (Entry<Maps, GameInstance> entry : this.gameMap.entrySet()) {
+            if (entry.getKey().GetInstance().gameType == type) {
+                GameInstance instance = entry.getValue();
+
+                if (instance.isOpen() && instance.state == GameState.WAITING) {
+                    int currentPlayers = instance.players.size();
+                    int maxPlayers = instance.gameType.getMaxPlayers();
+
+                    if (currentPlayers + neededSlots <= maxPlayers) {
+                        this.JoinMap(player, entry.getKey());
+                        return;
+                    }
+                }
+
+                existingMaps.add(entry.getKey());
+            }
+        }
+
+        List<Maps> maps = Maps.getGameType(type);
+        maps.removeAll(existingMaps);
+
+        if (maps.size() > 0) {
+            Maps map = maps.get(new Random().nextInt(maps.size()));
+            this.JoinMap(player, map);
+        } else {
+            player.sendMessage(main.color("&c&l(!) &rNo games have enough space for your party! Try again later."));
+        }
+    }
 
 	@SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -1629,6 +1565,10 @@ public class GameManager implements Listener, PluginMessageListener {
 		return main;
 	}
 
+    /*
+    * This function handles player class selection, and will set it
+    * if they are in a game, but only if they're in waiting lobby
+     */
 	public void playerSelectClass(Player player, ClassType type) {
 		GameInstance instance = this.GetInstanceOfPlayer(player);
 		if (instance != null)
@@ -1666,169 +1606,209 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	public void JoinDuosMap(Player player, DuosMaps map) {
-		GameReason result = main.getGameManager().AddPlayerToDuosMap(player, map);
-		GameInstance instance = this.GetInstanceOfPlayer(player);
-		MapInstance mi = map.GetInstance();
-		Location loc = new Location(main.getLobbyWorld(), mi.signLoc.getX(), mi.signLoc.getY(), mi.signLoc.getZ());
-		Block b = main.getLobbyWorld().getBlockAt(loc);
+    public void JoinMap(Player player, Maps map) {
+        if (main.getPartyManager() != null) {
+            Party party = main.getPartyManager().getParty(player);
 
-		if (b.getType() == Material.SIGN || b.getType() == Material.WALL_SIGN || b.getType() == Material.SIGN_POST) {
-			if (instance != null) {
-				Sign s = (Sign) b.getState();
-				instance.setSign(s);
-				s.setLine(2, main.color("&0Players: " + instance.players.size() + "/6"));
-				s.setLine(3, main.color("&0" + instance.timeToStartSeconds + "s"));
-				s.update();
-			}
-		}
-		switch (result) {
-		case SUCCESS:
-			player.setGameMode(GameMode.ADVENTURE);
-			player.setAllowFlight(true);
+            if (party != null) {
+                if (!party.isLeader(player.getUniqueId())) {
+                    player.sendMessage(main.color("&c&l(!) &rOnly the party leader can join games for the party."));
+                    return;
+                }
 
-			if (player.getWorld() != main.getLobbyWorld()) {
-				player.getInventory().clear();
-				ItemStack classItem = ItemHelper.setDetails(new ItemStack(Material.COMPASS),
-						"" + ChatColor.GREEN + ChatColor.BOLD + "Class Selector",
-						ChatColor.GRAY + "Click to choose a class!");
-				ItemStack teamSel = ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE),
-						"" + ChatColor.GREEN + ChatColor.BOLD + "Team Selector",
-						ChatColor.GRAY + "Click to choose a team!");
-				player.getInventory().setItem(0, classItem);
-				player.getInventory().setItem(1, teamSel);
+                joinPartyToMap(player, party, map);
+                return;
+            }
+        }
 
-				ItemStack stats = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
-				SkullMeta statsMeta = (SkullMeta) stats.getItemMeta();
-				statsMeta.setOwner(player.getName());
-				stats.setItemMeta(statsMeta);
+        joinSinglePlayerToMap(player, map);
+    }
 
-				player.getInventory().setItem(7,
-						ItemHelper.setDetails(stats, "" + ChatColor.RESET + ChatColor.BOLD + "Profile"));
-				player.getInventory().setItem(4,
-						ItemHelper.setDetails(new ItemStack(Material.CHEST), "" + ChatColor.GRAY + "Cosmetics"));
+    private void joinPartyToMap(Player leader, Party party, Maps map) {
+        GameInstance existingInstance = getInstanceOfMap(map);
 
-				ItemStack leaveItem = ItemHelper.setDetails(new ItemStack(Material.BARRIER),
-						"" + ChatColor.RED + ChatColor.BOLD + "Leave Game",
-						ChatColor.GRAY + "Click to leave your game");
-				player.getInventory().setItem(8, leaveItem);
-			}
+        if (existingInstance != null && existingInstance.state == GameState.STARTED) {
+            spectatePartyMap(leader, party, map);
+            return;
+        }
 
-			break;
-		case ALREADY_IN:
-			player.sendMessage(main.color("&c&l(!) &rYou are already in a map!"));
-			break;
+        if (existingInstance != null && existingInstance.state == GameState.ENDED) {
+            leader.sendMessage(main.color("&c&l(!) &rThis game has already ended."));
+            return;
+        }
 
-		case IN_ANOTHER:
-			player.sendMessage(main.color("&c&l(!) &rYou are already in a game!"));
-			break;
+        List<Player> partyMembers = party.getOnlineMembers();
 
-		case ALREADYPLAYING:
-			player.sendMessage(main.color("&c&l(!) &rThis game is already playing!"));
-			break;
-		}
-	}
+        if (partyMembers.isEmpty()) {
+            leader.sendMessage(main.color("&c&l(!) &rYour party has no online members."));
+            return;
+        }
 
-	public void JoinMap(Player player, Maps map) {
-		GameReason result = main.getGameManager().AddPlayerToMap(player, map);
-		GameInstance instance = this.GetInstanceOfPlayer(player);
-		MapInstance mi = map.GetInstance();
-		main.getSignManager().updateSign(mi, instance); // Updates sign in lobby when a new player joins
+        int currentPlayers = existingInstance == null ? 0 : existingInstance.players.size();
+        int maxPlayers = existingInstance == null ? map.getGamemode().getMaxPlayers() : existingInstance.gameType.getMaxPlayers();
 
-		switch (result) {
-		case SUCCESS:
-			if (instance.gameType == GameType.FRENZY) {
-				player.sendMessage(main.color(
-						"&2&l(!) &rYou have joined a Frenzy game, your class will be randomly selected each life"));
-			}
+        if (currentPlayers + partyMembers.size() > maxPlayers) {
+            leader.sendMessage(main.color("&c&l(!) &rYour party is too large for this game."));
+            leader.sendMessage(main.color("&7Players: &e" + currentPlayers + "/" + maxPlayers + " &7| Party Size: &e" + partyMembers.size()));
+            return;
+        }
 
-			player.setGameMode(GameMode.ADVENTURE);
-			main.getListener().resetDoubleJump(player);
-			main.getLobbyItems().gameLobbyItems(player);
-			break;
-		case ALREADY_IN:
-			player.sendMessage(main.color("&c&l(!) &rYou are already in a map!"));
-			break;
+        for (Player member : partyMembers) {
+            if (GetInstanceOfPlayer(member) != null) {
+                leader.sendMessage(main.color("&c&l(!) &e" + member.getName() + " &ris already in a game."));
+                return;
+            }
 
-		case IN_ANOTHER:
-			player.sendMessage(main.color("&c&l(!) &rYou are already in a game!"));
-			break;
+            if (GetInstanceOfSpectator(member) != null) {
+                leader.sendMessage(main.color("&c&l(!) &e" + member.getName() + " &ris already spectating a game."));
+                return;
+            }
 
-		case ALREADYPLAYING:
-			player.sendMessage(main.color("&c&l(!) &rThis game is already playing!"));
-			break;
-		}
-	}
+            if (main.getParkour().hasPlayer(member)) {
+                leader.sendMessage(main.color("&c&l(!) &e" + member.getName() + " &ris currently in parkour."));
+                return;
+            }
+        }
 
-	public void SpectatorJoinDuosMap(Player player, DuosMaps map) {
-		GameReason result = main.getGameManager().AddSpectatorToDuosMap(player, map);
+        for (Player member : partyMembers) {
+            joinSinglePlayerToMap(member, map);
+        }
 
-		switch (result) {
-		case SPECTATOR:
-            player.sendMessage(main.color("&2&l(!) &rYou are spectating on &e" + map.toString() +
-                    ".&f Use &e/leave&f to leave"));
-			player.setGameMode(GameMode.SPECTATOR);
-			break;
+        for (Player member : partyMembers) {
+            member.sendMessage(main.color("&a&l(!) &rYour party has joined &e" + map.toString() + "&r."));
+        }
+    }
 
-		case ALREADY_IN:
-			player.sendMessage("" + ChatColor.WHITE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-					+ "You have to leave your game to Spectate");
-			break;
+    private void joinSinglePlayerToMap(Player player, Maps map) {
+        GameReason result = main.getGameManager().AddPlayerToMap(player, map);
+        GameInstance instance = this.GetInstanceOfPlayer(player);
+        MapInstance mi = map.GetInstance();
 
-		case FAIL:
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "This game is not playing!");
-			break;
-		}
-	}
+        if (instance != null) {
+            main.getSignManager().updateSign(mi, instance);
+        }
 
-	public GameReason AddSpectatorToDuosMap(Player player, DuosMaps map) {
-		GameInstance instance = null;
+        switch (result) {
+            case SUCCESS:
+                if (instance != null && instance.gameType == GameType.FRENZY) {
+                    player.sendMessage(main.color(
+                            "&2&l(!) &rYou have joined a Frenzy game, your class will be randomly selected each life"));
+                }
 
-		if (GetInstanceOfPlayer(player) != null) {
-			player.sendMessage(main.color("&c&l(!) &rYou have to leave your game to Spectate"));
-			return GameReason.IN_ANOTHER;
-		}
+                player.setGameMode(GameMode.ADVENTURE);
+                main.getListener().resetDoubleJump(player);
+                main.getLobbyItems().gameLobbyItems(player);
+                break;
 
-		if (gameMap2.containsKey(map))
-			instance = gameMap2.get(map);
-		else {
-			instance = new GameInstance(this, map);
-			gameMap2.put(map, instance);
-		}
+            case ALREADY_IN:
+                player.sendMessage(main.color("&c&l(!) &rYou are already in a map!"));
+                break;
 
-		return instance.AddSpectator(player);
-	}
+            case IN_ANOTHER:
+                player.sendMessage(main.color("&c&l(!) &rYou are already in a game!"));
+                break;
 
-	public void SpectatorJoinMap(Player player, Maps map) {
-		GameReason result = main.getGameManager().AddSpectatorToMap(player, map);
+            case ALREADYPLAYING:
+                player.sendMessage(main.color("&c&l(!) &rThis game is already playing!"));
+                break;
 
-		switch (result) {
-		case SPECTATOR:
-			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You are now spectating " + ""
-					+ ChatColor.GREEN + map.toString() + "." + ChatColor.RESET + " Use " + ChatColor.GREEN + "/leave "
-					+ ChatColor.RESET + "to leave");
-			player.setGameMode(GameMode.ADVENTURE); // Edit if needed
-			player.spigot().setCollidesWithEntities(false);
-			player.getInventory().clear();
-			main.getLobbyItems().spectatorItems(player);
-			break;
+            case FULL:
+                player.sendMessage(main.color("&c&l(!) &rThis game is full!"));
+                break;
 
-		case ALREADY_IN:
-			player.sendMessage(main.color("&c&l(!) &rYou have to leave your game to Spectate"));
-			break;
+            default:
+                break;
+        }
+    }
 
-		case FAIL:
-			player.sendMessage(main.color("&c&l(!) &rThis game is not playing!"));
-			break;
-		}
-	}
+    public void SpectatorJoinMap(Player player, Maps map) {
+        if (main.getPartyManager() != null) {
+            Party party = main.getPartyManager().getParty(player);
+
+            if (party != null) {
+                if (!party.isLeader(player.getUniqueId())) {
+                    player.sendMessage(main.color("&c&l(!) &rOnly the party leader can spectate games for the party."));
+                    return;
+                }
+
+                spectatePartyMap(player, party, map);
+                return;
+            }
+        }
+
+        spectateSinglePlayerMap(player, map);
+    }
+
+    private void spectatePartyMap(Player leader, Party party, Maps map) {
+        List<Player> partyMembers = party.getOnlineMembers();
+
+        if (partyMembers.isEmpty()) {
+            leader.sendMessage(main.color("&c&l(!) &rYour party has no online members."));
+            return;
+        }
+
+        for (Player member : partyMembers) {
+            if (GetInstanceOfPlayer(member) != null) {
+                leader.sendMessage(main.color("&c&l(!) &e" + member.getName() + " &ris already in a game."));
+                return;
+            }
+
+            if (GetInstanceOfSpectator(member) != null) {
+                leader.sendMessage(main.color("&c&l(!) &e" + member.getName() + " &ris already spectating a game."));
+                return;
+            }
+
+            if (main.getParkour().hasPlayer(member)) {
+                leader.sendMessage(main.color("&c&l(!) &e" + member.getName() + " &ris currently in parkour."));
+                return;
+            }
+        }
+
+        for (Player member : partyMembers) {
+            spectateSinglePlayerMap(member, map);
+        }
+
+        for (Player member : partyMembers) {
+            member.sendMessage(main.color("&a&l(!) &rYour party is now spectating &e" + map.toString() + "&r."));
+        }
+    }
+
+    private void spectateSinglePlayerMap(Player player, Maps map) {
+        GameReason result = main.getGameManager().AddSpectatorToMap(player, map);
+
+        switch (result) {
+            case SPECTATOR:
+                player.sendMessage(main.color("&2&l(!) &rYou are now spectating &a" + map.toString() +
+                        "&r. Use &a/leave &rto leave"));
+                player.setGameMode(GameMode.ADVENTURE);
+                player.spigot().setCollidesWithEntities(false);
+                player.getInventory().clear();
+                main.getLobbyItems().spectatorItems(player);
+                break;
+
+            case ALREADY_IN:
+                player.sendMessage(main.color("&c&l(!) &rYou have to leave your game to Spectate"));
+                break;
+
+            case IN_ANOTHER:
+                player.sendMessage(main.color("&c&l(!) &rYou have to leave your game to Spectate"));
+                break;
+
+            case FAIL:
+                player.sendMessage(main.color("&c&l(!) &rThis game is not playing!"));
+                break;
+
+            default:
+                break;
+        }
+    }
 
 	public GameReason AddSpectatorToMap(Player player, Maps map) {
 		GameInstance instance = null;
 
+        //If a player is already in a game, do not spectate
 		if (GetInstanceOfPlayer(player) != null) {
-			player.sendMessage("" + ChatColor.WHITE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-					+ "You have to leave your game to Spectate");
+            player.sendMessage(main.color("&c&l(!) &rYou have to leave your game to Spectate"));
 			return GameReason.IN_ANOTHER;
 		}
 
@@ -1840,24 +1820,6 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 
 		return instance.AddSpectator(player);
-	}
-
-	public GameReason AddPlayerToDuosMap(Player player, DuosMaps map) {
-		GameInstance instance = null;
-
-		if (GetInstanceOfPlayer(player) != null) {
-			return GameReason.IN_ANOTHER;
-		}
-		if (gameMap2.containsKey(map))
-			instance = gameMap2.get(map);
-		else {
-			instance = new GameInstance(this, map);
-			gameMap2.put(map, instance);
-		}
-
-		GameReason reason = instance.AddPlayer(player);
-
-		return reason;
 	}
 
 	/*
@@ -1882,16 +1844,6 @@ public class GameManager implements Listener, PluginMessageListener {
 		return reason;
 	}
 
-	/**
-	 * This function disables weather from changing
-	 *
-	 * @param event
-	 */
-	@EventHandler
-	public void onWeatherChange(WeatherChangeEvent event) {
-		event.setCancelled(true);
-	}
-
 	@EventHandler
 	public void PlayerInteractEvent(PlayerInteractEvent event) {
 		if ((event.getAction() == Action.PHYSICAL) && (event.getClickedBlock().getType() == Material.SOIL))
@@ -1899,68 +1851,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	@EventHandler
-	public void endCrystal(EntityDamageByEntityEvent e) {
-		if (e.getEntity().getType() == EntityType.ENDER_CRYSTAL) {
-			/*
-			 * if (e.getDamager() instanceof Player) { Player player = (Player)
-			 * e.getDamager();
-			 *
-			 * if (main.getCwManager() == null) { e.setCancelled(true); }
-			 * anthony.CrystalWars.game.GameInstance i =
-			 * main.getCwManager().getInstanceOfPlayer(player);
-			 *
-			 * if (i != null) { if (i.getTeam(player).equals("Blue")) { if
-			 * (i.isInBlue(player.getLocation())) { player.sendMessage(main.
-			 * color("&c&l(!) &rYou cannot destroy your own crystal!"));
-			 * e.setCancelled(true); } else if (i.isInRed(player.getLocation())) {
-			 * i.TellAll(main.color("&2&l(!) &r&lRed Crystal &rwas destroyed by &e" +
-			 * player.getName()));
-			 *
-			 * for (Player p : i.getPlayers()) { if (i.getTeam(p).equals("Red")) {
-			 * p.sendTitle(main.color("&cCRYSTAL DESTROYED"),
-			 * main.color("&rYou will no longer respawn")); i.crystal.remove(p); } }
-			 *
-			 * e.setCancelled(false); } } else if (i.getTeam(player).equals("Red")) { if
-			 * (i.isInRed(player.getLocation())) { player.sendMessage(main.
-			 * color("&c&l(!) &rYou cannot destroy your own crystal!"));
-			 * e.setCancelled(true); } else if (i.isInBlue(player.getLocation())) {
-			 * i.TellAll(main.color("&2&l(!) &r&lBlue Crystal &rwas destroyed by &e" +
-			 * player.getName()));
-			 *
-			 * for (Player p : i.getPlayers()) { if (i.getTeam(p).equals("Blue")) {
-			 * p.sendTitle(main.color("&cCRYSTAL DESTROYED"),
-			 * main.color("&rYou will no longer respawn")); i.crystal.remove(p); } }
-			 *
-			 * e.setCancelled(false); } } } else { e.setCancelled(true); } } else {
-			 * e.setCancelled(true); }
-			 */
-			e.setCancelled(true);
-		}
-	}
-
-	@EventHandler
-	public void endCrystal(EntityExplodeEvent e) {
-		if (e.getEntity().getType() == EntityType.ENDER_CRYSTAL)
-			e.setCancelled(true);
-	}
-
-	@EventHandler
-	public void teamSelector(PlayerInteractEvent event) {
-		Player player = event.getPlayer();
-		ItemStack item = event.getItem();
-		GameInstance i = this.GetInstanceOfPlayer(player);
-
-		if (item != null) {
-			if (i != null && i.state == GameState.WAITING) {
-				if (item.getType() == Material.STAINED_GLASS_PANE) {
-					new TeamSelectionGUI(getMain()).inv.open(player);
-				}
-			}
-		}
-	}
-
-	@EventHandler
-	public void fireFlower(PlayerInteractEvent event) {
+	public void fireFlowerItem(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
 		ItemStack item = event.getItem();
 		GameInstance instance = this.GetInstanceOfPlayer(player);
@@ -2025,7 +1916,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	@EventHandler
-	public void Nuke(PlayerInteractEvent event) {
+	public void nukeItem(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
 		ItemStack item = event.getItem();
 		GameInstance i = this.GetInstanceOfPlayer(player);
@@ -2119,21 +2010,21 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
+    /*
+    * This function returns if a player is in a game
+     */
 	public GameInstance GetInstanceOfPlayer(Player player) {
 		for (Entry<Maps, GameInstance> games : gameMap.entrySet())
-			if (games.getValue().HasPlayer(player))
-				return games.getValue();
-		for (Entry<DuosMaps, GameInstance> games : gameMap2.entrySet())
 			if (games.getValue().HasPlayer(player))
 				return games.getValue();
 		return null;
 	}
 
+    /*
+     * This function returns if a player is spectating a game
+     */
 	public GameInstance GetInstanceOfSpectator(Player spectator) {
 		for (Entry<Maps, GameInstance> games : gameMap.entrySet())
-			if (games.getValue().HasSpectator(spectator))
-				return games.getValue();
-		for (Entry<DuosMaps, GameInstance> games : gameMap2.entrySet())
 			if (games.getValue().HasSpectator(spectator))
 				return games.getValue();
 		return null;
@@ -2143,6 +2034,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		return this.gameMap.get(map);
 	}
 
+    //This function removes a player from a game
 	public void RemovePlayerFromMap(Player player, Maps map, Player player2) {
 		if (this.gameMap.containsKey(map))
 			this.gameMap.get(map).RemovePlayer(player);
@@ -2197,11 +2089,6 @@ public class GameManager implements Listener, PluginMessageListener {
 	// When a match is over it'll remove the game from the active games
 	public void RemoveMap(Maps maps) {
 		gameMap.remove(maps);
-	}
-
-	// When a match is over it'll remove the game from the active games
-	public void RemoveDuosMap(DuosMaps maps) {
-		gameMap2.remove(maps);
 	}
 
 	/**
@@ -2266,6 +2153,10 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
+    /*
+    * This function adds a player to the spawn protection for 5 seconds when the
+    * game starts, or a player just respawned
+     */
 	public void addSpawnProtection(Player player) {
 		BukkitRunnable runnable = this.spawnProt.get(player);
 		GameInstance instance = this.GetInstanceOfPlayer(player);

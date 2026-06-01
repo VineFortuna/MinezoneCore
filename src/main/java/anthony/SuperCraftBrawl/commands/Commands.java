@@ -10,6 +10,7 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.friends.FriendProfile;
+import anthony.SuperCraftBrawl.party.Party;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
@@ -148,10 +149,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 				duelCommand(args, player);
 				break;
 
-			case "party":
-				partyCommand(args, player);
-				break;
-
 			case "color":
 				colorCommand(args, player);
 				break;
@@ -176,6 +173,15 @@ public class Commands implements CommandExecutor, TabCompleter {
 				forceClassCommand(player, args);
 				break;
 
+                case "party":
+                    partyCommand(args, player);
+                    break;
+
+                case "partychat":
+                    partyChatCommand(args, player);
+                    break;
+
+
 			case "practice":
 				new SCBPractice(player, Game.BowPractice, main);
 				break;
@@ -192,6 +198,146 @@ public class Commands implements CommandExecutor, TabCompleter {
 			sender.sendMessage("Hey! You can't use this in the terminal!");
 		return true;
 	}
+
+    private void partyChatCommand(String[] args, Player player) {
+        if (main.getPartyManager() == null) {
+            player.sendMessage(main.color("&c&l(!) &rParty system is not loaded."));
+            return;
+        }
+
+        if (args.length == 0) {
+            main.getPartyManager().togglePartyChat(player);
+            return;
+        }
+
+        main.getPartyManager().sendPartyMessage(player, joinArgs(args, 0));
+    }
+
+    private String joinArgs(String[] args, int start) {
+        StringBuilder builder = new StringBuilder();
+
+        for (int i = start; i < args.length; i++) {
+            if (i > start) {
+                builder.append(" ");
+            }
+
+            builder.append(args[i]);
+        }
+
+        return builder.toString();
+    }
+
+    private void sendPartyHelp(Player player) {
+        player.sendMessage(main.color("&8&m------------------------------------"));
+        player.sendMessage(main.color("&6&lPARTY COMMANDS"));
+        player.sendMessage(main.color("&e/party invite <player> -> &rInvite a player"));
+        player.sendMessage(main.color("&e/party accept <player> -> &rAccept an invite"));
+        player.sendMessage(main.color("&e/party deny <player> -> &rDeny an invite"));
+        player.sendMessage(main.color("&e/party leave -> &rLeave your party"));
+        player.sendMessage(main.color("&e/party list -> &rView party members"));
+        player.sendMessage(main.color("&e/party kick <player> -> &rKick a member"));
+        player.sendMessage(main.color("&e/party promote <player> -> &rMake someone leader"));
+        player.sendMessage(main.color("&e/party disband -> &rDisband the party"));
+        player.sendMessage(main.color("&e/party chat [message] -> &rToggle/send party chat"));
+        player.sendMessage(main.color("&e/partychat [message] -> &rToggle/send party chat"));
+        player.sendMessage(main.color("&8&m------------------------------------"));
+    }
+
+    private void partyCommand(String[] args, Player player) {
+        if (main.getPartyManager() == null) {
+            player.sendMessage(main.color("&c&l(!) &rParty system is not loaded."));
+            return;
+        }
+
+        if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
+            sendPartyHelp(player);
+            return;
+        }
+
+        String sub = args[0].toLowerCase();
+
+        if (sub.equals("invite") || sub.equals("add")) {
+            if (args.length < 2) {
+                player.sendMessage(main.color("&c&l(!) &rIncorrect Usage! Try doing: &e/party invite <player>"));
+                return;
+            }
+
+            Player target = Bukkit.getPlayer(args[1]);
+            main.getPartyManager().invite(player, target);
+            return;
+        }
+
+        if (sub.equals("accept") || sub.equals("join")) {
+            if (args.length < 2) {
+                player.sendMessage(main.color("&c&l(!) &rIncorrect Usage! Try doing: &e/party accept <player>"));
+                return;
+            }
+
+            Player inviter = Bukkit.getPlayer(args[1]);
+            main.getPartyManager().accept(player, inviter);
+            return;
+        }
+
+        if (sub.equals("deny") || sub.equals("reject")) {
+            if (args.length < 2) {
+                player.sendMessage(main.color("&c&l(!) &rIncorrect Usage! Try doing: &e/party deny <player>"));
+                return;
+            }
+
+            Player inviter = Bukkit.getPlayer(args[1]);
+            main.getPartyManager().deny(player, inviter);
+            return;
+        }
+
+        if (sub.equals("leave")) {
+            main.getPartyManager().leave(player);
+            return;
+        }
+
+        if (sub.equals("disband")) {
+            main.getPartyManager().disband(player, true);
+            return;
+        }
+
+        if (sub.equals("kick") || sub.equals("remove")) {
+            if (args.length < 2) {
+                player.sendMessage(main.color("&c&l(!) &rIncorrect Usage! Try doing: &e/party kick <player>"));
+                return;
+            }
+
+            Player target = Bukkit.getPlayer(args[1]);
+            main.getPartyManager().kick(player, target);
+            return;
+        }
+
+        if (sub.equals("promote") || sub.equals("leader") || sub.equals("makeleader")) {
+            if (args.length < 2) {
+                player.sendMessage(main.color("&c&l(!) &rIncorrect Usage! Try doing: &e/party promote <player>"));
+                return;
+            }
+
+            Player target = Bukkit.getPlayer(args[1]);
+            main.getPartyManager().promote(player, target);
+            return;
+        }
+
+        if (sub.equals("list") || sub.equals("info")) {
+            main.getPartyManager().list(player);
+            return;
+        }
+
+        if (sub.equals("chat") || sub.equals("c")) {
+            if (args.length == 1) {
+                main.getPartyManager().togglePartyChat(player);
+                return;
+            }
+
+            main.getPartyManager().sendPartyMessage(player, joinArgs(args, 1));
+            return;
+        }
+
+        sendPartyHelp(player);
+    }
 
     private void friendsCommand(String[] args, Player player) {
         if (args.length == 0) {
@@ -990,16 +1136,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 		player.sendMessage(main.color("&f&l----------------------------------------"));
 	}
 
-	private void partyCommand(String[] args, Player player) {
-		if (args.length == 0) {
-			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing:"));
-			player.sendMessage(main.color(ChatColor.STRIKETHROUGH + "&7-------------------------------------"));
-			player.sendMessage(main.color("&e&lPARTY COMMANDS:"));
-			player.sendMessage(main.color("&e/party invite <player> &7-> &bInvites a player to your party"));
-			player.sendMessage(main.color("&e/party accept <player> &7-> &bAccepts a party invite from a player"));
-		}
-	}
-
 	private void purchaseCommand(String[] args, Player player) {
 		if (!player.hasPermission("scb.purchases")) {
 			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
@@ -1578,58 +1714,105 @@ public class Commands implements CommandExecutor, TabCompleter {
 		return null;
 	}
 
-	public void leaveGame(Player player) {
-		GameInstance game = main.getGameManager().GetInstanceOfSpectator(player);
-		player.spigot().setCollidesWithEntities(true);
-		player.setAllowFlight(false);
-		player.setAllowFlight(true);
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			player.showPlayer(p);
-			p.showPlayer(player);
-		}
+    public void leaveGame(Player player) {
+        if (main.getPartyManager() != null) {
+            Party party = main.getPartyManager().getParty(player);
 
-		if (game != null && game.state == GameState.ENDED)
-			return;
-		else if (main.getGameManager().RemovePlayerFromAll(player)) {
-			main.ResetPlayer(player);
-			/*
-			 * main.getScoreboardManager().lobbyBoard(player);
-			 * main.sendScoreboardUpdate(player);
-			 */
-			player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-					+ "You have left your game");
+            if (party != null) {
+                if (!party.isLeader(player.getUniqueId())) {
+                    player.sendMessage(main.color("&c&l(!) &rOnly the party leader can leave the game for the party."));
+                    player.sendMessage(main.color("&7If you want to leave by yourself, leave the party first with &e/party leave&7."));
+                    return;
+                }
 
-			if (game != null && game.getGameSettings() != null) {
-				GameSettings gs = game.getGameSettings();
+                leavePartyGame(player, party);
+                return;
+            }
+        }
 
-				if (gs.startVotes.contains(player)) {
-					gs.totalStartVotes--;
-					gs.startVotes.remove(player);
-				}
-			}
+        leaveSinglePlayerGame(player, true);
+    }
 
-			for (PotionEffect type : player.getActivePotionEffects())
-				player.removePotionEffect(type.getType());
+    private void leavePartyGame(Player leader, Party party) {
+        boolean anyoneLeft = false;
 
-			// main.sendScoreboardUpdate(player);
-			removeArmor(player);
-		} else if (game != null && game.spectators.contains(player)) {
-			String mapName = "";
-			if (game.duosMap != null)
-				mapName = game.duosMap.toString();
-			else
-				mapName = game.getMap().toString();
+        for (Player member : party.getOnlineMembers()) {
+            if (main.getGameManager().GetInstanceOfPlayer(member) != null
+                    || main.getGameManager().GetInstanceOfSpectator(member) != null) {
+                anyoneLeft = true;
+                break;
+            }
+        }
 
-			player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-					+ "You have left " + mapName);
-			main.ResetPlayer(player);
-			main.getScoreboardManager().lobbyBoard(player);
-			main.sendScoreboardUpdate(player);
-			game.spectators.remove(player);
-			player.setDisplayName("" + player.getName());
-		} else
-			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
-	}
+        if (!anyoneLeft) {
+            leader.sendMessage(main.color("&c&l(!) &rYour party is not in a game!"));
+            return;
+        }
+
+        for (Player member : party.getOnlineMembers()) {
+            leaveSinglePlayerGame(member, false);
+        }
+
+        for (Player member : party.getOnlineMembers()) {
+            member.sendMessage(main.color("&e&l(!) &rYour party leader left the game, so the whole party was removed."));
+        }
+    }
+
+    private void leaveSinglePlayerGame(Player player, boolean sendNotInGameMessage) {
+        GameInstance game = main.getGameManager().GetInstanceOfSpectator(player);
+
+        player.spigot().setCollidesWithEntities(true);
+        player.setAllowFlight(false);
+        player.setAllowFlight(true);
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            player.showPlayer(p);
+            p.showPlayer(player);
+        }
+
+        if (game != null && game.state == GameState.ENDED) {
+            return;
+        } else if (main.getGameManager().RemovePlayerFromAll(player)) {
+            main.ResetPlayer(player);
+
+            player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                    + "You have left your game");
+
+            if (game != null && game.getGameSettings() != null) {
+                GameSettings gs = game.getGameSettings();
+
+                if (gs.startVotes.contains(player)) {
+                    gs.totalStartVotes--;
+                    gs.startVotes.remove(player);
+                }
+            }
+
+            for (PotionEffect type : player.getActivePotionEffects()) {
+                player.removePotionEffect(type.getType());
+            }
+
+            removeArmor(player);
+        } else if (game != null && game.spectators.contains(player)) {
+            String mapName = "";
+
+            if (game.duosMap != null) {
+                mapName = game.duosMap.toString();
+            } else {
+                mapName = game.getMap().toString();
+            }
+
+            player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                    + "You have left " + mapName);
+
+            main.ResetPlayer(player);
+            main.getScoreboardManager().lobbyBoard(player);
+            main.sendScoreboardUpdate(player);
+            game.spectators.remove(player);
+            player.setDisplayName("" + player.getName());
+        } else if (sendNotInGameMessage) {
+            player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
+        }
+    }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String commandLabel, String[] args) {
