@@ -4,6 +4,9 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_8_R3.EntityArmorStand;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
@@ -76,9 +79,24 @@ public class Fishing implements Listener {
                 details = new FishingDetails();
                 data.playerFishing.put(fish.getId(), details);
             }
-            
-            p.sendMessage(main.color("&3&l(!) &rYou caught a "
-                    + fish.getRarity().getColor() + fish.getName() + "&r!"));
+
+            // Send catch message with hover event
+            TextComponent message = new TextComponent(main.color("&3&l(!) &rYou caught a "));
+            TextComponent fishName = new TextComponent(main.color(fish.getRarity().getColor() + fish.getName()));
+
+            fishName.setHoverEvent(new HoverEvent(
+                    HoverEvent.Action.SHOW_TEXT,
+                    new ComponentBuilder(main.color(
+                            fish.getRarity().getColor() + "&l" + fish.getRarity().getName().toUpperCase() +
+                                    (fish.isFish() ? " &e&lSEA CREATURE\n" : "\n") +
+                                    "&8" + fish.getDesc() + "\n" +
+                                    "&7Times caught: " + (details.timesCaught + 1)
+                    )).create()
+            ));
+
+            message.addExtra(fishName);
+            message.addExtra(new TextComponent(main.color("&r!")));
+            p.spigot().sendMessage(message);
 
             boolean updateScoreboard = false;
 
@@ -118,6 +136,32 @@ public class Fishing implements Listener {
             }
 
             playRewardEffect(p, fish.getRarity());
+
+            // Update player data
+            // Make sure fishing period snapshots exist BEFORE increasing TotalCaught.
+            // This prevents Daily/Weekly/Monthly fishing leaderboards from showing lifetime values.
+            if (main.snapshotDAO != null) {
+                main.snapshotDAO.ensureSnapshotForPlayer(
+                        p.getUniqueId().toString(),
+                        "TotalCaught",
+                        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,
+                        data.totalcaught
+                );
+
+                main.snapshotDAO.ensureSnapshotForPlayer(
+                        p.getUniqueId().toString(),
+                        "TotalCaught",
+                        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,
+                        data.totalcaught
+                );
+
+                main.snapshotDAO.ensureSnapshotForPlayer(
+                        p.getUniqueId().toString(),
+                        "TotalCaught",
+                        anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY,
+                        data.totalcaught
+                );
+            }
 
             // Update player data
             data.totalcaught++;

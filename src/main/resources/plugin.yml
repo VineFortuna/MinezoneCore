@@ -18,7 +18,6 @@ commands:
       description: Stats after a game
    fly:
       description: Fly command
-      aliases: f
    list:
       description: List of online players
    tournament:
@@ -163,6 +162,9 @@ commands:
       description: a
    lactate:
       description: Lactate command!
+   friends:
+      description: Friends command
+      aliases: [f, friend]
 
 permissions:
    scb.admin:
@@ -215,7 +217,7 @@ permissions:
    scb.trainee:
       description: Trainee perms
       children:
-         scb.captain: true
+         scb.pro: true
          scb.vanish: true
          scb.unvanish: true
          scb.staffchat: true
@@ -232,13 +234,17 @@ permissions:
    scb.qa:
       description: Design perms
       children:
-         scb.captain: true
+         scb.pro: true
    scb.media:
       description: Media perms
       children:
-         scb.captain: true
-   scb.captain:
-      description: Captain perms
+         scb.pro: true
+   scb.tw:
+      description: Tournament Winner perms that inherits PRO
+      children:
+         scb.pro: true
+   scb.pro:
+      description: PRO perms
       children:
          scb.vip: true
          scb.customWin: true

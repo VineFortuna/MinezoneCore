@@ -9,6 +9,7 @@ import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.SuperCraftBrawl.friends.FriendProfile;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
@@ -43,6 +44,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
+import anthony.SuperCraftBrawl.friends.FriendsManager;
+import anthony.SuperCraftBrawl.gui.FriendRequestsGUI;
+import anthony.SuperCraftBrawl.gui.FriendsGUI;
+
+import java.util.UUID;
+
 
 public class Commands implements CommandExecutor, TabCompleter {
 
@@ -61,6 +68,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 	@SuppressWarnings("unused")
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+        if (cmd.getName().equalsIgnoreCase("token")) {
+            tokenCommand(sender, args);
+            return true;
+        }
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
 
@@ -172,11 +183,208 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "candyaura":
 				candyAuraCommand(args, player);
 				break;
+
+                case "friends":
+                    friendsCommand(args, player);
+                    break;
 			}
 		} else
 			sender.sendMessage("Hey! You can't use this in the terminal!");
 		return true;
 	}
+
+    private void friendsCommand(String[] args, Player player) {
+        if (args.length == 0) {
+            new FriendsGUI(main).inv.open(player);
+            return;
+        }
+
+        String sub = args[0].toLowerCase();
+
+        if (sub.equals("help")) {
+            sendFriendsHelp(player);
+            return;
+        }
+
+        if (sub.equals("requests")) {
+            new FriendRequestsGUI(main).inv.open(player);
+            return;
+        }
+
+        if (sub.equals("list")) {
+            sendFriendsList(player);
+            return;
+        }
+
+        if (args.length < 2) {
+            sendFriendsHelp(player);
+            return;
+        }
+
+        if (args.length < 2) {
+            sendFriendsHelp(player);
+            return;
+        }
+
+        String targetName = args[1];
+
+        if (sub.equals("add")) {
+            FriendsManager.FriendResult result = main.getFriendsManager().sendRequest(player, targetName);
+
+            switch (result) {
+                case REQUEST_SENT:
+                    player.sendMessage(main.color("&a&l(!) &rFriend request sent to &e" + targetName + "&r!"));
+                    break;
+
+                case REQUEST_ACCEPTED:
+                    player.sendMessage(main.color("&a&l(!) &rYou are now friends with &e" + targetName + "&r!"));
+                    break;
+
+                case PLAYER_NOT_FOUND:
+                    player.sendMessage(main.color("&c&l(!) &rThat player could not be found."));
+                    break;
+
+                case CANNOT_ADD_SELF:
+                    player.sendMessage(main.color("&c&l(!) &rYou cannot add yourself as a friend."));
+                    break;
+
+                case ALREADY_FRIENDS:
+                    player.sendMessage(main.color("&c&l(!) &rYou are already friends with that player."));
+                    break;
+
+                case REQUEST_ALREADY_SENT:
+                    player.sendMessage(main.color("&c&l(!) &rYou already sent that player a friend request."));
+                    break;
+
+                default:
+                    player.sendMessage(main.color("&c&l(!) &rSomething went wrong while sending that friend request."));
+                    break;
+            }
+
+            return;
+        }
+
+        if (sub.equals("accept")) {
+            UUID senderUuid = main.getFriendsManager().findPlayerUuidByName(targetName);
+
+            if (senderUuid == null) {
+                player.sendMessage(main.color("&c&l(!) &rThat player could not be found."));
+                return;
+            }
+
+            FriendsManager.FriendResult result = main.getFriendsManager().acceptRequest(player.getUniqueId(), senderUuid);
+
+            if (result == FriendsManager.FriendResult.REQUEST_ACCEPTED) {
+                player.sendMessage(main.color("&a&l(!) &rYou are now friends with &e" + targetName + "&r!"));
+            } else if (result == FriendsManager.FriendResult.NO_REQUEST) {
+                player.sendMessage(main.color("&c&l(!) &rYou do not have a friend request from that player."));
+            } else {
+                player.sendMessage(main.color("&c&l(!) &rSomething went wrong while accepting that friend request."));
+            }
+
+            return;
+        }
+
+        if (sub.equals("reject") || sub.equals("deny")) {
+            UUID senderUuid = main.getFriendsManager().findPlayerUuidByName(targetName);
+
+            if (senderUuid == null) {
+                player.sendMessage(main.color("&c&l(!) &rThat player could not be found."));
+                return;
+            }
+
+            FriendsManager.FriendResult result = main.getFriendsManager().rejectRequest(player.getUniqueId(), senderUuid);
+
+            if (result == FriendsManager.FriendResult.REQUEST_REJECTED) {
+                player.sendMessage(main.color("&c&l(!) &rRejected &e" + targetName + "'s &rfriend request."));
+            } else if (result == FriendsManager.FriendResult.NO_REQUEST) {
+                player.sendMessage(main.color("&c&l(!) &rYou do not have a friend request from that player."));
+            } else {
+                player.sendMessage(main.color("&c&l(!) &rSomething went wrong while rejecting that friend request."));
+            }
+
+            return;
+        }
+
+        if (sub.equals("remove") || sub.equals("delete")) {
+            UUID friendUuid = main.getFriendsManager().findPlayerUuidByName(targetName);
+
+            if (friendUuid == null) {
+                player.sendMessage(main.color("&c&l(!) &rThat player could not be found."));
+                return;
+            }
+
+            FriendsManager.FriendResult result = main.getFriendsManager().removeFriend(player.getUniqueId(), friendUuid);
+
+            if (result == FriendsManager.FriendResult.FRIEND_REMOVED) {
+                player.sendMessage(main.color("&a&l(!) &rRemoved &e" + targetName + " &rfrom your friends list."));
+            } else if (result == FriendsManager.FriendResult.NOT_FRIENDS) {
+                player.sendMessage(main.color("&c&l(!) &rYou are not friends with that player."));
+            } else {
+                player.sendMessage(main.color("&c&l(!) &rSomething went wrong while removing that friend."));
+            }
+
+            return;
+        }
+
+        sendFriendsHelp(player);
+    }
+
+    private void sendFriendsList(Player player) {
+        List<FriendProfile> friends = main.getFriendsManager().getFriends(player.getUniqueId());
+
+        friends.sort((first, second) -> {
+            if (first.isOnline() && !second.isOnline()) {
+                return -1;
+            }
+
+            if (!first.isOnline() && second.isOnline()) {
+                return 1;
+            }
+
+            return first.getName().compareToIgnoreCase(second.getName());
+        });
+
+        player.sendMessage(main.color("&8&m--------------------------------"));
+        player.sendMessage(main.color("&a&lFriends List &7(" + friends.size() + ")"));
+
+        if (friends.isEmpty()) {
+            player.sendMessage(main.color("&7You do not have any friends yet."));
+            player.sendMessage(main.color("&7Add someone with &e/friends add <player>&7."));
+            player.sendMessage(main.color("&8&m--------------------------------"));
+            return;
+        }
+
+        StringBuilder list = new StringBuilder();
+
+        for (int i = 0; i < friends.size(); i++) {
+            FriendProfile friend = friends.get(i);
+
+            if (i > 0) {
+                list.append(main.color("&7, "));
+            }
+
+            if (friend.isOnline()) {
+                list.append(main.color("&a")).append(friend.getName());
+            } else {
+                list.append(main.color("&7")).append(friend.getName());
+            }
+        }
+
+        player.sendMessage(list.toString());
+        player.sendMessage(main.color("&8&m--------------------------------"));
+    }
+
+    private void sendFriendsHelp(Player player) {
+        player.sendMessage(main.color("&a&lFriends Commands"));
+        player.sendMessage(main.color("&e/friends &7- Open your friends list"));
+        player.sendMessage(main.color("&e/friends list &7- List your friends in chat"));
+        player.sendMessage(main.color("&e/friends add <player> &7- Send a friend request"));
+        player.sendMessage(main.color("&e/friends accept <player> &7- Accept a request"));
+        player.sendMessage(main.color("&e/friends reject <player> &7- Reject a request"));
+        player.sendMessage(main.color("&e/friends remove <player> &7- Remove a friend"));
+        player.sendMessage(main.color("&e/friends requests &7- View requests"));
+    }
 
 	private void candyAuraCommand(String[] args, Player player) {
 		// Optional permission – remove this block if you want everyone to use it
@@ -209,6 +417,92 @@ public class Commands implements CommandExecutor, TabCompleter {
 			break;
 		}
 	}
+
+    private void tokenCommand(CommandSender sender, String[] args) {
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+
+            if (!player.hasPermission("scb.giveTokens")) {
+                player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
+                        + ChatColor.RED + ChatColor.BOLD + "ADMIN " + ChatColor.RESET + "to use this command!");
+                return;
+            }
+        }
+
+        if (args.length != 3 || !args[0].equalsIgnoreCase("add")) {
+            sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                    + "Incorrect usage! Try doing: " + ChatColor.GREEN + "/token add <player> <amount>");
+            return;
+        }
+
+        String targetName = args[1];
+        int num;
+
+        try {
+            num = Integer.parseInt(args[2]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Please enter a number!");
+            return;
+        }
+
+        if (num <= 0) {
+            sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Please enter a positive number!");
+            return;
+        }
+
+        Player target = Bukkit.getServer().getPlayerExact(targetName);
+
+        if (target != null) {
+            PlayerData data = main.getDataManager().getPlayerData(target);
+
+            if (data == null) {
+                sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                        + "Could not load that player's data.");
+                return;
+            }
+
+            data.tokens += num;
+
+            sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You gave "
+                    + ChatColor.GREEN + target.getName() + ChatColor.RESET + " " + num + " Tokens!");
+
+            target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                    + "You were given " + num + " Tokens!");
+
+            if (main.getGameManager().GetInstanceOfPlayer(target) == null) {
+                main.getScoreboardManager().lobbyBoard(target);
+            }
+
+            main.getDataManager().saveData(data);
+            return;
+        }
+
+        final int amount = num;
+
+        Bukkit.getScheduler().runTaskAsynchronously(main, () -> {
+            try {
+                boolean updated = main.getDataManager().addTokensToOfflinePlayer(targetName, amount);
+
+                Bukkit.getScheduler().runTask(main, () -> {
+                    if (updated) {
+                        sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You gave "
+                                + ChatColor.GREEN + targetName + ChatColor.RESET + " " + amount
+                                + " Tokens while they were offline!");
+                    } else {
+                        sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                + "That player has never joined the server!");
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+
+                Bukkit.getScheduler().runTask(main, () -> {
+                    sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                            + "Could not give tokens to that player.");
+                });
+            }
+        });
+    }
 
 	private void ensureCandyAuraTaskRunning() {
 		if (candyAuraTaskId != -1)
@@ -257,14 +551,15 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void socialsCommand(Player player) {
-		player.sendMessage(main.color("&7&m-------&7&l[Social Medias]&7&m-------"));
-		player.sendMessage("");
-		player.sendMessage(main.color("&f&lDiscord: &ahttps://discord.gg/FSZpmY9FZB"));
-		player.sendMessage(main.color("&f&lYouTube: &ahttps://www.youtube.com/@minezone6480"));
-		player.sendMessage(main.color("&f&lTikTok: &ahttps://www.tiktok.com/@minezonemc"));
-//				player.sendMessage(main.color("&f&lTwitter: &ahttps://twitter.com/MinezoneMC"));
-		player.sendMessage("");
-		player.sendMessage(main.color("&7&m----------------------------"));
+        player.sendMessage(main.color("&8&m-------&8[Social Media]&8&m-------"));
+        player.sendMessage("");
+        player.sendMessage(main.color("&eDiscord: &7https://discord.gg/FSZpmY9FZB"));
+        player.sendMessage(main.color("&eStore: &7minezone.tebex.io"));
+        player.sendMessage(main.color("&eYouTube: &7https://www.youtube.com/@minezone6480"));
+        player.sendMessage(main.color("&eTwitter: &7https://twitter.com/MinezoneMC"));
+        player.sendMessage(main.color("&eTikTok: &7https://www.tiktok.com/@minezonemc"));
+        player.sendMessage("");
+        player.sendMessage(main.color("&8&m----------------------------"));
 	}
 
 	private void forceClassCommand(Player player, String[] args) {
@@ -1213,7 +1508,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 			Rank donor = classType.getMinRank();
 
 			if (donor == null || player.hasPermission("scb." + donor.toString().toLowerCase())) {
-				player.sendMessage(main.color("&2&l(!) " + "&eYou have selected to go a &lRandom class"));
+				player.sendMessage(main.color("&2&l(!) " + "&rYou have selected to go a &aRandom &rclass"));
 				main.getGameManager().playerSelectClass(player, classType);
 				GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
                 game.board.updateLine(3, main.color("&fClass: &cR&6a&en&ad&bo&3m"));
@@ -1336,40 +1631,78 @@ public class Commands implements CommandExecutor, TabCompleter {
 			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
 	}
 
-	public List<String> onTabComplete(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-		if (cmd.getName().equalsIgnoreCase("join") || cmd.getName().equalsIgnoreCase("spectate")) {
-			List<Maps> maps = Arrays.asList(Maps.values());
-			List<String> mapsString = Lists.newArrayList();
-			if (args.length == 1) {
-				for (Maps map : maps) {
-					if (map.getName().toLowerCase().startsWith(args[0].toLowerCase()))
-						mapsString.add(map.getName());
-				}
-				return mapsString;
-			}
-		} else if (cmd.getName().equalsIgnoreCase("class")) {
-			List<ClassType> a = Arrays.asList(ClassType.getAvailableClasses());
-			List<String> f = Lists.newArrayList();
-			if (args.length == 1) {
-				for (ClassType s : a) {
-					if (s.name().toLowerCase().startsWith(args[0].toLowerCase()))
-						f.add(s.name());
-				}
-				return f;
-			}
-		} else if (cmd.getName().equalsIgnoreCase("sound")) {
-			if (args.length == 1) {
-				List<String> soundNames = new ArrayList<>();
-				for (Sound sound : Sound.values()) {
-					if (sound.name().toLowerCase().startsWith(args[0].toLowerCase())) {
-						soundNames.add(sound.name());
-					}
-				}
-				return soundNames;
-			}
-		}
-		return null;
-	}
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+        if (cmd.getName().equalsIgnoreCase("join") || cmd.getName().equalsIgnoreCase("spectate")) {
+            List<Maps> maps = Arrays.asList(Maps.values());
+            List<String> mapsString = Lists.newArrayList();
+
+            if (args.length == 1) {
+                for (Maps map : maps) {
+                    if (map.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
+                        mapsString.add(map.getName());
+                    }
+                }
+
+                return mapsString;
+            }
+
+        } else if (cmd.getName().equalsIgnoreCase("class")) {
+            List<ClassType> a = Arrays.asList(ClassType.getAvailableClasses());
+            List<String> f = Lists.newArrayList();
+
+            if (args.length == 1) {
+                for (ClassType s : a) {
+                    if (s.name().toLowerCase().startsWith(args[0].toLowerCase())) {
+                        f.add(s.name());
+                    }
+                }
+
+                return f;
+            }
+
+        } else if (cmd.getName().equalsIgnoreCase("friends")) {
+            if (args.length == 1) {
+                List<String> options = Arrays.asList("add", "accept", "reject", "remove", "requests", "list", "help");
+                List<String> matches = new ArrayList<>();
+
+                for (String option : options) {
+                    if (option.toLowerCase().startsWith(args[0].toLowerCase())) {
+                        matches.add(option);
+                    }
+                }
+
+                return matches;
+            }
+
+            if (args.length == 2) {
+                List<String> names = new ArrayList<>();
+
+                for (Player online : Bukkit.getOnlinePlayers()) {
+                    if (online.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
+                        names.add(online.getName());
+                    }
+                }
+
+                return names;
+            }
+
+        } else if (cmd.getName().equalsIgnoreCase("sound")) {
+            if (args.length == 1) {
+                List<String> soundNames = new ArrayList<>();
+
+                for (Sound sound : Sound.values()) {
+                    if (sound.name().toLowerCase().startsWith(args[0].toLowerCase())) {
+                        soundNames.add(sound.name());
+                    }
+                }
+
+                return soundNames;
+            }
+        }
+
+        return null;
+    }
 
 	private boolean isGameStateWaiting(GameInstance game, Player player) {
 		if (game.state != GameState.WAITING) {

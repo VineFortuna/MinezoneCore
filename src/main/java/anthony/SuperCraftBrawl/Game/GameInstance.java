@@ -69,7 +69,7 @@ public class GameInstance {
 
     public List<Player> playerPosition = new ArrayList<>();
 
-    // ✅ FIXED: Use UUID keys to avoid pinning Player (and the whole world graph)
+    // Use UUID keys to avoid pinning Player (and the whole world graph)
     public Map<UUID, FastBoard> boards = new HashMap<>();
 
     public final HashMap<Player, ClassType> classSelection = new HashMap<>();
@@ -98,9 +98,9 @@ public class GameInstance {
     public List<ClassType> classList = generateClassList();
     private SignManager sm;
 
-    // ✅ FIXED: Track all tasks to cancel reliably
+    // Track all tasks to cancel reliably
     private final List<BukkitTask> instanceTasks = new ArrayList<>();
-    // ✅ FIXED: Per-player tasks keyed by UUID (not Player)
+    // Per-player tasks keyed by UUID (not Player)
     private final Map<UUID, List<BukkitTask>> perPlayerTasks = new HashMap<>();
 
     // DUEL COMMAND
@@ -193,6 +193,8 @@ public class GameInstance {
 
         if (getMap() != Maps.WitchesBrew)
             mapWorld.setTime(1000);
+
+        mapWorld.setDifficulty(Difficulty.NORMAL);
     }
 
     /**
@@ -270,7 +272,7 @@ public class GameInstance {
                     }
 
                     gamePlayer.sendMessage(color("&2&l(!) &f" + player.getName() +
-                            "&a joined &f(&a" + this.players.size() + "/" + getMaxPlayers() + "&f)"));
+                            "&a joined (" + this.players.size() + "/" + getMaxPlayers() + ")"));
                 }
 
                 return GameReason.SUCCESS;
@@ -291,7 +293,7 @@ public class GameInstance {
         return maxPlayers;
     }
 
-    private boolean isLobbyFull(Player player) {
+    public boolean isLobbyFull(Player player) {
         if (this.map != null) {
             if (this.gameType == GameType.DUEL && players.size() >= 2) {
                 player.sendMessage(color("&c&l(!) &fThis game is full!"));
@@ -1050,6 +1052,9 @@ public class GameInstance {
             }
         }
 
+        // Save game data
+        gameManager.getMain().getGameDataManager().saveMatch(gameType, map.getName(), gameTime, winnerList, players, classes);
+
         endGameAnimation = new BukkitRunnable() {
             int ticks = 12;
             @Override
@@ -1104,6 +1109,7 @@ public class GameInstance {
                         BaseClass bc = classes.get(player);
                         bc.GameEnd();
                         SetLobbyScoreboard(player);
+                        player.setDisplayName(player.getName());
                         gameManager.getMain().sendScoreboardUpdate(player);
                         for (PotionEffect type : player.getActivePotionEffects())
                             player.removePotionEffect(type.getType());
@@ -1332,6 +1338,7 @@ public class GameInstance {
                         data.exp += 133;
                     }
                     baseClass.totalExp += 133;
+                    baseClass.placement = 1;
 
                     winner.sendMessage("" + ChatColor.BOLD + "===========================");
                     winner.sendMessage("" + ChatColor.BOLD + "||");
@@ -1404,7 +1411,7 @@ public class GameInstance {
                     winner.sendMessage(getGameManager().getMain().color("&8&m----------------------------------------"));
                     winner.sendMessage(getGameManager().getMain().color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
                     winner.sendMessage(getGameManager().getMain()
-                            .color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
+                            .color("&7You are now &e&lLevel &6&l" + data.level + " &7- nice work!"));
                     winner.sendMessage(getGameManager().getMain().color("&8&m----------------------------------------"));
                     winner.playSound(winner.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
                 }
@@ -1761,7 +1768,7 @@ public class GameInstance {
                 if (this.map != null) {
                     updateCountOnBoard();
                     TellAll(color("&2&l(!) &f" + player.getName() +
-                            "&c left &f(&a" + this.players.size() + "/" + getMaxPlayers() + "&f)"));
+                            "&c left &a(" + this.players.size() + "/" + getMaxPlayers() + ")"));
 
                     if (checkIfMinPlayers() && this.gameStartTime != null) {
                         this.state = GameState.WAITING;

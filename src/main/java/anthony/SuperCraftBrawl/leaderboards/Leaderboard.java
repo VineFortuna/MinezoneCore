@@ -35,7 +35,7 @@ public class Leaderboard extends LeaderboardBase {
     private static final AtomicInteger ENTITY_ID = new AtomicInteger(200000); // custom id range for Wins
 
     // Board location for Wins
-    private static final Location TITLE_LOC = new Location(null, 179.5, 107.5, 709.4);
+    private static final Location TITLE_LOC = new Location(null, 183.5, 107, 710.5);
 
     public Leaderboard(Core main) {
         super(main);
@@ -141,6 +141,8 @@ public class Leaderboard extends LeaderboardBase {
 
             PlayerData data = main.getDataManager().getPlayerData(player);
             if (data == null) continue;
+            int val = data.wins;
+
             if (!lifetimeTopIds.contains(data.playerUUID)) {
                 Location line1 = base.clone().add(0, -0.24, 0);
                 sendStandToOnePlayerLifetimeOnly(line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------", player);
@@ -148,7 +150,7 @@ public class Leaderboard extends LeaderboardBase {
                 Location line2 = base.clone().add(0, -0.44, 0);
                 sendStandToOnePlayerLifetimeOnly(
                         line2,
-                        "" + ChatColor.GREEN + player.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + "N/A",
+                        "" + ChatColor.GREEN + player.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + val,
                         player
                 );
             }
@@ -209,6 +211,7 @@ public class Leaderboard extends LeaderboardBase {
         }
 
         // Your own value for this scope if not in top 10
+        int yourVal = getScopedWinsFor(viewer, scope);
         boolean youInTop = ids.contains(viewer.getUniqueId());
 
         if (!youInTop) {
@@ -221,7 +224,7 @@ public class Leaderboard extends LeaderboardBase {
             sendLineToViewer(
                     viewer,
                     yours,
-                    ChatColor.GREEN + viewer.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + "N/A"
+                    ChatColor.GREEN + viewer.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + yourVal
             );
         }
     }
