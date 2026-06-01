@@ -144,12 +144,12 @@ public class GadgetsGUI implements InventoryProvider {
 
 		contents.set(1, 5, ClickableItem.of(snowball, e -> {
 			if (data.snowParticles == 1) {
-				if (!(main.getListener().snowParticlePlayers.contains(player))) {
+				if (!(main.getCosmeticsManager().snowParticlePlayers.contains(player))) {
 					player.sendMessage(main.color("&r&l(!) &fYou equipped &bSnow Particles &fgadget"));
-					main.getListener().snowParticlePlayers.add(player);
+					main.getCosmeticsManager().snowParticlePlayers.add(player);
 				} else {
 					player.sendMessage(main.color("&r&l(!) &rYou unequipped &bSnow Particles &rgadget"));
-					main.getListener().snowParticlePlayers.remove(player);
+					main.getCosmeticsManager().snowParticlePlayers.remove(player);
 				}
 			} else {
 				player.sendMessage(main.color("&c&l(!) &rYou do not have this gadget!"));
