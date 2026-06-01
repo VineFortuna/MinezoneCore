@@ -1986,6 +1986,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									Location hitLoc = this.getBaseProj().getEntity().getLocation();
 
 									for (Player gamePlayer : this.getNearby(3.0)) {
+										if (gamePlayer == player) continue;
 										if (instance.duosMap != null) {
 											if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
 												@SuppressWarnings("deprecation")
