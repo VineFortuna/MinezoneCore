@@ -11,8 +11,13 @@ import anthony.SuperCraftBrawl.npcs.ChannelInjector;
 import anthony.SuperCraftBrawl.npcs.NPC;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.SuperCraftBrawl.titles.TitleSequence;
 import anthony.util.SoundManager;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
 import net.minecraft.server.v1_8_R3.*;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
@@ -30,13 +35,11 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
+import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Door;
@@ -55,7 +58,6 @@ public class PlayerListener implements Listener {
 	private final Core main;
 	public ScoreboardManager scoreManager = Bukkit.getScoreboardManager();
 	public Scoreboard c;
-	public List<Player> snowParticlePlayers = new ArrayList<Player>();
 	public Map<Player, Snowman> snowmanPetPlayers = new HashMap<>();
 	public List<Player> candyCaneSwirlPlayers = new ArrayList<Player>();
 	public List<Player> elfCosmeticPlayers = new ArrayList<Player>();
@@ -71,7 +73,7 @@ public class PlayerListener implements Listener {
 	}
 
     /*
-    * This function shows the server messages that appear every 5 minutes
+    * This function shows the server messages that appear every 5 minutes to players
      */
     public void messages() {
         // Don’t schedule more than once
@@ -139,6 +141,10 @@ public class PlayerListener implements Listener {
 			p.removePotionEffect(type.getType());
 	}
 
+    /*
+    * This function handles if a player has 2500 exp or more, it will
+    * level them up
+     */
 	public void checkIfLevelUp(Player player) {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 
@@ -148,12 +154,12 @@ public class PlayerListener implements Listener {
 				data.exp -= 2500;
 				player.sendMessage(main.color("&8&m----------------------------------------"));
 				player.sendMessage(main.color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
-				player.sendMessage(main.color("&7You are now &e&lLevel &6&l" + data.level + " &7- nice work!"));
+				player.sendMessage(main.color("&rYou are now &e&lLevel &6&l" + data.level + " &r- nice work!"));
 				player.sendMessage(main.color("&8&m----------------------------------------"));
 				player.playSound(player.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
 
 				if (player.getWorld() == main.getLobbyWorld())
-					main.getScoreboardManager().lobbyBoard(player);
+					main.getScoreboardManager().lobbyBoard(player); //Will update lobby scoreboard with new level
 			}
 		}
 	}
@@ -226,7 +232,6 @@ public class PlayerListener implements Listener {
         }
 
         if (main.getLbSettingsHologram().isSettingsHologram(event.getRightClicked().getUniqueId())) {
-
             SoundManager.playClickSound(player);
             new anthony.SuperCraftBrawl.gui.leaderboard.LeaderboardScopeGUI(main).inv().open(player);
             event.setCancelled(true);
@@ -250,20 +255,154 @@ public class PlayerListener implements Listener {
 
 	// EVENTS:
 
-	@EventHandler
-	public void OnPlayerJoin(PlayerJoinEvent event) {
-		event.getPlayer().teleport(main.GetHubLoc());
-		for (int i = 0; i < 9; i++) {
-			event.getPlayer().getInventory().setItem(i, new ItemStack(Material.WOOD_SWORD));
-		}
-		Bukkit.getScheduler().runTaskLater(main, () -> {
-			event.getPlayer().getInventory().clear();
-			main.ResetPlayer(event.getPlayer());
-		}, 20);
+    @EventHandler
+    public void onJoin(PlayerJoinEvent event) {
+        Player player = event.getPlayer();
+        PlayerData data = main.getDataManager().getPlayerData(player); // Gets the player data from database
+        String name = player.getName();
+        Rank rank = main.getRankManager().getRank(player); // Gets the player's rank
+        String tag = rank.getTagWithSpace(); // Gets the player's rank tag
 
+        hitGlitchFix(player);
+        giveLeaderboards(player);
+        resetDoubleJump(player);
+        resetArmor(player);
+        resetPotionEffects(player);
+        checkIfTournament(player);
+        setPlayerOnTablist(player);
+        chatAnnouncementOnJoin(player);
+        main.getScoreboardManager().lobbyBoard(player); // Gives the lobby scoreboard to player
+        main.sendScoreboardUpdate(player); // This sets the rank next to player name above their head
+
+        for (Player other : Bukkit.getOnlinePlayers()) {
+            if (other == null || !other.isOnline() || other == player) continue;
+            main.sendScoreboardUpdate(other);
+        }
+        main.showNPCs(player);
+
+        event.setJoinMessage(main.color("" + rank.getArrowColor() + "► " + tag +
+                main.getColorForNames(player, rank) + "&7 has joined!"));
+
+        if (data != null) {
+            player.setLevel(data.level); // Indication what the player's level is
+            // Give Christmas rewards if not received
+            boolean update = false;
+            if (data.december18 == -1 && data.snowmanPet == 0) {
+                data.snowmanPet = 1;
+                update = true;
+            }
+            if (data.december19 == -1 && data.candycaneParticles == 0) {
+                data.candycaneParticles = 1;
+                update = true;
+            }
+            if (data.december23 == -1 && data.snowballDeathEffect == 0) {
+                data.snowballDeathEffect = 1;
+                update = true;
+            }
+            if (update)
+                main.getDataManager().saveData(data);
+        }
+
+        if (main.tablistAnim != null) main.tablistAnim.applyTo(player);
+
+        player.setHealth(20);
+        player.setFoodLevel(20);
+
+        TitleSequence.sendChained(main, player,
+                new TitleSequence.TitleSpec("&6&lMINEZONE", "&e&lFRIENDS LIST &r-> &a/friends!", 10, 70, 0),
+                new TitleSequence.TitleSpec("&6&lMINEZONE", "&c&lDaily/Monthly/Weekly &e&lLEADERBOARDS", 0, 70, 10)
+        );
+
+        listFriendsOnline(player);
+    }
+
+    private void listFriendsOnline(Player player) {
+        Bukkit.getScheduler().runTaskAsynchronously(main, () -> {
+            int onlineFriends = main.getFriendsManager().getOnlineFriendsCount(player.getUniqueId());
+            int incomingRequests = main.getFriendsManager().getPendingRequestCount(player.getUniqueId());
+            List<UUID> friendUuids = main.getFriendsManager().getFriendUuids(player.getUniqueId());
+
+            Bukkit.getScheduler().runTask(main, () -> {
+                if (!player.isOnline()) {
+                    return;
+                }
+
+                player.sendMessage(main.color("&rYou have &a" + onlineFriends + " &rfriends online"));
+
+                if (incomingRequests > 0) {
+                    player.sendMessage(main.color("&rYou have &a" + incomingRequests + " &rincoming friend requests"));
+                }
+
+                for (UUID friendUuid : friendUuids) {
+                    Player friend = Bukkit.getPlayer(friendUuid);
+
+                    if (friend != null && friend.isOnline() && !friend.getUniqueId().equals(player.getUniqueId())) {
+                        friend.sendMessage(main.color("&rYour friend &a" + player.getName() + " &ris online!"));
+                    }
+                }
+            });
+        });
+    }
+
+    @SuppressWarnings("deprecation")
+    public void chatAnnouncementOnJoin(Player p) {
+        p.sendMessage("----------------------------------------------");
+        p.sendMessage("");
+        p.sendMessage(main.color("          &6&lMINEZONE NETWORK"));
+        p.sendMessage("");
+        p.sendMessage("" + "         Enjoy Super Craft Bros!");
+        p.sendMessage("");
+        p.sendMessage("" + " Be sure to join our Discord Server with " + ChatColor.GREEN + "/socials");
+        p.sendMessage("");
+        p.sendMessage("----------------------------------------------");
+        p.sendMessage("");
+
+        if (Bukkit.getOnlinePlayers().size() == 1) {
+            Bukkit.getScheduler().runTaskLater(main, () -> {
+                p.sendMessage("");
+
+                BaseComponent[] tip = new ComponentBuilder("TIP ")
+                        .color(net.md_5.bungee.api.ChatColor.YELLOW).bold(true) // &e&l
+                        .append("No players online? Join our ")
+                        .color(net.md_5.bungee.api.ChatColor.WHITE).bold(false)
+                        .append("Discord")
+                        .color(net.md_5.bungee.api.ChatColor.BLUE)     // &9
+                        .underlined(true)                                   // &n
+                        .event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/653vJzmrPz"))
+                        .event(new HoverEvent(
+                                HoverEvent.Action.SHOW_TEXT,
+                                new ComponentBuilder("Click here to join the Discord!")
+                                        .color(ChatColor.BLUE) // &9
+                                        .create()))
+                        .append(" with 400+ members!")
+                        .color(net.md_5.bungee.api.ChatColor.WHITE)
+                        .underlined(false)
+                        .create();
+
+                p.playSound(p.getLocation(), Sound.NOTE_PLING, 1, 1);
+                p.spigot().sendMessage(tip);
+                p.sendMessage("");
+            }, 60L);
+        }
+    }
+
+    /*
+    * This function fixes the minecraft hit glitch by placing a sword
+    * in a player's hand and removing it after a second
+     */
+    private void hitGlitchFix(Player player) {
+        player.teleport(main.GetHubLoc());
+        for (int i = 0; i < 9; i++) {
+            player.getInventory().setItem(i, new ItemStack(Material.WOOD_SWORD));
+        }
         Bukkit.getScheduler().runTaskLater(main, () -> {
-            Player p = event.getPlayer();
+            player.getInventory().clear();
+            main.ResetPlayer(player);
+        }, 20);
+    }
 
+    private void giveLeaderboards(Player p) {
+        Bukkit.getScheduler().runTaskLater(main, () -> {
             // Default their personal view to Lifetime (only set once)
             main.leaderboardScopeByViewer.putIfAbsent(p.getUniqueId(), LeaderboardScope.LIFETIME);
 
@@ -302,14 +441,14 @@ public class PlayerListener implements Listener {
                 ex.printStackTrace();
             }
         }, 40L); // ~2 seconds after join; adjust if your data load needs more/less time
-	}
+    }
 
 	@EventHandler
 	public void OnPlayerQuit(PlayerQuitEvent event) {
 		Player player = event.getPlayer();
 		GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
 		candyCaneSwirlPlayers.remove(player);
-		snowParticlePlayers.remove(player);
+		main.getCosmeticsManager().snowParticlePlayers.remove(player);
 		if (snowmanPetPlayers.containsKey(player))
 			snowmanPetPlayers.get(player).remove();
 		snowmanPetPlayers.remove(player);
@@ -356,6 +495,7 @@ public class PlayerListener implements Listener {
         Player player = event.getPlayer();
         clearLeaderboardHolograms(player);
     }
+
     private void clearLeaderboardHolograms(Player player) {
         try {
             if (main.getKillsLeaderboard() != null) {
@@ -413,34 +553,6 @@ public class PlayerListener implements Listener {
 					&& event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 				event.setCancelled(true);
 				new ChristmasRewardsGUI(main).inv.open(event.getPlayer());
-			}
-		}
-	}
-
-	@EventHandler
-	public void onPlayerMove(PlayerMoveEvent event) {
-		Player player = event.getPlayer();
-
-		if (this.snowParticlePlayers.contains(player) && player.getWorld() == main.getLobbyWorld()) {
-			Location loc = player.getLocation().add(0, 0.2, 0);
-
-			// Particle Settings
-			EnumParticle particleType = EnumParticle.CLOUD; // Example: CLOUD looks like a snow effect
-			boolean longDistance = false;
-			float offsetX = 0.3f;
-			float offsetY = 0.3f;
-			float offsetZ = 0.3f;
-			float speed = 0f;
-			int count = 5;
-
-			PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particleType, // The EnumParticle type
-					longDistance, // Long distance rendering
-					(float) loc.getX(), (float) loc.getY(), (float) loc.getZ(), offsetX, offsetY, offsetZ, speed,
-					count);
-
-			// Send the packet to all online players, so everyone can see the trail
-			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				((CraftPlayer) onlinePlayer).getHandle().playerConnection.sendPacket(packet);
 			}
 		}
 	}
@@ -831,6 +943,62 @@ public class PlayerListener implements Listener {
 		}
 	}
 
+    /*
+     * This function handles the interactivty with the 'Active Games' item in
+     * the lobby. It checks if the item is an eye of ender, then if the player
+     * is in the lobby, then will open the GUI if all conditions met
+     */
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void activeGames(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
+
+        if (event.getItem() != null && event.getItem().getType() == Material.EYE_OF_ENDER) {
+            event.setCancelled(true);
+            if (player.getWorld() == main.getLobbyWorld())
+                new ActiveGamesGUI(main).inv.open(player);
+        }
+
+    }
+
+    /**
+     * This function disables weather from changing
+     *
+     * @param event
+     */
+    @EventHandler
+    public void onWeatherChange(WeatherChangeEvent event) {
+        event.setCancelled(true);
+    }
+
+    //Disables interactivity with an end crystal
+    @EventHandler
+    public void endCrystal(EntityDamageByEntityEvent e) {
+        if (e.getEntity().getType() == EntityType.ENDER_CRYSTAL) {
+            e.setCancelled(true);
+        }
+    }
+
+    //Disables interactivity with an end crystal
+    @EventHandler
+    public void endCrystal(EntityExplodeEvent e) {
+        if (e.getEntity().getType() == EntityType.ENDER_CRYSTAL)
+            e.setCancelled(true);
+    }
+
+    /**
+     * This function disables players from moving items in their inventory
+     *
+     * @param e
+     */
+    @EventHandler
+    public void onInv(InventoryClickEvent e) {
+        Player player = (Player) e.getWhoClicked();
+
+        if (!(player.isOp()))
+            e.setCancelled(true);
+    }
+
 	@EventHandler
 	public void containerInteract(PlayerInteractEvent e) {
 		List<Material> list = new ArrayList<>(
@@ -853,6 +1021,21 @@ public class PlayerListener implements Listener {
 	public void onChat(AsyncPlayerChatEvent event) {
 		// StaffChat
 		event.setCancelled(true);
+
+        if (main.getPartyManager() != null && main.getPartyManager().isPartyChatToggled(event.getPlayer())) {
+            final Player chatPlayer = event.getPlayer();
+            final String chatMessage = event.getMessage();
+
+            Bukkit.getScheduler().runTask(main, new Runnable() {
+                @Override
+                public void run() {
+                    main.getPartyManager().sendPartyMessage(chatPlayer, chatMessage);
+                }
+            });
+
+            return;
+        }
+
 		if (main.staffchat.contains(event.getPlayer())) {
 			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
 			String message = tag + event.getPlayer().getDisplayName() + ": " + event.getMessage();

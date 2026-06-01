@@ -6,6 +6,7 @@ import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.armorstands.ArmorStandManager;
 import anthony.SuperCraftBrawl.commands.Commands;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticsManager;
 import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.fishing.Fishing;
@@ -22,10 +23,12 @@ import anthony.SuperCraftBrawl.halloween.TrickTitlePackets;
 import anthony.SuperCraftBrawl.leaderboards.*;
 import anthony.SuperCraftBrawl.lobbyexplorer.LobbyExplorerManager;
 import anthony.SuperCraftBrawl.lobbyexplorer.LobbyExplorers;
+import anthony.SuperCraftBrawl.mysterychest.MysteryChestManager;
 import anthony.SuperCraftBrawl.npcs.NPC;
 import anthony.SuperCraftBrawl.npcs.NPCManager;
 import anthony.SuperCraftBrawl.npcs.VisibleHook;
 import anthony.SuperCraftBrawl.packets.PacketMain;
+import anthony.SuperCraftBrawl.party.PartyManager;
 import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
 import anthony.SuperCraftBrawl.playerdata.GameDataManager;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -57,7 +60,6 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
@@ -81,6 +83,7 @@ public class Core extends JavaPlugin implements Listener {
 
 	private ActionBarManager actionBarManager;
 	public GameManager gameManager;
+    public MysteryChestManager mysteryChestManager;
 	public ScoreboardManager scoreboardManager;
 	public TablistManager tabManager;
 	public Version version;
@@ -156,7 +159,7 @@ public class Core extends JavaPlugin implements Listener {
     private anthony.SuperCraftBrawl.scoreboards.TitleAnimationManager titleAnimationManager;
 
     //TABLIST:
-    private TablistAnimationManager tablistAnim;
+    public TablistAnimationManager tablistAnim;
 
     //FLOATING BLOCK:
     private FloatingBlockManager floating;
@@ -170,6 +173,12 @@ public class Core extends JavaPlugin implements Listener {
 
     //FRIENDS:
     public FriendsManager friendsManager;
+
+    //PARTY:
+    private PartyManager partyManager;
+
+    //COSMETICS:
+    public CosmeticsManager cosmeticsManager;
 
     public Core() {
 		this.staffchat = new ArrayList<Player>();
@@ -185,6 +194,18 @@ public class Core extends JavaPlugin implements Listener {
     }
 
     // Getters:
+
+    public CosmeticsManager getCosmeticsManager() {
+        return cosmeticsManager;
+    }
+
+    public PartyManager getPartyManager() {
+        return partyManager;
+    }
+
+    public MysteryChestManager getMysteryChestManager() {
+        return mysteryChestManager;
+    }
 
     public FriendsManager getFriendsManager() {
         return friendsManager;
@@ -718,7 +739,7 @@ public class Core extends JavaPlugin implements Listener {
     }
 
     private void enableCommands() {
-        String[] commandTypes = { "maps", "join", "friends", "token", "cosmetics", "fishing", "server", "fly", "leave", "players",
+        String[] commandTypes = { "maps", "join", "party", "partychat", "friends", "token", "cosmetics", "fishing", "server", "fly", "leave", "players",
                 "class", "socials", "spectate", "startgame", "frenzy", "gamestats", "setlives", "purchases", "kit",
                 "items", "color", "sound", "heal", "forceclass", "lactate" };
 
@@ -745,10 +766,13 @@ public class Core extends JavaPlugin implements Listener {
         msg = new ArrayList<>();
         listener = new PlayerListener(this);
         gameManager = new GameManager(this);
+        mysteryChestManager = new MysteryChestManager(this);
+        cosmeticsManager = new CosmeticsManager(this);
         scoreboardManager = new ScoreboardManager(this);
         titleAnimationManager = new anthony.SuperCraftBrawl.scoreboards.TitleAnimationManager(this);
         tabManager = new TablistManager(this);
         commands = new Commands(this);
+        partyManager = new PartyManager(this);
         djManager = new DoubleJumpManager(this);
         databaseManager = new DatabaseManager(this);
         packetMain = new PacketMain(this);
@@ -1971,110 +1995,13 @@ public class Core extends JavaPlugin implements Listener {
         }
     }
 
-    private void showNPCs(Player player) {
+    public void showNPCs(Player player) {
 		for (NPC npc : npcs) {
 	        npc.showTo(player);
 	    }
 	}
 
 	public Map<Player, Holograms> holograms = new HashMap<Player, Holograms>();
-
-	/**
-	 * This function handles when a player joins the server
-	 *
-	 * @param e
-	 */
-	@SuppressWarnings("deprecation")
-	@EventHandler
-	public void joinEvent(PlayerJoinEvent e) {
-		Player player = e.getPlayer(); // Gets the player that joined
-		PlayerData data = this.getDataManager().getPlayerData(player); // Gets the player data from database
-		String name = player.getName();
-
-		getListener().resetDoubleJump(player);
-		getListener().resetArmor(player);
-		getListener().resetPotionEffects(player);
-		getListener().checkIfTournament(player);
-		getListener().setPlayerOnTablist(player);
-		chatAnnouncementOnJoin(player);
-		getScoreboardManager().lobbyBoard(player); // Gives the lobby scoreboard to player
-		sendScoreboardUpdate(player); // This sets the rank next to player name above their head
-
-        for (Player other : Bukkit.getOnlinePlayers()) {
-            if (other == null || !other.isOnline() || other == player) continue;
-            sendScoreboardUpdate(other);
-        }
-		showNPCs(player);
-
-		// For join message:
-		Rank rank = getRankManager().getRank(player); // Gets the player's rank
-		String tag = rank.getTagWithSpace(); // Gets the player's rank tag
-
-		e.setJoinMessage(color("" + rank.getArrowColor() + "► " + tag
-				+ getColorForNames(player, getRankManager().getRank(player)) + " &7has joined!"));
-
-		if (data != null) {
-			player.setLevel(data.level); // Indication what the player's level is
-
-			// Give Christmas rewards if not received
-			boolean update = false;
-			if (data.december18 == -1 && data.snowmanPet == 0) {
-				data.snowmanPet = 1;
-				update = true;
-			}
-			if (data.december19 == -1 && data.candycaneParticles == 0) {
-				data.candycaneParticles = 1;
-				update = true;
-			}
-			if (data.december23 == -1 && data.snowballDeathEffect == 0) {
-				data.snowballDeathEffect = 1;
-				update = true;
-			}
-			if (update)
-				this.getDataManager().saveData(data);
-		}
-
-        if (tablistAnim != null) tablistAnim.applyTo(e.getPlayer());
-
-		player.setHealth(20);
-		player.setFoodLevel(20);
-
-        TitleSequence.sendChained(this, player,
-                new TitleSequence.TitleSpec("&6&lMINEZONE", "&e&lFRIENDS LIST &r-> &a/friends!", 10, 70, 0),
-                new TitleSequence.TitleSpec("&6&lMINEZONE", "&c&lDaily/Monthly/Weekly &e&lLEADERBOARDS", 0, 70, 10)
-        );
-
-        listFriendsOnline(player);
-    }
-
-    private void listFriendsOnline(Player player) {
-        Bukkit.getScheduler().runTaskAsynchronously(this, () -> {
-            int onlineFriends = getFriendsManager().getOnlineFriendsCount(player.getUniqueId());
-            int incomingRequests = getFriendsManager().getPendingRequestCount(player.getUniqueId());
-            List<UUID> friendUuids = getFriendsManager().getFriendUuids(player.getUniqueId());
-
-            Bukkit.getScheduler().runTask(this, () -> {
-                if (!player.isOnline()) {
-                    return;
-                }
-
-                player.sendMessage(color("&rYou have &a" + onlineFriends + " &rfriends online"));
-
-                if (incomingRequests > 0) {
-                    player.sendMessage(color("&rYou have &a" + incomingRequests + " &rincoming friend requests"));
-                }
-
-                for (UUID friendUuid : friendUuids) {
-                    Player friend = Bukkit.getPlayer(friendUuid);
-
-                    if (friend != null && friend.isOnline() && !friend.getUniqueId().equals(player.getUniqueId())) {
-                        friend.sendMessage(color("&rYour friend &a" + player.getName() + " &ris online!"));
-                    }
-                }
-            });
-        });
-    }
-
 
 	public String getColorForNames(Player player, Rank rank) {
 		String msg = "";
@@ -2087,48 +2014,6 @@ public class Core extends JavaPlugin implements Listener {
 			msg = color("&e");
 
 		return msg += player.getName();
-	}
-
-	@SuppressWarnings("deprecation")
-	private void chatAnnouncementOnJoin(Player p) {
-		p.sendMessage("----------------------------------------------");
-		p.sendMessage("");
-		p.sendMessage(color("          &6&lMINEZONE NETWORK"));
-		p.sendMessage("");
-		p.sendMessage("" + "         Enjoy Super Craft Bros!");
-		p.sendMessage("");
-		p.sendMessage("" + " Be sure to join our Discord Server with " + ChatColor.GREEN + "/socials");
-		p.sendMessage("");
-		p.sendMessage("----------------------------------------------");
-		p.sendMessage("");
-
-		if (Bukkit.getOnlinePlayers().size() == 1) {
-			Bukkit.getScheduler().runTaskLater(this, () -> {
-				p.sendMessage("");
-
-				BaseComponent[] tip = new ComponentBuilder("TIP ")
-						.color(net.md_5.bungee.api.ChatColor.YELLOW).bold(true) // &e&l
-						.append("No players online? Join our ")
-						.color(net.md_5.bungee.api.ChatColor.WHITE).bold(false)
-						.append("Discord")
-						.color(net.md_5.bungee.api.ChatColor.BLUE)     // &9
-						.underlined(true)                                   // &n
-						.event(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/653vJzmrPz"))
-						.event(new HoverEvent(
-								HoverEvent.Action.SHOW_TEXT,
-								new ComponentBuilder("Click here to join the Discord!")
-										.color(ChatColor.BLUE) // &9
-										.create()))
-						.append(" with 400+ members!")
-						.color(net.md_5.bungee.api.ChatColor.WHITE)
-						.underlined(false)
-						.create();
-
-				p.playSound(p.getLocation(), Sound.NOTE_PLING, 1, 1);
-				p.spigot().sendMessage(tip);
-				p.sendMessage("");
-			}, 60L);
-		}
 	}
 
 	public void mysteryChestHologram(Player p) {
@@ -2208,6 +2093,10 @@ public class Core extends JavaPlugin implements Listener {
 		Player player = e.getPlayer();
 		Rank rank = getRankManager().getRank(player); // Gets the player's rank
 		String tag = rank.getTagWithSpace(); // Gets the player's rank tag
+
+        if (getPartyManager() != null) {
+            getPartyManager().handleQuit(player);
+        }
 
         if (getParkour() != null && getParkour().hasPlayer(player)) {
             try { getParkour().removePlayer(player); } catch (Throwable ignored) {}

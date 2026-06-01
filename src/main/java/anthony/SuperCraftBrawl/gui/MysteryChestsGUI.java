@@ -60,11 +60,11 @@ public class MysteryChestsGUI implements InventoryProvider {
 
                             // optional global re-entry guard
                             if (main.getGameManager() != null) {
-                                if (main.getGameManager().chestCanOpen) {
+                                if (main.getMysteryChestManager().chestCanOpen) {
                                     player.sendMessage(main.color("&c&l(!) &rPlease wait, a chest is already opening."));
                                     return;
                                 }
-                                main.getGameManager().chestCanOpen = true;
+                                main.getMysteryChestManager().chestCanOpen = true;
                             }
 
                             // nice display location centered above the block

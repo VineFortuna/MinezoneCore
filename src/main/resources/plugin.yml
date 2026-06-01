@@ -165,6 +165,12 @@ commands:
    friends:
       description: Friends command
       aliases: [f, friend]
+   party:
+     description: Party command
+     aliases: [ p, parties ]
+   partychat:
+     description: Party chat command
+     aliases: [ pc, pchat ]
 
 permissions:
    scb.admin:
