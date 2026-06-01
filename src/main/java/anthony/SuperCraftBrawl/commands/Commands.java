@@ -47,8 +47,10 @@ import java.util.Random;
 import anthony.SuperCraftBrawl.friends.FriendsManager;
 import anthony.SuperCraftBrawl.gui.FriendRequestsGUI;
 import anthony.SuperCraftBrawl.gui.FriendsGUI;
+import org.bukkit.util.StringUtil;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 public class Commands implements CommandExecutor, TabCompleter {
@@ -1007,13 +1009,13 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 
 		if (args.length == 0) {
-			player.sendMessage("Not enough arguments!");
-			return;
+            player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/purchases buy&r/&eget <className>"));
+            return;
 		}
 
 		switch (args[0].toLowerCase()) {
 		case "get":
-			purchaseGetCommand(player);
+			purchaseGetCommand(player, args);
 			break;
 		case "buy":
 			if (args.length == 1) {
@@ -1026,20 +1028,78 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 	}
 
-	private void purchaseGetCommand(Player player) {
-		PlayerData data = main.getDataManager().getPlayerData(player);
-		player.sendMessage("Listing purchases...");
+    private void purchaseGetCommand(Player player, String[] args) {
+        PlayerData data = main.getDataManager().getPlayerData(player);
 
-		int size = 0;
-		for (Entry<Integer, ClassDetails> entry : data.playerClasses.entrySet()) {
-			player.sendMessage(" - " + entry.getKey() + ": " + entry.getValue().toString());
-			size++;
-		}
+        // Filter by class name if argument provided
+        ClassType filter = null;
+        if (args.length > 1) {
+            for (ClassType type : ClassType.values()) {
+                if (type.name().equalsIgnoreCase(args[1])) {
+                    filter = type;
+                    break;
+                }
+            }
+            if (filter == null) {
+                player.sendMessage(main.color("&cUnknown class: &e" + args[1]));
+                return;
+            }
+        }
 
-		if (size == 0) {
-			player.sendMessage("You have no Class Stats");
-		}
-	}
+        player.sendMessage(main.color("&6&l=========== Your Class Data ==========="));
+
+        if (data.playerClasses.isEmpty()) {
+            player.sendMessage(main.color("&cYou have no class data."));
+            player.sendMessage(main.color("&6&l=================================="));
+            return;
+        }
+
+        boolean found = false;
+        for (Entry<Integer, ClassDetails> entry : data.playerClasses.entrySet()) {
+            int classId = entry.getKey();
+            ClassDetails details = entry.getValue();
+
+            ClassType classType = ClassType.getById(classId);
+
+            // Skip if filtering and this isn't the target class
+            if (filter != null && classType != filter) continue;
+            found = true;
+
+            String className = classType != null ? classType.getTag() : "Unknown";
+            player.sendMessage(main.color("&e&l" + className + " &7(#" + classId + ")"));
+
+            String winRate = String.format("%.1f",
+                    details.gamesPlayed == 0
+                            ? 0
+                            : (details.gamesWon * 100.0f / details.gamesPlayed)
+            );
+
+            player.sendMessage(main.color(
+                            "&f  Games Played: &e" + details.gamesPlayed +
+                            "&f  Games Won: &e" + details.gamesWon +
+                            "&f  Win Rate: &e" + winRate + "%"
+            ));
+
+            StringBuilder rewards = new StringBuilder("&f  Rewards: ");
+            boolean[] rewardFlags = {details.reward1, details.reward2, details.reward3, details.reward4, details.reward5};
+            for (int i = 0; i < rewardFlags.length; i++) {
+                rewards.append(boolColor(rewardFlags[i])).append("[R").append(i + 1).append("]  ");
+            }
+            player.sendMessage(main.color(rewards.toString()));
+
+            player.sendMessage(main.color("&8  ───────────────────────────"));
+        }
+
+        if (!found) {
+            player.sendMessage(main.color("&fNo data found for class: " + filter.getTag()));
+        }
+
+        player.sendMessage(main.color("&6&l======================================="));
+    }
+
+    private String boolColor(boolean value) {
+        return value ? "&a" : "&c";
+    }
 
 	private void purchaseBuyCommand(String[] args, Player player) {
 		int classID = Integer.parseInt(args[1]);
@@ -1396,7 +1456,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 
 		if (map == null) {
-			player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maps &rfor a list of maps"));
+			player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maps &rto see all maps"));
 			return;
 		}
 
@@ -1633,74 +1693,57 @@ public class Commands implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-        if (cmd.getName().equalsIgnoreCase("join") || cmd.getName().equalsIgnoreCase("spectate")) {
-            List<Maps> maps = Arrays.asList(Maps.values());
-            List<String> mapsString = Lists.newArrayList();
-
+        if (cmd.getName().equalsIgnoreCase("join")
+                || cmd.getName().equalsIgnoreCase("spectate")) {
             if (args.length == 1) {
-                for (Maps map : maps) {
-                    if (map.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
-                        mapsString.add(map.getName());
-                    }
-                }
+                List<String> mapNames = Arrays.stream(Maps.values())
+                        .map(Enum::name)
+                        .collect(Collectors.toList());
 
-                return mapsString;
+                return StringUtil.copyPartialMatches(args[0], mapNames, new ArrayList<>());
             }
+        } else if (cmd.getName().equalsIgnoreCase("class")
+                || cmd.getName().equalsIgnoreCase("purchases")
+                || cmd.getName().equalsIgnoreCase("forceclass")) {
+            List<String> classNames = Arrays.stream(ClassType.getAvailableClasses())
+                    .map(Enum::name)
+                    .collect(Collectors.toList());
 
-        } else if (cmd.getName().equalsIgnoreCase("class")) {
-            List<ClassType> a = Arrays.asList(ClassType.getAvailableClasses());
-            List<String> f = Lists.newArrayList();
+            boolean isClassCmd = cmd.getName().equalsIgnoreCase("class") && args.length == 1;
+            boolean isForceClassCmd = cmd.getName().equalsIgnoreCase("forceclass") && args.length == 1;
+            boolean isPurchasesCmd = cmd.getName().equalsIgnoreCase("purchases")
+                    && args.length == 2
+                    && args[0].equalsIgnoreCase("get");
 
-            if (args.length == 1) {
-                for (ClassType s : a) {
-                    if (s.name().toLowerCase().startsWith(args[0].toLowerCase())) {
-                        f.add(s.name());
-                    }
-                }
-
-                return f;
+            if (isClassCmd || isPurchasesCmd || isForceClassCmd) {
+                String partial = isPurchasesCmd ? args[1] : args[0];
+                return StringUtil.copyPartialMatches(partial, classNames, new ArrayList<>());
             }
-
         } else if (cmd.getName().equalsIgnoreCase("friends")) {
             if (args.length == 1) {
                 List<String> options = Arrays.asList("add", "accept", "reject", "remove", "requests", "list", "help");
-                List<String> matches = new ArrayList<>();
-
-                for (String option : options) {
-                    if (option.toLowerCase().startsWith(args[0].toLowerCase())) {
-                        matches.add(option);
-                    }
-                }
-
-                return matches;
+                return StringUtil.copyPartialMatches(args[0], options, new ArrayList<>());
             }
 
             if (args.length == 2) {
-                List<String> names = new ArrayList<>();
-
-                for (Player online : Bukkit.getOnlinePlayers()) {
-                    if (online.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
-                        names.add(online.getName());
-                    }
-                }
-
-                return names;
+                List<String> names = Bukkit.getOnlinePlayers()
+                        .stream()
+                        .map(player -> player.getName())
+                        .collect(Collectors.toList());
+                return StringUtil.copyPartialMatches(args[0], names, new ArrayList<>());
             }
-
         } else if (cmd.getName().equalsIgnoreCase("sound")) {
             if (args.length == 1) {
-                List<String> soundNames = new ArrayList<>();
-
-                for (Sound sound : Sound.values()) {
-                    if (sound.name().toLowerCase().startsWith(args[0].toLowerCase())) {
-                        soundNames.add(sound.name());
-                    }
-                }
-
-                return soundNames;
+                List<String> soundNames = Arrays.stream(Sound.values())
+                        .map(Sound::name)
+                        .collect(Collectors.toList());
+                return StringUtil.copyPartialMatches(args[0], soundNames, new ArrayList<>());
+            }
+        } else if (cmd.getName().equalsIgnoreCase("soundnms")) {
+            if (args.length == 1) {
+                return StringUtil.copyPartialMatches(args[0], getAllNMSSounds(), new ArrayList<>());
             }
         }
-
         return null;
     }
 
