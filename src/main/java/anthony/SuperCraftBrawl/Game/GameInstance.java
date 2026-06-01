@@ -1053,7 +1053,7 @@ public class GameInstance {
         }
 
         // Save game data
-        gameManager.getMain().getGameDataManager().saveMatch(gameType, map.getName(), gameTime, winnerList, players, classes);
+        gameManager.getMain().getGameDataManager().saveMatch(gameType, map.getName(), gameTime, winnerList, players, classes, firstBlood);
 
         endGameAnimation = new BukkitRunnable() {
             int ticks = 12;
