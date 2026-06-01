@@ -780,6 +780,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		newBaseClass.totalTokens = oldBaseClass.totalTokens;
 		newBaseClass.totalExp = oldBaseClass.totalExp;
 		newBaseClass.totalKills = oldBaseClass.totalKills;
+        newBaseClass.totalDeaths = oldBaseClass.totalDeaths;
 		newBaseClass.bountyTarget = oldBaseClass.bountyTarget;
 
 		// Create new scoreboard entry
