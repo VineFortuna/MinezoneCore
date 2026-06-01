@@ -1132,7 +1132,6 @@ public class GameInstance {
                     trackInstanceTask(task);
 
                     if (map != null) gameManager.RemoveMap(map);
-                    else gameManager.RemoveDuosMap(duosMap);
                 }
                 ticks--;
             }
