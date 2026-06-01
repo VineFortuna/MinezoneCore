@@ -1053,7 +1053,7 @@ public class GameInstance {
         }
 
         // Save game data
-        gameManager.getMain().getGameDataManager().saveMatch(gameType, map.getName(), gameTime, winnerList, players, classes);
+        gameManager.getMain().getGameDataManager().saveMatch(gameType, map.getName(), gameTime, winnerList, players, classes, firstBlood);
 
         endGameAnimation = new BukkitRunnable() {
             int ticks = 12;
@@ -1590,6 +1590,7 @@ public class GameInstance {
             newBaseClass.totalTokens = oldBaseClass.totalTokens;
             newBaseClass.totalExp = oldBaseClass.totalExp;
             newBaseClass.totalKills = oldBaseClass.totalKills;
+            newBaseClass.totalDeaths = oldBaseClass.totalDeaths;
             newBaseClass.bountyTarget = oldBaseClass.bountyTarget;
 
             String scoreEntry = truncateString("" + classType.getTag() + " " + ChatColor.WHITE + player.getName(), 40);
