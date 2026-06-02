@@ -398,6 +398,7 @@ public class LargeFernClass extends BaseClass {
         boolean smallFernSet = false;
         boolean largeFernSet = false;
         final PotionEffect transfernInvisibility = new PotionEffect(PotionEffectType.INVISIBILITY, 99999, 0, false, false);
+        final PotionEffect transfernResistance = new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 99999, 0, false, false);
         final PotionEffect transfernRegeneration = regeneration;
         final int smallFernTime = (int) Math.ceil(SMALL_FERN_TIME);
         final int largeFernTime = (int) Math.ceil(LARGE_FERN_TIME);
@@ -444,6 +445,7 @@ public class LargeFernClass extends BaseClass {
             SoundManager.playSoundToAll(player, Sound.DIG_GRASS, 1, 1);
             player.getInventory().setArmorContents(null);
             player.addPotionEffect(transfernInvisibility);
+            player.addPotionEffect(transfernResistance);
 
             fernLocation = player.getLocation().clone();
 
@@ -486,6 +488,7 @@ public class LargeFernClass extends BaseClass {
 
         private void cleanup() {
             player.removePotionEffect(transfernInvisibility.getType());
+            player.removePotionEffect(transfernResistance.getType());
             player.removePotionEffect(transfernRegeneration.getType());
             setArmor(player.getEquipment());
 
