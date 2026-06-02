@@ -1053,7 +1053,9 @@ public class GameInstance {
         }
 
         // Save game data
-        gameManager.getMain().getGameDataManager().saveMatch(gameType, map.getName(), gameTime, winnerList, players, classes, firstBlood);
+        if (allClasses.size() > 1) { // save only if more than 1 player in a match
+            gameManager.getMain().getGameDataManager().saveMatch(gameType, map.getName(), gameTime, winnerList, allClasses, firstBlood);
+        }
 
         endGameAnimation = new BukkitRunnable() {
             int ticks = 12;
