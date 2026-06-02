@@ -83,26 +83,25 @@ public class GameDataManager {
             String mapName,
             int durationMinutes,
             List<Player> winners,
-            List<Player> players,
             Map<Player, BaseClass> classes,
             Player firstBlood) {
 
         createGame(gameType.name(), mapName, durationMinutes, (gameId) -> {
 
-            for (Player p : players) {
+            for (Map.Entry<Player, BaseClass> p : classes.entrySet()) {
 
-                BaseClass bc = classes.get(p);
+                BaseClass bc = p.getValue();
 
                 insertGamePlayer(
                         gameId,
-                        p,
+                        p.getKey(),
                         bc.getType().getID(),
                         bc.placement,
                         bc.totalKills,
                         bc.totalDeaths,
                         bc.getLives(),
-                        winners.contains(p),
-                        firstBlood.equals(p)
+                        winners.contains(p.getKey()),
+                        firstBlood != null && firstBlood.equals(p.getKey())
                 );
             }
         });
