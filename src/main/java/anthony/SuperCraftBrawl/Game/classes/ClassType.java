@@ -180,7 +180,7 @@ public enum ClassType {
 			case Villager:
 				return "Trade emeralds for items";
 			case MagmaCube:
-				return "Bounce around and spawn Fairly high double jump and ability to spawn 7 MagmaCube minions";
+				return "Bounce around and unleash your Magma Cubes";
 			case Summoner:
 				return "Beware the Summoner!";
 			case Anvil:
