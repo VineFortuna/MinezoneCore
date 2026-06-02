@@ -42,8 +42,12 @@ public class SCBClassicGUI implements InventoryProvider {
 		ItemStack scbClassic = ItemHelper.createSkullTexture(
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I4NmI4MjE1YjM2MTBlYWE2NDhjMjNjNGEyMGFkNjc1OWYyNTFlZjg1NDc2ODI5ZGQ2ZDE4NDI4MjNiMTEzIn19fQ==");
 		contents.set(1, 2,
-				ClickableItem.of(ItemHelper.setDetails(scbClassic, "&eChoose a Map",
-						"&7Free for all, kill everyone", "", "&e&nLeft Click&r&e to choose a map",
+				ClickableItem.of(ItemHelper.setDetails(scbClassic,
+                        "&eChoose a Map",
+                        "&7Free for all, choose a class and",
+                        "&7kill your opponents",
+                        "",
+                        "&e&nLeft Click&r&e to choose a map",
 						"&e&nRight Click&r&e to join a random map"), e -> {
 							// If item was Left-clicked opens GUI to choose map
 							if (e.isLeftClick()) {
@@ -56,8 +60,12 @@ public class SCBClassicGUI implements InventoryProvider {
 						}));
 
         contents.set(1, 6,
-                ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FIREWORK), "&eJoin a Game",
-                        "&7Free for all, kill everyone", "", "&eClick to join a game"), e -> {
+                ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FIREWORK),
+                        "&eJoin a Game",
+                        "&7Free for all, choose a class and",
+                        "&7kill your opponents",
+                        "",
+                        "&eClick to join a game"), e -> {
                     GameInstance game = main.getGameManager().getLobbyActiveGames(player, GameType.CLASSIC);
 
                     if (game != null)
