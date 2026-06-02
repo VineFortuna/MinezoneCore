@@ -463,7 +463,6 @@ public class PlayerListener implements Listener {
         // Scoreboards
         main.getScoreboardManager().removeLobbyBoard(p);
         try { Holograms h = main.holograms.remove(p); if (h != null) h.destroyBoards(); } catch (Throwable ignored) {}
-        try { main.getFishing().cleanupAll(); } catch (Throwable ignored) {}
 
         // Holograms / packet armor stands
         main.hologramCleanup(p);
@@ -607,7 +606,7 @@ public class PlayerListener implements Listener {
 
         // 3) Fishing cleanup (no dangling hooks)
         try {
-            main.getFishing().cleanupAll(); // safe no-op if nothing to do
+            main.getFishing().cleanup(p); // safe no-op if nothing to do
         } catch (Throwable ignored) {}
 
         // 4) If the player left a game, ensure the instance drops references
