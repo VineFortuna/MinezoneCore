@@ -46,8 +46,8 @@ public class RabbitClass extends BaseClass {
 				"&7Hitting enemies have a 1 in 3 chance",
 				"&7to empower your kick",
 				"",
-				"&7Empowered kick send players away and",
-				"&7apply &3&oSlowness &e" + (slowness.getAmplifier() + 1) + " &7for &e" + slowness.getDuration() / 20 + "s"
+				"&7Empowered kick has &oKnockback 3&r&7, &oSharpness 4",
+				"&7and applies &3&oSlowness &e" + (slowness.getAmplifier() + 1) + " &7for &e" + slowness.getDuration() / 20 + "s"
 		};
 
 		// Weapon
