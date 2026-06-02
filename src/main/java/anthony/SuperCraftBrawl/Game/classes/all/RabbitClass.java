@@ -115,7 +115,7 @@ public class RabbitClass extends BaseClass {
 				direction.setY(1.0);
 				damagedPlayer.setVelocity(direction);
 				player.sendMessage(ChatColorHelper.color("&2&l(!) &rWeapon upgraded!"));
-				SoundManager.playSoundToAll(player, Sound.CAT_HISS, 1, 1);
+				SoundManager.playNMSSoundToAll(player, "mob.rabbit.hurt", 1, 1);
 			}
 		} else {
 			damagedPlayer.addPotionEffect(slowness);
