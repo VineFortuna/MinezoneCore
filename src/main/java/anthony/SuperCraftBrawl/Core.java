@@ -442,7 +442,7 @@ public class Core extends JavaPlugin implements Listener {
         //enableTablist();
         //Spawn after world & chunks are ready. Delay 3 seconds
         Bukkit.getScheduler().runTaskLater(this, () -> {
-			getLbSettingsHologram().spawnLeaderboardSettingsHologram(193.5, 105.5, 702.5); // main
+			getLbSettingsHologram().spawnLeaderboardSettingsHologram(195.5, 105.2, 675.5); // main
 			getLbSettingsHologram().spawnLeaderboardSettingsHologram(184.5, 106, 568.5); // parkour
 			getLbSettingsHologram().spawnLeaderboardSettingsHologram(300.5, 91.5, 530.5); // fishing pond
 		}, 60L);
@@ -469,12 +469,22 @@ public class Core extends JavaPlugin implements Listener {
 
             // 2) SOCIALS at 192.843,116,632.825
             floatingBlocks.add(
-                    new Location(w, 192.5, 111.0, 632.5),
+                    new Location(w, 192.5, 108.2, 632.5),
                     new ItemStack(Material.BOOKSHELF, 1, (short)0),
                     "&6&lSOCIALS",
                     "&aRight Click",
                     (player) -> {
                         player.performCommand("socials");
+                    }
+            );
+
+            floatingBlocks.add(
+                    new Location(w, 186.5, 108.2, 632.5),
+                    new ItemStack(Material.EMERALD_BLOCK, 1, (short)0),
+                    "&6&lSTORE",
+                    "&aRight Click",
+                    (player) -> {
+                        player.performCommand("store");
                     }
             );
 
@@ -829,11 +839,11 @@ public class Core extends JavaPlugin implements Listener {
 
     private void spawnSelfStatsNPC() {
         World w = lobbyWorld;
-        Location loc = new Location(w, 196.5, 105, 666.5, 0f, 1f); // where the NPC stands
+        Location loc = new Location(w, 180.5, 105, 650.5, 0f, 1f); // where the NPC stands
 
         NPC selfNPC = new NPC(
                 this,
-                color("&7Click to view"),
+                color("&eClick to View"),
                 loc,
                 null, null,
                 (clicker) -> new StatsGUI(this).inv.open(clicker),
@@ -2021,11 +2031,11 @@ public class Core extends JavaPlugin implements Listener {
 		PlayerData data = this.getDataManager().getPlayerData(p);
 
 		if (data != null) {
-			Location loc = new Location(this.getLobbyWorld(), 194.5, 111.5, 641.5);
+			Location loc = new Location(this.getLobbyWorld(), 198.5, 105.5, 650.5);
             String name = color("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Mystery Chests");
             this.armorStandManager.addMysteryChestHologram(p, loc, name);
 
-			loc = new Location(this.getLobbyWorld(), 194.5, 111.2, 641.5);
+			loc = new Location(this.getLobbyWorld(), 198.5, 105.2, 650.5);
             name = color("&e&l" + data.mysteryChests + " &eto open!");
             this.armorStandManager.addMysteryChestHologram(p, loc, name);
 		}
@@ -2084,7 +2094,7 @@ public class Core extends JavaPlugin implements Listener {
 	@EventHandler
 	public void serverMotd(ServerListPingEvent p) {
 		String msg = color(
-				"                     &eMinezone &7[1.8-1.26.1] \n        &c&lSUPER CRAFT BROS &7- &6&lNEW UPDATE!");
+				"                     &eMinezone &7[1.8-1.26.1] \n        &c&lSUPER CRAFT BROS &7- &b&lLOBBY UPDATE!");
 		p.setMotd(msg);
 		p.setMaxPlayers(1);
 	}
