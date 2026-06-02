@@ -6,6 +6,8 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -86,23 +88,35 @@ public class GameDataManager {
             Map<Player, BaseClass> classes,
             Player firstBlood) {
 
-        createGame(gameType.name(), mapName, durationMinutes, (gameId) -> {
-
-            for (Map.Entry<Player, BaseClass> p : classes.entrySet()) {
-
-                BaseClass bc = p.getValue();
-
-                insertGamePlayer(
-                        gameId,
-                        p.getKey(),
-                        bc.getType().getID(),
-                        bc.placement,
-                        bc.totalKills,
-                        bc.totalDeaths,
-                        bc.getLives(),
-                        winners.contains(p.getKey()),
-                        firstBlood != null && firstBlood.equals(p.getKey())
+        Bukkit.getScheduler().runTaskAsynchronously(main, () -> {
+            try {
+                Statement stmt = db.getConnection().createStatement();
+                stmt.execute(
+                        "INSERT INTO scb_games (game_type, map_name, end_time, game_duration_minutes) VALUES ('"
+                                + gameType.name() + "', '" + mapName + "', CURRENT_TIMESTAMP, " + durationMinutes + ")",
+                        Statement.RETURN_GENERATED_KEYS
                 );
+                ResultSet keys = stmt.getGeneratedKeys();
+                if (!keys.next()) { keys.close(); stmt.close(); return; }
+                int gameId = keys.getInt(1);
+                keys.close();
+                stmt.close();
+
+                for (Map.Entry<Player, BaseClass> entry : classes.entrySet()) {
+                    Player player = entry.getKey();
+                    BaseClass bc = entry.getValue();
+                    Statement ps = db.getConnection().createStatement();
+                    ps.execute(
+                            "INSERT INTO scb_game_players (game_id, uuid, class_id, placement, kills, deaths, lives, winner, firstblood) VALUES ("
+                                    + gameId + ", '" + player.getUniqueId() + "', " + bc.getType().getID() + ", "
+                                    + bc.placement + ", " + bc.totalKills + ", " + bc.totalDeaths + ", " + bc.getLives() + ", "
+                                    + (winners.contains(player) ? 1 : 0) + ", "
+                                    + (firstBlood != null && firstBlood.equals(player) ? 1 : 0) + ")"
+                    );
+                    ps.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
