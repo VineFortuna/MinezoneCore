@@ -235,7 +235,7 @@ public class Fishing implements Listener {
 
         for (FishType type : fishTypes) {
             if (type.getRarity() == rarity &&
-                    (area == null || type.getAreas() == null || type.getAreas().isEmpty() || type.getAreas().contains(area))) {
+                    (type.getAreas() == null || type.getAreas().isEmpty() || type.getAreas().contains(area))) {
                         filtered.add(type);
             }
         }
@@ -247,7 +247,7 @@ public class Fishing implements Listener {
         ArrayList<FishType> loot = new ArrayList<>();
         for (FishType type : fishTypes) {
             if (type.getRarity() == rarity &&
-                    (area == null || type.getAreas() == null || type.getAreas().isEmpty() || type.getAreas().contains(area))) {
+                    (type.getAreas() == null || type.getAreas().isEmpty() || type.getAreas().contains(area))) {
                 loot.add(type);
             }
         }
