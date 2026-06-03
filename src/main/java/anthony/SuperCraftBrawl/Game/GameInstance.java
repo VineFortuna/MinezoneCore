@@ -531,7 +531,8 @@ public class GameInstance {
                 }
 
                 if (ticks == 60 && gameManager.getMain().tournament) {
-                    TellAll(color("&2&l(!) &rThe game is now starting..."));
+                    TellAll(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                            + "The game is now starting...");
                 }
                 if (ticks == 30) {
                     for (Player p : players) {
@@ -682,6 +683,34 @@ public class GameInstance {
         return true;
     }
 
+    private void setTeams() {
+        for (Player gamePlayer : players) {
+            if (this.duosMap != null) {
+                if (!(this.team.containsKey(gamePlayer))) {
+                    if (redTeam.size() == 1 || redTeam.isEmpty()) {
+                        redTeam.add(gamePlayer);
+                        team.put(gamePlayer, "Red");
+                        gamePlayer.sendMessage(this.gameManager.getMain().color("&2&l(!) &rYou are on &c&lRed Team"));
+                    } else if (blueTeam.size() == 1 || blueTeam.isEmpty()) {
+                        blueTeam.add(gamePlayer);
+                        team.put(gamePlayer, "Blue");
+                        gamePlayer.sendMessage(this.gameManager.getMain().color("&2&l(!) &rYou are on &b&lBlue Team"));
+                    } else if (blackTeam.size() == 1 || blackTeam.isEmpty()) {
+                        blackTeam.add(gamePlayer);
+                        team.put(gamePlayer, "Black");
+                        gamePlayer.sendMessage(this.gameManager.getMain().color("&2&l(!) &rYou are on &0&lBlack Team"));
+                    }
+                }
+            }
+        }
+    }
+
+    private void addAliveTeams() {
+        if (redTeam != null && redTeam.size() > 0) aliveTeams++;
+        if (blueTeam != null && blueTeam.size() > 0) aliveTeams++;
+        if (blackTeam != null && blackTeam.size() > 0) aliveTeams++;
+    }
+
     private void addAlivePlayers() {
         alivePlayers = players.size();
     }
@@ -712,6 +741,7 @@ public class GameInstance {
     public void StartGame() {
         if (sm != null && s != null) this.sm.updateSignInProgress(s);
 
+        setTeams();
         startLightningDropsTimer();
 
         if (gameSettings.santaFlyover)
@@ -738,6 +768,7 @@ public class GameInstance {
         LoadClasses();
         GameScoreboard();
         addAlivePlayers();
+        addAliveTeams();
         giveRandomItemDrop();
         initialSpawn();
         gameTicks();
@@ -746,18 +777,11 @@ public class GameInstance {
         BukkitRunnable r = new BukkitRunnable() {
             @Override
             public void run() {
-                if (state != GameState.STARTED) {
-                    cancel();
-                    return;
-                }
-
-                updateGameScoreboards();
+                for (Player gamePlayer : players) sendScoreboardUpdate(gamePlayer);
             }
         };
-
-        BukkitTask task = r.runTaskTimer(getGameManager().getMain(), 20L, 20L);
+        BukkitTask task = r.runTaskLater(getGameManager().getMain(), 20);
         trackInstanceTask(task);
-        runnables.add(r);
     }
 
     private List<ItemStack> getSavedLootDropItems(Player player) {
@@ -776,42 +800,30 @@ public class GameInstance {
         if (!getGameSettings().randomClasses) return;
         if (getGameSettings().randomClassCycleSeconds <= 0) return;
 
-        randomClassSecondsLeft = getGameSettings().randomClassCycleSeconds;
-
         BukkitRunnable runnable = new BukkitRunnable() {
             int seconds = getGameSettings().randomClassCycleSeconds;
 
             @Override
             public void run() {
                 if (state != GameState.STARTED) {
-                    randomClassSecondsLeft = -1;
-                    hideRandomClassBossBars();
-                    updateGameScoreboards();
                     cancel();
                     return;
                 }
 
                 if (!getGameSettings().randomClasses) {
-                    randomClassSecondsLeft = -1;
-                    hideRandomClassBossBars();
-                    updateGameScoreboards();
                     cancel();
                     return;
                 }
-
-                randomClassSecondsLeft = seconds;
-                updateRandomClassBossBars(seconds);
-                updateGameScoreboards();
 
                 if (seconds <= 0) {
                     TellAll(color("&d&l(!) &rRandomizing classes..."));
 
                     for (Player player : new ArrayList<>(players)) {
-                        BaseClass baseClass = classes.get(player);
+                        BaseClass oldClass = classes.get(player);
 
-                        if (baseClass == null) continue;
-                        if (baseClass.getLives() <= 0) continue;
-                        if (baseClass.isDead) continue;
+                        if (oldClass == null) continue;
+                        if (oldClass.getLives() <= 0) continue;
+                        if (oldClass.isDead) continue;
 
                         List<ItemStack> savedDrops = new ArrayList<>();
 
@@ -824,9 +836,10 @@ public class GameInstance {
                         player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.3F);
                         player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1.0F, 1.8F);
 
+                        removeOldClassPotionEffects(player, oldClass);
+
                         player.getInventory().clear();
                         player.getInventory().setArmorContents(null);
-                        getGameManager().getMain().getListener().resetPotionEffects(player);
 
                         reRandomizeClass(player);
 
@@ -858,10 +871,6 @@ public class GameInstance {
                     }
 
                     seconds = getGameSettings().randomClassCycleSeconds;
-                    randomClassSecondsLeft = seconds;
-
-                    updateRandomClassBossBars(seconds);
-                    updateGameScoreboards();
                     return;
                 }
 
@@ -874,168 +883,160 @@ public class GameInstance {
         runnables.add(runnable);
     }
 
-    private void updateRandomClassBossBars(int secondsLeft) {
-        int maxSeconds = getGameSettings().randomClassCycleSeconds;
+    private void removeOldClassPotionEffects(Player player, BaseClass oldClass) {
+        if (player == null || oldClass == null) return;
 
-        if (maxSeconds <= 0) return;
-
-        double progress = secondsLeft / (double) maxSeconds;
-        progress = Math.max(0.0D, Math.min(1.0D, progress));
-
-        String timeText = secondsLeft == 1 ? "1 second" : secondsLeft + " seconds";
-
-        for (Player player : new ArrayList<>(players)) {
-            BaseClass baseClass = classes.get(player);
-
-            if (baseClass == null || baseClass.getLives() <= 0 || baseClass.isDead) {
-                RandomClassBossBar.remove(player);
-                continue;
+        for (PotionEffect effect : new ArrayList<>(player.getActivePotionEffects())) {
+            if (isOldClassPotionEffect(oldClass.getType(), effect)) {
+                player.removePotionEffect(effect.getType());
             }
-
-            RandomClassBossBar.show(
-                    player,
-                    "&d&lRandom Classes &8» &fNext switch in &e" + timeText,
-                    progress
-            );
-        }
-
-        for (Player spectator : new ArrayList<>(spectators)) {
-            RandomClassBossBar.remove(spectator);
         }
     }
 
-    private void hideRandomClassBossBars() {
-        for (Player player : new ArrayList<>(players)) {
-            RandomClassBossBar.remove(player);
+    private boolean isOldClassPotionEffect(ClassType classType, PotionEffect effect) {
+        if (classType == null || effect == null) return false;
+
+        PotionEffectType type = effect.getType();
+
+        /*
+         * Only remove long/passive class effects.
+         * This prevents removing short effects like:
+         * - Strength on Kill
+         * - poison from another player
+         * - regen from drops
+         * - temporary ability effects
+         */
+        if (effect.getDuration() < 20 * 60) {
+            return false;
         }
 
-        for (Player spectator : new ArrayList<>(spectators)) {
-            RandomClassBossBar.remove(spectator);
+        switch (classType) {
+            case Bat:
+                return type == PotionEffectType.SPEED
+                        || type == PotionEffectType.INVISIBILITY
+                        || type == PotionEffectType.DAMAGE_RESISTANCE;
+
+            case Bunny:
+                return type == PotionEffectType.SPEED
+                        || type == PotionEffectType.JUMP;
+
+            case Rabbit:
+                return type == PotionEffectType.SPEED
+                        || type == PotionEffectType.JUMP;
+
+            case Cloud:
+                return type == PotionEffectType.JUMP;
+
+            case Parrot:
+                return type == PotionEffectType.JUMP;
+
+            case Elf:
+                return type == PotionEffectType.SPEED;
+
+            case EnderDragon:
+                return type == PotionEffectType.WEAKNESS;
+
+            case Ice:
+                return type == PotionEffectType.WEAKNESS;
+
+            case Jeb:
+                return type == PotionEffectType.WEAKNESS;
+
+            case Notch:
+                return type == PotionEffectType.WEAKNESS;
+
+            case Herobrine:
+                return type == PotionEffectType.DAMAGE_RESISTANCE;
+
+            case Melon:
+                return type == PotionEffectType.DAMAGE_RESISTANCE;
+
+            case Mooshroom:
+                return type == PotionEffectType.SPEED;
+
+            case Noteblock:
+                return type == PotionEffectType.SPEED
+                        || type == PotionEffectType.DAMAGE_RESISTANCE;
+
+            case Ocelot:
+                return type == PotionEffectType.SPEED;
+
+            case Potato:
+                return type == PotionEffectType.SPEED;
+
+            case Vindicator:
+                return type == PotionEffectType.WEAKNESS;
+
+            case Wizard:
+                return type == PotionEffectType.SPEED
+                        || type == PotionEffectType.JUMP;
+
+            case Santa:
+                return type == PotionEffectType.INCREASE_DAMAGE
+                        || type == PotionEffectType.SLOW
+                        || type == PotionEffectType.DAMAGE_RESISTANCE
+                        || type == PotionEffectType.JUMP;
+
+            default:
+                return false;
         }
     }
-
 
     private void gameTicks() {
         BukkitRunnable runnable = new BukkitRunnable() {
             @Override
             public void run() {
-                if (state != GameState.STARTED) {
-                    cancel();
-                    return;
-                }
-
                 if (gameTicks % (60 * 20) == 0) {
+                    time.getScoreboard().resetScores(time.getEntry());
+                    time = o.getScore(color("&fGame Time: &a" + gameTime + "m"));
+                    time.setScore(0);
                     gameTime++;
-                    updateGameScoreboards();
                 }
 
-                for (Entry<Player, BaseClass> playerClass : new HashMap<>(classes).entrySet()) {
-                    if (playerClass.getValue() != null) {
-                        playerClass.getValue().Tick(gameTicks);
-                    }
-                }
+                for (Entry<Player, BaseClass> playerClass : classes.entrySet())
+                    playerClass.getValue().Tick(gameTicks);
 
-                for (Entity e : new ArrayList<>(mapWorld.getEntities())) {
+                for (Entity e : mapWorld.getEntities()) {
                     if (e instanceof Arrow) {
                         Arrow a = (Arrow) e;
-
-                        if (a.isOnGround()) {
-                            e.remove();
-                        }
+                        if (a.isOnGround()) e.remove();
                     }
                 }
 
                 if (gameTicks % 20 == 0) {
-                    for (Player gamePlayer : new ArrayList<>(players)) {
-                        if (gamePlayer != null && gamePlayer.isOnline() && gamePlayer.getFireTicks() >= 200) {
-                            gamePlayer.setFireTicks(110);
-                        }
+                    for (Player gamePlayer : players) {
+                        if (gamePlayer.getFireTicks() >= 200) gamePlayer.setFireTicks(110);
                     }
-
-                    updateGameScoreboards();
                 }
-
                 gameTicks++;
             }
         };
-
-        BukkitTask task = runnable.runTaskTimer(gameManager.getMain(), 0L, 1L);
+        BukkitTask task = runnable.runTaskTimer(gameManager.getMain(), 0, 1);
         trackInstanceTask(task);
         runnables.add(runnable);
     }
 
     @SuppressWarnings("deprecation")
     public void sendScoreboardUpdate(Player player) {
-        if (player == null) return;
-        if (state == GameState.ENDED) return;
-
-        BaseClass baseClass = this.classes.get(player);
-
-        if (baseClass == null) return;
-        if (baseClass.getType() == null) return;
-
-        ClassType classType = baseClass.getType();
-
-        Scoreboard board = null;
-
-        if (o != null && o.getScoreboard() != null) {
-            board = o.getScoreboard();
-        } else if (c != null) {
-            board = c;
-        } else if (player.getScoreboard() != null) {
-            board = player.getScoreboard();
-        }
-
-        if (board == null) return;
+        ClassType classType = this.classes.get(player).getType();
+        if (classType == null) return;
 
         String teamName = player.getName();
-
-        if (teamName.length() > 16) {
-            teamName = teamName.substring(0, 16);
-        }
+        Scoreboard board = o.getScoreboard();
 
         Team team = board.getTeam(teamName);
+        if (team == null) team = board.registerNewTeam(teamName);
 
-        if (team == null) {
-            team = board.registerNewTeam(teamName);
-        }
+        if (!team.hasEntry(player.getName())) team.addEntry(player.getName());
 
-        if (!team.hasEntry(player.getName())) {
-            team.addEntry(player.getName());
-        }
-
-        if (baseClass.getLives() > 0) {
+        if (this.classes.get(player).getLives() > 0) {
             String baseName = classType.getSecondTag() != null ? classType.getSecondTag() : classType.getTag();
             baseName += " ";
-
-            if (baseName.length() > 16) {
-                baseName = safeTeamPrefix(baseName, 16);
-            }
-
+            if (baseName.length() > 12) baseName = baseName.substring(0, Math.min(baseName.length(), 10)).trim() + " " + ChatColor.RESET;
             team.setPrefix(baseName);
         } else {
             team.setPrefix("");
         }
-
-        updateGameScoreboards();
-    }
-
-    private String safeTeamPrefix(String input, int maxLength) {
-        if (input == null) return "";
-
-        String colored = color(input);
-
-        if (colored.length() <= maxLength) {
-            return colored;
-        }
-
-        String shortened = colored.substring(0, maxLength);
-
-        if (shortened.endsWith("§")) {
-            shortened = shortened.substring(0, shortened.length() - 1);
-        }
-
-        return shortened;
     }
 
     public Location getItemSpawnLoc() {
@@ -1113,310 +1114,47 @@ public class GameInstance {
     private Scoreboard c;
     private Score time;
     private Objective o;
-    private int randomClassSecondsLeft = -1;
 
     public void GameScoreboard() {
-        for (Player player : new ArrayList<>(players)) {
-            createOrUpdateGameBoard(player);
-        }
-
-        for (Player spectator : new ArrayList<>(spectators)) {
-            createOrUpdateGameBoard(spectator);
-        }
-    }
-
-    private void createOrUpdateGameBoard(Player player) {
-        if (player == null || !player.isOnline()) return;
-
-        getGameManager().getMain().getScoreboardManager().removeLobbyBoard(player);
-
-        FastBoard board = boards.get(player.getUniqueId());
-
-        if (board == null) {
-            board = new FastBoard(player);
-            boards.put(player.getUniqueId(), board);
-        }
-
         try {
-            board.updateTitle(color("&e&l" + getDisplayMapName()));
-            board.updateLines(getGameScoreboardLines());
-        } catch (Exception ex) {
-            try {
-                board.delete();
-            } catch (Exception ignored) {
-            }
+            ScoreboardManager m = Bukkit.getScoreboardManager();
+            c = m.getNewScoreboard();
 
-            board = new FastBoard(player);
-            boards.put(player.getUniqueId(), board);
+            if (this.map != null) o = c.registerNewObjective("" + ChatColor.BOLD + this.map.toString(), "");
+            else o = c.registerNewObjective("" + ChatColor.BOLD + this.duosMap.toString(), "");
 
-            board.updateTitle(color("&e&l" + getDisplayMapName()));
-            board.updateLines(getGameScoreboardLines());
-        }
-    }
+            livesObjective = o;
+            o.setDisplaySlot(DisplaySlot.SIDEBAR);
 
-    public void updateGameScoreboards() {
-        for (Player player : new ArrayList<>(players)) {
-            createOrUpdateGameBoard(player);
-        }
+            for (Player player : players) {
+                getGameManager().getMain().getScoreboardManager().removeLobbyBoard(player);
+                BaseClass playerClass = classes.get(player);
+                PlayerData data = gameManager.getMain().getDataManager().getPlayerData(player);
 
-        for (Player spectator : new ArrayList<>(spectators)) {
-            createOrUpdateGameBoard(spectator);
-        }
-    }
-
-    private List<String> getGameScoreboardLines() {
-        List<String> lines = new ArrayList<>();
-
-        lines.add("");
-        lines.add(color("&rMode: &a" + gameType.getName()));
-        lines.add("");
-        lines.add(color("&rPlayers:"));
-
-        for (Player player : new ArrayList<>(players)) {
-            BaseClass baseClass = classes.get(player);
-
-            String classTag = "&7?";
-            int lives = 0;
-
-            if (baseClass != null && baseClass.getType() != null) {
-                classTag = baseClass.getType().getTag(); // actual class tag
-                lives = Math.max(0, baseClass.getLives());
-            }
-
-            lines.add(makePlayerBoardLine(classTag, player.getName(), lives));
-        }
-
-        lines.add("");
-
-        if (isPrivateGame() && getGameSettings().randomClasses) {
-            lines.add(color("&rClasses Randomize: &a" + getRandomClassScoreboardTime()));
-            lines.add("");
-        }
-
-        lines.add(color("&eminezone.club"));
-
-        return lines;
-    }
-
-    private String makePlayerBoardLine(String classTag, String playerName, int lives) {
-        final int maxLength = 30;
-
-        String tag = color(classTag == null ? "&7?" : classTag);
-        String name = playerName == null ? "Unknown" : playerName;
-
-        String tagColors = getLeadingColors(tag);
-        String tagText = ChatColor.stripColor(tag);
-
-        if (tagText == null || tagText.trim().isEmpty()) {
-            tagText = "?";
-            tagColors = "" + ChatColor.GRAY;
-        }
-
-        String namePrefix = "" + ChatColor.RESET + ChatColor.WHITE;
-        String livesPart = "" + ChatColor.RESET + ChatColor.GRAY + ": " + ChatColor.GREEN + lives;
-
-        int tagLength = tagText.length();
-        int nameLength = name.length();
-
-        while (tagLength > 1) {
-            String line = tagColors + tagText.substring(0, tagLength)
-                    + " " + namePrefix + name + livesPart;
-
-            if (line.length() <= maxLength) {
-                return line;
-            }
-
-            tagLength--;
-        }
-
-        while (nameLength > 1) {
-            String line = tagColors + tagText.substring(0, 1)
-                    + " " + namePrefix + name.substring(0, nameLength) + livesPart;
-
-            if (line.length() <= maxLength) {
-                return line;
-            }
-
-            nameLength--;
-        }
-
-        return tagColors + tagText.substring(0, 1)
-                + " " + namePrefix + name.substring(0, 1) + livesPart;
-    }
-
-    private String getLeadingColors(String input) {
-        if (input == null || input.length() == 0) {
-            return "";
-        }
-
-        StringBuilder colors = new StringBuilder();
-
-        for (int i = 0; i < input.length() - 1; i++) {
-            if (input.charAt(i) == '§') {
-                colors.append(input.charAt(i));
-                colors.append(input.charAt(i + 1));
-                i++;
-                continue;
-            }
-
-            break;
-        }
-
-        return colors.toString();
-    }
-
-    private String substringColoredVisible(String input, int maxVisibleChars) {
-        if (input == null) return "";
-
-        StringBuilder result = new StringBuilder();
-        int visibleChars = 0;
-
-        for (int i = 0; i < input.length(); i++) {
-            char current = input.charAt(i);
-
-            // Preserve Minecraft color codes.
-            if (current == '§') {
-                if (i + 1 < input.length()) {
-                    result.append(current);
-                    result.append(input.charAt(i + 1));
-                    i++;
+                if (map != null) {
+                    Score livesScore = o.getScore(truncateString(
+                            playerClass.getType().getTag() + " " + ChatColor.RESET + player.getName(), 38));
+                    livesScore.setScore(5);
+                    playerClass.score = livesScore;
+                } else {
+                    if (team.get(player).equals("Blue"))
+                        boardColor(o, player, ChatColor.BLUE);
+                    else if (team.get(player).equals("Red"))
+                        boardColor(o, player, ChatColor.RED);
+                    else if (team.get(player).equals("Black"))
+                        boardColor(o, player, ChatColor.BLACK);
                 }
-                continue;
+                Score line = o.getScore("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "--------------------");
+                line.setScore(0);
+                Score game = o.getScore(color("&fGame Mode: &a" + this.gameType.getName()));
+                game.setScore(0);
+                time = o.getScore(color("&fGame Time: &a" + gameTime + "m"));
+                time.setScore(0);
+                player.setScoreboard(c);
             }
-
-            if (visibleChars >= maxVisibleChars) {
-                break;
-            }
-
-            result.append(current);
-            visibleChars++;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        if (result.length() > 0 && result.charAt(result.length() - 1) == '§') {
-            result.deleteCharAt(result.length() - 1);
-        }
-
-        return result.toString();
-    }
-
-    private String fitClassTagToLine(String classTag, String suffix, int maxLength) {
-        if (classTag == null || classTag.trim().isEmpty()) {
-            classTag = "&7?";
-        }
-
-        String currentTag = classTag;
-
-        while (getVisibleLength(color(currentTag + suffix)) > maxLength) {
-            String visibleTag = ChatColor.stripColor(color(currentTag));
-
-            if (visibleTag.length() <= 1) {
-                return "&7?";
-            }
-
-            visibleTag = visibleTag.substring(0, visibleTag.length() - 1);
-
-            String lastColors = getLastColors(color(classTag));
-
-            if (lastColors == null || lastColors.isEmpty()) {
-                currentTag = "&7" + visibleTag;
-            } else {
-                currentTag = lastColors + visibleTag;
-            }
-        }
-
-        return currentTag;
-    }
-
-    private String getLastColors(String input) {
-        if (input == null || input.length() == 0) return "";
-
-        String result = "";
-
-        for (int i = input.length() - 2; i >= 0; i--) {
-            if (input.charAt(i) == '§') {
-                char code = Character.toLowerCase(input.charAt(i + 1));
-                ChatColor color = ChatColor.getByChar(code);
-
-                if (color == null) continue;
-
-                result = color.toString() + result;
-
-                if (color == ChatColor.RESET
-                        || code == '0' || code == '1' || code == '2' || code == '3'
-                        || code == '4' || code == '5' || code == '6' || code == '7'
-                        || code == '8' || code == '9' || code == 'a' || code == 'b'
-                        || code == 'c' || code == 'd' || code == 'e' || code == 'f') {
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    private List<String> limitBoardLines(List<String> lines) {
-        List<String> fixed = new ArrayList<>();
-
-        for (String line : lines) {
-            fixed.add(limitBoardLine(line, 30));
-        }
-
-        return fixed;
-    }
-
-    private String limitBoardLine(String line, int maxLength) {
-        if (line == null) return "";
-
-        String colored = color(line);
-
-        while (ChatColor.stripColor(colored).length() > maxLength) {
-            String stripped = ChatColor.stripColor(colored);
-
-            if (stripped.length() <= 1) {
-                return "";
-            }
-
-            stripped = stripped.substring(0, stripped.length() - 1);
-            String lastColors = getLastColors(colored);
-            colored = lastColors + stripped;
-        }
-
-        return colored;
-    }
-
-    private int getVisibleLength(String text) {
-        if (text == null) return 0;
-
-        return ChatColor.stripColor(text).length();
-    }
-
-    private String getDisplayMapName() {
-        if (map != null) return map.toString();
-        if (duosMap != null) return duosMap.toString();
-        return "Game";
-    }
-
-    private String getRandomClassScoreboardTime() {
-        if (!getGameSettings().randomClasses) return "Disabled";
-
-        int seconds = randomClassSecondsLeft;
-
-        if (seconds < 0) {
-            seconds = getGameSettings().randomClassCycleSeconds;
-        }
-
-        if (seconds >= 60) {
-            int minutes = seconds / 60;
-            int leftoverSeconds = seconds % 60;
-
-            if (leftoverSeconds == 0) {
-                return minutes + "m";
-            }
-
-            return minutes + "m " + leftoverSeconds + "s";
-        }
-
-        return seconds + "s";
     }
 
     private void boardColor(Objective o, Player player, ChatColor c) {
@@ -1429,20 +1167,8 @@ public class GameInstance {
     }
 
     private void setGameScore(Player player) {
-        if (player == null) return;
-
-        getGameManager().getMain().getScoreboardManager().removeLobbyBoard(player);
-
-        FastBoard oldBoard = boards.remove(player.getUniqueId());
-
-        if (oldBoard != null) {
-            try {
-                oldBoard.delete();
-            } catch (Exception ignored) {
-            }
-        }
-
-        createOrUpdateGameBoard(player);
+        player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard()); // Reset to default
+        player.setScoreboard(c); // For joining spectators
     }
 
     public int teamsAlive = 0;
@@ -1614,7 +1340,8 @@ public class GameInstance {
                 for (Player gamePlayer : this.players) gamePlayer.hidePlayer(player);
                 for (Player spectator : this.spectators) spectator.showPlayer(player);
 
-                updateGameScoreboards();
+                try { finalBaseClass.score.getScoreboard().resetScores(finalBaseClass.score.getEntry()); }
+                catch (Exception e) { e.printStackTrace(); }
 
                 CheckForWin();
             } else {
@@ -1702,7 +1429,6 @@ public class GameInstance {
 
                     for (Player spectator : spectators) {
                         if (spectator.getWorld() == getMapWorld()) {
-                            removeGameBoard(spectator);
                             gameManager.getMain().ResetPlayer(spectator);
                             SetLobbyScoreboard(spectator);
                             spectator.setAllowFlight(false);
@@ -1720,7 +1446,6 @@ public class GameInstance {
                     if (sm != null && s != null) sm.resetSign(s, map);
 
                     for (Player player : players) {
-                        removeGameBoard(player);
                         gameManager.getMain().ResetPlayer(player);
                         BaseClass bc = classes.get(player);
                         bc.GameEnd();
@@ -1754,26 +1479,6 @@ public class GameInstance {
         };
         BukkitTask eg = endGameAnimation.runTaskTimer(getGameManager().getMain(), 0, 20);
         trackInstanceTask(eg);
-    }
-
-    private void removeGameBoard(Player player) {
-        if (player == null) return;
-
-        FastBoard board = boards.remove(player.getUniqueId());
-
-        if (board != null) {
-            board.delete();
-        }
-    }
-
-    private void removeAllGameBoards() {
-        for (UUID uuid : new ArrayList<>(boards.keySet())) {
-            FastBoard board = boards.remove(uuid);
-
-            if (board != null) {
-                board.delete();
-            }
-        }
     }
 
     public void SetLobbyScoreboard(Player player) {
@@ -2207,42 +1912,42 @@ public class GameInstance {
     }
 
     private void reRandomizeClass(Player player) {
-        if (player == null) return;
+        BaseClass baseClass = classes.get(player);
+        if (baseClass.getLives() > 0) {
+            ClassType classType = ClassType.getAvailableClasses()[random
+                    .nextInt(ClassType.getAvailableClasses().length)];
+            BaseClass newBaseClass = classType.GetClassInstance(this, player);
+            BaseClass oldBaseClass = classes.get(player);
+            oldClasses.put(player, oldBaseClass);
 
-        BaseClass oldBaseClass = classes.get(player);
+            if (oldBaseClass.score != null) {
+                try { oldBaseClass.score.getScoreboard().resetScores(oldBaseClass.score.getEntry()); }
+                catch (Exception e) { e.printStackTrace(); }
+            }
 
-        if (oldBaseClass == null) return;
-        if (oldBaseClass.getLives() <= 0) return;
+            newBaseClass.lives = oldBaseClass.lives;
+            newBaseClass.tokens = oldBaseClass.tokens;
+            newBaseClass.totalTokens = oldBaseClass.totalTokens;
+            newBaseClass.totalExp = oldBaseClass.totalExp;
+            newBaseClass.totalKills = oldBaseClass.totalKills;
+            newBaseClass.totalDeaths = oldBaseClass.totalDeaths;
+            newBaseClass.bountyTarget = oldBaseClass.bountyTarget;
 
-        ClassType classType = ClassType.getAvailableClasses()[random.nextInt(ClassType.getAvailableClasses().length)];
-        BaseClass newBaseClass = classType.GetClassInstance(this, player);
+            String scoreEntry = truncateString("" + classType.getTag() + " " + ChatColor.WHITE + player.getName(), 40);
+            Score newScore = livesObjective.getScore(scoreEntry);
+            newBaseClass.score = newScore;
+            newScore.setScore(newBaseClass.lives);
 
-        if (newBaseClass == null) return;
+            classes.put(player, newBaseClass);
+            allClasses.put(player, newBaseClass);
+            sendScoreboardUpdate(player);
 
-        oldClasses.put(player, oldBaseClass);
+            player.sendMessage(color("&2&l(!) &rYour class was randomly selected to " + classType.getTag()));
 
-        newBaseClass.lives = oldBaseClass.lives;
-        newBaseClass.tokens = oldBaseClass.tokens;
-        newBaseClass.totalTokens = oldBaseClass.totalTokens;
-        newBaseClass.totalExp = oldBaseClass.totalExp;
-        newBaseClass.totalKills = oldBaseClass.totalKills;
-        newBaseClass.totalDeaths = oldBaseClass.totalDeaths;
-        newBaseClass.bountyTarget = oldBaseClass.bountyTarget;
-        newBaseClass.eachLifeKills = oldBaseClass.eachLifeKills;
-        newBaseClass.placement = oldBaseClass.placement;
-        newBaseClass.isDead = oldBaseClass.isDead;
-
-        classes.put(player, newBaseClass);
-        allClasses.put(player, newBaseClass);
-
-        sendScoreboardUpdate(player);
-
-        player.sendMessage(color("&2&l(!) &rYour class was randomly selected to " + classType.getTag()));
-
-        if (player.hasPermission("scb.chat")) {
-            player.setDisplayName("" + player.getName() + " " + classType.getTag());
-        } else {
-            player.setDisplayName("" + player.getName() + " " + classType.getTag() + ChatColor.GRAY);
+            if (player.hasPermission("scb.chat"))
+                player.setDisplayName("" + player.getName() + " " + classType.getTag());
+            else
+                player.setDisplayName("" + player.getName() + " " + classType.getTag() + ChatColor.GRAY);
         }
     }
 
@@ -2507,21 +2212,11 @@ public class GameInstance {
         }
     }
 
-    public void removeSpectator(Player player) {
-        if (player == null) return;
-
-        spectators.remove(player);
-
-        FastBoard board = boards.remove(player.getUniqueId());
-
-        if (board != null) {
-            try {
-                board.delete();
-            } catch (Exception ignored) {
-            }
+    private void removeSpectator(Player spec) {
+        if (this.spectators.contains(spec)) {
+            this.spectators.remove(spec);
+            spec.setDisplayName("" + spec.getName());
         }
-
-        RandomClassBossBar.remove(player);
     }
 
     public boolean PlayerInteract(PlayerInteractEvent event) {

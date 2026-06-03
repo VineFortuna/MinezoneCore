@@ -230,7 +230,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         return builder.toString();
     }
 
-    public void sendPartyHelp(Player player) {
+    private void sendPartyHelp(Player player) {
         player.sendMessage(main.color("&8&m------------------------------------"));
         player.sendMessage(main.color("&6&lPARTY COMMANDS"));
         player.sendMessage(main.color("&e/party invite <player> -> &rInvite a player"));
@@ -530,17 +530,15 @@ public class Commands implements CommandExecutor, TabCompleter {
         player.sendMessage(main.color("&8&m--------------------------------"));
     }
 
-    public void sendFriendsHelp(Player player) {
-        player.sendMessage(main.color("&8&m--------------------------------------"));
-        player.sendMessage(main.color("&a&lFRIENDS COMMANDS"));
-        player.sendMessage(main.color("&e/friends &r-> Open your friends list"));
-        player.sendMessage(main.color("&e/friends list &r-> List your friends in chat"));
-        player.sendMessage(main.color("&e/friends add <player> &r-> Send a friend request"));
-        player.sendMessage(main.color("&e/friends accept <player> &r-> Accept a request"));
-        player.sendMessage(main.color("&e/friends reject <player> &r-> Reject a request"));
-        player.sendMessage(main.color("&e/friends remove <player> &r-> Remove a friend"));
-        player.sendMessage(main.color("&e/friends requests &r-> View requests"));
-        player.sendMessage(main.color("&8&m--------------------------------------"));
+    private void sendFriendsHelp(Player player) {
+        player.sendMessage(main.color("&a&lFriends Commands"));
+        player.sendMessage(main.color("&e/friends &7- Open your friends list"));
+        player.sendMessage(main.color("&e/friends list &7- List your friends in chat"));
+        player.sendMessage(main.color("&e/friends add <player> &7- Send a friend request"));
+        player.sendMessage(main.color("&e/friends accept <player> &7- Accept a request"));
+        player.sendMessage(main.color("&e/friends reject <player> &7- Reject a request"));
+        player.sendMessage(main.color("&e/friends remove <player> &7- Remove a friend"));
+        player.sendMessage(main.color("&e/friends requests &7- View requests"));
     }
 
 	private void candyAuraCommand(String[] args, Player player) {
@@ -1419,9 +1417,9 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
-        baseClass.lives = num;
-        player.sendMessage(main.color("&2&l(!) &rYou set &e" + target.getName() + "&r's lives to &e" + num));
-        game.sendScoreboardUpdate(target);
+		baseClass.lives = num;
+		player.sendMessage(main.color("&2&l(!) &rYou set &e" + target.getName() + "&r's lives to &e" + num));
+		baseClass.score.setScore(baseClass.lives);
 	}
 
 	private void gameStatsCommand(String[] args, Player player) {
