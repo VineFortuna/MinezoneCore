@@ -226,7 +226,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         return builder.toString();
     }
 
-    private void sendPartyHelp(Player player) {
+    public void sendPartyHelp(Player player) {
         player.sendMessage(main.color("&8&m------------------------------------"));
         player.sendMessage(main.color("&6&lPARTY COMMANDS"));
         player.sendMessage(main.color("&e/party invite <player> -> &rInvite a player"));
@@ -526,7 +526,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         player.sendMessage(main.color("&8&m--------------------------------"));
     }
 
-    private void sendFriendsHelp(Player player) {
+    public void sendFriendsHelp(Player player) {
         player.sendMessage(main.color("&a&lFriends Commands"));
         player.sendMessage(main.color("&e/friends &7- Open your friends list"));
         player.sendMessage(main.color("&e/friends list &7- List your friends in chat"));

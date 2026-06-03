@@ -1316,9 +1316,10 @@ public class Core extends JavaPlugin implements Listener {
                 player.sendMessage(color("&6&lFISHING COMMANDS"));
                 player.sendMessage(color("&e/fishing -> &rOpens Fishing menu"));
                 player.sendMessage("");
-                player.sendMessage(color("&6&lSOCIAL COMMANDS"));
-                //player.sendMessage(color("&e/party help -> &rShow list of party commands"));
-                player.sendMessage(color("&e/friend help -> &rShow list of friends commands"));
+                getCommands().sendPartyHelp(player);
+                player.sendMessage("");
+                getCommands().sendFriendsHelp(player);
+                player.sendMessage("");
                 player.sendMessage(color("&e/staffhelp -> &rRequest help from a staff member"));
             }
 
