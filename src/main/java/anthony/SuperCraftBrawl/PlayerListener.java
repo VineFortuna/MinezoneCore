@@ -310,7 +310,7 @@ public class PlayerListener implements Listener {
 
         TitleSequence.sendChained(main, player,
                 new TitleSequence.TitleSpec("&6&lMINEZONE", "&e&lFRIENDS LIST &r-> &a/friends!", 10, 70, 0),
-                new TitleSequence.TitleSpec("&6&lMINEZONE", "&c&lDaily/Monthly/Weekly &e&lLEADERBOARDS", 0, 70, 10)
+                new TitleSequence.TitleSpec("&6&lMINEZONE", "&b&lLOBBY UPDATE", 0, 70, 10)
         );
 
         listFriendsOnline(player);

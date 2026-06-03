@@ -67,7 +67,7 @@ public class Parkour implements Listener {
 
         main.getScoreboardManager().removeLobbyBoard(player);
         players.put(player, arena);
-        player.sendMessage(main.color("&e&l(!) &rYou have joined &r&l" + arena.getName()));
+        player.sendMessage(main.color("&e&l(!) &rYou have joined &e&l" + arena.getName()));
 
         // Inventory/UI
         player.getInventory().clear();
