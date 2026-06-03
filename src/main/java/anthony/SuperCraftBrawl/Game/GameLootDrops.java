@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.Game;
 
 import java.util.Random;
 
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
@@ -57,18 +58,67 @@ public enum GameLootDrops {
 		return randomDrop;
 	}
 
-	public static GameLootDrops helper(Rarity rarity, GameLootDrops randomDrop, GameLootDrops[] drops, Random r) {
-		boolean found = false;
+    public static GameLootDrops getOpDrop() {
+        Random r = new Random();
+        GameLootDrops[] drops = GameLootDrops.values();
+        GameLootDrops randomDrop = null;
 
-		while (found == false) {
-			randomDrop = drops[r.nextInt(drops.length)];
+        int chance = r.nextInt(100);
 
-			if (randomDrop.getRarity() == rarity)
-				found = true;
-		}
+        if (chance < 70) {
+            randomDrop = helper(Rarity.MYTHIC, randomDrop, drops, r, true);
+        } else {
+            randomDrop = helper(Rarity.LEGENDARY, randomDrop, drops, r, true);
+        }
 
-		return randomDrop;
-	}
+        return randomDrop;
+    }
+
+    public static GameLootDrops helper(Rarity rarity, GameLootDrops randomDrop, GameLootDrops[] drops, Random r) {
+        return helper(rarity, randomDrop, drops, r, false);
+    }
+
+    public static GameLootDrops helper(Rarity rarity, GameLootDrops randomDrop, GameLootDrops[] drops, Random r, boolean removeExtraLife) {
+        boolean found = false;
+
+        while (!found) {
+            randomDrop = drops[r.nextInt(drops.length)];
+
+            if (removeExtraLife && randomDrop == EXTRA_LIFE) {
+                continue;
+            }
+
+            if (randomDrop.getRarity() == rarity) {
+                found = true;
+            }
+        }
+
+        return randomDrop;
+    }
+
+    public static boolean isLootDropItem(ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) return false;
+        if (!item.hasItemMeta() || !item.getItemMeta().hasDisplayName()) return false;
+
+        String itemName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
+
+        for (GameLootDrops drop : GameLootDrops.values()) {
+            ItemStack dropItem = drop.getItem();
+
+            if (dropItem == null) continue;
+            if (!dropItem.hasItemMeta() || !dropItem.getItemMeta().hasDisplayName()) continue;
+
+            String dropName = ChatColor.stripColor(dropItem.getItemMeta().getDisplayName());
+
+            if (item.getType() == dropItem.getType()
+                    && item.getDurability() == dropItem.getDurability()
+                    && itemName.equalsIgnoreCase(dropName)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
 	public ItemStack getItem() {
 	    ItemStack item = null;

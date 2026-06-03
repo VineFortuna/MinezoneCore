@@ -21,6 +21,12 @@ public class GameSettings {
 	public List<Player> gameTypeVotes;
 	public List<Player> lightningVotes;
 	public List<Player> santaVotes;
+    public boolean opDrops;
+    public boolean strengthOnKill;
+    public boolean disableHealthPots;
+    public boolean disableSpawnProtection;
+    public boolean randomClasses;
+    public int randomClassCycleSeconds;
 
 	public GameSettings(GameInstance game) {
 		this.game = game;
@@ -36,6 +42,12 @@ public class GameSettings {
 		this.gameTypeVotes = new ArrayList<Player>();
 		this.lightningVotes = new ArrayList<Player>();
 		this.santaVotes = new ArrayList<Player>();
+        this.opDrops = false;
+        this.strengthOnKill = false;
+        this.disableHealthPots = false;
+        this.disableSpawnProtection = false;
+        this.randomClasses = false;
+        this.randomClassCycleSeconds = 15;
 	}
 
 	// GETTER METHODS:

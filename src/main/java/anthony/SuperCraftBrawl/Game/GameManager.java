@@ -10,6 +10,7 @@ import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileManager;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.SuperCraftBrawl.gui.*;
+import anthony.SuperCraftBrawl.gui.games.GameModifiersGUI;
 import anthony.SuperCraftBrawl.party.Party;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -1670,12 +1671,133 @@ public class GameManager implements Listener, PluginMessageListener {
             }
         }
 
+        GameInstance targetInstance = existingInstance;
+
+        if (targetInstance == null) {
+            targetInstance = new GameInstance(this, map);
+            gameMap.put(map, targetInstance);
+        }
+
+        if (party.isPrivateGames()) {
+            targetInstance.enablePrivateGame(leader);
+        }
+
         for (Player member : partyMembers) {
             joinSinglePlayerToMap(member, map);
         }
 
+        if (party.isPrivateGames() && targetInstance.state == GameState.WAITING) {
+            targetInstance.givePrivateGameLeaderItems(leader);
+
+            for (Player member : partyMembers) {
+                member.sendMessage(main.color("&6&l(!) &rThis is a &ePrivate Game&r. The party leader must start the countdown."));
+            }
+        }
+
         for (Player member : partyMembers) {
             member.sendMessage(main.color("&a&l(!) &rYour party has joined &e" + map.toString() + "&r."));
+        }
+    }
+
+    public void sendAcceptedPartyMemberToLeaderGame(Player leader, Player newMember) {
+        if (leader == null || newMember == null) return;
+
+        GameInstance leaderInstance = GetInstanceOfPlayer(leader);
+
+        if (leaderInstance == null) {
+            leaderInstance = GetInstanceOfSpectator(leader);
+        }
+
+        if (leaderInstance == null) return;
+
+        Maps map = leaderInstance.getMap();
+
+        if (map == null) return;
+
+        if (GetInstanceOfPlayer(newMember) != null) {
+            newMember.sendMessage(main.color("&c&l(!) &rYou are already in a game."));
+            return;
+        }
+
+        if (GetInstanceOfSpectator(newMember) != null) {
+            newMember.sendMessage(main.color("&c&l(!) &rYou are already spectating a game."));
+            return;
+        }
+
+        if (main.getParkour().hasPlayer(newMember)) {
+            newMember.sendMessage(main.color("&c&l(!) &rYou cannot join your party leader while in parkour."));
+            return;
+        }
+
+        if (leaderInstance.state == GameState.WAITING) {
+            GameReason result = AddPlayerToMap(newMember, map);
+
+            if (result == GameReason.SUCCESS) {
+                newMember.setGameMode(GameMode.ADVENTURE);
+                main.getListener().resetDoubleJump(newMember);
+                main.getLobbyItems().gameLobbyItems(newMember);
+
+                if (main.getSignManager() != null && map.GetInstance() != null) {
+                    main.getSignManager().updateSign(map.GetInstance(), leaderInstance);
+                }
+
+                newMember.sendMessage(main.color("&a&l(!) &rYou joined your party leader's game."));
+                leader.sendMessage(main.color("&a&l(!) &e" + newMember.getName() + " &rjoined your game."));
+            } else {
+                newMember.sendMessage(main.color("&c&l(!) &rYou joined the party, but could not join your party leader's game."));
+            }
+
+            return;
+        }
+
+        if (leaderInstance.state == GameState.STARTED) {
+            spectateSinglePlayerMap(newMember, map);
+
+            newMember.sendMessage(main.color("&a&l(!) &rYou are now spectating your party leader's game."));
+            leader.sendMessage(main.color("&a&l(!) &e" + newMember.getName() + " &ris now spectating your game."));
+            return;
+        }
+
+        newMember.sendMessage(main.color("&e&l(!) &rYou joined the party, but your party leader's game is no longer available."));
+    }
+
+    @EventHandler
+    public void privateGameItems(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        ItemStack item = event.getItem();
+
+        if (item == null || item.getType() == Material.AIR) return;
+        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+
+        GameInstance instance = GetInstanceOfPlayer(player);
+
+        if (instance == null) return;
+        if (instance.state != GameState.WAITING) return;
+        if (!instance.isPrivateGame()) return;
+
+        if (item.getType() == Material.EMERALD && item.hasItemMeta()
+                && item.getItemMeta().hasDisplayName()
+                && ChatColor.stripColor(item.getItemMeta().getDisplayName()).contains("Start Game")) {
+
+            event.setCancelled(true);
+            instance.startPrivateGameCountdown(player);
+            player.getInventory().clear();
+            main.getLobbyItems().gameLobbyItems(player);
+            return;
+        }
+
+        if (item.getType() == Material.REDSTONE_COMPARATOR && item.hasItemMeta()
+                && item.getItemMeta().hasDisplayName()
+                && ChatColor.stripColor(item.getItemMeta().getDisplayName()).contains("Game Modifiers")) {
+
+            event.setCancelled(true);
+
+            if (!instance.isPrivateGameLeader(player)) {
+                player.sendMessage(main.color("&c&l(!) &rOnly the party leader can modify this private game."));
+                return;
+            }
+
+            new GameModifiersGUI(main, instance).inv.open(player);
         }
     }
 
@@ -1832,14 +1954,19 @@ public class GameManager implements Listener, PluginMessageListener {
 		if (GetInstanceOfPlayer(player) != null || getMain().getParkour().hasPlayer(player))
 			return GameReason.IN_ANOTHER;
 
-		if (gameMap.containsKey(map)) // Checks if the game has already been initialized
-			instance = gameMap.get(map);
-		else {
-			instance = new GameInstance(this, map); // Creates a new game if one doesn't already exist
-			gameMap.put(map, instance);
-		}
+        if (gameMap.containsKey(map)) {
+            instance = gameMap.get(map);
+        } else {
+            instance = new GameInstance(this, map);
+            gameMap.put(map, instance);
+        }
 
-		GameReason reason = instance.AddPlayer(player);
+        if (instance.isPrivateGame() && !instance.canAccessPrivateGame(player)) {
+            player.sendMessage(main.color("&c&l(!) &rThis is a private party game. You cannot join it."));
+            return GameReason.ALREADYPLAYING;
+        }
+
+        GameReason reason = instance.AddPlayer(player);
 
 		return reason;
 	}
@@ -2158,11 +2285,20 @@ public class GameManager implements Listener, PluginMessageListener {
     * This function adds a player to the spawn protection for 5 seconds when the
     * game starts, or a player just respawned
      */
-	public void addSpawnProtection(Player player) {
-		BukkitRunnable runnable = this.spawnProt.get(player);
-		GameInstance instance = this.GetInstanceOfPlayer(player);
+    public void addSpawnProtection(Player player) {
+        BukkitRunnable runnable = this.spawnProt.get(player);
+        GameInstance instance = this.GetInstanceOfPlayer(player);
 
-		if (runnable == null) {
+        if (instance != null && instance.getGameSettings().disableSpawnProtection) {
+            if (runnable != null) {
+                runnable.cancel();
+                this.spawnProt.remove(player);
+            }
+
+            return;
+        }
+
+        if (runnable == null) {
 			runnable = new BukkitRunnable() {
 				int ticks = SPAWN_PROT_DURATION;
 

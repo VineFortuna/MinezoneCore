@@ -29,6 +29,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Score;
@@ -1740,9 +1741,12 @@ public abstract class BaseClass {
 	}
 
 	// Giving health potions on kill
-	protected void healthPots(Player d) {
-		if (checkIfDead(d, instance) || instance.classes.get(d).getType() == ClassType.Horse)
-			return;
+    protected void healthPots(Player d) {
+        if (instance.getGameSettings().disableHealthPots)
+            return;
+
+        if (checkIfDead(d, instance) || instance.classes.get(d).getType() == ClassType.Horse)
+            return;
 
 		if (instance.alivePlayers == 1) return;
 
@@ -1801,12 +1805,18 @@ public abstract class BaseClass {
 
 					d.playSound(d.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
 
-					if (baseClass3 != null) {
-						baseClass3.totalTokens += 1;
-						baseClass3.totalKills++;
-						baseClass3.eachLifeKills++;
-						this.checkBountyKill(baseClass3, p, d);
-					}
+                    if (baseClass3 != null) {
+                        baseClass3.totalTokens += 1;
+                        baseClass3.totalKills++;
+                        baseClass3.eachLifeKills++;
+
+                        if (instance.getGameSettings().strengthOnKill) {
+                            d.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 5 * 20, 0));
+                            d.sendMessage(instance.color("&2&l(!) &rYou gained &cStrength I &rfor &e5 seconds&r."));
+                        }
+
+                        this.checkBountyKill(baseClass3, p, d);
+                    }
 				}
 			}
 		}

@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.party;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.Game.GameInstance;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -142,6 +143,12 @@ public class PartyManager {
 
         broadcast(party, "&a&l(!) &e" + player.getName() + " &rhas joined the party.");
         player.playSound(player.getLocation(), Sound.LEVEL_UP, 1.0F, 1.0F);
+
+        Player partyLeader = Bukkit.getPlayer(party.getLeaderId());
+
+        if (partyLeader != null && partyLeader.isOnline()) {
+            main.getGameManager().sendAcceptedPartyMemberToLeaderGame(partyLeader, player);
+        }
     }
 
     public void deny(Player player, Player inviter) {
@@ -252,9 +259,16 @@ public class PartyManager {
             return;
         }
 
+        GameInstance leaderInstance = main.getGameManager().GetInstanceOfPlayer(leader);
+        GameInstance targetInstance = main.getGameManager().GetInstanceOfPlayer(target);
+
         partyByLeader.remove(leader.getUniqueId());
         party.setLeader(target.getUniqueId());
         partyByLeader.put(target.getUniqueId(), party);
+
+        if (leaderInstance != null && leaderInstance == targetInstance) {
+            leaderInstance.transferPrivateGameLeader(leader, target);
+        }
 
         broadcast(party, "&a&l(!) &e" + target.getName() + " &ris now the party leader.");
     }
@@ -303,6 +317,11 @@ public class PartyManager {
 
         if (party == null) {
             sender.sendMessage(main.color("&c&l(!) &rYou are not in a party."));
+            return;
+        }
+
+        if (party.isPartyChatMuted() && !party.isLeader(sender.getUniqueId())) {
+            sender.sendMessage(main.color("&c&l(!) &rParty chat is currently muted."));
             return;
         }
 

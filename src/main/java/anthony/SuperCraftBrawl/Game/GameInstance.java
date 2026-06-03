@@ -11,6 +11,7 @@ import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.PlayerListener;
 import anthony.SuperCraftBrawl.Timer;
+import anthony.SuperCraftBrawl.party.Party;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
@@ -106,6 +107,11 @@ public class GameInstance {
     // DUEL COMMAND
     public boolean isDuel = false;
 
+    //PARTY SYSTEM
+    private boolean privateGame = false;
+    private boolean privateGameCountdownStarted = false;
+    private UUID privateGameLeader;
+
     // Constructors:
     public GameInstance(GameManager gameManager, Maps map) {
         this.gameManager = gameManager;
@@ -195,6 +201,124 @@ public class GameInstance {
             mapWorld.setTime(1000);
 
         mapWorld.setDifficulty(Difficulty.NORMAL);
+    }
+
+    public boolean isPrivateGame() {
+        return privateGame;
+    }
+
+    public UUID getPrivateGameLeader() {
+        return privateGameLeader;
+    }
+
+    public boolean isPrivateGameLeader(Player player) {
+        return player != null && privateGameLeader != null && privateGameLeader.equals(player.getUniqueId());
+    }
+
+    public boolean isPrivateGameCountdownStarted() {
+        return privateGameCountdownStarted;
+    }
+
+    public void enablePrivateGame(Player leader) {
+        if (leader == null) return;
+
+        this.privateGame = true;
+        this.privateGameLeader = leader.getUniqueId();
+        this.privateGameCountdownStarted = false;
+    }
+
+    public boolean canAccessPrivateGame(Player player) {
+        if (!privateGame) return true;
+        if (player == null) return false;
+
+        if (isPrivateGameLeader(player)) return true;
+
+        if (gameManager.getMain().getPartyManager() == null) {
+            return false;
+        }
+
+        Player leader = Bukkit.getPlayer(privateGameLeader);
+
+        if (leader == null) {
+            return false;
+        }
+
+        Party party = gameManager.getMain().getPartyManager().getParty(leader);
+
+        if (party == null) {
+            return false;
+        }
+
+        return party.contains(player.getUniqueId());
+    }
+
+    public void transferPrivateGameLeader(Player oldLeader, Player newLeader) {
+        if (!privateGame) return;
+        if (state != GameState.WAITING) return;
+        if (oldLeader == null || newLeader == null) return;
+
+        if (!HasPlayer(oldLeader) || !HasPlayer(newLeader)) return;
+
+        this.privateGameLeader = newLeader.getUniqueId();
+
+        oldLeader.getInventory().clear();
+        getGameManager().getMain().getLobbyItems().gameLobbyItems(oldLeader);
+
+        givePrivateGameLeaderItems(newLeader);
+
+        oldLeader.sendMessage(color("&e&l(!) &rYou are no longer the private game leader."));
+        newLeader.sendMessage(color("&a&l(!) &rYou are now the private game leader."));
+    }
+
+    public void givePrivateGameLeaderItems(Player leader) {
+        if (leader == null) return;
+        if (!isPrivateGameLeader(leader)) return;
+        if (state != GameState.WAITING) return;
+
+        ItemStack modifiers = ItemHelper.setDetails(
+                new ItemStack(Material.REDSTONE_COMPARATOR),
+                color("&eGame Modifiers &7(Right Click)"),
+                "",
+                color("&7Click to modify this private game.")
+        );
+
+        ItemStack startGame = ItemHelper.setDetails(
+                new ItemStack(Material.EMERALD),
+                color("&aStart Game &7(Right Click)"),
+                "",
+                color("&7Click to start the countdown.")
+        );
+
+        leader.getInventory().clear();
+        leader.getInventory().setItem(0, modifiers);
+        leader.getInventory().setItem(1, startGame);
+    }
+
+    public void startPrivateGameCountdown(Player player) {
+        if (!privateGame) {
+            player.sendMessage(color("&c&l(!) &rThis is not a private game."));
+            return;
+        }
+
+        if (!isPrivateGameLeader(player)) {
+            player.sendMessage(color("&c&l(!) &rOnly the party leader can start this private game."));
+            return;
+        }
+
+        if (players.size() < 2) {
+            player.sendMessage(color("&c&l(!) &rYou need at least 2 players to start the game."));
+            return;
+        }
+
+        if (gameStartTime != null) {
+            player.sendMessage(color("&c&l(!) &rThe game countdown has already started."));
+            return;
+        }
+
+        privateGameCountdownStarted = true;
+
+        TellAll(color("&a&l(!) &e" + player.getName() + " &rstarted the private game countdown."));
+        StartGameTimer();
     }
 
     /**
@@ -332,8 +456,13 @@ public class GameInstance {
     }
 
     public void CheckForGameStart() {
-        if (players.size() == 2)
-            StartGameTimer();
+        if (players.size() < 2) return;
+
+        if (privateGame && !privateGameCountdownStarted) {
+            return;
+        }
+
+        StartGameTimer();
     }
 
     public int getSecondsUntilStart() {
@@ -378,6 +507,10 @@ public class GameInstance {
 
     public void StartGameTimer() {
         if (gameStartTime != null) return;
+
+        if (privateGame && !privateGameCountdownStarted) {
+            return;
+        }
 
         final SignManager sm = getGameManager().getMain().getSignManager();
         timeToStartSeconds = getSecondsUntilStart();
@@ -639,6 +772,7 @@ public class GameInstance {
         giveRandomItemDrop();
         initialSpawn();
         gameTicks();
+        startRandomClassesTimer();
 
         BukkitRunnable r = new BukkitRunnable() {
             @Override
@@ -648,6 +782,204 @@ public class GameInstance {
         };
         BukkitTask task = r.runTaskLater(getGameManager().getMain(), 20);
         trackInstanceTask(task);
+    }
+
+    private List<ItemStack> getSavedLootDropItems(Player player) {
+        List<ItemStack> savedDrops = new ArrayList<>();
+
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (GameLootDrops.isLootDropItem(item)) {
+                savedDrops.add(item.clone());
+            }
+        }
+
+        return savedDrops;
+    }
+
+    private void startRandomClassesTimer() {
+        if (!getGameSettings().randomClasses) return;
+        if (getGameSettings().randomClassCycleSeconds <= 0) return;
+
+        BukkitRunnable runnable = new BukkitRunnable() {
+            int seconds = getGameSettings().randomClassCycleSeconds;
+
+            @Override
+            public void run() {
+                if (state != GameState.STARTED) {
+                    cancel();
+                    return;
+                }
+
+                if (!getGameSettings().randomClasses) {
+                    cancel();
+                    return;
+                }
+
+                if (seconds <= 0) {
+                    TellAll(color("&d&l(!) &rRandomizing classes..."));
+
+                    for (Player player : new ArrayList<>(players)) {
+                        BaseClass oldClass = classes.get(player);
+
+                        if (oldClass == null) continue;
+                        if (oldClass.getLives() <= 0) continue;
+                        if (oldClass.isDead) continue;
+
+                        List<ItemStack> savedDrops = new ArrayList<>();
+
+                        for (ItemStack item : player.getInventory().getContents()) {
+                            if (GameLootDrops.isLootDropItem(item)) {
+                                savedDrops.add(item.clone());
+                            }
+                        }
+
+                        player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.3F);
+                        player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1.0F, 1.8F);
+
+                        removeOldClassPotionEffects(player, oldClass);
+
+                        player.getInventory().clear();
+                        player.getInventory().setArmorContents(null);
+
+                        reRandomizeClass(player);
+
+                        BaseClass newClass = classes.get(player);
+
+                        if (newClass != null) {
+                            newClass.loadPlayer();
+
+                            for (ItemStack savedDrop : savedDrops) {
+                                if (savedDrop != null && savedDrop.getType() != Material.AIR) {
+                                    player.getInventory().addItem(savedDrop);
+                                }
+                            }
+
+                            player.updateInventory();
+
+                            TitleUtil.sendTitle(
+                                    player,
+                                    "&eNew Random Class",
+                                    "" + newClass.getType().getTag(),
+                                    1,
+                                    30,
+                                    10
+                            );
+
+                            player.playSound(player.getLocation(), Sound.HORSE_ARMOR, 1.0F, 1.0F);
+                            player.playSound(player.getLocation(), Sound.LEVEL_UP, 1.0F, 1.2F);
+                        }
+                    }
+
+                    seconds = getGameSettings().randomClassCycleSeconds;
+                    return;
+                }
+
+                seconds--;
+            }
+        };
+
+        BukkitTask task = runnable.runTaskTimer(gameManager.getMain(), 20L, 20L);
+        trackInstanceTask(task);
+        runnables.add(runnable);
+    }
+
+    private void removeOldClassPotionEffects(Player player, BaseClass oldClass) {
+        if (player == null || oldClass == null) return;
+
+        for (PotionEffect effect : new ArrayList<>(player.getActivePotionEffects())) {
+            if (isOldClassPotionEffect(oldClass.getType(), effect)) {
+                player.removePotionEffect(effect.getType());
+            }
+        }
+    }
+
+    private boolean isOldClassPotionEffect(ClassType classType, PotionEffect effect) {
+        if (classType == null || effect == null) return false;
+
+        PotionEffectType type = effect.getType();
+
+        /*
+         * Only remove long/passive class effects.
+         * This prevents removing short effects like:
+         * - Strength on Kill
+         * - poison from another player
+         * - regen from drops
+         * - temporary ability effects
+         */
+        if (effect.getDuration() < 20 * 60) {
+            return false;
+        }
+
+        switch (classType) {
+            case Bat:
+                return type == PotionEffectType.SPEED
+                        || type == PotionEffectType.INVISIBILITY
+                        || type == PotionEffectType.DAMAGE_RESISTANCE;
+
+            case Bunny:
+                return type == PotionEffectType.SPEED
+                        || type == PotionEffectType.JUMP;
+
+            case Rabbit:
+                return type == PotionEffectType.SPEED
+                        || type == PotionEffectType.JUMP;
+
+            case Cloud:
+                return type == PotionEffectType.JUMP;
+
+            case Parrot:
+                return type == PotionEffectType.JUMP;
+
+            case Elf:
+                return type == PotionEffectType.SPEED;
+
+            case EnderDragon:
+                return type == PotionEffectType.WEAKNESS;
+
+            case Ice:
+                return type == PotionEffectType.WEAKNESS;
+
+            case Jeb:
+                return type == PotionEffectType.WEAKNESS;
+
+            case Notch:
+                return type == PotionEffectType.WEAKNESS;
+
+            case Herobrine:
+                return type == PotionEffectType.DAMAGE_RESISTANCE;
+
+            case Melon:
+                return type == PotionEffectType.DAMAGE_RESISTANCE;
+
+            case Mooshroom:
+                return type == PotionEffectType.SPEED;
+
+            case Noteblock:
+                return type == PotionEffectType.SPEED
+                        || type == PotionEffectType.DAMAGE_RESISTANCE;
+
+            case Ocelot:
+                return type == PotionEffectType.SPEED;
+
+            case Potato:
+                return type == PotionEffectType.SPEED;
+
+            case Vindicator:
+                return type == PotionEffectType.WEAKNESS;
+
+            case Wizard:
+                return type == PotionEffectType.SPEED
+                        || type == PotionEffectType.JUMP;
+
+            case Santa:
+                return type == PotionEffectType.INCREASE_DAMAGE
+                        || type == PotionEffectType.SLOW
+                        || type == PotionEffectType.DAMAGE_RESISTANCE
+                        || type == PotionEffectType.JUMP;
+
+            default:
+                return false;
+        }
     }
 
     private void gameTicks() {
@@ -763,7 +1095,14 @@ public class GameInstance {
     }
 
     public ItemStack getItemToDrop() {
-        GameLootDrops lootDrop = GameLootDrops.getDrop();
+        GameLootDrops lootDrop;
+
+        if (getGameSettings().opDrops) {
+            lootDrop = GameLootDrops.getOpDrop();
+        } else {
+            lootDrop = GameLootDrops.getDrop();
+        }
+
         return lootDrop.getItem();
     }
 
@@ -1789,7 +2128,7 @@ public class GameInstance {
 
                             FastBoard fb = this.boards.get(gamePlayer.getUniqueId());
                             updateCountOnBoard();
-                            if (fb != null) fb.updateLine(7, color("&7&oWaiting for &a1 &7&oplayer"));
+                            if (fb != null) fb.updateLine(7, color("&7&oWaiting for players.."));
                         }
                     }
                 }
