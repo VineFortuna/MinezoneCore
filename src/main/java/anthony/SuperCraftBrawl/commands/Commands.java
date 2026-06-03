@@ -13,6 +13,7 @@ import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.friends.FriendProfile;
 import anthony.SuperCraftBrawl.party.Party;
+import anthony.SuperCraftBrawl.party.gui.PartySettingsGUI;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
@@ -238,6 +239,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         player.sendMessage(main.color("&e/party disband -> &rDisband the party"));
         player.sendMessage(main.color("&e/party chat [message] -> &rToggle/send party chat"));
         player.sendMessage(main.color("&e/partychat [message] -> &rToggle/send party chat"));
+        player.sendMessage(main.color("&e/party settings -> &rCustom settings to your party"));
         player.sendMessage(main.color("&8&m------------------------------------"));
     }
 
@@ -262,6 +264,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 
             Player target = Bukkit.getPlayer(args[1]);
             main.getPartyManager().invite(player, target);
+            return;
+        }
+
+        if (sub.equals("settings")) {
+            new PartySettingsGUI(main).inv.open(player);
             return;
         }
 

@@ -30,6 +30,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.bukkit.scoreboard.Score;
 
@@ -565,6 +566,9 @@ public abstract class BaseClass {
 
 	// Giving health potions on kill
 	protected void giveHealthPot(Player killer) {
+		if (instance.getGameSettings().disableHealthPots)
+			return;
+
 		Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new Runnable() {
 			@Override
 			public void run() {
@@ -635,6 +639,12 @@ public abstract class BaseClass {
 						baseClass.totalTokens += 1;
 						baseClass.totalKills++;
 						baseClass.eachLifeKills++;
+
+						if (instance.getGameSettings().strengthOnKill) {
+							killer.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 5 * 20, 0));
+							killer.sendMessage(instance.color("&2&l(!) &rYou gained &cStrength I &rfor &e5 seconds&r."));
+						}
+
 						this.checkBountyKill(baseClass, victim, killer);
 					}
 				}

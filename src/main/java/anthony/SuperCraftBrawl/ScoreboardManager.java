@@ -156,7 +156,7 @@ public class ScoreboardManager {
                             + (game.getMap().GetInstance().gameType == GameType.DUEL
                             ? "" + ChatColor.GREEN + game.players.size() + "/" + game.gameType.getMaxPlayers()
                             : "")),
-                    "", main.color("&7&oWaiting for &a1 &7&oplayer"), "", main.color("&ewww.minezone.club"));
+                    "", main.color("&7&oWaiting for players.."), "", main.color("&ewww.minezone.club"));
 
             game.boards.get(player.getUniqueId()).updateTitle(main.color("&e&l" + game.getMap()));
         }

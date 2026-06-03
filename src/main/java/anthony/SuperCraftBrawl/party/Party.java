@@ -14,6 +14,8 @@ public class Party {
 
     private UUID leader;
     private final LinkedHashSet<UUID> members = new LinkedHashSet<>();
+    private boolean privateGames = false;
+    private boolean partyChatMuted = false;
 
     public Party(UUID leader) {
         this.leader = leader;
@@ -72,5 +74,21 @@ public class Party {
         }
 
         return onlineMembers;
+    }
+
+    public boolean isPrivateGames() {
+        return privateGames;
+    }
+
+    public void setPrivateGames(boolean privateGames) {
+        this.privateGames = privateGames;
+    }
+
+    public boolean isPartyChatMuted() {
+        return partyChatMuted;
+    }
+
+    public void setPartyChatMuted(boolean partyChatMuted) {
+        this.partyChatMuted = partyChatMuted;
     }
 }
