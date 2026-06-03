@@ -347,11 +347,20 @@ public abstract class BaseClass {
     * This function decreases lives on death and sets it
     * on the scoreboard too
      */
-    private void decreaseLives() {
-        if (instance.gameType != GameType.GUNGAME) {
-            lives--;
+    public void decreaseLives() {
+        lives--;
+
+        if (lives <= 0) {
+            lives = 0;
+            isDead = true;
         }
-        score.setScore(lives);
+
+        try {
+            if (instance != null) {
+                instance.updateGameScoreboards();
+            }
+        } catch (Exception ignored) {
+        }
     }
 
     private void giveGameStats(Player p, BaseClass pBc, PlayerData data) {

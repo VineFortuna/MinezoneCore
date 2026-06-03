@@ -82,14 +82,13 @@ public class SheepClass extends BaseClass {
 		black = false;
 		pink = false;
 		// To reset Sheep's scoreboard color
-		BaseClass bc = instance.classes.get(player);
-		if (bc.getLives() > 0 && bc.getLives() != 5) {
-			bc.score.getScoreboard().resetScores(bc.score.getEntry());
-			Score newScore = instance.livesObjective.getScore(instance
-					.truncateString(instance.getGameManager().getMain().color("&r&lSheep &r" + player.getName()), 40));
-			bc.score = newScore;
-			newScore.setScore(bc.getLives());
-		}
+        // FastBoard handles the sidebar now.
+        // Just refresh the game scoreboard after Sheep loads.
+        BaseClass bc = instance.classes.get(player);
+
+        if (bc != null && bc.getLives() > 0) {
+            instance.updateGameScoreboards();
+        }
 		resetArmor();
 		
 		ItemStack whiteWool = getStartWool();
@@ -239,8 +238,6 @@ public class SheepClass extends BaseClass {
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.RED
 					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
-			bc.score = newScore;
-			newScore.setScore(bc.getLives());
 		} else if (itemList[randomNum] == item) { // BLUE
 			color = "FF";
 			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.BLUE
@@ -249,8 +246,6 @@ public class SheepClass extends BaseClass {
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.BLUE
 					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
-			bc.score = newScore;
-			newScore.setScore(bc.getLives());
 		} else if (itemList[randomNum] == item7) { // BLACK
 			color = "0";
 			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.BLACK
@@ -259,8 +254,6 @@ public class SheepClass extends BaseClass {
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.BLACK
 					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
-			bc.score = newScore;
-			newScore.setScore(bc.getLives());
 			black = true;
 		} else if (itemList[randomNum] == item4) { // PURPLE
 			color = "800080";
@@ -270,8 +263,6 @@ public class SheepClass extends BaseClass {
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.DARK_PURPLE
 					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
-			bc.score = newScore;
-			newScore.setScore(bc.getLives());
 		} else if (itemList[randomNum] == item5) { // GREEN
 			color = "8000";
 			player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET + "You were given " + ChatColor.DARK_GREEN
@@ -280,8 +271,6 @@ public class SheepClass extends BaseClass {
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.DARK_GREEN
 					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
-			bc.score = newScore;
-			newScore.setScore(bc.getLives());
 			green = true;
 		} else if (itemList[randomNum] == item6) { // GRAY
 			color = "808080";
@@ -291,8 +280,6 @@ public class SheepClass extends BaseClass {
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.GRAY
 					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
-			bc.score = newScore;
-			newScore.setScore(bc.getLives());
 			gray = true;
 		} else if (itemList[randomNum] == pinkWool) { // PINK
 			color = "FF69B4";
@@ -301,8 +288,6 @@ public class SheepClass extends BaseClass {
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.LIGHT_PURPLE
 					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " " + getTeamColor() + player.getName(), 40));
-			bc.score = newScore;
-			newScore.setScore(bc.getLives());
 			pink = true;
 		} else if (itemList[randomNum] == limeWool) { // LIME
 			color = "FF00";
@@ -312,8 +297,6 @@ public class SheepClass extends BaseClass {
 			BaseClass bc = instance.classes.get(player);
 			Score newScore = instance.livesObjective.getScore(instance.truncateString("" + ChatColor.GREEN
 					+ ChatColor.BOLD + "Sheep" + ChatColor.RESET + " "  + getTeamColor() + player.getName(), 40));
-			bc.score = newScore;
-			newScore.setScore(bc.getLives());
 			lime = true;
 		}
 		chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, color, "&rSheep Chestplate");
