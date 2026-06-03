@@ -29,7 +29,7 @@ public class PartySettingsGUI implements InventoryProvider {
         SmartInventory.Builder builder = SmartInventory.builder()
                 .id("partySettings")
                 .provider(this)
-                .size(4, 9)
+                .size(3, 9)
                 .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Party Settings");
 
         if (parent != null) {
@@ -46,7 +46,7 @@ public class PartySettingsGUI implements InventoryProvider {
 
         for (int row = 0; row < 4; row++) {
             for (int col = 0; col < 9; col++) {
-                if (row == 0 || row == 3 || col == 0 || col == 8) {
+                if (row == 0 || row == 2 || col == 0 || col == 8) {
                     contents.set(row, col, border);
                 }
             }

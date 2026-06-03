@@ -1048,7 +1048,8 @@ public class PlayerListener implements Listener {
 			List<String> filteredWords = new ArrayList<>(Arrays.asList("nibba", "nigga", "niggas", "nigger", "niggers",
 					"porn", "pornhub", "cum", "fuck you", "fuckyou", "fuck", "bitch", "pussy", "fucker", "motherfucker",
 					"kys", "pu$$y", "fag", "faggot", "bitchass", "cunt", "retard", "penis", "fucker", "twat", "cock",
-					"dick", "cumming", "fuckass", "vagina", "fuckers", "shit", "shitter", "shitters", "fucking"));
+					"dick", "cumming", "fuckass", "vagina", "fuckers", "shit", "shitter", "shitters", "fucking",
+                    "nexly", "nexly.network"));
 			PlayerData data = main.getDataManager().getPlayerData(event.getPlayer());
 			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
 			String message = event.getMessage();

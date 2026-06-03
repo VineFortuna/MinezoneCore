@@ -32,7 +32,7 @@ public class MysteryChestsGUI implements InventoryProvider {
                 .id("myInventory")
                 .provider(this)
                 .size(3, 9)
-                .title("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MysteryChest")
+                .title(main.color("&d&lMYSTERY CHEST"))
                 .build();
         this.main = main;
         this.loc = loc;
@@ -47,10 +47,10 @@ public class MysteryChestsGUI implements InventoryProvider {
                 contents.set(0, 0, ClickableItem.of(
                         ItemHelper.setDetails(
                                 new ItemStack(Material.ENDER_CHEST, data.mysteryChests),
-                                "" + ChatColor.RESET + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MysteryChest",
+                                "" + ChatColor.RESET + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "MYSTERY CHEST",
                                 "",
-                                "" + ChatColor.RESET + ChatColor.YELLOW + "You have " + data.mysteryChests
-                                        + (data.mysteryChests > 1 ? " Chests" : " Chest") + " to Open!"
+                                main.color("&rYou have &a" + data.mysteryChests
+                                        + (data.mysteryChests > 1 ? " Chests" : " Chest") + " &rto open!")
                         ),
                         e -> {
                             // guard
@@ -101,9 +101,11 @@ public class MysteryChestsGUI implements InventoryProvider {
             contents.set(1, 4, ClickableItem.of(
                     ItemHelper.setDetails(
                             new ItemStack(Material.WORKBENCH),
-                            "" + ChatColor.RESET + ChatColor.YELLOW + "Craft MysteryChest",
+                            main.color("&e&lCraft MysteryChest"),
                             "",
-                            "" + ChatColor.RESET + ChatColor.RESET + "Click to craft 1 MysteryChest for " + ChatColor.YELLOW + "100 Tokens"
+                            main.color("&rClick to craft &a1 MysteryChest"),
+                            "",
+                            main.color("&rPrice: &a100 Tokens")
                     ),
                     e -> {
                         if (data.tokens >= 100) {
@@ -113,7 +115,7 @@ public class MysteryChestsGUI implements InventoryProvider {
                             player.sendMessage(main.color("&9&l(!) &rYou crafted &e1 MysteryChest!"));
                             hologram(player);
                         } else {
-                            player.sendMessage(main.color("&c&l(!) &rYou do not have enough to craft a MysteryChest!"));
+                            player.sendMessage(main.color("&c&l(!) &rYou do not have enough tokens to craft a MysteryChest!"));
                         }
                         inv.close(player);
                     }
@@ -142,7 +144,7 @@ public class MysteryChestsGUI implements InventoryProvider {
                 stand = new EntityArmorStand(s);
 
                 stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-                stand.setCustomName(main.color("&e&l" + data.mysteryChests + " &eto open!"));
+                stand.setCustomName(main.color("&a" + data.mysteryChests + " &rto open!"));
                 stand.setCustomNameVisible(true);
                 stand.setGravity(false);
                 stand.setInvisible(true);

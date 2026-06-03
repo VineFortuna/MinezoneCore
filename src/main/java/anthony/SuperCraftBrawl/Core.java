@@ -1390,6 +1390,10 @@ public class Core extends JavaPlugin implements Listener {
 				player.sendMessage("");
 				player.sendMessage(color("&6&lFISHING COMMANDS"));
 				player.sendMessage(color("&e/fishing -> &rOpens Fishing menu"));
+                player.sendMessage("");
+                getCommands().sendPartyHelp(player);
+                player.sendMessage("");
+                getCommands().sendFriendsHelp(player);
 			}
 
 			if (cmd.getName().equalsIgnoreCase("exp")) {
@@ -2031,11 +2035,11 @@ public class Core extends JavaPlugin implements Listener {
 
 		if (data != null) {
 			Location loc = new Location(this.getLobbyWorld(), 198.5, 105.5, 650.5);
-            String name = color("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "Mystery Chests");
+            String name = color("&d&lMYSTERY CHEST");
             this.armorStandManager.addMysteryChestHologram(p, loc, name);
 
 			loc = new Location(this.getLobbyWorld(), 198.5, 105.2, 650.5);
-            name = color("&e&l" + data.mysteryChests + " &eto open!");
+            name = color("&a" + data.mysteryChests + " &rto open!");
             this.armorStandManager.addMysteryChestHologram(p, loc, name);
 		}
 	}

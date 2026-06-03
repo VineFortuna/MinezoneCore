@@ -224,7 +224,7 @@ public class GameSettings {
 	public void updateGameStartVoteStatus(Player player, GameInstance game, ChatColor color) {
 		String status = color + (color == ChatColor.GREEN ? " is Ready " : " is no longer Ready ");
         String message = game.color("&2&l(!) &r" + player.getName() + status +
-                "(" + game.getGameSettings().totalStartVotes + "/" + game.players.size() + ")");
+                "&a(" + game.getGameSettings().totalStartVotes + "/" + game.players.size() + ")");
 		game.TellAll(message);
 
 		if (game.getGameSettings().totalStartVotes == game.players.size())
