@@ -199,6 +199,7 @@ public class PartyManager {
 
     public void leave(Player player) {
         Party party = getParty(player);
+        String message = "&e&l(!) &rYou left the party.";
 
         if (party == null) {
             player.sendMessage(main.color("&c&l(!) &rYou are not in a party."));
@@ -227,13 +228,14 @@ public class PartyManager {
             partyByLeader.put(newLeader.getUniqueId(), party);
 
             broadcast(party, "&e&l(!) &e" + player.getName() + " &rhas left the party. &e" + newLeader.getName() + " &ris now the party leader.");
+            player.sendMessage(main.color(message));
         } else {
             party.removeMember(player.getUniqueId());
             partyByMember.remove(player.getUniqueId());
             partyChatToggled.remove(player.getUniqueId());
 
             broadcast(party, "&e&l(!) &e" + player.getName() + " &rhas left the party.");
-            player.sendMessage(main.color("&e&l(!) &rYou left the party."));
+            player.sendMessage(main.color(message));
         }
     }
 
