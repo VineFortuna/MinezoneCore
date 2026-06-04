@@ -1,0 +1,5 @@
+database:
+  host: "your-host:3306"
+  username: "your-username"
+  password: "your-password"
+  name: "your-database-name"
