@@ -2,6 +2,10 @@ package anthony.SuperCraftBrawl.party;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -101,12 +105,33 @@ public class PartyManager {
         Map<UUID, Long> targetInvites = invites.computeIfAbsent(target.getUniqueId(), k -> new HashMap<>());
         targetInvites.put(inviter.getUniqueId(), System.currentTimeMillis() + INVITE_DURATION_MILLIS);
 
-        inviter.sendMessage(main.color("&a&l(!) &rYou invited &e" + target.getName() + " &rto your party."));
+        inviter.sendMessage(main.color("&a&l(!) &rYou invited &a" + target.getName() + " &rto your party"));
 
-        target.sendMessage(main.color("&e&l(!) &e" + inviter.getName() + " &rhas invited you to their party."));
-        target.sendMessage(main.color("&7Type &e/party accept " + inviter.getName() + " &7to join."));
-        target.sendMessage(main.color("&7This invite expires in &e60 seconds&7."));
+        target.sendMessage(main.color("&e&l(!) &a" + inviter.getName() + " &rhas invited you to their party"));
 
+        TextComponent prefix = new TextComponent(main.color("&7["));
+
+        TextComponent accept = new TextComponent(main.color("&a&lACCEPT"));
+        accept.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/party accept " + inviter.getName()));
+        accept.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                new ComponentBuilder(main.color("&aClick to accept " + inviter.getName() + "'s party invite")).create()));
+
+        TextComponent middle = new TextComponent(main.color("&7] ["));
+
+        TextComponent reject = new TextComponent(main.color("&c&lREJECT"));
+        reject.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/party reject " + inviter.getName()));
+        reject.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                new ComponentBuilder(main.color("&cClick to reject " + inviter.getName() + "'s party invite")).create()));
+
+        TextComponent suffix = new TextComponent(main.color("&7]"));
+
+        prefix.addExtra(accept);
+        prefix.addExtra(middle);
+        prefix.addExtra(reject);
+        prefix.addExtra(suffix);
+
+        target.spigot().sendMessage(prefix);
+        target.sendMessage(main.color("&rThis invite expires in &a60 seconds"));
         target.playSound(target.getLocation(), Sound.NOTE_PLING, 1.0F, 1.5F);
     }
 
