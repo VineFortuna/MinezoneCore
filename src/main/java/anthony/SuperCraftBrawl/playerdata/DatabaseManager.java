@@ -13,7 +13,6 @@ import org.bukkit.Bukkit;
 import anthony.SuperCraftBrawl.Core;
 
 public class DatabaseManager {
-	String hostName = "***REMOVED***", username = "***REMOVED***", password = "***REMOVED***";
 	List<String> pendCommands = new ArrayList<>();
 
 	private Connection c;
@@ -26,12 +25,16 @@ public class DatabaseManager {
 
 	public void loadConnection() {
 		System.out.print("Loading database connection!");
+		String hostName = main.getConfig().getString("database.host");
+		String username = main.getConfig().getString("database.username");
+		String password = main.getConfig().getString("database.password");
+		String dbName   = main.getConfig().getString("database.name");
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			c = DriverManager.getConnection("jdbc:mysql://" + hostName + "?user=" + username + "&password=" + password
 					+ "&autoReconnect=true&failOverReadOnly=false&maxReconnects=10");
 			System.out.print("Loaded database connection!");
-			c.setCatalog("***REMOVED***");
+			c.setCatalog(dbName);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -82,7 +85,7 @@ public class DatabaseManager {
 	}
 
     public void ensureSnapshotTable() {
-        // We already setCatalog("***REMOVED***"), so no need to prefix the schema.
+        // We already setCatalog the database name in loadConnection(), so no need to prefix the schema.
         final String sql =
                 "CREATE TABLE IF NOT EXISTS scb_stat_snapshots (" +
                         "  metric       VARCHAR(32)  NOT NULL," +           // 'Wins','Kills','FlawlessWins','TotalCaught', etc.
