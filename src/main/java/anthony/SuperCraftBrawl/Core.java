@@ -599,6 +599,7 @@ public class Core extends JavaPlugin implements Listener {
     }
 
     private void initVariables() {
+        saveDefaultConfig();
         plugin = this;
         msg = new ArrayList<>();
         listener = new PlayerListener(this);
