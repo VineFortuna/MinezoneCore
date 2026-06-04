@@ -63,6 +63,24 @@ public class StatsGUI implements InventoryProvider {
 		
 		contents.fillBorders(ClickableItem.of(ItemHelper.setDetails(
 				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
+
+        if (this.target != null && target.isOnline() && !target.getUniqueId().equals(player.getUniqueId())) {
+            contents.set(0, 8,
+                    ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
+                            main.color("&a&lInvite to Party"),
+                            "",
+                            main.color("&rClick to invite &a" + target.getName())), e -> {
+
+                        player.closeInventory();
+
+                        if (main.getPartyManager() == null) {
+                            player.sendMessage(main.color("&c&l(!) &rThe party system is currently unavailable."));
+                            return;
+                        }
+
+                        main.getPartyManager().invite(player, target);
+                    }));
+        }
 		
 		contents.set(4, 6, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.REDSTONE_COMPARATOR),
 				"" + ChatColor.RESET + ChatColor.YELLOW + "Preferences"), e -> {

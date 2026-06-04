@@ -37,6 +37,7 @@ import anthony.SuperCraftBrawl.practice.BowPractice;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.ranks.RankManager;
 import anthony.SuperCraftBrawl.signs.SignManager;
+import anthony.SuperCraftBrawl.staffhelp.StaffHelpManager;
 import anthony.SuperCraftBrawl.tablist.TablistAnimationManager;
 import anthony.SuperCraftBrawl.tablist.TablistManager;
 import anthony.SuperCraftBrawl.titles.TitleSequence;
@@ -180,6 +181,9 @@ public class Core extends JavaPlugin implements Listener {
     //COSMETICS:
     public CosmeticsManager cosmeticsManager;
 
+    //STAFF HELP:
+    public StaffHelpManager  staffHelpManager;
+
     public Core() {
 		this.staffchat = new ArrayList<Player>();
 		this.globalchat = new ArrayList<Player>();
@@ -209,6 +213,10 @@ public class Core extends JavaPlugin implements Listener {
 
     public FriendsManager getFriendsManager() {
         return friendsManager;
+    }
+
+    public StaffHelpManager getStaffHelpManager() {
+        return staffHelpManager;
     }
 
 	public ActionBarManager getActionBarManager() {
@@ -331,42 +339,6 @@ public class Core extends JavaPlugin implements Listener {
 		return databaseManager;
 	}
 
-	@EventHandler
-	public void onPlayerInteract(PlayerInteractEvent e) {
-		Player player = e.getPlayer();
-
-		if (e.getClickedBlock() == null)
-			return;
-		if (e.getClickedBlock().getType() == Material.WALL_SIGN || e.getClickedBlock().getType() == Material.SIGN_POST
-				|| e.getClickedBlock().getType() == Material.SIGN) {
-			Sign s = (Sign) e.getClickedBlock().getState();
-			for (Maps map : Maps.values()) {
-				if (s.getLine(1).equalsIgnoreCase(map.toString())) {
-					this.getGameManager().JoinMap(player, map);
-					GameInstance i = null;
-
-					if (getGameManager().gameMap.containsKey(map)) {
-						i = getGameManager().gameMap.get(map);
-
-						if (i != null) {
-							if (i.state == GameState.WAITING) {
-								s.setLine(2, this.color("&0Players: " + i.players.size() + "/"
-										+ i.getMap().GetInstance().gameType.getMaxPlayers()));
-								s.setLine(3, this.color("&0" + i.timeToStartSeconds + "s"));
-								s.update();
-							} else if (i.state == GameState.STARTED) {
-								player.sendMessage(this.color(
-										"&2&l(!) &rSince the game you tried joining has started, you've joined as a Spectator"));
-								getGameManager().SpectatorJoinMap(player, map);
-							}
-						}
-						i.setSign(s);
-					}
-				}
-			}
-		}
-	}
-
 	public Location getSCBLoc() {
 		return new Location(lobbyWorld, -8.531, 161, -406.493);
 	}
@@ -440,11 +412,11 @@ public class Core extends JavaPlugin implements Listener {
         enableLeaderboardSnapshotTables();
         spawnFloatingBlocks();
         //enableTablist();
-        //Spawn after world & chunks are ready. Delay 3 seconds
+        //Spawn leaderboard settings holograms after world & chunks are ready. Delay 3 seconds
         Bukkit.getScheduler().runTaskLater(this, () -> {
 			getLbSettingsHologram().spawnLeaderboardSettingsHologram(195.5, 105.2, 675.5); // main
 			getLbSettingsHologram().spawnLeaderboardSettingsHologram(184.5, 106, 568.5); // parkour
-			getLbSettingsHologram().spawnLeaderboardSettingsHologram(300.5, 91.5, 530.5); // fishing pond
+			getLbSettingsHologram().spawnLeaderboardSettingsHologram(226.5, 105.2, 625.5); // fishing pond
 		}, 60L);
     }
 
@@ -748,10 +720,13 @@ public class Core extends JavaPlugin implements Listener {
         getCommand("tricktitle").setExecutor(new TrickTitleCommand(trickTitle));
     }
 
+    /*
+    * This function registers & enables all commands from Commands.java
+     */
     private void enableCommands() {
         String[] commandTypes = { "maps", "join", "party", "partychat", "friends", "token", "cosmetics", "fishing", "server", "fly", "leave", "players",
                 "class", "socials", "spectate", "startgame", "frenzy", "gamestats", "setlives", "purchases", "kit",
-                "items", "color", "sound", "soundnms", "heal", "forceclass", "lactate" };
+                "items", "color", "sound", "soundnms", "heal", "forceclass", "lactate", "sh", "shr" };
 
         for (String command : commandTypes) {
             PluginCommand pluginCommand = this.getCommand(command);
@@ -818,6 +793,7 @@ public class Core extends JavaPlugin implements Listener {
         floatingBlocks = new FloatingBlocks(this);
         armorStandManager = new ArmorStandManager(this);
         lbSettingsHolo = new SettingsHologram(this);
+        staffHelpManager = new StaffHelpManager(this);
 
         for (Arenas arena : Arenas.values()) {
             parkourBoards.add(new ParkourBoard(this, arena));
@@ -961,9 +937,6 @@ public class Core extends JavaPlugin implements Listener {
 		}
 	}
 
-	public String staffhelp = "";
-	public String staffhelpReply = "";
-
 	@SuppressWarnings({ "null", "deprecation" })
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -1022,63 +995,6 @@ public class Core extends JavaPlugin implements Listener {
 			sender.sendMessage(players);
 		} else if (sender instanceof Player) {
 			Player player = (Player) sender;
-
-			if (cmd.getName().equalsIgnoreCase("sh")) {
-				if (args.length == 0)
-					player.sendMessage(color("&c&l(!) &rIncorrect usage! Try doing: &e/sh <message>"));
-				else {
-					staffhelp = "";
-
-					for (int i = 0; i < args.length; i++) {
-						staffhelp += args[i] + " ";
-					}
-					player.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "StaffHelp> " + ChatColor.RESET
-							+ getRankManager().getRank(player).getTagWithSpace() + ChatColor.RESET + player.getName()
-							+ ": " + ChatColor.LIGHT_PURPLE + staffhelp);
-					player.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "If any staff is online, you will recieve a reply shortly");
-
-					for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
-						if (onlinePlayers.hasPermission("scb.staffhelp")) {
-							onlinePlayers.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "StaffHelp> "
-									+ ChatColor.RESET + getRankManager().getRank(player).getTagWithSpace()
-									+ ChatColor.RESET + player.getName() + ": " + ChatColor.LIGHT_PURPLE + staffhelp);
-						}
-					}
-				}
-			} else if (cmd.getName().equalsIgnoreCase("shr")) {
-				if (player.hasPermission("scb.staffhelpreply")) {
-					if (args.length == 0) {
-						player.sendMessage(color("&c&l(!) &rIncorrect usage! Try doing: &e/shr <player> <message>"));
-					} else if (args.length == 1) {
-						player.sendMessage(color("&c&l(!) &rIncorrect usage! Try doing: &e/shr <player> <message>"));
-					} else {
-						Player target = Bukkit.getServer().getPlayerExact(args[0]);
-						staffhelpReply = "";
-
-						if (target != null) {
-							for (int i = 1; i < args.length; i++) {
-								staffhelpReply += args[i] + " ";
-							}
-							player.sendMessage(
-									"" + ChatColor.YELLOW + ChatColor.BOLD + "StaffHelp REPLY> " + ChatColor.RESET
-											+ getRankManager().getRank(player).getTagWithSpace() + ChatColor.RESET
-											+ player.getName() + ": " + ChatColor.LIGHT_PURPLE + staffhelpReply);
-							target.sendMessage(
-									"" + ChatColor.YELLOW + ChatColor.BOLD + "StaffHelp REPLY> " + ChatColor.RESET
-											+ getRankManager().getRank(player).getTagWithSpace() + ChatColor.RESET
-											+ player.getName() + ": " + ChatColor.LIGHT_PURPLE + staffhelpReply);
-						} else {
-							player.sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ "Please specify a player!");
-						}
-					}
-				} else {
-					player.sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ "You need the rank " + ChatColor.GOLD + ChatColor.BOLD + "TRAINEE " + ChatColor.RESET
-							+ "to use this command");
-				}
-			}
 
 			if (cmd.getName().equalsIgnoreCase("broadcast")) {
 				if (player.hasPermission("scb.broadcast")) {
@@ -1391,9 +1307,10 @@ public class Core extends JavaPlugin implements Listener {
 				player.sendMessage(color("&6&lFISHING COMMANDS"));
 				player.sendMessage(color("&e/fishing -> &rOpens Fishing menu"));
                 player.sendMessage("");
-                getCommands().sendPartyHelp(player);
-                player.sendMessage("");
-                getCommands().sendFriendsHelp(player);
+                player.sendMessage(color("&6&lSOCIAL COMMANDS"));
+                player.sendMessage(color("&e/party help -> &rShow list of party commands"));
+                player.sendMessage(color("&e/friend help -> &rShow list of friends commands"));
+                player.sendMessage(color("&e/staffhelp -> &rRequest help from a staff member"));
 			}
 
 			if (cmd.getName().equalsIgnoreCase("exp")) {
@@ -1964,36 +1881,6 @@ public class Core extends JavaPlugin implements Listener {
 		return false;
 	}
 
-	private void sendClassesList(Player player) {
-		String dClasses = "";
-		String tClasses = "";
-		String lClasses = "";
-		String rClasses = "";
-		for (ClassType type : ClassType.sortAlphabetically(ClassType.getAvailableClasses())) {
-			if (type.getTokenCost() == 0 && type.getLevel() == 0 && type.getMinRank() != Rank.VIP)
-				dClasses += type.getTag() + " ";
-			else if (type.getTokenCost() > 0)
-				tClasses += type.getTag() + " ";
-			else if (type.getLevel() > 0)
-				lClasses += type.getTag() + " ";
-			else if (type.getMinRank() == Rank.VIP)
-				rClasses += type.getTag() + " ";
-		}
-		player.sendMessage(color("&f&l----------------------------------------"));
-		player.sendMessage(color("&e&lFREE CLASSES:"));
-		player.sendMessage(dClasses);
-		player.sendMessage("");
-		player.sendMessage(color("&e&lTOKEN CLASSES:"));
-		player.sendMessage(tClasses);
-		player.sendMessage("");
-		player.sendMessage(color("&e&lLEVEL CLASSES:"));
-		player.sendMessage(lClasses);
-		player.sendMessage("");
-		player.sendMessage(color("&e&lDONOR CLASSES:"));
-		player.sendMessage(rClasses);
-		player.sendMessage(color("&f&l----------------------------------------"));
-	}
-
     public void sendScoreboardUpdate(Player trigger) {
         for (Player p : Bukkit.getOnlinePlayers()) {
             try {
@@ -2097,7 +1984,7 @@ public class Core extends JavaPlugin implements Listener {
 	@EventHandler
 	public void serverMotd(ServerListPingEvent p) {
 		String msg = color(
-				"                     &eMinezone &7[1.8-1.26.1] \n        &c&lSUPER CRAFT BROS &7- &b&lLOBBY UPDATE!");
+				"                     &eMinezone &7[1.8-26.1] \n        &c&lSUPER CRAFT BROS &7- &b&lLOBBY UPDATE!");
 		p.setMotd(msg);
 		p.setMaxPlayers(1);
 	}

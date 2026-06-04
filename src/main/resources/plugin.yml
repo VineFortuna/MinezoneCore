@@ -118,6 +118,7 @@ commands:
       description: SMM
    sh:
       description: Staff help command
+      aliases: staffhelp
    shr:
       description: Staff help reply command
    points:

@@ -41,6 +41,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.Score;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -76,6 +77,17 @@ public class Commands implements CommandExecutor, TabCompleter {
             tokenCommand(sender, args);
             return true;
         }
+
+        if (cmd.getName().equalsIgnoreCase("setrank")) {
+            setrankCommand(args, sender);
+            return true;
+        }
+
+        if (cmd.getName().equalsIgnoreCase("list")) {
+            listCommand(args, sender);
+            return true;
+        }
+
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
 
@@ -148,6 +160,14 @@ public class Commands implements CommandExecutor, TabCompleter {
 				playersCommand(player);
 				break;
 
+                case "sh":
+                    staffhelpCommand(args, player);
+                    break;
+
+                case "shr":
+                    staffhelpReplyCommand(args, player);
+                    break;
+
 			case "duel":
 				duelCommand(args, player);
 				break;
@@ -202,6 +222,122 @@ public class Commands implements CommandExecutor, TabCompleter {
 		return true;
 	}
 
+    private void staffhelpReplyCommand(String[] args, Player player) {
+        if (player.hasPermission("scb.staffhelpreply")) {
+            if (args.length == 0) {
+                player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/shr <player> <message>"));
+            } else if (args.length == 1) {
+                player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/shr <player> <message>"));
+            } else {
+                Player target = Bukkit.getServer().getPlayerExact(args[0]);
+                main.getStaffHelpManager().staffhelpReply = "";
+
+                if (target != null) {
+                    for (int i = 1; i < args.length; i++) {
+                        main.getStaffHelpManager().staffhelpReply += args[i] + " ";
+                    }
+                    player.sendMessage(
+                            "" + ChatColor.YELLOW + ChatColor.BOLD + "StaffHelp REPLY> " + ChatColor.RESET
+                                    + main.getRankManager().getRank(player).getTagWithSpace() + ChatColor.RESET
+                                    + player.getName() + ": " + ChatColor.LIGHT_PURPLE + main.getStaffHelpManager().staffhelpReply);
+                    target.sendMessage(
+                            "" + ChatColor.YELLOW + ChatColor.BOLD + "StaffHelp REPLY> " + ChatColor.RESET
+                                    + main.getRankManager().getRank(player).getTagWithSpace() + ChatColor.RESET
+                                    + player.getName() + ": " + ChatColor.LIGHT_PURPLE + main.getStaffHelpManager().staffhelpReply);
+                } else {
+                    player.sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                            + "Please specify a player!");
+                }
+            }
+        } else {
+            player.sendMessage("" + ChatColor.DARK_RED + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                    + "You need the rank " + ChatColor.GOLD + ChatColor.BOLD + "TRAINEE " + ChatColor.RESET
+                    + "to use this command");
+        }
+    }
+
+    private void staffhelpCommand(String[] args, Player player) {
+        if (args.length == 0)
+            player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/sh <message>"));
+        else {
+            main.getStaffHelpManager().staffhelp = "";
+
+            for (int i = 0; i < args.length; i++) {
+                main.getStaffHelpManager().staffhelp += args[i] + " ";
+            }
+
+            player.sendMessage(main.color("&e&lStaffHelp>&r " +
+                    main.getRankManager().getRank(player).getTagWithSpace() + ChatColor.RESET + player.getName() +
+                    ": &d" + main.getStaffHelpManager().staffhelp));
+            player.sendMessage(main.color("&e&l(!) &rIf any staff are online, you will receieve a reply shortly"));
+
+            for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
+                if (onlinePlayers.hasPermission("scb.staffhelp")) {
+                    onlinePlayers.sendMessage("" + ChatColor.YELLOW + ChatColor.BOLD + "StaffHelp> "
+                            + ChatColor.RESET + main.getRankManager().getRank(player).getTagWithSpace()
+                            + ChatColor.RESET + player.getName() + ": " + ChatColor.LIGHT_PURPLE + main.getStaffHelpManager().staffhelp);
+                }
+            }
+        }
+    }
+
+    private void listCommand(String[] args, CommandSender sender) {
+        String players = "";
+        int count = 0;
+        int totalPlayers = Bukkit.getOnlinePlayers().size();
+        sender.sendMessage(main.color("&r&l(!) &rThere are &a" + totalPlayers + " &rplayers online:"));
+
+        for (Player onlinePlayers : Bukkit.getOnlinePlayers()) {
+            count++;
+            players += "" + ChatColor.YELLOW + onlinePlayers.getName() + "";
+
+            if (count < totalPlayers) {
+                players += "" + ChatColor.RESET + ", ";
+            }
+        }
+        sender.sendMessage(players);
+    }
+
+    private void setrankCommand(String[] args, CommandSender sender) {
+        if (sender.hasPermission("scb.setrank")) {
+            if (args.length > 1) {
+                Rank rank = Rank.getRankFromName(args[1]);
+                Player target = Bukkit.getServer().getPlayerExact(args[0]);
+
+                if (target != null) {
+                    main.getRankManager().setRank(target, rank);
+                    String temp = "" + main.getRankManager().getRank(target);
+                    String temp2 = temp.toUpperCase();
+
+                    sender.sendMessage(main.color("&r&l(!) &a" + target.getName() +
+                            "'s &rrank was set to " + main.getRankManager().getRank(target).getTag()));
+                    target.sendMessage(main.color("&r&l(!) &rYour rank was set to " +
+                            main.getRankManager().getRank(target).getTag()));
+                } else {
+                    boolean success;
+                    try {
+                        success = main.dataManager.setOfflinePlayerRank(args[0], rank);
+                    } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    }
+                    if (success) {
+                        String temp = rank.name();
+                        String temp2 = temp.toUpperCase();
+                        sender.sendMessage(main.color("&r&l(!) &a" + args[0] +
+                                "'s &rrank was set to &a" + temp2));
+                    } else {
+                        sender.sendMessage(main.color("&c&l(!) &rFailed to update player rank"));
+                    }
+                }
+            } else {
+                sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
+                        + ChatColor.GREEN + "/setrank <player> <rank>");
+            }
+        } else {
+            sender.sendMessage(main.color("&c&l(!) &rYou need the rank &c&lADMIN&r to use this!"));
+        }
+    }
+
     private void partyChatCommand(String[] args, Player player) {
         if (main.getPartyManager() == null) {
             player.sendMessage(main.color("&c&l(!) &rParty system is not loaded."));
@@ -230,7 +366,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         return builder.toString();
     }
 
-    private void sendPartyHelp(Player player) {
+    public void sendPartyHelp(Player player) {
         player.sendMessage(main.color("&8&m------------------------------------"));
         player.sendMessage(main.color("&6&lPARTY COMMANDS"));
         player.sendMessage(main.color("&e/party invite <player> -> &rInvite a player"));
@@ -530,7 +666,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         player.sendMessage(main.color("&8&m--------------------------------"));
     }
 
-    private void sendFriendsHelp(Player player) {
+    public void sendFriendsHelp(Player player) {
         player.sendMessage(main.color("&a&lFriends Commands"));
         player.sendMessage(main.color("&e/friends &7- Open your friends list"));
         player.sendMessage(main.color("&e/friends list &7- List your friends in chat"));

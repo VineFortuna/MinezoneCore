@@ -837,6 +837,7 @@ public class GameInstance {
                         player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1.0F, 1.8F);
 
                         removeOldClassPotionEffects(player, oldClass);
+                        getGameManager().getMain().getListener().resetPotionEffects(player);
 
                         player.getInventory().clear();
                         player.getInventory().setArmorContents(null);

@@ -52,6 +52,10 @@ public class WinEffects {
         this.instance = instance;
     }
 
+    /*
+    * This function checks which win effect to give to a player
+    * depending what they have selected in Cosmetics
+     */
     public void checkWinEffect() { // Database checking here
         if (instance != null) {
             PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(player);
