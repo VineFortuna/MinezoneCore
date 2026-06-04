@@ -176,7 +176,7 @@ public class PartyManager {
         }
     }
 
-    public void deny(Player player, Player inviter) {
+    public void reject(Player player, Player inviter) {
         cleanupExpiredInvites();
 
         if (inviter == null) {

@@ -29,7 +29,6 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_8_R3.*;
 import org.apache.commons.lang.WordUtils;
 
-import com.google.common.collect.Lists;
 import org.bukkit.*;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -196,14 +195,17 @@ public class Commands implements CommandExecutor, TabCompleter {
 				forceClassCommand(player, args);
 				break;
 
-                case "party":
-                    partyCommand(args, player);
-                    break;
+            case "friends":
+                friendsCommand(args, player);
+                break;
 
-                case "partychat":
-                    partyChatCommand(args, player);
-                    break;
+            case "party":
+                partyCommand(args, player);
+                break;
 
+            case "partychat":
+                partyChatCommand(args, player);
+                break;
 
 			case "practice":
 				new SCBPractice(player, Game.BowPractice, main);
@@ -212,10 +214,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "candyaura":
 				candyAuraCommand(args, player);
 				break;
-
-                case "friends":
-                    friendsCommand(args, player);
-                    break;
 			}
 		} else
 			sender.sendMessage("Hey! You can't use this in the terminal!");
@@ -366,23 +364,6 @@ public class Commands implements CommandExecutor, TabCompleter {
         return builder.toString();
     }
 
-    public void sendPartyHelp(Player player) {
-        player.sendMessage(main.color("&8&m------------------------------------"));
-        player.sendMessage(main.color("&6&lPARTY COMMANDS"));
-        player.sendMessage(main.color("&e/party invite <player> -> &rInvite a player"));
-        player.sendMessage(main.color("&e/party accept <player> -> &rAccept an invite"));
-        player.sendMessage(main.color("&e/party deny <player> -> &rDeny an invite"));
-        player.sendMessage(main.color("&e/party leave -> &rLeave your party"));
-        player.sendMessage(main.color("&e/party list -> &rView party members"));
-        player.sendMessage(main.color("&e/party kick <player> -> &rKick a member"));
-        player.sendMessage(main.color("&e/party promote <player> -> &rMake someone leader"));
-        player.sendMessage(main.color("&e/party disband -> &rDisband the party"));
-        player.sendMessage(main.color("&e/party chat [message] -> &rToggle/send party chat"));
-        player.sendMessage(main.color("&e/partychat [message] -> &rToggle/send party chat"));
-        player.sendMessage(main.color("&e/party settings -> &rCustom settings to your party"));
-        player.sendMessage(main.color("&8&m------------------------------------"));
-    }
-
     private void partyCommand(String[] args, Player player) {
         if (main.getPartyManager() == null) {
             player.sendMessage(main.color("&c&l(!) &rParty system is not loaded."));
@@ -423,14 +404,14 @@ public class Commands implements CommandExecutor, TabCompleter {
             return;
         }
 
-        if (sub.equals("deny") || sub.equals("reject")) {
+        if (sub.equals("reject") || sub.equals("deny")) {
             if (args.length < 2) {
-                player.sendMessage(main.color("&c&l(!) &rIncorrect Usage! Try doing: &e/party deny <player>"));
+                player.sendMessage(main.color("&c&l(!) &rIncorrect Usage! Try doing: &e/party reject <player>"));
                 return;
             }
 
             Player inviter = Bukkit.getPlayer(args[1]);
-            main.getPartyManager().deny(player, inviter);
+            main.getPartyManager().reject(player, inviter);
             return;
         }
 
@@ -482,6 +463,23 @@ public class Commands implements CommandExecutor, TabCompleter {
         }
 
         sendPartyHelp(player);
+    }
+
+    public void sendPartyHelp(Player player) {
+        player.sendMessage(main.color("&8&m------------------------------------"));
+        player.sendMessage(main.color("&6&lPARTY COMMANDS"));
+        player.sendMessage(main.color("&e/party invite <player> -> &rInvite a player"));
+        player.sendMessage(main.color("&e/party accept <player> -> &rAccept an invite"));
+        player.sendMessage(main.color("&e/party reject <player> -> &rReject an invite"));
+        player.sendMessage(main.color("&e/party leave -> &rLeave your party"));
+        player.sendMessage(main.color("&e/party list -> &rView party members"));
+        player.sendMessage(main.color("&e/party kick <player> -> &rKick a member"));
+        player.sendMessage(main.color("&e/party promote <player> -> &rMake someone leader"));
+        player.sendMessage(main.color("&e/party disband -> &rDisband the party"));
+        player.sendMessage(main.color("&e/party chat [message] -> &rToggle/send party chat"));
+        player.sendMessage(main.color("&e/partychat [message] -> &rToggle/send party chat"));
+        player.sendMessage(main.color("&e/party settings -> &rCustom settings to your party"));
+        player.sendMessage(main.color("&8&m------------------------------------"));
     }
 
     private void friendsCommand(String[] args, Player player) {
