@@ -2057,6 +2057,11 @@ public class Commands implements CommandExecutor, TabCompleter {
                         .collect(Collectors.toList());
                 return StringUtil.copyPartialMatches(args[0], names, new ArrayList<>());
             }
+        } else if (cmd.getName().equalsIgnoreCase("party")) {
+            if (args.length == 1) {
+                List<String> options = Arrays.asList("invite", "accept", "reject", "leave", "list", "kick", "promote", "disband", "chat", "settings");
+                return StringUtil.copyPartialMatches(args[0], options, new ArrayList<>());
+            }
         } else if (cmd.getName().equalsIgnoreCase("sound")) {
             if (args.length == 1) {
                 List<String> soundNames = Arrays.stream(Sound.values())
