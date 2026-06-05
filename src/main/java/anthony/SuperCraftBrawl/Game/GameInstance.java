@@ -194,7 +194,7 @@ public class GameInstance {
         if (getMap() != Maps.WitchesBrew)
             mapWorld.setTime(1000);
 
-        mapWorld.setDifficulty(Difficulty.NORMAL);
+        mapWorld.setDifficulty(Difficulty.EASY);
     }
 
     /**
