@@ -1908,14 +1908,6 @@ public class Commands implements CommandExecutor, TabCompleter {
                 List<String> options = Arrays.asList("add", "accept", "reject", "remove", "requests", "list", "help");
                 return StringUtil.copyPartialMatches(args[0], options, new ArrayList<>());
             }
-
-            if (args.length == 2) {
-                List<String> names = Bukkit.getOnlinePlayers()
-                        .stream()
-                        .map(player -> player.getName())
-                        .collect(Collectors.toList());
-                return StringUtil.copyPartialMatches(args[0], names, new ArrayList<>());
-            }
         } else if (cmd.getName().equalsIgnoreCase("sound")) {
             if (args.length == 1) {
                 List<String> soundNames = Arrays.stream(Sound.values())
