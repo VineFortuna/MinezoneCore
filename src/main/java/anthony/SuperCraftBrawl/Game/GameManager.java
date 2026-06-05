@@ -20,12 +20,9 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.EnumParticle;
-import net.minecraft.server.v1_8_R3.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutChat;
 import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.block.Sign;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
@@ -39,16 +36,13 @@ import org.bukkit.event.block.EntityBlockFormEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.painting.PaintingBreakEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
-import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.potion.PotionEffect;
@@ -388,6 +382,17 @@ public class GameManager implements Listener, PluginMessageListener {
 				return;
 			}
 		}
+	}
+
+	@EventHandler
+	public void onCaveSpiderPlayerHit(EntityDamageByEntityEvent event) {
+		Entity damager = event.getDamager();
+		if (!(damager instanceof CaveSpider)) return;
+		Entity damagee = event.getEntity();
+		if (!(damagee instanceof Player)) return;
+		Player playerDamagee = (Player) damagee;
+
+		playerDamagee.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 7 * 20, 0));
 	}
 
 	@EventHandler
