@@ -15,6 +15,7 @@ import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -82,6 +83,23 @@ public class StatsGUI implements InventoryProvider {
 			rankName = rank == Rank.DEFAULT ? main.color("&7Default") : rank.getTag();
 		
 		if (data != null) {
+			boolean ownStats = target == null || target.getUniqueId().equals(player.getUniqueId());
+			if (!ownStats) {
+				String message;
+				boolean areFriends = main.getFriendsManager().areFriends(player.getUniqueId(), target.getUniqueId());
+				if (areFriends) { message = "&rAlready friends with &a" + target.getName();
+				} else message = "&rClick to add &a" + target.getName() + "&r as a friend";
+
+				contents.set(0, 0,
+						ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.EMERALD),
+								"&a&lSend Friend Request",
+								"",
+								message),
+								inventoryClickEvent -> {
+									player.closeInventory();
+									player.performCommand("friend add " + target.getName());
+								}));
+			}
 			contents.set(0, 4,
 					ClickableItem.of(ItemHelper.createSkullHeadPlayer(1, data.playerName, main.color("&e" + data.playerName),
 							Arrays.asList(main.color("&fRank: &a" + rankName),
