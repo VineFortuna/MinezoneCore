@@ -166,7 +166,7 @@ public enum GameLootDrops {
 	        	 break;
 
 			case CAVE_SPIDER_EGG:
-				item = ItemHelper.createMonsterEgg(EntityType.SPIDER, 1);
+				item = ItemHelper.createMonsterEgg(EntityType.CAVE_SPIDER, 1);
 				ItemHelper.setDetails(item, "&c&lCAVE SPIDER POKEBALL", "&7Spawns a Cave Spider",
 						"", "&2&lUNCOMMON");
 				break;
