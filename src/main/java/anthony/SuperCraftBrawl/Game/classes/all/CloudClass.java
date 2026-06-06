@@ -313,6 +313,7 @@ public class CloudClass extends BaseClass {
 
 	// Send messages to player each life about abilities
 	private void forcesOfNature() {
+        player.sendMessage("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "------------------------------------");
 		player.sendMessage(instance.getGameManager().getMain().color("&9&lForces Of Nature"));
 		player.sendMessage(instance.getGameManager().getMain().color("&r&lStorm Wind: &rBlow away nearby enemies"));
 		player.sendMessage("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Lightning Strike: " + ChatColor.RESET
@@ -321,6 +322,7 @@ public class CloudClass extends BaseClass {
 				.color("&7&lLightning Blast: &rChannel lightning to all near players & do effects"));
 		player.sendMessage(instance.getGameManager().getMain().color("&0&lSnow Blast: &rPelt enemies with snow"));
 		player.sendMessage(instance.getGameManager().getMain().color("&c&lTNT Rain: &rSend TNT rain on all enemies"));
+        player.sendMessage("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "------------------------------------");
 	}
 
 	@Override
