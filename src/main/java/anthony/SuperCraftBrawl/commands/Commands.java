@@ -811,7 +811,19 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void healCommand(Player player, String[] args) {
-		if (!player.hasPermission("scb.heal")) {
+        GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+
+        if (args.length > 1) {
+            player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/heal &ror &e/heal <player>"));
+            return;
+        }
+
+        if (game == null) {
+            player.sendMessage(main.color("&c&l(!) &rYou are not in a game"));
+            return;
+        }
+
+        if (!player.hasPermission("scb.heal")) {
 			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
 			return;
 		}
@@ -832,15 +844,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 		// Fully heal the player to their maximum health
 		double maxHealth = targetPlayer.getMaxHealth();
 		targetPlayer.setHealth(maxHealth);
-		targetPlayer.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
 
-		if (targetPlayer.equals(player)) {
-			player.sendMessage(main.color("&a&l(!) &rYou have been healed!"));
-		} else {
-			player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
-			player.sendMessage(main.color("&a&l(!) &rYou have healed &e" + targetPlayer.getName() + "&r!"));
-			targetPlayer.sendMessage(main.color("&a&l(!) &rYou have been healed by &e" + player.getName() + "&r!"));
-		}
+        game.TellAll("&a&l(!) &r&e" + targetPlayer.getName() + " &r was healed");
+        targetPlayer.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
+        if (!targetPlayer.equals(player)) player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
 	}
 
 	private void soundCommand(String[] args, Player player) {
