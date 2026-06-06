@@ -17,6 +17,7 @@ import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.signs.SignManager;
 import anthony.SuperCraftBrawl.titles.TitleUtil;
 import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
+import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import fr.mrmicky.fastboard.FastBoard;
 import net.md_5.bungee.api.ChatColor;
@@ -1720,7 +1721,7 @@ public class GameInstance {
     }
 
     public void TellAll(String msg) {
-        for (Player player : players) player.sendMessage(msg);
+        for (Player player : players) player.sendMessage(ChatColorHelper.color(msg));
     }
 
     public void TellSpec(String msg) {
