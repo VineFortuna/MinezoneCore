@@ -1883,6 +1883,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 									for (Player gamePlayer : this.getNearby(3.0)) {
 										if (gamePlayer == player) continue;
+										if (instance.getGameManager().spawnProt.containsKey(gamePlayer)) continue;
 										if (instance.duosMap != null) {
 											if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
 												@SuppressWarnings("deprecation")

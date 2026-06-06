@@ -117,10 +117,12 @@ public class GenericModeGUI implements InventoryProvider {
 		setItem(contents, totalRows - 1, 5, getSorterItem(), e -> handleSortClick(e, player));
 
 		// Setting "Go Back" Button
-		contents.set(totalRows - 1, totalColumns - 1, ClickableItem.of(ItemHelper.getGoBackItem(), e -> {
-			SoundManager.playClickSound(player);
-			if (inv.getParent().isPresent()) {inv.getParent().get().open(player);}
-		}));
+		if (inv.getParent().isPresent()) {
+			contents.set(totalRows - 1, totalColumns - 1, ClickableItem.of(ItemHelper.getGoBackItem(), e -> {
+				SoundManager.playClickSound(player);
+				inv.getParent().get().open(player);
+			}));
+		}
 
 		// Maps
 		SlotIterator iterator = contents.newIterator(SlotIterator.Type.HORIZONTAL, SlotPos.of(1, 1));
