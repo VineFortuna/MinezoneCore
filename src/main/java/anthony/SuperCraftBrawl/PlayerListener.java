@@ -397,7 +397,35 @@ public class PlayerListener implements Listener {
         }
         Bukkit.getScheduler().runTaskLater(main, () -> {
             player.getInventory().clear();
-            main.ResetPlayer(player);
+            PlayerData playerData = main.getDataManager().getPlayerData(player);
+
+            if (player != null && playerData != null) {
+                player.getInventory().clear();
+                main.LobbyItems(player);
+                player.setHealth(20.0f);
+                player.setFireTicks(0);
+                player.setLevel(playerData.level);
+                player.setGameMode(GameMode.ADVENTURE);
+                player.setAllowFlight(true);
+                main.mysteryChestHologram(player);
+                main.parkourHolograms(player);
+                main.updateLeaderboards();
+
+                anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope =
+                        main.leaderboardScopeByViewer.getOrDefault(player.getUniqueId(),
+                                anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.LIFETIME);
+
+                try {
+                    main.repaintLeaderboardsFor(player, scope);
+                } catch (Throwable ignored) {
+                }
+
+                main.getScoreboardManager().lobbyBoard(player);
+                main.sendScoreboardUpdate(player);
+
+                if (!(main.holograms.containsKey(player)))
+                    main.holograms.put(player, new Holograms(main, player));
+            }
         }, 20);
     }
 
