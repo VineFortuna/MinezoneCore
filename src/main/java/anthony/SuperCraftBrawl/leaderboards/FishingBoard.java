@@ -32,7 +32,7 @@ public class FishingBoard extends ScopedStatLeaderboard {
 
     @Override
     protected Location titleLocation() {
-        return new Location(main.getLobbyWorld(), 305.5, 92.5, 531.5);
+        return new Location(main.getLobbyWorld(), 228.5, 106.5, 629.5);
     }
 
     @Override
