@@ -1339,8 +1339,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 	private void itemsCommand(String[] args, Player player) {
 		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 
-		if (args.length != 0) {
-			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/items"));
+		if (args.length > 2) {
+			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/items &ror &e/items <item>"));
 			return;
 		}
 
@@ -1354,12 +1354,45 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
-		for (GameLootDrops loot : GameLootDrops.values()) {
-			player.getInventory().addItem(loot.getItem());
-		}
+        Player targetPlayer;
+        if (args.length <= 1) {
+            targetPlayer = player;
+        } else {
+            targetPlayer = Bukkit.getPlayer(args[1]);
+            if (targetPlayer == null) {
+                player.sendMessage(main.color("&c&l(!) &rPlayer not found!"));
+                return;
+            }
+        }
+
+        if (args.length == 0) {
+            for (GameLootDrops loot : GameLootDrops.values()) {
+                targetPlayer.getInventory().addItem(loot.getItem());
+            }
+            game.TellAll(getItemCommandMessage(targetPlayer, null));
+            return;
+        }
+
+        String itemString = args[0];
+        for (GameLootDrops lootDrops : GameLootDrops.values()) {
+            if (lootDrops.toString().equalsIgnoreCase(itemString)) {
+                targetPlayer.getInventory().addItem(lootDrops.getItem());
+                game.TellAll(getItemCommandMessage(targetPlayer, lootDrops.getItem().getItemMeta().getDisplayName()));
+                return;
+            }
+        }
+
+        player.sendMessage(main.color("&c&l(!) &rItem not found!"));
 	}
 
-	private void setLivesCommand(String[] args, Player player) {
+    private String getItemCommandMessage(Player targetPlayer, String itemName) {
+        String prefix = "&a&l(!) &r&e" + targetPlayer.getName() + " &r";
+        if (itemName == null)
+            return prefix + "received all item drops";
+        return prefix + "received " + itemName;
+    }
+
+    private void setLivesCommand(String[] args, Player player) {
 		if (args.length < 2) {
 			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/setlives <player> <num>"));
 			return;
@@ -1907,6 +1940,13 @@ public class Commands implements CommandExecutor, TabCompleter {
             if (args.length == 1) {
                 List<String> options = Arrays.asList("add", "accept", "reject", "remove", "requests", "list", "help");
                 return StringUtil.copyPartialMatches(args[0], options, new ArrayList<>());
+            }
+        } else if (cmd.getName().equalsIgnoreCase("items")) {
+            if (args.length == 1) {
+                List<String> items = Arrays.stream(GameLootDrops.values())
+                        .map(GameLootDrops::name)
+                        .collect(Collectors.toList());
+                return StringUtil.copyPartialMatches(args[0], items, new ArrayList<>());
             }
         } else if (cmd.getName().equalsIgnoreCase("sound")) {
             if (args.length == 1) {
