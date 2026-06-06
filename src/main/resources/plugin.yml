@@ -134,7 +134,7 @@ commands:
       description: Kit command for SkyWars
    items:
       description: Get all SCB Item Drops
-      aliases: it
+      aliases: [item, it]
    sound:
       description: Play a sound to everyone, at your location
       aliases: s

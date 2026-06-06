@@ -96,6 +96,7 @@ public class WitherClass extends BaseClass {
 	@Override
 	public void DoDamage(EntityDamageByEntityEvent event) {
 		if (!isPlayerAlive()) return;
+		if (instance.getGameManager().spawnProt.containsKey(player)) return;
 		checkToApplyWither(event);
 	}
 

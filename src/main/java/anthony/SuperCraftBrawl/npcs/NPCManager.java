@@ -2,16 +2,12 @@ package anthony.SuperCraftBrawl.npcs;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameManager;
-import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
+import anthony.SuperCraftBrawl.gui.ClassicModeGUI;
+import anthony.SuperCraftBrawl.gui.DuelsModeGUI;
 import anthony.SuperCraftBrawl.gui.fishing.FishingGUI;
-import anthony.SuperCraftBrawl.gui.games.ParkourGUI;
-import anthony.SuperCraftBrawl.gui.games.ParkourMapsGUI;
-import anthony.SuperCraftBrawl.gui.games.SCBClassicGUI;
-import anthony.SuperCraftBrawl.gui.games.SCBDuelsGUI;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
 import net.jitse.npclib.NPCLib;
-import net.jitse.npclib.api.NPC;
 import net.jitse.npclib.api.events.NPCInteractEvent;
 import net.jitse.npclib.api.skin.Skin;
 import net.jitse.npclib.api.state.NPCSlot;
@@ -25,10 +21,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 
 public class NPCManager implements Listener {
 
@@ -78,7 +71,7 @@ public class NPCManager implements Listener {
 		socialMedia.setSkin(sethblingSkin);
 		socialMedia.create();
 
-		fishing = npcLib.createNPC(Arrays.asList(main.color("&6&lFISHING"), main.color("&eClick to Play!")));
+		fishing = npcLib.createNPC(Arrays.asList(main.color("&6&lFISHING"), main.color("&eClick to view!")));
 		fishing.setLocation(new Location(main.getLobbyWorld(), 195.5, 106, 656.5, 162, 3));
 		fishing.setSkin(fishermanSkin);
 		fishing.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.FISHING_ROD));
@@ -167,9 +160,9 @@ public class NPCManager implements Listener {
 		if (e.getNPC() == fishing) {
 			new FishingGUI(main, null).inv.open(player);
 		} else if (e.getNPC() == scbClassic) {
-			new SCBClassicGUI(main).inv.open(player);
+			new ClassicModeGUI(main, null).inv.open(player);
 		} else if (e.getNPC() == scbDuels) {
-			new SCBDuelsGUI(main).inv.open(player);
+			new DuelsModeGUI(main, null).inv.open(player);
 		} else if (e.getNPC() == parkour) {
             SoundManager.playClickSound(player);
             mainParkour(player);
