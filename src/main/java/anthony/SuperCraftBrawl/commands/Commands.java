@@ -845,7 +845,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		double maxHealth = targetPlayer.getMaxHealth();
 		targetPlayer.setHealth(maxHealth);
 
-        game.TellAll("&a&l(!) &r&e" + targetPlayer.getName() + " &r was healed");
+        game.TellAll("&a&l(!) &r&e" + targetPlayer.getName() + " &rwas healed");
         targetPlayer.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
         if (!targetPlayer.equals(player)) player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
 	}
