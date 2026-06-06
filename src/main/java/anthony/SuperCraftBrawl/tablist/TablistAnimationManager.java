@@ -129,13 +129,13 @@ public class TablistAnimationManager {
         final String PAD = "   "; // 3 spaces left + right
         final String PAD2 = " ";
 
-        String l1 = ChatColor.RESET + PAD + ChatColor.GRAY + "/help"
+        String l1 = ChatColor.RESET + PAD + ChatColor.GREEN + "/help"
                 + ChatColor.WHITE + " for a list of commands" + PAD;
-        String l2 = ChatColor.RESET + PAD2 + ChatColor.GRAY + "/store"
+        String l2 = ChatColor.RESET + PAD2 + ChatColor.GREEN + "/store"
                 + ChatColor.WHITE + " to purchase a rank" + PAD;
-        String l3 = ChatColor.RESET + PAD + ChatColor.GRAY + "/discord"
+        String l3 = ChatColor.RESET + PAD + ChatColor.GREEN + "/discord"
                 + ChatColor.WHITE + " to join our Discord" + PAD;
-        String l4 = ChatColor.RESET + "" + ChatColor.YELLOW + "minezone.club";
+        String l4 = ChatColor.RESET + "" + ChatColor.YELLOW + "www.minezone.club";
 
         return "\n" + l1 + "\n" + l2 + "\n" + l3 + "\n\n" + l4 + "\n";
     }
