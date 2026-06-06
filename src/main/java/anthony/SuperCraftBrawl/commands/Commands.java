@@ -845,7 +845,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		double maxHealth = targetPlayer.getMaxHealth();
 		targetPlayer.setHealth(maxHealth);
 
-        game.TellAll("&a&l(!) &r&e" + targetPlayer.getName() + " &rwas healed");
+        game.TellAll("&a&l(!) &r&e" + targetPlayer.getName() + " &r was healed");
         targetPlayer.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
         if (!targetPlayer.equals(player)) player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
 	}
@@ -1346,8 +1346,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 	private void itemsCommand(String[] args, Player player) {
 		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 
-		if (args.length != 0) {
-			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/items"));
+		if (args.length > 2) {
+			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/items &ror &e/items <item>"));
 			return;
 		}
 
@@ -1392,7 +1392,14 @@ public class Commands implements CommandExecutor, TabCompleter {
         player.sendMessage(main.color("&c&l(!) &rItem not found!"));
 	}
 
-	private void setLivesCommand(String[] args, Player player) {
+    private String getItemCommandMessage(Player targetPlayer, String itemName) {
+        String prefix = "&a&l(!) &r&e" + targetPlayer.getName() + " &r";
+        if (itemName == null)
+            return prefix + "received all item drops";
+        return prefix + "received " + itemName;
+    }
+
+    private void setLivesCommand(String[] args, Player player) {
 		if (args.length < 2) {
 			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/setlives <player> <num>"));
 			return;
