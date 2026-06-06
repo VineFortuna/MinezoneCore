@@ -149,6 +149,7 @@ public class SkeletonClass extends BaseClass {
 				&& heldItem.equals(weapon);
 
 		if (!isWeaponMelee && !isAttackArrow && !isSelfShot) return;
+		if (isAttackArrow && isSelfShot) return;
 		handleAddingArrow(1);
 	}
 
