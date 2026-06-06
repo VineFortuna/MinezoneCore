@@ -71,7 +71,7 @@ public class NPCManager implements Listener {
 		socialMedia.setSkin(sethblingSkin);
 		socialMedia.create();
 
-		fishing = npcLib.createNPC(Arrays.asList(main.color("&6&lFISHING"), main.color("&eClick to Play!")));
+		fishing = npcLib.createNPC(Arrays.asList(main.color("&6&lFISHING"), main.color("&eClick to view!")));
 		fishing.setLocation(new Location(main.getLobbyWorld(), 195.5, 106, 656.5, 162, 3));
 		fishing.setSkin(fishermanSkin);
 		fishing.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.FISHING_ROD));
