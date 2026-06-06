@@ -116,6 +116,48 @@ public enum FishType {
     MAP(34, "Treasure Map", FishRarity.TREASURE, null),
     CRATE(35, "MysteryChest", FishRarity.TREASURE, null);
 
+    // UNUSED
+
+    /* OLD Red Snapper -> Red Emperor
+    "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmI4MjI2YWI5ODcwYjdjNmM1OWQzMWI0MGI4NmVkZjczMjRlY2E2NzRiNzBkNTViZThhYWU2YTBiODllN2Q4YiJ9fX0="
+     */
+
+    /* Fish in ice
+    https://minecraft-heads.com/custom-heads/head/120479-fish-in-ice
+     */
+
+    /* Seal
+    https://minecraft-heads.com/custom-heads/head/114362-seal
+     */
+
+    /* Walrus
+    https://minecraft-heads.com/custom-heads/head/85224-walrus
+     */
+
+    /* Orca
+    https://minecraft-heads.com/custom-heads/head/120379-orca
+     */
+
+    // Beach ball
+
+    // Penguin
+
+    // Frozen salmon
+
+    // Narwhal
+
+    /* Arctic Comb Jelly
+    https://minecraft-heads.com/custom-heads/head/118987-jellyfish
+     */
+
+    // Toxic fish
+
+
+
+
+
+
+
     private int id;
     private String name;
     private FishRarity rarity;
@@ -274,7 +316,7 @@ public enum FishType {
                         "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjBlMjM2M2MyZDQxYTlkMzIzYmE2MjVkZThjMDYzNzA2M2EzNmZlODVhMDQ1ZGUyNzVhN2I3NzM5ZGVkNjA1MSJ9fX0=");
             case REDSNAPPER:
                 return ItemHelper.createSkullTexture(
-                        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmI4MjI2YWI5ODcwYjdjNmM1OWQzMWI0MGI4NmVkZjczMjRlY2E2NzRiNzBkNTViZThhYWU2YTBiODllN2Q4YiJ9fX0=");
+                        "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTJkNTk4MTdjOTI2NDE4NWU3NDM4NzQ2M2YyMjZiZWJmYmIxNTg0M2FhOTc2YWIxZmM5ODIxMTM2ZWVhMzliZiJ9fX0=");
             case DUCK:
                 return ItemHelper.createSkullTexture(
                         "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmU2ODY0NzAxMWZmMjI0NzlmYTgzYTM4YzI0N2U5NWFiZmY2ZGUyMTJhMzE3NjAzYjg5MTVkYzg0MDNhOTU0YSJ9fX0=");

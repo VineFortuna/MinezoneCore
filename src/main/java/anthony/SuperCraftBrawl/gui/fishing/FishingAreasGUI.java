@@ -2,6 +2,8 @@ package anthony.SuperCraftBrawl.gui.fishing;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.fishing.FishArea;
+import anthony.SuperCraftBrawl.fishing.FishType;
+import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
@@ -36,13 +38,24 @@ public class FishingAreasGUI implements InventoryProvider {
         if (data != null) {
             for (FishArea area : FishArea.values()) {
                 int id = area.getID();
+
+                int totalInArea = 0;
+                int caughtInArea = 0;
+                for (FishType type : FishType.values()) {
+                    if (type.getAreas() != null && type.getAreas().contains(area)) {
+                        totalInArea++;
+                        FishingDetails details = data.playerFishing.get(type.getId());
+                        if (details != null && details.timesCaught > 0) caughtInArea++;
+                    }
+                }
+                String speciesCaughtLine = main.color("&7Species caught: &e" + caughtInArea + "&7/" + totalInArea);
+
                 if (data.getFishingWarps().contains(id)) {
                     contents.add(
                             ClickableItem.of(
-                                    ItemHelper
-                                            .setDetails(area.getDisplayItem()
-                                                    , "&e&l" + area.getName(),
-                                                    "&7Click to teleport"),
+                                    ItemHelper.setDetails(area.getDisplayItem(), "&e&l" + area.getName(),
+                                            speciesCaughtLine,
+                                            "&7Click to teleport"),
                                     e -> {
                                         if (main.getGameManager().GetInstanceOfPlayer(player) == null
                                                 && main.getGameManager().GetInstanceOfSpectator(player) == null
@@ -64,10 +77,9 @@ public class FishingAreasGUI implements InventoryProvider {
                 } else {
                     contents.add(
                             ClickableItem.of(
-                                    ItemHelper
-                                            .setDetails(ItemHelper.createDye(DyeColor.GRAY, 1)
-                                                    , "&c???",
-                                                    "&7Visit location to unlock quick travel"),
+                                    ItemHelper.setDetails(ItemHelper.createDye(DyeColor.GRAY, 1), "&c???",
+                                            speciesCaughtLine,
+                                            "&7Visit location to unlock quick travel"),
                                     e -> {
                                     }));
                 }
