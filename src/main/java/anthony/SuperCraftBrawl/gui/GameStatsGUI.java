@@ -62,24 +62,24 @@ public class GameStatsGUI implements InventoryProvider {
 						contents.set(y, x,
 								ClickableItem.of(
 										ItemHelper.setDetails(stats, main.color("&e&lMATCH MVP"), "",
-												main.color("&ePlayer: " + rank + "&r" + entry.getKey().getName()),
-												main.color("&eClass: "
+												main.color("&rPlayer: " + rank + "&a" + entry.getKey().getName()),
+												main.color("&rClass: "
 														+ i.allClasses.get(entry.getKey()).getType().getTag()),
-												main.color("&eKills: &r" + i.allClasses.get(entry.getKey()).totalKills),
+												main.color("&rKills: &a" + i.allClasses.get(entry.getKey()).totalKills),
 												main.color(
-														"&eDeaths: &r" + i.allClasses.get(entry.getKey()).totalDeaths)),
+														"&rDeaths: &a" + i.allClasses.get(entry.getKey()).totalDeaths)),
 										e -> {
 										}));
 					} else {
 						contents.set(y, x,
 								ClickableItem.of(
 										ItemHelper.setDetails(stats,
-												main.color("&ePlayer: " + rank + "&r" + entry.getKey().getName()),
-												main.color("&eClass: "
+												main.color("&rPlayer: " + rank + "&a" + entry.getKey().getName()),
+												main.color("&rClass: "
 														+ i.allClasses.get(entry.getKey()).getType().getTag()),
-												main.color("&eKills: &r" + i.allClasses.get(entry.getKey()).totalKills),
+												main.color("&rKills: &a" + i.allClasses.get(entry.getKey()).totalKills),
 												main.color(
-														"&eDeaths: &r" + i.allClasses.get(entry.getKey()).totalDeaths)),
+														"&rDeaths: &a" + i.allClasses.get(entry.getKey()).totalDeaths)),
 										e -> {
 										}));
 					}
