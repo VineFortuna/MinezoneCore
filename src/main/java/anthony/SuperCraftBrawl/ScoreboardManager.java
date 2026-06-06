@@ -76,7 +76,7 @@ public class ScoreboardManager {
                         "" + ChatColor.RESET + ChatColor.BOLD + "Level: " + ChatColor.WHITE + data.level,
                         expBar,
                         "" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "-----------------",
-                        "" + ChatColor.AQUA + "minezone.club"
+                        "" + ChatColor.AQUA + "www.minezone.club"
                 );
             }
             return;
@@ -100,7 +100,7 @@ public class ScoreboardManager {
                         main.color("&fLevel: &f" + data.checkPlayerLevel(player, data) + "✧" + data.level),
                         expBar,
                         "",
-                        main.color("&eminezone.club")
+                        main.color("&ewww.minezone.club")
                 );
             }
         } else {
@@ -117,7 +117,7 @@ public class ScoreboardManager {
                         "",
                         "" + ChatColor.WHITE + ChatColor.BOLD + "Points: " + ChatColor.GRAY + fmt(data.points),   // ← commas
                         "",
-                        "" + ChatColor.AQUA + "minezone.club"
+                        "" + ChatColor.AQUA + "www.minezone.club"
                 );
             }
         }
@@ -156,7 +156,7 @@ public class ScoreboardManager {
                             + (game.getMap().GetInstance().gameType == GameType.DUEL
                             ? "" + ChatColor.GREEN + game.players.size() + "/" + game.gameType.getMaxPlayers()
                             : "")),
-                    "", main.color("&7&oWaiting for &a1 &7&oplayer"), "", main.color("&eminezone.club"));
+                    "", main.color("&7&oWaiting for &a1 &7&oplayer"), "", main.color("&ewww.minezone.club"));
 
             game.boards.get(player.getUniqueId()).updateTitle(main.color("&e&l" + game.getMap()));
         }
