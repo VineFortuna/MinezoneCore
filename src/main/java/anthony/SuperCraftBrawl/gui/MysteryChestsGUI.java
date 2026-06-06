@@ -142,7 +142,7 @@ public class MysteryChestsGUI implements InventoryProvider {
                 stand = new EntityArmorStand(s);
 
                 stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-                stand.setCustomName(main.color("&e&l" + data.mysteryChests + " &eto open!"));
+                stand.setCustomName(main.color("&a" + data.mysteryChests + " &rto open!"));
                 stand.setCustomNameVisible(true);
                 stand.setGravity(false);
                 stand.setInvisible(true);

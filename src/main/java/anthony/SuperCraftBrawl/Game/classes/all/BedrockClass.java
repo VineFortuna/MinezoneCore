@@ -189,6 +189,8 @@ public class BedrockClass extends BaseClass {
 				// LAVA ABILITY
 				if (item.equals(lavaItem)) {
 					if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
+						if (instance.getGameManager().spawnProt.containsKey(player)) return;
+
 						boolean foundPlayers = false;
 
 						for (Entity entity : player.getWorld().getNearbyEntities(
@@ -197,13 +199,15 @@ public class BedrockClass extends BaseClass {
 								LAVA_ABILITY_RANGE,
 								LAVA_ABILITY_RANGE
 						)) {
-							if (entity instanceof Player && !entity.equals(player)) {
-								Player playerInRange = (Player) entity;
-								if (!checkIfDead(playerInRange, instance) && !instance.HasSpectator(playerInRange)) {
-									useLavaAbility(playerInRange);
-									foundPlayers = true;
-								}
-							}
+							if (!(entity instanceof Player)) continue;
+							if (entity.equals(player)) continue;
+							Player playerInRange = (Player) entity;
+							if (checkIfDead(playerInRange, instance)) continue;
+							if  (instance.HasSpectator(playerInRange)) continue;
+							if (instance.getGameManager().spawnProt.containsKey(playerInRange)) continue;
+
+							useLavaAbility(playerInRange);
+							foundPlayers = true;
 						}
 						if (foundPlayers) SoundManager.playSoundToPlayer(player, Sound.LAVA_POP, 1, 1);
 						else player.sendMessage(ChatColorHelper.color("&c&l(!) &rNo nearby players have been found!"));
