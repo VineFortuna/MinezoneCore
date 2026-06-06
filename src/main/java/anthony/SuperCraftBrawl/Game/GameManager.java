@@ -36,7 +36,8 @@ import org.bukkit.event.block.EntityBlockFormEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
-import org.bukkit.event.painting.PaintingBreakEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.world.ChunkUnloadEvent;
@@ -1535,10 +1536,38 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	// Disables painting breaking
-	@SuppressWarnings("deprecation")
+	// Only creative players can break paintings
 	@EventHandler
-	public void onPaintingBreak(PaintingBreakEvent event) {
+	public void onPaintingBreak(HangingBreakEvent event) {
+		Entity entity = event.getEntity();
+		if (!(entity instanceof Painting) && !(entity instanceof ItemFrame)) return;
+		if (event instanceof HangingBreakByEntityEvent) {
+			Entity remover = ((HangingBreakByEntityEvent) event).getRemover();
+			if (remover instanceof Player && ((Player) remover).getGameMode() == GameMode.CREATIVE)
+				return;
+		}
+		event.setCancelled(true);
+	}
+
+	// Only creative players can interact with items inside item frames
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onItemFrameInteract(PlayerInteractEntityEvent event) {
+		if (!(event.getRightClicked() instanceof ItemFrame)) return;
+		if (event.getPlayer().getGameMode() == GameMode.CREATIVE) {
+			event.setCancelled(false);
+			return;
+		}
+		event.setCancelled(true);
+	}
+
+	// Only creative players can remove items from item frames by hitting them
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onItemFrameDamage(EntityDamageByEntityEvent event) {
+		if (!(event.getEntity() instanceof ItemFrame)) return;
+		if (event.getDamager() instanceof Player && ((Player) event.getDamager()).getGameMode() == GameMode.CREATIVE) {
+			event.setCancelled(false);
+			return;
+		}
 		event.setCancelled(true);
 	}
 
