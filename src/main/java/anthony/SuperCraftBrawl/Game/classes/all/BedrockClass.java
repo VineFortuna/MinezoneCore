@@ -189,6 +189,8 @@ public class BedrockClass extends BaseClass {
 				// LAVA ABILITY
 				if (item.equals(lavaItem)) {
 					if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
+						if (instance.getGameManager().spawnProt.containsKey(player)) return;
+
 						boolean foundPlayers = false;
 
 						for (Entity entity : player.getWorld().getNearbyEntities(
