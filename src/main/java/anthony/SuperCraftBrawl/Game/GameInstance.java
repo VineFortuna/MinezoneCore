@@ -997,6 +997,7 @@ public class GameInstance {
                 player.setAllowFlight(true);
                 player.getInventory().clear();
                 getGameManager().getMain().getLobbyItems().spectatorItems(player);
+                getGameManager().getMain().getListener().resetArmor(player);
 
                 for (Player gamePlayer : this.players) gamePlayer.hidePlayer(player);
                 for (Player spectator : this.spectators) spectator.showPlayer(player);
@@ -1098,6 +1099,7 @@ public class GameInstance {
                             spectator.sendMessage(getGameManager().getMain().color("&2&l(!) &rThe game on &r&l"
                                     + mapName + " &rhas ended. Moving you back to spawn..."));
                             spectator.spigot().setCollidesWithEntities(true);
+                            gameManager.getMain().restoreLobbyNameTag(spectator);
                             gameManager.getMain().sendScoreboardUpdate(spectator);
 
                             for (Player p : Bukkit.getOnlinePlayers()) p.showPlayer(spectator);
@@ -1112,6 +1114,7 @@ public class GameInstance {
                         bc.GameEnd();
                         SetLobbyScoreboard(player);
                         player.setDisplayName(player.getName());
+                        gameManager.getMain().restoreLobbyNameTag(player);
                         gameManager.getMain().sendScoreboardUpdate(player);
                         for (PotionEffect type : player.getActivePotionEffects())
                             player.removePotionEffect(type.getType());
@@ -1144,6 +1147,7 @@ public class GameInstance {
 
     public void SetLobbyScoreboard(Player player) {
         gameManager.getMain().getScoreboardManager().lobbyBoard(player);
+        gameManager.getMain().restoreLobbyNameTag(player);
         gameManager.getMain().gameStats.put(player, this);
         TextComponent message = new TextComponent(getGameManager().getMain()
                 .color("&2&l(!) &eThe match stats have been recorded. &e&lClick here to view!"));
