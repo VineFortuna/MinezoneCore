@@ -104,8 +104,10 @@ public class IrongolemClass extends BaseClass {
 									Vector v = direction;
 									v.setY(1.0);
 									hit.setVelocity(v);
-									for (Player gamePlayer : instance.players)
-										gamePlayer.playSound(loc, Sound.EXPLODE, 1, 1);
+									for (Player gamePlayer : instance.players) {
+                                        gamePlayer.playSound(loc, Sound.EXPLODE, 1, 1);
+                                        gamePlayer.playEffect(loc, Effect.EXPLOSION_LARGE, 1);
+                                    }
 								}
 							}
 						}
