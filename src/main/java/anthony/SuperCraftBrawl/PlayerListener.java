@@ -55,25 +55,25 @@ import java.util.*;
 
 public class PlayerListener implements Listener {
 
-	private final Core main;
-	public ScoreboardManager scoreManager = Bukkit.getScoreboardManager();
-	public Scoreboard c;
-	public Map<Player, Snowman> snowmanPetPlayers = new HashMap<>();
-	public List<Player> candyCaneSwirlPlayers = new ArrayList<Player>();
-	public List<Player> elfCosmeticPlayers = new ArrayList<Player>();
-	public List<Player> goldenOutfitPlayers = new ArrayList<>();
-	public List<Player> freddyOutfitPlayers = new ArrayList<>();
-	public List<Player> rudolphOutfitPlayers = new ArrayList<>();
-	private BukkitTask announcementsTask;
+    private final Core main;
+    public ScoreboardManager scoreManager = Bukkit.getScoreboardManager();
+    public Scoreboard c;
+    public Map<Player, Snowman> snowmanPetPlayers = new HashMap<>();
+    public List<Player> candyCaneSwirlPlayers = new ArrayList<Player>();
+    public List<Player> elfCosmeticPlayers = new ArrayList<Player>();
+    public List<Player> goldenOutfitPlayers = new ArrayList<>();
+    public List<Player> freddyOutfitPlayers = new ArrayList<>();
+    public List<Player> rudolphOutfitPlayers = new ArrayList<>();
+    private BukkitTask announcementsTask;
 
-	public PlayerListener(Core main) {
-		this.main = main;
-		this.main.getServer().getPluginManager().registerEvents(this, main);
-		this.c = scoreManager.getNewScoreboard();
-	}
+    public PlayerListener(Core main) {
+        this.main = main;
+        this.main.getServer().getPluginManager().registerEvents(this, main);
+        this.c = scoreManager.getNewScoreboard();
+    }
 
     /*
-    * This function shows the server messages that appear every 5 minutes to players
+     * This function shows the server messages that appear every 5 minutes to players
      */
     public void messages() {
         // Don’t schedule more than once
@@ -105,97 +105,97 @@ public class PlayerListener implements Listener {
     }
 
     /**
-	 * This function just resets player double jump & sets gamemode to Adventure
-	 *
-	 * @param p to be reset
-	 */
-	public void resetDoubleJump(Player p) {
-		p.setAllowFlight(false);
-		p.setAllowFlight(true);
-		p.setGameMode(GameMode.ADVENTURE);
-	}
+     * This function just resets player double jump & sets gamemode to Adventure
+     *
+     * @param p to be reset
+     */
+    public void resetDoubleJump(Player p) {
+        p.setAllowFlight(false);
+        p.setAllowFlight(true);
+        p.setGameMode(GameMode.ADVENTURE);
+    }
 
-	public void removeCosmetics(Player player) {
-		main.getTrickTitle().disable(player);
-	}
+    public void removeCosmetics(Player player) {
+        main.getTrickTitle().disable(player);
+    }
 
-	/**
-	 * This function resets the armor of a player
-	 *
-	 * @param p which is Player to remove armor
-	 */
-	public void resetArmor(Player p) {
-		p.getInventory().setHelmet(new ItemStack(Material.AIR, 1));
-		p.getInventory().setChestplate(new ItemStack(Material.AIR, 1));
-		p.getInventory().setLeggings(new ItemStack(Material.AIR, 1));
-		p.getInventory().setBoots(new ItemStack(Material.AIR, 1));
-	}
+    /**
+     * This function resets the armor of a player
+     *
+     * @param p which is Player to remove armor
+     */
+    public void resetArmor(Player p) {
+        p.getInventory().setHelmet(new ItemStack(Material.AIR, 1));
+        p.getInventory().setChestplate(new ItemStack(Material.AIR, 1));
+        p.getInventory().setLeggings(new ItemStack(Material.AIR, 1));
+        p.getInventory().setBoots(new ItemStack(Material.AIR, 1));
+    }
 
-	/**
-	 * This function resets the Player's potion effects if any is active
-	 *
-	 * @param p which is Player to remove effects
-	 */
-	public void resetPotionEffects(Player p) {
-		for (PotionEffect type : p.getActivePotionEffects()) // Loop through all active effects
-			p.removePotionEffect(type.getType());
-	}
+    /**
+     * This function resets the Player's potion effects if any is active
+     *
+     * @param p which is Player to remove effects
+     */
+    public void resetPotionEffects(Player p) {
+        for (PotionEffect type : p.getActivePotionEffects()) // Loop through all active effects
+            p.removePotionEffect(type.getType());
+    }
 
     /*
-    * This function handles if a player has 2500 exp or more, it will
-    * level them up
+     * This function handles if a player has 2500 exp or more, it will
+     * level them up
      */
-	public void checkIfLevelUp(Player player) {
-		PlayerData data = main.getDataManager().getPlayerData(player);
+    public void checkIfLevelUp(Player player) {
+        PlayerData data = main.getDataManager().getPlayerData(player);
 
-		if (data != null) {
-			if (data.exp >= 2500) {
-				data.level++;
-				data.exp -= 2500;
-				player.sendMessage(main.color("&8&m----------------------------------------"));
-				player.sendMessage(main.color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
-				player.sendMessage(main.color("&rYou are now &e&lLevel &6&l" + data.level + " &r- nice work!"));
-				player.sendMessage(main.color("&8&m----------------------------------------"));
-				player.playSound(player.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
+        if (data != null) {
+            if (data.exp >= 2500) {
+                data.level++;
+                data.exp -= 2500;
+                player.sendMessage(main.color("&8&m----------------------------------------"));
+                player.sendMessage(main.color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
+                player.sendMessage(main.color("&rYou are now &e&lLevel &6&l" + data.level + " &r- nice work!"));
+                player.sendMessage(main.color("&8&m----------------------------------------"));
+                player.playSound(player.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
 
-				if (player.getWorld() == main.getLobbyWorld())
-					main.getScoreboardManager().lobbyBoard(player); //Will update lobby scoreboard with new level
-			}
-		}
-	}
+                if (player.getWorld() == main.getLobbyWorld())
+                    main.getScoreboardManager().lobbyBoard(player); //Will update lobby scoreboard with new level
+            }
+        }
+    }
 
-	/**
-	 * This function sets the player's rank on the tablist to the left of their name
-	 *
-	 * @param p which is Player to set rank on tablist
-	 */
-	@SuppressWarnings("deprecation")
-	public void setPlayerOnTablist(Player p) {
-		String rank = main.getRankManager().getRank(p).getTagWithSpace(); // Gets the player's rank
-		Rank r = main.getRankManager().getRank(p);
+    /**
+     * This function sets the player's rank on the tablist to the left of their name
+     *
+     * @param p which is Player to set rank on tablist
+     */
+    @SuppressWarnings("deprecation")
+    public void setPlayerOnTablist(Player p) {
+        String rank = main.getRankManager().getRank(p).getTagWithSpace(); // Gets the player's rank
+        Rank r = main.getRankManager().getRank(p);
 
-		if (rank.length() >= 16) {
-			String s = rank.substring(0, 9);
-			p.setPlayerListName(s + " " + r.getColorForNames(p, r));
-		} else
-			p.setPlayerListName(rank + r.getColorForNames(p, r));
+        if (rank.length() >= 16) {
+            String s = rank.substring(0, 9);
+            p.setPlayerListName(s + " " + r.getColorForNames(p, r));
+        } else
+            p.setPlayerListName(rank + r.getColorForNames(p, r));
 
-		if (main.getRankManager().getRank(p) == Rank.DEFAULT)
-			p.setPlayerListName(rank + r.getColorForNames(p, r));
+        if (main.getRankManager().getRank(p) == Rank.DEFAULT)
+            p.setPlayerListName(rank + r.getColorForNames(p, r));
 
-		/*
-		 * Team captain = c.registerNewTeam("b_captain");
-		 * captain.setPrefix(Rank.CAPTAIN.getTagWithSpace()); Team owner =
-		 * c.registerNewTeam("a_owner"); owner.setPrefix(Rank.OWNER.getTagWithSpace());
-		 *
-		 * if (main.getRankManager().getRank(p) == Rank.CAPTAIN) captain.addPlayer(p);
-		 * else if (main.getRankManager().getRank(p) == Rank.OWNER) owner.addPlayer(p);
-		 *
-		 * p.setScoreboard(c);
-		 *
-		 * if (main.getTabManager() != null) main.getTabManager().setPlayerTeam(p);
-		 */
-	}
+        /*
+         * Team captain = c.registerNewTeam("b_captain");
+         * captain.setPrefix(Rank.CAPTAIN.getTagWithSpace()); Team owner =
+         * c.registerNewTeam("a_owner"); owner.setPrefix(Rank.OWNER.getTagWithSpace());
+         *
+         * if (main.getRankManager().getRank(p) == Rank.CAPTAIN) captain.addPlayer(p);
+         * else if (main.getRankManager().getRank(p) == Rank.OWNER) owner.addPlayer(p);
+         *
+         * p.setScoreboard(c);
+         *
+         * if (main.getTabManager() != null) main.getTabManager().setPlayerTeam(p);
+         */
+    }
 
     // Track the follow task for each player's snowman so we can cancel it.
     private final Map<UUID, Integer> snowmanTasks = new HashMap<>();
@@ -208,12 +208,12 @@ public class PlayerListener implements Listener {
     }
 
     public int getHalloweenEventProgress(Player player) {
-		int progress = (main.getHalloweenManager() != null)
-				? main.getHalloweenManager().getFoundCount(player.getUniqueId())
-				: 0;
+        int progress = (main.getHalloweenManager() != null)
+                ? main.getHalloweenManager().getFoundCount(player.getUniqueId())
+                : 0;
 
-		return progress;
-	}
+        return progress;
+    }
 
     // Clicking leaderboard settings in lobby
     @EventHandler
@@ -239,25 +239,33 @@ public class PlayerListener implements Listener {
     }
 
     /**
-	 * This function checks if tournament mode is active on Player Join
-	 *
-	 * @param p which is Player to add to the tournament
-	 */
-	public void checkIfTournament(Player p) {
-		if (main.tournament) {
-			PlayerData data = main.getDataManager().getPlayerData(p);
-			if (main.tourneyreset) {
+     * This function checks if tournament mode is active on Player Join
+     *
+     * @param p which is Player to add to the tournament
+     */
+    public void checkIfTournament(Player p) {
+        if (main.tournament) {
+            PlayerData data = main.getDataManager().getPlayerData(p);
+            if (main.tourneyreset) {
                 data.points = main.tourney.getOrDefault(p.getName(), 0);
-			}
-			main.tourney.put(p.getName(), data.points);
-		}
-	}
+            }
+            main.tourney.put(p.getName(), data.points);
+        }
+    }
 
-	// EVENTS:
+    // EVENTS:
 
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+
+        // Safety net: if this player is somehow still riding an EnderDragon from a previous session, eject and remove it
+        if (player.isInsideVehicle()) {
+            Entity vehicle = player.getVehicle();
+            player.leaveVehicle();
+            if (vehicle instanceof EnderDragon) vehicle.remove();
+        }
+
         PlayerData data = main.getDataManager().getPlayerData(player); // Gets the player data from database
         String name = player.getName();
         Rank rank = main.getRankManager().getRank(player); // Gets the player's rank
@@ -387,8 +395,8 @@ public class PlayerListener implements Listener {
     }
 
     /*
-    * This function fixes the minecraft hit glitch by placing a sword
-    * in a player's hand and removing it after a second
+     * This function fixes the minecraft hit glitch by placing a sword
+     * in a player's hand and removing it after a second
      */
     private void hitGlitchFix(Player player) {
         player.teleport(main.GetHubLoc());
@@ -471,19 +479,37 @@ public class PlayerListener implements Listener {
         }, 40L); // ~2 seconds after join; adjust if your data load needs more/less time
     }
 
-	@EventHandler
-	public void OnPlayerQuit(PlayerQuitEvent event) {
-		Player player = event.getPlayer();
-		GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
-		candyCaneSwirlPlayers.remove(player);
-		main.getCosmeticsManager().snowParticlePlayers.remove(player);
-		if (snowmanPetPlayers.containsKey(player))
-			snowmanPetPlayers.get(player).remove();
-		snowmanPetPlayers.remove(player);
-		elfCosmeticPlayers.remove(player);
+    @EventHandler
+    public void OnPlayerQuit(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
 
-		if (instance != null)
-			main.getGameManager().RemovePlayerFromAll(player);
+        // --- EnderDragon win-effect fix ---
+        // Must run BEFORE RemovePlayerFromAll since instance is still valid here.
+        // 1. Eject the player from any vehicle so Minecraft doesn't restore the mount on reconnect.
+        // 2. Remove the dragon from the world so it doesn't linger.
+        if (player.isInsideVehicle()) {
+            Entity vehicle = player.getVehicle();
+            player.leaveVehicle();
+            if (vehicle instanceof EnderDragon) {
+                vehicle.remove();
+            }
+        }
+        // Also clean up via the effects map in case the dragon is tracked there
+        if (instance != null && instance.effects.containsKey(player)) {
+            instance.effects.get(player).removeWinEffects();
+            instance.effects.remove(player);
+        }
+
+        candyCaneSwirlPlayers.remove(player);
+        main.getCosmeticsManager().snowParticlePlayers.remove(player);
+        if (snowmanPetPlayers.containsKey(player))
+            snowmanPetPlayers.get(player).remove();
+        snowmanPetPlayers.remove(player);
+        elfCosmeticPlayers.remove(player);
+
+        if (instance != null)
+            main.getGameManager().RemovePlayerFromAll(player);
 
         main.getScoreboardManager().removeLobbyBoard(player);
         Player p = event.getPlayer();
@@ -566,47 +592,47 @@ public class PlayerListener implements Listener {
     }
 
     @EventHandler
-	public void waterNoFlow(BlockFromToEvent e) {
-		if (main.getCommands() != null)
-			e.setCancelled(true);
-		else
-			e.setCancelled(false);
-	}
+    public void waterNoFlow(BlockFromToEvent e) {
+        if (main.getCommands() != null)
+            e.setCancelled(true);
+        else
+            e.setCancelled(false);
+    }
 
-	@EventHandler
-	public void onEnderChestInteract(PlayerInteractEvent event) {
-		if (event.getClickedBlock() != null) {
-			if (event.getClickedBlock().getType() == Material.ENDER_CHEST
-					&& event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-				event.setCancelled(true);
-				new ChristmasRewardsGUI(main).inv.open(event.getPlayer());
-			}
-		}
-	}
+    @EventHandler
+    public void onEnderChestInteract(PlayerInteractEvent event) {
+        if (event.getClickedBlock() != null) {
+            if (event.getClickedBlock().getType() == Material.ENDER_CHEST
+                    && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                event.setCancelled(true);
+                new ChristmasRewardsGUI(main).inv.open(event.getPlayer());
+            }
+        }
+    }
 
-	@EventHandler
-	public void onJumpPadStep(PlayerMoveEvent event) {
-		Player player = event.getPlayer();
-		// Lobby jump pad
-		if (player.getWorld() == main.getLobbyWorld()) {
-			Location location = player.getLocation();
+    @EventHandler
+    public void onJumpPadStep(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        // Lobby jump pad
+        if (player.getWorld() == main.getLobbyWorld()) {
+            Location location = player.getLocation();
 
-			// Check if the block below the player is a gold block
-			if (player.isOnGround() && location.getBlock().getType() == Material.GOLD_PLATE) {
-				// Check if the player is facing south
-				float yaw = location.getYaw();
-				if (isFacingSouth(yaw)) {
-					// Set the boost direction to south
-					Vector direction = new Vector(0, 1.25, 3); // Current facing direction
+            // Check if the block below the player is a gold block
+            if (player.isOnGround() && location.getBlock().getType() == Material.GOLD_PLATE) {
+                // Check if the player is facing south
+                float yaw = location.getYaw();
+                if (isFacingSouth(yaw)) {
+                    // Set the boost direction to south
+                    Vector direction = new Vector(0, 1.25, 3); // Current facing direction
 
-					// Apply the velocity to the player
-					player.setVelocity(direction);
+                    // Apply the velocity to the player
+                    player.setVelocity(direction);
 
-					player.getWorld().playSound(location, Sound.BAT_TAKEOFF, 1, 5);
-				}
-			}
-		}
-	}
+                    player.getWorld().playSound(location, Sound.BAT_TAKEOFF, 1, 5);
+                }
+            }
+        }
+    }
 
     @EventHandler
     public void onPlayerChangedWorld(PlayerChangedWorldEvent e) {
@@ -648,67 +674,67 @@ public class PlayerListener implements Listener {
             }
         } catch (Throwable ignored) {}
 
-		// 5) Hide or show NPCS
-		for (NPC npc : main.getAllNPCs()) {
-			// Leaving NPC world
-			if (!p.getWorld().equals(npc.getLocation().getWorld())) {
-				npc.hideFrom(p);
-				continue;
-			}
-			// Returning to NPC world
-			Bukkit.getScheduler().runTaskLater(main, () -> {
-				npc.showTo(p);
-			}, 5L);
-		}
+        // 5) Hide or show NPCS
+        for (NPC npc : main.getAllNPCs()) {
+            // Leaving NPC world
+            if (!p.getWorld().equals(npc.getLocation().getWorld())) {
+                npc.hideFrom(p);
+                continue;
+            }
+            // Returning to NPC world
+            Bukkit.getScheduler().runTaskLater(main, () -> {
+                npc.showTo(p);
+            }, 5L);
+        }
 
         clearLeaderboardHolograms(p);
     }
 
     @EventHandler
-	public void onEnterFishingArea(PlayerMoveEvent event) {
-		Player player = event.getPlayer();
-		Location to = event.getTo();
+    public void onEnterFishingArea(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        Location to = event.getTo();
 
-		// Ensure the event occurs in the lobby world
-		if (player.getWorld().equals(main.getLobbyWorld())) {
-			// Ignore if the player hasn't moved to a new block
-			if (to == null || to.equals(event.getFrom())) {
-				return;
-			}
+        // Ensure the event occurs in the lobby world
+        if (player.getWorld().equals(main.getLobbyWorld())) {
+            // Ignore if the player hasn't moved to a new block
+            if (to == null || to.equals(event.getFrom())) {
+                return;
+            }
 
-			// Check if the player is entering a fishing area
-			FishArea newArea = main.getFishingArea(to);
-			FishArea previousArea = main.getFishingArea(event.getFrom());
+            // Check if the player is entering a fishing area
+            FishArea newArea = main.getFishingArea(to);
+            FishArea previousArea = main.getFishingArea(event.getFrom());
 
-			if (previousArea == null && newArea != null) {
-				String msg = main.color("&3&l(!) &rEntering &e" + newArea.getName());
-				PacketPlayOutChat packet = new PacketPlayOutChat(
-						IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
-				PlayerData data = main.getDataManager().getPlayerData(player);
-				if (!data.getFishingWarps().contains(newArea.getID())) {
-					player.sendTitle(main.color("&6" + newArea.getName()), main.color("&eArea discovered"));
-					data.addFishingWarp(newArea.getID());
-					main.getDataManager().saveData(data);
-				}
-			} else if (previousArea != null && newArea == null) {
-				String msg = main.color("&3&l(!) &rLeaving &e" + previousArea.getName());
-				PacketPlayOutChat packet = new PacketPlayOutChat(
-						IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
-				CraftPlayer craft = (CraftPlayer) player;
-				craft.getHandle().playerConnection.sendPacket(packet);
-			}
-		}
-	}
+            if (previousArea == null && newArea != null) {
+                String msg = main.color("&3&l(!) &rEntering &e" + newArea.getName());
+                PacketPlayOutChat packet = new PacketPlayOutChat(
+                        IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
+                CraftPlayer craft = (CraftPlayer) player;
+                craft.getHandle().playerConnection.sendPacket(packet);
+                PlayerData data = main.getDataManager().getPlayerData(player);
+                if (!data.getFishingWarps().contains(newArea.getID())) {
+                    player.sendTitle(main.color("&6" + newArea.getName()), main.color("&eArea discovered"));
+                    data.addFishingWarp(newArea.getID());
+                    main.getDataManager().saveData(data);
+                }
+            } else if (previousArea != null && newArea == null) {
+                String msg = main.color("&3&l(!) &rLeaving &e" + previousArea.getName());
+                PacketPlayOutChat packet = new PacketPlayOutChat(
+                        IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"), (byte) 2);
+                CraftPlayer craft = (CraftPlayer) player;
+                craft.getHandle().playerConnection.sendPacket(packet);
+            }
+        }
+    }
 
-	private boolean isFacingSouth(float yaw) {
-		// Normalize yaw to 0-360 degrees
-		yaw = (yaw % 360 + 360) % 360;
+    private boolean isFacingSouth(float yaw) {
+        // Normalize yaw to 0-360 degrees
+        yaw = (yaw % 360 + 360) % 360;
 
-		// Check if yaw is within the range for south direction
-		return (yaw >= 337.5 || yaw <= 22.5);
-	}
+        // Check if yaw is within the range for south direction
+        return (yaw >= 337.5 || yaw <= 22.5);
+    }
 
     public void snowmanPet(Player player) {
         UUID uid = player.getUniqueId();
@@ -750,86 +776,86 @@ public class PlayerListener implements Listener {
     }
 
     // Angle used to rotate the swirl; we store it as a field so it persists across
-	// movements
-	private double angle = 0;
+    // movements
+    private double angle = 0;
 
-	public void candyCaneSwirlCosmetic(Player player) {
-		if (this.candyCaneSwirlPlayers.contains(player)) {
-			new BukkitRunnable() {
-				@Override
-				public void run() {
-					// Check if player is still in the arraylist
-					if (!candyCaneSwirlPlayers.contains(player)) {
-						this.cancel();
-						return;
-					}
+    public void candyCaneSwirlCosmetic(Player player) {
+        if (this.candyCaneSwirlPlayers.contains(player)) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    // Check if player is still in the arraylist
+                    if (!candyCaneSwirlPlayers.contains(player)) {
+                        this.cancel();
+                        return;
+                    }
 
-					if (player.getWorld() == main.getLobbyWorld()) {
-						angle += Math.PI / 16; // adjust for speed of rotation
+                    if (player.getWorld() == main.getLobbyWorld()) {
+                        angle += Math.PI / 16; // adjust for speed of rotation
 
-						// Set the radius of the swirl and the vertical height
-						double radius = 1.0;
-						double height = 1.0; // how high around the player the swirl appears
+                        // Set the radius of the swirl and the vertical height
+                        double radius = 1.0;
+                        double height = 1.0; // how high around the player the swirl appears
 
-						// Calculate the positions for red and white particles in a circle
-						double xRed = radius * Math.cos(angle);
-						double zRed = radius * Math.sin(angle);
+                        // Calculate the positions for red and white particles in a circle
+                        double xRed = radius * Math.cos(angle);
+                        double zRed = radius * Math.sin(angle);
 
-						double xWhite = radius * Math.cos(angle + Math.PI); // Opposite side for a striped effect
-						double zWhite = radius * Math.sin(angle + Math.PI);
+                        double xWhite = radius * Math.cos(angle + Math.PI); // Opposite side for a striped effect
+                        double zWhite = radius * Math.sin(angle + Math.PI);
 
-						// Get player location
-						Location baseLoc = player.getLocation();
+                        // Get player location
+                        Location baseLoc = player.getLocation();
 
-						// Red particle (REDSTONE)
-						sendParticleToAll(EnumParticle.REDSTONE, baseLoc.getX() + xRed, baseLoc.getY() + height,
-								baseLoc.getZ() + zRed, 0.1f, 0.1f, 0.1f, 0f, 5);
+                        // Red particle (REDSTONE)
+                        sendParticleToAll(EnumParticle.REDSTONE, baseLoc.getX() + xRed, baseLoc.getY() + height,
+                                baseLoc.getZ() + zRed, 0.1f, 0.1f, 0.1f, 0f, 5);
 
-						// White particle (CLOUD)
-						sendParticleToAll(EnumParticle.SNOW_SHOVEL, baseLoc.getX() + xWhite, baseLoc.getY() + height,
-								baseLoc.getZ() + zWhite, 0.1f, 0.1f, 0.1f, 0f, 5);
-					}
-				}
-			}.runTaskTimer(main, 0L, 1L); // Run every 20 ticks (1 second), adjust as needed
-		}
-	}
+                        // White particle (CLOUD)
+                        sendParticleToAll(EnumParticle.SNOW_SHOVEL, baseLoc.getX() + xWhite, baseLoc.getY() + height,
+                                baseLoc.getZ() + zWhite, 0.1f, 0.1f, 0.1f, 0f, 5);
+                    }
+                }
+            }.runTaskTimer(main, 0L, 1L); // Run every 20 ticks (1 second), adjust as needed
+        }
+    }
 
-	// Sends the particle packet to all online players so everyone sees the swirl
-	private void sendParticleToAll(EnumParticle particle, double x, double y, double z, float offsetX, float offsetY,
-			float offsetZ, float speed, int count) {
-		PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particle, false, // long distance
-				(float) x, (float) y, (float) z, offsetX, offsetY, offsetZ, speed, count);
+    // Sends the particle packet to all online players so everyone sees the swirl
+    private void sendParticleToAll(EnumParticle particle, double x, double y, double z, float offsetX, float offsetY,
+                                   float offsetZ, float speed, int count) {
+        PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particle, false, // long distance
+                (float) x, (float) y, (float) z, offsetX, offsetY, offsetZ, speed, count);
 
-		for (Player online : Bukkit.getOnlinePlayers()) {
-			((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
-		}
-	}
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            ((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
+        }
+    }
 
-	@EventHandler
-	public void onPlayerInteract(PlayerInteractEntityEvent event) {
-		if (event.getRightClicked() instanceof Player) {
-			Player player = event.getPlayer();
-			Player target = (Player) event.getRightClicked();
+    @EventHandler
+    public void onPlayerInteract(PlayerInteractEntityEvent event) {
+        if (event.getRightClicked() instanceof Player) {
+            Player player = event.getPlayer();
+            Player target = (Player) event.getRightClicked();
 
-			if (player != null && target != null) {
-				GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
-				GameInstance spectating = main.getGameManager().GetInstanceOfSpectator(player);
+            if (player != null && target != null) {
+                GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+                GameInstance spectating = main.getGameManager().GetInstanceOfSpectator(player);
 
-				if ((game != null && game.state == GameState.STARTED) || spectating != null || main.getParkour().hasPlayer(player)) {
-					return;
-				}
+                if ((game != null && game.state == GameState.STARTED) || spectating != null || main.getParkour().hasPlayer(player)) {
+                    return;
+                }
 
-				new StatsGUI(main, target).inv.open(player);
-			}
-		}
-	}
+                new StatsGUI(main, target).inv.open(player);
+            }
+        }
+    }
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void onBlockBreak(BlockBreakEvent event) {
-		Player player = event.getPlayer();
-		// anthony.CrystalWars.game.GameInstance i =
-		// main.getCwManager().getInstanceOfPlayer(player);
-		Block b = event.getBlock();
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBlockBreak(BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        // anthony.CrystalWars.game.GameInstance i =
+        // main.getCwManager().getInstanceOfPlayer(player);
+        Block b = event.getBlock();
 
 //		if (i != null) {
 //			if (i.getState() == GameState.IN_PROGRESS) {
@@ -841,10 +867,10 @@ public class PlayerListener implements Listener {
 //				player.sendMessage(main.color("&c&l(!) &rYou can only destroy blocks placed by players!"));
 //			}
 //		} else {
-		if (player.isOp())
-			event.setCancelled(false);
-		else
-			event.setCancelled(true);
+        if (player.isOp())
+            event.setCancelled(false);
+        else
+            event.setCancelled(true);
 //		}
 //		i = null;
 //		anthony.skywars.GameInstance i2 = main.getSWManager().getInstanceOfPlayer(player);
@@ -856,119 +882,119 @@ public class PlayerListener implements Listener {
 //			}
 //		}
 //		i2 = null;
-	}
+    }
 
-	@EventHandler(priority = EventPriority.LOWEST)
-	public void onBlockPlace(BlockPlaceEvent event) {
-		Player player = event.getPlayer();
-		/*
-		 * anthony.CrystalWars.game.GameInstance i =
-		 * main.getCwManager().getInstanceOfPlayer(player);
-		 *
-		 * if (i != null) { if (i.getState() == GameState.IN_PROGRESS) {
-		 * event.setCancelled(false);
-		 * i.blocksPlaced.add(event.getBlockPlaced().getLocation().toVector()); return;
-		 * } } i = null;
-		 *
-		 * anthony.skywars.GameInstance i2 =
-		 * main.getSWManager().getInstanceOfPlayer(player);
-		 *
-		 * if (i2 != null) { if (i2.getState() == anthony.skywars.GameState.STARTED) {
-		 * event.setCancelled(false); return; } }
-		 */
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onBlockPlace(BlockPlaceEvent event) {
+        Player player = event.getPlayer();
+        /*
+         * anthony.CrystalWars.game.GameInstance i =
+         * main.getCwManager().getInstanceOfPlayer(player);
+         *
+         * if (i != null) { if (i.getState() == GameState.IN_PROGRESS) {
+         * event.setCancelled(false);
+         * i.blocksPlaced.add(event.getBlockPlaced().getLocation().toVector()); return;
+         * } } i = null;
+         *
+         * anthony.skywars.GameInstance i2 =
+         * main.getSWManager().getInstanceOfPlayer(player);
+         *
+         * if (i2 != null) { if (i2.getState() == anthony.skywars.GameState.STARTED) {
+         * event.setCancelled(false); return; } }
+         */
 
-		if (!(player.isOp()))
-			event.setCancelled(true);
-	}
+        if (!(player.isOp()))
+            event.setCancelled(true);
+    }
 
-	@EventHandler
-	public void onFall(EntityDamageEvent e) {
-		if (e.getCause() == EntityDamageEvent.DamageCause.FALL)
-			e.setCancelled(true);
-	}
+    @EventHandler
+    public void onFall(EntityDamageEvent e) {
+        if (e.getCause() == EntityDamageEvent.DamageCause.FALL)
+            e.setCancelled(true);
+    }
 
-	@EventHandler
-	public void armorStand(EntityDamageByEntityEvent e) {
-		if (e.getDamager() instanceof Player)
-			if (e.getEntity() instanceof ArmorStand)
-				if (((Player) e.getDamager()).getPlayer().getGameMode() != GameMode.CREATIVE)
-					e.setCancelled(true);
-	}
+    @EventHandler
+    public void armorStand(EntityDamageByEntityEvent e) {
+        if (e.getDamager() instanceof Player)
+            if (e.getEntity() instanceof ArmorStand)
+                if (((Player) e.getDamager()).getPlayer().getGameMode() != GameMode.CREATIVE)
+                    e.setCancelled(true);
+    }
 
-	@EventHandler(priority = EventPriority.NORMAL)
-	public void onClick(InventoryClickEvent event) {
-		if (event.getSlotType() == InventoryType.SlotType.ARMOR)
-			event.setCancelled(true);
-	}
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onClick(InventoryClickEvent event) {
+        if (event.getSlotType() == InventoryType.SlotType.ARMOR)
+            event.setCancelled(true);
+    }
 
-	@EventHandler
-	public void tokenClassGUI(PlayerInteractEvent e) {
-		Player player = e.getPlayer();
-		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
-		if (e.getItem() != null && e.getItem().getType() == Material.ENCHANTED_BOOK) {
-			e.setCancelled(true);
-			if (i == null) {
-				new ClassesGUI(main).inv.open(player);
-			}
-		}
-	}
+    @EventHandler
+    public void tokenClassGUI(PlayerInteractEvent e) {
+        Player player = e.getPlayer();
+        GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
+        if (e.getItem() != null && e.getItem().getType() == Material.ENCHANTED_BOOK) {
+            e.setCancelled(true);
+            if (i == null) {
+                new ClassesGUI(main).inv.open(player);
+            }
+        }
+    }
 
-	@EventHandler
-	public void cosmeticsGUI(PlayerInteractEvent e) {
-		Player player = e.getPlayer();
-		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
+    @EventHandler
+    public void cosmeticsGUI(PlayerInteractEvent e) {
+        Player player = e.getPlayer();
+        GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
 
-		if (e.getItem() != null && e.getItem().getType() == Material.CHEST) {
-			if (i != null && i.state == GameState.WAITING)
-				new CosmeticsGUI(main).inv.open(player);
-			else if (player.getWorld() == main.getLobbyWorld())
-				new CosmeticsGUI(main).inv.open(player);
-		}
-	}
+        if (e.getItem() != null && e.getItem().getType() == Material.CHEST) {
+            if (i != null && i.state == GameState.WAITING)
+                new CosmeticsGUI(main).inv.open(player);
+            else if (player.getWorld() == main.getLobbyWorld())
+                new CosmeticsGUI(main).inv.open(player);
+        }
+    }
 
-	@EventHandler
-	public void prefsGUI(PlayerInteractEvent e) {
-		ItemStack item = e.getItem();
-		Player player = e.getPlayer();
+    @EventHandler
+    public void prefsGUI(PlayerInteractEvent e) {
+        ItemStack item = e.getItem();
+        Player player = e.getPlayer();
 
-		if (item != null && item.getType() == Material.REDSTONE_COMPARATOR)
-			new PrefsGUI(main).inv.open(player);
-	}
+        if (item != null && item.getType() == Material.REDSTONE_COMPARATOR)
+            new PrefsGUI(main).inv.open(player);
+    }
 
-	@EventHandler
-	public void joinItem(PlayerInteractEvent e) {
-		Player player = e.getPlayer();
-		ItemStack item = e.getItem();
+    @EventHandler
+    public void joinItem(PlayerInteractEvent e) {
+        Player player = e.getPlayer();
+        ItemStack item = e.getItem();
 
-		if (item != null && item.getType() == Material.WATCH)
-			new GameSelectorGUI(main).inv.open(player);
-	}
+        if (item != null && item.getType() == Material.WATCH)
+            new GameSelectorGUI(main).inv.open(player);
+    }
 
-	@EventHandler
-	public void manipulate(PlayerArmorStandManipulateEvent e) {
-		if (!e.getRightClicked().isVisible())
-			e.setCancelled(true);
-	}
+    @EventHandler
+    public void manipulate(PlayerArmorStandManipulateEvent e) {
+        if (!e.getRightClicked().isVisible())
+            e.setCancelled(true);
+    }
 
-	@EventHandler
-	public void someGuis(PlayerInteractEvent e) {
-		Player player = e.getPlayer();
-		ItemStack item = e.getItem();
+    @EventHandler
+    public void someGuis(PlayerInteractEvent e) {
+        Player player = e.getPlayer();
+        ItemStack item = e.getItem();
 
-		if (item != null) {
-			if (item.getType() == Material.SKULL_ITEM) {
-				if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
-					if (item.getItemMeta().getDisplayName().contains("Profile"))
-						new StatsGUI(main).inv.open(player);
-					else if (item.getItemMeta().getDisplayName().contains("Tournament"))
-						new TournamentGUI(main).inv.open(player);
-				}
-			} else if (item.getType() == Material.NETHER_STAR) {
-				if (player.getWorld() == main.getLobbyWorld())
-					new ChallengesGUI(main).inv.open(player);
-			}
-		}
-	}
+        if (item != null) {
+            if (item.getType() == Material.SKULL_ITEM) {
+                if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+                    if (item.getItemMeta().getDisplayName().contains("Profile"))
+                        new StatsGUI(main).inv.open(player);
+                    else if (item.getItemMeta().getDisplayName().contains("Tournament"))
+                        new TournamentGUI(main).inv.open(player);
+                }
+            } else if (item.getType() == Material.NETHER_STAR) {
+                if (player.getWorld() == main.getLobbyWorld())
+                    new ChallengesGUI(main).inv.open(player);
+            }
+        }
+    }
 
     /*
      * This function handles the interactivty with the 'Active Games' item in
@@ -1026,28 +1052,28 @@ public class PlayerListener implements Listener {
             e.setCancelled(true);
     }
 
-	@EventHandler
-	public void containerInteract(PlayerInteractEvent e) {
-		List<Material> list = new ArrayList<>(
-				Arrays.asList(Material.FURNACE, Material.HOPPER, Material.ANVIL, Material.ENCHANTMENT_TABLE,
-						Material.ANVIL, Material.WORKBENCH, Material.BREWING_STAND, Material.TRAPPED_CHEST,
-						Material.ENDER_CHEST, Material.BEACON, Material.DISPENSER, Material.DROPPER, Material.CHEST));
-		if (e.getAction() == Action.RIGHT_CLICK_BLOCK && list.contains(e.getClickedBlock().getType())) {
-			Player player = e.getPlayer();
-			if (!player.isOp())
-				e.setCancelled(true);
-		}
-	}
+    @EventHandler
+    public void containerInteract(PlayerInteractEvent e) {
+        List<Material> list = new ArrayList<>(
+                Arrays.asList(Material.FURNACE, Material.HOPPER, Material.ANVIL, Material.ENCHANTMENT_TABLE,
+                        Material.ANVIL, Material.WORKBENCH, Material.BREWING_STAND, Material.TRAPPED_CHEST,
+                        Material.ENDER_CHEST, Material.BEACON, Material.DISPENSER, Material.DROPPER, Material.CHEST));
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK && list.contains(e.getClickedBlock().getType())) {
+            Player player = e.getPlayer();
+            if (!player.isOp())
+                e.setCancelled(true);
+        }
+    }
 
-	@EventHandler
-	public void onFoodChange(FoodLevelChangeEvent e) {
-		e.setCancelled(true);
-	}
+    @EventHandler
+    public void onFoodChange(FoodLevelChangeEvent e) {
+        e.setCancelled(true);
+    }
 
-	@EventHandler
-	public void onChat(AsyncPlayerChatEvent event) {
-		// StaffChat
-		event.setCancelled(true);
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent event) {
+        // StaffChat
+        event.setCancelled(true);
 
         if (main.getPartyManager() != null && main.getPartyManager().isPartyChatToggled(event.getPlayer())) {
             final Player chatPlayer = event.getPlayer();
@@ -1063,246 +1089,246 @@ public class PlayerListener implements Listener {
             return;
         }
 
-		if (main.staffchat.contains(event.getPlayer())) {
-			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
-			String message = tag + event.getPlayer().getDisplayName() + ": " + event.getMessage();
+        if (main.staffchat.contains(event.getPlayer())) {
+            String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
+            String message = tag + event.getPlayer().getDisplayName() + ": " + event.getMessage();
 
-			for (Player staff : main.staffchat) {
-				TellAll(message);
-				return;
-			}
-		} else {
-			// Chat filter
-			List<String> filteredWords = new ArrayList<>(Arrays.asList("nibba", "nigga", "niggas", "nigger", "niggers",
-					"porn", "pornhub", "cum", "fuck you", "fuckyou", "fuck", "bitch", "pussy", "fucker", "motherfucker",
-					"kys", "pu$$y", "fag", "faggot", "bitchass", "cunt", "retard", "penis", "fucker", "twat", "cock",
-					"dick", "cumming", "fuckass", "vagina", "fuckers", "shit", "shitter", "shitters", "fucking"));
-			PlayerData data = main.getDataManager().getPlayerData(event.getPlayer());
-			String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
-			String message = event.getMessage();
+            for (Player staff : main.staffchat) {
+                TellAll(message);
+                return;
+            }
+        } else {
+            // Chat filter
+            List<String> filteredWords = new ArrayList<>(Arrays.asList("nibba", "nigga", "niggas", "nigger", "niggers",
+                    "porn", "pornhub", "cum", "fuck you", "fuckyou", "fuck", "bitch", "pussy", "fucker", "motherfucker",
+                    "kys", "pu$$y", "fag", "faggot", "bitchass", "cunt", "retard", "penis", "fucker", "twat", "cock",
+                    "dick", "cumming", "fuckass", "vagina", "fuckers", "shit", "shitter", "shitters", "fucking"));
+            PlayerData data = main.getDataManager().getPlayerData(event.getPlayer());
+            String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
+            String message = event.getMessage();
 
-			event.setFormat(ChatColor.YELLOW + main.color("" + data.checkPlayerLevel(event.getPlayer(), data) + "✧")
-					+ data.level + " " + tag);
-			String displayName = main.getRankManager().getRank(event.getPlayer()).getColorForNames(event.getPlayer(),
-					main.getRankManager().getRank(event.getPlayer()));
+            event.setFormat(ChatColor.YELLOW + main.color("" + data.checkPlayerLevel(event.getPlayer(), data) + "✧")
+                    + data.level + " " + tag);
+            String displayName = main.getRankManager().getRank(event.getPlayer()).getColorForNames(event.getPlayer(),
+                    main.getRankManager().getRank(event.getPlayer()));
 
-			if (!data.color.isEmpty() && !data.color.equals("0"))
-				displayName = ChatColor.valueOf(data.color) + event.getPlayer().getDisplayName();
+            if (!data.color.isEmpty() && !data.color.equals("0"))
+                displayName = ChatColor.valueOf(data.color) + event.getPlayer().getDisplayName();
 
-			if (event.getPlayer().hasPermission("scb.chat"))
-				event.setFormat(main.color(event.getFormat() + displayName + ":&r "));
-			else {
-				event.setFormat(main.color(event.getFormat() + "&7" + displayName + ":&r "));
-			}
+            if (event.getPlayer().hasPermission("scb.chat"))
+                event.setFormat(main.color(event.getFormat() + displayName + ":&r "));
+            else {
+                event.setFormat(main.color(event.getFormat() + "&7" + displayName + ":&r "));
+            }
 
-			String tempmsg = "";
-			for (String msgWord : message.split(" ")) { // Loop through each word and check if it is a banned word
-				if (filteredWords.contains(msgWord.toLowerCase())) {
-					tempmsg += StringUtils.repeat('*', msgWord.length()) + " ";
-				} else
-					tempmsg += msgWord + " ";
-			}
-			message = tempmsg.trim();
+            String tempmsg = "";
+            for (String msgWord : message.split(" ")) { // Loop through each word and check if it is a banned word
+                if (filteredWords.contains(msgWord.toLowerCase())) {
+                    tempmsg += StringUtils.repeat('*', msgWord.length()) + " ";
+                } else
+                    tempmsg += msgWord + " ";
+            }
+            message = tempmsg.trim();
 
-			if (event.getPlayer().hasPermission("scb.colorChat"))
-				event.setMessage(main.color(message));
-			else
-				event.setMessage(message);
+            if (event.getPlayer().hasPermission("scb.colorChat"))
+                event.setMessage(main.color(message));
+            else
+                event.setMessage(message);
 
-			Bukkit.broadcastMessage(event.getFormat() + event.getMessage());
-		}
-	}
+            Bukkit.broadcastMessage(event.getFormat() + event.getMessage());
+        }
+    }
 
-	public void TellAll(String message) {
-		for (Player staff : main.staffchat)
-			staff.sendMessage("" + ChatColor.GREEN + ChatColor.BOLD + "StaffChat> " + ChatColor.RESET + message);
-	}
+    public void TellAll(String message) {
+        for (Player staff : main.staffchat)
+            staff.sendMessage("" + ChatColor.GREEN + ChatColor.BOLD + "StaffChat> " + ChatColor.RESET + message);
+    }
 
-	// COSMETICS:
+    // COSMETICS:
 
-	@EventHandler
-	public void cosmetics(PlayerInteractEvent event) {
-		Player player = event.getPlayer();
-		PlayerData data = main.getDataManager().getPlayerData(player);
-		ItemStack item = event.getItem();
-		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
+    @EventHandler
+    public void cosmetics(PlayerInteractEvent event) {
+        Player player = event.getPlayer();
+        PlayerData data = main.getDataManager().getPlayerData(player);
+        ItemStack item = event.getItem();
+        GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
 
-		if (item != null) {
-			if (item.getType() == Material.GOLD_BARDING
-					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-				if ((player.getWorld() == main.getLobbyWorld())
-						|| (i != null && i.state == GameState.WAITING)) {
+        if (item != null) {
+            if (item.getType() == Material.GOLD_BARDING
+                    && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+                if ((player.getWorld() == main.getLobbyWorld())
+                        || (i != null && i.state == GameState.WAITING)) {
 
-					if (data != null) {
-						if (data.paintball > 0) {
-							Snowball snowball = player.launchProjectile(Snowball.class);
-							snowball.setMetadata("paintball", new FixedMetadataValue(main, true));
-							data.paintball--;
-							main.getDataManager().saveData(data);
+                    if (data != null) {
+                        if (data.paintball > 0) {
+                            Snowball snowball = player.launchProjectile(Snowball.class);
+                            snowball.setMetadata("paintball", new FixedMetadataValue(main, true));
+                            data.paintball--;
+                            main.getDataManager().saveData(data);
 
-							String msg = main.color("&9&l(!) &rYou have &e" + data.paintball + " paintballs");
-							PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-									(byte) 2);
-							CraftPlayer craft = (CraftPlayer) player;
-							craft.getHandle().playerConnection.sendPacket(packet);
+                            String msg = main.color("&9&l(!) &rYou have &e" + data.paintball + " paintballs");
+                            PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
+                                    (byte) 2);
+                            CraftPlayer craft = (CraftPlayer) player;
+                            craft.getHandle().playerConnection.sendPacket(packet);
 
-							player.getWorld().playSound(player.getLocation(), Sound.CHICKEN_EGG_POP, 1, 1);
-						} else
-							player.sendMessage(main.color("&c&l(!) &rYou do not have anymore &ePaintballs &r:("));
-					}
-				}
-			}
-		}
-	}
+                            player.getWorld().playSound(player.getLocation(), Sound.CHICKEN_EGG_POP, 1, 1);
+                        } else
+                            player.sendMessage(main.color("&c&l(!) &rYou do not have anymore &ePaintballs &r:("));
+                    }
+                }
+            }
+        }
+    }
 
-	@EventHandler
-	public void onHookHit(EntityDamageByEntityEvent event) {
-		if (event.getDamager() instanceof FishHook)
-			event.setCancelled(true);
-	}
+    @EventHandler
+    public void onHookHit(EntityDamageByEntityEvent event) {
+        if (event.getDamager() instanceof FishHook)
+            event.setCancelled(true);
+    }
 
-	@EventHandler
-	public void snowballHit(ProjectileHitEvent event) {
-		Entity e = event.getEntity();
-		Snowball s;
+    @EventHandler
+    public void snowballHit(ProjectileHitEvent event) {
+        Entity e = event.getEntity();
+        Snowball s;
 
-		if (e instanceof Snowball && e.hasMetadata("paintball")) {
-			s = (Snowball) e;
-			DyeColor col = DyeColor.values()[new Random().nextInt(DyeColor.values().length)];
-			if (s.getShooter() instanceof Player) {
-				Player p = (Player) s.getShooter();
-				GameInstance i = main.getGameManager().GetInstanceOfPlayer(p);
+        if (e instanceof Snowball && e.hasMetadata("paintball")) {
+            s = (Snowball) e;
+            DyeColor col = DyeColor.values()[new Random().nextInt(DyeColor.values().length)];
+            if (s.getShooter() instanceof Player) {
+                Player p = (Player) s.getShooter();
+                GameInstance i = main.getGameManager().GetInstanceOfPlayer(p);
 
-				if (i != null && i.state == GameState.STARTED)
-					return;
+                if (i != null && i.state == GameState.STARTED)
+                    return;
 
-				Block center = s.getLocation().getBlock();
-				int x = center.getX();
-				int z = center.getZ();
-				if (center.getType() != Material.AIR) {
-					doTheWorkForMe(center, col);
+                Block center = s.getLocation().getBlock();
+                int x = center.getX();
+                int z = center.getZ();
+                if (center.getType() != Material.AIR) {
+                    doTheWorkForMe(center, col);
 
-				}
+                }
 
-				int max = s.getLocation().getBlock().getY() + 1;
-				int min = s.getLocation().getBlock().getY() - 1;
-				Location loc;
-				for (int y = min; y <= max; y++) {
-					loc = new Location(center.getWorld(), x + 1, y, z);
-					doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-					loc = new Location(center.getWorld(), x, y, z);
-					doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-					loc = new Location(center.getWorld(), x + 1, y, z + 1);
-					doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-					loc = new Location(center.getWorld(), x, y, z + 1);
-					doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-					loc = new Location(center.getWorld(), x - 1, y, z + 1);
-					doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-					loc = new Location(center.getWorld(), x - 1, y, z);
-					doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-					loc = new Location(center.getWorld(), x - 1, y, z);
-					doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-					loc = new Location(center.getWorld(), x - 1, y, z - 1);
-					doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-					loc = new Location(center.getWorld(), x, y, z - 1);
-					doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-					loc = new Location(center.getWorld(), x + 1, y, z - 1);
-					doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-				}
-			}
-		}
-	}
+                int max = s.getLocation().getBlock().getY() + 1;
+                int min = s.getLocation().getBlock().getY() - 1;
+                Location loc;
+                for (int y = min; y <= max; y++) {
+                    loc = new Location(center.getWorld(), x + 1, y, z);
+                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
+                    loc = new Location(center.getWorld(), x, y, z);
+                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
+                    loc = new Location(center.getWorld(), x + 1, y, z + 1);
+                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
+                    loc = new Location(center.getWorld(), x, y, z + 1);
+                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
+                    loc = new Location(center.getWorld(), x - 1, y, z + 1);
+                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
+                    loc = new Location(center.getWorld(), x - 1, y, z);
+                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
+                    loc = new Location(center.getWorld(), x - 1, y, z);
+                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
+                    loc = new Location(center.getWorld(), x - 1, y, z - 1);
+                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
+                    loc = new Location(center.getWorld(), x, y, z - 1);
+                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
+                    loc = new Location(center.getWorld(), x + 1, y, z - 1);
+                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
+                }
+            }
+        }
+    }
 
-	@SuppressWarnings("deprecation")
-	private void randomizeColor(Block block, DyeColor color) {
-		block.setData(color.getData());
-	}
+    @SuppressWarnings("deprecation")
+    private void randomizeColor(Block block, DyeColor color) {
+        block.setData(color.getData());
+    }
 
-	@SuppressWarnings("deprecation")
-	private void doTheWorkForMe(Block block, DyeColor color) {
-		if (block.getType() != Material.AIR && block.getType() != Material.SIGN && block.getType() != Material.SIGN_POST
-				&& block.getType() != Material.WALL_SIGN && block.getType() != Material.WOOL
-				&& block.getType() != Material.CHEST && block.getType() != Material.LONG_GRASS
-				&& block.getType() != Material.RED_ROSE && block.getType() != Material.DEAD_BUSH
-				&& block.getType() != Material.FLOWER_POT && block.getType() != Material.DOUBLE_PLANT
-				&& block.getType() != Material.BED_BLOCK && !(block.getState().getData() instanceof Door)
-				&& !(block.getState() instanceof InventoryHolder) && !(block.getState() instanceof Banner)
-				&& block.getType() != Material.SKULL && block.getType() != Material.SOIL
-				&& block.getType() != Material.SEA_LANTERN && block.getType() != Material.BEACON
-				&& block.getType() != Material.GLOWSTONE && block.getType() != Material.LADDER) {
-			Material og = block.getType();
-			Byte data = block.getData();
-			if (og == Material.WOOL) {
-				randomizeColor(block, color);
-				return;
-			}
-			Location loc = new Location(block.getWorld(), block.getX(), block.getY() + 1, block.getZ());
+    @SuppressWarnings("deprecation")
+    private void doTheWorkForMe(Block block, DyeColor color) {
+        if (block.getType() != Material.AIR && block.getType() != Material.SIGN && block.getType() != Material.SIGN_POST
+                && block.getType() != Material.WALL_SIGN && block.getType() != Material.WOOL
+                && block.getType() != Material.CHEST && block.getType() != Material.LONG_GRASS
+                && block.getType() != Material.RED_ROSE && block.getType() != Material.DEAD_BUSH
+                && block.getType() != Material.FLOWER_POT && block.getType() != Material.DOUBLE_PLANT
+                && block.getType() != Material.BED_BLOCK && !(block.getState().getData() instanceof Door)
+                && !(block.getState() instanceof InventoryHolder) && !(block.getState() instanceof Banner)
+                && block.getType() != Material.SKULL && block.getType() != Material.SOIL
+                && block.getType() != Material.SEA_LANTERN && block.getType() != Material.BEACON
+                && block.getType() != Material.GLOWSTONE && block.getType() != Material.LADDER) {
+            Material og = block.getType();
+            Byte data = block.getData();
+            if (og == Material.WOOL) {
+                randomizeColor(block, color);
+                return;
+            }
+            Location loc = new Location(block.getWorld(), block.getX(), block.getY() + 1, block.getZ());
 
-			if (loc.getBlock().getType().isSolid() == false && loc.getBlock().getType() != Material.AIR
-					&& loc.getBlock().getType() != Material.TORCH)
-				return;
+            if (loc.getBlock().getType().isSolid() == false && loc.getBlock().getType() != Material.AIR
+                    && loc.getBlock().getType() != Material.TORCH)
+                return;
 
-			Bukkit.getScheduler().runTaskLater(main, () -> {
-				block.setType(og);
-				block.setData(data);
-			}, 20 * 5L);
-			block.setType(Material.WOOL);
-			randomizeColor(block, color);
-		}
-	}
+            Bukkit.getScheduler().runTaskLater(main, () -> {
+                block.setType(og);
+                block.setData(data);
+            }, 20 * 5L);
+            block.setType(Material.WOOL);
+            randomizeColor(block, color);
+        }
+    }
 
-	public void trampoline(Player player) {
-		Location loc = player.getLocation();
-		int x = loc.getBlockX();
-		int y = loc.getBlockY();
-		int z = loc.getBlockZ();
-		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
+    public void trampoline(Player player) {
+        Location loc = player.getLocation();
+        int x = loc.getBlockX();
+        int y = loc.getBlockY();
+        int z = loc.getBlockZ();
+        GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
 
-		if (i != null || player.getWorld() != main.getLobbyWorld()) {
-			player.sendMessage(main.color("&c&l(!) &rYou can only use this Cosmetic in spawn!"));
-			return;
-		}
+        if (i != null || player.getWorld() != main.getLobbyWorld()) {
+            player.sendMessage(main.color("&c&l(!) &rYou can only use this Cosmetic in spawn!"));
+            return;
+        }
 
-		loc.setY(y - 1);
-		loc = new Location(player.getWorld(), x + 1, y, z);
-		doStuff(player.getWorld().getBlockAt(loc), player);
-		loc = new Location(player.getWorld(), x, y, z);
-		doStuff(player.getWorld().getBlockAt(loc), player);
-		loc = new Location(player.getWorld(), x + 1, y, z + 1);
-		doStuff(player.getWorld().getBlockAt(loc), player);
-		loc = new Location(player.getWorld(), x, y, z + 1);
-		doStuff(player.getWorld().getBlockAt(loc), player);
-		loc = new Location(player.getWorld(), x - 1, y, z + 1);
-		doStuff(player.getWorld().getBlockAt(loc), player);
-		loc = new Location(player.getWorld(), x - 1, y, z);
-		doStuff(player.getWorld().getBlockAt(loc), player);
-		loc = new Location(player.getWorld(), x - 1, y, z);
-		doStuff(player.getWorld().getBlockAt(loc), player);
-		loc = new Location(player.getWorld(), x - 1, y, z - 1);
-		doStuff(player.getWorld().getBlockAt(loc), player);
-		loc = new Location(player.getWorld(), x, y, z - 1);
-		doStuff(player.getWorld().getBlockAt(loc), player);
-		loc = new Location(player.getWorld(), x + 1, y, z - 1);
-		doStuff(player.getWorld().getBlockAt(loc), player);
-	}
+        loc.setY(y - 1);
+        loc = new Location(player.getWorld(), x + 1, y, z);
+        doStuff(player.getWorld().getBlockAt(loc), player);
+        loc = new Location(player.getWorld(), x, y, z);
+        doStuff(player.getWorld().getBlockAt(loc), player);
+        loc = new Location(player.getWorld(), x + 1, y, z + 1);
+        doStuff(player.getWorld().getBlockAt(loc), player);
+        loc = new Location(player.getWorld(), x, y, z + 1);
+        doStuff(player.getWorld().getBlockAt(loc), player);
+        loc = new Location(player.getWorld(), x - 1, y, z + 1);
+        doStuff(player.getWorld().getBlockAt(loc), player);
+        loc = new Location(player.getWorld(), x - 1, y, z);
+        doStuff(player.getWorld().getBlockAt(loc), player);
+        loc = new Location(player.getWorld(), x - 1, y, z);
+        doStuff(player.getWorld().getBlockAt(loc), player);
+        loc = new Location(player.getWorld(), x - 1, y, z - 1);
+        doStuff(player.getWorld().getBlockAt(loc), player);
+        loc = new Location(player.getWorld(), x, y, z - 1);
+        doStuff(player.getWorld().getBlockAt(loc), player);
+        loc = new Location(player.getWorld(), x + 1, y, z - 1);
+        doStuff(player.getWorld().getBlockAt(loc), player);
+    }
 
-	private void doStuff(Block block, Player player) {
-		if (block.getType() != Material.AIR && block.getType() != Material.SIGN && block.getType() != Material.SIGN_POST
-				&& block.getType() != Material.WALL_SIGN && block.getType() != Material.WOOL
-				&& block.getType() != Material.CHEST && block.getType() != Material.LONG_GRASS
-				&& block.getType() != Material.RED_ROSE && block.getType() != Material.DEAD_BUSH
-				&& block.getType() != Material.FLOWER_POT) {
-			Material og = block.getType();
-			Byte data = block.getData();
+    private void doStuff(Block block, Player player) {
+        if (block.getType() != Material.AIR && block.getType() != Material.SIGN && block.getType() != Material.SIGN_POST
+                && block.getType() != Material.WALL_SIGN && block.getType() != Material.WOOL
+                && block.getType() != Material.CHEST && block.getType() != Material.LONG_GRASS
+                && block.getType() != Material.RED_ROSE && block.getType() != Material.DEAD_BUSH
+                && block.getType() != Material.FLOWER_POT) {
+            Material og = block.getType();
+            Byte data = block.getData();
 
-			Bukkit.getScheduler().runTaskLater(main, () -> {
-				block.setType(og);
-				block.setData(data);
-			}, 20 * 5L);
-			block.setType(Material.SLIME_BLOCK);
-		} else {
-			player.sendMessage(main.color("&c&l(!) &rYou need to be in an open area to use this!"));
-			return;
-		}
-	}
+            Bukkit.getScheduler().runTaskLater(main, () -> {
+                block.setType(og);
+                block.setData(data);
+            }, 20 * 5L);
+            block.setType(Material.SLIME_BLOCK);
+        } else {
+            player.sendMessage(main.color("&c&l(!) &rYou need to be in an open area to use this!"));
+            return;
+        }
+    }
 }
