@@ -80,7 +80,10 @@ public class CloudClass extends BaseClass {
 	@Override
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.WOOD_SWORD),
-				instance.getGameManager().getMain().color("&b&lCloud Sword"));
+				instance.color("&b&lCloud Sword"),
+                "",
+                instance.color("&7Right click your sword to use"),
+                instance.color("one of your cloud abilities"));
 		ItemMeta meta = item.getItemMeta();
 		meta.spigot().setUnbreakable(true);
 		item.setItemMeta(meta);
