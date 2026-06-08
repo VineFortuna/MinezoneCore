@@ -127,15 +127,15 @@ public class MelonClass extends BaseClass {
 
 		int chance = rand.nextInt(5);
 		if (chance == 0) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 400, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 999999999, 0));
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.GREEN + "You were given "
 					+ ChatColor.YELLOW + ChatColor.BOLD + "ABSORPTION I");
 		} else if (chance == 1) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 800, 3));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2));
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.GREEN + "You were given "
-					+ ChatColor.YELLOW + ChatColor.BOLD + "SPEED IV");
+					+ ChatColor.YELLOW + ChatColor.BOLD + "SPEED III");
 		} else if (chance == 2) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 300, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 999999999, 0));
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.GREEN + "You were given "
 					+ ChatColor.YELLOW + ChatColor.BOLD + "STRENGTH I");
 		} else if (chance == 3) {
@@ -143,7 +143,7 @@ public class MelonClass extends BaseClass {
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.GREEN + "You were given "
 					+ ChatColor.YELLOW + ChatColor.BOLD + "RESISTANCE II");
 		} else if (chance == 4) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 600, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 999999999, 1));
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.GREEN + "You were given "
 					+ ChatColor.YELLOW + ChatColor.BOLD + "HEALTH BOOST II");
 		} else {
@@ -186,7 +186,7 @@ public class MelonClass extends BaseClass {
 		} else if (item != null && item.getType() == Material.INK_SACK
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 			player.playSound(player.getLocation(), Sound.EAT, 1, 2);
-			player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 200, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 110, 1));
 			if (shurikenCooldown.useAndResetCooldown()) {
 				int amount = item.getAmount();
 				if (amount > 0) {
