@@ -221,6 +221,7 @@ public class GameManager implements Listener, PluginMessageListener {
     }
 
     public void shootProjectile(GameInstance instance, Player player, double dmg, Material mat, Sound s, int volume, Effect e, int pitch) {
+        Vector direction = player.getLocation().getDirection();
         ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
             @Override
             public void onHit(Player hit) {
@@ -231,6 +232,9 @@ public class GameManager implements Listener, PluginMessageListener {
                         EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer, DamageCause.VOID, dmg);
                         instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
                         gamePlayer.damage(dmg, player);
+                        if (gamePlayer == hit) {
+                            gamePlayer.setVelocity(new Vector(0, 0.7, 0));
+                        }
                     }
                    for (Player gamePlayer : instance.players) {
                         gamePlayer.playSound(hitLoc, s, volume, pitch);
@@ -475,6 +479,9 @@ public class GameManager implements Listener, PluginMessageListener {
 			player.sendMessage(getMain().color("&c&l(!) &rYou cannot teleport there!"));
 			return;
 		}
+
+        if (baseClass.getType() == ClassType.Enderman)
+            SoundManager.playSoundToAll(player, Sound.ENDERMAN_TELEPORT, 1, 1);
 
 		player.teleport(to);
 	}
