@@ -59,15 +59,12 @@ public class LobbyItems {
 
 			ItemStack classes = ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK),
 					"&eClasses &7(Right Click)", "", "&7Click to choose a class");
-			ItemStack cosmetics = ItemHelper.setDetails(new ItemStack(Material.CHEST), "&eCosmetics &7(Right Click)",
-					"", "&7Click to open your cosmetics");
 			ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
 			ItemStack leaveGame = ItemHelper.setDetails(new ItemStack(Material.BARRIER), "&eLeave Game &7(Right Click)", "",
 					"&7Click to leave your game");
 			
 			player.getInventory().setItem(0, classes);
-			player.getInventory().setItem(4, cosmetics);
-			player.getInventory().setItem(7,
+			player.getInventory().setItem(4,
 					ItemHelper.setDetails(stats, "&eMy Profile &7(Right Click)", "", "&7Click to see your profile"));
 			player.getInventory().setItem(8, leaveGame);
 		}
