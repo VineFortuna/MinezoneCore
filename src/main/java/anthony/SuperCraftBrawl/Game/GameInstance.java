@@ -192,8 +192,8 @@ public class GameInstance {
         mapWorld = Bukkit.getServer().createWorld(w);
         mapWorld.setAutoSave(false);
 
-        if (getMap() != Maps.WitchesBrew)
-            mapWorld.setTime(1000);
+        //if (getMap() != Maps.WitchesBrew)
+            //mapWorld.setTime(1000);
 
         mapWorld.setDifficulty(Difficulty.EASY);
     }
