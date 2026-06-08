@@ -82,6 +82,7 @@ public class EndermanClass extends BaseClass {
         used = false;
         teleportAbility.getCooldownInstance().reset();
         blockAbility.getCooldownInstance().reset();
+
         playerInv.setItem(0, weapon);
         playerInv.setItem(1, blockItem);
         playerInv.setItem(2, teleportItem);
@@ -161,8 +162,7 @@ public class EndermanClass extends BaseClass {
         } else if (block.getType().isSolid()) {
             newItem = new ItemStack(block.getType(), 1);
         } else {
-            player.sendMessage(instance.getGameManager().getMain()
-                    .color("&c&l(!) &rThere is no block under you. Please try again."));
+            player.sendMessage(instance.color("&c&l(!) &rThere is no block under you. Please try again"));
             return;
         }
 
@@ -189,10 +189,6 @@ public class EndermanClass extends BaseClass {
         ItemHelper.setDetails(newItem, blockThrowAbility.getAbilityNameLeftRightClickMessage());
 
         player.getInventory().setItem(1, newItem);
-
-        player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou picked up &e1 " +
-                WordUtils.capitalizeFully(newItem.getType().name().replace('_', ' ').replaceAll("[0-9]", ""))));
-
         player.playSound(player.getLocation(), Sound.ITEM_PICKUP, 1, 1);
         SoundManager.playSoundToAll(player, Sound.ENDERMAN_IDLE, 1, 1);
 
