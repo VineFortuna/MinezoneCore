@@ -3,14 +3,14 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
+import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.SmallFireball;
+import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -19,216 +19,263 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.BlockIterator;
+import org.bukkit.util.Vector;
 
 import java.util.Random;
 
 public class WizardClass extends BaseClass {
 
-	private boolean clicked = false;
-	private boolean fireball = false;
-	private int fireballs = 3;
-	private boolean blindness = false;
-	private boolean speedyjumpy = false;
-	private int cooldownSec;
+    private boolean spellPicked = false;
+    private int spell = -1; // 1 = teleport, 2 = fireball, 3 = speed/jump, 4 = blindness
+    private boolean speedyjumpy = false;
+    private boolean blindness = false;
 
-	public WizardClass(GameInstance instance, Player player) {
-		super(instance, player);
-		baseVerticalJump = 1.1;
-		createArmor(
-				null,
-				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODM4NTY0ZTI4YWJhOTgzMDFkYmRhNWZhZmQ4NmQxZGE0ZTJlYWVlZjEyZWE5NGRjZjQ0MGI4ODNlNTU5MzExYyJ9fX0=",
-				"C178E8",
-				"C178E8",
-				"965905",
-				6,
-				"Wizard"
-		);
-	}
+    public WizardClass(GameInstance instance, Player player) {
+        super(instance, player);
+        baseVerticalJump = 1.1;
+        createArmor(
+                null,
+                "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODM4NTY0ZTI4YWJhOTgzMDFkYmRhNWZhZmQ4NmQxZGE0ZTJlYWVlZjEyZWE5NGRjZjQ0MGI4ODNlNTU5MzExYyJ9fX0=",
+                "C178E8",
+                "C178E8",
+                "965905",
+                6,
+                "Wizard"
+        );
+    }
 
-	@Override
-	public ClassType getType() {
-		return ClassType.Wizard;
-	}
+    // -----------------------------------------------------------------------
+    //  Wand item builders
+    // -----------------------------------------------------------------------
 
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
-	}
+    private ItemStack makePlainWand() {
+        return ItemHelper.setDetails(new ItemStack(Material.STICK),
+                ChatColor.RESET + "Magic Wand " + ChatColor.GRAY + "(Right Click)");
+    }
 
-	@Override
-	public ItemStack getAttackWeapon() {
-		return player.getInventory().getItem(0);
-	}
+    private ItemStack makeWand(int sharpness, int knockback) {
+        ItemStack wand = ItemHelper.setDetails(new ItemStack(Material.STICK),
+                ChatColor.RESET + "Magic Wand");
+        wand.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, sharpness);
+        wand.addUnsafeEnchantment(Enchantment.KNOCKBACK, knockback);
+        return wand;
+    }
 
-	@Override
-	public void Tick(int gameTicks) {
-		if (speedyjumpy) {
-			if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
-				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
-			if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
-				player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 0));
-		}
+    // -----------------------------------------------------------------------
+    //  Lifecycle
+    // -----------------------------------------------------------------------
 
-		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Wizard
-				&& instance.classes.get(player).getLives() > 0) {
-			
-			this.cooldownSec = (3000 - wizard.getTime()) / 1000 + 1;
-			
+    @Override
+    public ClassType getType() { return ClassType.Wizard; }
 
-			if (wizard.getTime() < 3000) {
-				String msg = "" + ChatColor.RESET + ChatColor.RED + ChatColor.BOLD + "Fireballs" + ChatColor.RESET
-						+ " regenerates in: " + ChatColor.YELLOW + cooldownSec + "s";
-				getActionBarManager().setActionBar(player, "wizard.cooldown", msg, 2);
-			} else {
-				if (fireball) {
-					String msg = "" + ChatColor.RESET + "You can use " + ChatColor.RED + ChatColor.BOLD + "Fireballs";
-					getActionBarManager().setActionBar(player, "wizard.cooldown", msg, 2);
-				}
-			}
-		}
-	}
+    @Override
+    public void setArmor(EntityEquipment playerEquip) { setArmorNew(playerEquip); }
 
-	@Override
-	public void SetNameTag() {
+    @Override
+    public ItemStack getAttackWeapon() { return player.getInventory().getItem(0); }
 
-	}
+    @Override
+    public void SetNameTag() {}
 
-	@Override
-	public void SetItems(Inventory playerInv) {
-		if (speedyjumpy) {
-			player.removePotionEffect(PotionEffectType.JUMP);
-			player.removePotionEffect(PotionEffectType.SPEED);
-		}
-		clicked = false; // To reset each life
-		fireball = false;
-		blindness = false;
-		speedyjumpy = false;
-		fireballs = 3;
-		playerInv.setItem(0, ItemHelper.setDetails(new ItemStack(Material.STICK),
-				"" + ChatColor.RESET + "Magic Wand " + ChatColor.GRAY + "(Right Click)"));
-	}
+    @Override
+    public void SetItems(Inventory playerInv) {
+        if (speedyjumpy) {
+            player.removePotionEffect(PotionEffectType.SPEED);
+            player.removePotionEffect(PotionEffectType.JUMP);
+        }
+        spellPicked = false;
+        spell = -1;
+        speedyjumpy = false;
+        blindness = false;
+        playerInv.setItem(0, makePlainWand());
+    }
 
-	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
-		Random rand = new Random();
-		int chance = rand.nextInt(9);
+    @Override
+    public void Tick(int gameTicks) {
+        // Keep speed/jump alive for spell 3
+        if (speedyjumpy) {
+            if (!player.hasPotionEffect(PotionEffectType.SPEED))
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1)); // Speed 2
+            if (!player.hasPotionEffect(PotionEffectType.JUMP))
+                player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 2)); // Jump Boost 3
+        }
 
-		if (blindness) {
-			if (chance <= 5 && chance > 0) {
-				if (event.getEntity() instanceof LivingEntity) {
-					((LivingEntity) event.getEntity())
-							.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 65, 2, true));
-				}
-			}
-		}
-	}
+        // Action bar cooldown for teleport and fireball spells
+        if ((spell == 1 || spell == 2)
+                && instance.classes.containsKey(player)
+                && instance.classes.get(player).getType() == ClassType.Wizard
+                && instance.classes.get(player).getLives() > 0) {
 
-	@Override
-	public void UseItem(PlayerInteractEvent event) {
-		ItemStack item = event.getItem();
+            int cooldownMs = 10000; // both teleport and blaze powder use 10s
+            int cooldownSec = (cooldownMs - wizard.getTime()) / 1000 + 1;
+            String label = (spell == 1) ? "Teleport" : "Fireballs";
 
-		if (player.getGameMode() != GameMode.SPECTATOR) {
-			if (item != null) {
-				if (item.getType() == Material.STICK) {
-					if (!clicked) {
-						player.getInventory().remove(Material.STICK);
-						clicked = true;
-						Random r = new Random();
-						int chance = r.nextInt(3);
+            if (wizard.getTime() < cooldownMs) {
+                String msg = ChatColor.RED + "" + ChatColor.BOLD + label
+                        + ChatColor.RESET + " regenerates in: " + ChatColor.YELLOW + cooldownSec + "s";
+                getActionBarManager().setActionBar(player, "wizard.cooldown", msg, 2);
+            } else {
+                String msg = ChatColor.RESET + "You can use " + ChatColor.RED + ChatColor.BOLD + label;
+                getActionBarManager().setActionBar(player, "wizard.cooldown", msg, 2);
+            }
+        }
+    }
 
-						if (chance == 0) {
-							for (Player gamePlayer : instance.players) {
-								if (gamePlayer != player) {
-									if (instance.duosMap != null) {
-										if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
-											gamePlayer.getWorld().strikeLightningEffect(gamePlayer.getLocation());
-											gamePlayer.setFireTicks(100);
-										}
-									} else {
-										gamePlayer.getWorld().strikeLightningEffect(gamePlayer.getLocation());
-										gamePlayer.setFireTicks(100);
-									}
-								}
-							}
-							player.getInventory()
-									.setItem(0,
-											ItemHelper.addEnchant(
-													ItemHelper.setDetails(new ItemStack(Material.STICK),
-															"" + ChatColor.RESET + "Magic Wand"),
-													Enchantment.DAMAGE_ALL, 4));
-							fireball = true;
-							player.sendMessage(instance.getGameManager().getMain()
-									.color("&e&l(!) &rI cast spell... Fireball fireball fireball!!"));
-						} else if (chance == 1) {
-							for (Player gamePlayer : instance.players) {
-								if (gamePlayer != player) {
-									if (instance.duosMap != null) {
-										if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
-											gamePlayer
-													.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 120, 0));
-										}
-									} else {
-										gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 120, 0));
-									}
-								}
-							}
-							player.getInventory()
-									.setItem(0,
-											ItemHelper
-													.addEnchant(
-															ItemHelper.addEnchant(
-																	ItemHelper.setDetails(new ItemStack(Material.STICK),
-																			"" + ChatColor.RESET + "Magic Wand"),
-																	Enchantment.DAMAGE_ALL, 3),
-															Enchantment.KNOCKBACK, 2));
-							blindness = true;
-							player.sendMessage(instance.getGameManager().getMain()
-									.color("&e&l(!) &rI cast spell... Let my enemy see darkness"));
-						} else if (chance == 2) {
-							for (Player gamePlayer : instance.players) {
-								if (gamePlayer != player) {
-									if (instance.duosMap != null) {
-										if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
-											gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 2));
-										}
-									} else {
-										gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 2));
-									}
-								}
-							}
-							player.getInventory()
-									.setItem(0,
-											ItemHelper
-													.addEnchant(
-															ItemHelper.addEnchant(
-																	ItemHelper.setDetails(new ItemStack(Material.STICK),
-																			"" + ChatColor.RESET + "Magic Wand"),
-																	Enchantment.DAMAGE_ALL, 3),
-															Enchantment.KNOCKBACK, 1));
-							speedyjumpy = true;
-							player.sendMessage(instance.getGameManager().getMain()
-									.color("&e&l(!) &rI cast spell... Speedy speedy jumpy jumpy!"));
-						}
-					} else {
-						if (fireball) {
-							if (event.getAction() == Action.RIGHT_CLICK_AIR
-									|| event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-								if (wizard.getTime() < 3000) {
-									int seconds = (3000 - wizard.getTime()) / 1000 + 1;
-									event.setCancelled(true);
-									player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-											+ "Your Fireballs are still regenerating for " + ChatColor.YELLOW + seconds
-											+ "s");
-								} else {
-									wizard.restart();
-									player.launchProjectile(SmallFireball.class);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+    @Override
+    public void DoDamage(EntityDamageByEntityEvent event) {
+        if (!blindness) return;
+        if (!(event.getEntity() instanceof LivingEntity)) return;
+        // 1/3 chance of Blindness 2 for 5 seconds
+        if (new Random().nextInt(3) == 0) {
+            ((LivingEntity) event.getEntity())
+                    .addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 1, true));
+        }
+    }
 
+    @Override
+    public void UseItem(PlayerInteractEvent event) {
+        ItemStack item = event.getItem();
+        if (item == null || item.getType() != Material.STICK) return;
+        if (player.getGameMode() == GameMode.SPECTATOR) return;
+        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+
+        event.setCancelled(true);
+
+        if (!spellPicked) {
+            pickSpell();
+            return;
+        }
+
+        if (spell == 1) useTeleport();
+        else if (spell == 2) useFireball();
+    }
+
+    // -----------------------------------------------------------------------
+    //  Spell selection
+    // -----------------------------------------------------------------------
+
+    private void pickSpell() {
+        spellPicked = true;
+        spell = new Random().nextInt(4) + 1;
+
+        switch (spell) {
+            case 1:
+                // Teleport — Sharp 4, KB 1
+                player.getInventory().setItem(0, makeWand(4, 1));
+                instance.TellAll(instance.color("&6&l&lWizard> &rI cast spell... Teleport!"));
+                break;
+            case 2:
+                // Triple Fireball — Sharp 3, KB 2
+                player.getInventory().setItem(0, makeWand(3, 2));
+                instance.TellAll(instance.color("&6&l&lWizard> &rI cast spell... Fireball fireball fireball!!"));
+                break;
+            case 3:
+                // Speed 2 + Jump Boost 3 — Sharp 3, KB 1
+                player.getInventory().setItem(0, makeWand(3, 1));
+                speedyjumpy = true;
+                instance.TellAll(instance.color("&6&l&lWizard> &rI cast... Speedy speedy jumpy jumpy"));
+                break;
+            case 4:
+                // Blindness on hit — Sharp 3, KB 2
+                player.getInventory().setItem(0, makeWand(3, 2));
+                blindness = true;
+                instance.TellAll(instance.color("&6&l&lWizard> &rI cast... Let my enemies see darkness.."));
+                break;
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    //  Spell 1: Teleport
+    // -----------------------------------------------------------------------
+
+    private void useTeleport() {
+        if (wizard.getTime() < 10000) {
+            int seconds = (10000 - wizard.getTime()) / 1000 + 1;
+            player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET
+                    + "Teleport is still on cooldown for " + ChatColor.YELLOW + seconds + "s");
+            return;
+        }
+
+        // Trace ray up to 10 blocks for a solid block
+        BlockIterator bi = new BlockIterator(player.getEyeLocation(), 0, 20);
+        Block target = null;
+        while (bi.hasNext()) {
+            Block block = bi.next();
+            if (block.getType().isSolid()) {
+                target = block;
+                break;
+            }
+        }
+
+        if (target == null) {
+            player.sendMessage(ChatColor.RED + "(!) " + ChatColor.RESET + "No block in sight within 10 blocks.");
+            return;
+        }
+
+        Location origin = player.getLocation().clone();
+        Location destination = target.getLocation().add(0.5, 1, 0.5);
+        destination.setYaw(origin.getYaw());
+        destination.setPitch(origin.getPitch());
+
+        // Ender particle + sound at origin
+        for (int i = 0; i < 6; i++)
+            origin.getWorld().playEffect(origin.clone().add(
+                            (Math.random() - 0.5) * 0.8, Math.random() * 1.8, (Math.random() - 0.5) * 0.8),
+                    Effect.PORTAL, 1);
+        origin.getWorld().playSound(origin, Sound.ENDERMAN_TELEPORT, 1, 1);
+
+        player.teleport(destination);
+
+        // Ender particle + sound at destination
+        for (int i = 0; i < 6; i++)
+            destination.getWorld().playEffect(destination.clone().add(
+                            (Math.random() - 0.5) * 0.8, Math.random() * 1.8, (Math.random() - 0.5) * 0.8),
+                    Effect.PORTAL, 1);
+        destination.getWorld().playSound(destination, Sound.ENDERMAN_TELEPORT, 1, 1);
+
+        wizard.restart();
+    }
+
+    // -----------------------------------------------------------------------
+    //  Spell 2: Triple Fireball
+    // -----------------------------------------------------------------------
+    //  Spell 2: Blaze Powder — 3 projectiles from chest (center, left, right)
+    // -----------------------------------------------------------------------
+
+    private void useFireball() {
+        if (wizard.getTime() < 10000) {
+            int seconds = (10000 - wizard.getTime()) / 1000 + 1;
+            player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET
+                    + "Blaze Powder is still on cooldown for " + ChatColor.YELLOW + seconds + "s");
+            return;
+        }
+
+        wizard.restart();
+
+        Location chest = player.getLocation().add(0, 1.2, 0);
+        Vector dir = player.getEyeLocation().getDirection();
+
+        // Perpendicular right vector relative to the direction the player is facing
+        Vector right = dir.clone().crossProduct(new Vector(0, 1, 0));
+        if (right.lengthSquared() < 0.001) right = new Vector(1, 0, 0);
+        right.normalize();
+
+        shootBlazePowder(chest.clone(), dir);
+        shootBlazePowder(chest.clone().add(right), dir);
+        shootBlazePowder(chest.clone().subtract(right), dir);
+    }
+
+    private void shootBlazePowder(Location from, Vector direction) {
+        ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
+            @Override
+            public void onHit(Player hit) {
+                // Direct hit only — set fire for 5 seconds
+                if (hit != null && hit.getGameMode() != GameMode.SPECTATOR) {
+                    hit.setFireTicks(100);
+                }
+            }
+        }, new ItemStack(Material.BLAZE_POWDER));
+        instance.getGameManager().getProjManager().shootProjectile(proj, from, direction.clone().multiply(2.5));
+    }
 }
