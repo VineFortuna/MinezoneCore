@@ -142,9 +142,6 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 				if (this.instance.recentDrop == null || !this.instance.isInBounds(this.instance.recentDrop)) {
 					this.player.sendMessage(this.instance.getGameManager().getMain()
 							.color("&c&l(!) &rThere are no drops you can pickup!"));
-				} else if (!this.player.isOnGround()) {
-					this.player.sendMessage(this.instance.getGameManager().getMain()
-							.color("&c&l(!) &rYou have to be on the ground to use this!"));
 				} else {
 					this.player.teleport(this.instance.recentDrop);
 					this.player.getInventory().remove(this.player.getItemInHand());
