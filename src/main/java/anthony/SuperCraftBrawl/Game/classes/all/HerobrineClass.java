@@ -19,6 +19,8 @@ import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -77,12 +79,12 @@ public class HerobrineClass extends BaseClass {
                 new ItemStack(Material.DIAMOND),
                 despairAbility.getAbilityNameRightClickMessage(),
                 "&7Inflict one of 4 effects on enemies:",
-                "&7▶ &2&oPoison &e" + (poison.getAmplifier() + 1) + " &7for &e" + poison.getDuration() / 20 + "s",
+                "&7▶ &2&oPoison, &r" + (poison.getAmplifier() + 1) + " &rfor &a" + poison.getDuration() / 20 + "s",
                 "&7▶ &c&oFire&7, by striking lightning at them",
-                "&7▶ &4&o☠ Rising Ruin&7, blocks erupt around you",
-                "&7▶ &8&o\u2620 Summon&7, a zombie upon each enemy",
+                "&7▶ &4&oRising Ruin&7, blocks erupt around you",
+                "&7▶ &8&oSummon&7, a zombie upon each enemy",
                 "",
-                "&7Range: &a" + rangeDisplay + " &7blocks"
+                "&rRange: &a" + rangeDisplay + " blocks"
         );
     }
 
@@ -118,9 +120,8 @@ public class HerobrineClass extends BaseClass {
             if (herobrine.getTime() < DESPAIR_ABILITY_COOLDOWN) {
                 int seconds = (int) ((DESPAIR_ABILITY_COOLDOWN - herobrine.getTime()) / 1000 + 1);
                 event.setCancelled(true);
-                player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                        + "Your Diamond of Despair is still regenerating for " + ChatColor.YELLOW + seconds
-                        + " more seconds ");
+                player.sendMessage(instance.color("&c&l(!) &rYour &b&lDiamond of Despair&r is still regenerating for &a" +
+                        seconds + "s"));
             } else {
                 searchForPlayers();
             }
@@ -187,10 +188,11 @@ public class HerobrineClass extends BaseClass {
             target.sendMessage(ChatColorHelper.color("&c&l(!) &e" + player.getName() + " &rsummoned a zombie on you!"));
 
             Zombie zombie = (Zombie) target.getWorld().spawnEntity(target.getLocation(), EntityType.ZOMBIE);
-            zombie.setCustomName(ChatColorHelper.color("&c" + player.getName() + "'s Zombie"));
+            zombie.setCustomName(ChatColorHelper.color("&c" + player.getName() + "'s &eZombie"));
             zombie.setCustomNameVisible(true);
             zombie.setTarget(target); // immediately aggro on the player it spawned on
             zombie.getEquipment().clear(); // no random drops
+            zombie.getEquipment().setItemInHand(new ItemStack(Material.GOLD_SWORD));
             zombie.setCanPickupItems(false);
         }
     }
@@ -310,10 +312,17 @@ public class HerobrineClass extends BaseClass {
         for (Entity entity : world.getNearbyEntities(impactLoc, RUIN_EXPLOSION_RADIUS, RUIN_EXPLOSION_RADIUS, RUIN_EXPLOSION_RADIUS)) {
             if (!(entity instanceof Player)) continue;
             Player hit = (Player) entity;
+
             if (hit.equals(caster)) {
-                if (!checkIfDead(caster, instance)) caster.damage(RUIN_DAMAGE_SELF);
+                if (!checkIfDead(caster, instance)) {
+                    EntityDamageEvent selfDmg = new EntityDamageEvent(caster, DamageCause.CUSTOM, RUIN_DAMAGE_SELF);
+                    instance.getGameManager().getMain().getServer().getPluginManager().callEvent(selfDmg);
+                    if (!selfDmg.isCancelled()) caster.damage(RUIN_DAMAGE_SELF);
+                }
             } else if (targets.contains(hit) || (!checkIfDead(hit, instance) && !instance.HasSpectator(hit))) {
-                hit.damage(RUIN_DAMAGE_ENEMY, caster);
+                EntityDamageEvent dmgEvent = new EntityDamageEvent(hit, DamageCause.CUSTOM, RUIN_DAMAGE_ENEMY);
+                instance.getGameManager().getMain().getServer().getPluginManager().callEvent(dmgEvent);
+                if (!dmgEvent.isCancelled()) hit.damage(RUIN_DAMAGE_ENEMY, caster);
             }
         }
     }
