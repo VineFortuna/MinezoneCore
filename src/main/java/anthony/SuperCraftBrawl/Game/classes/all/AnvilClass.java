@@ -83,7 +83,14 @@ public class AnvilClass extends BaseClass {
     }
 
     public void Tick(int gameTicks) {
-        if (!isPlayerAlive()) return;
+        if (!isPlayerAlive()) {
+            // Player died or became spectator mid-stomp — clean up immediately
+            if (stompUsed) {
+                stompUsed = false;
+                cancelTrail();
+            }
+            return;
+        }
         stompAbility.updateActionBar(player, this);
         if (!stompUsed) return;
         if (!player.isOnGround()) return;
@@ -165,7 +172,7 @@ public class AnvilClass extends BaseClass {
         trailTask = new BukkitRunnable() {
             @Override
             public void run() {
-                if (!player.isOnline() || !stompUsed) {
+                if (!player.isOnline() || !stompUsed || !isPlayerAlive()) {
                     cancel();
                     return;
                 }
