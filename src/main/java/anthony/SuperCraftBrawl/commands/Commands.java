@@ -702,7 +702,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         player.sendMessage(main.color("&8&m-------&8[Social Media]&8&m-------"));
         player.sendMessage("");
         player.sendMessage(main.color("&eDiscord: &7https://discord.gg/FSZpmY9FZB"));
-        player.sendMessage(main.color("&eStore: &7minezone.tebex.io"));
+        player.sendMessage(main.color("&eStore: &7www.minezone.club/store"));
         player.sendMessage(main.color("&eYouTube: &7https://www.youtube.com/@minezone6480"));
         player.sendMessage(main.color("&eTwitter: &7https://twitter.com/MinezoneMC"));
         player.sendMessage(main.color("&eTikTok: &7https://www.tiktok.com/@minezonemc"));
@@ -730,7 +730,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 				return;
 			}
 		} else {
-			player.sendMessage(main.color("&c&l(!) &rUsage: /fc <className> [player]"));
+			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing /fc <className> [player]"));
 			return;
 		}
 
