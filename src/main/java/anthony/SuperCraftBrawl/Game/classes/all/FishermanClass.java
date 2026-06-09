@@ -27,7 +27,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 public class FishermanClass extends BaseClass {
@@ -107,7 +107,6 @@ public class FishermanClass extends BaseClass {
     @Override
     public void onFish(PlayerFishEvent event) {
         if (!grappleAbility.isReady()){
-//            grappleAbility.sendPlayerRemainingCooldownChatMessage();
             event.setCancelled(true);
             return;
         }
@@ -150,14 +149,13 @@ public class FishermanClass extends BaseClass {
     }
 
     private void detonateTacticalFish() {
-        Iterator<Item> it= puffer.iterator();
-        while (it.hasNext()) {
-            Item fish = it.next();
-            boolean nearby = false;
+        List<Item> toRemove = new ArrayList<>();
+        for (Item fish : puffer) {
             Location loc = fish.getLocation();
+            boolean nearby = false;
             for (Player p : instance.players) {
                 if (!checkIfDead(p, instance) &&
-                        p != player && p.getLocation().distance(fish.getLocation()) <= 2) {
+                        p != player && p.getLocation().distance(loc) <= 2) {
                     nearby = true;
                     EntityDamageEvent damageEvent = new EntityDamageEvent(p,
                             EntityDamageEvent.DamageCause.VOID, 5);
@@ -172,9 +170,10 @@ public class FishermanClass extends BaseClass {
                 player.getWorld().playEffect(loc, Effect.EXPLOSION_LARGE, 1);
                 player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
                 fish.remove();
-                puffer.remove(fish);
+                toRemove.add(fish);
             }
         }
+        puffer.removeAll(toRemove);
     }
     
     @Override
@@ -215,7 +214,7 @@ public class FishermanClass extends BaseClass {
         if (player.getGameMode() == GameMode.SPECTATOR) return;
         if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
 
-        if (item.isSimilar(bucketItem)) bucketAbility.sendCustomMessage("&c&l(!) &rCollect " + (4 - hits) + " more fish!");
+        if (item.isSimilar(bucketItem)) bucketAbility.sendCustomMessage("&c&l(!) &rCollect " + (MINIMUM_HITS_AMOUNT - hits) + " more fish!");
 
         if (item.isSimilar(waterBucketItem)) onFishBucket();
 
@@ -253,7 +252,7 @@ public class FishermanClass extends BaseClass {
 
     private void addFish() {
         Random random = new Random();
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 0; i < RANDOM_FISH_AMOUNT; i++) {
             int chance = random.nextInt(4) + 1;
             if (chance == 1)
                 player.getInventory().addItem(flyingFish);
