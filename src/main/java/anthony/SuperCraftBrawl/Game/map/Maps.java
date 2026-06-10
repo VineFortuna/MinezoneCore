@@ -168,7 +168,7 @@ public enum Maps {
 					.setSource(MapSource.MINECADE)
 	),
 	
-	HauntedMansion(
+	/*HauntedMansion(
 			"HauntedMansion",
 			new Gameplay[]{Gameplay.INDOOR},
 			Size.MEDIUM,
@@ -188,7 +188,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(-1207.500, 138, 959.500))
 					.setBounds(new Vector(-1207.500, 138, 959.500), 100, 100)
 					.setSource(MapSource.COMMUNITY)
-	),
+	),*/
 	
 	CliffSide(
 			"CliffSide",
@@ -234,7 +234,7 @@ public enum Maps {
 					.setSource(MapSource.MINECADE)
 	),
 	
-	WitchesBrew(
+	/*WitchesBrew(
 			"WitchesBrew",
 			new Gameplay[]{Gameplay.VOIDY},
 			Size.SMALL,
@@ -253,7 +253,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(-1328.500, 170, 981.500))
 					.setBounds(new Vector(-1328.500, 170, 981.500), 40, 100)
 					.setSource(MapSource.COMMUNITY)
-	),
+	),*/
 	
 	Stronghold(
 			"Stronghold",
@@ -474,7 +474,7 @@ public enum Maps {
 					.setGameType(GameType.DUEL)
 	),
 	
-	TheCraftOf87(
+	/*TheCraftOf87(
 			"TheCraftOf87",
 			new Gameplay[]{Gameplay.INDOOR},
 			Size.SMALL,
@@ -494,9 +494,9 @@ public enum Maps {
 					.setSpecLoc(new Vector(251.994, 145, 119.004))
 					.setBounds(new Vector(251.994, 145, 119.004), 200, 200)
 					.setSource(MapSource.COMMUNITY)
-	),
+	),*/
 	
-	Citadel(
+	/*Citadel(
 			"Citadel",
 			new Gameplay[]{Gameplay.FLAT, Gameplay.ELEVATED},
 			Size.LARGE,
@@ -516,7 +516,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(329.500, 121, 162.500))
 					.setBounds(new Vector(329.500, 121, 162.500), 300, 300)
 					.setSource(MapSource.COMMUNITY)
-	),
+	),*/
 	
 	HighIslands(
 			"HighIslands",
@@ -671,7 +671,7 @@ public enum Maps {
 					.setSource(MapSource.MINECADE)
 	),
 	
-	SnowGlobe(
+	/*SnowGlobe(
 			"SnowGlobe",
 			new Gameplay[]{Gameplay.INDOOR},
 			Size.SMALL,
@@ -694,7 +694,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(66.578, 100, -34.391))
 					.setBounds(new Vector(55.500, 174, -57.500), 58, 58)
 					.setSource(MapSource.COMMUNITY)
-	),
+	),*/
 	
 	Elven(
 			"Elven",
@@ -1033,7 +1033,7 @@ public enum Maps {
 					.setSource(MapSource.COMMUNITY)
 	),
 	
-	CommCollab(
+	/*CommCollab(
 			"CommCollab",
 			new Gameplay[]{Gameplay.INDOOR},
 			Size.MEDIUM,
@@ -1053,7 +1053,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(5042.537, 171, 679.629))
 					.setBounds(new Vector(5042.537, 171, 679.629), 200, 200)
 					.setSource(MapSource.COMMUNITY)
-	),
+	),*/
 	
 	Apex(
 			"Apex",
@@ -1465,7 +1465,7 @@ public enum Maps {
 					.setSource(MapSource.MINECADE)
 	),
 	
-	SantasWorkshop(
+	/*SantasWorkshop(
 			"SantasWorkshop",
 			new Gameplay[]{Gameplay.INDOOR, Gameplay.FLAT},
 			Size.MEDIUM,
@@ -1487,7 +1487,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(55.654, 101, -50.585))
 					.setBounds(new Vector(55, 74, -43), 100, 100)
 					.setSource(MapSource.COMMUNITY)
-	),
+	),*/
 	
 	Slither(
 			"Slither",
