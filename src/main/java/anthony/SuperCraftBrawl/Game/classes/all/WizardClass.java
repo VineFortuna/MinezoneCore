@@ -107,7 +107,7 @@ public class WizardClass extends BaseClass {
                 && instance.classes.get(player).getType() == ClassType.Wizard
                 && instance.classes.get(player).getLives() > 0) {
 
-            int cooldownMs = 10000; // both teleport and blaze powder use 10s
+            int cooldownMs = (spell == 1) ? 15000 : 10000;
             int cooldownSec = (cooldownMs - wizard.getTime()) / 1000 + 1;
             String label = (spell == 1) ? "Teleport" : "Fireballs";
 
@@ -190,51 +190,104 @@ public class WizardClass extends BaseClass {
     // -----------------------------------------------------------------------
 
     private void useTeleport() {
-        if (wizard.getTime() < 10000) {
-            int seconds = (10000 - wizard.getTime()) / 1000 + 1;
-            player.sendMessage(ChatColor.BOLD + "(!) " + ChatColor.RESET
-                    + "Teleport is still on cooldown for " + ChatColor.YELLOW + seconds + "s");
+        if (wizard.getTime() < 15000) {
+            int seconds = (15000 - wizard.getTime()) / 1000 + 1;
+            player.sendMessage(instance.color("&c&l(!) Teleport&r is still on cooldown for &a" +
+                    seconds + "s"));
             return;
         }
 
-        // Trace ray up to 10 blocks for a solid block
-        BlockIterator bi = new BlockIterator(player.getEyeLocation(), 0, 20);
-        Block target = null;
+        // Trace ray up to 15 blocks — track the last free block before the wall
+        // so we never teleport the player inside a solid block
+        BlockIterator bi = new BlockIterator(player.getEyeLocation(), 0, 15);
+        Block lastFree = null;
         while (bi.hasNext()) {
             Block block = bi.next();
-            if (block.getType().isSolid()) {
-                target = block;
-                break;
-            }
+            if (block.getType().isSolid()) break;
+            lastFree = block;
         }
 
-        if (target == null) {
-            player.sendMessage(ChatColor.RED + "(!) " + ChatColor.RESET + "No block in sight within 10 blocks.");
+        // No free space found (wall right at face, or nothing in range)
+        if (lastFree == null) {
+            player.sendMessage(instance.color("&c&l(!) &rNo safe space to teleport to!"));
+            return;
+        }
+
+        // Make sure there is head room at the destination (2-block tall player)
+        if (lastFree.getRelative(org.bukkit.block.BlockFace.UP).getType().isSolid()) {
+            player.sendMessage(instance.color("&c&l(!) &rNot enough room to teleport there!"));
             return;
         }
 
         Location origin = player.getLocation().clone();
-        Location destination = target.getLocation().add(0.5, 1, 0.5);
+        Location destination = lastFree.getLocation().add(0.5, 0, 0.5);
         destination.setYaw(origin.getYaw());
         destination.setPitch(origin.getPitch());
 
-        // Ender particle + sound at origin
-        for (int i = 0; i < 6; i++)
-            origin.getWorld().playEffect(origin.clone().add(
-                            (Math.random() - 0.5) * 0.8, Math.random() * 1.8, (Math.random() - 0.5) * 0.8),
-                    Effect.PORTAL, 1);
-        origin.getWorld().playSound(origin, Sound.ENDERMAN_TELEPORT, 1, 1);
-
+        playVanishEffect(origin);
         player.teleport(destination);
-
-        // Ender particle + sound at destination
-        for (int i = 0; i < 6; i++)
-            destination.getWorld().playEffect(destination.clone().add(
-                            (Math.random() - 0.5) * 0.8, Math.random() * 1.8, (Math.random() - 0.5) * 0.8),
-                    Effect.PORTAL, 1);
-        destination.getWorld().playSound(destination, Sound.ENDERMAN_TELEPORT, 1, 1);
+        playAppearEffect(destination);
 
         wizard.restart();
+    }
+
+    // -----------------------------------------------------------------------
+    //  Teleport particle effects
+    // -----------------------------------------------------------------------
+
+    /**
+     * Played at the origin — portal particles spiral upward in expanding rings,
+     * giving the impression of the wizard dissolving into thin air.
+     */
+    private void playVanishEffect(Location loc) {
+        World world = loc.getWorld();
+
+        // Rising spiral: 5 rings climbing from feet to above head, each slightly wider
+        int rings = 5;
+        int points = 10;
+        for (int ring = 0; ring < rings; ring++) {
+            double y      = ring * 0.4;          // climb upward
+            double radius = 0.3 + ring * 0.12;   // expand outward
+            double offset = ring * 0.35;          // rotate each ring slightly
+            for (int i = 0; i < points; i++) {
+                double angle = (2 * Math.PI / points) * i + offset;
+                Location p = loc.clone().add(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
+                world.playEffect(p, Effect.PORTAL, 1);
+            }
+        }
+        // Dense central burst at chest height
+        for (int i = 0; i < 5; i++)
+            world.playEffect(loc.clone().add(0, 1, 0), Effect.PORTAL, 1);
+
+        // Low whoosh — slightly lower pitch than the appear sound so they feel different
+        world.playSound(loc, Sound.ENDERMAN_TELEPORT, 1.0f, 0.75f);
+        world.playSound(loc, Sound.PORTAL_TRAVEL, 0.3f, 1.8f);
+    }
+
+    /**
+     * Played at the destination — portal particles burst outward from rings that
+     * contract toward the centre, like the wizard snapping into existence.
+     */
+    private void playAppearEffect(Location loc) {
+        World world = loc.getWorld();
+
+        // Contracting rings: largest at the bottom, smallest at the top
+        int rings = 4;
+        int points = 12;
+        for (int ring = 0; ring < rings; ring++) {
+            double y      = ring * 0.45;
+            double radius = 1.2 - ring * 0.25;    // shrink as they rise
+            double offset = ring * 0.5;
+            for (int i = 0; i < points; i++) {
+                double angle = (2 * Math.PI / points) * i + offset;
+                Location p = loc.clone().add(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
+                world.playEffect(p, Effect.PORTAL, 1);
+                // Sprinkle enchantment-table runes on every other point for extra flair
+                if (i % 2 == 0) world.playEffect(p, Effect.ENDER_SIGNAL, 1);
+            }
+        }
+        // Sharp snap sound — higher pitch to signal arrival
+        world.playSound(loc, Sound.ENDERMAN_TELEPORT, 1.0f, 1.3f);
     }
 
     // -----------------------------------------------------------------------
