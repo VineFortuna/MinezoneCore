@@ -193,7 +193,7 @@ public class GameInstance {
         mapWorld.setAutoSave(false);
 
         //if (getMap() != Maps.WitchesBrew)
-            //mapWorld.setTime(1000);
+        //mapWorld.setTime(1000);
 
         mapWorld.setDifficulty(Difficulty.EASY);
     }
@@ -690,7 +690,13 @@ public class GameInstance {
         ClassType classType = this.classes.get(player).getType();
         if (classType == null) return;
 
-        String teamName = player.getName();
+        // Prefix the team name with a rank-order number so the tablist stays
+        // sorted by rank in-game, matching the lobby TablistManager ordering.
+        Rank rank = getGameManager().getMain().getRankManager().getRank(player);
+        String rankPrefix = String.format("%02d_", rankOrder(rank));
+        String teamName = rankPrefix + player.getName();
+        if (teamName.length() > 16) teamName = teamName.substring(0, 16);
+
         Scoreboard board = o.getScoreboard();
 
         Team team = board.getTeam(teamName);
@@ -705,6 +711,26 @@ public class GameInstance {
             team.setPrefix(baseName);
         } else {
             team.setPrefix("");
+        }
+    }
+
+    /** Mirrors TablistManager.orderFor — lower = higher in tab. */
+    private int rankOrder(Rank r) {
+        switch (r) {
+            case OWNER:        return 0;
+            case ADMIN:        return 1;
+            case DEVELOPER:    return 2;
+            case SR_MODERATOR: return 3;
+            case MODERATOR:    return 4;
+            case TRAINEE:      return 5;
+            case QA:           return 6;
+            case BUILDER:      return 7;
+            case MEDIA:        return 8;
+            case SUPREME:      return 9;
+            case PRO:          return 10;
+            case VIP:          return 11;
+            case DEFAULT:
+            default:           return 12;
         }
     }
 

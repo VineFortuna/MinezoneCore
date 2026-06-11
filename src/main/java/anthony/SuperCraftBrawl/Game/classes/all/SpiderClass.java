@@ -37,14 +37,13 @@ public class SpiderClass extends BaseClass {
 	private ItemStack weapon;
 	private ItemStack webItem;
 	private final Ability mutateAbility = new Ability("&c&lMutate", 6, player);
-	private final Ability webAbility = new Ability("&f&lWeb", 4, player);
+	private final Ability webAbility = new Ability("&f&lWeb", 5, player);
 	private static final double WEB_ABILITY_DURATION = 2;
 	private static final int MAX_WEB_AMOUNT = 4;
 	private static final double WEB_PLAYER_RADIUS = 1.0;
 	private final PotionEffect speed = new PotionEffect(PotionEffectType.SPEED, 6 * 20, 1, false, true);
 	private final PotionEffect strength = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 6 * 20, 0, false, true);
 	private final PotionEffect regen = new PotionEffect(PotionEffectType.REGENERATION, 5 * 20, 1, false, true);
-	private final PotionEffect invis = new PotionEffect(PotionEffectType.INVISIBILITY, 6 * 20, 0, false, false);
 	private final PotionEffect poison = new PotionEffect(PotionEffectType.POISON, 4 * 20, 0, false, true);
 	private static final int VENOM_ABILITY_DURATION = 6;
 	public int invisTaskId;
@@ -75,8 +74,7 @@ public class SpiderClass extends BaseClass {
 				"&7▶ &b&oSpeed &e" + (speed.getAmplifier() + 1) + " &7for &e" + speed.getDuration() / 20 + "s",
 				"&7▶ &2&oVenom &7for &e" + poison.getDuration() / 20 + "s",
 				"&7▶ &4&oStrength &e" + (strength.getAmplifier() + 1) + " &7for &e" + strength.getDuration() / 20 + "s",
-				"&7▶ &d&oRegeneration &e" + (regen.getAmplifier() + 1) + " &7for &e" + regen.getDuration() / 20 + "s",
-				"&7▶ &f&oInvisibility &e" + (invis.getAmplifier() + 1) + " &7for &e" + invis.getDuration() / 20 + "s"
+				"&7▶ &d&oRegeneration &e" + (regen.getAmplifier() + 1) + " &7for &e" + regen.getDuration() / 20 + "s"
 		);
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
 
@@ -221,7 +219,7 @@ public class SpiderClass extends BaseClass {
 
 	private void applyRandomEffect() {
 		Random random = new Random();
-		int chance = random.nextInt(5) + 1;
+		int chance = random.nextInt(4) + 1;
 
 		String effect = "";
 		switch (chance) {
@@ -240,10 +238,6 @@ public class SpiderClass extends BaseClass {
 			case 4:
 				addVenom();
 				effect = "&2Venom";
-				break;
-			case 5:
-				addInvisibility();
-				effect = "&7Invis";
 				break;
 		}
 
@@ -299,18 +293,6 @@ public class SpiderClass extends BaseClass {
 			Bukkit.getScheduler().cancelTask(venomTaskId);
 			venomTaskId = -1;
 		}
-	}
-
-	private void addInvisibility() {
-		removeInvisibility();
-		player.addPotionEffect(invis);
-		removeArmor();
-
-		invisTaskId = Bukkit.getScheduler().runTaskLater(
-				instance.getGameManager().getMain(),
-				() -> {removeInvisibility(); setArmorBack();},
-				invis.getDuration()
-		).getTaskId();
 	}
 
 	private void removeArmor () {

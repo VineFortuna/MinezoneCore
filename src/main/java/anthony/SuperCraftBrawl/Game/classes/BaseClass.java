@@ -961,10 +961,8 @@ public abstract class BaseClass {
                         }
                         p.sendMessage("" + ChatColor.BOLD + "||");
                         p.sendMessage("" + ChatColor.BOLD + "=====================");
-                        p.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + "You have gained " + ChatColor.GREEN + baseClassDead.totalExp + " EXP!");
-                        p.sendMessage("" + ChatColor.LIGHT_PURPLE + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + "You have earned " + ChatColor.GREEN + baseClassDead.totalTokens + " Tokens!");
+                        p.sendMessage(instance.color("&2&l(!) &rYou earned &a" + baseClassDead.totalTokens +
+                                " &rTokens and &a" + baseClassDead.totalExp + " &rEXP!"));
 
                         if (data3.exp >= 2500) {
                             data3.level++;
@@ -1853,7 +1851,21 @@ public abstract class BaseClass {
 				damagerPlayer.getInventory().setItem(2, zombieEgg);
 			} else if (baseClass.getType() == ClassType.Wolf) {
 				wolfPackAdd = true;
-			}
+			} else if (baseClass.getType() == ClassType.SnowGolem) {
+                ItemStack slowballs = ItemHelper.setDetails(
+                        new ItemStack(Material.SNOW_BALL, 1),
+                        "&f&lSLOWBALL &7(Right click)",
+                        "&7Hit players within &e2 blocks &7to give:",
+                        "&7Slowness 2 for 3s + half a heart damage"
+                );
+
+                if (damagerPlayer.getInventory().getItem(2).getType() != Material.SNOW_BALL)
+                    damagerPlayer.getInventory().setItem(2, slowballs);
+                else
+                    damagerPlayer.getInventory().addItem(slowballs);
+
+                damagerPlayer.sendMessage(instance.color("&2&l(!) &rYou got a kill and gained an extra &f&lSLOWBALL"));
+            }
 		}
 	}
 
