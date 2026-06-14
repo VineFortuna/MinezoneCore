@@ -106,7 +106,7 @@ public class SnowGolemClass extends BaseClass {
         // Show a barrier in slot 2 when all slowballs are used up
         ItemStack slot2 = player.getInventory().getItem(2);
         if (slot2 == null || slot2.getType() != Material.SNOW_BALL || slot2.getType() != Material.BARRIER) {
-            if (outOfSlowballs) {
+            if (!outOfSlowballs) {
                 player.getInventory().setItem(2, ItemHelper.setDetails(
                         new ItemStack(Material.BARRIER),
                         instance.color("&c&lOut of Slowballs!"),
