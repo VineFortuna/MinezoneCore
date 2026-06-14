@@ -1851,21 +1851,7 @@ public abstract class BaseClass {
 				damagerPlayer.getInventory().setItem(2, zombieEgg);
 			} else if (baseClass.getType() == ClassType.Wolf) {
 				wolfPackAdd = true;
-			} else if (baseClass.getType() == ClassType.SnowGolem) {
-                ItemStack slowballs = ItemHelper.setDetails(
-                        new ItemStack(Material.SNOW_BALL, 1),
-                        "&f&lSLOWBALL &7(Right click)",
-                        "&7Hit players within &e2 blocks &7to give:",
-                        "&7Slowness 2 for 3s + half a heart damage"
-                );
-
-                if (damagerPlayer.getInventory().getItem(2).getType() != Material.SNOW_BALL)
-                    damagerPlayer.getInventory().setItem(2, slowballs);
-                else
-                    damagerPlayer.getInventory().addItem(slowballs);
-
-                damagerPlayer.sendMessage(instance.color("&2&l(!) &rYou got a kill and gained an extra &f&lSLOWBALL"));
-            }
+			}
 		}
 	}
 
