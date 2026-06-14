@@ -13,6 +13,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
@@ -30,6 +31,7 @@ public class WizardClass extends BaseClass {
     private int spell = -1; // 1 = teleport, 2 = fireball, 3 = speed/jump, 4 = blindness
     private boolean speedyjumpy = false;
     private boolean blindness = false;
+    private ItemStack weapon;
 
     public WizardClass(GameInstance instance, Player player) {
         super(instance, player);
@@ -88,7 +90,9 @@ public class WizardClass extends BaseClass {
         spell = -1;
         speedyjumpy = false;
         blindness = false;
-        playerInv.setItem(0, makePlainWand());
+        weapon = makePlainWand();
+
+        playerInv.setItem(0, weapon);
     }
 
     @Override
@@ -126,6 +130,16 @@ public class WizardClass extends BaseClass {
     public void DoDamage(EntityDamageByEntityEvent event) {
         if (!blindness) return;
         if (!(event.getEntity() instanceof LivingEntity)) return;
+
+        ItemStack heldItem = player.getInventory().getItem(player.getInventory().getHeldItemSlot());
+
+        boolean isWeaponMelee =
+                event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
+                        && heldItem != null
+                        && heldItem.equals(weapon);
+
+        if (!isWeaponMelee) return;
+
         // 1/3 chance of Blindness 2 for 5 seconds
         if (new Random().nextInt(3) == 0) {
             ((LivingEntity) event.getEntity())
@@ -161,28 +175,29 @@ public class WizardClass extends BaseClass {
 
         switch (spell) {
             case 1:
-                // Teleport — Sharp 4, KB 1
-                player.getInventory().setItem(0, makeWand(4, 1));
+                // Teleport - Sharp 4, KB 1
+                weapon = makeWand(4, 1);
                 instance.TellAll(instance.color("&6&l&lWizard> &rI cast spell... Teleport!"));
                 break;
             case 2:
-                // Triple Fireball — Sharp 3, KB 2
-                player.getInventory().setItem(0, makeWand(3, 2));
+                // Triple Fireball - Sharp 3, KB 2
+                weapon = makeWand(3, 2);
                 instance.TellAll(instance.color("&6&l&lWizard> &rI cast spell... Fireball fireball fireball!!"));
                 break;
             case 3:
-                // Speed 2 + Jump Boost 3 — Sharp 3, KB 1
-                player.getInventory().setItem(0, makeWand(3, 1));
+                // Speed 2 + Jump Boost 3 - Sharp 3, KB 1
+                weapon = makeWand(3, 1);
                 speedyjumpy = true;
                 instance.TellAll(instance.color("&6&l&lWizard> &rI cast... Speedy speedy jumpy jumpy"));
                 break;
             case 4:
-                // Blindness on hit — Sharp 3, KB 2
-                player.getInventory().setItem(0, makeWand(3, 2));
+                // Blindness on hit - Sharp 3, KB 2
+                weapon = makeWand(3, 2);
                 blindness = true;
                 instance.TellAll(instance.color("&6&l&lWizard> &rI cast... Let my enemies see darkness.."));
                 break;
         }
+        player.getInventory().setItem(0, weapon);
     }
 
     // -----------------------------------------------------------------------
@@ -197,9 +212,9 @@ public class WizardClass extends BaseClass {
             return;
         }
 
-        // Trace ray up to 15 blocks — track the last free block before the wall
+        // Trace ray up to 10 blocks - track the last free block before the wall
         // so we never teleport the player inside a solid block
-        BlockIterator bi = new BlockIterator(player.getEyeLocation(), 0, 15);
+        BlockIterator bi = new BlockIterator(player.getEyeLocation(), 0, 10);
         Block lastFree = null;
         while (bi.hasNext()) {
             Block block = bi.next();
