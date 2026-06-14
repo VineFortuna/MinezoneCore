@@ -30,7 +30,7 @@ import xyz.xenondevs.particle.data.texture.BlockTexture;
 
 public class SnowGolemClass extends BaseClass {
 
-    private boolean outOfSlowballs = false;
+    private boolean outOfSlowballs = true;
 
     private ItemStack weapon;
     private final Ability pumpkinAbility = new Ability("&6&lPumpkin Head", player);
@@ -60,6 +60,7 @@ public class SnowGolemClass extends BaseClass {
                 ChatColor.WHITE + "Snow Platform",
                 ChatColor.GRAY + "Right click to save yourself from falling");
 
+        outOfSlowballs = false;
         ItemStack slowballs = ItemHelper.setDetails(
                 new ItemStack(Material.SNOW_BALL, 5),
                 "&f&lSLOWBALL &7(Right click)",
@@ -67,7 +68,6 @@ public class SnowGolemClass extends BaseClass {
                 "&7Slowness 2 for 3s + half a heart damage"
         );
 
-        outOfSlowballs = false;
 
         String radiusDisplay   = ItemHelper.formatDouble(PUMPKIN_ABILITY_RANGE);
         String durationDisplay = ItemHelper.formatDouble(PUMPKIN_ABILITY_DURATION);
@@ -105,14 +105,14 @@ public class SnowGolemClass extends BaseClass {
 
         // Show a barrier in slot 2 when all slowballs are used up
         ItemStack slot2 = player.getInventory().getItem(2);
-        if (slot2 == null || slot2.getType() != Material.SNOW_BALL || slot2.getType() != Material.BARRIER) {
+        if ( slot2 == null || (slot2.getType() != Material.SNOW_BALL && slot2.getType() != Material.BARRIER)) {
             if (!outOfSlowballs) {
-                player.getInventory().setItem(2, ItemHelper.setDetails(
-                        new ItemStack(Material.BARRIER),
-                        instance.color("&c&lOut of Slowballs!"),
-                        "",
-                        instance.color("&7Get a kill to regen a snowball")));
                 outOfSlowballs = true;
+                player.getInventory().setItem(2, ItemHelper.setDetails(
+                    new ItemStack(Material.BARRIER),
+                    instance.color("&c&lOut of Slowballs!"),
+                    "",
+                    instance.color("&7Get a kill to regen a snowball")));
             }
         }
     }
