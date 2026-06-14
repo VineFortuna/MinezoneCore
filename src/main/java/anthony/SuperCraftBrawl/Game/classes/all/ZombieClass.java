@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -80,40 +81,33 @@ public class ZombieClass extends BaseClass {
 
 	@Override
 	public void DoDamage(EntityDamageByEntityEvent event) {
-		BaseClass bc = instance.classes.get(player);
-		if (bc != null && bc.getLives() <= 0)
-			return;
+		if (!isPlayerAlive()) return;
+		if (!(event.getEntity() instanceof Player)) return;
+
+		ItemStack heldItem = player.getInventory().getItem(player.getInventory().getHeldItemSlot());
+
+		boolean isWeaponMelee =
+				event.getCause() == EntityDamageEvent.DamageCause.ENTITY_ATTACK
+						&& heldItem != null
+						&& heldItem.equals(weapon);
+
+		if (!isWeaponMelee) return;
+
+		Player p = (Player) event.getEntity();
+
+		if (instance.duosMap != null)
+			if (instance.team.get(p).equals(instance.team.get(player)))
+				return;
 
 		Random rand = new Random();
 		int chance = rand.nextInt(3);
 
 		if (chance == 0) {
-			if (event.getEntity() instanceof Player) {
-				Player p = (Player) event.getEntity();
-				if (instance.duosMap != null)
-					if (instance.team.get(p).equals(instance.team.get(player)))
-						return;
-
-				p.addPotionEffect(slowness);
-			}
+			p.addPotionEffect(slowness);
 		} else if (chance == 1) {
-			if (event.getEntity() instanceof Player) {
-				Player p = (Player) event.getEntity();
-				if (instance.duosMap != null)
-					if (instance.team.get(p).equals(instance.team.get(player)))
-						return;
-
-				p.addPotionEffect(poison);
-			}
+			p.addPotionEffect(poison);
 		} else if (chance == 2) {
-			if (event.getEntity() instanceof Player) {
-				Player p = (Player) event.getEntity();
-				if (instance.duosMap != null)
-					if (instance.team.get(p).equals(instance.team.get(player)))
-						return;
-
-				p.addPotionEffect(weakness);
-			}
+			p.addPotionEffect(weakness);
 		}
 	}
 
