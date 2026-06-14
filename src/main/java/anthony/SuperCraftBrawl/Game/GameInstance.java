@@ -1081,7 +1081,7 @@ public class GameInstance {
         }
 
         // Save game data
-        if (allClasses.size() > 1) { // save only if more than 1 player in a match
+        if (!getGameManager().getMain().getConfig().getBoolean("dev") && allClasses.size() > 1) {
             gameManager.getMain().getGameDataManager().saveMatch(gameType, map.getName(), gameTime, winnerList, allClasses, firstBlood);
         }
 
