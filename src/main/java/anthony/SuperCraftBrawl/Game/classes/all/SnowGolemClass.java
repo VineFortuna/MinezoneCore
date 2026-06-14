@@ -30,7 +30,7 @@ import xyz.xenondevs.particle.data.texture.BlockTexture;
 
 public class SnowGolemClass extends BaseClass {
 
-    private int cooldownSec = 0;
+    private boolean outOfSlowballs = false;
 
     private ItemStack weapon;
     private final Ability pumpkinAbility = new Ability("&6&lPumpkin Head", player);
@@ -67,6 +67,8 @@ public class SnowGolemClass extends BaseClass {
                 "&7Slowness 2 for 3s + half a heart damage"
         );
 
+        outOfSlowballs = false;
+
         String radiusDisplay   = ItemHelper.formatDouble(PUMPKIN_ABILITY_RANGE);
         String durationDisplay = ItemHelper.formatDouble(PUMPKIN_ABILITY_DURATION);
         ItemStack pumpkin = ItemHelper.setDetails(
@@ -90,10 +92,10 @@ public class SnowGolemClass extends BaseClass {
     public void Tick(int gameTicks) {
         if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.SnowGolem
                 && instance.classes.get(player).getLives() > 0) {
-            this.cooldownSec = (20000 - snowGolem.getTime()) / 1000 + 1;
+            int cooldownSec = (20000 - snowGolem.getTime()) / 1000 + 1;
             if (snowGolem.getTime() < 20000) {
                 String msg = instance.getGameManager().getMain()
-                        .color("&bSnow Platform &rregenerates in: &e" + this.cooldownSec + "s");
+                        .color("&bSnow Platform &rregenerates in: &e" + cooldownSec + "s");
                 getActionBarManager().setActionBar(player, "platform.cooldown", msg, 2);
             } else {
                 String msg = instance.getGameManager().getMain().color("&rYou can use &bSnow Platform");
@@ -103,13 +105,14 @@ public class SnowGolemClass extends BaseClass {
 
         // Show a barrier in slot 2 when all slowballs are used up
         ItemStack slot2 = player.getInventory().getItem(2);
-        if (slot2 == null || slot2.getType() != Material.SNOW_BALL) {
-            if (slot2 == null || slot2.getType() != Material.BARRIER) {
+        if (slot2 == null || slot2.getType() != Material.SNOW_BALL || slot2.getType() != Material.BARRIER) {
+            if (outOfSlowballs) {
                 player.getInventory().setItem(2, ItemHelper.setDetails(
                         new ItemStack(Material.BARRIER),
                         instance.color("&c&lOut of Slowballs!"),
                         "",
                         instance.color("&7Get a kill to regen a snowball")));
+                outOfSlowballs = true;
             }
         }
     }
