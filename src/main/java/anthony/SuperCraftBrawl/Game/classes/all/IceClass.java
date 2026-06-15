@@ -11,6 +11,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -55,6 +56,9 @@ public class IceClass extends BaseClass {
     }
 
     @Override
+    public void SetNameTag() {}
+
+    @Override
     public ItemStack getAttackWeapon() {
         ItemStack item = new ItemStack(Material.STONE_SWORD);
         ItemMeta meta = item.getItemMeta();
@@ -63,21 +67,33 @@ public class IceClass extends BaseClass {
         return item;
     }
 
-    @Override
-    public void SetNameTag() {}
+    private ItemStack getFreezeRay() {
+        ItemStack freezeRay = ItemHelper.setDetails(new ItemStack(Material.WOOL),
+                instance.color("&bFreeze Ray"),
+                instance.color("&7Right click to shoot a player with freeze ray!"),
+                "",
+                instance.color("&rEffect: &aDamage & Slowness II"),
+                instance.color("&rRange: &a30 blocks"));
+        return freezeRay;
+    }
+
+    private ItemStack getFreezeBomb() {
+        ItemStack freezeBomb = ItemHelper.setDetails(new ItemStack(Material.PACKED_ICE),
+                instance.color("&bFreeze Bomb"), "",
+                instance.color("&7Right click to freeze nearby enemies!"),
+                "",
+                instance.color("&rRange: &a10 blocks"));
+        return freezeBomb;
+    }
 
     @Override
     public void SetItems(Inventory playerInv) {
-        ice.startTime = System.currentTimeMillis() - 100000;
-        playerInv.setItem(0, this.getAttackWeapon());
-        playerInv.setItem(1,
-                ItemHelper.setDetails(new ItemStack(Material.WOOL),
-                        instance.getGameManager().getMain().color("&bFreeze Ray"), "",
-                        instance.getGameManager().getMain().color("&7Right click to shoot a player with freeze ray!")));
-        playerInv.setItem(2,
-                ItemHelper.setDetails(new ItemStack(Material.PACKED_ICE),
-                        instance.getGameManager().getMain().color("&bFreeze Bomb"), "",
-                        instance.getGameManager().getMain().color("&7Right click to freeze nearby enemies!")));
+        ice.startTime = System.currentTimeMillis() - 100000; //Restarts cooldown per life
+        playerInv.setItem(0, getAttackWeapon());
+        playerInv.setItem(1, getFreezeRay());
+        playerInv.setItem(2, getFreezeBomb());
+
+        //Permanent Weakness 2 to balance
         player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
     }
 
@@ -91,14 +107,127 @@ public class IceClass extends BaseClass {
             this.cooldownSec = (10 * 1000 - ice.getTime()) / 1000 + 1;
 
             if (ice.getTime() < 10 * 1000) {
-                String msg = instance.getGameManager().getMain()
-                        .color("&b&lFreeze Ray &rregenerates in: &e" + this.cooldownSec + "s");
+                String msg = instance.color("&b&lFreeze Ray &rregenerates in: &e" + this.cooldownSec + "s");
                 getActionBarManager().setActionBar(player, "ice.cooldown", msg, 2);
             } else {
-                String msg = instance.getGameManager().getMain().color("&rYou can use &b&lFreeze Ray");
+                String msg = instance.color("&rYou can use &b&lFreeze Ray");
                 getActionBarManager().setActionBar(player, "ice.cooldown", msg, 2);
             }
         }
+    }
+
+    private void freezeRayEffect() {
+        int range = 30; //Max range of freeze ray
+        Location endLoc = player.getEyeLocation();
+        BlockIterator b = new BlockIterator(player.getEyeLocation(), 0, range);
+
+        while (b.hasNext()) {
+            Block block = b.next();
+            endLoc = block.getLocation();
+            if (block.getType().isSolid())
+                break;
+        }
+
+        Vector dir = player.getEyeLocation().getDirection();
+        double maxDist = endLoc.distance(player.getEyeLocation());
+
+        // Compute two vectors perpendicular to the ray direction for the wider beam
+        Vector right = dir.clone().crossProduct(new Vector(0, 1, 0));
+        if (right.lengthSquared() < 0.001) right = new Vector(1, 0, 0); // fallback for straight-up/down aim
+        right.normalize();
+        Vector up2 = dir.clone().crossProduct(right).normalize();
+        double beamRadius = 0.35;
+
+        // Wider beam: center + 4 surrounding particles at each step
+        for (double t = 1; t < maxDist; t += 0.5) {
+            Location center = player.getEyeLocation().add(dir.clone().multiply(t));
+            BlockTexture ice = new BlockTexture(Material.ICE);
+
+            ParticleEffect.BLOCK_CRACK.display(center,                                                    0.0F, 0.0F, 0.0F, 0.0F, 1, ice);
+            ParticleEffect.BLOCK_CRACK.display(center.clone().add(right.clone().multiply( beamRadius)), 0.0F, 0.0F, 0.0F, 0.0F, 1, ice);
+            ParticleEffect.BLOCK_CRACK.display(center.clone().add(right.clone().multiply(-beamRadius)), 0.0F, 0.0F, 0.0F, 0.0F, 1, ice);
+            ParticleEffect.BLOCK_CRACK.display(center.clone().add(up2.clone().multiply( beamRadius)),   0.0F, 0.0F, 0.0F, 0.0F, 1, ice);
+            ParticleEffect.BLOCK_CRACK.display(center.clone().add(up2.clone().multiply(-beamRadius)),   0.0F, 0.0F, 0.0F, 0.0F, 1, ice);
+        }
+
+        for (Player p : instance.players) {
+            SoundManager.playSoundToAll(player, Sound.GLASS, 1.0f, 0.8f);
+            if (p != player) {
+                Vector d = p.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
+                double dist = d.dot(dir);
+
+                if (dist < maxDist) {
+                    Location closest = player.getEyeLocation().add(dir.clone().multiply(dist));
+
+                    if (closest.distanceSquared(p.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
+                        p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 4 * 20, 1));
+
+                        EntityDamageByEntityEvent damageEvent = new EntityDamageByEntityEvent(
+                                player,
+                                p,
+                                DamageCause.CUSTOM,
+                                4.5
+                        );
+
+                        instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+
+                        if (!damageEvent.isCancelled()) {
+                            p.damage(damageEvent.getDamage(), player);
+
+                            // Force the last damage cause to be the Ice player who hit them with Freeze Ray.
+                            // This helps kill credit / death logic detect the correct attacker.
+                            p.setLastDamageCause(damageEvent);
+
+                            Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
+                                p.playSound(p.getLocation(), Sound.GLASS, 1.0f, 0.75f);
+                            }, 5L);
+
+                            spawnIceHitEffect(p);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void freezeBombEffect() {
+        List<Player> nearby = new ArrayList<>();
+
+        for (Entity en : player.getNearbyEntities(10.0, 10.0, 10.0)) {
+            if (en instanceof Player) {
+                Player target = (Player) en;
+                if (!target.equals(player) && target.getGameMode() != GameMode.SPECTATOR) {
+                    nearby.add(target);
+                }
+            }
+        }
+
+        if (nearby.isEmpty()) {
+            player.sendMessage(instance.color("&c&l(!) &rNo nearby players have been found!"));
+            return;
+        }
+
+        for (Player p : nearby) {
+            if (p.getGameMode() != GameMode.SPECTATOR) {
+                p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 4));
+                Firework firework = p.getWorld().spawn(p.getEyeLocation(), Firework.class);
+                FireworkEffect effect = FireworkEffect.builder().flicker(true)
+                        .withColor(Color.WHITE)
+                        .with(FireworkEffect.Type.BURST)
+                        .build();
+                FireworkMeta meta = firework.getFireworkMeta();
+                meta.clearEffects();
+                meta.addEffect(effect);
+                firework.setFireworkMeta(meta);
+                Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), firework::detonate, 2L);
+            }
+        }
+
+        fireworkEffect(player);
+
+        player.sendMessage(
+                instance.getGameManager().getMain().color("&2&l(!) &rYou have &b&lFrozen &rnearby players!"));
+        player.getInventory().clear(player.getInventory().getHeldItemSlot());
     }
 
     @Override
@@ -111,106 +240,15 @@ public class IceClass extends BaseClass {
                 if (ice.getTime() < 10000) {
                     int seconds = (10000 - ice.getTime()) / 1000 + 1;
                     event.setCancelled(true);
-                    player.sendMessage(instance.color("&c&l(!) &rYour &b&lFreeze Ray &ris still regenerating for &a" + seconds + "s"));
+                    player.sendMessage(instance.color("&c&l(!) &rYour &b&lFreeze Ray &ris still regenerating for &a"
+                            + seconds + "s"));
                 } else {
                     ice.restart();
-                    int range = 30;
-                    Location endLoc = player.getEyeLocation();
-                    BlockIterator b = new BlockIterator(player.getEyeLocation(), 0, range);
-
-                    while (b.hasNext()) {
-                        Block block = b.next();
-                        endLoc = block.getLocation();
-                        if (block.getType().isSolid())
-                            break;
-                    }
-
-                    Vector dir = player.getEyeLocation().getDirection();
-                    double maxDist = endLoc.distance(player.getEyeLocation());
-
-                    // Compute two vectors perpendicular to the ray direction for the wider beam
-                    Vector right = dir.clone().crossProduct(new Vector(0, 1, 0));
-                    if (right.lengthSquared() < 0.001) right = new Vector(1, 0, 0); // fallback for straight-up/down aim
-                    right.normalize();
-                    Vector up2 = dir.clone().crossProduct(right).normalize();
-                    double beamRadius = 0.35;
-
-                    // Wider beam: center + 4 surrounding particles at each step
-                    for (double t = 1; t < maxDist; t += 0.5) {
-                        Location center = player.getEyeLocation().add(dir.clone().multiply(t));
-                        BlockTexture ice = new BlockTexture(Material.ICE);
-
-                        ParticleEffect.BLOCK_CRACK.display(center,                                                    0.0F, 0.0F, 0.0F, 0.0F, 1, ice);
-                        ParticleEffect.BLOCK_CRACK.display(center.clone().add(right.clone().multiply( beamRadius)), 0.0F, 0.0F, 0.0F, 0.0F, 1, ice);
-                        ParticleEffect.BLOCK_CRACK.display(center.clone().add(right.clone().multiply(-beamRadius)), 0.0F, 0.0F, 0.0F, 0.0F, 1, ice);
-                        ParticleEffect.BLOCK_CRACK.display(center.clone().add(up2.clone().multiply( beamRadius)),   0.0F, 0.0F, 0.0F, 0.0F, 1, ice);
-                        ParticleEffect.BLOCK_CRACK.display(center.clone().add(up2.clone().multiply(-beamRadius)),   0.0F, 0.0F, 0.0F, 0.0F, 1, ice);
-                    }
-
-                    for (Player p : instance.players) {
-                        SoundManager.playSoundToAll(player, Sound.GLASS, 1.0f, 0.8f);
-                        if (p != player) {
-                            Vector d = p.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
-                            double dist = d.dot(dir);
-
-                            if (dist < maxDist) {
-                                Location closest = player.getEyeLocation().add(dir.clone().multiply(dist));
-
-                                if (closest.distanceSquared(p.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
-                                    p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 4 * 20, 1));
-                                    EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID, 4.5);
-                                    instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
-                                    p.damage(4.5, player);
-
-                                    Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
-                                        p.playSound(p.getLocation(), Sound.GLASS, 1.0f, 0.75f);
-                                    }, 5L);
-                                    spawnIceHitEffect(p);
-                                }
-                            }
-                        }
-                    }
+                    freezeRayEffect();
                 }
             } else if (item.getType() == Material.PACKED_ICE
                     && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-                List<Player> nearby = new ArrayList<>();
-
-                for (Entity en : player.getNearbyEntities(10.0, 10.0, 10.0)) {
-                    if (en instanceof Player) {
-                        Player target = (Player) en;
-                        if (!target.equals(player) && target.getGameMode() != GameMode.SPECTATOR) {
-                            nearby.add(target);
-                        }
-                    }
-                }
-
-                if (nearby.isEmpty()) {
-                    player.sendMessage(
-                            instance.getGameManager().getMain().color("&c&l(!) &rNo nearby players have been found :("));
-                    return;
-                }
-
-                for (Player p : nearby) {
-                    if (p.getGameMode() != GameMode.SPECTATOR) {
-                        p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 4));
-                        Firework firework = p.getWorld().spawn(p.getEyeLocation(), Firework.class);
-                        FireworkEffect effect = FireworkEffect.builder().flicker(true)
-                                .withColor(Color.WHITE)
-                                .with(FireworkEffect.Type.BURST)
-                                .build();
-                        FireworkMeta meta = firework.getFireworkMeta();
-                        meta.clearEffects();
-                        meta.addEffect(effect);
-                        firework.setFireworkMeta(meta);
-                        Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), firework::detonate, 2L);
-                    }
-                }
-
-                fireworkEffect(player);
-
-                player.sendMessage(
-                        instance.getGameManager().getMain().color("&2&l(!) &rYou have &b&lFrozen &rnearby players!"));
-                player.getInventory().clear(player.getInventory().getHeldItemSlot());
+                freezeBombEffect();
             }
         }
     }
