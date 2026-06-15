@@ -26,13 +26,11 @@ public class ChickenClass extends BaseClass {
         super(instance, player);
         baseVerticalJump = 1.1;
         createArmor(
-                null,
                 "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDg5ZmVmMmVmNGY4MWVlYzZkMDdiYWVmNmM0YWVhNzRlNDQyZGNlNzJhMDFkZTk2NGViY2JhYzhhOGQ4MmM3NyJ9fX0=",
-                "FFFFFF",
-                "FFFFFF",
-                "FF7F10",
                 6,
-                "Chicken"
+                "FFFFFF",
+                "FFFFFF",
+                "FF7F10"
         );
     }
 

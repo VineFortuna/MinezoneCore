@@ -25,11 +25,11 @@ public class SlimeClass extends BaseClass {
 		super(instance, player);
 		baseVerticalJump = 1.2;
 		createArmor(
-				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWI1ODk5MDBmNDkwNzM3ZjU1OGQ5NzJhZGViYjQ0YjFhZjk2N2ZlOGQwMzJmMTc4NTU4ZDkzNzcxY2E3YzUzZSJ9fX0=",
-				"79D963",
 				6,
-				"Slime"
+				"79D963",
+				"79D963",
+				"79D963"
 		);
 	}
 

@@ -38,13 +38,11 @@ public class SteveClass extends BaseClass {
 	public SteveClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzVhZDYyNjE4MTExMWU1NWViZmM5MDZhOGU3MDQwYzY2YjhlZmU5NGY3YzA3NDQ4ZDU3MTAwMTJkNjg0MzZjIn19fQ==",
+				6,
 				"00ADAD",
 				"4A4191",
-				"686868",
-				6,
-				"Steve"
+				"686868"
 		);
 	}
 

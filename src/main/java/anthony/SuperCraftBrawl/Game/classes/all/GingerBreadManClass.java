@@ -30,11 +30,11 @@ public class GingerBreadManClass extends BaseClass {
 	public GingerBreadManClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
-				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDk0MDQzYWIxNjIzOGUzYTFhODhhMmVlZjQ5MGIwZWY4MGY5NTM4MGY3MzhkMWExZWNjNTMzNGRhZDZhYjE1In19fQ==",
-				"D2691E",
 				6,
-				"GingerBreadMan"
+				"D2691E",
+				"D2691E",
+				"D2691E"
 		);
 	}
 

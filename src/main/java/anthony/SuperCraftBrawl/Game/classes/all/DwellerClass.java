@@ -24,11 +24,11 @@ public class DwellerClass extends BaseClass {
 	public DwellerClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
-				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTAyNzVlMmJmN2Q2N2JlNzA4Yzc5ZDJhMDE5MjI0ODI2YjcwNzJkZjA1Mjk0ODFkNzUwYWIxOTRlZGYxODRhIn19fQ==",
-				"A3A3A3",
 				6,
-				"Dweller"
+				"A3A3A3",
+				"A3A3A3",
+				"A3A3A3"
 		);
 	}
 

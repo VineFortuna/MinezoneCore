@@ -35,13 +35,11 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 				(Plugin) instance.getGameManager().getMain());
 
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWE3MDVkYzkzYWIzYjIyNDUxNmI4YWZiMjMwNTI5MWIyODU1ZWIyMzVjZThlNGVkNDY2NjQyODBhYmRhIn19fQ==",
+				6,
 				"999999",
 				"404040",
-				"404040",
-				6,
-				"DarkSethBling"
+				"404040"
 		);
 	}
 

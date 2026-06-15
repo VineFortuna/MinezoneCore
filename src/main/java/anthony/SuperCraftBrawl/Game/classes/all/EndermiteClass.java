@@ -49,13 +49,11 @@ public class EndermiteClass extends BaseClass {
     public EndermiteClass(GameInstance instance, Player player) {
         super(instance, player);
         createArmor(
-                null,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWJjN2I5ZDM2ZmI5MmI2YmYyOTJiZTczZDMyYzZjNWIwZWNjMjViNDQzMjNhNTQxZmFlMWYxZTY3ZTM5M2EzZSJ9fX0=",
-                "3C2B4F",
-                "3C2B4F",
-                "23192E",
                 6,
-                "Endermite"
+                "3C2B4F",
+                "3C2B4F",
+                "23192E"
         );
 
         // Weapon

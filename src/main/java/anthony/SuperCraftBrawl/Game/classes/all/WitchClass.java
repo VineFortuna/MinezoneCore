@@ -41,11 +41,11 @@ public class WitchClass extends BaseClass {
 	public WitchClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjBlMTNkMTg0NzRmYzk0ZWQ1NWFlYjcwNjk1NjZlNDY4N2Q3NzNkYWMxNmY0YzNmODcyMmZjOTViZjlmMmRmYSJ9fX0=",
-				"47236B",
 				6,
-				"Witch"
+				"47236B",
+				"47236B",
+				"47236B"
 		);
 
 		weaknessItem = ItemHelper.setDetails(

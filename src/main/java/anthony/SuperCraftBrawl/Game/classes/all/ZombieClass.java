@@ -37,13 +37,11 @@ public class ZombieClass extends BaseClass {
 	public ZombieClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTZmYzg1NGJiODRjZjRiNzY5NzI5Nzk3M2UwMmI3OWJjMTA2OTg0NjBiNTFhNjM5YzYwZTVlNDE3NzM0ZTExIn19fQ==",
+				6,
 				"00ADAD",
 				"4A4191",
-				"686868",
-				6,
-				"Zombie"
+				"686868"
 		);
 
 		// Weapon

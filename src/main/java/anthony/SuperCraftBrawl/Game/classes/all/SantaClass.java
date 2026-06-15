@@ -31,9 +31,13 @@ public class SantaClass extends BaseClass {
 
 	public SantaClass(GameInstance instance, Player player) {
 		super(instance, player);
-		createArmor(null,
+		createArmor(
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19",
-				"FF0000", 6, "Santa");
+				6,
+				"FF0000",
+				"FF0000",
+				"FF0000"
+				);
 	}
 
 	@Override

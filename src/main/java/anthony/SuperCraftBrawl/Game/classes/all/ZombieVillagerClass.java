@@ -25,13 +25,11 @@ public class ZombieVillagerClass extends BaseClass {
     public ZombieVillagerClass(GameInstance instance, Player player) {
         super(instance, player);
         createArmor(
-                null,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzQ1YzExZTAzMjcwMzU2NDljYTA2MDBlZjkzODkwMGUyNWZkMWUzODAxNzQyMmJjOTc0MGU0Y2RhMmNiYTg5MiJ9fX0=",
-                "7F5E58",
-                "7F5E58",
-                "4D6929",
                 6,
-                "ZombieVillager"
+                "7F5E58",
+                "7F5E58",
+                "4D6929"
         );
     }
 

@@ -27,13 +27,11 @@ public class ZombiePigmanClass extends BaseClass {
 	public ZombiePigmanClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
-				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWY5OGEzY2ZkZjhjMTNlZTY2MzQxNDBmOTQ1YjcxZDJlNDg4ZmY0ODVlMTBjMzNhZTI1ODIxZDgyZDg0OGE3MyJ9fX0=",
+				6,
 				"FF9999",
 				"6E4021",
-				"FF9999",
-				6,
-				"ZombiePigman"
+				"FF9999"
 		);
 	}
 

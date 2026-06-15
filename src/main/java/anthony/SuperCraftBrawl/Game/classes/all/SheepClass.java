@@ -33,13 +33,11 @@ public class SheepClass extends BaseClass {
 		super(instance, player);
 		baseVerticalJump = 1.0;
 		createArmor(
-				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTIyYWIwNTA4OTAwNjRlMjhhOWY0MDFiMmZjYjgyOThlODI0OWMzYTlmOWI2MGVkZmEwMDc4YzRiMDI1YjllMyJ9fX0=",
-				"FFFFFF",
-				"FFFFFF",
-				"B59984",
 				6,
-				"Sheep"
+				"FFFFFF",
+				"FFFFFF",
+				"B59984"
 		);
 	}
 

@@ -44,13 +44,11 @@ public class BrewingStandClass extends BaseClass {
 		super(instance, player);
 		baseVerticalJump = 1.0;
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjU0M2JiZDkwNTcxYjFlMzVhYTAzOWE1ZWJhZDY1ZjQxNDI3YzhiODg3MWRkZjc2NzU4MGYzYTViMTAyMmZiZiJ9fX0=",
+				6,
 				"FFB81A",
 				"FFA236",
-				"756B6D",
-				6,
-				"BrewingStand"
+				"756B6D"
 		);
 
 		initializeItems();

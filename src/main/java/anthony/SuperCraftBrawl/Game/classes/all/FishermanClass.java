@@ -65,13 +65,11 @@ public class FishermanClass extends BaseClass {
     public FishermanClass(GameInstance instance, Player player) {
         super(instance, player);
         createArmor(
-                null,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOWY1ZDM4MTlhNjVkYjc5YzQ1ZmQwMDE0MWMwODgyZTQ3YWQyMzRjMGU1Zjg5OTJiZjRhZjE4Y2VkMGUxZWNkYyJ9fX0=",
+                6,
                 "6E504B",
                 "8F4020",
-                "452518",
-                6,
-                "Fisherman"
+                "452518"
         );
 
         playerHead.addUnsafeEnchantment(Enchantment.DEPTH_STRIDER, 1);

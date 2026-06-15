@@ -29,13 +29,11 @@ public class VampireClass extends BaseClass {
 	public VampireClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTI2YTk4ZDQwMzhlYWJhNDdlMDJlZWUxNTUxZGE5OTJhYTVhZDQ2NzA1YTc4MWY0NjE0NzA0MmQyOWNhZjEwNCJ9fX0=",
+				6,
 				"1A1A1A",
 				"B20B14",
-				"B20B14",
-				6,
-				"Vampire"
+				"B20B14"
 		);
 	}
 

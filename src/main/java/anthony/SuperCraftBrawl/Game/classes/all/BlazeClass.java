@@ -35,13 +35,11 @@ public class BlazeClass extends BaseClass {
 	public BlazeClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
-				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjU5Njk4MmMzZGJhN2Y2NzRjZmI5M2RkMzllMTcxM2E4ZWMxMjk5MDQ3M2FjYmZkODVhMThmZDkwOTE4ZGE0MSJ9fX0=",
+				6,
 				"FC9513",
 				"FCAA00",
-				"FCBF00",
-				6,
-				"Blaze"
+				"FCBF00"
 		);
 
 		// Weapon

@@ -41,11 +41,11 @@ public class LargeFernClass extends BaseClass {
     public LargeFernClass(GameInstance instance, Player player) {
         super(instance, player);
         createArmor(
-                null,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDQxNTczYmYyZTAyNzBiYjYyMDNkMmI3NjRkZDdkMGNiYmM1ZDdiMWJhNmNkY2NjOWFmNWZmNDc0MzRhMGViNCJ9fX0=",
-                "285F3F",
                 6,
-                "LargeFern"
+                "285F3F",
+                "285F3F",
+                "285F3F"
         );
 
         // Weapon

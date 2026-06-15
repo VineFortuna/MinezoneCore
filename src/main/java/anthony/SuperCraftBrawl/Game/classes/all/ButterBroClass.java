@@ -25,11 +25,11 @@ public class ButterBroClass extends BaseClass {
 		super(instance, player);
 		baseVerticalJump = 1.1;
 		createArmor(
-				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTZhMjYyMjIxYjUwOWY5YWNjZDliYzMwNWFiNGVkY2NiNWMyMDQ4MjExYTdhYjRlMDg4YTY1M2VkMzA2ZGMzIn19fQ==",
-				"FFD63D",
 				6,
-				"ButterBro"
+				"FFD63D",
+				"FFD63D",
+				"FFD63D"
 		);
 	}
 

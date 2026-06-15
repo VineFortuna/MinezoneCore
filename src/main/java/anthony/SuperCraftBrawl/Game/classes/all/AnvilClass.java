@@ -44,10 +44,10 @@ public class AnvilClass extends BaseClass {
         super(instance, player);
         createArmor(
                 Material.IRON_BLOCK,
-                null,
-                "373638",
                 6,
-                "Anvil"
+                "373638",
+                "373638",
+                "373638"
         );
 
         // Weapon

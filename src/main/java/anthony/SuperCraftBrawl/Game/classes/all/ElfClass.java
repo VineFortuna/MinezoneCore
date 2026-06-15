@@ -27,9 +27,13 @@ public class ElfClass extends BaseClass {
 	public ElfClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.15;
-		createArmor(null,
+		createArmor(
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGRlNjkzZjEyYjY4MjJmYWQ1ZTZmMjgzYzU1YzM4NWJmZjI1NDhhZTRiMWIyOTQzYWQwNWI1N2VmNWQzOTNiYiJ9fX0=",
-				"228B22", 6, "Elf");
+				6,
+				"228B22",
+				"228B22",
+				"228B22"
+		);
 	}
 
 

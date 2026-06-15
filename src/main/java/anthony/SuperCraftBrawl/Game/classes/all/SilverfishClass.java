@@ -40,11 +40,11 @@ public class SilverfishClass extends BaseClass {
 	public SilverfishClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGE5MWRhYjgzOTFhZjVmZGE1NGFjZDJjMGIxOGZiZDgxOWI4NjVlMWE4ZjFkNjIzODEzZmE3NjFlOTI0NTQwIn19fQ==",
-				"717E81",
 				6,
-				"Silverfish"
+				"717E81",
+				"717E81",
+				"717E81"
 		);
 
 		// Weapon

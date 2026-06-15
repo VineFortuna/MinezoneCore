@@ -32,11 +32,11 @@ public class WitherClass extends BaseClass {
 		super(instance, player);
 		baseVerticalJump = 1.1;
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNzRmMzI4ZjUwNDQxMjliNWQxZjk2YWZmZDFiOGMwNWJjZGU2YmQ4ZTc1NmFmZjVjNTAyMDU4NWVlZjhhM2RhZiJ9fX0=",
-				"1F1F1F",
 				6,
-				"Wither"
+				"1F1F1F",
+				"1F1F1F",
+				"1F1F1F"
 		);
 
 		// Weapon

@@ -27,10 +27,10 @@ public class PresentClass extends BaseClass {
 		super(instance, player);
 		createArmor(
 				Material.CHEST,
-				null,
-				"AF7B34",
 				6,
-				"Present"
+				"AF7B34",
+				"AF7B34",
+				"AF7B34"
 		);
 	}
 

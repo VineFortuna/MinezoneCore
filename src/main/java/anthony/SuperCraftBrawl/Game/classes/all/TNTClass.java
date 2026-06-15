@@ -30,11 +30,11 @@ public class TNTClass extends BaseClass {
     public TNTClass(GameInstance instance, Player player) {
         super(instance, player);
         createArmor(
-                null,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTU3M2Q3MDQ2ZDZlMDgxOTgzOTBhYTU2YzhmODY3OGMxNmQ0NDA3YWY5ZjIxNGJmMDI5MWYzYzdkYjFmMzc5YSJ9fX0=",
-                "B83816",
                 6,
-                "Tnt"
+                "B83816",
+                "B83816",
+                "B83816"
         );
     }
 

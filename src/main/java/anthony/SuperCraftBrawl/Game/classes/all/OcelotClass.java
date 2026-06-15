@@ -33,11 +33,11 @@ public class OcelotClass extends BaseClass {
 	public OcelotClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
-				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjU0ODM1MTlhYmY1MjM0MGNmM2FkOTNlNTE3NTY4YWQyNzZhZWFhMTg1OGZlMzNjNzdkOTM1M2Q5NzYwZDkwNSJ9fX0=",
-				"FFD95C",
 				6,
-				"Ocelot"
+				"FFD95C",
+				"FFD95C",
+				"FFD95C"
 		);
 	}
 

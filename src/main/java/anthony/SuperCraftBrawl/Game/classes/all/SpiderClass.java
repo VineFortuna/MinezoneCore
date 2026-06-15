@@ -52,13 +52,11 @@ public class SpiderClass extends BaseClass {
 	public SpiderClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzg3YTk2YThjMjNiODNiMzJhNzNkZjA1MWY2Yjg0YzJlZjI0ZDI1YmE0MTkwZGJlNzRmMTExMzg2MjliNWFlZiJ9fX0=",
+				6,
 				"4C453B",
 				"5C0000",
-				"4C453B",
-				6,
-				"Spider"
+				"4C453B"
 		);
 
 		initializeItems();

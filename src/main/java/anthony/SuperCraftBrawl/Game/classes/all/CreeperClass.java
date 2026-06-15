@@ -40,11 +40,11 @@ public class CreeperClass extends BaseClass {
 	public CreeperClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWZmOGY2ZDAwZDViMDczODc1ODRmMTE3YzY2ZDY5OGM5MGM2OWNlZGIwMWE2ZTY5ZGJiMDI3NzFjNzMwMmQxNiJ9fX0=",
-				"62E04A",
 				6,
-				"Creeper"
+				"62E04A",
+				"62E04A",
+				"62E04A"
 		);
 
 		initializeItems();

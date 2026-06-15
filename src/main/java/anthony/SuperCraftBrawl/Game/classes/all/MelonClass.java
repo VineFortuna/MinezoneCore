@@ -30,11 +30,11 @@ public class MelonClass extends BaseClass {
 	public MelonClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODA5MmQ3NjBjNDUzNjI1NTk0NjYyYzlmYzg2ODE1MmEwMWExZjZmOGQ2MTM3ZmI4NjhkYTVhOTViYmQxZjU4In19fQ==",
-				"B3B82E",
 				6,
-				"Melon"
+				"B3B82E",
+				"B3B82E",
+				"B3B82E"
 		);
 	}
 

@@ -27,11 +27,11 @@ public class EnchantTableClass extends BaseClass {
 	public EnchantTableClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTc2MmExNWIwNDY5MmEyZTRiM2ZiMzY2M2JkNGI3ODQzNGRjZTE3MzJiOGViMWM3YTlmN2MwZmJmNmYifX19",
-				"120021",
 				6,
-				"EnchantmentTable"
+				"120021",
+				"120021",
+				"120021"
 		);
 	}
 

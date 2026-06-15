@@ -49,11 +49,11 @@ public class BedrockClass extends BaseClass {
 		this.blockList = new ArrayList<>();
 		this.blockList2 = new ArrayList<>();
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmZjY2ZlNTA5NmEzMzViOWFiNzhhYjRmNzc4YWU0OTlmNGNjYWI0ZTJjOTVmYTM0OTIyN2ZkMDYwNzU5YmFhZiJ9fX0=",
-				"404040",
 				6,
-				"Bedrock"
+				"404040",
+				"404040",
+				"404040"
 		);
 
 		// Weapon

@@ -34,13 +34,11 @@ public class NotchClass extends BaseClass {
         super(instance, player);
         baseVerticalJump = 1.0;
         createArmor(
-                null,
                 "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTlkNDhkYWMyMDI1NDQ1Y2NlZjhiYzJiYWY1NjZlZDlmZWMyM2Q5MWZkNWQyMmNiN2I5YmE2MzIyYjI5ZiJ9fX0=",
+                6,
                 "744832",
                 "8E8E8E",
-                "262626",
-                6,
-                "Notch"
+                "262626"
         );
 
         // Weapon

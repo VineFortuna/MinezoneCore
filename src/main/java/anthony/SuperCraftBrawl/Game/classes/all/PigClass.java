@@ -38,9 +38,13 @@ public class PigClass extends BaseClass {
 	public PigClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.05;
-		createArmor(null,
+		createArmor(
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjUwMzM3NzlmODc2MTFmOGU3MWM1YjAyYjkxYjQwYmNhNWMxYzk5YWZhNzUyYWJkNjM2YTQ5NWY5NTNiNjQ2In19fQ==",
-				"FF9999", 6, "Pig");
+				6,
+				"FF9999",
+				"FF9999",
+				"FF9999"
+		);
 	}
 
 	@Override

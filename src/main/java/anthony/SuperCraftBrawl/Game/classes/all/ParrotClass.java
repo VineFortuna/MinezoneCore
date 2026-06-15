@@ -53,13 +53,11 @@ public class ParrotClass extends BaseClass {
     public ParrotClass(GameInstance instance, Player player) {
         super(instance, player);
         createArmor(
-                null,
                 "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWZjOWEzYjlkNTg3OWMyMTUwOTg0ZGJmZTU4OGNjMmU2MWZiMWRlMWU2MGZkMmE0NjlmNjlkZDRiNmY2YTk5MyJ9fX0=",
-                "8DCE00",
-                "8DCE00",
-                "BD9D9D",
                 protectionLevel,
-                "Parrot"
+                "8DCE00",
+                "8DCE00",
+                "BD9D9D"
         );
 
         // Weapon

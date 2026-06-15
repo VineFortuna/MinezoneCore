@@ -33,13 +33,11 @@ public class BeeClass extends BaseClass {
 		super(instance, player);
 		baseVerticalJump = 1.2;
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1NGIyMTdmMjBmNWNmZjE0YWI0NGRkMjhhMWU5M2VmM2EyYTJiZGQzMjU2ZTlmOWYzMzk0NmU3MDEwYTc3OCJ9fX0=",
+				6,
 				"FFB526",
 				"451309",
-				"FFB526",
-				6,
-				"Bee"
+				"FFB526"
 		);
 	}
 

@@ -23,13 +23,11 @@ public class SethBlingClass extends BaseClass {
 		super(instance, player);
 		baseVerticalJump = 1.3;
 		createArmor(
-				null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I4NmI4MjE1YjM2MTBlYWE2NDhjMjNjNGEyMGFkNjc1OWYyNTFlZjg1NDc2ODI5ZGQ2ZDE4NDI4MjNiMTEzIn19fQ==",
+				6,
 				"FF4E4A",
 				"4193FF",
-				"9A562B",
-				6,
-				"SethBling"
+				"9A562B"
 		);
 	}
 

@@ -46,11 +46,11 @@ public class HunterClass extends BaseClass {
 		super(instance, player);
 		baseVerticalJump = 1.1;
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOGI0YWNjM2YyNmU1NGI5MDA0MWZlOTVjNGU2MmI4ZTdiNjNhZWVmN2E5ZmMzOWNkOWJjN2U4ZWI5MWEzMzQ3MCJ9fX0=",
-				"F0FBFB",
 				6,
-				"Hunter"
+				"F0FBFB",
+				"F0FBFB",
+				"F0FBFB"
 		);
 
 		// Weapon

@@ -35,13 +35,11 @@ public class FlintAndSteelClass extends BaseClass {
 		super(instance, player);
 		baseVerticalJump = 1.0;
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTNlOTdmYWI0NzUzYjc1YmE1YjBjMDM4YmVkMzc3YjE2MmJhMjhiN2E1ZTI5MGFiZmQwMThhNTU4MWFjNTM4OCJ9fX0=",
+				6,
 				"F7F7F7",
 				"303030",
-				"303030",
-				6,
-				"Flint&Steel"
+				"303030"
 		);
 
 		String flintName = "&8&lFlint";

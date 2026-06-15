@@ -18,11 +18,11 @@ public class CactusClass extends BaseClass {
 	public CactusClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(
-				null,
 				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMmY1ODViNDFjYTVhMWI0YWMyNmY1NTY3NjBlZDExMzA3Yzk0ZjhmOGExYWRlNjE1YmQxMmNlMDc0ZjQ3OTMifX19",
-				"10761D",
 				6,
-				"Cactus"
+				"10761D",
+				"10761D",
+				"10761D"
 		);
 		playerHead.addUnsafeEnchantment(Enchantment.THORNS, 1);
 

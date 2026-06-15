@@ -26,9 +26,13 @@ public class GrimReaperClass extends BaseClass {
 		super(instance, player);
 		baseVerticalJump = 1.2;
 
-		createArmor(null,
+		createArmor(
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYWJiZWE3MTljNTlmODAzZmY4NjQwNWI5M2M2NTA3ODg0NWRiMTY2OWFlMTA0NDQ3ZDhhMGU1MDBjZmNhZTllNCJ9fX0=",
-				"141419", 6, "GrimReaper");
+				6,
+				"141419",
+				"141419",
+				"141419"
+		);
 	}
 
 	@Override
