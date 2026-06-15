@@ -699,15 +699,16 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void socialsCommand(Player player) {
-        player.sendMessage(main.color("&8&m-------&8[Social Media]&8&m-------"));
+        player.sendMessage(main.color("&r&m-------&e[Social Media]&r&m-------"));
         player.sendMessage("");
-        player.sendMessage(main.color("&eDiscord: &7https://discord.gg/FSZpmY9FZB"));
-        player.sendMessage(main.color("&eStore: &7www.minezone.club/store"));
-        player.sendMessage(main.color("&eYouTube: &7https://www.youtube.com/@minezone6480"));
-        player.sendMessage(main.color("&eTwitter: &7https://twitter.com/MinezoneMC"));
-        player.sendMessage(main.color("&eTikTok: &7https://www.tiktok.com/@minezonemc"));
+        player.sendMessage(main.color("&rDiscord: &ahttps://discord.gg/FSZpmY9FZB"));
+        player.sendMessage(main.color("&rWebsite: &ahttps://www.minezone.club"));
+        player.sendMessage(main.color("&rStore: &ahttps://www.minezone.club/store"));
+        player.sendMessage(main.color("&rYouTube: &ahttps://www.youtube.com/@minezone6480"));
+        player.sendMessage(main.color("&rTwitter: &ahttps://twitter.com/MinezoneMC"));
+        player.sendMessage(main.color("&rTikTok: &ahttps://www.tiktok.com/@minezonemc"));
         player.sendMessage("");
-        player.sendMessage(main.color("&8&m----------------------------"));
+        player.sendMessage(main.color("&r&m----------------------------"));
 	}
 
 	private void forceClassCommand(Player player, String[] args) {
