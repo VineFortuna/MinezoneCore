@@ -52,7 +52,7 @@ public enum Maps {
 					)
 					.setLobbyLoc(new Vector(173.5, 151, 347.5))
 					.setSpecLoc(new Vector(174.5, 146, 389.5))
-					.setBounds(new Vector(173.496, 147, 399.6), 100, 40)
+					.setBounds(new Vector(173.496, 147, 399.6), 100, 39)
 					.setGameType(GameType.DUEL)
 					.setSource(MapSource.COMMUNITY)
 	),
