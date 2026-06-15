@@ -176,67 +176,6 @@ public abstract class BaseClass {
 		return instance.getGameManager().getMain().getRankManager().getRank(p).getTagWithSpace();
 	}
 
-	// Event for EnderDragon class:
-	private void enderDragonEvent(Player p, Player killer, PlayerData data2, BaseClass baseClass) {
-		Location loc = p.getLocation();
-		List<Item> deathParticles = new ArrayList<>();
-
-		// Spawn the particles in a circle around the player
-		for (int i = 0; i < 10; i++) {
-			double angle = i * Math.PI / 5;
-			double x = loc.getX() + Math.cos(angle) * 0.5;
-			double y = loc.getY() + 1.5;
-			double z = loc.getZ() + Math.sin(angle) * 0.5;
-
-			Material mat = Material.INK_SACK; // Default
-			if (data2 != null && p.hasPermission("scb.deathParticles")) {
-				if (data2.goldApple == 1) {
-					mat = Material.GOLDEN_APPLE;
-				} else if (data2.glowstone == 1) {
-					mat = Material.GLOWSTONE_DUST;
-				} else if (data2.redstone == 1) {
-					mat = Material.REDSTONE;
-				} else if (data2.web == 1) {
-					mat = Material.WEB;
-				} else if (data2.bottleEXP == 1) {
-					mat = Material.EXP_BOTTLE;
-				} else if (data2.pumpkinPie == 1) {
-					mat = Material.PUMPKIN_PIE;
-				}
-			}
-
-			ItemStack particleItem = null;
-
-			if (mat == Material.INK_SACK)
-				particleItem = new ItemStack(Material.INK_SACK, 1, (short) 15);
-			else
-				particleItem = new ItemStack(mat);
-			Item particle = loc.getWorld().dropItem(new Location(loc.getWorld(), x, y, z), particleItem);
-			particle.setPickupDelay(Integer.MAX_VALUE);
-			deathParticles.add(particle);
-		}
-
-		// Schedule a task to remove the particles after 5 seconds
-		Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
-			for (Item particle : deathParticles) {
-				particle.remove();
-			}
-		}, 5 * 20);
-
-		if (baseClass != null) {
-			if (baseClass.getType() == ClassType.EnderDragon) {
-				if (killer != null) {
-					Location pLoc = p.getLocation();
-					EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc, EntityType.ENDER_CRYSTAL);
-					HealTask task = new HealTask(killer, crystal, instance.getGameManager().getMain());
-					BukkitTask bukkit = Bukkit.getScheduler()
-							.runTaskTimerAsynchronously(instance.getGameManager().getMain(), task, 0, 2L);
-					task.set(bukkit);
-				}
-			}
-		}
-	}
-
 	@SuppressWarnings("deprecation")
 	private void checkBountyKill(BaseClass kClass, Player playerKilled, Player killer) {
 		PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(killer);
@@ -1124,21 +1063,6 @@ public abstract class BaseClass {
                     }
                     TellAll(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET
                             + p.getPlayer().getDisplayName() + ChatColor.RED + " has " + lives + " lives left");
-                }
-
-                // END CRYSTAL
-                if (baseClassKiller != null) {
-                    if (baseClassKiller.getType() == ClassType.EnderDragon) {
-                        if (killer != null) {
-                            Location pLoc = p.getLocation();
-                            EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc,
-                                    EntityType.ENDER_CRYSTAL);
-                            HealTask task = new HealTask(killer, crystal, instance.getGameManager().getMain());
-                            BukkitTask bukkit = Bukkit.getScheduler()
-                                    .runTaskTimerAsynchronously(instance.getGameManager().getMain(), task, 0, 20L);
-                            task.set(bukkit);
-                        }
-                    }
                 }
 
                 if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
