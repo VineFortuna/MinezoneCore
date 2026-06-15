@@ -12,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -52,11 +53,12 @@ public class HerobrineClass extends BaseClass {
     private static final double RUIN_UPWARD_VELOCITY  = 0.95;
 
     private static final int[][] RUIN_CIRCLE = {
-            {-1,-2}, {0,-2}, {1,-2},
-            {-2,-1},                  {2,-1},
-            {-2, 0},                  {2, 0},
-            {-2, 1},                  {2, 1},
-            {-1, 2}, {0, 2}, {1, 2}
+            {-1, -3}, {0, -3}, {1, -3}, {2, -3},   // top row
+            {-2, -2},                         {3, -2},
+            {-2, -1},                         {3, -1},
+            {-2,  0},                         {3,  0},
+            {-2,  1},                         {3,  1},
+            {-1,  2}, {0,  2}, {1,  2}, {2,  2}    // bottom row
     };
 
     public HerobrineClass(GameInstance instance, Player player) {
@@ -78,11 +80,12 @@ public class HerobrineClass extends BaseClass {
         despairItem = ItemHelper.setDetails(
                 new ItemStack(Material.DIAMOND),
                 despairAbility.getAbilityNameRightClickMessage(),
-                "&7Inflict one of 4 effects on enemies:",
-                "&7▶ &2&oPoison, &r" + (poison.getAmplifier() + 1) + " &rfor &a" + poison.getDuration() / 20 + "s",
-                "&7▶ &c&oFire&7, by striking lightning at them",
-                "&7▶ &4&oRising Ruin&7, blocks erupt around you",
-                "&7▶ &8&oSummon&7, a zombie upon each enemy",
+                "&7Cast one of 4 effects:",
+                "&r- &2Poison " + (poison.getAmplifier() + 1) + " &rfor &a" + poison.getDuration() / 20 +
+                        "s &ron enemies",
+                "&r- &cFire&r lightning at enemies",
+                "&r- &4Rising Ruin&r erupts damaging blocks around you",
+                "&r- &8Invoke&r a zombie upon each enemy",
                 "",
                 "&rRange: &a" + rangeDisplay + " blocks"
         );
@@ -102,11 +105,10 @@ public class HerobrineClass extends BaseClass {
                 && instance.classes.get(player).getLives() > 0) {
             int cooldownSec = (int) ((DESPAIR_ABILITY_COOLDOWN - herobrine.getTime()) / 1000 + 1);
             if (herobrine.getTime() < DESPAIR_ABILITY_COOLDOWN) {
-                String msg = instance.getGameManager().getMain()
-                        .color("&b&lDiamond of Despair &rregenerates in: &e" + cooldownSec + "s");
+                String msg = instance.color("&b&lDiamond of Despair &rregenerates in: &e" + cooldownSec + "s");
                 getActionBarManager().setActionBar(player, "herobrine.cooldown", msg, 2);
             } else {
-                String msg = instance.getGameManager().getMain().color("&rYou can use &b&lDiamond of Despair");
+                String msg = instance.color("&rYou can use &b&lDiamond of Despair");
                 getActionBarManager().setActionBar(player, "herobrine.cooldown", msg, 2);
             }
         }
@@ -120,8 +122,8 @@ public class HerobrineClass extends BaseClass {
             if (herobrine.getTime() < DESPAIR_ABILITY_COOLDOWN) {
                 int seconds = (int) ((DESPAIR_ABILITY_COOLDOWN - herobrine.getTime()) / 1000 + 1);
                 event.setCancelled(true);
-                player.sendMessage(instance.color("&c&l(!) &rYour &b&lDiamond of Despair&r is still regenerating for &a" +
-                        seconds + "s"));
+                player.sendMessage(instance.color("&c&l(!) &rYour &b&lDiamond of Despair&r is still " +
+                        "regenerating for &a" + seconds + "s"));
             } else {
                 searchForPlayers();
             }
@@ -144,31 +146,26 @@ public class HerobrineClass extends BaseClass {
         if (!playersInRange.isEmpty()) {
             herobrine.restart();
 
-            // Randomly pick one of 4 abilities
             switch (new Random().nextInt(4)) {
                 case 0:
-                    // Poison
                     player.sendMessage(ChatColorHelper.color("&2&l(!) &rYou poisoned your enemies!"));
                     for (Player target : playersInRange) {
                         target.addPotionEffect(poison);
-                        target.sendMessage(ChatColorHelper.color("&c&l(!) &e" + player.getName() + " &rpoisoned you!"));
+                        target.sendMessage(ChatColorHelper.color("&2&l(!) &e" + player.getName() + " &rpoisoned you!"));
                     }
                     break;
                 case 1:
-                    // Fire + lightning
                     player.sendMessage(ChatColorHelper.color("&2&l(!) &rYou set your enemies on fire!"));
                     for (Player target : playersInRange) {
                         target.setFireTicks(80);
                         instance.getMapWorld().strikeLightningEffect(target.getLocation());
-                        target.sendMessage(ChatColorHelper.color("&c&l(!) &e" + player.getName() + " &rset you on fire!"));
+                        target.sendMessage(ChatColorHelper.color("&2&l(!) &e" + player.getName() + " &rset you on fire!"));
                     }
                     break;
                 case 2:
-                    // Rising Ruin
                     launchRisingRuin(playersInRange, 1);
                     break;
                 case 3:
-                    // Summon zombies
                     spawnZombies(playersInRange);
                     break;
             }
@@ -185,13 +182,13 @@ public class HerobrineClass extends BaseClass {
         player.sendMessage(ChatColorHelper.color("&2&l(!) &rYou summoned zombies upon your enemies!"));
 
         for (Player target : targets) {
-            target.sendMessage(ChatColorHelper.color("&c&l(!) &e" + player.getName() + " &rsummoned a zombie on you!"));
+            target.sendMessage(ChatColorHelper.color("&2&l(!) &e" + player.getName() + " &rsummoned a zombie on you!"));
 
             Zombie zombie = (Zombie) target.getWorld().spawnEntity(target.getLocation(), EntityType.ZOMBIE);
             zombie.setCustomName(ChatColorHelper.color("&c" + player.getName() + "'s &eZombie"));
             zombie.setCustomNameVisible(true);
-            zombie.setTarget(target); // immediately aggro on the player it spawned on
-            zombie.getEquipment().clear(); // no random drops
+            zombie.setTarget(target);
+            zombie.getEquipment().clear();
             zombie.getEquipment().setItemInHand(new ItemStack(Material.GOLD_SWORD));
             zombie.setCanPickupItems(false);
         }
@@ -209,9 +206,9 @@ public class HerobrineClass extends BaseClass {
         if (wave == 1) {
             world.playSound(origin, Sound.WITHER_SPAWN, 1.0f, 0.6f);
             world.playSound(origin, Sound.PORTAL_TRAVEL, 0.5f, 0.3f);
-            player.sendMessage(ChatColorHelper.color("&4&l(!) &r\u2620 &4Rising Ruin&r erupts from the earth!"));
+            player.sendMessage(ChatColorHelper.color("&2&l(!) &4Rising Ruin&r erupts from the earth!"));
             targets.forEach(t -> t.sendMessage(
-                    ChatColorHelper.color("&4&l(!) &e" + player.getName() + " &rsummoned &4Rising Ruin&r!")));
+                    ChatColorHelper.color("&2&l(!) &e" + player.getName() + " &rsummoned &4Rising Ruin&r!")));
         } else {
             world.playSound(origin, Sound.WITHER_HURT, 0.8f, 0.5f);
         }
@@ -230,37 +227,41 @@ public class HerobrineClass extends BaseClass {
 
             final Material blockMat = (i % 2 == 0) ? Material.NETHERRACK : Material.SOUL_SAND;
 
-            @SuppressWarnings("deprecation")
             FallingBlock fb = world.spawnFallingBlock(spawnLoc, blockMat, (byte) 0);
             fb.setVelocity(new Vector(0, RUIN_UPWARD_VELOCITY, 0));
             fb.setDropItem(false);
             fb.setHurtEntities(false);
 
             final Location storedLoc = spawnLoc.clone();
+            final Location[] lastPos = { fb.getLocation() };
+            final boolean[] triggered = { false };
 
-            // Failsafe: force-remove and erase any placed block after 5s
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    if (fb.isValid() && !fb.isDead()) fb.remove();
-                    if (storedLoc.getBlock().getType() == blockMat)
-                        storedLoc.getBlock().setType(Material.AIR);
+                    if (triggered[0]) return;
+
+                    triggered[0] = true;
+
+                    if (fb.isValid() && !fb.isDead()) {
+                        fb.remove();
+                    }
+
+                    removePlacedRuinBlocks(blockMat, lastPos[0], storedLoc);
+                    onBlockLanded(world, lastPos[0], caster, targets, landedCount, totalBlocks, wave);
                 }
             }.runTaskLater(instance.getGameManager().getMain(), 100L);
 
-            final Location[] lastPos = { fb.getLocation() };
-            final boolean[] triggered = { false };
             new BukkitRunnable() {
                 @Override
                 public void run() {
                     if (!fb.isValid() || fb.isDead()) {
                         if (!triggered[0]) {
                             triggered[0] = true;
-                            Location landedBlock = lastPos[0].getBlock().getLocation();
-                            if (landedBlock.getBlock().getType() == blockMat)
-                                landedBlock.getBlock().setType(Material.AIR);
+                            removePlacedRuinBlocks(blockMat, lastPos[0], storedLoc);
                             onBlockLanded(world, lastPos[0], caster, targets, landedCount, totalBlocks, wave);
                         }
+
                         this.cancel();
                         return;
                     }
@@ -271,20 +272,56 @@ public class HerobrineClass extends BaseClass {
 
                     if (movingDown) {
                         Location below = current.clone().subtract(0, 0.2, 0);
+
                         if (below.getBlock().getType().isSolid() || below.getY() <= origin.getY() + 0.5) {
                             fb.remove();
+
                             if (!triggered[0]) {
                                 triggered[0] = true;
-                                Location landedBlock = current.getBlock().getLocation();
-                                if (landedBlock.getBlock().getType() == blockMat)
-                                    landedBlock.getBlock().setType(Material.AIR);
+                                removePlacedRuinBlocks(blockMat, current, storedLoc);
                                 onBlockLanded(world, current, caster, targets, landedCount, totalBlocks, wave);
                             }
+
                             this.cancel();
                         }
                     }
                 }
             }.runTaskTimer(instance.getGameManager().getMain(), 5L, 1L);
+        }
+    }
+
+    private void removePlacedRuinBlocks(Material blockMat, Location... locations) {
+        if (locations == null) return;
+
+        for (Location loc : locations) {
+            if (loc == null || loc.getWorld() == null) continue;
+
+            World world = loc.getWorld();
+            int x = loc.getBlockX();
+            int z = loc.getBlockZ();
+            int baseY = loc.getBlockY();
+
+            /*
+             * FallingBlock sometimes settles slightly above/below the entity's last
+             * position, especially on non-full collision blocks like:
+             *
+             * - fences
+             * - cobblestone walls
+             * - iron bars
+             * - glass panes
+             * - fence gates
+             * - slabs/stairs
+             *
+             * So instead of only checking one exact block, check a small vertical
+             * column and remove the temporary Rising Ruin block wherever Bukkit placed it.
+             */
+            for (int y = baseY - 2; y <= baseY + 2; y++) {
+                Block block = world.getBlockAt(x, y, z);
+
+                if (block.getType() == blockMat) {
+                    block.setType(Material.AIR);
+                }
+            }
         }
     }
 
@@ -297,7 +334,9 @@ public class HerobrineClass extends BaseClass {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    if (player.isOnline()) launchRisingRuin(targets, 2);
+                    if (player.isOnline()) {
+                        launchRisingRuin(targets, 2);
+                    }
                 }
             }.runTaskLater(instance.getGameManager().getMain(), 10L);
         }
@@ -311,25 +350,36 @@ public class HerobrineClass extends BaseClass {
 
         for (Entity entity : world.getNearbyEntities(impactLoc, RUIN_EXPLOSION_RADIUS, RUIN_EXPLOSION_RADIUS, RUIN_EXPLOSION_RADIUS)) {
             if (!(entity instanceof Player)) continue;
+
             Player hit = (Player) entity;
 
             if (hit.equals(caster)) {
                 if (!checkIfDead(caster, instance)) {
                     EntityDamageEvent selfDmg = new EntityDamageEvent(caster, DamageCause.CUSTOM, RUIN_DAMAGE_SELF);
                     instance.getGameManager().getMain().getServer().getPluginManager().callEvent(selfDmg);
-                    if (!selfDmg.isCancelled()) caster.damage(RUIN_DAMAGE_SELF);
+
+                    if (!selfDmg.isCancelled()) {
+                        caster.damage(RUIN_DAMAGE_SELF);
+                    }
                 }
             } else if (targets.contains(hit) || (!checkIfDead(hit, instance) && !instance.HasSpectator(hit))) {
                 EntityDamageEvent dmgEvent = new EntityDamageEvent(hit, DamageCause.CUSTOM, RUIN_DAMAGE_ENEMY);
                 instance.getGameManager().getMain().getServer().getPluginManager().callEvent(dmgEvent);
-                if (!dmgEvent.isCancelled()) hit.damage(RUIN_DAMAGE_ENEMY, caster);
+
+                if (!dmgEvent.isCancelled()) {
+                    hit.damage(RUIN_DAMAGE_ENEMY, caster);
+                }
             }
         }
     }
 
     @Override
-    public ClassType getType() { return ClassType.Herobrine; }
+    public ClassType getType() {
+        return ClassType.Herobrine;
+    }
 
     @Override
-    public ItemStack getAttackWeapon() { return weapon; }
+    public ItemStack getAttackWeapon() {
+        return weapon;
+    }
 }
