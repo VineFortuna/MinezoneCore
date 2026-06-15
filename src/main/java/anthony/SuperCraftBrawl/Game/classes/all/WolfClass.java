@@ -193,4 +193,9 @@ public class WolfClass extends BaseClass {
 		player.setVelocity(vel);
 		used = true;
 	}
+
+	@Override
+	public void killEvent(Player damagerPlayer, BaseClass baseClass) {
+		wolfPackAdd = true;
+	}
 }

@@ -79,10 +79,10 @@ public class GhastClass extends BaseClass {
 	}
 
 	@Override
-	public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
-		super.classesEvent(damagerPlayer, baseClass);
-
-		handleAddingArrow(ON_KILL_ARROWS_AMOUNT);
+	public void killEvent(Player damagerPlayer) {
+		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+			handleAddingArrow(ON_KILL_ARROWS_AMOUNT);
+		}
 	}
 
 	@Override

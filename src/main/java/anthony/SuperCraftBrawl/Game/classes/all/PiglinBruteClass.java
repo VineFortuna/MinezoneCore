@@ -123,4 +123,9 @@ public class PiglinBruteClass extends BaseClass {
 		return item;
 	}
 
+	@Override
+	public void killEvent(Player damagerPlayer, BaseClass baseClass) {
+		damagerPlayer.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rYou got a kill and gained an extra &eGold Ball"));
+		damagerPlayer.getInventory().addItem(getGoldBalls());
+	}
 }

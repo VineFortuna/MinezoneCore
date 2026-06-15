@@ -87,7 +87,7 @@ public class SheepClass extends BaseClass {
 			newScore.setScore(bc.getLives());
 		}
 		resetArmor();
-		
+
 		weapon = getStartWool();
 		playerInv.setItem(0, weapon);
 		ItemStack enchanter = getStartEnchanter();
@@ -207,10 +207,10 @@ public class SheepClass extends BaseClass {
 								instance.getGameManager().getMain().color("   &r3 sec Slowness II")),
 						Enchantment.KNOCKBACK, 2), Enchantment.DAMAGE_ALL, 3);
 
-		ItemStack[] itemList = { redWool, blueWool, purpleWool, redWool, blueWool, redWool, blueWool, redWool, blueWool, redWool, blueWool, redWool, blueWool,
+		ItemStack[] itemList = {redWool, blueWool, purpleWool, redWool, blueWool, redWool, blueWool, redWool, blueWool, redWool, blueWool, redWool, blueWool,
 				redWool, blueWool, redWool, blueWool, redWool, blueWool, greenWool, greenWool, greenWool, greenWool, greenWool, greenWool, greenWool, grayWool, grayWool,
 				grayWool, grayWool, grayWool, blackWool, blackWool, blackWool, blackWool, blackWool, blackWool, pinkWool, pinkWool, pinkWool, pinkWool,
-				limeWool, limeWool, limeWool, limeWool };
+				limeWool, limeWool, limeWool, limeWool};
 
 		Random rand = new Random();
 		int randomNum = rand.nextInt(itemList.length);
@@ -224,7 +224,7 @@ public class SheepClass extends BaseClass {
 		BaseClass bc = instance.classes.get(player);
 		bc.score.getScoreboard().resetScores(bc.score.getEntry());
 		player.playSound(player.getLocation(), Sound.SHEEP_IDLE, 1, 1);
-		
+
 		WoolType type;
 		if (itemList[randomNum] == redWool)
 			type = WoolType.RED;
@@ -245,7 +245,7 @@ public class SheepClass extends BaseClass {
 
 		switchWoolType(type, new ItemStack(itemList[randomNum]));
 	}
-	
+
 	public void resetArmor() {
 		String color = "FFFFFF";
 		chestplate = ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, color, "&rSheep Chestplate");
@@ -253,7 +253,7 @@ public class SheepClass extends BaseClass {
 		player.getInventory().setChestplate(chestplate);
 		player.getInventory().setLeggings(leggings);
 	}
-	
+
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
@@ -363,5 +363,13 @@ public class SheepClass extends BaseClass {
 		weapon = item;
 
 		player.getInventory().setItem(0, weapon);
+	}
+
+	@Override
+	public void killEvent(Player damagerPlayer) {
+		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+			damagerPlayer.getInventory().addItem(new ItemStack(Material.ENCHANTMENT_TABLE));
+			damagerPlayer.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou got a kill and now you can switch your wool color if you'd like!"));
+		}
 	}
 }

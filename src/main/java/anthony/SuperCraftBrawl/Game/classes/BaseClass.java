@@ -1150,20 +1150,20 @@ public abstract class BaseClass {
 
                         if (instance.classes.containsKey(d)) {
                             baseClassKiller = instance.classes.get(d);
-                            baseClassKiller.classesEvent(d, baseClassKiller);
+                            baseClassKiller.killEvent(d);
                         }
                     } else {
                         if (killer != null) {
                             if (instance.classes.containsKey(killer)) {
                                 baseClassKiller = instance.classes.get(killer);
-                                baseClassKiller.classesEvent(killer, baseClassKiller);
+                                baseClassKiller.killEvent(killer);
                             }
                         }
                     }
                 } else if (killer != null) {
                     if (instance.classes.containsKey(killer)) {
                         baseClassKiller = instance.classes.get(killer);
-                        baseClassKiller.classesEvent(killer, baseClassKiller);
+                        baseClassKiller.killEvent(killer);
                     }
                 }
                 // EntityDamageEvent event = new EntityDamageEvent(p, DamageCause.VOID, 0);
@@ -1642,21 +1642,6 @@ public abstract class BaseClass {
 		}, 5 * 20);
 	}
 
-	private void enderDragonCrystal(BaseClass pClass, Player killer, Player p) {
-		if (pClass != null) {
-			if (pClass.getType() == ClassType.EnderDragon) {
-				if (killer != null) {
-					Location pLoc = p.getLocation();
-					EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc, EntityType.ENDER_CRYSTAL);
-					HealTask task = new HealTask(killer, crystal, instance.getGameManager().getMain());
-					BukkitTask bukkit = Bukkit.getScheduler()
-							.runTaskTimerAsynchronously(instance.getGameManager().getMain(), task, 0, 20L);
-					task.set(bukkit);
-				}
-			}
-		}
-	}
-
 	// Giving health potions on kill
 	protected void healthPots(Player d) {
 		if (checkIfDead(d, instance) || instance.classes.get(d).getType() == ClassType.Horse)
@@ -1730,50 +1715,7 @@ public abstract class BaseClass {
 		}
 	}
 
-	// Classes such as Sheep & Hunter that when they get a kill, they one of their
-	// abilities back
-	public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
-		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
-			// Sheep
-			baseClass = instance.classes.get(damagerPlayer);
-			if (baseClass.getType() == ClassType.Sheep) {
-				damagerPlayer.getInventory().addItem(new ItemStack(Material.ENCHANTMENT_TABLE));
-				damagerPlayer.sendMessage(instance.getGameManager().getMain()
-						.color("&r&l(!) &rYou got a kill and now you can switch your wool color if you'd like!"));
-
-			} else if (baseClass.getType() == ClassType.Hunter) {
-				if (!hunterDash) {
-					damagerPlayer.sendMessage(instance.getGameManager().getMain()
-							.color("&r&l(!) &rYour &r&lDash &rhas been regenerated for getting a kill!"));
-					hunterDash = true;
-					ItemStack dash = ItemHelper.addEnchant(
-							ItemHelper.setDetails(new ItemStack(Material.FEATHER),
-									instance.getGameManager().getMain().color("&b&lDash"),
-									instance.getGameManager().getMain().color("&7A quick escape or attack")),
-							Enchantment.PROTECTION_ENVIRONMENTAL, 1);
-					player.getInventory().setItem(1, dash);
-				}
-			} else if (baseClass.getType() == ClassType.Present) {
-				damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
-						"&r&l(!) &rYour &r&lAggressive Gift has regenerated and you can get a new weapon if you'd like!"));
-				damagerPlayer.getInventory().addItem(ItemHelper.setDetails(new ItemStack(Material.CHEST, 1),
-						String.valueOf(ChatColor.RESET) + ChatColor.ITALIC + "Agressive Gift", "",
-						String.valueOf(ChatColor.RESET) + ChatColor.YELLOW + "Steals another player's main item"));
-			} else if (baseClass.getType() == ClassType.PiglinBrute) {
-				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK, 1),
-						"&eGold Balls",
-						"&7Right click to throw DEADLY gold balls!");
-				damagerPlayer.sendMessage(instance.getGameManager().getMain()
-						.color("&2&l(!) &rYou got a kill and gained an extra &eGold Ball"));
-				damagerPlayer.getInventory().addItem(item);
-			} else if (baseClass.getType() == ClassType.GrimReaper) {
-				ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
-				damagerPlayer.getInventory().setItem(2, zombieEgg);
-			} else if (baseClass.getType() == ClassType.Wolf) {
-				wolfPackAdd = true;
-			}
-		}
-	}
+	public void killEvent(Player damagerPlayer) {}
 
 	public void TellAll(String msg) {
 		for (Player player    : instance.players   )    player.sendMessage(msg);

@@ -200,13 +200,10 @@ public class EnchantTableClass extends BaseClass {
 
 
 	@Override
-	public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
-		if (instance.classes.containsKey(damagerPlayer)) {
+	public void killEvent(Player damagerPlayer) {
+		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
 			xpLevelsAmount++;
 			damagerPlayer.giveExpLevels(1);
-
-			// Playing XP Sound
-
 			damagerPlayer.sendMessage(ChatColorHelper.color("&b&l(!) &r&eYou got rewarded with a XP level"));
 		}
 	}

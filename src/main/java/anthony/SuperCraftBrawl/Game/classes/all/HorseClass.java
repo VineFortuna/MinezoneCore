@@ -117,10 +117,12 @@ public class HorseClass extends BaseClass {
 	}
 
 	@Override
-	public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
-		if (isPlayerAlive()) {
-			giveRandomTreat(damagerPlayer);
-			damagerPlayer.sendMessage(ChatColorHelper.color("&2&l(!) &r&eYou got rewarded with a special treat"));
+	public void killEvent(Player damagerPlayer) {
+		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+			if (isPlayerAlive()) {
+				giveRandomTreat(damagerPlayer);
+				damagerPlayer.sendMessage(ChatColorHelper.color("&2&l(!) &r&eYou got rewarded with a special treat"));
+			}
 		}
 	}
 
