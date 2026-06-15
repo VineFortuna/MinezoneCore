@@ -100,7 +100,6 @@ public abstract class BaseClass {
 
 	public int gunGamePos = 0;
 
-	// This would also take in a SuperClass.
 	public BaseClass(GameInstance instance, Player player) {
 		this.instance = instance;
 		this.player = player;
@@ -109,61 +108,35 @@ public abstract class BaseClass {
 	public ActionBarManager getActionBarManager() {
 		return instance.getGameManager().getMain().getActionBarManager();
 	}
-
 	public int getLives() {
 		return lives;
 	}
-
 	public int getTokens() {
 		return tokens;
 	}
+	public void setArmor(EntityEquipment playerEquip){
 
-	public abstract ClassType getType();
-
-	protected void setArmor(EntityEquipment playerEquip){
 		setArmorNew(playerEquip);
 	}
 
-	public abstract ItemStack getAttackWeapon();
+	protected abstract ClassType getType();
+	protected abstract ItemStack getAttackWeapon();
+	protected abstract void      SetItems(Inventory playerInv);
 
-	public void SetNameTag(){};
-
-	public abstract void SetItems(Inventory playerInv);
-
-	public void UseItem(PlayerInteractEvent event){};
-
-	public void onConsumingItem(PlayerItemConsumeEvent event) {
-	};
-
-	public void TakeDamage(EntityDamageEvent event) {
-	}; // To override
-
-	public void ProjectileLaunch(ProjectileLaunchEvent event) {
-	}; // To override
-
-	public void ProjectileHit(ProjectileHitEvent event) {
-	}; // To override
-
-	public void PotionSplashEvent(PotionSplashEvent event) {
-	}; // To override
-
-	public void DoDamage(EntityDamageByEntityEvent event) {
-	} // To override
-
-	public void DoDamage2(EntityDamageByEntityEvent event) {
-	} // To override
-
-	public void onEntityTarget(EntityTargetLivingEntityEvent event) {
-	} // To override
-
-	public void onPlayerMove(PlayerMoveEvent event) {
-	}
-
-	public void onFish(PlayerFishEvent event) {
-	} // To override
-
-	public void Tick(int gameTicks) {
-	}// To override
+	protected void SetNameTag() {}
+	protected void UseItem(PlayerInteractEvent event) {}
+	public    void onConsumingItem(PlayerItemConsumeEvent event) {}
+	public    void TakeDamage(EntityDamageEvent event) {}
+	protected void ProjectileLaunch(ProjectileLaunchEvent event) {}
+	public    void ProjectileHit(ProjectileHitEvent event) {}
+	public    void PotionSplashEvent(PotionSplashEvent event) {}
+	protected void DoDamage(EntityDamageByEntityEvent event) {}
+	public    void DoDamage2(EntityDamageByEntityEvent event) {}
+	protected void onEntityTarget(EntityTargetLivingEntityEvent event) {}
+	public    void onPlayerMove(PlayerMoveEvent event) {}
+	public    void onFish(PlayerFishEvent event) {}
+	protected void Tick(int gameTicks) {}
+	public void GameEnd() {}
 
 	public boolean isPlayerAlive() {
 		return instance.classes.containsKey(player)
@@ -172,8 +145,6 @@ public abstract class BaseClass {
 				&& instance.classes.get(player).getLives() > 0;
 	}
 
-	public void GameEnd() {
-	} // To override
 
 	/**
 	 * Equip class armor and custom head.

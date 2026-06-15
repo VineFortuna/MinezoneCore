@@ -94,7 +94,7 @@ public class LargeFernClass extends BaseClass {
 
     @Override
     public void onPlayerMove(PlayerMoveEvent event) {
-        super.onPlayerMove(event);
+
     }
 
     @Override
