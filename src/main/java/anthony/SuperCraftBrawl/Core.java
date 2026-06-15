@@ -21,6 +21,7 @@ import anthony.SuperCraftBrawl.halloween.TrickTitleCommand;
 import anthony.SuperCraftBrawl.halloween.TrickTitleManager;
 import anthony.SuperCraftBrawl.halloween.TrickTitlePackets;
 import anthony.SuperCraftBrawl.leaderboards.*;
+import anthony.SuperCraftBrawl.levels.LevelManager;
 import anthony.SuperCraftBrawl.lobbyexplorer.LobbyExplorerManager;
 import anthony.SuperCraftBrawl.lobbyexplorer.LobbyExplorers;
 import anthony.SuperCraftBrawl.mysterychest.MysteryChestManager;
@@ -185,6 +186,9 @@ public class Core extends JavaPlugin implements Listener {
     //STAFF HELP:
     public StaffHelpManager  staffHelpManager;
 
+    //LEVEL MANAGER:
+    public LevelManager levelManager;
+
     public Core() {
         this.staffchat = new ArrayList<Player>();
         this.globalchat = new ArrayList<Player>();
@@ -199,6 +203,10 @@ public class Core extends JavaPlugin implements Listener {
     }
 
     // Getters:
+
+    public LevelManager getLevelManager() {
+        return levelManager;
+    }
 
     public CosmeticsManager getCosmeticsManager() {
         return cosmeticsManager;
@@ -462,6 +470,7 @@ public class Core extends JavaPlugin implements Listener {
         data.tokens += 20;
         data.exp += 100;
         data.mysteryChests++;
+        getLevelManager().checkLevelUp(player);
         getScoreboardManager().lobbyBoard(player);
 
         data.lastDailyReward = now;
@@ -984,6 +993,7 @@ public class Core extends JavaPlugin implements Listener {
         armorStandManager = new ArmorStandManager(this);
         lbSettingsHolo = new SettingsHologram(this);
         staffHelpManager = new StaffHelpManager(this);
+        levelManager = new LevelManager(this);
 
         for (Arenas arena : Arenas.values()) {
             parkourBoards.add(new ParkourBoard(this, arena));
@@ -1518,19 +1528,7 @@ public class Core extends JavaPlugin implements Listener {
                         PlayerData data = this.getDataManager().getPlayerData(player);
                         data.exp += num;
                         player.sendMessage(color("&6&l(!) &rAdded &e" + num + " EXP &rto your account"));
-
-                        if (data.exp >= 2500) {
-                            data.level++;
-                            data.exp -= 2500;
-                            player.sendMessage(color("&8&m----------------------------------------"));
-                            player.sendMessage(color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
-                            player.sendMessage(color("&7You are now &e&lLevel &6&l" + data.level + " &7— nice work!"));
-                            player.sendMessage(color("&8&m----------------------------------------"));
-
-                            // (optional but fun) little audio feedback on 1.8:
-                            player.playSound(player.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
-
-                        }
+                        getLevelManager().checkLevelUp(player); //Check if player should level up
                         if (this.getGameManager().GetInstanceOfPlayer(player) == null)
                             getScoreboardManager().lobbyBoard(player);
                         this.getDataManager().saveData(data);
