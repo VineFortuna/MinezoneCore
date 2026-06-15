@@ -997,18 +997,6 @@ public class GameManager implements Listener, PluginMessageListener {
 				if (item != null && item.getType() == Material.PRISMARINE_SHARD
 						&& (event.getAction() == Action.RIGHT_CLICK_AIR
 								|| event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-					if (data != null) {
-                        //This below checks if a player has completed the challenge of finding & using an extra life
-						if (data.challenge3 == 0) {
-							player.sendMessage(getMain()
-									.color("&9&l(!) &rYou used an extra life and now rewarded with &e1 Bonus Level"));
-							data.level += 1;
-							data.challenge3 = 1;
-							player.sendMessage(instance.getGameManager().getMain().color("&e&lLEVEL UPGRADED!"));
-							player.sendMessage(instance.getGameManager().getMain()
-									.color("&r&l(!) &rYou are now Level " + data.level + "&r!"));
-						}
-					}
 					BaseClass baseClass = instance.classes.get(player);
 					int amount = item.getAmount();
 					baseClass.lives += 1;
