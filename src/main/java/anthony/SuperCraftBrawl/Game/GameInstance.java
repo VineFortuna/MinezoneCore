@@ -1918,7 +1918,7 @@ public class GameInstance {
                 BaseClass baseClass = classes.get(player);
                 if (event.getPlayer().getItemInHand().getType() == Material.ENDER_PEARL
                         && event.getPlayer().getItemInHand().hasItemMeta()
-                        && event.getPlayer().getItemInHand().getItemMeta().getDisplayName().contains("Teleporters")
+                        && event.getPlayer().getItemInHand().getItemMeta().getDisplayName().contains("Teleporter")
                         && (event.getAction() == Action.RIGHT_CLICK_AIR
                         || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
                     if (baseClass.pearlTimer.getTime() < 10000) {
