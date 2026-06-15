@@ -205,9 +205,8 @@ public class EndermanClass extends BaseClass {
 
         final Set<Material> subidBlocks = new HashSet<>(Arrays.asList(
             Material.STONE, Material.DIRT, Material.WOOD, Material.SAND, Material.SPONGE, Material.SANDSTONE,
-            Material.WOOL, Material.STEP, Material.STAINED_GLASS, Material.STAINED_GLASS_PANE, Material.MONSTER_EGG,
-            Material.SMOOTH_BRICK, Material.WOOD_STEP, Material.COBBLE_WALL, Material.QUARTZ_BLOCK,
-            Material.PRISMARINE, Material.RED_SANDSTONE
+            Material.WOOL, Material.STAINED_GLASS, Material.STAINED_GLASS_PANE, Material.MONSTER_EGG, Material.SMOOTH_BRICK,
+            Material.COBBLE_WALL, Material.QUARTZ_BLOCK, Material.PRISMARINE, Material.RED_SANDSTONE
         ));
 
         Location playerLocation = player.getLocation();
