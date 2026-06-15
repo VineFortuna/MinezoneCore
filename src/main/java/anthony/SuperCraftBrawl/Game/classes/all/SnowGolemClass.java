@@ -37,6 +37,7 @@ public class SnowGolemClass extends BaseClass {
     private final PotionEffect strength  = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, (int) (PUMPKIN_ABILITY_DURATION * 20), 0, false, true);
     private static final double PUMPKIN_ABILITY_DURATION = 5;
     private static final double PUMPKIN_ABILITY_RANGE    = 10;
+    private int cooldownSec = 0;
 
     public SnowGolemClass(GameInstance instance, Player player) {
         super(instance, player);
@@ -90,15 +91,18 @@ public class SnowGolemClass extends BaseClass {
 
     @Override
     public void Tick(int gameTicks) {
-        if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.SnowGolem
-                && instance.classes.get(player).getLives() > 0) {
-            int cooldownSec = (20000 - snowGolem.getTime()) / 1000 + 1;
+        if (!instance.classes.containsKey(player))
+            return;
+        if (instance.classes.get(player).getLives() <= 0)
+            return;
+
+        if (instance.classes.get(player).getType() == ClassType.SnowGolem) {
+            this.cooldownSec = (20000 - snowGolem.getTime()) / 1000 + 1;
             if (snowGolem.getTime() < 20000) {
-                String msg = instance.getGameManager().getMain()
-                        .color("&bSnow Platform &rregenerates in: &e" + cooldownSec + "s");
+                String msg = instance.color("&bSnow Platform &rregenerates in: &a" + this.cooldownSec + "s");
                 getActionBarManager().setActionBar(player, "platform.cooldown", msg, 2);
             } else {
-                String msg = instance.getGameManager().getMain().color("&rYou can use &bSnow Platform");
+                String msg = instance.color("&rYou can use &bSnow Platform");
                 getActionBarManager().setActionBar(player, "platform.cooldown", msg, 2);
             }
         }
@@ -137,23 +141,29 @@ public class SnowGolemClass extends BaseClass {
                 if (snowGolem.getTime() < 20000) {
                     int seconds = (20000 - snowGolem.getTime()) / 1000 + 1;
                     event.setCancelled(true);
-                    player.sendMessage(instance.getGameManager().getMain().color(
-                            "&c&l(!) &rYour &bSnow Platform &ris still regenerating for &e" + seconds + "s"));
+                    player.sendMessage(instance.color(
+                            "&c&l(!) &rYour &bSnow Platform &ris still regenerating for &a" + seconds + "s"));
                 } else {
                     snowGolem.restart();
+
                     BukkitRunnable runnable = new BukkitRunnable() {
                         int ticks = 0;
+
                         @Override
                         public void run() {
                             if (ticks == 8) {
                                 this.cancel();
                             } else {
                                 Location targetLocation = new Location(player.getWorld(),
-                                        player.getLocation().getX(), player.getLocation().getY() + 1,
+                                        player.getLocation().getX(),
+                                        player.getLocation().getY() + 1,
                                         player.getLocation().getZ());
+
                                 float originalYaw   = player.getLocation().getYaw();
                                 float originalPitch = player.getLocation().getPitch();
+
                                 player.teleport(targetLocation);
+
                                 Location newLocation = player.getLocation();
                                 newLocation.setYaw(originalYaw);
                                 newLocation.setPitch(originalPitch);
@@ -161,6 +171,7 @@ public class SnowGolemClass extends BaseClass {
 
                                 World playerWorld       = player.getWorld();
                                 Location playerLocation = player.getLocation();
+
                                 int platformLength = 3;
                                 int platformWidth  = 3;
 
@@ -168,14 +179,25 @@ public class SnowGolemClass extends BaseClass {
                                     for (int z = -platformWidth / 2; z <= platformWidth / 2; z++) {
                                         Location platformLocation = playerLocation.clone().add(x, -1, z);
                                         Block platformBlock = playerWorld.getBlockAt(platformLocation);
+
                                         if (platformBlock.getType() == Material.AIR) {
                                             platformBlock.setType(Material.SNOW_BLOCK);
                                             platformBlock.setMetadata("SnowPlatform",
                                                     new FixedMetadataValue(instance.getGameManager().getMain(), true));
-                                            Location particleLoc = platformLocation.clone().add(0.5, 1.0, 0.5);
-                                            ParticleEffect.BLOCK_CRACK.display(particleLoc, 0.3f, 0.1f, 0.3f, 0.05f, 6,
-                                                    new BlockTexture(Material.SNOW_BLOCK));
-                                            SoundManager.playSoundToAll(player, platformLocation, Sound.STEP_SNOW, 2, 1.5f);
+
+                                            Location particleLoc = getBlockCenter(platformBlock);
+
+                                            ParticleEffect.BLOCK_CRACK.display(
+                                                    particleLoc,
+                                                    0.3f,
+                                                    0.3f,
+                                                    0.3f,
+                                                    0.05f,
+                                                    6,
+                                                    new BlockTexture(Material.SNOW_BLOCK)
+                                            );
+
+                                            SoundManager.playSoundToAll(player, particleLoc, Sound.STEP_SNOW, 2, 1.5f);
                                         }
                                     }
                                 }
@@ -185,28 +207,41 @@ public class SnowGolemClass extends BaseClass {
                                         for (int z = -platformWidth / 2; z <= platformWidth / 2; z++) {
                                             Location platformLocation = playerLocation.clone().add(x, -1, z);
                                             Block platformBlock = playerWorld.getBlockAt(platformLocation);
+
                                             if (platformBlock.hasMetadata("SnowPlatform")) {
-                                                Location particleLoc = platformLocation.clone().add(0.5, 0.5, 0.5);
-                                                ParticleEffect.BLOCK_CRACK.display(particleLoc, 0.3f, 0.3f, 0.3f, 0.05f, 8,
-                                                        new BlockTexture(Material.SNOW_BLOCK));
+                                                Location particleLoc = getBlockCenter(platformBlock);
+
+                                                ParticleEffect.BLOCK_CRACK.display(
+                                                        particleLoc,
+                                                        0.3f,
+                                                        0.3f,
+                                                        0.3f,
+                                                        0.05f,
+                                                        8,
+                                                        new BlockTexture(Material.SNOW_BLOCK)
+                                                );
+
                                                 platformBlock.setType(Material.AIR);
                                                 platformBlock.removeMetadata("SnowPlatform",
                                                         instance.getGameManager().getMain());
-                                                SoundManager.playSoundToAll(player, platformLocation, Sound.DIG_SNOW, 2, 2);
+
+                                                SoundManager.playSoundToAll(player, particleLoc, Sound.DIG_SNOW, 2, 2);
                                             }
                                         }
                                     }
                                 }, 4 * 20);
+
                                 ticks++;
                             }
                         }
                     };
+
                     runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 2);
                 }
             }
         }
 
-        // SLOWBALL ABILITY — 5 total, no cooldown
+        // SLOWBALL ABILITY
         if (item.getType() == Material.SNOW_BALL
                 && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
             event.setCancelled(true);
@@ -214,8 +249,11 @@ public class SnowGolemClass extends BaseClass {
 
             // Consume one snowball
             int amount = item.getAmount() - 1;
-            if (amount <= 0) player.getInventory().clear(player.getInventory().getHeldItemSlot());
-            else item.setAmount(amount);
+            if (amount <= 0) {
+                player.getInventory().clear(player.getInventory().getHeldItemSlot());
+            } else {
+                item.setAmount(amount);
+            }
 
             ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
                 @Override
@@ -228,23 +266,33 @@ public class SnowGolemClass extends BaseClass {
                             gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_LARGE, 1);
                         }
 
-                        // Affect all players within 2.0 blocks of impact (covers both direct & ground hits)
+                        // Affect all players within 2.0 blocks of impact
                         for (Player gamePlayer : this.getNearby(2.0)) {
                             if (gamePlayer == player) continue;
                             if (checkIfDead(gamePlayer, instance) || instance.HasSpectator(gamePlayer)) continue;
 
-                            gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 1)); // Slowness 2, 3s
-                            EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-                                    EntityDamageEvent.DamageCause.PROJECTILE, 2.0);
+                            gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 1));
+
+                            EntityDamageEvent damageEvent = new EntityDamageEvent(
+                                    gamePlayer,
+                                    EntityDamageEvent.DamageCause.PROJECTILE,
+                                    2.0
+                            );
+
                             instance.getGameManager().getMain().getServer().getPluginManager()
                                     .callEvent(damageEvent);
+
                             gamePlayer.damage(2.0, player);
                         }
                     }
                 }
             }, new ItemStack(Material.SNOW_BALL));
-            instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-                    player.getLocation().getDirection().multiply(2.5D));
+
+            instance.getGameManager().getProjManager().shootProjectile(
+                    proj,
+                    player.getEyeLocation(),
+                    player.getLocation().getDirection().multiply(2.5D)
+            );
         }
 
         // PUMPKIN HEAD ABILITY
@@ -252,61 +300,86 @@ public class SnowGolemClass extends BaseClass {
                 && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
             if (player.getGameMode() != GameMode.SPECTATOR) {
                 int amount = item.getAmount();
+
                 if (amount > 0) {
                     boolean foundPlayers = false;
+
                     for (Entity entity : player.getWorld().getNearbyEntities(
-                            player.getLocation(), PUMPKIN_ABILITY_RANGE, PUMPKIN_ABILITY_RANGE, PUMPKIN_ABILITY_RANGE)) {
+                            player.getLocation(),
+                            PUMPKIN_ABILITY_RANGE,
+                            PUMPKIN_ABILITY_RANGE,
+                            PUMPKIN_ABILITY_RANGE)) {
                         if (entity instanceof Player && !entity.equals(player)) {
                             Player playerInRange = (Player) entity;
+
                             if (!checkIfDead(playerInRange, instance) && !instance.HasSpectator(playerInRange)) {
                                 setPumpkinHead(playerInRange);
                                 foundPlayers = true;
                             }
                         }
                     }
+
                     if (foundPlayers) {
                         amount--;
-                        if (amount == 0) player.getInventory().clear(player.getInventory().getHeldItemSlot());
-                        else item.setAmount(amount);
+
+                        if (amount == 0) {
+                            player.getInventory().clear(player.getInventory().getHeldItemSlot());
+                        } else {
+                            item.setAmount(amount);
+                        }
+
                         player.addPotionEffect(strength);
                         player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
                     } else {
                         player.sendMessage(ChatColorHelper.color("&c&l(!) &rNo nearby players have been found!"));
                     }
                 }
+
                 event.setCancelled(true);
             }
         }
     }
 
+    private Location getBlockCenter(Block block) {
+        return block.getLocation().clone().add(0.5, 0.5, 0.5);
+    }
+
     private void setPumpkinHead(Player playerInRange) {
         playerInRange.playSound(player.getLocation(), Sound.AMBIENCE_CAVE, 1, 2);
+
         BukkitRunnable runTimer = new BukkitRunnable() {
             int ticks = (int) PUMPKIN_ABILITY_DURATION;
             BaseClass baseClass = instance.classes.get(playerInRange);
+
             @Override
             public void run() {
                 if (ticks == PUMPKIN_ABILITY_DURATION) {
                     if (!checkIfDead(playerInRange, instance)) {
                         ItemStack pumpkin = new ItemStack(Material.PUMPKIN);
+
                         if (baseClass.getType() == ClassType.Spider) {
                             SpiderClass spiderClass = (SpiderClass) baseClass;
-                            if (spiderClass.invisTaskId != -1)
+
+                            if (spiderClass.invisTaskId != -1) {
                                 pumpkin.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 8);
-                            else
+                            } else {
                                 pumpkin.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 6);
+                            }
                         } else {
                             pumpkin.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 6);
                         }
+
                         playerInRange.getInventory().setHelmet(pumpkin);
                     }
                 } else if (ticks == 0) {
                     baseClass.resetHead();
                     this.cancel();
                 }
+
                 ticks--;
             }
         };
+
         runTimer.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
     }
 
@@ -329,8 +402,12 @@ public class SnowGolemClass extends BaseClass {
     }
 
     @Override
-    public ClassType getType() { return ClassType.SnowGolem; }
+    public ClassType getType() {
+        return ClassType.SnowGolem;
+    }
 
     @Override
-    public ItemStack getAttackWeapon() { return weapon; }
+    public ItemStack getAttackWeapon() {
+        return weapon;
+    }
 }
