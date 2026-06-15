@@ -42,14 +42,26 @@ public class ChickenClass extends BaseClass {
     }
 
     public ItemStack getEggs() {
-        return ItemHelper.setDetails(new ItemStack(Material.EGG, 10), ChatColor.YELLOW + "Explosive Eggs", "",
-                ChatColor.GRAY + "Right click to throw DEADLY eggs!");
+        ItemStack eggs = ItemHelper.setDetails(new ItemStack(Material.EGG, 10),
+                instance.color("&eExplosive Eggs"),
+                "",
+                instance.color("&7Right click to throw DEADLY eggs!"));
+        return eggs;
     }
 
     @Override
     public void SetItems(Inventory playerInv) {
         playerInv.setItem(0, this.getAttackWeapon());
         playerInv.setItem(1, this.getEggs());
+    }
+
+    private ItemStack getBarrier() {
+        ItemStack barrier = ItemHelper.setDetails(new ItemStack(Material.BARRIER),
+                instance.color("&c&lOut of Eggs!"),
+                "",
+                instance.color("&7Each kill regenerates 2 eggs"));
+
+        return barrier;
     }
 
     @Override
@@ -70,7 +82,7 @@ public class ChickenClass extends BaseClass {
                 if (amount > 0) {
                     amount--;
                     if (amount == 0)
-                        player.getInventory().clear(player.getInventory().getHeldItemSlot());
+                        player.getInventory().setItem(1, getBarrier());
                     else
                         item.setAmount(amount);
 
@@ -84,10 +96,10 @@ public class ChickenClass extends BaseClass {
 
                                 for (Player gamePlayer : this.getNearby(2.0)) {
                                     EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-                                            DamageCause.PROJECTILE, 5.5);
+                                            DamageCause.PROJECTILE, 4.0);
                                     instance.getGameManager().getMain().getServer().getPluginManager()
                                             .callEvent(damageEvent);
-                                    gamePlayer.damage(5.5, player);
+                                    gamePlayer.damage(4.0, player);
 
                                     // Direct hit: launch straight up only — no X/Z drift
                                     if (gamePlayer == hit) {
