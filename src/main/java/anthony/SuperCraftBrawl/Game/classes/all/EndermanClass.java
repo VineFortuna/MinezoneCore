@@ -26,10 +26,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Banner;
-import org.bukkit.material.Door;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.Skull;
+import org.bukkit.material.*;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
@@ -178,6 +175,17 @@ public class EndermanClass extends BaseClass {
             if (block.getType() == Material.LEAVES || block.getType() == Material.LEAVES_2 ||
                 block.getType() == Material.LOG    || block.getType() == Material.LOG_2) {
                 newItem = new ItemStack(block.getType(), 1, (short) 0, (byte) (block.getData() & 3));
+            } else if (block.getType() == Material.PISTON_EXTENSION    || block.getType() == Material.PUMPKIN             ||
+                       block.getType() == Material.JACK_O_LANTERN      || block.getType() == Material.PISTON_BASE         ||
+                       block.getType() == Material.PISTON_STICKY_BASE  || block.getType() == Material.BRICK_STAIRS        ||
+                       block.getType() == Material.SMOOTH_STAIRS       || block.getType() == Material.NETHER_BRICK_STAIRS ||
+                       block.getType() == Material.COBBLESTONE_STAIRS  || block.getType() == Material.WOOD_STAIRS         ||
+                       block.getType() == Material.SANDSTONE_STAIRS    || block.getType() == Material.SPRUCE_WOOD_STAIRS  ||
+                       block.getType() == Material.BIRCH_WOOD_STAIRS   || block.getType() == Material.JUNGLE_WOOD_STAIRS  ||
+                       block.getType() == Material.QUARTZ_STAIRS       || block.getType() == Material.ACACIA_STAIRS       ||
+                       block.getType() == Material.DARK_OAK_STAIRS     || block.getType() == Material.RED_SANDSTONE_STAIRS) {
+                // Yes, I seriously hate this, but it does work. Its temporary until I can think of a better solution.
+                newItem = new ItemStack(block.getType(), 1, (short) 0, (byte) 0);
             } else {
                 newItem = new ItemStack(block.getType(), 1, (short) 0, block.getData());
             }
@@ -186,15 +194,17 @@ public class EndermanClass extends BaseClass {
             return;
         }
 
+
         // Needs to be done first, otherwise you would get a bunch of null errors from the comparisons.
         if (block.getType() == Material.PISTON_EXTENSION) {
             boolean isSticky = (block.getData() & 8) == 1;
             newItem = new ItemStack(isSticky ? Material.PISTON_BASE : Material.PISTON_STICKY_BASE, 1);
         }
 
-        if (newItem.getType() == Material.DOUBLE_STEP || newItem.getType() == Material.DOUBLE_STONE_SLAB2 ||
-                newItem.getType() == Material.WOOD_DOUBLE_STEP) {
+        if (newItem.getType() == Material.DOUBLE_STEP || newItem.getType() == Material.DOUBLE_STONE_SLAB2 || newItem.getType() == Material.WOOD_DOUBLE_STEP) {
             newItem.setType(Material.valueOf(newItem.getType().name().replace("DOUBLE_", "")));
+        } else if (newItem.getData() instanceof Stairs) {
+            newItem.setType(block.getType());
         } else if (newItem.getData() instanceof Door) {
             newItem.setType(Material.WOOD_DOOR);
         } else if (newItem.getData() instanceof Skull) {
@@ -209,17 +219,7 @@ public class EndermanClass extends BaseClass {
             newItem.setType(Material.BREWING_STAND_ITEM);
         } else if (newItem.getType() == Material.CAULDRON) {
             newItem.setType(Material.CAULDRON_ITEM);
-        } else if (newItem.getType() == Material.PUMPKIN) {
-            newItem = new ItemStack(Material.PUMPKIN, 1);
-        } else if (newItem.getType() == Material.JACK_O_LANTERN) {
-            newItem = new ItemStack(Material.JACK_O_LANTERN, 1);
-        } else if (newItem.getType() == Material.PISTON_BASE) {
-            newItem = new ItemStack(Material.PISTON_BASE, 1);
-        } else if (newItem.getType() == Material.PISTON_STICKY_BASE) {
-            newItem = new ItemStack(Material.PISTON_STICKY_BASE, 1);
         }
-        // Pistons, Sticky pistons, Jack-o-lanterns and pumpkins have a tendency to not work if they are not
-        // south-facing. This is a temporary fix that just kind of works until a better solution is found.
 
 
         ItemHelper.setDetails(newItem, instance.getGameManager().getMain().color("&e&lBlock"));
