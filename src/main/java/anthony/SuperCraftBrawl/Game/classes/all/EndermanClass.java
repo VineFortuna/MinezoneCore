@@ -164,14 +164,19 @@ public class EndermanClass extends BaseClass {
         // 0b0011, or 3. This can not be done with other blocks, such as wool, as they use all 4 bits for
         // sub-ids. It's split into LEAVES and LEAVES_2 because they needed more leaves, but the 2 bits
         // they had only let them have 4 tree species, so they made another block type for the other 2.
+        //
+        // The exact same applies for logs, but the uses of the other bits is different. I believe its
+        // only block rotation?
         if (blockInside.getType().isSolid() && playerLocation.getY() % 1 != 0) {
-            if (block.getType() == Material.LEAVES || block.getType() == Material.LEAVES_2) {
+            if (block.getType() == Material.LEAVES || block.getType() == Material.LEAVES_2 ||
+                block.getType() == Material.LOG    || block.getType() == Material.LOG_2) {
                 newItem = new ItemStack(block.getType(), 1, (short) 0, (byte) (block.getData() & 3));
             } else {
                 newItem = new ItemStack(block.getType(), 1, (short) 0, block.getData());
             }
         } else if (block.getType().isSolid()) {
-            if (block.getType() == Material.LEAVES || block.getType() == Material.LEAVES_2) {
+            if (block.getType() == Material.LEAVES || block.getType() == Material.LEAVES_2 ||
+                block.getType() == Material.LOG    || block.getType() == Material.LOG_2) {
                 newItem = new ItemStack(block.getType(), 1, (short) 0, (byte) (block.getData() & 3));
             } else {
                 newItem = new ItemStack(block.getType(), 1, (short) 0, block.getData());
