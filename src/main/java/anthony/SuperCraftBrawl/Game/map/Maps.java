@@ -35,6 +35,27 @@ public enum Maps {
 					.setBounds(new Vector(216.500, 160, 382.500), 35, 45)
 					.setSource(MapSource.MINECADE)
 	),
+
+	TreeOfLife(
+			"TreeOfLife",
+			new Gameplay[]{Gameplay.ELEVATED},
+			Size.MEDIUM,
+			Category.CURATED,
+			new ItemStack(Material.LOG),
+			new MapInstance(
+					"treeoflife")
+					.setSpawnPos(
+							new Vector(173.970, 147, 377.339),
+							new Vector(153.385, 142, 393.5),
+							new Vector(184.5, 142, 412.5),
+							new Vector(178.5, 132, 401.5)
+					)
+					.setLobbyLoc(new Vector(173.5, 151, 347.5))
+					.setSpecLoc(new Vector(174.5, 146, 389.5))
+					.setBounds(new Vector(173.496, 147, 399.6), 100, 40)
+					.setGameType(GameType.DUEL)
+					.setSource(MapSource.COMMUNITY)
+	),
 	
 	Village(
 			"Village",
