@@ -1738,28 +1738,35 @@ public abstract class BaseClass {
 	}
 
 	// Giving health potions on kill
-	protected void healthPots(Player d) {
-		if (checkIfDead(d, instance) || instance.classes.get(d).getType() == ClassType.Horse)
-			return;
-
-		if (instance.alivePlayers == 1) return;
-
-		if (d.getHealth() / d.getMaxHealth() >= 0.5) return;
-
-		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-				String.valueOf(ChatColor.RED) + ChatColor.BOLD + "HEALING I");
-		Potion pot = new Potion(1);
-		pot.setType(PotionType.INSTANT_HEAL);
-		pot.setSplash(true);
-		pot.apply(item);
-		d.getInventory().addItem(item);
-
+	protected void healthPots(final Player d) {
 		Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new Runnable() {
 			@Override
 			public void run() {
-				d.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET
-						+ ChatColor.YELLOW + "You got a kill and got rewarded a " + ChatColor.YELLOW + ChatColor.BOLD
-						+ "Health Pot");
+				if (checkIfDead(d, instance) || instance.classes.get(d).getType() == ClassType.Horse)
+					return;
+
+				if (instance.alivePlayers == 1) return;
+
+				if (d.getHealth() / d.getMaxHealth() >= 0.5) return;
+
+				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
+						String.valueOf(ChatColor.RED) + ChatColor.BOLD + "HEALING I");
+
+				Potion pot = new Potion(1);
+				pot.setType(PotionType.INSTANT_HEAL);
+				pot.setSplash(true);
+				pot.apply(item);
+
+				d.getInventory().addItem(item);
+
+				Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new Runnable() {
+					@Override
+					public void run() {
+						d.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET
+								+ ChatColor.YELLOW + "You got a kill and got rewarded a " + ChatColor.YELLOW + ChatColor.BOLD
+								+ "Health Pot");
+					}
+				}, 1L);
 			}
 		}, 1L);
 	}
@@ -1847,14 +1854,14 @@ public abstract class BaseClass {
 						.color("&2&l(!) &rYou got a kill and gained an extra &eGold Ball"));
 				damagerPlayer.getInventory().addItem(item);
 			} else if (baseClass.getType() == ClassType.Chicken) {
-				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.EGG, 10),
+				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.EGG, 2),
 						instance.color("&eExplosive Eggs"),
 						"",
 						instance.color("&7Right click to throw DEADLY eggs!"));
 				damagerPlayer.sendMessage(instance.getGameManager().getMain()
 						.color("&2&l(!) &rYou got a kill and gained 2 extra &eExplosive Eggs"));
 
-				if (damagerPlayer.getInventory().getItem(2).getType() != Material.EGG)
+				if (damagerPlayer.getInventory().getItem(1).getType() != Material.EGG)
 					damagerPlayer.getInventory().setItem(1, item);
 				else
 					damagerPlayer.getInventory().addItem(item);
