@@ -28,6 +28,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Banner;
 import org.bukkit.material.Door;
+import org.bukkit.material.MaterialData;
 import org.bukkit.material.Skull;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -157,10 +158,24 @@ public class EndermanClass extends BaseClass {
 
         Block blockInside = playerWorld.getBlockAt(playerLocation);
 
+        // Leaves need their own special case as their data comprises more than just the blocks' sub-id.
+        // The metadata has the two least significant bits relating to the sub-id, and the other two are
+        // related to decay properties, which don't matter in this case here, so they are masked out with
+        // 0b0011, or 3. This can not be done with other blocks, such as wool, as they use all 4 bits for
+        // sub-ids. It's split into LEAVES and LEAVES_2 because they needed more leaves, but the 2 bits
+        // they had only let them have 4 tree species, so they made another block type for the other 2.
         if (blockInside.getType().isSolid() && playerLocation.getY() % 1 != 0) {
-            newItem = new ItemStack(blockInside.getType(), 1);
+            if (block.getType() == Material.LEAVES || block.getType() == Material.LEAVES_2) {
+                newItem = new ItemStack(block.getType(), 1, (short) 0, (byte) (block.getData() & 3));
+            } else {
+                newItem = new ItemStack(block.getType(), 1, (short) 0, block.getData());
+            }
         } else if (block.getType().isSolid()) {
-            newItem = new ItemStack(block.getType(), 1);
+            if (block.getType() == Material.LEAVES || block.getType() == Material.LEAVES_2) {
+                newItem = new ItemStack(block.getType(), 1, (short) 0, (byte) (block.getData() & 3));
+            } else {
+                newItem = new ItemStack(block.getType(), 1, (short) 0, block.getData());
+            }
         } else {
             player.sendMessage(instance.color("&c&l(!) &rThere is no block under you. Please try again"));
             return;
