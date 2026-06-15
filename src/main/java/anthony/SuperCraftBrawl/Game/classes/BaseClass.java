@@ -1846,6 +1846,18 @@ public abstract class BaseClass {
 				damagerPlayer.sendMessage(instance.getGameManager().getMain()
 						.color("&2&l(!) &rYou got a kill and gained an extra &eGold Ball"));
 				damagerPlayer.getInventory().addItem(item);
+			} else if (baseClass.getType() == ClassType.Chicken) {
+				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.EGG, 10),
+						instance.color("&eExplosive Eggs"),
+						"",
+						instance.color("&7Right click to throw DEADLY eggs!"));
+				damagerPlayer.sendMessage(instance.getGameManager().getMain()
+						.color("&2&l(!) &rYou got a kill and gained 2 extra &eExplosive Eggs"));
+
+				if (damagerPlayer.getInventory().getItem(2).getType() != Material.EGG)
+					damagerPlayer.getInventory().setItem(1, item);
+				else
+					damagerPlayer.getInventory().addItem(item);
 			} else if (baseClass.getType() == ClassType.GrimReaper) {
 				ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
 				damagerPlayer.getInventory().setItem(2, zombieEgg);
