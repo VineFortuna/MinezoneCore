@@ -75,217 +75,220 @@ public class PlayerDataManager implements Listener {
 		perms.remove(player);
 	}
 
-    public boolean addTokensToOfflinePlayer(String name, int amount) throws SQLException {
-        Connection c = manager.getConnection();
+	public boolean addTokensToOfflinePlayer(String name, int amount) throws SQLException {
+		Connection c = manager.getConnection();
 
-        PreparedStatement stmt = c.prepareStatement(
-                "UPDATE PlayerData SET Tokens = Tokens + ? WHERE LOWER(LastPlayerName) = LOWER(?)"
-        );
+		PreparedStatement stmt = c.prepareStatement(
+				"UPDATE PlayerData SET Tokens = Tokens + ? WHERE LOWER(LastPlayerName) = LOWER(?)"
+		);
 
-        stmt.setInt(1, amount);
-        stmt.setString(2, name);
+		stmt.setInt(1, amount);
+		stmt.setString(2, name);
 
-        int rowsUpdated = stmt.executeUpdate();
-        stmt.close();
+		int rowsUpdated = stmt.executeUpdate();
+		stmt.close();
 
-        return rowsUpdated > 0;
-    }
+		return rowsUpdated > 0;
+	}
 
-    public PlayerData getSavedDataByName(String name) throws SQLException {
-        Connection c = manager.getConnection();
+	public PlayerData getSavedDataByName(String name) throws SQLException {
+		Connection c = manager.getConnection();
 
-        PreparedStatement stmt = c.prepareStatement(
-                "SELECT * FROM PlayerData WHERE LOWER(LastPlayerName) = LOWER(?) LIMIT 1"
-        );
-        stmt.setString(1, name);
+		PreparedStatement stmt = c.prepareStatement(
+				"SELECT * FROM PlayerData WHERE LOWER(LastPlayerName) = LOWER(?) LIMIT 1"
+		);
+		stmt.setString(1, name);
 
-        ResultSet set = stmt.executeQuery();
+		ResultSet set = stmt.executeQuery();
 
-        PlayerData data = null;
+		PlayerData data = null;
 
-        if (set.next()) {
-            UUID uuid = UUID.fromString(set.getString("UUID"));
-            String playerName = set.getString("LastPlayerName");
-            String lastIp = set.getString("LastIP");
+		if (set.next()) {
+			UUID uuid = UUID.fromString(set.getString("UUID"));
+			String playerName = set.getString("LastPlayerName");
+			String lastIp = set.getString("LastIP");
 
-            int roleID = set.getInt("RoleID");
-            int tokens = set.getInt("Tokens");
-            int wins = set.getInt("Wins");
-            int kills = set.getInt("Kills");
-            int deaths = set.getInt("Deaths");
-            int flawlessWins = set.getInt("FlawlessWins");
-            int losses = set.getInt("Losses");
-            int winstreak = set.getInt("Winstreak");
-            int cwm = set.getInt("Cwm");
-            int melon = set.getInt("MelonCosmetic");
-            int astronaut = set.getInt("AstronautCosmetic");
-            int pm = set.getInt("PrivateMessages");
-            int votes = set.getInt("Votes");
-            int mysteryChests = set.getInt("MysteryChests");
-            int blue = set.getInt("Blue");
-            int red = set.getInt("Red");
-            int green = set.getInt("Green");
-            int yellow = set.getInt("Yellow");
-            int muted = set.getInt("Muted");
-            int exp = set.getInt("Exp");
-            int level = set.getInt("Level");
-            int bestTime = set.getInt("BestTime");
-            int magicbroom = set.getInt("MagicBroom");
-            int points = set.getInt("Points");
-            int withersk = set.getInt("WitherSk");
-            int bonusTokens = set.getInt("BonusTokens");
-            int bonusLevels = set.getInt("BonusLevels");
-            int paintball = set.getInt("Paintball");
-            int santaoutfit = set.getInt("SantaOutfit");
-            int elf = set.getInt("Elf");
-            int killMsgs = set.getInt("KillMsgs");
-            int gingerbreadman = set.getInt("GingerBreadMan");
-            int challenge1 = set.getInt("Challenge1");
-            int challenge2 = set.getInt("Challenge2");
-            int challenge3 = set.getInt("Challenge3");
-            int goldApple = set.getInt("GoldApple");
-            int glowstone = set.getInt("Glowstone");
-            int redstone = set.getInt("Redstone");
-            int web = set.getInt("Web");
-            int bottleEXP = set.getInt("BottleEXP");
-            int broomWinEffect = set.getInt("BroomWinEffect");
-            int enderDragonEffect = set.getInt("EnderDragonEffect");
-            int santaEffect = set.getInt("SantaEffect");
-            int fireParticlesEffect = set.getInt("FireParticlesEffect");
-            int fishRainEffect = set.getInt("FishRainEffect");
-            int challenge100 = set.getInt("Challenge100");
-            int challenge101 = set.getInt("Challenge101");
-            int challenge102 = set.getInt("Challenge102");
-            int challenge103 = set.getInt("Challenge103");
-            int matchMvps = set.getInt("MatchMvps");
-            int fly = set.getInt("Fly");
-            int totalcaught = set.getInt("TotalCaught");
-            int caught = set.getInt("Caught");
-            int rewardLevel = set.getInt("RewardLevel");
-            int lureLevel = set.getInt("LureLevel");
-            int lure = set.getInt("Lure");
-            int friendshipLevel = set.getInt("FriendshipLevel");
-            int friendship = set.getInt("Friendship");
-            int bestWinstreak = set.getInt("BestWinstreak");
-            int december15 = set.getInt("December15");
-            int december16 = set.getInt("December16");
-            int december17 = set.getInt("December17");
-            int december18 = set.getInt("December18");
-            int december19 = set.getInt("December19");
-            int december20 = set.getInt("December20");
-            int december21 = set.getInt("December21");
-            int december22 = set.getInt("December22");
-            int december23 = set.getInt("December23");
-            int december24 = set.getInt("December24");
-            int december25 = set.getInt("December25");
-            int snowParticles = set.getInt("SnowParticles");
-            int snowballDeathEffect = set.getInt("SnowballDeathEffect");
-            int elfCosmetic = set.getInt("ElfCosmetic");
-            int snowmanPet = set.getInt("SnowmanPet");
-            int candycaneParticles = set.getInt("CandyCaneParticles");
-            int snowball = set.getInt("Snowball");
-            int floodEffect = set.getInt("FloodEffect");
-            int treasureEffect = set.getInt("TreasureEffect");
-            int treasureOpened = set.getInt("TreasureOpened");
-            String color = set.getString("Color");
-            String fishingWarps = set.getString("FishingWarps");
-            String treasureLoc = set.getString("TreasureLoc");
-            int pumpkinPie = set.getInt("PumpkinPie");
-            int ritualEffect = set.getInt("RitualEffect");
-            int rudolphOutfit = set.getInt("RudolphOutfit");
-            int merryTitle = set.getInt("MerryTitle");
-            int hohohoTitle = set.getInt("HoHoHoTitle");
+			int roleID = set.getInt("RoleID");
+			int tokens = set.getInt("Tokens");
+			int wins = set.getInt("Wins");
+			int kills = set.getInt("Kills");
+			int deaths = set.getInt("Deaths");
+			int flawlessWins = set.getInt("FlawlessWins");
+			int losses = set.getInt("Losses");
+			int winstreak = set.getInt("Winstreak");
+			int cwm = set.getInt("Cwm");
+			int melon = set.getInt("MelonCosmetic");
+			int astronaut = set.getInt("AstronautCosmetic");
+			int pm = set.getInt("PrivateMessages");
+			int votes = set.getInt("Votes");
+			int mysteryChests = set.getInt("MysteryChests");
+			int blue = set.getInt("Blue");
+			int red = set.getInt("Red");
+			int green = set.getInt("Green");
+			int yellow = set.getInt("Yellow");
+			int muted = set.getInt("Muted");
+			int exp = set.getInt("Exp");
+			int level = set.getInt("Level");
+			int bestTime = set.getInt("BestTime");
+			int magicbroom = set.getInt("MagicBroom");
+			int points = set.getInt("Points");
+			int withersk = set.getInt("WitherSk");
+			int bonusTokens = set.getInt("BonusTokens");
+			int bonusLevels = set.getInt("BonusLevels");
+			int paintball = set.getInt("Paintball");
+			int santaoutfit = set.getInt("SantaOutfit");
+			int elf = set.getInt("Elf");
+			int killMsgs = set.getInt("KillMsgs");
+			int gingerbreadman = set.getInt("GingerBreadMan");
+			int challenge1 = set.getInt("Challenge1");
+			int challenge2 = set.getInt("Challenge2");
+			int challenge3 = set.getInt("Challenge3");
+			int goldApple = set.getInt("GoldApple");
+			int glowstone = set.getInt("Glowstone");
+			int redstone = set.getInt("Redstone");
+			int web = set.getInt("Web");
+			int bottleEXP = set.getInt("BottleEXP");
+			int broomWinEffect = set.getInt("BroomWinEffect");
+			int enderDragonEffect = set.getInt("EnderDragonEffect");
+			int santaEffect = set.getInt("SantaEffect");
+			int fireParticlesEffect = set.getInt("FireParticlesEffect");
+			int fishRainEffect = set.getInt("FishRainEffect");
+			int challenge100 = set.getInt("Challenge100");
+			int challenge101 = set.getInt("Challenge101");
+			int challenge102 = set.getInt("Challenge102");
+			int challenge103 = set.getInt("Challenge103");
+			int matchMvps = set.getInt("MatchMvps");
+			int fly = set.getInt("Fly");
+			int totalcaught = set.getInt("TotalCaught");
+			int caught = set.getInt("Caught");
+			int rewardLevel = set.getInt("RewardLevel");
+			int lureLevel = set.getInt("LureLevel");
+			int lure = set.getInt("Lure");
+			int friendshipLevel = set.getInt("FriendshipLevel");
+			int friendship = set.getInt("Friendship");
+			int bestWinstreak = set.getInt("BestWinstreak");
+			int december15 = set.getInt("December15");
+			int december16 = set.getInt("December16");
+			int december17 = set.getInt("December17");
+			int december18 = set.getInt("December18");
+			int december19 = set.getInt("December19");
+			int december20 = set.getInt("December20");
+			int december21 = set.getInt("December21");
+			int december22 = set.getInt("December22");
+			int december23 = set.getInt("December23");
+			int december24 = set.getInt("December24");
+			int december25 = set.getInt("December25");
+			int snowParticles = set.getInt("SnowParticles");
+			int snowballDeathEffect = set.getInt("SnowballDeathEffect");
+			int elfCosmetic = set.getInt("ElfCosmetic");
+			int snowmanPet = set.getInt("SnowmanPet");
+			int candycaneParticles = set.getInt("CandyCaneParticles");
+			int snowball = set.getInt("Snowball");
+			int floodEffect = set.getInt("FloodEffect");
+			int treasureEffect = set.getInt("TreasureEffect");
+			int treasureOpened = set.getInt("TreasureOpened");
+			String color = set.getString("Color");
+			String fishingWarps = set.getString("FishingWarps");
+			String treasureLoc = set.getString("TreasureLoc");
+			int pumpkinPie = set.getInt("PumpkinPie");
+			int ritualEffect = set.getInt("RitualEffect");
+			int rudolphOutfit = set.getInt("RudolphOutfit");
+			int merryTitle = set.getInt("MerryTitle");
+			int hohohoTitle = set.getInt("HoHoHoTitle");
+			long lastDailyReward = 0;
+			try { lastDailyReward = set.getLong("LastDailyReward"); } catch (Exception ignored) {}
 
-            data = new PlayerData(uuid, playerName, lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
-                    losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
-                    exp, level, bestTime, magicbroom, points, withersk, bonusTokens, bonusLevels, paintball,
-                    santaoutfit, elf, gingerbreadman, killMsgs, challenge1, challenge2, challenge3, goldApple,
-                    glowstone, redstone, web, bottleEXP, broomWinEffect, enderDragonEffect, santaEffect,
-                    fireParticlesEffect, fishRainEffect, challenge100, challenge101, challenge102, challenge103,
-                    matchMvps, fly, totalcaught, caught, rewardLevel, lureLevel, lure, friendshipLevel, friendship,
-                    bestWinstreak, december15, december16, december17, december18, december19, december20, december21,
-                    december22, december23, december24, december25, snowParticles, snowballDeathEffect, elfCosmetic,
-                    snowmanPet, candycaneParticles, snowball, floodEffect, treasureEffect, treasureOpened, color,
-                    fishingWarps, treasureLoc, pumpkinPie, ritualEffect, rudolphOutfit, merryTitle, hohohoTitle);
-        }
+			data = new PlayerData(uuid, playerName, lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
+					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
+					exp, level, bestTime, magicbroom, points, withersk, bonusTokens, bonusLevels, paintball,
+					santaoutfit, elf, gingerbreadman, killMsgs, challenge1, challenge2, challenge3, goldApple,
+					glowstone, redstone, web, bottleEXP, broomWinEffect, enderDragonEffect, santaEffect,
+					fireParticlesEffect, fishRainEffect, challenge100, challenge101, challenge102, challenge103,
+					matchMvps, fly, totalcaught, caught, rewardLevel, lureLevel, lure, friendshipLevel, friendship,
+					bestWinstreak, december15, december16, december17, december18, december19, december20, december21,
+					december22, december23, december24, december25, snowParticles, snowballDeathEffect, elfCosmetic,
+					snowmanPet, candycaneParticles, snowball, floodEffect, treasureEffect, treasureOpened, color,
+					fishingWarps, treasureLoc, pumpkinPie, ritualEffect, rudolphOutfit, merryTitle, hohohoTitle);
+			data.lastDailyReward = lastDailyReward;
+		}
 
-        set.close();
-        stmt.close();
+		set.close();
+		stmt.close();
 
-        if (data == null) {
-            return null;
-        }
+		if (data == null) {
+			return null;
+		}
 
-        Statement classState = c.createStatement();
-        ResultSet classSet = classState.executeQuery(
-                "SELECT * FROM PlayerClasses WHERE UUID = '" + data.playerUUID.toString() + "'"
-        );
+		Statement classState = c.createStatement();
+		ResultSet classSet = classState.executeQuery(
+				"SELECT * FROM PlayerClasses WHERE UUID = '" + data.playerUUID.toString() + "'"
+		);
 
-        while (classSet.next()) {
-            int classID = classSet.getInt("ClassID");
-            boolean purchased = classSet.getInt("Purchased") == 1;
-            int timePurchased = classSet.getInt("TimePurchased");
-            int gamesPlayed = classSet.getInt("GamesPlayed");
-            int gamesWon = classSet.getInt("GamesWon");
-            boolean reward1 = classSet.getInt("Reward1") == 1;
-            boolean reward2 = classSet.getInt("Reward2") == 1;
-            boolean reward3 = classSet.getInt("Reward3") == 1;
-            boolean reward4 = classSet.getInt("Reward4") == 1;
-            boolean reward5 = classSet.getInt("Reward5") == 1;
+		while (classSet.next()) {
+			int classID = classSet.getInt("ClassID");
+			boolean purchased = classSet.getInt("Purchased") == 1;
+			int timePurchased = classSet.getInt("TimePurchased");
+			int gamesPlayed = classSet.getInt("GamesPlayed");
+			int gamesWon = classSet.getInt("GamesWon");
+			boolean reward1 = classSet.getInt("Reward1") == 1;
+			boolean reward2 = classSet.getInt("Reward2") == 1;
+			boolean reward3 = classSet.getInt("Reward3") == 1;
+			boolean reward4 = classSet.getInt("Reward4") == 1;
+			boolean reward5 = classSet.getInt("Reward5") == 1;
 
-            data.playerClasses.put(classID, new ClassDetails(purchased, timePurchased, gamesPlayed, gamesWon,
-                    reward1, reward2, reward3, reward4, reward5));
-        }
+			data.playerClasses.put(classID, new ClassDetails(purchased, timePurchased, gamesPlayed, gamesWon,
+					reward1, reward2, reward3, reward4, reward5));
+		}
 
-        classSet.close();
-        classState.close();
+		classSet.close();
+		classState.close();
 
-        Statement fishingState = c.createStatement();
-        ResultSet fishingSet = fishingState.executeQuery(
-                "SELECT * FROM PlayerFishing WHERE UUID = '" + data.playerUUID.toString() + "'"
-        );
+		Statement fishingState = c.createStatement();
+		ResultSet fishingSet = fishingState.executeQuery(
+				"SELECT * FROM PlayerFishing WHERE UUID = '" + data.playerUUID.toString() + "'"
+		);
 
-        while (fishingSet.next()) {
-            int fishID = fishingSet.getInt("FishID");
-            int timesCaught = fishingSet.getInt("TimesCaught");
-            int carrying = fishingSet.getInt("Carrying");
+		while (fishingSet.next()) {
+			int fishID = fishingSet.getInt("FishID");
+			int timesCaught = fishingSet.getInt("TimesCaught");
+			int carrying = fishingSet.getInt("Carrying");
 
-            data.playerFishing.put(fishID, new FishingDetails(timesCaught, carrying));
-        }
+			data.playerFishing.put(fishID, new FishingDetails(timesCaught, carrying));
+		}
 
-        fishingSet.close();
-        fishingState.close();
+		fishingSet.close();
+		fishingState.close();
 
-        Statement parkourState = c.createStatement();
-        ResultSet parkourSet = parkourState.executeQuery(
-                "SELECT * FROM PlayerParkour WHERE UUID = '" + data.playerUUID.toString() + "'"
-        );
+		Statement parkourState = c.createStatement();
+		ResultSet parkourSet = parkourState.executeQuery(
+				"SELECT * FROM PlayerParkour WHERE UUID = '" + data.playerUUID.toString() + "'"
+		);
 
-        while (parkourSet.next()) {
-            int parkourID = parkourSet.getInt("ParkourID");
-            long totalTime = parkourSet.getLong("TotalTime");
+		while (parkourSet.next()) {
+			int parkourID = parkourSet.getInt("ParkourID");
+			long totalTime = parkourSet.getLong("TotalTime");
 
-            data.playerParkour.put(parkourID, new ParkourDetails(totalTime));
-        }
+			data.playerParkour.put(parkourID, new ParkourDetails(totalTime));
+		}
 
-        parkourSet.close();
-        parkourState.close();
+		parkourSet.close();
+		parkourState.close();
 
-        Statement customState = c.createStatement();
-        ResultSet customSet = customState.executeQuery(
-                "SELECT * FROM PlayerCustomIntegers WHERE UUID = '" + data.playerUUID.toString() + "'"
-        );
+		Statement customState = c.createStatement();
+		ResultSet customSet = customState.executeQuery(
+				"SELECT * FROM PlayerCustomIntegers WHERE UUID = '" + data.playerUUID.toString() + "'"
+		);
 
-        while (customSet.next()) {
-            int customInteger = customSet.getInt("CustomInteger");
-            data.customIntegers.add(customInteger);
-        }
+		while (customSet.next()) {
+			int customInteger = customSet.getInt("CustomInteger");
+			data.customIntegers.add(customInteger);
+		}
 
-        customSet.close();
-        customState.close();
+		customSet.close();
+		customState.close();
 
-        return data;
-    }
+		return data;
+	}
 
 	public PlayerData getSavedData(Player player) throws SQLException {
 		System.out.print("Getting saved data for " + player.getName());
@@ -391,6 +394,8 @@ public class PlayerDataManager implements Listener {
 			int rudolphOutfit = set.getInt("RudolphOutfit");
 			int merryTitle = set.getInt("MerryTitle");
 			int hohohoTitle = set.getInt("HoHoHoTitle");
+			long lastDailyReward = 0;
+			try { lastDailyReward = set.getLong("LastDailyReward"); } catch (Exception ignored) {}
 
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
@@ -403,6 +408,7 @@ public class PlayerDataManager implements Listener {
 					december22, december23, december24, december25, snowParticles, snowballDeathEffect, elfCosmetic,
 					snowmanPet, candycaneParticles, snowball, floodEffect, treasureEffect, treasureOpened, color,
 					fishingWarps, treasureLoc, pumpkinPie, ritualEffect, rudolphOutfit, merryTitle, hohohoTitle);
+			data.lastDailyReward = lastDailyReward;
 		}
 		set.close();
 		stmt.close();
@@ -473,7 +479,7 @@ public class PlayerDataManager implements Listener {
 		manager.executeUpdateCommand("INSERT INTO PlayerData (`UUID`, `LastPlayerName`, `LastIP`) VALUES ('"
 				+ player.getUniqueId().toString() + "', '" + player.getName() + "', '" + lastIp + "');");
 
-        Bukkit.broadcastMessage(main.color("&7► " + player.getName() + " &ejoined &b&lMinezone &efor the first time!"));
+		Bukkit.broadcastMessage(main.color("&7► " + player.getName() + " &ejoined &b&lMinezone &efor the first time!"));
 		return newData;
 	}
 
@@ -518,7 +524,9 @@ public class PlayerDataManager implements Listener {
 				+ data.treasureOpened + ", Color = '" + data.color + "', FishingWarps = '" + data.fishingWarps
 				+ "', TreasureLoc = '" + data.treasureLoc + "', PumpkinPie = " + data.pumpkinPie + ", RitualEffect = "
 				+ data.ritualEffect + ", RudolphOutfit = " + data.rudolphOutfit + ", MerryTitle = " + data.merryTitle
-				+ ", HoHoHoTitle = " + data.hohohoTitle + " WHERE UUID = '" + data.playerUUID.toString() + "';");
+				+ ", HoHoHoTitle = " + data.hohohoTitle
+				+ ", LastDailyReward = " + data.lastDailyReward
+				+ " WHERE UUID = '" + data.playerUUID.toString() + "';");
 		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon, "
 				+ "Reward1, Reward2, Reward3, Reward4, Reward5) VALUES ";
 		int index = 0;

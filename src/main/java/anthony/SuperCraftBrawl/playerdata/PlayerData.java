@@ -28,25 +28,28 @@ public class PlayerData {
 			pumpkinPie = 0, ritualEffect = 0, rudolphOutfit = 0, merryTitle = 0, hohohoTitle = 0;
 	public String color = "", fishingWarps = "", treasureLoc = "";
 
+	/** Unix timestamp (ms) of the last time the player claimed their daily reward. 0 = never. */
+	public long lastDailyReward = 0;
+
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
 	public HashMap<Integer, FishingDetails> playerFishing = new HashMap<>();
 	public HashMap<Integer, ParkourDetails> playerParkour = new HashMap<>();
 	public ArrayList<Integer> customIntegers = new ArrayList<>();
 
 	public PlayerData(UUID playerUUID, String playerName, String playerIP, int roleID, int tokens, int wins, int kills,
-			int deaths, int flawlessWins, int losses, int winstreak, int cwm, int melon, int astronaut, int pm,
-			int votes, int mysteryChests, int blue, int red, int green, int yellow, int muted, int exp, int level,
-			int bestTime, int magicbroom, int points, int withersk, int bonusTokens, int bonusLevels, int paintball,
-			int santaoutfit, int elf, int gingerbreadman, int killMsgs, int challenge1, int challenge2, int challenge3,
-			int goldApple, int glowstone, int redstone, int web, int bottleEXP, int broomWWinEffect,
-			int enderDragonEffect, int santaEffect, int fireParticlesEffect, int fishRainEffect, int challenge100,
-			int challenge101, int challenge102, int challenge103, int matchMvps, int fly, int totalcaught, int caught,
-			int rewardLevel, int lureLevel, int lure, int friendshipLevel, int friendship, int bestWinstreak,
-			int december15, int december16, int december17, int december18, int december19, int december20,
-			int december21, int december22, int december23, int december24, int december25, int snowParticles,
-			int snowballDeathEffect, int elfCosmetic, int snowmanPet, int candycaneParticles, int snowball,
-			int floodEffect, int treasureEffect, int treasureOpened, String color, String fishingWarps,
-			String treasureLoc, int pumpkinPie, int ritualEffect, int rudolphOutfit, int merryTitle, int hohohoTitle) {
+	                  int deaths, int flawlessWins, int losses, int winstreak, int cwm, int melon, int astronaut, int pm,
+	                  int votes, int mysteryChests, int blue, int red, int green, int yellow, int muted, int exp, int level,
+	                  int bestTime, int magicbroom, int points, int withersk, int bonusTokens, int bonusLevels, int paintball,
+	                  int santaoutfit, int elf, int gingerbreadman, int killMsgs, int challenge1, int challenge2, int challenge3,
+	                  int goldApple, int glowstone, int redstone, int web, int bottleEXP, int broomWWinEffect,
+	                  int enderDragonEffect, int santaEffect, int fireParticlesEffect, int fishRainEffect, int challenge100,
+	                  int challenge101, int challenge102, int challenge103, int matchMvps, int fly, int totalcaught, int caught,
+	                  int rewardLevel, int lureLevel, int lure, int friendshipLevel, int friendship, int bestWinstreak,
+	                  int december15, int december16, int december17, int december18, int december19, int december20,
+	                  int december21, int december22, int december23, int december24, int december25, int snowParticles,
+	                  int snowballDeathEffect, int elfCosmetic, int snowmanPet, int candycaneParticles, int snowball,
+	                  int floodEffect, int treasureEffect, int treasureOpened, String color, String fishingWarps,
+	                  String treasureLoc, int pumpkinPie, int ritualEffect, int rudolphOutfit, int merryTitle, int hohohoTitle) {
 		this(playerUUID, playerName, playerIP);
 		this.roleID = roleID;
 		this.tokens = tokens;
