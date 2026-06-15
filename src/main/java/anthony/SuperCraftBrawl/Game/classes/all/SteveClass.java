@@ -22,18 +22,23 @@ import java.util.Random;
 
 public class SteveClass extends BaseClass {
 
+	private boolean kb1 = false;
+	private boolean kb2 = false;
+	private int kb = 1;
+	private int sharp = 1;
+	private int fortune = 0;
+	public int goldAmt = 0;
+	public int coalAmt = 0;
+	public int diaAmt = 0;
+	//private int blind = 0;
+
 	private ItemStack stonePick = ItemHelper.setUnbreakable(
 			ItemHelper.setDetails(new ItemStack(Material.STONE_PICKAXE),
 					instance.getGameManager().getMain().color("&rStone Pickaxe &7(Right Click)")));
 	private ItemStack gold = new ItemStack(Material.GOLD_INGOT, goldAmt);
 	private ItemStack coal = new ItemStack(Material.COAL, coalAmt);
 	private ItemStack diamond = new ItemStack(Material.DIAMOND, diaAmt);
-	private boolean kb1 = false;
-	private boolean kb2 = false;
-	private int kb = 1;
-	private int sharp = 1;
-	private int fortune = 0;
-	//private int blind = 0;
+
 
 	public SteveClass(GameInstance instance, Player player) {
 		super(instance, player);

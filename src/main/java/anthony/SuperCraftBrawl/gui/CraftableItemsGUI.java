@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.gui;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.all.SteveClass;
 import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -29,7 +30,7 @@ public class CraftableItemsGUI implements InventoryProvider {
 	@Override
 	public void init(Player player, InventoryContents contents) {
 		GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
-		BaseClass bc = instance.classes.get(player);
+		SteveClass bc = (SteveClass) instance.classes.get(player);
 		ItemStack coal = new ItemStack(Material.COAL, 4);
 		ItemStack ironIngot = new ItemStack(Material.IRON_INGOT, 4);
 		ItemStack goldIngot = new ItemStack(Material.GOLD_INGOT, 4);

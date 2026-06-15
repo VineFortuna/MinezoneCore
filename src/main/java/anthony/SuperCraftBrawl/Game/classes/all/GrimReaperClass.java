@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
@@ -21,6 +22,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class GrimReaperClass extends BaseClass {
 
 	private int cooldownSec = 0, cooldownDuration = 15000;
+
+	public Timer grimReaper = new Timer();
 
 	public GrimReaperClass(GameInstance instance, Player player) {
 		super(instance, player);

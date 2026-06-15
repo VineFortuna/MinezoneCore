@@ -31,6 +31,8 @@ public class FlintAndSteelClass extends BaseClass {
 	private boolean isUsed = false;
 	private int initialLives = 0;
 
+	public boolean flintUsed = false;
+
 	public FlintAndSteelClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.0;

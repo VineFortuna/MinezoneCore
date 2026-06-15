@@ -5,6 +5,7 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
@@ -29,6 +30,8 @@ public class SummonerClass extends BaseClass {
 	private ItemStack summonMobItem;
 	private BukkitRunnable egg;
 	private int count = 0;
+
+	public Timer summon = new Timer();
 	
 	public SummonerClass(GameInstance instance, Player player) {
 		super(instance, player);

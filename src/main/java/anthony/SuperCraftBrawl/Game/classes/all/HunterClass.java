@@ -42,6 +42,8 @@ public class HunterClass extends BaseClass {
 
 	private int bloodLust = 0;
 
+	public boolean hunterDash = true;
+
 	public HunterClass(GameInstance instance, Player player) {
 		super(instance, player);
 		baseVerticalJump = 1.1;

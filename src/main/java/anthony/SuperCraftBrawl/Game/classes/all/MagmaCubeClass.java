@@ -5,6 +5,7 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
@@ -22,6 +23,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class MagmaCubeClass extends BaseClass {
 
 	private int cooldownSec = 0;
+
+	public Timer magmaCube = new Timer();
 
 	public MagmaCubeClass(GameInstance instance, Player player) {
 		super(instance, player);

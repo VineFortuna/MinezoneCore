@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
@@ -17,6 +18,8 @@ import org.bukkit.potion.PotionEffectType;
 public class EnderdragonClass extends BaseClass {
 
 	private int cooldownSec;
+
+	public Timer pearlTimer = new Timer();
 
 	public EnderdragonClass(GameInstance instance, Player player) {
 		super(instance, player);

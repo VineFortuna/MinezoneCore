@@ -7,6 +7,7 @@ import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Location;
@@ -32,6 +33,8 @@ public class NinjaClass extends BaseClass {
 	private int starsCooldown = 0;
 	private boolean usedAllStars = false;
 	private ItemStack barrier = new ItemStack(Material.BARRIER);
+
+	public Timer ninja = new Timer();
 
 	public NinjaClass(GameInstance instance, Player player) {
 		super(instance, player);

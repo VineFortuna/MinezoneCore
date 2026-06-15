@@ -6,6 +6,7 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
@@ -37,6 +38,8 @@ public class SnowGolemClass extends BaseClass {
     private final PotionEffect strength  = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, (int) (PUMPKIN_ABILITY_DURATION * 20), 0, false, true);
     private static final double PUMPKIN_ABILITY_DURATION = 5;
     private static final double PUMPKIN_ABILITY_RANGE    = 10;
+
+    public Timer snowGolem = new Timer();
 
     public SnowGolemClass(GameInstance instance, Player player) {
         super(instance, player);

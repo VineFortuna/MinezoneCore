@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
@@ -29,6 +30,7 @@ public class OcelotClass extends BaseClass {
 	private static final double PURR_ABILITY_COOLDOWN = 15 * 1000;
 	private static final double PURR_ABILITY_RANGE = 10;
 
+	public Timer ocelot = new Timer();
 
 	public OcelotClass(GameInstance instance, Player player) {
 		super(instance, player);

@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.GameMode;
@@ -25,6 +26,10 @@ public class FadeClass extends BaseClass {
 			"" + ChatColor.RESET + "Fade Ability");
 	private int cooldownSec = 0;
 	private BukkitRunnable r;
+
+	public boolean fadeAbilityActive = false;
+
+	public Timer fadeAbility = new Timer();
 
 	public FadeClass(GameInstance instance, Player player) {
 		super(instance, player);

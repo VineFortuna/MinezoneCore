@@ -551,6 +551,12 @@ public class GameInstance {
         return true;
     }
 
+    public <T extends BaseClass> T getPlayerClassAs(Player player, Class<T> tclass) {
+        BaseClass base = classes.get(player);
+        if (tclass.isInstance(base)) { return tclass.cast(base); }
+        return null;
+    }
+
     private void setTeams() {
         for (Player gamePlayer : players) {
             if (this.duosMap != null) {

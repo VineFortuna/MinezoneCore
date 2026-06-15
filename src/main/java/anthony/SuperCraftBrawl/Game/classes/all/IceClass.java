@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
 import org.bukkit.*;
@@ -32,6 +33,8 @@ import java.util.List;
 public class IceClass extends BaseClass {
 
     private int cooldownSec;
+
+    public Timer ice = new Timer();
 
     public IceClass(GameInstance instance, Player player) {
         super(instance, player);

@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
@@ -26,6 +27,8 @@ public class TNTClass extends BaseClass {
 
     private int cooldownSec;
     private static final int TNT_COOLDOWN = 10 * 1000;
+
+    public Timer tntItem = new Timer();
 
     public TNTClass(GameInstance instance, Player player) {
         super(instance, player);

@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
 import net.md_5.bungee.api.ChatColor;
@@ -54,6 +55,8 @@ public class CloudClass extends BaseClass {
 					instance.getGameManager().getMain().color("&b&lStorm Cloud")),
 			ItemHelper.setDetails(new ItemStack(Material.WOOL, 1, DyeColor.BROWN.getData()),
 					instance.getGameManager().getMain().color("&b&lStorm Cloud"))));
+
+	public Timer cloud = new Timer();
 
 	public CloudClass(GameInstance instance, Player player) {
 		super(instance, player);

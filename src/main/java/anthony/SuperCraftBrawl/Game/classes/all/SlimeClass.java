@@ -5,6 +5,7 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
@@ -20,6 +21,8 @@ import org.bukkit.inventory.ItemStack;
 public class SlimeClass extends BaseClass {
 
 	private int cooldownSec;
+
+	public Timer slimeBall = new Timer();
 
 	public SlimeClass(GameInstance instance, Player player) {
 		super(instance, player);

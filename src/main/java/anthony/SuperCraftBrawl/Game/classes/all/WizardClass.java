@@ -5,6 +5,7 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
@@ -32,6 +33,8 @@ public class WizardClass extends BaseClass {
     private boolean speedyjumpy = false;
     private boolean blindness = false;
     private ItemStack weapon;
+
+    public Timer wizard = new Timer();
 
     public WizardClass(GameInstance instance, Player player) {
         super(instance, player);

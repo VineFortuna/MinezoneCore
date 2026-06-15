@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Effect;
@@ -31,6 +32,9 @@ public class WolfClass extends BaseClass {
 	private List<Wolf> wolves = new ArrayList<>();
 	private List<Player> hitPlayers = new ArrayList<>();
 	private int biteCooldownSec, callCooldownSec;
+	public boolean wolfPackAdd = false;
+
+	public Timer wolfBite = new Timer();
 
 	public WolfClass(GameInstance instance, Player player) {
 		super(instance, player);

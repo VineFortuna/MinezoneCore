@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
@@ -28,6 +29,8 @@ public class BeeClass extends BaseClass {
 	private BukkitRunnable weak;
 	private int cooldownSec;
 	private int cooldownDuration = 20000;
+
+	public Timer bee = new Timer();
 
 	public BeeClass(GameInstance instance, Player player) {
 		super(instance, player);

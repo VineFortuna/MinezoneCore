@@ -5,6 +5,7 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 
@@ -31,6 +32,8 @@ public class FreddyClass extends BaseClass {
 
 	private boolean isUsed = false;
 	private int cooldownSec;
+
+	public Timer freddyCooldown = new Timer();
 
 	public FreddyClass(GameInstance instance, Player player) {
 		super(instance, player);

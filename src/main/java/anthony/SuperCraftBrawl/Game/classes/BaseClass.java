@@ -44,7 +44,6 @@ public abstract class BaseClass {
 	protected final Player player;
 	public int lives = 5;
 	public boolean isDead = false;
-	public boolean fadeAbilityActive = false;
 	public int tokens = 0;
 	public Score score;
 	public int totalTokens = 0;
@@ -54,41 +53,8 @@ public abstract class BaseClass {
 	public int eachLifeKills = 0;
 	public int totalExp = 0;
 	public double baseVerticalJump = 1.0;
-	public boolean flintUsed = false;
-	public Timer pearlTimer = new Timer();
-	public Timer tnt = new Timer();
-	public Timer slimeBall = new Timer();
-	public Timer tntItem = new Timer();
-	public Timer ice = new Timer();
-	public Timer golem = new Timer();
-	public Timer herobrine = new Timer();
-	public Timer bazooka = new Timer();
-	public Timer ninja = new Timer();
-	public Timer bee = new Timer();
-	public Timer aggressiveGift = new Timer();
-	public Timer defensiveGift = new Timer();
-	public Timer mythicalGift = new Timer();
-	public Timer wizard = new Timer();
-	public Timer magmaCube = new Timer();
-	public Timer ocelot = new Timer();
-	public Timer cloud = new Timer();
-	public Timer snowGolem = new Timer();
-	public Timer santa = new Timer();
-	public Timer cookie = new Timer();
-	public Timer vindication = new Timer();
-	public Timer fadeAbility = new Timer();
-	public Timer summon = new Timer();
-	public Timer grimReaper = new Timer();
-	public Timer alexBrewingStand = new Timer();
-	public Timer wolfBite = new Timer();
-	public Timer freddyCooldown = new Timer();
-	public boolean bedrockInvincibility = false;
-	public boolean hunterDash = true;
-	public boolean wolfPackAdd = false;
 
-	public int goldAmt = 0; // For Steve Class
-	public int coalAmt = 0; // For Steve Class
-	public int diaAmt = 0; // For Steve Class
+	public Timer bazooka = new Timer();
 
 	// Armor fields
 	protected ItemStack playerHead;

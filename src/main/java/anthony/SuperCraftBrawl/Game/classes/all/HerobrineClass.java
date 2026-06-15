@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import anthony.SuperCraftBrawl.Game.classes.Ability;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ChatColorHelper;
 import org.bukkit.Effect;
 import org.bukkit.EntityEffect;
@@ -58,6 +59,8 @@ public class HerobrineClass extends BaseClass {
             {-2, 1},                  {2, 1},
             {-1, 2}, {0, 2}, {1, 2}
     };
+
+    public Timer herobrine = new Timer();
 
     public HerobrineClass(GameInstance instance, Player player) {
         super(instance, player);

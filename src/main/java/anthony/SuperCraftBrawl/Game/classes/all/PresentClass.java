@@ -5,6 +5,7 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import org.apache.commons.lang.WordUtils;
@@ -22,6 +23,10 @@ import org.bukkit.potion.PotionEffect;
 import java.util.Random;
 
 public class PresentClass extends BaseClass {
+
+	public Timer aggressiveGift = new Timer();
+	public Timer defensiveGift = new Timer();
+	public Timer mythicalGift = new Timer();
 
 	public PresentClass(GameInstance instance, Player player) {
 		super(instance, player);

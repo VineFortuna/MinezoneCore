@@ -37,6 +37,8 @@ public class BedrockClass extends BaseClass {
 	private static final double INVINCIBILITY_COOLDOWN = 10;
 	private static final double LAVA_ABILITY_RANGE = 10;
 
+	public boolean bedrockInvincibility = false;
+
 	private ItemStack[] originalArmor;
 
 	private BukkitRunnable lava;
