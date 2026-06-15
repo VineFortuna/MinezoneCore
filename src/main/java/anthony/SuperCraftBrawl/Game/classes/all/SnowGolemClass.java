@@ -121,14 +121,6 @@ public class SnowGolemClass extends BaseClass {
         }
     }
 
-    // Cancel the vanilla Snowball entity so our ItemProjectile fires instead
-    @Override
-    public void ProjectileLaunch(ProjectileLaunchEvent event) {
-        if (event.getEntity() instanceof org.bukkit.entity.Snowball) {
-            event.setCancelled(true);
-        }
-    }
-
     @Override
     public void UseItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
@@ -239,60 +231,6 @@ public class SnowGolemClass extends BaseClass {
                     runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 2);
                 }
             }
-        }
-
-        // SLOWBALL ABILITY
-        if (item.getType() == Material.SNOW_BALL
-                && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-            event.setCancelled(true);
-            if (player.getGameMode() == GameMode.SPECTATOR) return;
-
-            // Consume one snowball
-            int amount = item.getAmount() - 1;
-            if (amount <= 0) {
-                player.getInventory().clear(player.getInventory().getHeldItemSlot());
-            } else {
-                item.setAmount(amount);
-            }
-
-            ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
-                @Override
-                public void onHit(Player hit) {
-                    if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
-                        Location hitLoc = this.getBaseProj().getEntity().getLocation();
-
-                        // Impact effect visible to all
-                        for (Player gamePlayer : instance.players) {
-                            gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_LARGE, 1);
-                        }
-
-                        // Affect all players within 2.0 blocks of impact
-                        for (Player gamePlayer : this.getNearby(2.0)) {
-                            if (gamePlayer == player) continue;
-                            if (checkIfDead(gamePlayer, instance) || instance.HasSpectator(gamePlayer)) continue;
-
-                            gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 70, 1));
-
-                            EntityDamageEvent damageEvent = new EntityDamageEvent(
-                                    gamePlayer,
-                                    EntityDamageEvent.DamageCause.PROJECTILE,
-                                    2.0
-                            );
-
-                            instance.getGameManager().getMain().getServer().getPluginManager()
-                                    .callEvent(damageEvent);
-
-                            gamePlayer.damage(2.0, player);
-                        }
-                    }
-                }
-            }, new ItemStack(Material.SNOW_BALL));
-
-            instance.getGameManager().getProjManager().shootProjectile(
-                    proj,
-                    player.getEyeLocation(),
-                    player.getLocation().getDirection().multiply(2.5D)
-            );
         }
 
         // PUMPKIN HEAD ABILITY
