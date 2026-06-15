@@ -1834,47 +1834,50 @@ public abstract class BaseClass {
 			spectator.sendMessage(msg);
 	}
 
-	/**
-	 * Create the armor and custom head of the class. Includes Custom Head Texture,
-	 * Armor Color and Protection Level. To call in the subclass constructor.
-	 *
-	 */
-	protected void createArmor(Material blockMaterial, String textureUrl, String hexCodeChestplate,
-			String hexCodeLeggings, String hexCodeBoots, int protectionLevel, String className) {
-		// Head (helmet)
-		if (blockMaterial != null) {
-			playerHead = new ItemStack(blockMaterial);
-		} else if (textureUrl != null) {
-			playerHead = ItemHelper.createSkullTexture(textureUrl);
-		}
-		playerHead = ItemHelper.setDetails(getHelmet(playerHead), "&r&f" + className + " Head");
-		if (protectionLevel > 0)
-			playerHead.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protectionLevel);
 
-		// Chestplate
-		if (hexCodeChestplate != null) {
-			chestplate = ItemHelper.setDetails(
-					ItemHelper.createColoredArmor(Material.LEATHER_CHESTPLATE, hexCodeChestplate),
-					"&r" + className + " Chestplate");
-		} else {
-			chestplate = ItemHelper.create(Material.AIR);
-		}
+	private ItemStack colorArmor(Material material, String color, String lore) {
+		if (color == null) return ItemHelper.create(Material.AIR);
+		return ItemHelper.setDetails(ItemHelper.createColoredArmor(material, color), lore);
+	}
 
-		// Leggings
-		if (hexCodeLeggings != null) {
-			leggings = ItemHelper.setDetails(ItemHelper.createColoredArmor(Material.LEATHER_LEGGINGS, hexCodeLeggings),
-					"&r" + className + " Leggings");
-		} else {
-			leggings = ItemHelper.create(Material.AIR);
-		}
+	protected void createArmor(
+			Material blockMaterial,
+			int protectionLevel,
+			String colorChestplate,
+			String colorLeggings,
+			String colorBoots
+	) {
+		ItemStack head           = ItemHelper.setDetails(new ItemStack(blockMaterial),     "&r&f" + this.getType().name() + " Head"      );
+		ItemStack chestplateItem = colorArmor(Material.LEATHER_CHESTPLATE, colorChestplate, "&r"   + this.getType().name() + " Chestplate");
+		ItemStack leggingsItem   = colorArmor(Material.LEATHER_LEGGINGS,   colorLeggings,   "&r"   + this.getType().name() + " Leggings"  );
+		ItemStack bootsItem      = colorArmor(Material.LEATHER_BOOTS,      colorBoots,      "&r"   + this.getType().name() + " Boots"     );
 
-		// Boots
-		if (hexCodeBoots != null) {
-			boots = ItemHelper.setDetails(ItemHelper.createColoredArmor(Material.LEATHER_BOOTS, hexCodeBoots),
-					"&r" + className + " Boots");
-		} else {
-			boots = ItemHelper.create(Material.AIR);
-		}
+		playerHead = (blockMaterial   != null) ? head           : ItemHelper.create(Material.AIR);
+		chestplate = (colorChestplate != null) ? chestplateItem : ItemHelper.create(Material.AIR);
+		leggings   = (colorLeggings   != null) ? leggingsItem   : ItemHelper.create(Material.AIR);
+		boots      = (colorBoots      != null) ? bootsItem      : ItemHelper.create(Material.AIR);
+
+		if (protectionLevel > 0) playerHead.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protectionLevel);
+	}
+
+	protected void createArmor(
+			String headTextureUrl,
+			int protectionLevel,
+			String colorChestplate,
+			String colorLeggings,
+			String colorBoots
+	) {
+		ItemStack head           = ItemHelper.setDetails(ItemHelper.createSkullTexture(headTextureUrl), "&r&f" + this.getType().name() + " Head"      );
+		ItemStack chestplateItem = colorArmor(Material.LEATHER_CHESTPLATE, colorChestplate,              "&r"   + this.getType().name() + " Chestplate");
+		ItemStack leggingsItem   = colorArmor(Material.LEATHER_LEGGINGS,   colorLeggings,                "&r"   + this.getType().name() + " Leggings"  );
+		ItemStack bootsItem      = colorArmor(Material.LEATHER_BOOTS,      colorBoots,                   "&r"   + this.getType().name() + " Boots"     );
+
+		playerHead = (headTextureUrl  != null) ? head           : ItemHelper.create(Material.AIR);
+		chestplate = (colorChestplate != null) ? chestplateItem : ItemHelper.create(Material.AIR);
+		leggings   = (colorLeggings   != null) ? leggingsItem   : ItemHelper.create(Material.AIR);
+		boots      = (colorBoots      != null) ? bootsItem      : ItemHelper.create(Material.AIR);
+
+		if (protectionLevel > 0) playerHead.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protectionLevel);
 	}
 
 	public void resetHead() {
