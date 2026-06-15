@@ -59,6 +59,13 @@ public class SheepClass extends BaseClass {
 				ChatColor.BLUE + "Wool Enchanter", ChatColor.YELLOW + "Right click!");
 	}
 
+	private ItemStack getBarrier() {
+		ItemStack barrier = ItemHelper.setDetails(new ItemStack(Material.BARRIER),
+				instance.color("&c&lOut of Enchants!"),
+				instance.color("&7Get a kill to get another Wool Enchanter"));
+		return barrier;
+	}
+
 	private ChatColor getTeamColor() {
 		ChatColor c = ChatColor.RESET;
 
@@ -255,7 +262,7 @@ public class SheepClass extends BaseClass {
 		player.getInventory().setChestplate(chestplate);
 		player.getInventory().setLeggings(leggings);
 	}
-	
+
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
@@ -265,7 +272,7 @@ public class SheepClass extends BaseClass {
 			if (amount > 0) {
 				amount--;
 				if (amount == 0)
-					player.getInventory().clear(player.getInventory().getHeldItemSlot());
+					player.getInventory().setItem(1, getBarrier());
 				else
 					item.setAmount(amount);
 				event.setCancelled(true);
