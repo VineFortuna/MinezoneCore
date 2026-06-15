@@ -29,13 +29,15 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.*;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import xyz.xenondevs.particle.ParticleEffect;
+import xyz.xenondevs.particle.data.texture.BlockTexture;
 
 public class EndermanClass extends BaseClass {
 
     private final ItemStack weapon;
     private final ItemStack teleportItem;
     private final ItemStack blockItem;
-    private final Ability teleportAbility = new Ability("&5&lTeleport", 10, player);
+    private final Ability teleportAbility = new Ability("&5&lTeleporter", 10, player);
     private final Ability blockAbility = new Ability("&5&lBlock", 7, player);
     private final Ability blockThrowAbility = new Ability("&5&lBlock Throw", player);
 
@@ -61,7 +63,7 @@ public class EndermanClass extends BaseClass {
         weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
 
         teleportItem = ItemHelper.setDetails(
-                new ItemStack(Material.ENDER_PEARL, 10),
+                new ItemStack(Material.ENDER_PEARL, 3),
                 teleportAbility.getAbilityNameRightClickMessage()
         );
 
@@ -73,6 +75,13 @@ public class EndermanClass extends BaseClass {
                 "",
                 blockAbility.getOnGroundItemMessage()
         );
+    }
+
+    private ItemStack getBarrier() {
+        ItemStack barrier = ItemHelper.setDetails(new ItemStack(Material.BARRIER),
+                instance.color("&c&lOut of Pearls!"),
+                instance.color("&7Get a kill to gain a pearl"));
+        return barrier;
     }
 
     @Override
@@ -95,8 +104,18 @@ public class EndermanClass extends BaseClass {
         abilityActionBar.setActionBarAbility(player, teleportAbility, blockAbility);
 
         Inventory inventory = player.getInventory();
-        if (inventory.contains(weapon)) return;
-        player.getInventory().setItem(0, weapon);
+
+        // Make sure weapon stays in slot 0, but do NOT return early.
+        if (!inventory.contains(weapon)) {
+            player.getInventory().setItem(0, weapon);
+        }
+
+        // If pearl slot is empty or no longer has pearls, show barrier.
+        ItemStack slot2 = player.getInventory().getItem(2);
+
+        if (slot2 == null || slot2.getType() != Material.ENDER_PEARL) {
+            player.getInventory().setItem(2, getBarrier());
+        }
     }
 
     @SuppressWarnings("deprecation")
@@ -108,10 +127,18 @@ public class EndermanClass extends BaseClass {
         if (item == null) return;
         if (player.getGameMode() == GameMode.SPECTATOR) return;
 
-        if (item.isSimilar(weapon)) event.setCancelled(true);
+        if (item.isSimilar(weapon)) {
+            event.setCancelled(true);
+            return;
+        }
 
+        // Pick up block with stick - RIGHT CLICK ONLY
         if (item.equals(blockItem)) {
-            if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
+            if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) {
+                return;
+            }
+
+            event.setCancelled(true);
 
             if (used) {
                 blockAbility.sendCustomMessage("&c&l(!) &rYou already have a block in your inventory!");
@@ -124,21 +151,33 @@ public class EndermanClass extends BaseClass {
             }
 
             if (!blockAbility.isReady()) return;
+
             getBlockAbility();
+            return;
         }
 
+        // Teleport - RIGHT CLICK ONLY
         if (item.isSimilar(teleportItem)) {
-            if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
+            if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) {
+                return;
+            }
 
             if (!teleportAbility.isReady()) {
-                event.setCancelled(true);
                 return;
             }
 
             teleportAbility.use();
+            return;
         }
 
-        if (item.hasItemMeta() && item.isSimilar(newItem)) {
+        // Throw picked-up block - LEFT CLICK ONLY
+        if (newItem != null && item.hasItemMeta() && item.isSimilar(newItem)) {
+            event.setCancelled(true);
+
+            if (action != Action.LEFT_CLICK_BLOCK && action != Action.LEFT_CLICK_AIR) {
+                return;
+            }
+
             throwBlockAbility();
         }
     }
@@ -223,7 +262,7 @@ public class EndermanClass extends BaseClass {
 
 
         ItemHelper.setDetails(newItem, instance.getGameManager().getMain().color("&e&lBlock"));
-        ItemHelper.setDetails(newItem, blockThrowAbility.getAbilityNameLeftRightClickMessage());
+        ItemHelper.setDetails(newItem, blockThrowAbility.getAbilityNameLeftClickMessage());
 
         player.getInventory().setItem(1, newItem);
         player.playSound(player.getLocation(), Sound.ITEM_PICKUP, 1, 1);
@@ -243,19 +282,21 @@ public class EndermanClass extends BaseClass {
 
         Location spawnLocation = player.getLocation().add(0, 1.25D, 0).add(direction.clone().multiply(1.2D));
 
-        byte data = 0;
-        if (thrownBlockItem.getData() != null) {
-            data = thrownBlockItem.getData().getData();
-        }
+        final byte blockData = thrownBlockItem.getData() != null
+                ? thrownBlockItem.getData().getData()
+                : 0;
 
         final FallingBlock fallingBlock = player.getWorld().spawnFallingBlock(
                 spawnLocation,
                 thrownBlockItem.getType(),
-                data
+                blockData
         );
 
         fallingBlock.setDropItem(false);
         fallingBlock.setVelocity(direction.clone().multiply(2.0D).setY(direction.getY() + 0.15D));
+
+        // Sound when the block is thrown
+        SoundManager.playSoundToAll(player, spawnLocation, Sound.CHICKEN_EGG_POP, 1.0f, 0.75f);
 
         used = false;
         newItem = null;
@@ -266,6 +307,18 @@ public class EndermanClass extends BaseClass {
                 if (!event.getEntity().equals(fallingBlock)) return;
 
                 event.setCancelled(true);
+
+                spawnBlockCollisionParticles(
+                        event.getEntity().getLocation(),
+                        thrownBlockItem.getType(),
+                        blockData
+                );
+
+                playBlockCollisionSound(
+                        event.getEntity().getLocation(),
+                        thrownBlockItem.getType()
+                );
+
                 event.getEntity().remove();
 
                 if (event.getBlock().getType() == thrownBlockItem.getType()) {
@@ -317,8 +370,6 @@ public class EndermanClass extends BaseClass {
                         }
                     }
 
-                    player.playSound(hitPlayer.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
-
                     Location location = hitPlayer.getLocation();
 
                     EntityDamageEvent damageEvent = new EntityDamageEvent(hitPlayer, DamageCause.PROJECTILE, 4.5);
@@ -331,7 +382,16 @@ public class EndermanClass extends BaseClass {
                         knockback.setY(1.0D);
                         hitPlayer.setVelocity(knockback);
 
-                        SoundManager.playSoundToAll(player, location, Sound.CHICKEN_EGG_POP, 1, 1);
+                        spawnBlockCollisionParticles(
+                                hitPlayer.getLocation(),
+                                thrownBlockItem.getType(),
+                                blockData
+                        );
+
+                        playBlockCollisionSound(
+                                hitPlayer.getLocation(),
+                                thrownBlockItem.getType()
+                        );
                     }
 
                     fallingBlock.remove();
@@ -342,6 +402,60 @@ public class EndermanClass extends BaseClass {
             }
         }.runTaskTimer(instance.getGameManager().getMain(), 1L, 1L);
     }
+
+    private void spawnBlockCollisionParticles(Location location, Material material, byte data) {
+        if (location == null || location.getWorld() == null || material == null) return;
+
+        ParticleEffect.BLOCK_CRACK.display(
+                location.clone().add(0, 0.5, 0),
+                0.35f,
+                0.35f,
+                0.35f,
+                0.08f,
+                18,
+                new BlockTexture(material, data)
+        );
+    }
+    private void playBlockCollisionSound(Location location, Material material) {
+        if (location == null || location.getWorld() == null || material == null) return;
+
+        Sound sound = getBlockCollisionSound(material);
+
+        SoundManager.playSoundToAll(player, location, sound, 1.0f, 1.0f);
+    }
+
+    private Sound getBlockCollisionSound(Material material) {
+        String name = material.name();
+
+        if (name.contains("GLASS") || name.contains("THIN_GLASS")) {
+            return Sound.GLASS;
+        }
+
+        if (name.contains("WOOD") || name.contains("LOG") || name.contains("PLANK")
+                || name.contains("FENCE") || name.contains("CHEST")) {
+            return Sound.DIG_WOOD;
+        }
+
+        if (name.contains("WOOL") || name.contains("CARPET")) {
+            return Sound.DIG_WOOL;
+        }
+
+        if (name.contains("SAND") || name.contains("GRAVEL")) {
+            return name.contains("SAND") ? Sound.DIG_SAND : Sound.DIG_GRAVEL;
+        }
+
+        if (name.contains("SNOW") || name.contains("ICE")) {
+            return Sound.DIG_SNOW;
+        }
+
+        if (name.contains("GRASS") || name.contains("DIRT") || name.contains("SOIL")
+                || name.contains("LEAVES")) {
+            return Sound.DIG_GRASS;
+        }
+
+        return Sound.DIG_STONE;
+    }
+
 
     @Override
     public ClassType getType() {
