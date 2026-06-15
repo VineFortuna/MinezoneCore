@@ -657,7 +657,7 @@ public class GameInstance {
             public void run() {
                 if (gameTicks % (60 * 20) == 0) {
                     time.getScoreboard().resetScores(time.getEntry());
-                    time = o.getScore(color("&fGame Time: &a" + gameTime + "m"));
+                    time = o.getScore(color("&fTime: &a" + gameTime + "m"));
                     time.setScore(0);
                     gameTime++;
                 }
@@ -834,9 +834,9 @@ public class GameInstance {
                 }
                 Score line = o.getScore("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "--------------------");
                 line.setScore(0);
-                Score game = o.getScore(color("&fGame Mode: &a" + this.gameType.getName()));
+                Score game = o.getScore(color("&fMode: &a" + this.gameType.getName()));
                 game.setScore(0);
-                time = o.getScore(color("&fGame Time: &a" + gameTime + "m"));
+                time = o.getScore(color("&fTime: &a" + gameTime + "m"));
                 time.setScore(0);
                 player.setScoreboard(c);
             }
@@ -1272,33 +1272,6 @@ public class GameInstance {
                     data3.playerClasses.put(classID, details);
                 }
                 details.winGame();
-                if (data3.challenge1 == 0) {
-                    if (bc != null) {
-                        if (bc.getType() == ClassType.Pig) {
-                            winner.sendMessage(getGameManager().getMain()
-                                    .color("&9&l(!) &rYou got a win with " + bc.getType().getTag()
-                                            + " &rand have now unlocked the " + ClassType.Notch.getTag()
-                                            + " &rclass!"));
-                            data3.challenge1 = 1;
-                            classID = 29;
-                            ClassDetails notchdetails = data3.playerClasses.get(classID);
-
-                            if (notchdetails == null) {
-                                notchdetails = new ClassDetails();
-                                data3.playerClasses.put(classID, notchdetails);
-                            }
-                            notchdetails.setPurchased();
-                        }
-                    }
-                }
-                if (data3.challenge2 == 0) {
-                    winner.sendMessage(getGameManager().getMain()
-                            .color("&9&l(!) &rYou got a win and you are now rewarded with &e50 Bonus Tokens"));
-                    data3.challenge2 = 1;
-
-                    if (bc != null)
-                        bc.totalTokens += 50;
-                }
             }
 
             Random r = new Random();
@@ -1437,16 +1410,7 @@ public class GameInstance {
                 } catch (Throwable ignored) {
                 }
 
-                if (data.exp >= 2500) {
-                    data.level++;
-                    data.exp -= 2500;
-                    winner.sendMessage(getGameManager().getMain().color("&8&m----------------------------------------"));
-                    winner.sendMessage(getGameManager().getMain().color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
-                    winner.sendMessage(getGameManager().getMain()
-                            .color("&7You are now &e&lLevel &6&l" + data.level + " &7- nice work!"));
-                    winner.sendMessage(getGameManager().getMain().color("&8&m----------------------------------------"));
-                    winner.playSound(winner.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
-                }
+                getGameManager().getMain().getLevelManager().checkLevelUp(winner);
             }
         }
         for (Player player : players) {
@@ -1542,7 +1506,7 @@ public class GameInstance {
                         color("&2&l(!) &e" + winner.getName() + " &rgot a Victory Royale on &e&l" + map.toString()));
             } else if (chance == 1) {
                 Bukkit.broadcastMessage(color("&2&l(!) &e" + winner.getName()
-                        + " &rjust showed the entire lobby who's boss on &b&l" + map.toString()));
+                        + " &rjust showed the entire lobby who's boss on &e&l" + map.toString()));
             } else if (chance == 2) {
                 Bukkit.broadcastMessage(
                         color("&2&l(!) &e" + winner.getName() + " &rjust won on &e&l" + map.toString()));

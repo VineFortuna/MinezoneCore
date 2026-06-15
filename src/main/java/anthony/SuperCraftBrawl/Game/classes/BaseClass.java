@@ -964,17 +964,7 @@ public abstract class BaseClass {
                         p.sendMessage(instance.color("&2&l(!) &rYou earned &a" + baseClassDead.totalTokens +
                                 " &rTokens and &a" + baseClassDead.totalExp + " &rEXP!"));
 
-                        if (data3.exp >= 2500) {
-                            data3.level++;
-                            data3.exp -= 2500;
-                            p.sendMessage(
-                                    instance.getGameManager().getMain().color("&8&m----------------------------------------"));
-                            p.sendMessage(instance.getGameManager().getMain().color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
-                            p.sendMessage(instance.getGameManager().getMain()
-                                    .color("&7You are now &e&lLevel &6&l" + data3.level + " &7- nice work!"));
-                            p.sendMessage(
-                                    instance.getGameManager().getMain().color("&8&m----------------------------------------"));
-                        }
+						instance.getGameManager().getMain().getLevelManager().checkLevelUp(p);
                     } else {
                         List<String> aliveTeam = new ArrayList<String>();
                         for (Entry<Player, BaseClass> entry : instance.classes.entrySet()) {
