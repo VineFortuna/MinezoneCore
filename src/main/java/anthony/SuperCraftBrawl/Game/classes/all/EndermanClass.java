@@ -33,6 +33,10 @@ import org.bukkit.util.Vector;
 import xyz.xenondevs.particle.ParticleEffect;
 import xyz.xenondevs.particle.data.texture.BlockTexture;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 public class EndermanClass extends BaseClass {
 
     private final ItemStack weapon;
@@ -186,6 +190,26 @@ public class EndermanClass extends BaseClass {
     }
 
     private void getBlockAbility() {
+        // Leaves need their own special case as their data comprises more than just the blocks' sub-id.
+        // The metadata has the two least significant bits relating to the sub-id, and the other two are
+        // related to decay properties, which don't matter in this case here, so they are masked out with
+        // 0b0011, or 3. This can not be done with other blocks, such as wool, as they use all 4 bits for
+        // sub-ids. It's split into LEAVES and LEAVES_2 because they needed more leaves, but the 2 bits
+        // they had only let them have 4 tree species, so they made another block type for the other 2.
+        //
+        // The exact same applies for logs, but the uses of the other bits is different. I believe its
+        // only block rotation?
+        final Set<Material> maskedSubidBlocks = new HashSet<>(Arrays.asList(
+            Material.LEAVES, Material.LEAVES_2, Material.LOG, Material.LOG_2
+        ));
+
+        final Set<Material> subidBlocks = new HashSet<>(Arrays.asList(
+            Material.STONE, Material.DIRT, Material.WOOD, Material.SAND, Material.SPONGE, Material.SANDSTONE,
+            Material.WOOL, Material.STEP, Material.STAINED_GLASS, Material.STAINED_GLASS_PANE, Material.MONSTER_EGG,
+            Material.SMOOTH_BRICK, Material.WOOD_STEP, Material.COBBLE_WALL, Material.QUARTZ_BLOCK,
+            Material.PRISMARINE, Material.RED_SANDSTONE
+        ));
+
         Location playerLocation = player.getLocation();
         World playerWorld = player.getWorld();
 
@@ -197,71 +221,42 @@ public class EndermanClass extends BaseClass {
 
         Block blockInside = playerWorld.getBlockAt(playerLocation);
 
-        // Leaves need their own special case as their data comprises more than just the blocks' sub-id.
-        // The metadata has the two least significant bits relating to the sub-id, and the other two are
-        // related to decay properties, which don't matter in this case here, so they are masked out with
-        // 0b0011, or 3. This can not be done with other blocks, such as wool, as they use all 4 bits for
-        // sub-ids. It's split into LEAVES and LEAVES_2 because they needed more leaves, but the 2 bits
-        // they had only let them have 4 tree species, so they made another block type for the other 2.
-        //
-        // The exact same applies for logs, but the uses of the other bits is different. I believe its
-        // only block rotation?
-        if (blockInside.getType().isSolid() && playerLocation.getY() % 1 != 0) {
-            if (block.getType() == Material.LEAVES || block.getType() == Material.LEAVES_2 ||
-                block.getType() == Material.LOG    || block.getType() == Material.LOG_2) {
-                newItem = new ItemStack(block.getType(), 1, (short) 0, (byte) (block.getData() & 3));
-            } else {
-                newItem = new ItemStack(block.getType(), 1, (short) 0, block.getData());
-            }
-        } else if (block.getType().isSolid()) {
-            if (block.getType() == Material.LEAVES || block.getType() == Material.LEAVES_2 ||
-                block.getType() == Material.LOG    || block.getType() == Material.LOG_2) {
-                newItem = new ItemStack(block.getType(), 1, (short) 0, (byte) (block.getData() & 3));
-            } else if (block.getType() == Material.PISTON_EXTENSION    || block.getType() == Material.PUMPKIN             ||
-                       block.getType() == Material.JACK_O_LANTERN      || block.getType() == Material.PISTON_BASE         ||
-                       block.getType() == Material.PISTON_STICKY_BASE  || block.getType() == Material.BRICK_STAIRS        ||
-                       block.getType() == Material.SMOOTH_STAIRS       || block.getType() == Material.NETHER_BRICK_STAIRS ||
-                       block.getType() == Material.COBBLESTONE_STAIRS  || block.getType() == Material.WOOD_STAIRS         ||
-                       block.getType() == Material.SANDSTONE_STAIRS    || block.getType() == Material.SPRUCE_WOOD_STAIRS  ||
-                       block.getType() == Material.BIRCH_WOOD_STAIRS   || block.getType() == Material.JUNGLE_WOOD_STAIRS  ||
-                       block.getType() == Material.QUARTZ_STAIRS       || block.getType() == Material.ACACIA_STAIRS       ||
-                       block.getType() == Material.DARK_OAK_STAIRS     || block.getType() == Material.RED_SANDSTONE_STAIRS) {
-                // Yes, I seriously hate this, but it does work. Its temporary until I can think of a better solution.
-                newItem = new ItemStack(block.getType(), 1, (short) 0, (byte) 0);
-            } else {
-                newItem = new ItemStack(block.getType(), 1, (short) 0, block.getData());
-            }
-        } else {
+        boolean isInsideBlock = blockInside.getType().isSolid() && playerLocation.getY() % 1 != 0;
+
+        if (!isInsideBlock && !block.getType().isSolid()) {
             player.sendMessage(instance.color("&c&l(!) &rThere is no block under you. Please try again"));
             return;
         }
 
+        Material blockMaterial = isInsideBlock ? blockInside.getType() : block.getType();
+
+        if (maskedSubidBlocks.contains(blockMaterial))
+            newItem = new ItemStack(blockMaterial, 1, (short) 0, (byte) (block.getData() & 3));
+        else if (subidBlocks.contains(blockMaterial))
+            newItem = new ItemStack(blockMaterial, 1, (short) 0, (byte) block.getData());
+        else
+            newItem = new ItemStack(blockMaterial, 1, (short) 0, (byte) 0);
 
         // Needs to be done first, otherwise you would get a bunch of null errors from the comparisons.
-        if (block.getType() == Material.PISTON_EXTENSION) {
-            boolean isSticky = (block.getData() & 8) == 1;
-            newItem = new ItemStack(isSticky ? Material.PISTON_BASE : Material.PISTON_STICKY_BASE, 1);
-        }
+        if (blockMaterial == Material.PISTON_EXTENSION)
+            newItem = new ItemStack(((block.getData() & 8) == 1) ? Material.PISTON_BASE : Material.PISTON_STICKY_BASE, 1);
 
-        if (newItem.getType() == Material.DOUBLE_STEP || newItem.getType() == Material.DOUBLE_STONE_SLAB2 || newItem.getType() == Material.WOOD_DOUBLE_STEP) {
+        if (newItem.getType() == Material.DOUBLE_STEP || newItem.getType() == Material.DOUBLE_STONE_SLAB2 || newItem.getType() == Material.WOOD_DOUBLE_STEP)
             newItem.setType(Material.valueOf(newItem.getType().name().replace("DOUBLE_", "")));
-        } else if (newItem.getData() instanceof Stairs) {
-            newItem.setType(block.getType());
-        } else if (newItem.getData() instanceof Door) {
+        else if (newItem.getData() instanceof Stairs)
+            newItem.setType(blockMaterial);
+        else if (newItem.getData() instanceof Door)
             newItem.setType(Material.WOOD_DOOR);
-        } else if (newItem.getData() instanceof Skull) {
+        else if (newItem.getData() instanceof Skull)
             newItem.setType(Material.SKULL_ITEM);
-        } else if (newItem.getType() == Material.SOIL) {
+        else if (newItem.getType() == Material.SOIL)
             newItem.setType(Material.DIRT);
-        } else if (newItem.getType() == Material.BED_BLOCK) {
+        else if (newItem.getType() == Material.BED_BLOCK)
             newItem.setType(Material.BED);
-        } else if (newItem.getData() instanceof Banner) {
-            newItem.setType(Material.BANNER);
-        } else if (newItem.getType() == Material.BREWING_STAND) {
+        else if (blockMaterial == Material.BREWING_STAND)
             newItem.setType(Material.BREWING_STAND_ITEM);
-        } else if (newItem.getType() == Material.CAULDRON) {
+        else if (newItem.getType() == Material.CAULDRON)
             newItem.setType(Material.CAULDRON_ITEM);
-        }
 
 
         ItemHelper.setDetails(newItem, instance.getGameManager().getMain().color("&e&lBlock"));
@@ -280,20 +275,31 @@ public class EndermanClass extends BaseClass {
         final ItemStack thrownBlockItem = new ItemStack(newItem);
         final Vector direction = player.getLocation().getDirection().normalize();
 
-        player.getInventory().remove(newItem);
-        player.getInventory().setItem(1, blockItem);
-
         Location spawnLocation = player.getLocation().add(0, 1.25D, 0).add(direction.clone().multiply(1.2D));
 
         final byte blockData = thrownBlockItem.getData() != null
                 ? thrownBlockItem.getData().getData()
                 : 0;
 
+        if (thrownBlockItem.getType() == Material.WOOD_DOOR)
+            thrownBlockItem.setType(Material.WOODEN_DOOR);
+        else if (thrownBlockItem.getType() == Material.SKULL_ITEM)
+            thrownBlockItem.setType(Material.SKULL);
+        else if (thrownBlockItem.getType() == Material.BED)
+            thrownBlockItem.setType(Material.BED_BLOCK);
+        else if (thrownBlockItem.getType() == Material.BREWING_STAND_ITEM)
+            thrownBlockItem.setType(Material.BREWING_STAND);
+        else if (thrownBlockItem.getType() == Material.CAULDRON_ITEM)
+            thrownBlockItem.setType(Material.CAULDRON);
+
         final FallingBlock fallingBlock = player.getWorld().spawnFallingBlock(
                 spawnLocation,
                 thrownBlockItem.getType(),
                 blockData
         );
+
+        player.getInventory().remove(newItem);
+        player.getInventory().setItem(1, blockItem);
 
         fallingBlock.setDropItem(false);
         fallingBlock.setVelocity(direction.clone().multiply(2.0D).setY(direction.getY() + 0.15D));
