@@ -8,6 +8,7 @@ import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -20,6 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class PigClass extends BaseClass {
 
@@ -112,19 +114,22 @@ public class PigClass extends BaseClass {
         return true;
     }
 
+
 	private void giveSpeedPork() {
-	    player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 5, 2));
+		Bukkit.getScheduler().runTask(instance.getGameManager().getMain(), () -> {
+			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 5, 2, true), true);
 
-	    // Don't override firePork if the player is currently burning
-	    if (player.getFireTicks() > 0) return;
+			// Don't override firePork if the player is currently burning
+			if (player.getFireTicks() > 0) return;
 
-	    PlayerInventory inv = player.getInventory();
-	    ItemStack current = inv.getItem(0);
+			PlayerInventory inv = player.getInventory();
+			ItemStack current = inv.getItem(0);
 
-	    if (current == null || !current.isSimilar(this.speedPork) ||
-	        current.getAmount() != this.speedPork.getAmount()) {
-	        inv.setItem(0, this.speedPork.clone());
-	    }
+			if (current == null || !current.isSimilar(this.speedPork) ||
+				current.getAmount() != this.speedPork.getAmount()) {
+				inv.setItem(0, this.speedPork.clone());
+			}
+	    });
 	}
 
 	@Override
