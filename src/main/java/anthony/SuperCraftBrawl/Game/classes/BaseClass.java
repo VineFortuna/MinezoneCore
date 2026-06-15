@@ -1817,8 +1817,8 @@ public abstract class BaseClass {
 		}
 	}
 
-	// Classes such as Sheep & Hunter that when they get a kill, they one of their
-	// abilities back
+	// Classes such as Sheep & Hunter for example that when they get a kill,
+	// they one of their abilities back
 	public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
 		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
 			// Sheep
@@ -1853,6 +1853,18 @@ public abstract class BaseClass {
 				damagerPlayer.sendMessage(instance.getGameManager().getMain()
 						.color("&2&l(!) &rYou got a kill and gained an extra &eGold Ball"));
 				damagerPlayer.getInventory().addItem(item);
+			} else if (baseClass.getType() == ClassType.Enderman) {
+				ItemStack item = ItemHelper.setDetails(
+						new ItemStack(Material.ENDER_PEARL, 1),
+						instance.color("&5&lTeleporter &7(Right Click)")
+				);
+				damagerPlayer.sendMessage(instance.getGameManager().getMain()
+						.color("&2&l(!) &rYou got a kill and gained an extra &5&lTeleporter"));
+
+				if (damagerPlayer.getInventory().getItem(2).getType() != Material.ENDER_PEARL)
+					damagerPlayer.getInventory().setItem(2, item);
+				else
+					damagerPlayer.getInventory().addItem(item);
 			} else if (baseClass.getType() == ClassType.Chicken) {
 				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.EGG, 2),
 						instance.color("&eExplosive Eggs"),
