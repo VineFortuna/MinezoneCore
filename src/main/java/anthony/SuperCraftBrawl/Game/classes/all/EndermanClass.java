@@ -203,7 +203,14 @@ public class EndermanClass extends BaseClass {
             newItem.setType(Material.BREWING_STAND_ITEM);
         } else if (newItem.getType() == Material.CAULDRON) {
             newItem.setType(Material.CAULDRON_ITEM);
+        } else if (newItem.getType() == Material.PUMPKIN) {
+            newItem = new ItemStack(Material.PUMPKIN, 1);
+        } else if (newItem.getType() == Material.JACK_O_LANTERN) {
+            newItem = new ItemStack(Material.JACK_O_LANTERN, 1);
         }
+        // Jack-o-lanterns and pumpkins have a tendency to not work if they are not south-facing.
+        // This is a temporary fix that just kind of works until a better solution is found.
+
 
         ItemHelper.setDetails(newItem, instance.getGameManager().getMain().color("&e&lBlock"));
         ItemHelper.setDetails(newItem, blockThrowAbility.getAbilityNameLeftRightClickMessage());
