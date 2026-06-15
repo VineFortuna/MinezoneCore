@@ -114,10 +114,8 @@ public abstract class BaseClass {
 	public int getTokens() {
 		return tokens;
 	}
-	public void setArmor(EntityEquipment playerEquip){
-
-		setArmorNew(playerEquip);
-	}
+	public void setArmor(EntityEquipment playerEquip){ setArmorNew(playerEquip); }
+	public void resetHead() { player.getEquipment().setHelmet(playerHead); }
 
 	protected abstract ClassType getType();
 	protected abstract ItemStack getAttackWeapon();
@@ -136,7 +134,7 @@ public abstract class BaseClass {
 	public    void onPlayerMove(PlayerMoveEvent event) {}
 	public    void onFish(PlayerFishEvent event) {}
 	protected void Tick(int gameTicks) {}
-	public void GameEnd() {}
+	public    void GameEnd() {}
 
 	public boolean isPlayerAlive() {
 		return instance.classes.containsKey(player)
@@ -151,20 +149,10 @@ public abstract class BaseClass {
 	 *
 	 */
 	protected void setArmorNew(EntityEquipment entityEquipment) {
-		if (playerHead != null) {
-			entityEquipment.setHelmet(playerHead);
-		}
-
-		if (chestplate != null) {
-			entityEquipment.setChestplate(chestplate);
-		}
-
-		if (leggings != null) {
-			entityEquipment.setLeggings(leggings);
-		}
-		if (boots != null) {
-			entityEquipment.setBoots(boots);
-		}
+		if (playerHead != null) { entityEquipment.setHelmet(playerHead);     }
+		if (chestplate != null) { entityEquipment.setChestplate(chestplate); }
+		if (leggings   != null) { entityEquipment.setLeggings(leggings);     }
+		if (boots      != null) { entityEquipment.setBoots(boots);           }
 	}
 
 	public void loadPlayer() {
@@ -178,14 +166,9 @@ public abstract class BaseClass {
 	}
 
 	public boolean checkIfDead(Player player, GameInstance gameInstance) {
-		if (player.getGameMode() == GameMode.SPECTATOR) {
-			return true;
-		}
-		else if (gameInstance.classes.get(player) != null && gameInstance.classes.get(player).getLives() <= 0) {
-			return true;
-		}
-
-		return false;
+		if (player.getGameMode() == GameMode.SPECTATOR) return true;
+		else if (gameInstance.classes.get(player) != null && gameInstance.classes.get(player).getLives() <= 0) return true;
+		else return false;
 	}
 
 	/**
@@ -1827,11 +1810,8 @@ public abstract class BaseClass {
 	}
 
 	public void TellAll(String msg) {
-		for (Player player : instance.players)
-			player.sendMessage(msg);
-
-		for (Player spectator : instance.spectators)
-			spectator.sendMessage(msg);
+		for (Player player    : instance.players   )    player.sendMessage(msg);
+		for (Player spectator : instance.spectators) spectator.sendMessage(msg);
 	}
 
 
@@ -1879,6 +1859,4 @@ public abstract class BaseClass {
 
 		if (protectionLevel > 0) playerHead.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protectionLevel);
 	}
-
-	public void resetHead() { player.getEquipment().setHelmet(playerHead); }
 }
