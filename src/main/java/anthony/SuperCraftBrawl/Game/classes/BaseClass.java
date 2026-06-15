@@ -1877,18 +1877,6 @@ public abstract class BaseClass {
 		}
 	}
 
-	/**
-	 * Create the armor and custom head of the class. Includes Custom Head Texture,
-	 * Armor Color and Protection Level. Single Color for full armor. To call in the
-	 * subclass constructor.
-	 *
-	 */
-	protected void createArmor(Material blockMaterial, String textureUrl, String hexCodeAllArmor, int protectionLevel,
-			String className) {
-		createArmor(blockMaterial, textureUrl, hexCodeAllArmor, hexCodeAllArmor, hexCodeAllArmor, protectionLevel,
-				className);
-	}
-
 	public void resetHead() {
 		if (this.getType() == ClassType.Spider) {
 			SpiderClass spiderClass = (SpiderClass) this;
