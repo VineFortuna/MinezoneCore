@@ -186,6 +186,12 @@ public class EndermanClass extends BaseClass {
             return;
         }
 
+        // Needs to be done first, otherwise you would get a bunch of null errors from the comparisons.
+        if (block.getType() == Material.PISTON_EXTENSION) {
+            boolean isSticky = (block.getData() & 8) == 1;
+            newItem = new ItemStack(isSticky ? Material.PISTON_BASE : Material.PISTON_STICKY_BASE, 1);
+        }
+
         if (newItem.getType() == Material.DOUBLE_STEP || newItem.getType() == Material.DOUBLE_STONE_SLAB2 ||
                 newItem.getType() == Material.WOOD_DOUBLE_STEP) {
             newItem.setType(Material.valueOf(newItem.getType().name().replace("DOUBLE_", "")));
@@ -207,9 +213,13 @@ public class EndermanClass extends BaseClass {
             newItem = new ItemStack(Material.PUMPKIN, 1);
         } else if (newItem.getType() == Material.JACK_O_LANTERN) {
             newItem = new ItemStack(Material.JACK_O_LANTERN, 1);
+        } else if (newItem.getType() == Material.PISTON_BASE) {
+            newItem = new ItemStack(Material.PISTON_BASE, 1);
+        } else if (newItem.getType() == Material.PISTON_STICKY_BASE) {
+            newItem = new ItemStack(Material.PISTON_STICKY_BASE, 1);
         }
-        // Jack-o-lanterns and pumpkins have a tendency to not work if they are not south-facing.
-        // This is a temporary fix that just kind of works until a better solution is found.
+        // Pistons, Sticky pistons, Jack-o-lanterns and pumpkins have a tendency to not work if they are not
+        // south-facing. This is a temporary fix that just kind of works until a better solution is found.
 
 
         ItemHelper.setDetails(newItem, instance.getGameManager().getMain().color("&e&lBlock"));
