@@ -24,7 +24,7 @@ public class LevelManager {
             data.exp -= 2500;
             player.sendMessage(this.core.color("&8&m---------------------------"));
             player.sendMessage(this.core.color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
-            player.sendMessage(this.core.color("&rYou are now Level: &a" +
+            player.sendMessage(this.core.color("&rYou are now Level &a" +
                     data.checkPlayerLevel(player, data) + "✧" + data.level));
             player.sendMessage(this.core.color("&8&m---------------------------"));
             player.playSound(player.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
