@@ -72,11 +72,11 @@ public class MelonClass extends BaseClass {
                 instance.color("&rMushroom Soup &7(Right Click)"),
                 "",
                 instance.color("&7Right click for one of the following:"),
-                instance.color("&r- &e&lABSORPTION I"),
-                instance.color("&r- &e&lAHEALTH BOOST II"),
-                instance.color("&r- &4&lSTRENGTH I"),
-                instance.color("&r- &7&lRESISTANCE I"),
-                instance.color("&r- &b&lSPEED III"));
+                instance.color("&7▶ &eAbsorption&r &a1"),
+                instance.color("&7▶ &d&oHealth Boost&r &a2"),
+                instance.color("&7▶ &c&oStrength&r &a1"),
+                instance.color("&7▶ &8&oResistance&r &a1"),
+                instance.color("&7▶ &b&oSpeed&r &a3"));
 		return soup;
 	}
 
