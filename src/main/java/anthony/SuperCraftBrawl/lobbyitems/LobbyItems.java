@@ -26,10 +26,6 @@ public class LobbyItems {
         if (core.getCommands() != null) {
             player.getInventory().setItem(1,
                     ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER), "&eActive Games &7(Right Click)"));
-            player.getInventory().setItem(3,
-                    ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK), "&eClasses &7(Right Click)"));
-            player.getInventory().setItem(8,
-                    ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), "&eChallenges &7(Right Click)"));
         }
         player.getInventory().setItem(0,
                 ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&eGame Selector &7(Right Click)"));
@@ -37,7 +33,7 @@ public class LobbyItems {
         player.getInventory().setItem(4,
                 ItemHelper.setDetails(new ItemStack(Material.CHEST), "&eCosmetics &7(Right Click)"));
         ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
-        player.getInventory().setItem(7, ItemHelper.setDetails(stats, "&eProfile &7(Right Click)"));
+        player.getInventory().setItem(8, ItemHelper.setDetails(stats, "&eMy Profile &7(Right Click)"));
 
         player.getInventory().setItem(5, core.getFishingRod(player));
 
