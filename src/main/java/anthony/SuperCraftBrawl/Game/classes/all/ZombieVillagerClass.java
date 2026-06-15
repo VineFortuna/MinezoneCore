@@ -14,11 +14,13 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import xyz.xenondevs.particle.ParticleBuilder;
 import xyz.xenondevs.particle.ParticleEffect;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class ZombieVillagerClass extends BaseClass {
 
@@ -73,11 +75,14 @@ public class ZombieVillagerClass extends BaseClass {
             if (item.getType() == Material.POISONOUS_POTATO
                     && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
                 event.setCancelled(true);
+
                 int amount = item.getAmount();
                 amount--;
                 item.setAmount(amount);
-                if (amount <= 0)
+
+                if (amount <= 0) {
                     player.getInventory().clear(player.getInventory().getHeldItemSlot());
+                }
 
                 ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
                     @SuppressWarnings("deprecation")
@@ -87,19 +92,28 @@ public class ZombieVillagerClass extends BaseClass {
                             Location hitLoc = this.getBaseProj().getEntity().getLocation();
                             player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
 
+                            List<Player> affectedPlayers = new ArrayList<Player>();
+
                             for (Player gamePlayer : this.getNearby(2.5)) {
                                 if (instance.duosMap != null) {
                                     if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
                                         gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 80, 2));
+                                        affectedPlayers.add(gamePlayer);
                                     }
                                 } else if (gamePlayer != player) {
                                     gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 80, 2));
+                                    affectedPlayers.add(gamePlayer);
                                 }
                             }
 
                             if (hit == null) {
-                                // Hit the ground — green radius burst, fades after 1 second
+                                // Hit the ground — green radius burst
                                 spawnGroundSplash(hitLoc);
+
+                                // Also show the green ring on every player actually infected by the splash radius
+                                for (Player affected : affectedPlayers) {
+                                    spawnPlayerHitRing(affected);
+                                }
                             } else {
                                 // Direct player hit — instant green ring around their eyes
                                 spawnPlayerHitRing(hit);
@@ -112,8 +126,12 @@ public class ZombieVillagerClass extends BaseClass {
                         }
                     }
                 }, new ItemStack(Material.POISONOUS_POTATO));
-                instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-                        player.getLocation().getDirection().multiply(2.0D));
+
+                instance.getGameManager().getProjManager().shootProjectile(
+                        proj,
+                        player.getEyeLocation(),
+                        player.getLocation().getDirection().multiply(2.0D)
+                );
             }
         }
     }
