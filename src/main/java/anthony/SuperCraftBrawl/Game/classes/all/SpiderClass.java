@@ -477,4 +477,15 @@ public class SpiderClass extends BaseClass {
 	public ItemStack getAttackWeapon() {
 		return weapon;
 	}
+
+	@Override
+	public void resetHead() {
+		if (this.invisTaskId != -1) {
+			ItemStack invisHelmet = playerHead.clone();
+			invisHelmet.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 8);
+			player.getEquipment().setHelmet(invisHelmet);
+		} else {
+			player.getEquipment().setHelmet(playerHead);
+		}
+	}
 }

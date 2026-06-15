@@ -1880,23 +1880,5 @@ public abstract class BaseClass {
 		if (protectionLevel > 0) playerHead.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, protectionLevel);
 	}
 
-	public void resetHead() {
-		if (this.getType() == ClassType.Spider) {
-			SpiderClass spiderClass = (SpiderClass) this;
-			if (spiderClass.invisTaskId != -1) {
-				ItemStack invisHelmet = playerHead.clone();
-				invisHelmet.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 8);
-				player.getEquipment().setHelmet(invisHelmet);
-				return;
-			}
-		}
-		if (this.getType() == ClassType.Fade) {
-			if (fadeAbilityActive) {
-				player.getEquipment().setHelmet(ItemHelper.create(Material.AIR));
-				return;
-			}
-		}
-
-		player.getEquipment().setHelmet(playerHead);
-	}
+	public void resetHead() { player.getEquipment().setHelmet(playerHead); }
 }
