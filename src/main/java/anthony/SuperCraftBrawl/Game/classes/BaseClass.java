@@ -308,9 +308,9 @@ public abstract class BaseClass {
 				if (killer != null) {
 					Location pLoc = p.getLocation();
 					EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc, EntityType.ENDER_CRYSTAL);
-					HealTask task = new HealTask(killer, crystal, instance.getGameManager().getMain());
+					HealTask task = new HealTask(killer, crystal, instance);
 					BukkitTask bukkit = Bukkit.getScheduler()
-							.runTaskTimerAsynchronously(instance.getGameManager().getMain(), task, 0, 2L);
+							.runTaskTimer(instance.getGameManager().getMain(), task, 0L, 2L);
 					task.set(bukkit);
 				}
 			}
@@ -365,6 +365,7 @@ public abstract class BaseClass {
         if (player.getName() != null && lives > 0) {
             Player p = player.getPlayer();
             Player killer = player.getKiller();
+			Location deathLocation = p.getLocation().clone();
             Core core =  instance.getGameManager().getMain();
             PlayerListener listener = core.getListener();
             PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(p);
@@ -411,7 +412,7 @@ public abstract class BaseClass {
 
             Player killer = player.getKiller();
             Player p = player.getPlayer();
-
+			Location deathLocation = p.getLocation().clone();
             // Remove mobs spawned by the player
             removeMobs(p);
             resetMobTarget(p);
@@ -1198,17 +1199,8 @@ public abstract class BaseClass {
 
                 // END CRYSTAL
                 if (baseClassKiller != null) {
-                    if (baseClassKiller.getType() == ClassType.EnderDragon) {
-                        if (killer != null) {
-                            Location pLoc = p.getLocation();
-                            EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc,
-                                    EntityType.ENDER_CRYSTAL);
-                            HealTask task = new HealTask(killer, crystal, instance.getGameManager().getMain());
-                            BukkitTask bukkit = Bukkit.getScheduler()
-                                    .runTaskTimerAsynchronously(instance.getGameManager().getMain(), task, 0, 20L);
-                            task.set(bukkit);
-                        }
-                    }
+					// END CRYSTAL
+					spawnEnderDragonCrystal(baseClassKiller, killer, deathLocation);
                 }
 
                 if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
@@ -1242,6 +1234,28 @@ public abstract class BaseClass {
             }
         }
     }
+
+	private void spawnEnderDragonCrystal(BaseClass dragonClass, Player killer, Location deathLocation) {
+		if (dragonClass == null || killer == null || deathLocation == null || deathLocation.getWorld() == null) {
+			return;
+		}
+
+		if (dragonClass.getType() != ClassType.EnderDragon) {
+			return;
+		}
+
+		Location crystalLocation = deathLocation.clone();
+
+		EnderCrystal crystal = (EnderCrystal) crystalLocation.getWorld().spawnEntity(
+				crystalLocation,
+				EntityType.ENDER_CRYSTAL
+		);
+
+		HealTask task = new HealTask(killer, crystal, instance);
+		BukkitTask bukkit = Bukkit.getScheduler()
+				.runTaskTimer(instance.getGameManager().getMain(), task, 0L, 2L);
+		task.set(bukkit);
+	}
 
 	private boolean foundDeath = false;
 
@@ -1718,9 +1732,9 @@ public abstract class BaseClass {
 				if (killer != null) {
 					Location pLoc = p.getLocation();
 					EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc, EntityType.ENDER_CRYSTAL);
-					HealTask task = new HealTask(killer, crystal, instance.getGameManager().getMain());
+					HealTask task = new HealTask(killer, crystal, instance);
 					BukkitTask bukkit = Bukkit.getScheduler()
-							.runTaskTimerAsynchronously(instance.getGameManager().getMain(), task, 0, 20L);
+							.runTaskTimer(instance.getGameManager().getMain(), task, 0L, 2L);
 					task.set(bukkit);
 				}
 			}
@@ -1837,12 +1851,16 @@ public abstract class BaseClass {
 						String.valueOf(ChatColor.RESET) + ChatColor.ITALIC + "Agressive Gift", "",
 						String.valueOf(ChatColor.RESET) + ChatColor.YELLOW + "Steals another player's main item"));
 			} else if (baseClass.getType() == ClassType.PiglinBrute) {
-				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK, 1),
+				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK, 2),
 						"&eGold Balls",
 						"&7Right click to throw DEADLY gold balls!");
 				damagerPlayer.sendMessage(instance.getGameManager().getMain()
-						.color("&2&l(!) &rYou got a kill and gained an extra &eGold Ball"));
-				damagerPlayer.getInventory().addItem(item);
+						.color("&2&l(!) &rYou got a kill and gained &e2 Gold Balls"));
+
+				if (damagerPlayer.getInventory().getItem(1).getType() != Material.GOLD_BLOCK)
+					damagerPlayer.getInventory().setItem(1, item);
+				else
+					damagerPlayer.getInventory().addItem(item);
 			} else if (baseClass.getType() == ClassType.Enderman) {
 				ItemStack item = ItemHelper.setDetails(
 						new ItemStack(Material.ENDER_PEARL, 1),
