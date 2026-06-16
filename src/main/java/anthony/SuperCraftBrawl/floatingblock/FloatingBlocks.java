@@ -220,7 +220,7 @@ public final class FloatingBlocks implements Listener {
 
         e.rewardAnimationRunning = true;
 
-        // Keep normal chest spin speed. Do NOT speed it up.
+        // Keep normal chest spin speed
         e.spinSpeed = 6.0;
 
         final Location center = e.baseLoc.clone().add(0, 1.75, 0);
@@ -243,9 +243,25 @@ public final class FloatingBlocks implements Listener {
                     return;
                 }
 
-                // Small charging effect while waiting, no purple/enderman particles
-                if (ticks % 2 == 0) {
-                    world.playEffect(center.clone().add(0, 0.4, 0), org.bukkit.Effect.MOBSPAWNER_FLAMES, 0);
+                // Light fire particles around the floating block, not too many
+                if (!exploded && ticks % 6 == 0) {
+                    double angle = Math.toRadians((ticks * 35) % 360);
+                    double radius = 0.55;
+
+                    Location flame1 = center.clone().add(
+                            Math.cos(angle) * radius,
+                            0.15,
+                            Math.sin(angle) * radius
+                    );
+
+                    Location flame2 = center.clone().add(
+                            Math.cos(angle + Math.PI) * radius,
+                            0.15,
+                            Math.sin(angle + Math.PI) * radius
+                    );
+
+                    world.playEffect(flame1, org.bukkit.Effect.MOBSPAWNER_FLAMES, 0);
+                    world.playEffect(flame2, org.bukkit.Effect.MOBSPAWNER_FLAMES, 0);
                 }
 
                 // Burst after a short delay
@@ -260,7 +276,6 @@ public final class FloatingBlocks implements Listener {
                     spawnDailyRewardEmeraldBurst(center);
                 }
 
-                // Reset/finish
                 if (ticks >= 40) {
                     e.spinSpeed = 6.0;
                     e.rewardAnimationRunning = false;
@@ -276,7 +291,8 @@ public final class FloatingBlocks implements Listener {
 
         Random random = new Random();
 
-        for (int i = 0; i < 14; i++) {
+        // Reduced from 14 emeralds to 8 so it is less spammy
+        for (int i = 0; i < 8; i++) {
             final org.bukkit.entity.Item emerald = world.dropItem(
                     center.clone().add(0, 0.15, 0),
                     new ItemStack(org.bukkit.Material.EMERALD, 1)
@@ -284,9 +300,10 @@ public final class FloatingBlocks implements Listener {
 
             emerald.setPickupDelay(999999);
 
-            double x = (random.nextDouble() - 0.5) * 0.7;
-            double y = 0.25 + random.nextDouble() * 0.35;
-            double z = (random.nextDouble() - 0.5) * 0.7;
+            // Smaller velocity so emeralds stay close to the floating block
+            double x = (random.nextDouble() - 0.5) * 0.35;
+            double y = 0.18 + random.nextDouble() * 0.22;
+            double z = (random.nextDouble() - 0.5) * 0.35;
 
             emerald.setVelocity(new org.bukkit.util.Vector(x, y, z));
 

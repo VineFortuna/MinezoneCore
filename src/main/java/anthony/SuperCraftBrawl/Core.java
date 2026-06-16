@@ -37,6 +37,7 @@ import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
 import anthony.SuperCraftBrawl.practice.BowPractice;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.ranks.RankManager;
+import anthony.SuperCraftBrawl.rewards.DailyRewards;
 import anthony.SuperCraftBrawl.signs.SignManager;
 import anthony.SuperCraftBrawl.staffhelp.StaffHelpManager;
 import anthony.SuperCraftBrawl.tablist.TablistAnimationManager;
@@ -164,9 +165,10 @@ public class Core extends JavaPlugin implements Listener {
     public TablistAnimationManager tablistAnim;
 
     //FLOATING BLOCK:
-    private FloatingBlockManager floating;
-    private FloatingBlocks floatingBlocks;
-    private FloatingBlocks.Entry dailyRewardEntry; // kept so claimDailyReward can push instant subtitle updates
+    public FloatingBlockManager floating;
+    public FloatingBlocks floatingBlocks;
+    public FloatingBlocks.Entry dailyRewardEntry; // kept so claimDailyReward can push instant subtitle updates
+    public final Set<UUID> dailyRewardClaimsInProgress = new HashSet<>();// kept so claimDailyReward can push instant subtitle updates
 
     //ARMOR STANDS
     public ArmorStandManager armorStandManager;
@@ -189,6 +191,9 @@ public class Core extends JavaPlugin implements Listener {
     //LEVEL MANAGER:
     public LevelManager levelManager;
 
+    //REWARDS:
+    public DailyRewards dailyRewards;
+
     public Core() {
         this.staffchat = new ArrayList<Player>();
         this.globalchat = new ArrayList<Player>();
@@ -203,6 +208,10 @@ public class Core extends JavaPlugin implements Listener {
     }
 
     // Getters:
+
+    public DailyRewards getDailyRewards() {
+        return dailyRewards;
+    }
 
     public LevelManager getLevelManager() {
         return levelManager;
@@ -419,7 +428,7 @@ public class Core extends JavaPlugin implements Listener {
         showNPCs();
         enableTitlesCosmetic();
         enableLeaderboardSnapshotTables();
-        spawnFloatingBlocks();
+        this.floating.spawnFloatingBlocks();
         //enableTablist();
         //Spawn leaderboard settings holograms after world & chunks are ready. Delay 3 seconds
         Bukkit.getScheduler().runTaskLater(this, () -> {
@@ -429,62 +438,14 @@ public class Core extends JavaPlugin implements Listener {
         }, 60L);
     }
 
-    /*
-     * This function spawns the floating blocks in the lobby, for
-     * Socials and Daily Rewards
-     */
-    private static final long DAILY_REWARD_COOLDOWN = 24 * 60 * 60 * 1000L; // 24 hours in ms
-
     /**
      * Called when a player clicks the Daily Reward floating block.
      * Checks the 24-hour cooldown and either gives the reward or tells
      * the player how long they have to wait.
      */
-    public void claimDailyReward(org.bukkit.entity.Player player) {
-        PlayerData data = getDataManager().getPlayerData(player);
-        if (data == null) return;
-
-        long now      = System.currentTimeMillis();
-        long elapsed  = now - data.lastDailyReward;
-
-        if (data.lastDailyReward > 0 && elapsed < DAILY_REWARD_COOLDOWN) {
-            long remaining = DAILY_REWARD_COOLDOWN - elapsed;
-            player.sendMessage(color("&c&l(!) &rYou already claimed your daily reward!"));
-            player.sendMessage(color("&rNext reward available in: &a" + formatCooldown(remaining)));
-            player.playSound(player.getLocation(), org.bukkit.Sound.NOTE_BASS, 1f, 0.5f);
-            return;
-        }
-
-        // Give the reward here
-        player.sendMessage(color("&8&m------------------------------"));
-        player.sendMessage(color("&6&l★ DAILY REWARD CLAIMED! ★"));
-        player.sendMessage(color(""));
-        player.sendMessage(color("&a+20 Tokens"));
-        player.sendMessage(color("&a+100 EXP"));
-        player.sendMessage(color("&a+1 Mystery Chest"));
-        player.sendMessage(color(""));
-        player.sendMessage(color("&rCome back tomorrow for more!"));
-        player.sendMessage(color("&8&m------------------------------"));
-        player.playSound(player.getLocation(), org.bukkit.Sound.LEVEL_UP, 1f, 1f);
-
-        data.tokens += 20;
-        data.exp += 100;
-        data.mysteryChests++;
-        getLevelManager().checkLevelUp(player);
-        getScoreboardManager().lobbyBoard(player);
-
-        data.lastDailyReward = now;
-        getDataManager().saveData(data);
-
-        // Push an immediate subtitle update so the player sees "Next Reward: ..."
-        // right away without waiting for the next 10-second refresh cycle
-        if (dailyRewardEntry != null) {
-            floatingBlocks.sendSubtitlePacket(player, dailyRewardEntry);
-        }
-    }
 
     /** Formats a millisecond duration into "X hours and Y minutes" style text. */
-    private String formatCooldown(long millis) {
+    public String formatCooldown(long millis) {
         long totalSeconds = millis / 1000;
 
         long days = totalSeconds / 86400;
@@ -504,175 +465,6 @@ public class Core extends JavaPlugin implements Listener {
         }
 
         return "less than 1m";
-    }
-
-    private void spawnFloatingBlocks() {
-        Bukkit.getScheduler().runTaskLater(this, () -> {
-            World w = Bukkit.getWorld("lobby-1");
-
-            if (w == null) {
-                getLogger().warning("[FloatingBlocks] lobby-1 is null. Retrying in 40 ticks.");
-                spawnFloatingBlocks();
-                return;
-            }
-
-            Location dailyRewardLoc = new Location(w, 192.5, 108.2, 632.5);
-            Location socialsLoc     = new Location(w, 186.5, 108.2, 626.5);
-            Location storeLoc       = new Location(w, 192.5, 108.2, 626.5);
-            Location classesLoc     = new Location(w, 186.5, 108.2, 632.5);
-
-            /*
-             * Fixes duplicate floating blocks after /save-all + restart.
-             *
-             * /save-all saves the armor stands to the world.
-             * On restart, Bukkit metadata is gone, so old title/subtitle stands
-             * like "Click to Claim!" and "Next Reward..." can stay behind.
-             *
-             * This removes old saved floating-block armor stands around these locations
-             * before spawning the fresh plugin-controlled ones.
-             */
-            cleanupSavedFloatingBlockStands(w, dailyRewardLoc, socialsLoc, storeLoc, classesLoc);
-
-            // 1) DAILY REWARD — subtitle is per-player via NMS metadata packets
-            dailyRewardEntry = floatingBlocks.add(
-                    dailyRewardLoc,
-                    new ItemStack(Material.CHEST, 1, (short) 0),
-                    "&e&lDAILY REWARD",
-                    (player) -> {
-                        anthony.SuperCraftBrawl.playerdata.PlayerData d = getDataManager().getPlayerData(player);
-                        if (d == null) return "&aClick to Claim!";
-
-                        long elapsed = System.currentTimeMillis() - d.lastDailyReward;
-
-                        if (d.lastDailyReward > 0 && elapsed < DAILY_REWARD_COOLDOWN) {
-                            return "&rNext Reward: &a" + formatCooldown(DAILY_REWARD_COOLDOWN - elapsed);
-                        }
-
-                        return "&aClick to Claim!";
-                    },
-                    (player) -> {
-                        floatingBlocks.playDailyRewardClaimAnimation(dailyRewardEntry);
-                        claimDailyReward(player);
-                    }
-            );
-
-            // 2) SOCIALS
-            floatingBlocks.add(
-                    socialsLoc,
-                    new ItemStack(Material.BOOKSHELF, 1, (short) 0),
-                    "&6&lSOCIALS",
-                    "&aRight Click",
-                    (player) -> {
-                        player.performCommand("socials");
-                    }
-            );
-
-            // 3) STORE
-            floatingBlocks.add(
-                    storeLoc,
-                    new ItemStack(Material.EMERALD_BLOCK, 1, (short) 0),
-                    "&6&lSTORE",
-                    "&aRight Click",
-                    (player) -> {
-                        player.performCommand("store");
-                    }
-            );
-
-            floatingBlocks.add(
-                    classesLoc,
-                    new ItemStack(Material.ENCHANTMENT_TABLE, 1, (short) 0),
-                    "&6&lSCB CLASSES",
-                    "&aRight Click",
-                    (player) -> {
-                        player.performCommand("classes");
-                    }
-            );
-
-            floatingBlocks.spawnAll();
-        }, 40L);
-    }
-
-    private void cleanupSavedFloatingBlockStands(World world, Location... baseLocations) {
-        if (world == null || baseLocations == null) return;
-
-        for (ArmorStand stand : new ArrayList<ArmorStand>(world.getEntitiesByClass(ArmorStand.class))) {
-            if (stand == null || stand.isDead()) continue;
-
-            boolean nearFloatingBlock = false;
-
-            for (Location baseLoc : baseLocations) {
-                if (baseLoc == null) continue;
-
-                if (isNearFloatingBlockLocation(stand.getLocation(), baseLoc)) {
-                    nearFloatingBlock = true;
-                    break;
-                }
-            }
-
-            if (!nearFloatingBlock) continue;
-
-            if (isOldFloatingBlockStand(stand)) {
-                try {
-                    stand.remove();
-                } catch (Throwable ignored) {}
-            }
-        }
-    }
-
-    private boolean isNearFloatingBlockLocation(Location standLoc, Location baseLoc) {
-        if (standLoc == null || baseLoc == null) return false;
-        if (standLoc.getWorld() == null || baseLoc.getWorld() == null) return false;
-        if (!standLoc.getWorld().equals(baseLoc.getWorld())) return false;
-
-        Location titleLoc = baseLoc.clone().add(0, 2.55, 0);
-        Location subLoc   = baseLoc.clone().add(0, 2.30, 0);
-
-        double blockRadiusSq = 1.25 * 1.25;
-        double textRadiusSq  = 1.25 * 1.25;
-
-        return standLoc.distanceSquared(baseLoc) <= blockRadiusSq
-                || standLoc.distanceSquared(titleLoc) <= textRadiusSq
-                || standLoc.distanceSquared(subLoc) <= textRadiusSq;
-    }
-
-    private boolean isOldFloatingBlockStand(ArmorStand stand) {
-        String name = stand.getCustomName();
-        String strippedName = "";
-
-        if (name != null) {
-            strippedName = org.bukkit.ChatColor.stripColor(name).toLowerCase(java.util.Locale.US);
-        }
-
-        if (strippedName.startsWith("fb:")) return true;
-        if (strippedName.contains("daily reward")) return true;
-        if (strippedName.contains("click to claim")) return true;
-        if (strippedName.contains("next reward")) return true;
-        if (strippedName.contains("socials")) return true;
-        if (strippedName.contains("store")) return true;
-        if (strippedName.contains("right click")) return true;
-
-        try {
-            ItemStack helmet = stand.getEquipment() == null ? null : stand.getEquipment().getHelmet();
-            return helmet != null && helmet.getType() != Material.AIR;
-        } catch (Throwable ignored) {
-            return false;
-        }
-    }
-
-    public void removeLeaderboardSettingsHologram() {
-        org.bukkit.World w = getLobbyWorld();
-        if (w == null) return;
-
-        for (org.bukkit.entity.ArmorStand as : w.getEntitiesByClass(org.bukkit.entity.ArmorStand.class)) {
-            String name = as.getCustomName();
-            if (name == null) continue;
-
-            // Strip colors and compare against the known lines we spawn
-            String plain = org.bukkit.ChatColor.stripColor(name).trim().toLowerCase();
-            if (plain.equals("leaderboard settings") || plain.equals("click to change settings")) {
-                try { as.remove(); } catch (Throwable ignored) {}
-            }
-        }
     }
 
     private void enableTablist() {
@@ -956,6 +748,7 @@ public class Core extends JavaPlugin implements Listener {
         partyManager = new PartyManager(this);
         djManager = new DoubleJumpManager(this);
         databaseManager = new DatabaseManager(this);
+        databaseManager.ensureLastDailyRewardColumn();
         packetMain = new PacketMain(this);
         dataManager = new PlayerDataManager(this);
         gameDataManager = new GameDataManager(this);
@@ -994,6 +787,7 @@ public class Core extends JavaPlugin implements Listener {
         lbSettingsHolo = new SettingsHologram(this);
         staffHelpManager = new StaffHelpManager(this);
         levelManager = new LevelManager(this);
+        dailyRewards = new DailyRewards(this);
 
         for (Arenas arena : Arenas.values()) {
             parkourBoards.add(new ParkourBoard(this, arena));
@@ -1107,7 +901,7 @@ public class Core extends JavaPlugin implements Listener {
 
         // return new Location(lobbyWorld, -58.507, 125, -18.519, -179, -1);
         // if (this.getCommands() != null || this.getSWCommands() != null)
-        return new Location(lobbyWorld, 189.495, 115, 629.438, -0, 1);
+        return new Location(lobbyWorld, 189.495, 108, 629.438, -0, 1);
         // else
         // return new Location(lobbyWorld, 0.478, 51, 0.550);
     }
@@ -2542,6 +2336,22 @@ public class Core extends JavaPlugin implements Listener {
                 PacketPlayOutEntityDestroy destroy = new PacketPlayOutEntityDestroy(stand.getId());
                 ((CraftPlayer) p).getHandle().playerConnection.sendPacket(destroy);
             } catch (Throwable ignored) {}
+        }
+    }
+
+    public void removeLeaderboardSettingsHologram() {
+        World w = getLobbyWorld();
+        if (w == null) return;
+
+        for (ArmorStand as : w.getEntitiesByClass(ArmorStand.class)) {
+            String name = as.getCustomName();
+            if (name == null) continue;
+
+            // Strip colors and compare against the known lines we spawn
+            String plain = ChatColor.stripColor(name).trim().toLowerCase();
+            if (plain.equals("leaderboard settings") || plain.equals("click to change settings")) {
+                try { as.remove(); } catch (Throwable ignored) {}
+            }
         }
     }
 
