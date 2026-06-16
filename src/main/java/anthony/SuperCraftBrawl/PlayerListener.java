@@ -316,9 +316,10 @@ public class PlayerListener implements Listener {
         player.setHealth(20);
         player.setFoodLevel(20);
 
+        //Send news to players with titles when they join
         TitleSequence.sendChained(main, player,
-                new TitleSequence.TitleSpec("&6&lMINEZONE", "&e&lFRIENDS LIST &r-> &a/friends!", 10, 70, 0),
-                new TitleSequence.TitleSpec("&6&lMINEZONE", "&b&lLOBBY UPDATE", 0, 70, 10)
+                new TitleSequence.TitleSpec("&6&lMINEZONE", "&c&lHUGE CLASSES REVAMP!", 10, 70, 0),
+                new TitleSequence.TitleSpec("&6&lMINEZONE", "&e&lFRIENDS LIST! &e-> /friends", 0, 70, 10)
         );
 
         listFriendsOnline(player);
