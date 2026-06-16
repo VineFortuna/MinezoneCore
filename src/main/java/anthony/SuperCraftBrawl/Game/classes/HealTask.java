@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.Game.classes;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.EnderCrystal;
@@ -8,81 +9,197 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
-import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.Game.GameInstance;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 
 public class HealTask implements Runnable {
-	private EnderCrystal crystal;
-	private Player p;
-    private int count;
-	private Core main;
-    private int expired;
-    private BukkitTask te;
 
-	public HealTask(Player p, EnderCrystal crystal, Core main) {
+	private static final int TOTAL_DURATION_TICKS = 20 * 3;
+	private static final int TASK_INTERVAL_TICKS = 2;
+	private static final int HEAL_INTERVAL_TICKS = 20;
+
+	private static final double HEAL_AMOUNT = 1.0; // 0.5 hearts per second
+	private static final double HEAL_RANGE = 10.0;
+	private static final double HEAL_RANGE_SQUARED = HEAL_RANGE * HEAL_RANGE;
+
+	/*
+	 * Lower = beam updates more often.
+	 * Higher = less particle trail.
+	 *
+	 * 4 ticks = updates 5 times per second.
+	 */
+	private static final int BEAM_REDRAW_INTERVAL_TICKS = 4;
+
+	private final Player player;
+	private final EnderCrystal crystal;
+	private final GameInstance instance;
+
+	private int elapsedTicks = 0;
+	private int nextHealTick = HEAL_INTERVAL_TICKS;
+	private int healsGiven = 0;
+	private int beamTicks = 0;
+
+	private BukkitTask task;
+	private boolean cleanedUp = false;
+
+	public HealTask(Player player, EnderCrystal crystal, GameInstance instance) {
+		this.player = player;
 		this.crystal = crystal;
-		this.p = p;
-        count = 0;
-		this.main = main;
-        expired = 0;
+		this.instance = instance;
 	}
 
-	public void set(BukkitTask te){
-		this.te = te;
+	public void set(BukkitTask task) {
+		this.task = task;
 	}
 
 	@Override
 	public void run() {
-        if (expired == 0){
-            expired = 1;
-            expireCrystal();
-        }
-		Location pLoc = p.getLocation();
-		Location kLoc = crystal.getLocation();
-		kLoc.setY(kLoc.getY() + 1);
-		Vector vec = pLoc.toVector().subtract(kLoc.toVector()).normalize();
-		vec = vec.divide(new Vector(5,5,5));
-		Location clone = kLoc.clone();
-		if (clone.distance(pLoc) > 10) {
+		if (shouldCancel()) {
+			cleanup();
 			return;
 		}
-		PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(EnumParticle.ENCHANTMENT_TABLE, true,
-				(float) clone.getX(), (float) clone.getY(), (float) clone.getZ(), 0F, 0F, 0F, 0F, 3);
-		for (Player pl : Bukkit.getOnlinePlayers()) {
-			((CraftPlayer) pl).getHandle().playerConnection.sendPacket(packet);
-		}
-		for (int i = 0; i < 200; i++) {
-			clone.add(vec);
-			packet = new PacketPlayOutWorldParticles(EnumParticle.ENCHANTMENT_TABLE, true, (float) clone.getX(),
-					(float) clone.getY(), (float) clone.getZ(), 0F, 0F, 0F, 0F, 3);
-			for (Player pl : Bukkit.getOnlinePlayers()) {
-				((CraftPlayer) pl).getHandle().playerConnection.sendPacket(packet);
-			}
-			if (((int) clone.distance(pLoc)) == 0) {
-				return;
-			}
-            if (count < 3){
-                if (p.getHealth() < 20) {
-                	p.setHealth(Math.min(p.getHealth() + 1, p.getMaxHealth()));
-                    count++;
-                }
-            }
+
+		Location playerLocation = player.getLocation();
+		Location crystalLocation = crystal.getLocation().add(0, 1, 0);
+
+		if (playerLocation.getWorld() == null || crystalLocation.getWorld() == null
+				|| !playerLocation.getWorld().equals(crystalLocation.getWorld())) {
+			cleanup();
+			return;
 		}
 
+		double distanceSquared = playerLocation.distanceSquared(crystalLocation);
+
+		elapsedTicks += TASK_INTERVAL_TICKS;
+		beamTicks += TASK_INTERVAL_TICKS;
+
+		/*
+		 * Do not draw a full new beam every single task tick.
+		 * This makes it look more like one beam following the player
+		 * instead of multiple old lines stacking behind them.
+		 */
+		if (distanceSquared <= HEAL_RANGE_SQUARED && beamTicks >= BEAM_REDRAW_INTERVAL_TICKS) {
+			beamTicks = 0;
+			playHealParticles(crystalLocation.clone(), getPlayerBeamTarget(player));
+		}
+
+		if (elapsedTicks >= nextHealTick) {
+			if (distanceSquared <= HEAL_RANGE_SQUARED) {
+				healPlayer();
+			}
+
+			nextHealTick += HEAL_INTERVAL_TICKS;
+		}
+
+		if (elapsedTicks >= TOTAL_DURATION_TICKS || healsGiven >= 3) {
+			cleanup();
+		}
 	}
 
-	private void expireCrystal(){
-       Bukkit.getScheduler().runTaskLater(main, () -> {
-            if (crystal != null){
-                crystal.remove();
-            }
-			if (te == null){
-				System.out.println("Oh ur in fucking trouble theres no way to cancel this task");
-				return;
-			}
-			te.cancel();
-       }, 20*3); 
-    }
+	private Location getPlayerBeamTarget(Player player) {
+		return player.getLocation().clone().add(0, 1.0, 0);
+	}
 
+	private void healPlayer() {
+		if (player.getHealth() >= player.getMaxHealth()) {
+			return;
+		}
+
+		player.setHealth(Math.min(player.getHealth() + HEAL_AMOUNT, player.getMaxHealth()));
+		healsGiven++;
+	}
+
+	private boolean shouldCancel() {
+		if (cleanedUp) {
+			return true;
+		}
+
+		if (player == null || crystal == null) {
+			return true;
+		}
+
+		if (!player.isOnline() || player.isDead() || player.getHealth() <= 0.0 || player.getGameMode() == GameMode.SPECTATOR) {
+			return true;
+		}
+
+		if (crystal.isDead() || !crystal.isValid()) {
+			return true;
+		}
+
+		if (instance == null || !instance.players.contains(player) || !instance.classes.containsKey(player)) {
+			return true;
+		}
+
+		BaseClass playerClass = instance.classes.get(player);
+
+		return playerClass == null
+				|| playerClass.getType() != ClassType.EnderDragon
+				|| playerClass.getLives() <= 0
+				|| playerClass.isDead;
+	}
+
+	private void playHealParticles(Location from, Location to) {
+		Vector direction = to.toVector().subtract(from.toVector());
+		double distance = direction.length();
+
+		if (distance <= 0.1) {
+			sendParticle(from);
+			return;
+		}
+
+		/*
+		 * Larger step = fewer particles per beam.
+		 * This reduces old particle trails when the player moves.
+		 */
+		Vector step = direction.normalize().multiply(0.45);
+		Location current = from.clone();
+
+		int steps = Math.min(80, (int) (distance / 0.45));
+
+		for (int i = 0; i <= steps; i++) {
+			sendParticle(current);
+			current.add(step);
+		}
+	}
+
+	private void sendParticle(Location location) {
+		/*
+		 * SPELL_WITCH is purple and fades much faster than PORTAL.
+		 * PORTAL particles drift and stay around too long, which makes the
+		 * beam look like multiple old lines when the player moves.
+		 */
+		PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(
+				EnumParticle.SPELL_WITCH,
+				true,
+				(float) location.getX(),
+				(float) location.getY(),
+				(float) location.getZ(),
+				0.01F,
+				0.01F,
+				0.01F,
+				0.0F,
+				1
+		);
+
+		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+			((CraftPlayer) onlinePlayer).getHandle().playerConnection.sendPacket(packet);
+		}
+	}
+
+	private void cleanup() {
+		if (cleanedUp) {
+			return;
+		}
+
+		cleanedUp = true;
+
+		if (crystal != null && !crystal.isDead()) {
+			crystal.remove();
+		}
+
+		if (task != null) {
+			task.cancel();
+		}
+	}
 }
