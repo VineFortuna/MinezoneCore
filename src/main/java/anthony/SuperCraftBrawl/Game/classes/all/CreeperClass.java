@@ -132,6 +132,9 @@ public class CreeperClass extends BaseClass {
 		Bukkit.getScheduler().runTaskLater(
 				instance.getGameManager().getMain(),
 				() -> {
+					if (!isPlayerAlive()) return;
+					if (instance.state == GameState.ENDED) return;
+
 					shooter.getInventory().remove(Material.BARRIER);
 					shooter.getInventory().setItem(1, potionItem);
 				},
