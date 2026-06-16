@@ -1885,12 +1885,19 @@ public class GameInstance {
                         && event.getPlayer().getItemInHand().getItemMeta().getDisplayName().contains("Teleporter")
                         && (event.getAction() == Action.RIGHT_CLICK_AIR
                         || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-                    if (baseClass.pearlTimer.getTime() < 10000) {
-                        int seconds = (10000 - baseClass.pearlTimer.getTime()) / 1000 + 1;
-                        event.setCancelled(true);
-                        player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You have to wait " + ChatColor.YELLOW
-                                + seconds + " seconds " + ChatColor.RESET + "to use this item again");
-                    } else baseClass.pearlTimer.restart();
+
+                    // Enderman has no pearl cooldown.
+                    // Other classes, like EnderDragon, still use the normal pearlTimer cooldown.
+                    if (baseClass.getType() != ClassType.Enderman) {
+                        if (baseClass.pearlTimer.getTime() < 10000) {
+                            int seconds = (10000 - baseClass.pearlTimer.getTime()) / 1000 + 1;
+                            event.setCancelled(true);
+                            player.sendMessage(color("&c&l(!) &rYour ender pearl is still on cooldown for &a" +
+                                    seconds + "s"));
+                        } else {
+                            baseClass.pearlTimer.restart();
+                        }
+                    }
                 }
                 baseClass.UseItem(event);
             }
