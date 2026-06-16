@@ -34,9 +34,9 @@ public class SnowGolemClass extends BaseClass {
 
     private ItemStack weapon;
     private final Ability pumpkinAbility = new Ability("&6&lPumpkin Head", player);
-    private final PotionEffect strength  = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, (int) (PUMPKIN_ABILITY_DURATION * 20), 0, false, true);
+    private final PotionEffect strength = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, (int) (PUMPKIN_ABILITY_DURATION * 20), 0, false, true);
     private static final double PUMPKIN_ABILITY_DURATION = 5;
-    private static final double PUMPKIN_ABILITY_RANGE    = 10;
+    private static final double PUMPKIN_ABILITY_RANGE = 10;
     private int cooldownSec = 0;
 
     public SnowGolemClass(GameInstance instance, Player player) {
@@ -65,21 +65,20 @@ public class SnowGolemClass extends BaseClass {
         ItemStack slowballs = ItemHelper.setDetails(
                 new ItemStack(Material.SNOW_BALL, 5),
                 "&f&lSLOWBALL &7(Right click)",
-                "&7Hit players within &e2 blocks &7to give:",
-                "&7Slowness 2 for 3s + half a heart damage"
+                "&7Hit players to give:",
+                "&7▶ &7&oSlowness&r &e3 &rfor &e3s"
         );
 
-
-        String radiusDisplay   = ItemHelper.formatDouble(PUMPKIN_ABILITY_RANGE);
+        String radiusDisplay = ItemHelper.formatDouble(PUMPKIN_ABILITY_RANGE);
         String durationDisplay = ItemHelper.formatDouble(PUMPKIN_ABILITY_DURATION);
         ItemStack pumpkin = ItemHelper.setDetails(
                 new ItemStack(Material.PUMPKIN),
                 pumpkinAbility.getAbilityNameRightClickMessage(),
                 "&7Put a pumpkin on your enemies' head",
-                "",
                 "&7Gives you &4&oStrength &e" + (strength.getAmplifier() + 1) + " &7for &e" + strength.getDuration() / 20 + "s",
-                "&7Duration: &a" + durationDisplay + "&as",
-                "&7Range: &a" + radiusDisplay + " &7blocks"
+                "",
+                "&rDuration: &a" + durationDisplay + "&as",
+                "&rRange: &a" + radiusDisplay + " &7blocks"
         );
 
         playerInv.setItem(0, weapon);
@@ -107,16 +106,15 @@ public class SnowGolemClass extends BaseClass {
             }
         }
 
-        // Show a barrier in slot 2 when all slowballs are used up
         ItemStack slot2 = player.getInventory().getItem(2);
-        if ( slot2 == null || (slot2.getType() != Material.SNOW_BALL && slot2.getType() != Material.BARRIER)) {
+        if (slot2 == null || (slot2.getType() != Material.SNOW_BALL && slot2.getType() != Material.BARRIER)) {
             if (!outOfSlowballs) {
                 outOfSlowballs = true;
                 player.getInventory().setItem(2, ItemHelper.setDetails(
-                    new ItemStack(Material.BARRIER),
-                    instance.color("&c&lOut of Slowballs!"),
-                    "",
-                    instance.color("&7Get a kill to regen a snowball")));
+                        new ItemStack(Material.BARRIER),
+                        instance.color("&c&lOut of Slowballs!"),
+                        "",
+                        instance.color("&7Get a kill to regen a snowball")));
             }
         }
     }
@@ -129,13 +127,21 @@ public class SnowGolemClass extends BaseClass {
         // SNOW PLATFORM ABILITY
         if (item.getType() == Material.SNOW_BLOCK
                 && (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR)) {
+            event.setCancelled(true);
+
             if (player.getGameMode() != GameMode.SPECTATOR) {
                 if (snowGolem.getTime() < 20000) {
                     int seconds = (20000 - snowGolem.getTime()) / 1000 + 1;
-                    event.setCancelled(true);
                     player.sendMessage(instance.color(
                             "&c&l(!) &rYour &bSnow Platform &ris still regenerating for &a" + seconds + "s"));
                 } else {
+                    Location nextLocation = player.getLocation().clone().add(0, 1, 0);
+
+                    if (wouldSuffocateAt(nextLocation)) {
+                        player.sendMessage(instance.color("&c&l(!) &rYou need more space above you to use &bSnow Platform&r"));
+                        return;
+                    }
+
                     snowGolem.restart();
 
                     BukkitRunnable runnable = new BukkitRunnable() {
@@ -143,88 +149,45 @@ public class SnowGolemClass extends BaseClass {
 
                         @Override
                         public void run() {
-                            if (ticks == 8) {
+                            if (ticks >= 8) {
                                 this.cancel();
-                            } else {
-                                Location targetLocation = new Location(player.getWorld(),
-                                        player.getLocation().getX(),
-                                        player.getLocation().getY() + 1,
-                                        player.getLocation().getZ());
-
-                                float originalYaw   = player.getLocation().getYaw();
-                                float originalPitch = player.getLocation().getPitch();
-
-                                player.teleport(targetLocation);
-
-                                Location newLocation = player.getLocation();
-                                newLocation.setYaw(originalYaw);
-                                newLocation.setPitch(originalPitch);
-                                player.teleport(newLocation);
-
-                                World playerWorld       = player.getWorld();
-                                Location playerLocation = player.getLocation();
-
-                                int platformLength = 3;
-                                int platformWidth  = 3;
-
-                                for (int x = -platformLength / 2; x <= platformLength / 2; x++) {
-                                    for (int z = -platformWidth / 2; z <= platformWidth / 2; z++) {
-                                        Location platformLocation = playerLocation.clone().add(x, -1, z);
-                                        Block platformBlock = playerWorld.getBlockAt(platformLocation);
-
-                                        if (platformBlock.getType() == Material.AIR) {
-                                            platformBlock.setType(Material.SNOW_BLOCK);
-                                            platformBlock.setMetadata("SnowPlatform",
-                                                    new FixedMetadataValue(instance.getGameManager().getMain(), true));
-
-                                            Location particleLoc = getBlockCenter(platformBlock);
-
-                                            ParticleEffect.BLOCK_CRACK.display(
-                                                    particleLoc,
-                                                    0.3f,
-                                                    0.3f,
-                                                    0.3f,
-                                                    0.05f,
-                                                    6,
-                                                    new BlockTexture(Material.SNOW_BLOCK)
-                                            );
-
-                                            SoundManager.playSoundToAll(player, particleLoc, Sound.STEP_SNOW, 2, 1.5f);
-                                        }
-                                    }
-                                }
-
-                                Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
-                                    for (int x = -platformLength / 2; x <= platformLength / 2; x++) {
-                                        for (int z = -platformWidth / 2; z <= platformWidth / 2; z++) {
-                                            Location platformLocation = playerLocation.clone().add(x, -1, z);
-                                            Block platformBlock = playerWorld.getBlockAt(platformLocation);
-
-                                            if (platformBlock.hasMetadata("SnowPlatform")) {
-                                                Location particleLoc = getBlockCenter(platformBlock);
-
-                                                ParticleEffect.BLOCK_CRACK.display(
-                                                        particleLoc,
-                                                        0.3f,
-                                                        0.3f,
-                                                        0.3f,
-                                                        0.05f,
-                                                        8,
-                                                        new BlockTexture(Material.SNOW_BLOCK)
-                                                );
-
-                                                platformBlock.setType(Material.AIR);
-                                                platformBlock.removeMetadata("SnowPlatform",
-                                                        instance.getGameManager().getMain());
-
-                                                SoundManager.playSoundToAll(player, particleLoc, Sound.DIG_SNOW, 2, 2);
-                                            }
-                                        }
-                                    }
-                                }, 4 * 20);
-
-                                ticks++;
+                                return;
                             }
+
+                            if (!player.isOnline()
+                                    || player.isDead()
+                                    || player.getGameMode() == GameMode.SPECTATOR
+                                    || !instance.classes.containsKey(player)
+                                    || instance.classes.get(player).getLives() <= 0
+                                    || instance.classes.get(player).getType() != ClassType.SnowGolem) {
+                                this.cancel();
+                                return;
+                            }
+
+                            Location currentLocation = player.getLocation();
+                            Location targetLocation = currentLocation.clone().add(0, 1, 0);
+
+                            /*
+                             * Only checks the middle column above the player.
+                             * If moving up would put the player inside a block,
+                             * place the platform at the current safe height and stop.
+                             */
+                            if (wouldSuffocateAt(targetLocation)) {
+                                placeSnowPlatform(player.getLocation());
+                                this.cancel();
+                                return;
+                            }
+
+                            float originalYaw = currentLocation.getYaw();
+                            float originalPitch = currentLocation.getPitch();
+
+                            targetLocation.setYaw(originalYaw);
+                            targetLocation.setPitch(originalPitch);
+
+                            player.teleport(targetLocation);
+                            placeSnowPlatform(player.getLocation());
+
+                            ticks++;
                         }
                     };
 
@@ -282,6 +245,102 @@ public class SnowGolemClass extends BaseClass {
         return block.getLocation().clone().add(0.5, 0.5, 0.5);
     }
 
+    private boolean wouldSuffocateAt(Location location) {
+        if (location == null || location.getWorld() == null) {
+            return true;
+        }
+
+        World world = location.getWorld();
+
+        Block feetBlock = world.getBlockAt(
+                location.getBlockX(),
+                location.getBlockY(),
+                location.getBlockZ()
+        );
+
+        Block headBlock = world.getBlockAt(
+                location.getBlockX(),
+                location.getBlockY() + 1,
+                location.getBlockZ()
+        );
+
+        return isSuffocatingBlock(feetBlock) || isSuffocatingBlock(headBlock);
+    }
+
+    private boolean isSuffocatingBlock(Block block) {
+        return block != null
+                && block.getType() != Material.AIR
+                && block.getType().isSolid();
+    }
+
+    private void placeSnowPlatform(Location centerLocation) {
+        if (centerLocation == null || centerLocation.getWorld() == null) {
+            return;
+        }
+
+        World playerWorld = centerLocation.getWorld();
+        Location playerLocation = centerLocation.clone();
+
+        int platformLength = 3;
+        int platformWidth = 3;
+
+        for (int x = -platformLength / 2; x <= platformLength / 2; x++) {
+            for (int z = -platformWidth / 2; z <= platformWidth / 2; z++) {
+                Location platformLocation = playerLocation.clone().add(x, -1, z);
+                Block platformBlock = playerWorld.getBlockAt(platformLocation);
+
+                if (platformBlock.getType() == Material.AIR) {
+                    platformBlock.setType(Material.SNOW_BLOCK);
+                    platformBlock.setMetadata("SnowPlatform",
+                            new FixedMetadataValue(instance.getGameManager().getMain(), true));
+
+                    Location particleLoc = getBlockCenter(platformBlock);
+
+                    ParticleEffect.BLOCK_CRACK.display(
+                            particleLoc,
+                            0.3f,
+                            0.3f,
+                            0.3f,
+                            0.05f,
+                            6,
+                            new BlockTexture(Material.SNOW_BLOCK)
+                    );
+
+                    SoundManager.playSoundToAll(player, particleLoc, Sound.STEP_SNOW, 2, 1.5f);
+                }
+            }
+        }
+
+        Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
+            for (int x = -platformLength / 2; x <= platformLength / 2; x++) {
+                for (int z = -platformWidth / 2; z <= platformWidth / 2; z++) {
+                    Location platformLocation = playerLocation.clone().add(x, -1, z);
+                    Block platformBlock = playerWorld.getBlockAt(platformLocation);
+
+                    if (platformBlock.hasMetadata("SnowPlatform")) {
+                        Location particleLoc = getBlockCenter(platformBlock);
+
+                        ParticleEffect.BLOCK_CRACK.display(
+                                particleLoc,
+                                0.3f,
+                                0.3f,
+                                0.3f,
+                                0.05f,
+                                8,
+                                new BlockTexture(Material.SNOW_BLOCK)
+                        );
+
+                        platformBlock.setType(Material.AIR);
+                        platformBlock.removeMetadata("SnowPlatform",
+                                instance.getGameManager().getMain());
+
+                        SoundManager.playSoundToAll(player, particleLoc, Sound.DIG_SNOW, 2, 2);
+                    }
+                }
+            }
+        }, 4 * 20);
+    }
+
     private void setPumpkinHead(Player playerInRange) {
         playerInRange.playSound(player.getLocation(), Sound.AMBIENCE_CAVE, 1, 2);
 
@@ -325,16 +384,17 @@ public class SnowGolemClass extends BaseClass {
     public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
         ItemStack slowballs = ItemHelper.setDetails(
                 new ItemStack(Material.SNOW_BALL, 1),
-                "&f&lSLOWBALL &7(Right click)",
-                "&7Hit players within &e2 blocks &7to give:",
-                "&7Slowness 2 for 3s + half a heart damage"
+                "&f&lSLOWBALL &7(Right Click)",
+                "&7Hit players to give:",
+                "&7▶ &7&oSlowness&r &e3 &rfor &e3s"
         );
 
         if (damagerPlayer.getInventory().getItem(2).getType() != Material.SNOW_BALL) {
             damagerPlayer.getInventory().setItem(2, slowballs);
             outOfSlowballs = false;
-        } else
+        } else {
             damagerPlayer.getInventory().addItem(slowballs);
+        }
 
         damagerPlayer.sendMessage(instance.color("&2&l(!) &rYou got a kill and gained an extra &f&lSLOWBALL"));
     }
