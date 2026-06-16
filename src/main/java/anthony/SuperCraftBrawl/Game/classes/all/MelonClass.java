@@ -69,9 +69,9 @@ public class MelonClass extends BaseClass {
 
 	public ItemStack getSoup() {
         ItemStack soup = ItemHelper.setDetails(new ItemStack(Material.MUSHROOM_SOUP, 1),
-                instance.color("&rMushroom Soup &7(Right Click)"),
+                instance.color("&rMelon Soup &7(Right Click)"),
                 "",
-                instance.color("&7Right click for one of the following:"),
+                instance.color("&7Right click to gain one of these effects:"),
                 instance.color("&7▶ &eAbsorption&r &a1"),
                 instance.color("&7▶ &d&oHealth Boost&r &a2"),
                 instance.color("&7▶ &c&oStrength&r &a1"),
