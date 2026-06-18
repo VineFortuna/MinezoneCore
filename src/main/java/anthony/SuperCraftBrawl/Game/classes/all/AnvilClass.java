@@ -50,6 +50,8 @@ public class AnvilClass extends BaseClass {
                 "Anvil"
         );
 
+        baseVerticalJump = 1.15;
+
         // Weapon
         weapon = ItemHelper.setDetails(
                 new ItemStack(Material.WOOD_SWORD),
@@ -272,7 +274,7 @@ public class AnvilClass extends BaseClass {
     }
 
     private void performStompAbility(Player player) {
-        player.setVelocity((new Vector(0.0D, -1.5D, 0.0D)).multiply(1.0D));
+        player.setVelocity((new Vector(0.0D, -1.5D, 0.0D)).multiply(1.2D));
         playActivationEffects();  // burst on activation
         startFallingTrail();      // trail while falling
     }

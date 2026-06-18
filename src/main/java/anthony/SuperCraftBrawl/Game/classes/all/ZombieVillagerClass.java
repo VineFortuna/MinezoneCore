@@ -63,8 +63,8 @@ public class ZombieVillagerClass extends BaseClass {
         playerInv.setItem(0, this.getAttackWeapon());
         playerInv.setItem(1,
                 ItemHelper.setDetails(new ItemStack(Material.POISONOUS_POTATO, 7), "", "",
-                        instance.getGameManager().getMain().color("&7Throw at players to infect with:"),
-                        instance.getGameManager().getMain().color("   &r4 sec Poison III")));
+                        instance.getGameManager().getMain().color("&7Throw at enemies to inflict:"),
+                        instance.getGameManager().getMain().color("&7▶ &2&oPoison&r &e3")));
     }
 
     @Override

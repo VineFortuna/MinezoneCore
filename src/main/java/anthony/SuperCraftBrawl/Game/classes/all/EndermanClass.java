@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.ActionBarManager;
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
@@ -41,7 +42,7 @@ public class EndermanClass extends BaseClass {
     private final ItemStack weapon;
     private final ItemStack teleportItem;
     private final ItemStack blockItem;
-    private final Ability teleportAbility = new Ability("&5&lTeleporter", 10, player);
+    private final Ability teleportAbility = new Ability("&5&lTeleporter", 0, player);
     private final Ability blockAbility = new Ability("&5&lBlock", 7, player);
     private final Ability blockThrowAbility = new Ability("&5&lBlock Throw", player);
 
@@ -102,19 +103,19 @@ public class EndermanClass extends BaseClass {
     @Override
     public void Tick(int gameTicks) {
         if (!isPlayerAlive()) return;
+        if (instance.state == GameState.ENDED)
+            return;
 
         ActionBarManager actionBarManager = this.getActionBarManager();
         ActionBarManager.AbilityActionBar abilityActionBar = new ActionBarManager.AbilityActionBar(this, actionBarManager);
-        abilityActionBar.setActionBarAbility(player, teleportAbility, blockAbility);
+        abilityActionBar.setActionBarAbility(player, blockAbility, null);
 
         Inventory inventory = player.getInventory();
 
-        // Make sure weapon stays in slot 0, but do NOT return early.
         if (!inventory.contains(weapon)) {
             player.getInventory().setItem(0, weapon);
         }
 
-        // If pearl slot is empty or no longer has pearls, show barrier.
         ItemStack slot2 = player.getInventory().getItem(2);
 
         if (slot2 == null || slot2.getType() != Material.ENDER_PEARL) {
@@ -136,7 +137,6 @@ public class EndermanClass extends BaseClass {
             return;
         }
 
-        // Pick up block with stick - RIGHT CLICK ONLY
         if (item.equals(blockItem)) {
             if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) {
                 return;
@@ -160,7 +160,6 @@ public class EndermanClass extends BaseClass {
             return;
         }
 
-        // Teleport - RIGHT CLICK ONLY
         if (item.isSimilar(teleportItem)) {
             if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) {
                 return;
@@ -174,11 +173,10 @@ public class EndermanClass extends BaseClass {
             return;
         }
 
-        // Throw picked-up block - LEFT CLICK ONLY
         if (newItem != null && item.hasItemMeta() && item.isSimilar(newItem)) {
             event.setCancelled(true);
 
-            if (action != Action.LEFT_CLICK_BLOCK && action != Action.LEFT_CLICK_AIR) {
+            if (!action.name().contains("LEFT_CLICK")) {
                 return;
             }
 
@@ -187,20 +185,15 @@ public class EndermanClass extends BaseClass {
     }
 
     private void getBlockAbility() {
-        // Leaves need their own special case as their data comprises more than just the blocks' sub-id.
-        // The metadata has the two least significant bits relating to the sub-id, and the other two are
-        // related to decay properties, which don't matter in this case here, so they are masked out with
-        // 0b0011, or 3. This can not be done with other blocks, such as wool, as they use all 4 bits for
-        // sub-ids. It's split into LEAVES and LEAVES_2 because they needed more leaves, but the 2 bits
-        // they had only let them have 4 tree species, so they made another block type for the other 2.
-        //
-        // The exact same applies for logs, but the uses of the other bits is different. I believe its
-        // only block rotation?
         final Set<Material> maskedSubidBlocks = new HashSet<>(Arrays.asList(
-            Material.LEAVES, Material.LEAVES_2, Material.LOG, Material.LOG_2
+                Material.LEAVES, Material.LEAVES_2, Material.LOG, Material.LOG_2
         ));
 
         final Set<Material> subidBlocks = new HashSet<>(Arrays.asList(
+                Material.STONE, Material.DIRT, Material.WOOD, Material.SAND, Material.SPONGE, Material.SANDSTONE,
+                Material.WOOL, Material.STEP, Material.STAINED_GLASS, Material.STAINED_GLASS_PANE, Material.MONSTER_EGG,
+                Material.SMOOTH_BRICK, Material.WOOD_STEP, Material.COBBLE_WALL, Material.QUARTZ_BLOCK,
+                Material.PRISMARINE, Material.RED_SANDSTONE,
             Material.STONE, Material.DIRT, Material.WOOD, Material.SAND, Material.SPONGE, Material.SANDSTONE,
             Material.WOOL, Material.STAINED_GLASS, Material.STAINED_GLASS_PANE, Material.MONSTER_EGG, Material.SMOOTH_BRICK,
             Material.COBBLE_WALL, Material.QUARTZ_BLOCK, Material.PRISMARINE, Material.RED_SANDSTONE
