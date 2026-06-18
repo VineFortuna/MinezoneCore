@@ -322,7 +322,7 @@ public class CloudClass extends BaseClass {
 		player.sendMessage("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Lightning Strike: " + ChatColor.RESET
 				+ "Channel lightning to nearest player");
 		player.sendMessage(instance.getGameManager().getMain()
-				.color("&7&lLightning Blast: &rChannel lightning to all near players & do effects"));
+				.color("&7&lLightning Blast: &rChannel lightning to all nearby players to inflict fire and poison"));
 		player.sendMessage(instance.getGameManager().getMain().color("&0&lSnow Blast: &rPelt enemies with snow"));
 		player.sendMessage(instance.getGameManager().getMain().color("&c&lTNT Rain: &rSend TNT rain on all enemies"));
         player.sendMessage("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "------------------------------------");
