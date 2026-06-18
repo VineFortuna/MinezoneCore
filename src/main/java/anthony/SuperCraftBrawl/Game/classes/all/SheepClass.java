@@ -371,6 +371,8 @@ public class SheepClass extends BaseClass {
 		updateArmor();
 		weapon = item;
 
+		player.setDisplayName(instance.getGameManager().getMain().color(player.getName() + " " + color + "&lSheep&r"));
+
 		player.getInventory().setItem(0, weapon);
 	}
 }
