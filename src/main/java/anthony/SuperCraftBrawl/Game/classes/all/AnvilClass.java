@@ -27,12 +27,12 @@ import java.util.List;
 
 public class AnvilClass extends BaseClass {
 
-    private final ItemStack weapon;
-    private final ItemStack stompItem;
+    private ItemStack weapon;
+    private ItemStack stompItem;
     private final Ability stompAbility = new Ability("&8&lGoomba Stomp", 10, player);
-    private static final double MAX_STOMP_DAMAGE = 8 * 2.0;
-    private static final double STOMP_X_Z_RANGE = 3;
-    private static final double STOMP_Y_RANGE = 1;
+    private static double MAX_STOMP_DAMAGE = 8 * 2.0;
+    private static double STOMP_X_Z_RANGE = 3;
+    private static double STOMP_Y_RANGE = 1;
     private boolean stompUsed;
     private double stompDamage = 0;
     private int initialHeight;
@@ -50,8 +50,16 @@ public class AnvilClass extends BaseClass {
                 "Anvil"
         );
 
-        baseVerticalJump = 1.15;
+        baseVerticalJump = 1.15; //Adjusts double jump height
+        createItems();
+    }
 
+    /*
+    * This function creates Anvil's items
+    * Slot 1: Wood Swoord
+    * Slot 2: 'Goomba Stomp'
+     */
+    private void createItems() {
         // Weapon
         weapon = ItemHelper.setDetails(
                 new ItemStack(Material.WOOD_SWORD),
@@ -68,22 +76,32 @@ public class AnvilClass extends BaseClass {
                 new ItemStack(Material.ANVIL),
                 stompAbility.getAbilityNameRightClickMessage(),
                 "&7Slam down on your enemies",
-                "",
                 "&7The damage increases with height",
-                "&7Range: &e" + displayRangeWide + " &7blocks wide",
-                "&7Range: &e" + displayRangeY + " &7blocks up and down"
+                "",
+                "&rRange: &a" + displayRangeWide + " &rblocks wide",
+                "&rRange: &a" + displayRangeY + " &rblocks up and down"
         );
     }
 
+    /*
+    * This function sets the player's items
+     */
     public void SetItems(Inventory playerInv) {
         stompAbility.getCooldownInstance().reset();
         this.stompUsed = false;
         this.stompDamage = 0;
         cancelTrail();
-        playerInv.setItem(0, weapon);
-        playerInv.setItem(1, stompItem);
+        playerInv.setItem(0, this.weapon);
+        playerInv.setItem(1, this.stompItem);
     }
 
+    /*
+    * This is a function that runs continuously every tick per game.
+    * Checks if a player is alive before using stomp ability, then
+    * checks if they're in the air to use it.
+    *
+    * Also action bar message that displays cooldown
+     */
     public void Tick(int gameTicks) {
         if (!isPlayerAlive()) {
             // Player died or became spectator mid-stomp — clean up immediately
@@ -121,6 +139,7 @@ public class AnvilClass extends BaseClass {
                 playerInRange, EntityDamageEvent.DamageCause.CUSTOM, stompDamage
         );
 
+        //Prevents vanilla dying, need to call EntityDamageEvent to not break
         instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
         if (damageEvent.isCancelled()) return;
 

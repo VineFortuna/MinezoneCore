@@ -29,10 +29,10 @@ import java.util.List;
 
 public class BedrockClass extends BaseClass {
 
-	private final ItemStack weapon;
-	private final ItemStack lavaItem;
-	private final Ability invincibilityAbility = new Ability("&8&lInvincibility", INVINCIBILITY_COOLDOWN, player);
-	private final Ability lavaAbility = new Ability("&6&lLava", player);
+	private ItemStack weapon;
+	private ItemStack lavaItem;
+	private Ability invincibilityAbility = new Ability("&8&lInvincibility", INVINCIBILITY_COOLDOWN, player);
+	private Ability lavaAbility = new Ability("&6&lLava", player);
 	private static final double INVINCIBILITY_DURATION = 3;
 	private static final double INVINCIBILITY_COOLDOWN = 10;
 	private static final double LAVA_ABILITY_RANGE = 10;
@@ -55,18 +55,25 @@ public class BedrockClass extends BaseClass {
 				6,
 				"Bedrock"
 		);
+		createItems();
+	}
 
+	/*
+	* This function creates Bedrock's 2 items
+	* Slot 1: Bedrock, Sharpness 3 Knockback 1. Right click for 3s invincibility effect
+	* Slot 2: Lava Bucket, spawn on players nearby
+	 */
+	private void createItems() {
 		// Weapon
 		String durationDisplay = ItemHelper.formatDouble(INVINCIBILITY_DURATION);
 
 		weapon = ItemHelper.setDetails(
 				new ItemStack(Material.BEDROCK),
 				invincibilityAbility.getAbilityNameRightClickMessage(),
-				"",
 				"&7Be invincible to all damage",
 				"&7You can not hit other players",
 				"",
-				"&7Duration: &a" + durationDisplay + "&as"
+				"&rDuration: &a" + durationDisplay + "&as"
 		);
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3); // Sharpness 3
 		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1); // Knockback 1
@@ -75,11 +82,11 @@ public class BedrockClass extends BaseClass {
 		String rangeDisplay = ItemHelper.formatDouble(LAVA_ABILITY_RANGE);
 
 		lavaItem = ItemHelper.setDetails(new ItemStack(
-				Material.LAVA_BUCKET),
+						Material.LAVA_BUCKET),
 				lavaAbility.getAbilityNameRightClickMessage(),
 				"&7Pour lava on your opponents",
 				"",
-				"&7Range: &a" + rangeDisplay + " &7blocks"
+				"&rRange: &a" + rangeDisplay + " &rblocks"
 		);
 	}
 
@@ -114,13 +121,13 @@ public class BedrockClass extends BaseClass {
 		invincibilityAbility.getCooldownInstance().reset();
 
 		// Settings Items
-		playerInv.setItem(0, weapon);
-		playerInv.setItem(1, lavaItem);
+		playerInv.setItem(0, this.weapon);
+		playerInv.setItem(1, this.lavaItem);
 	}
 
 	@Override
 	public void Tick(int gameTicks) {
-		// ActionBar
+		// ActionBar to show cooldown
 		if (isPlayerAlive()) invincibilityAbility.updateActionBar(player, this);
 	}
 

@@ -60,13 +60,30 @@ public class BeeClass extends BaseClass {
 						ItemHelper
 								.addEnchant(
 										ItemHelper.setDetails(new ItemStack(Material.GLOWSTONE_DUST),
-												instance.getGameManager().getMain().color("&eNectar"), "",
-												instance.getGameManager().getMain()
-														.color("&7Right click to gain energy")),
+												instance.color("&eNectar"), "",
+												instance.color("&7Right click to gain energy:"),
+												instance.color("&7▶ &b&oSpeed&r &e1 &7for &e5s"),
+												instance.color("&7▶ &4&oStrength&r &e1 &7for &e5s")),
 										Enchantment.DAMAGE_ALL, 3),
 						Enchantment.KNOCKBACK, 1);
 
 		return item;
+	}
+
+	private ItemStack getPollen() {
+		ItemStack pollen = ItemHelper.setDetails(new ItemStack(Material.RED_ROSE, 1, (short) 6),
+				instance.color("Pollen"), "",
+				instance.color("&7Right click to get nutrients:"),
+				instance.color("&7▶ &c&oRegeneration&r &e3 &7for &e3s"),
+				instance.color("&7▶ &8&oResistance&r &e1 &7for &e5s"));
+		return pollen;
+	}
+
+	private ItemStack getStinger() {
+		ItemStack stinger = ItemHelper.setDetails(new ItemStack(Material.STICK),
+				instance.getGameManager().getMain().color("&eStinger"),
+				instance.getGameManager().getMain().color("&7Hit a player to inflict poison!"));
+		return stinger;
 	}
 
 	@Override
@@ -77,14 +94,8 @@ public class BeeClass extends BaseClass {
 	@Override
 	public void SetItems(Inventory playerInv) {
 		playerInv.setItem(0, getAttackWeapon());
-		ItemStack pollen = ItemHelper.setDetails(new ItemStack(Material.RED_ROSE, 1, (short) 6),
-				instance.getGameManager().getMain().color("Pollen"), "",
-				instance.getGameManager().getMain().color("&7Right click to get nutrients"));
-		playerInv.setItem(1, pollen);
-		playerInv.setItem(2,
-				ItemHelper.setDetails(new ItemStack(Material.STICK),
-						instance.getGameManager().getMain().color("&eStinger"),
-						instance.getGameManager().getMain().color("&7Hit a player with this to give poison!")));
+		playerInv.setItem(1, getPollen());
+		playerInv.setItem(2, getStinger());
 	}
 
 	@Override
@@ -120,8 +131,7 @@ public class BeeClass extends BaseClass {
 				}
 
 				p.getInventory().clear(p.getInventory().getHeldItemSlot());
-				p.sendMessage(instance.getGameManager().getMain()
-						.color("&2&l(!) &rYou used your stinger and now you're weak for 5 seconds"));
+				p.sendMessage(instance.color("&2&l(!) &rYou used your stinger and now you're weak for 5s"));
 
 				if (weak == null) {
 					weak = new BukkitRunnable() {
@@ -168,6 +178,8 @@ public class BeeClass extends BaseClass {
 					if (bee.getTime() < 20000) {
 						int seconds = (20000 - bee.getTime()) / 1000 + 1;
 						event.setCancelled(true);
+						player.sendMessage(instance.color("&c&l(!) &rYour &eNectar&r is still regenerating for &e" +
+								seconds + "s"));
 						player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
 								+ "Your Nectar is still regenerating for " + ChatColor.YELLOW + seconds
 								+ " more seconds ");

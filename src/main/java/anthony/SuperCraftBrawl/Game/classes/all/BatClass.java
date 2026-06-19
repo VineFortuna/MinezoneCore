@@ -42,6 +42,11 @@ public class BatClass extends BaseClass {
 		player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
 	}
 
+	/*
+	* This function runs every tick during the game to check if they don't have speed,
+	* invisibility, or resistance. If not, gets re-applied. Some causes that make it
+	* reset are pressure plates with effects
+	 */
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void Tick(int gameTicks) {
@@ -55,7 +60,7 @@ public class BatClass extends BaseClass {
 
 	@Override
 	public void UseItem(PlayerInteractEvent event) {
-
+		//Unused, auto-imported
 	}
 
 	@Override
@@ -71,11 +76,10 @@ public class BatClass extends BaseClass {
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.setUnbreakable(ItemHelper.addEnchant(ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.SHEARS), ChatColor.GREEN + "Shears",
-						ChatColor.GRAY + "Beat your enemies to pieces!", ChatColor.YELLOW + ""),
-				Enchantment.KNOCKBACK, 1), Enchantment.DAMAGE_ALL, 3));
-		return item;
+		ItemStack shears = ItemHelper.setUnbreakable(ItemHelper.addEnchant(ItemHelper.addEnchant(
+				new ItemStack(Material.SHEARS),
+				Enchantment.DAMAGE_ALL, 3),
+				Enchantment.KNOCKBACK, 1));
+		return shears;
 	}
-
 }

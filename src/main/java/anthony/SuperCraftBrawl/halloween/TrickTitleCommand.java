@@ -6,6 +6,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import java.util.stream.Collectors;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -71,7 +72,10 @@ public class TrickTitleCommand implements CommandExecutor, TabExecutor {
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
 		if (args.length == 1) {
 			String a = args[0].toLowerCase();
-			return Arrays.asList("on", "off", "toggle").stream().filter(opt -> opt.startsWith(a)).toList();
+			return Arrays.asList("on", "off", "toggle")
+					.stream()
+					.filter(opt -> opt.startsWith(a))
+					.collect(Collectors.toList());
 		}
 		return Collections.emptyList();
 	}

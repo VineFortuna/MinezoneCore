@@ -1824,73 +1824,133 @@ public abstract class BaseClass {
 	// Classes such as Sheep & Hunter for example that when they get a kill,
 	// they one of their abilities back
 	public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
-		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
-			// Sheep
-			baseClass = instance.classes.get(damagerPlayer);
-			if (baseClass.getType() == ClassType.Sheep) {
-				damagerPlayer.getInventory().addItem(new ItemStack(Material.ENCHANTMENT_TABLE));
-				damagerPlayer.sendMessage(instance.getGameManager().getMain()
-						.color("&r&l(!) &rYou got a kill and now you can switch your wool color if you'd like!"));
+		if (damagerPlayer == null || !instance.classes.containsKey(damagerPlayer)) {
+			return;
+		}
 
-			} else if (baseClass.getType() == ClassType.Hunter) {
-				if (!hunterDash) {
-					damagerPlayer.sendMessage(instance.getGameManager().getMain()
-							.color("&r&l(!) &rYour &r&lDash &rhas been regenerated for getting a kill!"));
-					hunterDash = true;
-					ItemStack dash = ItemHelper.addEnchant(
-							ItemHelper.setDetails(new ItemStack(Material.FEATHER),
-									instance.getGameManager().getMain().color("&b&lDash"),
-									instance.getGameManager().getMain().color("&7A quick escape or attack")),
-							Enchantment.PROTECTION_ENVIRONMENTAL, 1);
-					player.getInventory().setItem(1, dash);
-				}
-			} else if (baseClass.getType() == ClassType.Present) {
+		if (checkIfDead(damagerPlayer, instance)) {
+			return;
+		}
+
+		baseClass = instance.classes.get(damagerPlayer);
+
+		if (baseClass == null) {
+			return;
+		}
+
+		if (baseClass.getType() == ClassType.Sheep) {
+			damagerPlayer.getInventory().addItem(
+					new ItemStack(Material.ENCHANTMENT_TABLE)
+			);
+
+			damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
+					"&r&l(!) &rYou got a kill and now you can switch your wool color if you'd like!"
+			));
+
+		} else if (baseClass.getType() == ClassType.Hunter) {
+			if (!hunterDash) {
 				damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
-						"&r&l(!) &rYour &r&lAggressive Gift has regenerated and you can get a new weapon if you'd like!"));
-				damagerPlayer.getInventory().addItem(ItemHelper.setDetails(new ItemStack(Material.CHEST, 1),
-						String.valueOf(ChatColor.RESET) + ChatColor.ITALIC + "Agressive Gift", "",
-						String.valueOf(ChatColor.RESET) + ChatColor.YELLOW + "Steals another player's main item"));
-			} else if (baseClass.getType() == ClassType.PiglinBrute) {
-				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK, 2),
-						"&eGold Balls",
-						"&7Right click to throw DEADLY gold balls!");
-				damagerPlayer.sendMessage(instance.getGameManager().getMain()
-						.color("&2&l(!) &rYou got a kill and gained &e2 Gold Balls"));
+						"&r&l(!) &rYour &r&lDash &rhas been regenerated for getting a kill!"
+				));
 
-				if (damagerPlayer.getInventory().getItem(1).getType() != Material.GOLD_BLOCK)
-					damagerPlayer.getInventory().setItem(1, item);
-				else
-					damagerPlayer.getInventory().addItem(item);
-			} else if (baseClass.getType() == ClassType.Enderman) {
-				ItemStack item = ItemHelper.setDetails(
-						new ItemStack(Material.ENDER_PEARL, 1),
-						instance.color("&5&lTeleporter &7(Right Click)")
+				hunterDash = true;
+
+				ItemStack dash = ItemHelper.addEnchant(
+						ItemHelper.setDetails(
+								new ItemStack(Material.FEATHER),
+								instance.getGameManager().getMain().color("&b&lDash"),
+								instance.getGameManager().getMain().color("&7A quick escape or attack")
+						),
+						Enchantment.PROTECTION_ENVIRONMENTAL,
+						1
 				);
-				damagerPlayer.sendMessage(instance.getGameManager().getMain()
-						.color("&2&l(!) &rYou got a kill and gained an extra &5&lTeleporter"));
 
-				if (damagerPlayer.getInventory().getItem(2).getType() != Material.ENDER_PEARL)
-					damagerPlayer.getInventory().setItem(2, item);
-				else
-					damagerPlayer.getInventory().addItem(item);
-			} else if (baseClass.getType() == ClassType.Chicken) {
-				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.EGG, 2),
-						instance.color("&eExplosive Eggs"),
-						"",
-						instance.color("&7Right click to throw DEADLY eggs!"));
-				damagerPlayer.sendMessage(instance.getGameManager().getMain()
-						.color("&2&l(!) &rYou got a kill and gained 2 extra &eExplosive Eggs"));
-
-				if (damagerPlayer.getInventory().getItem(1).getType() != Material.EGG)
-					damagerPlayer.getInventory().setItem(1, item);
-				else
-					damagerPlayer.getInventory().addItem(item);
-			} else if (baseClass.getType() == ClassType.GrimReaper) {
-				ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
-				damagerPlayer.getInventory().setItem(2, zombieEgg);
-			} else if (baseClass.getType() == ClassType.Wolf) {
-				wolfPackAdd = true;
+				damagerPlayer.getInventory().setItem(1, dash);
 			}
+
+		} else if (baseClass.getType() == ClassType.Present) {
+			damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
+					"&r&l(!) &rYour &r&lAggressive Gift has regenerated and you can get a new weapon if you'd like!"
+			));
+
+			damagerPlayer.getInventory().addItem(
+					ItemHelper.setDetails(
+							new ItemStack(Material.CHEST, 1),
+							String.valueOf(ChatColor.RESET) + ChatColor.ITALIC + "Agressive Gift",
+							"",
+							String.valueOf(ChatColor.RESET) + ChatColor.YELLOW
+									+ "Steals another player's main item"
+					)
+			);
+
+		} else if (baseClass.getType() == ClassType.PiglinBrute) {
+			ItemStack item = ItemHelper.setDetails(
+					new ItemStack(Material.GOLD_BLOCK, 2),
+					"&eGold Balls",
+					"&7Right click to throw DEADLY gold balls!"
+			);
+
+			damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
+					"&2&l(!) &rYou got a kill and gained &e2 Gold Balls"
+			));
+
+			ItemStack currentItem = damagerPlayer.getInventory().getItem(1);
+
+			if (currentItem == null || currentItem.getType() != Material.GOLD_BLOCK) {
+				damagerPlayer.getInventory().setItem(1, item);
+			} else {
+				damagerPlayer.getInventory().addItem(item);
+			}
+
+		} else if (baseClass.getType() == ClassType.Enderman) {
+			ItemStack item = ItemHelper.setDetails(
+					new ItemStack(Material.ENDER_PEARL, 1),
+					instance.color("&5&lTeleporter &7(Right Click)")
+			);
+
+			damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
+					"&2&l(!) &rYou got a kill and gained an extra &5&lTeleporter"
+			));
+
+			ItemStack currentItem = damagerPlayer.getInventory().getItem(2);
+
+			if (currentItem == null || currentItem.getType() != Material.ENDER_PEARL) {
+				damagerPlayer.getInventory().setItem(2, item);
+			} else {
+				damagerPlayer.getInventory().addItem(item);
+			}
+
+		} else if (baseClass.getType() == ClassType.Chicken) {
+			ItemStack item = ItemHelper.setDetails(
+					new ItemStack(Material.EGG, 2),
+					instance.color("&eExplosive Eggs"),
+					"",
+					instance.color("&7Right click to throw DEADLY eggs!")
+			);
+
+			damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
+					"&2&l(!) &rYou got a kill and gained 2 extra &eExplosive Eggs"
+			));
+
+			ItemStack currentItem = damagerPlayer.getInventory().getItem(1);
+
+			if (currentItem == null || currentItem.getType() != Material.EGG) {
+				damagerPlayer.getInventory().setItem(1, item);
+			} else {
+				damagerPlayer.getInventory().addItem(item);
+			}
+
+		} else if (baseClass.getType() == ClassType.GrimReaper) {
+			ItemStack zombieEgg = ItemHelper.createMonsterEgg(
+					EntityType.ZOMBIE,
+					1,
+					"&2&lZOMBIE POKEBALL"
+			);
+
+			damagerPlayer.getInventory().setItem(2, zombieEgg);
+
+		} else if (baseClass.getType() == ClassType.Wolf) {
+			wolfPackAdd = true;
 		}
 	}
 
