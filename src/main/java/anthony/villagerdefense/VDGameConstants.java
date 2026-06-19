@@ -5,7 +5,7 @@ import org.bukkit.DyeColor;
 public final class VDGameConstants {
 
 	/** Bukkit world folder name for the arena, placed on the server by the user. */
-	public static final String MAP_WORLD_NAME = "VillagerDefenseMap";
+	public static final String MAP_WORLD_NAME = "Speedway";
 
 	public static final int MIN_PLAYERS = 2;
 	public static final int STARTING_COUNTDOWN_SECONDS = 30;
