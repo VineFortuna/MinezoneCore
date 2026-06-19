@@ -25,7 +25,7 @@ import java.util.List;
 public class VDSetupCommand implements CommandExecutor, TabExecutor {
 
 	private static final List<String> SUBCOMMANDS = Arrays.asList(
-			"lobby", "team", "villager", "shop", "generator", "list", "save");
+			"tp", "lobby", "team", "villager", "shop", "generator", "list", "save");
 	private static final List<String> RESOURCE_TYPES = Arrays.asList("iron", "gold", "emerald", "diamond");
 
 	private final VDGameManager vdGameManager;
@@ -59,6 +59,14 @@ public class VDSetupCommand implements CommandExecutor, TabExecutor {
 		if (sub.equals("save")) {
 			vdGameManager.getMapConfigManager().save();
 			player.sendMessage(vdGameManager.getMain().color("&2&l(!) &rSaved VillagerDefense map config."));
+			return true;
+		}
+
+		if (sub.equals("tp")) {
+			Location target = config.getLobby() != null
+					? config.getLobby() : vdGameManager.getArenaWorld().getSpawnLocation();
+			player.teleport(target);
+			player.sendMessage(vdGameManager.getMain().color("&2&l(!) &rTeleported to &e" + VDGameConstants.MAP_WORLD_NAME + "&r."));
 			return true;
 		}
 
@@ -180,6 +188,7 @@ public class VDSetupCommand implements CommandExecutor, TabExecutor {
 
 	private void sendUsage(Player player) {
 		player.sendMessage(vdGameManager.getMain().color("&6&lVDSETUP COMMANDS"));
+		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup tp -> &rTeleport into the map to start setting up"));
 		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup lobby"));
 		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup team <1-8>"));
 		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup villager <1-8>"));

@@ -23,6 +23,7 @@ public class VDGameManager {
 	public VDGameManager(Core main) {
 		this.main = main;
 		this.mapConfigManager = new VDMapConfigManager(main);
+		getArenaWorld(); // Load it eagerly at startup, like Core#lobbyWorld, so staff can /vdsetup before any match exists.
 	}
 
 	public Core getMain() {
