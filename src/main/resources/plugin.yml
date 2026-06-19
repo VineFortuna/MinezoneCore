@@ -171,6 +171,13 @@ commands:
    partychat:
      description: Party chat command
      aliases: [ pc, pchat ]
+   vd:
+      description: VillagerDefense gamemode command
+      usage: /vd <join|leave|help>
+      aliases: villagerdefense
+   vdsetup:
+      description: Staff tool to configure a VillagerDefense map
+      permission: vd.admin
 
 permissions:
    scb.admin:
@@ -182,6 +189,7 @@ permissions:
          scb.broadcast: true
          scb.ignite: true
          scb.give: true
+         vd.admin: true
          scb.purchases: true
          punish.networkban: true
    scb.developer:

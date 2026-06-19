@@ -92,6 +92,7 @@ public class Core extends JavaPlugin implements Listener {
     public Version version;
     public FreeClassesGUI inventoryGUI;
     public anthony.CrystalWars.game.GameManager gm;
+    public anthony.villagerdefense.VDGameManager vdGameManager;
     public DonorClassesGUI donorGUI;
     public GameSelectorGUI hubGUI;
     public Commands commands;
@@ -295,6 +296,17 @@ public class Core extends JavaPlugin implements Listener {
 
     public anthony.CrystalWars.game.GameManager getCwManager() {
         return gm;
+    }
+
+    public anthony.villagerdefense.VDGameManager getVdGameManager() {
+        return vdGameManager;
+    }
+
+    public boolean isPlayerInAnyGame(Player player) {
+        return getGameManager().GetInstanceOfPlayer(player) != null
+                || getGameManager().GetInstanceOfSpectator(player) != null
+                || vdGameManager.getInstanceOfPlayer(player) != null
+                || vdGameManager.getInstanceOfSpectator(player) != null;
     }
 
     public FlawlessWinsBoard getFlawlessWinsBoard() {
@@ -725,10 +737,20 @@ public class Core extends JavaPlugin implements Listener {
         }
 
         getCommand("treatsadmin").setExecutor(new TreatsAdminCommand(halloweenHunt));
+
+        anthony.villagerdefense.VDCommand vdCommand = new anthony.villagerdefense.VDCommand(vdGameManager);
+        getCommand("vd").setExecutor(vdCommand);
+        getCommand("vd").setTabCompleter(vdCommand);
+
+        anthony.villagerdefense.setup.VDSetupCommand vdSetupCommand =
+                new anthony.villagerdefense.setup.VDSetupCommand(vdGameManager);
+        getCommand("vdsetup").setExecutor(vdSetupCommand);
+        getCommand("vdsetup").setTabCompleter(vdSetupCommand);
     }
 
     private void registrations() {
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
+        Bukkit.getServer().getPluginManager().registerEvents(new anthony.villagerdefense.VDPlayerListener(vdGameManager), this);
         Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         Bukkit.getMessenger().registerIncomingPluginChannel(this, "BungeeCord", gameManager);
     }
@@ -739,6 +761,7 @@ public class Core extends JavaPlugin implements Listener {
         msg = new ArrayList<>();
         listener = new PlayerListener(this);
         gameManager = new GameManager(this);
+        vdGameManager = new anthony.villagerdefense.VDGameManager(this);
         mysteryChestManager = new MysteryChestManager(this);
         cosmeticsManager = new CosmeticsManager(this);
         scoreboardManager = new ScoreboardManager(this);
@@ -1052,6 +1075,9 @@ public class Core extends JavaPlugin implements Listener {
                 if (this.getGameManager().GetInstanceOfPlayer(player) != null
                         || this.getGameManager().GetInstanceOfSpectator(player) != null) {
                     this.getCommands().leaveGame(player);
+                } else if (vdGameManager.getInstanceOfPlayer(player) != null
+                        || vdGameManager.getInstanceOfSpectator(player) != null) {
+                    vdGameManager.leaveGame(player);
                 } else if (this.getParkour().hasPlayer(player)) {
                     this.getParkour().removePlayer(player);
                     this.ResetPlayer(player);
