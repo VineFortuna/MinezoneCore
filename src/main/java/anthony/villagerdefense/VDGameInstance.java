@@ -2,12 +2,16 @@ package anthony.villagerdefense;
 
 import anthony.villagerdefense.map.VDMapConfig;
 import anthony.villagerdefense.map.VDTeamSite;
+import anthony.villagerdefense.resources.VDResourceGenerator;
+import anthony.villagerdefense.villager.VDVillagerManager;
 import anthony.villagerdefense.villager.VillagerLevel;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
@@ -27,6 +31,8 @@ public class VDGameInstance {
 	private final Map<Integer, VDTeam> teams = new LinkedHashMap<>();
 	private final List<Player> spectators = new ArrayList<>();
 	private final List<BlockState> undoLog = new ArrayList<>();
+	private final VDVillagerManager villagerManager;
+	private final VDResourceGenerator resourceGenerator;
 
 	private VDGameState state = VDGameState.WAITING;
 	private BukkitTask countdownTask;
@@ -34,6 +40,8 @@ public class VDGameInstance {
 	public VDGameInstance(VDGameManager manager) {
 		this.manager = manager;
 		this.world = manager.getArenaWorld();
+		this.villagerManager = new VDVillagerManager(this);
+		this.resourceGenerator = new VDResourceGenerator(this);
 
 		for (int siteId = 1; siteId <= VDMapConfig.TEAM_COUNT; siteId++) {
 			teams.put(siteId, new VDTeam(
@@ -47,6 +55,10 @@ public class VDGameInstance {
 
 	public VDGameManager getManager() {
 		return manager;
+	}
+
+	public VDVillagerManager getVillagerManager() {
+		return villagerManager;
 	}
 
 	public World getWorld() {
@@ -206,14 +218,54 @@ public class VDGameInstance {
 				if (p == null) continue;
 
 				p.teleport(site.getSpawn());
-				p.getInventory().clear();
 				p.setGameMode(GameMode.SURVIVAL);
 				p.setHealth(20.0);
 				p.setFoodLevel(20);
+				giveStarterKit(p, team);
 			}
 		}
 
+		villagerManager.spawnAll();
+		resourceGenerator.start();
+
 		TellAll(manager.getMain().color("&a&l(!) &rVillagerDefense has started! Protect your villager!"));
+	}
+
+	/** Level 1 kit per the design doc: blocks, basic weapons, tools, simple food. */
+	public void giveStarterKit(Player player, VDTeam team) {
+		player.getInventory().clear();
+		player.getInventory().addItem(new ItemStack(Material.WOOD_SWORD));
+		player.getInventory().addItem(new ItemStack(Material.WOOD_PICKAXE));
+		player.getInventory().addItem(new ItemStack(Material.WOOD_AXE));
+		player.getInventory().addItem(new ItemStack(Material.WOOL, 16, team.getColor().getWoolData()));
+		player.getInventory().addItem(new ItemStack(Material.BREAD, 5));
+	}
+
+	/**
+	 * Called when a player's fatal damage was intercepted during IN_PROGRESS.
+	 * Respawns them if their villager is still alive (bed-equivalent); otherwise
+	 * eliminates their team and sends them to spectate.
+	 */
+	public void handlePlayerDowned(Player player) {
+		VDTeam team = findTeamOf(player);
+		if (team == null) return;
+
+		player.setHealth(20.0);
+		player.setFoodLevel(20);
+
+		if (team.isVillagerAlive()) {
+			VDTeamSite site = manager.getMapConfigManager().getConfig().getTeamSite(team.getSiteId());
+			player.teleport(site.getSpawn());
+			giveStarterKit(player, team);
+			TellAll(manager.getMain().color("&c&l(!) &e" + player.getName() + " &rwas downed and respawned!"));
+			return;
+		}
+
+		team.setEliminated(true);
+		player.setGameMode(GameMode.SPECTATOR);
+		player.teleport(manager.getMapConfigManager().getConfig().getLobby());
+		TellAll(manager.getMain().color("&4&l(!) &eTeam " + team.getName() + " &rhas been eliminated!"));
+		checkForWin();
 	}
 
 	private void checkForWin() {
@@ -248,13 +300,11 @@ public class VDGameInstance {
 	}
 
 	private void resetAndClear() {
+		resourceGenerator.stop();
+		villagerManager.despawnAll();
 		restoreWorld();
 
 		for (VDTeam team : teams.values()) {
-			if (team.getVillagerEntity() != null) {
-				team.getVillagerEntity().remove();
-				team.setVillagerEntity(null);
-			}
 			team.setVillagerAlive(true);
 			team.setEliminated(false);
 			team.setLevel(VillagerLevel.LEVEL_1);
