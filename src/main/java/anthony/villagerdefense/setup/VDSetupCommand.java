@@ -63,8 +63,16 @@ public class VDSetupCommand implements CommandExecutor, TabExecutor {
 		}
 
 		if (sub.equals("tp")) {
-			Location target = config.getLobby() != null
-					? config.getLobby() : vdGameManager.getArenaWorld().getSpawnLocation();
+			Location target = config.getLobby();
+			if (target == null) {
+				org.bukkit.World world = vdGameManager.getArenaWorld();
+				if (world == null) {
+					player.sendMessage(vdGameManager.getMain().color("&c&l(!) &rFailed to load &e"
+							+ VDGameConstants.MAP_WORLD_NAME + "&r. Check the console for errors."));
+					return true;
+				}
+				target = world.getSpawnLocation();
+			}
 			player.teleport(target);
 			player.sendMessage(vdGameManager.getMain().color("&2&l(!) &rTeleported to &e" + VDGameConstants.MAP_WORLD_NAME + "&r."));
 			return true;

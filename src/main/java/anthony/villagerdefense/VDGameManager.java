@@ -23,7 +23,6 @@ public class VDGameManager {
 	public VDGameManager(Core main) {
 		this.main = main;
 		this.mapConfigManager = new VDMapConfigManager(main);
-		getArenaWorld(); // Load it eagerly at startup, like Core#lobbyWorld, so staff can /vdsetup before any match exists.
 	}
 
 	public Core getMain() {
@@ -38,11 +37,26 @@ public class VDGameManager {
 		return activeInstance;
 	}
 
+	/**
+	 * Loads the arena world on first use only - never at plugin startup - so a
+	 * problem with this one world (corrupt chunks, missing folder, etc.) can
+	 * never take the rest of the plugin down with it. Returns null on failure;
+	 * callers must handle that instead of assuming a world is always available.
+	 */
 	public World getArenaWorld() {
 		if (arenaWorld == null) {
 			World existing = Bukkit.getWorld(VDGameConstants.MAP_WORLD_NAME);
-			arenaWorld = existing != null ? existing
-					: Bukkit.createWorld(new WorldCreator(VDGameConstants.MAP_WORLD_NAME));
+			if (existing != null) {
+				arenaWorld = existing;
+			} else {
+				try {
+					arenaWorld = Bukkit.createWorld(new WorldCreator(VDGameConstants.MAP_WORLD_NAME));
+				} catch (Throwable t) {
+					main.getLogger().severe("[VillagerDefense] Failed to load the " + VDGameConstants.MAP_WORLD_NAME
+							+ " world - VillagerDefense will be unavailable until this is fixed.");
+					t.printStackTrace();
+				}
+			}
 		}
 		return arenaWorld;
 	}
@@ -82,6 +96,10 @@ public class VDGameManager {
 		}
 
 		if (activeInstance == null) {
+			if (getArenaWorld() == null) {
+				player.sendMessage(main.color("&c&l(!) &rVillagerDefense's map failed to load. Tell staff to check the console."));
+				return false;
+			}
 			activeInstance = new VDGameInstance(this);
 		}
 
