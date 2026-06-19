@@ -1,22 +1,38 @@
 package anthony.villagerdefense;
 
 import anthony.SuperCraftBrawl.gui.ConfirmationGUI;
+import anthony.villagerdefense.items.GrapplingHookItem;
+import anthony.villagerdefense.items.TeleportBowItem;
+import anthony.villagerdefense.items.ThrowableTntItem;
 import anthony.villagerdefense.resources.VDResourceType;
 import anthony.villagerdefense.shop.VDShopGUI;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.util.Vector;
+
+import java.util.Collections;
+import java.util.UUID;
 
 /**
  * All VillagerDefense-only event handling. Every handler bails immediately
@@ -70,6 +86,8 @@ public class VDPlayerListener implements Listener {
 			VDGameInstance instance = vdGameManager.getInstanceOfPlayer(player);
 			if (instance == null || instance.getState() != VDGameState.IN_PROGRESS) return;
 
+			applyTeleportBow(event.getDamager(), player);
+
 			if (!event.isCancelled() && event.getFinalDamage() >= player.getHealth() - 0.2) {
 				event.setCancelled(true);
 				instance.handlePlayerDowned(player);
@@ -97,6 +115,75 @@ public class VDPlayerListener implements Listener {
 			if (shooter instanceof Player) return (Player) shooter;
 		}
 		return null;
+	}
+
+	private static final String TELEPORT_BOW_METADATA = "vd_teleport_bow";
+
+	/** Shooting a player with the Teleport Bow teleports the shooter to them. */
+	private void applyTeleportBow(Entity damager, Player victim) {
+		if (!(damager instanceof Arrow) || !damager.hasMetadata(TELEPORT_BOW_METADATA)) return;
+
+		Object value = damager.getMetadata(TELEPORT_BOW_METADATA).get(0).value();
+		if (!(value instanceof UUID)) return;
+
+		Player shooter = Bukkit.getPlayer((UUID) value);
+		if (shooter != null) {
+			shooter.teleport(victim.getLocation());
+		}
+	}
+
+	@EventHandler
+	public void onShootBow(EntityShootBowEvent event) {
+		if (!(event.getEntity() instanceof Player)) return;
+
+		Player shooter = (Player) event.getEntity();
+		VDGameInstance instance = vdGameManager.getInstanceOfPlayer(shooter);
+		if (instance == null || instance.getState() != VDGameState.IN_PROGRESS) return;
+
+		if (TeleportBowItem.matches(event.getBow())) {
+			event.getProjectile().setMetadata(TELEPORT_BOW_METADATA,
+					new FixedMetadataValue(vdGameManager.getMain(), shooter.getUniqueId()));
+		}
+	}
+
+	@EventHandler
+	public void onPlayerInteract(PlayerInteractEvent event) {
+		if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+
+		Player player = event.getPlayer();
+		VDGameInstance instance = vdGameManager.getInstanceOfPlayer(player);
+		if (instance == null || instance.getState() != VDGameState.IN_PROGRESS) return;
+
+		ItemStack item = event.getItem();
+		if (GrapplingHookItem.matches(item)) {
+			useGrapplingHook(player);
+		} else if (ThrowableTntItem.matches(item)) {
+			throwTnt(player);
+		}
+	}
+
+	private void useGrapplingHook(Player player) {
+		Block target = player.getTargetBlock(Collections.singleton(Material.AIR), 60);
+		if (target == null) return;
+
+		Vector toTarget = target.getLocation().add(0.5, 0.5, 0.5).subtract(player.getLocation()).toVector();
+		double distance = toTarget.length();
+		if (distance < 1) return;
+
+		player.setVelocity(toTarget.normalize().multiply(Math.min(distance, 8) * 0.6));
+	}
+
+	private void throwTnt(Player player) {
+		TNTPrimed tnt = (TNTPrimed) player.getWorld().spawnEntity(player.getEyeLocation(), org.bukkit.entity.EntityType.PRIMED_TNT);
+		tnt.setVelocity(player.getLocation().getDirection().multiply(1.4));
+		tnt.setFuseTicks(60);
+
+		ItemStack handItem = player.getItemInHand();
+		if (handItem.getAmount() <= 1) {
+			player.setItemInHand(null);
+		} else {
+			handItem.setAmount(handItem.getAmount() - 1);
+		}
 	}
 
 	@EventHandler
