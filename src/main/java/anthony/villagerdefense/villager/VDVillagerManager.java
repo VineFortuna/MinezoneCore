@@ -109,6 +109,7 @@ public class VDVillagerManager {
 		team.setLevel(next);
 		instance.TellAll(instance.getManager().getMain().color("&6&l(!) &eTeam " + team.getName()
 				+ "&r upgraded their villager to &e" + next.name() + "&r!"));
+		instance.getDefenseManager().onTeamUpgraded(team);
 		return true;
 	}
 }

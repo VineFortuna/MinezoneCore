@@ -1,5 +1,6 @@
 package anthony.villagerdefense;
 
+import anthony.villagerdefense.defense.VDDefenseManager;
 import anthony.villagerdefense.map.VDMapConfig;
 import anthony.villagerdefense.map.VDTeamSite;
 import anthony.villagerdefense.resources.VDResourceGenerator;
@@ -7,6 +8,7 @@ import anthony.villagerdefense.villager.VDVillagerManager;
 import anthony.villagerdefense.villager.VillagerLevel;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.BlockState;
@@ -33,6 +35,7 @@ public class VDGameInstance {
 	private final List<BlockState> undoLog = new ArrayList<>();
 	private final VDVillagerManager villagerManager;
 	private final VDResourceGenerator resourceGenerator;
+	private final VDDefenseManager defenseManager;
 
 	private VDGameState state = VDGameState.WAITING;
 	private BukkitTask countdownTask;
@@ -42,6 +45,7 @@ public class VDGameInstance {
 		this.world = manager.getArenaWorld();
 		this.villagerManager = new VDVillagerManager(this);
 		this.resourceGenerator = new VDResourceGenerator(this);
+		this.defenseManager = new VDDefenseManager(this);
 
 		for (int siteId = 1; siteId <= VDMapConfig.TEAM_COUNT; siteId++) {
 			teams.put(siteId, new VDTeam(
@@ -59,6 +63,10 @@ public class VDGameInstance {
 
 	public VDVillagerManager getVillagerManager() {
 		return villagerManager;
+	}
+
+	public VDDefenseManager getDefenseManager() {
+		return defenseManager;
 	}
 
 	public World getWorld() {
@@ -95,6 +103,31 @@ public class VDGameInstance {
 	/** Tracks a block's pre-change state during a match so it can be restored on reset. */
 	public void recordBlockChange(BlockState before) {
 		undoLog.add(before);
+	}
+
+	/**
+	 * Used by RepairGolemMechanic: restores up to maxBlocks distinct locations
+	 * near center to their earliest recorded state. Doesn't remove anything from
+	 * the undo log, so the final end-of-match restoreWorld() pass still wins
+	 * regardless of what's repaired mid-match.
+	 */
+	public void repairNear(Location center, double radius, int maxBlocks) {
+		Map<String, BlockState> earliestByLocation = new LinkedHashMap<>();
+
+		for (BlockState saved : undoLog) {
+			if (!saved.getWorld().equals(center.getWorld())) continue;
+			if (saved.getLocation().distanceSquared(center) > radius * radius) continue;
+
+			String key = saved.getX() + "," + saved.getY() + "," + saved.getZ();
+			earliestByLocation.putIfAbsent(key, saved);
+		}
+
+		int repaired = 0;
+		for (BlockState saved : earliestByLocation.values()) {
+			if (repaired >= maxBlocks) break;
+			saved.update(true, false);
+			repaired++;
+		}
 	}
 
 	public boolean addPlayer(Player player) {
@@ -302,6 +335,7 @@ public class VDGameInstance {
 	private void resetAndClear() {
 		resourceGenerator.stop();
 		villagerManager.despawnAll();
+		defenseManager.stopAll();
 		restoreWorld();
 
 		for (VDTeam team : teams.values()) {

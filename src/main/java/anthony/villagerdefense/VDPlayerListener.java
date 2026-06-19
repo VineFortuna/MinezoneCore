@@ -155,10 +155,18 @@ public class VDPlayerListener implements Listener {
 		if (instance == null || instance.getState() != VDGameState.IN_PROGRESS) return;
 
 		ItemStack item = event.getItem();
+		VDTeam team = instance.findTeamOf(player);
+
 		if (GrapplingHookItem.matches(item)) {
 			useGrapplingHook(player);
 		} else if (ThrowableTntItem.matches(item)) {
 			throwTnt(player);
+		} else if (team != null && anthony.villagerdefense.defense.VillageBellMechanic.matches(item)) {
+			instance.getDefenseManager().getVillageBell().activate(player, team);
+		} else if (team != null && anthony.villagerdefense.defense.BarricadeMechanic.matches(item)) {
+			instance.getDefenseManager().getBarricade().activate(player, team);
+		} else if (team != null && anthony.villagerdefense.defense.DecoyVillagerMechanic.matches(item)) {
+			instance.getDefenseManager().getDecoyVillager().activate(player, team);
 		}
 	}
 
@@ -238,6 +246,54 @@ public class VDPlayerListener implements Listener {
 			if (playerTeam != null) {
 				new VDShopGUI(vdGameManager.getMain(), playerTeam).open(player);
 			}
+		}
+	}
+
+	@EventHandler
+	public void onPlayerMove(org.bukkit.event.player.PlayerMoveEvent event) {
+		if (sameBlock(event.getFrom(), event.getTo())) return;
+
+		Player player = event.getPlayer();
+		VDGameInstance instance = vdGameManager.getInstanceOfPlayer(player);
+		if (instance == null || instance.getState() != VDGameState.IN_PROGRESS) return;
+
+		instance.getDefenseManager().getSnareTrap().checkMovement(instance, player);
+	}
+
+	private boolean sameBlock(org.bukkit.Location a, org.bukkit.Location b) {
+		return a.getBlockX() == b.getBlockX() && a.getBlockY() == b.getBlockY() && a.getBlockZ() == b.getBlockZ();
+	}
+
+	@EventHandler
+	public void onEntityDeath(org.bukkit.event.entity.EntityDeathEvent event) {
+		VDGameInstance instance = vdGameManager.getActiveInstance();
+		if (instance == null) return;
+
+		Entity entity = event.getEntity();
+
+		Integer guardSite = instance.getDefenseManager().getZombieGuard().teamSiteOf(entity);
+		if (guardSite != null) {
+			instance.getDefenseManager().getZombieGuard().onGuardKilled(guardSite);
+			return;
+		}
+
+		Integer golemSite = instance.getDefenseManager().getRepairGolem().teamSiteOf(entity);
+		if (golemSite != null) {
+			instance.getDefenseManager().getRepairGolem().onGolemKilled(golemSite);
+		}
+	}
+
+	@EventHandler
+	public void onEntityTarget(org.bukkit.event.entity.EntityTargetLivingEntityEvent event) {
+		VDGameInstance instance = vdGameManager.getActiveInstance();
+		if (instance == null || !(event.getTarget() instanceof Player)) return;
+
+		Integer guardSite = instance.getDefenseManager().getZombieGuard().teamSiteOf(event.getEntity());
+		if (guardSite == null) return;
+
+		VDTeam guardTeam = instance.getTeams().get(guardSite);
+		if (guardTeam != null && guardTeam.isMember((Player) event.getTarget())) {
+			event.setCancelled(true);
 		}
 	}
 
