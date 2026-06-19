@@ -64,9 +64,7 @@ public class VDGameManager {
 			return false;
 		}
 
-		if (main.getGameManager().GetInstanceOfPlayer(player) != null
-				|| main.getGameManager().GetInstanceOfSpectator(player) != null
-				|| main.getParkour().hasPlayer(player)) {
+		if (main.isPlayerInAnyGame(player) || main.getParkour().hasPlayer(player)) {
 			player.sendMessage(main.color("&c&l(!) &rYou have to leave your current game first!"));
 			return false;
 		}
