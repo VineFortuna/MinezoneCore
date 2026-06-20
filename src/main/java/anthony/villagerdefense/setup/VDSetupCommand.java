@@ -27,6 +27,8 @@ public class VDSetupCommand implements CommandExecutor, TabExecutor {
 	private static final List<String> SUBCOMMANDS = Arrays.asList(
 			"tp", "lobby", "team", "villager", "shop", "generator", "list", "save");
 	private static final List<String> RESOURCE_TYPES = Arrays.asList("iron", "gold", "emerald", "diamond");
+	private static final List<String> COLOR_NAMES = Arrays.asList(
+			"Lime", "Yellow", "Cyan", "Blue", "LightBlue", "White", "Pink", "Gray");
 
 	private final VDGameManager vdGameManager;
 
@@ -48,6 +50,10 @@ public class VDSetupCommand implements CommandExecutor, TabExecutor {
 			return true;
 		}
 
+		// Force the arena world to load (if it hasn't already) before reading any
+		// saved Location - VDMapConfig is loaded at plugin startup, before the arena
+		// world exists, so saved Locations have a null World until this reloads it.
+		org.bukkit.World arenaWorld = vdGameManager.getArenaWorld();
 		VDMapConfig config = vdGameManager.getMapConfigManager().getConfig();
 		String sub = args[0].toLowerCase();
 
@@ -64,14 +70,13 @@ public class VDSetupCommand implements CommandExecutor, TabExecutor {
 
 		if (sub.equals("tp")) {
 			Location target = config.getLobby();
-			if (target == null) {
-				org.bukkit.World world = vdGameManager.getArenaWorld();
-				if (world == null) {
+			if (target == null || target.getWorld() == null) {
+				if (arenaWorld == null) {
 					player.sendMessage(vdGameManager.getMain().color("&c&l(!) &rFailed to load &e"
 							+ VDGameConstants.MAP_WORLD_NAME + "&r. Check the console for errors."));
 					return true;
 				}
-				target = world.getSpawnLocation();
+				target = arenaWorld.getSpawnLocation();
 			}
 			player.teleport(target);
 			player.sendMessage(vdGameManager.getMain().color("&2&l(!) &rTeleported to &e" + VDGameConstants.MAP_WORLD_NAME + "&r."));
@@ -95,7 +100,7 @@ public class VDSetupCommand implements CommandExecutor, TabExecutor {
 			case "team":
 			case "villager":
 			case "shop": {
-				Integer siteId = parseSiteId(player, args, 1);
+				Integer siteId = parseTeamColor(player, args, 1);
 				if (siteId == null) break;
 
 				VDTeamSite site = config.getTeamSite(siteId);
@@ -103,7 +108,8 @@ public class VDSetupCommand implements CommandExecutor, TabExecutor {
 				else if (sub.equals("villager")) site.setVillagerLoc(loc);
 				else site.setShopLoc(loc);
 
-				player.sendMessage(vdGameManager.getMain().color("&2&l(!) &rSet team &e" + siteId + "&r's " + sub + " point."));
+				player.sendMessage(vdGameManager.getMain().color("&2&l(!) &rSet team &e"
+						+ VDGameConstants.TEAM_NAMES[siteId - 1] + "&r's " + sub + " point."));
 				break;
 			}
 
@@ -129,14 +135,15 @@ public class VDSetupCommand implements CommandExecutor, TabExecutor {
 		String type = args[1].toLowerCase();
 
 		if (type.equals("iron") || type.equals("gold")) {
-			Integer siteId = parseSiteId(player, args, 2);
+			Integer siteId = parseTeamColor(player, args, 2);
 			if (siteId == null) return;
 
 			VDTeamSite site = config.getTeamSite(siteId);
 			if (type.equals("iron")) site.setIronGenerator(loc);
 			else site.setGoldGenerator(loc);
 
-			player.sendMessage(vdGameManager.getMain().color("&2&l(!) &rSet team &e" + siteId + "&r's " + type + " generator."));
+			player.sendMessage(vdGameManager.getMain().color("&2&l(!) &rSet team &e"
+					+ VDGameConstants.TEAM_NAMES[siteId - 1] + "&r's " + type + " generator."));
 			return;
 		}
 
@@ -159,25 +166,19 @@ public class VDSetupCommand implements CommandExecutor, TabExecutor {
 		player.sendMessage(vdGameManager.getMain().color("&2&l(!) &rSet " + type + " generator &e#" + id + "&r."));
 	}
 
-	private Integer parseSiteId(Player player, String[] args, int index) {
+	private Integer parseTeamColor(Player player, String[] args, int index) {
 		if (args.length <= index) {
-			player.sendMessage(vdGameManager.getMain().color("&c&l(!) &rYou must specify a team id (1-"
-					+ VDMapConfig.TEAM_COUNT + ")."));
+			player.sendMessage(vdGameManager.getMain().color("&c&l(!) &rYou must specify a team color: &e"
+					+ VDGameConstants.colorNameList()));
 			return null;
 		}
 
-		try {
-			int id = Integer.parseInt(args[index]);
-			if (id < 1 || id > VDMapConfig.TEAM_COUNT) {
-				player.sendMessage(vdGameManager.getMain().color("&c&l(!) &rTeam id must be between 1 and "
-						+ VDMapConfig.TEAM_COUNT + "."));
-				return null;
-			}
-			return id;
-		} catch (NumberFormatException e) {
-			player.sendMessage(vdGameManager.getMain().color("&c&l(!) &rThat's not a valid team id!"));
-			return null;
+		Integer siteId = VDGameConstants.siteIdForColorName(args[index]);
+		if (siteId == null) {
+			player.sendMessage(vdGameManager.getMain().color("&c&l(!) &rThat's not a valid team color! Try: &e"
+					+ VDGameConstants.colorNameList()));
 		}
+		return siteId;
 	}
 
 	private void sendStatus(Player player, VDMapConfig config) {
@@ -198,13 +199,14 @@ public class VDSetupCommand implements CommandExecutor, TabExecutor {
 		player.sendMessage(vdGameManager.getMain().color("&6&lVDSETUP COMMANDS"));
 		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup tp -> &rTeleport into the map to start setting up"));
 		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup lobby"));
-		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup team <1-8>"));
-		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup villager <1-8>"));
-		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup shop <1-8>"));
-		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup generator <iron|gold> <1-8>"));
+		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup team <color>"));
+		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup villager <color>"));
+		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup shop <color>"));
+		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup generator <iron|gold> <color>"));
 		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup generator <emerald|diamond> <id>"));
 		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup list"));
 		player.sendMessage(vdGameManager.getMain().color("&e/vdsetup save"));
+		player.sendMessage(vdGameManager.getMain().color("&7Colors: &e" + VDGameConstants.colorNameList()));
 	}
 
 	@Override
@@ -215,6 +217,16 @@ public class VDSetupCommand implements CommandExecutor, TabExecutor {
 
 		if (args.length == 2 && args[0].equalsIgnoreCase("generator")) {
 			return StringUtil.copyPartialMatches(args[1], RESOURCE_TYPES, new ArrayList<>());
+		}
+
+		if (args.length == 2 && (args[0].equalsIgnoreCase("team")
+				|| args[0].equalsIgnoreCase("villager") || args[0].equalsIgnoreCase("shop"))) {
+			return StringUtil.copyPartialMatches(args[1], COLOR_NAMES, new ArrayList<>());
+		}
+
+		if (args.length == 3 && args[0].equalsIgnoreCase("generator")
+				&& (args[1].equalsIgnoreCase("iron") || args[1].equalsIgnoreCase("gold"))) {
+			return StringUtil.copyPartialMatches(args[2], COLOR_NAMES, new ArrayList<>());
 		}
 
 		return Collections.emptyList();

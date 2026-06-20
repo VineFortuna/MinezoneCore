@@ -1,6 +1,6 @@
 package anthony.villagerdefense;
 
-import anthony.villagerdefense.resources.VDResourceType;
+import anthony.villagerdefense.shop.VDTeamUpgrade;
 import anthony.villagerdefense.villager.VillagerLevel;
 import org.bukkit.DyeColor;
 import org.bukkit.entity.Player;
@@ -26,7 +26,7 @@ public class VDTeam {
 	private final List<UUID> members = new ArrayList<>();
 
 	private VillagerLevel level = VillagerLevel.LEVEL_1;
-	private final Map<VDResourceType, Integer> resources = new EnumMap<>(VDResourceType.class);
+	private final Map<VDTeamUpgrade, Integer> upgradeTiers = new EnumMap<>(VDTeamUpgrade.class);
 
 	private boolean villagerAlive = true;
 	private Villager villagerEntity;
@@ -37,9 +37,6 @@ public class VDTeam {
 		this.name = name;
 		this.color = color;
 		this.capacity = capacity;
-		for (VDResourceType type : VDResourceType.values()) {
-			resources.put(type, 0);
-		}
 	}
 
 	public int getSiteId() {
@@ -87,27 +84,16 @@ public class VDTeam {
 		this.level = level;
 	}
 
-	public int getResource(VDResourceType type) {
-		return resources.getOrDefault(type, 0);
+	public int getUpgradeTier(VDTeamUpgrade upgrade) {
+		return upgradeTiers.getOrDefault(upgrade, upgrade.getBaseTier());
 	}
 
-	public void addResource(VDResourceType type, int amount) {
-		resources.merge(type, amount, Integer::sum);
+	public void setUpgradeTier(VDTeamUpgrade upgrade, int tier) {
+		upgradeTiers.put(upgrade, tier);
 	}
 
-	public boolean canAfford(Map<VDResourceType, Integer> cost) {
-		for (Map.Entry<VDResourceType, Integer> entry : cost.entrySet()) {
-			if (getResource(entry.getKey()) < entry.getValue()) return false;
-		}
-		return true;
-	}
-
-	public boolean spend(Map<VDResourceType, Integer> cost) {
-		if (!canAfford(cost)) return false;
-		for (Map.Entry<VDResourceType, Integer> entry : cost.entrySet()) {
-			resources.merge(entry.getKey(), -entry.getValue(), Integer::sum);
-		}
-		return true;
+	public void resetUpgrades() {
+		upgradeTiers.clear();
 	}
 
 	public boolean isVillagerAlive() {

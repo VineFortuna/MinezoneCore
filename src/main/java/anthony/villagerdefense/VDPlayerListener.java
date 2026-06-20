@@ -4,14 +4,16 @@ import anthony.SuperCraftBrawl.gui.ConfirmationGUI;
 import anthony.villagerdefense.items.GrapplingHookItem;
 import anthony.villagerdefense.items.TeleportBowItem;
 import anthony.villagerdefense.items.ThrowableTntItem;
-import anthony.villagerdefense.resources.VDResourceType;
 import anthony.villagerdefense.shop.VDShopGUI;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.FishHook;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.entity.TNTPrimed;
@@ -23,15 +25,14 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.util.Vector;
 
-import java.util.Collections;
 import java.util.UUID;
 
 /**
@@ -54,25 +55,59 @@ public class VDPlayerListener implements Listener {
 		if (instance == null) return;
 
 		instance.recordBlockChange(event.getBlockReplacedState());
+		instance.markPlaced(event.getBlock());
 	}
 
+	/** Bedwars rule: the map's own terrain can't be broken - only blocks a player placed during the match. */
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent event) {
 		VDGameInstance instance = vdGameManager.getInstanceOfPlayer(event.getPlayer());
 		if (instance == null) return;
 
+		if (!instance.isPlacedByPlayer(event.getBlock())) {
+			event.setCancelled(true);
+			event.getPlayer().sendMessage(vdGameManager.getMain().color(
+					"&c&l(!) &rYou can only break blocks placed by players!"));
+			return;
+		}
+
 		instance.recordBlockChange(event.getBlock().getState());
+		instance.unmarkPlaced(event.getBlock());
 	}
 
 	@EventHandler
 	public void onEntityDamage(EntityDamageEvent event) {
-		if (!(event.getEntity() instanceof Player)) return;
+		Entity entity = event.getEntity();
 
-		Player player = (Player) event.getEntity();
-		VDGameInstance instance = vdGameManager.getInstanceOfPlayer(player);
+		if (entity instanceof Player) {
+			Player player = (Player) entity;
+			VDGameInstance instance = vdGameManager.getInstanceOfPlayer(player);
+			if (instance == null) return;
+
+			if (instance.getState() != VDGameState.IN_PROGRESS) {
+				event.setCancelled(true);
+				return;
+			}
+
+			// Entity-caused damage (PvP, mobs) is handled by onEntityDamageByEntity,
+			// which shares this same event - only handle the environmental causes
+			// (fall, fire, lava, drowning, etc.) here so a kill is never registered twice.
+			if (!(event instanceof EntityDamageByEntityEvent) && !event.isCancelled()
+					&& event.getFinalDamage() >= player.getHealth() - 0.2) {
+				event.setCancelled(true);
+				instance.killPlayer(player, null);
+			}
+			return;
+		}
+
+		// Objective Villagers and Shopkeepers never take real damage - the
+		// objective is destroyed purely by hit count (see registerHit), and
+		// shopkeepers can't be destroyed at all.
+		VDGameInstance instance = vdGameManager.getActiveInstance();
 		if (instance == null) return;
 
-		if (instance.getState() != VDGameState.IN_PROGRESS) {
+		if (instance.getVillagerManager().findTeamByObjective(entity) != null
+				|| instance.getVillagerManager().findSiteByShopkeeper(entity) != null) {
 			event.setCancelled(true);
 		}
 	}
@@ -90,7 +125,7 @@ public class VDPlayerListener implements Listener {
 
 			if (!event.isCancelled() && event.getFinalDamage() >= player.getHealth() - 0.2) {
 				event.setCancelled(true);
-				instance.handlePlayerDowned(player);
+				instance.killPlayer(player, resolveKiller(event.getDamager()));
 			}
 			return;
 		}
@@ -101,11 +136,16 @@ public class VDPlayerListener implements Listener {
 		VDTeam team = instance.getVillagerManager().findTeamByObjective(entity);
 		if (team == null) return;
 
-		LivingEntity villager = (LivingEntity) entity;
-		if (event.isCancelled() || event.getFinalDamage() < villager.getHealth() - 0.2) return;
-
 		event.setCancelled(true);
-		instance.getVillagerManager().destroyObjective(team, resolveKiller(event.getDamager()));
+		Player attacker = resolveKiller(event.getDamager());
+		if (attacker == null) return;
+
+		if (instance.findTeamOf(attacker) == team) {
+			attacker.sendMessage(vdGameManager.getMain().color("&c&l(!) &rYou can't damage your own villager!"));
+			return;
+		}
+
+		instance.getVillagerManager().registerHit(team, attacker);
 	}
 
 	private Player resolveKiller(Entity damager) {
@@ -157,9 +197,7 @@ public class VDPlayerListener implements Listener {
 		ItemStack item = event.getItem();
 		VDTeam team = instance.findTeamOf(player);
 
-		if (GrapplingHookItem.matches(item)) {
-			useGrapplingHook(player);
-		} else if (ThrowableTntItem.matches(item)) {
+		if (ThrowableTntItem.matches(item)) {
 			throwTnt(player);
 		} else if (team != null && anthony.villagerdefense.defense.VillageBellMechanic.matches(item)) {
 			instance.getDefenseManager().getVillageBell().activate(player, team);
@@ -170,15 +208,40 @@ public class VDPlayerListener implements Listener {
 		}
 	}
 
-	private void useGrapplingHook(Player player) {
-		Block target = player.getTargetBlock(Collections.singleton(Material.AIR), 60);
-		if (target == null) return;
+	/**
+	 * Same grapple mechanic as SuperCraftBros' FishermanClass#onFish: cast the
+	 * rod like a normal fishing rod, and once the hook embeds in (or right next
+	 * to) a block, yank the player toward it. Far more reliable than a manual
+	 * line-of-sight raycast since it rides on vanilla's own hook physics.
+	 */
+	@EventHandler
+	public void onFish(PlayerFishEvent event) {
+		Player player = event.getPlayer();
+		VDGameInstance instance = vdGameManager.getInstanceOfPlayer(player);
+		if (instance == null || instance.getState() != VDGameState.IN_PROGRESS) return;
 
-		Vector toTarget = target.getLocation().add(0.5, 0.5, 0.5).subtract(player.getLocation()).toVector();
-		double distance = toTarget.length();
-		if (distance < 1) return;
+		if (!GrapplingHookItem.matches(player.getItemInHand())) return;
 
-		player.setVelocity(toTarget.normalize().multiply(Math.min(distance, 8) * 0.6));
+		PlayerFishEvent.State state = event.getState();
+		if (state != PlayerFishEvent.State.FAILED_ATTEMPT && state != PlayerFishEvent.State.IN_GROUND) return;
+
+		FishHook hook = event.getHook();
+		Block block = hook.getLocation().getBlock();
+		boolean grapple = block.getType() != Material.AIR;
+
+		if (!grapple) {
+			for (BlockFace face : BlockFace.values()) {
+				if (block.getRelative(face).getType() != Material.AIR) {
+					grapple = true;
+					break;
+				}
+			}
+		}
+		if (!grapple) return;
+
+		Vector toHook = hook.getLocation().toVector().subtract(player.getLocation().toVector()).normalize();
+		player.setVelocity(toHook.multiply(2).add(new Vector(0, 0.8, 0)));
+		player.getWorld().playSound(player.getLocation(), Sound.BAT_TAKEOFF, 1, 10);
 	}
 
 	private void throwTnt(Player player) {
@@ -192,24 +255,6 @@ public class VDPlayerListener implements Listener {
 		} else {
 			handItem.setAmount(handItem.getAmount() - 1);
 		}
-	}
-
-	@EventHandler
-	public void onItemPickup(PlayerPickupItemEvent event) {
-		Player player = event.getPlayer();
-		VDGameInstance instance = vdGameManager.getInstanceOfPlayer(player);
-		if (instance == null || instance.getState() != VDGameState.IN_PROGRESS) return;
-
-		VDTeam team = instance.findTeamOf(player);
-		if (team == null) return;
-
-		ItemStack stack = event.getItem().getItemStack();
-		VDResourceType type = VDResourceType.fromMaterial(stack.getType());
-		if (type == null) return;
-
-		event.setCancelled(true);
-		team.addResource(type, stack.getAmount());
-		event.getItem().remove();
 	}
 
 	@EventHandler
@@ -244,7 +289,7 @@ public class VDPlayerListener implements Listener {
 			event.setCancelled(true);
 			VDTeam playerTeam = instance.findTeamOf(player);
 			if (playerTeam != null) {
-				new VDShopGUI(vdGameManager.getMain(), playerTeam).open(player);
+				new VDShopGUI(instance, playerTeam).open(player);
 			}
 		}
 	}
@@ -256,6 +301,15 @@ public class VDPlayerListener implements Listener {
 		Player player = event.getPlayer();
 		VDGameInstance instance = vdGameManager.getInstanceOfPlayer(player);
 		if (instance == null || instance.getState() != VDGameState.IN_PROGRESS) return;
+
+		// Eliminated/respawning players are GameMode.SPECTATOR - skip void/trap
+		// checks for them so a mid-respawn ghost can't re-trigger either.
+		if (player.getGameMode() != GameMode.SURVIVAL) return;
+
+		if (player.getLocation().getY() <= 0) {
+			instance.killPlayerInVoid(player);
+			return;
+		}
 
 		instance.getDefenseManager().getSnareTrap().checkMovement(instance, player);
 	}

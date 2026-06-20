@@ -19,8 +19,9 @@ public final class GrapplingHookItem {
 
 	public static ItemStack create() {
 		return ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD), "&a" + NAME,
-				"&7Right-click while looking at a",
-				"&7block to pull yourself toward it.");
+				"&7Right-click to cast it like a",
+				"&7fishing rod - it'll yank you toward",
+				"&7whatever block it lands on.");
 	}
 
 	public static boolean matches(ItemStack item) {

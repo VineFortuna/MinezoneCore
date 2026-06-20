@@ -46,18 +46,34 @@ public class VDGameManager {
 	public World getArenaWorld() {
 		if (arenaWorld == null) {
 			World existing = Bukkit.getWorld(VDGameConstants.MAP_WORLD_NAME);
+
 			if (existing != null) {
 				arenaWorld = existing;
 			} else {
 				try {
-					arenaWorld = Bukkit.createWorld(new WorldCreator(VDGameConstants.MAP_WORLD_NAME));
+					arenaWorld = Bukkit.createWorld(
+							new WorldCreator(VDGameConstants.MAP_WORLD_NAME)
+					);
 				} catch (Throwable t) {
-					main.getLogger().severe("[VillagerDefense] Failed to load the " + VDGameConstants.MAP_WORLD_NAME
-							+ " world - VillagerDefense will be unavailable until this is fixed.");
+					main.getLogger().severe(
+							"[VillagerDefense] Failed to load the "
+									+ VDGameConstants.MAP_WORLD_NAME
+									+ " world - VillagerDefense will be unavailable until this is fixed."
+					);
 					t.printStackTrace();
 				}
 			}
+
+			/*
+			 * The map configuration was originally loaded before the arena
+			 * world existed, meaning its Locations may contain a null World.
+			 * Reload it now that Speedway is loaded.
+			 */
+			if (arenaWorld != null) {
+				mapConfigManager.load();
+			}
 		}
+
 		return arenaWorld;
 	}
 
@@ -84,22 +100,43 @@ public class VDGameManager {
 			return false;
 		}
 
-		if (!mapConfigManager.getConfig().isReady()) {
-			player.sendMessage(main.color("&c&l(!) &rVillagerDefense's map hasn't been fully configured yet!"));
+		World world = getArenaWorld();
+
+		if (world == null) {
+			player.sendMessage(main.color(
+					"&c&l(!) &rVillagerDefense's map failed to load. Tell staff to check the console."
+			));
 			return false;
 		}
 
-		if (activeInstance != null && activeInstance.getState() != VDGameState.WAITING
+		if (!mapConfigManager.getConfig().isReady()) {
+			player.sendMessage(main.color(
+					"&c&l(!) &rVillagerDefense's map hasn't been fully configured yet!"
+			));
+			return false;
+		}
+
+		if (mapConfigManager.getConfig().getLobby() == null
+				|| mapConfigManager.getConfig().getLobby().getWorld() == null) {
+			player.sendMessage(main.color(
+					"&c&l(!) &rThe VillagerDefense lobby location is invalid. Please set it again."
+			));
+			main.getLogger().severe(
+					"[VillagerDefense] Lobby location has no valid world."
+			);
+			return false;
+		}
+
+		if (activeInstance != null
+				&& activeInstance.getState() != VDGameState.WAITING
 				&& activeInstance.getState() != VDGameState.STARTING) {
-			player.sendMessage(main.color("&c&l(!) &rA VillagerDefense match is already in progress. Try again soon!"));
+			player.sendMessage(main.color(
+					"&c&l(!) &rA VillagerDefense match is already in progress. Try again soon!"
+			));
 			return false;
 		}
 
 		if (activeInstance == null) {
-			if (getArenaWorld() == null) {
-				player.sendMessage(main.color("&c&l(!) &rVillagerDefense's map failed to load. Tell staff to check the console."));
-				return false;
-			}
 			activeInstance = new VDGameInstance(this);
 		}
 

@@ -1,5 +1,6 @@
 package anthony.villagerdefense.map;
 
+import anthony.villagerdefense.VDGameConstants;
 import org.bukkit.Location;
 
 import java.util.LinkedHashMap;
@@ -69,11 +70,12 @@ public class VDMapConfig {
 		java.util.List<String> missing = new java.util.ArrayList<>();
 		if (lobby == null) missing.add("lobby");
 		for (VDTeamSite site : teamSites.values()) {
-			if (site.getSpawn() == null) missing.add("team " + site.getId() + " spawn");
-			if (site.getVillagerLoc() == null) missing.add("team " + site.getId() + " villager");
-			if (site.getShopLoc() == null) missing.add("team " + site.getId() + " shop");
-			if (site.getIronGenerator() == null) missing.add("team " + site.getId() + " iron generator");
-			if (site.getGoldGenerator() == null) missing.add("team " + site.getId() + " gold generator");
+			String color = VDGameConstants.TEAM_NAMES[site.getId() - 1];
+			if (site.getSpawn() == null) missing.add("team " + color + " spawn");
+			if (site.getVillagerLoc() == null) missing.add("team " + color + " villager");
+			if (site.getShopLoc() == null) missing.add("team " + color + " shop");
+			if (site.getIronGenerator() == null) missing.add("team " + color + " iron generator");
+			if (site.getGoldGenerator() == null) missing.add("team " + color + " gold generator");
 		}
 		if (emeraldGenerators.isEmpty()) missing.add("at least one emerald generator");
 		if (diamondGenerators.isEmpty()) missing.add("at least one diamond generator");
