@@ -1839,13 +1839,19 @@ public abstract class BaseClass {
 		}
 
 		if (baseClass.getType() == ClassType.Sheep) {
-			damagerPlayer.getInventory().addItem(
-					new ItemStack(Material.ENCHANTMENT_TABLE)
-			);
-
 			damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
 					"&r&l(!) &rYou got a kill and now you can switch your wool color if you'd like!"
 			));
+
+			ItemStack currentItem = damagerPlayer.getInventory().getItem(1);
+			ItemStack woolEnchanter = ItemHelper.setDetails(new ItemStack(Material.ENCHANTMENT_TABLE, 1),
+					ChatColor.BLUE + "Wool Enchanter", ChatColor.YELLOW + "Right click!");
+
+			if (currentItem == null || currentItem.getType() != Material.ENCHANTMENT_TABLE) {
+				damagerPlayer.getInventory().setItem(1, woolEnchanter);
+			} else {
+				damagerPlayer.getInventory().addItem(woolEnchanter);
+			}
 
 		} else if (baseClass.getType() == ClassType.Hunter) {
 			if (!hunterDash) {
