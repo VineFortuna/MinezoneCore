@@ -44,7 +44,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-public class GameInstance {
+public class GameInstance implements WinEffects.Host {
 
     // Variables
     private final GameManager gameManager;
@@ -162,6 +162,29 @@ public class GameInstance {
 
     public World getMapWorld() {
         return this.mapWorld;
+    }
+
+    // WinEffects.Host plumbing - lets WinEffects.java be shared with other gamemodes
+    // (e.g. FlagDefense) without depending on this concrete class. Pure delegation,
+    // no behavior change for SCB itself.
+    @Override
+    public Core getPlugin() {
+        return gameManager.getMain();
+    }
+
+    @Override
+    public Vector getFloodCenter() {
+        return map.GetInstance().center.clone();
+    }
+
+    @Override
+    public double getFloodBoundsX() {
+        return map.GetInstance().boundsX;
+    }
+
+    @Override
+    public double getFloodBoundsZ() {
+        return map.GetInstance().boundsZ;
     }
 
     public void setSign(Sign s) {

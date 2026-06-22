@@ -92,7 +92,7 @@ public class Core extends JavaPlugin implements Listener {
     public Version version;
     public FreeClassesGUI inventoryGUI;
     public anthony.CrystalWars.game.GameManager gm;
-    public anthony.villagerdefense.VDGameManager vdGameManager;
+    public anthony.flagdefense.FDGameManager fdGameManager;
     public DonorClassesGUI donorGUI;
     public GameSelectorGUI hubGUI;
     public Commands commands;
@@ -298,15 +298,15 @@ public class Core extends JavaPlugin implements Listener {
         return gm;
     }
 
-    public anthony.villagerdefense.VDGameManager getVdGameManager() {
-        return vdGameManager;
+    public anthony.flagdefense.FDGameManager getFdGameManager() {
+        return fdGameManager;
     }
 
     public boolean isPlayerInAnyGame(Player player) {
         return getGameManager().GetInstanceOfPlayer(player) != null
                 || getGameManager().GetInstanceOfSpectator(player) != null
-                || vdGameManager.getInstanceOfPlayer(player) != null
-                || vdGameManager.getInstanceOfSpectator(player) != null;
+                || fdGameManager.getInstanceOfPlayer(player) != null
+                || fdGameManager.getInstanceOfSpectator(player) != null;
     }
 
     public FlawlessWinsBoard getFlawlessWinsBoard() {
@@ -738,19 +738,19 @@ public class Core extends JavaPlugin implements Listener {
 
         getCommand("treatsadmin").setExecutor(new TreatsAdminCommand(halloweenHunt));
 
-        anthony.villagerdefense.VDCommand vdCommand = new anthony.villagerdefense.VDCommand(vdGameManager);
-        getCommand("vd").setExecutor(vdCommand);
-        getCommand("vd").setTabCompleter(vdCommand);
+        anthony.flagdefense.FDCommand fdCommand = new anthony.flagdefense.FDCommand(fdGameManager);
+        getCommand("fd").setExecutor(fdCommand);
+        getCommand("fd").setTabCompleter(fdCommand);
 
-        anthony.villagerdefense.setup.VDSetupCommand vdSetupCommand =
-                new anthony.villagerdefense.setup.VDSetupCommand(vdGameManager);
-        getCommand("vdsetup").setExecutor(vdSetupCommand);
-        getCommand("vdsetup").setTabCompleter(vdSetupCommand);
+        anthony.flagdefense.setup.FDSetupCommand fdSetupCommand =
+                new anthony.flagdefense.setup.FDSetupCommand(fdGameManager);
+        getCommand("fdsetup").setExecutor(fdSetupCommand);
+        getCommand("fdsetup").setTabCompleter(fdSetupCommand);
     }
 
     private void registrations() {
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
-        Bukkit.getServer().getPluginManager().registerEvents(new anthony.villagerdefense.VDPlayerListener(vdGameManager), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new anthony.flagdefense.FDPlayerListener(fdGameManager), this);
         Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         Bukkit.getMessenger().registerIncomingPluginChannel(this, "BungeeCord", gameManager);
     }
@@ -761,7 +761,7 @@ public class Core extends JavaPlugin implements Listener {
         msg = new ArrayList<>();
         listener = new PlayerListener(this);
         gameManager = new GameManager(this);
-        vdGameManager = new anthony.villagerdefense.VDGameManager(this);
+        fdGameManager = new anthony.flagdefense.FDGameManager(this);
         mysteryChestManager = new MysteryChestManager(this);
         cosmeticsManager = new CosmeticsManager(this);
         scoreboardManager = new ScoreboardManager(this);
@@ -1075,9 +1075,9 @@ public class Core extends JavaPlugin implements Listener {
                 if (this.getGameManager().GetInstanceOfPlayer(player) != null
                         || this.getGameManager().GetInstanceOfSpectator(player) != null) {
                     this.getCommands().leaveGame(player);
-                } else if (vdGameManager.getInstanceOfPlayer(player) != null
-                        || vdGameManager.getInstanceOfSpectator(player) != null) {
-                    vdGameManager.leaveGame(player);
+                } else if (fdGameManager.getInstanceOfPlayer(player) != null
+                        || fdGameManager.getInstanceOfSpectator(player) != null) {
+                    fdGameManager.leaveGame(player);
                 } else if (this.getParkour().hasPlayer(player)) {
                     this.getParkour().removePlayer(player);
                     this.ResetPlayer(player);

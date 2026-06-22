@@ -1836,7 +1836,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		GameInstance instance = null;
 
         //If a player is already in a game, do not spectate
-		if (GetInstanceOfPlayer(player) != null || getMain().getVdGameManager().getInstanceOfPlayer(player) != null) {
+		if (GetInstanceOfPlayer(player) != null || getMain().getFdGameManager().getInstanceOfPlayer(player) != null) {
             player.sendMessage(main.color("&c&l(!) &rYou have to leave your game to Spectate"));
 			return GameReason.IN_ANOTHER;
 		}
@@ -1859,7 +1859,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		GameInstance instance = null;
 
 		if (GetInstanceOfPlayer(player) != null || getMain().getParkour().hasPlayer(player)
-				|| getMain().getVdGameManager().getInstanceOfPlayer(player) != null)
+				|| getMain().getFdGameManager().getInstanceOfPlayer(player) != null)
 			return GameReason.IN_ANOTHER;
 
 		if (gameMap.containsKey(map)) // Checks if the game has already been initialized

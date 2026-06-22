@@ -1,6 +1,6 @@
 package anthony.SuperCraftBrawl.Game;
 
-import anthony.SuperCraftBrawl.Game.map.MapInstance;
+import anthony.SuperCraftBrawl.Core;
 import anthony.util.ItemHelper;
 import net.minecraft.server.v1_8_R3.PacketPlayOutNamedSoundEffect;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -28,8 +28,22 @@ import com.mojang.authlib.properties.Property;
 
 public class WinEffects {
 
+    /**
+     * The slice of a game mode's match state WinEffects actually needs - lets this
+     * class be shared by any gamemode (SCB's GameInstance, FlagDefense's FDGameInstance
+     * via a small adapter, etc.) without depending on SCB's concrete GameInstance.
+     */
+    public interface Host {
+        World getMapWorld();
+        Core getPlugin();
+        Location GetRespawnLoc();
+        Vector getFloodCenter();
+        double getFloodBoundsX();
+        double getFloodBoundsZ();
+    }
+
     private Player player;
-    private GameInstance instance;
+    private Host instance;
     private EnderDragon dragon;
     private boolean defaultEffect = false;
     private boolean rainEffect = false;
@@ -47,14 +61,14 @@ public class WinEffects {
     // Example format inside the decoded value: {"textures":{"SKIN":{"url":"http://textures.minecraft.net/texture/<hash>"}}}
     private static final String HEROBRINE_TEXTURE_VALUE = ""; // <--- paste Base64 here (optional)
 
-    public WinEffects(Player player, GameInstance instance) {
+    public WinEffects(Player player, Host instance) {
         this.player = player;
         this.instance = instance;
     }
 
     public void checkWinEffect() { // Database checking here
         if (instance != null) {
-            PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(player);
+            PlayerData data = instance.getPlugin().getDataManager().getPlayerData(player);
             if (data != null) {
                 if (data.enderDragonEffect == 1) enderDragonEffect();
                 else if (data.santaEffect == 1)   santaEffect();
@@ -164,7 +178,7 @@ public class WinEffects {
                 rep++;
             }
         };
-        runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 1);
+        runnable.runTaskTimer(instance.getPlugin(), 0, 1);
     }
 
     private void floodEffect() {
@@ -174,13 +188,12 @@ public class WinEffects {
         world.setStorm(true);
         world.setThundering(true);
 
-        MapInstance map = instance.getMap().GetInstance();
-        Vector center = map.center.clone();
+        Vector center = instance.getFloodCenter();
         double centerX = center.getX();
         double centerY = player.getLocation().clone().getY() - 5;
         double centerZ = center.getZ();
-        double width  = map.boundsX;
-        double length = map.boundsZ;
+        double width  = instance.getFloodBoundsX();
+        double length = instance.getFloodBoundsZ();
 
         final Boat boat = (Boat) player.getWorld().spawnEntity(player.getLocation(), EntityType.BOAT);
         player.teleport(boat.getLocation());
@@ -209,7 +222,7 @@ public class WinEffects {
                 rep++;
             }
         };
-        runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+        runnable.runTaskTimer(instance.getPlugin(), 0, 20);
     }
 
     public void treasureEffect() {
@@ -254,13 +267,13 @@ public class WinEffects {
                             ));
                             new BukkitRunnable() {
                                 @Override public void run() { if (!item.isDead()) item.remove(); }
-                            }.runTaskLater(instance.getGameManager().getMain(), 40L);
+                            }.runTaskLater(instance.getPlugin(), 40L);
                         }
                     }
                 }
                 tick++;
             }
-        }.runTaskTimer(instance.getGameManager().getMain(), 0L, 4L);
+        }.runTaskTimer(instance.getPlugin(), 0L, 4L);
     }
 
     private void playRecord11Compat(World world, Location loc, float volume, float pitch) {
@@ -391,7 +404,7 @@ public class WinEffects {
 
                 try { world.playSound(top, Sound.WITHER_SPAWN, 1.0f, 0.7f); } catch (Throwable ignored) {}
             }
-        }.runTaskLater(instance.getGameManager().getMain(), 60L); // 3 seconds later
+        }.runTaskLater(instance.getPlugin(), 60L); // 3 seconds later
 
         // Cleanup after ~10 seconds
         new BukkitRunnable() {
@@ -415,7 +428,7 @@ public class WinEffects {
                 world.setTime(prevTime);
                 ritualEffect = false;
             }
-        }.runTaskLater(instance.getGameManager().getMain(), 200L);
+        }.runTaskLater(instance.getPlugin(), 200L);
     }
 
     private Location findGround(Location start) {
@@ -448,7 +461,7 @@ public class WinEffects {
                 sec++;
             }
         };
-        runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+        runnable.runTaskTimer(instance.getPlugin(), 0, 20);
     }
 
     private void playFireworks(World world) {
