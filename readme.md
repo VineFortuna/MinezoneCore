@@ -1,163 +1,132 @@
 # Minezone-Core
 
-**Minezone-Core** is a custom Minecraft server project built around a fast-paced PvP experience inspired by **Minecade’s Super Craft Bros**. This is a project I started in July 2020 and have been working on ever since.  
-The main focus of the project is **SuperCraftBros**, a class-based combat gamemode where players fight using unique kits, special abilities, movement mechanics, and map-based strategy.
+Minezone-Core is the main Java plugin behind **Minezone**, a custom Minecraft PvP server that I began developing in July 2020.
 
-This project also contains additional game packages and systems that support the wider server network.
+The project is built primarily around **Super Craft Bros**, a class-based PvP gamemode inspired by Minecade’s original Super Craft Bros. It also includes supporting Parkour and Fishing systems that give players additional progression and activities outside of matches.
 
----
+## Main Features
 
-## Overview
+### Super Craft Bros
 
-Minezone-Core is designed as the core plugin structure for a custom Minecraft minigame server.  
-It includes multiple gamemode packages, shared systems, and the main flagship mode:
+Super Craft Bros is the main focus of Minezone-Core. Players choose from custom Minecraft-inspired classes, each with its own abilities, strengths, weaknesses, and playstyle.
 
-- **CrystalWars**
-- **parkour**
-- **skywars**
-- **SuperCraftBros**
+The gamemode is designed around fast-paced combat, movement, knockback, map positioning, and learning how different classes interact with one another.
 
-Among these, **SuperCraftBros** is the primary and most developed gamemode.
+The project includes systems for:
 
----
+* Custom classes, kits, and abilities
+* Match creation and game flow
+* Player lives and elimination
+* Combat and damage handling
+* Ability cooldowns
+* Class selection
+* Scoreboards and player status
+* Spectating
+* Statistics and leaderboards
+* Rewards and progression
+* Private games and game modifiers
+* Party and friend integration
 
-## Main Gamemode: SuperCraftBros
+A large part of development also involves balancing classes, improving older abilities, resolving gameplay bugs, and making sure features work reliably during live matches.
 
-**SuperCraftBros** is a PvP gamemode heavily inspired by the classic **Minecade Super Craft Bros** experience.
+### Parkour
 
-Players select from a variety of custom kits, each with their own:
-- abilities
-- combat strengths
-- movement options
-- playstyles
+The Parkour system provides an additional challenge for players outside of the main PvP gamemode.
 
-The goal is to create a chaotic, skill-based arena fighter experience inside Minecraft, where every class feels distinct and rewarding to master.
+It includes:
 
-### Core gameplay ideas
-- **Class-based PvP combat**
-- **Unique custom kits**
-- **Special abilities and effects**
-- **Fast movement and knockback-focused fighting**
-- **Map control and positioning**
-- **Arcade-style battles inspired by classic server minigames**
+* Parkour start and finish detection
+* Player timing
+* Personal best times
+* Leaderboard tracking
+* Checkpoint and attempt management
+* Protection against invalid completions
 
----
+Parkour times are stored so players can continue competing for better personal and server-wide records.
 
-## Package Structure
+### Fishing
 
-### `SuperCraftBros`
-The main gamemode of the project.
+Fishing is a secondary progression activity within the server.
 
-This package contains the primary systems for:
-- kit selection
-- ability handling
-- combat logic
-- match flow
-- player state
-- win conditions
-- custom class mechanics
+The system includes:
 
-This is the heart of the server and the main focus of development.
+* Fishing statistics
+* Player progression
+* Rewards
+* Persistent fishing data
+* Leaderboard support
+* Custom handling for fishing-related events
 
-### `skywars`
-A separate PvP gamemode package based around survival, looting, and eliminating other players on isolated islands.
+Fishing gives players something more relaxed to work toward while still contributing to their overall server progression.
 
-### `parkour`
-A movement-focused package for parkour gameplay, challenges, or lobby-style obstacle content.
+## Technology
 
-### `CrystalWars`
-A custom gamemode package intended to add more variety to the server network with its own mechanics and gameplay loop.
+Minezone-Core is developed using:
 
----
+* Java
+* Spigot/Paper 1.8.8
+* Bukkit API
+* Maven
+* MySQL
+* Git and GitHub
 
-## Project Goals
+The project uses event-driven programming throughout its gameplay systems and contains persistent player data that is stored through MySQL.
 
-The goal of Minezone-Core is to recreate the feeling of older, iconic Minecraft minigame servers while adding custom improvements, cleaner systems, and original kit design.
+## Development Areas
 
-This project aims to:
-- capture the fun of classic Minecraft PvP minigames
-- rebuild the spirit of Minecade-style gameplay
-- create memorable custom kits and abilities
-- provide a solid foundation for multiple server gamemodes
-- keep gameplay arcade-like, competitive, and replayable
+The codebase includes work involving:
 
----
+* Event listeners
+* Commands and permissions
+* Game and player state management
+* Custom combat mechanics
+* Entity and projectile handling
+* Inventory-based interfaces
+* Scoreboards and holograms
+* Cooldown systems
+* Asynchronous database operations
+* Player statistics and leaderboards
+* Configuration files
+* Packet-based features
+* Error investigation and debugging
+
+## Project History
+
+I started Minezone-Core in 2020 while I was still learning Java and Minecraft plugin development. The project has grown significantly since then and has become my main long-term development project.
+
+Because of its age, the codebase contains systems written at different stages of my development experience. A major part of my current work involves refactoring older areas, improving organization, removing outdated implementations, and making the project easier to maintain and expand.
+
+Working on Minezone-Core has given me experience with the full development process, including:
+
+* Planning features
+* Implementing gameplay systems
+* Testing updates
+* Deploying changes
+* Maintaining a live server
+* Investigating stack traces and console errors
+* Responding to player-reported bugs
+* Improving features based on feedback
+
+## Current Focus
+
+Development is currently focused on:
+
+* Improving Super Craft Bros gameplay
+* Reworking and balancing classes
+* Refining abilities and combat mechanics
+* Refactoring older code
+* Improving performance and reliability
+* Expanding Parkour and Fishing progression
+* Fixing issues found during live gameplay
 
 ## Inspiration
 
-This project is primarily inspired by:
+Super Craft Bros is inspired by **Minecade’s Super Craft Bros** and the style of classic Minecraft minigame servers.
 
-- **Minecade’s Super Craft Bros**
-- classic Minecraft PvP servers
-- class-based arena combat
-- old-school minigame design
-
-SuperCraftBros is a tribute to that era of Minecraft, while also serving as a custom project with its own structure, ideas, and future direction.
-
----
-
-## Development Focus
-
-Current development is mainly centered around improving and expanding **SuperCraftBros**, including:
-- creating new kits
-- balancing existing classes
-- refining combat systems
-- improving ability design
-- adding polish to game flow and player experience
-
-The other packages exist as part of the wider server core, but **SuperCraftBros** is the main gamemode and priority.
-
----
-
-## Tech Stack
-
-Built for a **Spigot/Bukkit-based Minecraft server** with custom plugin development in Java.
-
-### Likely areas of implementation include:
-- event listeners
-- player kit systems
-- match management
-- scoreboard / UI systems
-- cooldown handling
-- custom abilities
-- movement/combat logic
-
----
-
-## Vision
-
-Minezone-Core is meant to be more than just a single minigame plugin.  
-It is the core of a server project built around custom PvP experiences, nostalgic inspiration, and unique gamemode design.
-
-At its center is **SuperCraftBros** — a Minecade-inspired class fighter built to bring back the kind of chaotic, creative, and competitive gameplay that made classic Minecraft servers memorable.
-
----
+Minezone is not intended to be a direct copy. The goal is to preserve the fast, creative, and class-based gameplay that made the original mode memorable while building new systems, classes, progression, and gameplay improvements around it.
 
 ## Status
 
-**In active development**
+Minezone-Core is currently in active development.
 
-Main priority:
-- **SuperCraftBros**
-
-Secondary packages:
-- CrystalWars
-- parkour
-- skywars
-
----
-
-## Future Plans
-
-- expand the SuperCraftBros kit roster
-- improve ability balance
-- add more maps and arena variety
-- refine matchmaking and round flow
-- continue developing the supporting gamemodes
-- polish the overall server experience
-
----
-
-## Notes
-
-This project is inspired by classic Minecraft server design, especially Minecade’s Super Craft Bros, but is being developed as its own custom server core with its own systems and direction.
+The main priority is Super Craft Bros, with Parkour and Fishing maintained as supporting server activities.
