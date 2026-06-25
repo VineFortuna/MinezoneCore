@@ -1267,25 +1267,46 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 
-		if (game == null) {
+		if (game != null) {
+			if (game.state != GameState.WAITING) {
+				if (game.state == GameState.STARTED)
+					player.sendMessage(main.color("&c&l(!) &rGame is already in progress!"));
+				else if (game.state == GameState.ENDED)
+					player.sendMessage(main.color("&c&l(!) &rGame has already ended!"));
+				return;
+			}
+
+			if (game.players.size() == 0) {
+				player.sendMessage(main.color("&c&l(!) &rNot enough players to start!"));
+				return;
+			}
+
+			game.getGameSettings().forceStartGame(true);
+			return;
+		}
+
+		anthony.flagwars.FWGameInstance fwGame = main.getFwGameManager().getInstanceOfPlayer(player);
+
+		if (fwGame == null) {
 			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
 			return;
 		}
 
-		if (game.state != GameState.WAITING) {
-			if (game.state == GameState.STARTED)
-				player.sendMessage(main.color("&c&l(!) &rGame is already in progress!"));
-			else if (game.state == GameState.ENDED)
-				player.sendMessage(main.color("&c&l(!) &rGame has already ended!"));
+		if (fwGame.getState() == anthony.flagwars.FWGameState.IN_PROGRESS) {
+			player.sendMessage(main.color("&c&l(!) &rGame is already in progress!"));
+			return;
+		}
+		if (fwGame.getState() == anthony.flagwars.FWGameState.ENDING) {
+			player.sendMessage(main.color("&c&l(!) &rGame has already ended!"));
 			return;
 		}
 
-		if (game.players.size() == 0) {
+		if (fwGame.countPlayers() == 0) {
 			player.sendMessage(main.color("&c&l(!) &rNot enough players to start!"));
 			return;
 		}
 
-		game.getGameSettings().forceStartGame(true);
+		fwGame.forceStartGame();
 	}
 
 	private void setFrenzyCommand(Player player) {
@@ -1817,6 +1838,16 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
     public void leaveGame(Player player) {
+        if (main.getFwGameManager().getInstanceOfPlayer(player) != null
+                || main.getFwGameManager().getInstanceOfSpectator(player) != null) {
+            if (main.getFwGameManager().leaveGame(player)) {
+                player.sendMessage(main.color("&2&l(!) &rYou left Flag Wars."));
+            } else {
+                player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
+            }
+            return;
+        }
+
         if (main.getPartyManager() != null) {
             Party party = main.getPartyManager().getParty(player);
 

@@ -31,6 +31,13 @@ public class PlayerData {
 	/** Unix timestamp (ms) of the last time the player claimed their daily reward. 0 = never. */
 	public long lastDailyReward = 0;
 
+	/** Comma-separated Flag Wars shop item names the player has shift-clicked into their personal Quick Buy tab. */
+	public String flagWarsQuickBuy = "";
+
+	/** Flag Wars' own stats - kept separate from SCB's win/kill/death tracking above. See FWGameInstance for where these get incremented. */
+	public int fwWins = 0, fwMatchMvps = 0, fwLosses = 0, fwCurrentWinstreak = 0, fwBestWinstreak = 0,
+			fwKills = 0, fwDeaths = 0, fwFlagsCaptured = 0;
+
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
 	public HashMap<Integer, FishingDetails> playerFishing = new HashMap<>();
 	public HashMap<Integer, ParkourDetails> playerParkour = new HashMap<>();
@@ -168,6 +175,25 @@ public class PlayerData {
 		} else if (!getFishingWarps().contains(i)) {
 			this.fishingWarps += "," + i;
 		}
+	}
+
+	public List<String> getFlagWarsQuickBuy() {
+		if (this.flagWarsQuickBuy == null || this.flagWarsQuickBuy.isEmpty()) {
+			return new ArrayList<>();
+		}
+		return new ArrayList<>(Arrays.asList(this.flagWarsQuickBuy.split(",")));
+	}
+
+	public void addFlagWarsQuickBuy(String itemName) {
+		if (getFlagWarsQuickBuy().contains(itemName)) return;
+		this.flagWarsQuickBuy = (this.flagWarsQuickBuy == null || this.flagWarsQuickBuy.isEmpty())
+				? itemName : this.flagWarsQuickBuy + "," + itemName;
+	}
+
+	public void removeFlagWarsQuickBuy(String itemName) {
+		List<String> items = getFlagWarsQuickBuy();
+		items.remove(itemName);
+		this.flagWarsQuickBuy = String.join(",", items);
 	}
 
 	public String checkPlayerLevel(Player player, PlayerData data) {

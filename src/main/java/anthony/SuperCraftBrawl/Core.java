@@ -92,7 +92,7 @@ public class Core extends JavaPlugin implements Listener {
     public Version version;
     public FreeClassesGUI inventoryGUI;
     public anthony.CrystalWars.game.GameManager gm;
-    public anthony.flagdefense.FDGameManager fdGameManager;
+    public anthony.flagwars.FWGameManager fwGameManager;
     public DonorClassesGUI donorGUI;
     public GameSelectorGUI hubGUI;
     public Commands commands;
@@ -156,6 +156,8 @@ public class Core extends JavaPlugin implements Listener {
     //LEADERBOARDS:
     public final java.util.Map<java.util.UUID, anthony.SuperCraftBrawl.leaderboards.LeaderboardScope>
             leaderboardScopeByViewer = new java.util.HashMap<>();
+    public final java.util.Map<java.util.UUID, anthony.SuperCraftBrawl.leaderboards.LeaderboardStatsMode>
+            leaderboardModeByViewer = new java.util.HashMap<>();
     public anthony.SuperCraftBrawl.leaderboards.StatSnapshotDAO snapshotDAO;
     public SettingsHologram lbSettingsHolo;
 
@@ -298,15 +300,15 @@ public class Core extends JavaPlugin implements Listener {
         return gm;
     }
 
-    public anthony.flagdefense.FDGameManager getFdGameManager() {
-        return fdGameManager;
+    public anthony.flagwars.FWGameManager getFwGameManager() {
+        return fwGameManager;
     }
 
     public boolean isPlayerInAnyGame(Player player) {
         return getGameManager().GetInstanceOfPlayer(player) != null
                 || getGameManager().GetInstanceOfSpectator(player) != null
-                || fdGameManager.getInstanceOfPlayer(player) != null
-                || fdGameManager.getInstanceOfSpectator(player) != null;
+                || fwGameManager.getInstanceOfPlayer(player) != null
+                || fwGameManager.getInstanceOfSpectator(player) != null;
     }
 
     public FlawlessWinsBoard getFlawlessWinsBoard() {
@@ -522,13 +524,17 @@ public class Core extends JavaPlugin implements Listener {
         getDatabaseManager().ensureSnapshotTable();
         getDatabaseManager().ensurePeriodWinstreakTable();
         getDatabaseManager().ensurePeriodParkourTable();
+        getDatabaseManager().ensureFwSnapshotTable();
+        getDatabaseManager().ensureFwPeriodWinstreakTable();
 
         this.snapshotDAO = new anthony.SuperCraftBrawl.leaderboards.StatSnapshotDAO(this);
 
         ensureAllLeaderboardSnapshots();
+        ensureAllFlagWarsLeaderboardSnapshots();
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             ensureAllLeaderboardSnapshots();
+            ensureAllFlagWarsLeaderboardSnapshots();
 
             try {
                 if (getLeaderboard() != null) {
@@ -703,6 +709,27 @@ public class Core extends JavaPlugin implements Listener {
         }
     }
 
+    /** Flag Wars equivalent of ensureAllLeaderboardSnapshots() above - same idea, fw_stat_snapshots table, FW* columns. */
+    private void ensureAllFlagWarsLeaderboardSnapshots() {
+        if (snapshotDAO == null) {
+            return;
+        }
+
+        try {
+            for (anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope : new anthony.SuperCraftBrawl.leaderboards.LeaderboardScope[]{
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY
+            }) {
+                snapshotDAO.ensureSnapshotsForAll("FWWins", scope, "FWWins", "fw_stat_snapshots");
+                snapshotDAO.ensureSnapshotsForAll("FWKills", scope, "FWKills", "fw_stat_snapshots");
+                snapshotDAO.ensureSnapshotsForAll("FWFlagsCaptured", scope, "FWFlagsCaptured", "fw_stat_snapshots");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void enableTitlesCosmetic() {
         trickTitleOld = new TrickTitleManager(this, "lobby-1");
         this.trickTitle = new TrickTitlePackets(this, "lobby-1"); // change world name if needed
@@ -738,19 +765,19 @@ public class Core extends JavaPlugin implements Listener {
 
         getCommand("treatsadmin").setExecutor(new TreatsAdminCommand(halloweenHunt));
 
-        anthony.flagdefense.FDCommand fdCommand = new anthony.flagdefense.FDCommand(fdGameManager);
-        getCommand("fd").setExecutor(fdCommand);
-        getCommand("fd").setTabCompleter(fdCommand);
+        anthony.flagwars.FWCommand fwCommand = new anthony.flagwars.FWCommand(fwGameManager);
+        getCommand("fw").setExecutor(fwCommand);
+        getCommand("fw").setTabCompleter(fwCommand);
 
-        anthony.flagdefense.setup.FDSetupCommand fdSetupCommand =
-                new anthony.flagdefense.setup.FDSetupCommand(fdGameManager);
-        getCommand("fdsetup").setExecutor(fdSetupCommand);
-        getCommand("fdsetup").setTabCompleter(fdSetupCommand);
+        anthony.flagwars.setup.FWSetupCommand fwSetupCommand =
+                new anthony.flagwars.setup.FWSetupCommand(fwGameManager);
+        getCommand("fwsetup").setExecutor(fwSetupCommand);
+        getCommand("fwsetup").setTabCompleter(fwSetupCommand);
     }
 
     private void registrations() {
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
-        Bukkit.getServer().getPluginManager().registerEvents(new anthony.flagdefense.FDPlayerListener(fdGameManager), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new anthony.flagwars.FWPlayerListener(fwGameManager), this);
         Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         Bukkit.getMessenger().registerIncomingPluginChannel(this, "BungeeCord", gameManager);
     }
@@ -761,7 +788,7 @@ public class Core extends JavaPlugin implements Listener {
         msg = new ArrayList<>();
         listener = new PlayerListener(this);
         gameManager = new GameManager(this);
-        fdGameManager = new anthony.flagdefense.FDGameManager(this);
+        fwGameManager = new anthony.flagwars.FWGameManager(this);
         mysteryChestManager = new MysteryChestManager(this);
         cosmeticsManager = new CosmeticsManager(this);
         scoreboardManager = new ScoreboardManager(this);
@@ -772,6 +799,8 @@ public class Core extends JavaPlugin implements Listener {
         djManager = new DoubleJumpManager(this);
         databaseManager = new DatabaseManager(this);
         databaseManager.ensureLastDailyRewardColumn();
+        databaseManager.ensureFlagWarsQuickBuyColumn();
+        databaseManager.ensureFlagWarsStatsColumns();
         packetMain = new PacketMain(this);
         dataManager = new PlayerDataManager(this);
         gameDataManager = new GameDataManager(this);
@@ -1075,9 +1104,9 @@ public class Core extends JavaPlugin implements Listener {
                 if (this.getGameManager().GetInstanceOfPlayer(player) != null
                         || this.getGameManager().GetInstanceOfSpectator(player) != null) {
                     this.getCommands().leaveGame(player);
-                } else if (fdGameManager.getInstanceOfPlayer(player) != null
-                        || fdGameManager.getInstanceOfSpectator(player) != null) {
-                    fdGameManager.leaveGame(player);
+                } else if (fwGameManager.getInstanceOfPlayer(player) != null
+                        || fwGameManager.getInstanceOfSpectator(player) != null) {
+                    fwGameManager.leaveGame(player);
                 } else if (this.getParkour().hasPlayer(player)) {
                     this.getParkour().removePlayer(player);
                     this.ResetPlayer(player);
@@ -1401,8 +1430,24 @@ public class Core extends JavaPlugin implements Listener {
                                     + "You must be in a Waiting Lobby to use this command");
                         }
                     } else {
-                        player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + "You need to be in a game to use this command");
+                        anthony.flagwars.FWGameInstance fwInstance = getFwGameManager().getInstanceOfPlayer(player);
+
+                        if (fwInstance != null && (fwInstance.getState() == anthony.flagwars.FWGameState.WAITING
+                                || fwInstance.getState() == anthony.flagwars.FWGameState.STARTING)) {
+                            Bukkit.broadcastMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
+                                    + getRankManager().getRank(player).getTagWithSpace() + ChatColor.YELLOW
+                                    + player.getName() + " " + ChatColor.RESET
+                                    + "invited all players in the Lobby to join " + ChatColor.GOLD + ChatColor.BOLD
+                                    + "Flag Wars");
+                            TextComponent message = new TextComponent(
+                                    "" + "     " + ChatColor.GREEN + ChatColor.BOLD + "Click here to join!");
+                            message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                    "/fw join " + (fwInstance.getMode() == anthony.flagwars.FWGameMode.SOLO ? "solo" : "duo")));
+                            Bukkit.spigot().broadcast(message);
+                        } else {
+                            player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                    + "You need to be in a game to use this command");
+                        }
                     }
                 } else {
                     player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "

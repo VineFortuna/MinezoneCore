@@ -68,6 +68,63 @@ public class DatabaseManager {
 		}
 	}
 
+	private static final String[] FLAG_WARS_STAT_COLUMNS = {
+			"FWWins", "FWMatchMvps", "FWLosses", "FWCurrentWinstreak", "FWBestWinstreak",
+			"FWKills", "FWDeaths", "FWFlagsCaptured"
+	};
+
+	public void ensureFlagWarsStatsColumns() {
+		if (getConnection() == null) {
+			Bukkit.getLogger().warning("[MinezoneCore] Could not check Flag Wars stats columns because MySQL is not connected.");
+			return;
+		}
+
+		for (String column : FLAG_WARS_STAT_COLUMNS) {
+			try {
+				Statement stmt = getConnection().createStatement();
+				stmt.executeUpdate("ALTER TABLE PlayerData ADD COLUMN " + column + " INT NOT NULL DEFAULT 0");
+				stmt.close();
+
+				Bukkit.getLogger().info("[MinezoneCore] Added missing PlayerData." + column + " column.");
+			} catch (SQLException e) {
+				String message = e.getMessage() == null ? "" : e.getMessage().toLowerCase();
+
+				// MySQL error 1060 = duplicate column. That means it already exists, so ignore it.
+				if (e.getErrorCode() == 1060 || message.contains("duplicate column")) {
+					continue;
+				}
+
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public void ensureFlagWarsQuickBuyColumn() {
+		if (getConnection() == null) {
+			Bukkit.getLogger().warning("[MinezoneCore] Could not check FlagWarsQuickBuy column because MySQL is not connected.");
+			return;
+		}
+
+		try {
+			Statement stmt = getConnection().createStatement();
+			// VARCHAR, not TEXT - pre-8.0.13 MySQL/MariaDB rejects a DEFAULT on TEXT/BLOB columns outright,
+			// which is exactly what silently failed here before (logged, not 1060, so it fell through unfixed).
+			stmt.executeUpdate("ALTER TABLE PlayerData ADD COLUMN FlagWarsQuickBuy VARCHAR(1000) NOT NULL DEFAULT ''");
+			stmt.close();
+
+			Bukkit.getLogger().info("[MinezoneCore] Added missing PlayerData.FlagWarsQuickBuy column.");
+		} catch (SQLException e) {
+			String message = e.getMessage() == null ? "" : e.getMessage().toLowerCase();
+
+			// MySQL error 1060 = duplicate column. That means it already exists, so ignore it.
+			if (e.getErrorCode() == 1060 || message.contains("duplicate column")) {
+				return;
+			}
+
+			e.printStackTrace();
+		}
+	}
+
 	public void multiExecuteUpdateCommand(String... updateCommand) {
 		Bukkit.getScheduler().runTaskAsynchronously(main, () -> {
 			for (String cmd : updateCommand) {
@@ -152,6 +209,40 @@ public class DatabaseManager {
                         "  updated_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
                         "  PRIMARY KEY (uuid, parkour_id, period, period_start)," +
                         "  INDEX (parkour_id, period, period_start)," +
+                        "  INDEX (uuid)" +
+                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+
+        executeUpdateCommand(sql);
+    }
+
+    /** Flag Wars equivalent of scb_stat_snapshots - same shape, separate table so SCB and FW period math never mixes. */
+    public void ensureFwSnapshotTable() {
+        final String sql =
+                "CREATE TABLE IF NOT EXISTS fw_stat_snapshots (" +
+                        "  metric       VARCHAR(32)  NOT NULL," +
+                        "  uuid         VARCHAR(36)  NOT NULL," +
+                        "  period       ENUM('DAILY','WEEKLY','MONTHLY') NOT NULL," +
+                        "  period_start DATE         NOT NULL," +
+                        "  total_value  INT          NOT NULL DEFAULT 0," +
+                        "  created_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP," +
+                        "  PRIMARY KEY (metric, uuid, period, period_start)," +
+                        "  INDEX (period, period_start)," +
+                        "  INDEX (uuid, metric)" +
+                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+        executeUpdateCommand(sql);
+    }
+
+    /** Flag Wars equivalent of scb_period_winstreaks. */
+    public void ensureFwPeriodWinstreakTable() {
+        final String sql =
+                "CREATE TABLE IF NOT EXISTS fw_period_winstreaks (" +
+                        "  uuid         VARCHAR(36) NOT NULL," +
+                        "  period       ENUM('DAILY','WEEKLY','MONTHLY') NOT NULL," +
+                        "  period_start DATE NOT NULL," +
+                        "  best_value   INT NOT NULL DEFAULT 0," +
+                        "  updated_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
+                        "  PRIMARY KEY (uuid, period, period_start)," +
+                        "  INDEX (period, period_start)," +
                         "  INDEX (uuid)" +
                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
 

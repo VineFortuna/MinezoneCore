@@ -3,7 +3,6 @@ package anthony.SuperCraftBrawl.npcs;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameManager;
 import anthony.SuperCraftBrawl.gui.ClassicModeGUI;
-import anthony.SuperCraftBrawl.gui.DuelsModeGUI;
 import anthony.SuperCraftBrawl.gui.fishing.FishingGUI;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
@@ -13,12 +12,15 @@ import net.jitse.npclib.api.skin.Skin;
 import net.jitse.npclib.api.state.NPCSlot;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Arrays;
@@ -45,6 +47,9 @@ public class NPCManager implements Listener {
 		Skin fishermanSkin = new Skin(
 				"ewogICJ0aW1lc3RhbXAiIDogMTYxNDE3ODA2NzIzNywKICAicHJvZmlsZUlkIiA6ICJmZDYwZjM2ZjU4NjE0ZjEyYjNjZDQ3YzJkODU1Mjk5YSIsCiAgInByb2ZpbGVOYW1lIiA6ICJSZWFkIiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlL2I2MTY0YTNjM2JlYjFiYzAzMTAwMzBmMjgxNTU4OTE5ODEzZjBhMTVjMmQ3Y2I3NzIyNGMxZDk0ZmZmMjE0NDQiCiAgICB9CiAgfQp9",
 				"GsrpTxzgihotEuasiq0cefZtiIzhyASNyAcXiHfFI+HqsC8aAZP/P6HYRa7zC3iQqMvDaVMZYFnmBui3B4KC49STqXy7UheGPT5xylV3dfjurinwpOUYJMNRcJYW9pLb98jVZ+bQW9LKHUdRbxgkGJxpJQQ+LQlROfpZ9DaM/fdVjImiMSUyUeCF5WyMxadRrEWeo+a1Cn25IrNWo+KWQy7OWLJONeZcuboZGqobuckZKfIRvW1Vtt2v45PXRI5ec/6YO6kr+yGVS51xlAZOzxjaaGACA+/5gHLeEu0Oka/hdGY0HdukqKcg3TXf1cZZ7qB/VCpnAuWOguTfXU09gh2BGRvOizsQpL5tRpg4lA/l5Q70t2jtj+79M2yRYC7LQs/SrUUIX6VJ3w8ylKKqTjLE+PVCmgwgW1bYX3tpt9xEhRJ5kPv47iX0DkVcGxE2QW3xd8gyJfE5BzeKhcXjEV+GJNa2NOiHnVIKJPuj+trJnOiKDainhcR00+Ncna5I9TomGm2r0TGUrO/bPqW7b2yvpBNUnAweUYjU/eG2E9uY5IzVPwO9M+PqulqD5Reqq3MW32WAcmLkO417Tn48tZnAmYjVoM5zb16ZN/J9LQgHMf9L0/ZgguBgKOx0UQeedJjwgkA9BZdL6LuTiLwfcEt2ZxSwvvAXfBWVmrSlVns=");
+		Skin flagWarsSkin = new Skin(
+				"ewogICJ0aW1lc3RhbXAiIDogMTc4MjM0MzczNjcxNCwKICAicHJvZmlsZUlkIiA6ICI0N2Q1ZjY1ZWQyOWM0ZTU0OWRmNjlmNGNiZmExNTg3OCIsCiAgInByb2ZpbGVOYW1lIiA6ICJQaWtlcnkiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmIxMjc3Zjk5ZjJkZmU1MWQ0YjhkNTU4OTcwYmI1NTMyYTk1OWE3NGIzYmMyM2ZmMWRiZjA3ODljZGQ0NDVlOCIKICAgIH0KICB9Cn0=",
+				"IFTvnqG3xZCYkQ6fe3U8IcVsbd+RkfFuHJv2uK21cnwIhaie0ABMGDbLgMTcutfZo+ujtxAMaAJYdljyp4Gg5b34AJhhGTo6dyuzZ0lmH7x73GAA5IstrfuVNK7vSIFnP/5I0C5zjK5joW3NqtkxXzRPwgxbP6NuuSDhiwOYQrTEGPoHCq5RFyaJ5LSpiqUMNU+i+vynlWNLnE7p90ZbSholPp4oB+DvP1lDy+n2xD8lQLrJeDHa/MtDr+C6oZZx5pkULOCV5iZfI/RDjhodA6RZAu6/Ij0o0YT2zPXJQBb6OT5oHr/Xl2ZgTlKVY4g6xYjmpZbPzkyGlK6meP6RMq9fKukMtjzTL9hAdMwWa7Wdll1MM6ynoxMF5nIhHeUWkRBocfYVGpsXQuGBCyWgoCYJRzkJT7O9uwKUUncn9mRG4ZbU+hwCQth30hUOfqZVNOmLiYeD0eWqqB0/XwOwK8rnYoNkhtPW3EedSMQqhvI9XcV/XZNTzC4c93waPt+yPtTqVMX/ReBtavaQMFKAqtSRWPBpA+fVMaBGkkdI+ZEU80QaSDQ3oQJLq3kza0kgJx3/UPwt+cIMwpi3g3nt5JJk1zMg7SEeiYPsriZ2VeeWmWylcmrlLz7yqhouTcHdVRKzd6JK6I+xzPxX7Nohmrk24d9Xo7cZQpvy7ItF0XI=");
 
 		scbClassic = npcLib.createNPC(Arrays.asList(main.color("&6&lSUPER CRAFT BROS"), main.color("&fMode: &aClassic"),
 				main.color("&eClick to Play!")));
@@ -53,11 +58,11 @@ public class NPCManager implements Listener {
 		scbClassic.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));
 		scbClassic.create();
 
-		scbDuels = npcLib.createNPC(Arrays.asList(main.color("&6&lSUPER CRAFT BROS"), main.color("&fMode: &aDuels"),
+		scbDuels = npcLib.createNPC(Arrays.asList(main.color("&6&lFLAG WARS"), main.color("&rModes: &aSolo, Duos"),
 				main.color("&eClick to Play!")));
 		scbDuels.setLocation(new Location(main.getLobbyWorld(), 187.5, 106, 657.5, -174, 3));
-		scbDuels.setSkin(sethblingSkin);
-		scbDuels.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));
+		scbDuels.setSkin(flagWarsSkin);
+		scbDuels.setItem(NPCSlot.MAINHAND, blueBanner());
 		scbDuels.create();
 
 		parkour = npcLib.createNPC(Arrays.asList(main.color("&6&lPARKOUR"), main.color("&eClick to Play!")));
@@ -76,6 +81,14 @@ public class NPCManager implements Listener {
 		fishing.setSkin(fishermanSkin);
 		fishing.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.FISHING_ROD));
 		fishing.create();
+	}
+
+	private ItemStack blueBanner() {
+		ItemStack banner = new ItemStack(Material.BANNER);
+		BannerMeta meta = (BannerMeta) banner.getItemMeta();
+		meta.setBaseColor(DyeColor.BLUE);
+		banner.setItemMeta(meta);
+		return banner;
 	}
 
 	private void update() { // Updates NPCs
@@ -162,7 +175,7 @@ public class NPCManager implements Listener {
 		} else if (e.getNPC() == scbClassic) {
 			new ClassicModeGUI(main, null).inv.open(player);
 		} else if (e.getNPC() == scbDuels) {
-			new DuelsModeGUI(main, null).inv.open(player);
+			new anthony.flagwars.FWModeSelectGUI(main.getFwGameManager()).open(player);
 		} else if (e.getNPC() == parkour) {
             SoundManager.playClickSound(player);
             mainParkour(player);

@@ -7,6 +7,7 @@ import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.gui.christmas.ChristmasRewardsGUI;
 import anthony.SuperCraftBrawl.gui.cosmetics.CosmeticsGUI;
 import anthony.SuperCraftBrawl.leaderboards.LeaderboardScope;
+import anthony.SuperCraftBrawl.leaderboards.LeaderboardStatsMode;
 import anthony.SuperCraftBrawl.npcs.ChannelInjector;
 import anthony.SuperCraftBrawl.npcs.NPC;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -440,8 +441,9 @@ public class PlayerListener implements Listener {
 
     private void giveLeaderboards(Player p) {
         Bukkit.getScheduler().runTaskLater(main, () -> {
-            // Default their personal view to Lifetime (only set once)
+            // Default their personal view to Lifetime + SCB (only set once)
             main.leaderboardScopeByViewer.putIfAbsent(p.getUniqueId(), LeaderboardScope.LIFETIME);
+            main.leaderboardModeByViewer.putIfAbsent(p.getUniqueId(), LeaderboardStatsMode.SCB);
 
             // Get their current totals from PlayerData
             PlayerData data = main.getDataManager().getPlayerData(p);
@@ -451,6 +453,9 @@ public class PlayerListener implements Listener {
             int wins = data.wins;
             int kills = data.kills;
             int flawlessWins = data.flawlessWins;
+            int fwWins = data.fwWins;
+            int fwKills = data.fwKills;
+            int fwFlagsCaptured = data.fwFlagsCaptured;
 
             try {
                 if (main.snapshotDAO == null) {
@@ -473,6 +478,19 @@ public class PlayerListener implements Listener {
                 main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FlawlessWins", LeaderboardScope.DAILY, flawlessWins);
                 main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FlawlessWins", LeaderboardScope.WEEKLY, flawlessWins);
                 main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FlawlessWins", LeaderboardScope.MONTHLY, flawlessWins);
+
+                // Flag Wars Wins/Kills/Flags Captured - same idea, separate fw_stat_snapshots table
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FWWins", LeaderboardScope.DAILY, fwWins, "fw_stat_snapshots");
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FWWins", LeaderboardScope.WEEKLY, fwWins, "fw_stat_snapshots");
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FWWins", LeaderboardScope.MONTHLY, fwWins, "fw_stat_snapshots");
+
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FWKills", LeaderboardScope.DAILY, fwKills, "fw_stat_snapshots");
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FWKills", LeaderboardScope.WEEKLY, fwKills, "fw_stat_snapshots");
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FWKills", LeaderboardScope.MONTHLY, fwKills, "fw_stat_snapshots");
+
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FWFlagsCaptured", LeaderboardScope.DAILY, fwFlagsCaptured, "fw_stat_snapshots");
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FWFlagsCaptured", LeaderboardScope.WEEKLY, fwFlagsCaptured, "fw_stat_snapshots");
+                main.snapshotDAO.ensureSnapshotForPlayer(uuid, "FWFlagsCaptured", LeaderboardScope.MONTHLY, fwFlagsCaptured, "fw_stat_snapshots");
 
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -594,6 +612,12 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void waterNoFlow(BlockFromToEvent e) {
+        // Flag Wars allows water (and lava) to flow normally - e.g. a shop-bought Water Bucket -
+        // unlike SCB, which this handler otherwise blocks flow for everywhere.
+        if (main.getFwGameManager().getInstanceForWorld(e.getBlock().getWorld()) != null) {
+            return;
+        }
+
         if (main.getCommands() != null)
             e.setCancelled(true);
         else
@@ -605,8 +629,16 @@ public class PlayerListener implements Listener {
         if (event.getClickedBlock() != null) {
             if (event.getClickedBlock().getType() == Material.ENDER_CHEST
                     && event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                Player player = event.getPlayer();
+
+                // Let Flag Wars players/spectators open their real ender chest instead of hijacking it.
+                if (main.getFwGameManager().getInstanceOfPlayer(player) != null
+                        || main.getFwGameManager().getInstanceOfSpectator(player) != null) {
+                    return;
+                }
+
                 event.setCancelled(true);
-                new ChristmasRewardsGUI(main).inv.open(event.getPlayer());
+                new ChristmasRewardsGUI(main).inv.open(player);
             }
         }
     }
@@ -842,7 +874,9 @@ public class PlayerListener implements Listener {
                 GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
                 GameInstance spectating = main.getGameManager().GetInstanceOfSpectator(player);
 
-                if ((game != null && game.state == GameState.STARTED) || spectating != null || main.getParkour().hasPlayer(player)) {
+                if ((game != null && game.state == GameState.STARTED) || spectating != null || main.getParkour().hasPlayer(player)
+                        || main.getFwGameManager().getInstanceOfPlayer(player) != null
+                        || main.getFwGameManager().getInstanceOfSpectator(player) != null) {
                     return;
                 }
 
@@ -851,12 +885,20 @@ public class PlayerListener implements Listener {
         }
     }
 
+    /** True once a Flag Wars match this player is in has actually started - FWPlayerListener owns block/armor/inventory rules from that point on. */
+    private boolean isInActiveFlagWarsMatch(Player player) {
+        anthony.flagwars.FWGameInstance instance = main.getFwGameManager().getInstanceOfPlayer(player);
+        return instance != null && instance.getState() == anthony.flagwars.FWGameState.IN_PROGRESS;
+    }
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
         // anthony.CrystalWars.game.GameInstance i =
         // main.getCwManager().getInstanceOfPlayer(player);
         Block b = event.getBlock();
+
+        if (isInActiveFlagWarsMatch(player)) return; // let FWPlayerListener#onBlockBreak decide instead
 
 //		if (i != null) {
 //			if (i.getState() == GameState.IN_PROGRESS) {
@@ -904,14 +946,19 @@ public class PlayerListener implements Listener {
          * event.setCancelled(false); return; } }
          */
 
+        if (isInActiveFlagWarsMatch(player)) return; // let FWPlayerListener#onBlockPlace decide instead
+
         if (!(player.isOp()))
             event.setCancelled(true);
     }
 
     @EventHandler
     public void onFall(EntityDamageEvent e) {
-        if (e.getCause() == EntityDamageEvent.DamageCause.FALL)
-            e.setCancelled(true);
+        if (e.getCause() != EntityDamageEvent.DamageCause.FALL) return;
+
+        if (e.getEntity() instanceof Player && isInActiveFlagWarsMatch((Player) e.getEntity())) return;
+
+        e.setCancelled(true);
     }
 
     @EventHandler
@@ -924,8 +971,11 @@ public class PlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onClick(InventoryClickEvent event) {
-        if (event.getSlotType() == InventoryType.SlotType.ARMOR)
+        if (event.getSlotType() == InventoryType.SlotType.ARMOR) {
+            if (event.getWhoClicked() instanceof Player && isInActiveFlagWarsMatch((Player) event.getWhoClicked()))
+                return;
             event.setCancelled(true);
+        }
     }
 
     @EventHandler
@@ -1049,6 +1099,8 @@ public class PlayerListener implements Listener {
     public void onInv(InventoryClickEvent e) {
         Player player = (Player) e.getWhoClicked();
 
+        if (isInActiveFlagWarsMatch(player)) return;
+
         if (!(player.isOp()))
             e.setCancelled(true);
     }
@@ -1105,21 +1157,62 @@ public class PlayerListener implements Listener {
                     "kys", "pu$$y", "fag", "faggot", "bitchass", "cunt", "retard", "penis", "fucker", "twat", "cock",
                     "dick", "cumming", "fuckass", "vagina", "fuckers", "shit", "shitter", "shitters", "fucking"));
             PlayerData data = main.getDataManager().getPlayerData(event.getPlayer());
-            String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
             String message = event.getMessage();
 
-            event.setFormat(ChatColor.YELLOW + main.color("" + data.checkPlayerLevel(event.getPlayer(), data) + "✧")
-                    + data.level + " " + tag);
-            String displayName = main.getRankManager().getRank(event.getPlayer()).getColorForNames(event.getPlayer(),
-                    main.getRankManager().getRank(event.getPlayer()));
+            // Flag Wars keeps the level badge and rank tag in their normal spots, colors the
+            // player's name with their team color instead of rank/custom color, and tacks the
+            // "[Team]" tag on after the name, right before the colon.
+            anthony.flagwars.FWGameInstance fwInstance = main.getFwGameManager().getInstanceOfPlayer(event.getPlayer());
+            anthony.flagwars.FWTeam fwTeam = fwInstance != null ? fwInstance.findTeamOf(event.getPlayer()) : null;
+            boolean fwSpectating = main.getFwGameManager().getInstanceOfSpectator(event.getPlayer()) != null;
 
-            if (!data.color.isEmpty() && !data.color.equals("0"))
-                displayName = ChatColor.valueOf(data.color) + event.getPlayer().getDisplayName();
+            if (fwSpectating) {
+                // Same format as a normal message (level badge, rank tag, name) - just with the
+                // same " &7&oSpectator&f" suffix SCB's own GameInstance#AddSpectator appends via
+                // setDisplayName, instead of replacing the whole prefix.
+                String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
 
-            if (event.getPlayer().hasPermission("scb.chat"))
+                event.setFormat(ChatColor.YELLOW + main.color("" + data.checkPlayerLevel(event.getPlayer(), data) + "✧")
+                        + data.level + " " + tag);
+                String displayName = main.getRankManager().getRank(event.getPlayer()).getColorForNames(event.getPlayer(),
+                        main.getRankManager().getRank(event.getPlayer()));
+
+                if (!data.color.isEmpty() && !data.color.equals("0"))
+                    displayName = ChatColor.valueOf(data.color) + event.getPlayer().getDisplayName();
+
+                displayName += main.color(" &7&oSpectator&f");
+
+                if (event.getPlayer().hasPermission("scb.chat"))
+                    event.setFormat(main.color(event.getFormat() + displayName + ":&r "));
+                else {
+                    event.setFormat(main.color(event.getFormat() + "&7" + displayName + ":&r "));
+                }
+            } else if (fwTeam != null) {
+                String teamColor = anthony.flagwars.FWGameConstants.chatColorCodeFor(fwTeam.getColor());
+                String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
+
+                event.setFormat(ChatColor.YELLOW + main.color("" + data.checkPlayerLevel(event.getPlayer(), data) + "✧")
+                        + data.level + " " + tag);
+
+                String displayName = main.color(teamColor) + event.getPlayer().getDisplayName()
+                        + main.color(" " + teamColor + "[" + fwTeam.getName() + "]");
                 event.setFormat(main.color(event.getFormat() + displayName + ":&r "));
-            else {
-                event.setFormat(main.color(event.getFormat() + "&7" + displayName + ":&r "));
+            } else {
+                String tag = main.getRankManager().getRank(event.getPlayer()).getTagWithSpace();
+
+                event.setFormat(ChatColor.YELLOW + main.color("" + data.checkPlayerLevel(event.getPlayer(), data) + "✧")
+                        + data.level + " " + tag);
+                String displayName = main.getRankManager().getRank(event.getPlayer()).getColorForNames(event.getPlayer(),
+                        main.getRankManager().getRank(event.getPlayer()));
+
+                if (!data.color.isEmpty() && !data.color.equals("0"))
+                    displayName = ChatColor.valueOf(data.color) + event.getPlayer().getDisplayName();
+
+                if (event.getPlayer().hasPermission("scb.chat"))
+                    event.setFormat(main.color(event.getFormat() + displayName + ":&r "));
+                else {
+                    event.setFormat(main.color(event.getFormat() + "&7" + displayName + ":&r "));
+                }
             }
 
             String tempmsg = "";

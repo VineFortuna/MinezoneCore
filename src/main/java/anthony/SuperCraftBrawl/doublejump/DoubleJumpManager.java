@@ -75,6 +75,13 @@ public class DoubleJumpManager implements Listener {
             return;
         }
 
+        // Flag Wars spectators are GameMode.ADVENTURE (mirroring SCB's own spectator mechanism,
+        // not vanilla GameMode.SPECTATOR), so they fall through the check above - same exemption
+        // SCB's own spectators get further down, just for FWGameManager's spectator list instead.
+        if (main.getFwGameManager().getInstanceOfSpectator(player) != null) {
+            return;
+        }
+
         GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
         PlayerData playerData = main.getDataManager().getPlayerData(player);
 

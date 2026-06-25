@@ -6,6 +6,8 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.flagwars.FWGameInstance;
+import anthony.flagwars.FWGameState;
 import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -33,7 +35,10 @@ public class ActiveGamesGUI implements InventoryProvider {
 		int count = 0;
 		int i = 0;
 
-		if (main.getGameManager().getNumOfGames() == 0) {
+		boolean noScbGames = main.getGameManager().getNumOfGames() == 0;
+		boolean noFwGames = main.getFwGameManager().getActiveInstances().isEmpty();
+
+		if (noScbGames && noFwGames) {
 			contents.set(1, 4, ClickableItem.of(
 					ItemHelper.setDetails(new ItemStack(Material.BARRIER), main.color("&c&lNo games!"),
 							main.color("&7Start a game by using"), main.color("&7the Game Selector")),
@@ -99,6 +104,51 @@ public class ActiveGamesGUI implements InventoryProvider {
 							inv.close(player);
 						}));
 			}
+			if (i > 8) {
+				count++;
+				i = 0;
+			}
+			i++;
+		}
+
+		for (FWGameInstance fwGame : main.getFwGameManager().getActiveInstances()) {
+			ItemStack displayItem = new ItemStack(Material.BANNER);
+			int maxPlayers = fwGame.getMode().getMaxPlayers();
+
+			if (fwGame.getState() == FWGameState.WAITING || fwGame.getState() == FWGameState.STARTING) {
+				String startLine = fwGame.getState() == FWGameState.STARTING
+						? "&fStarting In: &a" + fwGame.getCountdownSecondsLeft() + "s"
+						: "&fWaiting for Players";
+
+				contents.set(count, i, ClickableItem.of(
+						ItemHelper.setDetails(displayItem,
+								"&e&lFlag Wars",
+								"&fMode: &a" + fwGame.getMode().getLabel(),
+								"",
+								startLine,
+								"&fPlayers: &a" + fwGame.countPlayers() + "/" + maxPlayers,
+								"", "&r&nClick to join!"),
+						e -> {
+							main.getFwGameManager().joinGame(player, fwGame.getMode());
+							inv.close(player);
+						}));
+			} else if (fwGame.getState() == FWGameState.IN_PROGRESS) {
+				contents.set(count, i, ClickableItem.of(
+						ItemHelper.setDetails(ItemHelper.setGlowing(displayItem, true),
+								"&e&lFlag Wars",
+								"&fMode: &a" + fwGame.getMode().getLabel(),
+								"",
+								"&fIn Progress",
+								"&fPlayers: &a" + fwGame.countPlayers() + "/" + maxPlayers,
+								"&fSpectators: &a" + fwGame.getSpectators().size(), "", "&r&nClick to spectate!"),
+						e -> {
+							main.getFwGameManager().spectateGame(player, fwGame);
+							inv.close(player);
+						}));
+			} else {
+				continue; // ENDING - mid-reset, don't list it
+			}
+
 			if (i > 8) {
 				count++;
 				i = 0;

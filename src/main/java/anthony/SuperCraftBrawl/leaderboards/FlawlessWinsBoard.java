@@ -24,6 +24,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * SCB mode shows Flawless Wins. Flag Wars has no such concept, so per the brief this board shows
+ * Flags Captured (fwFlagsCaptured) instead when the viewer's stats-mode is FLAG_WARS - title and
+ * underlying stat both change, not just the data source.
+ */
 public class FlawlessWinsBoard extends LeaderboardBase {
 
     private final Core main;
@@ -38,6 +43,10 @@ public class FlawlessWinsBoard extends LeaderboardBase {
     private final Map<LeaderboardScope, List<String>> topNames = new EnumMap<>(LeaderboardScope.class);
     private final Map<LeaderboardScope, Map<UUID, Integer>> topValues = new EnumMap<>(LeaderboardScope.class);
 
+    private final Map<LeaderboardScope, List<UUID>> topIdsFW = new EnumMap<>(LeaderboardScope.class);
+    private final Map<LeaderboardScope, List<String>> topNamesFW = new EnumMap<>(LeaderboardScope.class);
+    private final Map<LeaderboardScope, Map<UUID, Integer>> topValuesFW = new EnumMap<>(LeaderboardScope.class);
+
     private final Map<UUID, List<Integer>> viewerEntityIds = new HashMap<>();
     private static final AtomicInteger ENTITY_ID = new AtomicInteger(500000);
 
@@ -51,13 +60,16 @@ public class FlawlessWinsBoard extends LeaderboardBase {
             topIds.put(scope, new ArrayList<UUID>());
             topNames.put(scope, new ArrayList<String>());
             topValues.put(scope, new HashMap<UUID, Integer>());
+            topIdsFW.put(scope, new ArrayList<UUID>());
+            topNamesFW.put(scope, new ArrayList<String>());
+            topValuesFW.put(scope, new HashMap<UUID, Integer>());
         }
     }
 
-    private String sqlForScope(LeaderboardScope scope) {
-        final String col = "FlawlessWins";
-        final String metric = "FlawlessWins";
-        final String label = "FlawlessWinsVal";
+    private String sqlForScope(LeaderboardScope scope, LeaderboardStatsMode mode) {
+        final String col = mode == LeaderboardStatsMode.FLAG_WARS ? "FWFlagsCaptured" : "FlawlessWins";
+        final String metric = col;
+        final String label = "ValueVal";
 
         if (scope == LeaderboardScope.LIFETIME) {
             return "SELECT UUID, LastPlayerName, " + col + " AS " + label + ", RoleID " +
@@ -66,12 +78,13 @@ public class FlawlessWinsBoard extends LeaderboardBase {
                     "ORDER BY " + label + " DESC LIMIT 10";
         }
 
+        final String table = mode == LeaderboardStatsMode.FLAG_WARS ? "fw_stat_snapshots" : "scb_stat_snapshots";
         java.sql.Date periodStart = main.snapshotDAO.startFor(scope);
 
         return "SELECT pd.UUID, pd.LastPlayerName, " +
                 "(pd." + col + " - IFNULL(s.total_value, 0)) AS " + label + ", pd.RoleID " +
                 "FROM PlayerData pd " +
-                "LEFT JOIN scb_stat_snapshots s " +
+                "LEFT JOIN " + table + " s " +
                 "ON s.uuid = pd.UUID AND s.metric = '" + metric + "' " +
                 "AND s.period = '" + scope.name() + "' AND s.period_start = '" + periodStart + "' " +
                 "HAVING " + label + " > 0 " +
@@ -82,29 +95,8 @@ public class FlawlessWinsBoard extends LeaderboardBase {
     public void asyncUpdate() throws SQLException {
         try (Statement st = main.getDatabaseManager().getConnection().createStatement()) {
             for (LeaderboardScope scope : LeaderboardScope.values()) {
-                List<UUID> ids = new ArrayList<>();
-                List<String> names = new ArrayList<>();
-                Map<UUID, Integer> vals = new HashMap<>();
-
-                try (ResultSet rs = st.executeQuery(sqlForScope(scope))) {
-                    while (rs.next()) {
-                        String uuid = rs.getString("UUID");
-                        String name = rs.getString("LastPlayerName");
-
-                        if (uuid == null || name == null) {
-                            continue;
-                        }
-
-                        UUID id = UUID.fromString(uuid);
-                        ids.add(id);
-                        names.add(name);
-                        vals.put(id, rs.getInt("FlawlessWinsVal"));
-                    }
-                }
-
-                topIds.put(scope, ids);
-                topNames.put(scope, names);
-                topValues.put(scope, vals);
+                fetchInto(st, scope, LeaderboardStatsMode.SCB, topIds, topNames, topValues);
+                fetchInto(st, scope, LeaderboardStatsMode.FLAG_WARS, topIdsFW, topNamesFW, topValuesFW);
             }
         }
 
@@ -115,6 +107,35 @@ public class FlawlessWinsBoard extends LeaderboardBase {
         lifetimeTopIds.addAll(topIds.getOrDefault(LeaderboardScope.LIFETIME, Collections.<UUID>emptyList()));
         lifetimeTopNames.addAll(topNames.getOrDefault(LeaderboardScope.LIFETIME, Collections.<String>emptyList()));
         lifetimeValues.putAll(topValues.getOrDefault(LeaderboardScope.LIFETIME, Collections.<UUID, Integer>emptyMap()));
+    }
+
+    private void fetchInto(Statement st, LeaderboardScope scope, LeaderboardStatsMode mode,
+                            Map<LeaderboardScope, List<UUID>> idsMap,
+                            Map<LeaderboardScope, List<String>> namesMap,
+                            Map<LeaderboardScope, Map<UUID, Integer>> valsMap) throws SQLException {
+        List<UUID> ids = new ArrayList<>();
+        List<String> names = new ArrayList<>();
+        Map<UUID, Integer> vals = new HashMap<>();
+
+        try (ResultSet rs = st.executeQuery(sqlForScope(scope, mode))) {
+            while (rs.next()) {
+                String uuid = rs.getString("UUID");
+                String name = rs.getString("LastPlayerName");
+
+                if (uuid == null || name == null) {
+                    continue;
+                }
+
+                UUID id = UUID.fromString(uuid);
+                ids.add(id);
+                names.add(name);
+                vals.put(id, rs.getInt("ValueVal"));
+            }
+        }
+
+        idsMap.put(scope, ids);
+        namesMap.put(scope, names);
+        valsMap.put(scope, vals);
     }
 
     @Override
@@ -148,7 +169,7 @@ public class FlawlessWinsBoard extends LeaderboardBase {
         Location base = new Location(title.getWorld(), title.getX(), y, title.getZ());
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!isViewerLifetime(player)) {
+            if (!usesGlobalBoard(player)) {
                 continue;
             }
 
@@ -170,16 +191,9 @@ public class FlawlessWinsBoard extends LeaderboardBase {
         }
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!isViewerLifetime(player)) {
+            if (!usesGlobalBoard(player)) {
                 hideGlobalForViewer(player);
-
-                LeaderboardScope scope = getViewerScopeOrLifetime(player);
-
-                if (scope != LeaderboardScope.LIFETIME) {
-                    showToViewer(player, scope);
-                } else {
-                    clearViewerHologram(player);
-                }
+                showToViewer(player, getViewerScopeOrLifetime(player));
             }
         }
     }
@@ -189,27 +203,34 @@ public class FlawlessWinsBoard extends LeaderboardBase {
             return;
         }
 
+        LeaderboardStatsMode mode = getViewerMode(viewer);
+
         clearViewerHologram(viewer);
 
-        if (scope == LeaderboardScope.LIFETIME) {
+        if (scope == LeaderboardScope.LIFETIME && mode == LeaderboardStatsMode.SCB) {
             return;
         }
 
         hideGlobalForViewer(viewer);
 
         Location title = ensureWorld(TITLE_LOC);
+        String statLabel = mode == LeaderboardStatsMode.FLAG_WARS ? "Flags Captured" : "Flawless Wins";
 
         sendLineToViewer(
                 viewer,
                 title,
-                ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + scope.display() + " Flawless Wins"
+                ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + scope.display() + " " + statLabel
         );
 
         double y = title.getY() - 0.40;
 
-        List<UUID> ids = topIds.getOrDefault(scope, Collections.<UUID>emptyList());
-        List<String> names = topNames.getOrDefault(scope, Collections.<String>emptyList());
-        Map<UUID, Integer> vals = topValues.getOrDefault(scope, Collections.<UUID, Integer>emptyMap());
+        Map<LeaderboardScope, List<UUID>> idsSrc = mode == LeaderboardStatsMode.FLAG_WARS ? topIdsFW : topIds;
+        Map<LeaderboardScope, List<String>> namesSrc = mode == LeaderboardStatsMode.FLAG_WARS ? topNamesFW : topNames;
+        Map<LeaderboardScope, Map<UUID, Integer>> valuesSrc = mode == LeaderboardStatsMode.FLAG_WARS ? topValuesFW : topValues;
+
+        List<UUID> ids = idsSrc.getOrDefault(scope, Collections.<UUID>emptyList());
+        List<String> names = namesSrc.getOrDefault(scope, Collections.<String>emptyList());
+        Map<UUID, Integer> vals = valuesSrc.getOrDefault(scope, Collections.<UUID, Integer>emptyMap());
 
         int rank = 1;
 
@@ -237,7 +258,7 @@ public class FlawlessWinsBoard extends LeaderboardBase {
             y -= 0.24;
         }
 
-        int yourVal = getScopedValueFor(viewer, scope);
+        int yourVal = getScopedValueFor(viewer, scope, mode);
 
         if (!ids.contains(viewer.getUniqueId())) {
             Location sep = new Location(title.getWorld(), title.getX(), y - 0.20, title.getZ());
@@ -259,7 +280,7 @@ public class FlawlessWinsBoard extends LeaderboardBase {
             return;
         }
 
-        if (scope == LeaderboardScope.LIFETIME) {
+        if (scope == LeaderboardScope.LIFETIME && getViewerMode(viewer) == LeaderboardStatsMode.SCB) {
             clearViewerHologram(viewer);
             return;
         }
@@ -269,14 +290,23 @@ public class FlawlessWinsBoard extends LeaderboardBase {
         showToViewer(viewer, scope);
     }
 
-    private int getScopedValueFor(Player viewer, LeaderboardScope scope) {
+    private int getScopedValueFor(Player viewer, LeaderboardScope scope, LeaderboardStatsMode mode) {
+        final String column = mode == LeaderboardStatsMode.FLAG_WARS ? "FWFlagsCaptured" : "FlawlessWins";
+        final String table = mode == LeaderboardStatsMode.FLAG_WARS ? "fw_stat_snapshots" : "scb_stat_snapshots";
+
         try {
             PlayerData data = main.getDataManager().getPlayerData(viewer);
-            int current = data != null ? data.flawlessWins : 0;
+
+            if (scope == LeaderboardScope.LIFETIME) {
+                if (data == null) return 0;
+                return mode == LeaderboardStatsMode.FLAG_WARS ? data.fwFlagsCaptured : data.flawlessWins;
+            }
+
+            int current = data != null ? (mode == LeaderboardStatsMode.FLAG_WARS ? data.fwFlagsCaptured : data.flawlessWins) : 0;
 
             if (data == null) {
                 try (PreparedStatement ps = main.getDatabaseManager().getConnection()
-                        .prepareStatement("SELECT FlawlessWins FROM PlayerData WHERE UUID=? LIMIT 1")) {
+                        .prepareStatement("SELECT " + column + " FROM PlayerData WHERE UUID=? LIMIT 1")) {
 
                     ps.setString(1, viewer.getUniqueId().toString());
 
@@ -292,10 +322,10 @@ public class FlawlessWinsBoard extends LeaderboardBase {
             int snapshot = 0;
 
             try (PreparedStatement ps = main.getDatabaseManager().getConnection().prepareStatement(
-                    "SELECT total_value FROM scb_stat_snapshots WHERE uuid=? AND metric=? AND period=? AND period_start=? LIMIT 1"
+                    "SELECT total_value FROM " + table + " WHERE uuid=? AND metric=? AND period=? AND period_start=? LIMIT 1"
             )) {
                 ps.setString(1, viewer.getUniqueId().toString());
-                ps.setString(2, "FlawlessWins");
+                ps.setString(2, column);
                 ps.setString(3, scope.name());
                 ps.setDate(4, periodStart);
 
@@ -311,7 +341,8 @@ public class FlawlessWinsBoard extends LeaderboardBase {
             e.printStackTrace();
 
             PlayerData data = main.getDataManager().getPlayerData(viewer);
-            return data != null ? data.flawlessWins : 0;
+            if (data == null) return 0;
+            return mode == LeaderboardStatsMode.FLAG_WARS ? data.fwFlagsCaptured : data.flawlessWins;
         }
     }
 
@@ -403,7 +434,7 @@ public class FlawlessWinsBoard extends LeaderboardBase {
         PacketPlayOutSpawnEntityLiving spawn = new PacketPlayOutSpawnEntityLiving(stand);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (isViewerLifetime(player)) {
+            if (usesGlobalBoard(player)) {
                 ((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(spawn);
             }
         }
@@ -476,6 +507,9 @@ public class FlawlessWinsBoard extends LeaderboardBase {
             topIds.get(scope).clear();
             topNames.get(scope).clear();
             topValues.get(scope).clear();
+            topIdsFW.get(scope).clear();
+            topNamesFW.get(scope).clear();
+            topValuesFW.get(scope).clear();
         }
 
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -483,8 +517,9 @@ public class FlawlessWinsBoard extends LeaderboardBase {
         }
     }
 
-    private boolean isViewerLifetime(Player player) {
-        return getViewerScopeOrLifetime(player) == LeaderboardScope.LIFETIME;
+    /** True only for the default combination (Lifetime + SCB) - the only one that uses the cheap shared global board. */
+    private boolean usesGlobalBoard(Player player) {
+        return getViewerScopeOrLifetime(player) == LeaderboardScope.LIFETIME && getViewerMode(player) == LeaderboardStatsMode.SCB;
     }
 
     private LeaderboardScope getViewerScopeOrLifetime(Player player) {
@@ -493,5 +528,13 @@ public class FlawlessWinsBoard extends LeaderboardBase {
         }
 
         return main.leaderboardScopeByViewer.getOrDefault(player.getUniqueId(), LeaderboardScope.LIFETIME);
+    }
+
+    private LeaderboardStatsMode getViewerMode(Player player) {
+        if (main.leaderboardModeByViewer == null) {
+            return LeaderboardStatsMode.SCB;
+        }
+
+        return main.leaderboardModeByViewer.getOrDefault(player.getUniqueId(), LeaderboardStatsMode.SCB);
     }
 }

@@ -1035,6 +1035,12 @@ public class GameManager implements Listener, PluginMessageListener {
 	 */
 	@EventHandler
 	public void onPlayerDropItem(PlayerDropItemEvent e) {
+		Player player = e.getPlayer();
+		anthony.flagwars.FWGameInstance fwInstance = getMain().getFwGameManager().getInstanceOfPlayer(player);
+		if (fwInstance != null && fwInstance.getState() == anthony.flagwars.FWGameState.IN_PROGRESS) {
+			return; // Flag Wars players can drop items mid-match
+		}
+
 		e.setCancelled(true);
 	}
 
@@ -1836,7 +1842,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		GameInstance instance = null;
 
         //If a player is already in a game, do not spectate
-		if (GetInstanceOfPlayer(player) != null || getMain().getFdGameManager().getInstanceOfPlayer(player) != null) {
+		if (GetInstanceOfPlayer(player) != null || getMain().getFwGameManager().getInstanceOfPlayer(player) != null) {
             player.sendMessage(main.color("&c&l(!) &rYou have to leave your game to Spectate"));
 			return GameReason.IN_ANOTHER;
 		}
@@ -1859,7 +1865,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		GameInstance instance = null;
 
 		if (GetInstanceOfPlayer(player) != null || getMain().getParkour().hasPlayer(player)
-				|| getMain().getFdGameManager().getInstanceOfPlayer(player) != null)
+				|| getMain().getFwGameManager().getInstanceOfPlayer(player) != null)
 			return GameReason.IN_ANOTHER;
 
 		if (gameMap.containsKey(map)) // Checks if the game has already been initialized
@@ -1994,6 +2000,9 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	@EventHandler
 	public void onBlowUp(EntityExplodeEvent e) {
+		// Flag Wars' own Fire Charge handles its own explosion (FWPlayerListener#onFireChargeExplode) - skip it here.
+		if (e.getEntity().hasMetadata("fw_fire_charge")) return;
+
 		if (e.getEntity() instanceof SmallFireball || e.getEntity() instanceof Fireball) {
 			e.blockList().clear();
 			e.setCancelled(true);
@@ -2013,6 +2022,9 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	@EventHandler
 	public void FireballDamage(EntityExplodeEvent event) {
+		// Flag Wars' own Fire Charge/TNT handle their own explosions (FWPlayerListener#onFireChargeExplode/onTntExplode) - skip them here.
+		if (event.getEntity().hasMetadata("fw_fire_charge") || event.getEntity().hasMetadata("fw_tnt")) return;
+
 		if (event.getEntity() instanceof SmallFireball || event.getEntity() instanceof Fireball) {
 			event.setCancelled(true);
 			((Fireball) event.getEntity()).setIsIncendiary(false);

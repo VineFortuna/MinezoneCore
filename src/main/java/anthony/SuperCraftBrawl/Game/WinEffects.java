@@ -30,7 +30,7 @@ public class WinEffects {
 
     /**
      * The slice of a game mode's match state WinEffects actually needs - lets this
-     * class be shared by any gamemode (SCB's GameInstance, FlagDefense's FDGameInstance
+     * class be shared by any gamemode (SCB's GameInstance, Flag Wars's FWGameInstance
      * via a small adapter, etc.) without depending on SCB's concrete GameInstance.
      */
     public interface Host {
@@ -50,6 +50,9 @@ public class WinEffects {
     private boolean floodEffect = false;
     private boolean treasureEffect = false;
     private boolean ritualEffect = false;
+
+    private BukkitRunnable floodRunnable;
+    private Boat floodBoat;
 
     private ArrayList<Item> fish = new ArrayList<>();
     private final List<Bat> ritualBats = new ArrayList<>();
@@ -184,6 +187,7 @@ public class WinEffects {
     private void floodEffect() {
         World world = player.getWorld();
         if (world != instance.getMapWorld()) return;
+        this.floodEffect = true;
         startFireworksRunnable(world);
         world.setStorm(true);
         world.setThundering(true);
@@ -195,16 +199,19 @@ public class WinEffects {
         double width  = instance.getFloodBoundsX();
         double length = instance.getFloodBoundsZ();
 
-        final Boat boat = (Boat) player.getWorld().spawnEntity(player.getLocation(), EntityType.BOAT);
-        player.teleport(boat.getLocation());
-        boat.setPassenger(player);
+        this.floodBoat = (Boat) player.getWorld().spawnEntity(player.getLocation(), EntityType.BOAT);
+        player.teleport(floodBoat.getLocation());
+        floodBoat.setPassenger(player);
 
-        BukkitRunnable runnable = new BukkitRunnable() {
+        this.floodRunnable = new BukkitRunnable() {
             int rep = 0;
             double y = centerY;
             @Override
             public void run() {
-                if (rep == 100) {
+                // 9 reps (9s), same budget startFireworksRunnable uses - rises well past the player
+                // and finishes on its own a second before FD's 10-second win-celebration cleanup runs,
+                // instead of getting cut off mid-rise.
+                if (rep == 9 || floodBoat == null || floodBoat.isDead()) {
                     this.cancel();
                 } else {
                     for (int x = (int) (centerX - width); x <= centerX + width; x++) {
@@ -217,12 +224,12 @@ public class WinEffects {
                         }
                     }
                     y++;
-                    boat.teleport(boat.getLocation().add(0, 1, 0));
+                    floodBoat.teleport(floodBoat.getLocation().add(0, 1, 0));
                 }
                 rep++;
             }
         };
-        runnable.runTaskTimer(instance.getPlugin(), 0, 20);
+        floodRunnable.runTaskTimer(instance.getPlugin(), 0, 20);
     }
 
     public void treasureEffect() {
@@ -499,6 +506,15 @@ public class WinEffects {
             for (Item i : fish) i.remove();
             this.rainEffect = false;
         } else if (this.floodEffect) {
+            if (this.floodRunnable != null) {
+                try { this.floodRunnable.cancel(); } catch (IllegalStateException ignored) {}
+                this.floodRunnable = null;
+            }
+            if (this.floodBoat != null && !this.floodBoat.isDead()) {
+                this.floodBoat.eject();
+                this.floodBoat.remove();
+            }
+            this.floodBoat = null;
             player.getWorld().setStorm(false);
             player.getWorld().setThundering(false);
             this.floodEffect = false;

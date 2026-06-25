@@ -38,6 +38,10 @@ public class WinstreakBoard extends LeaderboardBase {
     private final Map<LeaderboardScope, List<String>> topNames = new EnumMap<>(LeaderboardScope.class);
     private final Map<LeaderboardScope, Map<UUID, Integer>> topValues = new EnumMap<>(LeaderboardScope.class);
 
+    private final Map<LeaderboardScope, List<UUID>> topIdsFW = new EnumMap<>(LeaderboardScope.class);
+    private final Map<LeaderboardScope, List<String>> topNamesFW = new EnumMap<>(LeaderboardScope.class);
+    private final Map<LeaderboardScope, Map<UUID, Integer>> topValuesFW = new EnumMap<>(LeaderboardScope.class);
+
     private final Map<UUID, List<Integer>> viewerEntityIds = new HashMap<>();
     private static final AtomicInteger ENTITY_ID = new AtomicInteger(600000);
 
@@ -51,14 +55,20 @@ public class WinstreakBoard extends LeaderboardBase {
             topIds.put(scope, new ArrayList<UUID>());
             topNames.put(scope, new ArrayList<String>());
             topValues.put(scope, new HashMap<UUID, Integer>());
+            topIdsFW.put(scope, new ArrayList<UUID>());
+            topNamesFW.put(scope, new ArrayList<String>());
+            topValuesFW.put(scope, new HashMap<UUID, Integer>());
         }
     }
 
-    private String sqlForScope(LeaderboardScope scope) {
+    private String sqlForScope(LeaderboardScope scope, LeaderboardStatsMode mode) {
+        final String col = mode == LeaderboardStatsMode.FLAG_WARS ? "FWBestWinstreak" : "BestWinstreak";
+        final String table = mode == LeaderboardStatsMode.FLAG_WARS ? "fw_period_winstreaks" : "scb_period_winstreaks";
+
         if (scope == LeaderboardScope.LIFETIME) {
-            return "SELECT UUID, LastPlayerName, BestWinstreak AS WinstreakVal, RoleID " +
+            return "SELECT UUID, LastPlayerName, " + col + " AS WinstreakVal, RoleID " +
                     "FROM PlayerData " +
-                    "WHERE BestWinstreak > 0 " +
+                    "WHERE " + col + " > 0 " +
                     "ORDER BY WinstreakVal DESC LIMIT 10";
         }
 
@@ -66,7 +76,7 @@ public class WinstreakBoard extends LeaderboardBase {
 
         return "SELECT pd.UUID, pd.LastPlayerName, IFNULL(ws.best_value, 0) AS WinstreakVal, pd.RoleID " +
                 "FROM PlayerData pd " +
-                "LEFT JOIN scb_period_winstreaks ws " +
+                "LEFT JOIN " + table + " ws " +
                 "ON ws.uuid = pd.UUID " +
                 "AND ws.period = '" + scope.name() + "' " +
                 "AND ws.period_start = '" + periodStart + "' " +
@@ -78,29 +88,8 @@ public class WinstreakBoard extends LeaderboardBase {
     public void asyncUpdate() throws SQLException {
         try (Statement st = main.getDatabaseManager().getConnection().createStatement()) {
             for (LeaderboardScope scope : LeaderboardScope.values()) {
-                List<UUID> ids = new ArrayList<>();
-                List<String> names = new ArrayList<>();
-                Map<UUID, Integer> vals = new HashMap<>();
-
-                try (ResultSet rs = st.executeQuery(sqlForScope(scope))) {
-                    while (rs.next()) {
-                        String uuid = rs.getString("UUID");
-                        String name = rs.getString("LastPlayerName");
-
-                        if (uuid == null || name == null) {
-                            continue;
-                        }
-
-                        UUID id = UUID.fromString(uuid);
-                        ids.add(id);
-                        names.add(name);
-                        vals.put(id, rs.getInt("WinstreakVal"));
-                    }
-                }
-
-                topIds.put(scope, ids);
-                topNames.put(scope, names);
-                topValues.put(scope, vals);
+                fetchInto(st, scope, LeaderboardStatsMode.SCB, topIds, topNames, topValues);
+                fetchInto(st, scope, LeaderboardStatsMode.FLAG_WARS, topIdsFW, topNamesFW, topValuesFW);
             }
         }
 
@@ -111,6 +100,35 @@ public class WinstreakBoard extends LeaderboardBase {
         lifetimeTopIds.addAll(topIds.getOrDefault(LeaderboardScope.LIFETIME, Collections.<UUID>emptyList()));
         lifetimeTopNames.addAll(topNames.getOrDefault(LeaderboardScope.LIFETIME, Collections.<String>emptyList()));
         lifetimeValues.putAll(topValues.getOrDefault(LeaderboardScope.LIFETIME, Collections.<UUID, Integer>emptyMap()));
+    }
+
+    private void fetchInto(Statement st, LeaderboardScope scope, LeaderboardStatsMode mode,
+                            Map<LeaderboardScope, List<UUID>> idsMap,
+                            Map<LeaderboardScope, List<String>> namesMap,
+                            Map<LeaderboardScope, Map<UUID, Integer>> valsMap) throws SQLException {
+        List<UUID> ids = new ArrayList<>();
+        List<String> names = new ArrayList<>();
+        Map<UUID, Integer> vals = new HashMap<>();
+
+        try (ResultSet rs = st.executeQuery(sqlForScope(scope, mode))) {
+            while (rs.next()) {
+                String uuid = rs.getString("UUID");
+                String name = rs.getString("LastPlayerName");
+
+                if (uuid == null || name == null) {
+                    continue;
+                }
+
+                UUID id = UUID.fromString(uuid);
+                ids.add(id);
+                names.add(name);
+                vals.put(id, rs.getInt("WinstreakVal"));
+            }
+        }
+
+        idsMap.put(scope, ids);
+        namesMap.put(scope, names);
+        valsMap.put(scope, vals);
     }
 
     @Override
@@ -144,7 +162,7 @@ public class WinstreakBoard extends LeaderboardBase {
         Location base = new Location(title.getWorld(), title.getX(), y, title.getZ());
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!isViewerLifetime(player)) {
+            if (!usesGlobalBoard(player)) {
                 continue;
             }
 
@@ -166,16 +184,9 @@ public class WinstreakBoard extends LeaderboardBase {
         }
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!isViewerLifetime(player)) {
+            if (!usesGlobalBoard(player)) {
                 hideGlobalForViewer(player);
-
-                LeaderboardScope scope = getViewerScopeOrLifetime(player);
-
-                if (scope != LeaderboardScope.LIFETIME) {
-                    showToViewer(player, scope);
-                } else {
-                    clearViewerHologram(player);
-                }
+                showToViewer(player, getViewerScopeOrLifetime(player));
             }
         }
     }
@@ -185,27 +196,34 @@ public class WinstreakBoard extends LeaderboardBase {
             return;
         }
 
+        LeaderboardStatsMode mode = getViewerMode(viewer);
+
         clearViewerHologram(viewer);
 
-        if (scope == LeaderboardScope.LIFETIME) {
+        if (scope == LeaderboardScope.LIFETIME && mode == LeaderboardStatsMode.SCB) {
             return;
         }
 
         hideGlobalForViewer(viewer);
 
         Location title = ensureWorld(TITLE_LOC);
+        String statLabel = "Winstreak";
 
         sendLineToViewer(
                 viewer,
                 title,
-                ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + scope.display() + " Winstreak"
+                ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + scope.display() + " " + statLabel
         );
 
         double y = title.getY() - 0.40;
 
-        List<UUID> ids = topIds.getOrDefault(scope, Collections.<UUID>emptyList());
-        List<String> names = topNames.getOrDefault(scope, Collections.<String>emptyList());
-        Map<UUID, Integer> vals = topValues.getOrDefault(scope, Collections.<UUID, Integer>emptyMap());
+        Map<LeaderboardScope, List<UUID>> idsSrc = mode == LeaderboardStatsMode.FLAG_WARS ? topIdsFW : topIds;
+        Map<LeaderboardScope, List<String>> namesSrc = mode == LeaderboardStatsMode.FLAG_WARS ? topNamesFW : topNames;
+        Map<LeaderboardScope, Map<UUID, Integer>> valuesSrc = mode == LeaderboardStatsMode.FLAG_WARS ? topValuesFW : topValues;
+
+        List<UUID> ids = idsSrc.getOrDefault(scope, Collections.<UUID>emptyList());
+        List<String> names = namesSrc.getOrDefault(scope, Collections.<String>emptyList());
+        Map<UUID, Integer> vals = valuesSrc.getOrDefault(scope, Collections.<UUID, Integer>emptyMap());
 
         int rank = 1;
 
@@ -233,7 +251,7 @@ public class WinstreakBoard extends LeaderboardBase {
             y -= 0.24;
         }
 
-        int yourVal = getScopedValueFor(viewer, scope);
+        int yourVal = getScopedValueFor(viewer, scope, mode);
 
         if (!ids.contains(viewer.getUniqueId())) {
             Location sep = new Location(title.getWorld(), title.getX(), y - 0.20, title.getZ());
@@ -255,7 +273,7 @@ public class WinstreakBoard extends LeaderboardBase {
             return;
         }
 
-        if (scope == LeaderboardScope.LIFETIME) {
+        if (scope == LeaderboardScope.LIFETIME && getViewerMode(viewer) == LeaderboardStatsMode.SCB) {
             clearViewerHologram(viewer);
             return;
         }
@@ -265,17 +283,19 @@ public class WinstreakBoard extends LeaderboardBase {
         showToViewer(viewer, scope);
     }
 
-    private int getScopedValueFor(Player viewer, LeaderboardScope scope) {
+    private int getScopedValueFor(Player viewer, LeaderboardScope scope, LeaderboardStatsMode mode) {
         try {
             if (scope == LeaderboardScope.LIFETIME) {
                 PlayerData data = main.getDataManager().getPlayerData(viewer);
-                return data != null ? data.bestWinstreak : 0;
+                if (data == null) return 0;
+                return mode == LeaderboardStatsMode.FLAG_WARS ? data.fwBestWinstreak : data.bestWinstreak;
             }
 
+            final String table = mode == LeaderboardStatsMode.FLAG_WARS ? "fw_period_winstreaks" : "scb_period_winstreaks";
             java.sql.Date periodStart = main.snapshotDAO.startFor(scope);
 
             try (PreparedStatement ps = main.getDatabaseManager().getConnection().prepareStatement(
-                    "SELECT best_value FROM scb_period_winstreaks WHERE uuid=? AND period=? AND period_start=? LIMIT 1"
+                    "SELECT best_value FROM " + table + " WHERE uuid=? AND period=? AND period_start=? LIMIT 1"
             )) {
                 ps.setString(1, viewer.getUniqueId().toString());
                 ps.setString(2, scope.name());
@@ -382,7 +402,7 @@ public class WinstreakBoard extends LeaderboardBase {
         PacketPlayOutSpawnEntityLiving spawn = new PacketPlayOutSpawnEntityLiving(stand);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (isViewerLifetime(player)) {
+            if (usesGlobalBoard(player)) {
                 ((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection.sendPacket(spawn);
             }
         }
@@ -455,6 +475,9 @@ public class WinstreakBoard extends LeaderboardBase {
             topIds.get(scope).clear();
             topNames.get(scope).clear();
             topValues.get(scope).clear();
+            topIdsFW.get(scope).clear();
+            topNamesFW.get(scope).clear();
+            topValuesFW.get(scope).clear();
         }
 
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -462,8 +485,9 @@ public class WinstreakBoard extends LeaderboardBase {
         }
     }
 
-    private boolean isViewerLifetime(Player player) {
-        return getViewerScopeOrLifetime(player) == LeaderboardScope.LIFETIME;
+    /** True only for the default combination (Lifetime + SCB) - the only one that uses the cheap shared global board. */
+    private boolean usesGlobalBoard(Player player) {
+        return getViewerScopeOrLifetime(player) == LeaderboardScope.LIFETIME && getViewerMode(player) == LeaderboardStatsMode.SCB;
     }
 
     private LeaderboardScope getViewerScopeOrLifetime(Player player) {
@@ -472,5 +496,13 @@ public class WinstreakBoard extends LeaderboardBase {
         }
 
         return main.leaderboardScopeByViewer.getOrDefault(player.getUniqueId(), LeaderboardScope.LIFETIME);
+    }
+
+    private LeaderboardStatsMode getViewerMode(Player player) {
+        if (main.leaderboardModeByViewer == null) {
+            return LeaderboardStatsMode.SCB;
+        }
+
+        return main.leaderboardModeByViewer.getOrDefault(player.getUniqueId(), LeaderboardStatsMode.SCB);
     }
 }
