@@ -9,45 +9,46 @@ import org.bukkit.util.Vector;
 public enum FishArea {
     
     // CLASSIC
-    Pond(
+    POND(
             "Pond",
             new Vector(287, 94, 519),
             30, 15, 35,
             new Vector(302.5, 91, 527.5),
             new ItemStack(Material.GRASS)),
-    LushCave(
+    LUSH_CAVE(
             "Lush Cave",
             new Vector(265, 105, 629),
             32, 20, 41,
             new Vector(280.5, 107, 625.5),
             new ItemStack(Material.GLOWSTONE)),
-    Park("City Park",
+    PARK("City Park",
             new Vector(98, 115, 950),
             32, 20, 42,
             new Vector(96.5, 113, 923.5),
             new ItemStack(Material.WOOD)),
-    /*Shores("Rocky Shores",
-            new Vector(46, 80, 555),
-            25, 15, 35,
-            new Vector(56.5, 78, 569.5),
-            new ItemStack(Material.CLAY)),*/
-    Woods("Woods",
+    WOODS("Woods",
             new Vector(218, 107, 586),
             12, 14, 12,
             new Vector(204.5, 105, 582.5),
             new ItemStack(Material.LEAVES, 1, (short) 3)),
 
-    Sewers("Sewers",
+    SEWERS("Sewers",
             new Vector(90, 99, 832),
             105, 8, 105,
             new Vector(70.5, 98, 782.5),
             new ItemStack(Material.IRON_FENCE)),
 
-    Cavern("Cavern",
+    CAVERN("Cavern",
             new Vector(196, 70, 629),
             30, 9, 30,
             new Vector(175.5, 71, 638.5),
-            new ItemStack(Material.STONE));
+            new ItemStack(Material.STONE)),
+
+    BEACH("Beach",
+            new Vector(46, 80, 555),
+            25, 15, 35,
+            new Vector(56.5, 78, 569.5),
+            new ItemStack(Material.SAND));
     
     private final String name;
     private final Vector location;

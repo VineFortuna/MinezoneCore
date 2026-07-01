@@ -42,19 +42,24 @@ public class FishingAreasGUI implements InventoryProvider {
                 int totalInArea = 0;
                 int caughtInArea = 0;
                 for (FishType type : FishType.values()) {
-                    if (type.getAreas() != null && type.getAreas().contains(area)) {
+                    if (type.getAreas() == null || type.getAreas().contains(area)) {
                         totalInArea++;
                         FishingDetails details = data.playerFishing.get(type.getId());
                         if (details != null && details.timesCaught > 0) caughtInArea++;
                     }
                 }
-                String speciesCaughtLine = main.color("&7Species caught: &e" + caughtInArea + "&7/" + totalInArea);
+
+                String color = (caughtInArea < totalInArea) ? "&c" : "&a";
+                String speciesCaughtLine = main.color("&7Species caught: "
+                        + color + caughtInArea
+                        + "&e/" + totalInArea);
 
                 if (data.getFishingWarps().contains(id)) {
                     contents.add(
                             ClickableItem.of(
                                     ItemHelper.setDetails(area.getDisplayItem(), "&e&l" + area.getName(),
                                             speciesCaughtLine,
+                                            "",
                                             "&7Click to teleport"),
                                     e -> {
                                         if (main.getGameManager().GetInstanceOfPlayer(player) == null
@@ -78,8 +83,7 @@ public class FishingAreasGUI implements InventoryProvider {
                     contents.add(
                             ClickableItem.of(
                                     ItemHelper.setDetails(ItemHelper.createDye(DyeColor.GRAY, 1), "&c???",
-                                            speciesCaughtLine,
-                                            "&7Visit location to unlock quick travel"),
+                                            "&7Discover area to unlock quick travel"),
                                     e -> {
                                     }));
                 }
