@@ -1,5 +1,6 @@
 package anthony.SuperCraftBrawl.halloween;
 
+import anthony.SuperCraftBrawl.cosmetics.TitleCosmeticPackets;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -16,9 +17,9 @@ public class TrickTitleCommand implements CommandExecutor, TabExecutor {
 
 	// Works with either your passenger or packet manager — both expose
 	// enable/disable/toggle/isEnabled
-	private final TrickTitlePackets manager;
+	private final TitleCosmeticPackets manager;
 
-	public TrickTitleCommand(TrickTitlePackets manager) {
+	public TrickTitleCommand(TitleCosmeticPackets manager) {
 		this.manager = manager;
 	}
 

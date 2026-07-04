@@ -1,6 +1,8 @@
 package anthony.SuperCraftBrawl.commands;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameLootDrops;
 import anthony.SuperCraftBrawl.Game.GameSettings;
@@ -58,11 +60,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 	private final Core main;
 	public List<Player> players;
-	private final java.util.Set<java.util.UUID> candyAuraEnabled = new java.util.HashSet<>();
-	private int candyAuraTaskId = -1;
-
-	// how often to render (ticks). 5 = 4x/sec
-	private static final long CANDY_AURA_PERIOD_TICKS = 5L;
 
 	public Commands(Core main) {
 		this.main = main;
@@ -541,27 +538,30 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
+		Cosmetic candyAura = main.getCosmeticManager().registry().get(CosmeticCategory.TRAIL, "candy_aura");
+		if (!candyAura.isUnlocked(player)) {
+			player.sendMessage(candyAura.getUnlockMessage(player));
+			return;
+		}
+
 		String mode = (args.length == 0) ? "toggle" : args[0].toLowerCase();
 		switch (mode) {
 		case "on":
-			candyAuraEnabled.add(player.getUniqueId());
+			main.getCosmeticManager().equip(player, candyAura);
 			player.sendMessage(main.color("&dCandy Aura &aenabled&d. Sweet!"));
-			ensureCandyAuraTaskRunning();
 			break;
 		case "off":
-			candyAuraEnabled.remove(player.getUniqueId());
+			if (candyAura.id.equals(main.getCosmeticManager().getEquippedId(player, CosmeticCategory.TRAIL))) {
+				main.getCosmeticManager().unequip(player, CosmeticCategory.TRAIL);
+			}
 			player.sendMessage(main.color("&dCandy Aura &cdisabled&d."));
 			break;
 		case "toggle":
 		default:
-			if (candyAuraEnabled.contains(player.getUniqueId())) {
-				candyAuraEnabled.remove(player.getUniqueId());
-				player.sendMessage(main.color("&dCandy Aura &cdisabled&d."));
-			} else {
-				candyAuraEnabled.add(player.getUniqueId());
-				player.sendMessage(main.color("&dCandy Aura &aenabled&d. Sweet!"));
-				ensureCandyAuraTaskRunning();
-			}
+			boolean nowEnabled = main.getCosmeticManager().toggle(player, candyAura);
+			player.sendMessage(main.color(nowEnabled
+					? "&dCandy Aura &aenabled&d. Sweet!"
+					: "&dCandy Aura &cdisabled&d."));
 			break;
 		}
 	}
@@ -651,48 +651,6 @@ public class Commands implements CommandExecutor, TabCompleter {
             }
         });
     }
-
-	private void ensureCandyAuraTaskRunning() {
-		if (candyAuraTaskId != -1)
-			return; // already running
-		candyAuraTaskId = Bukkit.getScheduler().runTaskTimer(main, new Runnable() {
-			@Override
-			public void run() {
-				if (candyAuraEnabled.isEmpty())
-					return;
-				for (java.util.UUID id : new java.util.HashSet<>(candyAuraEnabled)) {
-					Player p = Bukkit.getPlayer(id);
-					if (p == null || !p.isOnline())
-						continue;
-					renderCandyAura(p);
-				}
-			}
-		}, CANDY_AURA_PERIOD_TICKS, CANDY_AURA_PERIOD_TICKS).getTaskId();
-	}
-
-	/** Draw a small “candy” swirl around the player (1.8-safe Effects). */
-	private void renderCandyAura(Player p) {
-		Location base = p.getLocation().add(0, 0.1, 0);
-
-		// light sparkles around feet
-		p.getWorld().playEffect(base, Effect.HAPPY_VILLAGER, 0, 16);
-		p.getWorld().playEffect(base, Effect.CRIT, 0, 16);
-
-		// purple-ish magic near waist
-		Location waist = base.clone().add(0, 0.7, 0);
-		p.getWorld().playEffect(waist, Effect.WITCH_MAGIC, 0, 16);
-
-		// tiny swirl ring
-		final double r = 0.45;
-		long t = System.currentTimeMillis();
-		for (int i = 0; i < 6; i++) {
-			double a = (t / 120.0 + i * Math.PI / 3.0);
-			double x = Math.cos(a) * r;
-			double z = Math.sin(a) * r;
-			Location ring = waist.clone().add(x, 0.1, z);
-			p.getWorld().playEffect(ring, Effect.HAPPY_VILLAGER, 0, 8);
-		}
-	}
 
 	private void serverCommand(Player player) {
 		player.sendMessage(main.color("&b&l(!) &rYou are currently connected to &2SCB-1"));
@@ -1875,6 +1833,11 @@ public class Commands implements CommandExecutor, TabCompleter {
         if (game != null && game.state == GameState.ENDED) {
             return;
         } else if (main.getGameManager().RemovePlayerFromAll(player)) {
+            for (PotionEffect type : player.getActivePotionEffects()) {
+                player.removePotionEffect(type.getType());
+            }
+
+            removeArmor(player);
             main.ResetPlayer(player);
 
             player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1888,12 +1851,6 @@ public class Commands implements CommandExecutor, TabCompleter {
                     gs.startVotes.remove(player);
                 }
             }
-
-            for (PotionEffect type : player.getActivePotionEffects()) {
-                player.removePotionEffect(type.getType());
-            }
-
-            removeArmor(player);
         } else if (game != null && game.spectators.contains(player)) {
             String mapName = "";
 

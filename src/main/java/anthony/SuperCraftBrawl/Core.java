@@ -1,12 +1,20 @@
 package anthony.SuperCraftBrawl;
 
 import anthony.SuperCraftBrawl.Game.*;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
-import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.armorstands.ArmorStandManager;
 import anthony.SuperCraftBrawl.commands.Commands;
-import anthony.SuperCraftBrawl.cosmetics.CosmeticsManager;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticDataDAO;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticManager;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticRegistry;
+import anthony.SuperCraftBrawl.cosmetics.GadgetListener;
+import anthony.SuperCraftBrawl.cosmetics.categories.DeathEffectCosmetics;
+import anthony.SuperCraftBrawl.cosmetics.categories.GadgetCosmetics;
+import anthony.SuperCraftBrawl.cosmetics.categories.OutfitCosmetics;
+import anthony.SuperCraftBrawl.cosmetics.categories.PetCosmetics;
+import anthony.SuperCraftBrawl.cosmetics.categories.TitleCosmetics;
+import anthony.SuperCraftBrawl.cosmetics.categories.TrailCosmetics;
+import anthony.SuperCraftBrawl.cosmetics.categories.WinEffectCosmetics;
 import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.fishing.Fishing;
@@ -18,8 +26,7 @@ import anthony.SuperCraftBrawl.halloween.CandyAuraManager;
 import anthony.SuperCraftBrawl.halloween.HalloweenHuntManager;
 import anthony.SuperCraftBrawl.halloween.TreatsAdminCommand;
 import anthony.SuperCraftBrawl.halloween.TrickTitleCommand;
-import anthony.SuperCraftBrawl.halloween.TrickTitleManager;
-import anthony.SuperCraftBrawl.halloween.TrickTitlePackets;
+import anthony.SuperCraftBrawl.cosmetics.TitleCosmeticPackets;
 import anthony.SuperCraftBrawl.leaderboards.*;
 import anthony.SuperCraftBrawl.levels.LevelManager;
 import anthony.SuperCraftBrawl.lobbyexplorer.LobbyExplorerManager;
@@ -42,7 +49,6 @@ import anthony.SuperCraftBrawl.signs.SignManager;
 import anthony.SuperCraftBrawl.staffhelp.StaffHelpManager;
 import anthony.SuperCraftBrawl.tablist.TablistAnimationManager;
 import anthony.SuperCraftBrawl.tablist.TablistManager;
-import anthony.SuperCraftBrawl.titles.TitleSequence;
 import anthony.parkour.Arenas;
 import anthony.parkour.Parkour;
 import anthony.util.ItemHelper;
@@ -52,7 +58,6 @@ import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.*;
-import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
@@ -62,7 +67,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.inventory.ItemStack;
@@ -112,9 +116,6 @@ public class Core extends JavaPlugin implements Listener {
     public boolean tourneyreset = false;
     public boolean tournamentend = false;
     public Map<String, Integer> tourney = new HashMap<>();
-    public HashMap<Player, Boolean> ao = new HashMap<>();
-    public HashMap<Player, Boolean> so = new HashMap<>();
-    public HashMap<Player, Boolean> po = new HashMap<>();
     public Parkour p;
     public Leaderboard lb;
     public FishingBoard fb;
@@ -142,8 +143,7 @@ public class Core extends JavaPlugin implements Listener {
 
     // HALLOWEEN CLASSES:
     private HalloweenHuntManager halloweenHunt;
-    private TrickTitleManager trickTitleOld;
-    private TrickTitlePackets trickTitle;
+    private TitleCosmeticPackets trickTitle;
 
     //PARKOUR VARIABLES:
     public final Set<UUID> sentMysteryHolos = new HashSet<>();
@@ -183,7 +183,9 @@ public class Core extends JavaPlugin implements Listener {
     private PartyManager partyManager;
 
     //COSMETICS:
-    public CosmeticsManager cosmeticsManager;
+    public GadgetListener gadgetListener;
+    private CosmeticRegistry cosmeticRegistry;
+    private CosmeticManager cosmeticManager;
 
     //STAFF HELP:
     public StaffHelpManager  staffHelpManager;
@@ -217,8 +219,12 @@ public class Core extends JavaPlugin implements Listener {
         return levelManager;
     }
 
-    public CosmeticsManager getCosmeticsManager() {
-        return cosmeticsManager;
+    public GadgetListener getGadgetListener() {
+        return gadgetListener;
+    }
+
+    public CosmeticManager getCosmeticManager() {
+        return cosmeticManager;
     }
 
     public PartyManager getPartyManager() {
@@ -253,11 +259,7 @@ public class Core extends JavaPlugin implements Listener {
         return this.candyAura;
     }
 
-    public TrickTitleManager getTrickTitle() {
-        return this.trickTitleOld;
-    }
-
-    public TrickTitlePackets getTrickPacket() {
+    public TitleCosmeticPackets getTitlePacket() {
         return this.trickTitle;
     }
 
@@ -427,6 +429,7 @@ public class Core extends JavaPlugin implements Listener {
         spawnSelfStatsNPC();
         showNPCs();
         enableTitlesCosmetic();
+        enableCosmeticsSystem();
         enableLeaderboardSnapshotTables();
         this.floating.spawnFloatingBlocks();
         //enableTablist();
@@ -692,19 +695,26 @@ public class Core extends JavaPlugin implements Listener {
     }
 
     private void enableTitlesCosmetic() {
-        trickTitleOld = new TrickTitleManager(this, "lobby-1");
-        this.trickTitle = new TrickTitlePackets(this, "lobby-1"); // change world name if needed
-        this.trickTitle.registerTitle("Trick-or-Treater", color("&6&lTrick-or-Treater"), 0.2);
-        this.trickTitle.registerTitle("Freddy Fazbear", color("&6&lFreddy Fazbear"), 0.2);
-        this.trickTitle.registerTitle("Fiesta De La Noche", color("&b&lFIESTA DE LA NOCHE"), 0.2);
-
-        this.trickTitle.registerTitle("SCB Summer Champ 2021", color("&b&lSCB SUMMER CHAMP (2021)"), 0.2);
-        this.trickTitle.registerTitle("SCB Summer Champ 2022", color("&b&lSCB SUMMER CHAMP (2022)"), 0.2);
-        this.trickTitle.registerTitle("SCB Cash Cup Champ 2023", color("&a&lSCB CASH CUP CHAMP (2023)"), 0.2);
-        this.trickTitle.registerTitle("SCB Halloween Champ 2024", color("&6&lSCB HALLOWEEN CHAMP (2024)"), 0.2);
-        this.trickTitle.registerTitle("SCB Winter Champ 2025", color("&b&lSCB WINTER CHAMP (2025)"), 0.2);
+        this.trickTitle = new TitleCosmeticPackets(this, "lobby-1"); // change world name if needed
+        // Title keys are registered with trickTitle by TitleCosmetics.registerAll(), alongside
+        // the matching Cosmetic definitions, so there's one place that owns the title list.
 
         getCommand("tricktitle").setExecutor(new TrickTitleCommand(trickTitle));
+    }
+
+    private void enableCosmeticsSystem() {
+        getDatabaseManager().ensurePlayerCosmeticsTable();
+
+        cosmeticRegistry = new CosmeticRegistry();
+        cosmeticManager = new CosmeticManager(this, cosmeticRegistry, new CosmeticDataDAO(this));
+
+        OutfitCosmetics.registerAll(this, cosmeticRegistry);
+        GadgetCosmetics.registerAll(this, cosmeticRegistry);
+        PetCosmetics.registerAll(this, cosmeticRegistry);
+        TrailCosmetics.registerAll(this, cosmeticRegistry);
+        TitleCosmetics.registerAll(this, cosmeticRegistry);
+        WinEffectCosmetics.registerAll(this, cosmeticRegistry);
+        DeathEffectCosmetics.registerAll(this, cosmeticRegistry);
     }
 
     /*
@@ -740,7 +750,7 @@ public class Core extends JavaPlugin implements Listener {
         listener = new PlayerListener(this);
         gameManager = new GameManager(this);
         mysteryChestManager = new MysteryChestManager(this);
-        cosmeticsManager = new CosmeticsManager(this);
+        gadgetListener = new GadgetListener(this);
         scoreboardManager = new ScoreboardManager(this);
         titleAnimationManager = new anthony.SuperCraftBrawl.scoreboards.TitleAnimationManager(this);
         tabManager = new TablistManager(this);
@@ -2098,6 +2108,12 @@ public class Core extends JavaPlugin implements Listener {
 
             if (!(holograms.containsKey(player)))
                 holograms.put(player, new Holograms(this, player));
+
+            // Re-apply whatever's equipped, since the inventory.clear() above wipes any
+            // GADGET/OUTFIT items a game or command doesn't know to restore. Null-checked:
+            // onEnable() calls ResetPlayer() for already-online players (on a /reload) before
+            // enableCosmeticsSystem() has run.
+            if (cosmeticManager != null) cosmeticManager.reapply(player);
         }
     }
 
@@ -2358,9 +2374,6 @@ public class Core extends JavaPlugin implements Listener {
     public void forgetPlayerEverywhere(Player p) {
         // Example toggles / wagers / stats maps keyed by Player:
         if (gameStats != null) gameStats.remove(p);
-        if (ao != null) ao.remove(p); // ability toggles
-        if (so != null) so.remove(p);
-        if (po != null) po.remove(p);
         if (wagers != null) wagers.remove(p);
     }
 

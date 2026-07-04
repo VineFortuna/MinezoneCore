@@ -189,6 +189,19 @@ public class DatabaseManager {
 		multiExecuteUpdateCommand(gamesTable, playersTable);
 	}
 
+    public void ensurePlayerCosmeticsTable() {
+        final String sql =
+                "CREATE TABLE IF NOT EXISTS scb_player_cosmetics (" +
+                        "  uuid        VARCHAR(36) NOT NULL," +
+                        "  category    VARCHAR(32) NOT NULL," +
+                        "  cosmetic_id VARCHAR(64) NOT NULL," +
+                        "  updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
+                        "  PRIMARY KEY (uuid, category)," +
+                        "  INDEX (uuid)" +
+                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+        executeUpdateCommand(sql);
+    }
+
     public void executeQueryCommand(String updateCommand, ExecuteFunction func) {
 		try {
 			Statement stmt = getConnection().createStatement();

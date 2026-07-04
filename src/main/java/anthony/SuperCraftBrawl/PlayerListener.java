@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.gui.christmas.ChristmasRewardsGUI;
@@ -23,7 +24,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.*;
@@ -40,10 +40,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
 import org.bukkit.event.weather.WeatherChangeEvent;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Door;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -58,12 +55,6 @@ public class PlayerListener implements Listener {
     private final Core main;
     public ScoreboardManager scoreManager = Bukkit.getScoreboardManager();
     public Scoreboard c;
-    public Map<Player, Snowman> snowmanPetPlayers = new HashMap<>();
-    public List<Player> candyCaneSwirlPlayers = new ArrayList<Player>();
-    public List<Player> elfCosmeticPlayers = new ArrayList<Player>();
-    public List<Player> goldenOutfitPlayers = new ArrayList<>();
-    public List<Player> freddyOutfitPlayers = new ArrayList<>();
-    public List<Player> rudolphOutfitPlayers = new ArrayList<>();
     private BukkitTask announcementsTask;
 
     public PlayerListener(Core main) {
@@ -116,7 +107,7 @@ public class PlayerListener implements Listener {
     }
 
     public void removeCosmetics(Player player) {
-        main.getTrickTitle().disable(player);
+        main.getCosmeticManager().unequip(player, CosmeticCategory.TITLE);
     }
 
     /**
@@ -195,16 +186,6 @@ public class PlayerListener implements Listener {
          *
          * if (main.getTabManager() != null) main.getTabManager().setPlayerTeam(p);
          */
-    }
-
-    // Track the follow task for each player's snowman so we can cancel it.
-    private final Map<UUID, Integer> snowmanTasks = new HashMap<>();
-
-    private void cancelSnowmanTask(UUID uuid) {
-        Integer id = snowmanTasks.remove(uuid);
-        if (id != null) {
-            try { Bukkit.getScheduler().cancelTask(id); } catch (Throwable ignored) {}
-        }
     }
 
     public int getHalloweenEventProgress(Player player) {
@@ -502,13 +483,6 @@ public class PlayerListener implements Listener {
             instance.effects.remove(player);
         }
 
-        candyCaneSwirlPlayers.remove(player);
-        main.getCosmeticsManager().snowParticlePlayers.remove(player);
-        if (snowmanPetPlayers.containsKey(player))
-            snowmanPetPlayers.get(player).remove();
-        snowmanPetPlayers.remove(player);
-        elfCosmeticPlayers.remove(player);
-
         if (instance != null)
             main.getGameManager().RemovePlayerFromAll(player);
 
@@ -537,7 +511,6 @@ public class PlayerListener implements Listener {
 
         // Any Player->... maps in Core
         main.forgetPlayerEverywhere(p);
-        cancelSnowmanTask(player.getUniqueId());
         main.sentMysteryHolos.remove(player.getUniqueId());
         main.sentParkourHolos.remove(player.getUniqueId());
         ChannelInjector.uninject(player);
@@ -735,101 +708,6 @@ public class PlayerListener implements Listener {
 
         // Check if yaw is within the range for south direction
         return (yaw >= 337.5 || yaw <= 22.5);
-    }
-
-    public void snowmanPet(Player player) {
-        UUID uid = player.getUniqueId();
-
-        // If we already had a task running for this player, stop it first.
-        cancelSnowmanTask(uid);
-
-        if (!this.snowmanPetPlayers.containsKey(player)) {
-            return; // nothing to follow right now
-        }
-
-        final Snowman snowman = snowmanPetPlayers.get(player);
-        final int taskId = Bukkit.getScheduler().runTaskTimer(main, () -> {
-            // End conditions: no player, no snowman, wrong world, or pet turned off
-            if (!player.isOnline()
-                    || !snowman.isValid()
-                    || player.getWorld() != snowman.getWorld()
-                    || !snowmanPetPlayers.containsKey(player)
-                    || player.getWorld() != main.getLobbyWorld()) {
-
-                // remove pet entity if still around
-                try { snowman.remove(); } catch (Throwable ignored) {}
-                cancelSnowmanTask(uid); // <- kill the ticker
-                return;
-            }
-
-            // Follow logic
-            Location playerLoc = player.getLocation();
-            double distance = playerLoc.distance(snowman.getLocation());
-
-            if (distance > 15) {
-                Location behind = playerLoc.clone().add(playerLoc.getDirection().multiply(-2));
-                behind.setY(Math.min(playerLoc.getWorld().getHighestBlockYAt(behind), playerLoc.getY() + 10));
-                snowman.teleport(behind);
-            }
-        }, 20L, 20L).getTaskId();
-
-        snowmanTasks.put(uid, taskId);
-    }
-
-    // Angle used to rotate the swirl; we store it as a field so it persists across
-    // movements
-    private double angle = 0;
-
-    public void candyCaneSwirlCosmetic(Player player) {
-        if (this.candyCaneSwirlPlayers.contains(player)) {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    // Check if player is still in the arraylist
-                    if (!candyCaneSwirlPlayers.contains(player)) {
-                        this.cancel();
-                        return;
-                    }
-
-                    if (player.getWorld() == main.getLobbyWorld()) {
-                        angle += Math.PI / 16; // adjust for speed of rotation
-
-                        // Set the radius of the swirl and the vertical height
-                        double radius = 1.0;
-                        double height = 1.0; // how high around the player the swirl appears
-
-                        // Calculate the positions for red and white particles in a circle
-                        double xRed = radius * Math.cos(angle);
-                        double zRed = radius * Math.sin(angle);
-
-                        double xWhite = radius * Math.cos(angle + Math.PI); // Opposite side for a striped effect
-                        double zWhite = radius * Math.sin(angle + Math.PI);
-
-                        // Get player location
-                        Location baseLoc = player.getLocation();
-
-                        // Red particle (REDSTONE)
-                        sendParticleToAll(EnumParticle.REDSTONE, baseLoc.getX() + xRed, baseLoc.getY() + height,
-                                baseLoc.getZ() + zRed, 0.1f, 0.1f, 0.1f, 0f, 5);
-
-                        // White particle (CLOUD)
-                        sendParticleToAll(EnumParticle.SNOW_SHOVEL, baseLoc.getX() + xWhite, baseLoc.getY() + height,
-                                baseLoc.getZ() + zWhite, 0.1f, 0.1f, 0.1f, 0f, 5);
-                    }
-                }
-            }.runTaskTimer(main, 0L, 1L); // Run every 20 ticks (1 second), adjust as needed
-        }
-    }
-
-    // Sends the particle packet to all online players so everyone sees the swirl
-    private void sendParticleToAll(EnumParticle particle, double x, double y, double z, float offsetX, float offsetY,
-                                   float offsetZ, float speed, int count) {
-        PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particle, false, // long distance
-                (float) x, (float) y, (float) z, offsetX, offsetY, offsetZ, speed, count);
-
-        for (Player online : Bukkit.getOnlinePlayers()) {
-            ((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
-        }
     }
 
     @EventHandler
@@ -1148,134 +1026,9 @@ public class PlayerListener implements Listener {
     // COSMETICS:
 
     @EventHandler
-    public void cosmetics(PlayerInteractEvent event) {
-        Player player = event.getPlayer();
-        PlayerData data = main.getDataManager().getPlayerData(player);
-        ItemStack item = event.getItem();
-        GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
-
-        if (item != null) {
-            if (item.getType() == Material.GOLD_BARDING
-                    && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-                if ((player.getWorld() == main.getLobbyWorld())
-                        || (i != null && i.state == GameState.WAITING)) {
-
-                    if (data != null) {
-                        if (data.paintball > 0) {
-                            Snowball snowball = player.launchProjectile(Snowball.class);
-                            snowball.setMetadata("paintball", new FixedMetadataValue(main, true));
-                            data.paintball--;
-                            main.getDataManager().saveData(data);
-
-                            String msg = main.color("&9&l(!) &rYou have &e" + data.paintball + " paintballs");
-                            PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-                                    (byte) 2);
-                            CraftPlayer craft = (CraftPlayer) player;
-                            craft.getHandle().playerConnection.sendPacket(packet);
-
-                            player.getWorld().playSound(player.getLocation(), Sound.CHICKEN_EGG_POP, 1, 1);
-                        } else
-                            player.sendMessage(main.color("&c&l(!) &rYou do not have anymore &ePaintballs &r:("));
-                    }
-                }
-            }
-        }
-    }
-
-    @EventHandler
     public void onHookHit(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof FishHook)
             event.setCancelled(true);
-    }
-
-    @EventHandler
-    public void snowballHit(ProjectileHitEvent event) {
-        Entity e = event.getEntity();
-        Snowball s;
-
-        if (e instanceof Snowball && e.hasMetadata("paintball")) {
-            s = (Snowball) e;
-            DyeColor col = DyeColor.values()[new Random().nextInt(DyeColor.values().length)];
-            if (s.getShooter() instanceof Player) {
-                Player p = (Player) s.getShooter();
-                GameInstance i = main.getGameManager().GetInstanceOfPlayer(p);
-
-                if (i != null && i.state == GameState.STARTED)
-                    return;
-
-                Block center = s.getLocation().getBlock();
-                int x = center.getX();
-                int z = center.getZ();
-                if (center.getType() != Material.AIR) {
-                    doTheWorkForMe(center, col);
-
-                }
-
-                int max = s.getLocation().getBlock().getY() + 1;
-                int min = s.getLocation().getBlock().getY() - 1;
-                Location loc;
-                for (int y = min; y <= max; y++) {
-                    loc = new Location(center.getWorld(), x + 1, y, z);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x, y, z);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x + 1, y, z + 1);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x, y, z + 1);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x - 1, y, z + 1);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x - 1, y, z);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x - 1, y, z);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x - 1, y, z - 1);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x, y, z - 1);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x + 1, y, z - 1);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                }
-            }
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    private void randomizeColor(Block block, DyeColor color) {
-        block.setData(color.getData());
-    }
-
-    @SuppressWarnings("deprecation")
-    private void doTheWorkForMe(Block block, DyeColor color) {
-        if (block.getType() != Material.AIR && block.getType() != Material.SIGN && block.getType() != Material.SIGN_POST
-                && block.getType() != Material.WALL_SIGN && block.getType() != Material.WOOL
-                && block.getType() != Material.CHEST && block.getType() != Material.LONG_GRASS
-                && block.getType() != Material.RED_ROSE && block.getType() != Material.DEAD_BUSH
-                && block.getType() != Material.FLOWER_POT && block.getType() != Material.DOUBLE_PLANT
-                && block.getType() != Material.BED_BLOCK && !(block.getState().getData() instanceof Door)
-                && !(block.getState() instanceof InventoryHolder) && !(block.getState() instanceof Banner)
-                && block.getType() != Material.SKULL && block.getType() != Material.SOIL
-                && block.getType() != Material.SEA_LANTERN && block.getType() != Material.BEACON
-                && block.getType() != Material.GLOWSTONE && block.getType() != Material.LADDER) {
-            Material og = block.getType();
-            Byte data = block.getData();
-            if (og == Material.WOOL) {
-                randomizeColor(block, color);
-                return;
-            }
-            Location loc = new Location(block.getWorld(), block.getX(), block.getY() + 1, block.getZ());
-
-            if (loc.getBlock().getType().isSolid() == false && loc.getBlock().getType() != Material.AIR
-                    && loc.getBlock().getType() != Material.TORCH)
-                return;
-
-            Bukkit.getScheduler().runTaskLater(main, () -> {
-                block.setType(og);
-                block.setData(data);
-            }, 20 * 5L);
-            block.setType(Material.WOOL);
-            randomizeColor(block, color);
-        }
     }
 
     public void trampoline(Player player) {

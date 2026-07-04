@@ -1136,6 +1136,7 @@ public class GameInstance {
                     if (sm != null && s != null) sm.resetSign(s, map);
 
                     for (Player player : players) {
+                        gameManager.getMain().getListener().resetArmor(player);
                         gameManager.getMain().ResetPlayer(player);
                         BaseClass bc = classes.get(player);
                         bc.GameEnd();
@@ -1145,7 +1146,6 @@ public class GameInstance {
                         gameManager.getMain().sendScoreboardUpdate(player);
                         for (PotionEffect type : player.getActivePotionEffects())
                             player.removePotionEffect(type.getType());
-                        gameManager.getMain().getListener().resetArmor(player);
                     }
 
                     for (BukkitRunnable runnable2 : runnables) runnable2.cancel();

@@ -1,4 +1,4 @@
-package anthony.SuperCraftBrawl.halloween;
+package anthony.SuperCraftBrawl.cosmetics;
 
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * - Title shows to OTHER players (not the owner)
  * - Lobby-only by world name
  */
-public final class TrickTitlePackets implements Listener {
+public final class TitleCosmeticPackets implements Listener {
 
     // ----- Title definition -----
     public static final class TitleDef {
@@ -61,7 +61,7 @@ public final class TrickTitlePackets implements Listener {
 
     private int reattachTaskId = -1;
 
-    public TrickTitlePackets(Plugin plugin, String lobbyWorldName) {
+    public TitleCosmeticPackets(Plugin plugin, String lobbyWorldName) {
         this.plugin = plugin;
         this.lobbyWorldName = (lobbyWorldName == null) ? "" : lobbyWorldName;
         Bukkit.getPluginManager().registerEvents(this, plugin);
