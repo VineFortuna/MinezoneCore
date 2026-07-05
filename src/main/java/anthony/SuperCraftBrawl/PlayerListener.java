@@ -6,7 +6,7 @@ import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.gui.christmas.ChristmasRewardsGUI;
-import anthony.SuperCraftBrawl.gui.cosmetics.CosmeticsGUI;
+import anthony.SuperCraftBrawl.gui.cosmetics.UnifiedCosmeticsGUI;
 import anthony.SuperCraftBrawl.leaderboards.LeaderboardScope;
 import anthony.SuperCraftBrawl.npcs.ChannelInjector;
 import anthony.SuperCraftBrawl.npcs.NPC;
@@ -825,9 +825,9 @@ public class PlayerListener implements Listener {
 
         if (e.getItem() != null && e.getItem().getType() == Material.CHEST) {
             if (i != null && i.state == GameState.WAITING)
-                new CosmeticsGUI(main).inv.open(player);
+                new UnifiedCosmeticsGUI(main).inv.open(player);
             else if (player.getWorld() == main.getLobbyWorld())
-                new CosmeticsGUI(main).inv.open(player);
+                new UnifiedCosmeticsGUI(main).inv.open(player);
         }
     }
 

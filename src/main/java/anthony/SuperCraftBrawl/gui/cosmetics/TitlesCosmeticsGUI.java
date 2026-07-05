@@ -47,7 +47,7 @@ public class TitlesCosmeticsGUI implements InventoryProvider {
             i++;
         }
 
-        contents.set(3, 4, ClickableItem
+        contents.set(3, 8, ClickableItem
                 .of(ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"), e -> {
                     inv.getParent().get().open(player);
                 }));
