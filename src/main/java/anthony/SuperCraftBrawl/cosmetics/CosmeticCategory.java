@@ -4,7 +4,7 @@ public enum CosmeticCategory {
     OUTFIT("Outfit", "Outfits"),
     GADGET("Gadget", "Gadgets"),
     PET("Pet", "Pets"),
-    TRAIL("Trail", "Particles"),
+    TRAIL("Particles", "Particles"),
     TITLE("Title", "Titles"),
     HOOK_TRAIL("Hook Trail", "Hook Trails"),
     WIN_EFFECT("Win Effect", "Win Effects"),

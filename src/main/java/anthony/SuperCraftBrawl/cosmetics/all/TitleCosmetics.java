@@ -53,7 +53,7 @@ public final class TitleCosmetics {
             public ItemStack getIcon(Player player) {
                 int found = main.getHalloweenManager() != null ? main.getHalloweenManager().getFoundCount(player.getUniqueId()) : 0;
                 return withRequirementLore(ItemHelper.setDetails(new ItemStack(Material.PUMPKIN), main.color("&6&lTrick-or-Treater"),
-                        main.color("&8Progress: &e" + Math.min(found, 2) + "&7/2")));
+                        main.color("&7Progress: &e" + Math.min(found, 2) + "&7/2")));
             }
 
             public boolean isUnlocked(Player player) {
@@ -81,7 +81,7 @@ public final class TitleCosmetics {
             public ItemStack getIcon(Player player) {
                 int found = main.getHalloweenManager() != null ? main.getHalloweenManager().getFoundCount(player.getUniqueId()) : 0;
                 return withRequirementLore(ItemHelper.createSkullTexture(FREDDY_TEXTURE, "&6&lFreddy Fazbear",
-                        main.color("&8Progress: &e" + Math.min(found, 8) + "&7/8")));
+                        main.color("&7Progress: &e" + Math.min(found, 8) + "&7/8")));
             }
 
             public boolean isUnlocked(Player player) {
@@ -105,7 +105,7 @@ public final class TitleCosmetics {
 
     private static Cosmetic fiestaDeLaNoche(Core main) {
         return new Cosmetic("Fiesta De La Noche", CosmeticCategory.TITLE, "Fiesta De La Noche",
-                Rank.VIP.getTag() + "&r+ Exclusive", "Purchase the VIP rank or higher") {
+                Rank.VIP.getTag() + "&c+ Exclusive", "Purchase the " + Rank.VIP.getTag() + "&7 rank or higher") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.setDetails(new ItemStack(Material.FIREWORK), main.color("&b&lFIESTA DE LA NOCHE"),
                         main.color("&7Go listen to the album DiscO-Zone.")));
@@ -116,7 +116,7 @@ public final class TitleCosmetics {
             }
 
             public String getUnlockMessage(Player player) {
-                return main.color("&c&l(!) &rYou need the rank &e&lVIP&r+ for this!");
+                return main.color("&c&l(!) &rYou need the rank ") + Rank.VIP.getTag() + main.color("&r+ for this!");
             }
 
             public void onEquip(Player player) {

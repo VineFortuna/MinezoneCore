@@ -105,8 +105,7 @@ public class CosmeticManager implements Listener {
         }
     }
 
-    // Runs after PlayerDataManager's data load (LOWEST) and PlayerListener's unconditional
-    // resetArmor() call (NORMAL), so a re-equipped outfit isn't immediately wiped out.
+    // Equip gadgets after the hotbar has been populated so they can be placed in the correct slot.
     @EventHandler(priority = EventPriority.HIGH)
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
@@ -117,10 +116,10 @@ public class CosmeticManager implements Listener {
         for (Map.Entry<CosmeticCategory, String> entry : rows.entrySet()) {
             Cosmetic cosmetic = registry.get(entry.getKey(), entry.getValue());
             if (cosmetic == null || !cosmetic.isUnlocked(player)) {
-                continue; // stale/renamed id or since-revoked unlock - leave the DB row untouched
+                continue; // skip invalid or locked equipped cosmetics
             }
-            // GADGET lands in a hotbar slot the hit-glitch-fix wooden-sword fill also targets;
-            // skip it here and let LobbyItems() re-apply it once that fill is done.
+            // GADGET lands in a hotbar slot the hit-glitch-fix wooden-sword fills.
+            // Skip it here and let LobbyItems() re-apply it after.
             if (entry.getKey() != CosmeticCategory.GADGET) {
                 cosmetic.onEquip(player);
             }
@@ -140,6 +139,7 @@ public class CosmeticManager implements Listener {
         }
     }
 
+    /** Runs a repeating task that updates equipped cosmetics requiring periodic ticks. */
     private void startTickTask() {
         new BukkitRunnable() {
             @Override

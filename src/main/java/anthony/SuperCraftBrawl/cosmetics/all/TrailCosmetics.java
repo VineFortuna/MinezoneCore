@@ -138,7 +138,7 @@ public final class TrailCosmetics {
                         ? main.getHalloweenManager().getFoundCount(player.getUniqueId()) : 0;
                 return withRequirementLore(ItemHelper.setDetails(ItemHelper.create(Material.SUGAR),
                         main.color("&dCandy Aura"), "",
-                        main.color("&fProgress: &a" + Math.min(found, 4) + "/4")));
+                        main.color("&7Progress: &e" + Math.min(found, 4) + "&7/4")));
             }
 
             public boolean isUnlocked(Player player) {
@@ -151,7 +151,7 @@ public final class TrailCosmetics {
                 int found = main.getHalloweenManager() != null
                         ? main.getHalloweenManager().getFoundCount(player.getUniqueId()) : 0;
                 return main.color("&c&l(!) &rYou need to find &e4 baskets &rto use &dCandy Aura&r.\n"
-                        + "&fProgress: &a" + found + "/4");
+                        + "&7Progress: &e" + found + "&7/4");
             }
 
             public void onEquip(Player player) {

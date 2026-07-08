@@ -26,7 +26,7 @@ public final class DeathEffectCosmetics {
         registry.register(pumpkinPie(main));
     }
 
-    /** The five always-unlocked death particles: same shape, different icon/name. */
+    /** The always-unlocked death particles have same format, different icon/name. */
     private static Cosmetic simple(String id, String displayName, Material iconMaterial) {
         return new Cosmetic(id, CosmeticCategory.DEATH_EFFECT, displayName) {
             public ItemStack getIcon(Player player) {

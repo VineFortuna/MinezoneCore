@@ -29,7 +29,7 @@ public final class GadgetCosmetics {
 
     private static Cosmetic magicBroom(Core main) {
         return new Cosmetic("magic_broom", CosmeticCategory.GADGET, "Magic Broom",
-                Rank.PRO.getTag() + "&r Exclusive", "Purchase the PRO rank") {
+                Rank.PRO.getTag() + "&c Exclusive", "Purchase the " + Rank.PRO.getTag() + "&7 rank") {
             public ItemStack getIcon(Player player) {
                 List<String> lore = new ArrayList<>();
                 lore.add(main.color("&7Fly around like a Witch!"));

@@ -19,9 +19,10 @@ public final class CosmeticGuiUtil {
     private CosmeticGuiUtil() {
     }
 
-    /** Clones the icon and appends a status line as extra lore (blank line, then the given text).
-     *  Used to mark a category tab as currently viewed, or a cosmetic as currently equipped -
-     *  an enchant glow can't be reused for this since some cosmetics already glow on their own. */
+    /**
+     * Creates a copy of an item icon with an additional status line in its lore.
+     * Used to show selected categories or equipped cosmetics.
+     */
     public static ItemStack withStatusLore(ItemStack icon, String statusLine) {
         ItemStack copy = icon.clone();
         ItemMeta meta = copy.getItemMeta();
@@ -33,14 +34,16 @@ public final class CosmeticGuiUtil {
         return copy;
     }
 
-    /** Same message for every category. */
+    /** Creates the message shown when a cosmetic is equipped or removed. */
     private static String toggleMessage(Cosmetic cosmetic, boolean nowEquipped) {
         return "&9&l(!) &rYou " + (nowEquipped ? "selected" : "removed")
                 + " &e" + cosmetic.displayName;
     }
 
-    /** Click-to-toggle: equip if not equipped, unequip if it is. Used by every cosmetics GUI
-     *  except Win Effects */
+    /**
+     * Creates a clickable cosmetic item that toggles between equipped and unequipped.
+     * Used by most cosmetic menus.
+     */
     public static ClickableItem toggleItem(Core main, CosmeticManager manager, Cosmetic cosmetic, Player player,
                                             ItemStack icon, SmartInventory closeOnSuccess) {
         return ClickableItem.of(icon, e -> {
@@ -54,7 +57,11 @@ public final class CosmeticGuiUtil {
         });
     }
 
-    /** Click-to-select: always (re)selects this cosmetic, no unequip-by-reclick. Used by Win Effects. */
+    /**
+     * Creates a clickable cosmetic item that equips the cosmetic when clicked.
+     * Unlike toggle items, clicking again does not unequip it.
+     * Used for WinEffects.
+     */
     public static ClickableItem selectItem(Core main, CosmeticManager manager, Cosmetic cosmetic, Player player,
                                             ItemStack icon, SmartInventory closeOnSuccess) {
         return ClickableItem.of(icon, e -> {
@@ -68,8 +75,10 @@ public final class CosmeticGuiUtil {
         });
     }
 
-    /** Same as {@link #toggleItem}, but for GUIs (like the unified one) that stay open and just
-     *  redraw in place afterward instead of closing. */
+    /**
+     * Creates a toggle item for menus that update their contents after selection
+     * instead of closing.
+     */
     public static ClickableItem toggleItem(Core main, CosmeticManager manager, Cosmetic cosmetic, Player player,
                                             ItemStack icon, Runnable onChange) {
         return ClickableItem.of(icon, e -> {
@@ -83,8 +92,10 @@ public final class CosmeticGuiUtil {
         });
     }
 
-    /** Same as {@link #selectItem}, but for GUIs (like the unified one) that stay open and just
-     *  redraw in place afterward instead of closing. */
+    /**
+     * Creates a select item for menus that update their contents after selection
+     * instead of closing.
+     */
     public static ClickableItem selectItem(Core main, CosmeticManager manager, Cosmetic cosmetic, Player player,
                                             ItemStack icon, Runnable onChange) {
         return ClickableItem.of(icon, e -> {

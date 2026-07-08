@@ -153,12 +153,12 @@ public final class OutfitCosmetics {
 
     private static Cosmetic golden(Core main) {
         return new Cosmetic("golden", CosmeticCategory.OUTFIT, "Golden Outfit",
-                Rank.VIP.getTag() + "&r+ Exclusive", "Purchase the VIP rank or higher") {
+                Rank.VIP.getTag() + "&c+ Exclusive", "Purchase the " + Rank.VIP.getTag() + "&7 rank or higher") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.create(Material.GOLD_HELMET, main.color("&6&lGolden Outfit")));
             }
 
-            public boolean isUnlocked(Player player) {
+        public boolean isUnlocked(Player player) {
                 return player.hasPermission("scb.vip");
             }
 
@@ -183,7 +183,7 @@ public final class OutfitCosmetics {
 
     private static Cosmetic diamond(Core main) {
         return new Cosmetic("diamond", CosmeticCategory.OUTFIT, "Diamond Outfit",
-                Rank.PRO.getTag() + "&r Exclusive", "Purchase the PRO rank") {
+                Rank.PRO.getTag() + "&c Exclusive", "Purchase the " + Rank.PRO.getTag() + "&7 rank") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.create(Material.DIAMOND_HELMET, main.color("&b&lDiamond Outfit")));
             }
@@ -226,7 +226,7 @@ public final class OutfitCosmetics {
             }
 
             public String getUnlockMessage(Player player) {
-                return main.color("&c&l(!) &rYou need &e6/10 &rbaskets to use this!");
+                return main.color("&c&l(!) &rYou need &e6&r baskets to use this!");
             }
 
             public void onEquip(Player player) {

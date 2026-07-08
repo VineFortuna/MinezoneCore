@@ -45,22 +45,23 @@ public class GadgetListener implements Listener {
      */
     @EventHandler
     public void magicBroom(PlayerInteractEvent event) {
-        if (!event.getAction().name().contains("RIGHT_CLICK")) return;
+        if (!isRightClick(event)) return;
 
-        ItemStack item = event.getItem();
         Player player = event.getPlayer();
-        PlayerData data = main.getDataManager().getPlayerData(player);
-        GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
+        ItemStack item = event.getItem();
 
-        if ((player.getWorld() == main.getLobbyWorld())
-                || (i != null && (i.state == GameState.WAITING || i.state == GameState.ENDED))) {
-            if (item != null && item.getType() == Material.WHEAT) {
-                double boosterStrength = 2.0;
-                Vector vel = player.getLocation().getDirection().multiply(boosterStrength);
-                player.setVelocity(vel);
-                data.magicbroom = 1;
-            }
+        if (item == null || item.getType() != Material.WHEAT) {
+            return;
         }
+
+        if (!canUseGadget(player)) return;
+
+        PlayerData data = main.getDataManager().getPlayerData(player);
+
+            double boosterStrength = 2.0;
+            Vector vel = player.getLocation().getDirection().multiply(boosterStrength);
+            player.setVelocity(vel);
+            data.magicbroom = 1;
     }
 
     /*
@@ -68,119 +69,115 @@ public class GadgetListener implements Listener {
      */
     @EventHandler
     public void melon(PlayerInteractEvent event) {
-        if (!event.getAction().name().contains("RIGHT_CLICK")) return;
+        if (!isRightClick(event)) return;
 
         Player player = event.getPlayer();
         ItemStack item = event.getItem();
-        PlayerData data = main.getDataManager().getPlayerData(player);
-        GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
 
-        if ((player.getWorld() == main.getLobbyWorld()) || (i != null && i.state == GameState.WAITING)) {
-            if (item != null && item.getType() == Material.MELON) {
-                if (player.getGameMode() != GameMode.SPECTATOR) {
-                    if (data.melon > 0) {
-                        data.melon--;
-                        main.getDataManager().saveData(data);
-                        String msg = main.color("&9&l(!) &rYou have &e" + data.melon + " melons");
-                        PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-                                (byte) 2);
-                        CraftPlayer craft = (CraftPlayer) player;
-                        craft.getHandle().playerConnection.sendPacket(packet);
-                        player.playSound(player.getLocation(), Sound.EAT, 2, 1);
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 110, 9), true);
-                        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 110, 9), true);
-                        if (data.melon == 0)
-                            player.getInventory().clear(player.getInventory().getHeldItemSlot());
-                    }
-                    event.setCancelled(true);
-                }
-            }
+        if (item == null || item.getType() != Material.MELON) {
+            return;
         }
+
+        if (!canUseGadget(player)) {
+            return;
+        }
+
+        if (player.getGameMode() == GameMode.SPECTATOR) {
+            return;
+        }
+
+        PlayerData data = main.getDataManager().getPlayerData(player);
+
+        if (data.melon <= 0) {
+            return;
+        }
+
+        data.melon--;
+        main.getDataManager().saveData(data);
+
+        sendActionBar(player, "&9&l(!) &rYou have &e" + data.melon + " melons");
+
+        player.playSound(player.getLocation(), Sound.EAT, 2, 1);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 110, 9), true);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 110, 9), true);
+
+        if (data.melon == 0) {
+            player.getInventory().clear(player.getInventory().getHeldItemSlot());
+        }
+
+        event.setCancelled(true);
     }
 
     @EventHandler
     public void paintballGun(PlayerInteractEvent event) {
-        if (!event.getAction().name().contains("RIGHT_CLICK")) return;
+        if (!isRightClick(event)) {
+            return;
+        }
 
         Player player = event.getPlayer();
-        PlayerData data = main.getDataManager().getPlayerData(player);
         ItemStack item = event.getItem();
-        GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
 
-        if (item != null) {
-            if (item.getType() == Material.GOLD_BARDING) {
-                if ((player.getWorld() == main.getLobbyWorld())
-                        || (i != null && i.state == GameState.WAITING)) {
-
-                    if (data != null) {
-                        if (data.paintball > 0) {
-                            Snowball snowball = player.launchProjectile(Snowball.class);
-                            snowball.setMetadata("paintball", new FixedMetadataValue(main, true));
-                            data.paintball--;
-                            main.getDataManager().saveData(data);
-
-                            String msg = main.color("&9&l(!) &rYou have &e" + data.paintball + " paintballs");
-                            PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-                                    (byte) 2);
-                            CraftPlayer craft = (CraftPlayer) player;
-                            craft.getHandle().playerConnection.sendPacket(packet);
-
-                            player.getWorld().playSound(player.getLocation(), Sound.CHICKEN_EGG_POP, 1, 1);
-                        } else
-                            player.sendMessage(main.color("&c&l(!) &rYou do not have anymore &ePaintballs &r:("));
-                    }
-                }
-            }
+        if (item == null || item.getType() != Material.GOLD_BARDING) {
+            return;
         }
+
+        if (!canUseGadget(player)) {
+            return;
+        }
+
+        PlayerData data = main.getDataManager().getPlayerData(player);
+
+        if (data.paintball <= 0) {
+            player.sendMessage(main.color("&c&l(!) &rYou do not have anymore &ePaintballs &r:("));
+            return;
+        }
+
+        Snowball snowball = player.launchProjectile(Snowball.class);
+        snowball.setMetadata("paintball", new FixedMetadataValue(main, true));
+
+        data.paintball--;
+        main.getDataManager().saveData(data);
+
+        sendActionBar(player, "&9&l(!) &rYou have &e" + data.paintball + " paintballs");
+
+        player.getWorld().playSound(player.getLocation(), Sound.CHICKEN_EGG_POP, 1, 1);
     }
 
     @EventHandler
     public void snowballHit(ProjectileHitEvent event) {
-        Entity e = event.getEntity();
-        Snowball s;
+        Entity entity = event.getEntity();
 
-        if (e instanceof Snowball && e.hasMetadata("paintball")) {
-            s = (Snowball) e;
-            DyeColor col = DyeColor.values()[new Random().nextInt(DyeColor.values().length)];
-            if (s.getShooter() instanceof Player) {
-                Player p = (Player) s.getShooter();
-                GameInstance i = main.getGameManager().GetInstanceOfPlayer(p);
+        if (!(entity instanceof Snowball) || !entity.hasMetadata("paintball")) {
+            return;
+        }
 
-                if (i != null && i.state == GameState.STARTED)
-                    return;
+        Snowball snowball = (Snowball) entity;
 
-                Block center = s.getLocation().getBlock();
-                int x = center.getX();
-                int z = center.getZ();
-                if (center.getType() != Material.AIR) {
-                    doTheWorkForMe(center, col);
+        if (!(snowball.getShooter() instanceof Player)) {
+            return;
+        }
 
-                }
+        Player player = (Player) snowball.getShooter();
 
-                int max = s.getLocation().getBlock().getY() + 1;
-                int min = s.getLocation().getBlock().getY() - 1;
-                Location loc;
-                for (int y = min; y <= max; y++) {
-                    loc = new Location(center.getWorld(), x + 1, y, z);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x, y, z);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x + 1, y, z + 1);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x, y, z + 1);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x - 1, y, z + 1);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x - 1, y, z);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x - 1, y, z);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x - 1, y, z - 1);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x, y, z - 1);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
-                    loc = new Location(center.getWorld(), x + 1, y, z - 1);
-                    doTheWorkForMe(center.getWorld().getBlockAt(loc), col);
+        GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+
+        // Do not allow paintballs to modify blocks during active games.
+        if (game != null && game.state == GameState.STARTED) {
+            return;
+        }
+
+        DyeColor color = DyeColor.values()[new Random().nextInt(DyeColor.values().length)];
+
+        Block center = snowball.getLocation().getBlock();
+
+        // paints 3x3 square
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                for (int z = -1; z <= 1; z++) {
+                    paintBlock(
+                            center.getRelative(x, y, z),
+                            color
+                    );
                 }
             }
         }
@@ -222,5 +219,90 @@ public class GadgetListener implements Listener {
             block.setType(Material.WOOL);
             randomizeColor(block, color);
         }
+    }
+
+    private boolean isRightClick(PlayerInteractEvent event) {
+        Action action = event.getAction();
+
+        return action.name().contains("RIGHT_CLICK");
+    }
+
+    private boolean canUseGadget(Player player) {
+        GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+
+        return player.getWorld() == main.getLobbyWorld()
+                || (game != null && game.state == GameState.WAITING);
+    }
+
+    private boolean isPaintable(Block block) {
+        Material type = block.getType();
+
+        return type != Material.AIR
+                && type != Material.SIGN
+                && type != Material.SIGN_POST
+                && type != Material.WALL_SIGN
+                && type != Material.CHEST
+                && type != Material.LONG_GRASS
+                && type != Material.RED_ROSE
+                && type != Material.DEAD_BUSH
+                && type != Material.FLOWER_POT
+                && type != Material.DOUBLE_PLANT
+                && type != Material.BED_BLOCK
+                && type != Material.SKULL
+                && type != Material.SOIL
+                && type != Material.SEA_LANTERN
+                && type != Material.BEACON
+                && type != Material.GLOWSTONE
+                && type != Material.LADDER
+                && !(block.getState().getData() instanceof Door)
+                && !(block.getState() instanceof InventoryHolder)
+                && !(block.getState() instanceof Banner);
+    }
+
+    @SuppressWarnings("deprecation")
+    private void paintBlock(Block block, DyeColor color) {
+        Material type = block.getType();
+
+        if (!isPaintable(block)) {
+            return;
+        }
+
+        if (type == Material.WOOL) {
+            block.setData(color.getData());
+            return;
+        }
+
+        Material originalType = block.getType();
+        byte originalData = block.getData();
+
+        Location above = block.getRelative(0, 1, 0).getLocation();
+
+        if (!above.getBlock().getType().isSolid()
+                && above.getBlock().getType() != Material.AIR
+                && above.getBlock().getType() != Material.TORCH) {
+            return;
+        }
+
+        Bukkit.getScheduler().runTaskLater(main, () -> {
+            block.setType(originalType);
+            block.setData(originalData);
+        }, 20 * 5L);
+
+        block.setType(Material.WOOL);
+        block.setData(color.getData());
+    }
+
+    private void sendActionBar(Player player, String message) {
+        String formatted = main.color(message);
+
+        PacketPlayOutChat packet = new PacketPlayOutChat(
+                IChatBaseComponent.ChatSerializer.a(
+                        "{\"text\":\"" + formatted + "\"}"
+                ),
+                (byte) 2
+        );
+
+        CraftPlayer craftPlayer = (CraftPlayer) player;
+        craftPlayer.getHandle().playerConnection.sendPacket(packet);
     }
 }

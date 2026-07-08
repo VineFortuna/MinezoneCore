@@ -42,7 +42,7 @@ public class CosmeticDataDAO {
         return result;
     }
 
-    /** Async fire-and-forget upsert; never blocks the calling (GUI-click) thread. */
+    /** Saves the player's equipped cosmetic to the database asynchronously to avoid blocking the main server thread. */
     public void saveEquipped(UUID uuid, CosmeticCategory category, String cosmeticId) {
         Bukkit.getScheduler().runTaskAsynchronously(main, () -> {
             String sql = "INSERT INTO " + TABLE + " (uuid, category, cosmetic_id) VALUES (?, ?, ?) " +
