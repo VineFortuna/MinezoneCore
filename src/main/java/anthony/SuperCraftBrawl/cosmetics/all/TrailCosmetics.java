@@ -29,7 +29,7 @@ public final class TrailCosmetics {
 
     private static Cosmetic snowParticles(Core main) {
         return new Cosmetic("snow_particles", CosmeticCategory.TRAIL, "Snow Particles",
-                "Christmas 2025 Exclusive", "Claim the Day 2 advent calendar reward") {
+                "Christmas 2025 Exclusive") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.setDetails(ItemHelper.create(Material.SNOW_BALL), "&bSnow Particles"));
             }
@@ -48,12 +48,13 @@ public final class TrailCosmetics {
             public void onUnequip(Player player) {
             }
 
+            @Override
             public long getTickPeriod() {
                 return 1L;
             }
 
             public void tick(Player player) {
-                if (player.getWorld() != main.getLobbyWorld()) return;
+                if (!main.isInAnyLobby(player)) return;
 
                 Location loc = player.getLocation().add(0, 0.2, 0);
                 PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(EnumParticle.CLOUD, false,
@@ -68,9 +69,7 @@ public final class TrailCosmetics {
 
     private static Cosmetic candyCaneSwirl(Core main) {
         return new Cosmetic("candy_cane_swirl", CosmeticCategory.TRAIL, "Candy Cane Swirl",
-                "Christmas 2024 Exclusive", "Logged in on December 19th, 2024") {
-            // Shared across every player wearing this trail, matching the original's single
-            // PlayerListener-wide angle field (more wearers => faster rotation - existing quirk, kept as-is).
+                "Christmas 2024 Exclusive") {
             private double angle = 0;
 
             public ItemStack getIcon(Player player) {
@@ -91,12 +90,14 @@ public final class TrailCosmetics {
             public void onUnequip(Player player) {
             }
 
+            @Override
             public long getTickPeriod() {
                 return 1L;
             }
 
+            @Override
             public void tick(Player player) {
-                if (player.getWorld() != main.getLobbyWorld()) return;
+                if (!main.isInAnyLobby(player)) return;
 
                 angle += Math.PI / 16;
 
@@ -132,13 +133,13 @@ public final class TrailCosmetics {
 
     private static Cosmetic candyAura(Core main) {
         return new Cosmetic("candy_aura", CosmeticCategory.TRAIL, "Candy Aura",
-                "Halloween 2025 Exclusive", "Find 4 baskets in the lobby") {
+                "Halloween 2025 Exclusive") {
             public ItemStack getIcon(Player player) {
                 int found = main.getHalloweenManager() != null
                         ? main.getHalloweenManager().getFoundCount(player.getUniqueId()) : 0;
                 return withRequirementLore(ItemHelper.setDetails(ItemHelper.create(Material.SUGAR),
                         main.color("&dCandy Aura"), "",
-                        main.color("&7Progress: &e" + Math.min(found, 4) + "&7/4")));
+                        main.color("&7Progress: &e" + Math.min(found, 4) + "&7/4 baskets")));
             }
 
             public boolean isUnlocked(Player player) {
@@ -150,8 +151,7 @@ public final class TrailCosmetics {
             public String getUnlockMessage(Player player) {
                 int found = main.getHalloweenManager() != null
                         ? main.getHalloweenManager().getFoundCount(player.getUniqueId()) : 0;
-                return main.color("&c&l(!) &rYou need to find &e4 baskets &rto use &dCandy Aura&r.\n"
-                        + "&7Progress: &e" + found + "&7/4");
+                return main.color("&c&l(!) &rYou need &e4&r baskets to use this!");
             }
 
             public void onEquip(Player player) {

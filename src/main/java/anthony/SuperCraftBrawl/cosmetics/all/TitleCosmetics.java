@@ -49,11 +49,11 @@ public final class TitleCosmetics {
 
     private static Cosmetic trickOrTreater(Core main) {
         return new Cosmetic("Trick-or-Treater", CosmeticCategory.TITLE, "Trick-or-Treater",
-                "Halloween 2025 Exclusive", "Find 2 baskets in the lobby") {
+                "Halloween 2025 Exclusive") {
             public ItemStack getIcon(Player player) {
                 int found = main.getHalloweenManager() != null ? main.getHalloweenManager().getFoundCount(player.getUniqueId()) : 0;
                 return withRequirementLore(ItemHelper.setDetails(new ItemStack(Material.PUMPKIN), main.color("&6&lTrick-or-Treater"),
-                        main.color("&7Progress: &e" + Math.min(found, 2) + "&7/2")));
+                        main.color("&7Progress: &e" + Math.min(found, 2) + "&7/2 baskets")));
             }
 
             public boolean isUnlocked(Player player) {
@@ -77,11 +77,11 @@ public final class TitleCosmetics {
 
     private static Cosmetic freddyFazbear(Core main) {
         return new Cosmetic("Freddy Fazbear", CosmeticCategory.TITLE, "Freddy Fazbear",
-                "Halloween 2025 Exclusive", "Find 8 baskets in the lobby") {
+                "Halloween 2025 Exclusive") {
             public ItemStack getIcon(Player player) {
                 int found = main.getHalloweenManager() != null ? main.getHalloweenManager().getFoundCount(player.getUniqueId()) : 0;
                 return withRequirementLore(ItemHelper.createSkullTexture(FREDDY_TEXTURE, "&6&lFreddy Fazbear",
-                        main.color("&7Progress: &e" + Math.min(found, 8) + "&7/8")));
+                        main.color("&7Progress: &e" + Math.min(found, 8) + "&7/8 baskets")));
             }
 
             public boolean isUnlocked(Player player) {
@@ -105,7 +105,7 @@ public final class TitleCosmetics {
 
     private static Cosmetic fiestaDeLaNoche(Core main) {
         return new Cosmetic("Fiesta De La Noche", CosmeticCategory.TITLE, "Fiesta De La Noche",
-                Rank.VIP.getTag() + "&c+ Exclusive", "Purchase the " + Rank.VIP.getTag() + "&7 rank or higher") {
+                Rank.VIP.getTag() + "&c+ Exclusive") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.setDetails(new ItemStack(Material.FIREWORK), main.color("&b&lFIESTA DE LA NOCHE"),
                         main.color("&7Go listen to the album DiscO-Zone.")));
@@ -131,7 +131,7 @@ public final class TitleCosmetics {
 
     private static Cosmetic merry(Core main) {
         return new Cosmetic("Merry", CosmeticCategory.TITLE, "Merry",
-                "Christmas 2025 Exclusive", "Claim the Day 6 advent calendar reward") {
+                "Christmas 2025 Exclusive") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.setDetails(new ItemStack(Material.LONG_GRASS, 1, (byte) 2), "&c&lMerry"));
             }
@@ -156,7 +156,7 @@ public final class TitleCosmetics {
 
     private static Cosmetic hoHoHo(Core main) {
         return new Cosmetic("Ho Ho Ho", CosmeticCategory.TITLE, "Ho Ho Ho",
-                "Christmas 2025 Exclusive", "Claim the Christmas Day advent calendar reward") {
+                "Christmas 2025 Exclusive") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.createSkullTexture(HOHOHO_TEXTURE, "&c&lHO &2&lHO &c&lHO"));
             }
@@ -179,11 +179,11 @@ public final class TitleCosmetics {
         };
     }
 
-    /** The five past-tournament-champion titles: same shape (locked to one exact player name), different icon/name. */
+    /** Tournament-champion titles: locked to one exact player name, different icon/name. */
     private static Cosmetic nameLockedTitle(Core main, String cosmeticId, Material iconMaterial, String displayName,
                                              String championLabel, String requiredPlayerName) {
         return new Cosmetic(cosmeticId, CosmeticCategory.TITLE, main.color(displayName),
-                "Tournament Champion Exclusive", "Awarded to the " + championLabel) {
+                "Tournament Champion Exclusive") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.setDetails(new ItemStack(iconMaterial), main.color(displayName),
                         main.color("&7Exclusive title for the winner of the"),

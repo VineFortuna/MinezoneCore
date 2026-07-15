@@ -29,7 +29,7 @@ public final class GadgetCosmetics {
 
     private static Cosmetic magicBroom(Core main) {
         return new Cosmetic("magic_broom", CosmeticCategory.GADGET, "Magic Broom",
-                Rank.PRO.getTag() + "&c Exclusive", "Purchase the " + Rank.PRO.getTag() + "&7 rank") {
+                Rank.PRO.getTag() + "&c Exclusive") {
             public ItemStack getIcon(Player player) {
                 List<String> lore = new ArrayList<>();
                 lore.add(main.color("&7Fly around like a Witch!"));
@@ -56,7 +56,7 @@ public final class GadgetCosmetics {
 
     private static Cosmetic paintballGun(Core main) {
         return new Cosmetic("paintball_gun", CosmeticCategory.GADGET, "Paintball Gun",
-                "Mystery Chest Reward", "Collect paintballs from Mystery Chests") {
+                "Mystery Chest Reward") {
             public ItemStack getIcon(Player player) {
                 int paintballs = main.getDataManager().getPlayerData(player).paintball;
                 List<String> lore = new ArrayList<>();
@@ -89,7 +89,7 @@ public final class GadgetCosmetics {
 
     private static Cosmetic melon(Core main) {
         return new Cosmetic("melon", CosmeticCategory.GADGET, "Melons",
-                "Mystery Chest Reward", "Collect melons from Mystery Chests") {
+                "Mystery Chest Reward") {
             public ItemStack getIcon(Player player) {
                 int melons = main.getDataManager().getPlayerData(player).melon;
                 List<String> lore = new ArrayList<>();

@@ -34,7 +34,7 @@ public final class PetCosmetics {
         final Map<UUID, Snowman> pets = new HashMap<>();
 
         return new Cosmetic("snowman", CosmeticCategory.PET, "Snowman Pet",
-                "Christmas 2024 Exclusive", "Logged in on December 18th, 2024") {
+                "Christmas 2024 Exclusive") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.setDetails(ItemHelper.create(Material.MONSTER_EGG), "&bSnowman Pet"));
             }
@@ -48,12 +48,20 @@ public final class PetCosmetics {
             }
 
             public void onEquip(Player player) {
+                Snowman existing = pets.remove(player.getUniqueId());
+                if (existing != null) {
+                    try {
+                        existing.remove();
+                    } catch (Throwable ignored) {
+                    }
+                }
+
                 Location spawnLoc = player.getLocation().add(1, 0, 1);
                 Snowman snowman = player.getWorld().spawn(spawnLoc, Snowman.class);
                 snowman.setCustomName(ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Snowman");
                 pets.put(player.getUniqueId(), snowman);
 
-                EntityLiving targetPlayer = (EntityLiving) ((CraftLivingEntity) player).getHandle();
+                EntityLiving targetPlayer = ((CraftLivingEntity) player).getHandle();
                 PathfinderHelper.clearPathfinderGoals(snowman);
                 PathfinderHelper.addPathfinderGoal(snowman, 1, new PathfinderGoalFollowPlayer(
                         (EntityInsentient) ((CraftLivingEntity) snowman).getHandle(), targetPlayer, 1.75, 5.0, 6.0));
@@ -69,15 +77,17 @@ public final class PetCosmetics {
                 }
             }
 
+            @Override
             public long getTickPeriod() {
                 return 20L;
             }
 
+            @Override
             public void tick(Player player) {
                 Snowman snowman = pets.get(player.getUniqueId());
                 if (snowman == null) return;
 
-                if (!snowman.isValid() || player.getWorld() != snowman.getWorld() || player.getWorld() != main.getLobbyWorld()) {
+                if (!snowman.isValid() || player.getWorld() != snowman.getWorld() || !main.isInAnyLobby(player)) {
                     try {
                         snowman.remove();
                     } catch (Throwable ignored) {

@@ -37,7 +37,7 @@ public final class OutfitCosmetics {
 
     private static Cosmetic astronaut(Core main) {
         return new Cosmetic("astronaut", CosmeticCategory.OUTFIT, "Astronaut Outfit",
-                "Mystery Chest Reward", "Unlocked from Mystery Chests") {
+                "Mystery Chest Reward") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.create(Material.GLASS, ChatColor.YELLOW.toString() + ChatColor.BOLD + "Astronaut Outfit"));
             }
@@ -66,7 +66,7 @@ public final class OutfitCosmetics {
 
     private static Cosmetic santa(Core main) {
         return new Cosmetic("santa", CosmeticCategory.OUTFIT, "Santa Outfit",
-                "Mystery Chest Reward", "Unlocked from Mystery Chests") {
+                "Mystery Chest Reward") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.createSkullTexture(SANTA_TEXTURE, ChatColor.RED.toString() + ChatColor.BOLD + "Santa Outfit"));
             }
@@ -95,7 +95,7 @@ public final class OutfitCosmetics {
 
     private static Cosmetic pirate(Core main) {
         return new Cosmetic("pirate", CosmeticCategory.OUTFIT, "Pirate Outfit",
-                "Fishing Reward", "Reach fishing reward level 6") {
+                "Fishing Reward") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.createSkullTexture(PIRATE_TEXTURE, "&3&lPirate Outfit"));
             }
@@ -124,7 +124,7 @@ public final class OutfitCosmetics {
 
     private static Cosmetic elf(Core main) {
         return new Cosmetic("elf", CosmeticCategory.OUTFIT, "Elf Outfit",
-                "Christmas 2024 Exclusive", "Awarded during the Christmas 2024 event") {
+                "Christmas 2024 Exclusive") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.createSkullTexture(ELF_TEXTURE, "&a&lElf Outfit"));
             }
@@ -153,7 +153,7 @@ public final class OutfitCosmetics {
 
     private static Cosmetic golden(Core main) {
         return new Cosmetic("golden", CosmeticCategory.OUTFIT, "Golden Outfit",
-                Rank.VIP.getTag() + "&c+ Exclusive", "Purchase the " + Rank.VIP.getTag() + "&7 rank or higher") {
+                Rank.VIP.getTag() + "&c+ Exclusive") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.create(Material.GOLD_HELMET, main.color("&6&lGolden Outfit")));
             }
@@ -183,7 +183,7 @@ public final class OutfitCosmetics {
 
     private static Cosmetic diamond(Core main) {
         return new Cosmetic("diamond", CosmeticCategory.OUTFIT, "Diamond Outfit",
-                Rank.PRO.getTag() + "&c Exclusive", "Purchase the " + Rank.PRO.getTag() + "&7 rank") {
+                Rank.PRO.getTag() + "&c Exclusive") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.create(Material.DIAMOND_HELMET, main.color("&b&lDiamond Outfit")));
             }
@@ -213,12 +213,12 @@ public final class OutfitCosmetics {
 
     private static Cosmetic freddy(Core main) {
         return new Cosmetic("freddy", CosmeticCategory.OUTFIT, "Freddy Outfit",
-                "Halloween 2025 Exclusive", "Find 6 baskets in the lobby") {
+                "Halloween 2025 Exclusive") {
             public ItemStack getIcon(Player player) {
                 int basketsFound = main.getHalloweenManager() != null
                         ? main.getHalloweenManager().getFoundCount(player.getUniqueId()) : 0;
                 return withRequirementLore(ItemHelper.createSkullTexture(FREDDY_TEXTURE, main.color("&4&6Freddy Outfit"), "",
-                        main.color("&7Progress: &e" + Math.min(basketsFound, 6) + "&7/6")));
+                        main.color("&7Progress: &e" + Math.min(basketsFound, 6) + "&7/6 baskets")));
             }
 
             public boolean isUnlocked(Player player) {
@@ -241,7 +241,7 @@ public final class OutfitCosmetics {
 
     private static Cosmetic rudolph(Core main) {
         return new Cosmetic("rudolph", CosmeticCategory.OUTFIT, "Rudolph Outfit",
-                "Christmas 2025 Exclusive", "Claim the Day 4 advent calendar reward") {
+                "Christmas 2025 Exclusive") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.createSkullTexture(RUDOLPH_TEXTURE, main.color("&c&6Rudolph Outfit")));
             }

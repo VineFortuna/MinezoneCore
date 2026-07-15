@@ -20,19 +20,16 @@ public abstract class Cosmetic {
 
     /** e.g. "PRO Exclusive", "Fishing Reward", "Halloween 2025 Exclusive"; null if always unlocked. */
     private final String requirement;
-    /** How to actually get it, e.g. "Purchase the PRO rank", "Find 6 baskets in the lobby"; null if always unlocked. */
-    private final String obtainMethod;
 
     protected Cosmetic(String id, CosmeticCategory category, String displayName) {
-        this(id, category, displayName, null, null);
+        this(id, category, displayName, null);
     }
 
-    protected Cosmetic(String id, CosmeticCategory category, String displayName, String requirement, String obtainMethod) {
+    protected Cosmetic(String id, CosmeticCategory category, String displayName, String requirement) {
         this.id = id;
         this.category = category;
         this.displayName = displayName;
         this.requirement = requirement;
-        this.obtainMethod = obtainMethod;
     }
 
     /** Built per-player/per-open since some icons show live progress (e.g. basket counts). */
@@ -69,7 +66,6 @@ public abstract class Cosmetic {
         List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
         lore.add("");
         lore.add(ChatColorHelper.color("&c" + requirement));
-        if (obtainMethod != null) lore.add(ChatColorHelper.color("&7" + obtainMethod));
         meta.setLore(lore);
         icon.setItemMeta(meta);
         return icon;

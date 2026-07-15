@@ -228,10 +228,7 @@ public class GadgetListener implements Listener {
     }
 
     private boolean canUseGadget(Player player) {
-        GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
-
-        return player.getWorld() == main.getLobbyWorld()
-                || (game != null && game.state == GameState.WAITING);
+        return main.isInAnyLobby(player);
     }
 
     private boolean isPaintable(Block block) {

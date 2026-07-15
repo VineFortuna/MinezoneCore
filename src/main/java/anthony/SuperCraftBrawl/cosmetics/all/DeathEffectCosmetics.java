@@ -50,8 +50,7 @@ public final class DeathEffectCosmetics {
     }
 
     private static Cosmetic snowball(Core main) {
-        return new Cosmetic("snowball", CosmeticCategory.DEATH_EFFECT, "Snowball",
-                "Christmas 2024 Exclusive", "Logged in on December 23rd, 2024") {
+        return new Cosmetic("snowball", CosmeticCategory.DEATH_EFFECT, "Snowball") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.setDetails(ItemHelper.create(Material.SNOW_BALL), ChatColor.YELLOW + "Snowball"));
             }
@@ -74,11 +73,11 @@ public final class DeathEffectCosmetics {
 
     private static Cosmetic pumpkinPie(Core main) {
         return new Cosmetic("pumpkin_pie", CosmeticCategory.DEATH_EFFECT, "Pumpkin Pie",
-                "Halloween 2025 Exclusive", "Find 7 baskets in the lobby") {
+                "Halloween 2025 Exclusive") {
             public ItemStack getIcon(Player player) {
                 int found = main.getHalloweenManager() != null ? main.getHalloweenManager().getFoundCount(player.getUniqueId()) : 0;
                 return withRequirementLore(ItemHelper.setDetails(ItemHelper.create(Material.PUMPKIN_PIE), main.color("&6Pumpkin Pie"), "",
-                        main.color("&7Progress: &e" + Math.min(found, 7) + "&7/7")));
+                        main.color("&7Progress: &e" + Math.min(found, 7) + "&7/7 baskets")));
             }
 
             public boolean isUnlocked(Player player) {

@@ -54,7 +54,7 @@ public final class WinEffectCosmetics {
 
     private static Cosmetic magicBroom(Core main) {
         return new Cosmetic("magic_broom", CosmeticCategory.WIN_EFFECT, "Magic Broom",
-                Rank.PRO.getTag() + "&c Exclusive", "Purchase the " + Rank.PRO.getTag() + "&7 rank") {
+                Rank.PRO.getTag() + "&c Exclusive") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.setDetails(new ItemStack(Material.WHEAT), main.color("&eMagic Broom"),
                         "", main.color("&7Fly around the map with"), main.color("&7this when you win!")));
@@ -78,7 +78,7 @@ public final class WinEffectCosmetics {
 
     private static Cosmetic santa(Core main) {
         return new Cosmetic("santa", CosmeticCategory.WIN_EFFECT, "Santa Claus",
-                Rank.PRO.getTag() + "&c Exclusive", "Purchase the " + Rank.PRO.getTag() + "&7 rank") {
+                Rank.PRO.getTag() + "&c Exclusive") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.setDetails(ItemHelper.createSkullTexture(SANTA_TEXTURE), main.color("&eSanta Claus"),
                         "", main.color("&7Become old Saint Nick himself"), main.color("&7and ride along!")));
@@ -102,7 +102,7 @@ public final class WinEffectCosmetics {
 
     private static Cosmetic enderDragon(Core main) {
         return new Cosmetic("ender_dragon", CosmeticCategory.WIN_EFFECT, "EnderDragon",
-                Rank.PRO.getTag() + "&c Exclusive", "Purchase the " + Rank.PRO.getTag() + "&7 rank") {
+                Rank.PRO.getTag() + "&c Exclusive") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.setDetails(new ItemStack(Material.DRAGON_EGG), main.color("&eEnderDragon"), "",
                         main.color("&7Fly around the map with an"), main.color("&7EnderDragon when you win!")));
@@ -126,7 +126,7 @@ public final class WinEffectCosmetics {
 
     private static Cosmetic fishRain(Core main) {
         return new Cosmetic("fish_rain", CosmeticCategory.WIN_EFFECT, "Fish Rain",
-                "Fishing Reward", "Reach fishing reward level 4") {
+                "Fishing Reward") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.setDetails(new ItemStack(Material.RAW_FISH), main.color("&eFish Rain"), "",
                         main.color("&7Cover the map with fish"), main.color("&7falling from the sky")));
@@ -150,7 +150,7 @@ public final class WinEffectCosmetics {
 
     private static Cosmetic flood(Core main) {
         return new Cosmetic("flood", CosmeticCategory.WIN_EFFECT, "Flood",
-                "Fishing Reward", "Catch every type of fish") {
+                "Fishing Reward") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.setDetails(new ItemStack(Material.BOAT), main.color("&eFlood"), "",
                         main.color("&7Flood the map and"), main.color("&7ride a boat to safety")));
@@ -174,7 +174,7 @@ public final class WinEffectCosmetics {
 
     private static Cosmetic treasureHoard(Core main) {
         return new Cosmetic("treasure_hoard", CosmeticCategory.WIN_EFFECT, "Treasure Hoard",
-                "Fishing Reward", "Open sunken treasure") {
+                "Fishing Reward") {
             public ItemStack getIcon(Player player) {
                 return withRequirementLore(ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK), main.color("&eTreasure Hoard"), "",
                         main.color("&7Plunder shiny riches"), main.color("&7like a true pirate")));
@@ -198,13 +198,13 @@ public final class WinEffectCosmetics {
 
     private static Cosmetic ritual(Core main) {
         return new Cosmetic("ritual", CosmeticCategory.WIN_EFFECT, "Ritual",
-                "Halloween 2025 Exclusive", "Find 3 baskets in the lobby") {
+                "Halloween 2025 Exclusive") {
             public ItemStack getIcon(Player player) {
                 int found = main.getHalloweenManager() != null
                         ? main.getHalloweenManager().getFoundCount(player.getUniqueId()) : 0;
                 return withRequirementLore(ItemHelper.setDetails(new ItemStack(Material.NETHERRACK), main.color("&eRitual"), "",
                         main.color("&7Herobrine totem and bats"), main.color("&7take over the map..."), "",
-                        main.color("&7Progress: &e" + Math.min(found, 3) + "&7/3")));
+                        main.color("&7Progress: &e" + Math.min(found, 3) + "&7/3 baskets")));
             }
 
             public boolean isUnlocked(Player player) {
