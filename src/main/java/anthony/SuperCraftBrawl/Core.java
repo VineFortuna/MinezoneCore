@@ -2069,11 +2069,8 @@ public class Core extends JavaPlugin implements Listener {
         return lobbyWorld;
     }
 
-    /** True in the hub lobby, and also in a match's waiting room */
-    public boolean isInAnyLobby(Player player) {
-        if (player.getWorld() == lobbyWorld) return true;
-        GameInstance game = gameManager.GetInstanceOfPlayer(player);
-        return game != null && game.state == GameState.WAITING;
+    public boolean isInLobby(Player player) {
+        return player.getWorld() == lobbyWorld;
     }
 
     /*

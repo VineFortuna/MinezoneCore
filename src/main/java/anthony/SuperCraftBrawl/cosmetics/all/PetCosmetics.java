@@ -87,7 +87,7 @@ public final class PetCosmetics {
                 Snowman snowman = pets.get(player.getUniqueId());
                 if (snowman == null) return;
 
-                if (!snowman.isValid() || player.getWorld() != snowman.getWorld() || !main.isInAnyLobby(player)) {
+                if (!snowman.isValid() || player.getWorld() != snowman.getWorld() || !main.isInLobby(player)) {
                     try {
                         snowman.remove();
                     } catch (Throwable ignored) {

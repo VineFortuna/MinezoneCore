@@ -54,7 +54,7 @@ public final class TrailCosmetics {
             }
 
             public void tick(Player player) {
-                if (!main.isInAnyLobby(player)) return;
+                if (!main.isInLobby(player)) return;
 
                 Location loc = player.getLocation().add(0, 0.2, 0);
                 PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(EnumParticle.CLOUD, false,
@@ -97,7 +97,7 @@ public final class TrailCosmetics {
 
             @Override
             public void tick(Player player) {
-                if (!main.isInAnyLobby(player)) return;
+                if (!main.isInLobby(player)) return;
 
                 angle += Math.PI / 16;
 

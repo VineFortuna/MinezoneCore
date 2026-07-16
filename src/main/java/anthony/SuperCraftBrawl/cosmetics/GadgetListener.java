@@ -228,7 +228,7 @@ public class GadgetListener implements Listener {
     }
 
     private boolean canUseGadget(Player player) {
-        return main.isInAnyLobby(player);
+        return main.isInLobby(player);
     }
 
     private boolean isPaintable(Block block) {
