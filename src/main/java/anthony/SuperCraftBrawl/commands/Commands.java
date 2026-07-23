@@ -1586,7 +1586,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 		for (Maps maps : Maps.values()) {
 			if (maps.toString().equalsIgnoreCase(mapName)) {
 				map = maps;
-				main.getListener().removeCosmetics(player);
 				break;
 			}
 		}

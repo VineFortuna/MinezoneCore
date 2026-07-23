@@ -2,7 +2,6 @@ package anthony.SuperCraftBrawl;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.gui.christmas.ChristmasRewardsGUI;
@@ -104,10 +103,6 @@ public class PlayerListener implements Listener {
         p.setAllowFlight(false);
         p.setAllowFlight(true);
         p.setGameMode(GameMode.ADVENTURE);
-    }
-
-    public void removeCosmetics(Player player) {
-        main.getCosmeticManager().unequip(player, CosmeticCategory.TITLE);
     }
 
     /**
