@@ -1,4 +1,4 @@
-package anthony.SuperCraftBrawl.halloween;
+package anthony.SuperCraftBrawl.cosmetics;
 
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Bukkit;
@@ -11,8 +11,10 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.plugin.Plugin;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Packet-only subtitle titles manager (1.8 R3).
@@ -21,7 +23,7 @@ import java.util.*;
  * - Title shows to OTHER players (not the owner)
  * - Lobby-only by world name
  */
-public final class TrickTitlePackets implements Listener {
+public final class TitleCosmeticPackets implements Listener {
 
     // ----- Title definition -----
     public static final class TitleDef {
@@ -38,6 +40,9 @@ public final class TrickTitlePackets implements Listener {
         UUID uuid;
         String key; // which title this stand represents
     }
+
+    // Safe entity ID range — far above real NMS entity IDs to prevent collisions with players/mobs
+    private static final AtomicInteger TITLE_ENTITY_ID = new AtomicInteger(800000);
 
     private final Plugin plugin;
     private final String lobbyWorldName;
@@ -56,7 +61,7 @@ public final class TrickTitlePackets implements Listener {
 
     private int reattachTaskId = -1;
 
-    public TrickTitlePackets(Plugin plugin, String lobbyWorldName) {
+    public TitleCosmeticPackets(Plugin plugin, String lobbyWorldName) {
         this.plugin = plugin;
         this.lobbyWorldName = (lobbyWorldName == null) ? "" : lobbyWorldName;
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -250,8 +255,8 @@ public final class TrickTitlePackets implements Listener {
         WorldServer nmsWorld = ((CraftWorld) owner.getWorld()).getHandle();
         EntityArmorStand stand = new EntityArmorStand(nmsWorld);
         stand.setLocation(owner.getLocation().getX(),
-                          owner.getLocation().getY() + def.yOffset,
-                          owner.getLocation().getZ(), 0f, 0f);
+                owner.getLocation().getY() + def.yOffset,
+                owner.getLocation().getZ(), 0f, 0f);
         stand.setInvisible(true);
         stand.setSmall(true);
         setMarkerSafe(stand, true);
@@ -260,9 +265,19 @@ public final class TrickTitlePackets implements Listener {
 
         StandData sd = new StandData();
         sd.nms = stand;
-        sd.entityId = stand.getId();
-        sd.uuid = stand.getUniqueID();
         sd.key = key;
+
+        // Override the NMS-assigned ID with one from our safe range (800k+)
+        // to prevent collisions with real player/entity IDs
+        int safeId = TITLE_ENTITY_ID.incrementAndGet();
+        try {
+            Field idField = net.minecraft.server.v1_8_R3.Entity.class.getDeclaredField("id");
+            idField.setAccessible(true);
+            idField.setInt(stand, safeId);
+        } catch (Throwable ignored) {}
+
+        sd.entityId = safeId;
+        sd.uuid = stand.getUniqueID();
         active.put(owner.getUniqueId(), sd);
 
         for (Player viewer : owner.getWorld().getPlayers()) {
@@ -284,8 +299,8 @@ public final class TrickTitlePackets implements Listener {
         double yOff = (def != null ? def.yOffset : 1.10D);
 
         sd.nms.setLocation(owner.getLocation().getX(),
-                           owner.getLocation().getY() + yOff,
-                           owner.getLocation().getZ(), 0f, 0f);
+                owner.getLocation().getY() + yOff,
+                owner.getLocation().getZ(), 0f, 0f);
 
         send(viewer, new PacketPlayOutSpawnEntityLiving(sd.nms));
         send(viewer, new PacketPlayOutEntityMetadata(sd.entityId, sd.nms.getDataWatcher(), true));

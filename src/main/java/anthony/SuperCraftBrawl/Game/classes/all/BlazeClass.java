@@ -125,14 +125,15 @@ public class BlazeClass extends BaseClass {
 		if (event.getEntityType() == EntityType.ARROW) {
 			event.setCancelled(true);
 
-			if (fireballAbility.isReady()) {
-				SmallFireball fireball = player.launchProjectile(SmallFireball.class);
-				fireball.setIsIncendiary(false);
-				fireballCounter--;
-				if (fireballCounter == 0) {
-					fireballAbility.use();
-					fireballCounter = FIREBALL_AMOUNT;
-				}
+			if (instance.getGameManager().spawnProt.containsKey(player)) return;
+			if (!fireballAbility.isReady()) return;
+
+			SmallFireball fireball = player.launchProjectile(SmallFireball.class);
+			fireball.setIsIncendiary(false);
+			fireballCounter--;
+			if (fireballCounter == 0) {
+				fireballAbility.use();
+				fireballCounter = FIREBALL_AMOUNT;
 			}
 		}
 	}

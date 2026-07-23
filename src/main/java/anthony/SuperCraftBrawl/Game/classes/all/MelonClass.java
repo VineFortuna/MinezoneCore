@@ -44,8 +44,11 @@ public class MelonClass extends BaseClass {
 	}
 
 	public ItemStack getWatermelon() {
-		return ItemHelper.setDetails(new ItemStack(Material.MELON, 1), "" + ChatColor.RESET + "#yolo (Right Click)",
-				ChatColor.YELLOW + "", "Right click for special feature!");
+        ItemStack melon = ItemHelper.setDetails(new ItemStack(Material.MELON),
+                instance.color("&r#yolo &7(Right Click)"),
+                "",
+                instance.color("&7Right click for special abilities!"));
+		return melon;
 	}
 
 	@Override
@@ -56,37 +59,56 @@ public class MelonClass extends BaseClass {
 	}
 
 	public ItemStack getMelon() {
-		return ItemHelper
-				.addEnchant(
-						ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.MELON_BLOCK, 1),
-								"" + ChatColor.RESET + "Melon Block"), Enchantment.DAMAGE_ALL, 3),
-						Enchantment.KNOCKBACK, 1);
+        ItemStack melon = ItemHelper
+                .addEnchant(
+                        ItemHelper.addEnchant(new ItemStack(Material.MELON_BLOCK, 1),
+                                Enchantment.DAMAGE_ALL, 3),
+                        Enchantment.KNOCKBACK, 1);
+		return melon;
 	}
 
 	public ItemStack getSoup() {
-		return ItemHelper.setDetails(new ItemStack(Material.MUSHROOM_SOUP, 1), "" + ChatColor.RESET + "Mushroom Soup");
+        ItemStack soup = ItemHelper.setDetails(new ItemStack(Material.MUSHROOM_SOUP, 1),
+                instance.color("&rMelon Soup &7(Right Click)"),
+                "",
+                instance.color("&7Right click to gain one of these effects:"),
+                instance.color("&7▶ &eAbsorption&r &a1"),
+                instance.color("&7▶ &d&oHealth Boost&r &a2"),
+                instance.color("&7▶ &c&oStrength&r &a1"),
+                instance.color("&7▶ &8&oResistance&r &a1"),
+                instance.color("&7▶ &b&oSpeed&r &a3"));
+		return soup;
 	}
 
 	public ItemStack getBeacon() {
-		return ItemHelper.addEnchant(ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.BEACON, 1), "" + ChatColor.RESET + "Beacon"),
-				Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 1);
+        ItemStack beacon = ItemHelper.addEnchant(ItemHelper.addEnchant(
+                new ItemStack(Material.BEACON, 1),
+                Enchantment.DAMAGE_ALL, 3),
+                Enchantment.KNOCKBACK, 1);
+		return beacon;
 	}
 
 	public ItemStack getRegenerators() {
-		return ItemHelper.setDetails(new ItemStack(Material.INK_SACK, 1),
-				"" + ChatColor.RESET + ChatColor.GREEN + "Regenerators");
+        ItemStack regenerators = ItemHelper.setDetails(new ItemStack(Material.INK_SACK, 1),
+                instance.color("&aRegenerators"),
+                "",
+                instance.color("&7Right click to gain:"),
+                instance.color("&c&lREGEN II &a- 5s"));
+		return regenerators;
 	}
 
 	public ItemStack getGlisteringMelon() {
-		return ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.SPECKLED_MELON, 1),
-				"" + ChatColor.RESET + "Special Melon"), Enchantment.DAMAGE_ALL, 4);
+        ItemStack specialMelon = ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.SPECKLED_MELON, 1),
+                instance.color("&aSpecial Melon")),
+                Enchantment.DAMAGE_ALL, 4);
+		return specialMelon;
 	}
 
 	public ItemStack getGold() {
-		return ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.GOLD_NUGGET, 1), "" + ChatColor.RESET + "Gold Nugget"),
-				Enchantment.KNOCKBACK, 3);
+        ItemStack goldNugget = ItemHelper.addEnchant(
+                new ItemStack(Material.GOLD_NUGGET, 1),
+                Enchantment.KNOCKBACK, 3);
+		return goldNugget;
 	}
 
 	public void PermItems() {
@@ -127,23 +149,23 @@ public class MelonClass extends BaseClass {
 
 		int chance = rand.nextInt(5);
 		if (chance == 0) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 400, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 999999999, 0));
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.GREEN + "You were given "
 					+ ChatColor.YELLOW + ChatColor.BOLD + "ABSORPTION I");
 		} else if (chance == 1) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 800, 3));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2));
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.GREEN + "You were given "
-					+ ChatColor.YELLOW + ChatColor.BOLD + "SPEED IV");
+					+ ChatColor.YELLOW + ChatColor.BOLD + "SPEED III");
 		} else if (chance == 2) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 300, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 999999999, 0));
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.GREEN + "You were given "
 					+ ChatColor.YELLOW + ChatColor.BOLD + "STRENGTH I");
 		} else if (chance == 3) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.GREEN + "You were given "
-					+ ChatColor.YELLOW + ChatColor.BOLD + "RESISTANCE II");
+					+ ChatColor.YELLOW + ChatColor.BOLD + "RESISTANCE I");
 		} else if (chance == 4) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 600, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 999999999, 1));
 			player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + ChatColor.GREEN + "You were given "
 					+ ChatColor.YELLOW + ChatColor.BOLD + "HEALTH BOOST II");
 		} else {
@@ -186,7 +208,7 @@ public class MelonClass extends BaseClass {
 		} else if (item != null && item.getType() == Material.INK_SACK
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 			player.playSound(player.getLocation(), Sound.EAT, 1, 2);
-			player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 200, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 110, 1));
 			if (shurikenCooldown.useAndResetCooldown()) {
 				int amount = item.getAmount();
 				if (amount > 0) {

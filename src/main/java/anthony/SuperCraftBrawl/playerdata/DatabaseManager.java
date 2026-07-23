@@ -44,6 +44,30 @@ public class DatabaseManager {
 		return c;
 	}
 
+	public void ensureLastDailyRewardColumn() {
+		if (getConnection() == null) {
+			Bukkit.getLogger().warning("[MinezoneCore] Could not check LastDailyReward column because MySQL is not connected.");
+			return;
+		}
+
+		try {
+			Statement stmt = getConnection().createStatement();
+			stmt.executeUpdate("ALTER TABLE PlayerData ADD COLUMN LastDailyReward BIGINT NOT NULL DEFAULT 0");
+			stmt.close();
+
+			Bukkit.getLogger().info("[MinezoneCore] Added missing PlayerData.LastDailyReward column.");
+		} catch (SQLException e) {
+			String message = e.getMessage() == null ? "" : e.getMessage().toLowerCase();
+
+			// MySQL error 1060 = duplicate column. That means it already exists, so ignore it.
+			if (e.getErrorCode() == 1060 || message.contains("duplicate column")) {
+				return;
+			}
+
+			e.printStackTrace();
+		}
+	}
+
 	public void multiExecuteUpdateCommand(String... updateCommand) {
 		Bukkit.getScheduler().runTaskAsynchronously(main, () -> {
 			for (String cmd : updateCommand) {
@@ -164,6 +188,19 @@ public class DatabaseManager {
 						")";
 		multiExecuteUpdateCommand(gamesTable, playersTable);
 	}
+
+    public void ensurePlayerCosmeticsTable() {
+        final String sql =
+                "CREATE TABLE IF NOT EXISTS scb_player_cosmetics (" +
+                        "  uuid        VARCHAR(36) NOT NULL," +
+                        "  category    VARCHAR(32) NOT NULL," +
+                        "  cosmetic_id VARCHAR(64) NOT NULL," +
+                        "  updated_at  TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP," +
+                        "  PRIMARY KEY (uuid, category)," +
+                        "  INDEX (uuid)" +
+                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+        executeUpdateCommand(sql);
+    }
 
     public void executeQueryCommand(String updateCommand, ExecuteFunction func) {
 		try {

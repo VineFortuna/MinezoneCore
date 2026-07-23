@@ -22,7 +22,7 @@ public enum GameLootDrops {
 	WITCH_EGG(Rarity.RARE), CREEPER_EGG(Rarity.RARE), FIRE_FLOWER(Rarity.RARE), CAVE_SPIDER_EGG(Rarity.RARE),
 
 	// RARE:
-	HEALTH2(Rarity.MYTHIC), BROOMS(Rarity.MYTHIC), HAMMER(Rarity.MYTHIC), ENDER_PEARL(Rarity.MYTHIC), BOUNTY(Rarity.MYTHIC),
+	HEALTH2(Rarity.MYTHIC), BROOMS(Rarity.MYTHIC), HAMMER(Rarity.MYTHIC), ENDER_PEARL(Rarity.MYTHIC),
 	GOLDEN_APPLE(Rarity.MYTHIC),
 
 	// LEGENDARY:
@@ -166,7 +166,7 @@ public enum GameLootDrops {
 	        	 break;
 
 			case CAVE_SPIDER_EGG:
-				item = ItemHelper.createMonsterEgg(EntityType.SPIDER, 1);
+				item = ItemHelper.createMonsterEgg(EntityType.CAVE_SPIDER, 1);
 				ItemHelper.setDetails(item, "&c&lCAVE SPIDER POKEBALL", "&7Spawns a Cave Spider",
 						"", "&2&lUNCOMMON");
 				break;
@@ -192,13 +192,6 @@ public enum GameLootDrops {
 	        case ENDER_PEARL:
 	            item = ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL),
 	                    "&5&lENDER PEARL", "", "&9&lRARE");
-	            break;
-
-	        case BOUNTY:
-	            item = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR, 1),
-	                    "&a&lBOUNTY",
-	                    "&7Set a bounty on a random player",
-	                    "&7Kill them to claim extra tokens", "", "&9&lRARE");
 	            break;
 
 	        case GOLDEN_APPLE:

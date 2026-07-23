@@ -60,11 +60,11 @@ public class MysteryChestsGUI implements InventoryProvider {
 
                             // optional global re-entry guard
                             if (main.getGameManager() != null) {
-                                if (main.getGameManager().chestCanOpen) {
+                                if (main.getMysteryChestManager().chestCanOpen) {
                                     player.sendMessage(main.color("&c&l(!) &rPlease wait, a chest is already opening."));
                                     return;
                                 }
-                                main.getGameManager().chestCanOpen = true;
+                                main.getMysteryChestManager().chestCanOpen = true;
                             }
 
                             // nice display location centered above the block
@@ -136,13 +136,13 @@ public class MysteryChestsGUI implements InventoryProvider {
                 ((CraftPlayer) player).getHandle().playerConnection.sendPacket(destroyPacket);
 
                 // fixed hologram position (adjust if needed)
-                loc = new Location(lobby, 194.5, 111.2, 641.5);
+                loc = new Location(lobby, 198.5, 105.2, 650.5);
 
                 WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
                 stand = new EntityArmorStand(s);
 
                 stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-                stand.setCustomName(main.color("&e&l" + data.mysteryChests + " &eto open!"));
+                stand.setCustomName(main.color("&a" + data.mysteryChests + " &rto open!"));
                 stand.setCustomNameVisible(true);
                 stand.setGravity(false);
                 stand.setInvisible(true);

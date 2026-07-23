@@ -1,6 +1,8 @@
 package anthony.SuperCraftBrawl.commands;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameLootDrops;
 import anthony.SuperCraftBrawl.Game.GameSettings;
@@ -10,6 +12,7 @@ import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.friends.FriendProfile;
+import anthony.SuperCraftBrawl.party.Party;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
@@ -47,19 +50,16 @@ import java.util.Random;
 import anthony.SuperCraftBrawl.friends.FriendsManager;
 import anthony.SuperCraftBrawl.gui.FriendRequestsGUI;
 import anthony.SuperCraftBrawl.gui.FriendsGUI;
+import org.bukkit.util.StringUtil;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 public class Commands implements CommandExecutor, TabCompleter {
 
 	private final Core main;
 	public List<Player> players;
-	private final java.util.Set<java.util.UUID> candyAuraEnabled = new java.util.HashSet<>();
-	private int candyAuraTaskId = -1;
-
-	// how often to render (ticks). 5 = 4x/sec
-	private static final long CANDY_AURA_PERIOD_TICKS = 5L;
 
 	public Commands(Core main) {
 		this.main = main;
@@ -148,10 +148,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 				duelCommand(args, player);
 				break;
 
-			case "party":
-				partyCommand(args, player);
-				break;
-
 			case "color":
 				colorCommand(args, player);
 				break;
@@ -176,6 +172,15 @@ public class Commands implements CommandExecutor, TabCompleter {
 				forceClassCommand(player, args);
 				break;
 
+                case "party":
+                    partyCommand(args, player);
+                    break;
+
+                case "partychat":
+                    partyChatCommand(args, player);
+                    break;
+
+
 			case "practice":
 				new SCBPractice(player, Game.BowPractice, main);
 				break;
@@ -192,6 +197,146 @@ public class Commands implements CommandExecutor, TabCompleter {
 			sender.sendMessage("Hey! You can't use this in the terminal!");
 		return true;
 	}
+
+    private void partyChatCommand(String[] args, Player player) {
+        if (main.getPartyManager() == null) {
+            player.sendMessage(main.color("&c&l(!) &rParty system is not loaded."));
+            return;
+        }
+
+        if (args.length == 0) {
+            main.getPartyManager().togglePartyChat(player);
+            return;
+        }
+
+        main.getPartyManager().sendPartyMessage(player, joinArgs(args, 0));
+    }
+
+    private String joinArgs(String[] args, int start) {
+        StringBuilder builder = new StringBuilder();
+
+        for (int i = start; i < args.length; i++) {
+            if (i > start) {
+                builder.append(" ");
+            }
+
+            builder.append(args[i]);
+        }
+
+        return builder.toString();
+    }
+
+    private void sendPartyHelp(Player player) {
+        player.sendMessage(main.color("&8&m------------------------------------"));
+        player.sendMessage(main.color("&6&lPARTY COMMANDS"));
+        player.sendMessage(main.color("&e/party invite <player> -> &rInvite a player"));
+        player.sendMessage(main.color("&e/party accept <player> -> &rAccept an invite"));
+        player.sendMessage(main.color("&e/party deny <player> -> &rDeny an invite"));
+        player.sendMessage(main.color("&e/party leave -> &rLeave your party"));
+        player.sendMessage(main.color("&e/party list -> &rView party members"));
+        player.sendMessage(main.color("&e/party kick <player> -> &rKick a member"));
+        player.sendMessage(main.color("&e/party promote <player> -> &rMake someone leader"));
+        player.sendMessage(main.color("&e/party disband -> &rDisband the party"));
+        player.sendMessage(main.color("&e/party chat [message] -> &rToggle/send party chat"));
+        player.sendMessage(main.color("&e/partychat [message] -> &rToggle/send party chat"));
+        player.sendMessage(main.color("&8&m------------------------------------"));
+    }
+
+    private void partyCommand(String[] args, Player player) {
+        if (main.getPartyManager() == null) {
+            player.sendMessage(main.color("&c&l(!) &rParty system is not loaded."));
+            return;
+        }
+
+        if (args.length == 0 || args[0].equalsIgnoreCase("help")) {
+            sendPartyHelp(player);
+            return;
+        }
+
+        String sub = args[0].toLowerCase();
+
+        if (sub.equals("invite") || sub.equals("add")) {
+            if (args.length < 2) {
+                player.sendMessage(main.color("&c&l(!) &rIncorrect Usage! Try doing: &e/party invite <player>"));
+                return;
+            }
+
+            Player target = Bukkit.getPlayer(args[1]);
+            main.getPartyManager().invite(player, target);
+            return;
+        }
+
+        if (sub.equals("accept") || sub.equals("join")) {
+            if (args.length < 2) {
+                player.sendMessage(main.color("&c&l(!) &rIncorrect Usage! Try doing: &e/party accept <player>"));
+                return;
+            }
+
+            Player inviter = Bukkit.getPlayer(args[1]);
+            main.getPartyManager().accept(player, inviter);
+            return;
+        }
+
+        if (sub.equals("deny") || sub.equals("reject")) {
+            if (args.length < 2) {
+                player.sendMessage(main.color("&c&l(!) &rIncorrect Usage! Try doing: &e/party deny <player>"));
+                return;
+            }
+
+            Player inviter = Bukkit.getPlayer(args[1]);
+            main.getPartyManager().deny(player, inviter);
+            return;
+        }
+
+        if (sub.equals("leave")) {
+            main.getPartyManager().leave(player);
+            return;
+        }
+
+        if (sub.equals("disband")) {
+            main.getPartyManager().disband(player, true);
+            return;
+        }
+
+        if (sub.equals("kick") || sub.equals("remove")) {
+            if (args.length < 2) {
+                player.sendMessage(main.color("&c&l(!) &rIncorrect Usage! Try doing: &e/party kick <player>"));
+                return;
+            }
+
+            Player target = Bukkit.getPlayer(args[1]);
+            main.getPartyManager().kick(player, target);
+            return;
+        }
+
+        if (sub.equals("promote") || sub.equals("leader") || sub.equals("makeleader")) {
+            if (args.length < 2) {
+                player.sendMessage(main.color("&c&l(!) &rIncorrect Usage! Try doing: &e/party promote <player>"));
+                return;
+            }
+
+            Player target = Bukkit.getPlayer(args[1]);
+            main.getPartyManager().promote(player, target);
+            return;
+        }
+
+        if (sub.equals("list") || sub.equals("info")) {
+            main.getPartyManager().list(player);
+            return;
+        }
+
+        if (sub.equals("chat") || sub.equals("c")) {
+            if (args.length == 1) {
+                main.getPartyManager().togglePartyChat(player);
+                return;
+            }
+
+            main.getPartyManager().sendPartyMessage(player, joinArgs(args, 1));
+            return;
+        }
+
+        sendPartyHelp(player);
+    }
 
     private void friendsCommand(String[] args, Player player) {
         if (args.length == 0) {
@@ -393,27 +538,30 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
+		Cosmetic candyAura = main.getCosmeticManager().registry().get(CosmeticCategory.TRAIL, "candy_aura");
+		if (!candyAura.isUnlocked(player)) {
+			player.sendMessage(candyAura.getUnlockMessage(player));
+			return;
+		}
+
 		String mode = (args.length == 0) ? "toggle" : args[0].toLowerCase();
 		switch (mode) {
 		case "on":
-			candyAuraEnabled.add(player.getUniqueId());
+			main.getCosmeticManager().equip(player, candyAura);
 			player.sendMessage(main.color("&dCandy Aura &aenabled&d. Sweet!"));
-			ensureCandyAuraTaskRunning();
 			break;
 		case "off":
-			candyAuraEnabled.remove(player.getUniqueId());
+			if (candyAura.id.equals(main.getCosmeticManager().getEquippedId(player, CosmeticCategory.TRAIL))) {
+				main.getCosmeticManager().unequip(player, CosmeticCategory.TRAIL);
+			}
 			player.sendMessage(main.color("&dCandy Aura &cdisabled&d."));
 			break;
 		case "toggle":
 		default:
-			if (candyAuraEnabled.contains(player.getUniqueId())) {
-				candyAuraEnabled.remove(player.getUniqueId());
-				player.sendMessage(main.color("&dCandy Aura &cdisabled&d."));
-			} else {
-				candyAuraEnabled.add(player.getUniqueId());
-				player.sendMessage(main.color("&dCandy Aura &aenabled&d. Sweet!"));
-				ensureCandyAuraTaskRunning();
-			}
+			boolean nowEnabled = main.getCosmeticManager().toggle(player, candyAura);
+			player.sendMessage(main.color(nowEnabled
+					? "&dCandy Aura &aenabled&d. Sweet!"
+					: "&dCandy Aura &cdisabled&d."));
 			break;
 		}
 	}
@@ -504,62 +652,21 @@ public class Commands implements CommandExecutor, TabCompleter {
         });
     }
 
-	private void ensureCandyAuraTaskRunning() {
-		if (candyAuraTaskId != -1)
-			return; // already running
-		candyAuraTaskId = Bukkit.getScheduler().runTaskTimer(main, new Runnable() {
-			@Override
-			public void run() {
-				if (candyAuraEnabled.isEmpty())
-					return;
-				for (java.util.UUID id : new java.util.HashSet<>(candyAuraEnabled)) {
-					Player p = Bukkit.getPlayer(id);
-					if (p == null || !p.isOnline())
-						continue;
-					renderCandyAura(p);
-				}
-			}
-		}, CANDY_AURA_PERIOD_TICKS, CANDY_AURA_PERIOD_TICKS).getTaskId();
-	}
-
-	/** Draw a small “candy” swirl around the player (1.8-safe Effects). */
-	private void renderCandyAura(Player p) {
-		Location base = p.getLocation().add(0, 0.1, 0);
-
-		// light sparkles around feet
-		p.getWorld().playEffect(base, Effect.HAPPY_VILLAGER, 0, 16);
-		p.getWorld().playEffect(base, Effect.CRIT, 0, 16);
-
-		// purple-ish magic near waist
-		Location waist = base.clone().add(0, 0.7, 0);
-		p.getWorld().playEffect(waist, Effect.WITCH_MAGIC, 0, 16);
-
-		// tiny swirl ring
-		final double r = 0.45;
-		long t = System.currentTimeMillis();
-		for (int i = 0; i < 6; i++) {
-			double a = (t / 120.0 + i * Math.PI / 3.0);
-			double x = Math.cos(a) * r;
-			double z = Math.sin(a) * r;
-			Location ring = waist.clone().add(x, 0.1, z);
-			p.getWorld().playEffect(ring, Effect.HAPPY_VILLAGER, 0, 8);
-		}
-	}
-
 	private void serverCommand(Player player) {
 		player.sendMessage(main.color("&b&l(!) &rYou are currently connected to &2SCB-1"));
 	}
 
 	private void socialsCommand(Player player) {
-        player.sendMessage(main.color("&8&m-------&8[Social Media]&8&m-------"));
+        player.sendMessage(main.color("&r&m-------&e[Social Media]&r&m-------"));
         player.sendMessage("");
-        player.sendMessage(main.color("&eDiscord: &7https://discord.gg/FSZpmY9FZB"));
-        player.sendMessage(main.color("&eStore: &7minezone.tebex.io"));
-        player.sendMessage(main.color("&eYouTube: &7https://www.youtube.com/@minezone6480"));
-        player.sendMessage(main.color("&eTwitter: &7https://twitter.com/MinezoneMC"));
-        player.sendMessage(main.color("&eTikTok: &7https://www.tiktok.com/@minezonemc"));
+        player.sendMessage(main.color("&rDiscord: &ahttps://discord.gg/FSZpmY9FZB"));
+        player.sendMessage(main.color("&rWebsite: &ahttps://www.minezone.club"));
+        player.sendMessage(main.color("&rStore: &ahttps://www.minezone.club/store"));
+        player.sendMessage(main.color("&rYouTube: &ahttps://www.youtube.com/@minezone6480"));
+        player.sendMessage(main.color("&rTwitter: &ahttps://twitter.com/MinezoneMC"));
+        player.sendMessage(main.color("&rTikTok: &ahttps://www.tiktok.com/@minezonemc"));
         player.sendMessage("");
-        player.sendMessage(main.color("&8&m----------------------------"));
+        player.sendMessage(main.color("&r&m----------------------------"));
 	}
 
 	private void forceClassCommand(Player player, String[] args) {
@@ -582,7 +689,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 				return;
 			}
 		} else {
-			player.sendMessage(main.color("&c&l(!) &rUsage: /fc <className> [player]"));
+			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing /fc <className> [player]"));
 			return;
 		}
 
@@ -632,6 +739,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		newBaseClass.totalTokens = oldBaseClass.totalTokens;
 		newBaseClass.totalExp = oldBaseClass.totalExp;
 		newBaseClass.totalKills = oldBaseClass.totalKills;
+        newBaseClass.totalDeaths = oldBaseClass.totalDeaths;
 		newBaseClass.bountyTarget = oldBaseClass.bountyTarget;
 
 		// Create new scoreboard entry
@@ -662,7 +770,19 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private void healCommand(Player player, String[] args) {
-		if (!player.hasPermission("scb.heal")) {
+        GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+
+        if (args.length > 1) {
+            player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/heal &ror &e/heal <player>"));
+            return;
+        }
+
+        if (game == null) {
+            player.sendMessage(main.color("&c&l(!) &rYou are not in a game"));
+            return;
+        }
+
+        if (!player.hasPermission("scb.heal")) {
 			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
 			return;
 		}
@@ -683,15 +803,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 		// Fully heal the player to their maximum health
 		double maxHealth = targetPlayer.getMaxHealth();
 		targetPlayer.setHealth(maxHealth);
-		targetPlayer.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
 
-		if (targetPlayer.equals(player)) {
-			player.sendMessage(main.color("&a&l(!) &rYou have been healed!"));
-		} else {
-			player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
-			player.sendMessage(main.color("&a&l(!) &rYou have healed &e" + targetPlayer.getName() + "&r!"));
-			targetPlayer.sendMessage(main.color("&a&l(!) &rYou have been healed by &e" + player.getName() + "&r!"));
-		}
+        game.TellAll("&a&l(!) &r&e" + targetPlayer.getName() + " &rwas healed");
+        targetPlayer.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
+        if (!targetPlayer.equals(player)) player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 1, 1);
 	}
 
 	private void soundCommand(String[] args, Player player) {
@@ -990,16 +1105,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 		player.sendMessage(main.color("&f&l----------------------------------------"));
 	}
 
-	private void partyCommand(String[] args, Player player) {
-		if (args.length == 0) {
-			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing:"));
-			player.sendMessage(main.color(ChatColor.STRIKETHROUGH + "&7-------------------------------------"));
-			player.sendMessage(main.color("&e&lPARTY COMMANDS:"));
-			player.sendMessage(main.color("&e/party invite <player> &7-> &bInvites a player to your party"));
-			player.sendMessage(main.color("&e/party accept <player> &7-> &bAccepts a party invite from a player"));
-		}
-	}
-
 	private void purchaseCommand(String[] args, Player player) {
 		if (!player.hasPermission("scb.purchases")) {
 			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
@@ -1007,13 +1112,13 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 
 		if (args.length == 0) {
-			player.sendMessage("Not enough arguments!");
-			return;
+            player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/purchases buy&r/&eget <className>"));
+            return;
 		}
 
 		switch (args[0].toLowerCase()) {
 		case "get":
-			purchaseGetCommand(player);
+			purchaseGetCommand(player, args);
 			break;
 		case "buy":
 			if (args.length == 1) {
@@ -1026,20 +1131,78 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 	}
 
-	private void purchaseGetCommand(Player player) {
-		PlayerData data = main.getDataManager().getPlayerData(player);
-		player.sendMessage("Listing purchases...");
+    private void purchaseGetCommand(Player player, String[] args) {
+        PlayerData data = main.getDataManager().getPlayerData(player);
 
-		int size = 0;
-		for (Entry<Integer, ClassDetails> entry : data.playerClasses.entrySet()) {
-			player.sendMessage(" - " + entry.getKey() + ": " + entry.getValue().toString());
-			size++;
-		}
+        // Filter by class name if argument provided
+        ClassType filter = null;
+        if (args.length > 1) {
+            for (ClassType type : ClassType.values()) {
+                if (type.name().equalsIgnoreCase(args[1])) {
+                    filter = type;
+                    break;
+                }
+            }
+            if (filter == null) {
+                player.sendMessage(main.color("&cUnknown class: &e" + args[1]));
+                return;
+            }
+        }
 
-		if (size == 0) {
-			player.sendMessage("You have no Class Stats");
-		}
-	}
+        player.sendMessage(main.color("&6&l=========== Your Class Data ==========="));
+
+        if (data.playerClasses.isEmpty()) {
+            player.sendMessage(main.color("&cYou have no class data."));
+            player.sendMessage(main.color("&6&l=================================="));
+            return;
+        }
+
+        boolean found = false;
+        for (Entry<Integer, ClassDetails> entry : data.playerClasses.entrySet()) {
+            int classId = entry.getKey();
+            ClassDetails details = entry.getValue();
+
+            ClassType classType = ClassType.getById(classId);
+
+            // Skip if filtering and this isn't the target class
+            if (filter != null && classType != filter) continue;
+            found = true;
+
+            String className = classType != null ? classType.getTag() : "Unknown";
+            player.sendMessage(main.color("&e&l" + className + " &7(#" + classId + ")"));
+
+            String winRate = String.format("%.1f",
+                    details.gamesPlayed == 0
+                            ? 0
+                            : (details.gamesWon * 100.0f / details.gamesPlayed)
+            );
+
+            player.sendMessage(main.color(
+                            "&f  Games Played: &e" + details.gamesPlayed +
+                            "&f  Games Won: &e" + details.gamesWon +
+                            "&f  Win Rate: &e" + winRate + "%"
+            ));
+
+            StringBuilder rewards = new StringBuilder("&f  Rewards: ");
+            boolean[] rewardFlags = {details.reward1, details.reward2, details.reward3, details.reward4, details.reward5};
+            for (int i = 0; i < rewardFlags.length; i++) {
+                rewards.append(boolColor(rewardFlags[i])).append("[R").append(i + 1).append("]  ");
+            }
+            player.sendMessage(main.color(rewards.toString()));
+
+            player.sendMessage(main.color("&8  ───────────────────────────"));
+        }
+
+        if (!found) {
+            player.sendMessage(main.color("&fNo data found for class: " + filter.getTag()));
+        }
+
+        player.sendMessage(main.color("&6&l======================================="));
+    }
+
+    private String boolColor(boolean value) {
+        return value ? "&a" : "&c";
+    }
 
 	private void purchaseBuyCommand(String[] args, Player player) {
 		int classID = Integer.parseInt(args[1]);
@@ -1142,8 +1305,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 	private void itemsCommand(String[] args, Player player) {
 		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 
-		if (args.length != 0) {
-			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/items"));
+		if (args.length > 2) {
+			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/items &ror &e/items <item>"));
 			return;
 		}
 
@@ -1157,12 +1320,45 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
-		for (GameLootDrops loot : GameLootDrops.values()) {
-			player.getInventory().addItem(loot.getItem());
-		}
+        Player targetPlayer;
+        if (args.length <= 1) {
+            targetPlayer = player;
+        } else {
+            targetPlayer = Bukkit.getPlayer(args[1]);
+            if (targetPlayer == null) {
+                player.sendMessage(main.color("&c&l(!) &rPlayer not found!"));
+                return;
+            }
+        }
+
+        if (args.length == 0) {
+            for (GameLootDrops loot : GameLootDrops.values()) {
+                targetPlayer.getInventory().addItem(loot.getItem());
+            }
+            game.TellAll(getItemCommandMessage(targetPlayer, null));
+            return;
+        }
+
+        String itemString = args[0];
+        for (GameLootDrops lootDrops : GameLootDrops.values()) {
+            if (lootDrops.toString().equalsIgnoreCase(itemString)) {
+                targetPlayer.getInventory().addItem(lootDrops.getItem());
+                game.TellAll(getItemCommandMessage(targetPlayer, lootDrops.getItem().getItemMeta().getDisplayName()));
+                return;
+            }
+        }
+
+        player.sendMessage(main.color("&c&l(!) &rItem not found!"));
 	}
 
-	private void setLivesCommand(String[] args, Player player) {
+    private String getItemCommandMessage(Player targetPlayer, String itemName) {
+        String prefix = "&a&l(!) &r&e" + targetPlayer.getName() + " &r";
+        if (itemName == null)
+            return prefix + "received all item drops";
+        return prefix + "received " + itemName;
+    }
+
+    private void setLivesCommand(String[] args, Player player) {
 		if (args.length < 2) {
 			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/setlives <player> <num>"));
 			return;
@@ -1390,13 +1586,12 @@ public class Commands implements CommandExecutor, TabCompleter {
 		for (Maps maps : Maps.values()) {
 			if (maps.toString().equalsIgnoreCase(mapName)) {
 				map = maps;
-				main.getListener().removeCosmetics(player);
 				break;
 			}
 		}
 
 		if (map == null) {
-			player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maps &rfor a list of maps"));
+			player.sendMessage(main.color("&c&l(!) &rThis map does not exist! Use &e/maps &rto see all maps"));
 			return;
 		}
 
@@ -1578,129 +1773,157 @@ public class Commands implements CommandExecutor, TabCompleter {
 		return null;
 	}
 
-	public void leaveGame(Player player) {
-		GameInstance game = main.getGameManager().GetInstanceOfSpectator(player);
-		player.spigot().setCollidesWithEntities(true);
-		player.setAllowFlight(false);
-		player.setAllowFlight(true);
-		for (Player p : Bukkit.getOnlinePlayers()) {
-			player.showPlayer(p);
-			p.showPlayer(player);
-		}
+    public void leaveGame(Player player) {
+        if (main.getPartyManager() != null) {
+            Party party = main.getPartyManager().getParty(player);
 
-		if (game != null && game.state == GameState.ENDED)
-			return;
-		else if (main.getGameManager().RemovePlayerFromAll(player)) {
-			main.ResetPlayer(player);
-			/*
-			 * main.getScoreboardManager().lobbyBoard(player);
-			 * main.sendScoreboardUpdate(player);
-			 */
-			player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-					+ "You have left your game");
-
-			if (game != null && game.getGameSettings() != null) {
-				GameSettings gs = game.getGameSettings();
-
-				if (gs.startVotes.contains(player)) {
-					gs.totalStartVotes--;
-					gs.startVotes.remove(player);
-				}
-			}
-
-			for (PotionEffect type : player.getActivePotionEffects())
-				player.removePotionEffect(type.getType());
-
-			// main.sendScoreboardUpdate(player);
-			removeArmor(player);
-		} else if (game != null && game.spectators.contains(player)) {
-			String mapName = "";
-			if (game.duosMap != null)
-				mapName = game.duosMap.toString();
-			else
-				mapName = game.getMap().toString();
-
-			player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-					+ "You have left " + mapName);
-			main.ResetPlayer(player);
-			main.getScoreboardManager().lobbyBoard(player);
-			main.sendScoreboardUpdate(player);
-			game.spectators.remove(player);
-			player.setDisplayName("" + player.getName());
-		} else
-			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
-	}
-
-    @Override
-    public List<String> onTabComplete(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-        if (cmd.getName().equalsIgnoreCase("join") || cmd.getName().equalsIgnoreCase("spectate")) {
-            List<Maps> maps = Arrays.asList(Maps.values());
-            List<String> mapsString = Lists.newArrayList();
-
-            if (args.length == 1) {
-                for (Maps map : maps) {
-                    if (map.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
-                        mapsString.add(map.getName());
-                    }
+            if (party != null) {
+                if (!party.isLeader(player.getUniqueId())) {
+                    player.sendMessage(main.color("&c&l(!) &rOnly the party leader can leave the game for the party."));
+                    player.sendMessage(main.color("&7If you want to leave by yourself, leave the party first with &e/party leave&7."));
+                    return;
                 }
 
-                return mapsString;
-            }
-
-        } else if (cmd.getName().equalsIgnoreCase("class")) {
-            List<ClassType> a = Arrays.asList(ClassType.getAvailableClasses());
-            List<String> f = Lists.newArrayList();
-
-            if (args.length == 1) {
-                for (ClassType s : a) {
-                    if (s.name().toLowerCase().startsWith(args[0].toLowerCase())) {
-                        f.add(s.name());
-                    }
-                }
-
-                return f;
-            }
-
-        } else if (cmd.getName().equalsIgnoreCase("friends")) {
-            if (args.length == 1) {
-                List<String> options = Arrays.asList("add", "accept", "reject", "remove", "requests", "list", "help");
-                List<String> matches = new ArrayList<>();
-
-                for (String option : options) {
-                    if (option.toLowerCase().startsWith(args[0].toLowerCase())) {
-                        matches.add(option);
-                    }
-                }
-
-                return matches;
-            }
-
-            if (args.length == 2) {
-                List<String> names = new ArrayList<>();
-
-                for (Player online : Bukkit.getOnlinePlayers()) {
-                    if (online.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
-                        names.add(online.getName());
-                    }
-                }
-
-                return names;
-            }
-
-        } else if (cmd.getName().equalsIgnoreCase("sound")) {
-            if (args.length == 1) {
-                List<String> soundNames = new ArrayList<>();
-
-                for (Sound sound : Sound.values()) {
-                    if (sound.name().toLowerCase().startsWith(args[0].toLowerCase())) {
-                        soundNames.add(sound.name());
-                    }
-                }
-
-                return soundNames;
+                leavePartyGame(player, party);
+                return;
             }
         }
 
+        leaveSinglePlayerGame(player, true);
+    }
+
+    private void leavePartyGame(Player leader, Party party) {
+        boolean anyoneLeft = false;
+
+        for (Player member : party.getOnlineMembers()) {
+            if (main.getGameManager().GetInstanceOfPlayer(member) != null
+                    || main.getGameManager().GetInstanceOfSpectator(member) != null) {
+                anyoneLeft = true;
+                break;
+            }
+        }
+
+        if (!anyoneLeft) {
+            leader.sendMessage(main.color("&c&l(!) &rYour party is not in a game!"));
+            return;
+        }
+
+        for (Player member : party.getOnlineMembers()) {
+            leaveSinglePlayerGame(member, false);
+        }
+
+        for (Player member : party.getOnlineMembers()) {
+            member.sendMessage(main.color("&e&l(!) &rYour party leader left the game, so the whole party was removed."));
+        }
+    }
+
+    private void leaveSinglePlayerGame(Player player, boolean sendNotInGameMessage) {
+        GameInstance game = main.getGameManager().GetInstanceOfSpectator(player);
+
+        player.spigot().setCollidesWithEntities(true);
+        player.setAllowFlight(false);
+        player.setAllowFlight(true);
+
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            player.showPlayer(p);
+            p.showPlayer(player);
+        }
+
+        if (game != null && game.state == GameState.ENDED) {
+            return;
+        } else if (main.getGameManager().RemovePlayerFromAll(player)) {
+            for (PotionEffect type : player.getActivePotionEffects()) {
+                player.removePotionEffect(type.getType());
+            }
+
+            removeArmor(player);
+            main.ResetPlayer(player);
+
+            player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                    + "You have left your game");
+
+            if (game != null && game.getGameSettings() != null) {
+                GameSettings gs = game.getGameSettings();
+
+                if (gs.startVotes.contains(player)) {
+                    gs.totalStartVotes--;
+                    gs.startVotes.remove(player);
+                }
+            }
+        } else if (game != null && game.spectators.contains(player)) {
+            String mapName = "";
+
+            if (game.duosMap != null) {
+                mapName = game.duosMap.toString();
+            } else {
+                mapName = game.getMap().toString();
+            }
+
+            player.sendMessage("" + ChatColor.RESET + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                    + "You have left " + mapName);
+
+            main.ResetPlayer(player);
+            main.getScoreboardManager().lobbyBoard(player);
+            main.sendScoreboardUpdate(player);
+            game.spectators.remove(player);
+            player.setDisplayName("" + player.getName());
+        } else if (sendNotInGameMessage) {
+            player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
+        }
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+        if (cmd.getName().equalsIgnoreCase("join")
+                || cmd.getName().equalsIgnoreCase("spectate")) {
+            if (args.length == 1) {
+                List<String> mapNames = Arrays.stream(Maps.values())
+                        .map(Enum::name)
+                        .collect(Collectors.toList());
+
+                return StringUtil.copyPartialMatches(args[0], mapNames, new ArrayList<>());
+            }
+        } else if (cmd.getName().equalsIgnoreCase("class")
+                || cmd.getName().equalsIgnoreCase("purchases")
+                || cmd.getName().equalsIgnoreCase("forceclass")) {
+            List<String> classNames = Arrays.stream(ClassType.getAvailableClasses())
+                    .map(Enum::name)
+                    .collect(Collectors.toList());
+
+            boolean isClassCmd = cmd.getName().equalsIgnoreCase("class") && args.length == 1;
+            boolean isForceClassCmd = cmd.getName().equalsIgnoreCase("forceclass") && args.length == 1;
+            boolean isPurchasesCmd = cmd.getName().equalsIgnoreCase("purchases")
+                    && args.length == 2
+                    && args[0].equalsIgnoreCase("get");
+
+            if (isClassCmd || isPurchasesCmd || isForceClassCmd) {
+                String partial = isPurchasesCmd ? args[1] : args[0];
+                return StringUtil.copyPartialMatches(partial, classNames, new ArrayList<>());
+            }
+        } else if (cmd.getName().equalsIgnoreCase("friends")) {
+            if (args.length == 1) {
+                List<String> options = Arrays.asList("add", "accept", "reject", "remove", "requests", "list", "help");
+                return StringUtil.copyPartialMatches(args[0], options, new ArrayList<>());
+            }
+        } else if (cmd.getName().equalsIgnoreCase("items")) {
+            if (args.length == 1) {
+                List<String> items = Arrays.stream(GameLootDrops.values())
+                        .map(GameLootDrops::name)
+                        .collect(Collectors.toList());
+                return StringUtil.copyPartialMatches(args[0], items, new ArrayList<>());
+            }
+        } else if (cmd.getName().equalsIgnoreCase("sound")) {
+            if (args.length == 1) {
+                List<String> soundNames = Arrays.stream(Sound.values())
+                        .map(Sound::name)
+                        .collect(Collectors.toList());
+                return StringUtil.copyPartialMatches(args[0], soundNames, new ArrayList<>());
+            }
+        } else if (cmd.getName().equalsIgnoreCase("soundnms")) {
+            if (args.length == 1) {
+                return StringUtil.copyPartialMatches(args[0], getAllNMSSounds(), new ArrayList<>());
+            }
+        }
         return null;
     }
 

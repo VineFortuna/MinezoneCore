@@ -184,15 +184,7 @@ public class Fishing implements Listener {
     }
 
     private void handleLevelUp(Player player, PlayerData data) {
-        if (data.exp >= 2500) {
-            data.level++;
-            data.exp -= 2500;
-            player.sendMessage(main.color("&8&m----------------------------------------"));
-            player.sendMessage(main.color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
-            player.sendMessage(main.color("&7You are now &e&lLevel &6&l" + data.level + " &7- nice work!"));
-            player.sendMessage(main.color("&8&m----------------------------------------"));
-            player.playSound(player.getLocation(), Sound.LEVEL_UP, 1f, 1.15f);
-        }
+        main.getLevelManager().checkLevelUp(player);
     }
 
     private void showFirstCatchMessage(Player p, FishType fish) {

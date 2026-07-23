@@ -17,32 +17,49 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+import xyz.xenondevs.particle.ParticleEffect;
+import xyz.xenondevs.particle.data.texture.BlockTexture;
 
 import java.util.List;
 
 public class AnvilClass extends BaseClass {
 
-    private final ItemStack weapon;
-    private final ItemStack stompItem;
+    private ItemStack weapon;
+    private ItemStack stompItem;
     private final Ability stompAbility = new Ability("&8&lGoomba Stomp", 10, player);
-	private static final double MAX_STOMP_DAMAGE = 8 * 2.0;
-	private static final double STOMP_X_Z_RANGE = 3;
-	private static final double STOMP_Y_RANGE = 1;
-	private boolean stompUsed;
-	private double stompDamage = 0;
-	private int initialHeight;
+    private static double MAX_STOMP_DAMAGE = 8 * 2.0;
+    private static double STOMP_X_Z_RANGE = 3;
+    private static double STOMP_Y_RANGE = 1;
+    private boolean stompUsed;
+    private double stompDamage = 0;
+    private int initialHeight;
 
-	public AnvilClass(GameInstance instance, Player player) {
-		super(instance, player);
-		createArmor(
-				Material.IRON_BLOCK,
-				null,
-				"373638",
-				6,
-				"Anvil"
-		);
+    // Particle trail task — cancelled when the player lands
+    private BukkitTask trailTask = null;
 
+    public AnvilClass(GameInstance instance, Player player) {
+        super(instance, player);
+        createArmor(
+                Material.IRON_BLOCK,
+                null,
+                "373638",
+                6,
+                "Anvil"
+        );
+
+        baseVerticalJump = 1.15; //Adjusts double jump height
+        createItems();
+    }
+
+    /*
+    * This function creates Anvil's items
+    * Slot 1: Wood Swoord
+    * Slot 2: 'Goomba Stomp'
+     */
+    private void createItems() {
         // Weapon
         weapon = ItemHelper.setDetails(
                 new ItemStack(Material.WOOD_SWORD),
@@ -52,89 +69,194 @@ public class AnvilClass extends BaseClass {
         ItemHelper.setUnbreakable(weapon);
 
         // Stomp Ability
-
-		String displayRangeWide = ItemHelper.formatDouble(STOMP_X_Z_RANGE);
-		String displayRangeY = ItemHelper.formatDouble(STOMP_Y_RANGE + 1);
+        String displayRangeWide = ItemHelper.formatDouble(STOMP_X_Z_RANGE);
+        String displayRangeY = ItemHelper.formatDouble(STOMP_Y_RANGE + 1);
 
         stompItem = ItemHelper.setDetails(
                 new ItemStack(Material.ANVIL),
                 stompAbility.getAbilityNameRightClickMessage(),
                 "&7Slam down on your enemies",
-                "",
                 "&7The damage increases with height",
-				"&7Range: &e" + displayRangeWide + " &7blocks wide",
-				"&7Range: &e" + displayRangeY + " &7blocks up and down"
+                "",
+                "&rRange: &a" + displayRangeWide + " &rblocks wide",
+                "&rRange: &a" + displayRangeY + " &rblocks up and down"
         );
-	}
+    }
 
-	public void SetItems(Inventory playerInv) {
+    /*
+    * This function sets the player's items
+     */
+    public void SetItems(Inventory playerInv) {
         stompAbility.getCooldownInstance().reset();
-		this.stompUsed = false;
-		this.stompDamage = 0;
-		playerInv.setItem(0, weapon);
-		playerInv.setItem(1, stompItem);
-	}
+        this.stompUsed = false;
+        this.stompDamage = 0;
+        cancelTrail();
+        playerInv.setItem(0, this.weapon);
+        playerInv.setItem(1, this.stompItem);
+    }
 
-	public void Tick(int gameTicks) {
-        if (!isPlayerAlive()) return;
+    /*
+    * This is a function that runs continuously every tick per game.
+    * Checks if a player is alive before using stomp ability, then
+    * checks if they're in the air to use it.
+    *
+    * Also action bar message that displays cooldown
+     */
+    public void Tick(int gameTicks) {
+        if (!isPlayerAlive()) {
+            // Player died or became spectator mid-stomp — clean up immediately
+            if (stompUsed) {
+                stompUsed = false;
+                cancelTrail();
+            }
+            return;
+        }
         stompAbility.updateActionBar(player, this);
-		if (!stompUsed) return;
-		if (!player.isOnGround()) return;
+        if (!stompUsed) return;
+        if (!player.isOnGround()) return;
 
-		stompUsed = false;
-		stompDamage = calculateDamage(player.getLocation().getBlockY());
-		applyStompEffectToNearbyPlayers();
-		playEffectsForAllPlayers();
-		stompDamage = 0;
-	}
+        stompUsed = false;
+        cancelTrail(); // stop the falling trail
+        stompDamage = calculateDamage(player.getLocation().getBlockY());
+        applyStompEffectToNearbyPlayers();
+        playLandingEffects();
+        stompDamage = 0;
+    }
 
-	private void applyStompEffectToNearbyPlayers() {
-		List<Entity> nearbyEntities = player.getNearbyEntities(STOMP_X_Z_RANGE, STOMP_Y_RANGE, STOMP_X_Z_RANGE);
-		for (Entity entity : nearbyEntities) {
-			if (!(entity instanceof Player)) continue;
-			Player playerInRange = (Player) entity;
-			if (playerInRange == player) continue;
-			if (checkIfDead(playerInRange, instance)) return;
-			applyStompToPlayer(playerInRange);
-		}
-	}
+    private void applyStompEffectToNearbyPlayers() {
+        List<Entity> nearbyEntities = player.getNearbyEntities(STOMP_X_Z_RANGE, STOMP_Y_RANGE, STOMP_X_Z_RANGE);
+        for (Entity entity : nearbyEntities) {
+            if (!(entity instanceof Player)) continue;
+            Player playerInRange = (Player) entity;
+            if (playerInRange == player) continue;
+            if (checkIfDead(playerInRange, instance)) return;
+            applyStompToPlayer(playerInRange);
+        }
+    }
 
-	private void applyStompToPlayer(Player playerInRange) {
-		// Damage
-		EntityDamageEvent damageEvent = new EntityDamageEvent(
-				playerInRange, EntityDamageEvent.DamageCause.CUSTOM, stompDamage
-		);
+    private void applyStompToPlayer(Player playerInRange) {
+        EntityDamageEvent damageEvent = new EntityDamageEvent(
+                playerInRange, EntityDamageEvent.DamageCause.CUSTOM, stompDamage
+        );
 
-		instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
-		if (damageEvent.isCancelled()) return;
+        //Prevents vanilla dying, need to call EntityDamageEvent to not break
+        instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
+        if (damageEvent.isCancelled()) return;
 
-		double currentHealth = playerInRange.getHealth();
-//		stompDamage = Math.min(stompDamage, currentHealth);
-		double finalHealth = currentHealth - stompDamage;
-//		player.sendMessage("Stomp Damage: " + stompDamage);
-//		player.sendMessage("Current Health: " + currentHealth);
-//		player.sendMessage("Final Health Before Check: " + finalHealth);
-//		playerInRange.damage(0, player);
-		if (finalHealth <= 0) {
-//			if (finalHealth == 0) player.sendMessage("Equals Zero");
-//			else player.sendMessage("Below Zero");
-			playerInRange.setHealth(0);
-		} else {
-			playerInRange.damage(0, player);
-			playerInRange.setHealth(finalHealth);
-		}
+        double currentHealth = playerInRange.getHealth();
+        double finalHealth = currentHealth - stompDamage;
+        if (finalHealth <= 0) {
+            playerInRange.setHealth(0);
+        } else {
+            playerInRange.damage(0, player);
+            playerInRange.setHealth(finalHealth);
+        }
 
-		playerInRange.setVelocity((new Vector(0, 1, 0)).multiply(0.5D));
-	}
+        playerInRange.setVelocity((new Vector(0, 1, 0)).multiply(0.5D));
+    }
 
-	private void playEffectsForAllPlayers() {
-		for (Player gamePlayer : instance.players) {
-			gamePlayer.playEffect(player.getLocation(), Effect.TILE_BREAK, 1);
-		}
-		SoundManager.playSoundToAll(player, Sound.ANVIL_LAND, 1, 1);
-	}
+    // -----------------------------------------------------------------------
+    //  Effects
+    // -----------------------------------------------------------------------
 
-	public void UseItem(PlayerInteractEvent event) {
+    /**
+     * Burst of anvil particles + sound played the moment the ability is activated.
+     * Called once, in the air.
+     */
+    private void playActivationEffects() {
+        Location loc = player.getLocation().add(0, 1, 0);
+        World world = player.getWorld();
+
+        // Anvil crack particles burst upward around the player
+        for (int i = 0; i < 12; i++) {
+            double angle = (2 * Math.PI / 12) * i;
+            Location ring = loc.clone().add(Math.cos(angle) * 0.6, 0, Math.sin(angle) * 0.6);
+            ParticleEffect.BLOCK_CRACK.display(ring, 0.0f, 0.2f, 0.0f, 0.15f, 3,
+                    new BlockTexture(Material.ANVIL));
+        }
+
+        // Extra burst right on the player
+        ParticleEffect.BLOCK_CRACK.display(loc, 0.3f, 0.3f, 0.3f, 0.1f, 8,
+                new BlockTexture(Material.ANVIL));
+
+        // Whoosh sound — anvil falling
+        world.playSound(loc, Sound.ANVIL_LAND, 0.6f, 1.8f);
+        world.playSound(loc, Sound.IRONGOLEM_HIT, 0.5f, 0.5f);
+    }
+
+    /**
+     * Continuous anvil-dust trail spawned every tick while the player is falling.
+     * Cancelled as soon as they hit the ground.
+     */
+    private void startFallingTrail() {
+        cancelTrail();
+        trailTask = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!player.isOnline() || !stompUsed || !isPlayerAlive()) {
+                    cancel();
+                    return;
+                }
+                Location loc = player.getLocation().add(0, 0.5, 0);
+
+                // Tight column of anvil particles beneath the player as they fall
+                ParticleEffect.BLOCK_CRACK.display(loc, 0.15f, 0.05f, 0.15f, 0.05f, 4,
+                        new BlockTexture(Material.ANVIL));
+
+                // Small smoke puff for extra weight feel
+                loc.getWorld().playEffect(loc, Effect.SMOKE, 4);
+            }
+        }.runTaskTimer(instance.getGameManager().getMain(), 0L, 1L);
+    }
+
+    /**
+     * Impact effects played when the player hits the ground.
+     * Anvil BLOCK_CRACK particles burst outward from the center to the damage radius edge,
+     * giving a clear read of exactly which players got hit.
+     */
+    private void playLandingEffects() {
+        Location groundLoc = player.getLocation();
+        World world = groundLoc.getWorld();
+
+        // Central burst of anvil debris right at the impact point
+        ParticleEffect.BLOCK_CRACK.display(groundLoc.clone().add(0, 0.1, 0),
+                0.5f, 0.3f, 0.5f, 0.2f, 24, new BlockTexture(Material.ANVIL));
+
+        // Radial spokes of anvil particles shooting outward from center to edge,
+        // filling in the full damage radius so the affected area is obvious
+        int spokeCount = 16;
+        int stepsPerSpoke = 5;
+        for (int i = 0; i < spokeCount; i++) {
+            double angle = (2 * Math.PI / spokeCount) * i;
+            for (int step = 1; step <= stepsPerSpoke; step++) {
+                double dist = STOMP_X_Z_RANGE * ((double) step / stepsPerSpoke);
+                double x = groundLoc.getX() + dist * Math.cos(angle);
+                double z = groundLoc.getZ() + dist * Math.sin(angle);
+                Location spikeLoc = new Location(world, x, groundLoc.getY() + 0.05, z);
+                // More particles at the outer edge so the radius boundary is crisp
+                int count = (step == stepsPerSpoke) ? 4 : 2;
+                ParticleEffect.BLOCK_CRACK.display(spikeLoc, 0.0f, 0.15f, 0.0f, 0.05f, count,
+                        new BlockTexture(Material.ANVIL));
+            }
+        }
+
+        // Sounds
+        SoundManager.playSoundToAll(player, Sound.ANVIL_LAND, 1, 0.8f);
+        world.playSound(groundLoc, Sound.IRONGOLEM_DEATH, 0.5f, 0.6f);
+    }
+
+    private void cancelTrail() {
+        if (trailTask != null) {
+            trailTask.cancel();
+            trailTask = null;
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    //  Original methods (unchanged)
+    // -----------------------------------------------------------------------
+
+    public void UseItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         Action action = event.getAction();
 
@@ -142,41 +264,39 @@ public class AnvilClass extends BaseClass {
         if (player.getGameMode() == GameMode.SPECTATOR) return;
         if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
 
-		if (!item.equals(stompItem)) return;
+        if (!item.equals(stompItem)) return;
         if (!stompAbility.isReady()) return;
         if (player.isOnGround()) {
-			stompAbility.sendCustomMessage("&c&l(!) You can't be on ground to use " + stompAbility.getAbilityName());
+            stompAbility.sendCustomMessage("&c&l(!) You can't be on ground to use " + stompAbility.getAbilityName());
             return;
         }
 
         useStompAbility();
         stompAbility.use();
         this.stompUsed = true;
-	}
-
-    private void useStompAbility() {
-		initialHeight = player.getLocation().getBlockY();
-		performStompAbility(player);
     }
 
-	private double calculateDamage(int currentHeight) {
-		int deltaHeight = initialHeight - currentHeight;
-		double damage;
-		if (deltaHeight <= 12) {
-			damage = deltaHeight * 0.4;
-		} else {
-			damage = deltaHeight * 0.33;
-		}
-//		player.sendMessage("CurrentHeight: " + currentHeight);
-//		player.sendMessage("DeltaHeight: " + deltaHeight);
-//		player.sendMessage("Damage: " + damage);
-		return Math.min(damage, MAX_STOMP_DAMAGE);
-	}
+    private void useStompAbility() {
+        initialHeight = player.getLocation().getBlockY();
+        performStompAbility(player);
+    }
 
-	private void performStompAbility(Player player) {
-		player.setVelocity((new Vector(0.0D, -1.5D, 0.0D)).multiply(1.0D));
-		player.playEffect(player.getLocation(), Effect.TILE_BREAK, 1);
-	}
+    private double calculateDamage(int currentHeight) {
+        int deltaHeight = initialHeight - currentHeight;
+        double damage;
+        if (deltaHeight <= 12) {
+            damage = deltaHeight * 0.4;
+        } else {
+            damage = deltaHeight * 0.33;
+        }
+        return Math.min(damage, MAX_STOMP_DAMAGE);
+    }
+
+    private void performStompAbility(Player player) {
+        player.setVelocity((new Vector(0.0D, -1.5D, 0.0D)).multiply(1.2D));
+        playActivationEffects();  // burst on activation
+        startFallingTrail();      // trail while falling
+    }
 
     public ClassType getType() {
         return ClassType.Anvil;

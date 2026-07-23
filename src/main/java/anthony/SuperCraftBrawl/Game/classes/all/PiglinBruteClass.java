@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
@@ -42,6 +43,22 @@ public class PiglinBruteClass extends BaseClass {
 		return ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK, 1),
 				"&eGold Balls",
 				 "&7Right click to throw DEADLY gold balls!");
+	}
+
+	@Override
+	public void Tick(int gameTicks) {
+		if (!isPlayerAlive()) return;
+		if (instance.state == GameState.ENDED) return;
+
+		if (player.getInventory().getItem(1).getType() != Material.GOLD_BLOCK)
+			player.getInventory().setItem(1, getBarrier());
+	}
+
+	private ItemStack getBarrier() {
+		ItemStack barrier = ItemHelper.setDetails(new ItemStack(Material.BARRIER),
+				instance.color("&c&lOut of Gold Balls!"),
+				instance.color("&7Get a kill to regen 2 Gold Balls"));
+		return barrier;
 	}
 
 	@Override

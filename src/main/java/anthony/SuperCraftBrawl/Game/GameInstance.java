@@ -17,6 +17,7 @@ import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.signs.SignManager;
 import anthony.SuperCraftBrawl.titles.TitleUtil;
 import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
+import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import fr.mrmicky.fastboard.FastBoard;
 import net.md_5.bungee.api.ChatColor;
@@ -191,10 +192,10 @@ public class GameInstance {
         mapWorld = Bukkit.getServer().createWorld(w);
         mapWorld.setAutoSave(false);
 
-        if (getMap() != Maps.WitchesBrew)
-            mapWorld.setTime(1000);
+        //if (getMap() != Maps.WitchesBrew)
+        //mapWorld.setTime(1000);
 
-        mapWorld.setDifficulty(Difficulty.NORMAL);
+        mapWorld.setDifficulty(Difficulty.EASY);
     }
 
     /**
@@ -656,7 +657,7 @@ public class GameInstance {
             public void run() {
                 if (gameTicks % (60 * 20) == 0) {
                     time.getScoreboard().resetScores(time.getEntry());
-                    time = o.getScore(color("&fGame Time: &a" + gameTime + "m"));
+                    time = o.getScore(color("&fTime: &a" + gameTime + "m"));
                     time.setScore(0);
                     gameTime++;
                 }
@@ -689,7 +690,13 @@ public class GameInstance {
         ClassType classType = this.classes.get(player).getType();
         if (classType == null) return;
 
-        String teamName = player.getName();
+        // Prefix the team name with a rank-order number so the tablist stays
+        // sorted by rank in-game, matching the lobby TablistManager ordering.
+        Rank rank = getGameManager().getMain().getRankManager().getRank(player);
+        String rankPrefix = String.format("%02d_", rankOrder(rank));
+        String teamName = rankPrefix + player.getName();
+        if (teamName.length() > 16) teamName = teamName.substring(0, 16);
+
         Scoreboard board = o.getScoreboard();
 
         Team team = board.getTeam(teamName);
@@ -704,6 +711,26 @@ public class GameInstance {
             team.setPrefix(baseName);
         } else {
             team.setPrefix("");
+        }
+    }
+
+    /** Mirrors TablistManager.orderFor — lower = higher in tab. */
+    private int rankOrder(Rank r) {
+        switch (r) {
+            case OWNER:        return 0;
+            case ADMIN:        return 1;
+            case DEVELOPER:    return 2;
+            case SR_MODERATOR: return 3;
+            case MODERATOR:    return 4;
+            case TRAINEE:      return 5;
+            case QA:           return 6;
+            case BUILDER:      return 7;
+            case MEDIA:        return 8;
+            case SUPREME:      return 9;
+            case PRO:          return 10;
+            case VIP:          return 11;
+            case DEFAULT:
+            default:           return 12;
         }
     }
 
@@ -807,9 +834,9 @@ public class GameInstance {
                 }
                 Score line = o.getScore("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "--------------------");
                 line.setScore(0);
-                Score game = o.getScore(color("&fGame Mode: &a" + this.gameType.getName()));
+                Score game = o.getScore(color("&fMode: &a" + this.gameType.getName()));
                 game.setScore(0);
-                time = o.getScore(color("&fGame Time: &a" + gameTime + "m"));
+                time = o.getScore(color("&fTime: &a" + gameTime + "m"));
                 time.setScore(0);
                 player.setScoreboard(c);
             }
@@ -997,6 +1024,7 @@ public class GameInstance {
                 player.setAllowFlight(true);
                 player.getInventory().clear();
                 getGameManager().getMain().getLobbyItems().spectatorItems(player);
+                getGameManager().getMain().getListener().resetArmor(player);
 
                 for (Player gamePlayer : this.players) gamePlayer.hidePlayer(player);
                 for (Player spectator : this.spectators) spectator.showPlayer(player);
@@ -1053,7 +1081,7 @@ public class GameInstance {
         }
 
         // Save game data
-        if (allClasses.size() > 1) { // save only if more than 1 player in a match
+        if (!getGameManager().getMain().getConfig().getBoolean("dev") && allClasses.size() > 1) {
             gameManager.getMain().getGameDataManager().saveMatch(gameType, map.getName(), gameTime, winnerList, allClasses, firstBlood);
         }
 
@@ -1098,6 +1126,7 @@ public class GameInstance {
                             spectator.sendMessage(getGameManager().getMain().color("&2&l(!) &rThe game on &r&l"
                                     + mapName + " &rhas ended. Moving you back to spawn..."));
                             spectator.spigot().setCollidesWithEntities(true);
+                            gameManager.getMain().restoreLobbyNameTag(spectator);
                             gameManager.getMain().sendScoreboardUpdate(spectator);
 
                             for (Player p : Bukkit.getOnlinePlayers()) p.showPlayer(spectator);
@@ -1107,15 +1136,16 @@ public class GameInstance {
                     if (sm != null && s != null) sm.resetSign(s, map);
 
                     for (Player player : players) {
+                        gameManager.getMain().getListener().resetArmor(player);
                         gameManager.getMain().ResetPlayer(player);
                         BaseClass bc = classes.get(player);
                         bc.GameEnd();
                         SetLobbyScoreboard(player);
                         player.setDisplayName(player.getName());
+                        gameManager.getMain().restoreLobbyNameTag(player);
                         gameManager.getMain().sendScoreboardUpdate(player);
                         for (PotionEffect type : player.getActivePotionEffects())
                             player.removePotionEffect(type.getType());
-                        gameManager.getMain().getListener().resetArmor(player);
                     }
 
                     for (BukkitRunnable runnable2 : runnables) runnable2.cancel();
@@ -1134,7 +1164,6 @@ public class GameInstance {
                     trackInstanceTask(task);
 
                     if (map != null) gameManager.RemoveMap(map);
-                    else gameManager.RemoveDuosMap(duosMap);
                 }
                 ticks--;
             }
@@ -1145,6 +1174,7 @@ public class GameInstance {
 
     public void SetLobbyScoreboard(Player player) {
         gameManager.getMain().getScoreboardManager().lobbyBoard(player);
+        gameManager.getMain().restoreLobbyNameTag(player);
         gameManager.getMain().gameStats.put(player, this);
         TextComponent message = new TextComponent(getGameManager().getMain()
                 .color("&2&l(!) &eThe match stats have been recorded. &e&lClick here to view!"));
@@ -1242,33 +1272,6 @@ public class GameInstance {
                     data3.playerClasses.put(classID, details);
                 }
                 details.winGame();
-                if (data3.challenge1 == 0) {
-                    if (bc != null) {
-                        if (bc.getType() == ClassType.Pig) {
-                            winner.sendMessage(getGameManager().getMain()
-                                    .color("&9&l(!) &rYou got a win with " + bc.getType().getTag()
-                                            + " &rand have now unlocked the " + ClassType.Notch.getTag()
-                                            + " &rclass!"));
-                            data3.challenge1 = 1;
-                            classID = 29;
-                            ClassDetails notchdetails = data3.playerClasses.get(classID);
-
-                            if (notchdetails == null) {
-                                notchdetails = new ClassDetails();
-                                data3.playerClasses.put(classID, notchdetails);
-                            }
-                            notchdetails.setPurchased();
-                        }
-                    }
-                }
-                if (data3.challenge2 == 0) {
-                    winner.sendMessage(getGameManager().getMain()
-                            .color("&9&l(!) &rYou got a win and you are now rewarded with &e50 Bonus Tokens"));
-                    data3.challenge2 = 1;
-
-                    if (bc != null)
-                        bc.totalTokens += 50;
-                }
             }
 
             Random r = new Random();
@@ -1407,16 +1410,7 @@ public class GameInstance {
                 } catch (Throwable ignored) {
                 }
 
-                if (data.exp >= 2500) {
-                    data.level++;
-                    data.exp -= 2500;
-                    winner.sendMessage(getGameManager().getMain().color("&8&m----------------------------------------"));
-                    winner.sendMessage(getGameManager().getMain().color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
-                    winner.sendMessage(getGameManager().getMain()
-                            .color("&7You are now &e&lLevel &6&l" + data.level + " &7- nice work!"));
-                    winner.sendMessage(getGameManager().getMain().color("&8&m----------------------------------------"));
-                    winner.playSound(winner.getLocation(), org.bukkit.Sound.LEVEL_UP, 1.0f, 1.15f);
-                }
+                getGameManager().getMain().getLevelManager().checkLevelUp(winner);
             }
         }
         for (Player player : players) {
@@ -1512,7 +1506,7 @@ public class GameInstance {
                         color("&2&l(!) &e" + winner.getName() + " &rgot a Victory Royale on &e&l" + map.toString()));
             } else if (chance == 1) {
                 Bukkit.broadcastMessage(color("&2&l(!) &e" + winner.getName()
-                        + " &rjust showed the entire lobby who's boss on &b&l" + map.toString()));
+                        + " &rjust showed the entire lobby who's boss on &e&l" + map.toString()));
             } else if (chance == 2) {
                 Bukkit.broadcastMessage(
                         color("&2&l(!) &e" + winner.getName() + " &rjust won on &e&l" + map.toString()));
@@ -1721,7 +1715,7 @@ public class GameInstance {
     }
 
     public void TellAll(String msg) {
-        for (Player player : players) player.sendMessage(msg);
+        for (Player player : players) player.sendMessage(ChatColorHelper.color(msg));
     }
 
     public void TellSpec(String msg) {
@@ -1888,15 +1882,22 @@ public class GameInstance {
                 BaseClass baseClass = classes.get(player);
                 if (event.getPlayer().getItemInHand().getType() == Material.ENDER_PEARL
                         && event.getPlayer().getItemInHand().hasItemMeta()
-                        && event.getPlayer().getItemInHand().getItemMeta().getDisplayName().contains("Teleporters")
+                        && event.getPlayer().getItemInHand().getItemMeta().getDisplayName().contains("Teleporter")
                         && (event.getAction() == Action.RIGHT_CLICK_AIR
                         || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-                    if (baseClass.pearlTimer.getTime() < 10000) {
-                        int seconds = (10000 - baseClass.pearlTimer.getTime()) / 1000 + 1;
-                        event.setCancelled(true);
-                        player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You have to wait " + ChatColor.YELLOW
-                                + seconds + " seconds " + ChatColor.RESET + "to use this item again");
-                    } else baseClass.pearlTimer.restart();
+
+                    // Enderman has no pearl cooldown.
+                    // Other classes, like EnderDragon, still use the normal pearlTimer cooldown.
+                    if (baseClass.getType() != ClassType.Enderman) {
+                        if (baseClass.pearlTimer.getTime() < 10000) {
+                            int seconds = (10000 - baseClass.pearlTimer.getTime()) / 1000 + 1;
+                            event.setCancelled(true);
+                            player.sendMessage(color("&c&l(!) &rYour ender pearl is still on cooldown for &a" +
+                                    seconds + "s"));
+                        } else {
+                            baseClass.pearlTimer.restart();
+                        }
+                    }
                 }
                 baseClass.UseItem(event);
             }

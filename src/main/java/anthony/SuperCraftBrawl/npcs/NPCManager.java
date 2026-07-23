@@ -2,15 +2,12 @@ package anthony.SuperCraftBrawl.npcs;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameManager;
-import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
+import anthony.SuperCraftBrawl.gui.ClassicModeGUI;
+import anthony.SuperCraftBrawl.gui.DuelsModeGUI;
 import anthony.SuperCraftBrawl.gui.fishing.FishingGUI;
-import anthony.SuperCraftBrawl.gui.games.ParkourGUI;
-import anthony.SuperCraftBrawl.gui.games.ParkourMapsGUI;
-import anthony.SuperCraftBrawl.gui.games.SCBClassicGUI;
-import anthony.SuperCraftBrawl.gui.games.SCBDuelsGUI;
 import anthony.util.ItemHelper;
+import anthony.util.SoundManager;
 import net.jitse.npclib.NPCLib;
-import net.jitse.npclib.api.NPC;
 import net.jitse.npclib.api.events.NPCInteractEvent;
 import net.jitse.npclib.api.skin.Skin;
 import net.jitse.npclib.api.state.NPCSlot;
@@ -24,10 +21,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 
 public class NPCManager implements Listener {
 
@@ -54,20 +48,20 @@ public class NPCManager implements Listener {
 
 		scbClassic = npcLib.createNPC(Arrays.asList(main.color("&6&lSUPER CRAFT BROS"), main.color("&fMode: &aClassic"),
 				main.color("&eClick to Play!")));
-		scbClassic.setLocation(new Location(main.getLobbyWorld(), 192.5, 109, 649.5, 174, 2));
+		scbClassic.setLocation(new Location(main.getLobbyWorld(), 191.5, 106, 657.5, 174, 2));
 		scbClassic.setSkin(sethblingSkin);
 		scbClassic.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));
 		scbClassic.create();
 
 		scbDuels = npcLib.createNPC(Arrays.asList(main.color("&6&lSUPER CRAFT BROS"), main.color("&fMode: &aDuels"),
 				main.color("&eClick to Play!")));
-		scbDuels.setLocation(new Location(main.getLobbyWorld(), 186.5, 109, 649.5, -174, 3));
+		scbDuels.setLocation(new Location(main.getLobbyWorld(), 187.5, 106, 657.5, -174, 3));
 		scbDuels.setSkin(sethblingSkin);
 		scbDuels.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));
 		scbDuels.create();
 
 		parkour = npcLib.createNPC(Arrays.asList(main.color("&6&lPARKOUR"), main.color("&eClick to Play!")));
-		parkour.setLocation(new Location(main.getLobbyWorld(), 183.5, 109, 648.5, -158, 2));
+		parkour.setLocation(new Location(main.getLobbyWorld(), 183.5, 106, 656.5, -158, 2));
 		parkour.setSkin(sethblingSkin);
 		parkour.create();
 
@@ -77,8 +71,8 @@ public class NPCManager implements Listener {
 		socialMedia.setSkin(sethblingSkin);
 		socialMedia.create();
 
-		fishing = npcLib.createNPC(Arrays.asList(main.color("&6&lFISHING"), main.color("&eClick to Play!")));
-		fishing.setLocation(new Location(main.getLobbyWorld(), 195.5, 109, 648.5, 162, 3));
+		fishing = npcLib.createNPC(Arrays.asList(main.color("&6&lFISHING"), main.color("&eClick to view!")));
+		fishing.setLocation(new Location(main.getLobbyWorld(), 195.5, 106, 656.5, 162, 3));
 		fishing.setSkin(fishermanSkin);
 		fishing.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.FISHING_ROD));
 		fishing.create();
@@ -166,11 +160,12 @@ public class NPCManager implements Listener {
 		if (e.getNPC() == fishing) {
 			new FishingGUI(main, null).inv.open(player);
 		} else if (e.getNPC() == scbClassic) {
-			new SCBClassicGUI(main).inv.open(player);
+			new ClassicModeGUI(main, null).inv.open(player);
 		} else if (e.getNPC() == scbDuels) {
-			new SCBDuelsGUI(main).inv.open(player);
+			new DuelsModeGUI(main, null).inv.open(player);
 		} else if (e.getNPC() == parkour) {
-			new ParkourMapsGUI(main).inv.open(player);
+            SoundManager.playClickSound(player);
+            mainParkour(player);
 		} else if (e.getNPC() == socialMedia) {
 			player.sendMessage(main.color("&8&m-------&8[Social Media]&8&m-------"));
 			player.sendMessage("");
@@ -183,6 +178,12 @@ public class NPCManager implements Listener {
 			player.sendMessage(main.color("&8&m----------------------------"));
 		}
 	}
+
+    private void mainParkour(Player player) {
+        Location loc = new Location(main.getLobbyWorld(), 189.5, 106, 571.5, -179, 1);
+        player.teleport(loc);
+        player.sendMessage(main.color("&r&l(!) &rYou have been sent to &e&lMain"));
+    }
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {

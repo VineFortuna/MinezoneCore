@@ -18,114 +18,119 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.util.Vector;
 
 public class ChickenClass extends BaseClass {
 
-	public ChickenClass(GameInstance instance, Player player) {
-		super(instance, player);
-		baseVerticalJump = 1.1;
-		createArmor(
-				null,
-				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDg5ZmVmMmVmNGY4MWVlYzZkMDdiYWVmNmM0YWVhNzRlNDQyZGNlNzJhMDFkZTk2NGViY2JhYzhhOGQ4MmM3NyJ9fX0=",
-				"FFFFFF",
-				"FFFFFF",
-				"FF7F10",
-				6,
-				"Chicken"
-		);
-	}
+    public ChickenClass(GameInstance instance, Player player) {
+        super(instance, player);
+        baseVerticalJump = 1.1;
+        createArmor(
+                null,
+                "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNDg5ZmVmMmVmNGY4MWVlYzZkMDdiYWVmNmM0YWVhNzRlNDQyZGNlNzJhMDFkZTk2NGViY2JhYzhhOGQ4MmM3NyJ9fX0=",
+                "FFFFFF",
+                "FFFFFF",
+                "FF7F10",
+                6,
+                "Chicken"
+        );
+    }
 
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
-	}
+    @Override
+    public void setArmor(EntityEquipment playerEquip) {
+        setArmorNew(playerEquip);
+    }
 
-	public ItemStack getEggs() {
-		return ItemHelper.setDetails(new ItemStack(Material.EGG, 10), ChatColor.YELLOW + "Explosive Eggs", "",
-				ChatColor.GRAY + "Right click to throw DEADLY eggs!");
-	}
+    public ItemStack getEggs() {
+        ItemStack eggs = ItemHelper.setDetails(new ItemStack(Material.EGG, 10),
+                instance.color("&eExplosive Eggs"),
+                "",
+                instance.color("&7Right click to throw DEADLY eggs!"));
+        return eggs;
+    }
 
-	@Override
-	public void SetItems(Inventory playerInv) {
-		playerInv.setItem(0, this.getAttackWeapon());
-		playerInv.setItem(1, this.getEggs());
+    @Override
+    public void SetItems(Inventory playerInv) {
+        playerInv.setItem(0, this.getAttackWeapon());
+        playerInv.setItem(1, this.getEggs());
+    }
 
-	}
+    private ItemStack getBarrier() {
+        ItemStack barrier = ItemHelper.setDetails(new ItemStack(Material.BARRIER),
+                instance.color("&c&lOut of Eggs!"),
+                "",
+                instance.color("&7Each kill regenerates 2 eggs"));
 
-	@Override
-	public void UseItem(PlayerInteractEvent event) {
-		ItemStack item = event.getItem();
-		if (item != null && item.getType() == Material.EGG) {
-			ItemMeta meta = item.getItemMeta();
+        return barrier;
+    }
 
-			if (meta.getDisplayName().contains("Easter"))
-				return;
+    @Override
+    public void UseItem(PlayerInteractEvent event) {
+        ItemStack item = event.getItem();
+        if (item != null && item.getType() == Material.EGG) {
+            ItemMeta meta = item.getItemMeta();
 
-			event.setCancelled(true);
-			if (player.getGameMode() != GameMode.SPECTATOR) {
-				for (Player gamePlayer : instance.players)
-					gamePlayer.playSound(player.getLocation(), Sound.CHICKEN_HURT, 1, 1);
-				
-				int amount = item.getAmount();
-				if (amount > 0) {
-					amount--;
-					if (amount == 0)
-						player.getInventory().clear(player.getInventory().getHeldItemSlot());
-					else
-						item.setAmount(amount);
-					ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
-						@SuppressWarnings("deprecation")
-						@Override
-						public void onHit(Player hit) {
-							if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
-								Location hitLoc = this.getBaseProj().getEntity().getLocation();
-								player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
+            if (meta.getDisplayName().contains("Easter"))
+                return;
 
-								for (Player gamePlayer : this.getNearby(3.0)) {
-									if (instance.duosMap != null) {
-										if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
-											EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-													DamageCause.PROJECTILE, 2.8);
-											instance.getGameManager().getMain().getServer().getPluginManager()
-													.callEvent(damageEvent);
-											gamePlayer.damage(2.8, player);
-										}
-									} else {
-										EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-												DamageCause.PROJECTILE, 2.8);
-										instance.getGameManager().getMain().getServer().getPluginManager()
-												.callEvent(damageEvent);
-										gamePlayer.damage(2.8, player);
-									}
-								}
-								for (Player gamePlayer : instance.players) {
-									gamePlayer.playSound(hitLoc, Sound.EXPLODE, 2, 1);
-									gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_HUGE, 1);
-								}
-							}
+            event.setCancelled(true);
+            if (player.getGameMode() != GameMode.SPECTATOR) {
+                for (Player gamePlayer : instance.players)
+                    gamePlayer.playSound(player.getLocation(), Sound.CHICKEN_HURT, 1, 1);
 
-						}
+                int amount = item.getAmount();
+                if (amount > 0) {
+                    amount--;
+                    if (amount == 0)
+                        player.getInventory().setItem(1, getBarrier());
+                    else
+                        item.setAmount(amount);
 
-					}, new ItemStack(Material.EGG));
-					instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-							player.getLocation().getDirection().multiply(2.5D));
-				}
-			}
-		}
-	}
+                    ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
+                        @SuppressWarnings("deprecation")
+                        @Override
+                        public void onHit(Player hit) {
+                            if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
+                                Location hitLoc = this.getBaseProj().getEntity().getLocation();
+                                player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
 
-	@Override
-	public ClassType getType() {
-		return ClassType.Chicken;
-	}
+                                for (Player gamePlayer : this.getNearby(2.0)) {
+                                    EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
+                                            DamageCause.PROJECTILE, 4.0);
+                                    instance.getGameManager().getMain().getServer().getPluginManager()
+                                            .callEvent(damageEvent);
+                                    gamePlayer.damage(4.0, player);
 
-	@Override
-	public ItemStack getAttackWeapon() {
-		ItemStack sword = ItemHelper.addEnchant(new ItemStack(Material.WOOD_SWORD), Enchantment.KNOCKBACK, 1);
-		ItemMeta meta = sword.getItemMeta();
-		meta.spigot().setUnbreakable(true);
-		sword.setItemMeta(meta);
-		return sword;
-	}
+                                    // Direct hit: launch straight up only — no X/Z drift
+                                    if (gamePlayer == hit) {
+                                        gamePlayer.setVelocity(new Vector(0, 0.7, 0));
+                                    }
+                                }
+                                for (Player gamePlayer : instance.players) {
+                                    gamePlayer.playSound(hitLoc, Sound.EXPLODE, 2, 1);
+                                    gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_LARGE, 1);
+                                }
+                            }
+                        }
+                    }, new ItemStack(Material.EGG));
+                    instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+                            player.getLocation().getDirection().multiply(2.5D));
+                }
+            }
+        }
+    }
 
+    @Override
+    public ClassType getType() {
+        return ClassType.Chicken;
+    }
+
+    @Override
+    public ItemStack getAttackWeapon() {
+        ItemStack sword = ItemHelper.addEnchant(new ItemStack(Material.WOOD_SWORD), Enchantment.KNOCKBACK, 1);
+        ItemMeta meta = sword.getItemMeta();
+        meta.spigot().setUnbreakable(true);
+        sword.setItemMeta(meta);
+        return sword;
+    }
 }

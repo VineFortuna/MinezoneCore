@@ -1,5 +1,6 @@
 package anthony.SuperCraftBrawl.gui;
 
+import java.util.List;
 import java.util.Random;
 
 import anthony.SuperCraftBrawl.gui.fishing.FishingAreasGUI;
@@ -17,7 +18,6 @@ import org.bukkit.inventory.ItemStack;
 
 import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.Game.GameManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -136,10 +136,10 @@ public class GameSelectorGUI implements InventoryProvider {
 			boolean joined = false;
 
 			do {
+				List<Maps> curatedMaps = Maps.filterMaps(gameType, Maps.Category.CURATED, null, null);
 				Random random = new Random();
-				int randomizedNumber = random.nextInt(Maps.filterMaps(gameType, Maps.Category.CURATED, null, null).size());
-
-				randomizedMap = Maps.getGameType(gameType).get(randomizedNumber);
+				int randomizedNumber = random.nextInt(curatedMaps.size());
+				randomizedMap = curatedMaps.get(randomizedNumber);
 				GameInstance gameInstance = main.getGameManager().getInstanceOfMap(randomizedMap);
 
 				// If gameInstance does not exist

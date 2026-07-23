@@ -180,7 +180,7 @@ public enum ClassType {
 			case Villager:
 				return "Trade emeralds for items";
 			case MagmaCube:
-				return "Bounce around and spawn Fairly high double jump and ability to spawn 7 MagmaCube minions";
+				return "Bounce around and unleash your Magma Cubes";
 			case Summoner:
 				return "Beware the Summoner!";
 			case Anvil:
@@ -836,6 +836,13 @@ public enum ClassType {
 		if (current.length() > 0)
 			lines.add(ChatColor.GRAY + current.substring(0, current.length() - 1));
 		return lines;
+	}
+
+	public static ClassType getById(int id) {
+		for (ClassType type : values()) {
+			if (type.id == id) return type;
+		}
+		return null;
 	}
 
 	public String color(String c) {

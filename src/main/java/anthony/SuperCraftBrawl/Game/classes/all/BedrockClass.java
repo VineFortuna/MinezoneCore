@@ -29,11 +29,11 @@ import java.util.List;
 
 public class BedrockClass extends BaseClass {
 
-	private final ItemStack weapon;
-	private final ItemStack lavaItem;
-	private final Ability invincibilityAbility = new Ability("&8&lInvincibility", INVINCIBILITY_COOLDOWN, player);
-	private final Ability lavaAbility = new Ability("&6&lLava", player);
-	private static final double INVINCIBILITY_DURATION = 2;
+	private ItemStack weapon;
+	private ItemStack lavaItem;
+	private Ability invincibilityAbility = new Ability("&8&lInvincibility", INVINCIBILITY_COOLDOWN, player);
+	private Ability lavaAbility = new Ability("&6&lLava", player);
+	private static final double INVINCIBILITY_DURATION = 3;
 	private static final double INVINCIBILITY_COOLDOWN = 10;
 	private static final double LAVA_ABILITY_RANGE = 10;
 
@@ -55,18 +55,25 @@ public class BedrockClass extends BaseClass {
 				6,
 				"Bedrock"
 		);
+		createItems();
+	}
 
+	/*
+	* This function creates Bedrock's 2 items
+	* Slot 1: Bedrock, Sharpness 3 Knockback 1. Right click for 3s invincibility effect
+	* Slot 2: Lava Bucket, spawn on players nearby
+	 */
+	private void createItems() {
 		// Weapon
 		String durationDisplay = ItemHelper.formatDouble(INVINCIBILITY_DURATION);
 
 		weapon = ItemHelper.setDetails(
 				new ItemStack(Material.BEDROCK),
 				invincibilityAbility.getAbilityNameRightClickMessage(),
-				"",
 				"&7Be invincible to all damage",
 				"&7You can not hit other players",
 				"",
-				"&7Duration: &a" + durationDisplay + "&as"
+				"&rDuration: &a" + durationDisplay + "&as"
 		);
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3); // Sharpness 3
 		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1); // Knockback 1
@@ -75,11 +82,11 @@ public class BedrockClass extends BaseClass {
 		String rangeDisplay = ItemHelper.formatDouble(LAVA_ABILITY_RANGE);
 
 		lavaItem = ItemHelper.setDetails(new ItemStack(
-				Material.LAVA_BUCKET),
+						Material.LAVA_BUCKET),
 				lavaAbility.getAbilityNameRightClickMessage(),
 				"&7Pour lava on your opponents",
 				"",
-				"&7Range: &a" + rangeDisplay + " &7blocks"
+				"&rRange: &a" + rangeDisplay + " &rblocks"
 		);
 	}
 
@@ -114,13 +121,13 @@ public class BedrockClass extends BaseClass {
 		invincibilityAbility.getCooldownInstance().reset();
 
 		// Settings Items
-		playerInv.setItem(0, weapon);
-		playerInv.setItem(1, lavaItem);
+		playerInv.setItem(0, this.weapon);
+		playerInv.setItem(1, this.lavaItem);
 	}
 
 	@Override
 	public void Tick(int gameTicks) {
-		// ActionBar
+		// ActionBar to show cooldown
 		if (isPlayerAlive()) invincibilityAbility.updateActionBar(player, this);
 	}
 
@@ -189,6 +196,8 @@ public class BedrockClass extends BaseClass {
 				// LAVA ABILITY
 				if (item.equals(lavaItem)) {
 					if (event.getAction() == Action.RIGHT_CLICK_BLOCK || event.getAction() == Action.RIGHT_CLICK_AIR) {
+						if (instance.getGameManager().spawnProt.containsKey(player)) return;
+
 						boolean foundPlayers = false;
 
 						for (Entity entity : player.getWorld().getNearbyEntities(
@@ -197,13 +206,15 @@ public class BedrockClass extends BaseClass {
 								LAVA_ABILITY_RANGE,
 								LAVA_ABILITY_RANGE
 						)) {
-							if (entity instanceof Player && !entity.equals(player)) {
-								Player playerInRange = (Player) entity;
-								if (!checkIfDead(playerInRange, instance) && !instance.HasSpectator(playerInRange)) {
-									useLavaAbility(playerInRange);
-									foundPlayers = true;
-								}
-							}
+							if (!(entity instanceof Player)) continue;
+							if (entity.equals(player)) continue;
+							Player playerInRange = (Player) entity;
+							if (checkIfDead(playerInRange, instance)) continue;
+							if  (instance.HasSpectator(playerInRange)) continue;
+							if (instance.getGameManager().spawnProt.containsKey(playerInRange)) continue;
+
+							useLavaAbility(playerInRange);
+							foundPlayers = true;
 						}
 						if (foundPlayers) SoundManager.playSoundToPlayer(player, Sound.LAVA_POP, 1, 1);
 						else player.sendMessage(ChatColorHelper.color("&c&l(!) &rNo nearby players have been found!"));

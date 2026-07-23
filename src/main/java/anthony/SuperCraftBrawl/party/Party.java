@@ -1,18 +1,76 @@
 package anthony.SuperCraftBrawl.party;
 
-import java.util.Map;
-
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import anthony.SuperCraftBrawl.Core;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public class Party {
 
-	private Core core;
-	public Map<Player, PartyManager> party;
-	
-	public Party(Core core) {
-		this.core = core;
-	}
-	
+    private UUID leader;
+    private final LinkedHashSet<UUID> members = new LinkedHashSet<>();
+
+    public Party(UUID leader) {
+        this.leader = leader;
+        this.members.add(leader);
+    }
+
+    public UUID getLeaderId() {
+        return leader;
+    }
+
+    public Player getLeader() {
+        return Bukkit.getPlayer(leader);
+    }
+
+    public void setLeader(UUID leader) {
+        if (!members.contains(leader)) {
+            members.add(leader);
+        }
+
+        this.leader = leader;
+    }
+
+    public boolean isLeader(UUID uuid) {
+        return leader.equals(uuid);
+    }
+
+    public boolean contains(UUID uuid) {
+        return members.contains(uuid);
+    }
+
+    public void addMember(UUID uuid) {
+        members.add(uuid);
+    }
+
+    public void removeMember(UUID uuid) {
+        members.remove(uuid);
+    }
+
+    public int size() {
+        return members.size();
+    }
+
+    public Set<UUID> getMemberIds() {
+        return Collections.unmodifiableSet(members);
+    }
+
+    public List<Player> getOnlineMembers() {
+        List<Player> onlineMembers = new ArrayList<>();
+
+        for (UUID uuid : members) {
+            Player player = Bukkit.getPlayer(uuid);
+
+            if (player != null && player.isOnline()) {
+                onlineMembers.add(player);
+            }
+        }
+
+        return onlineMembers;
+    }
 }

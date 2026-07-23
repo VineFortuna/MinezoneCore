@@ -253,7 +253,7 @@ public class MysteryChestAnimation extends BukkitRunnable {
             HandlerList.unregisterAll(guard);
             guard = null;
         }
-        if (main.getGameManager() != null) main.getGameManager().chestCanOpen = false;
+        if (main.getGameManager() != null) main.getMysteryChestManager().chestCanOpen = false;
     }
 
     // ===== visuals / audio helpers =====

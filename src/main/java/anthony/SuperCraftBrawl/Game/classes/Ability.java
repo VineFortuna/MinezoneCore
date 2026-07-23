@@ -36,6 +36,10 @@ public class Ability {
         return abilityName + " &7(Right Click)";
     }
 
+    public String getAbilityNameLeftClickMessage() {
+        return abilityName + " &7(Left Click)";
+    }
+
     public String getAbilityNameLeftRightClickMessage() {
         return abilityName + " &7(Left/Right Click)";
     }

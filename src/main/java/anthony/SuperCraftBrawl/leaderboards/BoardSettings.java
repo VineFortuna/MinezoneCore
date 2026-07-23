@@ -21,7 +21,7 @@ public class BoardSettings {
 		Bukkit.getScheduler().runTaskLater(main, new Runnable() {
             @Override
             public void run() {
-            	Location loc = new Location(main.getLobbyWorld(), 189.518, 105, 676.499);
+            	Location loc = new Location(main.getLobbyWorld(), 195.5, 500, 675.5);
 
         		ArmorStand settingsStand = (ArmorStand) main.getLobbyWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
         		settingsStand.setCustomName(main.color("&c&lChristmas Rewards"));
