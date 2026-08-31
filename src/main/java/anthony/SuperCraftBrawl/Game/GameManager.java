@@ -1146,6 +1146,25 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	@EventHandler
+	public void onBroomWinEffectUse(PlayerInteractEvent event) {
+		ItemStack item = event.getItem();
+		Player player = event.getPlayer();
+		PlayerData data = main.getDataManager().getPlayerData(player);
+		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
+
+		if ((player.getWorld() == main.getLobbyWorld())
+				|| (i != null && (i.state == GameState.WAITING || i.state == GameState.ENDED))) {
+			if (item != null && item.getType() == Material.WHEAT
+					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+				double boosterStrength = 2.0;
+				Vector vel = player.getLocation().getDirection().multiply(boosterStrength);
+				player.setVelocity(vel);
+				data.magicbroom = 1;
+			}
+		}
+	}
+
+	@EventHandler
 	public void milk(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
 		ItemStack item = e.getItem();
