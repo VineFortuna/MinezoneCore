@@ -101,7 +101,7 @@ public class HerobrineClass extends BaseClass {
     }
 
     @Override
-    public void SetItems(Inventory playerInv) {
+    public void setItems(Inventory playerInv) {
         herobrine.startTime = System.currentTimeMillis() - 100000;
         playerInv.setItem(0, weapon);
         playerInv.setItem(1, despairItem);
@@ -109,7 +109,7 @@ public class HerobrineClass extends BaseClass {
     }
 
     @Override
-    public void Tick(int gameTicks) {
+    public void tick(int gameTicks) {
         if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Herobrine
                 && instance.classes.get(player).getLives() > 0) {
             int cooldownSec = (int) ((DESPAIR_ABILITY_COOLDOWN - herobrine.getTime()) / 1000 + 1);
@@ -124,7 +124,7 @@ public class HerobrineClass extends BaseClass {
     }
 
     @Override
-    public void UseItem(PlayerInteractEvent event) {
+    public void useItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         if (item != null && item.getType() == Material.DIAMOND
                 && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {

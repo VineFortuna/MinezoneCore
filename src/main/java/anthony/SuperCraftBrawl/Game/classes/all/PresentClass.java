@@ -50,12 +50,12 @@ public class PresentClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		baseVerticalJump = 1.0;
 		playerInv.setItem(0,
 				ItemHelper.setDetails(new ItemStack(Material.CHEST, 1),
@@ -73,7 +73,7 @@ public class PresentClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 
 		if (player.getGameMode() != GameMode.SPECTATOR) {

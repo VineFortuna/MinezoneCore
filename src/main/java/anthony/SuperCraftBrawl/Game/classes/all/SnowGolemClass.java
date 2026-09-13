@@ -51,7 +51,7 @@ public class SnowGolemClass extends BaseClass {
     }
 
     @Override
-    public void SetItems(Inventory playerInv) {
+    public void setItems(Inventory playerInv) {
         ItemStack weapon = ItemHelper.create(Material.STICK, ChatColor.GREEN + "Map Knocker");
         weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
         weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
@@ -89,7 +89,7 @@ public class SnowGolemClass extends BaseClass {
     }
 
     @Override
-    public void Tick(int gameTicks) {
+    public void tick(int gameTicks) {
         if (!instance.classes.containsKey(player))
             return;
         if (instance.classes.get(player).getLives() <= 0)
@@ -120,7 +120,7 @@ public class SnowGolemClass extends BaseClass {
     }
 
     @Override
-    public void UseItem(PlayerInteractEvent event) {
+    public void useItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         if (item == null) return;
 

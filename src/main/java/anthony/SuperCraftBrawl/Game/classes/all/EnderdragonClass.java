@@ -36,7 +36,7 @@ public class EnderdragonClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL, 5),
 				"" + ChatColor.BLACK + ChatColor.BOLD + "Teleporters"));
@@ -45,7 +45,7 @@ public class EnderdragonClass extends BaseClass {
 
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.WEAKNESS)))
 			player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
 
@@ -65,7 +65,7 @@ public class EnderdragonClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		/*
 		 * ItemStack item = event.getItem(); if (item != null && item.getType() ==
 		 * Material.STONE_SWORD && (event.getAction() == Action.RIGHT_CLICK_AIR ||
@@ -83,7 +83,7 @@ public class EnderdragonClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 		// TODO Auto-generated method stub
 
 	}

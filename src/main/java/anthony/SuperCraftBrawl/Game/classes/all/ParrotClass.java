@@ -89,7 +89,7 @@ public class ParrotClass extends BaseClass {
     }
 
     @Override
-    public void Tick(int gameTicks) {
+    public void tick(int gameTicks) {
         if (!isPlayerAlive()) return;
 
         if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
@@ -114,7 +114,7 @@ public class ParrotClass extends BaseClass {
     }
 
     @Override
-    public void SetItems(Inventory playerInv) {
+    public void setItems(Inventory playerInv) {
         // Resetting Dance Ability CD
         danceAbility.getCooldownInstance().reset();
         flapAbility.getCooldownInstance().reset();
@@ -126,7 +126,7 @@ public class ParrotClass extends BaseClass {
     }
 
     @Override
-    public void UseItem(PlayerInteractEvent event) {
+    public void useItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         Action action = event.getAction();
 

@@ -46,12 +46,12 @@ public class EnchantTableClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		// Weapon
 		ItemStack weapon = ItemHelper.create(Material.WOOD_SWORD, ChatColorHelper.color("&dNot so great of a Sword"));
 		ItemHelper.setUnbreakable(weapon);
@@ -93,7 +93,7 @@ public class EnchantTableClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		BaseClass bc = instance.classes.get(player);
 		Inventory inventory = player.getInventory();

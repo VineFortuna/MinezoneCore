@@ -41,7 +41,7 @@ public class MooshroomClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		playerInv.setItem(0,
 				ItemHelper.addEnchant(
 						ItemHelper.setDetails(new ItemStack(Material.RED_MUSHROOM),
@@ -61,7 +61,7 @@ public class MooshroomClass extends BaseClass {
 	}
 
 	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
+	public void doDamage(EntityDamageByEntityEvent event) {
 		Random rand = new Random();
 		int chance = rand.nextInt(9);
 
@@ -74,7 +74,7 @@ public class MooshroomClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 
 		if (item != null) {
@@ -97,7 +97,7 @@ public class MooshroomClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 		// TODO Auto-generated method stub
 	}
 

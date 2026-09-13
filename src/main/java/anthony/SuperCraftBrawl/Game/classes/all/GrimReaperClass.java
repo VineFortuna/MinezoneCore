@@ -37,7 +37,7 @@ public class GrimReaperClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
 
 		playerInv.setItem(0, getAttackWeapon());
@@ -53,7 +53,7 @@ public class GrimReaperClass extends BaseClass {
 
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		this.cooldownSec = (this.cooldownDuration - grimReaper.getTime()) / 1000 + 1;
 		cooldownActionBar(this.cooldownSec, this.cooldownDuration, grimReaper, ClassType.GrimReaper,
 				"grimReaper.cooldown", "Spirit Shackles");
@@ -94,7 +94,7 @@ public class GrimReaperClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		if (item != null && item.getType() == Material.REDSTONE
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
@@ -176,7 +176,7 @@ public class GrimReaperClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 		// TODO Auto-generated method stub
 
 	}

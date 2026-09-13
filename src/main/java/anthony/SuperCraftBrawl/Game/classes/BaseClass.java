@@ -44,13 +44,14 @@ public abstract class BaseClass {
 	public boolean isDead = false;
 	public boolean fadeAbilityActive = false;
 	public int tokens = 0;
-	public Score score;
 	public int totalTokens = 0;
 	public int totalKills = 0;
 	public int totalDeaths = 0;
 	public int placement = 0;
 	public int eachLifeKills = 0;
 	public int totalExp = 0;
+    public Score score;
+
 	public double baseVerticalJump = 1.0;
 
 	public Timer bazooka = new Timer();
@@ -126,44 +127,33 @@ public abstract class BaseClass {
 
 	public abstract ItemStack getAttackWeapon();
 
-	public void SetNameTag(){};
+	public void setNameTag(){}
 
-	public abstract void SetItems(Inventory playerInv);
+	public abstract void setItems(Inventory playerInv);
 
-	public void UseItem(PlayerInteractEvent event){};
+	public void useItem(PlayerInteractEvent event){}
 
-	public void onConsumingItem(PlayerItemConsumeEvent event) {
-	};
+	public void onConsumingItem(PlayerItemConsumeEvent event) {}
 
-	public void TakeDamage(EntityDamageEvent event) {
-	}; // To override
+	public void takeDamage(EntityDamageEvent event) {}
 
-	public void ProjectileLaunch(ProjectileLaunchEvent event) {
-	}; // To override
+	public void projectileLaunch(ProjectileLaunchEvent event) {}
 
-	public void ProjectileHit(ProjectileHitEvent event) {
-	}; // To override
+	public void projectileHit(ProjectileHitEvent event) {}
 
-	public void PotionSplashEvent(PotionSplashEvent event) {
-	}; // To override
+	public void potionSplashEvent(PotionSplashEvent event) {}
 
-	public void DoDamage(EntityDamageByEntityEvent event) {
-	} // To override
+	public void doDamage(EntityDamageByEntityEvent event) {}
 
-	public void DoDamage2(EntityDamageByEntityEvent event) {
-	} // To override
+	public void doDamage2(EntityDamageByEntityEvent event) {}
 
-	public void onEntityTarget(EntityTargetLivingEntityEvent event) {
-	} // To override
+	public void onEntityTarget(EntityTargetLivingEntityEvent event) {}
 
-	public void onPlayerMove(PlayerMoveEvent event) {
-	}
+	public void onPlayerMove(PlayerMoveEvent event) {}
 
-	public void onFish(PlayerFishEvent event) {
-	} // To override
+	public void onFish(PlayerFishEvent event) {}
 
-	public void Tick(int gameTicks) {
-	}// To override
+	public void tick(int gameTicks) {}
 
 	public boolean isPlayerAlive() {
 		return instance.classes.containsKey(player)
@@ -199,7 +189,7 @@ public abstract class BaseClass {
 	public void loadPlayer() {
 		Inventory inv = player.getInventory();
 		setArmor(player.getEquipment());
-		SetItems(inv);
+		setItems(inv);
 	}
 
 	public void loadArmor(Player player) {

@@ -55,7 +55,7 @@ public class NinjaClass extends BaseClass {
 	}
 
     @Override
-    public void DoDamage(EntityDamageByEntityEvent event) {
+    public void doDamage(EntityDamageByEntityEvent event) {
         ItemStack hand = player.getItemInHand();
         if (hand == null || hand.getType() != Material.GHAST_TEAR) return;
 
@@ -129,7 +129,7 @@ public class NinjaClass extends BaseClass {
     }
 
     @Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		ninja.startTime = System.currentTimeMillis() - 100000;
 		this.regenStars = 0;
 		this.starsCooldown = 0;
@@ -158,7 +158,7 @@ public class NinjaClass extends BaseClass {
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (!isPlayerAlive()) return;
 		if (instance.state == GameState.ENDED) return;
 
@@ -206,7 +206,7 @@ public class NinjaClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 
 		if (item != null && item.getType() == Material.STICK
@@ -270,7 +270,7 @@ public class NinjaClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 		// TODO Auto-generated method stub
 
 	}

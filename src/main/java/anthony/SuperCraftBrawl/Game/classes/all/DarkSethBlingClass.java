@@ -49,7 +49,7 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 		setArmorNew(playerEquip);
 	}
 
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		this.usedTp = false;
 		playerInv.setItem(0, getAttackWeapon());
 		playerInv.setItem(1,
@@ -63,7 +63,7 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (instance.classes.get(player).getLives() <= 0) return;
 		String nextItemString = instance.getNextItemToDrop().getItemMeta().getDisplayName();
 		int index = nextItemString.indexOf("§7(");
@@ -85,7 +85,7 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 		return cloned.get(r.nextInt(cloned.size()));
 	}
 
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack plItem = event.getItem();
 		if (plItem != null)
 			if (plItem.getType() == Material.COMMAND
@@ -156,7 +156,7 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 		return ClassType.DarkSethBling;
 	}
 
-	public void SetNameTag() {
+	public void setNameTag() {
 	}
 
 	public ItemStack getAttackWeapon() {

@@ -77,7 +77,7 @@ public class LargeFernClass extends BaseClass {
     }
 
     @Override
-    public void SetItems(Inventory playerInv) {
+    public void setItems(Inventory playerInv) {
         isTransferned = false;
         // Resetting Spore Launcher CD
         sporeAbility.getCooldownInstance().reset();
@@ -87,7 +87,7 @@ public class LargeFernClass extends BaseClass {
     }
     
     @Override
-    public void Tick(int gameTicks) {
+    public void tick(int gameTicks) {
         if (!isPlayerAlive()) return;
         sporeAbility.updateActionBar(player,this);
     }
@@ -98,7 +98,7 @@ public class LargeFernClass extends BaseClass {
     }
 
     @Override
-    public void UseItem(PlayerInteractEvent event) {
+    public void useItem(PlayerInteractEvent event) {
         ItemStack item = event.getPlayer().getItemInHand();
         Action action = event.getAction();
 

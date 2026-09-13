@@ -86,7 +86,7 @@ public class AnvilClass extends BaseClass {
     /*
     * This function sets the player's items
      */
-    public void SetItems(Inventory playerInv) {
+    public void setItems(Inventory playerInv) {
         stompAbility.getCooldownInstance().reset();
         this.stompUsed = false;
         this.stompDamage = 0;
@@ -102,7 +102,7 @@ public class AnvilClass extends BaseClass {
     *
     * Also action bar message that displays cooldown
      */
-    public void Tick(int gameTicks) {
+    public void tick(int gameTicks) {
         if (!isPlayerAlive()) {
             // Player died or became spectator mid-stomp — clean up immediately
             if (stompUsed) {
@@ -256,7 +256,7 @@ public class AnvilClass extends BaseClass {
     //  Original methods (unchanged)
     // -----------------------------------------------------------------------
 
-    public void UseItem(PlayerInteractEvent event) {
+    public void useItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         Action action = event.getAction();
 

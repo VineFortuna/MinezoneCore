@@ -46,7 +46,7 @@ public class FreddyClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		this.isUsed = false;
 		playerInv.setItem(0, getAttackWeapon());
 		playerInv.setItem(1, getStunAbility());
@@ -54,7 +54,7 @@ public class FreddyClass extends BaseClass {
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Freddy
 				&& instance.classes.get(player).getLives() > 0) {
 			this.cooldownSec = (10000 - freddyCooldown.getTime()) / 1000 + 1;
@@ -71,7 +71,7 @@ public class FreddyClass extends BaseClass {
 	}
 
 	@EventHandler(ignoreCancelled = true)
-	public void UseItem(PlayerInteractEvent e) {
+	public void useItem(PlayerInteractEvent e) {
 		ItemStack item = e.getItem();
 		Player p = e.getPlayer();
 
@@ -198,7 +198,7 @@ public class FreddyClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 		// TODO Auto-generated method stub
 
 	}

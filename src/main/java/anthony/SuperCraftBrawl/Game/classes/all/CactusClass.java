@@ -44,7 +44,7 @@ public class CactusClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		playerInv.setItem(0, weapon);
 		playerInv.setItem(1, cactusItem);
 	}

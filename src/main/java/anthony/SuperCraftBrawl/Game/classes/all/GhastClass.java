@@ -64,7 +64,7 @@ public class GhastClass extends BaseClass {
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (!isPlayerAlive()) return;
 		// Add barrier
 		Inventory inventory = player.getInventory() ;
@@ -72,7 +72,7 @@ public class GhastClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		playerInv.setItem(0, weapon);
 		playerInv.setItem(1, bowItem);
 		playerInv.setItem(8, new ItemStack(Material.ARROW, MAX_ARROWS_AMOUNT));
@@ -86,7 +86,7 @@ public class GhastClass extends BaseClass {
 	}
 
 	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
+	public void doDamage(EntityDamageByEntityEvent event) {
 		if (!isPlayerAlive()) return;
 		if (!(event.getEntity() instanceof Player)) return;
 

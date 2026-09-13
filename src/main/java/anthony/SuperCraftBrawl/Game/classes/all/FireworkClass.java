@@ -59,7 +59,7 @@ public class FireworkClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		this.used = false; // Reset each life
 		this.cooldown = 0; // Reset each life
 		this.msg = "";
@@ -97,13 +97,13 @@ public class FireworkClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Firework
 				&& instance.classes.get(player).getLives() > 0) {
 			if (gameTicks % 20 == 0)
@@ -121,7 +121,7 @@ public class FireworkClass extends BaseClass {
 	}
 
 	@Override
-	public void ProjectileLaunch(ProjectileLaunchEvent event) {
+	public void projectileLaunch(ProjectileLaunchEvent event) {
 		Entity e = event.getEntity();
 
 		if (e instanceof Arrow) {
@@ -136,7 +136,7 @@ public class FireworkClass extends BaseClass {
 	}
 
 	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
+	public void doDamage(EntityDamageByEntityEvent event) {
 		if (event.getEntity() instanceof Player) {
 			Player target = (Player) event.getEntity();
 			if (event.getDamager() instanceof Arrow) {
@@ -184,7 +184,7 @@ public class FireworkClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		Player player = event.getPlayer();
 

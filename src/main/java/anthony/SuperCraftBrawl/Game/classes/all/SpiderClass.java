@@ -91,7 +91,7 @@ public class SpiderClass extends BaseClass {
 	}
 
 	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
+	public void doDamage(EntityDamageByEntityEvent event) {
 		if (!isPlayerAlive()) return;
 		if (venomTaskId == -1) return;
 
@@ -110,7 +110,7 @@ public class SpiderClass extends BaseClass {
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (!isPlayerAlive()) return;
 		handleAddingWebItem();
 		// ActionBar
@@ -146,7 +146,7 @@ public class SpiderClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		// Resetting Dance Ability CD
 		mutateAbility.getCooldownInstance().reset();
 		webAbility.getCooldownInstance().reset();
@@ -160,7 +160,7 @@ public class SpiderClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		Action action = event.getAction();
 		if (item == null) return;

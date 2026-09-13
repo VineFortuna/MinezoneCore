@@ -56,7 +56,7 @@ public class IceClass extends BaseClass {
     }
 
     @Override
-    public void SetNameTag() {}
+    public void setNameTag() {}
 
     @Override
     public ItemStack getAttackWeapon() {
@@ -87,7 +87,7 @@ public class IceClass extends BaseClass {
     }
 
     @Override
-    public void SetItems(Inventory playerInv) {
+    public void setItems(Inventory playerInv) {
         ice.startTime = System.currentTimeMillis() - 100000; //Restarts cooldown per life
         playerInv.setItem(0, getAttackWeapon());
         playerInv.setItem(1, getFreezeRay());
@@ -98,7 +98,7 @@ public class IceClass extends BaseClass {
     }
 
     @Override
-    public void Tick(int gameTicks) {
+    public void tick(int gameTicks) {
         if (!(player.getActivePotionEffects().contains(PotionEffectType.WEAKNESS)))
             player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
 
@@ -231,7 +231,7 @@ public class IceClass extends BaseClass {
     }
 
     @Override
-    public void UseItem(PlayerInteractEvent event) {
+    public void useItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
 
         if (item != null) {

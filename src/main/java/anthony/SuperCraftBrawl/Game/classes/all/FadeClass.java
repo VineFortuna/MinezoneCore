@@ -56,12 +56,12 @@ public class FadeClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Fade
 				&& instance.classes.get(player).getLives() > 0) {
 			this.cooldownSec = (30000 - fadeAbility.getTime()) / 1000 + 1;
@@ -92,7 +92,7 @@ public class FadeClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		fadeAbility.startTime = System.currentTimeMillis() - 100000;
 		fadeAbilityActive = false;
 		playerInv.setItem(0, getAttackWeapon());
@@ -100,7 +100,7 @@ public class FadeClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		if (item != null && item.equals(this.string)
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK

@@ -65,7 +65,7 @@ public class NotchClass extends BaseClass {
     }
 
     @Override
-    public void SetItems(Inventory playerInv) {
+    public void setItems(Inventory playerInv) {
         pullAbility.getCooldownInstance().reset();
         playerInv.setItem(0, weapon);
         playerInv.setItem(1, pullItem);
@@ -73,7 +73,7 @@ public class NotchClass extends BaseClass {
     }
 
     @Override
-    public void Tick(int gameTicks) {
+    public void tick(int gameTicks) {
         if (!isPlayerAlive()) return;
 
         if (!(player.getActivePotionEffects().contains(PotionEffectType.WEAKNESS)))
@@ -88,7 +88,7 @@ public class NotchClass extends BaseClass {
     }
 
     @Override
-    public void UseItem(PlayerInteractEvent event) {
+    public void useItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         Action action = event.getAction();
 

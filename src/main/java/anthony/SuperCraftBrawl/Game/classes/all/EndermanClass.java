@@ -90,7 +90,7 @@ public class EndermanClass extends BaseClass {
     }
 
     @Override
-    public void SetItems(Inventory playerInv) {
+    public void setItems(Inventory playerInv) {
         used = false;
         teleportAbility.getCooldownInstance().reset();
         blockAbility.getCooldownInstance().reset();
@@ -101,7 +101,7 @@ public class EndermanClass extends BaseClass {
     }
 
     @Override
-    public void Tick(int gameTicks) {
+    public void tick(int gameTicks) {
         if (!isPlayerAlive()) return;
         if (instance.state == GameState.ENDED)
             return;
@@ -125,7 +125,7 @@ public class EndermanClass extends BaseClass {
 
     @SuppressWarnings("deprecation")
     @Override
-    public void UseItem(PlayerInteractEvent event) {
+    public void useItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         Action action = event.getAction();
 

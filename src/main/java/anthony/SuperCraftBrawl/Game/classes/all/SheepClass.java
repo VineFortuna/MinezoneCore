@@ -83,7 +83,7 @@ public class SheepClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		currentWool = WoolType.WHITE; // To reset each life
 
 		// To reset Sheep's scoreboard color
@@ -104,7 +104,7 @@ public class SheepClass extends BaseClass {
 	}
 
 	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
+	public void doDamage(EntityDamageByEntityEvent event) {
 		if (!isPlayerAlive()) return;
 		if (!(event.getEntity() instanceof Player)) return;
 
@@ -264,7 +264,7 @@ public class SheepClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		if (item != null && item.getType() == Material.ENCHANTMENT_TABLE
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
@@ -288,7 +288,7 @@ public class SheepClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 		// TODO Auto-generated method stub
 
 	}

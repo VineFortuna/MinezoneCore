@@ -835,7 +835,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		GameInstance gameInstance = GetInstanceOfPlayer(shooter);
 		if (gameInstance == null)
 			return;
-		gameInstance.classes.get(shooter).PotionSplashEvent(event);
+		gameInstance.classes.get(shooter).potionSplashEvent(event);
 	}
 
 	public void onPlayerMoveEvent(PlayerMoveEvent event) {
@@ -1428,9 +1428,9 @@ public class GameManager implements Listener, PluginMessageListener {
 								}
 								if (baseClass.getType() == ClassType.FlintAndSteel)
 									if (baseClass.flintUsed == true)
-										baseClass.DoDamage2(damageEvent);
+										baseClass.doDamage2(damageEvent);
 
-								baseClass.DoDamage(damageEvent);
+								baseClass.doDamage(damageEvent);
 							}
 						}
 					} else if (damageEvent.getDamager() instanceof WitherSkull) {
@@ -1508,7 +1508,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									}
 									player.setLastDamageCause(new EntityDamageByEntityEvent(shooterPlayer, player,
 											event.getCause(), event.getDamage()));
-									shooterBaseClass.DoDamage(damageEvent);
+									shooterBaseClass.doDamage(damageEvent);
 								}
 							}
 						}
@@ -1545,7 +1545,7 @@ public class GameManager implements Listener, PluginMessageListener {
 					instance.PlayerDeath(player);
 					return;
 				} else if (instance.classes.containsKey(player))
-					instance.classes.get(player).TakeDamage(event);
+					instance.classes.get(player).takeDamage(event);
 			}
 		}
 	}
@@ -1592,7 +1592,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			GameInstance instance = this.GetInstanceOfPlayer(player);
 			if (instance != null) {
 				BaseClass baseClass = instance.classes.get(player);
-				baseClass.ProjectileLaunch(event);
+				baseClass.projectileLaunch(event);
 			}
 		}
 	}
@@ -1604,7 +1604,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			GameInstance instance = this.GetInstanceOfPlayer(player);
 			if (instance != null) {
 				BaseClass baseClass = instance.classes.get(player);
-				baseClass.ProjectileHit(event);
+				baseClass.projectileHit(event);
 			}
 		}
 	}
