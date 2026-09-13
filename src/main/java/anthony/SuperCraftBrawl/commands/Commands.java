@@ -30,7 +30,6 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.minecraft.server.v1_8_R3.*;
 import org.apache.commons.lang.WordUtils;
 
-import com.google.common.collect.Lists;
 import org.bukkit.*;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -766,7 +765,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		newBaseClass.loadPlayer();
 
 		String message = "&a&l(!) &r&e" + targetPlayer.getName() + "&r's class was set to " + selectedClass.getTag();
-		newBaseClass.TellAll(main.color(message));
+		newBaseClass.tellAll(main.color(message));
 	}
 
 	private void healCommand(Player player, String[] args) {

@@ -175,4 +175,15 @@ public class PresentClass extends BaseClass {
 		}
 	}
 
+	@Override
+	public void killEvent(Player damagerPlayer) {
+		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+			damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
+					"&r&l(!) &rYour &r&lAggressive Gift has regenerated and you can get a new weapon if you'd like!"));
+			damagerPlayer.getInventory().addItem(ItemHelper.setDetails(new ItemStack(Material.CHEST, 1),
+					String.valueOf(ChatColor.RESET) + ChatColor.ITALIC + "Agressive Gift", "",
+					String.valueOf(ChatColor.RESET) + ChatColor.YELLOW + "Steals another player's main item"));
+		}
+	}
+
 }

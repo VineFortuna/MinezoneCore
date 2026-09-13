@@ -19,7 +19,6 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.*;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
@@ -35,7 +34,6 @@ import org.bukkit.scoreboard.Score;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Random;
 
 public abstract class BaseClass {
@@ -54,6 +52,9 @@ public abstract class BaseClass {
 	public int eachLifeKills = 0;
 	public int totalExp = 0;
 	public double baseVerticalJump = 1.0;
+
+	public Timer bazooka = new Timer();
+
 	public boolean flintUsed = false;
 	public Timer pearlTimer = new Timer();
 	public Timer tnt = new Timer();
@@ -62,7 +63,6 @@ public abstract class BaseClass {
 	public Timer ice = new Timer();
 	public Timer golem = new Timer();
 	public Timer herobrine = new Timer();
-	public Timer bazooka = new Timer();
 	public Timer ninja = new Timer();
 	public Timer bee = new Timer();
 	public Timer aggressiveGift = new Timer();
@@ -406,6 +406,10 @@ public abstract class BaseClass {
         }
     }
 
+	private void elimination() {
+
+	}
+
     public void Death(PlayerDeathEvent e) {
         if (player.getName() != null && lives > 0) {
             decreaseLives();
@@ -413,789 +417,186 @@ public abstract class BaseClass {
             Player killer = player.getKiller();
             Player p = player.getPlayer();
 			Location deathLocation = p.getLocation().clone();
+
             // Remove mobs spawned by the player
             removeMobs(p);
             resetMobTarget(p);
 
             if (isDead) {
                 PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(p);
+
                 data.deaths += 1;
+
                 for (PotionEffect type : p.getActivePotionEffects())
                     p.removePotionEffect(type.getType());
 
                 p.setFireTicks(0);
                 p.getInventory().clear();
+
+				Creature creature = null;
+
+				EntityDamageEvent lastDamage = p.getLastDamageCause();
+
+				if (lastDamage instanceof EntityDamageByEntityEvent) {
+					Entity damager;
+
+					damager = ((EntityDamageByEntityEvent) lastDamage).getDamager();
+
+					if (damager instanceof Creature && damager.getCustomName() != null) {
+						creature = (Creature) damager;
+
+						String owner = ChatColor.stripColor(
+								creature.getCustomName().substring(0, creature.getCustomName().indexOf("'")));
+						Player mobOwner = Bukkit.getPlayer(owner);
+
+						if (mobOwner != null && instance.classes.containsKey(mobOwner)) {
+							killer = mobOwner;
+						}
+					}
+
+					if (damager instanceof Projectile) {
+						Projectile projectile = (Projectile) damager;
+
+						if (projectile.getShooter() instanceof Creature && ((Creature) projectile.getShooter()).getCustomName() != null) {
+							creature = (Creature) projectile.getShooter();
+
+							String owner = ChatColor.stripColor(
+									creature.getCustomName().substring(0, creature.getCustomName().indexOf("'")));
+							Player mobOwner = Bukkit.getPlayer(owner);
+
+							if (mobOwner != null && instance.classes.containsKey(mobOwner)) {
+								killer = mobOwner;
+							}
+						}
+					}
+				}
+
                 BaseClass baseClassKiller = instance.classes.get(killer);
                 BaseClass baseClassDead = instance.classes.get(p);
+
                 baseClassDead.totalDeaths++;
                 baseClassDead.eachLifeKills = 0;
 
                 BaseClass baseClass = this;
 
-                // DEATH PARTICLES
+				// Death message
+				DeathMessageProvider deathMessage = new DeathMessageProvider();
+				PlayerData killerData = instance.getGameManager().getMain().getDataManager().getPlayerData(killer);
+				boolean customEnabled = killer != null ? killerData.killMsgs == 1 : data.killMsgs == 1;
+
+				tellAll(instance.color(deathMessage.getDeathMessage(player, killer, creature, customEnabled)));
+
+				if (killer != null) {
+					giveStats(killer, player);
+					giveHealthPot(killer);
+					p.teleport(killer);
+				}
+
+				// DEATH PARTICLES
                 deathParticles(data, p);
 
-                if (p.getLocation().getY() <= 50) { // VOID KILLS
-                    if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
-                        EntityDamageByEntityEvent entityDamageEvent = (EntityDamageByEntityEvent) p
-                                .getLastDamageCause();
-                        Entity damager = entityDamageEvent.getDamager();
+				if (lives == 0) {
+					if (data != null) {
+						data.losses += 1;
+						data.winstreak = 0;
 
-                        if (damager instanceof Player) {
-                            Player d = (Player) damager;
+						ClassType type = baseClassDead.getType();
+						ClassDetails details = data.playerClasses.get(type.getID());
+						if (details == null) {
+							details = new ClassDetails();
+							data.playerClasses.put(type.getID(), details);
+						}
+						details.playGame();
+					}
+					if (killer != null) {
+						String msg = instance.getGameManager().getMain().color("&4&lELIMINATED &e" + p.getName());
+						PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
+								(byte) 2);
+						CraftPlayer craft = (CraftPlayer) killer;
+						craft.getHandle().playerConnection.sendPacket(packet);
+					}
 
-                            if (instance.classes.containsKey(d)) {
-                                baseClassKiller = instance.classes.get(d);
-                                PlayerData killerData = instance.getGameManager().getMain().getDataManager()
-                                        .getPlayerData(d);
+					p.setDisplayName("" + p.getName() + " " + ChatColor.RESET + ChatColor.GRAY + ChatColor.ITALIC
+							+ "Spectator" + ChatColor.RESET);
+					instance.sendScoreboardUpdate(player);
 
-                                if (killerData != null && killerData.killMsgs == 1) {
-                                    this.giveStats(d, p);
-                                    TellAll(instance.color("&2&l(!) &cHello? AND GOODBYE TO " + ChatColor.WHITE
-                                            + p.getPlayer().getDisplayName() + " &cAND ANYONE ELSE STANDING IN " + ChatColor.WHITE + d.getDisplayName() + "'s &cWAY!"));
-                                } else {
-                                    this.giveStats(d, p);
-                                    TellAll(instance.color("&2&l(!) &f" + p.getDisplayName() +
-                                            " &cwas doomed to fall by &f" + d.getDisplayName()));
-                                }
-                                p.teleport(d.getLocation());
-                                this.healthPots(d);
-                            } else {
-                                Random r = new Random();
-                                int chance = r.nextInt(2);
+					Random r = new Random();
+					int chance = r.nextInt(1000);
 
-                                if (data != null && data.killMsgs == 1) {
-                                    if (chance == 0) {
-                                        TellAll(instance.color("&2&l(!) " + "&r" + p.getPlayer().getDisplayName() +
-                                                " &csaid NO THANK YOU and took the easy way out"));
-                                    } else {
-                                        TellAll(instance.color("&2&l(!) " + "&r" + p.getPlayer().getDisplayName()
-                                                + " &cwalked off the edge..."));
-                                    }
-                                } else {
-                                    TellAll(instance.color("&2&l(!) " + "&r" + p.getPlayer().getDisplayName()
-                                            + " &cfell into the void"));
-                                }
-                                p.teleport(instance.GetSpecLoc());
-                            }
-                        } else if (damager instanceof Arrow) {
-                            Arrow a = (Arrow) damager;
+					if (chance >= 0 && chance <= 1) {
 
-                            if (a.getShooter() instanceof Player && a.getShooter() != null) {
-                                Player d = (Player) a.getShooter();
+						if (data != null) {
+							data.mysteryChests++;
+							player.sendMessage(instance.getGameManager().getMain()
+									.color("&5&l(!) &rYou have found &e1 MysteryChest!"));
+						}
+					}
 
-                                if (instance.classes.containsKey(d)) {
-                                    baseClassKiller = instance.classes.get(d);
-                                    PlayerData killerData = instance.getGameManager().getMain().getDataManager()
-                                            .getPlayerData(d);
-                                    if (killerData != null && killerData.killMsgs == 1) {
-                                        this.giveStats(d, p);
-                                        this.healthPots(d);
-                                        TellAll(instance.getGameManager().getMain()
-                                                .color("&2&l(!) &cHello? AND GOODBYE TO " + ChatColor.WHITE
-                                                        + p.getPlayer().getDisplayName()
-                                                        + " &cAND ANYONE ELSE STANDING IN " + ChatColor.WHITE
-                                                        + d.getDisplayName() + "'s &cWAY!"));
-                                    } else {
-                                        this.giveStats(d, p);
-                                        TellAll(instance.color("&2&l(!) &f" + p.getDisplayName() +
-                                                " &cwas doomed to fall by &f" + d.getDisplayName()));
-                                    }
-                                } else {
-                                    Random r = new Random();
-                                    int chance = r.nextInt(2);
+					tellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ p.getPlayer().getName() + " " + baseClassDead.getType().getTag() + ChatColor.RED
+							+ " has been eliminated!");
 
-                                    if (data != null && data.killMsgs == 1) {
-                                        if (chance == 0) {
-                                            TellAll(instance.color("&2&l(!) " + "&r" + p.getPlayer().getDisplayName()
-                                                    + " &csaid NO THANK YOU and took the easy way out"));
-                                        } else {
-                                            TellAll(instance.color("&2&l(!) " + "&r" + p.getPlayer().getDisplayName()
-                                                    + " &cwalked off the edge..."));
-                                        }
-                                    } else {
-                                        TellAll(instance.color("&2&l(!) " + "&f" + p.getPlayer().getDisplayName()
-                                                + " &cfell into the void"));
-                                    }
-                                    p.teleport(instance.GetSpecLoc());
-                                }
-                            } else {
-                                Random r = new Random();
-                                int chance = r.nextInt(2);
+					if (instance.getMap() != null) {
+						p.sendMessage(ChatColor.BOLD + "=====================");
+						p.sendMessage(ChatColor.BOLD + "||");
+						p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RED + ChatColor.BOLD
+								+ "  GAME LOST");
+						p.sendMessage(ChatColor.BOLD + "||");
 
-                                if (data != null && data.killMsgs == 1) {
-                                    if (chance == 0) {
-                                        TellAll(instance.color("&2&l(!) " + "&f" + p.getPlayer().getDisplayName()
-                                                + " &csaid NO THANK YOU and took the easy way out"));
-                                    } else {
-                                        TellAll(instance.color("&2&l(!) " + "&f" + p.getPlayer().getDisplayName()
-                                                + " &cwalked off the edge..."));
-                                    }
-                                } else {
-                                    TellAll(instance.color("&2&l(!) " + "&f" + p.getPlayer().getDisplayName()
-                                            + " &cfell into the void"));
-                                }
-                                p.teleport(instance.GetSpecLoc());
-                            }
-                        } else {
-                            Random r = new Random();
-                            int chance = r.nextInt(2);
+						int tokensEarned = 0;
+						if (instance.alivePlayers == 5) {
+							tokensEarned = 1;
+						} else if (instance.alivePlayers == 4) {
+							tokensEarned = 3;
+						} else if (instance.alivePlayers == 3) {
+							tokensEarned = 5;
+						} else if (instance.alivePlayers == 2) {
+							tokensEarned = 7;
+						}
 
-                            if (data != null && data.killMsgs == 1) {
-                                if (chance == 0) {
-                                    TellAll(instance.color("&2&l(!) " + "&f" + p.getPlayer().getDisplayName()
-                                            + " &csaid NO THANK YOU and took the easy way out"));
-                                } else {
-                                    TellAll(instance.color("&2&l(!) " + "&r" + p.getPlayer().getDisplayName()
-                                            + " &cwalked off the edge..."));
-                                }
-                            } else {
-                                TellAll(instance.color("&2&l(!) " + "&r" + p.getPlayer().getDisplayName()
-                                        + " &cfell into the void"));
-                            }
-                            p.teleport(instance.GetSpecLoc());
-                        }
-                    } else if (killer != null && instance.classes.containsKey(killer)) {
-                        PlayerData killerData = instance.getGameManager().getMain().getDataManager()
-                                .getPlayerData(killer);
-                        if (killer != p) {
-                            if (lives == 0) {
-                                if (killerData != null && killerData.killMsgs == 1) {
-                                    this.giveStats(killer, p);
-                                    this.healthPots(killer);
-                                    TellAll(instance.getGameManager().getMain()
-                                            .color("&2&l(!) " + "&r" + p.getPlayer().getDisplayName() +
-                                                    " &cwas not strong enough to encounter " + "&r" + killer.getDisplayName()));
-                                } else {
-                                    this.giveStats(killer, p);
-                                    TellAll(instance.color("&2&l(!) &f" + p.getDisplayName() +
-                                            " &cwas killed by &f" + killer.getDisplayName()));
-                                }
-                            } else if (lives > 0) {
-                                if (killerData != null && killerData.killMsgs == 1) {
-                                    this.giveStats(killer, p);
-                                    this.healthPots(killer);
-                                    TellAll(instance.color("&2&l(!) " + "&r" + p.getPlayer().getDisplayName()
-                                            + " &cwas not strong enough to encounter " + "&r" + killer.getDisplayName()));
-                                } else {
-                                    this.giveStats(killer, p);
-                                    TellAll(instance.color("&2&l(!) &f" + p.getDisplayName() +
-                                            " &cwas killed by &f" + killer.getDisplayName()));
-                                }
-                            }
-                            p.teleport(killer);
-                        } else {
-                            if (lives > 0) {
-                                TellAll(instance.color("&2&l(!) &f" + p.getDisplayName() + " &ccommitted suicide"));
-                            } else {
-                                TellAll(instance.color("&2&l(!) &f" + p.getDisplayName() + " &ccommitted suicide"));
-                            }
-                            p.teleport(killer);
-                        }
-                    } else {
-                        Random r = new Random();
-                        int chance = r.nextInt(2);
+						data.tokens += tokensEarned;
+						baseClassDead.totalTokens += tokensEarned;
+						p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Placed #"
+								+ instance.alivePlayers + ": " + ChatColor.GREEN + tokensEarned + " Tokens");
+						baseClassDead.placement = instance.alivePlayers;
 
-                        if (data != null && data.killMsgs == 1) {
-                            if (chance == 0) {
-                                TellAll(instance.color("&2&l(!) " + "&r" + p.getPlayer().getDisplayName()
-                                        + " &csaid NO THANK YOU and took the easy way out"));
-                            } else {
-                                TellAll(instance.color("&2&l(!) " + "&r" + p.getPlayer().getDisplayName()
-                                        + " &cwalked off the edge..."));
-                            }
-                        } else {
-                            TellAll(instance.color("&2&l(!) &f" + p.getDisplayName() + " &cfell into the void"));
-                        }
-                        p.teleport(instance.GetSpecLoc());
-                    }
-                } else if (p.getLastDamageCause() != null && p.getLastDamageCause().getCause() != null
-                        && p.getLastDamageCause().getCause() == DamageCause.MAGIC) {
-                    TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                            + p.getPlayer().getDisplayName() + ChatColor.RED + " was murdered via the dark arts");
-                    p.teleport(instance.GetSpecLoc());
-                } else if (p.getLastDamageCause() != null && p.getLastDamageCause().getCause() != null
-                        && p.getLastDamageCause().getCause() == DamageCause.WITHER) {
-                    if (killer == null) {
-                        TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + p.getPlayer().getDisplayName() + ChatColor.RED + " withered away");
-                        p.teleport(instance.GetSpecLoc());
-                    } else {
-                        this.giveStats(killer, p);
-                        TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + p.getPlayer().getDisplayName() + ChatColor.RED + " was withered by " + ChatColor.WHITE + killer.getDisplayName());
-                        p.teleport(instance.GetSpecLoc());
-                        this.healthPots(killer);
-                    }
-                } else if (p.getLastDamageCause() != null && p.getLastDamageCause().getCause() != null
-                        && (p.getLastDamageCause().getCause() == DamageCause.FIRE_TICK
-                        || p.getLastDamageCause().getCause() == DamageCause.FIRE
-                        || p.getLastDamageCause().getCause() == DamageCause.LAVA)) {
-                    if (killer == null) {
-                        TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + p.getPlayer().getDisplayName() + ChatColor.RED + " burned to death");
-                        p.teleport(instance.GetSpecLoc());
-                    } else {
-                        this.giveStats(killer, p);
-                        TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + p.getPlayer().getDisplayName() + ChatColor.RED + " was burned to death by " + ChatColor.WHITE + killer.getDisplayName());
-                        p.teleport(killer);
-                        this.healthPots(killer);
-                    }
-                } else if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
-                    EntityDamageByEntityEvent entityDamageEvent = (EntityDamageByEntityEvent) p.getLastDamageCause();
-                    Entity damager = entityDamageEvent.getDamager();
-
-                    if (damager instanceof Player) {
-                        Player d = (Player) damager;
-
-                        if (instance.classes.containsKey(d)) {
-                            baseClassKiller = instance.classes.get(d);
-                            PlayerData killerData = instance.getGameManager().getMain().getDataManager()
-                                    .getPlayerData(d);
-                            if (d != p || killer != p) {
-                                if (lives == 0) {
-                                    if (killerData != null && killerData.killMsgs == 1) {
-                                        this.giveStats(d, p);
-                                        TellAll(instance.color("&2&l(!) " + "&r" + p.getPlayer().getDisplayName()
-                                                + " &cwas not strong enough to encounter " + "&r" + d.getDisplayName()));
-                                        this.healthPots(d);
-                                    } else {
-                                        this.giveStats(d, p);
-                                        TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                                + p.getPlayer().getDisplayName() + ChatColor.RED
-                                                + " was killed by " + ChatColor.WHITE + d.getDisplayName());
-                                        this.healthPots(d);
-                                    }
-                                } else if (lives > 0) {
-                                    if (killerData != null && killerData.killMsgs == 1) {
-                                        this.giveStats(d, p);
-                                        TellAll(instance.getGameManager().getMain()
-                                                .color("&2&l(!) " + "&r" + p.getPlayer().getDisplayName()
-                                                        + " &cwas not strong enough to encounter " + "&r" + d.getDisplayName()));
-                                        this.healthPots(d);
-                                    } else {
-                                        this.giveStats(d, p);
-                                        TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                                + p.getPlayer().getDisplayName() + ChatColor.RED
-                                                + " was killed by " + ChatColor.WHITE + d.getDisplayName());
-                                        this.healthPots(d);
-                                    }
-                                }
-                                p.teleport(d);
-                            } else {
-                                if (lives > 0) {
-                                    TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                            + p.getPlayer().getDisplayName() + ChatColor.RED
-                                            + " committed suicide");
-                                } else {
-                                    TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                            + p.getPlayer().getDisplayName() + ChatColor.RED
-                                            + " committed suicide");
-                                }
-                                p.teleport(d);
-                            }
-                        } else {
-                            TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                    + p.getPlayer().getDisplayName() + ChatColor.RED + " died");
-                        }
-                    } else if (damager instanceof Creature) {
-                        if (damager.getCustomName() != null) {
-                            String owner = ChatColor.stripColor(
-                                    damager.getCustomName().substring(0, damager.getCustomName().indexOf("'")));
-                            Player d = Bukkit.getPlayer(owner);
-                            killer = d;
-
-                            if (instance.classes.containsKey(d)) {
-                                baseClassKiller = instance.classes.get(d);
-                                if (d != p) {
-                                    this.giveStats(d, p);
-                                    TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                            + p.getPlayer().getDisplayName() + ChatColor.RED
-                                            + " was killed by " + ChatColor.RESET + d.getDisplayName() + ChatColor.RED + "'s "
-                                            + ChatColor.YELLOW + instance.getGameManager().getMobTypeName(damager.getType()));
-                                    p.teleport(d);
-                                } else {
-                                    TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                            + p.getPlayer().getDisplayName() + ChatColor.RED
-                                            + " was killed by a " + ChatColor.YELLOW
-                                            + instance.getGameManager().getMobTypeName(damager.getType()));
-                                }
-                            } else {
-                                TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                        + p.getPlayer().getDisplayName() + ChatColor.RED
-                                        + " was killed by a " + ChatColor.YELLOW
-                                        + instance.getGameManager().getMobTypeName(damager.getType()));
-                            }
-                        } else {
-                            TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                    + p.getPlayer().getDisplayName() + ChatColor.RED
-                                    + " was killed by a " + ChatColor.YELLOW
-                                    + instance.getGameManager().getMobTypeName(damager.getType()));
-                        }
-                    } else if (damager instanceof Projectile) {
-                        Projectile a = (Projectile) damager;
-                        if (a.getShooter() instanceof Player && a.getShooter() != null) {
-                            Player shooter = (Player) a.getShooter();
-
-                            if (instance.classes.containsKey(shooter)) {
-                                baseClassKiller = instance.classes.get(shooter);
-                                PlayerData killerData = instance.getGameManager().getMain().getDataManager()
-                                        .getPlayerData(shooter);
-                                if (shooter != p || killer != p) {
-                                    if (killerData != null && killerData.killMsgs == 1) {
-                                        this.giveStats(shooter, p);
-                                        TellAll(instance.getGameManager().getMain().color("&2&l(!) " + "&r"
-                                                + p.getPlayer().getDisplayName() + " &cwas not strong enough to encounter " + "&r"
-                                                + shooter.getDisplayName()));
-                                        this.healthPots(shooter);
-                                    } else {
-                                        this.giveStats(shooter, p);
-                                        TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                                + p.getPlayer().getDisplayName() + ChatColor.RED
-                                                + " was killed by " + ChatColor.WHITE + shooter.getDisplayName());
-                                        this.healthPots(shooter);
-                                    }
-                                    p.teleport(shooter);
-                                }
-                            } else {
-                                if (lives > 0) {
-                                    TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                            + p.getPlayer().getDisplayName() + ChatColor.RED + " committed suicide");
-                                } else {
-                                    TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                            + p.getPlayer().getDisplayName() + ChatColor.RED + " committed suicide");
-                                }
-                                p.teleport(shooter);
-                            }
-                        } else if (a.getShooter() instanceof Creature && a.getShooter() != null) {
-                            Creature shooter = (Creature) a.getShooter();
-                            if (shooter.getCustomName() != null) {
-                                String owner = ChatColor.stripColor(
-                                        shooter.getCustomName().substring(0, shooter.getCustomName().indexOf("'")));
-                                Player d = Bukkit.getPlayer(owner);
-                                killer = d;
-
-                                if (instance.classes.containsKey(d)) {
-                                    baseClassKiller = instance.classes.get(d);
-                                    if (d != p) {
-                                        this.giveStats(d, p);
-                                        TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                                + p.getPlayer().getDisplayName() + ChatColor.RED
-                                                + " was killed by " + ChatColor.RESET + d.getDisplayName()
-                                                + ChatColor.RED + "'s " + ChatColor.YELLOW
-                                                + instance.getGameManager().getMobTypeName(damager.getType()));
-                                        p.teleport(d);
-                                    } else {
-                                        TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                                + p.getPlayer().getDisplayName() + ChatColor.RED
-                                                + " was killed by a " + ChatColor.YELLOW
-                                                + instance.getGameManager().getMobTypeName(damager.getType()));
-                                    }
-                                } else {
-                                    TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                            + p.getPlayer().getDisplayName() + " " + ChatColor.RED
-                                            + " was killed by a " + ChatColor.YELLOW
-                                            + instance.getGameManager().getMobTypeName(damager.getType()));
-                                }
-                            }
-                        } else {
-                            TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                    + p.getPlayer().getDisplayName() + ChatColor.RED + " died");
-                        }
-                    } else {
-                        TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + p.getPlayer().getDisplayName() + ChatColor.RED + " just died SO badly");
-                    }
-                } else if (killer != null) {
-                    PlayerData killerData = instance.getGameManager().getMain().getDataManager().getPlayerData(killer);
-                    if (killer != p) {
-                        if (lives == 0) {
-                            if (killerData != null && killerData.killMsgs == 1) {
-                                this.giveStats(killer, p);
-                                TellAll(instance.getGameManager().getMain()
-                                        .color("&2&l(!) " + getPlayerRank(p) + "&r" + p.getPlayer().getDisplayName()
-                                                + " &cwas not strong enough to encounter "
-                                                + "&r" + killer.getDisplayName()));
-                                this.healthPots(killer);
-                            } else {
-                                this.giveStats(killer, p);
-                                TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                        + p.getPlayer().getDisplayName() + ChatColor.RED + " was killed by " + ChatColor.WHITE + killer.getDisplayName());
-                                this.healthPots(killer);
-                            }
-                        } else if (lives > 0) {
-                            if (killerData != null && killerData.killMsgs == 1) {
-                                this.giveStats(killer, p);
-                                TellAll(instance.color("&2&l(!) " + "&r" + p.getPlayer().getDisplayName()
-                                        + " &cwas not strong enough to encounter " + "&r" + killer.getDisplayName()));
-                                this.healthPots(killer);
-                            } else {
-                                this.giveStats(killer, p);
-                                TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                        + p.getPlayer().getDisplayName() + ChatColor.RED
-                                        + " was killed by " + ChatColor.WHITE + killer.getDisplayName());
-                                this.healthPots(killer);
-                            }
-                        }
-                        p.teleport(killer);
-                    } else {
-                        if (lives > 0) {
-                            TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                    + p.getPlayer().getDisplayName() + ChatColor.RED + " committed suicide");
-                        } else {
-                            TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                    + p.getPlayer().getDisplayName() + ChatColor.RED + " committed suicide");
-                        }
-                        p.teleport(killer);
-                    }
-                } else if (DamageCause.VOID != null) {
-                    if (lives == 0) {
-                        TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + p.getPlayer().getDisplayName() + ChatColor.RED + " just died SO badly");
-                    } else if (lives > 0) {
-                        TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + p.getPlayer().getDisplayName() + ChatColor.RED + " just died SO badly");
-                    }
-                    p.getPlayer().setFireTicks(0);
-                } else if (DamageCause.SUICIDE != null) {
-                    TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                            + p.getPlayer().getDisplayName() + ChatColor.RED + " committed suicide");
-                    p.getPlayer().setFireTicks(0);
-                } else if (DamageCause.LAVA != null || DamageCause.FIRE != null || DamageCause.FIRE_TICK != null) {
-                    TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                            + p.getPlayer().getDisplayName() + ChatColor.RED + " just burned to death");
-                } else {
-                    if (lives == 0) {
-                        TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + p.getPlayer().getDisplayName() + ChatColor.RED + " just died SO badly");
-                    } else if (lives > 0) {
-                        TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + p.getPlayer().getDisplayName() + ChatColor.RED + " just died SO badly");
-                    }
-                    p.getPlayer().setFireTicks(0);
-                }
-
-                if (lives == 0) {
-                    if (data != null) {
-                        data.losses += 1;
-                        ClassType type = baseClassDead.getType();
-                        ClassDetails details = data.playerClasses.get(type.getID());
-                        if (details == null) {
-                            details = new ClassDetails();
-                            data.playerClasses.put(type.getID(), details);
-                        }
-                        details.playGame();
-                        data.winstreak = 0;
-                    }
-                    if (killer != null) {
-                        String msg = instance.getGameManager().getMain().color("&4&lELIMINATED &e" + p.getName());
-                        PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-                                (byte) 2);
-                        CraftPlayer craft = (CraftPlayer) killer;
-                        craft.getHandle().playerConnection.sendPacket(packet);
-                    }
-                    p.setDisplayName("" + p.getName() + " " + ChatColor.RESET + ChatColor.GRAY + ChatColor.ITALIC
-                            + "Spectator" + ChatColor.RESET);
-                    instance.sendScoreboardUpdate(player);
-
-                    Random r = new Random();
-                    int chance = r.nextInt(1000);
-
-                    if (chance >= 0 && chance <= 1) {
-
-                        if (data != null) {
-                            data.mysteryChests++;
-                            player.sendMessage(instance.getGameManager().getMain()
-                                    .color("&5&l(!) &rYou have found &e1 MysteryChest!"));
-                        }
-                    }
-
-                    if (data.withersk != 3)
-                        data.withersk = 0;
-
-                    TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                            + p.getPlayer().getName() + " " + baseClassDead.getType().getTag() + ChatColor.RED
-                            + " has been eliminated!");
-
-                    if (instance.getMap() != null) {
-                        PlayerData data3 = instance.getGameManager().getMain().getDataManager().getPlayerData(p);
-                        p.sendMessage("" + ChatColor.BOLD + "=====================");
-                        p.sendMessage("" + ChatColor.BOLD + "||");
-                        p.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RED + ChatColor.BOLD
-                                + "  GAME LOST");
-                        p.sendMessage("" + ChatColor.BOLD + "||");
-
-                        int tokensEarned = 0;
-                        if (instance.alivePlayers == 5) {
-                            tokensEarned = 1;
-                        } else if (instance.alivePlayers == 4) {
-                            tokensEarned = 3;
-                        } else if (instance.alivePlayers == 3) {
-                            tokensEarned = 5;
-                        } else if (instance.alivePlayers == 2) {
-                            tokensEarned = 7;
-                        }
-                        data3.tokens += tokensEarned;
-                        baseClassDead.totalTokens += tokensEarned;
-                        p.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Placed #"
-                                + instance.alivePlayers + ": " + ChatColor.GREEN + tokensEarned + " Tokens");
-                        baseClassDead.placement = instance.alivePlayers;
-
-                        if (baseClassDead != null && baseClassDead.totalKills >= 0) {
-                            player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  "
-                                    + baseClassDead.totalKills + " Kills: " + ChatColor.GREEN
-                                    + (baseClassDead.totalKills * 2) + " Tokens");
-                            data3.tokens += baseClassDead.totalKills * 2;
-                            baseClassDead.totalTokens += baseClassDead.totalKills;
-                        }
-                        if (baseClassDead != null && instance.firstBlood == player) {
-                            player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET
-                                    + "  First Blood: " + ChatColor.GREEN + "10 Tokens");
-                            data3.tokens += 10;
-                        }
-                        if (p.hasPermission("scb.rankBonus")) {
-                            p.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Rank Bonus: "
-                                    + ChatColor.GREEN + "10 Tokens");
-                            data3.tokens += 10;
-                            baseClassDead.totalTokens += 10;
-                        }
-                        p.sendMessage("" + ChatColor.BOLD + "||");
-                        p.sendMessage("" + ChatColor.BOLD + "=====================");
-                        p.sendMessage(instance.color("&2&l(!) &rYou earned &a" + baseClassDead.totalTokens +
-                                " &rTokens and &a" + baseClassDead.totalExp + " &rEXP!"));
+						if (baseClassDead.totalKills >= 0) {
+							player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  "
+									+ baseClassDead.totalKills + " Kills: " + ChatColor.GREEN
+									+ (baseClassDead.totalKills * 2) + " Tokens");
+							data.tokens += baseClassDead.totalKills * 2;
+							baseClassDead.totalTokens += baseClassDead.totalKills;
+						}
+						if (instance.firstBlood == player) {
+							player.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RESET
+									+ "  First Blood: " + ChatColor.GREEN + "10 Tokens");
+							data.tokens += 10;
+						}
+						if (p.hasPermission("scb.rankBonus")) {
+							p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Rank Bonus: "
+									+ ChatColor.GREEN + "10 Tokens");
+							data.tokens += 10;
+							baseClassDead.totalTokens += 10;
+						}
+						p.sendMessage(ChatColor.BOLD + "||");
+						p.sendMessage(ChatColor.BOLD + "=====================");
+						p.sendMessage(instance.color("&2&l(!) &rYou earned &a" + baseClassDead.totalTokens +
+								" &rTokens and &a" + baseClassDead.totalExp + " &rEXP!"));
 
 						instance.getGameManager().getMain().getLevelManager().checkLevelUp(p);
-                    } else {
-                        List<String> aliveTeam = new ArrayList<String>();
-                        for (Entry<Player, BaseClass> entry : instance.classes.entrySet()) {
-                            if (entry.getValue().getLives() > 0) {
-                                if (!(aliveTeam.contains(instance.team.get(entry.getKey())))) {
-                                    aliveTeam.add(instance.team.get(entry.getKey()));
-                                    instance.teamsAlive++;
-                                }
-                            }
-                        }
-                        instance.teamsAlive++;
-                        if (instance.team.get(p).equals("Red")) {
-                            if (!(aliveTeam.contains("Red"))) {
-                                TellAll(instance.getGameManager().getMain()
-                                        .color("&2&l(!) &c&lRed Team &r has been eliminated!"));
+					}
+				}
 
-                                for (Player losers : instance.redTeam) {
-                                    BaseClass loserBc = instance.classes.get(losers);
-                                    PlayerData data3 = instance.getGameManager().getMain().getDataManager()
-                                            .getPlayerData(losers);
-                                    losers.sendMessage(ChatColor.BOLD + "=====================");
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-                                    losers.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RED
-                                            + ChatColor.BOLD + "  GAME LOST");
-                                    losers.sendMessage(ChatColor.BOLD + "||");
+				if (killer != null) {
+					String msg = instance.getGameManager().getMain().color("&4&lKILLED &e" + p.getName());
+					PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
+							(byte) 2);
+					CraftPlayer craft = (CraftPlayer) killer;
+					craft.getHandle().playerConnection.sendPacket(packet);
+				}
 
-                                    int tokensEarned = 0;
-                                    if (instance.aliveTeams == 3)
-                                        tokensEarned = 5;
-                                    else if (instance.aliveTeams == 2)
-                                        tokensEarned = 7;
-
-                                    losers.sendMessage("        " + "    " + instance.aliveTeams + " Place: "
-                                            + tokensEarned + " Tokens");
-                                    data3.tokens += tokensEarned;
-                                    loserBc.totalTokens += tokensEarned;
-
-                                    if (loserBc.totalKills >= 0) {
-                                        player.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
-                                                + ChatColor.BOLD + "  " + loserBc.totalKills + " Kills: "
-                                                + ChatColor.RESET + ChatColor.YELLOW + loserBc.totalKills + " Tokens");
-                                        data3.tokens += loserBc.totalKills;
-                                        loserBc.totalTokens += loserBc.totalKills;
-                                    }
-                                    if (losers.hasPermission("scb.rankBonus")) {
-                                        losers.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
-                                                + ChatColor.BOLD + "  RANK BONUS: " + ChatColor.RESET + ChatColor.YELLOW
-                                                + "10 Tokens");
-                                        data3.tokens += 10;
-                                        loserBc.totalTokens += 10;
-                                    }
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-                                    losers.sendMessage(ChatColor.BOLD + "=====================");
-                                    losers.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + ChatColor.BOLD + "(!) "
-                                            + ChatColor.RESET + "You have gained " + ChatColor.YELLOW + loserBc.totalExp
-                                            + " EXP!");
-
-                                    if (data3.exp >= 2500) {
-                                        data3.level++;
-                                        data3.exp -= 2500;
-										losers.sendMessage(
-												instance.getGameManager().getMain().color("&8&m----------------------------------------"));
-										losers.sendMessage(instance.getGameManager().getMain().color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
-										losers.sendMessage(instance.getGameManager().getMain()
-												.color("&7You are now &e&lLevel &6&l" + data3.level + " &7- nice work!"));
-										losers.sendMessage(
-												instance.getGameManager().getMain().color("&8&m----------------------------------------"));
-                                    }
-
-                                    losers.sendMessage(instance.getGameManager().getMain()
-                                            .color("&2&l(!) &rYou have gained &e" + loserBc.totalTokens + " Tokens"));
-                                }
-                            }
-                        } else if (instance.team.get(p).equals("Blue")) {
-                            if (!(aliveTeam.contains("Blue"))) {
-                                TellAll(instance.getGameManager().getMain()
-                                        .color("&2&l(!) &b&lBlue Team &r has been eliminated!"));
-
-                                for (Player losers : instance.blueTeam) {
-                                    BaseClass loserBc = instance.classes.get(losers);
-                                    PlayerData data3 = instance.getGameManager().getMain().getDataManager()
-                                            .getPlayerData(losers);
-                                    losers.sendMessage(ChatColor.BOLD + "=====================");
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-                                    losers.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RED
-                                            + ChatColor.BOLD + "  GAME LOST");
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-
-                                    int tokensEarned = 0;
-                                    if (instance.aliveTeams == 3)
-                                        tokensEarned = 5;
-                                    else if (instance.aliveTeams == 2)
-                                        tokensEarned = 7;
-
-                                    losers.sendMessage("        " + "    " + instance.aliveTeams + " Place: "
-                                            + tokensEarned + " Tokens");
-                                    data3.tokens += tokensEarned;
-                                    loserBc.totalTokens += tokensEarned;
-
-                                    if (loserBc.totalKills >= 0) {
-                                        player.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
-                                                + ChatColor.BOLD + "  " + loserBc.totalKills + " Kills: "
-                                                + ChatColor.RESET + ChatColor.YELLOW + loserBc.totalKills + " Tokens");
-                                        data3.tokens += loserBc.totalKills;
-                                        loserBc.totalTokens += loserBc.totalKills;
-                                    }
-                                    if (losers.hasPermission("scb.rankBonus")) {
-                                        losers.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
-                                                + ChatColor.BOLD + "  RANK BONUS: " + ChatColor.RESET + ChatColor.YELLOW
-                                                + "10 Tokens");
-                                        data3.tokens += 10;
-                                        loserBc.totalTokens += 10;
-                                    }
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-                                    losers.sendMessage(ChatColor.BOLD + "=====================");
-                                    losers.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + ChatColor.BOLD + "(!) "
-                                            + ChatColor.RESET + "You have gained " + ChatColor.YELLOW + loserBc.totalExp
-                                            + " EXP!");
-
-                                    if (data3.exp >= 2500) {
-                                        data3.level++;
-                                        data3.exp -= 2500;
-										losers.sendMessage(
-												instance.getGameManager().getMain().color("&8&m----------------------------------------"));
-										losers.sendMessage(instance.getGameManager().getMain().color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
-										losers.sendMessage(instance.getGameManager().getMain()
-												.color("&7You are now &e&lLevel &6&l" + data3.level + " &7- nice work!"));
-										losers.sendMessage(
-												instance.getGameManager().getMain().color("&8&m----------------------------------------"));
-                                    }
-                                    losers.sendMessage(instance.getGameManager().getMain()
-                                            .color("&2&l(!) &rYou have gained &e" + loserBc.totalTokens + " Tokens"));
-                                }
-                            }
-                        } else if (instance.team.get(p).equals("Black")) {
-                            if (!(aliveTeam.contains("Black"))) {
-                                TellAll(instance.getGameManager().getMain()
-                                        .color("&2&l(!) &0&lBlack Team &r has been eliminated!"));
-
-                                for (Player losers : instance.blackTeam) {
-                                    BaseClass loserBc = instance.classes.get(losers);
-                                    PlayerData data3 = instance.getGameManager().getMain().getDataManager()
-                                            .getPlayerData(losers);
-                                    losers.sendMessage(ChatColor.BOLD + "=====================");
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-                                    losers.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RED
-                                            + ChatColor.BOLD + "  GAME LOST");
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-
-                                    int tokensEarned = 0;
-                                    if (instance.aliveTeams == 3)
-                                        tokensEarned = 5;
-                                    else if (instance.aliveTeams == 2)
-                                        tokensEarned = 7;
-
-                                    losers.sendMessage("        " + "    " + instance.aliveTeams + " Place: "
-                                            + tokensEarned + " Tokens");
-                                    data3.tokens += tokensEarned;
-                                    loserBc.totalTokens += tokensEarned;
-
-                                    if (loserBc.totalKills >= 0) {
-                                        player.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
-                                                + ChatColor.BOLD + "  " + loserBc.totalKills + " Kills: "
-                                                + ChatColor.RESET + ChatColor.YELLOW + loserBc.totalKills + " Tokens");
-                                        data3.tokens += loserBc.totalKills;
-                                        loserBc.totalTokens += loserBc.totalKills;
-                                    }
-                                    if (losers.hasPermission("scb.rankBonus")) {
-                                        losers.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.BLUE
-                                                + ChatColor.BOLD + "  RANK BONUS: " + ChatColor.RESET + ChatColor.YELLOW
-                                                + "10 Tokens");
-                                        data3.tokens += 10;
-                                        loserBc.totalTokens += 10;
-                                    }
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-                                    losers.sendMessage(ChatColor.BOLD + "||");
-                                    losers.sendMessage(ChatColor.BOLD + "=====================");
-                                    losers.sendMessage(String.valueOf(ChatColor.LIGHT_PURPLE) + ChatColor.BOLD + "(!) "
-                                            + ChatColor.RESET + "You have gained " + ChatColor.YELLOW + loserBc.totalExp
-                                            + " EXP!");
-
-                                    if (data3.exp >= 2500) {
-                                        data3.level++;
-                                        data3.exp -= 2500;
-										losers.sendMessage(
-												instance.getGameManager().getMain().color("&8&m----------------------------------------"));
-										losers.sendMessage(instance.getGameManager().getMain().color("&6&l✦✦ &e&lLEVEL UP! &6&l✦✦"));
-										losers.sendMessage(instance.getGameManager().getMain()
-												.color("&7You are now &e&lLevel &6&l" + data3.level + " &7- nice work!"));
-										losers.sendMessage(
-												instance.getGameManager().getMain().color("&8&m----------------------------------------"));
-                                    }
-                                    losers.sendMessage(instance.getGameManager().getMain()
-                                            .color("&2&l(!) &rYou have gained &e" + loserBc.totalTokens + " Tokens"));
-                                }
-                            }
-                        }
-                        instance.aliveTeams--;
-                    }
-
-                } else if (lives == 1) {
-                    if (killer != null) {
-                        String msg = instance.getGameManager().getMain().color("&4&lKILLED &e" + p.getName());
-                        PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-                                (byte) 2);
-                        CraftPlayer craft = (CraftPlayer) killer;
-                        craft.getHandle().playerConnection.sendPacket(packet);
-                    }
-                    TellAll(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                            + p.getPlayer().getDisplayName() + ChatColor.RED + " has " + lives + " life left");
-
-                } else {
-                    if (killer != null) {
-                        String msg = instance.getGameManager().getMain().color("&4&lKILLED &e" + p.getName());
-                        PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-                                (byte) 2);
-                        CraftPlayer craft = (CraftPlayer) killer;
-                        craft.getHandle().playerConnection.sendPacket(packet);
-                    }
-                    TellAll(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                            + p.getPlayer().getDisplayName() + ChatColor.RED + " has " + lives + " lives left");
-                }
+				tellAll(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET
+						+ p.getPlayer().getDisplayName() + ChatColor.RED + " has " + lives + " live" + (lives == 1 ? "" : "s") + " left");
 
                 // END CRYSTAL
                 if (baseClassKiller != null) {
@@ -1212,25 +613,23 @@ public abstract class BaseClass {
 
                         if (instance.classes.containsKey(d)) {
                             baseClassKiller = instance.classes.get(d);
-                            baseClassKiller.classesEvent(d, baseClassKiller);
+                            baseClassKiller.killEvent(d);
                         }
                     } else {
                         if (killer != null) {
                             if (instance.classes.containsKey(killer)) {
                                 baseClassKiller = instance.classes.get(killer);
-                                baseClassKiller.classesEvent(killer, baseClassKiller);
+                                baseClassKiller.killEvent(killer);
                             }
                         }
                     }
                 } else if (killer != null) {
                     if (instance.classes.containsKey(killer)) {
                         baseClassKiller = instance.classes.get(killer);
-                        baseClassKiller.classesEvent(killer, baseClassKiller);
+                        baseClassKiller.killEvent(killer);
                     }
                 }
-                // EntityDamageEvent event = new EntityDamageEvent(p, DamageCause.VOID, 0);
                 p.setLastDamageCause(null);
-                // Bukkit.getServer().getPluginManager().callEvent(event);
             }
         }
     }
@@ -1257,411 +656,7 @@ public abstract class BaseClass {
 		task.set(bukkit);
 	}
 
-	private boolean foundDeath = false;
-
-	private void checkRegularKill(Player p, Player killer, BaseClass pClass) {
-		if (foundDeath)
-			return;
-
-		BaseClass kClass = null;
-		PlayerData kData = null;
-
-		if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
-			EntityDamageByEntityEvent entityDamageEvent = (EntityDamageByEntityEvent) p.getLastDamageCause();
-			Entity damager = entityDamageEvent.getDamager();
-
-			if (damager instanceof Player) {
-				Player d = (Player) damager;
-
-				if (instance.classes.containsKey(d)) {
-					kClass = instance.classes.get(d);
-					kData = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
-
-					if (d != p || killer != p) {
-						if (kData != null && kData.killMsgs == 1) {
-							giveStats(d, p);
-							TellAll(instance.getGameManager().getMain()
-									.color("&2&l(!) " + getPlayerRank(p) + "&r" + p.getPlayer().getName() + " "
-											+ pClass.getType().getTag() + " &cwas not strong enough to encounter "
-											+ getPlayerRank(d) + "&r" + d.getName() + " " + kClass.getType().getTag()));
-							healthPots(d);
-						} else {
-							giveStats(d, p);
-							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ getPlayerRank(p) + p.getPlayer().getName() + " " + pClass.getType().getTag()
-									+ ChatColor.RED + " was killed by " + ChatColor.WHITE + getPlayerRank(d)
-									+ d.getName() + " " + kClass.getType().getTag());
-							healthPots(d);
-						}
-						p.teleport(d);
-					} else {
-						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-								+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
-								+ " committed suicide");
-						p.teleport(instance.GetSpecLoc());
-					}
-				} else {
-					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-							+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED + " died");
-					p.teleport(instance.GetSpecLoc());
-				}
-			} else if (damager instanceof Zombie) {
-				TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-						+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
-						+ " was killed by a " + ChatColor.YELLOW + "zombie");
-			} else if (damager instanceof Skeleton) {
-				TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-						+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
-						+ " was shot to death by a " + ChatColor.YELLOW + "skeleton");
-			} else if (damager instanceof Arrow) {
-				Arrow a = (Arrow) damager;
-
-				if (a.getShooter() instanceof Player && a.getShooter() != null) {
-					Player shooter = (Player) a.getShooter();
-
-					if (instance.classes.containsKey(shooter)) {
-						kClass = instance.classes.get(shooter);
-						kData = instance.getGameManager().getMain().getDataManager().getPlayerData(shooter);
-
-						if (shooter != p || killer != p) {
-							if (kData != null && kData.killMsgs == 1) {
-								giveStats(shooter, p);
-								TellAll(instance.getGameManager().getMain()
-										.color("&2&l(!) " + getPlayerRank(p) + "&r" + p.getPlayer().getName() + " "
-												+ pClass.getType().getTag() + " &cwas not strong enough to encounter "
-												+ getPlayerRank(shooter) + "&r" + shooter.getName() + " "
-												+ kClass.getType().getTag()));
-								healthPots(shooter);
-							} else {
-								giveStats(shooter, p);
-								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-										+ getPlayerRank(p) + p.getPlayer().getName() + " " + pClass.getType().getTag()
-										+ ChatColor.RED + " was killed by " + ChatColor.WHITE + getPlayerRank(shooter)
-										+ shooter.getName() + " " + kClass.getType().getTag());
-								healthPots(shooter);
-							}
-							p.teleport(shooter);
-						}
-					} else {
-						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-								+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
-								+ " committed suicide");
-						p.teleport(instance.GetSpecLoc());
-					}
-				} else {
-					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-							+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED + " died");
-					p.teleport(instance.GetSpecLoc());
-				}
-			} else {
-				TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-						+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
-						+ " just died SO badly");
-				p.teleport(instance.GetSpecLoc());
-			}
-		} else if (killer != null && instance.classes.get(killer) != null) {
-			kData = instance.getGameManager().getMain().getDataManager().getPlayerData(killer);
-			kClass = instance.classes.get(killer);
-
-			if (killer != p) {
-				if (kData != null && kData.killMsgs == 1) {
-					this.giveStats(killer, p);
-					TellAll(instance.getGameManager().getMain()
-							.color("&2&l(!) " + getPlayerRank(p) + "&r" + p.getPlayer().getName() + " "
-									+ pClass.getType().getTag() + " &cwas not strong enough to encounter "
-									+ getPlayerRank(killer) + "&r" + killer.getName() + " "
-									+ kClass.getType().getTag()));
-					this.healthPots(killer);
-				} else {
-					this.giveStats(killer, p);
-					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-							+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
-							+ " was killed by " + ChatColor.WHITE + getPlayerRank(killer) + killer.getName() + " "
-							+ kClass.getType().getTag());
-					this.healthPots(killer);
-				}
-				p.teleport(killer);
-			} else {
-				TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-						+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
-						+ " committed suicide");
-				p.teleport(instance.GetSpecLoc());
-			}
-
-			this.foundDeath = true;
-		}
-	}
-
-	private void checkWitherKill(Player p, Player killer, BaseClass pClass, BaseClass kClass) {
-		if (foundDeath)
-			return;
-
-		if (p.getLastDamageCause() != null && p.getLastDamageCause().getCause() != null
-				&& p.getLastDamageCause().getCause() == DamageCause.WITHER) {
-			if (killer == null) {
-				TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-						+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED + " withered away");
-				p.teleport(instance.GetSpecLoc());
-			} else {
-				this.giveStats(killer, p);
-				TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-						+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
-						+ " was withered by " + ChatColor.WHITE + getPlayerRank(killer) + killer.getName() + " "
-						+ kClass.getType().getTag());
-				p.teleport(instance.GetSpecLoc());
-				healthPots(killer);
-			}
-
-			this.foundDeath = true;
-		}
-	}
-
-	private void checkMagicKill(Player p, BaseClass pClass) {
-		if (foundDeath)
-			return;
-
-		if (p.getLastDamageCause() != null && p.getLastDamageCause().getCause() != null
-				&& p.getLastDamageCause().getCause() == DamageCause.MAGIC) {
-			TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-					+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
-					+ " was murdered via the dark arts");
-			p.teleport(instance.GetSpecLoc());
-			this.foundDeath = true;
-		}
-	}
-
-	private void checkVoidKill(Player p, Player killer, BaseClass pClass, PlayerData pData) {
-		if (foundDeath)
-			return;
-
-		BaseClass kClass = null;
-		PlayerData kData = null;
-
-		if (p.getLocation().getY() <= 50) {
-			if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
-				EntityDamageByEntityEvent entityDamageEvent = (EntityDamageByEntityEvent) p.getLastDamageCause();
-				Entity damager = entityDamageEvent.getDamager();
-
-				if (damager instanceof Player && damager != null) {
-					Player d = (Player) damager;
-					if (instance.classes.containsKey(d)) { // Verify they're still in the same game
-						kClass = instance.classes.get(d);
-						kData = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
-
-						if (kData != null && kData.killMsgs == 1) { // If they have custom kill msgs enabled
-							this.giveStats(d, p);
-							TellAll(instance.getGameManager().getMain()
-									.color("&2&l(!) &cHello? AND GOODBYE TO " + getPlayerRank(p) + ChatColor.WHITE
-											+ p.getPlayer().getName() + " " + pClass.getType().getTag()
-											+ " &cAND ANYONE ELSE STANDING IN " + getPlayerRank(d) + ChatColor.WHITE
-											+ d.getName() + " " + kClass.getType().getTag() + "'s &cWAY!"));
-						} else {
-							this.giveStats(d, p);
-							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ getPlayerRank(p) + p.getPlayer().getName() + " " + pClass.getType().getTag()
-									+ ChatColor.RED + " was doomed to fall by " + ChatColor.WHITE + getPlayerRank(d)
-									+ d.getName() + " " + kClass.getType().getTag());
-						}
-						p.teleport(d.getLocation());
-					} else {
-						Random r = new Random();
-						int chance = r.nextInt(2);
-
-						if (pData != null && pData.killMsgs == 1) {
-							if (chance == 0) {
-								TellAll(instance.getGameManager().getMain()
-										.color("&2&l(!) "
-												+ instance.getGameManager().getMain().getRankManager().getRank(player)
-														.getTagWithSpace()
-												+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-												+ " &csaid NO THANK YOU and took the easy way out"));
-							} else {
-								TellAll(instance.getGameManager().getMain()
-										.color("&2&l(!) "
-												+ instance.getGameManager().getMain().getRankManager().getRank(player)
-														.getTagWithSpace()
-												+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-												+ " &cwalked off the edge..."));
-							}
-						} else {
-							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ instance.getGameManager().getMain().getRankManager().getRank(player)
-											.getTagWithSpace()
-									+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
-									+ " fell into the void");
-						}
-						p.teleport(instance.GetSpecLoc());
-					}
-
-				} else if (damager instanceof Arrow) {
-					Arrow a = (Arrow) damager;
-
-					if (a.getShooter() instanceof Player && a.getShooter() != null) {
-						Player d = (Player) a.getShooter();
-
-						if (instance.classes.containsKey(d)) {
-							kClass = instance.classes.get(d);
-							kData = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
-
-							if (kData != null && kData.killMsgs == 1) {
-								this.giveStats(d, p);
-								TellAll(instance.getGameManager().getMain()
-										.color("&2&l(!) &cHello? AND GOODBYE TO " + getPlayerRank(p) + ChatColor.WHITE
-												+ p.getPlayer().getName() + " " + pClass.getType().getTag()
-												+ " &cAND ANYONE ELSE STANDING IN " + getPlayerRank(d) + ChatColor.WHITE
-												+ d.getName() + " " + kClass.getType().getTag() + "'s &cWAY!"));
-							} else {
-								this.giveStats(d, p);
-								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-										+ getPlayerRank(p) + p.getPlayer().getName() + " " + pClass.getType().getTag()
-										+ ChatColor.RED + " was doomed to fall by " + ChatColor.WHITE + getPlayerRank(d)
-										+ d.getName() + " " + kClass.getType().getTag());
-							}
-						} else {
-							Random r = new Random();
-							int chance = r.nextInt(2);
-
-							if (pData != null && pData.killMsgs == 1) {
-								if (chance == 0) {
-									TellAll(instance.getGameManager().getMain()
-											.color("&2&l(!) "
-													+ instance.getGameManager().getMain().getRankManager()
-															.getRank(player).getTagWithSpace()
-													+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-													+ " &csaid NO THANK YOU and took the easy way out"));
-								} else {
-									TellAll(instance.getGameManager().getMain().color("&2&l(!) "
-											+ instance.getGameManager().getMain().getRankManager().getRank(player)
-													.getTagWithSpace()
-											+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-											+ " &cwalked off the edge..."));
-								}
-							} else {
-								TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-										+ instance.getGameManager().getMain().getRankManager().getRank(player)
-												.getTagWithSpace()
-										+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
-										+ " fell into the void");
-							}
-							p.teleport(instance.GetSpecLoc());
-						}
-					} else {
-						Random r = new Random();
-						int chance = r.nextInt(2);
-
-						if (pData != null && pData.killMsgs == 1) {
-							if (chance == 0) {
-								TellAll(instance.getGameManager().getMain()
-										.color("&2&l(!) "
-												+ instance.getGameManager().getMain().getRankManager().getRank(player)
-														.getTagWithSpace()
-												+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-												+ " &csaid NO THANK YOU and took the easy way out"));
-							} else {
-								TellAll(instance.getGameManager().getMain()
-										.color("&2&l(!) "
-												+ instance.getGameManager().getMain().getRankManager().getRank(player)
-														.getTagWithSpace()
-												+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-												+ " &cwalked off the edge..."));
-							}
-						} else {
-							TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-									+ instance.getGameManager().getMain().getRankManager().getRank(player)
-											.getTagWithSpace()
-									+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
-									+ " fell into the void");
-						}
-						p.teleport(instance.GetSpecLoc());
-					}
-				} else {
-					Random r = new Random();
-					int chance = r.nextInt(2);
-
-					if (pData != null && pData.killMsgs == 1) {
-						if (chance == 0) {
-							TellAll(instance.getGameManager().getMain().color("&2&l(!) "
-									+ instance.getGameManager().getMain().getRankManager().getRank(player)
-											.getTagWithSpace()
-									+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-									+ " &csaid NO THANK YOU and took the easy way out"));
-						} else {
-							TellAll(instance.getGameManager().getMain()
-									.color("&2&l(!) "
-											+ instance.getGameManager().getMain().getRankManager().getRank(player)
-													.getTagWithSpace()
-											+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-											+ " &cwalked off the edge..."));
-						}
-					} else {
-						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-								+ instance.getGameManager().getMain().getRankManager().getRank(player).getTagWithSpace()
-								+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
-								+ " fell into the void");
-					}
-					p.teleport(instance.GetSpecLoc());
-				}
-			} else if (killer != null && instance.classes.containsKey(killer)) {
-				kData = instance.getGameManager().getMain().getDataManager().getPlayerData(killer);
-				kClass = instance.classes.get(killer);
-
-				if (killer != p) {
-					if (kData != null && kData.killMsgs == 1) {
-						this.giveStats(killer, p);
-						TellAll(instance.getGameManager().getMain()
-								.color("&2&l(!) " + getPlayerRank(p) + "&r" + p.getPlayer().getName() + " "
-										+ pClass.getType().getTag() + " &cwas not strong enough to encounter "
-										+ getPlayerRank(killer) + "&r" + killer.getName() + " "
-										+ kClass.getType().getTag()));
-					} else {
-						this.giveStats(killer, p);
-						TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-								+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
-								+ " was killed by " + ChatColor.WHITE + getPlayerRank(killer) + killer.getName() + " "
-								+ kClass.getType().getTag());
-					}
-					p.teleport(killer);
-				} else {
-					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET + getPlayerRank(p)
-							+ p.getPlayer().getName() + " "
-							+ /* baseClass2.getType().getTag() */pClass.getType().getTag() + ChatColor.RED
-							+ " committed suicide");
-					p.teleport(instance.GetSpecLoc());
-				}
-			} else {
-				Random r = new Random();
-				int chance = r.nextInt(2);
-
-				if (pData != null && pData.killMsgs == 1) {
-					if (chance == 0) {
-						TellAll(instance.getGameManager().getMain()
-								.color("&2&l(!) "
-										+ instance.getGameManager().getMain().getRankManager().getRank(player)
-												.getTagWithSpace()
-										+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-										+ " &csaid NO THANK YOU and took the easy way out"));
-					} else {
-						TellAll(instance.getGameManager().getMain()
-								.color("&2&l(!) "
-										+ instance.getGameManager().getMain().getRankManager().getRank(player)
-												.getTagWithSpace()
-										+ "&r" + p.getPlayer().getName() + " " + pClass.getType().getTag()
-										+ " &cwalked off the edge..."));
-					}
-				} else {
-					TellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ instance.getGameManager().getMain().getRankManager().getRank(player).getTagWithSpace()
-							+ p.getPlayer().getName() + " " + pClass.getType().getTag() + ChatColor.RED
-							+ " fell into the void");
-				}
-				p.teleport(instance.GetSpecLoc());
-			}
-
-			this.foundDeath = true;
-		}
-	}
-
-	// This function removes any mobs that the player who died has spawned
+	// Removes any mobs that the player who died has spawned
 	private void removeMobs(Player p) {
 		for (Entity en : p.getWorld().getEntities())
 			if (!(en instanceof Player))
@@ -1669,6 +664,7 @@ public abstract class BaseClass {
 					en.remove();
 	}
 
+	// Resets target for any mob targeting the player who died
 	private void resetMobTarget(Player p) {
 		for (Creature en : p.getWorld().getEntitiesByClass(Creature.class)) {
 			if (en.getTarget() != null && en.getTarget() == p) {
@@ -1742,16 +738,16 @@ public abstract class BaseClass {
 	}
 
 	// Giving health potions on kill
-	protected void healthPots(final Player d) {
+	protected void giveHealthPot(Player killer) {
 		Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new Runnable() {
 			@Override
 			public void run() {
-				if (checkIfDead(d, instance) || instance.classes.get(d).getType() == ClassType.Horse)
+				if (checkIfDead(killer, instance) || instance.classes.get(killer).getType() == ClassType.Horse)
 					return;
 
 				if (instance.alivePlayers == 1) return;
 
-				if (d.getHealth() / d.getMaxHealth() >= 0.5) return;
+				if (killer.getHealth() / killer.getMaxHealth() >= 0.5) return;
 
 				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
 						String.valueOf(ChatColor.RED) + ChatColor.BOLD + "HEALING I");
@@ -1761,12 +757,12 @@ public abstract class BaseClass {
 				pot.setSplash(true);
 				pot.apply(item);
 
-				d.getInventory().addItem(item);
+				killer.getInventory().addItem(item);
 
 				Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new Runnable() {
 					@Override
 					public void run() {
-						d.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET
+						killer.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET
 								+ ChatColor.YELLOW + "You got a kill and got rewarded a " + ChatColor.YELLOW + ChatColor.BOLD
 								+ "Health Pot");
 					}
@@ -1776,191 +772,55 @@ public abstract class BaseClass {
 	}
 
 	// Gives the killer kills for stats, points for tourney, etc
-	private void giveStats(Player d, Player p) {
-		PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
-		if (d != null) {
-			if (instance.classes.containsKey(d)) {
-				PlayerData data2 = instance.getGameManager().getMain().getDataManager().getPlayerData(d);
-				BaseClass baseClass3 = instance.classes.get(d);
+	private void giveStats(Player killer, Player victim) {
+		if (killer != null && instance.classes.containsKey(killer)) {
+				PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(killer);
+				BaseClass baseClass = instance.classes.get(killer);
+
 				// For first blood:
 				if (instance.firstBlood == null) {
-					instance.firstBlood = d;
-					TellAll("");
-					TellAll(instance.color("&2&l(!) &r" + d.getName() + " &adrew first blood!"));
-					TellAll("");
-					baseClass3.totalTokens += 10;
+					instance.firstBlood = killer;
+					tellAll("");
+					tellAll(instance.color("&2&l(!) &r" + killer.getName() + " &adrew first blood!"));
+					tellAll("");
+					baseClass.totalTokens += 10;
 					if (instance.getGameManager().getMain().tournament) {
 						if (instance.gameType != GameType.DUEL) {
-							data2.points += 2;
-							instance.getGameManager().getMain().tourney.put(d.getName(), data2.points);
+							data.points += 2;
+							instance.getGameManager().getMain().tourney.put(killer.getName(), data.points);
 						}
 					}
 				}
 
-				if (data2 != null) {
-					data2.kills += 1;
-					data2.exp += 29;
-					baseClass3.totalExp += 29;
+				if (data != null) {
+					data.kills += 1;
+					data.exp += 29;
+					baseClass.totalExp += 29;
 					if (instance.getGameManager().getMain().tournament) {
 						if (instance.gameType != GameType.DUEL) {
-							data2.points++;
-							instance.getGameManager().getMain().tourney.put(d.getName(), data2.points);
+							data.points++;
+							instance.getGameManager().getMain().tourney.put(killer.getName(), data.points);
 						}
 					}
 
-					d.playSound(d.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
+					killer.playSound(killer.getLocation(), Sound.SUCCESSFUL_HIT, 2, 1);
 
-					if (baseClass3 != null) {
-						baseClass3.totalTokens += 1;
-						baseClass3.totalKills++;
-						baseClass3.eachLifeKills++;
-						this.checkBountyKill(baseClass3, p, d);
+					if (baseClass != null) {
+						baseClass.totalTokens += 1;
+						baseClass.totalKills++;
+						baseClass.eachLifeKills++;
+						this.checkBountyKill(baseClass, victim, killer);
 					}
 				}
 			}
-		}
+
 	}
 
 	// Classes such as Sheep & Hunter for example that when they get a kill,
 	// they one of their abilities back
-	public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
-		if (damagerPlayer == null || !instance.classes.containsKey(damagerPlayer)) {
-			return;
-		}
+	public void killEvent(Player damagerPlayer) {}
 
-		if (checkIfDead(damagerPlayer, instance)) {
-			return;
-		}
-
-		baseClass = instance.classes.get(damagerPlayer);
-
-		if (baseClass == null) {
-			return;
-		}
-
-		if (baseClass.getType() == ClassType.Sheep) {
-			damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
-					"&r&l(!) &rYou got a kill and now you can switch your wool color if you'd like!"
-			));
-
-			ItemStack currentItem = damagerPlayer.getInventory().getItem(1);
-			ItemStack woolEnchanter = ItemHelper.setDetails(new ItemStack(Material.ENCHANTMENT_TABLE, 1),
-					ChatColor.BLUE + "Wool Enchanter", ChatColor.YELLOW + "Right click!");
-
-			if (currentItem == null || currentItem.getType() != Material.ENCHANTMENT_TABLE) {
-				damagerPlayer.getInventory().setItem(1, woolEnchanter);
-			} else {
-				damagerPlayer.getInventory().addItem(woolEnchanter);
-			}
-
-		} else if (baseClass.getType() == ClassType.Hunter) {
-			if (!hunterDash) {
-				damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
-						"&r&l(!) &rYour &r&lDash &rhas been regenerated for getting a kill!"
-				));
-
-				hunterDash = true;
-
-				ItemStack dash = ItemHelper.addEnchant(
-						ItemHelper.setDetails(
-								new ItemStack(Material.FEATHER),
-								instance.getGameManager().getMain().color("&b&lDash"),
-								instance.getGameManager().getMain().color("&7A quick escape or attack")
-						),
-						Enchantment.PROTECTION_ENVIRONMENTAL,
-						1
-				);
-
-				damagerPlayer.getInventory().setItem(1, dash);
-			}
-
-		} else if (baseClass.getType() == ClassType.Present) {
-			damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
-					"&r&l(!) &rYour &r&lAggressive Gift has regenerated and you can get a new weapon if you'd like!"
-			));
-
-			damagerPlayer.getInventory().addItem(
-					ItemHelper.setDetails(
-							new ItemStack(Material.CHEST, 1),
-							String.valueOf(ChatColor.RESET) + ChatColor.ITALIC + "Agressive Gift",
-							"",
-							String.valueOf(ChatColor.RESET) + ChatColor.YELLOW
-									+ "Steals another player's main item"
-					)
-			);
-
-		} else if (baseClass.getType() == ClassType.PiglinBrute) {
-			ItemStack item = ItemHelper.setDetails(
-					new ItemStack(Material.GOLD_BLOCK, 2),
-					"&eGold Balls",
-					"&7Right click to throw DEADLY gold balls!"
-			);
-
-			damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
-					"&2&l(!) &rYou got a kill and gained &e2 Gold Balls"
-			));
-
-			ItemStack currentItem = damagerPlayer.getInventory().getItem(1);
-
-			if (currentItem == null || currentItem.getType() != Material.GOLD_BLOCK) {
-				damagerPlayer.getInventory().setItem(1, item);
-			} else {
-				damagerPlayer.getInventory().addItem(item);
-			}
-
-		} else if (baseClass.getType() == ClassType.Enderman) {
-			ItemStack item = ItemHelper.setDetails(
-					new ItemStack(Material.ENDER_PEARL, 1),
-					instance.color("&5&lTeleporter &7(Right Click)")
-			);
-
-			damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
-					"&2&l(!) &rYou got a kill and gained an extra &5&lTeleporter"
-			));
-
-			ItemStack currentItem = damagerPlayer.getInventory().getItem(2);
-
-			if (currentItem == null || currentItem.getType() != Material.ENDER_PEARL) {
-				damagerPlayer.getInventory().setItem(2, item);
-			} else {
-				damagerPlayer.getInventory().addItem(item);
-			}
-
-		} else if (baseClass.getType() == ClassType.Chicken) {
-			ItemStack item = ItemHelper.setDetails(
-					new ItemStack(Material.EGG, 2),
-					instance.color("&eExplosive Eggs"),
-					"",
-					instance.color("&7Right click to throw DEADLY eggs!")
-			);
-
-			damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
-					"&2&l(!) &rYou got a kill and gained 2 extra &eExplosive Eggs"
-			));
-
-			ItemStack currentItem = damagerPlayer.getInventory().getItem(1);
-
-			if (currentItem == null || currentItem.getType() != Material.EGG) {
-				damagerPlayer.getInventory().setItem(1, item);
-			} else {
-				damagerPlayer.getInventory().addItem(item);
-			}
-
-		} else if (baseClass.getType() == ClassType.GrimReaper) {
-			ItemStack zombieEgg = ItemHelper.createMonsterEgg(
-					EntityType.ZOMBIE,
-					1,
-					"&2&lZOMBIE POKEBALL"
-			);
-
-			damagerPlayer.getInventory().setItem(2, zombieEgg);
-
-		} else if (baseClass.getType() == ClassType.Wolf) {
-			wolfPackAdd = true;
-		}
-	}
-
-	public void TellAll(String msg) {
+	public void tellAll(String msg) {
 		for (Player player : instance.players)
 			player.sendMessage(msg);
 

@@ -375,4 +375,12 @@ public class SheepClass extends BaseClass {
 
 		player.getInventory().setItem(0, weapon);
 	}
+
+	@Override
+	public void killEvent(Player damagerPlayer) {
+		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+			damagerPlayer.getInventory().addItem(new ItemStack(Material.ENCHANTMENT_TABLE));
+			damagerPlayer.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou got a kill and now you can switch your wool color if you'd like!"));
+		}
+	}
 }

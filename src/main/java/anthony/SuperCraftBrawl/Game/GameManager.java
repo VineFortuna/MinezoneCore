@@ -1001,7 +1001,7 @@ public class GameManager implements Listener, PluginMessageListener {
 					int amount = item.getAmount();
 					baseClass.lives += 1;
 					baseClass.score.setScore(baseClass.lives);
-                    baseClass.TellAll(main.color("&2&l(!) &a" + player.getName() + "&r used an extra life!"));
+                    baseClass.tellAll(main.color("&2&l(!) &a" + player.getName() + "&r used an extra life!"));
 					player.getWorld().playSound(player.getLocation(), Sound.LEVEL_UP, 1, 2);
 
 					if (amount > 0) {
@@ -2777,7 +2777,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		mob.setCustomNameVisible(true);
 	}
 
-	public String getMobTypeName(EntityType entityType) {
+	public static String getMobTypeName(EntityType entityType) {
 		switch (entityType) {
 		case SKELETON:
 			return "Skeleton";

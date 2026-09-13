@@ -464,4 +464,26 @@ public class EndermanClass extends BaseClass {
     public ItemStack getAttackWeapon() {
         return weapon;
     }
+
+    @Override
+    public void killEvent(Player damagerPlayer) {
+        if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+            ItemStack item = ItemHelper.setDetails(
+                    new ItemStack(Material.ENDER_PEARL, 1),
+                    instance.color("&5&lTeleporter &7(Right Click)")
+            );
+
+            damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
+                    "&2&l(!) &rYou got a kill and gained an extra &5&lTeleporter"
+            ));
+
+            ItemStack currentItem = damagerPlayer.getInventory().getItem(2);
+
+            if (currentItem == null || currentItem.getType() != Material.ENDER_PEARL) {
+                damagerPlayer.getInventory().setItem(2, item);
+            } else {
+                damagerPlayer.getInventory().addItem(item);
+            }
+        }
+    }
 }

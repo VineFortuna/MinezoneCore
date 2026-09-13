@@ -192,4 +192,12 @@ public class GrimReaperClass extends BaseClass {
 		return item;
 	}
 
+	@Override
+	public void killEvent(Player damagerPlayer) {
+		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+			ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
+			damagerPlayer.getInventory().setItem(2, zombieEgg);
+		}
+	}
+
 }
