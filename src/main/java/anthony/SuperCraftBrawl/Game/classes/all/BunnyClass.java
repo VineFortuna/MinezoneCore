@@ -40,7 +40,7 @@ public class BunnyClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		playerInv.setItem(0,
 				ItemHelper.addEnchant(
 						ItemHelper.addEnchant(new ItemStack(Material.CARROT_ITEM), Enchantment.DAMAGE_ALL, 3),
@@ -56,7 +56,7 @@ public class BunnyClass extends BaseClass {
 
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED))) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2));
 		}
@@ -89,7 +89,7 @@ public class BunnyClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 
 		if (item != null && item.getType() == Material.GOLDEN_CARROT
@@ -115,7 +115,7 @@ public class BunnyClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 		// TODO Auto-generated method stub
 	}
 

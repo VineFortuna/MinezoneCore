@@ -69,7 +69,7 @@ public class WitherClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		skullAbility.getCooldownInstance().reset();
 		skullCounter = SKULL_AMOUNT;
 		playerInv.setItem(0, weapon);
@@ -78,7 +78,7 @@ public class WitherClass extends BaseClass {
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (!isPlayerAlive()) return;
 
 		if (!skullAbility.isReady()) {
@@ -94,7 +94,7 @@ public class WitherClass extends BaseClass {
 	}
 
 	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
+	public void doDamage(EntityDamageByEntityEvent event) {
 		if (!isPlayerAlive()) return;
 		if (instance.getGameManager().spawnProt.containsKey(player)) return;
 		checkToApplyWither(event);
@@ -119,7 +119,7 @@ public class WitherClass extends BaseClass {
 	}
 
 	@Override
-	public void ProjectileLaunch(ProjectileLaunchEvent event) {
+	public void projectileLaunch(ProjectileLaunchEvent event) {
 		if (event.getEntityType() == EntityType.ARROW) {
 			event.setCancelled(true);
 

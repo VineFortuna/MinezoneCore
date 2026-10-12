@@ -61,7 +61,7 @@ public class WitherSkeletonClass extends BaseClass {
     }
 
     @Override
-    public void ProjectileLaunch(ProjectileLaunchEvent event) {
+    public void projectileLaunch(ProjectileLaunchEvent event) {
         Entity e = event.getEntity();
 
         if (this.used == true) {
@@ -79,7 +79,7 @@ public class WitherSkeletonClass extends BaseClass {
     }
 
     @Override
-    public void Tick(int gameTicks) {
+    public void tick(int gameTicks) {
         if (instance.classes.containsKey(player) && instance.classes.get(player).getLives() > 0
                 && instance.classes.get(player).getType() == ClassType.WitherSkeleton)
             if (!(player.getInventory().contains(this.getAttackWeapon())))
@@ -185,7 +185,7 @@ public class WitherSkeletonClass extends BaseClass {
 
     @SuppressWarnings("deprecation")
     @Override
-    public void DoDamage(EntityDamageByEntityEvent event) {
+    public void doDamage(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Arrow) {
             Arrow a = (Arrow) event.getDamager();
             if (a.getShooter() instanceof Player) {
@@ -254,7 +254,7 @@ public class WitherSkeletonClass extends BaseClass {
     }
 
     @Override
-    public void SetItems(Inventory playerInv) {
+    public void setItems(Inventory playerInv) {
         this.cooldown = 0;
         this.used = false;
         this.bow = ItemHelper
@@ -276,7 +276,7 @@ public class WitherSkeletonClass extends BaseClass {
     }
 
     @Override
-    public void UseItem(PlayerInteractEvent event) {
+    public void useItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
 
         if (item != null) {

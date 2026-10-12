@@ -55,20 +55,20 @@ public class GingerBreadManClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 
 	}
 
 	// Setting items
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		this.chocChips.setAmount(5);
 		playerInv.setItem(0, getAttackWeapon());
 		playerInv.setItem(1, this.chocChips);
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 
 		if (item != null) {

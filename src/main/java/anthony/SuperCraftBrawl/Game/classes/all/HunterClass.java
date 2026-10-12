@@ -94,7 +94,7 @@ public class HunterClass extends BaseClass {
 	}
 
 	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
+	public void doDamage(EntityDamageByEntityEvent event) {
 		if (!isPlayerAlive()) return;
 		if (!(event.getEntity() instanceof Player)) return;
 
@@ -154,7 +154,7 @@ public class HunterClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		bloodLust = 0;
 		hunterDash = true;
 		player.sendMessage("" + ChatColor.BOLD + "===============================");
@@ -169,7 +169,7 @@ public class HunterClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		if (item != null) {
 			if (item.getType() == Material.FEATHER
@@ -200,5 +200,19 @@ public class HunterClass extends BaseClass {
 	@Override
 	public ItemStack getAttackWeapon() {
 		return weapon;
+	}
+
+	@Override
+	public void killEvent(Player damagerPlayer) {
+		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+			if (!hunterDash) {
+				damagerPlayer.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYour &r&lDash &rhas been regenerated for getting a kill!"));
+				hunterDash = true;
+				ItemStack dash = ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.FEATHER),
+								instance.getGameManager().getMain().color("&b&lDash"), instance.getGameManager().getMain().color("&7A quick escape or attack")),
+						Enchantment.PROTECTION_ENVIRONMENTAL, 1);
+				player.getInventory().setItem(1, dash);
+			}
+		}
 	}
 }

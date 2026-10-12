@@ -100,13 +100,13 @@ public class HorseClass extends BaseClass {
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (!isPlayerAlive()) return;
 		jumpAbility.updateActionBar(player, this);
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		// Resetting Jump Ability CD
 		jumpAbility.getCooldownInstance().reset();
 
@@ -118,10 +118,12 @@ public class HorseClass extends BaseClass {
 	}
 
 	@Override
-	public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
-		if (isPlayerAlive()) {
-			giveRandomTreat(damagerPlayer);
-			damagerPlayer.sendMessage(ChatColorHelper.color("&2&l(!) &r&eYou got rewarded with a special treat"));
+	public void killEvent(Player damagerPlayer) {
+		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+			if (isPlayerAlive()) {
+				giveRandomTreat(damagerPlayer);
+				damagerPlayer.sendMessage(ChatColorHelper.color("&2&l(!) &r&eYou got rewarded with a special treat"));
+			}
 		}
 	}
 
@@ -146,7 +148,7 @@ public class HorseClass extends BaseClass {
 
 	@SuppressWarnings("deprecation") // isOnGround() method
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 
 		if (item != null) {

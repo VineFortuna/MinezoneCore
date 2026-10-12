@@ -110,10 +110,10 @@ public class WizardClass extends BaseClass {
     }
 
     @Override
-    public void SetNameTag() {}
+    public void setNameTag() {}
 
     @Override
-    public void SetItems(Inventory playerInv) {
+    public void setItems(Inventory playerInv) {
         clearCurrentSpellEffects();
 
         spellPicked = false;
@@ -128,7 +128,7 @@ public class WizardClass extends BaseClass {
     }
 
     @Override
-    public void Tick(int gameTicks) {
+    public void tick(int gameTicks) {
         if (!instance.classes.containsKey(player)) return;
         if (instance.classes.get(player).getType() != ClassType.Wizard) return;
         if (instance.classes.get(player).getLives() <= 0) return;
@@ -171,7 +171,7 @@ public class WizardClass extends BaseClass {
     }
 
     @Override
-    public void DoDamage(EntityDamageByEntityEvent event) {
+    public void doDamage(EntityDamageByEntityEvent event) {
         if (!blindness) return;
         if (!(event.getEntity() instanceof LivingEntity)) return;
 
@@ -192,7 +192,7 @@ public class WizardClass extends BaseClass {
     }
 
     @Override
-    public void UseItem(PlayerInteractEvent event) {
+    public void useItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         if (item == null) return;
         if (player.getGameMode() == GameMode.SPECTATOR) return;

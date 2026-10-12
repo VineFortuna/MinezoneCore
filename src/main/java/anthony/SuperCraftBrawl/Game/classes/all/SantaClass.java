@@ -51,7 +51,7 @@ public class SantaClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		this.cookieUses = 0;
 
 		playerInv.setItem(0, getAttackWeapon());
@@ -63,7 +63,7 @@ public class SantaClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = player.getItemInHand();
 
 		if (item != null && item.getType() == Material.MONSTER_EGG) {
@@ -159,7 +159,7 @@ public class SantaClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 
 	}
 

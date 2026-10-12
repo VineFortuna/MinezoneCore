@@ -87,7 +87,7 @@ public class FlintAndSteelClass extends BaseClass {
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public void DoDamage2(EntityDamageByEntityEvent event) {
+	public void doDamage2(EntityDamageByEntityEvent event) {
 		if (event.getEntity() instanceof Player) {
 			Player p = (Player) event.getEntity();
 			if (instance.duosMap != null)
@@ -195,7 +195,7 @@ public class FlintAndSteelClass extends BaseClass {
 	}
 
 	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
+	public void doDamage(EntityDamageByEntityEvent event) {
 		if (runnable == null) {
 			if (!isUsed) {
 				if (!flintUsed) {
@@ -240,7 +240,7 @@ public class FlintAndSteelClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		flintUsed = false; // Default state
 		isUsed = false; // Default state
 		playerInv.setItem(0, flintItem);

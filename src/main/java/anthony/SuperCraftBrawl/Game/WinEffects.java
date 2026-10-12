@@ -1,9 +1,10 @@
 package anthony.SuperCraftBrawl.Game;
 
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.util.ItemHelper;
 import net.minecraft.server.v1_8_R3.PacketPlayOutNamedSoundEffect;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -52,20 +53,22 @@ public class WinEffects {
         this.instance = instance;
     }
 
-    public void checkWinEffect() { // Database checking here
-        if (instance != null) {
-            PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(player);
-            if (data != null) {
-                if (data.enderDragonEffect == 1) enderDragonEffect();
-                else if (data.santaEffect == 1)   santaEffect();
-                else if (data.fireParticlesEffect == 1) fireParticlesEffect();
-                else if (data.broomWinEffect == 1) magicBroomEffect();
-                else if (data.fishRainEffect == 1) fishRainEffect();
-                else if (data.floodEffect == 1)    floodEffect();
-                else if (data.treasureEffect == 1) treasureEffect();
-                else if (data.ritualEffect == 1)   ritualEffect();
-                else defaultEffect();
-            }
+    public void checkWinEffect() {
+        if (instance == null) return;
+
+        Core main = instance.getGameManager().getMain();
+        String id = main.getCosmeticManager().getEquippedId(player, CosmeticCategory.WIN_EFFECT);
+        if (id == null) id = "default";
+
+        switch (id) {
+            case "ender_dragon": enderDragonEffect(); break;
+            case "santa": santaEffect(); break;
+            case "magic_broom": magicBroomEffect(); break;
+            case "fish_rain": fishRainEffect(); break;
+            case "flood": floodEffect(); break;
+            case "treasure_hoard": treasureEffect(); break;
+            case "ritual": ritualEffect(); break;
+            default: defaultEffect();
         }
     }
 

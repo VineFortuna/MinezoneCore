@@ -91,7 +91,7 @@ public class CloudClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 		// TODO Auto-generated method stub
 
 	}
@@ -293,7 +293,7 @@ public class CloudClass extends BaseClass {
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		// Cooldown stuff:
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Cloud
 				&& instance.classes.get(player).getLives() > 0) {
@@ -329,7 +329,7 @@ public class CloudClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		cloud.startTime = System.currentTimeMillis() - 100000;
 		this.whiteWool = false; // Default when spawning in
 		this.blackWool = false;
@@ -344,7 +344,7 @@ public class CloudClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
 		Action action = event.getAction();
 

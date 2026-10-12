@@ -39,7 +39,7 @@ public class SlimeClass extends BaseClass {
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Slime
 				&& instance.classes.get(player).getLives() > 0) {
 			this.cooldownSec = (5000 - slimeBall.getTime()) / 1000 + 1;
@@ -61,7 +61,7 @@ public class SlimeClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		slimeBall.startTime = System.currentTimeMillis() - 100000;
 		playerInv.setItem(0, this.getAttackWeapon());
 		ItemStack slime = getSlimeBall();
@@ -70,7 +70,7 @@ public class SlimeClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		if (item != null && item.getType() == Material.SLIME_BALL
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK
@@ -98,7 +98,7 @@ public class SlimeClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 		// TODO Auto-generated method stub
 
 	}

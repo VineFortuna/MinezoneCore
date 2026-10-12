@@ -56,18 +56,18 @@ public class SquidClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		playerInv.setItem(0, weapon);
 	}
 	
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (!isPlayerAlive()) return;
 		inkAbility.updateActionBar(player, this);
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		Action action = event.getAction();
 

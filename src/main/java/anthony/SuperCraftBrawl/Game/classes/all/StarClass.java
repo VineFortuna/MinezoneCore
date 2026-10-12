@@ -45,7 +45,7 @@ public class StarClass extends BaseClass {
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (isSpawned) {
 			if (count > 0) {
 				if (gameTicks % 20 == 0) {
@@ -98,12 +98,12 @@ public class StarClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		count = 10; // To reset each life
 		isSpawned = false; // Also here too
 		for (Entity e : player.getWorld().getEntities()) {
@@ -116,7 +116,7 @@ public class StarClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 
 		if (item != null && event.getAction().name().contains("RIGHT_CLICK")) {

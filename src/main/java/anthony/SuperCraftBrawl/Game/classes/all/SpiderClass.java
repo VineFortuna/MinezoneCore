@@ -91,7 +91,7 @@ public class SpiderClass extends BaseClass {
 	}
 
 	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
+	public void doDamage(EntityDamageByEntityEvent event) {
 		if (!isPlayerAlive()) return;
 		if (venomTaskId == -1) return;
 
@@ -110,7 +110,7 @@ public class SpiderClass extends BaseClass {
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (!isPlayerAlive()) return;
 		handleAddingWebItem();
 		// ActionBar
@@ -146,7 +146,7 @@ public class SpiderClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		// Resetting Dance Ability CD
 		mutateAbility.getCooldownInstance().reset();
 		webAbility.getCooldownInstance().reset();
@@ -160,7 +160,7 @@ public class SpiderClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		Action action = event.getAction();
 		if (item == null) return;
@@ -211,8 +211,8 @@ public class SpiderClass extends BaseClass {
 
 
 	@Override
-	public void Death(PlayerDeathEvent e) {
-		super.Death(e);
+	public void onDeath(PlayerDeathEvent e) {
+		super.onDeath(e);
 		removeInvisibility();
 		removeVenom();
 	}
@@ -479,4 +479,16 @@ public class SpiderClass extends BaseClass {
 	public ItemStack getAttackWeapon() {
 		return weapon;
 	}
+
+	@Override
+	public void resetHead() {
+		if (this.invisTaskId != -1) {
+			ItemStack invisHelmet = playerHead.clone();
+			invisHelmet.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 8);
+			player.getEquipment().setHelmet(invisHelmet);
+		} else {
+			player.getEquipment().setHelmet(playerHead);
+		}
+	}
+
 }

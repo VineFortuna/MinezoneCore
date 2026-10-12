@@ -77,12 +77,12 @@ public class WolfClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 
 	}
 	
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (used) {
 			List<Entity> nearby = player.getNearbyEntities(1D, 1D, 1D);
 			for (Entity entity : nearby) {
@@ -126,7 +126,7 @@ public class WolfClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		wolfBite.startTime = System.currentTimeMillis() - 100000;
 		wolves.clear();
 		hitPlayers.clear();
@@ -138,7 +138,7 @@ public class WolfClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 
 		if (item != null && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
@@ -176,7 +176,7 @@ public class WolfClass extends BaseClass {
 	}
 	
 	@Override
-	public void TakeDamage(EntityDamageEvent event) {
+	public void takeDamage(EntityDamageEvent event) {
 		for (Wolf wolf : wolves) {
 			if (!wolf.isDead()) {
 				wolf.setAngry(true);
@@ -190,5 +190,10 @@ public class WolfClass extends BaseClass {
 		Vector vel = player.getLocation().getDirection().setY(0.5).multiply(new Vector(boosterStrength, 0, boosterStrength));
 		player.setVelocity(vel);
 		used = true;
+	}
+
+	@Override
+	public void killEvent(Player damagerPlayer) {
+		wolfPackAdd = true;
 	}
 }

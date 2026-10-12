@@ -3,9 +3,14 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.HealTask;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.EnderCrystal;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
@@ -13,6 +18,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitTask;
 
 public class EnderdragonClass extends BaseClass {
 
@@ -36,7 +42,7 @@ public class EnderdragonClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL, 5),
 				"" + ChatColor.BLACK + ChatColor.BOLD + "Teleporters"));
@@ -45,7 +51,7 @@ public class EnderdragonClass extends BaseClass {
 
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.WEAKNESS)))
 			player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
 
@@ -65,7 +71,7 @@ public class EnderdragonClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		/*
 		 * ItemStack item = event.getItem(); if (item != null && item.getType() ==
 		 * Material.STONE_SWORD && (event.getAction() == Action.RIGHT_CLICK_AIR ||
@@ -83,7 +89,7 @@ public class EnderdragonClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 		// TODO Auto-generated method stub
 
 	}
@@ -93,5 +99,17 @@ public class EnderdragonClass extends BaseClass {
 		ItemStack item = ItemHelper.setUnbreakable(new ItemStack(Material.STONE_SWORD));
 		return item;
 	}
+
+	@Override
+	public void killEvent(Player damagerPlayer) {
+		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+			Location pLoc = damagerPlayer.getLocation();
+			EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc, EntityType.ENDER_CRYSTAL);
+			HealTask task = new HealTask(damagerPlayer, crystal, instance);
+			BukkitTask bukkit = Bukkit.getScheduler().runTaskTimerAsynchronously(instance.getGameManager().getMain(), task, 0, 2L);
+			task.set(bukkit);
+		}
+	}
+
 
 }

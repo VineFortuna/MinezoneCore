@@ -51,7 +51,7 @@ public class NoteblockClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 
 	}
 
@@ -71,7 +71,7 @@ public class NoteblockClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		sharp = false;
 		fire = false;
 		knock = false;
@@ -110,7 +110,7 @@ public class NoteblockClass extends BaseClass {
 				instance.getGameManager().getMain().color("&2&lErase Your Work")));*/
 	}
 	
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Noteblock
 				&& instance.classes.get(player).getLives() > 0) {
 			String msg = instance.getGameManager().getMain()
@@ -127,7 +127,7 @@ public class NoteblockClass extends BaseClass {
 	
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		
 		if (item != null && event.getAction().toString().contains("RIGHT_CLICK")) {

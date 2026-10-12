@@ -50,12 +50,12 @@ public class PresentClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		baseVerticalJump = 1.0;
 		playerInv.setItem(0,
 				ItemHelper.setDetails(new ItemStack(Material.CHEST, 1),
@@ -73,7 +73,7 @@ public class PresentClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 
 		if (player.getGameMode() != GameMode.SPECTATOR) {
@@ -172,6 +172,17 @@ public class PresentClass extends BaseClass {
 					}
 				}
 			}
+		}
+	}
+
+	@Override
+	public void killEvent(Player damagerPlayer) {
+		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+			damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
+					"&r&l(!) &rYour &r&lAggressive Gift has regenerated and you can get a new weapon if you'd like!"));
+			damagerPlayer.getInventory().addItem(ItemHelper.setDetails(new ItemStack(Material.CHEST, 1),
+					String.valueOf(ChatColor.RESET) + ChatColor.ITALIC + "Agressive Gift", "",
+					String.valueOf(ChatColor.RESET) + ChatColor.YELLOW + "Steals another player's main item"));
 		}
 	}
 

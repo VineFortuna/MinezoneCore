@@ -116,7 +116,7 @@ public class BedrockClass extends BaseClass {
 
 	// Setting items
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		this.bedrockInvincibility = false; // To reset each life
 		invincibilityAbility.getCooldownInstance().reset();
 
@@ -126,13 +126,13 @@ public class BedrockClass extends BaseClass {
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		// ActionBar to show cooldown
 		if (isPlayerAlive()) invincibilityAbility.updateActionBar(player, this);
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 
 		if (item != null) {

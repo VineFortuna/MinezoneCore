@@ -96,7 +96,7 @@ public class BrewingStandClass extends BaseClass {
 	 * This function sets the items for the player's kit when they respawn
 	 */
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		brewAbility.getCooldownInstance().reset();
 		playerInv.setItem(0, weapon);
 		playerInv.setItem(1, brewingItem);
@@ -109,7 +109,7 @@ public class BrewingStandClass extends BaseClass {
 	 *
 	 */
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (!isPlayerAlive()) {
 //			if (runnable != null) runnable.cancel();
 			return;
@@ -131,7 +131,7 @@ public class BrewingStandClass extends BaseClass {
 	}
 
 	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
+	public void doDamage(EntityDamageByEntityEvent event) {
 		if (!isPlayerAlive()) return;
 		if (!brewAbility.isReady()) return;
 		if (!(event.getEntity() instanceof Player)) return;
@@ -166,7 +166,7 @@ public class BrewingStandClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		Action action = event.getAction();
 

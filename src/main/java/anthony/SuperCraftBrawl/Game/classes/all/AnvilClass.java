@@ -13,6 +13,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
@@ -86,7 +87,7 @@ public class AnvilClass extends BaseClass {
     /*
     * This function sets the player's items
      */
-    public void SetItems(Inventory playerInv) {
+    public void setItems(Inventory playerInv) {
         stompAbility.getCooldownInstance().reset();
         this.stompUsed = false;
         this.stompDamage = 0;
@@ -102,7 +103,7 @@ public class AnvilClass extends BaseClass {
     *
     * Also action bar message that displays cooldown
      */
-    public void Tick(int gameTicks) {
+    public void tick(int gameTicks) {
         if (!isPlayerAlive()) {
             // Player died or became spectator mid-stomp — clean up immediately
             if (stompUsed) {
@@ -135,11 +136,11 @@ public class AnvilClass extends BaseClass {
     }
 
     private void applyStompToPlayer(Player playerInRange) {
-        EntityDamageEvent damageEvent = new EntityDamageEvent(
-                playerInRange, EntityDamageEvent.DamageCause.CUSTOM, stompDamage
+        EntityDamageByEntityEvent damageEvent = new EntityDamageByEntityEvent(player,
+                playerInRange, EntityDamageByEntityEvent.DamageCause.CUSTOM, stompDamage
         );
 
-        //Prevents vanilla dying, need to call EntityDamageEvent to not break
+        //Prevents vanilla dying, need to call EntityDamageByEvent to not break
         instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
         if (damageEvent.isCancelled()) return;
 
@@ -256,7 +257,7 @@ public class AnvilClass extends BaseClass {
     //  Original methods (unchanged)
     // -----------------------------------------------------------------------
 
-    public void UseItem(PlayerInteractEvent event) {
+    public void useItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         Action action = event.getAction();
 

@@ -94,7 +94,7 @@ public class EndermiteClass extends BaseClass {
     }
     
     @Override
-    public void SetItems(Inventory playerInv) {
+    public void setItems(Inventory playerInv) {
         for (Entity e : player.getWorld().getEntities())
             if (e instanceof Endermite)
                 if (e.getName().contains(player.getName()))
@@ -109,7 +109,7 @@ public class EndermiteClass extends BaseClass {
     }
     
     @Override
-    public void Tick(int gameTicks) {
+    public void tick(int gameTicks) {
         if (!isPlayerAlive()) return;
         phaseAbility.updateActionBar(player, this);
         if (!player.getInventory().contains(weapon)) {
@@ -136,7 +136,7 @@ public class EndermiteClass extends BaseClass {
     }
     
     @Override
-    public void UseItem(PlayerInteractEvent event) {
+    public void useItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         Action action = event.getAction();
 
@@ -289,13 +289,13 @@ public class EndermiteClass extends BaseClass {
     }
 
     @Override
-    public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
-        super.classesEvent(damagerPlayer, baseClass);
+    public void killEvent(Player damagerPlayer) {
+        if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+            ItemStack endermiteEgg = eggItem.clone();
+            endermiteEgg.setAmount(1);
 
-        ItemStack endermiteEgg = eggItem.clone();
-        endermiteEgg.setAmount(1);
-
-        player.getInventory().addItem(endermiteEgg);
+            player.getInventory().addItem(endermiteEgg);
+        }
     }
 
     @Override
