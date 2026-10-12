@@ -1675,7 +1675,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		ClassDetails classDetails = playerData.playerClasses.get(type.getID());
 
 		if (!isClassUnlocked(player, classDetails, type) || !isLevelUnlocked(player, playerData, type)
-				|| !isFishermanClassUnlocked(player, type) || !isFreddyUnlocked(player, type)
+				|| !isFishermanClassUnlocked(player, type)
 				|| !isRankRequirementMet(player, type) || (game != null && !isGameStateWaiting(game, player))
 				|| (game != null && !isFrenzyGameType(game, player))) {
 			return;
@@ -1729,14 +1729,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 		return true;
 	}
 	
-	private boolean isFreddyUnlocked(Player player, ClassType type) {
-		if (type == ClassType.Freddy && !main.getHalloweenManager().hasUnlockedFreddy(player) && !player.isOp()) {
-			player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
-			return false;
-		}
-		return true;
-	}
-
 	private boolean isFishermanClassUnlocked(Player player, ClassType type) {
 		if (type == ClassType.Fisherman && !main.fishing.hasUnlockedFisherman(player) && !player.isOp()) {
 			player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));

@@ -99,7 +99,7 @@ public enum ClassType {
 	GingerBreadMan(102, 0, 0, true),
 	Santa(103, 0, 0, true),
 	GrimReaper(104, 0, 0, true),
-	Freddy(105, 0, 0, true);
+	Freddy(105, 0, 0, false);
 
 	private final int id;
 	private int tokenCost = 0;

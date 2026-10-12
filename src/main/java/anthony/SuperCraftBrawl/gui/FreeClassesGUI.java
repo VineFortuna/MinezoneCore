@@ -42,16 +42,13 @@ public class FreeClassesGUI implements InventoryProvider {
 			if (type == ClassType.Fisherman &&  !main.fishing.hasUnlockedFisherman(player)) {
 				continue;
 			}
-			if (type == ClassType.Freddy &&  !main.getHalloweenManager().hasUnlockedFreddy(player)) {
-				continue;
-			}
 
 			// Lore
 			List<String> lore = type.buildDescription();
 			lore.add("");
 
 				// Adds Unlocked lore text to Free but not regularly unlocked classes
-			if (type == ClassType.Fisherman || type == ClassType.Freddy) {
+			if (type == ClassType.Fisherman) {
 				lore.addAll(getUnlockedDescriptionText(player, type));
 			}
 
@@ -134,9 +131,6 @@ public class FreeClassesGUI implements InventoryProvider {
 		if (type == ClassType.Fisherman) {
 			isUnlocked = main.getFishing().hasUnlockedFisherman(player);
 			source = "Fishing";
-		} else if (type == ClassType.Freddy) {
-			isUnlocked = main.getHalloweenManager().hasUnlockedFreddy(player);
-			source = "Halloween Hunt";
 		}
 
 		String color = isUnlocked ? "&e" : "&c";
