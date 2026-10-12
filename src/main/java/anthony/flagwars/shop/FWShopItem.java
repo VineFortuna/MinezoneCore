@@ -8,7 +8,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -29,6 +28,9 @@ public class FWShopItem {
 	private final boolean armorSet;
 	private final FWResourceType costType;
 	private final int cost;
+	private int displayAmount; // 0 = use item's actual amount
+
+	private String description = "";
 
 	public FWShopItem(String name, int row, int col, ItemStack giveItem, FWResourceType costType, int cost) {
 		this(name, row, col, new ItemStack[]{giveItem}, false, costType, cost);
@@ -94,6 +96,17 @@ public class FWShopItem {
 		return FWEconomy.canAfford(player, costType, cost);
 	}
 
+	public FWShopItem withDescription(String description) {
+		this.description = description;
+		return this;
+	}
+
+	/** Override the stack-size shown in the shop GUI without changing what the player actually receives. */
+	public FWShopItem withDisplayAmount(int n) {
+		this.displayAmount = n;
+		return this;
+	}
+
 	/** Which Quick Buy lore line/state to show: not added yet, already added by the player, or always-on by default. */
 	public enum QuickBuyHint {
 		ADD, REMOVE, DEFAULT
@@ -101,24 +114,23 @@ public class FWShopItem {
 
 	public ItemStack toDisplayItem(Player player, Core main, QuickBuyHint quickBuyHint) {
 		boolean affordable = isAffordableFor(player);
+		String resourceName = costType.getDisplayName();
 
 		List<String> lore = new ArrayList<>();
+		if (!description.isEmpty()) lore.add(main.color("&7" + description));
 		lore.add("");
-		lore.add(main.color(FWResourceType.formatCost(Collections.singletonMap(costType, cost))));
-		lore.add(main.color(affordable ? "&a&lClick to purchase" : "&c&lNot enough resources"));
+		lore.add(main.color("&rCost: " + costType.getColorCode() + cost + " " + resourceName));
+		lore.add(main.color(affordable ? "&eClick to purchase" : "&cNot enough resources!"));
 		lore.add("");
-		switch (quickBuyHint) {
-			case DEFAULT:
-				lore.add(main.color("&7Already in Quick Buy"));
-				break;
-			case REMOVE:
-				lore.add(main.color("&7Shift-click to &cremove&7 from Quick Buy"));
-				break;
-			default:
-				lore.add(main.color("&7Shift-click to &aadd&7 to Quick Buy"));
+		if (quickBuyHint == QuickBuyHint.REMOVE) {
+			lore.add(main.color("&rShift-Click to &cremove&r from Quick Buy"));
+		} else {
+			lore.add(main.color("&rShift-Click to &aadd&r to Quick Buy"));
 		}
 
 		String color = affordable ? "&a" : "&c";
-		return ItemHelper.setDetails(getDisplayIcon(), main.color(color + name), lore);
+		ItemStack icon = getDisplayIcon();
+		if (displayAmount > 0) icon.setAmount(displayAmount);
+		return ItemHelper.setDetails(icon, main.color(color + name), lore);
 	}
 }

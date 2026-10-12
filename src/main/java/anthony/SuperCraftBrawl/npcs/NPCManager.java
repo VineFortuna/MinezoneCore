@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.npcs;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameManager;
 import anthony.SuperCraftBrawl.gui.ClassicModeGUI;
+import anthony.SuperCraftBrawl.gui.SCBModeSelectGUI;
 import anthony.SuperCraftBrawl.gui.fishing.FishingGUI;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
@@ -31,7 +32,7 @@ public class NPCManager implements Listener {
 	private NPCLib npcLib;
 
 	// NPCS HERE:
-    private net.jitse.npclib.api.NPC fishing, scbClassic, scbDuels, socialMedia, parkour;
+    private net.jitse.npclib.api.NPC fishing, scbClassic, flagwars, socialMedia, parkour;
 
     public NPCManager(Core main) {
 		this.main = main;
@@ -51,19 +52,19 @@ public class NPCManager implements Listener {
 				"ewogICJ0aW1lc3RhbXAiIDogMTc4MjM0MzczNjcxNCwKICAicHJvZmlsZUlkIiA6ICI0N2Q1ZjY1ZWQyOWM0ZTU0OWRmNjlmNGNiZmExNTg3OCIsCiAgInByb2ZpbGVOYW1lIiA6ICJQaWtlcnkiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmIxMjc3Zjk5ZjJkZmU1MWQ0YjhkNTU4OTcwYmI1NTMyYTk1OWE3NGIzYmMyM2ZmMWRiZjA3ODljZGQ0NDVlOCIKICAgIH0KICB9Cn0=",
 				"IFTvnqG3xZCYkQ6fe3U8IcVsbd+RkfFuHJv2uK21cnwIhaie0ABMGDbLgMTcutfZo+ujtxAMaAJYdljyp4Gg5b34AJhhGTo6dyuzZ0lmH7x73GAA5IstrfuVNK7vSIFnP/5I0C5zjK5joW3NqtkxXzRPwgxbP6NuuSDhiwOYQrTEGPoHCq5RFyaJ5LSpiqUMNU+i+vynlWNLnE7p90ZbSholPp4oB+DvP1lDy+n2xD8lQLrJeDHa/MtDr+C6oZZx5pkULOCV5iZfI/RDjhodA6RZAu6/Ij0o0YT2zPXJQBb6OT5oHr/Xl2ZgTlKVY4g6xYjmpZbPzkyGlK6meP6RMq9fKukMtjzTL9hAdMwWa7Wdll1MM6ynoxMF5nIhHeUWkRBocfYVGpsXQuGBCyWgoCYJRzkJT7O9uwKUUncn9mRG4ZbU+hwCQth30hUOfqZVNOmLiYeD0eWqqB0/XwOwK8rnYoNkhtPW3EedSMQqhvI9XcV/XZNTzC4c93waPt+yPtTqVMX/ReBtavaQMFKAqtSRWPBpA+fVMaBGkkdI+ZEU80QaSDQ3oQJLq3kza0kgJx3/UPwt+cIMwpi3g3nt5JJk1zMg7SEeiYPsriZ2VeeWmWylcmrlLz7yqhouTcHdVRKzd6JK6I+xzPxX7Nohmrk24d9Xo7cZQpvy7ItF0XI=");
 
-		scbClassic = npcLib.createNPC(Arrays.asList(main.color("&6&lSUPER CRAFT BROS"), main.color("&fMode: &aClassic"),
+		scbClassic = npcLib.createNPC(Arrays.asList(main.color("&6&lSUPER CRAFT BROS"), main.color("&fModes: &aClassic, Duels"),
 				main.color("&eClick to Play!")));
 		scbClassic.setLocation(new Location(main.getLobbyWorld(), 191.5, 106, 657.5, 174, 2));
 		scbClassic.setSkin(sethblingSkin);
 		scbClassic.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));
 		scbClassic.create();
 
-		scbDuels = npcLib.createNPC(Arrays.asList(main.color("&6&lFLAG WARS"), main.color("&rModes: &aSolo, Duos"),
+		flagwars = npcLib.createNPC(Arrays.asList(main.color("&6&lFLAG WARS &r&lNEW!"), main.color("&rModes: &aSolo, Duos"),
 				main.color("&eClick to Play!")));
-		scbDuels.setLocation(new Location(main.getLobbyWorld(), 187.5, 106, 657.5, -174, 3));
-		scbDuels.setSkin(flagWarsSkin);
-		scbDuels.setItem(NPCSlot.MAINHAND, blueBanner());
-		scbDuels.create();
+		flagwars.setLocation(new Location(main.getLobbyWorld(), 187.5, 106, 657.5, -174, 3));
+		flagwars.setSkin(flagWarsSkin);
+		flagwars.setItem(NPCSlot.MAINHAND, blueBanner());
+		flagwars.create();
 
 		parkour = npcLib.createNPC(Arrays.asList(main.color("&6&lPARKOUR"), main.color("&eClick to Play!")));
 		parkour.setLocation(new Location(main.getLobbyWorld(), 183.5, 106, 656.5, -158, 2));
@@ -173,8 +174,8 @@ public class NPCManager implements Listener {
 		if (e.getNPC() == fishing) {
 			new FishingGUI(main, null).inv.open(player);
 		} else if (e.getNPC() == scbClassic) {
-			new ClassicModeGUI(main, null).inv.open(player);
-		} else if (e.getNPC() == scbDuels) {
+			new SCBModeSelectGUI(main).inv.open(player);
+		} else if (e.getNPC() == flagwars) {
 			new anthony.flagwars.FWModeSelectGUI(main.getFwGameManager()).open(player);
 		} else if (e.getNPC() == parkour) {
             SoundManager.playClickSound(player);
@@ -206,14 +207,18 @@ public class NPCManager implements Listener {
 			Bukkit.getScheduler().runTask(main, () -> fishing.show(e.getPlayer()));
 			Bukkit.getScheduler().runTask(main, () -> scbClassic.show(e.getPlayer()));
 			//Bukkit.getScheduler().runTask(main, () -> socialMedia.show(e.getPlayer()));
-			Bukkit.getScheduler().runTask(main, () -> scbDuels.show(e.getPlayer()));
+			Bukkit.getScheduler().runTask(main, () -> flagwars.show(e.getPlayer()));
 			Bukkit.getScheduler().runTask(main, () -> parkour.show(e.getPlayer()));
 		}, 20L);
 		// }
 	}
 
+    public NPCLib getNpcLib() {
+        return npcLib;
+    }
+
     public void shutdown() {
-        net.jitse.npclib.api.NPC[] all = { fishing, scbClassic, scbDuels, socialMedia, parkour };
+        net.jitse.npclib.api.NPC[] all = { fishing, scbClassic, flagwars, socialMedia, parkour };
 
         for (net.jitse.npclib.api.NPC npc : all) {
             if (npc == null) continue;

@@ -1,10 +1,15 @@
 package anthony.flagwars.setup;
 
+import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
 import anthony.flagwars.FWGameConstants;
 import anthony.flagwars.FWGameManager;
 import anthony.flagwars.map.FWMapConfig;
+import anthony.flagwars.map.FWMapConfigManager;
 import anthony.flagwars.map.FWTeamSite;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.WorldCreator;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -16,16 +21,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
- * Staff-only tool to capture Flag Wars map coordinates in-game,
- * since they can't be supplied any other way. Walk the map, stand where
- * you want each point, and run the matching subcommand.
+ * Staff-only tool to configure Flag Wars maps. Each subcommand (except tp,
+ * list, createmap, save) operates on the map whose world the player is
+ * currently standing in, so builders just need to be in the right world.
  */
 public class FWSetupCommand implements CommandExecutor, TabExecutor {
 
 	private static final List<String> SUBCOMMANDS = Arrays.asList(
-			"tp", "lobby", "team", "flag", "shop", "generator", "boundary1", "boundary2", "list", "save");
+			"tp", "createmap", "lobby", "spectator", "team", "flag", "shop",
+			"generator", "boundary1", "boundary2", "chesthologram", "list", "save");
 	private static final List<String> RESOURCE_TYPES = Arrays.asList("iron", "gold", "emerald", "diamond");
 	private static final List<String> COLOR_NAMES = Arrays.asList(
 			"Lime", "Yellow", "Cyan", "Blue", "LightBlue", "White", "Pink", "Gray");
@@ -50,51 +57,100 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 			return true;
 		}
 
-		// Force the arena world to load (if it hasn't already) before reading any
-		// saved Location - FWMapConfig is loaded at plugin startup, before the arena
-		// world exists, so saved Locations have a null World until this reloads it.
-		org.bukkit.World arenaWorld = fwGameManager.getArenaWorld();
-		FWMapConfig config = fwGameManager.getMapConfigManager().getConfig();
+		FWMapConfigManager manager = fwGameManager.getMapConfigManager();
 		String sub = args[0].toLowerCase();
 
-		if (sub.equals("list")) {
-			sendStatus(player, config);
-			return true;
-		}
+		// ── Commands that don't require being inside a specific map world ──
 
-		if (sub.equals("save")) {
-			fwGameManager.getMapConfigManager().save();
-			player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rSaved Flag Wars map config."));
+		if (sub.equals("list")) {
+			sendMapList(player, manager);
 			return true;
 		}
 
 		if (sub.equals("tp")) {
-			Location target = config.getLobby();
-			if (target == null || target.getWorld() == null) {
-				if (arenaWorld == null) {
-					player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rFailed to load &e"
-							+ FWGameConstants.MAP_WORLD_NAME + "&r. Check the console for errors."));
+			if (args.length < 2) {
+				player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rTry: &e/fwsetup tp <mapname>"));
+				return true;
+			}
+			String mapName = args[1];
+			World world = Bukkit.getWorld(mapName);
+			if (world == null) {
+				try {
+					world = Bukkit.createWorld(new WorldCreator(mapName)
+							.environment(World.Environment.NORMAL)
+							.generateStructures(false)
+							.generator(new VoidGenerator()));
+				} catch (Throwable t) {
+					player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rFailed to load world: &e" + t.getMessage()));
 					return true;
 				}
-				target = arenaWorld.getSpawnLocation();
 			}
-			player.teleport(target);
-			player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rTeleported to &e" + FWGameConstants.MAP_WORLD_NAME + "&r."));
+			if (world == null) {
+				player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rWorld &e" + mapName + "&r doesn't exist."));
+				return true;
+			}
+			FWMapConfig cfg = manager.getOrCreate(mapName);
+			Location dest = cfg.getLobby() != null && cfg.getLobby().getWorld() != null
+					? cfg.getLobby() : world.getSpawnLocation();
+			player.teleport(dest);
+			player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rTeleported to &e" + mapName + "&r."));
 			return true;
 		}
 
-		if (!player.getWorld().getName().equals(FWGameConstants.MAP_WORLD_NAME)) {
-			player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rYou must be standing in the &e"
-					+ FWGameConstants.MAP_WORLD_NAME + " &rworld to use this!"));
+		if (sub.equals("createmap")) {
+			if (args.length < 2) {
+				player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rTry: &e/fwsetup createmap <mapname>"));
+				return true;
+			}
+			String mapName = args[1];
+			if (Bukkit.getWorld(mapName) != null) {
+				player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rA world named &e" + mapName + "&r is already loaded!"));
+				return true;
+			}
+			player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rCreating void world &e" + mapName + "&r..."));
+			World newWorld;
+			try {
+				newWorld = Bukkit.createWorld(new WorldCreator(mapName)
+						.environment(World.Environment.NORMAL)
+						.generateStructures(false)
+						.generator(new VoidGenerator()));
+			} catch (Throwable t) {
+				player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rFailed to create world: &e" + t.getMessage()));
+				return true;
+			}
+			if (newWorld == null) {
+				player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rWorld creation returned null. Check the console."));
+				return true;
+			}
+			newWorld.setSpawnFlags(false, false);
+			newWorld.setTime(6000);
+			manager.getOrCreate(mapName); // register in the config index
+			player.teleport(newWorld.getSpawnLocation());
+			player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rVoid world &e" + mapName + "&r created! Build away."));
 			return true;
 		}
 
+		if (sub.equals("save")) {
+			FWMapConfig cfg = manager.getOrCreate(player.getWorld().getName());
+			manager.save(cfg);
+			player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rSaved map config for &e" + player.getWorld().getName() + "&r."));
+			return true;
+		}
+
+		// ── Commands that operate on whichever map world the player is in ──
+
+		FWMapConfig config = manager.getOrCreate(player.getWorld().getName());
 		Location loc = player.getLocation();
 
 		switch (sub) {
 			case "lobby":
 				config.setLobby(loc);
-				player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rSet the Flag Wars lobby point."));
+				player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rSet the lobby point for &e" + player.getWorld().getName() + "&r."));
+				break;
+
+			case "spectator":
+				config.setSpectatorLocation(loc);
+				player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rSet the spectator spawn point."));
 				break;
 
 			case "team":
@@ -106,19 +162,29 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 				if (siteId == null) break;
 
 				FWTeamSite site = config.getTeamSite(siteId);
-				if (sub.equals("team")) site.setSpawn(loc);
+				boolean newlyCreated = false;
+				if (sub.equals("team")) {
+					newlyCreated = !site.isCreated();
+					site.setSpawn(loc);
+					site.setCreated(true);
+				}
 				else if (sub.equals("flag")) site.setFlagLoc(loc);
 				else if (sub.equals("shop")) site.setShopLoc(loc);
 				else if (sub.equals("boundary1")) site.setBoundaryCorner1(loc);
 				else site.setBoundaryCorner2(loc);
 
 				player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rSet team &e"
-						+ FWGameConstants.TEAM_NAMES[siteId - 1] + "&r's " + sub + " point."));
+						+ FWGameConstants.TEAM_NAMES[siteId - 1] + "&r's " + sub + " point."
+						+ (newlyCreated ? " &7(team created)" : "")));
 				break;
 			}
 
 			case "generator":
 				handleGenerator(player, config, args, loc);
+				break;
+
+			case "chesthologram":
+				handleChestHologram(player, config, args, loc);
 				break;
 
 			default:
@@ -132,7 +198,7 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 	private void handleGenerator(Player player, FWMapConfig config, String[] args, Location loc) {
 		if (args.length < 2 || !RESOURCE_TYPES.contains(args[1].toLowerCase())) {
 			player.sendMessage(fwGameManager.getMain().color(
-					"&c&l(!) &rTry: &e/fwsetup generator <iron|gold|emerald|diamond> <id>"));
+					"&c&l(!) &rTry: &e/fwsetup generator <iron|gold|emerald|diamond> <id> [interval|clear]"));
 			return;
 		}
 
@@ -143,16 +209,22 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 			if (siteId == null) return;
 
 			FWTeamSite site = config.getTeamSite(siteId);
-			if (type.equals("iron")) site.setIronGenerator(loc);
-			else site.setGoldGenerator(loc);
+			if (type.equals("iron")) {
+				site.setIronGenerator(loc);
+				if (!applyOptionalInterval(player, args, 3, site::setIronGeneratorInterval)) return;
+			} else {
+				site.setGoldGenerator(loc);
+				if (!applyOptionalInterval(player, args, 3, site::setGoldGeneratorInterval)) return;
+			}
 
 			player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rSet team &e"
-					+ FWGameConstants.TEAM_NAMES[siteId - 1] + "&r's " + type + " generator."));
+					+ FWGameConstants.TEAM_NAMES[siteId - 1] + "&r's " + type + " generator"
+					+ intervalSuffix(args, 3) + "&r."));
 			return;
 		}
 
 		if (args.length < 3) {
-			player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rTry: &e/fwsetup generator " + type + " <id>"));
+			player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rTry: &e/fwsetup generator " + type + " <id> [interval|clear]"));
 			return;
 		}
 
@@ -164,10 +236,66 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 			return;
 		}
 
-		if (type.equals("emerald")) config.setEmeraldGenerator(id, loc);
-		else config.setDiamondGenerator(id, loc);
+		if (type.equals("emerald")) {
+			config.setEmeraldGenerator(id, loc);
+			if (!applyOptionalInterval(player, args, 3, seconds -> config.setEmeraldGeneratorInterval(id, seconds))) return;
+		} else {
+			config.setDiamondGenerator(id, loc);
+			if (!applyOptionalInterval(player, args, 3, seconds -> config.setDiamondGeneratorInterval(id, seconds))) return;
+		}
 
-		player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rSet " + type + " generator &e#" + id + "&r."));
+		player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rSet " + type + " generator &e#" + id + "&r"
+				+ intervalSuffix(args, 3) + "&r."));
+	}
+
+	/**
+	 * Parses the optional trailing interval arg at args[index] (whole seconds, or "clear" to remove
+	 * an existing override) and hands it to setter. Leaves the existing value untouched if the arg
+	 * is absent. Returns false (after messaging the player) only on a genuinely invalid value.
+	 */
+	private boolean applyOptionalInterval(Player player, String[] args, int index, java.util.function.Consumer<Integer> setter) {
+		if (args.length <= index) return true;
+
+		if (args[index].equalsIgnoreCase("clear")) {
+			setter.accept(null);
+			return true;
+		}
+
+		try {
+			int seconds = Integer.parseInt(args[index]);
+			if (seconds < 1) throw new NumberFormatException();
+			setter.accept(seconds);
+			return true;
+		} catch (NumberFormatException e) {
+			player.sendMessage(fwGameManager.getMain().color(
+					"&c&l(!) &rThe interval must be a whole number of seconds (or &eclear&r)!"));
+			return false;
+		}
+	}
+
+	/** Player-facing suffix describing what applyOptionalInterval just did, for the confirmation message. */
+	private String intervalSuffix(String[] args, int index) {
+		if (args.length <= index) return "";
+		if (args[index].equalsIgnoreCase("clear")) return " &7(cleared custom interval)";
+		return " &7(custom interval: &e" + args[index] + "s&7)";
+	}
+
+	private void handleChestHologram(Player player, FWMapConfig config, String[] args, Location loc) {
+		if (args.length < 2) {
+			player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rTry: &e/fwsetup chesthologram <id>"));
+			return;
+		}
+
+		int id;
+		try {
+			id = Integer.parseInt(args[1]);
+		} catch (NumberFormatException e) {
+			player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rThe id must be a number!"));
+			return;
+		}
+
+		config.setChestHologram(id, loc);
+		player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rSet chest hologram &e#" + id + "&r."));
 	}
 
 	private Integer parseTeamColor(Player player, String[] args, int index) {
@@ -185,33 +313,41 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 		return siteId;
 	}
 
-	private void sendStatus(Player player, FWMapConfig config) {
-		List<String> missing = config.findMissing();
-
-		if (missing.isEmpty()) {
-			player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rThe Flag Wars map is fully configured!"));
-			return;
-		}
-
-		player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rMissing " + missing.size() + " setup point(s):"));
-		for (String entry : missing) {
-			player.sendMessage(fwGameManager.getMain().color("&7- &e" + entry));
+	private void sendMapList(Player player, FWMapConfigManager manager) {
+		List<FWMapConfig> all = new ArrayList<>(manager.getAllConfigs());
+		player.sendMessage(fwGameManager.getMain().color("&6&lFLAG WARS MAPS &7(" + all.size() + " known)"));
+		for (FWMapConfig cfg : all) {
+			List<String> missing = cfg.findMissing();
+			boolean loaded = Bukkit.getWorld(cfg.getWorldName()) != null;
+			String worldTag = loaded ? "&2[loaded]" : "&8[unloaded]";
+			if (missing.isEmpty()) {
+				player.sendMessage(fwGameManager.getMain().color("  &e" + cfg.getWorldName()
+						+ " " + worldTag + " &a[Ready]"));
+			} else {
+				player.sendMessage(fwGameManager.getMain().color("  &e" + cfg.getWorldName()
+						+ " " + worldTag + " &c[Missing " + missing.size() + " point(s)]"));
+			}
 		}
 	}
 
 	private void sendUsage(Player player) {
 		player.sendMessage(fwGameManager.getMain().color("&6&lFWSETUP COMMANDS"));
-		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup tp -> &rTeleport into the map to start setting up"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup list &7-> &rShow all maps and their status"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup tp <map> &7-> &rTeleport into a map (loads it if needed)"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup createmap <map> &7-> &rCreate a new void world"));
+		player.sendMessage(fwGameManager.getMain().color("&7(Stand in the target map world for all commands below)"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup lobby"));
-		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup team <color>"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup spectator"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup team <color> &7- also creates that team if it isn't already on this map"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup flag <color>"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup shop <color>"));
-		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup boundary1 <color> &7- &rfirst corner of that team's island"));
-		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup boundary2 <color> &7- &ropposite corner"));
-		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup generator <iron|gold> <color>"));
-		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup generator <emerald|diamond> <id>"));
-		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup list"));
-		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup save"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup boundary1 <color> &7- first corner of that team's island"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup boundary2 <color> &7- opposite corner"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup generator <iron|gold> <color> [interval|clear]"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup generator <emerald|diamond> <id> [interval|clear]"));
+		player.sendMessage(fwGameManager.getMain().color("&7  interval (seconds) overrides that generator's timing entirely; &eclear&7 removes the override"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup chesthologram <id>"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup save &7-> &rSave the current map's config to disk"));
 		player.sendMessage(fwGameManager.getMain().color("&7Colors: &e" + FWGameConstants.colorNameList()));
 	}
 
@@ -219,6 +355,12 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 	public List<String> onTabComplete(CommandSender sender, Command cmd, String label, String[] args) {
 		if (args.length == 1) {
 			return StringUtil.copyPartialMatches(args[0], SUBCOMMANDS, new ArrayList<>());
+		}
+
+		if (args.length == 2 && args[0].equalsIgnoreCase("tp")) {
+			List<String> mapNames = new ArrayList<>(fwGameManager.getMapConfigManager().getAllConfigs()
+					.stream().map(FWMapConfig::getWorldName).collect(Collectors.toList()));
+			return StringUtil.copyPartialMatches(args[1], mapNames, new ArrayList<>());
 		}
 
 		if (args.length == 2 && args[0].equalsIgnoreCase("generator")) {
@@ -234,6 +376,10 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 		if (args.length == 3 && args[0].equalsIgnoreCase("generator")
 				&& (args[1].equalsIgnoreCase("iron") || args[1].equalsIgnoreCase("gold"))) {
 			return StringUtil.copyPartialMatches(args[2], COLOR_NAMES, new ArrayList<>());
+		}
+
+		if (args.length == 4 && args[0].equalsIgnoreCase("generator")) {
+			return StringUtil.copyPartialMatches(args[3], Collections.singletonList("clear"), new ArrayList<>());
 		}
 
 		return Collections.emptyList();

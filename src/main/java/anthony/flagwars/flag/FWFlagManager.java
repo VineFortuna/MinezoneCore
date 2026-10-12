@@ -2,7 +2,6 @@ package anthony.flagwars.flag;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.titles.TitleSequence;
-import anthony.SuperCraftBrawl.titles.TitleUtil;
 import anthony.flagwars.FWGameConstants;
 import anthony.flagwars.FWGameInstance;
 import anthony.flagwars.FWTeam;
@@ -28,8 +27,10 @@ import org.bukkit.util.Vector;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -57,6 +58,8 @@ public class FWFlagManager {
 	private final Map<UUID, Integer> carrying = new HashMap<>();
 	/** carrierUUID -> their real helmet, saved while a flag banner occupies that slot. */
 	private final Map<UUID, ItemStack> savedHelmets = new HashMap<>();
+	/** playerUUID -> set of site IDs they've already successfully captured this match (blocks re-captures by the same player). */
+	private final Map<UUID, Set<Integer>> playerCaptures = new HashMap<>();
 
 	public FWFlagManager(FWGameInstance instance) {
 		this.instance = instance;
@@ -76,12 +79,13 @@ public class FWFlagManager {
 			// the actual placed block's corner so siteIdLookingAt's cylinder is centered correctly.
 			flagLocs.put(team.getSiteId(), site.getFlagLoc().getBlock().getLocation());
 
-			Villager shopkeeper = (Villager) world.spawnEntity(site.getShopLoc(), EntityType.VILLAGER);
+			Location shopSpawn = facingTowards(site.getShopLoc(), site.getSpawn());
+			Villager shopkeeper = (Villager) world.spawnEntity(shopSpawn, EntityType.VILLAGER);
 			shopkeeper.setCustomName(instance.getManager().getMain().color("&6&lShop & Upgrades"));
 			shopkeeper.setCustomNameVisible(true);
 			shopkeeper.setRemoveWhenFarAway(false);
 			shopkeepers.put(team.getSiteId(), shopkeeper);
-			pinned.put(shopkeeper, site.getShopLoc().clone());
+			pinned.put(shopkeeper, shopSpawn);
 		}
 
 		startPinning();
@@ -100,6 +104,16 @@ public class FWFlagManager {
 	}
 
 	/** Forces every tracked shopkeeper back to its spawn spot and zeroes velocity, so it never wanders or shows knockback. */
+	private static Location facingTowards(Location from, Location target) {
+		Location loc = from.clone();
+		if (target != null) {
+			double dx = target.getX() - from.getX();
+			double dz = target.getZ() - from.getZ();
+			loc.setYaw((float) (Math.toDegrees(Math.atan2(-dx, dz))));
+		}
+		return loc;
+	}
+
 	private void startPinning() {
 		if (pinTask != null) return;
 
@@ -142,6 +156,7 @@ public class FWFlagManager {
 		}
 		carrying.clear();
 		savedHelmets.clear();
+		playerCaptures.clear();
 	}
 
 	public Integer findSiteByShopkeeper(Entity entity) {
@@ -341,7 +356,7 @@ public class FWFlagManager {
 			return;
 		}
 
-		if (attackerTeam.hasCapturedFrom(ownerSiteId)) {
+		if (playerCaptures.getOrDefault(attacker.getUniqueId(), Collections.emptySet()).contains(ownerSiteId)) {
 			attacker.sendMessage(main.color("&c&l(!) &rYou've already captured this flag! Steal from someone else."));
 			return;
 		}
@@ -349,6 +364,10 @@ public class FWFlagManager {
 		carrying.put(attacker.getUniqueId(), ownerSiteId);
 		savedHelmets.put(attacker.getUniqueId(), attacker.getInventory().getHelmet());
 		attacker.getInventory().setHelmet(flagBannerItem(ownerTeam));
+
+		// Remove the flag block so only one carrier can go for it at a time
+		Location stolenLoc = flagLocs.remove(ownerSiteId);
+		if (stolenLoc != null) stolenLoc.getBlock().setType(Material.AIR);
 
 		String attackerColor = FWGameConstants.chatColorCodeFor(attackerTeam.getColor());
 		String ownerColor = FWGameConstants.chatColorCodeFor(ownerTeam.getColor());
@@ -360,7 +379,7 @@ public class FWFlagManager {
 		instance.playSoundForAll(Sound.ENDERDRAGON_GROWL, 0.5f, 1.6f);
 		instance.refreshScoreboards();
 
-		TitleUtil.sendTitle(attacker, "", main.color("&rCarrying " + ownerColor + ownerTeam.getName() + " Team's &rflag"), 0, 60, 0);
+		sendTitleTo(attacker, "", "&rCarrying " + ownerColor + ownerTeam.getName() + " Team's &rflag");
 		sendTeamTitle(ownerTeam, "&c&lFLAG STOLEN!", "&rKill &a" + attacker.getName() + " &rto retrieve!");
 	}
 
@@ -378,6 +397,7 @@ public class FWFlagManager {
 		carrierTeam.markCapturedFrom(ownerSiteId);
 		carrierTeam.addCapturedFlag();
 		instance.addFlagCapture(carrier);
+		playerCaptures.computeIfAbsent(carrier.getUniqueId(), k -> new HashSet<>()).add(ownerSiteId);
 
 		int required = instance.getRequiredCaptures();
 		Core main = instance.getManager().getMain();
@@ -392,13 +412,22 @@ public class FWFlagManager {
 				+ carrierTeam.getCapturedFlags() + "/" + required + ")"));
 		instance.TellAll("");
 		instance.playSoundForAll(Sound.LEVEL_UP, 1f, 1f);
-		carrier.sendTitle(main.color("&6&lFLAG CAPTURED"),
-				main.color("&e" + carrierTeam.getCapturedFlags() + "&7/&e" + required));
+		sendTitleTo(carrier, "&6&lFLAG CAPTURED", "&e" + carrierTeam.getCapturedFlags() + "&7/&e" + required);
 		if (ownerTeam != null) {
-			sendTeamTitle(ownerTeam, "&c&lFLAG CAPTURED", "&a" + carrier.getName() + " &rcaptured your flag!");
+			sendTeamTitle(ownerTeam, "&c&lFLAG CAPTURED", "&rYour flag will respawn shortly!");
 		}
 
 		instance.refreshScoreboards();
+
+		if (ownerTeam != null) {
+			FWTeamSite ownerSite = instance.getMapConfig().getTeamSite(ownerSiteId);
+			Location flagOrigin = ownerSite != null ? ownerSite.getFlagLoc() : null;
+			if (flagOrigin != null) {
+				placeFlagBlock(flagOrigin, ownerTeam);
+				flagLocs.put(ownerSiteId, flagOrigin.getBlock().getLocation());
+			}
+		}
+
 		instance.onFlagCaptured(carrierTeam);
 	}
 
@@ -420,6 +449,16 @@ public class FWFlagManager {
 		} else {
 			instance.TellAll(main.color("&e&l(!) &r" + carrier.getName() + "'s stolen flag returned to &e"
 					+ (ownerTeam != null ? ownerTeam.getName() : "its owner") + "&r's base."));
+		}
+
+		// Put the flag back at its base
+		if (ownerTeam != null) {
+			FWTeamSite ownerSite = instance.getMapConfig().getTeamSite(ownerSiteId);
+			Location flagOrigin = ownerSite != null ? ownerSite.getFlagLoc() : null;
+			if (flagOrigin != null) {
+				placeFlagBlock(flagOrigin, ownerTeam);
+				flagLocs.put(ownerSiteId, flagOrigin.getBlock().getLocation());
+			}
 		}
 
 		instance.refreshScoreboards();

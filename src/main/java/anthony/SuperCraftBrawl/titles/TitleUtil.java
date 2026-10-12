@@ -35,8 +35,8 @@ public final class TitleUtil {
         PacketPlayOutTitle times = new PacketPlayOutTitle(EnumTitleAction.TIMES, null, fadeIn, stay, fadeOut);
         cp.getHandle().playerConnection.sendPacket(times);
 
-        // 2) Subtitle first (vanilla shows sub if you send before title)
-        if (subtitle != null && !subtitle.isEmpty()) {
+        // 2) Subtitle first (vanilla shows sub if you send before title); empty string clears it
+        if (subtitle != null) {
             IChatBaseComponent sub = new ChatComponentText(color(subtitle));
             PacketPlayOutTitle subPkt = new PacketPlayOutTitle(EnumTitleAction.SUBTITLE, sub);
             cp.getHandle().playerConnection.sendPacket(subPkt);

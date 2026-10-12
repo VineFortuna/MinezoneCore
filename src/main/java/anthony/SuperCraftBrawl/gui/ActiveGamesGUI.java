@@ -113,7 +113,7 @@ public class ActiveGamesGUI implements InventoryProvider {
 
 		for (FWGameInstance fwGame : main.getFwGameManager().getActiveInstances()) {
 			ItemStack displayItem = new ItemStack(Material.BANNER);
-			int maxPlayers = fwGame.getMode().getMaxPlayers();
+			int maxPlayers = fwGame.getMaxPlayers();
 
 			if (fwGame.getState() == FWGameState.WAITING || fwGame.getState() == FWGameState.STARTING) {
 				String startLine = fwGame.getState() == FWGameState.STARTING

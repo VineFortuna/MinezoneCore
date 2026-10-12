@@ -40,12 +40,6 @@ public class GameCosmeticsGUI implements InventoryProvider {
 		contents.set(1, 2, ClickableItem.of(winEffects, e -> {
 			new WinEffectsGUI(main, inv).inv.open(player);
             SoundManager.playClickSound(player);
-
-			/*if (player.hasPermission("scb.winEffects"))
-				new WinEffectsGUI(main, inv).inv.open(player);
-			else
-				player.sendMessage(main.color(
-						"&c&l(!) &rYou need the rank " + ChatColor.BLUE + ChatColor.BOLD + "CAPTAIN &rto use this!"));*/
 		}));
 
 		contents.set(1, 6, ClickableItem.of(deathEffects, e -> {

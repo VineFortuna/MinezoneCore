@@ -44,7 +44,7 @@ public class FWScoreboardManager {
 		board.updateTitle(main().color("&6&lFLAG WARS"));
 
 		int playerCount = instance.countPlayers();
-		int maxPlayers = instance.getMode().getMaxPlayers();
+		int maxPlayers = instance.getMaxPlayers();
 
 		board.updateLines(
 				"",
@@ -81,9 +81,7 @@ public class FWScoreboardManager {
 		lines.add("");
 		if (own != null) {
 			lines.add(main().color("&rKills: &a" + instance.getKills(player)));
-			lines.add(main().color("&rFlags: &a" + instance.getFlagCaptures(player)));
-		} else {
-			lines.add(main().color("&7Spectating"));
+			lines.add(main().color("&rFlags: &a" + instance.getFlagCaptures(player) + "/" + instance.getRequiredCaptures()));
 		}
 
 		if (own != null && instance.getFlagManager().isCarrying(player)) {
@@ -206,10 +204,5 @@ public class FWScoreboardManager {
 		if (withoutNameColor.length() <= 16) return main().color(withoutNameColor);
 
 		return main().color(withoutNameColor).substring(0, 16);
-	}
-
-	/** Reverts a leaving participant to the default scoreboard so their nametag/tab list goes back to normal once they're out of Flag Wars. */
-	public void leaveNameTagScoreboard(Player player) {
-		player.setScoreboard(Bukkit.getScoreboardManager().getMainScoreboard());
 	}
 }

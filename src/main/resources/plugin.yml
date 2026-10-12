@@ -5,7 +5,7 @@ softdepend: [MinezonePunish]
 commands:
    join:
       description: Join a game
-      usage: /join [map name]
+      usage: /join [map name | flagwars [solo|duo]]
    hub:
       description: Hub command
       aliases: [h, lobby]
@@ -173,7 +173,7 @@ commands:
      aliases: [ pc, pchat ]
    fw:
       description: Flag Wars gamemode command
-      usage: /fw <join|leave|help>
+      usage: /fw help (join/leave moved to /join flagwars and /leave)
       aliases: [flagwars, fd, vd]
    fwsetup:
       description: Staff tool to configure a Flag Wars map

@@ -16,14 +16,23 @@ public class FWMapConfig {
 
 	public static final int TEAM_COUNT = 8;
 
-	/** No building within this many blocks of a spawn or any generator - keeps those spots from getting blocked off. */
-	private static final double PROTECTED_RADIUS = 4.0;
+	/** No building within this many blocks of a team spawn. */
+	private static final double SPAWN_PROTECTED_RADIUS = 7.0;
+	/** No building within this many blocks (XZ only, any Y) of any generator (iron, gold, emerald, diamond). */
+	private static final double GENERATOR_PROTECTED_RADIUS = 4.0;
+	/** No building within this many blocks of a team's flag. */
+	private static final double FLAG_PROTECTED_RADIUS = 1.5;
 
 	private final String worldName;
 	private Location lobby;
+	private Location spectatorLocation;
 	private final Map<Integer, FWTeamSite> teamSites = new LinkedHashMap<>();
 	private final Map<Integer, Location> emeraldGenerators = new LinkedHashMap<>();
 	private final Map<Integer, Location> diamondGenerators = new LinkedHashMap<>();
+	private final Map<Integer, Location> chestHolograms = new LinkedHashMap<>();
+	/** Custom fixed generation interval (seconds) per generator id, overriding the tier-based timing entirely. Absent means "use the default tiered timing". */
+	private final Map<Integer, Integer> emeraldGeneratorIntervals = new LinkedHashMap<>();
+	private final Map<Integer, Integer> diamondGeneratorIntervals = new LinkedHashMap<>();
 
 	public FWMapConfig(String worldName) {
 		this.worldName = worldName;
@@ -42,6 +51,14 @@ public class FWMapConfig {
 
 	public void setLobby(Location lobby) {
 		this.lobby = lobby;
+	}
+
+	public Location getSpectatorLocation() {
+		return spectatorLocation;
+	}
+
+	public void setSpectatorLocation(Location spectatorLocation) {
+		this.spectatorLocation = spectatorLocation;
 	}
 
 	public FWTeamSite getTeamSite(int id) {
@@ -68,11 +85,46 @@ public class FWMapConfig {
 		diamondGenerators.put(id, loc);
 	}
 
-	/** Returns missing pieces of config, for /fwsetup list. Empty if fully configured. */
+	/** Null if this generator uses the default tiered timing. */
+	public Integer getEmeraldGeneratorInterval(int id) {
+		return emeraldGeneratorIntervals.get(id);
+	}
+
+	/** Pass null to clear the override and fall back to the default tiered timing. */
+	public void setEmeraldGeneratorInterval(int id, Integer seconds) {
+		if (seconds == null) emeraldGeneratorIntervals.remove(id);
+		else emeraldGeneratorIntervals.put(id, seconds);
+	}
+
+	/** Null if this generator uses the default tiered timing. */
+	public Integer getDiamondGeneratorInterval(int id) {
+		return diamondGeneratorIntervals.get(id);
+	}
+
+	/** Pass null to clear the override and fall back to the default tiered timing. */
+	public void setDiamondGeneratorInterval(int id, Integer seconds) {
+		if (seconds == null) diamondGeneratorIntervals.remove(id);
+		else diamondGeneratorIntervals.put(id, seconds);
+	}
+
+	public Map<Integer, Location> getChestHolograms() {
+		return chestHolograms;
+	}
+
+	public void setChestHologram(int id, Location loc) {
+		chestHolograms.put(id, loc);
+	}
+
+	/** Returns missing pieces of config, for /fwsetup list. Empty if fully configured. Only created team slots (see FWTeamSite#isCreated) are checked - an uncreated slot just isn't in play on this map. */
 	public java.util.List<String> findMissing() {
 		java.util.List<String> missing = new java.util.ArrayList<>();
 		if (lobby == null) missing.add("lobby");
+
+		int createdCount = 0;
 		for (FWTeamSite site : teamSites.values()) {
+			if (!site.isCreated()) continue;
+			createdCount++;
+
 			String color = FWGameConstants.TEAM_NAMES[site.getId() - 1];
 			if (site.getSpawn() == null) missing.add("team " + color + " spawn");
 			if (site.getFlagLoc() == null) missing.add("team " + color + " flag");
@@ -80,6 +132,8 @@ public class FWMapConfig {
 			if (site.getIronGenerator() == null) missing.add("team " + color + " iron generator");
 			if (site.getGoldGenerator() == null) missing.add("team " + color + " gold generator");
 		}
+
+		if (createdCount < 2) missing.add("at least 2 created teams (run /fwsetup team <color>)");
 		if (emeraldGenerators.isEmpty()) missing.add("at least one emerald generator");
 		if (diamondGenerators.isEmpty()) missing.add("at least one diamond generator");
 		return missing;
@@ -89,26 +143,34 @@ public class FWMapConfig {
 		return findMissing().isEmpty();
 	}
 
-	/** True if loc is within PROTECTED_RADIUS of any team's spawn/iron/gold generator, or any shared emerald/diamond generator. */
+	/** True if loc is within the protected radius of any team spawn (7 blocks), any team flag (1.5 blocks), or any generator (4 blocks XZ, any Y). */
 	public boolean isProtectedFromBuilding(Location loc) {
 		for (FWTeamSite site : teamSites.values()) {
-			if (withinRadius(loc, site.getSpawn())) return true;
-			if (withinRadius(loc, site.getIronGenerator())) return true;
-			if (withinRadius(loc, site.getGoldGenerator())) return true;
+			if (withinRadius(loc, site.getSpawn(), SPAWN_PROTECTED_RADIUS)) return true;
+			if (withinRadius(loc, site.getFlagLoc(), FLAG_PROTECTED_RADIUS)) return true;
+			if (withinXZRadius(loc, site.getIronGenerator(), GENERATOR_PROTECTED_RADIUS)) return true;
+			if (withinXZRadius(loc, site.getGoldGenerator(), GENERATOR_PROTECTED_RADIUS)) return true;
 		}
 		for (Location gen : emeraldGenerators.values()) {
-			if (withinRadius(loc, gen)) return true;
+			if (withinXZRadius(loc, gen, GENERATOR_PROTECTED_RADIUS)) return true;
 		}
 		for (Location gen : diamondGenerators.values()) {
-			if (withinRadius(loc, gen)) return true;
+			if (withinXZRadius(loc, gen, GENERATOR_PROTECTED_RADIUS)) return true;
 		}
 		return false;
 	}
 
-	private boolean withinRadius(Location loc, Location point) {
+	private boolean withinRadius(Location loc, Location point, double radius) {
 		return point != null
 				&& loc.getWorld().equals(point.getWorld())
-				&& loc.distanceSquared(point) <= PROTECTED_RADIUS * PROTECTED_RADIUS;
+				&& loc.distanceSquared(point) <= radius * radius;
+	}
+
+	private boolean withinXZRadius(Location loc, Location point, double radius) {
+		if (point == null || !loc.getWorld().equals(point.getWorld())) return false;
+		double dx = loc.getX() - point.getX();
+		double dz = loc.getZ() - point.getZ();
+		return dx * dx + dz * dz <= radius * radius;
 	}
 
 	/**
@@ -121,15 +183,19 @@ public class FWMapConfig {
 	public FWMapConfig translateTo(World targetWorld) {
 		FWMapConfig copy = new FWMapConfig(worldName);
 		copy.setLobby(translateLocation(lobby, targetWorld));
+		copy.setSpectatorLocation(translateLocation(spectatorLocation, targetWorld));
 
 		for (Map.Entry<Integer, FWTeamSite> entry : teamSites.entrySet()) {
 			FWTeamSite source = entry.getValue();
 			FWTeamSite target = copy.getTeamSite(entry.getKey());
+			target.setCreated(source.isCreated());
 			target.setSpawn(translateLocation(source.getSpawn(), targetWorld));
 			target.setFlagLoc(translateLocation(source.getFlagLoc(), targetWorld));
 			target.setShopLoc(translateLocation(source.getShopLoc(), targetWorld));
 			target.setIronGenerator(translateLocation(source.getIronGenerator(), targetWorld));
 			target.setGoldGenerator(translateLocation(source.getGoldGenerator(), targetWorld));
+			target.setIronGeneratorInterval(source.getIronGeneratorInterval());
+			target.setGoldGeneratorInterval(source.getGoldGeneratorInterval());
 			target.setBoundaryCorner1(translateLocation(source.getBoundaryCorner1(), targetWorld));
 			target.setBoundaryCorner2(translateLocation(source.getBoundaryCorner2(), targetWorld));
 		}
@@ -139,6 +205,15 @@ public class FWMapConfig {
 		}
 		for (Map.Entry<Integer, Location> entry : diamondGenerators.entrySet()) {
 			copy.setDiamondGenerator(entry.getKey(), translateLocation(entry.getValue(), targetWorld));
+		}
+		for (Map.Entry<Integer, Integer> entry : emeraldGeneratorIntervals.entrySet()) {
+			copy.setEmeraldGeneratorInterval(entry.getKey(), entry.getValue());
+		}
+		for (Map.Entry<Integer, Integer> entry : diamondGeneratorIntervals.entrySet()) {
+			copy.setDiamondGeneratorInterval(entry.getKey(), entry.getValue());
+		}
+		for (Map.Entry<Integer, Location> entry : chestHolograms.entrySet()) {
+			copy.setChestHologram(entry.getKey(), translateLocation(entry.getValue(), targetWorld));
 		}
 
 		return copy;

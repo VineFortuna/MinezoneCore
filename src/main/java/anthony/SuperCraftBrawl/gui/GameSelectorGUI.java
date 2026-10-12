@@ -1,20 +1,24 @@
 package anthony.SuperCraftBrawl.gui;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import anthony.SuperCraftBrawl.gui.fishing.FishingAreasGUI;
 import anthony.SuperCraftBrawl.gui.fishing.FishingGUI;
+import anthony.flagwars.FWModeSelectGUI;
 import anthony.util.ChatColorHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 
 import anthony.util.SoundManager;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BannerMeta;
 
 import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.Core;
@@ -24,6 +28,20 @@ import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 
 public class GameSelectorGUI implements InventoryProvider {
+
+	private static final List<String> SCB_DESCRIPTION = java.util.Arrays.asList(
+			"&7Select from a wide range of classes, each",
+			"&7with unique abilities. Fight Free For All",
+			"&7to be the last one standing, or go 1v1 &",
+			"&7fight to the death in Duels!"
+	);
+
+	private static final List<String> FLAG_WARS_DESCRIPTION = java.util.Arrays.asList(
+			"&7Steal flags from enemies and rush it back",
+			"&7to your base while defending your own.",
+			"&7Capture the most flags to win! You can",
+			"&7play Solo or team up in Duos!"
+	);
 
 	public Core main;
 	public SmartInventory inv;
@@ -38,64 +56,44 @@ public class GameSelectorGUI implements InventoryProvider {
 
 	@Override
 	public void init(Player player, InventoryContents contents) {
-		contents.fill(ClickableItem.of(ItemHelper.setDetails(
-				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
+		ItemStack pane = ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " ");
+		for (int row = 0; row < 3; row++) {
+			for (int col = 0; col < 9; col++) {
+				if (row == 0 || row == 2 || col == 0 || col == 8) {
+					contents.set(row, col, ClickableItem.of(pane, e -> {}));
+				}
+			}
+		}
 
-		// Classic Mode
-		ItemStack scbClassic = ItemHelper.createSkullTexture("e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I4NmI4MjE1YjM2MTBlYWE2NDhjMjNjNGEyMGFkNjc1OWYyNTFlZjg1NDc2ODI5ZGQ2ZDE4NDI4MjNiMTEzIn19fQ==");
+		// Super Craft Bros - opens a Classic/Duels sub-menu (the same two icons that used to live here directly)
+		ItemStack scbIcon = ItemHelper.createSkullTexture("e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I4NmI4MjE1YjM2MTBlYWE2NDhjMjNjNGEyMGFkNjc1OWYyNTFlZjg1NDc2ODI5ZGQ2ZDE4NDI4MjNiMTEzIn19fQ==");
 		contents.set(1, 3,
 				ClickableItem.of(
-						ItemHelper.setDetails(scbClassic,
-								"&e&lSuper Craft Brothers",
-								"&fMode: &aClassic",
-								"",
-								"&7Free for all, kill everyone",
-								"",
-								"&e&nLeft Click&r&e to choose a map",
-								"&e&nRight Click&r&e to join a random map"),
+						modeSelectorDisplayItem(scbIcon, "&6&lSUPER CRAFT BROS", SCB_DESCRIPTION, scbPlayerCount()),
 						e -> {
-							// If item was Left-clicked opens GUI to choose map
-							if (e.isLeftClick()) {
-								SoundManager.playClickSound(player);
-								new ClassicModeGUI(main, inv).inv.open(player);
-							// If item was Right-clicked join random game
-							} else if (e.isRightClick()) {
-								main.getGameManager().JoinMap(player, randomizeMap(GameType.CLASSIC));
-							}
+							SoundManager.playClickSound(player);
+							new SCBModeSelectGUI(main).inv.open(player);
 						}));
 
-		// Duels Mode
+		// Flag Wars - replaces the old standalone Duels icon's slot
 		contents.set(1, 5,
 				ClickableItem.of(
-						ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD),
-								"&e&lSuper Craft Brothers",
-								"&fMode: &aDuels",
-								"",
-								"&71v1 someone to the death",
-								"",
-								"&e&nLeft Click&r&e to choose a map",
-								"&e&nRight Click&r&e to join a random map"),
+						modeSelectorDisplayItem(blueBanner(), "&6&lFLAG WARS &r&lNEW!", FLAG_WARS_DESCRIPTION, flagWarsPlayerCount()),
 						e -> {
-							// If item was Left-clicked opens GUI to choose map
-							if (e.isLeftClick()) {
-								SoundManager.playClickSound(player);
-								new DuelsModeGUI(main, inv).inv.open(player);
-							// If item was Right-clicked join random game
-							} else if (e.isRightClick()) {
-								main.getGameManager().JoinMap(player, randomizeMap(GameType.DUEL));
-							}
+							SoundManager.playClickSound(player);
+							new FWModeSelectGUI(main.getFwGameManager()).open(player);
 						}));
 
 		// Fishing
 		contents.set(1, 1,
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
-								"&e&lFishing",
-								"&7Fish for junk, fish and treasures",
+								"&6&lFISHING",
 								"",
+								"&7Fish for junk, fish and treasures",
 								"&7Earn unique rewards",
 								"",
-								"&e&nLeft Click&r&e to see your Fishingpedia",
+							"&e&nLeft Click&r&e to see your Fishingpedia",
 								"&e&nRight Click&r&e to see the Fishing Warps"),
 						e -> {
 							// If item was Left-clicked opens GUI to choose map
@@ -113,9 +111,9 @@ public class GameSelectorGUI implements InventoryProvider {
 		contents.set(1, 7,
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.GRASS),
-								"&e&lParkour",
-								"&7How fast are you?",
+								"&6&lPARKOUR",
 								"",
+								"&7How fast are you?",
 								"&7Earn rewards for completing the parkour",
 								"",
 								"&eClick to teleport"
@@ -149,5 +147,46 @@ public class GameSelectorGUI implements InventoryProvider {
 			} while (!joined);
 
 			return randomizedMap;
+		}
+
+		/** Same lore template for every top-level mode tile: blank, description (can be multiple lines), blank, "Click to Play!", blank, live player count. */
+		private ItemStack modeSelectorDisplayItem(ItemStack icon, String title, List<String> description, int playerCount) {
+			List<String> lore = new ArrayList<>();
+			lore.add("");
+			for (String line : description) {
+				lore.add(main.color(line));
+			}
+			lore.add("");
+			lore.add(main.color("&eClick to Play!"));
+			lore.add("");
+			lore.add(main.color("&a" + playerCount + " &rplaying!"));
+
+			return ItemHelper.setDetails(icon, main.color(title), lore);
+		}
+
+		private ItemStack blueBanner() {
+			ItemStack banner = new ItemStack(Material.BANNER);
+			BannerMeta meta = (BannerMeta) banner.getItemMeta();
+			meta.setBaseColor(DyeColor.BLUE);
+			banner.setItemMeta(meta);
+			return banner;
+		}
+
+		/** Summed across every active Classic/Duels instance - both GameTypes share the same gameMap/Maps pool. */
+		private int scbPlayerCount() {
+			int total = 0;
+			for (GameInstance instance : main.getGameManager().gameMap.values()) {
+				if (instance != null) total += instance.players.size();
+			}
+			return total;
+		}
+
+		/** Summed across every concurrent Flag Wars instance (Solo + Duos) - FWGameManager can run more than one at once. */
+		private int flagWarsPlayerCount() {
+			int total = 0;
+			for (anthony.flagwars.FWGameInstance instance : main.getFwGameManager().getActiveInstances()) {
+				total += instance.countPlayers();
+			}
+			return total;
 		}
 }

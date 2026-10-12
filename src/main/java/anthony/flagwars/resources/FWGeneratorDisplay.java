@@ -54,6 +54,7 @@ public class FWGeneratorDisplay {
 	private BukkitTask task;
 
 	private static final class Entry {
+		final int id;
 		final Location baseLoc;
 		final FWResourceType type;
 		ArmorStand blockStand;
@@ -64,7 +65,8 @@ public class FWGeneratorDisplay {
 		double particleFilledDeg;
 		boolean particlesActive;
 
-		Entry(Location loc, FWResourceType type) {
+		Entry(int id, Location loc, FWResourceType type) {
+			this.id = id;
 			this.baseLoc = loc.clone();
 			this.type = type;
 		}
@@ -78,11 +80,11 @@ public class FWGeneratorDisplay {
 		if (task != null) return;
 
 		FWMapConfig config = instance.getMapConfig();
-		for (Location loc : config.getEmeraldGenerators().values()) {
-			entries.add(new Entry(loc, FWResourceType.EMERALD));
+		for (java.util.Map.Entry<Integer, Location> genEntry : config.getEmeraldGenerators().entrySet()) {
+			entries.add(new Entry(genEntry.getKey(), genEntry.getValue(), FWResourceType.EMERALD));
 		}
-		for (Location loc : config.getDiamondGenerators().values()) {
-			entries.add(new Entry(loc, FWResourceType.DIAMOND));
+		for (java.util.Map.Entry<Integer, Location> genEntry : config.getDiamondGenerators().entrySet()) {
+			entries.add(new Entry(genEntry.getKey(), genEntry.getValue(), FWResourceType.DIAMOND));
 		}
 
 		for (Entry entry : entries) {
@@ -107,23 +109,23 @@ public class FWGeneratorDisplay {
 		entries.clear();
 	}
 
-	/** Called by FWResourceGenerator once a second with the new countdown for every generator of this resource type. */
-	public void updateCountdown(FWResourceType type, int secondsLeft) {
+	/** Called by FWResourceGenerator once a second with the new countdown for one specific generator (its own interval may differ from others of the same resource type). */
+	public void updateCountdown(FWResourceType type, int id, int secondsLeft) {
 		Core main = instance.getManager().getMain();
 		String line = main.color("&rRegenerates In: &a" + secondsLeft + "s");
 
 		for (Entry entry : entries) {
-			if (entry.type != type) continue;
+			if (entry.type != type || entry.id != id) continue;
 			if (entry.countdownStand != null && !entry.countdownStand.isDead()) {
 				entry.countdownStand.setCustomName(line);
 			}
 		}
 	}
 
-	/** Called by FWResourceGenerator to toggle the warning ring on/off for every generator of this resource type. */
-	public void setParticlesActive(FWResourceType type, boolean active) {
+	/** Called by FWResourceGenerator to toggle the warning ring on/off for one specific generator. */
+	public void setParticlesActive(FWResourceType type, int id, boolean active) {
 		for (Entry entry : entries) {
-			if (entry.type != type) continue;
+			if (entry.type != type || entry.id != id) continue;
 			if (active && !entry.particlesActive) {
 				entry.particleAngleDeg = 0;
 				entry.particleFilledDeg = 0;
@@ -202,7 +204,7 @@ public class FWGeneratorDisplay {
 	 * the ring, that point starts getting refreshed every tick too, so it stays lit instead of
 	 * fading - the ring visibly fills in over one lap instead of popping in all at once. Once a
 	 * full lap has passed, every anchor point is filled and the ring just keeps spinning, lit in
-	 * full, until setParticlesActive(type, false) stops new particles being sent entirely.
+	 * full, until setParticlesActive(type, id, false) stops new particles being sent entirely.
 	 */
 	private void spawnParticleRing(Entry entry) {
 		entry.particleAngleDeg = (entry.particleAngleDeg + RING_DEGREES_PER_TICK) % 360;

@@ -448,11 +448,12 @@ public class GameManager implements Listener, PluginMessageListener {
 	@EventHandler
 	public void onEnderPearl(PlayerTeleportEvent event) {
 		if (event.getCause() != TeleportCause.ENDER_PEARL) return;
-		event.setCancelled(true);
 
 		Player player = event.getPlayer();
 		GameInstance instance = this.GetInstanceOfPlayer(player);
-		if (instance == null) return;
+		if (instance == null) return; // not in an SCB game - let vanilla (or FW) handle it
+
+		event.setCancelled(true);
 
 		BaseClass baseClass = instance.classes.get(player);
 		if (baseClass == null || baseClass.isDead) return;

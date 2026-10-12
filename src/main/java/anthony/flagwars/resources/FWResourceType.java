@@ -28,6 +28,11 @@ public enum FWResourceType {
 		return null;
 	}
 
+	/** Title-case name for chat/lore display, e.g. "Iron", "Diamond". */
+	public String getDisplayName() {
+		return name().charAt(0) + name().substring(1).toLowerCase();
+	}
+
 	/** Chat color code (with leading &amp;) this resource's amount is rendered in on shop/upgrade lore. */
 	public String getColorCode() {
 		switch (this) {
@@ -59,13 +64,12 @@ public enum FWResourceType {
 	 * darkened to &amp;8 there so the label doesn't blend into the amount.
 	 */
 	public static String formatCost(Map<FWResourceType, Integer> cost) {
-		boolean ironOnly = cost.size() == 1 && cost.containsKey(IRON);
-		StringBuilder builder = new StringBuilder(ironOnly ? "&8Cost: " : "&7Cost: ");
+		StringBuilder builder = new StringBuilder("&rCost: ");
 
 		boolean first = true;
 		for (Map.Entry<FWResourceType, Integer> entry : cost.entrySet()) {
-			if (!first) builder.append("&7, ");
-			builder.append(entry.getKey().getColorCode()).append(entry.getValue()).append(' ').append(entry.getKey().name());
+			if (!first) builder.append("&r, ");
+			builder.append(entry.getKey().getColorCode()).append(entry.getValue()).append(' ').append(entry.getKey().getDisplayName());
 			first = false;
 		}
 		return builder.toString();

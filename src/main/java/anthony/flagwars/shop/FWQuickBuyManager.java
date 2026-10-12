@@ -14,6 +14,9 @@ import java.util.LinkedHashSet;
  */
 public final class FWQuickBuyManager {
 
+	/** Prefix stored in the set for default items the player has explicitly hidden. */
+	private static final String REMOVED_PREFIX = "~";
+
 	private FWQuickBuyManager() {
 	}
 
@@ -37,9 +40,39 @@ public final class FWQuickBuyManager {
 		return nowAdded;
 	}
 
+	/** Whether the player has explicitly hidden a default Quick Buy item. */
+	public static boolean isDefaultRemoved(Core main, Player player, String itemName) {
+		PlayerData data = main.getDataManager().getPlayerData(player);
+		return data != null && data.getFlagWarsQuickBuy().contains(REMOVED_PREFIX + itemName);
+	}
+
+	/**
+	 * Toggles a default item's visibility. Returns true = item is now visible (shown in Quick Buy),
+	 * false = item is now hidden (removed from Quick Buy).
+	 */
+	public static boolean toggleDefault(Core main, Player player, String itemName) {
+		PlayerData data = main.getDataManager().getPlayerData(player);
+		if (data == null) return true;
+
+		String key = REMOVED_PREFIX + itemName;
+		boolean nowHidden = !data.getFlagWarsQuickBuy().contains(key);
+		if (nowHidden) {
+			data.addFlagWarsQuickBuy(key);
+		} else {
+			data.removeFlagWarsQuickBuy(key);
+		}
+		main.getDataManager().saveData(data);
+		return !nowHidden; // true = now visible
+	}
+
+	/** Returns item names the player has personally added, in insertion order, excluding removed-default markers. */
 	public static LinkedHashSet<String> getAdded(Core main, Player player) {
 		PlayerData data = main.getDataManager().getPlayerData(player);
 		if (data == null) return new LinkedHashSet<>();
-		return new LinkedHashSet<>(data.getFlagWarsQuickBuy());
+		LinkedHashSet<String> result = new LinkedHashSet<>();
+		for (String name : data.getFlagWarsQuickBuy()) {
+			if (!name.startsWith(REMOVED_PREFIX)) result.add(name);
+		}
+		return result;
 	}
 }

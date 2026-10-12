@@ -777,7 +777,9 @@ public class Core extends JavaPlugin implements Listener {
 
     private void registrations() {
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
-        Bukkit.getServer().getPluginManager().registerEvents(new anthony.flagwars.FWPlayerListener(fwGameManager), this);
+        anthony.flagwars.FWPlayerListener fwPlayerListener = new anthony.flagwars.FWPlayerListener(fwGameManager);
+        fwGameManager.setPlayerListener(fwPlayerListener);
+        Bukkit.getServer().getPluginManager().registerEvents(fwPlayerListener, this);
         Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         Bukkit.getMessenger().registerIncomingPluginChannel(this, "BungeeCord", gameManager);
     }
@@ -1442,7 +1444,7 @@ public class Core extends JavaPlugin implements Listener {
                             TextComponent message = new TextComponent(
                                     "" + "     " + ChatColor.GREEN + ChatColor.BOLD + "Click here to join!");
                             message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                    "/fw join " + (fwInstance.getMode() == anthony.flagwars.FWGameMode.SOLO ? "solo" : "duo")));
+                                    "/join flagwars " + (fwInstance.getMode() == anthony.flagwars.FWGameMode.SOLO ? "solo" : "duo")));
                             Bukkit.spigot().broadcast(message);
                         } else {
                             player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
@@ -1953,11 +1955,7 @@ public class Core extends JavaPlugin implements Listener {
     public void sendScoreboardUpdate(Player trigger) {
         for (Player p : Bukkit.getOnlinePlayers()) {
             try {
-                boolean inGame =
-                        getGameManager().GetInstanceOfPlayer(p) != null
-                                || getGameManager().GetInstanceOfSpectator(p) != null;
-
-                if (!inGame) {
+                if (!isPlayerInAnyGame(p)) {
                     restoreLobbyNameTag(p);
                 }
                 // else: the game scoreboard owns nametag/class; do nothing.

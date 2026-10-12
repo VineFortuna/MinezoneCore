@@ -11,7 +11,7 @@ import java.util.Map;
  * in order; effects are applied by FWTeamUpgradeManager.
  */
 public enum FWTeamUpgrade {
-	FORGE("Forge", 4),
+	RESOURCE_RUSH("Resource Rush", 4),
 	SHARPENED_SWORDS("Sharpened Swords", 1),
 	REINFORCED_ARMOR("Reinforced Armor", 4),
 	HEAL_POOL("Heal Pool", 1),
@@ -33,9 +33,9 @@ public enum FWTeamUpgrade {
 		return maxTier;
 	}
 
-	/** Tier every team starts the match at - Forge starts at 1 (base speed), everything else at 0 (not bought). */
+	/** Tier every team starts the match at - 0 for all upgrades (nothing unlocked by default). */
 	public int getBaseTier() {
-		return this == FORGE ? 1 : 0;
+		return 0;
 	}
 
 	/** Resource cost to go from (nextTier - 1) to nextTier. Null once nextTier is past the max. */
@@ -43,9 +43,10 @@ public enum FWTeamUpgrade {
 		if (nextTier > maxTier) return null;
 
 		switch (this) {
-			case FORGE:
+			case RESOURCE_RUSH:
 				switch (nextTier) {
-					case 2: return cost(FWResourceType.IRON, 40, FWResourceType.GOLD, 20);
+					case 1: return cost(FWResourceType.DIAMOND, 2);
+					case 2: return cost(FWResourceType.DIAMOND, 4);
 					case 3: return cost(FWResourceType.DIAMOND, 8);
 					case 4: return cost(FWResourceType.DIAMOND, 16);
 					default: return null;
@@ -62,9 +63,9 @@ public enum FWTeamUpgrade {
 					default: return null;
 				}
 			case HEAL_POOL:
-				return nextTier == 1 ? cost(FWResourceType.IRON, 40, FWResourceType.GOLD, 20) : null;
+				return nextTier == 1 ? cost(FWResourceType.DIAMOND, 1) : null;
 			case FEATHER_FALLING:
-				return nextTier == 1 ? cost(FWResourceType.DIAMOND, 4) : null;
+				return nextTier == 1 ? cost(FWResourceType.DIAMOND, 2) : null;
 			default:
 				return null;
 		}

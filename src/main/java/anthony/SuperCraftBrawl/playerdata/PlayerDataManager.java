@@ -294,7 +294,7 @@ public class PlayerDataManager implements Listener {
 		return data;
 	}
 
-	/** Reads the 8 Flag Wars stat columns onto data, defaulting each to 0 if the column isn't there yet (fresh install, migration not run). */
+	/** Reads the Flag Wars columns onto data, defaulting each to 0 if the column isn't there yet (fresh install, migration not run). */
 	private void applyFlagWarsStats(ResultSet set, PlayerData data) {
 		data.fwWins = readIntOrDefault(set, "FWWins");
 		data.fwMatchMvps = readIntOrDefault(set, "FWMatchMvps");

@@ -1113,8 +1113,11 @@ public class PlayerListener implements Listener {
                         Material.ENDER_CHEST, Material.BEACON, Material.DISPENSER, Material.DROPPER, Material.CHEST));
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK && list.contains(e.getClickedBlock().getType())) {
             Player player = e.getPlayer();
-            if (!player.isOp())
+            if (!player.isOp()
+                    && main.getFwGameManager().getInstanceOfPlayer(player) == null
+                    && main.getFwGameManager().getInstanceOfSpectator(player) == null) {
                 e.setCancelled(true);
+            }
         }
     }
 

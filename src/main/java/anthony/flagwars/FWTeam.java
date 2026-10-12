@@ -1,10 +1,13 @@
 package anthony.flagwars;
 
 import anthony.flagwars.shop.FWTeamUpgrade;
+import anthony.flagwars.shop.FWTrap;
 import org.bukkit.DyeColor;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +29,7 @@ public class FWTeam {
 	private final List<UUID> members = new ArrayList<>();
 
 	private final Map<FWTeamUpgrade, Integer> upgradeTiers = new EnumMap<>(FWTeamUpgrade.class);
+	private final Deque<FWTrap> trapQueue = new ArrayDeque<>();
 
 	/** True once every member has left mid-match - the base sits idle (no generator/defense upkeep) but its flag stays capturable. */
 	private boolean inactive = false;
@@ -87,6 +91,25 @@ public class FWTeam {
 
 	public void resetUpgrades() {
 		upgradeTiers.clear();
+		trapQueue.clear();
+	}
+
+	public boolean addTrap(FWTrap trap) {
+		if (trapQueue.size() >= FWTrapManager.MAX_QUEUE_SIZE) return false;
+		trapQueue.offer(trap);
+		return true;
+	}
+
+	public FWTrap pollTrap() {
+		return trapQueue.poll();
+	}
+
+	public int getTrapQueueSize() {
+		return trapQueue.size();
+	}
+
+	public List<FWTrap> getTrapQueue() {
+		return new ArrayList<>(trapQueue);
 	}
 
 	public boolean isInactive() {

@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.util.ItemHelper;
 import anthony.flagwars.FWGameInstance;
 import anthony.flagwars.FWTeam;
+import anthony.flagwars.FWTrapManager;
 import anthony.flagwars.resources.FWEconomy;
 import anthony.flagwars.resources.FWResourceType;
 import fr.minuskube.inv.ClickableItem;
@@ -20,8 +21,6 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -123,80 +122,48 @@ public class FWShopGUI implements InventoryProvider {
 		} else if (category == Category.QUICK_BUY) {
 			renderQuickBuy(player, contents);
 		} else {
-			renderCatalogSorted(player, contents, catalogFor(category));
+			renderCatalog(player, contents, catalogFor(category, player));
 		}
 
 		renderCategoryButtons(player, contents, filler);
 	}
 
-	/** Material (cost type) >> cost amount >> alphabetical, cheapest/lowest-tier items first - same convention the Upgrades tab sorts by. */
-	private static final Comparator<FWShopItem> SHOP_ITEM_ORDER = Comparator
-			.comparingInt((FWShopItem item) -> item.getCostType().ordinal())
-			.thenComparingInt(FWShopItem::getCost)
-			.thenComparing(FWShopItem::getName);
-
-	private static final int CATALOG_ROW = 2;
-	private static final int CATALOG_FIRST_COL = 1;
-	private static final int CATALOG_COLS_PER_ROW = 7;
-
-	/**
-	 * Each catalog method's own (row, col) on FWShopItem is ignored here in favor of a fresh
-	 * sorted layout - cheapest/lowest-tier material first, wrapping to the next row after 7 items
-	 * (cols 1-7, matching Hypixel's own inset margin) exactly like Utility's 8th item already did
-	 * before this existed.
-	 */
-	private void renderCatalogSorted(Player player, InventoryContents contents, List<FWShopItem> items) {
-		List<FWShopItem> sorted = new ArrayList<>(items);
-		sorted.sort(SHOP_ITEM_ORDER);
-
-		int index = 0;
-		for (FWShopItem shopItem : sorted) {
-			int row = CATALOG_ROW + index / CATALOG_COLS_PER_ROW;
-			int col = CATALOG_FIRST_COL + index % CATALOG_COLS_PER_ROW;
-			contents.set(row, col, shopClickable(player, shopItem, contents));
-			index++;
+	private void renderCatalog(Player player, InventoryContents contents, List<FWShopItem> items) {
+		for (FWShopItem shopItem : items) {
+			contents.set(shopItem.getRow(), shopItem.getCol(), shopClickable(player, shopItem, contents));
 		}
 	}
 
-	/** Rows tried first for a new addition, closest to the default row (2) outward, then that row's own leftover corners last. */
-	private static final int[] QUICK_BUY_PREFERRED_ROWS = {1, 3, 0, 4, 2};
-	/** Columns tried first - directly above/below an existing default item before the far corners. */
-	private static final int[] QUICK_BUY_PREFERRED_COLS = {1, 2, 3, 4, 5, 6, 7, 0, 8};
-
 	/**
-	 * Default Quick Buy items keep their pinned Hypixel-style slots; anything the player
-	 * shift-clicked onto their Quick Buy elsewhere gets packed into the nearest free slot above
-	 * or below that row instead of starting from the top-left corner, so additions stay visually
-	 * next to the items already there.
+	 * Default items keep their pinned slots (skipped if the player hid them). Added favorites
+	 * fill in insertion order starting from the default row (2) downward, cols 1-7 (no edges).
 	 */
 	private void renderQuickBuy(Player player, InventoryContents contents) {
-		Set<Integer> usedSlots = new HashSet<>();
 		Set<String> shown = new HashSet<>();
+		Set<Integer> occupied = new HashSet<>();
 
 		for (FWShopItem shopItem : FWShopCatalog.quickBuy(team)) {
+			if (FWQuickBuyManager.isDefaultRemoved(main, player, shopItem.getName())) continue;
 			contents.set(shopItem.getRow(), shopItem.getCol(), shopClickable(player, shopItem, contents));
-			usedSlots.add(shopItem.getRow() * 9 + shopItem.getCol());
 			shown.add(shopItem.getName());
+			occupied.add(shopItem.getRow() * 9 + shopItem.getCol());
 		}
 
-		List<Integer> freeSlotsByPriority = new ArrayList<>();
-		for (int row : QUICK_BUY_PREFERRED_ROWS) {
-			for (int col : QUICK_BUY_PREFERRED_COLS) {
+		List<Integer> freeSlots = new ArrayList<>();
+		for (int row = 2; row <= 4; row++) {
+			for (int col = 1; col <= 7; col++) {
 				int slot = row * 9 + col;
-				if (!usedSlots.contains(slot)) freeSlotsByPriority.add(slot);
+				if (!occupied.contains(slot)) freeSlots.add(slot);
 			}
 		}
 
-		List<FWShopItem> allItems = FWShopCatalog.allItems(team);
+		List<FWShopItem> allItems = FWShopCatalog.allItems(team, player);
 		int nextIndex = 0;
 		for (String addedName : FWQuickBuyManager.getAdded(main, player)) {
 			if (shown.contains(addedName)) continue;
-
 			FWShopItem match = findByName(allItems, addedName);
-			if (match == null) continue;
-			if (nextIndex >= freeSlotsByPriority.size()) break;
-
-			int slot = freeSlotsByPriority.get(nextIndex++);
+			if (match == null || nextIndex >= freeSlots.size()) continue;
+			int slot = freeSlots.get(nextIndex++);
 			contents.set(slot / 9, slot % 9, shopClickable(player, match, contents));
 			shown.add(addedName);
 		}
@@ -223,7 +190,11 @@ public class FWShopGUI implements InventoryProvider {
 	}
 
 	private FWShopItem.QuickBuyHint quickBuyHint(Player player, FWShopItem shopItem) {
-		if (isDefaultQuickBuy(shopItem.getName())) return FWShopItem.QuickBuyHint.DEFAULT;
+		if (isDefaultQuickBuy(shopItem.getName())) {
+			// If the player removed this default, show ADD so they can restore it
+			return FWQuickBuyManager.isDefaultRemoved(main, player, shopItem.getName())
+					? FWShopItem.QuickBuyHint.ADD : FWShopItem.QuickBuyHint.REMOVE;
+		}
 		return FWQuickBuyManager.isAdded(main, player, shopItem.getName())
 				? FWShopItem.QuickBuyHint.REMOVE : FWShopItem.QuickBuyHint.ADD;
 	}
@@ -236,25 +207,24 @@ public class FWShopGUI implements InventoryProvider {
 	}
 
 	private void toggleQuickBuy(Player player, FWShopItem shopItem) {
+		boolean nowInQuickBuy;
 		if (isDefaultQuickBuy(shopItem.getName())) {
-			player.sendMessage(main.color("&e&l(!) &r" + shopItem.getName() + " is already in your Quick Buy by default."));
-			player.playSound(player.getLocation(), Sound.VILLAGER_NO, 1f, 1f);
-			return;
+			nowInQuickBuy = FWQuickBuyManager.toggleDefault(main, player, shopItem.getName());
+		} else {
+			nowInQuickBuy = FWQuickBuyManager.toggle(main, player, shopItem.getName());
 		}
-
-		boolean nowAdded = FWQuickBuyManager.toggle(main, player, shopItem.getName());
-		player.sendMessage(main.color(nowAdded
-				? "&2&l(!) &rAdded &e" + shopItem.getName() + "&r to your Quick Buy."
-				: "&c&l(!) &rRemoved &e" + shopItem.getName() + "&r from your Quick Buy."));
-		player.playSound(player.getLocation(), Sound.NOTE_PLING, 1f, nowAdded ? 1.4f : 0.8f);
+		player.sendMessage(main.color(nowInQuickBuy
+				? "&2&l(!) &rAdded &e" + shopItem.getName() + "&r to your Quick Buy"
+				: "&c&l(!) &rRemoved &e" + shopItem.getName() + "&r from your Quick Buy"));
+		player.playSound(player.getLocation(), Sound.NOTE_PLING, 1f, nowInQuickBuy ? 1.4f : 0.8f);
 	}
 
-	private List<FWShopItem> catalogFor(Category category) {
+	private List<FWShopItem> catalogFor(Category category, Player player) {
 		switch (category) {
 			case BLOCKS: return FWShopCatalog.blocks(team);
 			case MELEE: return FWShopCatalog.melee();
 			case ARMOR: return FWShopCatalog.armor();
-			case TOOLS: return FWShopCatalog.tools();
+			case TOOLS: return FWShopCatalog.tools(player);
 			case BOWS_AND_ARROWS: return FWShopCatalog.bowsAndArrows();
 			case POTIONS: return FWShopCatalog.potions();
 			case UTILITY: return FWShopCatalog.utility();
@@ -265,6 +235,12 @@ public class FWShopGUI implements InventoryProvider {
 	private void purchase(Player player, FWShopItem shopItem) {
 		if (shopItem.isArmorSet() && !isArmorUpgrade(player, shopItem)) {
 			player.sendMessage(main.color("&c&l(!) &rYou already own this tier of armor or better!"));
+			player.playSound(player.getLocation(), Sound.VILLAGER_NO, 1f, 1f);
+			return;
+		}
+
+		if (isSwordPurchase(shopItem) && !isSwordUpgrade(player, shopItem)) {
+			player.sendMessage(main.color("&c&l(!) &rYou already own this tier of sword or better!"));
 			player.playSound(player.getLocation(), Sound.VILLAGER_NO, 1f, 1f);
 			return;
 		}
@@ -281,34 +257,40 @@ public class FWShopGUI implements InventoryProvider {
 				equip(player, upgraded);
 			} else if (piece.getType().name().endsWith("_SWORD")) {
 				giveSword(player, upgraded);
+			} else if (piece.getType().name().endsWith("_PICKAXE")) {
+				givePickaxe(player, upgraded);
+			} else if (piece.getType().name().endsWith("_AXE")) {
+				giveAxe(player, upgraded);
 			} else {
 				player.getInventory().addItem(upgraded);
 			}
 		}
 
-		player.sendMessage(main.color("&2&l(!) &rPurchased &e" + shopItem.getName() + "&r."));
+		player.sendMessage(main.color("&2&l(!) &rPurchased &e" + shopItem.getName()));
 		player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1f, 1f);
+		if (shopItem.isArmorSet()) {
+			player.playSound(player.getLocation(), Sound.HORSE_ARMOR, 1.0f, 1.0f);
+		}
 		playShopkeeperTradeEffect();
 	}
 
 	/**
 	 * Same trade feedback VillagerAbilityGUI uses in SCB: green Happy Villager particles
 	 * scattered around a 1-block-radius circle at head height, plus the villager haggle
-	 * sound - centered on the shopkeeper here instead of the buyer.
+	 * sound - centered on the shopkeeper villager.
 	 */
 	private void playShopkeeperTradeEffect() {
 		Villager shopkeeper = instance.getFlagManager().getShopkeeper(team.getSiteId());
-		if (shopkeeper == null || shopkeeper.isDead()) return;
+		if (shopkeeper == null) return;
 
-		// getEyeLocation() (not getLocation(), which is the villager's feet) so the ring circles its head.
 		Location center = shopkeeper.getEyeLocation();
-		shopkeeper.getWorld().playSound(center, Sound.VILLAGER_HAGGLE, 1f, 1f);
+		center.getWorld().playSound(center, Sound.VILLAGER_HAGGLE, 1f, 1f);
 
 		for (int i = 0; i < 100; i++) {
 			double angle = Math.random() * Math.PI * 2;
 			double x = Math.cos(angle);
 			double z = Math.sin(angle);
-			shopkeeper.getWorld().playEffect(center.clone().add(x, 0, z), Effect.HAPPY_VILLAGER, 0);
+			center.getWorld().playEffect(center.clone().add(x, 0, z), Effect.HAPPY_VILLAGER, 0);
 		}
 	}
 
@@ -332,6 +314,37 @@ public class FWShopGUI implements InventoryProvider {
 		return newTier > currentTier;
 	}
 
+	/** Wood is the untracked starter tier every player begins with - everything above it is a real shop tier. */
+	private static final List<Material> SWORD_TIER_ORDER = Arrays.asList(
+			Material.WOOD_SWORD, Material.STONE_SWORD, Material.IRON_SWORD, Material.DIAMOND_SWORD);
+
+	private boolean isSwordPurchase(FWShopItem shopItem) {
+		for (ItemStack piece : shopItem.getGiveItems()) {
+			if (piece.getType().name().endsWith("_SWORD")) return true;
+		}
+		return false;
+	}
+
+	/** Blocks re-buying the same sword tier or a lower one (an accidental downgrade) - same rule as isArmorUpgrade. */
+	private boolean isSwordUpgrade(Player player, FWShopItem swordItem) {
+		int currentTier = -1;
+		for (ItemStack item : player.getInventory().getContents()) {
+			if (item != null && item.getType().name().endsWith("_SWORD")) {
+				currentTier = Math.max(currentTier, SWORD_TIER_ORDER.indexOf(item.getType()));
+			}
+		}
+
+		int newTier = -1;
+		for (ItemStack piece : swordItem.getGiveItems()) {
+			if (piece.getType().name().endsWith("_SWORD")) {
+				newTier = SWORD_TIER_ORDER.indexOf(piece.getType());
+				break;
+			}
+		}
+
+		return newTier > currentTier;
+	}
+
 	/** Equips one armor piece into its matching slot, instantly upgrading the player like Hypixel's full-set purchases do. */
 	private void equip(Player player, ItemStack piece) {
 		String type = piece.getType().name();
@@ -344,79 +357,122 @@ public class FWShopGUI implements InventoryProvider {
 	/**
 	 * Buying a sword tier swaps out whatever sword the player's currently carrying - the starter
 	 * Wood Sword, or an earlier purchase - in its own slot, instead of just adding the new one
-	 * alongside it and leaving the old one cluttering the inventory.
+	 * alongside it and leaving the old one cluttering the inventory. Any other stray sword the
+	 * player happens to be holding (e.g. a leftover from before this "one sword only" rule) is
+	 * cleared out rather than kept.
+	 *
+	 * The held slot is always preferred as the swap target over just the first sword found by
+	 * index: otherwise, if the sword actually in the player's hand isn't the earliest one in
+	 * inventory order, the new sword lands elsewhere in the inventory and the held slot gets
+	 * nulled out instead - the hand goes empty and it looks like the purchase removed every sword.
 	 */
 	private void giveSword(Player player, ItemStack newSword) {
 		ItemStack[] contents = player.getInventory().getContents();
-		boolean replaced = false;
+		int heldSlot = player.getInventory().getHeldItemSlot();
+
+		int keeperSlot = -1;
+		for (int i = 0; i < contents.length; i++) {
+			ItemStack item = contents[i];
+			if (item == null || !item.getType().name().endsWith("_SWORD")) continue;
+			if (keeperSlot == -1 || i == heldSlot) keeperSlot = i;
+		}
+
+		if (keeperSlot == -1) {
+			player.getInventory().addItem(newSword);
+			return;
+		}
 
 		for (int i = 0; i < contents.length; i++) {
 			ItemStack item = contents[i];
-			if (item != null && item.getType().name().endsWith("_SWORD")) {
-				player.getInventory().setItem(i, replaced ? null : newSword);
-				replaced = true;
+			if (item != null && i != keeperSlot && item.getType().name().endsWith("_SWORD")) {
+				player.getInventory().setItem(i, null);
 			}
 		}
+		player.getInventory().setItem(keeperSlot, newSword);
+	}
 
-		if (!replaced) {
-			player.getInventory().addItem(newSword);
+	/** Buying a pickaxe tier replaces the previous one in-slot, same held-slot-preferring rule as giveSword. */
+	private void givePickaxe(Player player, ItemStack newPickaxe) {
+		ItemStack[] contents = player.getInventory().getContents();
+		int heldSlot = player.getInventory().getHeldItemSlot();
+
+		int keeperSlot = -1;
+		for (int i = 0; i < contents.length; i++) {
+			ItemStack item = contents[i];
+			if (item == null || !item.getType().name().endsWith("_PICKAXE")) continue;
+			if (keeperSlot == -1 || i == heldSlot) keeperSlot = i;
 		}
+
+		if (keeperSlot == -1) {
+			player.getInventory().addItem(newPickaxe);
+			return;
+		}
+
+		for (int i = 0; i < contents.length; i++) {
+			ItemStack item = contents[i];
+			if (item != null && i != keeperSlot && item.getType().name().endsWith("_PICKAXE")) {
+				player.getInventory().setItem(i, null);
+			}
+		}
+		player.getInventory().setItem(keeperSlot, newPickaxe);
+	}
+
+	/** Buying an axe tier replaces the previous one in-slot, same held-slot-preferring rule as giveSword/givePickaxe. */
+	private void giveAxe(Player player, ItemStack newAxe) {
+		ItemStack[] contents = player.getInventory().getContents();
+		int heldSlot = player.getInventory().getHeldItemSlot();
+
+		int keeperSlot = -1;
+		for (int i = 0; i < contents.length; i++) {
+			ItemStack item = contents[i];
+			if (item == null || !item.getType().name().endsWith("_AXE")) continue;
+			if (keeperSlot == -1 || i == heldSlot) keeperSlot = i;
+		}
+
+		if (keeperSlot == -1) {
+			player.getInventory().addItem(newAxe);
+			return;
+		}
+
+		for (int i = 0; i < contents.length; i++) {
+			ItemStack item = contents[i];
+			if (item != null && i != keeperSlot && item.getType().name().endsWith("_AXE")) {
+				player.getInventory().setItem(i, null);
+			}
+		}
+		player.getInventory().setItem(keeperSlot, newAxe);
 	}
 
 	private void renderUpgrades(Player player, InventoryContents contents) {
+		// Row 2: team-wide upgrades
 		int col = 1;
-		for (FWTeamUpgrade upgrade : sortedUpgrades()) {
+		for (FWTeamUpgrade upgrade : FWTeamUpgrade.values()) {
 			contents.set(2, col++, ClickableItem.of(upgradeDisplayItem(player, upgrade), e -> {
 				purchaseUpgrade(player, upgrade);
 				render(player, contents);
 			}));
 		}
-	}
 
-	/**
-	 * FWTeamUpgrade.values() is declaration order, not a meaningful shop order - sort dynamically
-	 * instead by material (the priciest resource in the next tier's cost) >> cost (that resource's
-	 * amount) >> name, cheapest/lowest-tier upgrades first, same convention the regular catalog
-	 * tabs already follow (iron-cost items before gold before emerald/diamond).
-	 */
-	private List<FWTeamUpgrade> sortedUpgrades() {
-		List<FWTeamUpgrade> upgrades = new ArrayList<>(Arrays.asList(FWTeamUpgrade.values()));
-		upgrades.sort((a, b) -> {
-			Map<FWResourceType, Integer> costA = nextCostOf(a);
-			Map<FWResourceType, Integer> costB = nextCostOf(b);
+		// Row 3: traps divider
+		contents.set(3, 4, ClickableItem.empty(ItemHelper.setDetails(
+				new ItemStack(Material.TRIPWIRE_HOOK),
+				main.color("&e&lTraps"),
+				Arrays.asList(
+						main.color("&7Triggered when an enemy enters your base."),
+						main.color("&7Max " + FWTrapManager.MAX_QUEUE_SIZE + " traps queued at once.")
+				)
+		)));
 
-			int materialCompare = Integer.compare(primaryMaterialOrdinal(costA), primaryMaterialOrdinal(costB));
-			if (materialCompare != 0) return materialCompare;
-
-			int costCompare = Integer.compare(primaryAmount(costA), primaryAmount(costB));
-			if (costCompare != 0) return costCompare;
-
-			return a.getDisplayName().compareTo(b.getDisplayName());
-		});
-		return upgrades;
-	}
-
-	/** Empty (sorts last via ordinal -1) once an upgrade is maxed - there's no "next" cost to rank it by. */
-	private Map<FWResourceType, Integer> nextCostOf(FWTeamUpgrade upgrade) {
-		int tier = team.getUpgradeTier(upgrade);
-		Map<FWResourceType, Integer> cost = upgrade.costForTier(tier + 1);
-		return cost != null ? cost : Collections.emptyMap();
-	}
-
-	/** The highest-tier resource type in a cost map - e.g. {IRON, GOLD} ranks as GOLD. */
-	private int primaryMaterialOrdinal(Map<FWResourceType, Integer> cost) {
-		int max = -1;
-		for (FWResourceType type : cost.keySet()) max = Math.max(max, type.ordinal());
-		return max;
-	}
-
-	/** The amount of whichever resource determined primaryMaterialOrdinal. */
-	private int primaryAmount(Map<FWResourceType, Integer> cost) {
-		int ordinal = primaryMaterialOrdinal(cost);
-		for (Map.Entry<FWResourceType, Integer> entry : cost.entrySet()) {
-			if (entry.getKey().ordinal() == ordinal) return entry.getValue();
+		// Row 4: trap items
+		FWTrap[] traps = FWTrap.values();
+		for (int i = 0; i < traps.length; i++) {
+			FWTrap trap = traps[i];
+			int trapCol = i + 2;
+			contents.set(4, trapCol, ClickableItem.of(trapDisplayItem(player, trap), e -> {
+				purchaseTrap(player, trap);
+				render(player, contents);
+			}));
 		}
-		return 0;
 	}
 
 	private ItemStack upgradeDisplayItem(Player player, FWTeamUpgrade upgrade) {
@@ -426,22 +482,22 @@ public class FWShopGUI implements InventoryProvider {
 
 		List<String> lore = new ArrayList<>();
 		lore.add("");
-		lore.add(main.color("&7Tier: &e" + tier + "&7/&e" + upgrade.getMaxTier()));
-
 		if (cost != null) {
 			boolean affordable = FWEconomy.canAfford(player, cost);
 			lore.add(main.color(FWResourceType.formatCost(cost)));
-			lore.add(main.color(affordable ? "&a&lClick to upgrade" : "&c&lNot enough resources"));
+			lore.add(main.color(affordable ? "&eClick to upgrade" : "&cNot enough resources!"));
 		} else {
-			lore.add(main.color("&a&lMax tier reached"));
+			lore.add(main.color("&aMax tier reached!"));
 		}
+		lore.add("");
+		lore.add(main.color("&rTier: &a" + tier + "/" + upgrade.getMaxTier()));
 
 		return ItemHelper.setDetails(new ItemStack(iconFor(upgrade)), main.color((maxed ? "&a" : "&e") + upgrade.getDisplayName()), lore);
 	}
 
 	private Material iconFor(FWTeamUpgrade upgrade) {
 		switch (upgrade) {
-			case FORGE: return Material.FURNACE;
+			case RESOURCE_RUSH: return Material.FURNACE;
 			case SHARPENED_SWORDS: return Material.IRON_SWORD;
 			case REINFORCED_ARMOR: return Material.IRON_LEGGINGS;
 			case HEAL_POOL: return Material.SPECKLED_MELON;
@@ -463,6 +519,66 @@ public class FWShopGUI implements InventoryProvider {
 			return;
 		}
 
+		player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1f, 1f);
+		playShopkeeperTradeEffect();
+	}
+
+	private ItemStack trapDisplayItem(Player player, FWTrap trap) {
+		int queued = team.getTrapQueueSize();
+		boolean full = queued >= FWTrapManager.MAX_QUEUE_SIZE;
+		boolean affordable = FWEconomy.canAfford(player, FWResourceType.DIAMOND, trap.getDiamondCost());
+
+		List<String> lore = new ArrayList<>();
+		lore.add("");
+		lore.add(main.color(trap.getDescription()));
+		lore.add("");
+		lore.add(main.color("&bCost: &f" + trap.getDiamondCost() + " Diamond" + (trap.getDiamondCost() > 1 ? "s" : "")));
+		if (full) {
+			lore.add(main.color("&c&lTrap queue is full! (" + queued + "/" + FWTrapManager.MAX_QUEUE_SIZE + ")"));
+		} else {
+			lore.add(main.color(affordable ? "&a&lClick to queue" : "&c&lNot enough Diamonds"));
+			lore.add(main.color("&7Queue: &e" + queued + "&7/&e" + FWTrapManager.MAX_QUEUE_SIZE));
+		}
+
+		// Show what's currently queued so teammates can see
+		List<FWTrap> queue = team.getTrapQueue();
+		if (!queue.isEmpty()) {
+			lore.add("");
+			lore.add(main.color("&7Queued traps:"));
+			for (int i = 0; i < queue.size(); i++) {
+				lore.add(main.color("&7  " + (i + 1) + ". &e" + queue.get(i).getDisplayName()));
+			}
+		}
+
+		return ItemHelper.setDetails(new ItemStack(trapIconFor(trap)),
+				main.color((full ? "&c" : "&e") + trap.getDisplayName()), lore);
+	}
+
+	private Material trapIconFor(FWTrap trap) {
+		switch (trap) {
+			case MINING_FATIGUE:     return Material.IRON_PICKAXE;
+			case MLG:                return Material.WATER_BUCKET;
+			case SLOWNESS_BLINDNESS: return Material.INK_SACK;
+			default:                 return Material.TRIPWIRE_HOOK;
+		}
+	}
+
+	private void purchaseTrap(Player player, FWTrap trap) {
+		if (team.getTrapQueueSize() >= FWTrapManager.MAX_QUEUE_SIZE) {
+			player.sendMessage(main.color("&c&l(!) &rYour trap queue is full! (" + FWTrapManager.MAX_QUEUE_SIZE + "/" + FWTrapManager.MAX_QUEUE_SIZE + ")"));
+			player.playSound(player.getLocation(), Sound.VILLAGER_NO, 1f, 1f);
+			return;
+		}
+
+		if (!FWEconomy.withdraw(player, FWResourceType.DIAMOND, trap.getDiamondCost())) {
+			player.sendMessage(main.color("&c&l(!) &rYou don't have enough Diamonds!"));
+			player.playSound(player.getLocation(), Sound.VILLAGER_NO, 1f, 1f);
+			return;
+		}
+
+		team.addTrap(trap);
+		player.sendMessage(main.color("&2&l(!) &rQueued &e" + trap.getDisplayName() + " &r(&e"
+				+ team.getTrapQueueSize() + "&r/&e" + FWTrapManager.MAX_QUEUE_SIZE + "&r)"));
 		player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1f, 1f);
 		playShopkeeperTradeEffect();
 	}

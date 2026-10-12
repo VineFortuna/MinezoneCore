@@ -10,11 +10,16 @@ import org.bukkit.Location;
 public class FWTeamSite {
 
 	private final int id;
+	/** Whether this color slot is actually in play on this map - see FWGameInstance's team setup, which only instantiates a runtime FWTeam for created sites. Set via /fwsetup team &lt;color&gt;. */
+	private boolean created = false;
 	private Location spawn;
 	private Location flagLoc;
 	private Location shopLoc;
 	private Location ironGenerator;
 	private Location goldGenerator;
+	/** Custom fixed generation interval (seconds) set via /fwsetup, overriding the team-upgrade/early-boost timing entirely. Null means "use the default timing". */
+	private Integer ironGeneratorInterval;
+	private Integer goldGeneratorInterval;
 	/** Two opposite corners of this island's capture boundary box - optional; see isWithinBoundary(). */
 	private Location boundaryCorner1;
 	private Location boundaryCorner2;
@@ -25,6 +30,14 @@ public class FWTeamSite {
 
 	public int getId() {
 		return id;
+	}
+
+	public boolean isCreated() {
+		return created;
+	}
+
+	public void setCreated(boolean created) {
+		this.created = created;
 	}
 
 	public Location getSpawn() {
@@ -65,6 +78,22 @@ public class FWTeamSite {
 
 	public void setGoldGenerator(Location goldGenerator) {
 		this.goldGenerator = goldGenerator;
+	}
+
+	public Integer getIronGeneratorInterval() {
+		return ironGeneratorInterval;
+	}
+
+	public void setIronGeneratorInterval(Integer ironGeneratorInterval) {
+		this.ironGeneratorInterval = ironGeneratorInterval;
+	}
+
+	public Integer getGoldGeneratorInterval() {
+		return goldGeneratorInterval;
+	}
+
+	public void setGoldGeneratorInterval(Integer goldGeneratorInterval) {
+		this.goldGeneratorInterval = goldGeneratorInterval;
 	}
 
 	public boolean isComplete() {

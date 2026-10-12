@@ -2,9 +2,14 @@ package anthony.flagwars;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.flagwars.map.FWMapConfigManager;
+import anthony.util.SoundManager;
+import net.minecraft.server.v1_8_R3.EnumParticle;
+import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -16,7 +21,10 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Tracks every concurrently-running Flag Wars match. Mirrors the role of
@@ -32,15 +40,74 @@ import java.util.List;
  */
 public class FWGameManager {
 
+	private static final int SPAWN_PROT_DURATION_TICKS = 3 * 20;
+
 	private final Core main;
 	private final FWMapConfigManager mapConfigManager;
 	private final List<FWGameInstance> activeInstances = new ArrayList<>();
+	private final Set<UUID> spawnProtected = new HashSet<>();
 	private World primaryWorld;
 	private int cloneCounter = 0;
+	private FWPlayerListener playerListener;
 
 	public FWGameManager(Core main) {
 		this.main = main;
 		this.mapConfigManager = new FWMapConfigManager(main);
+	}
+
+	public void setPlayerListener(FWPlayerListener playerListener) {
+		this.playerListener = playerListener;
+	}
+
+	public void clearAttackerHistory(Player player) {
+		if (playerListener != null) playerListener.clearAttackerHistory(player);
+	}
+
+	public boolean isSpawnProtected(Player player) {
+		return spawnProtected.contains(player.getUniqueId());
+	}
+
+	/** Grants 3-second spawn protection to a player: blocks incoming/outgoing damage and shows enchantment-table particles. */
+	public void grantSpawnProtection(Player player, FWGameInstance instance) {
+		UUID uuid = player.getUniqueId();
+		spawnProtected.add(uuid);
+		new BukkitRunnable() {
+			@Override public void run() { spawnProtected.remove(uuid); }
+		}.runTaskLater(main, SPAWN_PROT_DURATION_TICKS);
+		spawnProtParticles(player, instance);
+	}
+
+	private void spawnProtParticles(Player player, FWGameInstance instance) {
+		new BukkitRunnable() {
+			int ticks = 0;
+			final double radius = 1.0;
+			final int particleCount = 20;
+
+			@Override
+			public void run() {
+				if (ticks >= SPAWN_PROT_DURATION_TICKS || !player.isOnline()) {
+					cancel();
+					return;
+				}
+
+				double angle = 2 * Math.PI * ticks / particleCount;
+				double x = radius * Math.cos(angle);
+				double z = radius * Math.sin(angle);
+
+				for (double yOffset = 0; yOffset <= 2; yOffset += 0.1) {
+					Location loc = player.getLocation().clone().add(x, yOffset, z);
+					PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(
+							EnumParticle.ENCHANTMENT_TABLE, true,
+							(float) loc.getX(), (float) loc.getY(), (float) loc.getZ(),
+							0F, 0F, 0F, 0F, 1);
+					for (Player viewer : instance.onlineParticipants()) {
+						((CraftPlayer) viewer).getHandle().playerConnection.sendPacket(packet);
+					}
+				}
+
+				ticks++;
+			}
+		}.runTaskTimer(main, 0L, 1L);
 	}
 
 	public Core getMain() {
@@ -100,7 +167,7 @@ public class FWGameManager {
 			 */
 			if (primaryWorld != null) {
 				primaryWorld.setAutoSave(false); // never persist a match's grief to disk - see releaseArenaWorld()
-				mapConfigManager.load();
+				mapConfigManager.reload();
 			}
 		}
 

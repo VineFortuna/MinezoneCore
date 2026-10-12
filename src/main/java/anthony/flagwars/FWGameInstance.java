@@ -2,6 +2,8 @@ package anthony.flagwars;
 
 import anthony.SuperCraftBrawl.Game.WinEffects;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.SuperCraftBrawl.titles.TitleSequence;
+import anthony.SuperCraftBrawl.titles.TitleUtil;
 import anthony.flagwars.flag.FWFlagManager;
 import anthony.flagwars.map.FWMapConfig;
 import anthony.flagwars.map.FWTeamSite;
@@ -23,6 +25,7 @@ import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -30,6 +33,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -61,6 +65,8 @@ public class FWGameInstance {
 	private final FWScoreboardManager scoreboardManager;
 	private final FWTeamUpgradeManager teamUpgradeManager;
 	private final FWGameSettings gameSettings;
+	private final FWChestHologramManager chestHologramManager;
+	private final FWTrapManager trapManager;
 
 	private FWGameState state = FWGameState.WAITING;
 	private BukkitTask countdownTask;
@@ -80,8 +86,14 @@ public class FWGameInstance {
 		this.scoreboardManager = new FWScoreboardManager(this);
 		this.teamUpgradeManager = new FWTeamUpgradeManager(this);
 		this.gameSettings = new FWGameSettings(this);
+		this.chestHologramManager = new FWChestHologramManager(this);
+		this.trapManager = new FWTrapManager(this);
 
+		// Only sites actually created via /fwsetup team <color> get a runtime team - an uncreated
+		// slot has no configured spawn/flag/shop, so letting players get assigned to it would break.
 		for (int siteId = 1; siteId <= FWMapConfig.TEAM_COUNT; siteId++) {
+			if (!mapConfig.getTeamSite(siteId).isCreated()) continue;
+
 			teams.put(siteId, new FWTeam(
 					siteId,
 					FWGameConstants.TEAM_NAMES[siteId - 1],
@@ -89,6 +101,11 @@ public class FWGameInstance {
 					mode.getTeamCapacity()
 			));
 		}
+	}
+
+	/** Actual max players for this specific map - scales with however many teams were actually created on it, not a fixed 8-team ceiling. */
+	public int getMaxPlayers() {
+		return mode.getTeamCapacity() * teams.size();
 	}
 
 	public FWGameManager getManager() {
@@ -131,6 +148,10 @@ public class FWGameInstance {
 
 	public FWTeamUpgradeManager getTeamUpgradeManager() {
 		return teamUpgradeManager;
+	}
+
+	public FWTrapManager getTrapManager() {
+		return trapManager;
 	}
 
 	public FWGameSettings getGameSettings() {
@@ -212,15 +233,24 @@ public class FWGameInstance {
 
 		freeTeam.addMember(player.getUniqueId());
 		player.getInventory().clear();
+		player.getEnderChest().clear();
 		player.setGameMode(GameMode.ADVENTURE);
 		player.teleport(mapConfig.getLobby());
 		FWLobbyItems.give(player);
 		scoreboardManager.applyNameTag(player, freeTeam);
 
+		// Same join-time hygiene SCB's own GameInstance#AddPlayer applies (cosmetics/armor),
+		// plus a potion-effect reset since Flag Wars shops sell Speed/Jump/Invisibility that
+		// could otherwise be carried in from a previous match. One choke point so it applies
+		// the same way whether a player joined via /join flagwars or the FWModeSelectGUI.
+		manager.getMain().getListener().removeCosmetics(player);
+		manager.getMain().getListener().resetArmor(player);
+		manager.getMain().getListener().resetPotionEffects(player);
+
 		player.sendMessage(manager.getMain().color("&2&l(!) &rYou joined Flag Wars as Team &e"
 				+ freeTeam.getName()));
 		TellAll(manager.getMain().color("&2&l(!) &f" + player.getName() + "&a joined ("
-				+ countPlayers() + "/" + mode.getMaxPlayers() + ")"));
+				+ countPlayers() + "/" + getMaxPlayers() + ")"));
 
 		checkForStart();
 
@@ -276,10 +306,10 @@ public class FWGameInstance {
 			if (data != null) manager.getMain().getDataManager().saveData(data);
 		}
 
+		player.getEnderChest().clear();
 		manager.getMain().ResetPlayer(player);
 		manager.getMain().getListener().resetArmor(player); // ResetPlayer() only clears the main inventory, not armor slots
 		manager.getMain().getListener().resetPotionEffects(player); // nor any Speed/Jump/Invisibility potions bought from the shop
-		scoreboardManager.leaveNameTagScoreboard(player);
 	}
 
 	private String waitingStatusLine() {
@@ -311,7 +341,8 @@ public class FWGameInstance {
 		player.setGameMode(GameMode.ADVENTURE);
 		player.spigot().setCollidesWithEntities(false);
 		player.setAllowFlight(true);
-		player.teleport(mapConfig.getLobby());
+		Location spectatorLoc = mapConfig.getSpectatorLocation();
+		player.teleport(spectatorLoc != null ? spectatorLoc : mapConfig.getLobby());
 		FWLobbyItems.spectatorItems(player);
 		scoreboardManager.joinNameTagScoreboard(player);
 
@@ -332,7 +363,6 @@ public class FWGameInstance {
 		manager.getMain().ResetPlayer(player);
 		manager.getMain().getListener().resetArmor(player);
 		manager.getMain().getListener().resetPotionEffects(player);
-		scoreboardManager.leaveNameTagScoreboard(player);
 
 		player.spigot().setCollidesWithEntities(true);
 		for (Player p : Bukkit.getOnlinePlayers()) {
@@ -418,7 +448,7 @@ public class FWGameInstance {
 
 		TextComponent join = new TextComponent("     " + manager.getMain().color("&a&lClick here to join!"));
 		join.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-				"/fw join " + (mode == FWGameMode.SOLO ? "solo" : "duo")));
+				"/join flagwars " + (mode == FWGameMode.SOLO ? "solo" : "duo")));
 
 		for (Player p : lobby.getPlayers()) {
 			p.sendMessage(msg);
@@ -509,35 +539,113 @@ public class FWGameInstance {
 				p.setHealth(20.0);
 				p.setFoodLevel(20);
 				giveStarterKit(p, team);
+				manager.grantSpawnProtection(p, this);
 			}
 		}
 
 		flagManager.spawnAll();
+		chestHologramManager.start();
+		trapManager.reset();
 		resourceGenerator.start();
 		teamUpgradeManager.start();
 		scoreboardManager.refreshAllGame();
 
 		TellAll(manager.getMain().color("&e&l----------------------------------------"));
-		TellAll(manager.getMain().color("                  &6&lFLAG WARS"));
+		TellAll(manager.getMain().color("                   &6&lFLAG WARS"));
 		TellAll("");
-		TellAll(manager.getMain().color("&r     Steal enemy flags and capture them at home."));
+		TellAll(manager.getMain().color("&r    Steal enemy flags and capture them at home."));
 		TellAll(manager.getMain().color("&r      Earn resources to buy gear in the shop."));
 		TellAll(manager.getMain().color("&r          Defend your flag from thieves!"));
 		TellAll(manager.getMain().color("&r                    Good Luck!"));
 		TellAll(manager.getMain().color("&e&l----------------------------------------"));
 		TellAll(manager.getMain().color("&a&l(!) &rCapture &e" + requiredCaptures + " &rflags to win!"));
-		playSoundForAll(Sound.ENDERDRAGON_GROWL, 0.5f, 1.5f);
+		playSoundForAll(Sound.ENDERDRAGON_GROWL, 0.35f, 1.0f);
 	}
 
 	/** Level 1 kit per the design doc: a sword plus team-colored leather armor - everything else is bought from the shop. */
 	public void giveStarterKit(Player player, FWTeam team) {
+		int pickaxeTier = pickaxeTierOf(player);
+		int axeTier = axeTierOf(player);
+		// Unlike the pickaxe/axe progressions, Shears have no tiers to reset - a bought pair is
+		// just kept as-is across deaths instead of being lost like the rest of the starter-kit wipe.
+		boolean hadShears = hasToolType(player, "SHEARS");
+
 		player.getInventory().clear();
 		// getInventory().clear() doesn't touch whatever item the player's mid-click holding on
 		// their cursor (e.g. dragged out of a shop/inventory GUI) - without this, dying while
 		// holding one let it survive straight through to the respawn kit.
 		player.setItemOnCursor(new ItemStack(Material.AIR));
 		player.getInventory().addItem(teamUpgradeManager.applyUpgrades(team, new ItemStack(Material.WOOD_SWORD)));
+
+		// Dying drops a tool down exactly one tier instead of resetting it to the bottom -
+		// Diamond -> Iron -> Stone -> Wood -> gone, the same ladder for both pickaxe and axe.
+		ItemStack downgradedPickaxe = pickaxeForTier(pickaxeTier - 1);
+		if (downgradedPickaxe != null) player.getInventory().addItem(downgradedPickaxe);
+
+		ItemStack downgradedAxe = axeForTier(axeTier - 1);
+		if (downgradedAxe != null) player.getInventory().addItem(downgradedAxe);
+
+		if (hadShears) player.getInventory().addItem(new ItemStack(Material.SHEARS));
 		giveStarterArmorIfUnequipped(player, team);
+	}
+
+	/** Returns true if the player is carrying any tool whose material name ends with the given suffix (e.g. "SHEARS"). */
+	private boolean hasToolType(Player player, String suffix) {
+		for (ItemStack item : player.getInventory().getContents()) {
+			if (item != null && item.getType().name().endsWith(suffix)) return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 0=none, 1=wood, 2=stone, 3=iron, 4=diamond - unlike FWShopCatalog's own pickaxe tier check
+	 * (which deliberately ignores Wood, since it was never a real purchase), this one tracks Wood
+	 * too, because a death downgrade can leave a player holding a plain Wood Pickaxe rather than
+	 * losing the tool outright.
+	 */
+	private int pickaxeTierOf(Player player) {
+		for (ItemStack item : player.getInventory().getContents()) {
+			if (item == null) continue;
+			if (item.getType() == Material.DIAMOND_PICKAXE) return 4;
+			if (item.getType() == Material.IRON_PICKAXE) return 3;
+			if (item.getType() == Material.STONE_PICKAXE) return 2;
+			if (item.getType() == Material.WOOD_PICKAXE) return 1;
+		}
+		return 0;
+	}
+
+	/** 0=none, 1=wood, 2=stone, 3=iron, 4=diamond - same ladder FWShopCatalog's own axeTierOf uses. */
+	private int axeTierOf(Player player) {
+		for (ItemStack item : player.getInventory().getContents()) {
+			if (item == null) continue;
+			if (item.getType() == Material.DIAMOND_AXE) return 4;
+			if (item.getType() == Material.IRON_AXE) return 3;
+			if (item.getType() == Material.STONE_AXE) return 2;
+			if (item.getType() == Material.WOOD_AXE) return 1;
+		}
+		return 0;
+	}
+
+	/** Enchanted the same way FWShopCatalog.tools() enchants each pickaxe tier - Efficiency I across the board. Null at tier &lt;= 0 (nothing to give). */
+	private ItemStack pickaxeForTier(int tier) {
+		switch (tier) {
+			case 4: return ItemHelper.addEnchant(new ItemStack(Material.DIAMOND_PICKAXE), Enchantment.DIG_SPEED, 1);
+			case 3: return ItemHelper.addEnchant(new ItemStack(Material.IRON_PICKAXE), Enchantment.DIG_SPEED, 1);
+			case 2: return ItemHelper.addEnchant(new ItemStack(Material.STONE_PICKAXE), Enchantment.DIG_SPEED, 1);
+			case 1: return new ItemStack(Material.WOOD_PICKAXE);
+			default: return null;
+		}
+	}
+
+	/** Enchanted the same way FWShopCatalog.tools() enchants each axe tier - Wood/Stone at Efficiency I, Iron at II, Diamond at III. Null at tier &lt;= 0 (nothing to give). */
+	private ItemStack axeForTier(int tier) {
+		switch (tier) {
+			case 4: return ItemHelper.addEnchant(new ItemStack(Material.DIAMOND_AXE), Enchantment.DIG_SPEED, 3);
+			case 3: return ItemHelper.addEnchant(new ItemStack(Material.IRON_AXE), Enchantment.DIG_SPEED, 2);
+			case 2: return ItemHelper.addEnchant(new ItemStack(Material.STONE_AXE), Enchantment.DIG_SPEED, 1);
+			case 1: return ItemHelper.addEnchant(new ItemStack(Material.WOOD_AXE), Enchantment.DIG_SPEED, 1);
+			default: return null;
+		}
 	}
 
 	/**
@@ -570,9 +678,15 @@ public class FWGameInstance {
 		if (killer != null) addKill(killer);
 
 		String message = killer != null
-				? "&r" + player.getName() + " &cwas killed by &r" + killer.getName()
-				: "&r" + player.getName() + " &cdied";
+				? "&r" + coloredName(player) + " &cwas killed by &r" + coloredName(killer)
+				: "&r" + coloredName(player) + " &cdied";
 		handleDeath(player, killer, message);
+	}
+
+	/** Player's name in their team's chat color, same coloring FWFlagManager already uses for steal/capture broadcasts. */
+	private String coloredName(Player player) {
+		FWTeam team = findTeamOf(player);
+		return team != null ? FWGameConstants.chatColorCodeFor(team.getColor()) + player.getName() : player.getName();
 	}
 
 	public void addKill(Player killer) {
@@ -615,9 +729,9 @@ public class FWGameInstance {
 	public void killPlayerInVoid(Player player, Player attacker) {
 		if (attacker != null) {
 			addKill(attacker);
-			handleDeath(player, attacker, "&r" + player.getName() + " &cwas doomed to fall by &r" + attacker.getName());
+			handleDeath(player, attacker, "&r" + coloredName(player) + " &cwas doomed to fall by &r" + coloredName(attacker));
 		} else {
-			handleDeath(player, null, "&r" + player.getName() + " &cfell into the void");
+			handleDeath(player, null, "&r" + coloredName(player) + " &cfell into the void");
 		}
 	}
 
@@ -635,19 +749,32 @@ public class FWGameInstance {
 		beginRespawn(player, team);
 	}
 
+	/** Display order for the kill-feedback chat lines below - Iron, Gold, Diamond, Emerald. */
+	private static final FWResourceType[] LOOT_FEEDBACK_ORDER =
+			{FWResourceType.IRON, FWResourceType.GOLD, FWResourceType.DIAMOND, FWResourceType.EMERALD};
+
 	/**
 	 * Bedwars rule: a kill loots the victim's iron/gold/emerald/diamond straight into the killer's
 	 * inventory instead of dropping it. One sound per resource TYPE actually looted (not one per
 	 * unit, and not the same sound repeated for every type) - see FWResourceType#getPickupSound.
+	 * Also tells the killer exactly what they picked up, one "&lt;color&gt;+N &lt;Name&gt;" line per
+	 * type looted, so a kill's payoff is visible without opening the inventory.
 	 */
 	private void lootResourcesToKiller(Player victim, Player killer) {
-		for (FWResourceType type : FWResourceType.values()) {
+		List<String> feedback = new ArrayList<>();
+
+		for (FWResourceType type : LOOT_FEEDBACK_ORDER) {
 			int amount = FWEconomy.count(victim, type);
 			if (amount <= 0) continue;
 
 			FWEconomy.withdraw(victim, type, amount);
 			killer.getInventory().addItem(new ItemStack(type.getMaterial(), amount));
 			killer.playSound(killer.getLocation(), type.getPickupSound(), 1f, 1f);
+			feedback.add(type.getColorCode() + "+" + amount + " " + type.getDisplayName());
+		}
+
+		for (String line : feedback) {
+			killer.sendMessage(manager.getMain().color(line));
 		}
 	}
 
@@ -672,8 +799,13 @@ public class FWGameInstance {
 					return;
 				}
 
-				p.sendTitle(manager.getMain().color("&c&lYOU DIED"),
-						manager.getMain().color("&eRespawning in &c" + secondsLeft + "&e..."));
+				String sub = "&eRespawning in &c" + secondsLeft + "&e...";
+				if (secondsLeft == RESPAWN_SECONDS) {
+					TitleUtil.sendTitle(p, "&c&lYOU DIED", sub, 5, 25, 5);
+				} else {
+					TitleUtil.sendTimes(p, 0, 25, 5);
+					TitleUtil.setSubtitle(p, sub);
+				}
 				secondsLeft--;
 			}
 		}.runTaskTimer(manager.getMain(), 0L, 20L);
@@ -681,8 +813,10 @@ public class FWGameInstance {
 
 	private void respawn(Player player, FWTeam team) {
 		if (!team.isMember(player)) {
-			return; // they already left the game through other means (e.g. /fw leave) while respawning
+			return; // they already left the game through other means (e.g. /leave) while respawning
 		}
+
+		manager.clearAttackerHistory(player);
 
 		FWTeamSite site = mapConfig.getTeamSite(team.getSiteId());
 		player.setGameMode(GameMode.SURVIVAL);
@@ -691,7 +825,9 @@ public class FWGameInstance {
 		player.setFoodLevel(20);
 		manager.getMain().getListener().resetPotionEffects(player); // Speed/Jump/Invisibility etc. shouldn't survive a death
 		giveStarterKit(player, team);
-		player.sendTitle(manager.getMain().color("&a&lRESPAWNED"), "");
+		manager.grantSpawnProtection(player, this);
+		TitleSequence.sendSequence(manager.getMain(), player,
+				Collections.singletonList(new TitleSequence.TitleSpec("&a&lRESPAWNED", "", 5, 40, 10)));
 		player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1f, 1f);
 	}
 
@@ -732,7 +868,8 @@ public class FWGameInstance {
 			for (UUID uuid : winner.getMembers()) {
 				Player p = Bukkit.getPlayer(uuid);
 				if (p != null) {
-					p.sendTitle(manager.getMain().color("&6&lVICTORY"), manager.getMain().color("&eYou won the game!"));
+					TitleSequence.sendSequence(manager.getMain(), p,
+							Collections.singletonList(new TitleSequence.TitleSpec("&6&lVICTORY", "&eYou won the game!", 10, 100, 20)));
 
 					WinEffects winEffects = new WinEffects(p, new FWWinEffectsHost(this, p));
 					winEffects.checkWinEffect();
@@ -741,6 +878,14 @@ public class FWGameInstance {
 			}
 		} else {
 			TellAll(manager.getMain().color("&6&lFW> &rFlag Wars ended with no winner."));
+		}
+
+		for (FWTeam team : teams.values()) {
+			if (team == winner) continue;
+			for (UUID uuid : team.getMembers()) {
+				Player p = Bukkit.getPlayer(uuid);
+				if (p != null) p.setGameMode(GameMode.SPECTATOR);
+			}
 		}
 
 		Bukkit.getScheduler().runTaskLater(manager.getMain(), () -> {
@@ -924,6 +1069,8 @@ public class FWGameInstance {
 	 */
 	private void resetAndClear() {
 		resourceGenerator.stop();
+		chestHologramManager.stop();
+		trapManager.reset();
 		flagManager.despawnAll();
 		teamUpgradeManager.stop();
 		scoreboardManager.removeAll();
@@ -972,7 +1119,6 @@ public class FWGameInstance {
 		manager.getMain().ResetPlayer(player);
 		manager.getMain().getListener().resetArmor(player); // ResetPlayer() only clears the main inventory, not armor slots
 		manager.getMain().getListener().resetPotionEffects(player); // nor any Speed/Jump/Invisibility potions bought from the shop
-		scoreboardManager.leaveNameTagScoreboard(player);
 
 		// Only meaningful for spectators (see addSpectator), but harmless no-ops for regular
 		// players - same blanket re-show/re-collide SCB's own end-of-match cleanup does.

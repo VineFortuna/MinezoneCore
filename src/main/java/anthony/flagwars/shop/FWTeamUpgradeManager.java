@@ -7,6 +7,7 @@ import anthony.flagwars.resources.FWEconomy;
 import anthony.flagwars.resources.FWResourceType;
 import anthony.util.ItemHelper;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -24,11 +25,9 @@ import java.util.UUID;
 
 /**
  * Hypixel Bedwars-style team upgrades bought from the shop's Upgrades tab:
- * Forge speeds up that team's generators, Sharpened Swords / Reinforced
- * Armor permanently enchant swords/armor the team is given, Heal Pool gives
- * passive regen near the team's own flag, and Team Level is the old
- * tiered villager-upgrade track (now bought here too, since there's no
- * entity left to right-click) that gates shop items and defense mechanics.
+ * Resource Rush speeds up that team's generators, Sharpened Swords / Reinforced
+ * Armor permanently enchant swords/armor the team is given, and Heal Pool gives
+ * passive regen inside the team's island boundary.
  */
 public class FWTeamUpgradeManager {
 
@@ -49,12 +48,12 @@ public class FWTeamUpgradeManager {
 			Material.LEATHER_BOOTS, Material.CHAINMAIL_BOOTS, Material.IRON_BOOTS, Material.GOLD_BOOTS, Material.DIAMOND_BOOTS);
 	/** Fixed at Feather Falling II once bought - it's a one-shot Upgrades tab purchase, not a tiered enchant like Sharpened Swords/Reinforced Armor. */
 	private static final int FEATHER_FALLING_LEVEL = 2;
-	/** Every weapon/tool material a player can be given - these never lose durability (Fishing Rod covers the Grappling Hook, Bow covers the Teleport Bow). */
+	/** Every weapon/tool material a player can be given - these never lose durability (Bow covers the Teleport Bow). Fishing Rod is intentionally omitted: the Grappling Hook uses item durability as a visual "uses remaining" bar, so it must not be made unbreakable. */
 	private static final Set<Material> UNBREAKABLE_TYPES = EnumSet.of(
 			Material.WOOD_SWORD, Material.STONE_SWORD, Material.IRON_SWORD, Material.GOLD_SWORD, Material.DIAMOND_SWORD,
 			Material.WOOD_PICKAXE, Material.STONE_PICKAXE, Material.IRON_PICKAXE, Material.GOLD_PICKAXE, Material.DIAMOND_PICKAXE,
 			Material.WOOD_AXE, Material.STONE_AXE, Material.IRON_AXE, Material.GOLD_AXE, Material.DIAMOND_AXE,
-			Material.SHEARS, Material.BOW, Material.FISHING_ROD);
+			Material.SHEARS, Material.BOW);
 
 	private final FWGameInstance instance;
 	private BukkitTask healPoolTask;
@@ -71,8 +70,8 @@ public class FWTeamUpgradeManager {
 		if (cost == null || !FWEconomy.withdraw(buyer, cost)) return false;
 
 		team.setUpgradeTier(upgrade, next);
-		instance.TellAll(instance.getManager().getMain().color("&6&l(!) &eTeam " + team.getName()
-				+ "&r upgraded &e" + upgrade.getDisplayName() + " &rto tier &e" + next + "&r!"));
+		buyer.sendMessage(instance.getManager().getMain().color("&2&l(!) &rYou upgraded &e"
+				+ upgrade.getDisplayName() + (next > 1 ? " &rto tier &e" + next : "") + "&r!"));
 		reapplyToCurrentGear(team);
 		return true;
 	}
@@ -118,9 +117,9 @@ public class FWTeamUpgradeManager {
 		return item;
 	}
 
-	/** Iron amount per drop for the team's current Forge tier. */
+	/** Iron amount per drop for the team's current Resource Rush tier. */
 	public int ironAmountFor(FWTeam team) {
-		switch (team.getUpgradeTier(FWTeamUpgrade.FORGE)) {
+		switch (team.getUpgradeTier(FWTeamUpgrade.RESOURCE_RUSH)) {
 			case 4: return 3;
 			case 2:
 			case 3: return 2;
@@ -128,13 +127,22 @@ public class FWTeamUpgradeManager {
 		}
 	}
 
-	/** Gold generator interval (seconds) for the team's current Forge tier - lower is faster. */
+	/** Iron generator interval (seconds) - flat across Resource Rush tiers; iron bonus is expressed as more per drop (see ironAmountFor). */
+	public int ironIntervalSecondsFor(FWTeam team) {
+		return 2;
+	}
+
+	/**
+	 * Gold generator interval (seconds) for the team's current Resource Rush tier - lower is faster.
+	 * Base (tier 0, unupgraded) is 10s; tier 1 = 8s, tier 2 = 7s, tier 3 = 5s, tier 4 = 3s.
+	 */
 	public int goldIntervalSecondsFor(FWTeam team) {
-		switch (team.getUpgradeTier(FWTeamUpgrade.FORGE)) {
-			case 4: return 1;
-			case 3: return 2;
-			case 2: return 3;
-			default: return 4;
+		switch (team.getUpgradeTier(FWTeamUpgrade.RESOURCE_RUSH)) {
+			case 4: return 3;
+			case 3: return 5;
+			case 2: return 7;
+			case 1: return 8;
+			default: return 10;
 		}
 	}
 
@@ -156,16 +164,19 @@ public class FWTeamUpgradeManager {
 			if (team.getUpgradeTier(FWTeamUpgrade.HEAL_POOL) <= 0) continue;
 
 			FWTeamSite site = instance.getMapConfig().getTeamSite(team.getSiteId());
-			Location flagLoc = site.getFlagLoc();
-			if (flagLoc == null) continue;
 
 			for (UUID uuid : team.getMembers()) {
 				Player player = Bukkit.getPlayer(uuid);
-				if (player == null) continue;
-				if (player.getLocation().distanceSquared(flagLoc) > HEAL_POOL_RADIUS * HEAL_POOL_RADIUS) continue;
+				if (player == null || player.getGameMode() == GameMode.SPECTATOR) continue;
+
+				boolean atBase = site.hasBoundary()
+						? site.isWithinBoundary(player.getLocation())
+						: (site.getFlagLoc() != null
+								&& player.getLocation().distanceSquared(site.getFlagLoc()) <= HEAL_POOL_RADIUS * HEAL_POOL_RADIUS);
+				if (!atBase) continue;
 
 				player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION,
-						(int) HEAL_POOL_INTERVAL_TICKS + 20, 0, false, false));
+						(int) HEAL_POOL_INTERVAL_TICKS + 20, 0, false, false), true);
 			}
 		}
 	}

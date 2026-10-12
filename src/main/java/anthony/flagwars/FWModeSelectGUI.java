@@ -20,15 +20,15 @@ import java.util.List;
 public class FWModeSelectGUI implements InventoryProvider {
 
 	private static final List<String> SOLO_DESCRIPTION = Arrays.asList(
-			"&7Every player for themselves - steal",
-			"&7enemy flags, defend your own, and",
-			"&7outlast the rest in this fast-paced brawl!"
+			"&7Every player for themselves, steal enemy",
+			"&7flags, defend your own, and be the first",
+			"&7to capture 4 flags to be victorious!"
 	);
 
 	private static final List<String> DUO_DESCRIPTION = Arrays.asList(
 			"&7Team up with a partner and take on the",
-			"&7rest in Duos - up to 8 teams, 16 players",
-			"&7battling it out at once!"
+			"&7rest in Duos. Up to 8 teams, 16 players",
+			"&7battling it out for 4 flags!"
 	);
 
 	private final FWGameManager fwGameManager;
@@ -61,6 +61,15 @@ public class FWModeSelectGUI implements InventoryProvider {
 	private void render(Player player, InventoryContents contents) {
 		Core main = fwGameManager.getMain();
 
+		ItemStack pane = ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " ");
+		for (int row = 0; row < 3; row++) {
+			for (int col = 0; col < 9; col++) {
+				if (row == 0 || row == 2 || col == 0 || col == 8) {
+					contents.set(row, col, ClickableItem.of(pane, e -> {}));
+				}
+			}
+		}
+
 		contents.set(1, 3, ClickableItem.of(modeIcon(main, blueBanner(), FWGameMode.SOLO, SOLO_DESCRIPTION), e -> {
 			inv.close(player);
 			fwGameManager.joinGame(player, FWGameMode.SOLO);
@@ -87,6 +96,7 @@ public class FWModeSelectGUI implements InventoryProvider {
 
 	private ItemStack modeIcon(Core main, ItemStack icon, FWGameMode mode, List<String> description) {
 		List<String> lore = new ArrayList<>();
+		lore.add(main.color("&rMode: &a" + mode.getLabel()));
 		lore.add("");
 		for (String line : description) {
 			lore.add(main.color(line));
@@ -96,7 +106,7 @@ public class FWModeSelectGUI implements InventoryProvider {
 		lore.add("");
 		lore.add(main.color("&a" + playersInMode(mode) + " &rplaying!"));
 
-		return ItemHelper.setDetails(icon, main.color("&6&lFLAG WARS&r &e&o" + mode.getLabel()), lore);
+		return ItemHelper.setDetails(icon, main.color("&6&lFLAG WARS"), lore);
 	}
 
 	/** Summed across every concurrent instance of this mode - FWGameManager can run more than one at once. */

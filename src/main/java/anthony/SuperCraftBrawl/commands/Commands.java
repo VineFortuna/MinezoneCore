@@ -22,6 +22,7 @@ import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.practice.Game;
 import anthony.SuperCraftBrawl.practice.SCBPractice;
 import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.flagwars.FWGameMode;
 import anthony.util.SoundManager;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -1636,6 +1637,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
+		if (args[0].equalsIgnoreCase("flagwars") || args[0].equalsIgnoreCase("fw")) {
+			joinFlagWars(args, player);
+			return;
+		}
+
 		String mapName = args[0];
 		GameInstance gameSpectator = main.getGameManager().GetInstanceOfSpectator(player);
 
@@ -1660,6 +1666,21 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 
 		main.getGameManager().JoinMap(player, map);
+	}
+
+	/** /join flagwars [solo|duo] - folded in from the old standalone /fw join, same accepted tokens and default. */
+	private void joinFlagWars(String[] args, Player player) {
+		FWGameMode mode = FWGameMode.SOLO;
+		if (args.length >= 2) {
+			if (args[1].equalsIgnoreCase("duo") || args[1].equalsIgnoreCase("duos")) {
+				mode = FWGameMode.DUO;
+			} else if (!args[1].equalsIgnoreCase("solo") && !args[1].equalsIgnoreCase("solos")) {
+				player.sendMessage(main.color("&c&l(!) &rTry: &e/join flagwars <solo|duo>"));
+				return;
+			}
+		}
+
+		main.getFwGameManager().joinGame(player, mode);
 	}
 
 	private void spectateCommand(String[] args, Player player) {
@@ -1956,7 +1977,17 @@ public class Commands implements CommandExecutor, TabCompleter {
                         .map(Enum::name)
                         .collect(Collectors.toList());
 
+                if (cmd.getName().equalsIgnoreCase("join")) {
+                    mapNames = new ArrayList<>(mapNames);
+                    mapNames.add("flagwars");
+                }
+
                 return StringUtil.copyPartialMatches(args[0], mapNames, new ArrayList<>());
+            }
+
+            if (cmd.getName().equalsIgnoreCase("join") && args.length == 2
+                    && (args[0].equalsIgnoreCase("flagwars") || args[0].equalsIgnoreCase("fw"))) {
+                return StringUtil.copyPartialMatches(args[1], Arrays.asList("solo", "duo"), new ArrayList<>());
             }
         } else if (cmd.getName().equalsIgnoreCase("class")
                 || cmd.getName().equalsIgnoreCase("purchases")
