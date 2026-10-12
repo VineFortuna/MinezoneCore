@@ -1527,25 +1527,13 @@ public class GameManager implements Listener, PluginMessageListener {
 
 				if (!event.isCancelled() && event.getFinalDamage() >= player.getHealth() - 0.2) {
 					event.setCancelled(true);
-					if (event instanceof EntityDamageByEntityEvent) {
-						EntityDamageByEntityEvent damageEvent = (EntityDamageByEntityEvent) event;
-						if (damageEvent.getDamager() instanceof Player) {
-							Player damager = (Player) damageEvent.getDamager();
-							player.setLastDamageCause(new EntityDamageByEntityEvent(damager, player, event.getCause(),
-									event.getDamage()));
-						} else if (damageEvent.getDamager() instanceof Arrow) {
-							Arrow a = (Arrow) damageEvent.getDamager();
-							if (a.getShooter() instanceof Player) {
-								Player damager = (Player) a.getShooter();
-								player.setLastDamageCause(new EntityDamageByEntityEvent(damager, player,
-										event.getCause(), event.getDamage()));
-							}
-						}
-					}
+
+					player.setLastDamageCause(event);
 					instance.PlayerDeath(player);
-					return;
-				} else if (instance.classes.containsKey(player))
+
+				} else if (instance.classes.containsKey(player)) {
 					instance.classes.get(player).takeDamage(event);
+				}
 			}
 		}
 	}
@@ -2698,7 +2686,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	public Player getMobOwner(Creature creature) {
+	public static Player getMobOwner(LivingEntity creature) {
 		if (creature.getCustomName() != null) {
 			String customName = ChatColor.stripColor(creature.getCustomName());
 

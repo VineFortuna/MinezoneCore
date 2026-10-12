@@ -1,12 +1,13 @@
 package anthony.SuperCraftBrawl.Game.classes;
 
-import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.ActionBarManager;
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameManager;
 import anthony.SuperCraftBrawl.Game.GameType;
-import anthony.SuperCraftBrawl.Game.classes.all.SpiderClass;
-import anthony.SuperCraftBrawl.PlayerListener;
 import anthony.SuperCraftBrawl.Timer;
+import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticManager;
 import anthony.SuperCraftBrawl.gui.ClassMasteryGUI;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -18,6 +19,7 @@ import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
+import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -29,7 +31,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.Score;
 
 import java.util.ArrayList;
@@ -200,12 +201,8 @@ public abstract class BaseClass {
 		if (player.getGameMode() == GameMode.SPECTATOR) {
 			return true;
 		}
-		else if (gameInstance.classes.get(player) != null && gameInstance.classes.get(player).getLives() <= 0) {
-			return true;
-		}
-
-		return false;
-	}
+		else return gameInstance.classes.get(player) != null && gameInstance.classes.get(player).getLives() <= 0;
+    }
 
 	/**
 	 * This function displays an Action Bar for cooldowns of each class
@@ -240,71 +237,6 @@ public abstract class BaseClass {
 		if (details != null && details.reward5)
 			return ClassMasteryGUI.headReward(this.getType());
 		return helmet;
-	}
-
-	private String getPlayerRank(Player p) {
-		return instance.getGameManager().getMain().getRankManager().getRank(p).getTagWithSpace();
-	}
-
-	// Event for EnderDragon class:
-	private void enderDragonEvent(Player p, Player killer, PlayerData data2, BaseClass baseClass) {
-		Location loc = p.getLocation();
-		List<Item> deathParticles = new ArrayList<>();
-
-		// Spawn the particles in a circle around the player
-		for (int i = 0; i < 10; i++) {
-			double angle = i * Math.PI / 5;
-			double x = loc.getX() + Math.cos(angle) * 0.5;
-			double y = loc.getY() + 1.5;
-			double z = loc.getZ() + Math.sin(angle) * 0.5;
-
-			Material mat = Material.INK_SACK; // Default
-			if (data2 != null && p.hasPermission("scb.deathParticles")) {
-				if (data2.goldApple == 1) {
-					mat = Material.GOLDEN_APPLE;
-				} else if (data2.glowstone == 1) {
-					mat = Material.GLOWSTONE_DUST;
-				} else if (data2.redstone == 1) {
-					mat = Material.REDSTONE;
-				} else if (data2.web == 1) {
-					mat = Material.WEB;
-				} else if (data2.bottleEXP == 1) {
-					mat = Material.EXP_BOTTLE;
-				} else if (data2.pumpkinPie == 1) {
-					mat = Material.PUMPKIN_PIE;
-				}
-			}
-
-			ItemStack particleItem = null;
-
-			if (mat == Material.INK_SACK)
-				particleItem = new ItemStack(Material.INK_SACK, 1, (short) 15);
-			else
-				particleItem = new ItemStack(mat);
-			Item particle = loc.getWorld().dropItem(new Location(loc.getWorld(), x, y, z), particleItem);
-			particle.setPickupDelay(Integer.MAX_VALUE);
-			deathParticles.add(particle);
-		}
-
-		// Schedule a task to remove the particles after 5 seconds
-		Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
-			for (Item particle : deathParticles) {
-				particle.remove();
-			}
-		}, 5 * 20);
-
-		if (baseClass != null) {
-			if (baseClass.getType() == ClassType.EnderDragon) {
-				if (killer != null) {
-					Location pLoc = p.getLocation();
-					EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc, EntityType.ENDER_CRYSTAL);
-					HealTask task = new HealTask(killer, crystal, instance);
-					BukkitTask bukkit = Bukkit.getScheduler()
-							.runTaskTimer(instance.getGameManager().getMain(), task, 0L, 2L);
-					task.set(bukkit);
-				}
-			}
-		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -343,116 +275,147 @@ public abstract class BaseClass {
         score.setScore(lives);
     }
 
-    private void giveGameStats(Player p, BaseClass pBc, PlayerData data) {
-        if (data != null && pBc != null) {
-            data.deaths++;
-            pBc.totalDeaths++;
-            pBc.eachLifeKills = 0;
-        }
-    }
+	private void handleElimination(Player p, Player killer, BaseClass baseClassDead, PlayerData data) {
+		if (data != null) {
+			data.losses += 1;
+			data.winstreak = 0;
 
-    public void Death2(PlayerDeathEvent e) {
-        if (player.getName() != null && lives > 0) {
-            Player p = player.getPlayer();
-            Player killer = player.getKiller();
-			Location deathLocation = p.getLocation().clone();
-            Core core =  instance.getGameManager().getMain();
-            PlayerListener listener = core.getListener();
-            PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(p);
+			ClassType type = baseClassDead.getType();
+			ClassDetails details = data.playerClasses.get(type.getID());
+			if (details == null) {
+				details = new ClassDetails();
+				data.playerClasses.put(type.getID(), details);
+			}
+			details.playGame();
+		}
+		if (killer != null) {
+			String msg = instance.getGameManager().getMain().color("&4&lELIMINATED &e" + p.getName());
+			PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
+					(byte) 2);
+			CraftPlayer craft = (CraftPlayer) killer;
+			craft.getHandle().playerConnection.sendPacket(packet);
+		}
 
-            decreaseLives();
-            removeMobs(p); //Removes mobs spawned by the player
-            resetMobTarget(p);
-            listener.resetPotionEffects(p);
+		p.setDisplayName("" + p.getName() + " " + ChatColor.RESET + ChatColor.GRAY + ChatColor.ITALIC
+				+ "Spectator" + ChatColor.RESET);
+		instance.sendScoreboardUpdate(player);
 
-            if (data != null && isDead) { //Checks if player is dead, then run through rest of function
-                BaseClass killerBc = instance.classes.get(killer);
-                BaseClass pBc = instance.classes.get(p);
-                BaseClass baseClass = this;
+		Random r = new Random();
+		int chance = r.nextInt(1000);
 
-                giveGameStats(p, pBc, data);
-                deathParticles(data, p);
-                p.setFireTicks(0);
-                p.getInventory().clear();
-            }
-        }
-    }
+		if (chance >= 0 && chance <= 1) {
 
-    /*
-     * This function checks if the death
-     * was caused due to void
-     */
-    private void voidDeath(PlayerDeathEvent e, Player p) {
-        if (p.getLocation().getY() <= 50) { //If they're below Y = 50, die
-            if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
-                EntityDamageByEntityEvent entityDamageEvent = (EntityDamageByEntityEvent) p
-                        .getLastDamageCause();
-                Entity damager = entityDamageEvent.getDamager();
+			if (data != null) {
+				data.mysteryChests++;
+				player.sendMessage(instance.getGameManager().getMain()
+						.color("&5&l(!) &rYou have found &e1 MysteryChest!"));
+			}
+		}
 
-                if (damager instanceof Player) {
-                    Player d = (Player) damager;
-                }
-            }
-        }
-    }
+		tellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
+				+ p.getPlayer().getName() + " " + baseClassDead.getType().getTag() + ChatColor.RED
+				+ " has been eliminated!");
 
-	private void elimination() {
+		if (instance.getMap() != null) {
+			p.sendMessage(ChatColor.BOLD + "=====================");
+			p.sendMessage(ChatColor.BOLD + "||");
+			p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RED + ChatColor.BOLD
+					+ "  GAME LOST");
+			p.sendMessage(ChatColor.BOLD + "||");
 
+			int tokensEarned = 0;
+			if (instance.alivePlayers == 5) {
+				tokensEarned = 1;
+			} else if (instance.alivePlayers == 4) {
+				tokensEarned = 3;
+			} else if (instance.alivePlayers == 3) {
+				tokensEarned = 5;
+			} else if (instance.alivePlayers == 2) {
+				tokensEarned = 7;
+			}
+
+			data.tokens += tokensEarned;
+			baseClassDead.totalTokens += tokensEarned;
+			p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Placed #"
+					+ instance.alivePlayers + ": " + ChatColor.GREEN + tokensEarned + " Tokens");
+			baseClassDead.placement = instance.alivePlayers;
+
+			if (baseClassDead.totalKills >= 0) {
+				player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  "
+						+ baseClassDead.totalKills + " Kills: " + ChatColor.GREEN
+						+ (baseClassDead.totalKills * 2) + " Tokens");
+				data.tokens += baseClassDead.totalKills * 2;
+				baseClassDead.totalTokens += baseClassDead.totalKills;
+			}
+			if (instance.firstBlood == player) {
+				player.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RESET
+						+ "  First Blood: " + ChatColor.GREEN + "10 Tokens");
+				data.tokens += 10;
+			}
+			if (p.hasPermission("scb.rankBonus")) {
+				p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Rank Bonus: "
+						+ ChatColor.GREEN + "10 Tokens");
+				data.tokens += 10;
+				baseClassDead.totalTokens += 10;
+			}
+			p.sendMessage(ChatColor.BOLD + "||");
+			p.sendMessage(ChatColor.BOLD + "=====================");
+			p.sendMessage(instance.color("&2&l(!) &rYou earned &a" + baseClassDead.totalTokens +
+					" &rTokens and &a" + baseClassDead.totalExp + " &rEXP!"));
+
+			instance.getGameManager().getMain().getLevelManager().checkLevelUp(p);
+		}
 	}
 
-    public void Death(PlayerDeathEvent e) {
+	@EventHandler
+    public void onDeath(PlayerDeathEvent e) {
         if (player.getName() != null && lives > 0) {
             decreaseLives();
 
             Player killer = player.getKiller();
             Player p = player.getPlayer();
-			Location deathLocation = p.getLocation().clone();
 
             // Remove mobs spawned by the player
             removeMobs(p);
             resetMobTarget(p);
 
             if (isDead) {
-                PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(p);
+				PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(p);
 
-                data.deaths += 1;
+				data.deaths += 1;
 
-                for (PotionEffect type : p.getActivePotionEffects())
-                    p.removePotionEffect(type.getType());
+				for (PotionEffect type : p.getActivePotionEffects())
+					p.removePotionEffect(type.getType());
 
-                p.setFireTicks(0);
-                p.getInventory().clear();
+				p.setFireTicks(0);
+				p.getInventory().clear();
 
-				Creature creature = null;
+				LivingEntity creature = null;
 
 				EntityDamageEvent lastDamage = p.getLastDamageCause();
 
 				if (lastDamage instanceof EntityDamageByEntityEvent) {
-					Entity damager;
+					Entity damager = ((EntityDamageByEntityEvent) lastDamage).getDamager();
 
-					damager = ((EntityDamageByEntityEvent) lastDamage).getDamager();
+					if (damager instanceof Player && killer == null) {
+						killer = (Player) damager;
+					} else if (damager instanceof LivingEntity && damager.getCustomName() != null) {
+						creature = (LivingEntity) damager;
 
-					if (damager instanceof Creature && damager.getCustomName() != null) {
-						creature = (Creature) damager;
-
-						String owner = ChatColor.stripColor(
-								creature.getCustomName().substring(0, creature.getCustomName().indexOf("'")));
-						Player mobOwner = Bukkit.getPlayer(owner);
+						Player mobOwner = GameManager.getMobOwner(creature);
 
 						if (mobOwner != null && instance.classes.containsKey(mobOwner)) {
 							killer = mobOwner;
 						}
-					}
-
-					if (damager instanceof Projectile) {
+					} else if (damager instanceof Projectile) {
 						Projectile projectile = (Projectile) damager;
 
-						if (projectile.getShooter() instanceof Creature && ((Creature) projectile.getShooter()).getCustomName() != null) {
-							creature = (Creature) projectile.getShooter();
+						if (projectile.getShooter() instanceof Player) {
+                            killer = (Player) projectile.getShooter();
 
-							String owner = ChatColor.stripColor(
-									creature.getCustomName().substring(0, creature.getCustomName().indexOf("'")));
-							Player mobOwner = Bukkit.getPlayer(owner);
+						} else if (projectile.getShooter() instanceof LivingEntity && ((LivingEntity) projectile.getShooter()).getCustomName() != null) {
+							creature = (LivingEntity) projectile.getShooter();
+							Player mobOwner = GameManager.getMobOwner(creature);
 
 							if (mobOwner != null && instance.classes.containsKey(mobOwner)) {
 								killer = mobOwner;
@@ -461,122 +424,38 @@ public abstract class BaseClass {
 					}
 				}
 
-                BaseClass baseClassKiller = instance.classes.get(killer);
-                BaseClass baseClassDead = instance.classes.get(p);
+				BaseClass baseClassDead = instance.classes.get(p);
 
-                baseClassDead.totalDeaths++;
-                baseClassDead.eachLifeKills = 0;
+				baseClassDead.totalDeaths++;
+				baseClassDead.eachLifeKills = 0;
 
-                BaseClass baseClass = this;
+				if (killer != null && !killer.equals(player)) {
+					giveStats(killer, player);
+				}
 
 				// Death message
 				DeathMessageProvider deathMessage = new DeathMessageProvider();
 				PlayerData killerData = instance.getGameManager().getMain().getDataManager().getPlayerData(killer);
+				// check if killer has custom kill messages enabled
+				// if there is no killer, use victim's settings
 				boolean customEnabled = killer != null ? killerData.killMsgs == 1 : data.killMsgs == 1;
 
-				tellAll(instance.color(deathMessage.getDeathMessage(player, killer, creature, customEnabled)));
+				tellAll(instance.color(deathMessage.getDeathMessage(player, killer, creature, lastDamage, customEnabled)));
 
-				if (killer != null) {
-					giveStats(killer, player);
+				// DEATH PARTICLES
+				deathParticles(data, p);
+
+				if (killer != null && !killer.equals(player)) {
 					giveHealthPot(killer);
 					p.teleport(killer);
 				}
 
-				// DEATH PARTICLES
-                deathParticles(data, p);
-
+				// PLAYER ELIMINATED
 				if (lives == 0) {
-					if (data != null) {
-						data.losses += 1;
-						data.winstreak = 0;
-
-						ClassType type = baseClassDead.getType();
-						ClassDetails details = data.playerClasses.get(type.getID());
-						if (details == null) {
-							details = new ClassDetails();
-							data.playerClasses.put(type.getID(), details);
-						}
-						details.playGame();
-					}
-					if (killer != null) {
-						String msg = instance.getGameManager().getMain().color("&4&lELIMINATED &e" + p.getName());
-						PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
-								(byte) 2);
-						CraftPlayer craft = (CraftPlayer) killer;
-						craft.getHandle().playerConnection.sendPacket(packet);
-					}
-
-					p.setDisplayName("" + p.getName() + " " + ChatColor.RESET + ChatColor.GRAY + ChatColor.ITALIC
-							+ "Spectator" + ChatColor.RESET);
-					instance.sendScoreboardUpdate(player);
-
-					Random r = new Random();
-					int chance = r.nextInt(1000);
-
-					if (chance >= 0 && chance <= 1) {
-
-						if (data != null) {
-							data.mysteryChests++;
-							player.sendMessage(instance.getGameManager().getMain()
-									.color("&5&l(!) &rYou have found &e1 MysteryChest!"));
-						}
-					}
-
-					tellAll("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) " + ChatColor.RESET
-							+ p.getPlayer().getName() + " " + baseClassDead.getType().getTag() + ChatColor.RED
-							+ " has been eliminated!");
-
-					if (instance.getMap() != null) {
-						p.sendMessage(ChatColor.BOLD + "=====================");
-						p.sendMessage(ChatColor.BOLD + "||");
-						p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RED + ChatColor.BOLD
-								+ "  GAME LOST");
-						p.sendMessage(ChatColor.BOLD + "||");
-
-						int tokensEarned = 0;
-						if (instance.alivePlayers == 5) {
-							tokensEarned = 1;
-						} else if (instance.alivePlayers == 4) {
-							tokensEarned = 3;
-						} else if (instance.alivePlayers == 3) {
-							tokensEarned = 5;
-						} else if (instance.alivePlayers == 2) {
-							tokensEarned = 7;
-						}
-
-						data.tokens += tokensEarned;
-						baseClassDead.totalTokens += tokensEarned;
-						p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Placed #"
-								+ instance.alivePlayers + ": " + ChatColor.GREEN + tokensEarned + " Tokens");
-						baseClassDead.placement = instance.alivePlayers;
-
-						if (baseClassDead.totalKills >= 0) {
-							player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  "
-									+ baseClassDead.totalKills + " Kills: " + ChatColor.GREEN
-									+ (baseClassDead.totalKills * 2) + " Tokens");
-							data.tokens += baseClassDead.totalKills * 2;
-							baseClassDead.totalTokens += baseClassDead.totalKills;
-						}
-						if (instance.firstBlood == player) {
-							player.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RESET
-									+ "  First Blood: " + ChatColor.GREEN + "10 Tokens");
-							data.tokens += 10;
-						}
-						if (p.hasPermission("scb.rankBonus")) {
-							p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Rank Bonus: "
-									+ ChatColor.GREEN + "10 Tokens");
-							data.tokens += 10;
-							baseClassDead.totalTokens += 10;
-						}
-						p.sendMessage(ChatColor.BOLD + "||");
-						p.sendMessage(ChatColor.BOLD + "=====================");
-						p.sendMessage(instance.color("&2&l(!) &rYou earned &a" + baseClassDead.totalTokens +
-								" &rTokens and &a" + baseClassDead.totalExp + " &rEXP!"));
-
-						instance.getGameManager().getMain().getLevelManager().checkLevelUp(p);
-					}
+					handleElimination(p, killer, baseClassDead, data);
 				}
 
+				// Send actionbar to killer
 				if (killer != null) {
 					String msg = instance.getGameManager().getMain().color("&4&lKILLED &e" + p.getName());
 					PacketPlayOutChat packet = new PacketPlayOutChat(ChatSerializer.a("{\"text\":\"" + msg + "\"}"),
@@ -585,65 +464,42 @@ public abstract class BaseClass {
 					craft.getHandle().playerConnection.sendPacket(packet);
 				}
 
-				tellAll(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET
-						+ p.getPlayer().getDisplayName() + ChatColor.RED + " has " + lives + " live" + (lives == 1 ? "" : "s") + " left");
+				if (lives > 0) {
+					tellAll(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ p.getPlayer().getDisplayName() + ChatColor.RED + " has " + lives +
+							(lives == 1 ? " life " : " lives ") + "left");
+				}
 
-                // END CRYSTAL
-                if (baseClassKiller != null) {
-					// END CRYSTAL
-					spawnEnderDragonCrystal(baseClassKiller, killer, deathLocation);
-                }
-
-                if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
-                    EntityDamageByEntityEvent entityDamageEvent = (EntityDamageByEntityEvent) p.getLastDamageCause();
-                    Entity damager = entityDamageEvent.getDamager();
-
-                    if (damager instanceof Player) {
-                        Player d = (Player) damager;
-
-                        if (instance.classes.containsKey(d)) {
-                            baseClassKiller = instance.classes.get(d);
-                            baseClassKiller.killEvent(d);
-                        }
-                    } else {
-                        if (killer != null) {
-                            if (instance.classes.containsKey(killer)) {
-                                baseClassKiller = instance.classes.get(killer);
-                                baseClassKiller.killEvent(killer);
-                            }
-                        }
-                    }
-                } else if (killer != null) {
-                    if (instance.classes.containsKey(killer)) {
-                        baseClassKiller = instance.classes.get(killer);
-                        baseClassKiller.killEvent(killer);
-                    }
-                }
-                p.setLastDamageCause(null);
+				handleKillEvent(p, killer);
             }
         }
     }
 
-	private void spawnEnderDragonCrystal(BaseClass dragonClass, Player killer, Location deathLocation) {
-		if (dragonClass == null || killer == null || deathLocation == null || deathLocation.getWorld() == null) {
-			return;
+	private void handleKillEvent(Player p, Player killer) {
+		if (p.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
+			EntityDamageByEntityEvent entityDamageEvent =
+					(EntityDamageByEntityEvent) p.getLastDamageCause();
+
+			Entity damager = entityDamageEvent.getDamager();
+
+			if (damager instanceof Player) {
+				Player d = (Player) damager;
+
+				if (instance.classes.containsKey(d)) {
+					instance.classes.get(d).killEvent(d);
+				}
+			} else if (killer != null) {
+				if (instance.classes.containsKey(killer)) {
+					instance.classes.get(killer).killEvent(killer);
+				}
+			}
+		} else if (killer != null) {
+			if (instance.classes.containsKey(killer)) {
+				instance.classes.get(killer).killEvent(killer);
+			}
 		}
 
-		if (dragonClass.getType() != ClassType.EnderDragon) {
-			return;
-		}
-
-		Location crystalLocation = deathLocation.clone();
-
-		EnderCrystal crystal = (EnderCrystal) crystalLocation.getWorld().spawnEntity(
-				crystalLocation,
-				EntityType.ENDER_CRYSTAL
-		);
-
-		HealTask task = new HealTask(killer, crystal, instance);
-		BukkitTask bukkit = Bukkit.getScheduler()
-				.runTaskTimer(instance.getGameManager().getMain(), task, 0L, 2L);
-		task.set(bukkit);
+		p.setLastDamageCause(null);
 	}
 
 	// Removes any mobs that the player who died has spawned
@@ -664,26 +520,21 @@ public abstract class BaseClass {
 		}
 	}
 
-	private void deathParticles(PlayerData pData, Player p) {
+	private Material checkDeathEffect(PlayerData data, Player p) {
+		CosmeticManager cosmeticManager = instance.getGameManager().getMain().getCosmeticManager();
+		Cosmetic cosmetic = cosmeticManager.getEquipped(p, CosmeticCategory.DEATH_EFFECT);
+
+		if (data != null && cosmetic != null && p.hasPermission("scb.deathParticles")) {
+			return cosmetic.getIcon(p).getType();
+		}
+		return Material.INK_SACK;
+	}
+
+	private void deathParticles(PlayerData data, Player p) {
 		Location pLocation = p.getLocation();
 		List<Item> deathParticles = new ArrayList<>();
-		Material mat = Material.INK_SACK;
 
-		// Particles
-		if (pData != null && p.hasPermission("scb.deathParticles")) {
-			if (pData.goldApple == 1)
-				mat = Material.GOLDEN_APPLE;
-			else if (pData.glowstone == 1)
-				mat = Material.GLOWSTONE_DUST;
-			else if (pData.redstone == 1)
-				mat = Material.REDSTONE;
-			else if (pData.web == 1)
-				mat = Material.WEB;
-			else if (pData.bottleEXP == 1)
-				mat = Material.EXP_BOTTLE;
-			else if (pData.pumpkinPie == 1)
-				mat = Material.PUMPKIN_PIE;
-		}
+		Material mat = checkDeathEffect(data, p);
 
 		ItemStack particleItem;
 
@@ -710,21 +561,6 @@ public abstract class BaseClass {
 				particle.remove();
 			}
 		}, 5 * 20);
-	}
-
-	private void enderDragonCrystal(BaseClass pClass, Player killer, Player p) {
-		if (pClass != null) {
-			if (pClass.getType() == ClassType.EnderDragon) {
-				if (killer != null) {
-					Location pLoc = p.getLocation();
-					EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc, EntityType.ENDER_CRYSTAL);
-					HealTask task = new HealTask(killer, crystal, instance);
-					BukkitTask bukkit = Bukkit.getScheduler()
-							.runTaskTimer(instance.getGameManager().getMain(), task, 0L, 2L);
-					task.set(bukkit);
-				}
-			}
-		}
 	}
 
 	// Giving health potions on kill
@@ -874,22 +710,6 @@ public abstract class BaseClass {
 	}
 
 	public void resetHead() {
-		if (this.getType() == ClassType.Spider) {
-			SpiderClass spiderClass = (SpiderClass) this;
-			if (spiderClass.invisTaskId != -1) {
-				ItemStack invisHelmet = playerHead.clone();
-				invisHelmet.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 8);
-				player.getEquipment().setHelmet(invisHelmet);
-				return;
-			}
-		}
-		if (this.getType() == ClassType.Fade) {
-			if (fadeAbilityActive) {
-				player.getEquipment().setHelmet(ItemHelper.create(Material.AIR));
-				return;
-			}
-		}
-
 		player.getEquipment().setHelmet(playerHead);
 	}
 }

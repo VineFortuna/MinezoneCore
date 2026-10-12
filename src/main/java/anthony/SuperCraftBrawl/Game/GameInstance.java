@@ -911,7 +911,7 @@ public class GameInstance {
         BaseClass baseClassBeforeChecks = this.classes.get(player);
         PlayerDeathEvent event = new PlayerDeathEvent(player, null, 0, null);
         baseClassBeforeChecks.isDead = true;
-        baseClassBeforeChecks.Death(event);
+        baseClassBeforeChecks.onDeath(event);
 
         final BaseClass baseClass = this.classes.get(player);
         if (baseClass == null) return;

@@ -211,8 +211,8 @@ public class SpiderClass extends BaseClass {
 
 
 	@Override
-	public void Death(PlayerDeathEvent e) {
-		super.Death(e);
+	public void onDeath(PlayerDeathEvent e) {
+		super.onDeath(e);
 		removeInvisibility();
 		removeVenom();
 	}
@@ -479,4 +479,16 @@ public class SpiderClass extends BaseClass {
 	public ItemStack getAttackWeapon() {
 		return weapon;
 	}
+
+	@Override
+	public void resetHead() {
+		if (this.invisTaskId != -1) {
+			ItemStack invisHelmet = playerHead.clone();
+			invisHelmet.addUnsafeEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 8);
+			player.getEquipment().setHelmet(invisHelmet);
+		} else {
+			player.getEquipment().setHelmet(playerHead);
+		}
+	}
+
 }

@@ -191,4 +191,9 @@ public class FadeClass extends BaseClass {
 		};
 		r.runTaskLater(instance.getGameManager().getMain(), 20 * 5);
 	}
+
+	@Override
+	public void resetHead() {
+		player.getEquipment().setHelmet(fadeAbilityActive ? ItemHelper.create(Material.AIR) : playerHead);
+	}
 }

@@ -83,7 +83,6 @@ public class CosmeticsGUI implements InventoryProvider {
     private static String defaultCosmeticId(CosmeticCategory category) {
         switch (category) {
             case WIN_EFFECT: return "default";
-            case DEATH_EFFECT: return "redstone";
             default: return null;
         }
     }

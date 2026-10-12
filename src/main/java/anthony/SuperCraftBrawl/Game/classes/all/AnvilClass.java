@@ -13,6 +13,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
@@ -135,11 +136,11 @@ public class AnvilClass extends BaseClass {
     }
 
     private void applyStompToPlayer(Player playerInRange) {
-        EntityDamageEvent damageEvent = new EntityDamageEvent(
-                playerInRange, EntityDamageEvent.DamageCause.CUSTOM, stompDamage
+        EntityDamageByEntityEvent damageEvent = new EntityDamageByEntityEvent(player,
+                playerInRange, EntityDamageByEntityEvent.DamageCause.CUSTOM, stompDamage
         );
 
-        //Prevents vanilla dying, need to call EntityDamageEvent to not break
+        //Prevents vanilla dying, need to call EntityDamageByEvent to not break
         instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
         if (damageEvent.isCancelled()) return;
 

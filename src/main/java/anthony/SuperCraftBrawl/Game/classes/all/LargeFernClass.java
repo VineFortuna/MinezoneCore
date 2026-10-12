@@ -376,8 +376,8 @@ public class LargeFernClass extends BaseClass {
     }
 
     @Override
-    public void Death(PlayerDeathEvent e) {
-        super.Death(e);
+    public void onDeath(PlayerDeathEvent e) {
+        super.onDeath(e);
         if (transfernRunnable != null) {
             transfernRunnable.cleanup();
             transfernRunnable.cancel();

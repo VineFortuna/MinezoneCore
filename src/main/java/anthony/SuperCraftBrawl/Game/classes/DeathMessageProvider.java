@@ -1,10 +1,7 @@
 package anthony.SuperCraftBrawl.Game.classes;
 
 import anthony.SuperCraftBrawl.Game.GameManager;
-import org.bukkit.entity.Creature;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.*;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
@@ -56,8 +53,12 @@ public class DeathMessageProvider {
                 header + "&cHello? AND GOODBYE TO &f%victim% &cAND ANYONE ELSE STANDING IN &f%killer%'s &cWAY!"
         ));
 
-        deathMessages.put(DeathCategory.MAGIC, Arrays.asList(
+        deathMessages.put(DeathCategory.MAGIC_ENVIRONMENT, Arrays.asList(
                 header + "%victim% &cwas murdered via the dark arts"
+        ));
+
+        deathMessages.put(DeathCategory.MAGIC_COMBAT, Arrays.asList(
+                header + "%victim% &cwas murdered via the dark arts by &f%killer%"
         ));
 
         deathMessages.put(DeathCategory.WITHER_ENVIRONMENT, Arrays.asList(
@@ -82,19 +83,20 @@ public class DeathMessageProvider {
         ));
     }
 
-    private DeathCategory resolveDeathCategory(Player victim, Player killer) {
-        EntityDamageEvent lastDamage = victim.getLastDamageCause();
+    private DeathCategory resolveDeathCategory(Player victim, Player killer, EntityDamageEvent lastDamage) {
+        DamageCause cause = lastDamage.getCause();
 
-        if (victim.getLocation().getY() <= 50)
-            return (killer == null) ? DeathCategory.VOID_ENVIRONMENTAL : DeathCategory.VOID_COMBAT;
+        if (victim.getLocation().getY() <= 50) {
+            if (killer == null || killer.equals(victim)) {
+                return DeathCategory.VOID_ENVIRONMENTAL;
+            } else {
+                return DeathCategory.VOID_COMBAT;
+            }
+        }
 
         if (killer != null && killer.equals(victim)) return DeathCategory.SUICIDE;
 
-        //if (lastDamage == null) return DeathCategory.UNKNOWN;
-
-        DamageCause cause = lastDamage.getCause();
-
-        if (cause == DamageCause.MAGIC ) return DeathCategory.MAGIC;
+        if (cause == DamageCause.MAGIC) return (killer == null) ? DeathCategory.MAGIC_ENVIRONMENT : DeathCategory.MAGIC_COMBAT;
         if (cause == DamageCause.WITHER) return (killer == null) ? DeathCategory.WITHER_ENVIRONMENT : DeathCategory.WITHER_COMBAT;
         if (cause == DamageCause.FIRE || cause == DamageCause.FIRE_TICK || cause == DamageCause.LAVA)
             return (killer == null) ? DeathCategory.FIRE_ENVIRONMENT : DeathCategory.FIRE_COMBAT;
@@ -102,23 +104,27 @@ public class DeathMessageProvider {
         if (lastDamage instanceof EntityDamageByEntityEvent) {
             Entity damager = ((EntityDamageByEntityEvent) lastDamage).getDamager();
 
-            if (damager instanceof Player)   return (damager.equals(victim)) ? DeathCategory.SUICIDE : DeathCategory.PVP_MELEE;
-            if (damager instanceof Creature) return DeathCategory.PVE_MELEE;
+            if (damager instanceof Player) return (damager.equals(victim)) ? DeathCategory.SUICIDE : DeathCategory.PVP_MELEE;
+            if (damager instanceof LivingEntity) return DeathCategory.PVE_MELEE;
 
             if (damager instanceof Projectile) {
                 Projectile projectile = (Projectile) damager;
 
                 if (projectile.getShooter() instanceof Player)
                     return (projectile.getShooter().equals(victim)) ? DeathCategory.SUICIDE : DeathCategory.PVP_PROJECTILE;
-                if (projectile.getShooter() instanceof Creature) return DeathCategory.PVE_PROJECTILE;
+                if (projectile.getShooter() instanceof LivingEntity) return DeathCategory.PVE_PROJECTILE;
             }
+        }
+
+        if (killer != null) {
+            return DeathCategory.PVP_MELEE;
         }
 
         return DeathCategory.UNKNOWN;
     }
 
-    public String getDeathMessage(Player victim, Player killer, Creature creature, boolean customEnabled) {
-        DeathCategory category = resolveDeathCategory(victim, killer);
+    public String getDeathMessage(Player victim, Player killer, LivingEntity creature, EntityDamageEvent lastDamage, boolean customEnabled) {
+        DeathCategory category = resolveDeathCategory(victim, killer, lastDamage);
 
         List<String> messages = deathMessages.getOrDefault(category, deathMessages.get(DeathCategory.UNKNOWN));
 
@@ -130,8 +136,8 @@ public class DeathMessageProvider {
 
         String rawMessage = messages.get(index);
 
-        return rawMessage.replace("%victim%", victim.getName())
-                .replace("%killer%", killer != null ? killer.getName() : "")
+        return rawMessage.replace("%victim%", victim.getDisplayName())
+                .replace("%killer%", killer != null ? killer.getDisplayName() : "")
                 .replace("%mob%", creature != null ? GameManager.getMobTypeName(creature.getType()) : "");
     }
 }
@@ -147,7 +153,8 @@ enum DeathCategory {
     WITHER_COMBAT,
     FIRE_ENVIRONMENT,
     FIRE_COMBAT,
-    MAGIC,
+    MAGIC_ENVIRONMENT,
+    MAGIC_COMBAT,
     SUICIDE,
     UNKNOWN
 }

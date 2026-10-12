@@ -176,8 +176,8 @@ public class ParrotClass extends BaseClass {
     }
 
     @Override
-    public void Death(PlayerDeathEvent e) {
-        super.Death(e);
+    public void onDeath(PlayerDeathEvent e) {
+        super.onDeath(e);
         if (isDanceAbilityActive()) cleanupDanceAbility();
     }
 
