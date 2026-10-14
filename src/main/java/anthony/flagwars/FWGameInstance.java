@@ -239,11 +239,10 @@ public class FWGameInstance {
 		FWLobbyItems.give(player);
 		scoreboardManager.applyNameTag(player, freeTeam);
 
-		// Same join-time hygiene SCB's own GameInstance#AddPlayer applies (cosmetics/armor),
+		// Same join-time hygiene SCB's own GameInstance#AddPlayer applies (armor),
 		// plus a potion-effect reset since Flag Wars shops sell Speed/Jump/Invisibility that
 		// could otherwise be carried in from a previous match. One choke point so it applies
 		// the same way whether a player joined via /join flagwars or the FWModeSelectGUI.
-		manager.getMain().getListener().removeCosmetics(player);
 		manager.getMain().getListener().resetArmor(player);
 		manager.getMain().getListener().resetPotionEffects(player);
 

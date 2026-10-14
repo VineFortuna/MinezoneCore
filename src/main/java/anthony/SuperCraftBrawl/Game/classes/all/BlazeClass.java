@@ -81,7 +81,7 @@ public class BlazeClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		riseAbility.getCooldownInstance().reset();
 		fireballAbility.getCooldownInstance().reset();
 		fireballCounter = FIREBALL_AMOUNT;
@@ -92,7 +92,7 @@ public class BlazeClass extends BaseClass {
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (!isPlayerAlive()) return;
 
 		// Fireball Launcher Ability Message
@@ -121,7 +121,7 @@ public class BlazeClass extends BaseClass {
 	}
 
 	@Override
-	public void ProjectileLaunch(ProjectileLaunchEvent event) {
+	public void projectileLaunch(ProjectileLaunchEvent event) {
 		if (event.getEntityType() == EntityType.ARROW) {
 			event.setCancelled(true);
 
@@ -140,7 +140,7 @@ public class BlazeClass extends BaseClass {
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		Action action = event.getAction();
 

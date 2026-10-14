@@ -56,12 +56,12 @@ public class ZombiePigmanClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		for (Entity e : player.getWorld().getEntities())
 			if (e instanceof PigZombie)
 				if (e.getName().contains(player.getName()))
@@ -73,7 +73,7 @@ public class ZombiePigmanClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 
 		if (item != null && item.getType() == Material.MONSTER_EGG) {

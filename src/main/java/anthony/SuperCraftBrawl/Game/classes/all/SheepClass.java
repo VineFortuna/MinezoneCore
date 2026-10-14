@@ -83,7 +83,7 @@ public class SheepClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		currentWool = WoolType.WHITE; // To reset each life
 
 		// To reset Sheep's scoreboard color
@@ -104,7 +104,7 @@ public class SheepClass extends BaseClass {
 	}
 
 	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
+	public void doDamage(EntityDamageByEntityEvent event) {
 		if (!isPlayerAlive()) return;
 		if (!(event.getEntity() instanceof Player)) return;
 
@@ -264,7 +264,7 @@ public class SheepClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		if (item != null && item.getType() == Material.ENCHANTMENT_TABLE
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
@@ -288,7 +288,7 @@ public class SheepClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 		// TODO Auto-generated method stub
 
 	}
@@ -374,5 +374,22 @@ public class SheepClass extends BaseClass {
 		player.setDisplayName(instance.getGameManager().getMain().color(player.getName() + " " + color + "&lSheep&r"));
 
 		player.getInventory().setItem(0, weapon);
+	}
+
+	@Override
+	public void killEvent(Player damagerPlayer) {
+		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+			damagerPlayer.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou got a kill and now you can switch your wool color if you'd like!"));
+
+			ItemStack currentItem = damagerPlayer.getInventory().getItem(1);
+			ItemStack woolEnchanter = ItemHelper.setDetails(new ItemStack(Material.ENCHANTMENT_TABLE, 1),
+					ChatColor.BLUE + "Wool Enchanter", ChatColor.YELLOW + "Right click!");
+
+			if (currentItem == null || currentItem.getType() != Material.ENCHANTMENT_TABLE) {
+				damagerPlayer.getInventory().setItem(1, woolEnchanter);
+			} else {
+				damagerPlayer.getInventory().addItem(woolEnchanter);
+			}
+		}
 	}
 }

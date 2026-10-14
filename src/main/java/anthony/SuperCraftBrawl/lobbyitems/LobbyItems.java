@@ -7,6 +7,9 @@ import org.bukkit.inventory.ItemStack;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameType;
+import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticManager;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 
@@ -35,7 +38,13 @@ public class LobbyItems {
         ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
         player.getInventory().setItem(8, ItemHelper.setDetails(stats, "&eMy Profile &7(Right Click)"));
 
-        player.getInventory().setItem(5, core.getFishingRod(player));
+        CosmeticManager cosmeticManager = core.getCosmeticManager();
+        Cosmetic equippedGadget = cosmeticManager == null ? null : cosmeticManager.getEquipped(player, CosmeticCategory.GADGET);
+        if (equippedGadget == null) {
+            player.getInventory().setItem(5, core.getFishingRod(player));
+        } else {
+            equippedGadget.onEquip(player);
+        }
 
         if (core.tournament) {
             ItemStack tournament = ItemHelper.createSkullTexture(

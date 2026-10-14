@@ -59,18 +59,18 @@ public class DwellerClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		usedBone = false; // To reset each life
 		playerInv.setItem(0, this.getAttackWeapon());
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		if (usedBone == false) {
 			if (item != null && item.getType() == Material.BONE

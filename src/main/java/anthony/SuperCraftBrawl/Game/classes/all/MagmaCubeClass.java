@@ -43,7 +43,7 @@ public class MagmaCubeClass extends BaseClass {
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.MagmaCube
 				&& instance.classes.get(player).getLives() > 0) {
 			this.cooldownSec = (5000 - magmaCube.getTime()) / 1000 + 1;
@@ -60,7 +60,7 @@ public class MagmaCubeClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		magmaCube.startTime = System.currentTimeMillis() - 100000;
 		this.cooldownSec = 0; // Reset each life
 		for (Entity en : player.getWorld().getEntities())
@@ -73,7 +73,7 @@ public class MagmaCubeClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 
 		if (item != null) {

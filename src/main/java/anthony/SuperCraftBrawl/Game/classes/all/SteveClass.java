@@ -54,7 +54,7 @@ public class SteveClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		playerInv.setItem(0, stonePick);
 		playerInv.setItem(1, new ItemStack(Material.WORKBENCH));
 
@@ -67,7 +67,7 @@ public class SteveClass extends BaseClass {
 	}
 
 	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
+	public void doDamage(EntityDamageByEntityEvent event) {
 		BaseClass bc = instance.classes.get(player);
 		if (bc != null && bc.getLives() <= 0)
 			return;
@@ -139,7 +139,7 @@ public class SteveClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 
 		if (item != null && item.getType() == Material.WORKBENCH
@@ -230,7 +230,7 @@ public class SteveClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 		// TODO Auto-generated method stub
 
 	}

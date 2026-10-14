@@ -46,7 +46,7 @@ public class PiglinBruteClass extends BaseClass {
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (!isPlayerAlive()) return;
 		if (instance.state == GameState.ENDED) return;
 
@@ -62,7 +62,7 @@ public class PiglinBruteClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		playerInv.setItem(0, this.getAttackWeapon());
 		ItemStack goldBalls = getGoldBalls();
 		goldBalls.setAmount(5);
@@ -70,7 +70,7 @@ public class PiglinBruteClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		if (item != null && item.getType() == Material.GOLD_BLOCK) {
 			if (player.getGameMode() != GameMode.SPECTATOR) {
@@ -126,7 +126,7 @@ public class PiglinBruteClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 		// TODO Auto-generated method stub
 
 	}
@@ -140,6 +140,14 @@ public class PiglinBruteClass extends BaseClass {
 		meta.spigot().setUnbreakable(true);
 		item.setItemMeta(meta);
 		return item;
+	}
+
+	@Override
+	public void killEvent(Player damagerPlayer) {
+		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+			damagerPlayer.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rYou got a kill and gained an extra &eGold Ball"));
+			damagerPlayer.getInventory().addItem(getGoldBalls());
+		}
 	}
 
 }

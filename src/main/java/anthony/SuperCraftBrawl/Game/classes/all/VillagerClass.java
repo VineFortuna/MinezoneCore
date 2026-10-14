@@ -63,7 +63,7 @@ public class VillagerClass extends BaseClass {
 	}
 
 	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
+	public void doDamage(EntityDamageByEntityEvent event) {
 		if (!isPlayerAlive()) return;
 		if (!(event.getEntity() instanceof Player)) return;
 
@@ -86,7 +86,7 @@ public class VillagerClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		// Resetting Emeralds on Death
 		emeraldsCount = 0;
 		weapon.setAmount(1);
@@ -101,7 +101,7 @@ public class VillagerClass extends BaseClass {
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (!isPlayerAlive()) return;
 		handleAddingPotato();
 		updateActionBarMessage();
@@ -151,7 +151,7 @@ public class VillagerClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		Action action = event.getAction();
 

@@ -50,7 +50,7 @@ public class ChickenClass extends BaseClass {
     }
 
     @Override
-    public void SetItems(Inventory playerInv) {
+    public void setItems(Inventory playerInv) {
         playerInv.setItem(0, this.getAttackWeapon());
         playerInv.setItem(1, this.getEggs());
     }
@@ -65,7 +65,7 @@ public class ChickenClass extends BaseClass {
     }
 
     @Override
-    public void UseItem(PlayerInteractEvent event) {
+    public void useItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         if (item != null && item.getType() == Material.EGG) {
             ItemMeta meta = item.getItemMeta();
@@ -132,5 +132,29 @@ public class ChickenClass extends BaseClass {
         meta.spigot().setUnbreakable(true);
         sword.setItemMeta(meta);
         return sword;
+    }
+
+    @Override
+    public void killEvent(Player damagerPlayer) {
+        if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+            ItemStack item = ItemHelper.setDetails(
+                    new ItemStack(Material.EGG, 2),
+                    instance.color("&eExplosive Eggs"),
+                    "",
+                    instance.color("&7Right click to throw DEADLY eggs!")
+            );
+
+            damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
+                    "&2&l(!) &rYou got a kill and gained 2 extra &eExplosive Eggs"
+            ));
+
+            ItemStack currentItem = damagerPlayer.getInventory().getItem(1);
+
+            if (currentItem == null || currentItem.getType() != Material.EGG) {
+                damagerPlayer.getInventory().setItem(1, item);
+            } else {
+                damagerPlayer.getInventory().addItem(item);
+            }
+        }
     }
 }

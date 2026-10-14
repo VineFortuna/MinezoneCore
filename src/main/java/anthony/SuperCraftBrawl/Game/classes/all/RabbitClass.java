@@ -70,7 +70,7 @@ public class RabbitClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		playerInv.setItem(0, weapon);
 		player.addPotionEffect(speed);
 		player.addPotionEffect(jump);
@@ -78,7 +78,7 @@ public class RabbitClass extends BaseClass {
 
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (!isPlayerAlive()) return;
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
 			player.addPotionEffect(speed);
@@ -87,7 +87,7 @@ public class RabbitClass extends BaseClass {
 	}
 
 	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
+	public void doDamage(EntityDamageByEntityEvent event) {
 		if (!isPlayerAlive()) return;
 		ItemStack heldItem = player.getInventory().getItem(player.getInventory().getHeldItemSlot());
 		boolean isWeaponMelee =

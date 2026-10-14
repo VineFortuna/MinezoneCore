@@ -1,5 +1,6 @@
 package anthony.SuperCraftBrawl.Game;
 
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.all.LargeFernClass;
@@ -8,7 +9,6 @@ import anthony.SuperCraftBrawl.Game.events.SantaFlyoverEvent;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
-import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.PlayerListener;
 import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
@@ -26,7 +26,6 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.block.Sign;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -34,7 +33,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.scoreboard.*;
@@ -686,7 +684,7 @@ public class GameInstance implements WinEffects.Host {
                 }
 
                 for (Entry<Player, BaseClass> playerClass : classes.entrySet())
-                    playerClass.getValue().Tick(gameTicks);
+                    playerClass.getValue().tick(gameTicks);
 
                 for (Entity e : mapWorld.getEntities()) {
                     if (e instanceof Arrow) {
@@ -937,7 +935,7 @@ public class GameInstance implements WinEffects.Host {
         BaseClass baseClassBeforeChecks = this.classes.get(player);
         PlayerDeathEvent event = new PlayerDeathEvent(player, null, 0, null);
         baseClassBeforeChecks.isDead = true;
-        baseClassBeforeChecks.Death(event);
+        baseClassBeforeChecks.onDeath(event);
 
         final BaseClass baseClass = this.classes.get(player);
         if (baseClass == null) return;
@@ -1159,6 +1157,7 @@ public class GameInstance implements WinEffects.Host {
                     if (sm != null && s != null) sm.resetSign(s, map);
 
                     for (Player player : players) {
+                        gameManager.getMain().getListener().resetArmor(player);
                         gameManager.getMain().ResetPlayer(player);
                         BaseClass bc = classes.get(player);
                         bc.GameEnd();
@@ -1168,7 +1167,6 @@ public class GameInstance implements WinEffects.Host {
                         gameManager.getMain().sendScoreboardUpdate(player);
                         for (PotionEffect type : player.getActivePotionEffects())
                             player.removePotionEffect(type.getType());
-                        gameManager.getMain().getListener().resetArmor(player);
                     }
 
                     for (BukkitRunnable runnable2 : runnables) runnable2.cancel();
@@ -1705,13 +1703,11 @@ public class GameInstance implements WinEffects.Host {
                                 if (playerData.level >= classType.getLevel()) {
                                     if (classType != ClassType.Fisherman || this.getGameManager().getMain().getFishing()
                                             .hasUnlockedFisherman(player)) {
-                                        if (classType != ClassType.Freddy || this.getGameManager().getMain()
-                                                .getHalloweenManager().hasUnlockedFreddy(player))
-                                            if (donor == null
-                                                    || player.hasPermission("scb." + donor.toString().toLowerCase())) {
-                                                selectedClass = classType;
-                                                break;
-                                            }
+                                        if (donor == null
+                                                || player.hasPermission("scb." + donor.toString().toLowerCase())) {
+                                            selectedClass = classType;
+                                            break;
+                                        }
                                     }
                                 }
                             }
@@ -1922,7 +1918,7 @@ public class GameInstance implements WinEffects.Host {
                         }
                     }
                 }
-                baseClass.UseItem(event);
+                baseClass.useItem(event);
             }
             return true;
         }

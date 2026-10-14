@@ -57,12 +57,12 @@ public class ShulkerClass extends BaseClass {
 	}
 
 	@Override
-	public void SetNameTag() {
+	public void setNameTag() {
 
 	}
 
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Shulker
 				&& instance.classes.get(player).getLives() > 0) {
 			if (this.cooldown > 0) {
@@ -81,7 +81,7 @@ public class ShulkerClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		this.cooldown = 0; // Reset each life
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv
@@ -96,7 +96,7 @@ public class ShulkerClass extends BaseClass {
 	}
 
 	@Override
-	public void ProjectileLaunch(ProjectileLaunchEvent event) {
+	public void projectileLaunch(ProjectileLaunchEvent event) {
 		Entity e = event.getEntity();
 
 		if (e instanceof Arrow) {
@@ -114,7 +114,7 @@ public class ShulkerClass extends BaseClass {
 	}
 
 	@Override
-	public void DoDamage(EntityDamageByEntityEvent event) {
+	public void doDamage(EntityDamageByEntityEvent event) {
 		if (event.getEntity() instanceof Player) {
 			Player p = (Player) event.getEntity();
 			if (event.getDamager() instanceof Arrow) {
@@ -142,7 +142,7 @@ public class ShulkerClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 
 	}
 

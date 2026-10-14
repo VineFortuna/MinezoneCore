@@ -55,7 +55,7 @@ public class OcelotClass extends BaseClass {
 
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Ocelot
 				&& instance.classes.get(player).getLives() > 0) {
 			this.cooldownSec = (int) ((PURR_ABILITY_COOLDOWN - ocelot.getTime()) / 1000 + 1);
@@ -74,7 +74,7 @@ public class OcelotClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		this.cooldownSec = 0; // Reset each life
 		ocelot.startTime = System.currentTimeMillis() - 100000;
 		playerInv.setItem(0, this.getAttackWeapon());
@@ -87,7 +87,7 @@ public class OcelotClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 
 		if (item != null) {

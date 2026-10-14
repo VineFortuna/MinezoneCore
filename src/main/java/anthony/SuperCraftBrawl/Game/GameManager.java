@@ -836,7 +836,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		GameInstance gameInstance = GetInstanceOfPlayer(shooter);
 		if (gameInstance == null)
 			return;
-		gameInstance.classes.get(shooter).PotionSplashEvent(event);
+		gameInstance.classes.get(shooter).potionSplashEvent(event);
 	}
 
 	public void onPlayerMoveEvent(PlayerMoveEvent event) {
@@ -1002,7 +1002,7 @@ public class GameManager implements Listener, PluginMessageListener {
 					int amount = item.getAmount();
 					baseClass.lives += 1;
 					baseClass.score.setScore(baseClass.lives);
-                    baseClass.TellAll(main.color("&2&l(!) &a" + player.getName() + "&r used an extra life!"));
+                    baseClass.tellAll(main.color("&2&l(!) &a" + player.getName() + "&r used an extra life!"));
 					player.getWorld().playSound(player.getLocation(), Sound.LEVEL_UP, 1, 2);
 
 					if (amount > 0) {
@@ -1148,6 +1148,25 @@ public class GameManager implements Listener, PluginMessageListener {
 							gamePlayer.playSound(player.getLocation(), Sound.BAT_TAKEOFF, 1, 1);
 					}
 				}
+			}
+		}
+	}
+
+	@EventHandler
+	public void onBroomWinEffectUse(PlayerInteractEvent event) {
+		ItemStack item = event.getItem();
+		Player player = event.getPlayer();
+		PlayerData data = main.getDataManager().getPlayerData(player);
+		GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
+
+		if ((player.getWorld() == main.getLobbyWorld())
+				|| (i != null && (i.state == GameState.WAITING || i.state == GameState.ENDED))) {
+			if (item != null && item.getType() == Material.WHEAT
+					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+				double boosterStrength = 2.0;
+				Vector vel = player.getLocation().getDirection().multiply(boosterStrength);
+				player.setVelocity(vel);
+				data.magicbroom = 1;
 			}
 		}
 	}
@@ -1416,9 +1435,9 @@ public class GameManager implements Listener, PluginMessageListener {
 								}
 								if (baseClass.getType() == ClassType.FlintAndSteel)
 									if (baseClass.flintUsed == true)
-										baseClass.DoDamage2(damageEvent);
+										baseClass.doDamage2(damageEvent);
 
-								baseClass.DoDamage(damageEvent);
+								baseClass.doDamage(damageEvent);
 							}
 						}
 					} else if (damageEvent.getDamager() instanceof WitherSkull) {
@@ -1496,7 +1515,7 @@ public class GameManager implements Listener, PluginMessageListener {
 									}
 									player.setLastDamageCause(new EntityDamageByEntityEvent(shooterPlayer, player,
 											event.getCause(), event.getDamage()));
-									shooterBaseClass.DoDamage(damageEvent);
+									shooterBaseClass.doDamage(damageEvent);
 								}
 							}
 						}
@@ -1515,25 +1534,13 @@ public class GameManager implements Listener, PluginMessageListener {
 
 				if (!event.isCancelled() && event.getFinalDamage() >= player.getHealth() - 0.2) {
 					event.setCancelled(true);
-					if (event instanceof EntityDamageByEntityEvent) {
-						EntityDamageByEntityEvent damageEvent = (EntityDamageByEntityEvent) event;
-						if (damageEvent.getDamager() instanceof Player) {
-							Player damager = (Player) damageEvent.getDamager();
-							player.setLastDamageCause(new EntityDamageByEntityEvent(damager, player, event.getCause(),
-									event.getDamage()));
-						} else if (damageEvent.getDamager() instanceof Arrow) {
-							Arrow a = (Arrow) damageEvent.getDamager();
-							if (a.getShooter() instanceof Player) {
-								Player damager = (Player) a.getShooter();
-								player.setLastDamageCause(new EntityDamageByEntityEvent(damager, player,
-										event.getCause(), event.getDamage()));
-							}
-						}
-					}
+
+					player.setLastDamageCause(event);
 					instance.PlayerDeath(player);
-					return;
-				} else if (instance.classes.containsKey(player))
-					instance.classes.get(player).TakeDamage(event);
+
+				} else if (instance.classes.containsKey(player)) {
+					instance.classes.get(player).takeDamage(event);
+				}
 			}
 		}
 	}
@@ -1580,7 +1587,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			GameInstance instance = this.GetInstanceOfPlayer(player);
 			if (instance != null) {
 				BaseClass baseClass = instance.classes.get(player);
-				baseClass.ProjectileLaunch(event);
+				baseClass.projectileLaunch(event);
 			}
 		}
 	}
@@ -1592,7 +1599,7 @@ public class GameManager implements Listener, PluginMessageListener {
 			GameInstance instance = this.GetInstanceOfPlayer(player);
 			if (instance != null) {
 				BaseClass baseClass = instance.classes.get(player);
-				baseClass.ProjectileHit(event);
+				baseClass.projectileHit(event);
 			}
 		}
 	}
@@ -2693,7 +2700,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	public Player getMobOwner(Creature creature) {
+	public static Player getMobOwner(LivingEntity creature) {
 		if (creature.getCustomName() != null) {
 			String customName = ChatColor.stripColor(creature.getCustomName());
 
@@ -2772,7 +2779,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		mob.setCustomNameVisible(true);
 	}
 
-	public String getMobTypeName(EntityType entityType) {
+	public static String getMobTypeName(EntityType entityType) {
 		switch (entityType) {
 		case SKELETON:
 			return "Skeleton";

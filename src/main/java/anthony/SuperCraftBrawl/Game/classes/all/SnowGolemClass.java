@@ -51,7 +51,7 @@ public class SnowGolemClass extends BaseClass {
     }
 
     @Override
-    public void SetItems(Inventory playerInv) {
+    public void setItems(Inventory playerInv) {
         ItemStack weapon = ItemHelper.create(Material.STICK, ChatColor.GREEN + "Map Knocker");
         weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
         weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
@@ -89,7 +89,7 @@ public class SnowGolemClass extends BaseClass {
     }
 
     @Override
-    public void Tick(int gameTicks) {
+    public void tick(int gameTicks) {
         if (!instance.classes.containsKey(player))
             return;
         if (instance.classes.get(player).getLives() <= 0)
@@ -120,7 +120,7 @@ public class SnowGolemClass extends BaseClass {
     }
 
     @Override
-    public void UseItem(PlayerInteractEvent event) {
+    public void useItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
         if (item == null) return;
 
@@ -381,23 +381,25 @@ public class SnowGolemClass extends BaseClass {
     }
 
     @Override
-    public void classesEvent(Player damagerPlayer, BaseClass baseClass) {
-        ItemStack slowballs = ItemHelper.setDetails(
-                new ItemStack(Material.SNOW_BALL, 1),
-                "&f&lSLOWBALL &7(Right Click)",
-                "&7Hit players to give:",
-                "&7▶ &7&oSlowness&r &e3 &rfor &e3s"
-        );
+    public void killEvent(Player damagerPlayer) {
+        if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+            ItemStack slowballs = ItemHelper.setDetails(
+                    new ItemStack(Material.SNOW_BALL, 1),
+                    "&f&lSLOWBALL &7(Right click)",
+                    "&7Hit players to give:",
+                    "&7▶ &7&oSlowness&r &e3 &rfor &e3s"
+            );
 
-        if (damagerPlayer.getInventory().getItem(2) == null &&
-                damagerPlayer.getInventory().getItem(2).getType() != Material.SNOW_BALL) {
-            damagerPlayer.getInventory().setItem(2, slowballs);
-            outOfSlowballs = false;
-        } else {
-            damagerPlayer.getInventory().addItem(slowballs);
+            if (damagerPlayer.getInventory().getItem(2) == null &&
+                    damagerPlayer.getInventory().getItem(2).getType() != Material.SNOW_BALL) {
+                damagerPlayer.getInventory().setItem(2, slowballs);
+                outOfSlowballs = false;
+            } else {
+                damagerPlayer.getInventory().addItem(slowballs);
+            }
+
+            damagerPlayer.sendMessage(instance.color("&2&l(!) &rYou got a kill and gained an extra &f&lSLOWBALL"));
         }
-
-        damagerPlayer.sendMessage(instance.color("&2&l(!) &rYou got a kill and gained an extra &f&lSLOWBALL"));
     }
 
     @Override

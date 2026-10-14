@@ -56,10 +56,10 @@ public class ZombieVillagerClass extends BaseClass {
     }
 
     @Override
-    public void SetNameTag() {}
+    public void setNameTag() {}
 
     @Override
-    public void SetItems(Inventory playerInv) {
+    public void setItems(Inventory playerInv) {
         playerInv.setItem(0, this.getAttackWeapon());
         playerInv.setItem(1,
                 ItemHelper.setDetails(new ItemStack(Material.POISONOUS_POTATO, 7), "", "",
@@ -68,7 +68,7 @@ public class ZombieVillagerClass extends BaseClass {
     }
 
     @Override
-    public void UseItem(PlayerInteractEvent event) {
+    public void useItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
 
         if (item != null) {

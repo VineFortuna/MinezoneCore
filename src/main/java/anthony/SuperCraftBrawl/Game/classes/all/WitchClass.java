@@ -96,7 +96,7 @@ public class WitchClass extends BaseClass {
 	}
 
 	@Override
-	public void ProjectileLaunch(ProjectileLaunchEvent event) {
+	public void projectileLaunch(ProjectileLaunchEvent event) {
 		if (event.getEntity() instanceof ThrownPotion) {
 			ThrownPotion potion = (ThrownPotion) event.getEntity();
 
@@ -114,7 +114,7 @@ public class WitchClass extends BaseClass {
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public void Tick(int gameTicks) {
+	public void tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Witch
 				&& instance.classes.get(player).getLives() > 0) {
 			if (player.getInventory().getItem(1) == null || player.getInventory().getItem(1).getType() == Material.AIR) {
@@ -150,7 +150,7 @@ public class WitchClass extends BaseClass {
 	}
 
 	@Override
-	public void SetItems(Inventory playerInv) {
+	public void setItems(Inventory playerInv) {
 		this.used = false; // To reset each life
 		this.cooldown = 0; // Also same
 		this.regenBrooms = 4; // ALSO SAME LMFAO!!!
@@ -162,7 +162,7 @@ public class WitchClass extends BaseClass {
 	}
 
 	@Override
-	public void UseItem(PlayerInteractEvent event) {
+	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		if (item != null && item.getType() == Material.WHEAT
 				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
