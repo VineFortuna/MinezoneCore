@@ -27,6 +27,9 @@ public class GameSettings {
     public boolean disableSpawnProtection;
     public boolean randomClasses;
     public int randomClassCycleSeconds;
+    public int startingLives;
+    public int respawnSeconds;
+    public boolean lowGravity;
 
 	public GameSettings(GameInstance game) {
 		this.game = game;
@@ -48,6 +51,9 @@ public class GameSettings {
         this.disableSpawnProtection = false;
         this.randomClasses = false;
         this.randomClassCycleSeconds = 15;
+        this.startingLives = 5; // Default lives
+        this.respawnSeconds = 3; // Default respawn countdown
+        this.lowGravity = false;
 	}
 
 	// GETTER METHODS:

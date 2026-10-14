@@ -114,7 +114,7 @@ public class FriendRequestsGUI implements InventoryProvider {
                     main.color("&7You do not have any friend requests right now.")), e -> {}));
         }
 
-        contents.set(4, 7, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.ARROW),
+        contents.set(4, 8, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.ARROW),
                 main.color("&7Go Back")), e -> {
             if (contents.inventory().getParent().isPresent()) {
                 contents.inventory().getParent().get().open(player);

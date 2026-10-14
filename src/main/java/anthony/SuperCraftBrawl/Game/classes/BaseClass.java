@@ -280,6 +280,8 @@ public abstract class BaseClass {
 		if (data != null) {
 			data.losses += 1;
 			data.winstreak = 0;
+			instance.getGameManager().getMain().giveBattlePassXp(p,
+					anthony.SuperCraftBrawl.battlepass.BattlePassSeason.XP_GAME_PLAYED);
 
 			ClassType type = baseClassDead.getType();
 			ClassDetails details = data.playerClasses.get(type.getID());
@@ -626,6 +628,8 @@ public abstract class BaseClass {
 					data.kills += 1;
 					data.exp += 29;
 					baseClass.totalExp += 29;
+					instance.getGameManager().getMain().giveBattlePassXp(killer,
+							anthony.SuperCraftBrawl.battlepass.BattlePassSeason.XP_KILL);
 					if (instance.getGameManager().getMain().tournament) {
 						if (instance.gameType != GameType.DUEL) {
 							data.points++;

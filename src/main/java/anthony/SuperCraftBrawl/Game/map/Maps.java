@@ -255,7 +255,7 @@ public enum Maps {
 					.setSource(MapSource.MINECADE)
 	),
 	
-	/*WitchesBrew(
+	WitchesBrew(
 			"WitchesBrew",
 			new Gameplay[]{Gameplay.VOIDY},
 			Size.SMALL,
@@ -274,7 +274,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(-1328.500, 170, 981.500))
 					.setBounds(new Vector(-1328.500, 170, 981.500), 40, 100)
 					.setSource(MapSource.COMMUNITY)
-	),*/
+	),
 	
 	Stronghold(
 			"Stronghold",

@@ -196,6 +196,9 @@ public class Core extends JavaPlugin implements Listener {
     //REWARDS:
     public DailyRewards dailyRewards;
 
+    //BATTLE PASS (null if it failed to start):
+    private anthony.SuperCraftBrawl.battlepass.BattlePassManager battlePassManager;
+
     public Core() {
         this.staffchat = new ArrayList<Player>();
         this.globalchat = new ArrayList<Player>();
@@ -213,6 +216,17 @@ public class Core extends JavaPlugin implements Listener {
 
     public DailyRewards getDailyRewards() {
         return dailyRewards;
+    }
+
+    /** May be null if the Battle Pass failed to start - always null-check. */
+    public anthony.SuperCraftBrawl.battlepass.BattlePassManager getBattlePassManager() {
+        return battlePassManager;
+    }
+
+    /** Safe to call from anywhere in game code; does nothing if the Battle Pass is off. */
+    public void giveBattlePassXp(Player player, int amount) {
+        if (battlePassManager != null && player != null)
+            battlePassManager.addXp(player, amount);
     }
 
     public LevelManager getLevelManager() {
@@ -735,6 +749,12 @@ public class Core extends JavaPlugin implements Listener {
         }
 
         getCommand("treatsadmin").setExecutor(new TreatsAdminCommand(halloweenHunt));
+
+        PluginCommand battlePassCommand = getCommand("battlepass");
+        if (battlePassCommand != null)
+            battlePassCommand.setExecutor(new anthony.SuperCraftBrawl.battlepass.BattlePassCommand(this));
+        else
+            System.out.print("battlepass was null!");
     }
 
     private void registrations() {
@@ -798,6 +818,15 @@ public class Core extends JavaPlugin implements Listener {
         staffHelpManager = new StaffHelpManager(this);
         levelManager = new LevelManager(this);
         dailyRewards = new DailyRewards(this);
+
+        // Isolated so a Battle Pass problem can never stop the rest of the plugin from loading
+        try {
+            battlePassManager = new anthony.SuperCraftBrawl.battlepass.BattlePassManager(this);
+        } catch (Throwable t) {
+            battlePassManager = null;
+            getLogger().severe("[BattlePass] Failed to start, Battle Pass is disabled: " + t);
+            t.printStackTrace();
+        }
 
         for (Arenas arena : Arenas.values()) {
             parkourBoards.add(new ParkourBoard(this, arena));
@@ -2170,6 +2199,8 @@ public class Core extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        if (battlePassManager != null)
+            battlePassManager.shutdown();
         disablePacketNPCs();
         ByteArrayOutputStream b = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(b);

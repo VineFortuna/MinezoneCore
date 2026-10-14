@@ -30,6 +30,27 @@ public class ScoreboardManager {
         return playersLobbyBoard.containsKey(p.getUniqueId());      // NEW
     }                                                               // NEW
 
+    /**
+     * Battle Pass tier + progress bar, styled like the Level lines.
+     * Skipped while the pass is disabled or the player's progress is still loading
+     * (BattlePassManager refreshes the board once it loads).
+     */
+    private void addBattlePassLines(Player player, java.util.List<String> lines) {
+        anthony.SuperCraftBrawl.battlepass.BattlePassManager bp = main.getBattlePassManager();
+        anthony.SuperCraftBrawl.battlepass.BattlePassProgress progress = bp == null ? null : bp.getProgress(player);
+        if (progress == null)
+            return;
+
+        int tier = progress.getTier();
+        int perTier = anthony.SuperCraftBrawl.battlepass.BattlePassSeason.XP_PER_TIER;
+        boolean maxed = tier >= anthony.SuperCraftBrawl.battlepass.BattlePassSeason.MAX_TIER;
+        int intoTier = maxed ? perTier : progress.xp - tier * perTier;
+
+        lines.add("");
+        lines.add(main.color("&fBattle Pass: &6✦" + tier));
+        lines.add(Bars.dotsBar(intoTier, perTier, 10, ChatColor.GOLD, ChatColor.GRAY, '■', '■', true, true));
+    }
+
     public void lobbyBoard(Player player) {
         // Stop any previous animation and board (prevents duplicates)          // NEW
         try { main.getTitleAnimationManager().stop(player); } catch (Throwable ignored) {} // NEW
@@ -90,7 +111,7 @@ public class ScoreboardManager {
 
             board.updateTitle(main.color("&e&l" + gameServer));
             if (data != null) {
-                board.updateLines(
+                java.util.List<String> lines = new java.util.ArrayList<>(java.util.Arrays.asList(
                         "",
                         main.color("&fTokens: &a" + fmt(data.tokens)),  // ← formatted with commas
                         "",
@@ -98,10 +119,12 @@ public class ScoreboardManager {
                         "",
                         // shows ✧ plus the level like your existing line
                         main.color("&fLevel: &f" + data.checkPlayerLevel(player, data) + "✧" + data.level),
-                        expBar,
-                        "",
-                        main.color("&ewww.minezone.club")
-                );
+                        expBar
+                ));
+                addBattlePassLines(player, lines);
+                lines.add("");
+                lines.add(main.color("&ewww.minezone.club"));
+                board.updateLines(lines);
             }
         } else {
             // Tournament uses static title → ensure animation is STOPPED        // NEW

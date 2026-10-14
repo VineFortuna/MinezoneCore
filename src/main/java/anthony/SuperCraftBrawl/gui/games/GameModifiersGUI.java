@@ -31,7 +31,7 @@ public class GameModifiersGUI implements InventoryProvider {
         this.inv = SmartInventory.builder()
                 .id("gameModifiers")
                 .provider(this)
-                .size(2, 9)
+                .size(3, 9)
                 .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Game Modifiers")
                 .build();
     }
@@ -42,7 +42,7 @@ public class GameModifiersGUI implements InventoryProvider {
                 new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e -> {});
 
         for (int i = 0; i < 9; i++) {
-            contents.set(1, i, border);
+            contents.set(2, i, border);
         }
 
         if (game == null || game.state != GameState.WAITING) {
@@ -73,6 +73,109 @@ public class GameModifiersGUI implements InventoryProvider {
         addDisableHealthPotsModifier(contents, player);
         addDisableSpawnProtectionModifier(contents, player);
         addRandomClassesModifier(contents, player);
+        addLivesModifier(contents, player);
+        addRespawnTimeModifier(contents, player);
+        addLowGravityModifier(contents, player);
+    }
+
+    private void addLowGravityModifier(InventoryContents contents, Player player) {
+        boolean enabled = game.getGameSettings().lowGravity;
+
+        ItemStack item = new ItemStack(Material.FEATHER);
+        if (enabled) item = ItemHelper.setGlowing(item, true);
+
+        contents.set(1, 3, ClickableItem.of(ItemHelper.setDetails(
+                item,
+                main.color("&e&lLow Gravity"),
+                "",
+                main.color("&fStatus: " + (enabled ? "&aEnabled" : "&cDisabled")),
+                "",
+                main.color("&7Everyone gets permanent"),
+                main.color("&bJump Boost X &7while alive"),
+                "",
+                main.color("&eClick to toggle")
+        ), e -> {
+            SoundManager.playSuccessfulHit(player);
+
+            game.getGameSettings().lowGravity = !game.getGameSettings().lowGravity;
+
+            if (game.getGameSettings().lowGravity) {
+                game.TellAll(main.color("&2&l(!) &rLow Gravity has been &aenabled"));
+            } else {
+                game.TellAll(main.color("&2&l(!) &rLow Gravity has been &cdisabled"));
+            }
+
+            inv.open(player);
+        }));
+    }
+
+    private void addLivesModifier(InventoryContents contents, Player player) {
+        int lives = game.getGameSettings().startingLives;
+
+        contents.set(1, 1, ClickableItem.of(ItemHelper.setDetails(
+                new ItemStack(Material.GOLDEN_APPLE),
+                main.color("&e&lLives"),
+                "",
+                main.color("&fCurrent: &e" + formatLives(lives)),
+                "",
+                main.color("&7Click to cycle:"),
+                main.color("&e1&7, &e2&7, &e3&7, &e4&7, &e5")
+        ), e -> {
+            SoundManager.playSuccessfulHit(player);
+
+            game.getGameSettings().startingLives = getNextLives(game.getGameSettings().startingLives);
+
+            game.TellAll(main.color("&2&l(!) &rEveryone will now start with &e&l"
+                    + formatLives(game.getGameSettings().startingLives) + "&r."));
+
+            inv.open(player);
+        }));
+    }
+
+    private void addRespawnTimeModifier(InventoryContents contents, Player player) {
+        int seconds = game.getGameSettings().respawnSeconds;
+
+        contents.set(1, 2, ClickableItem.of(ItemHelper.setDetails(
+                new ItemStack(Material.BED),
+                main.color("&e&lRespawn Time"),
+                "",
+                main.color("&fCurrent: &e" + formatRespawnTime(seconds)),
+                "",
+                main.color("&7Click to cycle:"),
+                main.color("&eNone&7, &e1s&7, &e2s&7, &e3s&7,"),
+                main.color("&e4s&7, &e5s")
+        ), e -> {
+            SoundManager.playSuccessfulHit(player);
+
+            game.getGameSettings().respawnSeconds = getNextRespawnTime(game.getGameSettings().respawnSeconds);
+
+            int newSeconds = game.getGameSettings().respawnSeconds;
+            if (newSeconds == 0) {
+                game.TellAll(main.color("&2&l(!) &rPlayers will now respawn &e&linstantly&r."));
+            } else {
+                game.TellAll(main.color("&2&l(!) &rRespawn time was set to &e&l" + newSeconds + "s&r."));
+            }
+
+            inv.open(player);
+        }));
+    }
+
+    private int getNextLives(int current) {
+        // 1 -> 2 -> 3 -> 4 -> 5 -> 1
+        return current >= 5 || current < 1 ? 1 : current + 1;
+    }
+
+    private String formatLives(int lives) {
+        return lives + (lives == 1 ? " Life" : " Lives");
+    }
+
+    private int getNextRespawnTime(int current) {
+        // None -> 1s -> 2s -> 3s -> 4s -> 5s -> None
+        return current >= 5 || current < 0 ? 0 : current + 1;
+    }
+
+    private String formatRespawnTime(int seconds) {
+        return seconds <= 0 ? "None" : seconds + "s";
     }
 
     private void addRandomClassesModifier(InventoryContents contents, Player player) {

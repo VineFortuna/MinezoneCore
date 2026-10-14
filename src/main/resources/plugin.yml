@@ -159,6 +159,9 @@ commands:
       description: Candy aura cosmetic (testing for Admins)
    treatsadmin:
       description: Reset halloween treats command (Admins only)
+   battlepass:
+      description: Open the Battle Pass
+      aliases: [bp, pass]
    tricktitle:
       description: a
    lactate:

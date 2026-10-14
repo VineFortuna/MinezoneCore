@@ -748,7 +748,9 @@ public class GameInstance {
         TellAll(color("&e&l----------------------------------------"));
         TellAll(color("            &6&lSUPER CRAFT BROTHERS"));
         TellAll("");
-        TellAll(color("&r  5 lives each with different classes & unique"));
+        int startingLives = gameSettings.startingLives;
+        TellAll(color("&r  " + startingLives + (startingLives == 1 ? " life" : " lives")
+                + " each with different classes & unique"));
         TellAll(color("&r    abilities. Look out for lightning drops as"));
         TellAll(color("&r       they can spawn useful powerups."));
         TellAll(color("&r                   Good Luck!"));
@@ -764,6 +766,10 @@ public class GameInstance {
         this.state = GameState.STARTED;
         resetState();
         LoadClasses();
+        // Private game "Lives" modifier (5 by default)
+        for (BaseClass startingClass : classes.values()) {
+            if (startingClass != null) startingClass.lives = gameSettings.startingLives;
+        }
         GameScoreboard();
         addAlivePlayers();
         addAliveTeams();
@@ -981,6 +987,44 @@ public class GameInstance {
         }
     }
 
+    /** Low Gravity modifier: Jump Boost X (amplifier 9). */
+    public static final int LOW_GRAVITY_AMPLIFIER = 9;
+
+    /**
+     * Keeps Low Gravity's Jump Boost on every alive player.
+     * - A weaker Jump Boost (e.g. Bunny/Cloud passives) gets overridden.
+     * - A stronger one (jump pads, class abilities) is left alone until it runs out,
+     *   then Low Gravity is put straight back on.
+     * Uses a short duration that keeps getting refreshed, so it wears off by itself
+     * within ~2s once the player dies, becomes a spectator, leaves, or the game ends.
+     */
+    private void applyLowGravity() {
+        for (Player player : players) {
+            if (player == null || !player.isOnline() || player.getGameMode() == GameMode.SPECTATOR) continue;
+            if (spectators.contains(player)) continue;
+
+            BaseClass baseClass = classes.get(player);
+            if (baseClass == null || baseClass.isDead || baseClass.getLives() <= 0) continue;
+
+            PotionEffect current = null;
+            for (PotionEffect effect : player.getActivePotionEffects()) {
+                if (effect.getType().equals(PotionEffectType.JUMP)) {
+                    current = effect;
+                    break;
+                }
+            }
+
+            if (current != null) {
+                // Stronger boost active (jump pad, ability) -> let it run out first
+                if (current.getAmplifier() > LOW_GRAVITY_AMPLIFIER) continue;
+                // Ours (or equal) and not about to expire -> nothing to do
+                if (current.getAmplifier() == LOW_GRAVITY_AMPLIFIER && current.getDuration() > 10) continue;
+            }
+
+            player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 40, LOW_GRAVITY_AMPLIFIER, false, false), true);
+        }
+    }
+
     private void gameTicks() {
         BukkitRunnable runnable = new BukkitRunnable() {
             @Override
@@ -1006,6 +1050,10 @@ public class GameInstance {
                     for (Player gamePlayer : players) {
                         if (gamePlayer.getFireTicks() >= 200) gamePlayer.setFireTicks(110);
                     }
+                }
+
+                if (gameTicks % 5 == 0 && gameSettings.lowGravity && state == GameState.STARTED) {
+                    applyLowGravity();
                 }
                 gameTicks++;
             }
@@ -1159,7 +1207,7 @@ public class GameInstance {
                 if (map != null) {
                     Score livesScore = o.getScore(truncateString(
                             playerClass.getType().getTag() + " " + ChatColor.RESET + player.getName(), 38));
-                    livesScore.setScore(5);
+                    livesScore.setScore(playerClass.lives);
                     playerClass.score = livesScore;
                 } else {
                     if (team.get(player).equals("Blue"))
@@ -1186,7 +1234,7 @@ public class GameInstance {
         BaseClass bc = classes.get(player);
         if (bc != null) {
             Score livesScore = o.getScore(truncateString(bc.getType().getTag() + " " + c + player.getName() + "", 38));
-            livesScore.setScore(5);
+            livesScore.setScore(bc.lives);
             bc.score = livesScore;
         }
     }
@@ -1272,7 +1320,7 @@ public class GameInstance {
 
             // Countdown & respawn
             BukkitRunnable runTimer = new BukkitRunnable() {
-                int ticks = 3;
+                int ticks = gameSettings.respawnSeconds; // 0 = respawn instantly
                 boolean timesSent = false;
 
                 @SuppressWarnings("deprecation")
@@ -1318,7 +1366,7 @@ public class GameInstance {
                         }
 
                         // During countdown
-                        if (this.ticks <= 3 && GameInstance.this.state == GameState.STARTED) {
+                        if (GameInstance.this.state == GameState.STARTED) {
                             if (!players.contains(player)) {
                                 cancel();
                                 return;
@@ -1732,6 +1780,8 @@ public class GameInstance {
                 data.wins += 1;
                 data.winstreak += 1;
                 data.exp += 113;
+                gameManager.getMain().giveBattlePassXp(winner,
+                        anthony.SuperCraftBrawl.battlepass.BattlePassSeason.XP_WIN);
 
                 if (data.winstreak >= data.bestWinstreak) {
                     data.bestWinstreak = data.winstreak;
