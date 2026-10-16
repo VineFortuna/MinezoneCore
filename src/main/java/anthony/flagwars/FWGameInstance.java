@@ -52,7 +52,8 @@ public class FWGameInstance {
 	private final FWGameManager manager;
 	private final FWGameMode mode;
 	private final World world;
-	private final boolean clonedWorld;
+	/** Name of the map this match is a copy of (e.g. "Speedway") - the world itself is a throwaway "fwgame_" copy. */
+	private final String mapName;
 	private final FWMapConfig mapConfig;
 	private final Map<Integer, FWTeam> teams = new LinkedHashMap<>();
 	private final List<Player> spectators = new ArrayList<>();
@@ -75,12 +76,12 @@ public class FWGameInstance {
 	private int requiredCaptures = FWGameConstants.MAX_WINNING_FLAG_CAPTURES;
 	private final List<WinEffects> activeWinEffects = new ArrayList<>();
 
-	public FWGameInstance(FWGameManager manager, FWGameMode mode, World world, boolean clonedWorld) {
+	public FWGameInstance(FWGameManager manager, FWGameMode mode, World world, FWMapConfig map) {
 		this.manager = manager;
 		this.mode = mode;
 		this.world = world;
-		this.clonedWorld = clonedWorld;
-		this.mapConfig = manager.getMapConfigManager().getConfig().translateTo(world);
+		this.mapName = map.getWorldName();
+		this.mapConfig = map.translateTo(world);
 		this.flagManager = new FWFlagManager(this);
 		this.resourceGenerator = new FWResourceGenerator(this);
 		this.scoreboardManager = new FWScoreboardManager(this);
@@ -121,8 +122,8 @@ public class FWGameInstance {
 		return mapConfig;
 	}
 
-	public boolean isClonedWorld() {
-		return clonedWorld;
+	public String getMapName() {
+		return mapName;
 	}
 
 	public boolean hasSpace() {
@@ -443,7 +444,7 @@ public class FWGameInstance {
 		if (lobby == null) return;
 
 		String msg = manager.getMain().color("&2&l(!) &a&lA &6&lFlagWars&a&l game on&f&l "
-				+ FWGameConstants.MAP_WORLD_NAME + " &a&lis starting in 30 seconds");
+				+ mapName + " &a&lis starting in 30 seconds");
 
 		TextComponent join = new TextComponent("     " + manager.getMain().color("&a&lClick here to join!"));
 		join.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
@@ -862,7 +863,7 @@ public class FWGameInstance {
 		if (winner != null) {
 			// Server-wide, not TellAll (which only reaches this match's own players) - a Flag Wars win is worth announcing to everyone.
 			Bukkit.broadcastMessage(manager.getMain().color("&6&lFW> &e" + winningPlayerNames(winner) + " &rjust won on &e&l"
-					+ FWGameConstants.MAP_WORLD_NAME));
+					+ mapName));
 			playSoundForAll(Sound.LEVEL_UP, 1f, 0.7f);
 			for (UUID uuid : winner.getMembers()) {
 				Player p = Bukkit.getPlayer(uuid);

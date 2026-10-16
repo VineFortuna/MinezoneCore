@@ -1,6 +1,8 @@
 package anthony.flagwars;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
+import anthony.flagwars.map.FWMapConfig;
 import anthony.flagwars.map.FWMapConfigManager;
 import anthony.util.SoundManager;
 import net.minecraft.server.v1_8_R3.EnumParticle;
@@ -25,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Tracks every concurrently-running Flag Wars match. Mirrors the role of
@@ -32,11 +35,12 @@ import java.util.UUID;
  * named FWGameManager (not GameManager) so it never collides with either of
  * those when Core.java wildcard-imports anthony.SuperCraftBrawl.Game.*.
  *
- * Only one physical map is set up by staff (FWGameConstants.MAP_WORLD_NAME,
- * "Speedway"), but more than one match can run at once: the first match of
- * any kind uses that real world directly, and once it's occupied, any
- * further match gets a throwaway copy of it (see provisionWorld()/cloneWorld())
- * that's deleted from disk again the moment that match ends.
+ * Every map staff set up with /fwsetup (createmap + a fully configured, saved
+ * config) is in the rotation automatically. Each new match picks one of those
+ * maps at random and plays on a throwaway copy of it (see provisionWorld()/
+ * cloneWorld()) that's deleted from disk again the moment that match ends - so
+ * any number of matches can run at once, on any mix of maps, and the original
+ * maps are never played on (or griefed) directly.
  */
 public class FWGameManager {
 
@@ -46,13 +50,15 @@ public class FWGameManager {
 	private final FWMapConfigManager mapConfigManager;
 	private final List<FWGameInstance> activeInstances = new ArrayList<>();
 	private final Set<UUID> spawnProtected = new HashSet<>();
-	private World primaryWorld;
+	/** Prefix for every throwaway match world, so they're never mistaken for a real map and stale ones can be swept on startup. */
+	private static final String CLONE_PREFIX = "fwgame_";
 	private int cloneCounter = 0;
 	private FWPlayerListener playerListener;
 
 	public FWGameManager(Core main) {
 		this.main = main;
 		this.mapConfigManager = new FWMapConfigManager(main);
+		deleteStaleClones();
 	}
 
 	public void setPlayerListener(FWPlayerListener playerListener) {
@@ -132,92 +138,81 @@ public class FWGameManager {
 	}
 
 	/**
-	 * Loads the real, staff-configured arena world on first use only - never at plugin
-	 * startup - so a problem with this one world (corrupt chunks, missing folder, etc.)
-	 * can never take the rest of the plugin down with it. Returns null on failure;
-	 * callers must handle that instead of assuming a world is always available. Used
-	 * directly by /fwsetup (always configures the real map, never a clone) and as the
-	 * template provisionWorld() clones from.
+	 * Every map that can host a match right now: fully configured (see FWMapConfig#isReady) and
+	 * with a world folder on disk to copy from. New maps join the rotation automatically as soon
+	 * as they're set up and saved - nothing here is hardcoded to a specific map.
 	 */
-	public World getArenaWorld() {
-		if (primaryWorld == null) {
-			World existing = Bukkit.getWorld(FWGameConstants.MAP_WORLD_NAME);
-
-			if (existing != null) {
-				primaryWorld = existing;
-			} else {
-				try {
-					primaryWorld = Bukkit.createWorld(
-							new WorldCreator(FWGameConstants.MAP_WORLD_NAME)
-					);
-				} catch (Throwable t) {
-					main.getLogger().severe(
-							"[Flag Wars] Failed to load the "
-									+ FWGameConstants.MAP_WORLD_NAME
-									+ " world - Flag Wars will be unavailable until this is fixed."
-					);
-					t.printStackTrace();
-				}
-			}
-
-			/*
-			 * The map configuration was originally loaded before the arena
-			 * world existed, meaning its Locations may contain a null World.
-			 * Reload it now that Speedway is loaded.
-			 */
-			if (primaryWorld != null) {
-				primaryWorld.setAutoSave(false); // never persist a match's grief to disk - see releaseArenaWorld()
-				mapConfigManager.reload();
-			}
+	public List<FWMapConfig> getPlayableMaps() {
+		List<FWMapConfig> playable = new ArrayList<>();
+		for (FWMapConfig config : mapConfigManager.getAllConfigs()) {
+			String name = config.getWorldName();
+			if (name.startsWith(CLONE_PREFIX)) continue;
+			if (!new File(new File(Bukkit.getWorldContainer(), name), "level.dat").exists()) continue;
+			if (!config.isReady()) continue;
+			playable.add(config);
 		}
-
-		return primaryWorld;
+		return playable;
 	}
 
 	/**
-	 * Picks a world for a brand new match: the real arena if nothing's using it right
-	 * now, otherwise a throwaway clone of it so several matches can run side by side
-	 * instead of queuing behind each other.
+	 * Loads a fresh copy of the given map for a brand new match. The original is never played on,
+	 * so any number of matches can share the same map. Returns null if the copy failed (already logged).
 	 */
-	private World provisionWorld() {
-		World primary = getArenaWorld();
-		if (primary == null) return null;
-
-		if (getInstanceForWorld(primary) == null) {
-			return primary;
-		}
-		return cloneWorld(primary);
+	private World provisionWorld(FWMapConfig map) {
+		World source = Bukkit.getWorld(map.getWorldName());
+		// Staff may have it loaded for /fwsetup - flush their edits to disk so the copy is current.
+		if (source != null) source.save();
+		return cloneWorld(map.getWorldName());
 	}
 
 	/**
-	 * Copies the real arena world's folder to a fresh, uniquely-named one and loads it
-	 * as a brand new World - a byte-for-byte duplicate of the same map, but a completely
-	 * independent Bukkit world so a second/third/etc. match can play out on it without
-	 * touching the original. uid.dat and session.lock are deliberately skipped so Bukkit
-	 * assigns the clone its own UUID and lock instead of colliding with the original's.
+	 * Copies a map's world folder to a fresh, uniquely-named one and loads it as a brand new
+	 * World - a byte-for-byte duplicate of the map, but a completely independent Bukkit world so
+	 * matches can play out side by side without touching the original. uid.dat and session.lock
+	 * are deliberately skipped so Bukkit assigns the clone its own UUID and lock instead of
+	 * colliding with the original's.
 	 */
-	private World cloneWorld(World primary) {
-		String cloneName = FWGameConstants.MAP_WORLD_NAME + "_temp" + (++cloneCounter);
-		File source = new File(Bukkit.getWorldContainer(), primary.getName());
+	private World cloneWorld(String mapName) {
+		String cloneName = CLONE_PREFIX + mapName + "_" + (++cloneCounter);
+		File source = new File(Bukkit.getWorldContainer(), mapName);
 		File target = new File(Bukkit.getWorldContainer(), cloneName);
 
 		try {
 			copyWorldFolder(source.toPath(), target.toPath());
 		} catch (IOException e) {
-			main.getLogger().severe("[Flag Wars] Failed to clone the arena world for an overflow match: " + e.getMessage());
+			main.getLogger().severe("[Flag Wars] Failed to copy map " + mapName + " for a new match: " + e.getMessage());
+			deleteWorldFolder(target);
 			return null;
 		}
 
 		World clone;
 		try {
-			clone = Bukkit.createWorld(new WorldCreator(cloneName));
+			// Void generator, same as /fwsetup createmap, so unbuilt chunks stay empty instead of growing terrain
+			clone = Bukkit.createWorld(new WorldCreator(cloneName)
+					.environment(World.Environment.NORMAL)
+					.generateStructures(false)
+					.generator(new VoidGenerator()));
 		} catch (Throwable t) {
-			main.getLogger().severe("[Flag Wars] Failed to load cloned arena world " + cloneName + ": " + t.getMessage());
+			main.getLogger().severe("[Flag Wars] Failed to load copied map " + cloneName + ": " + t.getMessage());
+			clone = null;
+		}
+		if (clone == null) {
+			deleteWorldFolder(target);
 			return null;
 		}
 
 		clone.setAutoSave(false);
 		return clone;
+	}
+
+	/** Match copies left on disk by a crash/restart mid-game - nothing loads them, so they're safe to delete. */
+	private void deleteStaleClones() {
+		File[] folders = Bukkit.getWorldContainer().listFiles(
+				f -> f.isDirectory() && f.getName().startsWith(CLONE_PREFIX));
+		if (folders == null) return;
+		for (File folder : folders) {
+			if (Bukkit.getWorld(folder.getName()) == null) deleteWorldFolder(folder);
+		}
 	}
 
 	private void copyWorldFolder(Path source, Path target) throws IOException {
@@ -256,29 +251,21 @@ public class FWGameManager {
 	}
 
 	/**
-	 * Unregisters a finished match, unloads its world without saving (discarding any
-	 * grief), and - if that world was a temporary clone rather than the real arena -
-	 * deletes its folder from disk entirely once the unload succeeds.
+	 * Unregisters a finished match, unloads its world without saving, and deletes that
+	 * throwaway copy from disk once the unload succeeds. The original map is never touched.
 	 */
 	public void releaseArenaWorld(FWGameInstance instance) {
 		activeInstances.remove(instance);
 
 		World world = instance.getWorld();
-		boolean isClone = instance.isClonedWorld();
 		File worldFolder = new File(Bukkit.getWorldContainer(), world.getName());
-
-		if (world.equals(primaryWorld)) {
-			primaryWorld = null;
-		}
 
 		new BukkitRunnable() {
 			@Override
 			public void run() {
 				if (Bukkit.unloadWorld(world, false)) {
 					this.cancel();
-					if (isClone) {
-						deleteWorldFolder(worldFolder);
-					}
+					deleteWorldFolder(worldFolder);
 				}
 			}
 		}.runTaskTimer(main, 0L, 1L);
@@ -300,7 +287,7 @@ public class FWGameManager {
 
 	/**
 	 * Joins an existing joinable (waiting/starting, not full) match of this mode if one
-	 * exists, otherwise provisions a world (real arena or a fresh clone) and starts a new one.
+	 * exists, otherwise starts a new one on a fresh copy of a randomly picked map.
 	 *
 	 * @return true if the player ended up in the match, false if they were rejected
 	 * (a message was already sent to them either way).
@@ -316,33 +303,6 @@ public class FWGameManager {
 			return false;
 		}
 
-		// Just to make sure the real arena (and its map config) is loaded - this match may
-		// still end up on a clone of it if the real one's already mid-game, see provisionWorld().
-		if (getArenaWorld() == null) {
-			player.sendMessage(main.color(
-					"&c&l(!) &rFlag Wars's map failed to load. Tell staff to check the console."
-			));
-			return false;
-		}
-
-		if (!mapConfigManager.getConfig().isReady()) {
-			player.sendMessage(main.color(
-					"&c&l(!) &rFlag Wars's map hasn't been fully configured yet!"
-			));
-			return false;
-		}
-
-		if (mapConfigManager.getConfig().getLobby() == null
-				|| mapConfigManager.getConfig().getLobby().getWorld() == null) {
-			player.sendMessage(main.color(
-					"&c&l(!) &rThe Flag Wars lobby location is invalid. Please set it again."
-			));
-			main.getLogger().severe(
-					"[Flag Wars] Lobby location has no valid world."
-			);
-			return false;
-		}
-
 		for (FWGameInstance instance : activeInstances) {
 			if (instance.getMode() == mode
 					&& (instance.getState() == FWGameState.WAITING || instance.getState() == FWGameState.STARTING)
@@ -351,7 +311,17 @@ public class FWGameManager {
 			}
 		}
 
-		World world = provisionWorld();
+		// No open match - start a new one on a random map out of every fully set-up map.
+		List<FWMapConfig> playableMaps = getPlayableMaps();
+		if (playableMaps.isEmpty()) {
+			player.sendMessage(main.color(
+					"&c&l(!) &rNo Flag Wars maps have been fully configured yet!"
+			));
+			return false;
+		}
+
+		FWMapConfig map = playableMaps.get(ThreadLocalRandom.current().nextInt(playableMaps.size()));
+		World world = provisionWorld(map);
 		if (world == null) {
 			player.sendMessage(main.color(
 					"&c&l(!) &rFlag Wars's map failed to load. Tell staff to check the console."
@@ -359,7 +329,7 @@ public class FWGameManager {
 			return false;
 		}
 
-		FWGameInstance instance = new FWGameInstance(this, mode, world, !world.equals(primaryWorld));
+		FWGameInstance instance = new FWGameInstance(this, mode, world, map);
 		activeInstances.add(instance);
 		return instance.addPlayer(player);
 	}

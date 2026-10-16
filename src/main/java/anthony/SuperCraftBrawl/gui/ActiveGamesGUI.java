@@ -123,6 +123,7 @@ public class ActiveGamesGUI implements InventoryProvider {
 				contents.set(count, i, ClickableItem.of(
 						ItemHelper.setDetails(displayItem,
 								"&e&lFlag Wars",
+								"&fMap: &a" + fwGame.getMapName(),
 								"&fMode: &a" + fwGame.getMode().getLabel(),
 								"",
 								startLine,
@@ -136,6 +137,7 @@ public class ActiveGamesGUI implements InventoryProvider {
 				contents.set(count, i, ClickableItem.of(
 						ItemHelper.setDetails(ItemHelper.setGlowing(displayItem, true),
 								"&e&lFlag Wars",
+								"&fMap: &a" + fwGame.getMapName(),
 								"&fMode: &a" + fwGame.getMode().getLabel(),
 								"",
 								"&fIn Progress",

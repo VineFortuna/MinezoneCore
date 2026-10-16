@@ -185,7 +185,8 @@ public class FWMapConfigManager {
 
 	private void writeLocation(YamlConfiguration yaml, String path, Location loc) {
 		if (loc == null) return;
-		yaml.set(path + ".world", loc.getWorld().getName());
+		// Locations read while their world wasn't loaded yet have a null World - fall back to this config's own world
+		yaml.set(path + ".world", loc.getWorld() != null ? loc.getWorld().getName() : yaml.getString("world"));
 		yaml.set(path + ".x", loc.getX());
 		yaml.set(path + ".y", loc.getY());
 		yaml.set(path + ".z", loc.getZ());

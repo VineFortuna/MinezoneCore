@@ -122,6 +122,8 @@ public class FWPlayerListener implements Listener {
 	private final Set<UUID> noPearlDamage = new HashSet<>();
 	/** Players currently airborne from a grappling hook launch — fall damage is suppressed until they land. */
 	private final Set<UUID> grapplingNoFallDamage = new HashSet<>();
+	/** Players launched by TNT (UUID -> launch time) - fall damage is suppressed until they land, so TNT jumping only costs the blast's 1 heart. */
+	private final Map<UUID, Long> tntNoFallDamage = new HashMap<>();
 
 	/** Who hit a player most recently (PvP, TNT, Fire Charge) and when - see recentAttackerOf below. */
 	private static final class RecentAttack {
@@ -200,7 +202,7 @@ public class FWPlayerListener implements Listener {
 			event.setCancelled(true);
 			TNTPrimed tnt = (TNTPrimed) event.getBlock().getWorld().spawnEntity(
 					event.getBlock().getLocation().add(0.5, 0, 0.5), org.bukkit.entity.EntityType.PRIMED_TNT);
-			tnt.setFuseTicks(80);
+			tnt.setFuseTicks(60);
 			tnt.setMetadata(TNT_METADATA, new FixedMetadataValue(fwGameManager.getMain(), true));
 			tnt.setMetadata(TNT_OWNER_METADATA, new FixedMetadataValue(fwGameManager.getMain(), event.getPlayer().getUniqueId()));
 
@@ -337,6 +339,10 @@ public class FWPlayerListener implements Listener {
 					return;
 				}
 				if (grapplingNoFallDamage.remove(player.getUniqueId())) {
+					event.setCancelled(true);
+					return;
+				}
+				if (tntNoFallDamage.remove(player.getUniqueId()) != null) {
 					event.setCancelled(true);
 					return;
 				}
@@ -1043,9 +1049,20 @@ public class FWPlayerListener implements Listener {
 			int cx = baseX + dx * step;
 			int cz = baseZ + dz * step;
 
+			// Diagonal rows advance on both axes at once, so the 3 cells of each row only cover
+			// every other block (a checkerboard) - also fill the 2 cells between this row's center
+			// and the previous one, which closes those holes into a solid diagonal strip.
+			List<int[]> cells = new ArrayList<>();
+			for (int w = -1; w <= 1; w++)
+				cells.add(new int[]{cx + px * w, cz + pz * w});
+			if (dx != 0 && dz != 0) {
+				cells.add(new int[]{cx, cz - dz});
+				cells.add(new int[]{cx - dx, cz});
+			}
+
 			List<Block> row = new ArrayList<>();
-			for (int w = -1; w <= 1; w++) {
-				Block block = world.getBlockAt(cx + px * w, baseY, cz + pz * w);
+			for (int[] cell : cells) {
+				Block block = world.getBlockAt(cell[0], baseY, cell[1]);
 				Block support = block.getRelative(BlockFace.DOWN);
 				if (block.getType().isSolid() || support.getType().isSolid()) continue;
 				if (instance.getMapConfig().isProtectedFromBuilding(block.getLocation())) continue;
@@ -1454,9 +1471,11 @@ public class FWPlayerListener implements Listener {
 	private static final String TNT_OWNER_METADATA = "fw_tnt_owner";
 
 	private static final double TNT_KNOCKBACK_RADIUS     = 4.0;
-	private static final double TNT_KNOCKBACK_HORIZONTAL = 1.5;
-	private static final double TNT_KNOCKBACK_VERTICAL   = 0.9;
+	private static final double TNT_KNOCKBACK_HORIZONTAL = 2.5;
+	private static final double TNT_KNOCKBACK_VERTICAL   = 1.25;
+	private static final double TNT_KNOCKBACK_MAX_VERTICAL = 2.0; // keeps side-on blasts from launching you into orbit
 	private static final double TNT_DAMAGE               = 2.0; // 1 heart
+	private static final long   TNT_NO_FALL_GRACE_MS     = 500;
 
 	/**
 	 * Lets shop/thrown TNT's explosion through (GameManager's global hooks blanket-clear every
@@ -1532,8 +1551,10 @@ public class FWPlayerListener implements Listener {
 		double y = normalized.getY();
 		if (y < 0) y += 1.5;
 		y = y <= 0.5 ? TNT_KNOCKBACK_VERTICAL * 1.5 : y * TNT_KNOCKBACK_VERTICAL * 1.5;
+		y = Math.min(y, TNT_KNOCKBACK_MAX_VERTICAL);
 
 		player.setVelocity(horizontal.setY(y));
+		tntNoFallDamage.put(player.getUniqueId(), System.currentTimeMillis());
 	}
 
 	@EventHandler
@@ -1548,7 +1569,13 @@ public class FWPlayerListener implements Listener {
 		// for them so a mid-respawn ghost can't re-trigger either of them.
 		if (player.getGameMode() != GameMode.SURVIVAL) return;
 
-		if (player.isOnGround()) grapplingNoFallDamage.remove(player.getUniqueId());
+		if (player.isOnGround()) {
+			grapplingNoFallDamage.remove(player.getUniqueId());
+			// Short grace so the launch tick itself (still on the ground) doesn't clear it
+			Long launchedAt = tntNoFallDamage.get(player.getUniqueId());
+			if (launchedAt != null && System.currentTimeMillis() - launchedAt > TNT_NO_FALL_GRACE_MS)
+				tntNoFallDamage.remove(player.getUniqueId());
+		}
 
 		if (player.getLocation().getY() <= 0) {
 			instance.killPlayerInVoid(player, recentAttackerOf(player));

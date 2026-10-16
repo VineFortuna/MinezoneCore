@@ -48,7 +48,7 @@ public class FWScoreboardManager {
 
 		board.updateLines(
 				"",
-				main().color("&rMap: &a" + FWGameConstants.MAP_WORLD_NAME),
+				main().color("&rMap: &a" + instance.getMapName()),
 				"",
 				main().color("&rMode: &a" + instance.getMode().getLabel()),
 				"",
