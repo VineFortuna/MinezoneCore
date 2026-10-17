@@ -3,6 +3,7 @@ package anthony.flagwars.setup;
 import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
 import anthony.flagwars.FWGameConstants;
 import anthony.flagwars.FWGameManager;
+import anthony.flagwars.map.FWImportantArea;
 import anthony.flagwars.map.FWMapConfig;
 import anthony.flagwars.map.FWMapConfigManager;
 import anthony.flagwars.map.FWTeamSite;
@@ -32,7 +33,8 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 
 	private static final List<String> SUBCOMMANDS = Arrays.asList(
 			"tp", "createmap", "lobby", "spectator", "team", "flag", "shop",
-			"generator", "boundary1", "boundary2", "chesthologram", "list", "save");
+			"generator", "boundary1", "boundary2", "importantarea", "chesthologram", "list", "save");
+	private static final String IMPORTANT_AREA_USAGE = "/fwsetup importantarea <color> <id> <X> <Y> <Z> &7or &e<id> remove";
 	private static final List<String> RESOURCE_TYPES = Arrays.asList("iron", "gold", "emerald", "diamond");
 	private static final List<String> COLOR_NAMES = Arrays.asList(
 			"Lime", "Yellow", "Cyan", "Blue", "LightBlue", "White", "Pink", "Gray");
@@ -187,6 +189,10 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 				handleChestHologram(player, config, args, loc);
 				break;
 
+			case "importantarea":
+				handleImportantArea(player, config, args, loc);
+				break;
+
 			default:
 				sendUsage(player);
 				break;
@@ -298,6 +304,70 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 		player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rSet chest hologram &e#" + id + "&r."));
 	}
 
+	/**
+	 * /fwsetup importantarea <color> <id> <X> <Y> <Z> - a no-build area centered where the player stands,
+	 * reaching that many blocks in both directions of each axis. "remove" in place of X deletes the area.
+	 */
+	private void handleImportantArea(Player player, FWMapConfig config, String[] args, Location loc) {
+		Integer siteId = parseTeamColor(player, args, 1);
+		if (siteId == null) return;
+
+		if (args.length < 3) {
+			player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rTry: &e" + IMPORTANT_AREA_USAGE));
+			return;
+		}
+
+		int id;
+		try {
+			id = Integer.parseInt(args[2]);
+		} catch (NumberFormatException e) {
+			player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rThe id must be a number!"));
+			return;
+		}
+
+		FWTeamSite site = config.getTeamSite(siteId);
+		String teamName = FWGameConstants.TEAM_NAMES[siteId - 1];
+
+		if (args.length > 3 && args[3].equalsIgnoreCase("remove")) {
+			if (site.removeImportantArea(id)) {
+				player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rRemoved team &e" + teamName
+						+ "&r's important area &e#" + id + "&r."));
+			} else {
+				player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rTeam &e" + teamName
+						+ "&r has no important area &e#" + id + "&r!"));
+			}
+			return;
+		}
+
+		if (args.length < 6) {
+			player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rTry: &e" + IMPORTANT_AREA_USAGE));
+			return;
+		}
+
+		Integer xRadius = parseAreaRadius(player, args[3], "X");
+		Integer yRadius = xRadius == null ? null : parseAreaRadius(player, args[4], "Y");
+		Integer zRadius = yRadius == null ? null : parseAreaRadius(player, args[5], "Z");
+		if (zRadius == null) return;
+
+		site.setImportantArea(id, new FWImportantArea(loc, xRadius, yRadius, zRadius));
+		player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rSet team &e" + teamName + "&r's important area &e#"
+				+ id + "&r &7(" + (xRadius * 2 + 1) + "x" + (yRadius * 2 + 1) + "x" + (zRadius * 2 + 1)
+				+ " centered on you)&r."));
+	}
+
+	/** A non-negative whole number of blocks for one axis. Null (after messaging) if invalid. */
+	private Integer parseAreaRadius(Player player, String arg, String axis) {
+		try {
+			int value = Integer.parseInt(arg);
+			if (value < 0) throw new NumberFormatException();
+			return value;
+		} catch (NumberFormatException e) {
+			player.sendMessage(fwGameManager.getMain().color(
+					"&c&l(!) &rThe " + axis + " size must be a whole number of blocks!"));
+			return null;
+		}
+	}
+
 	private Integer parseTeamColor(Player player, String[] args, int index) {
 		if (args.length <= index) {
 			player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rYou must specify a team color: &e"
@@ -346,6 +416,9 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup generator <iron|gold> <color> [interval|clear]"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup generator <emerald|diamond> <id> [interval|clear]"));
 		player.sendMessage(fwGameManager.getMain().color("&7  interval (seconds) overrides that generator's timing entirely; &eclear&7 removes the override"));
+		player.sendMessage(fwGameManager.getMain().color("&e" + IMPORTANT_AREA_USAGE));
+		player.sendMessage(fwGameManager.getMain().color("&7  no-build area centered on you, X/Y/Z blocks out in both"
+				+ " directions of each axis (3 = 7 wide); &e<id> remove&7 deletes it"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup chesthologram <id>"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup save &7-> &rSave the current map's config to disk"));
 		player.sendMessage(fwGameManager.getMain().color("&7Colors: &e" + FWGameConstants.colorNameList()));
@@ -369,13 +442,17 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 
 		if (args.length == 2 && (args[0].equalsIgnoreCase("team") || args[0].equalsIgnoreCase("flag")
 				|| args[0].equalsIgnoreCase("shop") || args[0].equalsIgnoreCase("boundary1")
-				|| args[0].equalsIgnoreCase("boundary2"))) {
+				|| args[0].equalsIgnoreCase("boundary2") || args[0].equalsIgnoreCase("importantarea"))) {
 			return StringUtil.copyPartialMatches(args[1], COLOR_NAMES, new ArrayList<>());
 		}
 
 		if (args.length == 3 && args[0].equalsIgnoreCase("generator")
 				&& (args[1].equalsIgnoreCase("iron") || args[1].equalsIgnoreCase("gold"))) {
 			return StringUtil.copyPartialMatches(args[2], COLOR_NAMES, new ArrayList<>());
+		}
+
+		if (args.length == 4 && args[0].equalsIgnoreCase("importantarea")) {
+			return StringUtil.copyPartialMatches(args[3], Collections.singletonList("remove"), new ArrayList<>());
 		}
 
 		if (args.length == 4 && args[0].equalsIgnoreCase("generator")) {

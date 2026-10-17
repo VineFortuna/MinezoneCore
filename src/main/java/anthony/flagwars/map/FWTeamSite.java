@@ -2,6 +2,9 @@ package anthony.flagwars.map;
 
 import org.bukkit.Location;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * One team's set of points of interest on a Flag Wars map, captured
  * in-game via /fwsetup. Anything left null means that part of the map
@@ -23,6 +26,8 @@ public class FWTeamSite {
 	/** Two opposite corners of this island's capture boundary box - optional; see isWithinBoundary(). */
 	private Location boundaryCorner1;
 	private Location boundaryCorner2;
+	/** No-build zones on this island by id, set via /fwsetup importantarea &lt;color&gt; &lt;id&gt;. */
+	private final Map<Integer, FWImportantArea> importantAreas = new LinkedHashMap<>();
 
 	public FWTeamSite(int id) {
 		this.id = id;
@@ -115,6 +120,26 @@ public class FWTeamSite {
 
 	public void setBoundaryCorner2(Location boundaryCorner2) {
 		this.boundaryCorner2 = boundaryCorner2;
+	}
+
+	public Map<Integer, FWImportantArea> getImportantAreas() {
+		return importantAreas;
+	}
+
+	public void setImportantArea(int id, FWImportantArea area) {
+		importantAreas.put(id, area);
+	}
+
+	/** Returns true if an area with that id existed. */
+	public boolean removeImportantArea(int id) {
+		return importantAreas.remove(id) != null;
+	}
+
+	public boolean isInImportantArea(Location loc) {
+		for (FWImportantArea area : importantAreas.values()) {
+			if (area.contains(loc)) return true;
+		}
+		return false;
 	}
 
 	public boolean hasBoundary() {

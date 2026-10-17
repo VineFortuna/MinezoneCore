@@ -103,6 +103,13 @@ public class FWMapConfigManager {
 			if (site.getGoldGeneratorInterval() != null) yaml.set(base + "goldGeneratorInterval", site.getGoldGeneratorInterval());
 			writeLocation(yaml, base + "boundary1", site.getBoundaryCorner1());
 			writeLocation(yaml, base + "boundary2", site.getBoundaryCorner2());
+			for (Map.Entry<Integer, FWImportantArea> area : site.getImportantAreas().entrySet()) {
+				String areaPath = base + "importantAreas." + area.getKey();
+				writeLocation(yaml, areaPath, area.getValue().getCenter());
+				yaml.set(areaPath + ".xRadius", area.getValue().getXRadius());
+				yaml.set(areaPath + ".yRadius", area.getValue().getYRadius());
+				yaml.set(areaPath + ".zRadius", area.getValue().getZRadius());
+			}
 		}
 
 		for (Map.Entry<Integer, Location> entry : config.getEmeraldGenerators().entrySet()) {
@@ -149,6 +156,16 @@ public class FWMapConfigManager {
 			if (yaml.isSet(base + "goldGeneratorInterval")) site.setGoldGeneratorInterval(yaml.getInt(base + "goldGeneratorInterval"));
 			site.setBoundaryCorner1(readLocation(yaml, base + "boundary1"));
 			site.setBoundaryCorner2(readLocation(yaml, base + "boundary2"));
+
+			ConfigurationSection areas = yaml.getConfigurationSection(base + "importantAreas");
+			if (areas != null) {
+				for (String key : areas.getKeys(false)) {
+					String areaPath = base + "importantAreas." + key;
+					site.setImportantArea(Integer.parseInt(key), new FWImportantArea(readLocation(yaml, areaPath),
+							yaml.getInt(areaPath + ".xRadius"), yaml.getInt(areaPath + ".yRadius"),
+							yaml.getInt(areaPath + ".zRadius")));
+				}
+			}
 		}
 
 		ConfigurationSection chestHolograms = yaml.getConfigurationSection("chestHolograms");

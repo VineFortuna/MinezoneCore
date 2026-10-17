@@ -16,12 +16,8 @@ public class FWMapConfig {
 
 	public static final int TEAM_COUNT = 8;
 
-	/** No building within this many blocks of a team spawn. */
-	private static final double SPAWN_PROTECTED_RADIUS = 7.0;
-	/** No building within this many blocks (XZ only, any Y) of any generator (iron, gold, emerald, diamond). */
-	private static final double GENERATOR_PROTECTED_RADIUS = 4.0;
-	/** No building within this many blocks of a team's flag. */
-	private static final double FLAG_PROTECTED_RADIUS = 1.5;
+	/** No building in the 3x3 column (any Y) centered on an emerald or diamond generator. */
+	private static final int MID_GENERATOR_PROTECTED_RADIUS = 1;
 
 	private final String worldName;
 	private Location lobby;
@@ -143,34 +139,28 @@ public class FWMapConfig {
 		return findMissing().isEmpty();
 	}
 
-	/** True if loc is within the protected radius of any team spawn (7 blocks), any team flag (1.5 blocks), or any generator (4 blocks XZ, any Y). */
+	/**
+	 * True if loc is inside any island's important area (set in-game via /fwsetup importantarea), or in the
+	 * hardcoded 3x3 column around an emerald/diamond generator.
+	 */
 	public boolean isProtectedFromBuilding(Location loc) {
 		for (FWTeamSite site : teamSites.values()) {
-			if (withinRadius(loc, site.getSpawn(), SPAWN_PROTECTED_RADIUS)) return true;
-			if (withinRadius(loc, site.getFlagLoc(), FLAG_PROTECTED_RADIUS)) return true;
-			if (withinXZRadius(loc, site.getIronGenerator(), GENERATOR_PROTECTED_RADIUS)) return true;
-			if (withinXZRadius(loc, site.getGoldGenerator(), GENERATOR_PROTECTED_RADIUS)) return true;
+			if (site.isInImportantArea(loc)) return true;
 		}
 		for (Location gen : emeraldGenerators.values()) {
-			if (withinXZRadius(loc, gen, GENERATOR_PROTECTED_RADIUS)) return true;
+			if (withinBlockColumn(loc, gen, MID_GENERATOR_PROTECTED_RADIUS)) return true;
 		}
 		for (Location gen : diamondGenerators.values()) {
-			if (withinXZRadius(loc, gen, GENERATOR_PROTECTED_RADIUS)) return true;
+			if (withinBlockColumn(loc, gen, MID_GENERATOR_PROTECTED_RADIUS)) return true;
 		}
 		return false;
 	}
 
-	private boolean withinRadius(Location loc, Location point, double radius) {
-		return point != null
-				&& loc.getWorld().equals(point.getWorld())
-				&& loc.distanceSquared(point) <= radius * radius;
-	}
-
-	private boolean withinXZRadius(Location loc, Location point, double radius) {
+	/** True if loc's block is within radius blocks of point's block on X and Z, at any Y. */
+	private boolean withinBlockColumn(Location loc, Location point, int radius) {
 		if (point == null || !loc.getWorld().equals(point.getWorld())) return false;
-		double dx = loc.getX() - point.getX();
-		double dz = loc.getZ() - point.getZ();
-		return dx * dx + dz * dz <= radius * radius;
+		return Math.abs(loc.getBlockX() - point.getBlockX()) <= radius
+				&& Math.abs(loc.getBlockZ() - point.getBlockZ()) <= radius;
 	}
 
 	/**
@@ -198,6 +188,9 @@ public class FWMapConfig {
 			target.setGoldGeneratorInterval(source.getGoldGeneratorInterval());
 			target.setBoundaryCorner1(translateLocation(source.getBoundaryCorner1(), targetWorld));
 			target.setBoundaryCorner2(translateLocation(source.getBoundaryCorner2(), targetWorld));
+			for (Map.Entry<Integer, FWImportantArea> area : source.getImportantAreas().entrySet()) {
+				target.setImportantArea(area.getKey(), area.getValue().translateTo(targetWorld));
+			}
 		}
 
 		for (Map.Entry<Integer, Location> entry : emeraldGenerators.entrySet()) {

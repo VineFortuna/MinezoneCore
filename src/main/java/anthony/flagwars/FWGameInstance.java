@@ -747,6 +747,19 @@ public class FWGameInstance {
 		if (killer != null) lootResourcesToKiller(player, killer);
 		refreshScoreboards(); // so the killer's Kills line (and the victim's, if they were carrying) updates immediately
 		beginRespawn(player, team);
+		teleportToDeathView(player, killer);
+	}
+
+	/** While respawning, the dead player watches from their killer, or from the spectator point if nobody killed them. */
+	private void teleportToDeathView(Player player, Player killer) {
+		Location view;
+		if (killer != null && killer.isOnline() && killer.getWorld().equals(player.getWorld())) {
+			view = killer.getLocation();
+		} else {
+			Location spectatorLoc = mapConfig.getSpectatorLocation();
+			view = spectatorLoc != null ? spectatorLoc : mapConfig.getLobby();
+		}
+		if (view != null) player.teleport(view);
 	}
 
 	/** Display order for the kill-feedback chat lines below - Iron, Gold, Diamond, Emerald. */

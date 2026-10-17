@@ -48,6 +48,8 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -730,8 +732,8 @@ public class FWPlayerListener implements Listener {
 		ItemStack held = player.getItemInHand();
 		if (held == null || held.getType() == Material.AIR) return;
 
-		if (isSwordOrTool(held.getType())) {
-			player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rYou can't store swords or tools in a chest!"));
+		if (held.getType() == Material.WOOD_SWORD) {
+			player.sendMessage(fwGameManager.getMain().color(CANT_STORE_DEFAULT_SWORD));
 			return;
 		}
 
@@ -762,21 +764,48 @@ public class FWPlayerListener implements Listener {
 
 		if (totalDeposited > 0) {
 			player.playSound(player.getLocation(), Sound.ITEM_PICKUP, 0.5f, 1.2f);
+			normalizeSwords(player, instance);
 		} else {
 			player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rThe chest is full!"));
 		}
 	}
 
+	private static final String CANT_STORE_DEFAULT_SWORD = "&c&l(!) &rYou can't store your default sword in a chest!";
+
 	/**
-	 * Swords, pickaxes, axes, spades and hoes - Bedwars-style: these can't be stashed away in a chest.
-	 * Shears don't follow the "_MATERIAL" naming pattern the other tools do (Material.SHEARS has no
-	 * tier prefix), so they're checked explicitly rather than falling out of the suffix match.
+	 * Same rule dropping a sword follows (see onDropSword/onPickupSword), applied after any chest use:
+	 * a player left with no sword gets a fresh (team-upgraded) Wood Sword back, and one who took a
+	 * better sword out of a chest loses the Wood Sword it replaces.
 	 */
-	private boolean isSwordOrTool(Material type) {
-		if (type == Material.SHEARS) return true;
-		String name = type.name();
-		return name.endsWith("_SWORD") || name.endsWith("_PICKAXE") || name.endsWith("_AXE")
-				|| name.endsWith("_SPADE") || name.endsWith("_HOE");
+	private void normalizeSwords(Player player, FWGameInstance instance) {
+		FWTeam team = instance.findTeamOf(player);
+		if (team == null || instance.getState() != FWGameState.IN_PROGRESS || player.getGameMode() == GameMode.SPECTATOR) return;
+
+		boolean hasBetterSword = false;
+		for (ItemStack item : player.getInventory().getContents()) {
+			if (item != null && item.getType() != Material.WOOD_SWORD && item.getType().name().endsWith("_SWORD")) {
+				hasBetterSword = true;
+				break;
+			}
+		}
+
+		if (hasBetterSword) {
+			player.getInventory().remove(Material.WOOD_SWORD);
+		} else if (!hasAnySword(player)) {
+			player.getInventory().addItem(instance.getTeamUpgradeManager().applyUpgrades(team, new ItemStack(Material.WOOD_SWORD)));
+		}
+	}
+
+	/** Runs normalizeSwords next tick, once a chest click/drag/close has actually moved the items. */
+	private void normalizeSwordsNextTick(Player player) {
+		Bukkit.getScheduler().runTask(fwGameManager.getMain(), () -> {
+			FWGameInstance instance = fwGameManager.getInstanceOfPlayer(player);
+			if (instance != null && player.isOnline()) normalizeSwords(player, instance);
+		});
+	}
+
+	private static boolean isStorageInventory(InventoryType type) {
+		return type == InventoryType.CHEST || type == InventoryType.ENDER_CHEST;
 	}
 
 	/** Pre-game lobby items (Vote / My Profile / Leave Game), given out by FWLobbyItems while WAITING or STARTING. */
@@ -1881,17 +1910,15 @@ public class FWPlayerListener implements Listener {
 	}
 
 	/**
-	 * Closes the same "swords/tools can't be stored" rule around a chest's own inventory GUI, not
-	 * just the punch-to-deposit shortcut (see onPunchChestDeposit/isSwordOrTool) - covers direct
-	 * placement, shift-clicking one up from the player's own inventory, and hotbar-swapping one in.
-	 * Dragging isn't covered - swords/tools aren't stackable, so there's nothing a drag achieves
-	 * here that a plain click doesn't already cover.
+	 * Chests and ender chests take anything except the default Wood Sword - covers direct placement,
+	 * shift-clicking one up from the player's own inventory, and hotbar-swapping one in (the
+	 * punch-to-deposit shortcut is onPunchChestDeposit). Every other click then re-checks the
+	 * player's swords, so storing a sword hands back a Wood Sword and withdrawing one removes it.
 	 */
 	@EventHandler
 	public void onChestStoreClick(InventoryClickEvent event) {
 		if (!(event.getWhoClicked() instanceof Player)) return;
-		InventoryType type = event.getInventory().getType();
-		if (type != InventoryType.CHEST && type != InventoryType.ENDER_CHEST) return;
+		if (!isStorageInventory(event.getInventory().getType())) return;
 
 		Player player = (Player) event.getWhoClicked();
 		if (fwGameManager.getInstanceOfPlayer(player) == null) return;
@@ -1905,10 +1932,45 @@ public class FWPlayerListener implements Listener {
 			movingIntoChest = player.getInventory().getItem(event.getHotbarButton());
 		}
 
-		if (movingIntoChest != null && movingIntoChest.getType() != Material.AIR && isSwordOrTool(movingIntoChest.getType())) {
+		if (movingIntoChest != null && movingIntoChest.getType() == Material.WOOD_SWORD) {
 			event.setCancelled(true);
-			player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rYou can't store swords or tools in a chest!"));
+			player.sendMessage(fwGameManager.getMain().color(CANT_STORE_DEFAULT_SWORD));
+			return;
 		}
+		normalizeSwordsNextTick(player);
+	}
+
+	/** Same default-sword rule as onChestStoreClick, for dragging an item across chest slots. */
+	@EventHandler
+	public void onChestStoreDrag(InventoryDragEvent event) {
+		if (!(event.getWhoClicked() instanceof Player)) return;
+		if (!isStorageInventory(event.getInventory().getType())) return;
+
+		Player player = (Player) event.getWhoClicked();
+		if (fwGameManager.getInstanceOfPlayer(player) == null) return;
+
+		int chestSize = event.getView().getTopInventory().getSize();
+		ItemStack dragged = event.getOldCursor();
+		if (dragged != null && dragged.getType() == Material.WOOD_SWORD) {
+			for (int rawSlot : event.getRawSlots()) {
+				if (rawSlot < chestSize) {
+					event.setCancelled(true);
+					player.sendMessage(fwGameManager.getMain().color(CANT_STORE_DEFAULT_SWORD));
+					return;
+				}
+			}
+		}
+		normalizeSwordsNextTick(player);
+	}
+
+	/** A sword still held on the cursor when the chest closes goes back into the inventory - re-check then too. */
+	@EventHandler
+	public void onChestClose(InventoryCloseEvent event) {
+		if (!(event.getPlayer() instanceof Player)) return;
+		if (!isStorageInventory(event.getInventory().getType())) return;
+
+		Player player = (Player) event.getPlayer();
+		if (fwGameManager.getInstanceOfPlayer(player) != null) normalizeSwordsNextTick(player);
 	}
 
 	@EventHandler
