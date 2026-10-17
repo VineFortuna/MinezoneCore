@@ -253,6 +253,10 @@ permissions:
       description: Tournament Winner perms that inherits PRO
       children:
          scb.pro: true
+   scb.legendary:
+      description: LEGENDARY perms (same as PRO for now)
+      children:
+         scb.pro: true
    scb.pro:
       description: PRO perms
       children:

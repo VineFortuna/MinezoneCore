@@ -7,6 +7,7 @@ public enum Rank {
     DEFAULT(0, "", color("&7")), //RANK GIVEN TO ALL NEW PLAYERS
     VIP(6, color("&e&lVIP"), color("&e")), //FIRST DONATION RANK
     PRO(8, color("&9&lPRO"), color("&9")), //SECOND DONATION RANK
+    LEGENDARY(20, color("&6&lLEGENDARY"), color("&6")), //THIRD DONATION RANK (same perms as PRO for now)
     TRAINEE(3, color("&2&lTRAINEE"), color("&6")),
     /* Trainee:
      * Obtainable: Players who applied and have been accepted. They are under training and shall only have
@@ -151,6 +152,8 @@ public enum Rank {
 			msg = color("&c");
         else if (rank == Rank.TW)
             msg = color("&5");
+        else if (rank == Rank.LEGENDARY)
+            msg = color("&6");
 		else if (rank == Rank.PRO)
 			msg = color("&9");
 		else if (rank == Rank.VIP)
@@ -181,10 +184,11 @@ public enum Rank {
             case BUILDER:       return 7;
             case MEDIA:         return 8;
             case TW:       return 9;
-            case PRO:       return 10;
-            case VIP:           return 11;
+            case LEGENDARY: return 10;
+            case PRO:       return 11;
+            case VIP:           return 12;
             case DEFAULT:
-            default:            return 12;
+            default:            return 13;
         }
     }
 

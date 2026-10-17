@@ -1949,6 +1949,8 @@ public class Core extends JavaPlugin implements Listener {
             msg = color("&c");
         else if (rank == Rank.DEVELOPER)
             msg = color("&6");
+        else if (rank == Rank.LEGENDARY)
+            msg = color("&6");
         else if (rank == Rank.PRO)
             msg = color("&9");
         else if (rank == Rank.VIP)

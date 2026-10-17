@@ -1105,10 +1105,11 @@ public class GameInstance {
             case BUILDER:      return 7;
             case MEDIA:        return 8;
             case SUPREME:      return 9;
-            case PRO:          return 10;
-            case VIP:          return 11;
+            case LEGENDARY: return 10;
+            case PRO:          return 11;
+            case VIP:          return 12;
             case DEFAULT:
-            default:           return 12;
+            default:           return 13;
         }
     }
 

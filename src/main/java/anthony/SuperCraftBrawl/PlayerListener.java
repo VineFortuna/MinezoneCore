@@ -160,14 +160,8 @@ public class PlayerListener implements Listener {
         String rank = main.getRankManager().getRank(p).getTagWithSpace(); // Gets the player's rank
         Rank r = main.getRankManager().getRank(p);
 
-        if (rank.length() >= 16) {
-            String s = rank.substring(0, 9);
-            p.setPlayerListName(s + " " + r.getColorForNames(p, r));
-        } else
-            p.setPlayerListName(rank + r.getColorForNames(p, r));
-
-        if (main.getRankManager().getRank(p) == Rank.DEFAULT)
-            p.setPlayerListName(rank + r.getColorForNames(p, r));
+        // 1.8 has no length limit on tab list names, so long tags like LEGENDARY show in full
+        p.setPlayerListName(rank + r.getColorForNames(p, r));
 
         /*
          * Team captain = c.registerNewTeam("b_captain");
