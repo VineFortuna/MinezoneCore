@@ -21,6 +21,7 @@ public enum GameLootDrops {
 	// UNCOMMON:
 	NUKE(Rarity.RARE), SPEED2(Rarity.RARE), INSTAGIB(Rarity.RARE), BAZOOKA(Rarity.RARE),
 	WITCH_EGG(Rarity.RARE), CREEPER_EGG(Rarity.RARE), FIRE_FLOWER(Rarity.RARE), CAVE_SPIDER_EGG(Rarity.RARE),
+	SNOWBALL_LAUNCHER(Rarity.RARE),
 
 	// RARE:
 	HEALTH2(Rarity.MYTHIC), BROOMS(Rarity.MYTHIC), HAMMER(Rarity.MYTHIC), ENDER_PEARL(Rarity.MYTHIC),
@@ -28,6 +29,10 @@ public enum GameLootDrops {
 
 	// LEGENDARY:
 	BOMB(Rarity.LEGENDARY), NOTCH_APPLE(Rarity.LEGENDARY), EXTRA_LIFE(Rarity.LEGENDARY);
+
+	// Iron horse armor has no durability bar, so the Snowball Launcher tracks its uses in a lore line
+	public static final int SNOWBALL_LAUNCHER_USES = 3;
+	public static final String SNOWBALL_LAUNCHER_USES_PREFIX = "&7Uses left: &e";
 
 	private Rarity r;
 
@@ -219,6 +224,13 @@ public enum GameLootDrops {
 				item = ItemHelper.createMonsterEgg(EntityType.CAVE_SPIDER, 1);
 				ItemHelper.setDetails(item, "&c&lCAVE SPIDER POKEBALL", "&7Spawns a Cave Spider",
 						"", "&2&lUNCOMMON");
+				break;
+
+			case SNOWBALL_LAUNCHER:
+				item = ItemHelper.setDetails(new ItemStack(Material.IRON_BARDING),
+						"&f&lSNOWBALL LAUNCHER",
+						"&7Fire a burst of 3 snowballs that", "&7launch enemies back and up!", "",
+						SNOWBALL_LAUNCHER_USES_PREFIX + SNOWBALL_LAUNCHER_USES, "", "&2&lUNCOMMON");
 				break;
 
 	        // ===== RARE =====

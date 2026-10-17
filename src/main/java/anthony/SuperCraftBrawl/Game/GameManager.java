@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.all.SantaClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
@@ -41,10 +42,12 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.potion.PotionEffect;
@@ -1119,6 +1122,183 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
+	private static final int SNOWBALL_LAUNCHER_SHOTS = 3;
+	private static final long SNOWBALL_LAUNCHER_SHOT_DELAY_TICKS = 6; // 0.3s between snowballs
+	private static final int SNOWBALL_LAUNCHER_COOLDOWN_MS = 1000; // covers the burst so uses can't overlap
+	private static final double SNOWBALL_LAUNCHER_KB_HORIZONTAL = 2.5;
+	private static final double SNOWBALL_LAUNCHER_KB_VERTICAL = 1.0;
+	private static final String SNOWBALL_LAUNCHER_META = "SnowballLauncher";
+
+	/*
+	 * This function deals with the 'Snowball Launcher' lightning drop item. Each right click uses
+	 * one charge and fires a burst of 3 snowballs, 0.3s apart. Any enemy hit is launched back and up.
+	 */
+	@EventHandler
+	public void snowballLauncherItem(PlayerInteractEvent event) {
+		Action action = event.getAction();
+		if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK)
+			return;
+
+		ItemStack item = event.getItem();
+		if (item == null || item.getType() != Material.IRON_BARDING || !item.hasItemMeta()
+				|| !item.getItemMeta().hasDisplayName()
+				|| !ChatColor.stripColor(item.getItemMeta().getDisplayName()).equals("SNOWBALL LAUNCHER"))
+			return;
+
+		Player player = event.getPlayer();
+		GameInstance instance = this.GetInstanceOfPlayer(player);
+		if (instance == null || instance.state != GameState.STARTED || player.getGameMode() == GameMode.SPECTATOR)
+			return;
+
+		BaseClass bc = instance.classes.get(player);
+		if (bc == null)
+			return;
+
+		event.setCancelled(true);
+		if (bc.snowballLauncher.getTime() < SNOWBALL_LAUNCHER_COOLDOWN_MS)
+			return;
+		bc.snowballLauncher.restart();
+
+		useSnowballLauncherCharge(player, item);
+
+		new BukkitRunnable() {
+			private int shotsFired = 0;
+
+			@Override
+			public void run() {
+				// Stop the burst early if the shooter died, left, or the game ended mid-burst
+				if (instance.state != GameState.STARTED || !player.isOnline()
+						|| !instance.classes.containsKey(player) || player.getGameMode() == GameMode.SPECTATOR) {
+					cancel();
+					return;
+				}
+
+				shootLauncherSnowball(instance, player, shotsFired);
+				if (++shotsFired >= SNOWBALL_LAUNCHER_SHOTS)
+					cancel();
+			}
+		}.runTaskTimer(main, 0, SNOWBALL_LAUNCHER_SHOT_DELAY_TICKS);
+	}
+
+	/** Takes one use off the held launcher's "Uses left" lore line, removing it on the last use. */
+	private void useSnowballLauncherCharge(Player player, ItemStack item) {
+		ItemMeta meta = item.getItemMeta();
+		List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
+		String prefix = main.color(GameLootDrops.SNOWBALL_LAUNCHER_USES_PREFIX);
+
+		int line = -1;
+		int uses = GameLootDrops.SNOWBALL_LAUNCHER_USES;
+		for (int i = 0; i < lore.size(); i++) {
+			if (lore.get(i).startsWith(prefix)) {
+				line = i;
+				try {
+					uses = Integer.parseInt(lore.get(i).substring(prefix.length()));
+				} catch (NumberFormatException ignored) {
+				}
+				break;
+			}
+		}
+
+		if (--uses <= 0) {
+			player.getInventory().clear(player.getInventory().getHeldItemSlot());
+			return;
+		}
+		if (line >= 0)
+			lore.set(line, prefix + uses);
+		else
+			lore.add(prefix + uses);
+		meta.setLore(lore);
+		item.setItemMeta(meta);
+	}
+
+	private void shootLauncherSnowball(GameInstance instance, Player shooter, int shotIndex) {
+		// Cartoony "bloop... bloop... BLOOP!" - each shot in the burst pops at a higher pitch
+		Location shootLoc = shooter.getLocation();
+		shooter.getWorld().playSound(shootLoc, Sound.CHICKEN_EGG_POP, 1.5f, 0.6f + shotIndex * 0.4f);
+		shooter.getWorld().playSound(shootLoc, Sound.SLIME_WALK, 1, 1.5f);
+
+		// A real snowball, tagged so only snowballLauncherHit handles it (never the Slowballs effect)
+		Snowball snowball = shooter.launchProjectile(Snowball.class);
+		snowball.setMetadata(SNOWBALL_LAUNCHER_META, new FixedMetadataValue(main, true));
+	}
+
+	/*
+	 * Launches enemies hit by a Snowball Launcher snowball back (along the snowball's flight) and up.
+	 * Runs first and always cancels the hit, so vanilla snowball knockback can't override the launch.
+	 */
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void snowballLauncherHit(EntityDamageByEntityEvent event) {
+		if (!(event.getDamager() instanceof Snowball) || !event.getDamager().hasMetadata(SNOWBALL_LAUNCHER_META))
+			return;
+		event.setCancelled(true);
+
+		Snowball snowball = (Snowball) event.getDamager();
+		if (!(snowball.getShooter() instanceof Player) || !(event.getEntity() instanceof Player))
+			return;
+
+		Player shooter = (Player) snowball.getShooter();
+		Player hit = (Player) event.getEntity();
+		GameInstance instance = this.GetInstanceOfPlayer(hit);
+		if (instance == null || instance.state != GameState.STARTED || instance != this.GetInstanceOfPlayer(shooter)
+				|| hit.getGameMode() == GameMode.SPECTATOR || spawnProt.containsKey(hit))
+			return;
+
+		BaseClass hitClass = instance.classes.get(hit);
+		if (hitClass == null || hitClass.getLives() <= 0 || hitClass.bedrockInvincibility)
+			return;
+		if (instance.duosMap != null && Objects.equals(instance.team.get(hit), instance.team.get(shooter)))
+			return;
+
+		Vector push = snowball.getVelocity().setY(0);
+		push = push.lengthSquared() > 1.0E-4 ? push.normalize().multiply(SNOWBALL_LAUNCHER_KB_HORIZONTAL) : new Vector();
+		hit.setVelocity(push.setY(SNOWBALL_LAUNCHER_KB_VERTICAL));
+
+		// Goofy "BOING" + a squeaky yelp from whoever got launched
+		Location launchLoc = hit.getLocation();
+		hit.getWorld().playSound(launchLoc, Sound.MAGMACUBE_JUMP, 1.5f, 0.6f);
+		hit.getWorld().playSound(launchLoc, Sound.VILLAGER_HIT, 1, 2.0f);
+
+		// Credit the shooter if the launch knocks them into the void
+		hit.setLastDamageCause(new EntityDamageByEntityEvent(shooter, hit, DamageCause.ENTITY_ATTACK, 0));
+	}
+
+	/*
+	 * Keeps Santa on his flying Reindeer when he holds Sneak (Sneak flies down instead).
+	 */
+	@EventHandler
+	public void onReindeerExit(VehicleExitEvent event) {
+		if (!(event.getExited() instanceof Player))
+			return;
+
+		Player player = (Player) event.getExited();
+		GameInstance instance = this.GetInstanceOfPlayer(player);
+		if (instance == null)
+			return;
+
+		BaseClass bc = instance.classes.get(player);
+		if (bc instanceof SantaClass && ((SantaClass) bc).shouldBlockReindeerExit(event.getVehicle()))
+			event.setCancelled(true);
+	}
+
+	/*
+	 * Teleports dismount the rider right after this event fires, so end the Reindeer flight first
+	 * (otherwise the blocked dismount would teleport Santa while still mounted).
+	 */
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onReindeerRiderTeleport(PlayerTeleportEvent event) {
+		Player player = event.getPlayer();
+		if (!(player.getVehicle() instanceof Horse))
+			return;
+
+		GameInstance instance = this.GetInstanceOfPlayer(player);
+		if (instance == null)
+			return;
+
+		BaseClass bc = instance.classes.get(player);
+		if (bc instanceof SantaClass)
+			((SantaClass) bc).endReindeerFlight();
+	}
+
 	@EventHandler
 	public void broom(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
@@ -1274,6 +1454,8 @@ public class GameManager implements Listener, PluginMessageListener {
 	public void snowballsItem(EntityDamageByEntityEvent event) {
 		if (event.getDamager() instanceof Snowball) {
 			Snowball snowball = (Snowball) event.getDamager();
+			if (snowball.hasMetadata(SNOWBALL_LAUNCHER_META))
+				return; // Snowball Launcher hits are handled by snowballLauncherHit, not Slowballs
 			if (snowball.getShooter() instanceof Player) {
 				Player shooter = (Player) snowball.getShooter();
 				if (event.getEntity() instanceof Player) {

@@ -57,6 +57,7 @@ public abstract class BaseClass {
 	public double baseVerticalJump = 1.0;
 
 	public Timer bazooka = new Timer();
+	public Timer snowballLauncher = new Timer();
 
 	public boolean flintUsed = false;
 	public Timer pearlTimer = new Timer();

@@ -265,7 +265,7 @@ public class PlayerListener implements Listener {
         main.showNPCs(player);
 
         event.setJoinMessage(main.color("" + rank.getArrowColor() + "► " + tag +
-                main.getColorForNames(player, rank) + "&7 has joined!"));
+                main.getColorForNames(player, rank) + "&c jingled into the server!"));
 
         if (data != null) {
             player.setLevel(data.level); // Indication what the player's level is

@@ -2069,7 +2069,7 @@ public class Core extends JavaPlugin implements Listener {
 
         getGameManager().removePlayerFromVotes(player);
         e.setQuitMessage(color("" + rank.getArrowColor() + "► " + tag
-                + getColorForNames(player, getRankManager().getRank(player)) + " &7has left!"));
+                + getColorForNames(player, getRankManager().getRank(player)) + " &cjingled away!"));
     }
 
     public static <K, V extends Comparable<? super V>> Map<K, V> sortMapByValueDescending(Map<K, V> map) {

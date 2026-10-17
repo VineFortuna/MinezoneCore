@@ -97,9 +97,10 @@ public enum ClassType {
 	// Holiday Classes
 	Elf(101, 0, 0, true),
 	GingerBreadMan(102, 0, 0, true),
-	Santa(103, 0, 0, true),
+	Santa(103, 0, 0, false), // TODO: re-vault after Christmas update testing
 	GrimReaper(104, 0, 0, true),
-	Freddy(105, 0, 0, true);
+	Freddy(105, 0, 0, true),
+	Grinch(106, 0, 0, false); // TODO: vault after Christmas update testing
 
 	private final int id;
 	private int tokenCost = 0;
@@ -141,6 +142,8 @@ public enum ClassType {
 				return "Uh oh, its 5 nights at Freddy's!!!";
 			case Santa:
 				return "HO HO HO! MERRRRRRYYYY CHRISTMASSSSS";
+			case Grinch:
+				return "You're a mean one! Steal your enemies' weapons and stick them with your Roast Beast";
 			case GingerBreadMan:
 				return "DO YOU KNOW? THE GINGERBREADMAN!?!?!";
 			case Elf:
@@ -297,6 +300,8 @@ public enum ClassType {
 				return "" + ChatColor.ITALIC + color("&6&l&oFreddy&r");
 			case Santa:
 				return "" + ChatColor.RED + ChatColor.BOLD + ChatColor.ITALIC + "Santa" + ChatColor.RESET;
+			case Grinch:
+				return color("&2&l&oGrinch&r");
 			case GingerBreadMan:
 				return color("&6GingerBread&0Man&r");
 			case Elf:
@@ -476,6 +481,9 @@ public enum ClassType {
 		case Santa:
 			return ItemHelper.createSkullTexture(
 					"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19");
+		case Grinch:
+			return ItemHelper.createSkullTexture(
+					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWVkYmRjNDFiZjQ4OWNjMWU5NjhmNDA0YWFjNWYyNDEwZTllZjk1MzViYjBhYWU3ZGEyZDljYTQxYWI1ZmY4MyJ9fX0=");
 		case GingerBreadMan:
 			return new ItemStack(Material.COOKIE);
 		case Elf:
@@ -636,6 +644,8 @@ public enum ClassType {
 				return new FreddyClass(instance, player);
 			case Santa:
 				return new SantaClass(instance, player);
+			case Grinch:
+				return new GrinchClass(instance, player);
 			case GingerBreadMan:
 				return new GingerBreadManClass(instance, player);
 			case Elf:
