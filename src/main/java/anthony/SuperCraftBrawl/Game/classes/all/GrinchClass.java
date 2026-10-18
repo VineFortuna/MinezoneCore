@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.CooldownNatowski;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
@@ -10,7 +11,6 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -19,26 +19,40 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import xyz.xenondevs.particle.ParticleEffect;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.WeakHashMap;
 
 /*
- * The Grinch: fights with his Roast Beast, and throws his Sticky Fingers hook to trade the Roast Beast
- * for the weapon of whoever it hits. Both keep each other's weapon until one of them dies.
+ * The Grinch: fights with his Roast Beast, and throws his Sticky Fingers hook to trade whatever weapon he's
+ * holding for whatever weapon the player it hits is holding. The hook is never used up, only put on
+ * cooldown, so a Grinch can keep passing stolen weapons around. Everyone keeps what they end up with until they die.
  */
 public class GrinchClass extends BaseClass {
 
 	private static final int HOOK_SLOT = 1;
-	private static final double HOOK_VOID_Y = 50; // a hook that falls below this is destroyed and handed back
+	private static final double HOOK_COOLDOWN_SECONDS = 7;
 
-	// Hook currently flying - null once it hits, misses or falls into the void
-	private ItemProjectile thrownHook;
-	private int grinchDeathsAtThrow;
+	private final CooldownNatowski hookCooldown = new CooldownNatowski(HOOK_COOLDOWN_SECONDS);
 
-	// Active trade - victim holds our Roast Beast, we hold stolenWeapon
-	private Player victim;
-	private ItemStack stolenWeapon;
-	private int victimDeathsAtSteal;
-	private int grinchDeathsAtSteal;
+	/*
+	 * The weapon each player was last handed by a Grinch swap, shared across every Grinch so they can find a
+	 * player's current weapon even when another Grinch swapped it in. Stale once the holder dies (they
+	 * respawn with their own kit) or changes class.
+	 */
+	private static final Map<Player, HeldWeapon> HELD_WEAPONS = new WeakHashMap<>();
+
+	private static class HeldWeapon {
+		final BaseClass holderClass;
+		final int deathsAtSwap;
+		final ItemStack weapon;
+
+		HeldWeapon(BaseClass holderClass, int deathsAtSwap, ItemStack weapon) {
+			this.holderClass = holderClass;
+			this.deathsAtSwap = deathsAtSwap;
+			this.weapon = weapon;
+		}
+	}
 
 	public GrinchClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -68,10 +82,10 @@ public class GrinchClass extends BaseClass {
 
 	private ItemStack getStickyFingers() {
 		return ItemHelper.setDetails(new ItemStack(Material.TRIPWIRE_HOOK), instance.color("&2&lSticky Fingers"),
-				"", instance.color("&7Throw it at an enemy to swap your"),
-				instance.color("&7Roast Beast for their weapon."),
-				instance.color("&7You keep each other's weapons until"),
-				instance.color("&7one of you dies!"));
+				"", instance.color("&7Throw it at an enemy to swap the"),
+				instance.color("&7weapon you're holding for theirs."),
+				instance.color("&7Reusable every &e7s &7- keep passing"),
+				instance.color("&7stolen weapons around!"));
 	}
 
 	@Override
@@ -82,19 +96,14 @@ public class GrinchClass extends BaseClass {
 
 	@Override
 	public void tick(int gameTicks) {
-		checkTradeEnded();
-		checkHookInVoid();
-
 		if (!isPlayerAlive())
 			return;
 
 		String msg;
-		if (victim != null)
-			msg = instance.color("&rHolding &e" + victim.getName() + "'s &rweapon");
-		else if (thrownHook != null)
-			msg = instance.color("&2Sticky Fingers &ris flying...");
-		else
+		if (hookCooldown.isReady())
 			msg = instance.color("&rThrow &2Sticky Fingers &rat an enemy");
+		else
+			msg = instance.color("&2Sticky Fingers &rready in &e" + getHookCooldownLeft() + "s");
 		getActionBarManager().setActionBar(player, "grinch.cooldown", msg, 2);
 	}
 
@@ -108,65 +117,33 @@ public class GrinchClass extends BaseClass {
 			return;
 
 		event.setCancelled(true);
-		if (victim != null || thrownHook != null)
+		if (!hookCooldown.isReady()) {
+			player.sendMessage(instance.color("&c&l(!) &rSticky Fingers is on cooldown for &e"
+					+ getHookCooldownLeft() + "s"));
 			return;
+		}
 
-		// A barrier holds the hook's slot until it comes back
-		player.getInventory().setItem(player.getInventory().getHeldItemSlot(), getHookPlaceholder());
+		hookCooldown.use();
 		player.getWorld().playSound(player.getLocation(), Sound.SHOOT_ARROW, 1, 0.7f);
-		grinchDeathsAtThrow = totalDeaths;
+		int grinchDeathsAtThrow = totalDeaths;
 
-		thrownHook = new ItemProjectile(instance, player, new ProjectileOnHit() {
+		ItemProjectile hook = new ItemProjectile(instance, player, new ProjectileOnHit() {
 			@Override
 			public void onHit(Player hit) {
-				if (thrownHook != this.getBaseProj())
-					return; // already resolved by the void check
-				thrownHook = null;
-
-				// A Grinch who died mid-throw already got a fresh hook on respawn
+				// A hook from a Grinch who died mid-throw doesn't count
 				if (totalDeaths != grinchDeathsAtThrow || !isPlayerAlive())
 					return;
 
-				if (hit == null || !isValidTarget(hit) || !stealWeapon(hit))
-					returnHook();
+				if (hit != null && isValidTarget(hit))
+					swapWeapons(hit);
 			}
 		}, getStickyFingers());
-		instance.getGameManager().getProjManager().shootProjectile(thrownHook, player.getEyeLocation(),
+		instance.getGameManager().getProjManager().shootProjectile(hook, player.getEyeLocation(),
 				player.getLocation().getDirection().multiply(2.0D));
 	}
 
-	/*
-	 * Projectiles that never land (e.g. thrown off the map) only expire after 10s and never call onHit,
-	 * so destroy the hook once it drops into the void and hand it straight back.
-	 */
-	private void checkHookInVoid() {
-		if (thrownHook == null)
-			return;
-
-		Entity hookEntity = thrownHook.getEntity();
-		if (hookEntity.isValid() && hookEntity.getLocation().getY() >= HOOK_VOID_Y)
-			return;
-
-		hookEntity.remove();
-		thrownHook = null;
-		if (totalDeaths == grinchDeathsAtThrow && isPlayerAlive())
-			returnHook();
-	}
-
-	private ItemStack getHookPlaceholder() {
-		return ItemHelper.setDetails(new ItemStack(Material.BARRIER), instance.color("&c&lSticky Fingers is out!"),
-				"", instance.color("&7Your hook comes back here when it misses,"),
-				instance.color("&7or once your weapon trade ends."));
-	}
-
-	/** Puts the hook back where its barrier placeholder is (normally the 2nd slot). */
-	private void returnHook() {
-		Inventory inv = player.getInventory();
-		int slot = inv.first(Material.BARRIER);
-		if (slot < 0)
-			slot = inv.getItem(HOOK_SLOT) == null ? HOOK_SLOT : inv.firstEmpty();
-		if (slot >= 0)
-			inv.setItem(slot, getStickyFingers());
+	private long getHookCooldownLeft() {
+		return (hookCooldown.getRemainingCooldownMillis() + 999) / 1000;
 	}
 
 	private boolean isValidTarget(Player target) {
@@ -177,82 +154,68 @@ public class GrinchClass extends BaseClass {
 						|| !Objects.equals(instance.team.get(target), instance.team.get(player)));
 	}
 
-	private boolean stealWeapon(Player target) {
-		BaseClass targetClass = instance.classes.get(target);
-		if (isTradeVictim(target)) {
-			player.sendMessage(instance.color("&2&l(!) &e" + target.getName()
-					+ " &ralready had their weapon stolen by a Grinch!"));
-			return false;
-		}
-
+	/*
+	 * Swaps whatever weapon the Grinch is holding right now (his Roast Beast, or one he stole earlier) with
+	 * whatever weapon the target is holding right now. Nobody gets anything back - everyone keeps what they
+	 * end up with until they die and respawn with their own kit, so weapons can get passed all around.
+	 */
+	private boolean swapWeapons(Player target) {
 		Inventory targetInv = target.getInventory();
 		Inventory grinchInv = player.getInventory();
-		int targetSlot = findWeaponSlot(targetInv, targetClass.getAttackWeapon());
-		int grinchSlot = findWeaponSlot(grinchInv, getAttackWeapon());
+		int targetSlot = findCurrentWeaponSlot(target);
+		int grinchSlot = findCurrentWeaponSlot(player);
 		if (targetSlot < 0 || grinchSlot < 0) {
 			player.sendMessage(instance.color("&2&l(!) &e" + target.getName() + " &rhas no weapon to steal!"));
 			return false;
 		}
 
 		ItemStack theirWeapon = targetInv.getItem(targetSlot);
-		targetInv.setItem(targetSlot, grinchInv.getItem(grinchSlot));
+		ItemStack ourWeapon = grinchInv.getItem(grinchSlot);
+		targetInv.setItem(targetSlot, ourWeapon);
 		grinchInv.setItem(grinchSlot, theirWeapon);
-
-		victim = target;
-		stolenWeapon = theirWeapon.clone();
-		victimDeathsAtSteal = targetClass.totalDeaths;
-		grinchDeathsAtSteal = totalDeaths;
+		setHeldWeapon(target, ourWeapon);
+		setHeldWeapon(player, theirWeapon);
 
 		player.getWorld().playSound(player.getLocation(), Sound.VILLAGER_HAGGLE, 1, 0.5f);
 		target.getWorld().playSound(target.getLocation(), Sound.ITEM_PICKUP, 1, 0.6f);
 		ParticleEffect.VILLAGER_ANGRY.display(target.getLocation().add(0, 2.2, 0));
 
-		player.sendMessage(instance.color("&2&l(!) &rYou snatched &e" + target.getName()
-				+ "'s &rweapon! They're stuck with your &2&lRoast Beast &runtil one of you dies."));
-		target.sendMessage(instance.color("&2&l(!) &rThe &2&l&oGrinch &rstole your weapon! You're stuck with his "
-				+ "&2&lRoast Beast &runtil one of you dies."));
+		player.sendMessage(instance.color("&2&l(!) &rYou traded your " + itemName(ourWeapon) + " &rfor &e"
+				+ target.getName() + "'s " + itemName(theirWeapon) + "&r!"));
+		target.sendMessage(instance.color("&2&l(!) &rThe &2&l&oGrinch &rswiped your " + itemName(theirWeapon)
+				+ " &rand left you with " + itemName(ourWeapon) + "&r! You're stuck with it until you die."));
 		return true;
 	}
 
-	/*
-	 * Ends the trade once either side dies. Whoever died gets their own kit back on respawn, so only the
-	 * survivor needs their weapon handed back (plus the hook, if the Grinch survived).
-	 */
-	private void checkTradeEnded() {
-		if (victim == null)
-			return;
-
-		BaseClass victimClass = instance.classes.get(victim);
-		boolean victimDied = victimClass == null || !victim.isOnline()
-				|| victimClass.totalDeaths != victimDeathsAtSteal || victimClass.getLives() <= 0;
-		boolean grinchDied = totalDeaths != grinchDeathsAtSteal || getLives() <= 0;
-		if (!victimDied && !grinchDied)
-			return;
-
-		if (!grinchDied) {
-			int slot = findWeaponSlot(player.getInventory(), stolenWeapon);
-			if (slot >= 0)
-				player.getInventory().setItem(slot, getAttackWeapon());
-			returnHook();
-			player.sendMessage(instance.color("&2&l(!) &rYour &2&lRoast Beast &rand &2&lSticky Fingers &rare back!"));
-		}
-		if (!victimDied) {
-			int slot = findWeaponSlot(victim.getInventory(), getAttackWeapon());
-			if (slot >= 0)
-				victim.getInventory().setItem(slot, stolenWeapon);
-			victim.sendMessage(instance.color("&2&l(!) &rThe &2&l&oGrinch &ris gone - you got your weapon back!"));
-		}
-
-		victim = null;
-		stolenWeapon = null;
+	private void setHeldWeapon(Player holder, ItemStack weapon) {
+		BaseClass holderClass = instance.classes.get(holder);
+		HELD_WEAPONS.put(holder, new HeldWeapon(holderClass, holderClass.totalDeaths, weapon.clone()));
 	}
 
-	private boolean isTradeVictim(Player target) {
-		for (BaseClass bc : instance.classes.values()) {
-			if (bc instanceof GrinchClass && ((GrinchClass) bc).victim == target)
-				return true;
+	/*
+	 * Slot of the weapon a player is currently fighting with: the last weapon a Grinch swapped into their
+	 * hands if that's still live (same class, no death since), otherwise their class's own weapon.
+	 */
+	private int findCurrentWeaponSlot(Player holder) {
+		BaseClass holderClass = instance.classes.get(holder);
+		if (holderClass == null)
+			return -1;
+
+		HeldWeapon held = HELD_WEAPONS.get(holder);
+		if (held != null) {
+			if (held.holderClass == holderClass && held.deathsAtSwap == holderClass.totalDeaths) {
+				int slot = findWeaponSlot(holder.getInventory(), held.weapon);
+				if (slot >= 0)
+					return slot;
+			}
+			HELD_WEAPONS.remove(holder);
 		}
-		return false;
+		return findWeaponSlot(holder.getInventory(), holderClass.getAttackWeapon());
+	}
+
+	private static String itemName(ItemStack item) {
+		return item.hasItemMeta() && item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName()
+				: "&e" + item.getType().name().toLowerCase().replace('_', ' ');
 	}
 
 	/** Slot holding an item with the same type and display name as weapon, or -1. */
