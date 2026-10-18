@@ -197,6 +197,8 @@ public class PlayerDataManager implements Listener {
 			int hohohoTitle = set.getInt("HoHoHoTitle");
 			long lastDailyReward = 0;
 			try { lastDailyReward = set.getLong("LastDailyReward"); } catch (Exception ignored) {}
+			boolean customGames = false;
+			try { customGames = set.getInt("CustomGames") == 1; } catch (Exception ignored) {}
 
 			data = new PlayerData(uuid, playerName, lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
@@ -210,6 +212,7 @@ public class PlayerDataManager implements Listener {
 					snowmanPet, candycaneParticles, snowball, floodEffect, treasureEffect, treasureOpened, color,
 					fishingWarps, treasureLoc, pumpkinPie, ritualEffect, rudolphOutfit, merryTitle, hohohoTitle);
 			data.lastDailyReward = lastDailyReward;
+			data.customGames = customGames;
 		}
 
 		set.close();
@@ -396,6 +399,8 @@ public class PlayerDataManager implements Listener {
 			int hohohoTitle = set.getInt("HoHoHoTitle");
 			long lastDailyReward = 0;
 			try { lastDailyReward = set.getLong("LastDailyReward"); } catch (Exception ignored) {}
+			boolean customGames = false;
+			try { customGames = set.getInt("CustomGames") == 1; } catch (Exception ignored) {}
 
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
@@ -409,6 +414,7 @@ public class PlayerDataManager implements Listener {
 					snowmanPet, candycaneParticles, snowball, floodEffect, treasureEffect, treasureOpened, color,
 					fishingWarps, treasureLoc, pumpkinPie, ritualEffect, rudolphOutfit, merryTitle, hohohoTitle);
 			data.lastDailyReward = lastDailyReward;
+			data.customGames = customGames;
 		}
 		set.close();
 		stmt.close();
@@ -526,6 +532,7 @@ public class PlayerDataManager implements Listener {
 				+ data.ritualEffect + ", RudolphOutfit = " + data.rudolphOutfit + ", MerryTitle = " + data.merryTitle
 				+ ", HoHoHoTitle = " + data.hohohoTitle
 				+ ", LastDailyReward = " + data.lastDailyReward
+				+ ", CustomGames = " + (data.customGames ? 1 : 0)
 				+ " WHERE UUID = '" + data.playerUUID.toString() + "';");
 		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon, "
 				+ "Reward1, Reward2, Reward3, Reward4, Reward5) VALUES ";

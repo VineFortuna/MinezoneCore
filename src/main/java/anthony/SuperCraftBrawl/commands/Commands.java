@@ -1975,6 +1975,11 @@ public class Commands implements CommandExecutor, TabCompleter {
         }
     }
 
+    /** Takes the player out of whatever game they're playing or spectating and back to the lobby. */
+    public void removeFromGame(Player player) {
+        leaveSinglePlayerGame(player, false);
+    }
+
     private void leaveSinglePlayerGame(Player player, boolean sendNotInGameMessage) {
         GameInstance game = main.getGameManager().GetInstanceOfSpectator(player);
 

@@ -66,6 +66,7 @@ import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerListPingEvent;
@@ -433,6 +434,17 @@ public class Core extends JavaPlugin implements Listener {
     public int getRankBonusTokens(Player player, String permission) {
         if (getRankManager().getRank(player) == Rank.LEGENDARY) return 20;
         return player.hasPermission(permission) ? 10 : 0;
+    }
+
+    /** Ranks that can host custom (private) games: LEGENDARY and above, which includes every staff rank. */
+    private static final Set<Rank> PRIVATE_GAME_HOST_RANKS = EnumSet.of(Rank.LEGENDARY, Rank.TRAINEE, Rank.MODERATOR,
+            Rank.SR_MODERATOR, Rank.ADMIN, Rank.DEVELOPER, Rank.SUPERVISOR, Rank.OWNER, Rank.QA);
+
+    /** Whether this player may run custom (private) games as party leader. */
+    public boolean canHostPrivateGames(Player player) {
+        if (player == null) return false;
+        if (player.isOp() || player.hasPermission("scb.privategames")) return true;
+        return PRIVATE_GAME_HOST_RANKS.contains(getRankManager().getRank(player));
     }
 
     /** Creative for LEGENDARY players (so they can build in the lobby), adventure for everyone else. */
@@ -828,6 +840,7 @@ public class Core extends JavaPlugin implements Listener {
         djManager = new DoubleJumpManager(this);
         databaseManager = new DatabaseManager(this);
         databaseManager.ensureLastDailyRewardColumn();
+        databaseManager.ensureCustomGamesColumn();
         packetMain = new PacketMain(this);
         dataManager = new PlayerDataManager(this);
         gameDataManager = new GameDataManager(this);
@@ -2082,15 +2095,20 @@ public class Core extends JavaPlugin implements Listener {
         p.setMaxPlayers(1);
     }
 
+    // LOWEST so it runs before the player is taken out of their game - a leaving private game leader's game
+    // still needs to be handed over or cancelled
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void partyQuit(PlayerQuitEvent e) {
+        if (getPartyManager() != null) {
+            getPartyManager().handleQuit(e.getPlayer());
+        }
+    }
+
     @EventHandler
     public void leave(PlayerQuitEvent e) {
         Player player = e.getPlayer();
         Rank rank = getRankManager().getRank(player); // Gets the player's rank
         String tag = rank.getTagWithSpace(); // Gets the player's rank tag
-
-        if (getPartyManager() != null) {
-            getPartyManager().handleQuit(player);
-        }
 
         if (getParkour() != null && getParkour().hasPlayer(player)) {
             try { getParkour().removePlayer(player); } catch (Throwable ignored) {}
@@ -2171,6 +2189,7 @@ public class Core extends JavaPlugin implements Listener {
             player.getInventory().clear();
             player.teleport(LobbyLoc());
             LobbyItems(player);
+            player.setMaxHealth(20.0); // undo the Max Health modifier
             player.setHealth(20.0f);
             player.setFireTicks(0);
             player.setLevel(playerData.level);

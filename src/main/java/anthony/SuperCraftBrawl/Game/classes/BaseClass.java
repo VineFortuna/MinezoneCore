@@ -191,6 +191,7 @@ public abstract class BaseClass {
 	}
 
 	public void loadPlayer() {
+		player.setMaxHealth(instance.getMaxHealthPoints()); // Max Health modifier
 		Inventory inv = player.getInventory();
 		setArmor(player.getEquipment());
 		setItems(inv);
@@ -587,10 +588,18 @@ public abstract class BaseClass {
 		Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new Runnable() {
 			@Override
 			public void run() {
-				if (checkIfDead(killer, instance) || instance.classes.get(killer).getType() == ClassType.Horse)
-					return;
-
+				if (checkIfDead(killer, instance)) return;
 				if (instance.alivePlayers == 1) return;
+
+				// Instant Full Heal: no potion, straight back to max health
+				if (potMode == GameSettings.HealthPotMode.FULL_HEAL) {
+					killer.setHealth(killer.getMaxHealth());
+					killer.sendMessage(String.valueOf(ChatColor.DARK_GREEN) + ChatColor.BOLD + "(!) " + ChatColor.RESET
+							+ ChatColor.YELLOW + "You got a kill and were " + ChatColor.YELLOW + ChatColor.BOLD + "fully healed");
+					return;
+				}
+
+				if (instance.classes.get(killer).getType() == ClassType.Horse) return;
 
 				// Half Health: only when at or below half health. Always: every kill
 				if (potMode == GameSettings.HealthPotMode.HALF_HEALTH && killer.getHealth() / killer.getMaxHealth() > 0.5)
@@ -661,9 +670,10 @@ public abstract class BaseClass {
 						baseClass.totalKills++;
 						baseClass.eachLifeKills++;
 
-						if (instance.getGameSettings().strengthOnKill) {
-							killer.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 5 * 20, 0));
-							killer.sendMessage(instance.color("&2&l(!) &rYou gained &cStrength I &rfor &e5 seconds&r."));
+						int strengthSeconds = instance.getGameSettings().strengthOnKillSeconds;
+						if (strengthSeconds > 0) {
+							killer.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, strengthSeconds * 20, 0), true);
+							killer.sendMessage(instance.color("&2&l(!) &rYou gained &cStrength I &rfor &e" + strengthSeconds + " seconds&r."));
 						}
 
 						this.checkBountyKill(baseClass, victim, killer);

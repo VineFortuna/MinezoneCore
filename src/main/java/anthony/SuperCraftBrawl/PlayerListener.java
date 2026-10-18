@@ -283,6 +283,7 @@ public class PlayerListener implements Listener {
 
         if (main.tablistAnim != null) main.tablistAnim.applyTo(player);
 
+        player.setMaxHealth(20.0); // in case they left a game with the Max Health modifier on
         player.setHealth(20);
         player.setFoodLevel(20);
 
@@ -381,6 +382,7 @@ public class PlayerListener implements Listener {
             if (player != null && playerData != null) {
                 player.getInventory().clear();
                 main.LobbyItems(player);
+                player.setMaxHealth(20.0);
                 player.setHealth(20.0f);
                 player.setFireTicks(0);
                 player.setLevel(playerData.level);

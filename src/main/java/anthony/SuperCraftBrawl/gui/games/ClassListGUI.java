@@ -50,7 +50,7 @@ public class ClassListGUI implements InventoryProvider {
     }
 
     private enum Status {
-        ALL("All"), ENABLED("Enabled"), DISABLED("Disabled");
+        ENABLED("Enabled"), DISABLED("Disabled"), ALL("All");
 
         final String name;
 
@@ -75,7 +75,7 @@ public class ClassListGUI implements InventoryProvider {
     public final SmartInventory inv;
 
     private Category category = Category.ALL;
-    private Status status = Status.ALL;
+    private Status status = Status.ENABLED;
     private Sorter sorter = Sorter.ALPHABETICAL;
     private int randomCountIndex = 1; // 10 classes
 

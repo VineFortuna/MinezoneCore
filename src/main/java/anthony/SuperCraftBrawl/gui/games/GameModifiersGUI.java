@@ -21,20 +21,31 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 /*
- * Private game modifiers. Toggles flip on any click; cycling settings go forward on left click and
- * backward on right click.
+ * Private game modifiers. Toggles flip on any click; cycling settings go back on left click and
+ * forward on right click (Left Click << | >> Right Click).
  */
 public class GameModifiersGUI implements InventoryProvider {
 
     private static final int[] DROP_TIMES = {5, 10, 15, 20, 25, 30, 45};
+    private static final String[] DROP_TIME_LABELS = {"5s", "10s", "15s", "20s", "25s", "30s", "45s"};
     private static final int[] CLASS_SWITCH_TIMES = {0, 15, 30, 45, 60}; // 0 = disabled
-    private static final int[] LIVES = {1, 2, 3, 4, 5};
-    private static final int[] RESPAWN_TIMES = {0, 1, 2, 3, 4, 5};
+    private static final String[] CLASS_SWITCH_LABELS = {"Disabled", "15s", "30s", "45s", "1m"};
+    private static final int[] LIVES = {1, 2, 3, 4, 5, 10};
+    private static final String[] LIVES_LABELS = {"1", "2", "3", "4", "5", "10"};
+    private static final int[] RESPAWN_TIMES = {0, 1, 2, 3, 4, 5, 10};
+    private static final String[] RESPAWN_TIME_LABELS = {"None", "1s", "2s", "3s", "4s", "5s", "10s"};
+    private static final int[] SPAWN_PROTECTION_TIMES = {0, 3, 5}; // 0 = disabled
+    private static final String[] SPAWN_PROTECTION_LABELS = {"Disabled", "3s", "5s"};
+    private static final int[] STRENGTH_TIMES = {0, 5, 10}; // 0 = disabled
+    private static final String[] STRENGTH_LABELS = {"Disabled", "5s", "10s"};
+    private static final int[] MAX_HEALTH_HEARTS = {10, 15, 20};
+    private static final String[] MAX_HEALTH_LABELS = {"10 Hearts", "15 Hearts", "20 Hearts"};
 
-    private static final long DAY = 1000, SUNSET = 12000, NIGHT = 18000;
+    private static final long DAY = 1000, SUNSET = 12500, NIGHT = 18000;
     private static final long[] TIMES_OF_DAY = {DAY, SUNSET, NIGHT};
+    private static final String[] TIME_OF_DAY_LABELS = {"Day", "Sunset", "Night"};
 
-    private static final String CYCLE_HINT = "&eLeft Click: next &7| &eRight Click: previous";
+    private static final String CYCLE_HINT = "&eLeft Click &7<< &8| &7>> &eRight Click";
 
     private final Core main;
     private final GameInstance game;
@@ -84,9 +95,10 @@ public class GameModifiersGUI implements InventoryProvider {
         addFrenzyModifier(contents, player);            // 0,0
         addClassSwitchModifier(contents, player);       // 0,1
         addOneForAllModifier(contents, player);         // 0,2
-        addLowGravityModifier(contents, player);        // 0,5
-        addStrengthOnKillModifier(contents, player);    // 0,6
-        addHealthPotsModifier(contents, player);        // 0,7
+        addLowGravityModifier(contents, player);        // 0,4
+        addStrengthOnKillModifier(contents, player);    // 0,5
+        addHealingOnKillModifier(contents, player);     // 0,6
+        addMaxHealthModifier(contents, player);         // 0,7
         addLightningDropRateModifier(contents, player); // 0,8
 
         // Bottom row
@@ -128,23 +140,23 @@ public class GameModifiersGUI implements InventoryProvider {
 
     private void addClassSwitchModifier(InventoryContents contents, Player player) {
         GameSettings settings = game.getGameSettings();
-        int current = settings.randomClasses ? settings.randomClassCycleSeconds : 0;
+        int index = indexOf(CLASS_SWITCH_TIMES, settings.randomClasses ? settings.randomClassCycleSeconds : 0);
+        int seconds = CLASS_SWITCH_TIMES[index];
 
-        contents.set(0, 1, ClickableItem.of(cycleItem(new ItemStack(Material.EYE_OF_ENDER), current > 0,
-                "&e&lClass Switch",
-                "&fCurrent: &e" + formatClassSwitch(current),
-                new String[]{"&7Everyone switches to a new", "&7random class every so often"},
-                "&e15s&7, &e30s&7, &e45s&7, &e1m&7, &cDisabled"
+        contents.set(0, 1, ClickableItem.of(cycleItem(new ItemStack(Material.EYE_OF_ENDER), "&e&lClass Switch",
+                CLASS_SWITCH_LABELS, index, seconds, seconds > 0,
+                "&7Everyone switches to a new", "&7random class every so often"
         ), e -> {
             SoundManager.playSuccessfulHit(player);
 
-            int next = cycle(CLASS_SWITCH_TIMES, current, isForward(e));
-            settings.randomClasses = next > 0;
-            if (next > 0) settings.randomClassCycleSeconds = next;
+            int next = step(index, CLASS_SWITCH_TIMES.length, e);
+            int nextSeconds = CLASS_SWITCH_TIMES[next];
+            settings.randomClasses = nextSeconds > 0;
+            if (nextSeconds > 0) settings.randomClassCycleSeconds = nextSeconds;
 
-            if (next > 0) {
+            if (nextSeconds > 0) {
                 game.TellAll(main.color("&2&l(!) &rClass Switch has been &aenabled&r. Classes will change every &e&l"
-                        + formatClassSwitch(next)));
+                        + CLASS_SWITCH_LABELS[next]));
             } else {
                 game.TellAll(main.color("&2&l(!) &rClass Switch has been &cdisabled"));
             }
@@ -172,7 +184,7 @@ public class GameModifiersGUI implements InventoryProvider {
     private void addLowGravityModifier(InventoryContents contents, Player player) {
         boolean enabled = game.getGameSettings().lowGravity;
 
-        contents.set(0, 5, ClickableItem.of(toggleItem(new ItemStack(Material.FEATHER), enabled, "&e&lLow Gravity",
+        contents.set(0, 4, ClickableItem.of(toggleItem(new ItemStack(Material.FEATHER), enabled, "&e&lLow Gravity",
                 "&7Everyone gets permanent",
                 "&bJump Boost X &7while alive"
         ), e -> {
@@ -186,59 +198,80 @@ public class GameModifiersGUI implements InventoryProvider {
     }
 
     private void addStrengthOnKillModifier(InventoryContents contents, Player player) {
-        boolean enabled = game.getGameSettings().strengthOnKill;
+        int index = indexOf(STRENGTH_TIMES, game.getGameSettings().strengthOnKillSeconds);
+        int seconds = STRENGTH_TIMES[index];
 
-        contents.set(0, 6, ClickableItem.of(toggleItem(new ItemStack(Material.BLAZE_POWDER), enabled, "&e&lStrength on Kill",
-                "&7Gain &c5 seconds of Strength I",
-                "&7after every kill."
+        contents.set(0, 5, ClickableItem.of(cycleItem(new ItemStack(Material.BLAZE_POWDER), "&e&lStrength on Kill",
+                STRENGTH_LABELS, index, seconds, seconds > 0,
+                "&7Killers gain &cStrength I", "&7for a few seconds after every kill"
         ), e -> {
             SoundManager.playSuccessfulHit(player);
 
-            game.getGameSettings().strengthOnKill = !game.getGameSettings().strengthOnKill;
-            game.TellAll(main.color("&2&l(!) &rStrength on Kill has been " + status(game.getGameSettings().strengthOnKill)));
+            int next = STRENGTH_TIMES[step(index, STRENGTH_TIMES.length, e)];
+            game.getGameSettings().strengthOnKillSeconds = next;
+
+            if (next > 0) {
+                game.TellAll(main.color("&2&l(!) &rStrength on Kill has been &aenabled&r: &e&l" + next
+                        + "s &rof Strength I after every kill."));
+            } else {
+                game.TellAll(main.color("&2&l(!) &rStrength on Kill has been &cdisabled"));
+            }
 
             inv.open(player);
         }));
     }
 
-    private void addHealthPotsModifier(InventoryContents contents, Player player) {
+    private void addHealingOnKillModifier(InventoryContents contents, Player player) {
         HealthPotMode mode = game.getGameSettings().healthPotMode;
+        HealthPotMode[] modes = HealthPotMode.values();
+        String[] labels = new String[modes.length];
+        for (int i = 0; i < modes.length; i++) labels[i] = modes[i].getName();
 
         // Splash Potion of Instant Health
         ItemStack potion = ItemHelper.setHideFlags(new ItemStack(Material.POTION, 1, (short) 16421), true);
 
-        contents.set(0, 7, ClickableItem.of(cycleItem(potion, mode != HealthPotMode.DISABLED,
-                "&e&lHealth Pots",
-                "&fCurrent: &e" + mode.getName(),
-                new String[]{"&7When killers are given a", "&7health pot:",
-                        "&cDisabled&7: never", "&eHalf Health&7: at or below half health", "&aAlways&7: every kill"},
-                "&cDisabled&7, &eHalf Health&7, &aAlways"
+        contents.set(0, 6, ClickableItem.of(cycleItem(potion, "&e&lHealing on Kill",
+                labels, mode.ordinal(), 1, mode != HealthPotMode.DISABLED,
+                "&7How killers get healed",
+                "&7after getting a kill"
         ), e -> {
             SoundManager.playSuccessfulHit(player);
 
-            HealthPotMode[] modes = HealthPotMode.values();
-            int step = isForward(e) ? 1 : modes.length - 1;
-            HealthPotMode next = modes[(mode.ordinal() + step) % modes.length];
+            HealthPotMode next = modes[step(mode.ordinal(), modes.length, e)];
             game.getGameSettings().healthPotMode = next;
+            game.TellAll(main.color("&2&l(!) &rHealing on Kill was set to &e&l" + next.getName() + "&r."));
 
-            game.TellAll(main.color("&2&l(!) &rHealth Pots were set to &e&l" + next.getName() + "&r."));
+            inv.open(player);
+        }));
+    }
+
+    private void addMaxHealthModifier(InventoryContents contents, Player player) {
+        int index = indexOf(MAX_HEALTH_HEARTS, game.getGameSettings().maxHealthHearts);
+
+        contents.set(0, 7, ClickableItem.of(cycleItem(new ItemStack(Material.GOLDEN_APPLE), "&e&lMax Health",
+                MAX_HEALTH_LABELS, index, MAX_HEALTH_HEARTS[index], true,
+                "&7How much health everyone", "&7has on each life"
+        ), e -> {
+            SoundManager.playSuccessfulHit(player);
+
+            int next = step(index, MAX_HEALTH_HEARTS.length, e);
+            game.getGameSettings().maxHealthHearts = MAX_HEALTH_HEARTS[next];
+            game.TellAll(main.color("&2&l(!) &rMax Health was set to &e&l" + MAX_HEALTH_LABELS[next] + "&r."));
 
             inv.open(player);
         }));
     }
 
     private void addLightningDropRateModifier(InventoryContents contents, Player player) {
-        int current = game.getGameSettings().dropTimer;
+        int index = indexOf(DROP_TIMES, game.getGameSettings().dropTimer);
 
-        contents.set(0, 8, ClickableItem.of(cycleItem(new ItemStack(Material.NETHER_STAR), false,
-                "&e&lLightning Drop Rate",
-                "&fCurrent: &eEvery " + current + "s",
-                new String[]{"&7How often lightning drops", "&7spawn on the map"},
-                "&e5s&7, &e10s&7, &e15s&7, &e20s&7, &e25s&7, &e30s&7, &e45s"
+        contents.set(0, 8, ClickableItem.of(cycleItem(new ItemStack(Material.NETHER_STAR), "&e&lLightning Drop Rate",
+                DROP_TIME_LABELS, index, DROP_TIMES[index], true,
+                "&7How often lightning drops", "&7spawn on the map"
         ), e -> {
             SoundManager.playSuccessfulHit(player);
 
-            game.getGameSettings().dropTimer = cycle(DROP_TIMES, current, isForward(e));
+            game.getGameSettings().dropTimer = DROP_TIMES[step(index, DROP_TIMES.length, e)];
             game.TellAll(main.color("&2&l(!) &rLightning drops will now spawn every &e&l"
                     + game.getGameSettings().dropTimer + "s&r."));
 
@@ -280,7 +313,7 @@ public class GameModifiersGUI implements InventoryProvider {
         contents.set(2, 2, ClickableItem.of(toggleItem(new ItemStack(Material.WHEAT), enabled, "&e&lOP Item Drops",
                 "&7Lightning drops only spawn",
                 "&6&lLEGENDARY &7and &d&lRARE &7items.",
-                "&7(Extra Lives are removed)"
+                "&7(No Extra Lives)"
         ), e -> {
             SoundManager.playSuccessfulHit(player);
 
@@ -292,17 +325,15 @@ public class GameModifiersGUI implements InventoryProvider {
     }
 
     private void addLivesModifier(InventoryContents contents, Player player) {
-        int lives = game.getGameSettings().startingLives;
+        int index = indexOf(LIVES, game.getGameSettings().startingLives);
 
-        contents.set(2, 4, ClickableItem.of(cycleItem(new ItemStack(Material.PRISMARINE_SHARD), false,
-                "&e&lLives",
-                "&fCurrent: &e" + formatLives(lives),
-                new String[]{"&7How many lives everyone", "&7starts with"},
-                "&e1&7, &e2&7, &e3&7, &e4&7, &e5"
+        contents.set(2, 4, ClickableItem.of(cycleItem(new ItemStack(Material.PRISMARINE_SHARD), "&e&lLives",
+                LIVES_LABELS, index, LIVES[index], true,
+                "&7How many lives everyone", "&7starts with"
         ), e -> {
             SoundManager.playSuccessfulHit(player);
 
-            game.getGameSettings().startingLives = cycle(LIVES, lives, isForward(e));
+            game.getGameSettings().startingLives = LIVES[step(index, LIVES.length, e)];
             game.TellAll(main.color("&2&l(!) &rEveryone will now start with &e&l"
                     + formatLives(game.getGameSettings().startingLives) + "&r."));
 
@@ -311,17 +342,16 @@ public class GameModifiersGUI implements InventoryProvider {
     }
 
     private void addRespawnTimeModifier(InventoryContents contents, Player player) {
-        int seconds = game.getGameSettings().respawnSeconds;
+        int index = indexOf(RESPAWN_TIMES, game.getGameSettings().respawnSeconds);
+        int seconds = RESPAWN_TIMES[index];
 
-        contents.set(2, 5, ClickableItem.of(cycleItem(new ItemStack(Material.DIODE), false,
-                "&e&lRespawn Time",
-                "&fCurrent: &e" + formatRespawnTime(seconds),
-                new String[]{"&7How long players wait", "&7before respawning"},
-                "&eNone&7, &e1s&7, &e2s&7, &e3s&7, &e4s&7, &e5s"
+        contents.set(2, 5, ClickableItem.of(cycleItem(new ItemStack(Material.DIODE), "&e&lRespawn Time",
+                RESPAWN_TIME_LABELS, index, seconds, seconds > 0,
+                "&7How long players wait", "&7before respawning"
         ), e -> {
             SoundManager.playSuccessfulHit(player);
 
-            int next = cycle(RESPAWN_TIMES, seconds, isForward(e));
+            int next = RESPAWN_TIMES[step(index, RESPAWN_TIMES.length, e)];
             game.getGameSettings().respawnSeconds = next;
 
             if (next == 0) {
@@ -335,40 +365,40 @@ public class GameModifiersGUI implements InventoryProvider {
     }
 
     private void addSpawnProtectionModifier(InventoryContents contents, Player player) {
-        boolean enabled = !game.getGameSettings().disableSpawnProtection;
+        int index = indexOf(SPAWN_PROTECTION_TIMES, game.getGameSettings().spawnProtectionSeconds);
+        int seconds = SPAWN_PROTECTION_TIMES[index];
 
-        contents.set(2, 6, ClickableItem.of(toggleItem(new ItemStack(Material.IRON_CHESTPLATE), enabled, "&e&lSpawn Protection",
-                "&7Players get spawn protection",
-                "&7when the game starts and",
-                "&7after respawning"
+        contents.set(2, 6, ClickableItem.of(cycleItem(new ItemStack(Material.IRON_CHESTPLATE), "&e&lSpawn Protection",
+                SPAWN_PROTECTION_LABELS, index, seconds, seconds > 0,
+                "&7How long players are protected", "&7when the game starts and", "&7after respawning"
         ), e -> {
             SoundManager.playSuccessfulHit(player);
 
-            game.getGameSettings().disableSpawnProtection = !game.getGameSettings().disableSpawnProtection;
-            game.TellAll(main.color("&2&l(!) &rSpawn Protection has been "
-                    + status(!game.getGameSettings().disableSpawnProtection)));
+            int next = SPAWN_PROTECTION_TIMES[step(index, SPAWN_PROTECTION_TIMES.length, e)];
+            game.getGameSettings().spawnProtectionSeconds = next;
+
+            if (next > 0) {
+                game.TellAll(main.color("&2&l(!) &rSpawn Protection was set to &e&l" + next + "s&r."));
+            } else {
+                game.TellAll(main.color("&2&l(!) &rSpawn Protection has been &cdisabled"));
+            }
 
             inv.open(player);
         }));
     }
 
     private void addTimeOfDayModifier(InventoryContents contents, Player player) {
-        long current = getTimeOfDay();
+        int index = indexOf(TIMES_OF_DAY, getTimeOfDay());
 
-        contents.set(2, 7, ClickableItem.of(cycleItem(new ItemStack(Material.WATCH), current != DAY,
-                "&e&lTime of Day",
-                "&fCurrent: " + formatTimeOfDay(current),
-                new String[]{"&7The time of day on the map"},
-                "&eDay&7, &6Sunset&7, &cNight"
+        contents.set(2, 7, ClickableItem.of(cycleItem(new ItemStack(Material.WATCH), "&e&lTime of Day",
+                TIME_OF_DAY_LABELS, index, 1, true,
+                "&7The time of day on the map"
         ), e -> {
             SoundManager.playSuccessfulHit(player);
 
-            int index = indexOf(TIMES_OF_DAY, current);
-            int step = isForward(e) ? 1 : TIMES_OF_DAY.length - 1;
-            long next = TIMES_OF_DAY[(index + step) % TIMES_OF_DAY.length];
-            game.getMapWorld().setTime(next);
-
-            game.TellAll(main.color("&2&l(!) &rPrivate game time was set to " + formatTimeOfDay(next) + "&r."));
+            int next = step(index, TIMES_OF_DAY.length, e);
+            game.getMapWorld().setTime(TIMES_OF_DAY[next]);
+            game.TellAll(main.color("&2&l(!) &rPrivate game time was set to " + formatTimeOfDay(TIMES_OF_DAY[next]) + "&r."));
 
             inv.open(player);
         }));
@@ -390,39 +420,48 @@ public class GameModifiersGUI implements InventoryProvider {
         return ItemHelper.setDetails(item, main.color(name), lore);
     }
 
-    private ItemStack cycleItem(ItemStack item, boolean glowing, String name, String current, String[] description,
-                                String options) {
-        if (glowing) item = ItemHelper.setGlowing(item, true);
+    /*
+     * A cycling setting: the current option in green ("Current: ..." and in the options list, others yellow),
+     * the icon's stack size matching the option's number, and enchanted unless the option is an "off" one.
+     */
+    private ItemStack cycleItem(ItemStack item, String name, String[] options, int current, int amount, boolean active,
+                                String... description) {
+        item.setAmount(Math.max(1, Math.min(64, amount)));
+        if (active) item = ItemHelper.setGlowing(item, true);
+
+        StringBuilder optionList = new StringBuilder();
+        for (int i = 0; i < options.length; i++) {
+            if (i > 0) optionList.append("&7, ");
+            optionList.append(i == current ? "&a" : "&e").append(options[i]);
+        }
 
         String[] lore = new String[description.length + 8];
         lore[0] = "";
-        lore[1] = main.color(current);
+        lore[1] = main.color("&fCurrent: &a" + options[current]);
         lore[2] = "";
         for (int i = 0; i < description.length; i++) lore[3 + i] = main.color(description[i]);
         int i = 3 + description.length;
         lore[i] = "";
         lore[i + 1] = main.color("&7Options:");
-        lore[i + 2] = main.color(options);
+        lore[i + 2] = main.color(optionList.toString());
         lore[i + 3] = "";
         lore[i + 4] = main.color(CYCLE_HINT);
 
         return ItemHelper.setDetails(item, main.color(name), lore);
     }
 
-    private static boolean isForward(InventoryClickEvent e) {
-        return !e.isRightClick();
+    /** The option index after a click: left click goes back, right click goes forward (matching the << | >> hint). */
+    private static int step(int index, int count, InventoryClickEvent e) {
+        int delta = e.isRightClick() ? 1 : count - 1;
+        return (index + delta) % count;
     }
 
-    /** The value after (or before) current in values, wrapping around. Unknown values start from the first one. */
-    private static int cycle(int[] values, int current, boolean forward) {
-        int index = -1;
+    /** Index of value in values, or 0 if it isn't one of them. */
+    private static int indexOf(int[] values, int value) {
         for (int i = 0; i < values.length; i++) {
-            if (values[i] == current) index = i;
+            if (values[i] == value) return i;
         }
-        if (index < 0) return values[0];
-
-        int step = forward ? 1 : values.length - 1;
-        return values[(index + step) % values.length];
+        return 0;
     }
 
     private static int indexOf(long[] values, long value) {
@@ -449,17 +488,8 @@ public class GameModifiersGUI implements InventoryProvider {
         return "&e&lDay";
     }
 
-    private String formatClassSwitch(int seconds) {
-        if (seconds <= 0) return "&cDisabled";
-        return seconds >= 60 ? "1m" : seconds + "s";
-    }
-
     private String formatLives(int lives) {
         return lives + (lives == 1 ? " Life" : " Lives");
-    }
-
-    private String formatRespawnTime(int seconds) {
-        return seconds <= 0 ? "None" : seconds + "s";
     }
 
     private void updateModeOnBoard() {

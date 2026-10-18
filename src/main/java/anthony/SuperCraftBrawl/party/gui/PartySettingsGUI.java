@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.party.gui;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.party.Party;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -64,7 +65,10 @@ public class PartySettingsGUI implements InventoryProvider {
         // Players without a party can still change settings - a party just for them is made on the first change
         Party party = main.getPartyManager().getParty(player);
         boolean isLeader = party == null || party.isLeader(player.getUniqueId());
-        boolean privateGames = party != null && party.isPrivateGames();
+        PlayerData data = main.getDataManager().getPlayerData(player);
+        // No party yet: show the saved choice the next party will start with
+        boolean privateGames = party != null ? party.isPrivateGames()
+                : data != null && data.customGames && main.canHostPrivateGames(player);
         boolean chatMuted = party != null && party.isPartyChatMuted();
 
         contents.set(1, 3, ClickableItem.of(ItemHelper.setDetails(
@@ -76,13 +80,26 @@ public class PartySettingsGUI implements InventoryProvider {
                 main.color("&7When enabled, your party games"),
                 main.color("&7can play around with game"),
                 main.color("&7settings and add cool things"),
+                main.color("&7Requires &6&lLEGENDARY &7or higher"),
                 "",
                 isLeader ? main.color("&eClick to toggle") : main.color("&cOnly the party leader can change this.")
         ), e -> {
+            if (!privateGames && !main.canHostPrivateGames(player)) {
+                player.sendMessage(main.color("&c&l(!) &rCustom Games need &6&lLEGENDARY &ror higher!"));
+                return;
+            }
+
             Party p = getPartyToModify(player);
             if (p == null) return;
 
             p.setPrivateGames(!p.isPrivateGames());
+
+            // Remember it across restarts
+            PlayerData leaderData = main.getDataManager().getPlayerData(player);
+            if (leaderData != null) {
+                leaderData.customGames = p.isPrivateGames();
+                main.getDataManager().saveData(leaderData);
+            }
 
             if (p.isPrivateGames()) {
                 player.sendMessage(main.color("&a&l(!) &rPrivate games have been &aenabled&r."));

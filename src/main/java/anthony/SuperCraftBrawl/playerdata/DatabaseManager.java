@@ -45,17 +45,27 @@ public class DatabaseManager {
 	}
 
 	public void ensureLastDailyRewardColumn() {
+		ensurePlayerDataColumn("LastDailyReward", "BIGINT NOT NULL DEFAULT 0");
+	}
+
+	/** The party leader's saved Custom Games (private games) on/off choice, so it survives restarts. */
+	public void ensureCustomGamesColumn() {
+		ensurePlayerDataColumn("CustomGames", "TINYINT NOT NULL DEFAULT 0");
+	}
+
+	/** Adds a column to PlayerData if it isn't there yet. */
+	private void ensurePlayerDataColumn(String column, String definition) {
 		if (getConnection() == null) {
-			Bukkit.getLogger().warning("[MinezoneCore] Could not check LastDailyReward column because MySQL is not connected.");
+			Bukkit.getLogger().warning("[MinezoneCore] Could not check " + column + " column because MySQL is not connected.");
 			return;
 		}
 
 		try {
 			Statement stmt = getConnection().createStatement();
-			stmt.executeUpdate("ALTER TABLE PlayerData ADD COLUMN LastDailyReward BIGINT NOT NULL DEFAULT 0");
+			stmt.executeUpdate("ALTER TABLE PlayerData ADD COLUMN " + column + " " + definition);
 			stmt.close();
 
-			Bukkit.getLogger().info("[MinezoneCore] Added missing PlayerData.LastDailyReward column.");
+			Bukkit.getLogger().info("[MinezoneCore] Added missing PlayerData." + column + " column.");
 		} catch (SQLException e) {
 			String message = e.getMessage() == null ? "" : e.getMessage().toLowerCase();
 

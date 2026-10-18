@@ -31,6 +31,9 @@ public class PlayerData {
 	/** Unix timestamp (ms) of the last time the player claimed their daily reward. 0 = never. */
 	public long lastDailyReward = 0;
 
+	/** Party setting: whether this player's party games are Custom Games (private games). Saved to the database. */
+	public boolean customGames = false;
+
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
 	public HashMap<Integer, FishingDetails> playerFishing = new HashMap<>();
 	public HashMap<Integer, ParkourDetails> playerParkour = new HashMap<>();

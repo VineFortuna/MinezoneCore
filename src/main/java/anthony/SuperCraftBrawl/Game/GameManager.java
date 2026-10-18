@@ -1883,7 +1883,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
         int currentPlayers = existingInstance == null ? 0 : existingInstance.players.size();
         int maxPlayers;
-        if (party.isPrivateGames() && (existingInstance == null || existingInstance.isPrivateGame()
+        if (party.isPrivateGames() && main.canHostPrivateGames(leader) && (existingInstance == null || existingInstance.isPrivateGame()
                 || existingInstance.players.isEmpty())) {
             maxPlayers = GameInstance.PRIVATE_GAME_MAX_PLAYERS;
         } else {
@@ -1920,7 +1920,9 @@ public class GameManager implements Listener, PluginMessageListener {
             gameMap.put(map, targetInstance);
         }
 
-        if (party.isPrivateGames()) {
+        // Custom games are LEGENDARY+ only, even if the party setting was left on
+        boolean privateGame = party.isPrivateGames() && main.canHostPrivateGames(leader);
+        if (privateGame) {
             targetInstance.enablePrivateGame(leader);
         }
 
@@ -1928,7 +1930,7 @@ public class GameManager implements Listener, PluginMessageListener {
             joinSinglePlayerToMap(member, map);
         }
 
-        if (party.isPrivateGames() && targetInstance.state == GameState.WAITING) {
+        if (privateGame && targetInstance.state == GameState.WAITING) {
             targetInstance.givePrivateGameLeaderItems(leader);
 
             for (Player member : partyMembers) {
@@ -2025,8 +2027,9 @@ public class GameManager implements Listener, PluginMessageListener {
             instance.startPrivateGameCountdown(player);
             player.getInventory().clear();
             main.getLobbyItems().gameLobbyItems(player);
-            if (instance.isPrivateGameCountdownStarted())
-                player.getInventory().setItem(7, GameInstance.getGameSettingsItem());
+            // Always, even when the countdown couldn't start (e.g. alone in the game), so the leader
+            // can always get back to their Game Modifiers / Start Game items
+            player.getInventory().setItem(7, GameInstance.getGameSettingsItem());
             return;
         }
 
@@ -2042,8 +2045,8 @@ public class GameManager implements Listener, PluginMessageListener {
                 return;
             }
 
-            // Game Settings during the countdown stops it and gives back Game Modifiers + Start Game
-            if (instance.isPrivateGameCountdownStarted()) {
+            // Game Settings stops the countdown (if it's running) and gives back Game Modifiers + Start Game
+            if (itemName.contains("Game Settings")) {
                 instance.cancelPrivateGameCountdown(player);
                 return;
             }
@@ -2541,7 +2544,10 @@ public class GameManager implements Listener, PluginMessageListener {
         BukkitRunnable runnable = this.spawnProt.get(player);
         GameInstance instance = this.GetInstanceOfPlayer(player);
 
-        if (instance != null && instance.getGameSettings().disableSpawnProtection) {
+        // Spawn Protection modifier: 0 turns it off, otherwise it's how many seconds it lasts
+        int duration = instance != null ? instance.getGameSettings().spawnProtectionSeconds : SPAWN_PROT_DURATION;
+
+        if (duration <= 0) {
             if (runnable != null) {
                 runnable.cancel();
                 this.spawnProt.remove(player);
@@ -2552,7 +2558,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
         if (runnable == null) {
 			runnable = new BukkitRunnable() {
-				int ticks = SPAWN_PROT_DURATION;
+				int ticks = duration;
 
 				@Override
 				public void run() {
@@ -2567,7 +2573,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 			runnable.runTaskTimer(main, 0, 20);
 			this.spawnProt.put(player, runnable);
-			spawnProtParticles(player, instance);
+			spawnProtParticles(player, instance, duration);
 		}
 	}
 
@@ -2577,8 +2583,8 @@ public class GameManager implements Listener, PluginMessageListener {
 	 * @param player
 	 * @param instance
 	 */
-	private void spawnProtParticles(Player player, GameInstance instance) {
-		int durationTicks = SPAWN_PROT_DURATION * 20; // 5 seconds in ticks
+	private void spawnProtParticles(Player player, GameInstance instance, int durationSeconds) {
+		int durationTicks = durationSeconds * 20;
 		double radius = 1.0;
 		int particleCount = 20;
 

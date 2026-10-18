@@ -12,7 +12,7 @@ import java.util.Set;
 public class GameSettings {
 
 	public enum HealthPotMode {
-		DISABLED("Disabled"), HALF_HEALTH("Half Health"), ALWAYS("Always");
+		DISABLED("Disabled"), HALF_HEALTH("Potion - Half Health"), ALWAYS("Potion - Always"), FULL_HEAL("Instant Full Heal");
 
 		private final String name;
 
@@ -39,10 +39,11 @@ public class GameSettings {
 	public List<Player> lightningVotes;
 	public List<Player> santaVotes;
     public boolean opDrops;
-    public boolean strengthOnKill;
-    public HealthPotMode healthPotMode; // when killers get a health pot
+    public int strengthOnKillSeconds; // 0 = off
+    public HealthPotMode healthPotMode; // Healing on Kill: when killers get a health pot, or a full heal
+    public int maxHealthHearts; // each life's max health
     public boolean oneForAll; // everyone plays the same class (not implemented yet)
-    public boolean disableSpawnProtection;
+    public int spawnProtectionSeconds; // 0 = no spawn protection
     public boolean randomClasses;
     public int randomClassCycleSeconds;
     public int startingLives;
@@ -65,10 +66,11 @@ public class GameSettings {
 		this.lightningVotes = new ArrayList<Player>();
 		this.santaVotes = new ArrayList<Player>();
         this.opDrops = false;
-        this.strengthOnKill = false;
+        this.strengthOnKillSeconds = 0;
         this.healthPotMode = HealthPotMode.HALF_HEALTH;
+        this.maxHealthHearts = 10;
         this.oneForAll = false;
-        this.disableSpawnProtection = false;
+        this.spawnProtectionSeconds = 5; // same as the normal spawn protection
         this.randomClasses = false;
         this.randomClassCycleSeconds = 15;
         this.startingLives = 5; // Default lives

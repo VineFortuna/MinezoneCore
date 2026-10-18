@@ -110,6 +110,7 @@ public class GameInstance {
     //PARTY SYSTEM
     public static final int PRIVATE_GAME_MAX_PLAYERS = 100;
     private boolean privateGame = false;
+    private boolean cancellingPrivateGame = false; // everyone's being sent home - nobody should be declared the winner
     private boolean privateGameCountdownStarted = false;
     private UUID privateGameLeader;
 
@@ -224,6 +225,11 @@ public class GameInstance {
         return enabled.isEmpty() ? ClassType.getAvailableClasses() : enabled.toArray(new ClassType[0]);
     }
 
+    /** Max health for each life in this game, from the Max Health modifier (20 = the normal 10 hearts). */
+    public double getMaxHealthPoints() {
+        return getGameSettings().maxHealthHearts * 2;
+    }
+
     public boolean isClassSelectable(ClassType type) {
         return Arrays.asList(getSelectableClasses()).contains(type);
     }
@@ -271,6 +277,41 @@ public class GameInstance {
         }
 
         return party.contains(player.getUniqueId());
+    }
+
+    /*
+     * The private game leader left the party while the game kept going: hand the game to newLeader. In the
+     * lobby they get the leader items (or the Game Settings item if the countdown is already running).
+     */
+    public void handOverPrivateGame(Player newLeader) {
+        if (!privateGame || newLeader == null || !HasPlayer(newLeader)) return;
+
+        this.privateGameLeader = newLeader.getUniqueId();
+        if (state == GameState.WAITING) {
+            if (privateGameCountdownStarted) newLeader.getInventory().setItem(7, getGameSettingsItem());
+            else givePrivateGameLeaderItems(newLeader);
+        }
+        newLeader.sendMessage(color("&a&l(!) &rYou are now the private game leader."));
+    }
+
+    /** Ends a private game with no winner: everyone in it (and watching it) goes back to the lobby. */
+    public void cancelPrivateGame(String reason) {
+        if (!privateGame) return;
+        cancellingPrivateGame = true;
+
+        if (gameStartTime != null) {
+            gameStartTime.cancel();
+            gameStartTime = null;
+        }
+
+        for (Player p : new ArrayList<>(players)) {
+            p.sendMessage(color(reason));
+            gameManager.getMain().getCommands().removeFromGame(p);
+        }
+        for (Player p : new ArrayList<>(spectators)) {
+            p.sendMessage(color(reason));
+            gameManager.getMain().getCommands().removeFromGame(p);
+        }
     }
 
     public void transferPrivateGameLeader(Player oldLeader, Player newLeader) {
@@ -358,6 +399,12 @@ public class GameInstance {
      */
     public void cancelPrivateGameCountdown(Player leader) {
         if (!privateGame || state != GameState.WAITING || !isPrivateGameLeader(leader)) return;
+
+        // No countdown running (e.g. it couldn't start with only the leader in the game): just give the items back
+        if (!privateGameCountdownStarted) {
+            givePrivateGameLeaderItems(leader);
+            return;
+        }
 
         if (gameStartTime != null) {
             gameStartTime.cancel();
@@ -1421,7 +1468,8 @@ public class GameInstance {
 
                             player.teleport(GameInstance.this.GetRespawnLoc());
                             player.setGameMode(GameMode.ADVENTURE);
-                            player.setHealth(20.0D);
+                            player.setMaxHealth(getMaxHealthPoints());
+                            player.setHealth(getMaxHealthPoints());
                             player.setAllowFlight(true);
                             GameInstance.this.getGameManager().addSpawnProtection(player);
 
@@ -2227,7 +2275,8 @@ public class GameInstance {
                 player.setDisplayName("" + player.getName() + " " + selectedClass.getTag() + ChatColor.GRAY);
             classes.put(player, baseClass);
             allClasses.put(player, baseClass);
-            player.setHealth(20.0);
+            player.setMaxHealth(getMaxHealthPoints());
+            player.setHealth(getMaxHealthPoints());
             player.setFoodLevel(20);
             player.setGameMode(GameMode.ADVENTURE);
             player.setAllowFlight(true);
@@ -2357,6 +2406,7 @@ public class GameInstance {
     }
 
     private void checkIfGameOver() {
+        if (cancellingPrivateGame) return;
         int alivePlayers = 0;
         Player alivePlayer = null;
         List<Player> lastAlive = new ArrayList<>();
