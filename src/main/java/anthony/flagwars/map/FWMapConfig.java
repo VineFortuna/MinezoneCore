@@ -16,10 +16,15 @@ public class FWMapConfig {
 
 	public static final int TEAM_COUNT = 8;
 
+	/** Map sizes /fwsetup size accepts: the usual 8-team maps, and 4-team maps (4 players in Solo). */
+	public static final int SIZE_EIGHT = 8;
+	public static final int SIZE_FOUR = 4;
+
 	/** No building in the 3x3 column (any Y) centered on an emerald or diamond generator. */
 	private static final int MID_GENERATOR_PROTECTED_RADIUS = 1;
 
 	private final String worldName;
+	private int size = SIZE_EIGHT;
 	private Location lobby;
 	private Location spectatorLocation;
 	private final Map<Integer, FWTeamSite> teamSites = new LinkedHashMap<>();
@@ -39,6 +44,28 @@ public class FWMapConfig {
 
 	public String getWorldName() {
 		return worldName;
+	}
+
+	/** How many teams this map is built for - 8, or 4 for a 4-player map. */
+	public int getSize() {
+		return size;
+	}
+
+	public void setSize(int size) {
+		this.size = size;
+	}
+
+	/** 4-player maps only start once all 4 bases have a player, so the full 3 captures are always needed to win. */
+	public boolean isFourPlayerMap() {
+		return size == SIZE_FOUR;
+	}
+
+	public int countCreatedTeams() {
+		int count = 0;
+		for (FWTeamSite site : teamSites.values()) {
+			if (site.isCreated()) count++;
+		}
+		return count;
 	}
 
 	public Location getLobby() {
@@ -129,7 +156,11 @@ public class FWMapConfig {
 			if (site.getGoldGenerator() == null) missing.add("team " + color + " gold generator");
 		}
 
-		if (createdCount < 2) missing.add("at least 2 created teams (run /fwsetup team <color>)");
+		if (isFourPlayerMap() && createdCount != SIZE_FOUR) {
+			missing.add("exactly 4 created teams for a 4-player map (has " + createdCount + ")");
+		} else if (createdCount < 2) {
+			missing.add("at least 2 created teams (run /fwsetup team <color>)");
+		}
 		if (emeraldGenerators.isEmpty()) missing.add("at least one emerald generator");
 		if (diamondGenerators.isEmpty()) missing.add("at least one diamond generator");
 		return missing;
@@ -172,6 +203,7 @@ public class FWMapConfig {
 	 */
 	public FWMapConfig translateTo(World targetWorld) {
 		FWMapConfig copy = new FWMapConfig(worldName);
+		copy.setSize(size);
 		copy.setLobby(translateLocation(lobby, targetWorld));
 		copy.setSpectatorLocation(translateLocation(spectatorLocation, targetWorld));
 

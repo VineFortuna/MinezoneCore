@@ -280,7 +280,7 @@ public class FWGameInstance {
 			TellAll(manager.getMain().color("&2&l(!) &e" + player.getName() + " &chas left the game!"));
 			gameSettings.removePlayer(player);
 
-			if (state == FWGameState.STARTING && countPlayers() < mode.getMinPlayers()) {
+			if (state == FWGameState.STARTING && !hasEnoughToStart()) {
 				cancelCountdown();
 			}
 
@@ -315,7 +315,9 @@ public class FWGameInstance {
 	private String waitingStatusLine() {
 		return state == FWGameState.STARTING
 				? "&rStarting In: &a" + FWGameConstants.STARTING_COUNTDOWN_SECONDS + "s"
-				: "&7&oWaiting for players...";
+				: mapConfig.isFourPlayerMap()
+						? "&7&oWaiting for all 4 teams..."
+						: "&7&oWaiting for players...";
 	}
 
 	/**
@@ -393,9 +395,18 @@ public class FWGameInstance {
 	}
 
 	private void checkForStart() {
-		if (state == FWGameState.WAITING && countPlayers() >= mode.getMinPlayers()) {
+		if (state == FWGameState.WAITING && hasEnoughToStart()) {
 			startCountdown();
 		}
+	}
+
+	/**
+	 * Enough players for the countdown to run. A 4-player map also needs a player on every base: you can only
+	 * capture each flag once, so with fewer teams in play the 3 captures needed to win would be impossible.
+	 */
+	private boolean hasEnoughToStart() {
+		if (countPlayers() < mode.getMinPlayers()) return false;
+		return !mapConfig.isFourPlayerMap() || countActiveTeams() == teams.size();
 	}
 
 	private void startCountdown() {

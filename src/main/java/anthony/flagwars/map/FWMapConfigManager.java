@@ -88,6 +88,7 @@ public class FWMapConfigManager {
 	public void save(FWMapConfig config) {
 		YamlConfiguration yaml = new YamlConfiguration();
 		yaml.set("world", config.getWorldName());
+		yaml.set("size", config.getSize());
 		writeLocation(yaml, "lobby", config.getLobby());
 		writeLocation(yaml, "spectatorLocation", config.getSpectatorLocation());
 
@@ -138,6 +139,7 @@ public class FWMapConfigManager {
 	private FWMapConfig loadFromFile(File source, String worldName) {
 		YamlConfiguration yaml = YamlConfiguration.loadConfiguration(source);
 		FWMapConfig loaded = new FWMapConfig(worldName);
+		loaded.setSize(yaml.getInt("size", FWMapConfig.SIZE_EIGHT)); // maps saved before sizes existed are 8-team maps
 		loaded.setLobby(readLocation(yaml, "lobby"));
 		loaded.setSpectatorLocation(readLocation(yaml, "spectatorLocation"));
 

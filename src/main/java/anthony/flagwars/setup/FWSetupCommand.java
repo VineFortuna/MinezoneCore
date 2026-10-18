@@ -32,12 +32,12 @@ import java.util.stream.Collectors;
 public class FWSetupCommand implements CommandExecutor, TabExecutor {
 
 	private static final List<String> SUBCOMMANDS = Arrays.asList(
-			"tp", "createmap", "lobby", "spectator", "team", "flag", "shop",
+			"tp", "createmap", "size", "lobby", "spectator", "team", "flag", "shop",
 			"generator", "boundary1", "boundary2", "importantarea", "chesthologram", "list", "save");
 	private static final String IMPORTANT_AREA_USAGE = "/fwsetup importantarea <color> <id> <X> <Y> <Z> &7or &e<id> remove";
 	private static final List<String> RESOURCE_TYPES = Arrays.asList("iron", "gold", "emerald", "diamond");
-	private static final List<String> COLOR_NAMES = Arrays.asList(
-			"Lime", "Yellow", "Cyan", "Blue", "LightBlue", "White", "Pink", "Gray");
+	private static final List<String> COLOR_NAMES = Arrays.asList(FWGameConstants.TEAM_NAMES);
+	private static final List<String> MAP_SIZES = Arrays.asList("4", "8");
 
 	private final FWGameManager fwGameManager;
 
@@ -145,6 +145,10 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 		Location loc = player.getLocation();
 
 		switch (sub) {
+			case "size":
+				handleSize(player, config, args);
+				break;
+
 			case "lobby":
 				config.setLobby(loc);
 				player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rSet the lobby point for &e" + player.getWorld().getName() + "&r."));
@@ -165,6 +169,11 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 
 				FWTeamSite site = config.getTeamSite(siteId);
 				boolean newlyCreated = false;
+				if (sub.equals("team") && !site.isCreated() && config.countCreatedTeams() >= config.getSize()) {
+					player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rThis is a " + config.getSize()
+							+ "-player map and already has " + config.countCreatedTeams() + " teams. Use &e/fwsetup size 8&r for more."));
+					break;
+				}
 				if (sub.equals("team")) {
 					newlyCreated = !site.isCreated();
 					site.setSpawn(loc);
@@ -383,13 +392,43 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 		return siteId;
 	}
 
+	/** /fwsetup size <4|8> - a 4-player map has 4 teams, needs all of them filled to start, and takes 3 captures to win. */
+	private void handleSize(Player player, FWMapConfig config, String[] args) {
+		int size;
+		try {
+			size = args.length < 2 ? -1 : Integer.parseInt(args[1]);
+		} catch (NumberFormatException e) {
+			size = -1;
+		}
+
+		if (size != FWMapConfig.SIZE_FOUR && size != FWMapConfig.SIZE_EIGHT) {
+			player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rTry: &e/fwsetup size <4|8> &7(this map is "
+					+ config.getSize() + "-player)"));
+			return;
+		}
+
+		int created = config.countCreatedTeams();
+		if (size < created) {
+			player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rThis map already has &e" + created
+					+ " &rteams created - a " + size + "-player map can only have " + size + "."));
+			return;
+		}
+
+		config.setSize(size);
+		String rules = size == FWMapConfig.SIZE_FOUR
+				? " &7Needs exactly 4 teams, starts once all 4 bases have a player, and takes 3 captures to win."
+				: "";
+		player.sendMessage(fwGameManager.getMain().color("&2&l(!) &e" + player.getWorld().getName()
+				+ " &ris now a &e" + size + "-player &rmap." + rules + " &7Run &e/fwsetup save &7to keep it."));
+	}
+
 	private void sendMapList(Player player, FWMapConfigManager manager) {
 		List<FWMapConfig> all = new ArrayList<>(manager.getAllConfigs());
 		player.sendMessage(fwGameManager.getMain().color("&6&lFLAG WARS MAPS &7(" + all.size() + " known)"));
 		for (FWMapConfig cfg : all) {
 			List<String> missing = cfg.findMissing();
 			boolean loaded = Bukkit.getWorld(cfg.getWorldName()) != null;
-			String worldTag = loaded ? "&2[loaded]" : "&8[unloaded]";
+			String worldTag = (loaded ? "&2[loaded]" : "&8[unloaded]") + " &b[" + cfg.getSize() + "-player]";
 			if (missing.isEmpty()) {
 				player.sendMessage(fwGameManager.getMain().color("  &e" + cfg.getWorldName()
 						+ " " + worldTag + " &a[Ready]"));
@@ -406,6 +445,7 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup tp <map> &7-> &rTeleport into a map (loads it if needed)"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup createmap <map> &7-> &rCreate a new void world"));
 		player.sendMessage(fwGameManager.getMain().color("&7(Stand in the target map world for all commands below)"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup size <4|8> &7- 4-player maps need all 4 teams to start and 3 captures to win"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup lobby"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup spectator"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup team <color> &7- also creates that team if it isn't already on this map"));
@@ -438,6 +478,10 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 
 		if (args.length == 2 && args[0].equalsIgnoreCase("generator")) {
 			return StringUtil.copyPartialMatches(args[1], RESOURCE_TYPES, new ArrayList<>());
+		}
+
+		if (args.length == 2 && args[0].equalsIgnoreCase("size")) {
+			return StringUtil.copyPartialMatches(args[1], MAP_SIZES, new ArrayList<>());
 		}
 
 		if (args.length == 2 && (args[0].equalsIgnoreCase("team") || args[0].equalsIgnoreCase("flag")
