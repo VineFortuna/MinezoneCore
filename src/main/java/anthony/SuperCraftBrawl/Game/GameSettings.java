@@ -11,6 +11,20 @@ import java.util.Set;
 
 public class GameSettings {
 
+	public enum HealthPotMode {
+		DISABLED("Disabled"), HALF_HEALTH("Half Health"), ALWAYS("Always");
+
+		private final String name;
+
+		HealthPotMode(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+	}
+
 	private GameInstance game;
 	public int totalStartVotes;
 	public int totalTimeVotes;
@@ -26,7 +40,8 @@ public class GameSettings {
 	public List<Player> santaVotes;
     public boolean opDrops;
     public boolean strengthOnKill;
-    public boolean disableHealthPots;
+    public HealthPotMode healthPotMode; // when killers get a health pot
+    public boolean oneForAll; // everyone plays the same class (not implemented yet)
     public boolean disableSpawnProtection;
     public boolean randomClasses;
     public int randomClassCycleSeconds;
@@ -51,7 +66,8 @@ public class GameSettings {
 		this.santaVotes = new ArrayList<Player>();
         this.opDrops = false;
         this.strengthOnKill = false;
-        this.disableHealthPots = false;
+        this.healthPotMode = HealthPotMode.HALF_HEALTH;
+        this.oneForAll = false;
         this.disableSpawnProtection = false;
         this.randomClasses = false;
         this.randomClassCycleSeconds = 15;

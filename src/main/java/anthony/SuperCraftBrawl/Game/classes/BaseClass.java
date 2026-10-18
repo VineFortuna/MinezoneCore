@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes;
 import anthony.SuperCraftBrawl.Game.ActionBarManager;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameManager;
+import anthony.SuperCraftBrawl.Game.GameSettings;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
@@ -579,7 +580,8 @@ public abstract class BaseClass {
 
 	// Giving health potions on kill
 	protected void giveHealthPot(Player killer) {
-		if (instance.getGameSettings().disableHealthPots)
+		GameSettings.HealthPotMode potMode = instance.getGameSettings().healthPotMode;
+		if (potMode == GameSettings.HealthPotMode.DISABLED)
 			return;
 
 		Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new Runnable() {
@@ -590,7 +592,9 @@ public abstract class BaseClass {
 
 				if (instance.alivePlayers == 1) return;
 
-				if (killer.getHealth() / killer.getMaxHealth() >= 0.5) return;
+				// Half Health: only when at or below half health. Always: every kill
+				if (potMode == GameSettings.HealthPotMode.HALF_HEALTH && killer.getHealth() / killer.getMaxHealth() > 0.5)
+					return;
 
 				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
 						String.valueOf(ChatColor.RED) + ChatColor.BOLD + "HEALING I");
