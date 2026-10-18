@@ -61,24 +61,17 @@ public class PartySettingsGUI implements InventoryProvider {
             return;
         }
 
+        // Players without a party can still change settings - a party just for them is made on the first change
         Party party = main.getPartyManager().getParty(player);
-
-        if (party == null) {
-            contents.set(1, 4, ClickableItem.of(ItemHelper.setDetails(
-                    new ItemStack(Material.BARRIER),
-                    main.color("&cNo Party"),
-                    main.color("&7You are not currently in a party.")
-            ), e -> {}));
-            return;
-        }
-
-        boolean isLeader = party.isLeader(player.getUniqueId());
+        boolean isLeader = party == null || party.isLeader(player.getUniqueId());
+        boolean privateGames = party != null && party.isPrivateGames();
+        boolean chatMuted = party != null && party.isPartyChatMuted();
 
         contents.set(1, 3, ClickableItem.of(ItemHelper.setDetails(
-                ItemHelper.setGlowing(new ItemStack(Material.EYE_OF_ENDER), party.isPrivateGames()),
+                ItemHelper.setGlowing(new ItemStack(Material.EYE_OF_ENDER), privateGames),
                 main.color("&eCustom Games"),
                 "",
-                main.color("&fStatus: " + getStatus(party.isPrivateGames())),
+                main.color("&fStatus: " + getStatus(privateGames)),
                 "",
                 main.color("&7When enabled, your party games"),
                 main.color("&7can play around with game"),
@@ -86,14 +79,12 @@ public class PartySettingsGUI implements InventoryProvider {
                 "",
                 isLeader ? main.color("&eClick to toggle") : main.color("&cOnly the party leader can change this.")
         ), e -> {
-            if (!party.isLeader(player.getUniqueId())) {
-                player.sendMessage(main.color("&c&l(!) &rOnly the party leader can change party settings."));
-                return;
-            }
+            Party p = getPartyToModify(player);
+            if (p == null) return;
 
-            party.setPrivateGames(!party.isPrivateGames());
+            p.setPrivateGames(!p.isPrivateGames());
 
-            if (party.isPrivateGames()) {
+            if (p.isPrivateGames()) {
                 player.sendMessage(main.color("&a&l(!) &rPrivate games have been &aenabled&r."));
             } else {
                 player.sendMessage(main.color("&a&l(!) &rPrivate games have been &cdisabled&r."));
@@ -103,24 +94,22 @@ public class PartySettingsGUI implements InventoryProvider {
         }));
 
         contents.set(1, 5, ClickableItem.of(ItemHelper.setDetails(
-                ItemHelper.setGlowing(new ItemStack(Material.NOTE_BLOCK), party.isPartyChatMuted()),
+                ItemHelper.setGlowing(new ItemStack(Material.NOTE_BLOCK), chatMuted),
                 main.color("&eMute Party Chat"),
                 "",
-                main.color("&fStatus: " + getStatus(party.isPartyChatMuted())),
+                main.color("&fStatus: " + getStatus(chatMuted)),
                 "",
                 main.color("&7When enabled, party members"),
                 main.color("&7cannot send party chat messages."),
                 "",
                 isLeader ? main.color("&eClick to toggle") : main.color("&cOnly the party leader can change this.")
         ), e -> {
-            if (!party.isLeader(player.getUniqueId())) {
-                player.sendMessage(main.color("&c&l(!) &rOnly the party leader can change party settings."));
-                return;
-            }
+            Party p = getPartyToModify(player);
+            if (p == null) return;
 
-            party.setPartyChatMuted(!party.isPartyChatMuted());
+            p.setPartyChatMuted(!p.isPartyChatMuted());
 
-            if (party.isPartyChatMuted()) {
+            if (p.isPartyChatMuted()) {
                 player.sendMessage(main.color("&a&l(!) &rParty chat has been &cmuted&r."));
             } else {
                 player.sendMessage(main.color("&a&l(!) &rParty chat has been &aunmuted&r."));
@@ -136,6 +125,16 @@ public class PartySettingsGUI implements InventoryProvider {
                 inv.close(player);
             }
         }));
+    }
+
+    /** The party whose settings the player may change (made on the spot if they have none), or null if they're not its leader. */
+    private Party getPartyToModify(Player player) {
+        Party party = main.getPartyManager().getOrCreateParty(player);
+        if (!party.isLeader(player.getUniqueId())) {
+            player.sendMessage(main.color("&c&l(!) &rOnly the party leader can change party settings."));
+            return null;
+        }
+        return party;
     }
 
     private String getStatus(boolean enabled) {

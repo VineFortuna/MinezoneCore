@@ -171,13 +171,13 @@ public class ScoreboardManager {
                     "", main.color("&fClass: &cR&6a&en&ad&bo&3m"), "",
                     main.color("Players: &e"
                             + (game.getMap().GetInstance().gameType == GameType.FRENZY
-                            ? "" + ChatColor.GREEN + game.players.size() + "/" + game.gameType.getMaxPlayers()
+                            ? "" + ChatColor.GREEN + game.players.size() + "/" + game.getMaxPlayerCount()
                             : "")
                             + (game.getMap().GetInstance().gameType == GameType.CLASSIC
-                            ? "" + ChatColor.GREEN + game.players.size() + "/" + game.gameType.getMaxPlayers()
+                            ? "" + ChatColor.GREEN + game.players.size() + "/" + game.getMaxPlayerCount()
                             : "")
                             + (game.getMap().GetInstance().gameType == GameType.DUEL
-                            ? "" + ChatColor.GREEN + game.players.size() + "/" + game.gameType.getMaxPlayers()
+                            ? "" + ChatColor.GREEN + game.players.size() + "/" + game.getMaxPlayerCount()
                             : "")),
                     "", main.color("&7&oWaiting for players.."), "", main.color("&ewww.minezone.club"));
 
@@ -189,18 +189,18 @@ public class ScoreboardManager {
         if (game != null) {
             GameType gameType = game.getMap().GetInstance().gameType;
             int playerSize = game.players.size();
-            int maxSize = game.gameType.getMaxPlayers();
+            int maxSize = game.getMaxPlayerCount();
 
             game.boards.get(player.getUniqueId()).updateLine(5,
                     main.color("Players: &e"
                             + (game.getMap().GetInstance().gameType == GameType.FRENZY
-                            ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.gameType.getMaxPlayers()
+                            ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.getMaxPlayerCount()
                             : "")
                             + (game.getMap().GetInstance().gameType == GameType.CLASSIC
-                            ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.gameType.getMaxPlayers()
+                            ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.getMaxPlayerCount()
                             : "")
                             + (game.getMap().GetInstance().gameType == GameType.DUEL
-                            ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.gameType.getMaxPlayers()
+                            ? "" + ChatColor.YELLOW + game.players.size() + "/" + game.getMaxPlayerCount()
                             : "")));
         }
     }

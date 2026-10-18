@@ -37,7 +37,7 @@ public class SignManager implements Listener {
 				Sign s = (Sign) b.getState();
 				instance.setSign(s);
 				s.setLine(2, core.color("&0Players: " + instance.players.size() + "/"
-						+ instance.getMap().GetInstance().gameType.getMaxPlayers()));
+						+ instance.getMaxPlayerCount()));
 				s.setLine(3, core.color("&0" + instance.timeToStartSeconds + "s"));
 				s.update();
 			}
@@ -104,7 +104,7 @@ public class SignManager implements Listener {
                         if (i != null) {
                             if (i.state == GameState.WAITING) {
                                 s.setLine(2, core.color("&0Players: " + i.players.size() + "/"
-                                        + i.getMap().GetInstance().gameType.getMaxPlayers()));
+                                        + i.getMaxPlayerCount()));
                                 s.setLine(3, core.color("&0" + i.timeToStartSeconds + "s"));
                                 s.update();
                             } else if (i.state == GameState.STARTED) {

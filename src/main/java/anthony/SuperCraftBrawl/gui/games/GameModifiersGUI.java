@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
 import fr.minuskube.inv.ClickableItem;
@@ -76,6 +77,33 @@ public class GameModifiersGUI implements InventoryProvider {
         addLivesModifier(contents, player);
         addRespawnTimeModifier(contents, player);
         addLowGravityModifier(contents, player);
+        addClassListModifier(contents, player);
+    }
+
+    private void addClassListModifier(InventoryContents contents, Player player) {
+        int enabled = 0;
+        int vaulted = 0;
+        for (ClassType type : game.getGameSettings().enabledClasses) {
+            if (!type.isPlayable()) continue;
+            enabled++;
+            if (type.isVaulted()) vaulted++;
+        }
+
+        contents.set(1, 4, ClickableItem.of(ItemHelper.setDetails(
+                new ItemStack(Material.ARMOR_STAND),
+                main.color("&e&lClass List"),
+                "",
+                main.color("&fEnabled: &a" + enabled + "&7/&a" + ClassType.getPlayableClasses().length + " &7classes"),
+                main.color("&fVaulted Enabled: &a" + vaulted),
+                "",
+                main.color("&7Choose which classes players"),
+                main.color("&7can pick, including vaulted ones"),
+                "",
+                main.color("&eClick to open")
+        ), e -> {
+            SoundManager.playClickSound(player);
+            new ClassListGUI(main, game, this).inv.open(player);
+        }));
     }
 
     private void addLowGravityModifier(InventoryContents contents, Player player) {

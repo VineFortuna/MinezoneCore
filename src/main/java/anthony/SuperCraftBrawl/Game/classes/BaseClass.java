@@ -244,7 +244,7 @@ public abstract class BaseClass {
 	@SuppressWarnings("deprecation")
 	private void checkBountyKill(BaseClass kClass, Player playerKilled, Player killer) {
 		PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(killer);
-		if (data != null) {
+		if (data != null && instance.savesStats()) {
 			if (kClass.bountyTarget != null) {
 				if (kClass.bountyTarget == playerKilled) {
 					kClass.bountyTarget = null;
@@ -278,7 +278,7 @@ public abstract class BaseClass {
     }
 
 	private void handleElimination(Player p, Player killer, BaseClass baseClassDead, PlayerData data) {
-		if (data != null) {
+		if (data != null && instance.savesStats()) {
 			data.losses += 1;
 			data.winstreak = 0;
 			instance.getGameManager().getMain().giveBattlePassXp(p,
@@ -309,7 +309,7 @@ public abstract class BaseClass {
 
 		if (chance >= 0 && chance <= 1) {
 
-			if (data != null) {
+			if (data != null && instance.savesStats()) {
 				data.mysteryChests++;
 				player.sendMessage(instance.getGameManager().getMain()
 						.color("&5&l(!) &rYou have found &e1 MysteryChest!"));
@@ -326,6 +326,15 @@ public abstract class BaseClass {
 			p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RED + ChatColor.BOLD
 					+ "  GAME LOST");
 			p.sendMessage(ChatColor.BOLD + "||");
+			baseClassDead.placement = instance.alivePlayers;
+
+			if (!instance.savesStats()) {
+				p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Placed #" + instance.alivePlayers);
+				p.sendMessage(ChatColor.BOLD + "||");
+				p.sendMessage(ChatColor.BOLD + "=====================");
+				p.sendMessage(instance.color("&2&l(!) &rPrivate games don't give Tokens, EXP or stats."));
+				return;
+			}
 
 			int tokensEarned = 0;
 			if (instance.alivePlayers == 5) {
@@ -342,7 +351,6 @@ public abstract class BaseClass {
 			baseClassDead.totalTokens += tokensEarned;
 			p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Placed #"
 					+ instance.alivePlayers + ": " + ChatColor.GREEN + tokensEarned + " Tokens");
-			baseClassDead.placement = instance.alivePlayers;
 
 			if (baseClassDead.totalKills >= 0) {
 				player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  "
@@ -356,11 +364,12 @@ public abstract class BaseClass {
 						+ "  First Blood: " + ChatColor.GREEN + "10 Tokens");
 				data.tokens += 10;
 			}
-			if (p.hasPermission("scb.rankBonus")) {
+			int rankBonus = instance.getGameManager().getMain().getRankBonusTokens(p, "scb.rankBonus");
+			if (rankBonus > 0) {
 				p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Rank Bonus: "
-						+ ChatColor.GREEN + "10 Tokens");
-				data.tokens += 10;
-				baseClassDead.totalTokens += 10;
+						+ ChatColor.GREEN + rankBonus + " Tokens");
+				data.tokens += rankBonus;
+				baseClassDead.totalTokens += rankBonus;
 			}
 			p.sendMessage(ChatColor.BOLD + "||");
 			p.sendMessage(ChatColor.BOLD + "=====================");
@@ -386,7 +395,8 @@ public abstract class BaseClass {
             if (isDead) {
 				PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(p);
 
-				data.deaths += 1;
+				if (instance.savesStats())
+					data.deaths += 1;
 
 				for (PotionEffect type : p.getActivePotionEffects())
 					p.removePotionEffect(type.getType());
@@ -617,7 +627,7 @@ public abstract class BaseClass {
 					tellAll(instance.color("&2&l(!) &r" + killer.getName() + " &adrew first blood!"));
 					tellAll("");
 					baseClass.totalTokens += 10;
-					if (instance.getGameManager().getMain().tournament) {
+					if (instance.getGameManager().getMain().tournament && instance.savesStats()) {
 						if (instance.gameType != GameType.DUEL) {
 							data.points += 2;
 							instance.getGameManager().getMain().tourney.put(killer.getName(), data.points);
@@ -626,15 +636,17 @@ public abstract class BaseClass {
 				}
 
 				if (data != null) {
-					data.kills += 1;
-					data.exp += 29;
-					baseClass.totalExp += 29;
-					instance.getGameManager().getMain().giveBattlePassXp(killer,
-							anthony.SuperCraftBrawl.battlepass.BattlePassSeason.XP_KILL);
-					if (instance.getGameManager().getMain().tournament) {
-						if (instance.gameType != GameType.DUEL) {
-							data.points++;
-							instance.getGameManager().getMain().tourney.put(killer.getName(), data.points);
+					if (instance.savesStats()) {
+						data.kills += 1;
+						data.exp += 29;
+						baseClass.totalExp += 29;
+						instance.getGameManager().getMain().giveBattlePassXp(killer,
+								anthony.SuperCraftBrawl.battlepass.BattlePassSeason.XP_KILL);
+						if (instance.getGameManager().getMain().tournament) {
+							if (instance.gameType != GameType.DUEL) {
+								data.points++;
+								instance.getGameManager().getMain().tourney.put(killer.getName(), data.points);
+							}
 						}
 					}
 

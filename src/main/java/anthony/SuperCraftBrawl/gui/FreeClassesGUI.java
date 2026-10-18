@@ -36,7 +36,7 @@ public class FreeClassesGUI implements InventoryProvider {
 		
 		PlayerData data = main.getDataManager().getPlayerData(player);
 
-		for (ClassType type : ClassType.sortAlphabetically(ClassType.getFreeClasses(false))) {
+		for (ClassType type : ClassType.sortAlphabetically(main.getGameManager().filterSelectableClasses(player, ClassType.getFreeClasses(true)))) {
 			ItemStack item = type.getItem();
 			
 			if (type == ClassType.Fisherman &&  !main.fishing.hasUnlockedFisherman(player)) {

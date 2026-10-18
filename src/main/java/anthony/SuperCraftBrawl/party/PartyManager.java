@@ -41,6 +41,12 @@ public class PartyManager {
         return partyByMember.get(player.getUniqueId());
     }
 
+    /** The player's party, or a new party with just them in it. */
+    public Party getOrCreateParty(Player player) {
+        Party party = getParty(player);
+        return party != null ? party : createParty(player);
+    }
+
     public boolean isInParty(Player player) {
         return getParty(player) != null;
     }
@@ -237,6 +243,16 @@ public class PartyManager {
             broadcast(party, "&e&l(!) &e" + player.getName() + " &rhas left the party.");
             player.sendMessage(main.color(message));
         }
+
+        disbandIfAlone(party);
+    }
+
+    /** A party that's down to just its leader after members leave gets disbanded. */
+    private void disbandIfAlone(Party party) {
+        if (party.size() > 1) return;
+
+        broadcast(party, "&e&l(!) &rThe party was disbanded because only one player was left.");
+        removeParty(party);
     }
 
     public void kick(Player leader, Player target) {
@@ -263,10 +279,7 @@ public class PartyManager {
         target.sendMessage(main.color("&c&l(!) &rYou were kicked from the party."));
         broadcast(party, "&c&l(!) &e" + target.getName() + " &rwas kicked from the party.");
 
-        if (party.size() <= 1) {
-            broadcast(party, "&e&l(!) &rThe party was disbanded because only one player was left.");
-            removeParty(party);
-        }
+        disbandIfAlone(party);
     }
 
     public void promote(Player leader, Player target) {
@@ -404,6 +417,8 @@ public class PartyManager {
 
             broadcast(party, "&e&l(!) &e" + player.getName() + " &rleft the server and was removed from the party.");
         }
+
+        disbandIfAlone(party);
     }
 
     private Party createParty(Player leader) {

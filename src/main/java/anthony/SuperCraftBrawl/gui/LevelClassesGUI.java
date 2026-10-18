@@ -40,7 +40,7 @@ public class LevelClassesGUI implements InventoryProvider {
 		int a = 0;
 		int b = 0;
 
-		for (ClassType type : ClassType.getLevelClasses(false)) {
+		for (ClassType type : main.getGameManager().filterSelectableClasses(player, ClassType.getLevelClasses(true))) {
 			ClassDetails details = data.playerClasses.get(type.getID());
 			int played = details.gamesPlayed + 2 * details.gamesWon;
 			int nextLevel = 10;

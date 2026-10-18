@@ -384,7 +384,7 @@ public class PlayerListener implements Listener {
                 player.setHealth(20.0f);
                 player.setFireTicks(0);
                 player.setLevel(playerData.level);
-                player.setGameMode(GameMode.ADVENTURE);
+                player.setGameMode(main.getLobbyGameMode(player));
                 player.setAllowFlight(true);
                 main.mysteryChestHologram(player);
                 main.parkourHolograms(player);
@@ -785,7 +785,8 @@ public class PlayerListener implements Listener {
     public void armorStand(EntityDamageByEntityEvent e) {
         if (e.getDamager() instanceof Player)
             if (e.getEntity() instanceof ArmorStand)
-                if (((Player) e.getDamager()).getPlayer().getGameMode() != GameMode.CREATIVE)
+                if (((Player) e.getDamager()).getPlayer().getGameMode() != GameMode.CREATIVE
+                        || main.getLobbyBuildManager().isLobbyBuilder((Player) e.getDamager()))
                     e.setCancelled(true);
     }
 
@@ -825,7 +826,9 @@ public class PlayerListener implements Listener {
         ItemStack item = e.getItem();
         Player player = e.getPlayer();
 
-        if (item != null && item.getType() == Material.REDSTONE_COMPARATOR)
+        // In a game the comparator is the private game's Game Modifiers / Game Settings item instead
+        if (item != null && item.getType() == Material.REDSTONE_COMPARATOR
+                && main.getGameManager().GetInstanceOfPlayer(player) == null)
             new PrefsGUI(main).inv.open(player);
     }
 

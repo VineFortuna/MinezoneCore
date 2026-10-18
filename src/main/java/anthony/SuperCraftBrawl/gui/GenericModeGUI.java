@@ -250,7 +250,7 @@ public class GenericModeGUI implements InventoryProvider {
 
 		// Player information
 		int numberOfPlayers = (game != null) ? game.players.size() : 0;
-		int maxNumberOfPlayers = (game != null) ? game.gameType.getMaxPlayers() : map.getGamemode().getMaxPlayers();
+		int maxNumberOfPlayers = (game != null) ? game.getMaxPlayerCount() : map.getGamemode().getMaxPlayers();
 		String playersInfo = "&rPlayers: &e" + numberOfPlayers + "/" + maxNumberOfPlayers;
 		String clickMessage = (game == null || game.state == GameState.WAITING) ? "&r&nClick to join!" : "&r&nClick to spectate!";
 

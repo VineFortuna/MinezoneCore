@@ -11,6 +11,7 @@ import net.minecraft.server.v1_8_R3.EntityArmorStand;
 import net.minecraft.server.v1_8_R3.PacketPlayOutEntityDestroy;
 import net.minecraft.server.v1_8_R3.PacketPlayOutSpawnEntityLiving;
 import net.minecraft.server.v1_8_R3.WorldServer;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -73,6 +74,7 @@ public class Parkour implements Listener {
         player.getInventory().clear();
         giveGameItems(player);
         createOrUpdateBoard(player, /*resetTime*/ true);
+        player.setGameMode(GameMode.ADVENTURE); // LEGENDARY players are in creative in the lobby
         player.setAllowFlight(false);
         player.closeInventory();
 
@@ -110,6 +112,7 @@ public class Parkour implements Listener {
         main.getScoreboardManager().lobbyBoard(player);
         player.getInventory().clear();
         main.LobbyItems(player);
+        player.setGameMode(main.getLobbyGameMode(player));
         player.setAllowFlight(true);
         player.setFireTicks(0);
     }

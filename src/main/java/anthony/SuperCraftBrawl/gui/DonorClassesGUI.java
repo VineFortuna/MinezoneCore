@@ -39,7 +39,7 @@ public class DonorClassesGUI implements InventoryProvider {
 					new ClassesGUI(main).inv.open(player);
 				}));
 
-		for (ClassType type : ClassType.sortAlphabetically(ClassType.getDonorClasses(false))) {
+		for (ClassType type : ClassType.sortAlphabetically(main.getGameManager().filterSelectableClasses(player, ClassType.getDonorClasses(true)))) {
 			ClassDetails details = data.playerClasses.get(type.getID());
 			int played = details.gamesPlayed + 2 * details.gamesWon;
 			int nextLevel = 10;

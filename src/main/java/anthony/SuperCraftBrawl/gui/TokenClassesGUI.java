@@ -38,7 +38,7 @@ public class TokenClassesGUI implements InventoryProvider {
 					new ClassesGUI(main).inv.open(player);
 				}));
 
-		for (ClassType type : ClassType.sortAlphabetically(ClassType.getTokenClasses(false))) {
+		for (ClassType type : ClassType.sortAlphabetically(main.getGameManager().filterSelectableClasses(player, ClassType.getTokenClasses(true)))) {
 			ClassDetails details = data.playerClasses.get(type.getID());
 			int played = details.gamesPlayed + 2 * details.gamesWon;
 			int nextLevel = 10;

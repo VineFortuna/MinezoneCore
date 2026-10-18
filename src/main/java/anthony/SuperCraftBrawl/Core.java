@@ -104,6 +104,7 @@ public class Core extends JavaPlugin implements Listener {
     public DoubleJumpManager djManager;
     protected final Cooldown cooldownTime = null;
     public RankManager rankManager;
+    private anthony.SuperCraftBrawl.lobbybuild.LobbyBuildManager lobbyBuildManager;
     public List<Player> staffchat;
     public List<Player> globalchat;
     public PlayerDataManager dataManager;
@@ -419,6 +420,24 @@ public class Core extends JavaPlugin implements Listener {
 
     public RankManager getRankManager() {
         return rankManager;
+    }
+
+    public anthony.SuperCraftBrawl.lobbybuild.LobbyBuildManager getLobbyBuildManager() {
+        return lobbyBuildManager;
+    }
+
+    /**
+     * End-of-game rank bonus tokens: 20 for LEGENDARY, 10 for any other rank with the given bonus permission
+     * (scb.rankBonus / scb.rankBonusOne), otherwise 0.
+     */
+    public int getRankBonusTokens(Player player, String permission) {
+        if (getRankManager().getRank(player) == Rank.LEGENDARY) return 20;
+        return player.hasPermission(permission) ? 10 : 0;
+    }
+
+    /** Creative for LEGENDARY players (so they can build in the lobby), adventure for everyone else. */
+    public GameMode getLobbyGameMode(Player player) {
+        return lobbyBuildManager != null ? lobbyBuildManager.getLobbyGameMode(player) : GameMode.ADVENTURE;
     }
 
     // For tab organization.
@@ -749,16 +768,46 @@ public class Core extends JavaPlugin implements Listener {
         }
 
         getCommand("treatsadmin").setExecutor(new TreatsAdminCommand(halloweenHunt));
+        getCommand("setimportantarea").setExecutor(lobbyBuildManager);
 
         PluginCommand battlePassCommand = getCommand("battlepass");
         if (battlePassCommand != null)
             battlePassCommand.setExecutor(new anthony.SuperCraftBrawl.battlepass.BattlePassCommand(this));
         else
             System.out.print("battlepass was null!");
+
+        claimPartyAlias();
+        // Again once every plugin has finished enabling, in case one registers /p late
+        Bukkit.getScheduler().runTask(this, new Runnable() {
+            @Override
+            public void run() {
+                claimPartyAlias();
+            }
+        });
+    }
+
+    /*
+     * MinezonePunish loads before us (softdepend) and claims the /p alias for its punishment command,
+     * so point /p back at /party in the server's command map.
+     */
+    @SuppressWarnings("unchecked")
+    private void claimPartyAlias() {
+        PluginCommand party = getCommand("party");
+        if (party == null) return;
+
+        try {
+            Object commandMap = Bukkit.getServer().getClass().getMethod("getCommandMap").invoke(Bukkit.getServer());
+            Field knownCommands = org.bukkit.command.SimpleCommandMap.class.getDeclaredField("knownCommands");
+            knownCommands.setAccessible(true);
+            ((Map<String, Command>) knownCommands.get(commandMap)).put("p", party);
+        } catch (Exception e) {
+            getLogger().warning("Couldn't point /p at /party: " + e);
+        }
     }
 
     private void registrations() {
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
+        Bukkit.getServer().getPluginManager().registerEvents(lobbyBuildManager, this);
         Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         Bukkit.getMessenger().registerIncomingPluginChannel(this, "BungeeCord", gameManager);
     }
@@ -783,6 +832,7 @@ public class Core extends JavaPlugin implements Listener {
         dataManager = new PlayerDataManager(this);
         gameDataManager = new GameDataManager(this);
         rankManager = new RankManager(this);
+        lobbyBuildManager = new anthony.SuperCraftBrawl.lobbybuild.LobbyBuildManager(this);
         actionBarManager = new ActionBarManager(this);
         ag = new ActiveGamesGUI(this);
         p = new Parkour(this);
@@ -1090,7 +1140,8 @@ public class Core extends JavaPlugin implements Listener {
                  */
                 if (this.getGameManager().GetInstanceOfPlayer(player) != null
                         || this.getGameManager().GetInstanceOfSpectator(player) != null) {
-                    this.getCommands().leaveGame(player);
+                    if (!this.getCommands().leaveGame(player))
+                        return true;
                 } else if (this.getParkour().hasPlayer(player)) {
                     this.getParkour().removePlayer(player);
                     this.ResetPlayer(player);
@@ -2123,7 +2174,7 @@ public class Core extends JavaPlugin implements Listener {
             player.setHealth(20.0f);
             player.setFireTicks(0);
             player.setLevel(playerData.level);
-            player.setGameMode(GameMode.ADVENTURE);
+            player.setGameMode(getLobbyGameMode(player));
             player.setAllowFlight(true);
             mysteryChestHologram(player);
             parkourHolograms(player);
@@ -2203,6 +2254,8 @@ public class Core extends JavaPlugin implements Listener {
     public void onDisable() {
         if (battlePassManager != null)
             battlePassManager.shutdown();
+        if (lobbyBuildManager != null)
+            lobbyBuildManager.clearPlacedBlocks();
         disablePacketNPCs();
         ByteArrayOutputStream b = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(b);

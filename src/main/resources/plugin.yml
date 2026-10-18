@@ -162,6 +162,9 @@ commands:
    battlepass:
       description: Open the Battle Pass
       aliases: [bp, pass]
+   setimportantarea:
+      description: Protect an area of the lobby from Legendary building
+      usage: /setimportantarea <X> <Y> <Z> (blocks out from you in each direction)
    tricktitle:
       description: a
    lactate:

@@ -94,6 +94,8 @@ public class GameInstance {
     private ItemStack nextItemToDrop;
     public List<ItemStack> allItemDrops = new ArrayList<>();
     public List<Player> favClassSelection = new ArrayList<>();
+    // Classes each player has had this match, so Random Classes / Frenzy don't repeat one until they've had them all
+    private final Map<UUID, Set<ClassType>> classHistory = new HashMap<>();
     public List<ClassType> classList = generateClassList();
     private SignManager sm;
 
@@ -106,6 +108,7 @@ public class GameInstance {
     public boolean isDuel = false;
 
     //PARTY SYSTEM
+    public static final int PRIVATE_GAME_MAX_PLAYERS = 100;
     private boolean privateGame = false;
     private boolean privateGameCountdownStarted = false;
     private UUID privateGameLeader;
@@ -205,6 +208,26 @@ public class GameInstance {
         return privateGame;
     }
 
+    /** Private games don't count: no stats are saved and no tokens or EXP are given out. */
+    public boolean savesStats() {
+        return !privateGame;
+    }
+
+    /** Classes players can choose (or be randomly given) in this game. */
+    public ClassType[] getSelectableClasses() {
+        if (!privateGame) return ClassType.getAvailableClasses();
+
+        List<ClassType> enabled = new ArrayList<>();
+        for (ClassType type : getGameSettings().enabledClasses) {
+            if (type.isPlayable()) enabled.add(type); // inactive holiday classes never count
+        }
+        return enabled.isEmpty() ? ClassType.getAvailableClasses() : enabled.toArray(new ClassType[0]);
+    }
+
+    public boolean isClassSelectable(ClassType type) {
+        return Arrays.asList(getSelectableClasses()).contains(type);
+    }
+
     public UUID getPrivateGameLeader() {
         return privateGameLeader;
     }
@@ -268,6 +291,16 @@ public class GameInstance {
         newLeader.sendMessage(color("&a&l(!) &rYou are now the private game leader."));
     }
 
+    /** Reopens the Game Modifiers menu - goes in the 8th hotbar slot once the leader has started the countdown. */
+    public static ItemStack getGameSettingsItem() {
+        return ItemHelper.setDetails(
+                new ItemStack(Material.REDSTONE_COMPARATOR),
+                "&eGame Settings &7(Right Click)",
+                "",
+                "&7Click to go back to the game settings."
+        );
+    }
+
     public void givePrivateGameLeaderItems(Player leader) {
         if (leader == null) return;
         if (!isPrivateGameLeader(leader)) return;
@@ -319,6 +352,32 @@ public class GameInstance {
         StartGameTimer();
     }
 
+    /*
+     * The leader clicked Game Settings during the countdown: stop it and hand back the
+     * Game Modifiers / Start Game items so they can change settings and start again.
+     */
+    public void cancelPrivateGameCountdown(Player leader) {
+        if (!privateGame || state != GameState.WAITING || !isPrivateGameLeader(leader)) return;
+
+        if (gameStartTime != null) {
+            gameStartTime.cancel();
+            gameStartTime = null;
+        }
+        privateGameCountdownStarted = false;
+        timeToStartSeconds = getSecondsUntilStart();
+        removeVotePaper();
+
+        for (Player p : players) {
+            p.setLevel(0);
+            TitleUtil.clear(p);
+            FastBoard fb = boards.get(p.getUniqueId());
+            if (fb != null) fb.updateLine(7, color("&7&oWaiting for players.."));
+        }
+
+        TellAll(color("&e&l(!) &e" + leader.getName() + " &rstopped the countdown to change the game settings."));
+        givePrivateGameLeaderItems(leader);
+    }
+
     /**
      * Retrieves the location of the game lobby for the current map.
      *
@@ -331,7 +390,12 @@ public class GameInstance {
     }
 
     public boolean isOpen() {
-        return state == GameState.WAITING && this.players.size() < gameType.getMaxPlayers();
+        return state == GameState.WAITING && this.players.size() < getMaxPlayerCount();
+    }
+
+    /** Private games can hold far more players than the normal game type limit. */
+    public int getMaxPlayerCount() {
+        return privateGame ? PRIVATE_GAME_MAX_PLAYERS : gameType.getMaxPlayers();
     }
 
     public void SendPlayerToMap(Player player) {
@@ -408,6 +472,7 @@ public class GameInstance {
      * category are allowed
      */
     private String getMaxPlayers() {
+        if (privateGame) return "" + getMaxPlayerCount();
         String maxPlayers = ""
                 + (map.GetInstance().gameType == GameType.FRENZY ? "" + gameType.getMaxPlayers() : "")
                 + (map.GetInstance().gameType == GameType.CLASSIC ? "" + gameType.getMaxPlayers() : "")
@@ -417,6 +482,11 @@ public class GameInstance {
 
     public boolean isLobbyFull(Player player) {
         if (this.map != null) {
+            if (privateGame) {
+                if (players.size() < getMaxPlayerCount()) return false;
+                player.sendMessage(color("&c&l(!) &fThis game is full!"));
+                return true;
+            }
             if (this.gameType == GameType.DUEL && players.size() >= 2) {
                 player.sendMessage(color("&c&l(!) &fThis game is full!"));
                 return true;
@@ -861,14 +931,9 @@ public class GameInstance {
 
                             player.updateInventory();
 
-                            TitleUtil.sendTitle(
-                                    player,
-                                    "&eNew Random Class",
-                                    "" + newClass.getType().getTag(),
-                                    1,
-                                    30,
-                                    10
-                            );
+                            TitleUtil.sendTimes(player, 1, 30, 10);
+                            TitleUtil.setSubtitle(player, "" + newClass.getType().getTag());
+                            TitleUtil.setTitle(player, "");
 
                             player.playSound(player.getLocation(), Sound.HORSE_ARMOR, 1.0F, 1.0F);
                             player.playSound(player.getLocation(), Sound.LEVEL_UP, 1.0F, 1.2F);
@@ -877,6 +942,19 @@ public class GameInstance {
 
                     seconds = getGameSettings().randomClassCycleSeconds;
                     return;
+                }
+
+                // 3, 2, 1 subtitle countdown before the classes change
+                if (seconds <= 3) {
+                    for (Player player : players) {
+                        BaseClass bc = classes.get(player);
+                        if (bc == null || bc.getLives() <= 0 || bc.isDead) continue;
+
+                        TitleUtil.sendTimes(player, 0, 25, 5);
+                        TitleUtil.setSubtitle(player, "&e" + seconds);
+                        TitleUtil.setTitle(player, "");
+                        player.playSound(player.getLocation(), Sound.NOTE_PLING, 1.0F, 1.0F);
+                    }
                 }
 
                 seconds--;
@@ -1354,7 +1432,9 @@ public class GameInstance {
 
                                 if (GameInstance.this.gameType == GameType.FRENZY
                                         || GameInstance.this.gameType == GameType.GUNGAME) {
-                                    TitleUtil.sendTitle(player, "&eNew Class", "" + finalBaseClass.getType().getTag(), 1, 30, 10);
+                                    TitleUtil.sendTimes(player, 1, 30, 10);
+                                    TitleUtil.setSubtitle(player, "" + finalBaseClass.getType().getTag());
+                                    TitleUtil.setTitle(player, "");
                                 } else {
                                     TitleUtil.sendTimes(player, 1, 30, 10);
                                     TitleUtil.setSubtitle(player, "");
@@ -1375,7 +1455,8 @@ public class GameInstance {
                             player.setGameMode(GameMode.SPECTATOR);
 
                             if (!timesSent) {
-                                TitleUtil.sendTitle(player, "&eRespawning In", "&c" + this.ticks, 1, 60, 1);
+                                // Stays up for exactly the countdown so it matches the Respawn Time setting
+                                TitleUtil.sendTitle(player, "&eRespawning In", "&c" + this.ticks, 1, this.ticks * 20, 1);
                                 timesSent = true;
                             } else {
                                 TitleUtil.updateTitleText(player, null, "&c" + this.ticks);
@@ -1576,7 +1657,7 @@ public class GameInstance {
 
             if (baseClass == null) {
                 player.sendMessage("Your base class is fackin null");
-            } else if (data != null) {
+            } else if (data != null && savesStats()) {
                 data.tokens += tokens;
                 baseClass.totalTokens += tokens;
             }
@@ -1595,7 +1676,7 @@ public class GameInstance {
             Player player = playerPosition.get(playerPosition.size() - position);
             PlayerData data = gameManager.getMain().getDataManager().getPlayerData(player);
 
-            if (data != null) {
+            if (data != null && savesStats()) {
                 if (gameType != GameType.DUEL) {
                     data.points += points;
                     getGameManager().getMain().tourney.put(player.getName(), data.points);
@@ -1622,7 +1703,7 @@ public class GameInstance {
     }
 
     private void checkForMatchMvp() {
-        if (matchMvp() != null) {
+        if (savesStats() && matchMvp() != null) {
             for (Entry<Player, BaseClass> entry : this.allClasses.entrySet()) {
                 if (entry.getKey() != null) {
                     if (matchMvp() == entry.getValue()) {
@@ -1649,6 +1730,7 @@ public class GameInstance {
             data3 = gameManager.getMain().getDataManager().getPlayerData(winner);
             winnerList.add(winner);
             playerPosition.add(winner);
+            if (!savesStats()) continue;
             if (data3 != null) {
                 BaseClass bc = classes.get(winner);
                 int classID = bc.getType().getID();
@@ -1670,7 +1752,7 @@ public class GameInstance {
             }
         }
 
-        if (getGameManager().getMain().tournament == true) {
+        if (getGameManager().getMain().tournament == true && savesStats()) {
             givePoints(1, 10);
             givePoints(2, 7);
             givePoints(3, 5);
@@ -1683,6 +1765,18 @@ public class GameInstance {
             winner.getInventory().clear();
             winner.setGameMode(GameMode.ADVENTURE);
             BaseClass baseClass = classes.get(winner);
+
+            if (!savesStats()) {
+                if (baseClass != null) baseClass.placement = 1;
+                winner.sendMessage("" + ChatColor.BOLD + "===========================");
+                winner.sendMessage("" + ChatColor.BOLD + "||");
+                winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.YELLOW + ChatColor.BOLD + "  GAME WON");
+                winner.sendMessage("" + ChatColor.BOLD + "||");
+                winner.sendMessage("" + ChatColor.BOLD + "===========================");
+                winner.sendMessage(color("&2&l(!) &rPrivate games don't give Tokens, EXP or stats."));
+                continue;
+            }
+
             if (baseClass != null) {
                 if (baseClass.getLives() < 5) {
                     PlayerData data = gameManager.getMain().getDataManager().getPlayerData(winner);
@@ -1709,10 +1803,11 @@ public class GameInstance {
                         data3.tokens += 10;
                     }
 
-                    if (winner.hasPermission("scb.rankBonusOne")) {
+                    int rankBonus = getGameManager().getMain().getRankBonusTokens(winner, "scb.rankBonusOne");
+                    if (rankBonus > 0) {
                         winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Rank Bonus: "
-                                + ChatColor.GREEN + "10 Tokens");
-                        baseClass.totalTokens += 10;
+                                + ChatColor.GREEN + rankBonus + " Tokens");
+                        baseClass.totalTokens += rankBonus;
                     }
                     winner.sendMessage("" + ChatColor.BOLD + "||");
                     winner.sendMessage("" + ChatColor.BOLD + "===========================");
@@ -1752,10 +1847,11 @@ public class GameInstance {
                     winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Flawless Win: "
                             + ChatColor.GREEN + "10 Tokens");
                     baseClass.totalTokens += 10;
-                    if (winner.hasPermission("scb.rankBonus")) {
+                    int rankBonus = getGameManager().getMain().getRankBonusTokens(winner, "scb.rankBonus");
+                    if (rankBonus > 0) {
                         winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Rank Bonus: "
-                                + ChatColor.GREEN + "10 Tokens");
-                        baseClass.totalTokens += 10;
+                                + ChatColor.GREEN + rankBonus + " Tokens");
+                        baseClass.totalTokens += rankBonus;
                     }
                     winner.sendMessage("" + ChatColor.BOLD + "||");
                     winner.sendMessage("" + ChatColor.BOLD + "===========================");
@@ -1817,7 +1913,7 @@ public class GameInstance {
 
         if (map != null) {
             if (baseClass.getLives() >= 5) {
-                if (data != null) {
+                if (data != null && savesStats()) {
                     if (getGameManager().getMain().tournament) {
                         if (gameType != GameType.DUEL) data.points += 5;
                     }
@@ -1847,7 +1943,7 @@ public class GameInstance {
                 if (bc != null) display = (baseClass.getLives() >= bc.getLives()) ? winnerList.get(0) : winnerList.get(1);
             }
             if (baseClass.getLives() >= 5) {
-                if (data != null) {
+                if (data != null && savesStats()) {
                     if (getGameManager().getMain().tournament) {
                         if (gameType != GameType.DUEL) data.points += 5;
                     }
@@ -1955,11 +2051,45 @@ public class GameInstance {
         }
     }
 
+    private void recordClassPlayed(Player player, ClassType type) {
+        classHistory.computeIfAbsent(player.getUniqueId(), new java.util.function.Function<UUID, Set<ClassType>>() {
+            @Override
+            public Set<ClassType> apply(UUID id) {
+                return EnumSet.noneOf(ClassType.class);
+            }
+        }).add(type);
+    }
+
+    /*
+     * A random selectable class the player hasn't had yet this match. Once they've been through every one,
+     * their history starts over (still avoiding the class they're on right now, so it always changes).
+     */
+    private ClassType pickUnplayedClass(Player player) {
+        ClassType[] selectable = getSelectableClasses();
+        Set<ClassType> played = classHistory.get(player.getUniqueId());
+        BaseClass current = classes.get(player);
+
+        List<ClassType> options = new ArrayList<>();
+        for (ClassType type : selectable) {
+            if (played == null || !played.contains(type)) options.add(type);
+        }
+
+        if (options.isEmpty()) {
+            played.clear();
+            for (ClassType type : selectable) {
+                if (current == null || type != current.getType() || selectable.length == 1) options.add(type);
+            }
+        }
+
+        ClassType picked = options.get(random.nextInt(options.size()));
+        recordClassPlayed(player, picked);
+        return picked;
+    }
+
     private void reRandomizeClass(Player player) {
         BaseClass baseClass = classes.get(player);
         if (baseClass.getLives() > 0) {
-            ClassType classType = ClassType.getAvailableClasses()[random
-                    .nextInt(ClassType.getAvailableClasses().length)];
+            ClassType classType = pickUnplayedClass(player);
             BaseClass newBaseClass = classType.GetClassInstance(this, player);
             BaseClass oldBaseClass = classes.get(player);
             oldClasses.put(player, oldBaseClass);
@@ -2043,25 +2173,28 @@ public class GameInstance {
             PlayerData playerData = gameManager.getMain().getDataManager().getPlayerData(player);
             ClassType selectedClass = gameType != GameType.FRENZY ? classSelection.get(player) : null;
 
+            ClassType[] selectable = getSelectableClasses();
+
+            // A class the private game leader disabled after it was picked gets re-rolled
+            if (selectedClass != null && !isClassSelectable(selectedClass)) selectedClass = null;
+
             if (gameType == GameType.GUNGAME) selectedClass = classList.get(0);
 
             if (selectedClass == null) {
                 if (this.favClassSelection.contains(player) && !playerData.customIntegers.isEmpty()) {
-                    if (playerData != null) {
-                        int randomIndex = rand.nextInt(playerData.customIntegers.size());
-                        int randValue = playerData.customIntegers.get(randomIndex);
-                        for (ClassType type : ClassType.getAvailableClasses()) {
-                            if (type.getID() == randValue) { selectedClass = type; break; }
-                        }
+                    // Only favorites that are selectable in this game
+                    List<ClassType> favorites = new ArrayList<>();
+                    for (ClassType type : selectable) {
+                        if (playerData.customIntegers.contains(type.getID())) favorites.add(type);
                     }
-                } else {
-                    selectedClass = ClassType.getAvailableClasses()[rand
-                            .nextInt(ClassType.getAvailableClasses().length)];
+                    if (!favorites.isEmpty()) selectedClass = favorites.get(rand.nextInt(favorites.size()));
+                }
+                if (selectedClass == null) {
+                    selectedClass = selectable[rand.nextInt(selectable.length)];
                     if (gameType != GameType.FRENZY) {
                         while (attempts <= 500) {
                             attempts++;
-                            ClassType classType = ClassType.getAvailableClasses()[rand
-                                    .nextInt(ClassType.getAvailableClasses().length)];
+                            ClassType classType = selectable[rand.nextInt(selectable.length)];
                             Rank donor = classType.getMinRank();
 
                             if (playerData.playerClasses.get(classType.getID()) != null
@@ -2086,6 +2219,7 @@ public class GameInstance {
             }
 
             BaseClass baseClass = selectedClass.GetClassInstance(this, player);
+            recordClassPlayed(player, selectedClass);
 
             if (player.hasPermission("scb.chat"))
                 player.setDisplayName("" + player.getName() + " " + selectedClass.getTag());
@@ -2134,7 +2268,8 @@ public class GameInstance {
             try {
                 if (baseClass != null) {
                     baseClass.score.getScoreboard().resetScores(baseClass.score.getEntry());
-                    if (this.state != GameState.ENDED && this.state != GameState.WAITING && data != null) {
+                    if (this.state != GameState.ENDED && this.state != GameState.WAITING && data != null
+                            && savesStats()) {
                         data.losses++;
                         ClassType type = baseClass.getType();
                         ClassDetails details = data.playerClasses.get(type.getID());
@@ -2162,7 +2297,8 @@ public class GameInstance {
                         TellAll(color("&c&l(!) &rGame start cancelled, not enough players!"));
 
                         for (Player gamePlayer : this.players) {
-                            this.gameSettings = new GameSettings(this); // reset vars
+                            // Private games keep the leader's modifiers
+                            if (!privateGame) this.gameSettings = new GameSettings(this); // reset vars
                             if (gamePlayer.getInventory().contains(Material.PAPER)) {
                                 if (gamePlayer.getOpenInventory() != null
                                         && gamePlayer.getOpenInventory().getTitle().contains("Vote"))
@@ -2173,6 +2309,13 @@ public class GameInstance {
                             FastBoard fb = this.boards.get(gamePlayer.getUniqueId());
                             updateCountOnBoard();
                             if (fb != null) fb.updateLine(7, color("&7&oWaiting for players.."));
+                        }
+
+                        // The leader has to press Start Game again, so give their leader items back
+                        if (privateGame) {
+                            privateGameCountdownStarted = false;
+                            Player leader = Bukkit.getPlayer(privateGameLeader);
+                            if (leader != null && players.contains(leader)) givePrivateGameLeaderItems(leader);
                         }
                     }
                 }
@@ -2202,7 +2345,7 @@ public class GameInstance {
             if (this.s != null) {
                 if (this.map != null) {
                     this.s.setLine(2, getGameManager().getMain().color("&0Players: " + this.players.size() + "/"
-                            + (getMap().GetInstance()).gameType.getMaxPlayers()));
+                            + getMaxPlayerCount()));
                 } else {
                     this.s.setLine(2, getGameManager().getMain().color("&0Players: " + this.players.size() + "/6"));
                 }
@@ -2240,9 +2383,9 @@ public class GameInstance {
             FastBoard board = this.boards.get(gamePlayer.getUniqueId());
             if (board != null) {
                 board.updateLine(5, color("Players: &e"
-                        + (getMap().GetInstance().gameType == GameType.FRENZY ? "" + ChatColor.YELLOW + players.size() + "/" + gameType.getMaxPlayers() : "")
-                        + (getMap().GetInstance().gameType == GameType.CLASSIC ? "" + ChatColor.YELLOW + players.size() + "/" + gameType.getMaxPlayers() : "")
-                        + (getMap().GetInstance().gameType == GameType.DUEL ? "" + ChatColor.YELLOW + players.size() + "/" + gameType.getMaxPlayers() : "")));
+                        + (getMap().GetInstance().gameType == GameType.FRENZY ? "" + ChatColor.YELLOW + players.size() + "/" + getMaxPlayerCount() : "")
+                        + (getMap().GetInstance().gameType == GameType.CLASSIC ? "" + ChatColor.YELLOW + players.size() + "/" + getMaxPlayerCount() : "")
+                        + (getMap().GetInstance().gameType == GameType.DUEL ? "" + ChatColor.YELLOW + players.size() + "/" + getMaxPlayerCount() : "")));
             }
         }
     }
@@ -2346,8 +2489,8 @@ public class GameInstance {
     public List<ClassType> generateClassList() {
         List<ClassType> classes = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            ClassType classType = ClassType.getAvailableClasses()[random
-                    .nextInt(ClassType.getAvailableClasses().length)];
+            ClassType[] selectable = getSelectableClasses();
+            ClassType classType = selectable[random.nextInt(selectable.length)];
             classes.add(classType);
         }
         return classes;
@@ -2415,6 +2558,7 @@ public class GameInstance {
         playerPosition.clear();
         allItemDrops.clear();
         favClassSelection.clear();
+        classHistory.clear();
         lastKnownLocations.clear();
 
         // Do NOT null out players/classes here (other parts may still read stats),

@@ -1,10 +1,13 @@
 package anthony.SuperCraftBrawl.Game;
 
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 public class GameSettings {
 
@@ -30,6 +33,7 @@ public class GameSettings {
     public int startingLives;
     public int respawnSeconds;
     public boolean lowGravity;
+    public Set<ClassType> enabledClasses; // classes players may pick in a private game
 
 	public GameSettings(GameInstance game) {
 		this.game = game;
@@ -54,6 +58,10 @@ public class GameSettings {
         this.startingLives = 5; // Default lives
         this.respawnSeconds = 3; // Default respawn countdown
         this.lowGravity = false;
+        this.enabledClasses = EnumSet.noneOf(ClassType.class);
+        for (ClassType type : ClassType.getAvailableClasses()) {
+            this.enabledClasses.add(type); // default: every non-vaulted class
+        }
 	}
 
 	// GETTER METHODS:

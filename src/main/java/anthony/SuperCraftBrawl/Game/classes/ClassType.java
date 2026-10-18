@@ -73,7 +73,6 @@ public enum ClassType {
 	Jeb(56, 0, 20),
 	Shulker(60, 0, 25),
 	Cloud(63, 0, 30),
-	Guardian(69, 0, 30, true),
 
 	// Donor Classes
 	EnderDragon(3, 0, Rank.VIP),
@@ -94,19 +93,29 @@ public enum ClassType {
 	Fade(66, 0, Rank.VIP),
 	Endermite(70, 0, Rank.VIP),
 
-	// Holiday Classes
-	Elf(101, 0, 0, true),
-	GingerBreadMan(102, 0, 0, true),
-	Santa(103, 0, 0, false), // TODO: re-vault after Christmas update testing
-	GrimReaper(104, 0, 0, true),
-	Freddy(105, 0, 0, true),
-	Grinch(106, 0, 0, false); // TODO: vault after Christmas update testing
+	// Holiday Classes - separate from vaulted. Only playable while Active: set it to true for the
+	// corresponding holiday event, false again afterwards. Inactive ones can't be picked anywhere,
+	// including private games (Class List).
+	Santa(103, false), // Christmas
+	GingerBreadMan(102, false), // Christmas
+	Elf(101, false), // Christmas
+	Grinch(106, false), // Christmas
+	Freddy(105, false), // Halloween
+	GrimReaper(104, false); // Halloween
 
 	private final int id;
 	private int tokenCost = 0;
 	private int level = 0;
 	private Rank donor;
 	private boolean isVaulted = false;
+	private boolean isHoliday = false;
+	private boolean isActive = false;
+
+	ClassType(int id, boolean isActive) {
+		this.id = id;
+		this.isHoliday = true;
+		this.isActive = isActive;
+	}
 
 	ClassType(int id, int tokenCost, int level, boolean isVaulted) {
 		this.id = id;
@@ -282,8 +291,6 @@ public enum ClassType {
 				return "Have your pack defend you from enemies!";
 			case Parrot:
 				return "Regenerate health through music!";
-			case Guardian:
-				return "Guard thyself and thy family";
 //		case Fluxty:
 //			return: "We cannot have HATERS in the community... So use your Wood Axe to kick em all out!";
 //		case Snowman:
@@ -314,8 +321,6 @@ public enum ClassType {
 				return "" + ChatColor.DARK_GRAY + ChatColor.ITALIC + "Fade" + ChatColor.RESET;
 			case Cloud:
 				return "" + ChatColor.WHITE + ChatColor.ITALIC + "Cloud" + ChatColor.RESET;
-			case Guardian:
-				return "" + ChatColor.DARK_AQUA + ChatColor.BOLD + "Guardian" + ChatColor.RESET;
 			case Firework:
 				return "" + ChatColor.RED + ChatColor.BOLD + "Firework" + ChatColor.RESET;
 			case Bedrock:
@@ -629,8 +634,6 @@ public enum ClassType {
  			return new ItemStack(Material.BONE);
 		case Parrot:
 			return new ItemStack(Material.FEATHER);
- 		case Guardian:
- 			return new ItemStack(Material.PRISMARINE_SHARD);
 		}
 
 		return null;
@@ -784,8 +787,6 @@ public enum ClassType {
 				return new WolfClass(instance, player);
 			case Parrot:
 				return new ParrotClass(instance, player);
-			case Guardian:
-				return new GuardianClass(instance, player);
 //		case Fluxty:
 //			return new FluxtyClass(instance, player);
 //		case Snowman:
@@ -801,27 +802,27 @@ public enum ClassType {
 
 	public static ClassType[] getAvailableClasses() {
 		return Arrays.stream(values())
-				.filter(clazz -> !clazz.isVaulted())
+				.filter(clazz -> !clazz.isVaulted() && clazz.isPlayable())
 				.toArray(ClassType[]::new);
 	}
 	public static ClassType[] getFreeClasses(boolean includeVaulted) {
 		return Arrays.stream(values())
-				.filter(clazz -> (includeVaulted || !clazz.isVaulted) && clazz.tokenCost == 0 && clazz.level == 0 && clazz.donor == null)
+				.filter(clazz -> (includeVaulted || !clazz.isVaulted) && clazz.isPlayable() && clazz.tokenCost == 0 && clazz.level == 0 && clazz.donor == null)
 				.toArray(ClassType[]::new);
 	}
 	public static ClassType[] getTokenClasses(boolean includeVaulted) {
 		return Arrays.stream(values())
-				.filter(clazz -> (includeVaulted || !clazz.isVaulted) && clazz.tokenCost > 0)
+				.filter(clazz -> (includeVaulted || !clazz.isVaulted) && clazz.isPlayable() && clazz.tokenCost > 0)
 				.toArray(ClassType[]::new);
 	}
 	public static ClassType[] getLevelClasses(boolean includeVaulted) {
 		return Arrays.stream(values())
-				.filter(clazz -> (includeVaulted || !clazz.isVaulted) && clazz.level > 0)
+				.filter(clazz -> (includeVaulted || !clazz.isVaulted) && clazz.isPlayable() && clazz.level > 0)
 				.toArray(ClassType[]::new);
 	}
 	public static ClassType[] getDonorClasses(boolean includeVaulted) {
 		return Arrays.stream(values())
-				.filter(clazz -> (includeVaulted || !clazz.isVaulted) && clazz.donor != null)
+				.filter(clazz -> (includeVaulted || !clazz.isVaulted) && clazz.isPlayable() && clazz.donor != null)
 				.toArray(ClassType[]::new);
 	}
 
@@ -873,5 +874,21 @@ public enum ClassType {
 	}
 	public boolean isVaulted() {
 		return isVaulted;
+	}
+
+	public boolean isHoliday() {
+		return isHoliday;
+	}
+
+	/** False for holiday classes outside their holiday event - those can't be picked or given out at all. */
+	public boolean isPlayable() {
+		return !isHoliday || isActive;
+	}
+
+	/** Every class that can currently be played (inactive holiday classes left out), vaulted ones included. */
+	public static ClassType[] getPlayableClasses() {
+		return Arrays.stream(values())
+				.filter(ClassType::isPlayable)
+				.toArray(ClassType[]::new);
 	}
 }

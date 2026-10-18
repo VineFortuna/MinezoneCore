@@ -37,7 +37,7 @@ public class ClassesGUI implements InventoryProvider {
 	public void init(Player player, InventoryContents contents) {
 		boolean updated = false;
 		PlayerData data = main.getDataManager().getPlayerData(player);
-		for (ClassType type : ClassType.getAvailableClasses()) {
+		for (ClassType type : ClassType.values()) { // vaulted too - private games can enable them
 			ClassDetails details = data.playerClasses.get(type.getID());
 			if (details == null) {
 				updated = true;

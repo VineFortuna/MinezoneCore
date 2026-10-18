@@ -38,7 +38,8 @@ public class FavoriteClassesGUI implements InventoryProvider {
 
 		if (data != null) {
 			if (!(data.customIntegers.isEmpty())) {
-				for (ClassType type : ClassType.sortAlphabetically(ClassType.getAvailableClasses())) {
+				for (ClassType type : ClassType.sortAlphabetically(
+						main.getGameManager().filterSelectableClasses(player, ClassType.values()))) {
 					if (data.customIntegers.contains(type.getID())) {
 
 						ClassDetails details = data.playerClasses.get(type.getID());

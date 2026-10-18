@@ -62,7 +62,7 @@ public class ActiveGamesGUI implements InventoryProvider {
 									"",
 									"&fStarting In: &a" + entry.getValue().timeToStartSeconds + "s",
 									"&fPlayers: &a" + entry.getValue().players.size() + "/"
-											+ entry.getValue().gameType.getMaxPlayers(),
+											+ entry.getValue().getMaxPlayerCount(),
 									"", "&r&nClick to join!"),
 							e -> {
 								main.getGameManager().JoinMap(player, entry.getValue().getMap());
@@ -76,7 +76,7 @@ public class ActiveGamesGUI implements InventoryProvider {
 									"",
 									"&fWaiting for Players",
 									"&fPlayers: &a" + entry.getValue().players.size() + "/"
-											+ entry.getValue().gameType.getMaxPlayers(),
+											+ entry.getValue().getMaxPlayerCount(),
 									"", "&r&nClick to join!"),
 							e -> {
 								main.getGameManager().JoinMap(player, entry.getValue().getMap());
@@ -92,7 +92,7 @@ public class ActiveGamesGUI implements InventoryProvider {
 								"",
 								"&f" + state,
 								"&fPlayers: &a" + entry.getValue().players.size() + "/"
-										+ entry.getValue().gameType.getMaxPlayers(),
+										+ entry.getValue().getMaxPlayerCount(),
 								"&fSpectators: &a" + entry.getValue().spectators.size(), "", "&r&nClick to spectate!"),
 						e -> {
 							main.getGameManager().SpectatorJoinMap(player, entry.getValue().getMap());

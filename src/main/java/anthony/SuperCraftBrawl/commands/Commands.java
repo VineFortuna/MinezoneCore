@@ -852,6 +852,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
+		if (!selectedClass.isPlayable()) {
+			player.sendMessage(main.color("&c&l(!) &r" + selectedClass.getTag() + " &ris a holiday class and isn't active right now"));
+			return;
+		}
+
 		BaseClass oldBaseClass = game.classes.get(targetPlayer);
 
 		if (oldBaseClass == null) {
@@ -1823,6 +1828,16 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
+		if (!type.isPlayable()) {
+			player.sendMessage(main.color("&c&l(!) &r" + type.getTag() + " &ris a holiday class and isn't available right now"));
+			return;
+		}
+
+		if (game != null && game.isPrivateGame() && !game.isClassSelectable(type)) {
+			player.sendMessage(main.color("&c&l(!) &rThat class is disabled in this private game"));
+			return;
+		}
+
 		displayClassSelectionMessage(player, type);
 
 		if (game != null) {
@@ -1914,7 +1929,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 		return null;
 	}
 
-    public void leaveGame(Player player) {
+    /** Returns false if the player wasn't allowed to leave (a party member who isn't the leader). */
+    public boolean leaveGame(Player player) {
         if (main.getPartyManager() != null) {
             Party party = main.getPartyManager().getParty(player);
 
@@ -1922,15 +1938,16 @@ public class Commands implements CommandExecutor, TabCompleter {
                 if (!party.isLeader(player.getUniqueId())) {
                     player.sendMessage(main.color("&c&l(!) &rOnly the party leader can leave the game for the party."));
                     player.sendMessage(main.color("&7If you want to leave by yourself, leave the party first with &e/party leave&7."));
-                    return;
+                    return false;
                 }
 
                 leavePartyGame(player, party);
-                return;
+                return true;
             }
         }
 
         leaveSinglePlayerGame(player, true);
+        return true;
     }
 
     private void leavePartyGame(Player leader, Party party) {

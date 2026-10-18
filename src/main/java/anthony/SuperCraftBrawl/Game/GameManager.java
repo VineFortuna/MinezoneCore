@@ -1513,7 +1513,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
                 if (instance.isOpen() && instance.state == GameState.WAITING) {
                     int currentPlayers = instance.players.size();
-                    int maxPlayers = instance.gameType.getMaxPlayers();
+                    int maxPlayers = instance.getMaxPlayerCount();
 
                     if (currentPlayers + neededSlots <= maxPlayers) {
                         this.JoinMap(player, entry.getKey());
@@ -1728,7 +1728,8 @@ public class GameManager implements Listener, PluginMessageListener {
 		if (!(entity instanceof Painting) && !(entity instanceof ItemFrame)) return;
 		if (event instanceof HangingBreakByEntityEvent) {
 			Entity remover = ((HangingBreakByEntityEvent) event).getRemover();
-			if (remover instanceof Player && ((Player) remover).getGameMode() == GameMode.CREATIVE)
+			if (remover instanceof Player && ((Player) remover).getGameMode() == GameMode.CREATIVE
+					&& !main.getLobbyBuildManager().isLobbyBuilder((Player) remover))
 				return;
 		}
 		event.setCancelled(true);
@@ -1738,7 +1739,8 @@ public class GameManager implements Listener, PluginMessageListener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onItemFrameInteract(PlayerInteractEntityEvent event) {
 		if (!(event.getRightClicked() instanceof ItemFrame)) return;
-		if (event.getPlayer().getGameMode() == GameMode.CREATIVE) {
+		if (event.getPlayer().getGameMode() == GameMode.CREATIVE
+				&& !main.getLobbyBuildManager().isLobbyBuilder(event.getPlayer())) {
 			event.setCancelled(false);
 			return;
 		}
@@ -1749,7 +1751,8 @@ public class GameManager implements Listener, PluginMessageListener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onItemFrameDamage(EntityDamageByEntityEvent event) {
 		if (!(event.getEntity() instanceof ItemFrame)) return;
-		if (event.getDamager() instanceof Player && ((Player) event.getDamager()).getGameMode() == GameMode.CREATIVE) {
+		if (event.getDamager() instanceof Player && ((Player) event.getDamager()).getGameMode() == GameMode.CREATIVE
+				&& !main.getLobbyBuildManager().isLobbyBuilder((Player) event.getDamager())) {
 			event.setCancelled(false);
 			return;
 		}
@@ -1788,6 +1791,21 @@ public class GameManager implements Listener, PluginMessageListener {
     * This function handles player class selection, and will set it
     * if they are in a game, but only if they're in waiting lobby
      */
+	/*
+	 * Narrows a class menu down to what the player can pick in their current game: the non-vaulted classes
+	 * normally, or exactly the classes the leader enabled in a private game.
+	 */
+	public ClassType[] filterSelectableClasses(Player player, ClassType[] types) {
+		GameInstance instance = GetInstanceOfPlayer(player);
+		boolean privateGame = instance != null && instance.isPrivateGame();
+		List<ClassType> selectable = new ArrayList<>();
+		for (ClassType type : types) {
+			if (type.isPlayable() && (privateGame ? instance.isClassSelectable(type) : !type.isVaulted()))
+				selectable.add(type);
+		}
+		return selectable.toArray(new ClassType[0]);
+	}
+
 	public void playerSelectClass(Player player, ClassType type) {
 		GameInstance instance = this.GetInstanceOfPlayer(player);
 		if (instance != null)
@@ -1864,7 +1882,13 @@ public class GameManager implements Listener, PluginMessageListener {
         }
 
         int currentPlayers = existingInstance == null ? 0 : existingInstance.players.size();
-        int maxPlayers = existingInstance == null ? map.getGamemode().getMaxPlayers() : existingInstance.gameType.getMaxPlayers();
+        int maxPlayers;
+        if (party.isPrivateGames() && (existingInstance == null || existingInstance.isPrivateGame()
+                || existingInstance.players.isEmpty())) {
+            maxPlayers = GameInstance.PRIVATE_GAME_MAX_PLAYERS;
+        } else {
+            maxPlayers = existingInstance == null ? map.getGamemode().getMaxPlayers() : existingInstance.getMaxPlayerCount();
+        }
 
         if (currentPlayers + partyMembers.size() > maxPlayers) {
             leader.sendMessage(main.color("&c&l(!) &rYour party is too large for this game."));
@@ -2001,17 +2025,26 @@ public class GameManager implements Listener, PluginMessageListener {
             instance.startPrivateGameCountdown(player);
             player.getInventory().clear();
             main.getLobbyItems().gameLobbyItems(player);
+            if (instance.isPrivateGameCountdownStarted())
+                player.getInventory().setItem(7, GameInstance.getGameSettingsItem());
             return;
         }
 
-        if (item.getType() == Material.REDSTONE_COMPARATOR && item.hasItemMeta()
-                && item.getItemMeta().hasDisplayName()
-                && ChatColor.stripColor(item.getItemMeta().getDisplayName()).contains("Game Modifiers")) {
+        String itemName = item.hasItemMeta() && item.getItemMeta().hasDisplayName()
+                ? ChatColor.stripColor(item.getItemMeta().getDisplayName()) : "";
+        if (item.getType() == Material.REDSTONE_COMPARATOR
+                && (itemName.contains("Game Modifiers") || itemName.contains("Game Settings"))) {
 
             event.setCancelled(true);
 
             if (!instance.isPrivateGameLeader(player)) {
                 player.sendMessage(main.color("&c&l(!) &rOnly the party leader can modify this private game."));
+                return;
+            }
+
+            // Game Settings during the countdown stops it and gives back Game Modifiers + Start Game
+            if (instance.isPrivateGameCountdownStarted()) {
+                instance.cancelPrivateGameCountdown(player);
                 return;
             }
 
