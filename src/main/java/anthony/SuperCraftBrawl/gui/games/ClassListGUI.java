@@ -272,6 +272,7 @@ public class ClassListGUI implements InventoryProvider {
             game.TellAll(main.color("&2&l(!) &rAll classes have been &aenabled&r, including vaulted ones."));
         } else if (e.isRightClick()) {
             enabled.clear();
+            status = Status.DISABLED;
             game.TellAll(main.color("&2&l(!) &rAll classes have been &cdisabled&r."));
             warnIfNoneEnabled(player);
         } else {

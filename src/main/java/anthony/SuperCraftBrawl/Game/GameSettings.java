@@ -71,7 +71,7 @@ public class GameSettings {
         this.healthPotMode = HealthPotMode.HALF_HEALTH;
         this.maxHealthHearts = 10;
         this.oneForAll = false;
-        this.spawnProtectionSeconds = 5; // same as the normal spawn protection
+        this.spawnProtectionSeconds = 3; // the Spawn Protection modifier (custom games only)
         this.randomClasses = false;
         this.randomClassCycleSeconds = 15;
         this.startingLives = 5; // Default lives

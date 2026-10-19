@@ -45,8 +45,8 @@ public class GameModifiersGUI implements InventoryProvider {
     private static final String[] RESPAWN_TIME_LABELS = {"None", "1s", "2s", "3s", "4s", "5s", "10s"};
     private static final int[] SPAWN_PROTECTION_TIMES = {0, 3, 5}; // 0 = disabled
     private static final String[] SPAWN_PROTECTION_LABELS = {"Disabled", "3s", "5s"};
-    private static final int[] STRENGTH_TIMES = {0, 5, 10}; // 0 = disabled
-    private static final String[] STRENGTH_LABELS = {"Disabled", "5s", "10s"};
+    private static final int[] STRENGTH_TIMES = {0, 5, 10, 20, 30}; // 0 = disabled
+    private static final String[] STRENGTH_LABELS = {"Disabled", "5s", "10s", "20s", "30s"};
     private static final int[] MAX_HEALTH_HEARTS = {1, 3, 5, 10, 15, 20};
     private static final String[] MAX_HEALTH_LABELS = {"1 Heart", "3 Hearts", "5 Hearts", "10 Hearts", "15 Hearts", "20 Hearts"};
 
@@ -466,7 +466,7 @@ public class GameModifiersGUI implements InventoryProvider {
 
         contents.set(2, 2, ClickableItem.of(toggleItem(new ItemStack(Material.WHEAT), enabled, "&e&lOP Item Drops",
                 "&7Lightning drops only spawn",
-                "&6&lLEGENDARY &7and &d&lRARE &7items.",
+                "&6&lLEGENDARY &7and &9&lRARE &7items.",
                 "&7(No Extra Lives)"
         ), e -> {
             SoundManager.playClickSound(player);

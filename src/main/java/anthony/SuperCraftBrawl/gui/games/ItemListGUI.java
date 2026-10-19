@@ -244,6 +244,7 @@ public class ItemListGUI implements InventoryProvider {
             game.TellAll(main.color("&2&l(!) &rAll lightning drop items have been &aenabled&r."));
         } else if (e.isRightClick()) {
             enabled.clear();
+            status = Status.DISABLED; // show what was just disabled
             game.TellAll(main.color("&2&l(!) &rAll lightning drop items have been &cdisabled&r."));
             warnIfNoneEnabled(player);
         } else {

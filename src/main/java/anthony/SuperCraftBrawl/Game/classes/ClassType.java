@@ -97,10 +97,10 @@ public enum ClassType {
 	// Holiday Classes - separate from vaulted. Only playable while Active: set it to true for the
 	// corresponding holiday event, false again afterwards. Inactive ones can't be picked anywhere,
 	// including private games (Class List).
-	Santa(103, false), // Christmas
-	GingerBreadMan(102, false), // Christmas
-	Elf(101, false), // Christmas
-	Grinch(106, false), // Christmas
+	Santa(103, true), // Christmas
+	GingerBreadMan(102, true), // Christmas
+	Elf(101, true), // Christmas
+	Grinch(106, true), // Christmas
 	GrimReaper(104, false); // Halloween
 
 	private final int id;

@@ -2800,8 +2800,9 @@ public class GameManager implements Listener, PluginMessageListener {
         BukkitRunnable runnable = this.spawnProt.get(player);
         GameInstance instance = this.GetInstanceOfPlayer(player);
 
-        // Spawn Protection modifier: 0 turns it off, otherwise it's how many seconds it lasts
-        int duration = instance != null ? instance.getGameSettings().spawnProtectionSeconds : SPAWN_PROT_DURATION;
+        // Spawn Protection modifier (custom games): 0 turns it off, otherwise it's how many seconds it lasts
+        int duration = instance != null && instance.isCustomGame()
+                ? instance.getGameSettings().spawnProtectionSeconds : SPAWN_PROT_DURATION;
 
         if (duration <= 0) {
             if (runnable != null) {
