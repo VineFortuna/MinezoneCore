@@ -21,7 +21,10 @@ import org.bukkit.util.StringUtil;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -33,13 +36,17 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 
 	private static final List<String> SUBCOMMANDS = Arrays.asList(
 			"tp", "createmap", "size", "lobby", "spectator", "team", "flag", "shop",
-			"generator", "boundary1", "boundary2", "importantarea", "chesthologram", "list", "save");
+			"generator", "boundary1", "boundary2", "importantarea", "chesthologram", "list", "maplist", "delete", "save");
+	private static final long DELETE_CONFIRM_MILLIS = 15_000L;
 	private static final String IMPORTANT_AREA_USAGE = "/fwsetup importantarea <color> <id> <X> <Y> <Z> &7or &e<id> remove";
 	private static final List<String> RESOURCE_TYPES = Arrays.asList("iron", "gold", "emerald", "diamond");
 	private static final List<String> COLOR_NAMES = Arrays.asList(FWGameConstants.TEAM_NAMES);
 	private static final List<String> MAP_SIZES = Arrays.asList("4", "8");
 
 	private final FWGameManager fwGameManager;
+	// player -> map they asked to delete and when, so /fwsetup delete has to be run twice to go through
+	private final Map<UUID, String> pendingDeleteMap = new HashMap<>();
+	private final Map<UUID, Long> pendingDeleteTime = new HashMap<>();
 
 	public FWSetupCommand(FWGameManager fwGameManager) {
 		this.fwGameManager = fwGameManager;
@@ -66,6 +73,16 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 
 		if (sub.equals("list")) {
 			sendMapList(player, manager);
+			return true;
+		}
+
+		if (sub.equals("maplist")) {
+			sendPlayableMapList(player, manager);
+			return true;
+		}
+
+		if (sub.equals("delete")) {
+			handleDelete(player, manager, args);
 			return true;
 		}
 
@@ -422,6 +439,64 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 				+ " &ris now a &e" + size + "-player &rmap." + rules + " &7Run &e/fwsetup save &7to keep it."));
 	}
 
+	/** /fwsetup maplist - playable (fully set up) maps in green, unfinished ones in red. */
+	private void sendPlayableMapList(Player player, FWMapConfigManager manager) {
+		List<FWMapConfig> all = new ArrayList<>(manager.getAllConfigs());
+		int playable = 0;
+		for (FWMapConfig cfg : all) {
+			if (cfg.isReady()) playable++;
+		}
+
+		player.sendMessage(fwGameManager.getMain().color("&6&lFLAG WARS MAPS &7(&a" + playable + " playable&7, &c"
+				+ (all.size() - playable) + " not set up&7)"));
+		for (FWMapConfig cfg : all) {
+			String size = " &7(" + cfg.getSize() + "-player)";
+			if (cfg.isReady()) {
+				player.sendMessage(fwGameManager.getMain().color("  &a" + cfg.getWorldName() + size));
+			} else {
+				player.sendMessage(fwGameManager.getMain().color("  &c" + cfg.getWorldName() + size
+						+ " &8- missing " + cfg.findMissing().size() + " point(s), see &7/fwsetup list"));
+			}
+		}
+	}
+
+	/** /fwsetup delete <map> - run twice within 15s to confirm. Removes the map's Flag Wars setup, not its world. */
+	private void handleDelete(Player player, FWMapConfigManager manager, String[] args) {
+		if (args.length < 2) {
+			player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rTry: &e/fwsetup delete <map>"));
+			return;
+		}
+
+		FWMapConfig cfg = manager.find(args[1]);
+		if (cfg == null) {
+			player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rThere's no Flag Wars map called &e" + args[1]
+					+ "&r. See &e/fwsetup maplist&r."));
+			return;
+		}
+
+		String mapName = cfg.getWorldName();
+		UUID id = player.getUniqueId();
+		Long askedAt = pendingDeleteTime.get(id);
+		boolean confirmed = mapName.equals(pendingDeleteMap.get(id)) && askedAt != null
+				&& System.currentTimeMillis() - askedAt <= DELETE_CONFIRM_MILLIS;
+
+		if (!confirmed) {
+			pendingDeleteMap.put(id, mapName);
+			pendingDeleteTime.put(id, System.currentTimeMillis());
+			player.sendMessage(fwGameManager.getMain().color("&e&l(!) &rThis deletes &e" + mapName
+					+ "&r's whole Flag Wars setup (teams, flags, generators...) and takes it out of rotation."
+					+ " The world itself isn't deleted."));
+			player.sendMessage(fwGameManager.getMain().color("&e&l(!) &rRun &e/fwsetup delete " + mapName
+					+ " &ragain within 15 seconds to confirm."));
+			return;
+		}
+
+		pendingDeleteMap.remove(id);
+		pendingDeleteTime.remove(id);
+		manager.delete(mapName);
+		player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rDeleted the Flag Wars setup for &e" + mapName + "&r."));
+	}
+
 	private void sendMapList(Player player, FWMapConfigManager manager) {
 		List<FWMapConfig> all = new ArrayList<>(manager.getAllConfigs());
 		player.sendMessage(fwGameManager.getMain().color("&6&lFLAG WARS MAPS &7(" + all.size() + " known)"));
@@ -442,6 +517,8 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 	private void sendUsage(Player player) {
 		player.sendMessage(fwGameManager.getMain().color("&6&lFWSETUP COMMANDS"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup list &7-> &rShow all maps and their status"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup maplist &7-> &rPlayable maps in &agreen&r, unfinished ones in &cred"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup delete <map> &7-> &rDelete a map's Flag Wars setup (asks to confirm)"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup tp <map> &7-> &rTeleport into a map (loads it if needed)"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup createmap <map> &7-> &rCreate a new void world"));
 		player.sendMessage(fwGameManager.getMain().color("&7(Stand in the target map world for all commands below)"));
@@ -470,7 +547,7 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 			return StringUtil.copyPartialMatches(args[0], SUBCOMMANDS, new ArrayList<>());
 		}
 
-		if (args.length == 2 && args[0].equalsIgnoreCase("tp")) {
+		if (args.length == 2 && (args[0].equalsIgnoreCase("tp") || args[0].equalsIgnoreCase("delete"))) {
 			List<String> mapNames = new ArrayList<>(fwGameManager.getMapConfigManager().getAllConfigs()
 					.stream().map(FWMapConfig::getWorldName).collect(Collectors.toList()));
 			return StringUtil.copyPartialMatches(args[1], mapNames, new ArrayList<>());

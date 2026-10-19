@@ -79,6 +79,32 @@ public class FWMapConfigManager {
 		return configs.values();
 	}
 
+	/**
+	 * Forgets a map's Flag Wars setup and deletes its saved config (plus the old flagdefense save, so it isn't
+	 * migrated back on the next restart). The world folder itself is left alone. Returns false if unknown.
+	 */
+	public boolean delete(String worldName) {
+		FWMapConfig removed = configs.remove(worldName);
+
+		File file = new File(configDir, worldName + ".yml");
+		boolean hadFile = file.exists() && file.delete();
+
+		File legacy = new File(new File(main.getDataFolder(), "flagdefense"), worldName + ".yml");
+		if (legacy.exists() && !legacy.delete()) {
+			main.getLogger().warning("Couldn't delete the old Flag Wars config " + legacy.getPath());
+		}
+
+		return removed != null || hadFile;
+	}
+
+	/** The tracked config for a world, or null - unlike getOrCreate, never makes a new one. */
+	public FWMapConfig find(String worldName) {
+		for (FWMapConfig config : configs.values()) {
+			if (config.getWorldName().equalsIgnoreCase(worldName)) return config;
+		}
+		return null;
+	}
+
 	/** Saves the primary map config. */
 	public void save() {
 		save(getConfig());
