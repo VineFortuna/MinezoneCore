@@ -22,23 +22,28 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * /fwsetup generatemap: builds a complete 4-team Flag Wars map from code (Hypixel Bedwars style) and sets up all of
- * its Flag Wars config, so it's playable as soon as it's done:
- * - 4 floating bases (Red, Blue, Lime, Yellow), one on each side of mid, each with a roofed spawn pavilion in the
- *   team's color, a forge with the iron and gold generators, the flag on a pedestal, a shop stall, chests, a lit path
- *   to the front edge, trees and flowers - plus its island boundary and no-build areas
- * - 4 diamond islands on the diagonals, each between two bases
- * - a mid island with a stone brick plaza, a quartz monument and the 4 emerald generators in a circle around it
+ * /fwsetup generatemap: builds a complete 4-team Flag Wars map from code (laid out like a Hypixel Bedwars 4-team map)
+ * and sets up all of its Flag Wars config, so it's playable as soon as it's done:
+ * - 4 floating bases (Red, Blue, Lime, Yellow), one on each side of mid. Back to front: a team-colored forge building
+ *   with the iron and gold generators and the chests, a raised spawn plaza with the shop stall on one side and an
+ *   anvil stall on the other, the flag on a raised dais, and a lit path to the front edge - with big trees, boulders
+ *   and hills around it, plus its island boundary and no-build areas
+ * - 4 diamond islands on the diagonals, each between two bases, with ruins
+ * - a big mid island: a raised central platform (half-slab ramps on all four sides) with a quartz tower, a stone brick
+ *   plaza around it with the 4 emerald generators in pillared shrines, and a grassy outer ring with paths to each base
  * - a glass waiting lobby high above mid
  * The blocks are worked out first and then placed a few thousand per tick, so the server doesn't freeze.
  */
 public class FWMapGenerator {
 
 	private static final int GROUND = 64; // top block of every island; players stand at GROUND + 1
-	private static final int BASE_DISTANCE = 70;
+	private static final int BASE_DISTANCE = 72;
 	private static final int DIAMOND_OFFSET = 38; // diamond islands at (±38, ±38)
-	private static final int EMERALD_OFFSET = 5; // emerald generators at (±5, ±5)
-	private static final int LOBBY_Y = 110;
+	private static final int EMERALD_OFFSET = 8; // emerald generators at (±8, ±8), 16 blocks apart
+	private static final int MID_RADIUS = 23;
+	private static final int MID_PLATFORM_RADIUS = 6; // the raised center, 2 blocks up
+	private static final int MID_PLAZA_RADIUS = 15;
+	private static final int LOBBY_Y = 120;
 	private static final int BLOCKS_PER_TICK = 4000;
 
 	/** Team site ids (see FWGameConstants.TEAM_NAMES) and which way each base is from mid. */
@@ -48,10 +53,15 @@ public class FWMapGenerator {
 	// Block ids (1.8)
 	private static final int STONE = 1, GRASS = 2, DIRT = 3, COBBLE = 4, PLANKS = 5, IRON_ORE = 15, COAL_ORE = 16,
 			LOG = 17, LEAVES = 18, WOOL = 35, YELLOW_FLOWER = 37, RED_FLOWER = 38, GOLD_BLOCK = 41, IRON_BLOCK = 42,
-			DOUBLE_SLAB = 43, SLAB = 44, MOSSY_COBBLE = 48, TORCH = 50, CHEST = 54, DIAMOND_BLOCK = 57, FENCE = 85,
-			GLOWSTONE = 89, STAINED_GLASS = 95, STONE_BRICK = 98, CAULDRON = 118, WOOD_SLAB = 126, ENDER_CHEST = 130,
-			EMERALD_BLOCK = 133, COBBLE_WALL = 139, QUARTZ = 155, STAINED_CLAY = 159, BARRIER = 166,
-			SEA_LANTERN = 169, HAY = 170, CARPET = 171, TALL_GRASS = 31;
+			DOUBLE_SLAB = 43, SLAB = 44, BOOKSHELF = 47, MOSSY_COBBLE = 48, TORCH = 50, CHEST = 54, DIAMOND_BLOCK = 57,
+			FENCE = 85, GLOWSTONE = 89, STAINED_GLASS = 95, STONE_BRICK = 98, CAULDRON = 118, WOOD_SLAB = 126,
+			ENDER_CHEST = 130, EMERALD_BLOCK = 133, COBBLE_WALL = 139, ANVIL = 145, QUARTZ = 155, STAINED_CLAY = 159,
+			BARRIER = 166, SEA_LANTERN = 169, HAY = 170, CARPET = 171, TALL_GRASS = 31;
+	private static final int STONE_BRICK_SLAB = 5, QUARTZ_SLAB = 7, TOP_SLAB = 8; // slab data, TOP_SLAB is OR'd in
+	private static final int ANDESITE = 5, POLISHED_ANDESITE = 6; // stone data
+	private static final int MOSSY = 1, CRACKED = 2, CHISELED = 3; // stone brick data
+	private static final int QUARTZ_CHISELED = 1, QUARTZ_PILLAR = 2;
+	private static final int GREEN = 13; // dye data
 
 	private final FWGameManager fwGameManager;
 
@@ -86,8 +96,15 @@ public class FWMapGenerator {
 
 		Build build = new Build(world, mapName.hashCode());
 		FWMapConfig config = fwGameManager.getMapConfigManager().getOrCreate(mapName);
-		config.setSize(FWMapConfig.SIZE_FOUR);
+		layout(build, config);
 
+		player.sendMessage(color("&2&l(!) &rBuilding &e" + mapName + "&r (" + build.blocks.size() + " blocks)..."));
+		place(player, world, build, config);
+	}
+
+	/** Works out every block of the map and fills in its config. */
+	private void layout(Build build, FWMapConfig config) {
+		config.setSize(FWMapConfig.SIZE_FOUR);
 		buildLobby(build, config);
 		buildMid(build, config);
 		for (int i = 0; i < 4; i++) {
@@ -99,9 +116,6 @@ public class FWMapGenerator {
 		for (int i = 0; i < 4; i++) {
 			hologramId = buildBase(build, config, TEAM_SITES[i], BASE_DIRECTIONS[i], hologramId);
 		}
-
-		player.sendMessage(color("&2&l(!) &rBuilding &e" + mapName + "&r (" + build.blocks.size() + " blocks)..."));
-		place(player, world, build, config);
 	}
 
 	/** Places the worked-out blocks a few thousand per tick, then saves the world and its config. */
@@ -161,90 +175,163 @@ public class FWMapGenerator {
 		}
 		b.set(0, LOBBY_Y, 0, SEA_LANTERN, 0);
 		config.setLobby(new Location(b.world, 0.5, LOBBY_Y + 1, 0.5, 0, 0));
-		config.setSpectatorLocation(new Location(b.world, 0.5, GROUND + 30, -25.5, 0, 45));
+		config.setSpectatorLocation(new Location(b.world, 0.5, GROUND + 30, -40.5, 0, 35));
 	}
 
 	// ===== Mid =====
 
 	private void buildMid(Build b, FWMapConfig config) {
-		b.island(0, 0, 19, 19, 16, 0.11);
+		b.island(0, 0, MID_RADIUS, MID_RADIUS, 19, 0.08);
 
-		for (int x = -19; x <= 19; x++) {
-			for (int z = -19; z <= 19; z++) {
-				double r = Math.sqrt(x * x + z * z);
+		for (int x = -MID_RADIUS - 4; x <= MID_RADIUS + 4; x++) {
+			for (int z = -MID_RADIUS - 4; z <= MID_RADIUS + 4; z++) {
 				if (!b.has(x, GROUND, z)) continue;
-				if (r <= 3) {
-					b.set(x, GROUND, z, QUARTZ, 0);
-				} else if (r <= 11) {
-					boolean ring = r >= 7.5 && r <= 8.5;
-					double roll = b.random(x, GROUND, z);
-					b.set(x, GROUND, z, STONE_BRICK, ring ? 3 : roll < 0.08 ? 1 : roll < 0.14 ? 2 : 0);
-				} else if (Math.abs(x) <= 1 || Math.abs(z) <= 1) {
-					// Paths out towards each base
-					b.set(x, GROUND, z, STONE_BRICK, b.random(x, GROUND, z) < 0.15 ? 1 : 0);
+				double r = Math.sqrt(x * x + z * z);
+				boolean onAxis = Math.abs(x) <= 1 || Math.abs(z) <= 1;
+				double roll = b.random(x, GROUND, z);
+
+				if (r <= MID_PLATFORM_RADIUS) {
+					// Raised center, 2 blocks up, with a stone brick rim and a quartz floor
+					b.set(x, GROUND + 1, z, STONE, 0);
+					boolean rim = r > MID_PLATFORM_RADIUS - 1;
+					boolean inner = r >= MID_PLATFORM_RADIUS - 2.5 && r <= MID_PLATFORM_RADIUS - 1.5;
+					b.set(x, GROUND + 2, z, rim || inner ? STONE_BRICK : QUARTZ, inner ? CHISELED : 0);
+				} else if (r <= MID_PLAZA_RADIUS) {
+					boolean ring = r >= MID_PLATFORM_RADIUS + 3.5 && r <= MID_PLATFORM_RADIUS + 4.5;
+					boolean outerRing = r >= MID_PLAZA_RADIUS - 1.5 && r <= MID_PLAZA_RADIUS - 0.5;
+					if (outerRing) b.set(x, GROUND, z, STONE, POLISHED_ANDESITE);
+					else if (!ring && roll < 0.05) b.set(x, GROUND, z, STONE, ANDESITE);
+					else b.set(x, GROUND, z, STONE_BRICK, ring ? CHISELED : roll < 0.12 ? MOSSY : roll < 0.18 ? CRACKED : 0);
+				} else if (onAxis) {
+					b.set(x, GROUND, z, STONE_BRICK, roll < 0.15 ? MOSSY : 0);
 				}
 			}
 		}
 
-		// Quartz monument in the middle
-		for (int x = -1; x <= 1; x++) {
-			for (int z = -1; z <= 1; z++) {
-				if (x == 0 && z == 0) continue;
-				b.set(x, GROUND + 1, z, SLAB, 7);
+		// Half-slab ramps down from the platform on all four sides
+		for (int[] dir : BASE_DIRECTIONS) {
+			for (int side = -1; side <= 1; side++) {
+				for (int t = MID_PLATFORM_RADIUS; t <= MID_PLATFORM_RADIUS + 3; t++) {
+					int x = dir[0] * t + (dir[0] == 0 ? side : 0);
+					int z = dir[1] * t + (dir[1] == 0 ? side : 0);
+					int step = t - MID_PLATFORM_RADIUS; // 0: top edge .. 3: back on the plaza
+					b.clear(x, GROUND + 1, z);
+					b.clear(x, GROUND + 2, z);
+					if (step == 0) {
+						b.set(x, GROUND + 1, z, STONE, 0);
+						b.set(x, GROUND + 2, z, SLAB, STONE_BRICK_SLAB);
+					} else if (step == 1) {
+						b.set(x, GROUND + 1, z, STONE_BRICK, 0);
+					} else if (step == 2) {
+						b.set(x, GROUND + 1, z, SLAB, STONE_BRICK_SLAB);
+					}
+					b.set(x, GROUND, z, STONE_BRICK, 0);
+				}
 			}
 		}
-		for (int y = GROUND + 1; y <= GROUND + 6; y++) b.set(0, y, 0, QUARTZ, 2);
-		b.set(0, GROUND + 7, 0, QUARTZ, 1);
-		b.set(0, GROUND + 8, 0, GLOWSTONE, 0);
 
-		// Emerald generators in a circle around it
+		// Quartz tower in the middle, with a sea lantern band and a glowing top
+		int top = GROUND + 14;
+		for (int y = GROUND + 3; y <= top; y++) {
+			for (int x = -1; x <= 1; x++) {
+				for (int z = -1; z <= 1; z++) {
+					boolean corner = Math.abs(x) == 1 && Math.abs(z) == 1;
+					if (y == GROUND + 9 && !corner) b.set(x, y, z, SEA_LANTERN, 0);
+					else b.set(x, y, z, QUARTZ, corner ? QUARTZ_PILLAR : y == top ? QUARTZ_CHISELED : 0);
+				}
+			}
+		}
+		for (int x = -2; x <= 2; x++) {
+			for (int z = -2; z <= 2; z++) {
+				if (Math.abs(x) == 2 || Math.abs(z) == 2) {
+					b.set(x, GROUND + 3, z, SLAB, QUARTZ_SLAB);
+					b.set(x, top + 1, z, SLAB, QUARTZ_SLAB);
+				}
+			}
+		}
+		b.set(0, top + 1, 0, GLOWSTONE, 0);
+		b.set(0, top + 2, 0, SEA_LANTERN, 0);
+
+		// Lanterns on the platform
+		for (int sx = -1; sx <= 1; sx += 2) {
+			for (int sz = -1; sz <= 1; sz += 2) {
+				b.set(sx * 3, GROUND + 3, sz * 3, QUARTZ, QUARTZ_PILLAR);
+				b.set(sx * 3, GROUND + 4, sz * 3, GLOWSTONE, 0);
+			}
+		}
+
+		// Emerald generators in pillared shrines on the plaza, 20 blocks apart
 		int id = 1;
 		for (int sx = -1; sx <= 1; sx += 2) {
 			for (int sz = -1; sz <= 1; sz += 2) {
 				int gx = sx * EMERALD_OFFSET;
 				int gz = sz * EMERALD_OFFSET;
-				for (int x = -1; x <= 1; x++) {
-					for (int z = -1; z <= 1; z++) b.set(gx + x, GROUND, gz + z, STAINED_CLAY, 13);
+				for (int x = -2; x <= 2; x++) {
+					for (int z = -2; z <= 2; z++) {
+						boolean rim = Math.abs(x) == 2 || Math.abs(z) == 2;
+						b.set(gx + x, GROUND, gz + z, rim ? STONE_BRICK : STAINED_CLAY, rim ? 0 : GREEN);
+						if (Math.abs(x) == 2 && Math.abs(z) == 2) {
+							b.set(gx + x, GROUND + 1, gz + z, STONE_BRICK, MOSSY);
+							b.set(gx + x, GROUND + 2, gz + z, STONE_BRICK, 0);
+							b.set(gx + x, GROUND + 3, gz + z, STONE_BRICK, CHISELED);
+							b.set(gx + x, GROUND + 4, gz + z, GLOWSTONE, 0);
+						}
+					}
 				}
 				b.set(gx, GROUND, gz, EMERALD_BLOCK, 0);
 				config.setEmeraldGenerator(id++, new Location(b.world, gx + 0.5, GROUND + 1, gz + 0.5));
 			}
 		}
 
-		// Lamps beside each path, at the plaza's edge
+		// Lamps where the paths leave the plaza
 		for (int[] dir : BASE_DIRECTIONS) {
 			for (int side = -1; side <= 1; side += 2) {
-				int px = dir[0] * 12 + (dir[0] == 0 ? side * 2 : 0);
-				int pz = dir[1] * 12 + (dir[1] == 0 ? side * 2 : 0);
-				b.lampPost(px, pz);
+				int t = MID_PLAZA_RADIUS + 1;
+				b.lampPost(dir[0] * t + (dir[0] == 0 ? side * 2 : 0), dir[1] * t + (dir[1] == 0 ? side * 2 : 0));
+				t = MID_RADIUS - 3;
+				b.lampPost(dir[0] * t + (dir[0] == 0 ? side * 2 : 0), dir[1] * t + (dir[1] == 0 ? side * 2 : 0));
 			}
 		}
 
-		// Trees and bushes around the outer ring
-		int[][] trees = {{14, 6}, {-6, 14}, {-14, -6}, {6, -14}};
-		for (int[] t : trees) b.tree(t[0], GROUND + 1, t[1], 0, 5);
-		int[][] bushes = {{13, -8}, {8, 13}, {-13, 8}, {-8, -13}};
-		for (int[] bush : bushes) b.bush(bush[0], GROUND + 1, bush[1]);
-		b.decorate(0, 0, 19, 0.11);
+		// Big trees, bushes and boulders around the grassy outer ring
+		for (int i = 0; i < 8; i++) {
+			double angle = Math.PI / 8 + i * Math.PI / 4 + (i % 2 == 0 ? 0.12 : -0.12);
+			int tx = (int) Math.round(Math.cos(angle) * (MID_RADIUS - 5));
+			int tz = (int) Math.round(Math.sin(angle) * (MID_RADIUS - 5));
+			if (i % 2 == 0) b.bigTree(tx, tz, 7, 3, 0);
+			else b.tree(tx, GROUND + 1, tz, 2, 6);
+		}
+		for (int i = 0; i < 4; i++) {
+			double angle = i * Math.PI / 2 + Math.PI / 4;
+			b.bush((int) Math.round(Math.cos(angle) * (MID_RADIUS - 4)), GROUND + 1, (int) Math.round(Math.sin(angle) * (MID_RADIUS - 4)));
+			double boulderAngle = i * Math.PI / 2 + 0.55;
+			b.boulder((int) Math.round(Math.cos(boulderAngle) * (MID_RADIUS - 3)), (int) Math.round(Math.sin(boulderAngle) * (MID_RADIUS - 3)), 2);
+		}
+		b.decorate(0, 0, MID_RADIUS, 0.08, 0.7);
 	}
 
 	// ===== Diamond islands =====
 
 	private void buildDiamondIsland(Build b, FWMapConfig config, int id, int cx, int cz) {
-		b.island(cx, cz, 6.5, 6.5, 8, 0.12);
-		for (int x = -1; x <= 1; x++) {
-			for (int z = -1; z <= 1; z++) b.set(cx + x, GROUND, cz + z, STONE_BRICK, 1);
+		b.island(cx, cz, 8.5, 8.5, 11, 0.12);
+		for (int x = -2; x <= 2; x++) {
+			for (int z = -2; z <= 2; z++) {
+				boolean rim = Math.abs(x) == 2 || Math.abs(z) == 2;
+				b.set(cx + x, GROUND, cz + z, STONE_BRICK, rim ? (b.random(cx + x, 1, cz + z) < 0.5 ? MOSSY : CRACKED) : 0);
+			}
 		}
 		b.set(cx, GROUND, cz, DIAMOND_BLOCK, 0);
 		config.setDiamondGenerator(id, new Location(b.world, cx + 0.5, GROUND + 1, cz + 0.5));
 
-		// Ruined pillars and a tree on the far side from mid
+		// Ruins and a tree on the far side from mid, a boulder at the side
 		int ox = Integer.signum(cx);
 		int oz = Integer.signum(cz);
-		b.pillar(cx + ox * 4, cz - oz * 1, 3);
-		b.pillar(cx - ox * 1, cz + oz * 4, 2);
-		b.tree(cx + ox * 3, GROUND + 1, cz + oz * 3, 2, 4);
-		b.decorate(cx, cz, 6.5, 0.12);
+		b.pillar(cx + ox * 4, cz - oz * 2, 4);
+		b.pillar(cx - ox * 2, cz + oz * 4, 2);
+		b.pillar(cx + ox * 5, cz + oz * 1, 1);
+		b.bigTree(cx + ox * 3, cz + oz * 4, 6, 2, 0);
+		b.boulder(cx - ox * 5, cz + oz * 2, 1);
+		b.decorate(cx, cz, 8.5, 0.12, 0.5);
 	}
 
 	// ===== Bases =====
@@ -253,112 +340,153 @@ public class FWMapGenerator {
 	private int buildBase(Build b, FWMapConfig config, int siteId, int[] dir, int hologramId) {
 		int team = colorOf(siteId);
 		b.frame(dir[0] * BASE_DISTANCE, dir[1] * BASE_DISTANCE, -dir[0], -dir[1]);
-		World w = b.world;
 
 		// The island: longer towards mid than it is wide
 		boolean alongZ = dir[0] == 0;
-		b.island(b.bx, b.bz, alongZ ? 12 : 15, alongZ ? 15 : 12, 15, 0.1);
-
-		// Path from the flag to the front edge
-		for (int lz = 4; lz <= 16; lz++) {
-			for (int lx = -1; lx <= 1; lx++) {
-				if (!b.hasLocal(lx, lz)) continue;
-				b.setLocal(lx, GROUND, lz, STONE_BRICK, lx == 0 && lz % 4 == 0 ? 3 : b.randomLocal(lx, lz) < 0.15 ? 1 : 0);
-			}
-		}
-		b.lampLocal(-2, 8);
-		b.lampLocal(2, 8);
-		b.lampLocal(-2, 13);
-		b.lampLocal(2, 13);
-
-		// Flag plaza
-		for (int lx = -2; lx <= 2; lx++) {
-			for (int lz = 1; lz <= 5; lz++) {
-				boolean border = Math.abs(lx) == 2 || lz == 1 || lz == 5;
-				b.foundationLocal(lx, lz);
-				b.setLocal(lx, GROUND, lz, border ? STONE_BRICK : STAINED_CLAY, border ? 0 : team);
-			}
-		}
-		b.setLocal(0, GROUND, 3, QUARTZ, 1);
-
-		// Spawn pavilion
-		for (int lx = -4; lx <= 4; lx++) {
-			for (int lz = -10; lz <= -2; lz++) {
-				b.foundationLocal(lx, lz);
-				boolean inside = Math.abs(lx) <= 3 && lz >= -9 && lz <= -3;
-				if (inside) {
-					boolean border = Math.abs(lx) == 3 || lz == -9 || lz == -3;
-					b.setLocal(lx, GROUND, lz, PLANKS, border ? 1 : 0);
-				}
-			}
-		}
-		int[][] corners = {{-3, -9}, {3, -9}, {-3, -3}, {3, -3}};
-		for (int[] c : corners) {
-			for (int y = GROUND + 1; y <= GROUND + 4; y++) b.setLocal(c[0], y, c[1], LOG, 0);
-		}
-		for (int lx = -4; lx <= 4; lx++) {
-			for (int lz = -10; lz <= -2; lz++) {
-				boolean rim = Math.abs(lx) == 4 || lz == -10 || lz == -2;
-				b.setLocal(lx, GROUND + 5, lz, rim ? WOOD_SLAB : STAINED_CLAY, rim ? 1 : team);
-				if (Math.abs(lx) <= 2 && lz >= -8 && lz <= -4) b.setLocal(lx, GROUND + 6, lz, STAINED_CLAY, team);
-				if (Math.abs(lx) <= 1 && lz >= -7 && lz <= -5) b.setLocal(lx, GROUND + 7, lz, WOOL, team);
-			}
-		}
-		b.setLocal(0, GROUND + 8, -6, GLOWSTONE, 0);
-		b.setLocal(0, GROUND + 4, -6, GLOWSTONE, 0);
+		b.island(b.bx, b.bz, alongZ ? 15 : 19, alongZ ? 19 : 15, 18, 0.08);
 
 		FWTeamSite site = config.getTeamSite(siteId);
 		site.setCreated(true);
-		site.setSpawn(b.standLocal(0, -6, true));
-		site.setFlagLoc(b.standLocal(0, 3, false));
 
-		// Team chest and ender chest, with their Punch to Deposit holograms
-		b.setLocal(-2, GROUND + 1, -8, CHEST, b.facingData());
-		b.setLocal(2, GROUND + 1, -8, ENDER_CHEST, b.facingData());
-		config.setChestHologram(hologramId++, b.standLocal(-2, -8, false).add(0, 1.2, 0));
-		config.setChestHologram(hologramId++, b.standLocal(2, -8, false).add(0, 1.2, 0));
+		hologramId = buildForge(b, config, site, team, hologramId);
+		buildSpawnPlaza(b, site, team);
 
-		// Forge at the back with the iron and gold generators
-		for (int lx = -3; lx <= 3; lx++) {
-			for (int lz = -14; lz <= -11; lz++) {
+		// Flag on a raised dais in front of spawn
+		for (int lx = -2; lx <= 2; lx++) {
+			for (int lz = 3; lz <= 7; lz++) {
 				b.foundationLocal(lx, lz);
-				b.setLocal(lx, GROUND, lz, DOUBLE_SLAB, 0);
+				boolean border = Math.abs(lx) == 2 || lz == 3 || lz == 7;
+				b.setLocal(lx, GROUND, lz, border ? STONE_BRICK : STAINED_CLAY, border ? CHISELED : team);
+				if (!border) b.setLocal(lx, GROUND + 1, lz, CARPET, team);
 			}
-			b.setLocal(lx, GROUND + 1, -14, STONE_BRICK, 0);
-			b.setLocal(lx, GROUND + 2, -14, SLAB, 5);
 		}
-		for (int lx = -3; lx <= 3; lx += 6) {
-			b.setLocal(lx, GROUND + 2, -14, STONE_BRICK, 0);
-			b.setLocal(lx, GROUND + 3, -14, SEA_LANTERN, 0);
+		b.setLocal(0, GROUND + 1, 5, QUARTZ, QUARTZ_CHISELED);
+		site.setFlagLoc(b.standLocal(0, 5, 2, false));
+
+		// Lit path from the dais to the front edge
+		for (int lz = 8; lz <= 22; lz++) {
+			for (int lx = -1; lx <= 1; lx++) {
+				if (!b.hasLocal(lx, lz)) continue;
+				b.setLocal(lx, GROUND, lz, STONE_BRICK, lx == 0 && lz % 4 == 0 ? CHISELED : b.randomLocal(lx, lz) < 0.18 ? MOSSY : 0);
+			}
 		}
-		b.setLocal(-1, GROUND, -12, IRON_BLOCK, 0);
-		b.setLocal(1, GROUND, -12, GOLD_BLOCK, 0);
-		site.setIronGenerator(b.standLocal(-1, -12, false));
-		site.setGoldGenerator(b.standLocal(1, -12, false));
+		b.lampLocal(-2, 10);
+		b.lampLocal(2, 10);
+		b.lampLocal(-2, 15);
+		b.lampLocal(2, 15);
 
-		// Shop stall on one side, a farm stall on the other
-		b.stallLocal(-7, -2, team);
-		site.setShopLoc(b.standLocal(-7, -2, false));
-		b.stallLocal(7, -2, team);
-		b.setLocal(7, GROUND + 1, -2, HAY, 0);
-		b.setLocal(8, GROUND + 1, -3, HAY, 0);
-		b.setLocal(6, GROUND + 1, -1, CAULDRON, 0);
+		// Trees, boulders, then hills, grass and flowers wherever's free
+		b.bigTreeLocal(-10, -14, 7, 3, 0);
+		b.bigTreeLocal(10, -14, 7, 3, 0);
+		b.treeLocal(-9, 8, 2, 6);
+		b.treeLocal(9, 9, 0, 5);
+		b.bushLocal(-12, 1);
+		b.bushLocal(5, 14);
+		b.boulderLocal(12, 2, 2);
+		b.boulderLocal(-6, 15, 1);
+		b.decorate(b.bx, b.bz, 19, 0.08, 0.6);
 
-		// Trees, then grass and flowers wherever's free
-		b.treeLocal(7, -9, 0, 5);
-		b.treeLocal(-7, 8, 0, 5);
-		b.treeLocal(8, 5, 2, 6);
-		b.bushLocal(-9, -8);
-		b.decorate(b.bx, b.bz, 15, 0.1);
-
-		// Island boundary (for traps and the heal pool), and no-build areas at the generators, spawn and shop
-		site.setBoundaryCorner1(b.cornerLocal(-14, -17, GROUND - 25));
-		site.setBoundaryCorner2(b.cornerLocal(14, 17, GROUND + 25));
-		site.setImportantArea(1, b.areaLocal(0, -12, 2, 3, 1));
-		site.setImportantArea(2, b.areaLocal(0, -6, 1, 2, 1));
-		site.setImportantArea(3, b.areaLocal(-7, -2, 1, 2, 1));
+		// Island boundary (for traps and the heal pool), and no-build areas at the forge, spawn and shop
+		site.setBoundaryCorner1(b.cornerLocal(-17, -22, GROUND - 30));
+		site.setBoundaryCorner2(b.cornerLocal(17, 22, GROUND + 30));
+		site.setImportantArea(1, b.areaLocal(0, -15, 4, 4, 3));
+		site.setImportantArea(2, b.areaLocal(0, -7, 2, 2, 2));
+		site.setImportantArea(3, b.areaLocal(-8, -7, 1, 2, 1));
 
 		return hologramId;
+	}
+
+	/** The forge: a team-colored building at the back of the base with the generators and chests inside. */
+	private int buildForge(Build b, FWMapConfig config, FWTeamSite site, int team, int hologramId) {
+		for (int lx = -6; lx <= 6; lx++) {
+			for (int lz = -19; lz <= -11; lz++) b.foundationLocal(lx, lz);
+		}
+		for (int lx = -5; lx <= 5; lx++) {
+			for (int lz = -18; lz <= -12; lz++) {
+				boolean wall = Math.abs(lx) == 5 || lz == -18;
+				b.setLocal(lx, GROUND, lz, wall ? STONE_BRICK : DOUBLE_SLAB, 0);
+				if (!wall) continue;
+				boolean frontPillar = lz == -12;
+				for (int y = GROUND + 1; y <= GROUND + 4; y++) {
+					if (frontPillar) {
+						b.setLocal(lx, y, lz, QUARTZ, QUARTZ_PILLAR);
+					} else if (y == GROUND + 3) {
+						b.setLocal(lx, y, lz, STAINED_CLAY, team);
+					} else if (y == GROUND + 2 && Math.abs(lx) == 5 && lz >= -16 && lz <= -14) {
+						b.setLocal(lx, y, lz, STAINED_GLASS, team); // side windows
+					} else {
+						b.setLocal(lx, y, lz, STONE_BRICK, b.randomLocal(lx * 7 + y, lz) < 0.15 ? MOSSY : 0);
+					}
+				}
+			}
+		}
+		// Sea lanterns set into the back wall
+		b.setLocal(-3, GROUND + 2, -18, SEA_LANTERN, 0);
+		b.setLocal(3, GROUND + 2, -18, SEA_LANTERN, 0);
+
+		// Roof: a stone brick ceiling with a slab rim, then a stepped team-colored top
+		for (int lx = -6; lx <= 6; lx++) {
+			for (int lz = -19; lz <= -11; lz++) {
+				boolean rim = Math.abs(lx) == 6 || lz == -19 || lz == -11;
+				b.setLocal(lx, GROUND + 5, lz, rim ? SLAB : STONE_BRICK, rim ? STONE_BRICK_SLAB : 0);
+				if (Math.abs(lx) <= 4 && lz >= -17 && lz <= -13) b.setLocal(lx, GROUND + 6, lz, STAINED_CLAY, team);
+				if (Math.abs(lx) <= 2 && lz >= -16 && lz <= -14) b.setLocal(lx, GROUND + 7, lz, WOOL, team);
+			}
+		}
+		b.setLocal(0, GROUND + 8, -15, GLOWSTONE, 0);
+
+		// Generators on iron and gold blocks
+		b.setLocal(-1, GROUND, -15, IRON_BLOCK, 0);
+		b.setLocal(1, GROUND, -15, GOLD_BLOCK, 0);
+		site.setIronGenerator(b.standLocal(-1, -15, 1, false));
+		site.setGoldGenerator(b.standLocal(1, -15, 1, false));
+
+		// Team chest and ender chest just inside, with their Punch to Deposit holograms
+		b.setLocal(-4, GROUND + 1, -13, CHEST, b.facingData());
+		b.setLocal(4, GROUND + 1, -13, ENDER_CHEST, b.facingData());
+		config.setChestHologram(hologramId++, b.standLocal(-4, -13, 1, false).add(0, 1.2, 0));
+		config.setChestHologram(hologramId++, b.standLocal(4, -13, 1, false).add(0, 1.2, 0));
+		return hologramId;
+	}
+
+	/** A raised spawn plaza in front of the forge, with the shop stall on one side and an anvil stall on the other. */
+	private void buildSpawnPlaza(Build b, FWTeamSite site, int team) {
+		for (int lx = -11; lx <= 11; lx++) {
+			for (int lz = -11; lz <= -3; lz++) {
+				b.foundationLocal(lx, lz);
+				boolean border = Math.abs(lx) == 11 || lz == -11 || lz == -3;
+				boolean aisle = lx == 0 && lz >= -10 && lz <= -4;
+				b.setLocal(lx, GROUND, lz, STONE, 0);
+				if (border) {
+					boolean stripe = (Math.abs(lx) + Math.abs(lz)) % 4 < 2;
+					b.setLocal(lx, GROUND + 1, lz, stripe ? STAINED_CLAY : STONE_BRICK, stripe ? team : 0);
+				}
+				else if (aisle) b.setLocal(lx, GROUND + 1, lz, STAINED_CLAY, team);
+				else b.setLocal(lx, GROUND + 1, lz, STONE, POLISHED_ANDESITE);
+			}
+		}
+		// Half-slab step down towards the flag
+		for (int lx = -2; lx <= 2; lx++) b.setLocal(lx, GROUND + 1, -2, SLAB, STONE_BRICK_SLAB);
+		site.setSpawn(b.standLocal(0, -7, 2, true));
+
+		b.stallLocal(-8, -7, team, GROUND + 1);
+		site.setShopLoc(b.standLocal(-8, -7, 2, false));
+		b.stallLocal(8, -7, team, GROUND + 1);
+		b.setLocal(8, GROUND + 2, -7, ANVIL, 0);
+		b.setLocal(9, GROUND + 2, -8, BOOKSHELF, 0);
+		b.setLocal(7, GROUND + 2, -6, CAULDRON, 0);
+		b.setLocal(9, GROUND + 2, -6, HAY, 0);
+
+		// Hedge planters on the plaza
+		int[][] planters = {{-4, -10}, {4, -10}, {-4, -4}, {4, -4}};
+		for (int[] planter : planters) {
+			b.setLocal(planter[0], GROUND + 1, planter[1], GRASS, 0);
+			b.setLocal(planter[0], GROUND + 2, planter[1], LEAVES, 4);
+		}
+
+		// Lanterns at the plaza's front corners
+		b.lampLocal(-11, -2);
+		b.lampLocal(11, -2);
 	}
 
 	private static int colorOf(int siteId) {
@@ -389,6 +517,10 @@ public class FWMapGenerator {
 
 		void set(int x, int y, int z, int id, int data) {
 			blocks.put(key(x, y, z), (id << 4) | (data & 0xF));
+		}
+
+		void clear(int x, int y, int z) {
+			blocks.remove(key(x, y, z));
 		}
 
 		boolean has(int x, int y, int z) {
@@ -427,7 +559,9 @@ public class FWMapGenerator {
 							+ 0.4 * Math.sin(9 * angle + p3)) / 2.1;
 					double d = Math.sqrt((dx / a) * (dx / a) + (dz / c) * (dz / c)) / edge;
 					if (d > 1) continue;
-					int columnDepth = 2 + (int) Math.round(Math.pow(1 - d, 0.75) * depth + random(x, 0, z) * 2.5);
+					// A rocky point underneath, with a few stalactites hanging off it
+					double stalactite = d < 0.55 && random(x, 5, z) < 0.03 ? random(x, 6, z) * 4 : 0;
+					int columnDepth = 2 + (int) Math.round(Math.pow(1 - d, 0.7) * depth + random(x, 0, z) * 2.5 + stalactite);
 					column(x, z, columnDepth);
 				}
 			}
@@ -446,7 +580,7 @@ public class FWMapGenerator {
 					double roll = random(x, y, z);
 					if (roll < 0.03) set(x, y, z, COAL_ORE, 0);
 					else if (roll < 0.05) set(x, y, z, IRON_ORE, 0);
-					else if (roll < 0.20) set(x, y, z, STONE, 5); // andesite
+					else if (roll < 0.20) set(x, y, z, STONE, ANDESITE);
 					else if (roll < 0.30) set(x, y, z, COBBLE, 0);
 					else set(x, y, z, STONE, 0);
 				}
@@ -455,14 +589,14 @@ public class FWMapGenerator {
 
 		/** Makes sure a structure's block has ground under it, even past the island's wavy edge. */
 		void foundation(int x, int z) {
-			if (!has(x, GROUND, z)) column(x, z, 4);
+			if (!has(x, GROUND, z)) column(x, z, 5);
 		}
 
 		/**
-		 * Gentle hills (1-2 blocks) on the open grass towards the island's edge, then grass tufts and flowers on
-		 * top. Hills keep a block away from anything built, so paths, stalls and generators stay flat to walk on.
+		 * Gentle hills (1-2 blocks) on the open grass from hillStart (0..1 of the radius) out, then grass tufts and
+		 * flowers on top. Hills keep a block away from anything built, so paths and stalls stay flat to walk on.
 		 */
-		void decorate(int cx, int cz, double radius, double wobble) {
+		void decorate(int cx, int cz, double radius, double wobble, double hillStart) {
 			int reach = (int) Math.ceil(radius * (1 + wobble * 1.8)) + 1;
 			double p = (seed & 0xFF) / 40.0;
 			List<int[]> raise = new ArrayList<>();
@@ -470,8 +604,8 @@ public class FWMapGenerator {
 				for (int z = cz - reach; z <= cz + reach; z++) {
 					if (!isOpenGrass(x, z)) continue;
 					double d = Math.sqrt((x - cx) * (x - cx) + (z - cz) * (z - cz)) / radius;
-					if (d < 0.55 || !openAround(x, z)) continue;
-					double hill = Math.sin(x * 0.31 + p) * Math.cos(z * 0.27 - p) + (random(x, 7, z) - 0.5) * 0.3;
+					if (d < hillStart || !openAround(x, z)) continue;
+					double hill = Math.sin(x * 0.29 + p) * Math.cos(z * 0.25 - p) + (random(x, 7, z) - 0.5) * 0.3;
 					int height = hill > 0.75 ? 2 : hill > 0.35 ? 1 : 0;
 					if (height > 0) raise.add(new int[]{x, z, height});
 				}
@@ -532,6 +666,34 @@ public class FWMapGenerator {
 			set(x, y + height, z, LEAVES, woodData | 4);
 		}
 
+		/** A big round-crowned tree: a thick trunk base with roots and a layered canopy. */
+		void bigTree(int x, int z, int height, int radius, int woodData) {
+			for (int dx = -1; dx <= 1; dx++) {
+				for (int dz = -1; dz <= 1; dz++) foundation(x + dx, z + dz);
+			}
+			set(x, GROUND, z, DIRT, 0);
+			for (int y = 1; y <= height; y++) set(x, GROUND + y, z, LOG, woodData);
+			// Roots
+			int[][] roots = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+			for (int[] root : roots) {
+				if (random(x + root[0], 9, z + root[1]) < 0.6) set(x + root[0], GROUND + 1, z + root[1], LOG, woodData);
+			}
+			// Canopy: a squashed sphere around the top of the trunk
+			int cy = GROUND + height;
+			for (int dy = -2; dy <= 2; dy++) {
+				int r = dy <= 0 ? radius : radius - dy;
+				for (int dx = -r; dx <= r; dx++) {
+					for (int dz = -r; dz <= r; dz++) {
+						double dist = Math.sqrt(dx * dx + dz * dz + dy * dy * 1.5);
+						if (dist > r + 0.5) continue;
+						if (dist > r - 0.5 && random(x + dx, cy + dy, z + dz) < 0.35) continue; // ragged edge
+						if (dx == 0 && dz == 0 && dy <= 0) continue; // trunk
+						if (!has(x + dx, cy + dy, z + dz)) set(x + dx, cy + dy, z + dz, LEAVES, woodData | 4);
+					}
+				}
+			}
+		}
+
 		void bush(int x, int y, int z) {
 			foundation(x, z);
 			for (int dx = -1; dx <= 1; dx++) {
@@ -541,6 +703,22 @@ public class FWMapGenerator {
 				}
 			}
 			set(x, y + 1, z, LEAVES, 4);
+		}
+
+		/** A mossy boulder half sunk into the ground. */
+		void boulder(int x, int z, int size) {
+			for (int dx = -size; dx <= size; dx++) {
+				for (int dz = -size; dz <= size; dz++) {
+					foundation(x + dx, z + dz);
+					for (int dy = 0; dy <= size; dy++) {
+						double dist = Math.sqrt(dx * dx + dz * dz + dy * dy * 1.6);
+						if (dist > size + 0.4 || (dist > size - 0.4 && random(x + dx, dy, z + dz) < 0.4)) continue;
+						double roll = random(x + dx, GROUND + 1 + dy, z + dz);
+						set(x + dx, GROUND + 1 + dy, z + dz, roll < 0.4 ? MOSSY_COBBLE : roll < 0.7 ? STONE : COBBLE,
+								roll >= 0.4 && roll < 0.55 ? ANDESITE : 0);
+					}
+				}
+			}
 		}
 
 		void lampPost(int x, int z) {
@@ -555,7 +733,7 @@ public class FWMapGenerator {
 			foundation(x, z);
 			set(x, GROUND, z, STONE_BRICK, 0);
 			for (int y = 1; y <= height; y++) {
-				set(x, GROUND + y, z, y == height ? COBBLE_WALL : STONE_BRICK, y == height ? 1 : random(x, y, z) < 0.5 ? 1 : 2);
+				set(x, GROUND + y, z, y == height ? COBBLE_WALL : STONE_BRICK, y == height ? 1 : random(x, y, z) < 0.5 ? MOSSY : CRACKED);
 			}
 		}
 
@@ -598,35 +776,43 @@ public class FWMapGenerator {
 			tree(wx(lx, lz), GROUND + 1, wz(lx, lz), woodData, height);
 		}
 
+		void bigTreeLocal(int lx, int lz, int height, int radius, int woodData) {
+			bigTree(wx(lx, lz), wz(lx, lz), height, radius, woodData);
+		}
+
 		void bushLocal(int lx, int lz) {
 			bush(wx(lx, lz), GROUND + 1, wz(lx, lz));
+		}
+
+		void boulderLocal(int lx, int lz, int size) {
+			boulder(wx(lx, lz), wz(lx, lz), size);
 		}
 
 		void lampLocal(int lx, int lz) {
 			lampPost(wx(lx, lz), wz(lx, lz));
 		}
 
-		/** A 3x3 market stall: plank floor, fence posts and a striped awning (team color and white) with carpet on top. */
-		void stallLocal(int lx, int lz, int team) {
+		/** A 3x3 market stall on floorY: plank floor, fence posts and a striped awning with carpet on top. */
+		void stallLocal(int lx, int lz, int team, int floorY) {
 			for (int dx = -1; dx <= 1; dx++) {
 				for (int dz = -1; dz <= 1; dz++) {
 					foundationLocal(lx + dx, lz + dz);
-					setLocal(lx + dx, GROUND, lz + dz, PLANKS, 1);
+					setLocal(lx + dx, floorY, lz + dz, PLANKS, 1);
 					if (Math.abs(dx) == 1 && Math.abs(dz) == 1) {
-						setLocal(lx + dx, GROUND + 1, lz + dz, FENCE, 0);
-						setLocal(lx + dx, GROUND + 2, lz + dz, FENCE, 0);
+						setLocal(lx + dx, floorY + 1, lz + dz, FENCE, 0);
+						setLocal(lx + dx, floorY + 2, lz + dz, FENCE, 0);
 					}
 					int stripe = dx == 0 ? 0 : team;
-					setLocal(lx + dx, GROUND + 3, lz + dz, WOOL, stripe);
-					setLocal(lx + dx, GROUND + 4, lz + dz, CARPET, stripe);
+					setLocal(lx + dx, floorY + 3, lz + dz, WOOL, stripe);
+					setLocal(lx + dx, floorY + 4, lz + dz, CARPET, stripe);
 				}
 			}
 		}
 
-		/** Where a player stands on this block (its center, on top), facing mid if asked. */
-		Location standLocal(int lx, int lz, boolean faceMid) {
+		/** Where a player stands on this block (its center), `up` blocks above GROUND, facing mid if asked. */
+		Location standLocal(int lx, int lz, int up, boolean faceMid) {
 			float yaw = faceMid ? (float) Math.toDegrees(Math.atan2(-fx, fz)) : 0;
-			return new Location(world, wx(lx, lz) + 0.5, GROUND + 1, wz(lx, lz) + 0.5, yaw, 0);
+			return new Location(world, wx(lx, lz) + 0.5, GROUND + up, wz(lx, lz) + 0.5, yaw, 0);
 		}
 
 		Location cornerLocal(int lx, int lz, int y) {
@@ -636,7 +822,7 @@ public class FWMapGenerator {
 		/** A no-build area centered on this block, sideRadius to the side and forwardRadius towards mid. */
 		FWImportantArea areaLocal(int lx, int lz, int sideRadius, int yRadius, int forwardRadius) {
 			boolean alongZ = fx == 0;
-			return new FWImportantArea(standLocal(lx, lz, false),
+			return new FWImportantArea(standLocal(lx, lz, 1, false),
 					alongZ ? sideRadius : forwardRadius, yRadius, alongZ ? forwardRadius : sideRadius);
 		}
 
