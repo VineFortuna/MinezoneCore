@@ -2482,13 +2482,11 @@ public class GameInstance {
                                 if (playerData.level >= classType.getLevel()) {
                                     if (classType != ClassType.Fisherman || this.getGameManager().getMain().getFishing()
                                             .hasUnlockedFisherman(player)) {
-                                        if (classType != ClassType.Freddy || this.getGameManager().getMain()
-                                                .getHalloweenManager().hasUnlockedFreddy(player))
-                                            if (donor == null
-                                                    || player.hasPermission("scb." + donor.toString().toLowerCase())) {
-                                                selectedClass = classType;
-                                                break;
-                                            }
+                                        if (donor == null
+                                                || player.hasPermission("scb." + donor.toString().toLowerCase())) {
+                                            selectedClass = classType;
+                                            break;
+                                        }
                                     }
                                 }
                             }

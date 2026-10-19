@@ -28,6 +28,7 @@ public enum ClassType {
 	Spider(21, 0, 0),
 	Pig(30, 0, 0),
 	Blaze(31, 0, 0),
+	Freddy(105, 0, 0), // permanent free class (was Halloween Hunt-locked)
 	Wither(33, 0, 0),
 	Creeper(35, 0, 0),
 	Present(38, 0, 0, true),
@@ -100,7 +101,6 @@ public enum ClassType {
 	GingerBreadMan(102, false), // Christmas
 	Elf(101, false), // Christmas
 	Grinch(106, false), // Christmas
-	Freddy(105, false), // Halloween
 	GrimReaper(104, false); // Halloween
 
 	private final int id;

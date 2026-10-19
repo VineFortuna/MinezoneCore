@@ -1,5 +1,6 @@
 package anthony.SuperCraftBrawl.gui;
 
+import anthony.SuperCraftBrawl.mastery.MasteryTier;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -14,6 +15,8 @@ import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
+
+import java.util.List;
 
 public class FavoriteClassesGUI implements InventoryProvider {
 
@@ -43,30 +46,19 @@ public class FavoriteClassesGUI implements InventoryProvider {
 					if (data.customIntegers.contains(type.getID())) {
 
 						ClassDetails details = data.playerClasses.get(type.getID());
-						int played = details.gamesPlayed + 2 * details.gamesWon;
-						int nextLevel = 10;
 
-						if (played >= 75)
-							nextLevel = 100;
-						else if (played >= 50)
-							nextLevel = 75;
-						else if (played >= 25)
-							nextLevel = 50;
-						else if (played >= 10)
-							nextLevel = 25;
+						List<String> lore = type.buildDescription();
+						lore.add("");
+						lore.add(main.color("&e&nLeft Click&r &eto choose a class"));
+						lore.add(main.color("&e&nRight Click&r &eto view mastery"));
+						lore.add(main.color("&e&nShift Click&r &eto remove a favorite class"));
+						lore.add("");
+						lore.addAll(MasteryTier.getRewardAndProgressBar(details));
+
 
 						contents.set(y, x,
 								ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true),
-												type.getTag(), type.buildDescription(), "",
-												"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
-														+ ChatColor.YELLOW + " to choose a class",
-												"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET
-														+ ChatColor.YELLOW + " to view mastery",
-												"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Shift Click" + ChatColor.RESET
-														+ ChatColor.YELLOW + " to remove a favorite class",
-												"",
-												main.color("&aNext reward:"),
-												main.progressBar(played, nextLevel, 25)),
+												type.getTag(), lore),
 										e -> {
 											if (e.isShiftClick()) {
 												for (int i = 0; i < data.customIntegers.size(); i++) {
