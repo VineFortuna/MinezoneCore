@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public class FWSetupCommand implements CommandExecutor, TabExecutor {
 
 	private static final List<String> SUBCOMMANDS = Arrays.asList(
-			"tp", "createmap", "size", "lobby", "spectator", "team", "flag", "shop",
+			"tp", "createmap", "generatemap", "size", "lobby", "spectator", "team", "flag", "shop",
 			"generator", "boundary1", "boundary2", "importantarea", "chesthologram", "list", "maplist", "delete", "save");
 	private static final long DELETE_CONFIRM_MILLIS = 15_000L;
 	private static final String IMPORTANT_AREA_USAGE = "/fwsetup importantarea <color> <id> <X> <Y> <Z> &7or &e<id> remove";
@@ -146,6 +146,15 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 			manager.getOrCreate(mapName); // register in the config index
 			player.teleport(newWorld.getSpawnLocation());
 			player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rVoid world &e" + mapName + "&r created! Build away."));
+			return true;
+		}
+
+		if (sub.equals("generatemap")) {
+			if (args.length < 2) {
+				player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rTry: &e/fwsetup generatemap <mapname>"));
+				return true;
+			}
+			new FWMapGenerator(fwGameManager).generate(player, args[1]);
 			return true;
 		}
 
@@ -521,6 +530,7 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup delete <map> &7-> &rDelete a map's Flag Wars setup (asks to confirm)"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup tp <map> &7-> &rTeleport into a map (loads it if needed)"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup createmap <map> &7-> &rCreate a new void world"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup generatemap <map> &7-> &rBuild a complete, ready-to-play 4-team map"));
 		player.sendMessage(fwGameManager.getMain().color("&7(Stand in the target map world for all commands below)"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup size <4|8> &7- 4-player maps need all 4 teams to start and 3 captures to win"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup lobby"));
