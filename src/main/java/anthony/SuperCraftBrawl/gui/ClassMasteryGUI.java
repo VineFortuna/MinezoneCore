@@ -2,7 +2,6 @@ package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.levels.LevelManager;
 import anthony.SuperCraftBrawl.mastery.MasteryHeads;
 import anthony.SuperCraftBrawl.mastery.MasteryReward;
 import anthony.SuperCraftBrawl.mastery.MasteryStatus;
@@ -28,6 +27,8 @@ public class ClassMasteryGUI implements InventoryProvider {
     public ClassType type;
     public SmartInventory inv;
 
+    private static final String[] NUMERALS = {"I", "II", "III", "IV", "V"};
+
     public ClassMasteryGUI(Core main, ClassType type, SmartInventory parent) {
         inv = SmartInventory.builder()
                 .id("myInventory")
@@ -50,7 +51,6 @@ public class ClassMasteryGUI implements InventoryProvider {
 
         PlayerData data = main.getDataManager().getPlayerData(player);
         ClassDetails details = data.playerClasses.get(type.getID());
-        int played = details.gamesPlayed + (2 * details.gamesWon);
 
         MasteryTier[] tiers = new MasteryTier[]{
                 new MasteryTier(10,  new MasteryReward(10,  20,  Material.GOLD_PLATE),  1),
@@ -59,19 +59,6 @@ public class ClassMasteryGUI implements InventoryProvider {
                 new MasteryTier(75,  new MasteryReward(75,  150, Material.GOLD_BLOCK),  4),
                 new MasteryTier(100, new MasteryReward(0,   0,   null),                 5)
         };
-
-        // Reward items
-        for (int i = 0; i < tiers.length; i++) {
-            MasteryTier tier = tiers[i];
-
-            ItemStack item = (i < 4)
-                    ? createRewardItem(details, played, tier)
-                    : createAltHeadItem(details, played);
-
-            contents.set(1, i + 1, ClickableItem.of(
-                    item,
-                    e -> handleRewardClick(player, data, details, tier, played)));
-        }
 
         // Status indicator row
         for (int i = 0; i < tiers.length; i++) {
@@ -84,12 +71,25 @@ public class ClassMasteryGUI implements InventoryProvider {
             else color = 14;                                        // red
 
             ItemStack pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, color);
-            ItemHelper.setDetails(pane, " ", "");
-            contents.set(2, i + 1, ClickableItem.empty(pane));
+            ItemHelper.setDetails(pane, " ");
+            contents.set(0, i + 2, ClickableItem.empty(pane));
+        }
+
+        // Reward items
+        for (int i = 0; i < tiers.length; i++) {
+            MasteryTier tier = tiers[i];
+
+            ItemStack item = (i < 4)
+                    ? createRewardItem(details, tier, i)
+                    : createAltHeadItem(details);
+
+            contents.set(1, i + 2, ClickableItem.of(
+                    item,
+                    e -> handleRewardClick(player, data, details, tier)));
         }
 
         // Mastery info
-        contents.set(1, 7, ClickableItem.of(
+        contents.set(1, 8, ClickableItem.of(
                 ItemHelper.setDetails(
                         new ItemStack(Material.PAPER),
                         "&a&lMastery Points",
@@ -108,28 +108,31 @@ public class ClassMasteryGUI implements InventoryProvider {
     public void update(Player player, InventoryContents contents) {
     }
 
-    private ItemStack createRewardItem(ClassDetails details, int played, MasteryTier tier) {
+    private ItemStack createRewardItem(ClassDetails details, MasteryTier tier, int index) {
         MasteryReward reward = tier.getReward();
+        MasteryStatus status = tier.getStatus(details);
+        int played = MasteryTier.getProgress(details);
 
         ItemStack item = ItemHelper.setDetails(
                 new ItemStack(reward.getMaterial()),
-                main.color("&e&l" + reward.getTokenReward() + " Tokens & " + reward.getExpReward() + " EXP"));
-
-        MasteryStatus status = tier.getStatus(details);
+                main.color("&e&lTier " + NUMERALS[index]));
 
         if (status == MasteryStatus.LOCKED) {
             ItemHelper.setLore(item, Arrays.asList(
+                    main.color("&7" + reward.getTokenReward() + " Tokens & " + reward.getExpReward() + " EXP"),
                     "",
-                    main.progressBar(played, tier.getRequiredPoints(), 25)));
+                    MasteryTier.buildMasteryProgressBar(played, tier.getRequiredPoints(), 25)));
 
         } else if (status == MasteryStatus.CLAIMED) {
             ItemHelper.setLore(item, Arrays.asList(
+                    main.color("&7" + reward.getTokenReward() + " Tokens & " + reward.getExpReward() + " EXP"),
                     "",
                     main.color("&a&lCLAIMED")));
             ItemHelper.setGlowing(item, true);
 
         } else {
             ItemHelper.setLore(item, Arrays.asList(
+                    main.color("&7" + reward.getTokenReward() + " Tokens & " + reward.getExpReward() + " EXP"),
                     "",
                     main.color("&eClick to claim reward")));
         }
@@ -137,18 +140,22 @@ public class ClassMasteryGUI implements InventoryProvider {
         return item;
     }
 
-    private ItemStack createAltHeadItem(ClassDetails details, int played) {
+    private ItemStack createAltHeadItem(ClassDetails details) {
+        int played = MasteryTier.getProgress(details);
+
         ItemStack head = ItemHelper.setDetails(
                 MasteryHeads.headReward(type),
-                main.color("&e&lAlternate Head"));
+                main.color("&e&lTier " + NUMERALS[4]));
 
         if (played < 100) {
             ItemHelper.setLore(head, Arrays.asList(
+                    main.color("&7Alternate Head"),
                     "",
-                    main.progressBar(played, 100, 25)));
+                    MasteryTier.buildMasteryProgressBar(played, 100, 25)));
 
         } else if (details.reward5) {
             ItemHelper.setLore(head, Arrays.asList(
+                    main.color("&7Alternate Head"),
                     "",
                     main.color("&a&lENABLED"),
                     main.color("&eClick to disable")));
@@ -156,6 +163,7 @@ public class ClassMasteryGUI implements InventoryProvider {
 
         } else {
             ItemHelper.setLore(head, Arrays.asList(
+                    main.color("&7Alternate Head"),
                     "",
                     main.color("&eClick to enable")));
         }
@@ -163,7 +171,7 @@ public class ClassMasteryGUI implements InventoryProvider {
         return head;
     }
 
-    private void handleRewardClick(Player player, PlayerData data, ClassDetails details, MasteryTier tier, int played) {
+    private void handleRewardClick(Player player, PlayerData data, ClassDetails details, MasteryTier tier) {
         MasteryStatus status = tier.getStatus(details);
         MasteryReward reward = tier.getReward();
 

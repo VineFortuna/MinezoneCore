@@ -1,6 +1,12 @@
 package anthony.SuperCraftBrawl.mastery;
 
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
+import anthony.util.ChatColorHelper;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static anthony.util.ChatColorHelper.color;
 
 public class MasteryTier {
 
@@ -28,7 +34,7 @@ public class MasteryTier {
         return tierIndex;
     }
 
-    public int getProgress(ClassDetails details) {
+    public static int getProgress(ClassDetails details) {
         return details.gamesPlayed + (details.gamesWon * MULTIPLIER);
     }
 
@@ -65,5 +71,69 @@ public class MasteryTier {
             case 4: details.reward4 = value; break;
             case 5: details.reward5 = value; break;
         }
+    }
+
+    public static List<String> getRewardAndProgressBar(ClassDetails details) {
+        List<String> lines = new ArrayList<>();
+
+        int played = getProgress(details);
+        int[] thresholds = {10, 25, 50, 75, 100};
+        String[] numerals = {"I", "II", "III", "IV", "V"};
+
+        for (int i = 0; i < thresholds.length; i++) {
+            if (played < thresholds[i]) {
+                if (i > 0) {
+                    lines.add(color("&aMastery Tier " + numerals[i - 1]));
+                }
+                lines.add(color("&7Next tier:"));
+                lines.add(buildMasteryProgressBar(played, thresholds[i], 25));
+
+                int unclaimed = 0;
+                for (int j = 0; j < thresholds.length - 1; j++) {
+                    if (played >= thresholds[j] && !new MasteryTier(thresholds[j], null, j + 1).isClaimed(details)) {
+                        unclaimed++;
+                    }
+                }
+
+                if (unclaimed > 0) {
+                    lines.add("");
+                    lines.add(color("&e" + unclaimed + " unclaimed reward" + (unclaimed == 1 ? "" : "s")));
+                }
+
+                return lines;
+            }
+        }
+
+        // Max tier reached
+        lines.add(color("&aMastery Tier " + numerals[numerals.length - 1]));
+        lines.add(color("&aMastered!"));
+
+        int unclaimed = 0;
+        for (int i = 0; i < thresholds.length - 1; i++) {
+            if (!new MasteryTier(thresholds[i], null, i + 1).isClaimed(details)) {
+                unclaimed++;
+            }
+        }
+
+        if (unclaimed > 0) {
+            lines.add("");
+            lines.add(color("&e" + unclaimed + " unclaimed reward" + (unclaimed == 1 ? "" : "s")));
+        }
+
+        return lines;
+    }
+
+    public static String buildMasteryProgressBar(int progress, int nextLevel, int segments) {
+        String str = "";
+        str += color("&8[");
+        double frac = (double) progress / nextLevel;
+        for (int i = 0; i < segments; i++) {
+            if (i < Math.floor(frac * segments))
+                str += color("&a|");
+            else
+                str += color("&7|");
+        }
+        str += color("&8] &7(" + progress + "/" + nextLevel + ")");
+        return str;
     }
 }
