@@ -106,6 +106,7 @@ public class Core extends JavaPlugin implements Listener {
     protected final Cooldown cooldownTime = null;
     public RankManager rankManager;
     private anthony.SuperCraftBrawl.lobbybuild.LobbyBuildManager lobbyBuildManager;
+    private anthony.SuperCraftBrawl.Game.MaxHealthGuard maxHealthGuard;
     public List<Player> staffchat;
     public List<Player> globalchat;
     public PlayerDataManager dataManager;
@@ -820,6 +821,7 @@ public class Core extends JavaPlugin implements Listener {
     private void registrations() {
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
         Bukkit.getServer().getPluginManager().registerEvents(lobbyBuildManager, this);
+        Bukkit.getServer().getPluginManager().registerEvents(maxHealthGuard, this);
         Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         Bukkit.getMessenger().registerIncomingPluginChannel(this, "BungeeCord", gameManager);
     }
@@ -846,6 +848,7 @@ public class Core extends JavaPlugin implements Listener {
         gameDataManager = new GameDataManager(this);
         rankManager = new RankManager(this);
         lobbyBuildManager = new anthony.SuperCraftBrawl.lobbybuild.LobbyBuildManager(this);
+        maxHealthGuard = new anthony.SuperCraftBrawl.Game.MaxHealthGuard(this);
         actionBarManager = new ActionBarManager(this);
         ag = new ActiveGamesGUI(this);
         p = new Parkour(this);
@@ -2183,13 +2186,13 @@ public class Core extends JavaPlugin implements Listener {
     }
 
     public void ResetPlayer(Player player) {
+        if (player != null) anthony.SuperCraftBrawl.Game.MaxHealthGuard.reset(player); // undo the Max Health modifier, always
         PlayerData playerData = this.getDataManager().getPlayerData(player);
 
         if (player != null && playerData != null) {
             player.getInventory().clear();
             player.teleport(LobbyLoc());
             LobbyItems(player);
-            player.setMaxHealth(20.0); // undo the Max Health modifier
             player.setHealth(20.0f);
             player.setFireTicks(0);
             player.setLevel(playerData.level);
@@ -2275,6 +2278,8 @@ public class Core extends JavaPlugin implements Listener {
             battlePassManager.shutdown();
         if (lobbyBuildManager != null)
             lobbyBuildManager.clearPlacedBlocks();
+        if (maxHealthGuard != null)
+            maxHealthGuard.resetAll(); // never let a raised max health get saved into anyone's .dat
         disablePacketNPCs();
         ByteArrayOutputStream b = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(b);

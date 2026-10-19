@@ -227,6 +227,8 @@ public class GameInstance {
 
     /** Max health for each life in this game, from the Max Health modifier (20 = the normal 10 hearts). */
     public double getMaxHealthPoints() {
+        // Only private games can change it - every other game is always the normal 10 hearts
+        if (!privateGame) return MaxHealthGuard.DEFAULT_MAX_HEALTH;
         return getGameSettings().maxHealthHearts * 2;
     }
 
