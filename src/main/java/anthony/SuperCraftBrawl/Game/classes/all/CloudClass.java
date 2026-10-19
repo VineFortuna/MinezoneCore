@@ -118,7 +118,7 @@ public class CloudClass extends BaseClass {
 	}
 
 	public void pushParticles(Player player) {
-		new BukkitRunnable() {
+		instance.trackClassTask(new BukkitRunnable() {
 			int count = 0;
 			final int maxCount = 5;
 			double radius = 1;
@@ -159,7 +159,7 @@ public class CloudClass extends BaseClass {
 				count++;
 				radius += 2; // Increase radius each tick
 			}
-		}.runTaskTimer(instance.getGameManager().getMain(), 0, 1);
+		}.runTaskTimer(instance.getGameManager().getMain(), 0, 1));
 	}
 
 	private void strikeNearbyPlayers(Player player) {
@@ -205,7 +205,7 @@ public class CloudClass extends BaseClass {
 			}
 
 		};
-		runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+		instance.trackClassTask(runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20));
 	}
 
 	private void resetAllWools() {
@@ -461,6 +461,6 @@ public class CloudClass extends BaseClass {
 				ticks += 5;
 			}
 		};
-		runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 5);
+		instance.trackClassTask(runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 5));
 	}
 }

@@ -191,7 +191,7 @@ public class SnowGolemClass extends BaseClass {
                         }
                     };
 
-                    runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 2);
+                    instance.trackClassTask(runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 2));
                 }
             }
         }
@@ -377,7 +377,7 @@ public class SnowGolemClass extends BaseClass {
             }
         };
 
-        runTimer.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+        instance.trackClassTask(runTimer.runTaskTimer(instance.getGameManager().getMain(), 0, 20));
     }
 
     @Override

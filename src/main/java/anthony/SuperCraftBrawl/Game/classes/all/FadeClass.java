@@ -169,7 +169,7 @@ public class FadeClass extends BaseClass {
 				ticks++;
 			}
 		};
-		r.runTaskTimer(instance.getGameManager().getMain(), 0, 5);
+		instance.trackClassTask(r.runTaskTimer(instance.getGameManager().getMain(), 0, 5));
 	}
 
 	private void finishAbility() {

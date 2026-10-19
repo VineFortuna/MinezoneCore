@@ -106,7 +106,9 @@ public class EnderdragonClass extends BaseClass {
 			Location pLoc = damagerPlayer.getLocation();
 			EnderCrystal crystal = (EnderCrystal) pLoc.getWorld().spawnEntity(pLoc, EntityType.ENDER_CRYSTAL);
 			HealTask task = new HealTask(damagerPlayer, crystal, instance);
-			BukkitTask bukkit = Bukkit.getScheduler().runTaskTimerAsynchronously(instance.getGameManager().getMain(), task, 0, 2L);
+			// On the main thread: it heals the player and removes the crystal, which isn't safe from another thread
+			BukkitTask bukkit = instance.trackClassTask(
+					Bukkit.getScheduler().runTaskTimer(instance.getGameManager().getMain(), task, 0, 2L));
 			task.set(bukkit);
 		}
 	}

@@ -334,7 +334,7 @@ public abstract class BaseClass {
 				p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Placed #" + instance.alivePlayers);
 				p.sendMessage(ChatColor.BOLD + "||");
 				p.sendMessage(ChatColor.BOLD + "=====================");
-				p.sendMessage(instance.color("&2&l(!) &rPrivate games don't give Tokens, EXP or stats."));
+				p.sendMessage(instance.color("&2&l(!) &rCustom games don't give Tokens, EXP or stats."));
 				return;
 			}
 

@@ -67,6 +67,7 @@ public class ProjectileManager {
 				baseProj.lastVel = baseProj.getEntity().getVelocity();
 			} catch (Exception e) {
 				e.printStackTrace();
+				baseProj.addAge(1); // so one that keeps failing still times out, instead of being kept forever
 			}
 		}
 

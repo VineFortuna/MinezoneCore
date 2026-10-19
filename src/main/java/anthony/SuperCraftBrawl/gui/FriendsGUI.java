@@ -204,10 +204,10 @@ public class FriendsGUI implements InventoryProvider {
 
                 if (game != null) {
                     if (game.state == GameState.STARTED)
-                        main.getGameManager().SpectatorJoinMap(player, game.getMap());
+                        main.getGameManager().SpectatorJoinGame(player, game);
                     else if (game.state == GameState.WAITING)
                         if (!game.isLobbyFull(player))
-                            main.getGameManager().JoinMap(player, game.getMap());
+                            main.getGameManager().JoinGame(player, game);
 
                     return;
                 }
@@ -216,7 +216,7 @@ public class FriendsGUI implements InventoryProvider {
 
                 if (game != null) {
                     if (game.state == GameState.STARTED) {
-                        main.getGameManager().SpectatorJoinMap(player, game.getMap());
+                        main.getGameManager().SpectatorJoinGame(player, game);
                     }
                 }
             }));

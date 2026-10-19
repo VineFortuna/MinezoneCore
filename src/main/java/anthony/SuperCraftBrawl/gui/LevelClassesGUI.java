@@ -69,7 +69,8 @@ public class LevelClassesGUI implements InventoryProvider {
 									main.color("&aNext reward:"),
 									main.progressBar(played, nextLevel, 25)),
 							e -> {
-								if (!(data.level >= type.getLevel())) {
+								if (!(data.level >= type.getLevel())
+										&& !main.getGameManager().ignoresClassRequirements(player, type)) {
 									player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
 									return;
 								}
@@ -133,7 +134,7 @@ public class LevelClassesGUI implements InventoryProvider {
 		desc.add("");
 
 		if (data != null) {
-			if (data.level >= unlockLevel) {
+			if (data.level >= unlockLevel || main.getGameManager().ignoresClassRequirements(player, type)) {
 				desc.add(main.color("&e&lUnlocked"));
 				desc.add(main.color("&eLevel: " + unlockLevel));
 			} else {

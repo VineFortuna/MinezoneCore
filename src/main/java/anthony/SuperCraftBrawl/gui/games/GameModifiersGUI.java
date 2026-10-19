@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.gui.games;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameLootDrops;
 import anthony.SuperCraftBrawl.Game.GameSettings;
 import anthony.SuperCraftBrawl.Game.GameSettings.HealthPotMode;
 import anthony.SuperCraftBrawl.Game.GameState;
@@ -15,10 +16,18 @@ import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import fr.mrmicky.fastboard.FastBoard;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.SkullType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /*
  * Private game modifiers. Toggles flip on any click; cycling settings go back on left click and
@@ -38,14 +47,18 @@ public class GameModifiersGUI implements InventoryProvider {
     private static final String[] SPAWN_PROTECTION_LABELS = {"Disabled", "3s", "5s"};
     private static final int[] STRENGTH_TIMES = {0, 5, 10}; // 0 = disabled
     private static final String[] STRENGTH_LABELS = {"Disabled", "5s", "10s"};
-    private static final int[] MAX_HEALTH_HEARTS = {10, 15, 20};
-    private static final String[] MAX_HEALTH_LABELS = {"10 Hearts", "15 Hearts", "20 Hearts"};
+    private static final int[] MAX_HEALTH_HEARTS = {1, 3, 5, 10, 15, 20};
+    private static final String[] MAX_HEALTH_LABELS = {"1 Heart", "3 Hearts", "5 Hearts", "10 Hearts", "15 Hearts", "20 Hearts"};
 
     private static final long DAY = 1000, SUNSET = 12500, NIGHT = 18000;
     private static final long[] TIMES_OF_DAY = {DAY, SUNSET, NIGHT};
     private static final String[] TIME_OF_DAY_LABELS = {"Day", "Sunset", "Night"};
 
-    private static final String CYCLE_HINT = "&eLeft Click &7<< &8| &7>> &eRight Click";
+    private static final String CYCLE_HINT = "&7<< &eLeft Click &8| &eRight Click &7>>";
+    private static final int OPTIONS_LINE_LENGTH = 40; // options lists longer than this wrap onto another line
+
+    // Class selection modifiers: only one can be active per game (none = Classic)
+    private static final String FRENZY = "Frenzy", CLASS_SWITCH = "Class Switch", ONE_FOR_ALL = "One For All";
 
     private final Core main;
     private final GameInstance game;
@@ -58,7 +71,7 @@ public class GameModifiersGUI implements InventoryProvider {
         this.inv = SmartInventory.builder()
                 .id("gameModifiers")
                 .provider(this)
-                .size(3, 9)
+                .size(5, 9)
                 .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Game Modifiers")
                 .build();
     }
@@ -69,6 +82,7 @@ public class GameModifiersGUI implements InventoryProvider {
                 new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e -> {});
         for (int i = 0; i < 9; i++) {
             contents.set(1, i, divider);
+            contents.set(3, i, divider);
         }
 
         if (game == null || game.state != GameState.WAITING) {
@@ -77,17 +91,29 @@ public class GameModifiersGUI implements InventoryProvider {
                     main.color("&cUnavailable"),
                     "",
                     main.color("&7This game can no longer be modified.")
-            ), e -> {}));
+            ), e -> SoundManager.playErrorSound(player)));
             return;
         }
 
-        if (!game.isPrivateGameLeader(player)) {
+        if (!game.canEditCustomGame(player)) {
             contents.set(0, 4, ClickableItem.of(ItemHelper.setDetails(
                     new ItemStack(Material.BARRIER),
-                    main.color("&cParty Leader Only"),
+                    main.color("&cHost Only"),
                     "",
-                    main.color("&7Only the party leader can modify this game.")
-            ), e -> {}));
+                    main.color("&7Only this custom game's host and"),
+                    main.color("&7co-host can modify it.")
+            ), e -> SoundManager.playErrorSound(player)));
+            return;
+        }
+
+        if (game.isCustomGameCountdownStarted()) {
+            contents.set(0, 4, ClickableItem.of(ItemHelper.setDetails(
+                    new ItemStack(Material.BARRIER),
+                    main.color("&cCountdown Started"),
+                    "",
+                    main.color("&7The host can stop the countdown"),
+                    main.color("&7with the Game Settings item.")
+            ), e -> SoundManager.playErrorSound(player)));
             return;
         }
 
@@ -102,12 +128,88 @@ public class GameModifiersGUI implements InventoryProvider {
         addLightningDropRateModifier(contents, player); // 0,8
 
         // Bottom row
-        addClassListModifier(contents, player);         // 2,1
+        addClassListModifier(contents, player);         // 2,0
+        addItemListModifier(contents, player);          // 2,1
         addOpDropsModifier(contents, player);           // 2,2
         addLivesModifier(contents, player);             // 2,4
         addRespawnTimeModifier(contents, player);       // 2,5
         addSpawnProtectionModifier(contents, player);   // 2,6
         addTimeOfDayModifier(contents, player);         // 2,7
+
+        // Last row
+        addVisibilityModifier(contents, player);        // 4,3
+        addCoHostModifier(contents, player);            // 4,5
+    }
+
+    // ===== Last row =====
+
+    private void addVisibilityModifier(InventoryContents contents, Player player) {
+        boolean isPublic = game.isCustomGamePublic();
+
+        ItemStack item = ItemHelper.setDetails(new ItemStack(isPublic ? Material.EMERALD_BLOCK : Material.REDSTONE_BLOCK),
+                main.color("&e&lVisibility"),
+                "",
+                main.color("&fCurrent: " + (isPublic ? "&aPublic" : "&cPrivate")),
+                "",
+                main.color(isPublic ? "&7Anyone can join this game from" : "&7Only the host's party can join"),
+                main.color(isPublic ? "&7the Custom Games NPC" : "&7this game"),
+                "",
+                main.color("&eClick to make it " + (isPublic ? "&cprivate" : "&apublic")));
+
+        contents.set(4, 3, ClickableItem.of(item, e -> {
+            if (!canModify(player)) return;
+            SoundManager.playClickSound(player);
+
+            game.setCustomGamePublic(!isPublic);
+            game.TellAll(main.color("&2&l(!) &rThis custom game is now " + (!isPublic
+                    ? "&apublic&r - anyone can join it from the Custom Games NPC." : "&cprivate&r - only the host's party can join it.")));
+            if (!isPublic) announcePublicGame();
+            CustomGamesGUI.refreshOpenMenus(); // the game shows up / changes block for anyone looking
+
+            inv.open(player);
+            game.refreshEditorMenus(player);
+        }));
+    }
+
+    /** A custom game just went public: everyone in the lobby hears about it, with a click to join. */
+    private void announcePublicGame() {
+        String host = game.getCustomGameHostName();
+        String message = main.color("&6&l(!) &e" + host + " &rcreated a &6&lCUSTOM &rgame!");
+        TextComponent join = new TextComponent(main.color("     &a&lClick here to Join"));
+        join.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/joincustomgame " + host));
+
+        for (Player p : main.getLobbyWorld().getPlayers()) {
+            p.sendMessage(message);
+            p.spigot().sendMessage(join);
+        }
+    }
+
+    private void addCoHostModifier(InventoryContents contents, Player player) {
+        Player coHost = game.getCustomGameCoHost() == null ? null : Bukkit.getPlayer(game.getCustomGameCoHost());
+        boolean isHost = game.isCustomGameHost(player);
+
+        ItemStack head = coHost != null ? ItemHelper.createSkullHeadPlayer(1, coHost.getName())
+                : ItemHelper.createSkullHead(1, SkullType.PLAYER);
+        head = ItemHelper.setDetails(head,
+                main.color("&e&lCo-Host"),
+                "",
+                main.color("&fCurrent: " + (coHost != null ? "&a" + coHost.getName() : "&7None")),
+                "",
+                main.color("&7A player who can change the"),
+                main.color("&7Game Modifiers with the host"),
+                "",
+                main.color(isHost ? "&eClick to choose" : "&cOnly the host can choose the co-host"));
+
+        contents.set(4, 5, ClickableItem.of(head, e -> {
+            if (!isHost) {
+                SoundManager.playErrorSound(player);
+                return;
+            }
+            if (!canModify(player)) return;
+
+            SoundManager.playClickSound(player);
+            new CoHostGUI(main, game, this).inv.open(player);
+        }));
     }
 
     // ===== Top row =====
@@ -119,22 +221,24 @@ public class GameModifiersGUI implements InventoryProvider {
                     main.color("&c&lFrenzy Locked"),
                     "",
                     main.color("&7Duels cannot change game type.")
-            ), e -> {}));
+            ), e -> SoundManager.playErrorSound(player)));
             return;
         }
 
         boolean enabled = game.gameType == GameType.FRENZY;
-        contents.set(0, 0, ClickableItem.of(toggleItem(new ItemStack(Material.TNT), enabled, "&e&lFrenzy",
+        contents.set(0, 0, ClickableItem.of(classSelectionTag(toggleItem(new ItemStack(Material.TNT), enabled, "&e&lFrenzy",
                 "&7Everyone gets a random class",
                 "&7on each life"
-        ), e -> {
-            SoundManager.playSuccessfulHit(player);
+        )), e -> {
+            if (!enabled && isOtherClassSelectionModifierActive(player, FRENZY)) return;
+            SoundManager.playClickSound(player);
 
             game.gameType = game.gameType == GameType.FRENZY ? GameType.CLASSIC : GameType.FRENZY;
             game.TellAll(main.color("&2&l(!) &rFrenzy has been " + status(game.gameType == GameType.FRENZY)));
             updateModeOnBoard();
 
             inv.open(player);
+            game.refreshEditorMenus(player);
         }));
     }
 
@@ -143,14 +247,15 @@ public class GameModifiersGUI implements InventoryProvider {
         int index = indexOf(CLASS_SWITCH_TIMES, settings.randomClasses ? settings.randomClassCycleSeconds : 0);
         int seconds = CLASS_SWITCH_TIMES[index];
 
-        contents.set(0, 1, ClickableItem.of(cycleItem(new ItemStack(Material.EYE_OF_ENDER), "&e&lClass Switch",
+        contents.set(0, 1, ClickableItem.of(classSelectionTag(cycleItem(new ItemStack(Material.EYE_OF_ENDER), "&e&lClass Switch",
                 CLASS_SWITCH_LABELS, index, seconds, seconds > 0,
-                "&7Everyone switches to a new", "&7random class every so often"
-        ), e -> {
-            SoundManager.playSuccessfulHit(player);
-
+                "&7Everyone starts with a random class", "&7and switches to a new random", "&7class every so often"
+        )), e -> {
             int next = step(index, CLASS_SWITCH_TIMES.length, e);
             int nextSeconds = CLASS_SWITCH_TIMES[next];
+            if (seconds == 0 && nextSeconds > 0 && isOtherClassSelectionModifierActive(player, CLASS_SWITCH)) return;
+            SoundManager.playClickSound(player);
+
             settings.randomClasses = nextSeconds > 0;
             if (nextSeconds > 0) settings.randomClassCycleSeconds = nextSeconds;
 
@@ -162,22 +267,25 @@ public class GameModifiersGUI implements InventoryProvider {
             }
 
             inv.open(player);
+            game.refreshEditorMenus(player);
         }));
     }
 
     private void addOneForAllModifier(InventoryContents contents, Player player) {
         boolean enabled = game.getGameSettings().oneForAll;
 
-        contents.set(0, 2, ClickableItem.of(toggleItem(new ItemStack(Material.ARMOR_STAND), enabled, "&e&lOne For All",
+        contents.set(0, 2, ClickableItem.of(classSelectionTag(toggleItem(new ItemStack(Material.ARMOR_STAND), enabled, "&e&lOne For All",
                 "&7All players play with",
                 "&7the same class"
-        ), e -> {
-            SoundManager.playSuccessfulHit(player);
+        )), e -> {
+            if (!enabled && isOtherClassSelectionModifierActive(player, ONE_FOR_ALL)) return;
+            SoundManager.playClickSound(player);
 
             game.getGameSettings().oneForAll = !game.getGameSettings().oneForAll;
             game.TellAll(main.color("&2&l(!) &rOne For All has been " + status(game.getGameSettings().oneForAll)));
 
             inv.open(player);
+            game.refreshEditorMenus(player);
         }));
     }
 
@@ -188,12 +296,13 @@ public class GameModifiersGUI implements InventoryProvider {
                 "&7Everyone gets permanent",
                 "&bJump Boost X &7while alive"
         ), e -> {
-            SoundManager.playSuccessfulHit(player);
+            SoundManager.playClickSound(player);
 
             game.getGameSettings().lowGravity = !game.getGameSettings().lowGravity;
             game.TellAll(main.color("&2&l(!) &rLow Gravity has been " + status(game.getGameSettings().lowGravity)));
 
             inv.open(player);
+            game.refreshEditorMenus(player);
         }));
     }
 
@@ -205,7 +314,7 @@ public class GameModifiersGUI implements InventoryProvider {
                 STRENGTH_LABELS, index, seconds, seconds > 0,
                 "&7Killers gain &cStrength I", "&7for a few seconds after every kill"
         ), e -> {
-            SoundManager.playSuccessfulHit(player);
+            SoundManager.playClickSound(player);
 
             int next = STRENGTH_TIMES[step(index, STRENGTH_TIMES.length, e)];
             game.getGameSettings().strengthOnKillSeconds = next;
@@ -218,6 +327,7 @@ public class GameModifiersGUI implements InventoryProvider {
             }
 
             inv.open(player);
+            game.refreshEditorMenus(player);
         }));
     }
 
@@ -235,13 +345,14 @@ public class GameModifiersGUI implements InventoryProvider {
                 "&7How killers get healed",
                 "&7after getting a kill"
         ), e -> {
-            SoundManager.playSuccessfulHit(player);
+            SoundManager.playClickSound(player);
 
             HealthPotMode next = modes[step(mode.ordinal(), modes.length, e)];
             game.getGameSettings().healthPotMode = next;
             game.TellAll(main.color("&2&l(!) &rHealing on Kill was set to &e&l" + next.getName() + "&r."));
 
             inv.open(player);
+            game.refreshEditorMenus(player);
         }));
     }
 
@@ -249,16 +360,17 @@ public class GameModifiersGUI implements InventoryProvider {
         int index = indexOf(MAX_HEALTH_HEARTS, game.getGameSettings().maxHealthHearts);
 
         contents.set(0, 7, ClickableItem.of(cycleItem(new ItemStack(Material.GOLDEN_APPLE), "&e&lMax Health",
-                MAX_HEALTH_LABELS, index, MAX_HEALTH_HEARTS[index], true,
+                MAX_HEALTH_LABELS, index, MAX_HEALTH_HEARTS[index], false,
                 "&7How much health everyone", "&7has on each life"
         ), e -> {
-            SoundManager.playSuccessfulHit(player);
+            SoundManager.playClickSound(player);
 
             int next = step(index, MAX_HEALTH_HEARTS.length, e);
             game.getGameSettings().maxHealthHearts = MAX_HEALTH_HEARTS[next];
             game.TellAll(main.color("&2&l(!) &rMax Health was set to &e&l" + MAX_HEALTH_LABELS[next] + "&r."));
 
             inv.open(player);
+            game.refreshEditorMenus(player);
         }));
     }
 
@@ -269,13 +381,14 @@ public class GameModifiersGUI implements InventoryProvider {
                 DROP_TIME_LABELS, index, DROP_TIMES[index], true,
                 "&7How often lightning drops", "&7spawn on the map"
         ), e -> {
-            SoundManager.playSuccessfulHit(player);
+            SoundManager.playClickSound(player);
 
             game.getGameSettings().dropTimer = DROP_TIMES[step(index, DROP_TIMES.length, e)];
             game.TellAll(main.color("&2&l(!) &rLightning drops will now spawn every &e&l"
                     + game.getGameSettings().dropTimer + "s&r."));
 
             inv.open(player);
+            game.refreshEditorMenus(player);
         }));
     }
 
@@ -290,7 +403,7 @@ public class GameModifiersGUI implements InventoryProvider {
             if (type.isVaulted()) vaulted++;
         }
 
-        contents.set(2, 1, ClickableItem.of(ItemHelper.setDetails(
+        contents.set(2, 0, ClickableItem.of(ItemHelper.setDetails(
                 new ItemStack(Material.BOOK_AND_QUILL),
                 main.color("&e&lClass List"),
                 "",
@@ -307,6 +420,25 @@ public class GameModifiersGUI implements InventoryProvider {
         }));
     }
 
+    private void addItemListModifier(InventoryContents contents, Player player) {
+        int enabled = game.getGameSettings().enabledDrops.size();
+
+        contents.set(2, 1, ClickableItem.of(ItemHelper.setDetails(
+                new ItemStack(Material.BOOK_AND_QUILL),
+                main.color("&e&lItem List"),
+                "",
+                main.color("&fEnabled: &a" + enabled + "&7/&a" + GameLootDrops.values().length + " &7items"),
+                "",
+                main.color("&7Choose which items lightning"),
+                main.color("&7drops can spawn"),
+                "",
+                main.color("&eClick to open")
+        ), e -> {
+            SoundManager.playClickSound(player);
+            new ItemListGUI(main, game, this).inv.open(player);
+        }));
+    }
+
     private void addOpDropsModifier(InventoryContents contents, Player player) {
         boolean enabled = game.getGameSettings().opDrops;
 
@@ -315,12 +447,13 @@ public class GameModifiersGUI implements InventoryProvider {
                 "&6&lLEGENDARY &7and &d&lRARE &7items.",
                 "&7(No Extra Lives)"
         ), e -> {
-            SoundManager.playSuccessfulHit(player);
+            SoundManager.playClickSound(player);
 
             game.getGameSettings().opDrops = !game.getGameSettings().opDrops;
             game.TellAll(main.color("&2&l(!) &rOP Drops have been " + status(game.getGameSettings().opDrops)));
 
             inv.open(player);
+            game.refreshEditorMenus(player);
         }));
     }
 
@@ -331,13 +464,14 @@ public class GameModifiersGUI implements InventoryProvider {
                 LIVES_LABELS, index, LIVES[index], true,
                 "&7How many lives everyone", "&7starts with"
         ), e -> {
-            SoundManager.playSuccessfulHit(player);
+            SoundManager.playClickSound(player);
 
             game.getGameSettings().startingLives = LIVES[step(index, LIVES.length, e)];
             game.TellAll(main.color("&2&l(!) &rEveryone will now start with &e&l"
                     + formatLives(game.getGameSettings().startingLives) + "&r."));
 
             inv.open(player);
+            game.refreshEditorMenus(player);
         }));
     }
 
@@ -349,7 +483,7 @@ public class GameModifiersGUI implements InventoryProvider {
                 RESPAWN_TIME_LABELS, index, seconds, seconds > 0,
                 "&7How long players wait", "&7before respawning"
         ), e -> {
-            SoundManager.playSuccessfulHit(player);
+            SoundManager.playClickSound(player);
 
             int next = RESPAWN_TIMES[step(index, RESPAWN_TIMES.length, e)];
             game.getGameSettings().respawnSeconds = next;
@@ -361,6 +495,7 @@ public class GameModifiersGUI implements InventoryProvider {
             }
 
             inv.open(player);
+            game.refreshEditorMenus(player);
         }));
     }
 
@@ -368,11 +503,12 @@ public class GameModifiersGUI implements InventoryProvider {
         int index = indexOf(SPAWN_PROTECTION_TIMES, game.getGameSettings().spawnProtectionSeconds);
         int seconds = SPAWN_PROTECTION_TIMES[index];
 
-        contents.set(2, 6, ClickableItem.of(cycleItem(new ItemStack(Material.IRON_CHESTPLATE), "&e&lSpawn Protection",
+        // Has to be a stackable item, or the icon can't show the option's amount
+        contents.set(2, 6, ClickableItem.of(cycleItem(new ItemStack(Material.IRON_FENCE), "&e&lSpawn Protection",
                 SPAWN_PROTECTION_LABELS, index, seconds, seconds > 0,
                 "&7How long players are protected", "&7when the game starts and", "&7after respawning"
         ), e -> {
-            SoundManager.playSuccessfulHit(player);
+            SoundManager.playClickSound(player);
 
             int next = SPAWN_PROTECTION_TIMES[step(index, SPAWN_PROTECTION_TIMES.length, e)];
             game.getGameSettings().spawnProtectionSeconds = next;
@@ -384,6 +520,7 @@ public class GameModifiersGUI implements InventoryProvider {
             }
 
             inv.open(player);
+            game.refreshEditorMenus(player);
         }));
     }
 
@@ -394,17 +531,36 @@ public class GameModifiersGUI implements InventoryProvider {
                 TIME_OF_DAY_LABELS, index, 1, true,
                 "&7The time of day on the map"
         ), e -> {
-            SoundManager.playSuccessfulHit(player);
+            SoundManager.playClickSound(player);
 
             int next = step(index, TIMES_OF_DAY.length, e);
             game.getMapWorld().setTime(TIMES_OF_DAY[next]);
-            game.TellAll(main.color("&2&l(!) &rPrivate game time was set to " + formatTimeOfDay(TIMES_OF_DAY[next]) + "&r."));
+            game.TellAll(main.color("&2&l(!) &rTime of day was set to " + formatTimeOfDay(TIMES_OF_DAY[next]) + "&r."));
 
             inv.open(player);
+            game.refreshEditorMenus(player);
         }));
     }
 
     // ===== Helpers =====
+
+    private boolean canModify(Player player) {
+        if (game.state == GameState.WAITING && game.canEditCustomGame(player) && !game.isCustomGameCountdownStarted())
+            return true;
+        player.sendMessage(main.color("&c&l(!) &rThis game can no longer be modified."));
+        inv.close(player);
+        return false;
+    }
+
+    /** Frenzy, Class Switch and One For All: a dark grey tag above the item's blank line and Status/Current. */
+    private ItemStack classSelectionTag(ItemStack item) {
+        ItemMeta meta = item.getItemMeta();
+        List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<String>();
+        lore.add(0, main.color("&8Class Selection Modifier"));
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
 
     private ItemStack toggleItem(ItemStack item, boolean enabled, String name, String... description) {
         if (enabled) item = ItemHelper.setGlowing(item, true);
@@ -429,25 +585,39 @@ public class GameModifiersGUI implements InventoryProvider {
         item.setAmount(Math.max(1, Math.min(64, amount)));
         if (active) item = ItemHelper.setGlowing(item, true);
 
-        StringBuilder optionList = new StringBuilder();
+        List<String> lore = new ArrayList<>();
+        lore.add("");
+        lore.add(main.color("&fCurrent: &a" + options[current]));
+        lore.add("");
+        for (String line : description) lore.add(main.color(line));
+        lore.add("");
+        lore.add(main.color("&7Options:"));
+
+        // Options list, wrapped onto more lines when it gets too long
+        StringBuilder line = new StringBuilder();
+        int lineLength = 0;
         for (int i = 0; i < options.length; i++) {
-            if (i > 0) optionList.append("&7, ");
-            optionList.append(i == current ? "&a" : "&e").append(options[i]);
+            if (i > 0) {
+                line.append("&7,");
+                lineLength++;
+                if (lineLength + 1 + options[i].length() > OPTIONS_LINE_LENGTH) {
+                    lore.add(main.color(line.toString()));
+                    line = new StringBuilder();
+                    lineLength = 0;
+                } else {
+                    line.append(' ');
+                    lineLength++;
+                }
+            }
+            line.append(i == current ? "&a" : "&e").append(options[i]);
+            lineLength += options[i].length();
         }
+        lore.add(main.color(line.toString()));
 
-        String[] lore = new String[description.length + 8];
-        lore[0] = "";
-        lore[1] = main.color("&fCurrent: &a" + options[current]);
-        lore[2] = "";
-        for (int i = 0; i < description.length; i++) lore[3 + i] = main.color(description[i]);
-        int i = 3 + description.length;
-        lore[i] = "";
-        lore[i + 1] = main.color("&7Options:");
-        lore[i + 2] = main.color(optionList.toString());
-        lore[i + 3] = "";
-        lore[i + 4] = main.color(CYCLE_HINT);
+        lore.add("");
+        lore.add(main.color(CYCLE_HINT));
 
-        return ItemHelper.setDetails(item, main.color(name), lore);
+        return ItemHelper.setDetails(item, main.color(name), lore.toArray(new String[0]));
     }
 
     /** The option index after a click: left click goes back, right click goes forward (matching the << | >> hint). */
@@ -469,6 +639,24 @@ public class GameModifiersGUI implements InventoryProvider {
             if (values[i] == value) return i;
         }
         return 0;
+    }
+
+    /*
+     * Frenzy, Class Switch and One For All all decide how players get their class, so only one can be on at a time.
+     * If one other than the given one is already on, tells the leader to turn it off first and returns true.
+     */
+    private boolean isOtherClassSelectionModifierActive(Player player, String modifier) {
+        GameSettings settings = game.getGameSettings();
+        String active = null;
+        if (game.gameType == GameType.FRENZY && !modifier.equals(FRENZY)) active = FRENZY;
+        else if (settings.randomClasses && !modifier.equals(CLASS_SWITCH)) active = CLASS_SWITCH;
+        else if (settings.oneForAll && !modifier.equals(ONE_FOR_ALL)) active = ONE_FOR_ALL;
+        if (active == null) return false;
+
+        SoundManager.playErrorSound(player);
+        player.sendMessage(main.color("&c&l(!) &rOnly one class selection modifier (&eFrenzy&r, &eClass Switch &ror "
+                + "&eOne For All&r) can be active at a time. Disable &e" + active + " &rto enable &e" + modifier + "&r."));
+        return true;
     }
 
     private String status(boolean enabled) {

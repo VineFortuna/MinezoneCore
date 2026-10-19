@@ -62,19 +62,31 @@ public class LobbyItems {
 		if (player.getWorld() != core.getLobbyWorld()) {
 			player.getInventory().clear();
 
-			ItemStack classes = ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK),
-					"&eClasses &7(Right Click)", "", "&7Click to choose a class");
-			ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
-			ItemStack leaveGame = ItemHelper.setDetails(new ItemStack(Material.BARRIER), "&eLeave Game &7(Right Click)", "",
-					"&7Click to leave your game");
-			
-			player.getInventory().setItem(0, classes);
-			player.getInventory().setItem(4,
-					ItemHelper.setDetails(stats, "&eMy Profile &7(Right Click)", "", "&7Click to see your profile"));
-			player.getInventory().setItem(8, leaveGame);
+
+			// Frenzy games take the class selector away once classes can't be changed anymore
+			GameInstance game = core.getGameManager().GetInstanceOfPlayer(player);
+			if (game == null || !game.isClassSelectorRemoved())
+				player.getInventory().setItem(0, getClassSelectorItem());
+			player.getInventory().setItem(4, getProfileItem(player));
+			player.getInventory().setItem(8, getLeaveGameItem());
 		}
 	}
 	
+	public static ItemStack getProfileItem(Player player) {
+		return ItemHelper.setDetails(ItemHelper.createSkullHeadPlayer(1, player.getName()),
+				"&eMy Profile &7(Right Click)", "", "&7Click to see your profile");
+	}
+
+	public static ItemStack getLeaveGameItem() {
+		return ItemHelper.setDetails(new ItemStack(Material.BARRIER), "&eLeave Game &7(Right Click)", "",
+				"&7Click to leave your game");
+	}
+
+	public static ItemStack getClassSelectorItem() {
+		return ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK),
+				"&eClasses &7(Right Click)", "", "&7Click to choose a class");
+	}
+
 	/*
 	 * This function gives a player the SCB Vote paper wheen
 	 * they join a game to vote for game settings

@@ -41,7 +41,7 @@ public class MaxHealthGuard implements Listener {
     private boolean mayHaveRaisedMaxHealth(Player player) {
         if (main.getGameManager() == null) return false;
         GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
-        return game != null && game.isPrivateGame() && player.getWorld() == game.getMapWorld();
+        return game != null && game.isCustomGame() && player.getWorld() == game.getMapWorld();
     }
 
     public void enforce(Player player) {

@@ -504,7 +504,7 @@ public class WizardClass extends BaseClass {
     }
 
     private void keepProjectileFlyingStraight(final ItemProjectile proj, final Vector velocity) {
-        new BukkitRunnable() {
+        instance.trackClassTask(new BukkitRunnable() {
             private int ticksAlive = 0;
 
             @Override
@@ -524,6 +524,6 @@ public class WizardClass extends BaseClass {
 
                 proj.getEntity().setVelocity(velocity.clone());
             }
-        }.runTaskTimer(instance.getGameManager().getMain(), 1L, 1L);
+        }.runTaskTimer(instance.getGameManager().getMain(), 1L, 1L));
     }
 }

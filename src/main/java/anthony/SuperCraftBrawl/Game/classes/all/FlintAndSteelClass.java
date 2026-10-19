@@ -190,7 +190,7 @@ public class FlintAndSteelClass extends BaseClass {
 				}
 
 			};
-			runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+			instance.trackClassTask(runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20));
 		}
 	}
 
@@ -230,7 +230,7 @@ public class FlintAndSteelClass extends BaseClass {
 									}
 
 								};
-								runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+								instance.trackClassTask(runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20));
 							}
 						}
 					}

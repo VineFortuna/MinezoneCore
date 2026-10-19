@@ -161,7 +161,7 @@ public class BeeClass extends BaseClass {
 						}
 
 					};
-					weak.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+					instance.trackClassTask(weak.runTaskTimer(instance.getGameManager().getMain(), 0, 20));
 				}
 			}
 		}

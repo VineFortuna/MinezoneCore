@@ -85,7 +85,7 @@ public class BunnyClass extends BaseClass {
 				ticks--;
 			}
 		};
-		runTimer.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+		instance.trackClassTask(runTimer.runTaskTimer(instance.getGameManager().getMain(), 0, 20));
 	}
 
 	@Override

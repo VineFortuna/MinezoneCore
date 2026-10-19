@@ -1,95 +1,91 @@
 package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.MatchStats;
 import anthony.util.ItemHelper;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Material;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.Map.Entry;
+import java.util.List;
 
 public class GameStatsGUI implements InventoryProvider {
 
 	public Core main;
 	public SmartInventory inv;
-	public GameInstance i;
+	public MatchStats stats;
 
-	public GameStatsGUI(Core main, GameInstance i) {
+	public GameStatsGUI(Core main, MatchStats stats) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(1, 9)
 				.title(String.valueOf(ChatColor.DARK_GRAY) + ChatColor.BOLD + "Match Stats").build();
 		this.main = main;
-		this.i = i;
+		this.stats = stats;
 	}
-	
-	private BaseClass matchMvp() {
-		BaseClass matchMvp = null;
-		for (Entry<Player, BaseClass> entry : i.allClasses.entrySet()) {
-			if (entry.getKey() != null && entry.getValue() != null) {
-				if (matchMvp == null || entry.getValue().totalKills > matchMvp.totalKills)
-					matchMvp = entry.getValue();
-				else if (entry.getValue().totalKills == matchMvp.totalKills) {
-					if (i.getWinnerList().contains(entry.getKey()) || entry.getValue().totalDeaths < matchMvp.totalDeaths)
-						matchMvp = entry.getValue();
-				}
+
+	private MatchStats.Row matchMvp(List<MatchStats.Row> rows) {
+		MatchStats.Row matchMvp = null;
+		for (MatchStats.Row row : rows) {
+			if (matchMvp == null || row.kills > matchMvp.kills)
+				matchMvp = row;
+			else if (row.kills == matchMvp.kills) {
+				if (row.winner || row.deaths < matchMvp.deaths)
+					matchMvp = row;
 			}
 		}
-		if (matchMvp != null && matchMvp.totalKills == 0)
+		if (matchMvp != null && matchMvp.kills == 0)
 			matchMvp = null;
-		
+
 		return matchMvp;
 	}
 
 	@Override
 	public void init(Player player, InventoryContents contents) {
 		int x = 0, y = 0;
-		
-		if (i != null) {
-			for (Entry<Player, BaseClass> entry : i.allClasses.entrySet()) {
-				if (entry.getKey() != null && entry.getKey().isOnline()) {
-					ItemStack stats = ItemHelper.createSkullHeadPlayer(1, entry.getKey().getName());
 
-					String rank = main.getRankManager().getRank(entry.getKey()).getTagWithSpace();
+		if (stats != null) {
+			List<MatchStats.Row> rows = stats.getRows();
+			MatchStats.Row mvp = matchMvp(rows);
 
-					if (matchMvp() != null && matchMvp() == entry.getValue()) {
+			for (MatchStats.Row row : rows) {
+				Player rowPlayer = Bukkit.getPlayer(row.uuid);
+				if (rowPlayer != null && rowPlayer.isOnline()) {
+					ItemStack item = ItemHelper.createSkullHeadPlayer(1, row.name);
+
+					String rank = main.getRankManager().getRank(rowPlayer).getTagWithSpace();
+
+					if (mvp == row) {
 						contents.set(y, x,
 								ClickableItem.of(
-										ItemHelper.setDetails(stats, main.color("&e&lMATCH MVP"), "",
-												main.color("&rPlayer: " + rank + "&a" + entry.getKey().getName()),
-												main.color("&rClass: "
-														+ i.allClasses.get(entry.getKey()).getType().getTag()),
-												main.color("&rKills: &a" + i.allClasses.get(entry.getKey()).totalKills),
-												main.color(
-														"&rDeaths: &a" + i.allClasses.get(entry.getKey()).totalDeaths)),
+										ItemHelper.setDetails(item, main.color("&e&lMATCH MVP"), "",
+												main.color("&rPlayer: " + rank + "&a" + row.name),
+												main.color("&rClass: " + row.classTag),
+												main.color("&rKills: &a" + row.kills),
+												main.color("&rDeaths: &a" + row.deaths)),
 										e -> {
 										}));
 					} else {
 						contents.set(y, x,
 								ClickableItem.of(
-										ItemHelper.setDetails(stats,
-												main.color("&rPlayer: " + rank + "&a" + entry.getKey().getName()),
-												main.color("&rClass: "
-														+ i.allClasses.get(entry.getKey()).getType().getTag()),
-												main.color("&rKills: &a" + i.allClasses.get(entry.getKey()).totalKills),
-												main.color(
-														"&rDeaths: &a" + i.allClasses.get(entry.getKey()).totalDeaths)),
+										ItemHelper.setDetails(item,
+												main.color("&rPlayer: " + rank + "&a" + row.name),
+												main.color("&rClass: " + row.classTag),
+												main.color("&rKills: &a" + row.kills),
+												main.color("&rDeaths: &a" + row.deaths)),
 										e -> {
 										}));
 					}
-					if (isFirstBlood(entry.getKey(), i)) {
-						ItemHelper.setDetails(stats, stats.getItemMeta().getDisplayName(), stats.getItemMeta().getLore(),
+					if (row.firstBlood) {
+						ItemHelper.setDetails(item, item.getItemMeta().getDisplayName(), item.getItemMeta().getLore(),
 								main.color("&eFirst Blood"));
 					}
 
 					contents.set(y, x,
-							ClickableItem.of(stats, e -> {
+							ClickableItem.of(item, e -> {
 							}));
 
 					x++;
@@ -101,10 +97,6 @@ public class GameStatsGUI implements InventoryProvider {
 				}
 			}
 		}
-	}
-
-	private boolean isFirstBlood(Player gamePlayer, GameInstance i) {
-		return i.firstBlood == gamePlayer;
 	}
 
 	@Override

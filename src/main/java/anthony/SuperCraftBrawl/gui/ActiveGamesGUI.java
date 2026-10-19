@@ -15,7 +15,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.Map.Entry;
+import java.util.ArrayList;
 
 public class ActiveGamesGUI implements InventoryProvider {
 
@@ -43,29 +43,30 @@ public class ActiveGamesGUI implements InventoryProvider {
 			return;
 		}
 
-		for (Entry<Maps, GameInstance> entry : main.getGameManager().gameMap.entrySet()) {
-			GameInstance game = entry.getValue();
+		for (GameInstance game : new ArrayList<>(main.getGameManager().games)) {
 			Maps map = game.getMap();
 			String mapName = map.getName();
 			ItemStack displayItem = map.getDisplayItem();
-			GameType gameType = entry.getValue().gameType;
-			String mode = gameType.getName();
+			GameType gameType = game.gameType;
+			// Custom games show how players get their class (Classic, Frenzy, Class Switch or One For All)
+			String mode = game.isCustomGame() ? game.getClassSelectionName() : gameType.getName();
+			if (game.isCustomGame()) mode += game.isCustomGamePublic() ? " &6(Custom Game)" : " &c(Private Custom Game)";
 
 			System.out.println(mode);
 
-			if (entry.getValue().state == GameState.WAITING) {
-				if (entry.getValue().gameStartTime != null) {
+			if (game.state == GameState.WAITING) {
+				if (game.gameStartTime != null) {
 					contents.set(count, i, ClickableItem.of(
 							ItemHelper.setDetails(displayItem,
 									"&e&l" + mapName,
 									"&fMode: &a" + mode,
 									"",
-									"&fStarting In: &a" + entry.getValue().timeToStartSeconds + "s",
-									"&fPlayers: &a" + entry.getValue().players.size() + "/"
-											+ entry.getValue().getMaxPlayerCount(),
+									"&fStarting In: &a" + game.timeToStartSeconds + "s",
+									"&fPlayers: &a" + game.players.size() + "/"
+											+ game.getMaxPlayerCount(),
 									"", "&r&nClick to join!"),
 							e -> {
-								main.getGameManager().JoinMap(player, entry.getValue().getMap());
+								main.getGameManager().JoinGame(player, game);
 								inv.close(player);
 							}));
 				} else {
@@ -75,15 +76,15 @@ public class ActiveGamesGUI implements InventoryProvider {
 									"&fMode: &a" + mode,
 									"",
 									"&fWaiting for Players",
-									"&fPlayers: &a" + entry.getValue().players.size() + "/"
-											+ entry.getValue().getMaxPlayerCount(),
+									"&fPlayers: &a" + game.players.size() + "/"
+											+ game.getMaxPlayerCount(),
 									"", "&r&nClick to join!"),
 							e -> {
-								main.getGameManager().JoinMap(player, entry.getValue().getMap());
+								main.getGameManager().JoinGame(player, game);
 								inv.close(player);
 							}));
 				}
-			} else if (entry.getValue().state == GameState.STARTED) {
+			} else if (game.state == GameState.STARTED) {
 				String state = "In Progress";
 				contents.set(count, i, ClickableItem.of(
 						ItemHelper.setDetails(ItemHelper.setGlowing(displayItem, true),
@@ -91,11 +92,11 @@ public class ActiveGamesGUI implements InventoryProvider {
 								"&fMode: &a" + mode,
 								"",
 								"&f" + state,
-								"&fPlayers: &a" + entry.getValue().players.size() + "/"
-										+ entry.getValue().getMaxPlayerCount(),
-								"&fSpectators: &a" + entry.getValue().spectators.size(), "", "&r&nClick to spectate!"),
+								"&fPlayers: &a" + game.players.size() + "/"
+										+ game.getMaxPlayerCount(),
+								"&fSpectators: &a" + game.spectators.size(), "", "&r&nClick to spectate!"),
 						e -> {
-							main.getGameManager().SpectatorJoinMap(player, entry.getValue().getMap());
+							main.getGameManager().SpectatorJoinGame(player, game);
 							inv.close(player);
 						}));
 			}

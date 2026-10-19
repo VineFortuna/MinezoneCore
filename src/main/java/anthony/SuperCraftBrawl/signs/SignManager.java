@@ -95,23 +95,16 @@ public class SignManager implements Listener {
             Sign s = (Sign) e.getClickedBlock().getState();
             for (Maps map : Maps.values()) {
                 if (s.getLine(1).equalsIgnoreCase(map.toString())) {
+                    // Joins the map's open game, or starts a new one on a copy of the map if it's busy
                     core.getGameManager().JoinMap(player, map);
-                    GameInstance i = null;
+                    GameInstance i = core.getGameManager().GetInstanceOfPlayer(player);
 
-                    if (core.getGameManager().gameMap.containsKey(map)) {
-                        i = core.getGameManager().gameMap.get(map);
-
-                        if (i != null) {
-                            if (i.state == GameState.WAITING) {
-                                s.setLine(2, core.color("&0Players: " + i.players.size() + "/"
-                                        + i.getMaxPlayerCount()));
-                                s.setLine(3, core.color("&0" + i.timeToStartSeconds + "s"));
-                                s.update();
-                            } else if (i.state == GameState.STARTED) {
-                                player.sendMessage(core.color(
-                                        "&2&l(!) &rSince the game you tried joining has started, you've joined as a Spectator"));
-                                core.getGameManager().SpectatorJoinMap(player, map);
-                            }
+                    if (i != null && i.getMap() == map) {
+                        if (i.state == GameState.WAITING) {
+                            s.setLine(2, core.color("&0Players: " + i.players.size() + "/"
+                                    + i.getMaxPlayerCount()));
+                            s.setLine(3, core.color("&0" + i.timeToStartSeconds + "s"));
+                            s.update();
                         }
                         i.setSign(s);
                     }

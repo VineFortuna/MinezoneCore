@@ -66,7 +66,8 @@ public class DonorClassesGUI implements InventoryProvider {
 						Rank donor = type.getMinRank();
 
 						if (donor == null
-								|| player.hasPermission("scb." + donor.toString().toLowerCase())) {
+								|| player.hasPermission("scb." + donor.toString().toLowerCase())
+								|| main.getGameManager().ignoresClassRequirements(player, type)) {
 							if (e.isShiftClick()) {
 								if (data != null) {
 									if (!data.customIntegers.contains(type.getID())) {

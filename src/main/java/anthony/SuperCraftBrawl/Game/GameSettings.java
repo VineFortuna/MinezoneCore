@@ -50,6 +50,7 @@ public class GameSettings {
     public int respawnSeconds;
     public boolean lowGravity;
     public Set<ClassType> enabledClasses; // classes players may pick in a private game
+    public Set<GameLootDrops> enabledDrops; // items lightning drops can be (none = all of them)
 
 	public GameSettings(GameInstance game) {
 		this.game = game;
@@ -80,6 +81,27 @@ public class GameSettings {
         for (ClassType type : ClassType.getAvailableClasses()) {
             this.enabledClasses.add(type); // default: every non-vaulted class
         }
+        this.enabledDrops = EnumSet.allOf(GameLootDrops.class);
+	}
+
+	/** Takes over another game's Game Modifiers - a custom game's next round keeps the leader's settings. */
+	public void copyModifiersFrom(GameSettings other) {
+		this.dropTimer = other.dropTimer;
+		this.opDrops = other.opDrops;
+		this.strengthOnKillSeconds = other.strengthOnKillSeconds;
+		this.healthPotMode = other.healthPotMode;
+		this.maxHealthHearts = other.maxHealthHearts;
+		this.oneForAll = other.oneForAll;
+		this.spawnProtectionSeconds = other.spawnProtectionSeconds;
+		this.randomClasses = other.randomClasses;
+		this.randomClassCycleSeconds = other.randomClassCycleSeconds;
+		this.startingLives = other.startingLives;
+		this.respawnSeconds = other.respawnSeconds;
+		this.lowGravity = other.lowGravity;
+		this.enabledClasses.clear();
+		this.enabledClasses.addAll(other.enabledClasses);
+		this.enabledDrops.clear();
+		this.enabledDrops.addAll(other.enabledDrops);
 	}
 
 	// GETTER METHODS:
@@ -126,6 +148,8 @@ public class GameSettings {
 	 * everyone in the waiting lobby votes to start
 	 */
 	public void forceStartGame(boolean startGameCommand) {
+		// Custom games only start from their host's or co-host's countdown, never from votes
+		if (!startGameCommand && game.isCustomGame() && !game.isCustomGameCountdownStarted()) return;
 		if (!startGameCommand) {
 			if (game.gameStartTime == null && game.timeToStartSeconds > 60) {
 				return;

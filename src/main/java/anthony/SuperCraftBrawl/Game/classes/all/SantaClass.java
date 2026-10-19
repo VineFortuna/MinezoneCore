@@ -183,7 +183,7 @@ public class SantaClass extends BaseClass {
 		// The rider's keys arrive in steer packets every tick and are stored on the NMS player
 		EntityPlayer rider = ((CraftPlayer) player).getHandle();
 
-		reindeerTask = new BukkitRunnable() {
+		reindeerTask = instance.trackClassTask(new BukkitRunnable() {
 			@Override
 			public void run() {
 				if (flightTicks++ >= REINDEER_FLIGHT_TICKS || !horse.isValid() || horse.getPassenger() != player
@@ -216,7 +216,7 @@ public class SantaClass extends BaseClass {
 					horse.getWorld().playSound(horse.getLocation(), Sound.NOTE_PLING, 0.6f, 2.0f);
 				}
 			}
-		}.runTaskTimer(instance.getGameManager().getMain(), 1, 1);
+		}.runTaskTimer(instance.getGameManager().getMain(), 1, 1));
 	}
 
 	/** Ends the flight: stops the controller, drops Santa off and removes the reindeer. Safe to call twice. */

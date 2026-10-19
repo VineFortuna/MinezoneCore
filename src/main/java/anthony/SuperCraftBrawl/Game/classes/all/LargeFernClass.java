@@ -369,7 +369,7 @@ public class LargeFernClass extends BaseClass {
             isTransferned = true;
 
             transfernRunnable = new TransfernRunnable();
-            transfernRunnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+            instance.trackClassTask(transfernRunnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20));
         } else {
             transfernAbility.sendCustomMessage("&c&l(!) &rYou cannot transfern on this block");
         }
@@ -411,8 +411,9 @@ public class LargeFernClass extends BaseClass {
 
         @Override
         public void run() {
-            // Check if player moved first
-            if (instance.hasPlayerMovedPosition(player)) {
+            // Also stops if they're no longer playing this class here, which otherwise only GameEnd and quitting catch
+            if (instance.hasPlayerMovedPosition(player) || !player.isOnline()
+                    || instance.classes.get(player) != LargeFernClass.this) {
                 cleanup();
                 this.cancel();
                 return;

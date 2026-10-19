@@ -56,13 +56,15 @@ public class StarClass extends BaseClass {
 							for (Entity e : near) {
 								if (e instanceof Pig) {
 									if (e.getName().contains(player.getName())) {
-										if (player.getHealth() <= 18.0) {
+										// Against max health, not 20 - the Max Health modifier can change it
+										double maxHealth = player.getMaxHealth();
+										if (player.getHealth() <= maxHealth - 2.0) {
 											player.setHealth(player.getHealth() + 2.0);
 											player.sendMessage(instance.getGameManager().getMain()
 													.color("&e&l(!) &rJeffrey just gave you an extra 2 hearts!"));
 											count--;
-										} else if (player.getHealth() > 18.0 && player.getHealth() < 20.0) {
-											double p = 20.0 - player.getHealth();
+										} else if (player.getHealth() < maxHealth) {
+											double p = maxHealth - player.getHealth();
 											player.setHealth(player.getHealth() + p);
 											NumberFormat fmt = new DecimalFormat("#.##");
 											player.sendMessage(instance.getGameManager().getMain().color(

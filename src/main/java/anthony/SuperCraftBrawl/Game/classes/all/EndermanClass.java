@@ -332,7 +332,7 @@ public class EndermanClass extends BaseClass {
                 instance.getGameManager().getMain()
         );
 
-        new BukkitRunnable() {
+        instance.trackClassTask(new BukkitRunnable() {
             int ticks = 0;
 
             @Override
@@ -398,7 +398,7 @@ public class EndermanClass extends BaseClass {
                     return;
                 }
             }
-        }.runTaskTimer(instance.getGameManager().getMain(), 1L, 1L);
+        }.runTaskTimer(instance.getGameManager().getMain(), 1L, 1L));
     }
 
     private void spawnBlockCollisionParticles(Location location, Material material, byte data) {

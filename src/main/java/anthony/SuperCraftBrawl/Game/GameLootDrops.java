@@ -1,6 +1,12 @@
 package anthony.SuperCraftBrawl.Game;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -34,6 +40,8 @@ public enum GameLootDrops {
 	public static final int SNOWBALL_LAUNCHER_USES = 3;
 	public static final String SNOWBALL_LAUNCHER_USES_PREFIX = "&7Uses left: &e";
 
+	private static final Random RANDOM = new Random();
+
 	private Rarity r;
 
 	GameLootDrops(Rarity r) {
@@ -44,62 +52,42 @@ public enum GameLootDrops {
 		return this.r;
 	}
 
-	public static GameLootDrops getDrop() {
-		Random r = new Random();
-		int chance = r.nextInt(100);
-		GameLootDrops[] drops = GameLootDrops.values();
-		GameLootDrops randomDrop = null; // Default value
+	/*
+	 * A random lightning drop out of the enabled ones (all of them when none are enabled). A rarity is rolled
+	 * first, out of the rarities that have an enabled item, so disabling a whole rarity doesn't stop drops.
+	 * OP drops only give Rare and Legendary items (no Extra Lives), or any enabled item if none of those are enabled.
+	 */
+	public static GameLootDrops getDrop(Set<GameLootDrops> enabled, boolean op) {
+		if (enabled.isEmpty()) enabled = EnumSet.allOf(GameLootDrops.class);
 
-		if (chance >= 50 && chance <= 100) {
-			randomDrop = helper(Rarity.COMMON, randomDrop, drops, r);
-		} else if (chance < 50 && chance >= 15) {
-			randomDrop = helper(Rarity.RARE, randomDrop, drops, r);
-		} else if (chance < 15 && chance >= 3) {
-			randomDrop = helper(Rarity.MYTHIC, randomDrop, drops, r);
-		} else if (chance >= 0 && chance < 3) {
-			randomDrop = helper(Rarity.LEGENDARY, randomDrop, drops, r);
+		if (op) {
+			GameLootDrops drop = rollDrop(enabled, true);
+			if (drop != null) return drop;
 		}
-
-		return randomDrop;
+		return rollDrop(enabled, false);
 	}
 
-    public static GameLootDrops getOpDrop() {
-        Random r = new Random();
-        GameLootDrops[] drops = GameLootDrops.values();
-        GameLootDrops randomDrop = null;
+	private static GameLootDrops rollDrop(Set<GameLootDrops> enabled, boolean op) {
+		Map<Rarity, List<GameLootDrops>> byRarity = new EnumMap<>(Rarity.class);
+		for (GameLootDrops drop : enabled) {
+			if (drop.r.getChance(op) == 0 || (op && drop == EXTRA_LIFE)) continue;
+			byRarity.computeIfAbsent(drop.r, k -> new ArrayList<>()).add(drop);
+		}
 
-        int chance = r.nextInt(100);
+		int total = 0;
+		for (Rarity rarity : byRarity.keySet()) total += rarity.getChance(op);
+		if (total == 0) return null;
 
-        if (chance < 70) {
-            randomDrop = helper(Rarity.MYTHIC, randomDrop, drops, r, true);
-        } else {
-            randomDrop = helper(Rarity.LEGENDARY, randomDrop, drops, r, true);
-        }
-
-        return randomDrop;
-    }
-
-    public static GameLootDrops helper(Rarity rarity, GameLootDrops randomDrop, GameLootDrops[] drops, Random r) {
-        return helper(rarity, randomDrop, drops, r, false);
-    }
-
-    public static GameLootDrops helper(Rarity rarity, GameLootDrops randomDrop, GameLootDrops[] drops, Random r, boolean removeExtraLife) {
-        boolean found = false;
-
-        while (!found) {
-            randomDrop = drops[r.nextInt(drops.length)];
-
-            if (removeExtraLife && randomDrop == EXTRA_LIFE) {
-                continue;
-            }
-
-            if (randomDrop.getRarity() == rarity) {
-                found = true;
-            }
-        }
-
-        return randomDrop;
-    }
+		int roll = RANDOM.nextInt(total);
+		for (Map.Entry<Rarity, List<GameLootDrops>> entry : byRarity.entrySet()) {
+			roll -= entry.getKey().getChance(op);
+			if (roll < 0) {
+				List<GameLootDrops> drops = entry.getValue();
+				return drops.get(RANDOM.nextInt(drops.size()));
+			}
+		}
+		return null;
+	}
 
     public static boolean isLootDropItem(ItemStack item) {
         if (item == null || item.getType() == Material.AIR) return false;
@@ -285,17 +273,33 @@ public enum GameLootDrops {
 	    return item;
 	}
 
+	// Shown as Common / Uncommon / Rare / Legendary (the item lore names). Chances are out of 100.
 	public enum Rarity {
-		COMMON(60), RARE(25), MYTHIC(12), LEGENDARY(3);
+		COMMON("Common", "&7", 50, 0), RARE("Uncommon", "&2", 35, 0), MYTHIC("Rare", "&9", 12, 70),
+		LEGENDARY("Legendary", "&6", 3, 30);
 
-		private final int weight;
+		private final String name;
+		private final String color;
+		private final int chance;
+		private final int opChance; // with OP Item Drops on
 
-		Rarity(int weight) {
-			this.weight = weight;
+		Rarity(String name, String color, int chance, int opChance) {
+			this.name = name;
+			this.color = color;
+			this.chance = chance;
+			this.opChance = opChance;
 		}
 
-		public int weight() {
-			return weight;
+		public String getName() {
+			return name;
+		}
+
+		public String getColor() {
+			return color;
+		}
+
+		public int getChance(boolean op) {
+			return op ? opChance : chance;
 		}
 	}
 }

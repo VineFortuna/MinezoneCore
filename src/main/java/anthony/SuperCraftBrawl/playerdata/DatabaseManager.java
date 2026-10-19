@@ -48,11 +48,6 @@ public class DatabaseManager {
 		ensurePlayerDataColumn("LastDailyReward", "BIGINT NOT NULL DEFAULT 0");
 	}
 
-	/** The party leader's saved Custom Games (private games) on/off choice, so it survives restarts. */
-	public void ensureCustomGamesColumn() {
-		ensurePlayerDataColumn("CustomGames", "TINYINT NOT NULL DEFAULT 0");
-	}
-
 	/** Adds a column to PlayerData if it isn't there yet. */
 	private void ensurePlayerDataColumn(String column, String definition) {
 		if (getConnection() == null) {

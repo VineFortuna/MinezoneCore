@@ -33,15 +33,20 @@ public class SantaFlyoverEvent {
     }
 
     public void startEvent(int intervalSeconds) {
-        new BukkitRunnable() {
+        game.trackClassTask(new BukkitRunnable() {
             @Override
             public void run() {
+                // Stops for good once the game is over - it used to keep going forever, keeping the game in memory
+                if (game.state == GameState.ENDED) {
+                    cancel();
+                    return;
+                }
                 if (game.state != GameState.STARTED) return;
                 startSingleFlyover();
             }
         }.runTaskTimer(game.getGameManager().getMain(),
                 intervalSeconds * 20L,
-                intervalSeconds * 20L);
+                intervalSeconds * 20L));
     }
 
     private void startSingleFlyover() {
@@ -126,7 +131,7 @@ public class SantaFlyoverEvent {
         Vector toCenter = centerWaypoint.toVector().subtract(start.toVector()).normalize().multiply(0.65);
         Vector toEnd    = end.toVector().subtract(centerWaypoint.toVector()).normalize().multiply(0.65);
 
-        new BukkitRunnable() {
+        game.trackClassTask(new BukkitRunnable() {
 
             int ticks = 0;
 
@@ -172,7 +177,7 @@ public class SantaFlyoverEvent {
                 ticks++;
             }
 
-        }.runTaskTimer(game.getGameManager().getMain(), 0, 1);
+        }.runTaskTimer(game.getGameManager().getMain(), 0, 1));
 
         game.TellAll(ChatColorHelper.color("&2&l(!)&r Santa is flying across the map delivering presents!"));
     }

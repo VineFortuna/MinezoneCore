@@ -152,6 +152,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 				this.leaveGame(player);
 				break;
 
+			case "joincustomgame":
+				if (args.length < 1) player.sendMessage(main.color("&c&l(!) &rUsage: /joincustomgame <host>"));
+				else main.getGameManager().joinCustomGame(player, args[0]);
+				break;
+
 			case "players":
 				playersCommand(player);
 				break;
@@ -385,6 +390,11 @@ public class Commands implements CommandExecutor, TabCompleter {
             return;
         }
 
+        if (sub.equals("create")) {
+            main.getPartyManager().create(player);
+            return;
+        }
+
         if (sub.equals("settings")) {
             new PartySettingsGUI(main).inv.open(player);
             return;
@@ -465,6 +475,7 @@ public class Commands implements CommandExecutor, TabCompleter {
     public void sendPartyHelp(Player player) {
         player.sendMessage(main.color("&8&m------------------------------------"));
         player.sendMessage(main.color("&6&lPARTY COMMANDS"));
+        player.sendMessage(main.color("&e/party create -> &rCreate a party by yourself"));
         player.sendMessage(main.color("&e/party invite <player> -> &rInvite a player"));
         player.sendMessage(main.color("&e/party accept <player> -> &rAccept an invite"));
         player.sendMessage(main.color("&e/party reject <player> -> &rReject an invite"));
@@ -1414,6 +1425,9 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 
 		game.getGameSettings().changeGameType(true);
+		// Frenzy gives random classes: no class selector. Switching back to Classic gives it back
+		if (game.gameType == GameType.FRENZY) game.removeClassSelectors();
+		else game.restoreClassSelectors();
 	}
 
 	private void flyCommand(Player player) {
@@ -1569,7 +1583,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
-		GameInstance i = main.gameStats.get(player);
+		anthony.SuperCraftBrawl.Game.MatchStats i = main.gameStats.get(player);
 		// No stats available
 		if (i == null) {
 			player.sendMessage(main.color("&c&l(!) &rThis game's stats have expired or are unavailable."));
@@ -1577,7 +1591,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 
 		// Game in progress
-		if (i.state != GameState.ENDED) {
+		if (!i.hasEnded()) {
 			player.sendMessage(main.color("&c&l(!) &rThis game is still in progress. No stats available."));
 			return;
 		}
@@ -1809,6 +1823,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 
 		ClassType selectedClassType = getClassType(className);
+		// Vaulted classes can only be picked in private games that enabled them
+		if (selectedClassType != null && selectedClassType.isVaulted()
+				&& (game == null || !game.isCustomGame() || !game.isClassSelectable(selectedClassType)))
+			selectedClassType = null;
 		if (selectedClassType == null) {
 			player.sendMessage(
 					main.color("&c&l(!) &rThis class does not exist! Use &e/classes &rfor a list of playable classes"));
@@ -1820,10 +1838,11 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 	private void handleClassSelection(Player player, GameInstance game, PlayerData playerData, ClassType type) {
 		ClassDetails classDetails = playerData.playerClasses.get(type.getID());
+		boolean ignoreRequirements = game != null && game.ignoresClassRequirements(type);
 
-		if (!isClassUnlocked(player, classDetails, type) || !isLevelUnlocked(player, playerData, type)
+		if (!ignoreRequirements && (!isClassUnlocked(player, classDetails, type) || !isLevelUnlocked(player, playerData, type)
 				|| !isFishermanClassUnlocked(player, type) || !isFreddyUnlocked(player, type)
-				|| !isRankRequirementMet(player, type) || (game != null && !isGameStateWaiting(game, player))
+				|| !isRankRequirementMet(player, type)) || (game != null && !isGameStateWaiting(game, player))
 				|| (game != null && !isFrenzyGameType(game, player))) {
 			return;
 		}
@@ -1833,8 +1852,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
-		if (game != null && game.isPrivateGame() && !game.isClassSelectable(type)) {
-			player.sendMessage(main.color("&c&l(!) &rThat class is disabled in this private game"));
+		if (game != null && game.isCustomGame() && !game.isClassSelectable(type)) {
+			player.sendMessage(main.color("&c&l(!) &rThat class is disabled in this custom game"));
 			return;
 		}
 
@@ -1921,7 +1940,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 	}
 
 	private ClassType getClassType(String className) {
-		for (ClassType type : ClassType.getAvailableClasses()) {
+		for (ClassType type : ClassType.getPlayableClasses()) {
 			if (className.equalsIgnoreCase(type.toString())) {
 				return type;
 			}
@@ -1929,18 +1948,12 @@ public class Commands implements CommandExecutor, TabCompleter {
 		return null;
 	}
 
-    /** Returns false if the player wasn't allowed to leave (a party member who isn't the leader). */
+    /** The party leader takes the whole party out of the game; anyone else just leaves by themselves. */
     public boolean leaveGame(Player player) {
         if (main.getPartyManager() != null) {
             Party party = main.getPartyManager().getParty(player);
 
-            if (party != null) {
-                if (!party.isLeader(player.getUniqueId())) {
-                    player.sendMessage(main.color("&c&l(!) &rOnly the party leader can leave the game for the party."));
-                    player.sendMessage(main.color("&7If you want to leave by yourself, leave the party first with &e/party leave&7."));
-                    return false;
-                }
-
+            if (party != null && party.isLeader(player.getUniqueId())) {
                 leavePartyGame(player, party);
                 return true;
             }
@@ -1966,13 +1979,26 @@ public class Commands implements CommandExecutor, TabCompleter {
             return;
         }
 
+        // Only the members in the leader's game go with them (not ones in the lobby or elsewhere), and only
+        // they get told. The leader goes last, so the game isn't closed on members who are leaving anyway
+        GameInstance leaderGame = getGameOf(leader);
+        List<Player> leaving = new ArrayList<>();
         for (Player member : party.getOnlineMembers()) {
-            leaveSinglePlayerGame(member, false);
+            if (member != leader && leaderGame != null && getGameOf(member) == leaderGame) leaving.add(member);
         }
 
-        for (Player member : party.getOnlineMembers()) {
+        for (Player member : leaving) leaveSinglePlayerGame(member, false);
+        leaveSinglePlayerGame(leader, false);
+
+        for (Player member : leaving) {
             member.sendMessage(main.color("&e&l(!) &rYour party leader left the game, so the whole party was removed."));
         }
+    }
+
+    /** The game the player is playing or spectating, if any. */
+    private GameInstance getGameOf(Player player) {
+        GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+        return game != null ? game : main.getGameManager().GetInstanceOfSpectator(player);
     }
 
     /** Takes the player out of whatever game they're playing or spectating and back to the lobby. */
@@ -2077,7 +2103,7 @@ public class Commands implements CommandExecutor, TabCompleter {
             }
         } else if (cmd.getName().equalsIgnoreCase("party")) {
             if (args.length == 1) {
-                List<String> options = Arrays.asList("invite", "accept", "reject", "leave", "list", "kick", "promote", "disband", "chat", "settings");
+                List<String> options = Arrays.asList("create", "invite", "accept", "reject", "leave", "list", "kick", "promote", "disband", "chat", "settings");
                 return StringUtil.copyPartialMatches(args[0], options, new ArrayList<>());
             }
         } else if (cmd.getName().equalsIgnoreCase("sound")) {

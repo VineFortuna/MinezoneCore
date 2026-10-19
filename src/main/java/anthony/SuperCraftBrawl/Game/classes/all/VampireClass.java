@@ -124,22 +124,23 @@ public class VampireClass extends BaseClass {
 
 				@Override
 				public void run() {
+					// Ends even if they died or left meanwhile - otherwise it would never stop
+					if (ticks <= 0) {
+						restart();
+						r = null;
+						this.cancel();
+						return;
+					}
 					if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Vampire
 							&& instance.classes.get(player).getLives() > 0) {
-						if (ticks == 0) {
-							restart();
-							r = null;
-							this.cancel();
-						} else {
-							String msg = instance.getGameManager().getMain()
-									.color("&9&l(!) &eVampire's Bow Cooldown: " + ticks + "s");
-							getActionBarManager().setActionBar(player, "vampire.cooldown", msg, 2);
-						}
+						String msg = instance.getGameManager().getMain()
+								.color("&9&l(!) &eVampire's Bow Cooldown: " + ticks + "s");
+						getActionBarManager().setActionBar(player, "vampire.cooldown", msg, 2);
 					}
 					ticks--;
 				}
 			};
-			r.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+			instance.trackClassTask(r.runTaskTimer(instance.getGameManager().getMain(), 0, 20));
 		}
 	}
 

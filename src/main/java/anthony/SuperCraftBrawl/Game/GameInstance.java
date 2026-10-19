@@ -1,5 +1,14 @@
 package anthony.SuperCraftBrawl.Game;
 
+import java.util.Optional;
+import fr.minuskube.inv.SmartInvsPlugin;
+import fr.minuskube.inv.SmartInventory;
+import fr.minuskube.inv.content.InventoryProvider;
+import anthony.SuperCraftBrawl.gui.games.ItemListGUI;
+import anthony.SuperCraftBrawl.gui.games.GameModifiersGUI;
+import anthony.SuperCraftBrawl.gui.games.CoHostGUI;
+import anthony.SuperCraftBrawl.gui.games.ClassListGUI;
+import anthony.SuperCraftBrawl.gui.games.CustomGamesGUI;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.all.LargeFernClass;
@@ -10,13 +19,13 @@ import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.PlayerListener;
 import anthony.SuperCraftBrawl.Timer;
+import anthony.SuperCraftBrawl.lobbyitems.LobbyItems;
 import anthony.SuperCraftBrawl.party.Party;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.signs.SignManager;
 import anthony.SuperCraftBrawl.titles.TitleUtil;
-import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
 import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import fr.mrmicky.fastboard.FastBoard;
@@ -103,19 +112,32 @@ public class GameInstance {
     private final List<BukkitTask> instanceTasks = new ArrayList<>();
     // Per-player tasks keyed by UUID (not Player)
     private final Map<UUID, List<BukkitTask>> perPlayerTasks = new HashMap<>();
+    // Repeating tasks started by class abilities (see trackClassTask)
+    private final List<BukkitTask> classTasks = new ArrayList<>();
+    // What /gamestats shows for this game - outlives the game without keeping it in memory
+    private final MatchStats matchStats = new MatchStats(this);
 
     // DUEL COMMAND
     public boolean isDuel = false;
 
     //PARTY SYSTEM
-    public static final int PRIVATE_GAME_MAX_PLAYERS = 100;
-    private boolean privateGame = false;
-    private boolean cancellingPrivateGame = false; // everyone's being sent home - nobody should be declared the winner
-    private boolean privateGameCountdownStarted = false;
-    private UUID privateGameLeader;
+    public static final int CUSTOM_GAME_MAX_PLAYERS = 100;
+    private boolean customGame = false;
+    private boolean cancellingCustomGame = false; // everyone's being sent home - nobody should be declared the winner
+    private boolean customGameCountdownStarted = false;
+    private UUID customGameHost;
+    private boolean worldDiscarded = false;
+    private boolean customGamePublic = false; // a custom game anyone can join, not just the leader's party
+    private UUID customGameCoHost; // can change the Game Modifiers too (there's only ever one)
+    private boolean classSelectorRemoved = false; // Frenzy: classes are random, so the selector goes once settings are final
 
     // Constructors:
     public GameInstance(GameManager gameManager, Maps map) {
+        this(gameManager, map, null);
+    }
+
+    /** A game on an already loaded world (e.g. a custom game's own copy), or a new copy of the map if world is null. */
+    public GameInstance(GameManager gameManager, Maps map, World world) {
         this.gameManager = gameManager;
         this.gameSettings = new GameSettings(this);
         this.map = map;
@@ -129,7 +151,8 @@ public class GameInstance {
         classes = new HashMap<>();
         oldClasses = new HashMap<>();
         allClasses = new HashMap<>();
-        initialiseMap();
+        if (world != null) mapWorld = world;
+        else initialiseMap();
     }
 
     public GameInstance(GameManager gameManager, DuosMaps map) {
@@ -186,37 +209,36 @@ public class GameInstance {
     }
 
     /*
-     * This function initializes the world of the game map when a player joins. If
-     * the map doesn't exist in the files, it'll create a brand new void world
+     * This function loads this game's own copy of the map's world (so several games can be on the same map),
+     * which is deleted again when the game is over. If the map doesn't exist in the files, it's a brand new void world
      */
     public void initialiseMap() {
-        WorldCreator w = null;
-        if (map != null)
-            w = new WorldCreator(map.GetInstance().worldName).environment(World.Environment.NORMAL);
-        else
-            w = new WorldCreator(duosMap.GetInstance().worldName).environment(World.Environment.NORMAL);
-        w.generator(new VoidGenerator());
-        mapWorld = Bukkit.getServer().createWorld(w);
-        mapWorld.setAutoSave(false);
-
-        //if (getMap() != Maps.WitchesBrew)
-        //mapWorld.setTime(1000);
-
-        mapWorld.setDifficulty(Difficulty.EASY);
+        String worldName = map != null ? map.GetInstance().worldName : duosMap.GetInstance().worldName;
+        mapWorld = gameManager.getMain().getMapWorldManager().createGameWorld(worldName);
     }
 
-    public boolean isPrivateGame() {
-        return privateGame;
+    /** Unloads and deletes this game's map copy (once everyone has left it). Safe to call more than once. */
+    public void discardWorld() {
+        if (worldDiscarded) return;
+        worldDiscarded = true;
+        cancelAllTasks(); // nothing of this game may run in the world once it's unloaded
+        matchStats.freeze(); // /gamestats keeps working from a copy of the numbers, without this game
+        gameManager.getMain().getMapWorldManager().discardGameWorld(mapWorld);
+        mapWorld = null;
+    }
+
+    public boolean isCustomGame() {
+        return customGame;
     }
 
     /** Private games don't count: no stats are saved and no tokens or EXP are given out. */
     public boolean savesStats() {
-        return !privateGame;
+        return !customGame;
     }
 
     /** Classes players can choose (or be randomly given) in this game. */
     public ClassType[] getSelectableClasses() {
-        if (!privateGame) return ClassType.getAvailableClasses();
+        if (!customGame) return ClassType.getAvailableClasses();
 
         List<ClassType> enabled = new ArrayList<>();
         for (ClassType type : getGameSettings().enabledClasses) {
@@ -228,7 +250,7 @@ public class GameInstance {
     /** Max health for each life in this game, from the Max Health modifier (20 = the normal 10 hearts). */
     public double getMaxHealthPoints() {
         // Only private games can change it - every other game is always the normal 10 hearts
-        if (!privateGame) return MaxHealthGuard.DEFAULT_MAX_HEALTH;
+        if (!customGame) return MaxHealthGuard.DEFAULT_MAX_HEALTH;
         return getGameSettings().maxHealthHearts * 2;
     }
 
@@ -236,37 +258,167 @@ public class GameInstance {
         return Arrays.asList(getSelectableClasses()).contains(type);
     }
 
-    public UUID getPrivateGameLeader() {
-        return privateGameLeader;
+    /**
+     * Vaulted classes enabled in a private game are playable by everyone: their token, level and rank
+     * requirements are skipped (but kept on the class for if it ever gets unvaulted).
+     */
+    public boolean ignoresClassRequirements(ClassType type) {
+        return customGame && type.isVaulted() && isClassSelectable(type);
     }
 
-    public boolean isPrivateGameLeader(Player player) {
-        return player != null && privateGameLeader != null && privateGameLeader.equals(player.getUniqueId());
+    public UUID getCustomGameHost() {
+        return customGameHost;
     }
 
-    public boolean isPrivateGameCountdownStarted() {
-        return privateGameCountdownStarted;
+    public boolean isCustomGameHost(Player player) {
+        return player != null && customGameHost != null && customGameHost.equals(player.getUniqueId());
     }
 
-    public void enablePrivateGame(Player leader) {
+    /** The host's name, which /joincustomgame takes. */
+    public String getCustomGameHostName() {
+        if (customGameHost == null) return "Unknown";
+        String name = Bukkit.getOfflinePlayer(customGameHost).getName();
+        return name != null ? name : "Unknown";
+    }
+
+    /*
+     * The game lobby scoreboard's line while no countdown is running. In a custom game only the host waits for
+     * players - everyone else (the co-host too) waits for the host to start it.
+     */
+    public String getWaitingLine(Player player) {
+        return color(customGame && !isCustomGameHost(player) ? "&7&oWaiting for host.." : "&7&oWaiting for players..");
+    }
+
+    /** Puts the right waiting line back on the player's board (e.g. after they became host or co-host). */
+    private void refreshWaitingLine(Player player) {
+        if (player == null || state != GameState.WAITING || gameStartTime != null) return;
+        FastBoard board = boards.get(player.getUniqueId());
+        if (board != null) board.updateLine(7, getWaitingLine(player));
+    }
+
+    public UUID getCustomGameCoHost() {
+        return customGameCoHost;
+    }
+
+    public boolean isCustomGameCoHost(Player player) {
+        return player != null && customGameCoHost != null && customGameCoHost.equals(player.getUniqueId());
+    }
+
+    /** The host and the co-host can both change the Game Modifiers (only the host picks the co-host). */
+    public boolean canEditCustomGame(Player player) {
+        return isCustomGameHost(player) || isCustomGameCoHost(player);
+    }
+
+    /** Makes the player the co-host in place of the current one, or removes the co-host when null. */
+    public void setCustomGameCoHost(Player coHost) {
+        Player old = getOnlineCoHost();
+        customGameCoHost = coHost == null ? null : coHost.getUniqueId();
+
+        // The old co-host goes back to a normal player's items, the new one gets the host's
+        if (old != null && old != coHost) {
+            if (isCustomGameMenu(old)) old.closeInventory(); // they can't change the settings anymore
+            if (state == GameState.WAITING) {
+                old.getInventory().clear();
+                gameManager.getMain().getLobbyItems().gameLobbyItems(old);
+            }
+        }
+        if (coHost != null) giveEditorItems(coHost);
+        refreshWaitingLine(old);
+        refreshWaitingLine(coHost);
+    }
+
+    private Player getOnlineCoHost() {
+        Player coHost = customGameCoHost == null ? null : Bukkit.getPlayer(customGameCoHost);
+        return coHost != null && players.contains(coHost) ? coHost : null;
+    }
+
+    /** The host and co-host (whoever of them is in the game). */
+    private List<Player> getEditors() {
+        List<Player> editors = new ArrayList<>();
+        for (Player p : players) {
+            if (canEditCustomGame(p)) editors.add(p);
+        }
+        return editors;
+    }
+
+    /*
+     * The host's and co-host's items: Game Modifiers / Start Game / Change Map (with Profile and Leave Game) in
+     * the lobby, or the normal lobby items plus Game Settings (to stop it) once the countdown is running.
+     */
+    private void giveEditorItems(Player editor) {
+        if (state != GameState.WAITING) return;
+        if (customGameCountdownStarted) giveCountdownItems(editor);
+        else giveCustomGameHostItems(editor);
+    }
+
+    public void giveCountdownItems(Player editor) {
+        editor.getInventory().clear();
+        gameManager.getMain().getLobbyItems().gameLobbyItems(editor);
+        editor.getInventory().setItem(7, getGameSettingsItem());
+    }
+
+    /** Whether the player has one of the custom game settings menus open. */
+    private static boolean isCustomGameMenu(Player player) {
+        Optional<SmartInventory> open = SmartInvsPlugin.manager().getInventory(player);
+        if (!open.isPresent()) return false;
+        InventoryProvider provider = open.get().getProvider();
+        return provider instanceof GameModifiersGUI || provider instanceof ClassListGUI
+                || provider instanceof ItemListGUI || provider instanceof CoHostGUI;
+    }
+
+    /*
+     * The host or co-host changed something: their partner's open custom game menus (Game Modifiers, Class List,
+     * Item List, Co-Host) are reopened so they show it too.
+     */
+    public void refreshEditorMenus(Player changedBy) {
+        CustomGamesGUI.refreshOpenMenus(); // its mode may have changed
+        for (Player editor : getEditors()) {
+            if (editor == changedBy) continue;
+
+            if (!isCustomGameMenu(editor)) continue;
+            Optional<SmartInventory> open = SmartInvsPlugin.manager().getInventory(editor);
+
+            int page = SmartInvsPlugin.manager().getContents(editor)
+                    .map(contents -> contents.pagination().getPage()).orElse(0);
+            open.get().open(editor, page);
+        }
+    }
+
+    public boolean isCustomGameCountdownStarted() {
+        return customGameCountdownStarted;
+    }
+
+    public void enableCustomGame(Player leader) {
         if (leader == null) return;
 
-        this.privateGame = true;
-        this.privateGameLeader = leader.getUniqueId();
-        this.privateGameCountdownStarted = false;
+        this.customGame = true;
+        this.customGameHost = leader.getUniqueId();
+        this.customGameCountdownStarted = false;
     }
 
-    public boolean canAccessPrivateGame(Player player) {
-        if (!privateGame) return true;
+    public boolean isCancellingCustomGame() {
+        return cancellingCustomGame;
+    }
+
+    public boolean isCustomGamePublic() {
+        return customGamePublic;
+    }
+
+    public void setCustomGamePublic(boolean customGamePublic) {
+        this.customGamePublic = customGamePublic;
+    }
+
+    public boolean canAccessCustomGame(Player player) {
+        if (!customGame || customGamePublic) return true;
         if (player == null) return false;
 
-        if (isPrivateGameLeader(player)) return true;
+        if (isCustomGameHost(player)) return true;
 
         if (gameManager.getMain().getPartyManager() == null) {
             return false;
         }
 
-        Player leader = Bukkit.getPlayer(privateGameLeader);
+        Player leader = Bukkit.getPlayer(customGameHost);
 
         if (leader == null) {
             return false;
@@ -281,25 +433,15 @@ public class GameInstance {
         return party.contains(player.getUniqueId());
     }
 
-    /*
-     * The private game leader left the party while the game kept going: hand the game to newLeader. In the
-     * lobby they get the leader items (or the Game Settings item if the countdown is already running).
-     */
-    public void handOverPrivateGame(Player newLeader) {
-        if (!privateGame || newLeader == null || !HasPlayer(newLeader)) return;
-
-        this.privateGameLeader = newLeader.getUniqueId();
-        if (state == GameState.WAITING) {
-            if (privateGameCountdownStarted) newLeader.getInventory().setItem(7, getGameSettingsItem());
-            else givePrivateGameLeaderItems(newLeader);
-        }
-        newLeader.sendMessage(color("&a&l(!) &rYou are now the private game leader."));
+    /** Ends a private game with no winner: everyone in it (and watching it) goes back to the lobby. */
+    public void cancelCustomGame(String reason) {
+        cancelCustomGame(reason, null);
     }
 
-    /** Ends a private game with no winner: everyone in it (and watching it) goes back to the lobby. */
-    public void cancelPrivateGame(String reason) {
-        if (!privateGame) return;
-        cancellingPrivateGame = true;
+    /** Same, but leaves out the player who is already leaving (they're removed by their own leave). */
+    public void cancelCustomGame(String reason, Player leaving) {
+        if (!customGame) return;
+        cancellingCustomGame = true;
 
         if (gameStartTime != null) {
             gameStartTime.cancel();
@@ -307,31 +449,15 @@ public class GameInstance {
         }
 
         for (Player p : new ArrayList<>(players)) {
+            if (p == leaving) continue;
             p.sendMessage(color(reason));
             gameManager.getMain().getCommands().removeFromGame(p);
         }
         for (Player p : new ArrayList<>(spectators)) {
+            if (p == leaving) continue;
             p.sendMessage(color(reason));
             gameManager.getMain().getCommands().removeFromGame(p);
         }
-    }
-
-    public void transferPrivateGameLeader(Player oldLeader, Player newLeader) {
-        if (!privateGame) return;
-        if (state != GameState.WAITING) return;
-        if (oldLeader == null || newLeader == null) return;
-
-        if (!HasPlayer(oldLeader) || !HasPlayer(newLeader)) return;
-
-        this.privateGameLeader = newLeader.getUniqueId();
-
-        oldLeader.getInventory().clear();
-        getGameManager().getMain().getLobbyItems().gameLobbyItems(oldLeader);
-
-        givePrivateGameLeaderItems(newLeader);
-
-        oldLeader.sendMessage(color("&e&l(!) &rYou are no longer the private game leader."));
-        newLeader.sendMessage(color("&a&l(!) &rYou are now the private game leader."));
     }
 
     /** Reopens the Game Modifiers menu - goes in the 8th hotbar slot once the leader has started the countdown. */
@@ -344,16 +470,16 @@ public class GameInstance {
         );
     }
 
-    public void givePrivateGameLeaderItems(Player leader) {
+    public void giveCustomGameHostItems(Player leader) {
         if (leader == null) return;
-        if (!isPrivateGameLeader(leader)) return;
+        if (!canEditCustomGame(leader)) return;
         if (state != GameState.WAITING) return;
 
         ItemStack modifiers = ItemHelper.setDetails(
                 new ItemStack(Material.REDSTONE_COMPARATOR),
                 color("&eGame Modifiers &7(Right Click)"),
                 "",
-                color("&7Click to modify this private game.")
+                color("&7Click to modify this custom game.")
         );
 
         ItemStack startGame = ItemHelper.setDetails(
@@ -363,48 +489,116 @@ public class GameInstance {
                 color("&7Click to start the countdown.")
         );
 
+        ItemStack changeMap = ItemHelper.setDetails(
+                new ItemStack(Material.EMPTY_MAP),
+                color("&eChange Map &7(Right Click)"),
+                "",
+                color("&7Click to move this game to another map.")
+        );
+
         leader.getInventory().clear();
         leader.getInventory().setItem(0, modifiers);
         leader.getInventory().setItem(1, startGame);
+        leader.getInventory().setItem(2, changeMap);
+        leader.getInventory().setItem(4, LobbyItems.getProfileItem(leader));
+        leader.getInventory().setItem(8, LobbyItems.getLeaveGameItem());
     }
 
-    public void startPrivateGameCountdown(Player player) {
-        if (!privateGame) {
-            player.sendMessage(color("&c&l(!) &rThis is not a private game."));
-            return;
+    /** How players get their class: Classic, Frenzy, Class Switch or One For All. */
+    public String getClassSelectionName() {
+        GameSettings settings = getGameSettings();
+        if (gameType == GameType.FRENZY) return "Frenzy";
+        if (settings.randomClasses) return "Class Switch";
+        if (settings.oneForAll) return "One For All";
+        return "Classic";
+    }
+
+    /** Returns whether the countdown started (the host/co-host keep their items if it didn't). */
+    public boolean startCustomGameCountdown(Player player) {
+        if (!customGame) {
+            player.sendMessage(color("&c&l(!) &rThis is not a custom game."));
+            return false;
         }
 
-        if (!isPrivateGameLeader(player)) {
-            player.sendMessage(color("&c&l(!) &rOnly the party leader can start this private game."));
-            return;
+        if (!canEditCustomGame(player)) {
+            player.sendMessage(color("&c&l(!) &rOnly the custom game's host and co-host can start it."));
+            return false;
         }
 
         if (players.size() < 2) {
             player.sendMessage(color("&c&l(!) &rYou need at least 2 players to start the game."));
-            return;
+            return false;
         }
 
         if (gameStartTime != null) {
             player.sendMessage(color("&c&l(!) &rThe game countdown has already started."));
-            return;
+            return false;
         }
 
-        privateGameCountdownStarted = true;
+        customGameCountdownStarted = true;
+        removeClassSelectors(); // settings can't be changed anymore
+        for (Player editor : getEditors()) giveCountdownItems(editor);
 
-        TellAll(color("&a&l(!) &e" + player.getName() + " &rstarted the private game countdown."));
+        TellAll(color("&e&l(!) &e" + player.getName() + " &rstarted the game"));
+        announcePrivateGameSettings();
         StartGameTimer();
+        return true;
+    }
+
+    /** Sends everyone in the private game a summary of its Game Modifiers. */
+    private void announcePrivateGameSettings() {
+        GameSettings settings = getGameSettings();
+
+        String classSelection = getClassSelectionName();
+        if (settings.randomClasses) classSelection += " (" + formatSeconds(settings.randomClassCycleSeconds) + ")";
+
+        long time = mapWorld.getTime();
+        String timeOfDay = time >= 13000 && time <= 23000 ? "Night" : time >= 11000 && time < 13000 ? "Sunset" : "Day";
+
+        int enabledClasses = 0;
+        for (ClassType type : settings.enabledClasses) {
+            if (type.isPlayable()) enabledClasses++;
+        }
+
+        TellAll(color("&8&m------------------------------------"));
+        TellAll(color("&6&lGAME SETTINGS"));
+        TellAll(color("&fVisibility: " + (customGamePublic ? "&aPublic" : "&cPrivate")));
+        TellAll(color("&fClass Selection: &e" + classSelection));
+        TellAll(color("&fClass List: &e" + (enabledClasses == 0 ? "Default" : enabledClasses + "&7/&e"
+                + ClassType.getPlayableClasses().length + " classes")));
+        TellAll(color("&fLives: &e" + settings.startingLives));
+        TellAll(color("&fRespawn Time: &e" + (settings.respawnSeconds == 0 ? "None" : settings.respawnSeconds + "s")));
+        TellAll(color("&fSpawn Protection: &e" + formatSecondsOrDisabled(settings.spawnProtectionSeconds)));
+        TellAll(color("&fMax Health: &e" + settings.maxHealthHearts + " Hearts"));
+        TellAll(color("&fHealing on Kill: &e" + settings.healthPotMode.getName()));
+        TellAll(color("&fStrength on Kill: &e" + formatSecondsOrDisabled(settings.strengthOnKillSeconds)));
+        TellAll(color("&fLow Gravity: " + (settings.lowGravity ? "&aEnabled" : "&cDisabled")));
+        TellAll(color("&fItem List: &e" + (settings.enabledDrops.isEmpty() ? "Default" : settings.enabledDrops.size()
+                + "&7/&e" + GameLootDrops.values().length + " items")));
+        TellAll(color("&fOP Item Drops: " + (settings.opDrops ? "&aEnabled" : "&cDisabled")));
+        TellAll(color("&fLightning Drop Rate: &e" + settings.dropTimer + "s"));
+        TellAll(color("&fTime of Day: &e" + timeOfDay));
+        TellAll(color("&8&m------------------------------------"));
+    }
+
+    private static String formatSeconds(int seconds) {
+        return seconds % 60 == 0 ? seconds / 60 + "m" : seconds + "s";
+    }
+
+    private static String formatSecondsOrDisabled(int seconds) {
+        return seconds > 0 ? seconds + "s" : "&cDisabled";
     }
 
     /*
      * The leader clicked Game Settings during the countdown: stop it and hand back the
      * Game Modifiers / Start Game items so they can change settings and start again.
      */
-    public void cancelPrivateGameCountdown(Player leader) {
-        if (!privateGame || state != GameState.WAITING || !isPrivateGameLeader(leader)) return;
+    public void cancelCustomGameCountdown(Player leader) {
+        if (!customGame || state != GameState.WAITING || !canEditCustomGame(leader)) return;
 
-        // No countdown running (e.g. it couldn't start with only the leader in the game): just give the items back
-        if (!privateGameCountdownStarted) {
-            givePrivateGameLeaderItems(leader);
+        // No countdown running: just give the items back
+        if (!customGameCountdownStarted) {
+            giveCustomGameHostItems(leader);
             return;
         }
 
@@ -412,19 +606,20 @@ public class GameInstance {
             gameStartTime.cancel();
             gameStartTime = null;
         }
-        privateGameCountdownStarted = false;
+        customGameCountdownStarted = false;
         timeToStartSeconds = getSecondsUntilStart();
         removeVotePaper();
+        restoreClassSelectors(); // Frenzy might get turned off
 
         for (Player p : players) {
             p.setLevel(0);
             TitleUtil.clear(p);
             FastBoard fb = boards.get(p.getUniqueId());
-            if (fb != null) fb.updateLine(7, color("&7&oWaiting for players.."));
+            if (fb != null) fb.updateLine(7, getWaitingLine(p));
         }
 
         TellAll(color("&e&l(!) &e" + leader.getName() + " &rstopped the countdown to change the game settings."));
-        givePrivateGameLeaderItems(leader);
+        for (Player editor : getEditors()) giveCustomGameHostItems(editor);
     }
 
     /**
@@ -444,7 +639,7 @@ public class GameInstance {
 
     /** Private games can hold far more players than the normal game type limit. */
     public int getMaxPlayerCount() {
-        return privateGame ? PRIVATE_GAME_MAX_PLAYERS : gameType.getMaxPlayers();
+        return customGame ? CUSTOM_GAME_MAX_PLAYERS : gameType.getMaxPlayers();
     }
 
     public void SendPlayerToMap(Player player) {
@@ -521,7 +716,7 @@ public class GameInstance {
      * category are allowed
      */
     private String getMaxPlayers() {
-        if (privateGame) return "" + getMaxPlayerCount();
+        if (customGame) return "" + getMaxPlayerCount();
         String maxPlayers = ""
                 + (map.GetInstance().gameType == GameType.FRENZY ? "" + gameType.getMaxPlayers() : "")
                 + (map.GetInstance().gameType == GameType.CLASSIC ? "" + gameType.getMaxPlayers() : "")
@@ -531,7 +726,7 @@ public class GameInstance {
 
     public boolean isLobbyFull(Player player) {
         if (this.map != null) {
-            if (privateGame) {
+            if (customGame) {
                 if (players.size() < getMaxPlayerCount()) return false;
                 player.sendMessage(color("&c&l(!) &fThis game is full!"));
                 return true;
@@ -575,7 +770,7 @@ public class GameInstance {
     public void CheckForGameStart() {
         if (players.size() < 2) return;
 
-        if (privateGame && !privateGameCountdownStarted) {
+        if (customGame && !customGameCountdownStarted) {
             return;
         }
 
@@ -625,7 +820,7 @@ public class GameInstance {
     public void StartGameTimer() {
         if (gameStartTime != null) return;
 
-        if (privateGame && !privateGameCountdownStarted) {
+        if (customGame && !customGameCountdownStarted) {
             return;
         }
 
@@ -686,6 +881,7 @@ public class GameInstance {
                     getGameSettings().setTimeOfDay();
                     getGameSettings().enableSantaFlyover();
                     removeVotePaper();
+                    removeClassSelectors(); // after the game type vote, which can switch to Frenzy
                 }
 
                 timeToStartSeconds--;
@@ -701,11 +897,22 @@ public class GameInstance {
         TextComponent join = new TextComponent("     " + color("&a&lClick here to join!"));
         join.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/join " + mapName));
 
-        if (gameType == GameType.FRENZY) {
-            String msg = color("&2&l(!) &a&lA &7&oFrenzy &a&lgame on&f&l " + mapName + " &a&lis starting in 30 seconds");
+        // Private custom games aren't announced. Public ones say CUSTOM, and the click joins this custom game
+        // (/join only finds normal games)
+        String custom = "";
+        if (customGame) {
+            if (!customGamePublic) join = null;
+            else {
+                custom = "&6&lCUSTOM ";
+                join.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/joincustomgame " + getCustomGameHostName()));
+            }
+        }
+
+        if (join != null && gameType == GameType.FRENZY) {
+            String msg = color("&2&l(!) &a&lA " + custom + "&7&oFrenzy &a&lgame on&f&l " + mapName + " &a&lis starting in 30 seconds");
             broadcastToWorld(lobby, msg, join);
-        } else if (gameType == GameType.CLASSIC) {
-            String msg = color("&2&l(!) &a&lA game on&f&l " + mapName + " &a&lis starting in 30 seconds");
+        } else if (join != null && gameType == GameType.CLASSIC) {
+            String msg = color("&2&l(!) &a&lA " + custom + "&a&lgame on&f&l " + mapName + " &a&lis starting in 30 seconds");
             broadcastToWorld(lobby, msg, join);
         }
 
@@ -713,6 +920,35 @@ public class GameInstance {
 
         for (Player player : players)
             player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1);
+    }
+
+    public boolean isClassSelectorRemoved() {
+        return classSelectorRemoved;
+    }
+
+    /*
+     * Frenzy and Class Switch pick everyone's class at random, so the class selector goes once that's final
+     * (the countdown, or /frenzy).
+     */
+    public void removeClassSelectors() {
+        if (gameType != GameType.FRENZY && !getGameSettings().randomClasses) return;
+        classSelectorRemoved = true;
+
+        for (Player player : players) {
+            if (player.getOpenInventory() != null && player.getOpenInventory().getTitle().contains("Class"))
+                player.closeInventory();
+            player.getInventory().remove(Material.ENCHANTED_BOOK);
+        }
+    }
+
+    /** The countdown stopped (or /frenzy switched back): everyone gets their class selector back. */
+    public void restoreClassSelectors() {
+        if (!classSelectorRemoved) return;
+        classSelectorRemoved = false;
+
+        for (Player player : players) {
+            player.getInventory().setItem(0, LobbyItems.getClassSelectorItem());
+        }
     }
 
     private void removeVotePaper() {
@@ -883,6 +1119,7 @@ public class GameInstance {
         }
 
         this.state = GameState.STARTED;
+        if (customGame) CustomGamesGUI.refreshOpenMenus(); // Lobby -> Playing
         resetState();
         LoadClasses();
         // Private game "Lives" modifier (5 by default)
@@ -1296,15 +1533,8 @@ public class GameInstance {
     }
 
     public ItemStack getItemToDrop() {
-        GameLootDrops lootDrop;
-
-        if (getGameSettings().opDrops) {
-            lootDrop = GameLootDrops.getOpDrop();
-        } else {
-            lootDrop = GameLootDrops.getDrop();
-        }
-
-        return lootDrop.getItem();
+        GameSettings settings = getGameSettings();
+        return GameLootDrops.getDrop(settings.enabledDrops, settings.opDrops).getItem();
     }
 
     public String truncateString(String string, int length) {
@@ -1425,6 +1655,8 @@ public class GameInstance {
 
     public void PlayerDeath(Player player) {
         BaseClass baseClassBeforeChecks = this.classes.get(player);
+        // Already dead and waiting to respawn: one death only (e.g. several TNT exploding in the same tick)
+        if (baseClassBeforeChecks == null || baseClassBeforeChecks.isDead) return;
         PlayerDeathEvent event = new PlayerDeathEvent(player, null, 0, null);
         baseClassBeforeChecks.isDead = true;
         baseClassBeforeChecks.onDeath(event);
@@ -1445,6 +1677,7 @@ public class GameInstance {
                 nextClass(player);
             }
             final BaseClass finalBaseClass = this.classes.get(player);
+            finalBaseClass.isDead = true; // Frenzy / GunGame just gave them a new class, which isn't marked dead yet
 
             // Countdown & respawn
             BukkitRunnable runTimer = new BukkitRunnable() {
@@ -1522,7 +1755,7 @@ public class GameInstance {
             this.runnables.add(runTimer);
 
             // Post-death housekeeping
-            player.setHealth(20.0D);
+            player.setHealth(player.getMaxHealth()); // not 20: the Max Health modifier can make it lower
             player.setAllowFlight(true);
             player.setGameMode(GameMode.ADVENTURE);
 
@@ -1667,20 +1900,9 @@ public class GameInstance {
 
                     for (BukkitRunnable runnable2 : runnables) runnable2.cancel();
 
-                    BukkitRunnable r = new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            System.out.println("Unloading world");
-                            if (Bukkit.unloadWorld(mapWorld, false)) {
-                                System.out.println("World unloaded: " + mapWorld.getName());
-                                this.cancel();
-                            }
-                        }
-                    };
-                    BukkitTask task = r.runTaskTimer(getGameManager().getMain(), 0, 1);
-                    trackInstanceTask(task);
-
-                    if (map != null) gameManager.RemoveMap(map);
+                    // Custom games go straight back to a new custom game lobby (on the default map); others are removed,
+                    // which also unloads and deletes the map copy
+                    if (!gameManager.restartCustomGame(GameInstance.this)) gameManager.removeGame(GameInstance.this);
                 }
                 ticks--;
             }
@@ -1692,7 +1914,7 @@ public class GameInstance {
     public void SetLobbyScoreboard(Player player) {
         gameManager.getMain().getScoreboardManager().lobbyBoard(player);
         gameManager.getMain().restoreLobbyNameTag(player);
-        gameManager.getMain().gameStats.put(player, this);
+        gameManager.getMain().gameStats.put(player, matchStats);
         TextComponent message = new TextComponent(getGameManager().getMain()
                 .color("&2&l(!) &eThe match stats have been recorded. &e&lClick here to view!"));
         message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/gamestats"));
@@ -1823,7 +2045,7 @@ public class GameInstance {
                 winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.YELLOW + ChatColor.BOLD + "  GAME WON");
                 winner.sendMessage("" + ChatColor.BOLD + "||");
                 winner.sendMessage("" + ChatColor.BOLD + "===========================");
-                winner.sendMessage(color("&2&l(!) &rPrivate games don't give Tokens, EXP or stats."));
+                winner.sendMessage(color("&2&l(!) &rCustom games don't give Tokens, EXP or stats."));
                 continue;
             }
 
@@ -2221,7 +2443,9 @@ public class GameInstance {
         for (Player player : players) {
             player.getInventory().clear();
             PlayerData playerData = gameManager.getMain().getDataManager().getPlayerData(player);
-            ClassType selectedClass = gameType != GameType.FRENZY ? classSelection.get(player) : null;
+            // Frenzy and Class Switch give everyone a random class, whatever they picked
+            boolean randomClass = gameType == GameType.FRENZY || getGameSettings().randomClasses;
+            ClassType selectedClass = !randomClass ? classSelection.get(player) : null;
 
             ClassType[] selectable = getSelectableClasses();
 
@@ -2231,7 +2455,7 @@ public class GameInstance {
             if (gameType == GameType.GUNGAME) selectedClass = classList.get(0);
 
             if (selectedClass == null) {
-                if (this.favClassSelection.contains(player) && !playerData.customIntegers.isEmpty()) {
+                if (!randomClass && this.favClassSelection.contains(player) && !playerData.customIntegers.isEmpty()) {
                     // Only favorites that are selectable in this game
                     List<ClassType> favorites = new ArrayList<>();
                     for (ClassType type : selectable) {
@@ -2241,11 +2465,16 @@ public class GameInstance {
                 }
                 if (selectedClass == null) {
                     selectedClass = selectable[rand.nextInt(selectable.length)];
-                    if (gameType != GameType.FRENZY) {
+                    if (!randomClass) {
                         while (attempts <= 500) {
                             attempts++;
                             ClassType classType = selectable[rand.nextInt(selectable.length)];
                             Rank donor = classType.getMinRank();
+
+                            if (ignoresClassRequirements(classType)) {
+                                selectedClass = classType;
+                                break;
+                            }
 
                             if (playerData.playerClasses.get(classType.getID()) != null
                                     && playerData.playerClasses.get(classType.getID()).purchased
@@ -2349,7 +2578,7 @@ public class GameInstance {
 
                         for (Player gamePlayer : this.players) {
                             // Private games keep the leader's modifiers
-                            if (!privateGame) this.gameSettings = new GameSettings(this); // reset vars
+                            if (!customGame) this.gameSettings = new GameSettings(this); // reset vars
                             if (gamePlayer.getInventory().contains(Material.PAPER)) {
                                 if (gamePlayer.getOpenInventory() != null
                                         && gamePlayer.getOpenInventory().getTitle().contains("Vote"))
@@ -2359,14 +2588,16 @@ public class GameInstance {
 
                             FastBoard fb = this.boards.get(gamePlayer.getUniqueId());
                             updateCountOnBoard();
-                            if (fb != null) fb.updateLine(7, color("&7&oWaiting for players.."));
+                            if (fb != null) fb.updateLine(7, getWaitingLine(gamePlayer));
                         }
 
+                        restoreClassSelectors(); // the game type can be voted on / changed again
+
                         // The leader has to press Start Game again, so give their leader items back
-                        if (privateGame) {
-                            privateGameCountdownStarted = false;
-                            Player leader = Bukkit.getPlayer(privateGameLeader);
-                            if (leader != null && players.contains(leader)) givePrivateGameLeaderItems(leader);
+                        if (customGame) {
+                            customGameCountdownStarted = false;
+                            Player leader = Bukkit.getPlayer(customGameHost);
+                            for (Player editor : getEditors()) giveCustomGameHostItems(editor);
                         }
                     }
                 }
@@ -2408,7 +2639,7 @@ public class GameInstance {
     }
 
     private void checkIfGameOver() {
-        if (cancellingPrivateGame) return;
+        if (cancellingCustomGame) return;
         int alivePlayers = 0;
         Player alivePlayer = null;
         List<Player> lastAlive = new ArrayList<>();
@@ -2580,25 +2811,7 @@ public class GameInstance {
 
     // ✅ HARDENED CLEANUP: cancels everything & drops strong refs
     public void teardown() {
-        // Cancel scheduled instance tasks (safe even if already cancelled)
-        for (BukkitTask t : new ArrayList<>(instanceTasks)) {
-            try { t.cancel(); } catch (Throwable ignored) {}
-        }
-        instanceTasks.clear();
-
-        // Cancel start/end runnables if still alive
-        try { if (gameStartTime != null) { gameStartTime.cancel(); gameStartTime = null; } } catch (Throwable ignored) {}
-        try { if (endGameAnimation != null) { endGameAnimation.cancel(); endGameAnimation = null; } } catch (Throwable ignored) {}
-
-        // Cancel any raw runnables you kept for reference
-        for (BukkitRunnable br : new ArrayList<>(runnables)) {
-            try { br.cancel(); } catch (Throwable ignored) {}
-        }
-        runnables.clear();
-
-        // Cancel and forget per-player tasks
-        for (UUID id : new ArrayList<>(perPlayerTasks.keySet())) cancelPerPlayerTasks(id);
-        perPlayerTasks.clear();
+        cancelAllTasks();
 
         // Delete any FastBoards you created per-player
         for (FastBoard b : new ArrayList<>(boards.values())) {
@@ -2618,6 +2831,33 @@ public class GameInstance {
         // players.clear(); spectators.clear(); classes.clear(); etc.
     }
 
+    /** Stops everything this game still has scheduled (e.g. before its world is unloaded). */
+    private void cancelAllTasks() {
+        // Cancel scheduled instance tasks (safe even if already cancelled)
+        for (BukkitTask t : new ArrayList<>(instanceTasks)) {
+            try { t.cancel(); } catch (Throwable ignored) {}
+        }
+        instanceTasks.clear();
+        for (BukkitTask t : new ArrayList<>(classTasks)) {
+            try { t.cancel(); } catch (Throwable ignored) {}
+        }
+        classTasks.clear();
+
+        // Cancel start/end runnables if still alive
+        try { if (gameStartTime != null) { gameStartTime.cancel(); gameStartTime = null; } } catch (Throwable ignored) {}
+        try { if (endGameAnimation != null) { endGameAnimation.cancel(); endGameAnimation = null; } } catch (Throwable ignored) {}
+
+        // Cancel any raw runnables you kept for reference
+        for (BukkitRunnable br : new ArrayList<>(runnables)) {
+            try { br.cancel(); } catch (Throwable ignored) {}
+        }
+        runnables.clear();
+
+        // Cancel and forget per-player tasks
+        for (UUID id : new ArrayList<>(perPlayerTasks.keySet())) cancelPerPlayerTasks(id);
+        perPlayerTasks.clear();
+    }
+
     private void clearForPlayer(Player p) {
         cancelPerPlayerTasks(p.getUniqueId());
         FastBoard b = boards.remove(p.getUniqueId());
@@ -2630,6 +2870,26 @@ public class GameInstance {
         players.remove(p);
         spectators.remove(p);
         clearForPlayer(p);
+    }
+
+    /*
+     * For a repeating task of a class ability or game event: if it's still going once this game is removed, it's cancelled then,
+     * so it can't run on in an unloaded world (or keep that world in memory). Returns the task.
+     */
+    public BukkitTask trackClassTask(BukkitTask t) {
+        if (t == null) return null;
+        if (worldDiscarded) {
+            t.cancel();
+            return t;
+        }
+
+        // Forget ones that already stopped, so the list doesn't grow with every ability used
+        for (Iterator<BukkitTask> it = classTasks.iterator(); it.hasNext(); ) {
+            int id = it.next().getTaskId();
+            if (!Bukkit.getScheduler().isQueued(id) && !Bukkit.getScheduler().isCurrentlyRunning(id)) it.remove();
+        }
+        classTasks.add(t);
+        return t;
     }
 
     private void trackInstanceTask(BukkitTask t) {

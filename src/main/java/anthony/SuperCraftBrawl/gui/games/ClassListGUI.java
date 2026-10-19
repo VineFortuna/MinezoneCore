@@ -40,12 +40,16 @@ public class ClassListGUI implements InventoryProvider {
     private static final String RANDOMIZER_TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM0ZTA2M2NhZmI0NjdhNWM4ZGU0M2VjNzg2MTkzOTlmMzY5ZjRhNTI0MzRkYTgwMTdhOTgzY2RkOTI1MTZhMCJ9fX0=";
 
     private enum Category {
-        ALL("All"), FREE("Free"), TOKEN("Token"), LEVEL("Level"), RANK("Rank"), VAULTED("Vaulted"), HOLIDAY("Holiday");
+        ALL("All", ""), FREE("Free", "&a&lFREE"), TOKEN("Token", "&e&lTOKEN"),
+        LEVEL("Level", "&d&lLEVEL"), DONOR("Donor", "&c&lDONOR"), VAULTED("Vaulted", "&6&lVAULTED"),
+        HOLIDAY("Holiday", "&c&lHOLIDAY");
 
         final String name;
+        final String label; // shown under a class's description
 
-        Category(String name) {
+        Category(String name, String label) {
             this.name = name;
+            this.label = label;
         }
     }
 
@@ -127,7 +131,7 @@ public class ClassListGUI implements InventoryProvider {
             }));
         }
 
-        contents.set(ROWS - 1, 0, ClickableItem.of(getEnableAllItem(enabled.size()), e -> handleEnableAllClick(e, player)));
+        contents.set(ROWS - 1, 0, ClickableItem.of(getPresetsItem(enabled.size()), e -> handlePresetsClick(e, player)));
         contents.set(ROWS - 1, 3, ClickableItem.of(getFilterItem(), e -> handleFilterClick(e, player)));
         contents.set(ROWS - 1, 5, ClickableItem.of(getSorterItem(), e -> handleSortClick(e, player)));
         contents.set(ROWS - 1, 8, ClickableItem.of(ItemHelper.getGoBackItem(), e -> {
@@ -147,13 +151,18 @@ public class ClassListGUI implements InventoryProvider {
         if (item == null) item = new ItemStack(Material.WOOD);
         item = ItemHelper.setHideFlags(item, true);
 
+        Category category = getCategory(type);
         List<String> lore = new ArrayList<>();
+        List<String> description = type.buildDescription();
+        if (description != null) lore.addAll(description);
+        lore.add("");
+        lore.add(category.label);
         lore.add("");
         lore.add("&fStatus: " + (enabled ? "&aEnabled" : "&cDisabled"));
-        lore.add("&fCost: " + getCostString(type));
-        lore.add("&fUnlocked: " + (isUnlocked(viewer, type) ? "&aYes" : "&cNo"));
-        if (type.isVaulted()) lore.add("&6&lVAULTED");
-        if (type.isHoliday()) lore.add("&c&lHOLIDAY");
+        lore.add("&fRequirement: " + getCostString(type));
+        // Free and vaulted classes are always playable here, so there's nothing to unlock
+        if (category != Category.FREE && category != Category.VAULTED)
+            lore.add("&fUnlocked: " + (isUnlocked(viewer, type) ? "&aYes" : "&cNo"));
         lore.add("");
         lore.add("&e&nLeft Click&r &eto enable");
         lore.add("&e&nRight Click&r &eto disable");
@@ -164,17 +173,17 @@ public class ClassListGUI implements InventoryProvider {
     private ItemStack getRandomizerItem(int shownCount) {
         int count = RANDOM_COUNTS[randomCountIndex];
         return ItemHelper.setDetails(ItemHelper.createSkullTexture(RANDOMIZER_TEXTURE),
-                "&6Randomize List (" + count + ")",
+                "&6Randomize List",
                 "&7Enables &a" + count + " &7random classes out of",
                 "&7the &a" + shownCount + " &7shown and disables the rest",
                 "",
                 "&eLeft Click to randomize",
-                "&eRight Click to change the amount");
+                "&eRight click to cycle &namount");
     }
 
-    private ItemStack getEnableAllItem(int enabledCount) {
-        return ItemHelper.setDetails(new ItemStack(Material.EMERALD_BLOCK),
-                "&a&lEnable All",
+    private ItemStack getPresetsItem(int enabledCount) {
+        return ItemHelper.setDetails(new ItemStack(Material.BOOKSHELF),
+                "&6Class Presets",
                 "&fEnabled: &a" + enabledCount + "&7/&a" + ClassType.getPlayableClasses().length,
                 "",
                 "&eLeft Click to enable all",
@@ -188,7 +197,7 @@ public class ClassListGUI implements InventoryProvider {
                 "&6Filtering: &a" + category.name + "/" + status.name,
                 "&7Filter specific class types and statuses",
                 "",
-                "&7Next: &a" + next(Category.values(), category).name,
+                "&7Next: &a" + nextCategory().name,
                 "&eLeft click to cycle &ntype",
                 "",
                 "&7Next: &a" + next(Status.values(), status).name,
@@ -210,19 +219,20 @@ public class ClassListGUI implements InventoryProvider {
         if (!canModify(player)) return;
 
         Set<ClassType> enabled = game.getGameSettings().enabledClasses;
+        if (!e.isLeftClick() && !e.isRightClick()) return;
+        SoundManager.playClickSound(player);
+
         if (e.isLeftClick()) {
             if (!enabled.add(type)) return;
             game.TellAll(main.color("&2&l(!) &r" + type.getTag() + " &rhas been &aenabled"));
-        } else if (e.isRightClick()) {
+        } else {
             if (!enabled.remove(type)) return;
             game.TellAll(main.color("&2&l(!) &r" + type.getTag() + " &rhas been &cdisabled"));
             warnIfNoneEnabled(player);
-        } else {
-            return;
         }
 
-        SoundManager.playSuccessfulHit(player);
         inv.open(player, page);
+        game.refreshEditorMenus(player); // the other of host / co-host sees it too
     }
 
     private void handleRandomizerClick(InventoryClickEvent e, Player player) {
@@ -242,13 +252,14 @@ public class ClassListGUI implements InventoryProvider {
         enabled.clear();
         enabled.addAll(pool.subList(0, Math.min(RANDOM_COUNTS[randomCountIndex], pool.size())));
 
-        SoundManager.playSuccessfulHit(player);
+        SoundManager.playClickSound(player);
         game.TellAll(main.color("&2&l(!) &rThe class list has been &erandomized&r: &a" + enabled.size()
                 + " &rclasses are enabled."));
         inv.open(player);
+        game.refreshEditorMenus(player);
     }
 
-    private void handleEnableAllClick(InventoryClickEvent e, Player player) {
+    private void handlePresetsClick(InventoryClickEvent e, Player player) {
         if (!canModify(player)) return;
 
         Set<ClassType> enabled = game.getGameSettings().enabledClasses;
@@ -267,12 +278,13 @@ public class ClassListGUI implements InventoryProvider {
             return;
         }
 
-        SoundManager.playSuccessfulHit(player);
+        SoundManager.playClickSound(player);
         inv.open(player);
+        game.refreshEditorMenus(player);
     }
 
     private void handleFilterClick(InventoryClickEvent e, Player player) {
-        if (e.isLeftClick()) category = next(Category.values(), category);
+        if (e.isLeftClick()) category = nextCategory();
         else if (e.isRightClick()) status = next(Status.values(), status);
         else return;
 
@@ -295,7 +307,8 @@ public class ClassListGUI implements InventoryProvider {
     }
 
     private boolean canModify(Player player) {
-        if (game.state == GameState.WAITING && game.isPrivateGameLeader(player)) return true;
+        if (game.state == GameState.WAITING && game.canEditCustomGame(player) && !game.isCustomGameCountdownStarted())
+            return true;
         player.sendMessage(main.color("&c&l(!) &rThis game can no longer be modified."));
         inv.close(player);
         return false;
@@ -330,12 +343,13 @@ public class ClassListGUI implements InventoryProvider {
         if (type.isVaulted()) return Category.VAULTED;
         if (type.getTokenCost() > 0) return Category.TOKEN;
         if (type.getLevel() > 0) return Category.LEVEL;
-        if (type.getMinRank() != null) return Category.RANK;
+        if (type.getMinRank() != null) return Category.DONOR;
         return Category.FREE;
     }
 
-    // Free < Token < Level < Rank, then by the amount within each
+    // Free (and vaulted) < Token < Level < Donor, then by the amount within each
     private int getCostTier(ClassType type) {
+        if (type.isVaulted()) return 0;
         if (type.getTokenCost() > 0) return 1;
         if (type.getLevel() > 0) return 2;
         if (type.getMinRank() != null) return 3;
@@ -350,14 +364,17 @@ public class ClassListGUI implements InventoryProvider {
     }
 
     private String getCostString(ClassType type) {
-        if (type.getTokenCost() > 0) return "&a" + type.getTokenCost() + " Tokens";
-        if (type.getLevel() > 0) return "&bLevel " + type.getLevel();
+        // Enabled vaulted classes are playable by anyone (their requirements are kept for if they're unvaulted)
+        if (type.isVaulted()) return "&aNone";
+        if (type.getTokenCost() > 0) return "&e" + type.getTokenCost() + " Tokens";
+        if (type.getLevel() > 0) return "&dLevel " + type.getLevel();
         if (type.getMinRank() != null) return type.getMinRank().getTag();
         return "&aFree";
     }
 
     /** Whether the viewer could pick this class themselves (same checks as random class selection). */
     private boolean isUnlocked(Player viewer, ClassType type) {
+        if (type.isVaulted()) return true;
         PlayerData data = main.getDataManager().getPlayerData(viewer);
         if (data == null) return false;
 
@@ -367,6 +384,20 @@ public class ClassListGUI implements InventoryProvider {
         if (type == ClassType.Fisherman && !main.getFishing().hasUnlockedFisherman(viewer)) return false;
         if (type == ClassType.Freddy && !main.getHalloweenManager().hasUnlockedFreddy(viewer)) return false;
         return type.getMinRank() == null || viewer.hasPermission("scb." + type.getMinRank().toString().toLowerCase());
+    }
+
+    /** The next class type filter, skipping Holiday while no holiday class is active. */
+    private Category nextCategory() {
+        Category next = next(Category.values(), category);
+        if (next == Category.HOLIDAY && !isAnyHolidayClassActive()) next = next(Category.values(), next);
+        return next;
+    }
+
+    private static boolean isAnyHolidayClassActive() {
+        for (ClassType type : ClassType.getPlayableClasses()) {
+            if (type.isHoliday()) return true;
+        }
+        return false;
     }
 
     private static <T> T next(T[] values, T current) {

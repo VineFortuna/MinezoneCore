@@ -245,12 +245,13 @@ public class SpiderClass extends BaseClass {
 	}
 
 	private void addVenom() {
-		venomTaskId = Bukkit.getScheduler().runTaskTimer(
+		removeVenom(); // a previous one still going would otherwise never be cancelled
+		venomTaskId = instance.trackClassTask(Bukkit.getScheduler().runTaskTimer(
 				instance.getGameManager().getMain(),
 				this::spawnVenomParticles,
 				0, // Delay
 				10 // Repeat every x ticks
-		).getTaskId();
+		)).getTaskId();
 
 		Bukkit.getScheduler().runTaskLater(
 				instance.getGameManager().getMain(),

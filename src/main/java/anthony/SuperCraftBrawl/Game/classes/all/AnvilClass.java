@@ -191,10 +191,13 @@ public class AnvilClass extends BaseClass {
      */
     private void startFallingTrail() {
         cancelTrail();
-        trailTask = new BukkitRunnable() {
+        trailTask = instance.trackClassTask(new BukkitRunnable() {
             @Override
             public void run() {
-                if (!player.isOnline() || !stompUsed || !isPlayerAlive()) {
+                // stompUsed is only reset by tick(), which stops when the game ends or they change class
+                if (!player.isOnline() || !stompUsed || !isPlayerAlive()
+                        || instance.classes.get(player) != AnvilClass.this
+                        || instance.state == anthony.SuperCraftBrawl.Game.GameState.ENDED) {
                     cancel();
                     return;
                 }
@@ -207,7 +210,7 @@ public class AnvilClass extends BaseClass {
                 // Small smoke puff for extra weight feel
                 loc.getWorld().playEffect(loc, Effect.SMOKE, 4);
             }
-        }.runTaskTimer(instance.getGameManager().getMain(), 0L, 1L);
+        }.runTaskTimer(instance.getGameManager().getMain(), 0L, 1L));
     }
 
     /**

@@ -1,5 +1,6 @@
 package anthony.SuperCraftBrawl.npcs;
 
+import anthony.SuperCraftBrawl.gui.games.CustomGamesGUI;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameManager;
 import anthony.SuperCraftBrawl.gui.ClassicModeGUI;
@@ -29,7 +30,7 @@ public class NPCManager implements Listener {
 	private NPCLib npcLib;
 
 	// NPCS HERE:
-    private net.jitse.npclib.api.NPC fishing, scbClassic, scbDuels, socialMedia, parkour;
+    private net.jitse.npclib.api.NPC fishing, scbClassic, scbDuels, socialMedia, parkour, customGames;
 
     public NPCManager(Core main) {
 		this.main = main;
@@ -70,6 +71,12 @@ public class NPCManager implements Listener {
 		socialMedia.setLocation(new Location(main.getLobbyWorld(), 192.962, 115.5, 632.989, 137, 10));
 		socialMedia.setSkin(sethblingSkin);
 		socialMedia.create();
+
+		// Where the stats NPC used to stand
+		customGames = npcLib.createNPC(Arrays.asList(main.color("&6&lCUSTOM GAMES"), main.color("&eClick to View!")));
+		customGames.setLocation(new Location(main.getLobbyWorld(), 180.5, 105, 650.5, -90, 1)); // facing east
+		customGames.setSkin(sethblingSkin);
+		customGames.create();
 
 		fishing = npcLib.createNPC(Arrays.asList(main.color("&6&lFISHING"), main.color("&eClick to view!")));
 		fishing.setLocation(new Location(main.getLobbyWorld(), 195.5, 106, 656.5, 162, 3));
@@ -163,6 +170,9 @@ public class NPCManager implements Listener {
 			new ClassicModeGUI(main, null).inv.open(player);
 		} else if (e.getNPC() == scbDuels) {
 			new DuelsModeGUI(main, null).inv.open(player);
+		} else if (e.getNPC() == customGames) {
+			SoundManager.playClickSound(player);
+			new CustomGamesGUI(main).inv.open(player);
 		} else if (e.getNPC() == parkour) {
             SoundManager.playClickSound(player);
             mainParkour(player);
@@ -195,12 +205,13 @@ public class NPCManager implements Listener {
 			//Bukkit.getScheduler().runTask(main, () -> socialMedia.show(e.getPlayer()));
 			Bukkit.getScheduler().runTask(main, () -> scbDuels.show(e.getPlayer()));
 			Bukkit.getScheduler().runTask(main, () -> parkour.show(e.getPlayer()));
+			Bukkit.getScheduler().runTask(main, () -> customGames.show(e.getPlayer()));
 		}, 20L);
 		// }
 	}
 
     public void shutdown() {
-        net.jitse.npclib.api.NPC[] all = { fishing, scbClassic, scbDuels, socialMedia, parkour };
+        net.jitse.npclib.api.NPC[] all = { fishing, scbClassic, scbDuels, socialMedia, parkour, customGames };
 
         for (net.jitse.npclib.api.NPC npc : all) {
             if (npc == null) continue;

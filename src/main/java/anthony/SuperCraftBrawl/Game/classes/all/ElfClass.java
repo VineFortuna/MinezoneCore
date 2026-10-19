@@ -128,17 +128,14 @@ public class ElfClass extends BaseClass {
 				if (this.isUsed == false) {
 					double health = player.getHealth();
 
-					if (health >= 19.5) {
+					// Against max health, not 20 - the Max Health modifier can change it
+					double maxHealth = player.getMaxHealth();
+					if (health >= maxHealth - 0.5) {
 						player.sendMessage(instance.color("&c&l(!) &rProbably should save that when you need health!"));
 						return;
 					}
 
-					if (health >= 10.0) {
-						player.setHealth(20.0);
-					} else {
-						health += 10.0;
-						player.setHealth(health);
-					}
+					player.setHealth(Math.min(health + 10.0, maxHealth));
 
 					player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 110, 0));
 

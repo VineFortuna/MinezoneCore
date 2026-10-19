@@ -1,8 +1,6 @@
 package anthony.SuperCraftBrawl.party;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -11,7 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -53,6 +50,16 @@ public class PartyManager {
     public Party getOrCreateParty(Player player) {
         Party party = getParty(player);
         return party != null ? party : createParty(player);
+    }
+
+    /** /party create: a party with just the player in it, without having to invite anyone. */
+    public void create(Player player) {
+        if (getParty(player) != null) {
+            player.sendMessage(main.color("&c&l(!) &rYou are already in a party."));
+            return;
+        }
+
+        createParty(player);
     }
 
     public boolean isInParty(Player player) {
@@ -274,8 +281,6 @@ public class PartyManager {
             return;
         }
 
-        Player successor = leavePrivateGame(player, party, true);
-
         if (party.size() == 1) {
             disband(player, false);
             return;
@@ -286,7 +291,7 @@ public class PartyManager {
             partyByMember.remove(player.getUniqueId());
             partyChatToggled.remove(player.getUniqueId());
 
-            Player newLeader = successor != null ? successor : randomOnlineMember(party);
+            Player newLeader = randomOnlineMember(party);
 
             if (newLeader == null) {
                 removeParty(party);
@@ -299,7 +304,6 @@ public class PartyManager {
 
             broadcast(party, "&e&l(!) &e" + player.getName() + " &rhas left the party. &e" + newLeader.getName() + " &ris now the party leader.");
             player.sendMessage(main.color(message));
-            turnOffPrivateGamesIfCantHost(party, newLeader);
         } else {
             party.removeMember(player.getUniqueId());
             partyByMember.remove(player.getUniqueId());
@@ -312,64 +316,12 @@ public class PartyManager {
         disbandIfAlone(party);
     }
 
-    /*
-     * Someone leaving the party (or the server) while in the party's private game:
-     * - a member just leaves the game (it's the party's game, not theirs any more)
-     * - the leader, alone in the game: the game is cancelled
-     * - the leader with others: the first party member in the game who can host custom games takes it over
-     *   and becomes party leader; if nobody can, the game is cancelled and everyone goes back to the lobby
-     * Returns the player who took over, or null.
-     */
-    private Player leavePrivateGame(Player player, Party party, boolean removeFromGame) {
-        GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
-        if (game == null || !game.isPrivateGame()) return null;
-
-        if (!party.isLeader(player.getUniqueId()) || !game.isPrivateGameLeader(player)) {
-            if (removeFromGame) main.getCommands().removeFromGame(player);
-            return null;
-        }
-
-        List<Player> others = new ArrayList<>();
-        for (Player member : party.getOnlineMembers()) {
-            if (member != player && game.HasPlayer(member)) others.add(member);
-        }
-
-        Player successor = null;
-        for (Player member : others) {
-            if (main.canHostPrivateGames(member)) {
-                successor = member;
-                break;
-            }
-        }
-
-        if (successor != null) {
-            game.handOverPrivateGame(successor);
-            if (removeFromGame) main.getCommands().removeFromGame(player);
-            return successor;
-        }
-
-        String reason = others.isEmpty()
-                ? "&e&l(!) &rYour private game was cancelled."
-                : "&e&l(!) &rThe private game was cancelled - &e" + player.getName()
-                        + " &rleft the party and nobody left can run custom games.";
-        game.cancelPrivateGame(reason);
-        return null;
-    }
-
     private Player randomOnlineMember(Party party) {
         List<Player> online = party.getOnlineMembers();
         return online.isEmpty() ? null : online.get(new Random().nextInt(online.size()));
     }
 
-    /** Custom games are LEGENDARY+ only - switch them off when leadership passes to someone without it. */
-    private void turnOffPrivateGamesIfCantHost(Party party, Player newLeader) {
-        if (!party.isPrivateGames() || main.canHostPrivateGames(newLeader)) return;
-
-        party.setPrivateGames(false);
-        broadcast(party, "&e&l(!) &rCustom Games were turned off - the new leader needs &6&lLEGENDARY &ror higher to run them.");
-    }
-
-    /** A party that's down to just its leader after members leave gets disbanded. */
+    /** A party that's down to one player after others leave (or quit, or are kicked) gets disbanded. */
     private void disbandIfAlone(Party party) {
         if (party.size() > 1) return;
 
@@ -421,22 +373,9 @@ public class PartyManager {
             return;
         }
 
-        GameInstance leaderInstance = main.getGameManager().GetInstanceOfPlayer(leader);
-        GameInstance targetInstance = main.getGameManager().GetInstanceOfPlayer(target);
-
-        if (leaderInstance != null && leaderInstance.isPrivateGame() && !main.canHostPrivateGames(target)) {
-            leader.sendMessage(main.color("&c&l(!) &e" + target.getName() + " &rcan't run custom games "
-                    + "(&6&lLEGENDARY &ror higher), so they can't take over this private game."));
-            return;
-        }
-
         partyByLeader.remove(leader.getUniqueId());
         party.setLeader(target.getUniqueId());
         partyByLeader.put(target.getUniqueId(), party);
-
-        if (leaderInstance != null && leaderInstance == targetInstance) {
-            leaderInstance.transferPrivateGameLeader(leader, target);
-        }
 
         broadcast(party, "&a&l(!) &e" + target.getName() + " &ris now the party leader.");
     }
@@ -518,9 +457,6 @@ public class PartyManager {
             return;
         }
 
-        // The quit itself takes them out of the game, so only the hand-over / cancel is needed here
-        Player successor = leavePrivateGame(player, party, false);
-
         if (party.size() <= 1) {
             removeParty(party);
             return;
@@ -531,7 +467,7 @@ public class PartyManager {
             partyByMember.remove(player.getUniqueId());
             partyByLeader.remove(player.getUniqueId());
 
-            Player newLeader = successor != null ? successor : randomOnlineMember(party);
+            Player newLeader = randomOnlineMember(party);
 
             if (newLeader == null) {
                 removeParty(party);
@@ -542,7 +478,6 @@ public class PartyManager {
             partyByLeader.put(newLeader.getUniqueId(), party);
 
             broadcast(party, "&e&l(!) &e" + player.getName() + " &rleft the server. &e" + newLeader.getName() + " &ris now the party leader.");
-            turnOffPrivateGamesIfCantHost(party, newLeader);
         } else {
             party.removeMember(player.getUniqueId());
             partyByMember.remove(player.getUniqueId());
@@ -555,10 +490,6 @@ public class PartyManager {
 
     private Party createParty(Player leader) {
         Party party = new Party(leader.getUniqueId());
-
-        // Start with the leader's saved Custom Games choice (only if they're allowed to run them)
-        PlayerData data = main.getDataManager().getPlayerData(leader);
-        party.setPrivateGames(data != null && data.customGames && main.canHostPrivateGames(leader));
 
         partyByLeader.put(leader.getUniqueId(), party);
         partyByMember.put(leader.getUniqueId(), party);

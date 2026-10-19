@@ -284,7 +284,7 @@ public class HerobrineClass extends BaseClass {
                 }
             }.runTaskLater(instance.getGameManager().getMain(), 100L);
 
-            new BukkitRunnable() {
+            instance.trackClassTask(new BukkitRunnable() {
                 @Override
                 public void run() {
                     if (!fb.isValid() || fb.isDead()) {
@@ -316,7 +316,7 @@ public class HerobrineClass extends BaseClass {
                         }
                     }
                 }
-            }.runTaskTimer(instance.getGameManager().getMain(), 5L, 1L);
+            }.runTaskTimer(instance.getGameManager().getMain(), 5L, 1L));
         }
 
         /*

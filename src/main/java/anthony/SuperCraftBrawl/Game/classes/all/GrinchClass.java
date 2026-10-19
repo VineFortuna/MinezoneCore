@@ -19,6 +19,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import xyz.xenondevs.particle.ParticleEffect;
 
+import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
@@ -43,12 +44,14 @@ public class GrinchClass extends BaseClass {
 	private static final Map<Player, HeldWeapon> HELD_WEAPONS = new WeakHashMap<>();
 
 	private static class HeldWeapon {
-		final BaseClass holderClass;
+		// Weak: the class holds its Player (this map's key, which would then never be cleared) and its game,
+		// which holds the game's whole world
+		final WeakReference<BaseClass> holderClass;
 		final int deathsAtSwap;
 		final ItemStack weapon;
 
 		HeldWeapon(BaseClass holderClass, int deathsAtSwap, ItemStack weapon) {
-			this.holderClass = holderClass;
+			this.holderClass = new WeakReference<>(holderClass);
 			this.deathsAtSwap = deathsAtSwap;
 			this.weapon = weapon;
 		}
@@ -203,7 +206,7 @@ public class GrinchClass extends BaseClass {
 
 		HeldWeapon held = HELD_WEAPONS.get(holder);
 		if (held != null) {
-			if (held.holderClass == holderClass && held.deathsAtSwap == holderClass.totalDeaths) {
+			if (held.holderClass.get() == holderClass && held.deathsAtSwap == holderClass.totalDeaths) {
 				int slot = findWeaponSlot(holder.getInventory(), held.weapon);
 				if (slot >= 0)
 					return slot;

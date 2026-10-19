@@ -114,7 +114,7 @@ public class GrimReaperClass extends BaseClass {
 					double heightOffset = 0.1;
 
 					// Create the circle and display particles
-					new BukkitRunnable() {
+					instance.trackClassTask(new BukkitRunnable() {
 						int counter = 0;
 						Location center = player.getLocation();
 
@@ -152,7 +152,7 @@ public class GrimReaperClass extends BaseClass {
 
 							counter++;
 						}
-					}.runTaskTimer(instance.getGameManager().getMain(), 0, 20); // Runs every second for 5 seconds
+					}.runTaskTimer(instance.getGameManager().getMain(), 0, 20)); // Runs every second for 5 seconds
 				}
 			}
 		}

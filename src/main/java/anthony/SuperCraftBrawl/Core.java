@@ -106,6 +106,7 @@ public class Core extends JavaPlugin implements Listener {
     protected final Cooldown cooldownTime = null;
     public RankManager rankManager;
     private anthony.SuperCraftBrawl.lobbybuild.LobbyBuildManager lobbyBuildManager;
+    private anthony.SuperCraftBrawl.Game.map.MapWorldManager mapWorldManager;
     private anthony.SuperCraftBrawl.Game.MaxHealthGuard maxHealthGuard;
     public List<Player> staffchat;
     public List<Player> globalchat;
@@ -138,7 +139,7 @@ public class Core extends JavaPlugin implements Listener {
     public SignManager signManager;
 
     // Player's game stats
-    public Map<Player, GameInstance> gameStats = new HashMap<Player, GameInstance>();
+    public Map<Player, anthony.SuperCraftBrawl.Game.MatchStats> gameStats = new HashMap<>();
 
     public boolean finalEvent = false;
 
@@ -428,6 +429,10 @@ public class Core extends JavaPlugin implements Listener {
         return lobbyBuildManager;
     }
 
+    public anthony.SuperCraftBrawl.Game.map.MapWorldManager getMapWorldManager() {
+        return mapWorldManager;
+    }
+
     /**
      * End-of-game rank bonus tokens: 20 for LEGENDARY, 10 for any other rank with the given bonus permission
      * (scb.rankBonus / scb.rankBonusOne), otherwise 0.
@@ -438,14 +443,14 @@ public class Core extends JavaPlugin implements Listener {
     }
 
     /** Ranks that can host custom (private) games: LEGENDARY and above, which includes every staff rank. */
-    private static final Set<Rank> PRIVATE_GAME_HOST_RANKS = EnumSet.of(Rank.LEGENDARY, Rank.TRAINEE, Rank.MODERATOR,
+    private static final Set<Rank> CUSTOM_GAME_HOST_RANKS = EnumSet.of(Rank.LEGENDARY, Rank.TRAINEE, Rank.MODERATOR,
             Rank.SR_MODERATOR, Rank.ADMIN, Rank.DEVELOPER, Rank.SUPERVISOR, Rank.OWNER, Rank.QA);
 
     /** Whether this player may run custom (private) games as party leader. */
-    public boolean canHostPrivateGames(Player player) {
+    public boolean canHostCustomGames(Player player) {
         if (player == null) return false;
         if (player.isOp() || player.hasPermission("scb.privategames")) return true;
-        return PRIVATE_GAME_HOST_RANKS.contains(getRankManager().getRank(player));
+        return CUSTOM_GAME_HOST_RANKS.contains(getRankManager().getRank(player));
     }
 
     /** Creative for LEGENDARY players (so they can build in the lobby), adventure for everyone else. */
@@ -767,7 +772,7 @@ public class Core extends JavaPlugin implements Listener {
      * This function registers & enables all commands from Commands.java
      */
     private void enableCommands() {
-        String[] commandTypes = { "maps", "join", "party", "partychat", "friends", "token", "cosmetics", "fishing", "server", "fly", "leave", "players",
+        String[] commandTypes = { "maps", "join", "party", "partychat", "friends", "token", "cosmetics", "fishing", "server", "fly", "leave", "joincustomgame", "players",
                 "class", "socials", "spectate", "startgame", "frenzy", "gamestats", "setlives", "purchases", "kit",
                 "items", "color", "sound", "soundnms", "heal", "forceclass", "lactate", "sh", "shr" };
 
@@ -782,6 +787,8 @@ public class Core extends JavaPlugin implements Listener {
 
         getCommand("treatsadmin").setExecutor(new TreatsAdminCommand(halloweenHunt));
         getCommand("setimportantarea").setExecutor(lobbyBuildManager);
+        getCommand("scbsetup").setExecutor(mapWorldManager);
+        getCommand("scbsetup").setTabCompleter(mapWorldManager);
 
         PluginCommand battlePassCommand = getCommand("battlepass");
         if (battlePassCommand != null)
@@ -822,6 +829,7 @@ public class Core extends JavaPlugin implements Listener {
         Bukkit.getServer().getPluginManager().registerEvents(this, this);
         Bukkit.getServer().getPluginManager().registerEvents(lobbyBuildManager, this);
         Bukkit.getServer().getPluginManager().registerEvents(maxHealthGuard, this);
+        Bukkit.getServer().getPluginManager().registerEvents(mapWorldManager, this);
         Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         Bukkit.getMessenger().registerIncomingPluginChannel(this, "BungeeCord", gameManager);
     }
@@ -832,6 +840,12 @@ public class Core extends JavaPlugin implements Listener {
         msg = new ArrayList<>();
         listener = new PlayerListener(this);
         gameManager = new GameManager(this);
+        mapWorldManager = new anthony.SuperCraftBrawl.Game.map.MapWorldManager(this);
+        try {
+            mapWorldManager.deleteUnloadedCopies(); // map copies left behind if the server crashed
+        } catch (Exception e) {
+            getLogger().warning("Couldn't clean up old map copies: " + e);
+        }
         mysteryChestManager = new MysteryChestManager(this);
         gadgetListener = new GadgetListener(this);
         scoreboardManager = new ScoreboardManager(this);
@@ -842,7 +856,6 @@ public class Core extends JavaPlugin implements Listener {
         djManager = new DoubleJumpManager(this);
         databaseManager = new DatabaseManager(this);
         databaseManager.ensureLastDailyRewardColumn();
-        databaseManager.ensureCustomGamesColumn();
         packetMain = new PacketMain(this);
         dataManager = new PlayerDataManager(this);
         gameDataManager = new GameDataManager(this);
@@ -913,7 +926,7 @@ public class Core extends JavaPlugin implements Listener {
 
     private void spawnSelfStatsNPC() {
         World w = lobbyWorld;
-        Location loc = new Location(w, 180.5, 105, 650.5, 0f, 1f); // where the NPC stands
+        Location loc = new Location(w, 182.5, 105, 675.5, 0f, 1f); // where the NPC stands
 
         NPC selfNPC = new NPC(
                 this,
@@ -2284,7 +2297,7 @@ public class Core extends JavaPlugin implements Listener {
         ByteArrayOutputStream b = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(b);
 
-        for (GameInstance instance : gameManager.gameMap.values()) {
+        for (GameInstance instance : gameManager.games) {
             for (Map.Entry<Player, WinEffects> entry : instance.effects.entrySet())
                 entry.getValue().removeWinEffects();
         }
@@ -2318,6 +2331,13 @@ public class Core extends JavaPlugin implements Listener {
         getLogger().info("(!) You have disabled Minezone-Core");
         for (World world : Bukkit.getWorlds()) {
             Bukkit.unloadWorld(world, false);
+        }
+        if (mapWorldManager != null) {
+            try {
+                mapWorldManager.deleteUnloadedCopies(); // every game's map copy
+            } catch (Exception e) {
+                getLogger().warning("Couldn't delete map copies: " + e);
+            }
         }
 
         Bukkit.getScheduler().cancelTasks(this);

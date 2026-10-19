@@ -69,7 +69,8 @@ public class TokenClassesGUI implements InventoryProvider {
 							e -> {
 
 								if (data.playerClasses.get(type.getID()) != null
-										&& data.playerClasses.get(type.getID()).purchased) {
+										&& data.playerClasses.get(type.getID()).purchased
+										|| main.getGameManager().ignoresClassRequirements(player, type)) {
 
 									if (e.isShiftClick()) {
 										if (data != null) {
@@ -119,7 +120,10 @@ public class TokenClassesGUI implements InventoryProvider {
 		List<String> desc = type.buildDescription();
 		desc.add("");
 		if (data != null) {
-			if (data.isPurchased(type)) {
+			if (main.getGameManager().ignoresClassRequirements(player, type)) {
+				desc.add(main.color("&e&lUnlocked"));
+				desc.add(main.color("&eVaulted class - free to play"));
+			} else if (data.isPurchased(type)) {
 				desc.add(main.color("&e&lPurchased"));
 				desc.add(main.color("&e" + type.getTokenCost() + " Tokens"));
 			} else {

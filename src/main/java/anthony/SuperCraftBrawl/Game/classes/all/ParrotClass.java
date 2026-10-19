@@ -206,7 +206,7 @@ public class ParrotClass extends BaseClass {
             }
         };
 
-        danceRunnable.runTaskTimer(instance.getGameManager().getMain(), 0, 1);
+        instance.trackClassTask(danceRunnable.runTaskTimer(instance.getGameManager().getMain(), 0, 1));
     }
 
     private void setupJukebox() {

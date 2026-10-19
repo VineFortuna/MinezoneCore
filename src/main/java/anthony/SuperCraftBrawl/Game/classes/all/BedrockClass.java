@@ -188,7 +188,7 @@ public class BedrockClass extends BaseClass {
 										duration--;
 									}
 								};
-								bedrock.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+								instance.trackClassTask(bedrock.runTaskTimer(instance.getGameManager().getMain(), 0, 20));
 							}
 						}
 					}
@@ -257,10 +257,13 @@ public class BedrockClass extends BaseClass {
 						blockState.update(true);
 						count++;
 					}
+					blockList.clear();
+					blockList2.clear();
 					lava = null;
+					super.cancel(); // without this the task never actually stops
 				}
 			};
-			lava.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+			instance.trackClassTask(lava.runTaskTimer(instance.getGameManager().getMain(), 0, 20));
 		}
 	}
 

@@ -162,6 +162,13 @@ commands:
    battlepass:
       description: Open the Battle Pass
       aliases: [bp, pass]
+   joincustomgame:
+      description: Join a custom game (used by the Click here to Join messages)
+      usage: /joincustomgame <host>
+   scbsetup:
+      description: Edit the original map worlds (games play on copies of them)
+      usage: /scbsetup <tp <map>|save|leave>
+      aliases: [ss]
    setimportantarea:
       description: Protect an area of the lobby from Legendary building
       usage: /setimportantarea <X> <Y> <Z> (blocks out from you in each direction)

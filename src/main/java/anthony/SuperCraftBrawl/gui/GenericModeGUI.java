@@ -52,6 +52,8 @@ public class GenericModeGUI implements InventoryProvider {
 	public int totalRows;
 	public int totalColumns;
 
+	private Consumer<Maps> onMapPicked; // set when the map is being picked for something else, e.g. a custom game
+
 	public GenericModeGUI(Core main, SmartInventory parent, GameType gamemode, String title, int totalRows, int totalColumns) {
 		this.gamemode = gamemode;
 		this.totalRows = totalRows;
@@ -66,6 +68,13 @@ public class GenericModeGUI implements InventoryProvider {
 				.parent(parent)
 				.build();
 		this.main = main;
+	}
+
+	/** The same map list, but picking a map runs onMapPicked instead of joining it. */
+	public GenericModeGUI(Core main, SmartInventory parent, GameType gamemode, String title, int totalRows, int totalColumns,
+						  Consumer<Maps> onMapPicked) {
+		this(main, parent, gamemode, title, totalRows, totalColumns);
+		this.onMapPicked = onMapPicked;
 	}
 
 	@Override
@@ -116,6 +125,11 @@ public class GenericModeGUI implements InventoryProvider {
 		// Sorter
 		setItem(contents, totalRows - 1, 5, getSorterItem(), e -> handleSortClick(e, player));
 
+		// Classic / Duels maps when picking a map for something else (that menu has no Go Back button)
+		if (onMapPicked != null) {
+			setItem(contents, totalRows - 1, totalColumns - 1, getModeItem(), e -> handleModeClick(player));
+		}
+
 		// Setting "Go Back" Button
 		if (inv.getParent().isPresent()) {
 			contents.set(totalRows - 1, totalColumns - 1, ClickableItem.of(ItemHelper.getGoBackItem(), e -> {
@@ -151,7 +165,7 @@ public class GenericModeGUI implements InventoryProvider {
 	private ItemStack getRandomizerItem() {
 		String nome = "&6Randomizer";
 		String leftCLick = "&eLeft Click to randomize";
-		String rightClick = "&eRight Click to join";
+		String rightClick = onMapPicked != null ? "&eRight Click to pick it" : "&eRight Click to join";
 
 		ItemStack item = ItemHelper.createSkullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM0ZTA2M2NhZmI0NjdhNWM4ZGU0M2VjNzg2MTkzOTlmMzY5ZjRhNTI0MzRkYTgwMTdhOTgzY2RkOTI1MTZhMCJ9fX0=");
 		String[] lore = {leftCLick, "", rightClick};
@@ -207,6 +221,29 @@ public class GenericModeGUI implements InventoryProvider {
 		return item;
 	}
 
+	private ItemStack getModeItem() {
+		GameType next = gamemode == GameType.CLASSIC ? GameType.DUEL : GameType.CLASSIC;
+		// Same icons as the game selector: SethBling's head for Classic, an iron sword for Duels
+		ItemStack item = gamemode == GameType.CLASSIC
+				? ItemHelper.createSkullTexture("e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I4NmI4MjE1YjM2MTBlYWE2NDhjMjNjNGEyMGFkNjc1OWYyNTFlZjg1NDc2ODI5ZGQ2ZDE4NDI4MjNiMTEzIn19fQ==")
+				: ItemHelper.setHideFlags(new ItemStack(Material.IRON_SWORD), true);
+
+		return ItemHelper.setDetails(
+				item,
+				"&6Mode: &a" + gamemode.getName(),
+				"&7Show Classic or Duels maps",
+				"",
+				"&7Next: &a" + next.getName(),
+				"&eClick to cycle"
+		);
+	}
+
+	private void handleModeClick(Player player) {
+		gamemode = gamemode == GameType.CLASSIC ? GameType.DUEL : GameType.CLASSIC;
+		randomMap = null;
+		updateMaps(player);
+	}
+
 	private ItemStack getSorterItem() {
 		String currentSorterString = currentSorter.toString();
 		String nexSorterString = nextSorter.toString();
@@ -253,6 +290,12 @@ public class GenericModeGUI implements InventoryProvider {
 		int maxNumberOfPlayers = (game != null) ? game.getMaxPlayerCount() : map.getGamemode().getMaxPlayers();
 		String playersInfo = "&rPlayers: &e" + numberOfPlayers + "/" + maxNumberOfPlayers;
 		String clickMessage = (game == null || game.state == GameState.WAITING) ? "&r&nClick to join!" : "&r&nClick to spectate!";
+
+		// Picking a map for something else (e.g. a custom game): just the map, nothing about games on it
+		if (onMapPicked != null) {
+			ItemHelper.setGlowing(displayItem, false);
+			return ItemHelper.setDetails(displayItem, mapName, mapGameplay, mapSize, "", "&r&nClick to pick this map!");
+		}
 
 		if (game == null) {
 			ItemHelper.setGlowing(displayItem, false);
@@ -362,6 +405,13 @@ public class GenericModeGUI implements InventoryProvider {
 	}
 
 	private void handleMapClick(Player player, Maps map, GameInstance game) {
+		if (onMapPicked != null) {
+			SoundManager.playClickSound(player);
+			inv.close(player);
+			onMapPicked.accept(map);
+			return;
+		}
+
 		GameState state = (game != null) ? game.state : null;
 
 		if (state == GameState.STARTED) {
@@ -375,7 +425,8 @@ public class GenericModeGUI implements InventoryProvider {
 		List<Maps> availableMaps = maps.stream()
 				.filter(map -> {
 					GameInstance game = main.getGameManager().getInstanceOfMap(map);
-					return !map.equals(previousRandomMap) && (game == null || !(game.state.equals(GameState.STARTED) || game.state.equals(GameState.ENDED)));
+					return !map.equals(previousRandomMap) && (onMapPicked != null || game == null
+							|| !(game.state.equals(GameState.STARTED) || game.state.equals(GameState.ENDED)));
 				})
 				.collect(Collectors.toList());
 
