@@ -31,6 +31,8 @@ public class FWShopItem {
 	private int displayAmount; // 0 = use item's actual amount
 
 	private String description = "";
+	/** Extra lines between Cost and Click to purchase, e.g. an item's range or size. */
+	private final List<String> stats = new ArrayList<>();
 
 	public FWShopItem(String name, int row, int col, ItemStack giveItem, FWResourceType costType, int cost) {
 		this(name, row, col, new ItemStack[]{giveItem}, false, costType, cost);
@@ -101,6 +103,12 @@ public class FWShopItem {
 		return this;
 	}
 
+	/** Adds a line under Cost (color codes allowed), e.g. "&rRange: &a10 blocks". */
+	public FWShopItem withStat(String stat) {
+		this.stats.add(stat);
+		return this;
+	}
+
 	/** Override the stack-size shown in the shop GUI without changing what the player actually receives. */
 	public FWShopItem withDisplayAmount(int n) {
 		this.displayAmount = n;
@@ -120,6 +128,7 @@ public class FWShopItem {
 		if (!description.isEmpty()) lore.add(main.color("&7" + description));
 		lore.add("");
 		lore.add(main.color("&rCost: " + costType.getColorCode() + cost + " " + resourceName));
+		for (String stat : stats) lore.add(main.color(stat));
 		lore.add(main.color(affordable ? "&eClick to purchase" : "&cNot enough resources!"));
 		lore.add("");
 		if (quickBuyHint == QuickBuyHint.REMOVE) {

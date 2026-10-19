@@ -1624,19 +1624,26 @@ public class Commands implements CommandExecutor, TabCompleter {
 		main.getGameManager().JoinMap(player, map);
 	}
 
-	/** /join flagwars [solo|duo] - folded in from the old standalone /fw join, same accepted tokens and default. */
+	/** /join flagwars [solo|duo] [map], in either order - solo and any map by default. */
 	private void joinFlagWars(String[] args, Player player) {
 		FWGameMode mode = FWGameMode.SOLO;
-		if (args.length >= 2) {
-			if (args[1].equalsIgnoreCase("duo") || args[1].equalsIgnoreCase("duos")) {
+		anthony.flagwars.map.FWMapConfig map = null;
+		for (int i = 1; i < args.length; i++) {
+			if (args[i].equalsIgnoreCase("duo") || args[i].equalsIgnoreCase("duos")) {
 				mode = FWGameMode.DUO;
-			} else if (!args[1].equalsIgnoreCase("solo") && !args[1].equalsIgnoreCase("solos")) {
-				player.sendMessage(main.color("&c&l(!) &rTry: &e/join flagwars <solo|duo>"));
-				return;
+			} else if (args[i].equalsIgnoreCase("solo") || args[i].equalsIgnoreCase("solos")) {
+				mode = FWGameMode.SOLO;
+			} else {
+				map = main.getFwGameManager().getPlayableMap(args[i]);
+				if (map == null) {
+					player.sendMessage(main.color("&c&l(!) &rThere's no Flag Wars map called &e" + args[i]
+							+ "&r. Try: &e/join flagwars <map> [solo|duo]"));
+					return;
+				}
 			}
 		}
 
-		main.getFwGameManager().joinGame(player, mode);
+		main.getFwGameManager().joinGame(player, mode, map);
 	}
 
 	private void spectateCommand(String[] args, Player player) {
@@ -1932,9 +1939,13 @@ public class Commands implements CommandExecutor, TabCompleter {
                 return StringUtil.copyPartialMatches(args[0], mapNames, new ArrayList<>());
             }
 
-            if (cmd.getName().equalsIgnoreCase("join") && args.length == 2
+            if (cmd.getName().equalsIgnoreCase("join") && (args.length == 2 || args.length == 3)
                     && (args[0].equalsIgnoreCase("flagwars") || args[0].equalsIgnoreCase("fw"))) {
-                return StringUtil.copyPartialMatches(args[1], Arrays.asList("solo", "duo"), new ArrayList<>());
+                List<String> options = new ArrayList<>(Arrays.asList("solo", "duo"));
+                for (anthony.flagwars.map.FWMapConfig map : main.getFwGameManager().getPlayableMaps()) {
+                    options.add(map.getWorldName());
+                }
+                return StringUtil.copyPartialMatches(args[args.length - 1], options, new ArrayList<>());
             }
         } else if (cmd.getName().equalsIgnoreCase("class")
                 || cmd.getName().equalsIgnoreCase("purchases")

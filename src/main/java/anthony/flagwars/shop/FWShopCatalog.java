@@ -89,32 +89,35 @@ public final class FWShopCatalog {
 	}
 
 	/**
-	 * Pickaxe tier is progressive like Hypixel Bedwars: Stone (15 iron) → Iron (3 gold) →
+	 * Pickaxe tier is progressive like Hypixel Bedwars: Wood (10 iron) → Stone (15 iron) → Iron (3 gold) →
 	 * Diamond (6 gold). The shop only shows the next tier to buy based on what the player currently
 	 * holds; at diamond (max) the slot is empty. All tiers have Efficiency I.
 	 *
 	 * Axe tier is the same idea, four tiers deep: Wood (10 iron, Efficiency I) → Stone (10 iron,
-	 * Efficiency I) → Iron (3 gold, Efficiency II) → Diamond (6 gold, Efficiency III). Unlike the
-	 * pickaxe, Wood is a real tracked/purchasable tier here rather than the untracked default.
+	 * Efficiency I) → Iron (3 gold, Efficiency II) → Diamond (6 gold, Efficiency III).
 	 */
 	public static List<FWShopItem> tools(Player player) {
 		List<FWShopItem> items = new ArrayList<>();
 
 		int tier = pickaxeTierOf(player);
 		if (tier == 0) {
+			items.add(new FWShopItem("Wood Pickaxe", 2, 1,
+					ItemHelper.addEnchant(new ItemStack(Material.WOOD_PICKAXE), Enchantment.DIG_SPEED, 1),
+					FWResourceType.IRON, 10).withDescription("Mine blocks from enemy bases"));
+		} else if (tier == 1) {
 			items.add(new FWShopItem("Stone Pickaxe", 2, 1,
 					ItemHelper.addEnchant(new ItemStack(Material.STONE_PICKAXE), Enchantment.DIG_SPEED, 1),
-					FWResourceType.IRON, 15).withDescription("Mine blocks from enemy bases"));
-		} else if (tier == 1) {
+					FWResourceType.IRON, 15).withDescription("Faster mining speed"));
+		} else if (tier == 2) {
 			items.add(new FWShopItem("Iron Pickaxe", 2, 2,
 					ItemHelper.addEnchant(new ItemStack(Material.IRON_PICKAXE), Enchantment.DIG_SPEED, 1),
-					FWResourceType.GOLD, 3).withDescription("Faster mining speed"));
-		} else if (tier == 2) {
+					FWResourceType.GOLD, 3).withDescription("Even faster mining speed"));
+		} else if (tier == 3) {
 			items.add(new FWShopItem("Diamond Pickaxe", 2, 3,
 					ItemHelper.addEnchant(new ItemStack(Material.DIAMOND_PICKAXE), Enchantment.DIG_SPEED, 1),
 					FWResourceType.GOLD, 6).withDescription("The fastest pickaxe available"));
 		}
-		// tier 3 = diamond already owned, nothing more to show
+		// tier 4 = diamond already owned, nothing more to show
 
 		int axeTier = axeTierOf(player);
 		if (axeTier == 0) {
@@ -140,13 +143,14 @@ public final class FWShopCatalog {
 		return items;
 	}
 
-	/** 0=none, 1=stone, 2=iron, 3=diamond (wood pickaxes not counted — they aren't part of the shop progression). */
+	/** 0=none, 1=wood, 2=stone, 3=iron, 4=diamond. */
 	private static int pickaxeTierOf(Player player) {
 		for (ItemStack item : player.getInventory().getContents()) {
 			if (item == null) continue;
-			if (item.getType() == Material.DIAMOND_PICKAXE) return 3;
-			if (item.getType() == Material.IRON_PICKAXE) return 2;
-			if (item.getType() == Material.STONE_PICKAXE) return 1;
+			if (item.getType() == Material.DIAMOND_PICKAXE) return 4;
+			if (item.getType() == Material.IRON_PICKAXE) return 3;
+			if (item.getType() == Material.STONE_PICKAXE) return 2;
+			if (item.getType() == Material.WOOD_PICKAXE) return 1;
 		}
 		return 0;
 	}
@@ -202,17 +206,20 @@ public final class FWShopCatalog {
 				new FWShopItem("Ender Pearl", 2, 5, new ItemStack(Material.ENDER_PEARL),
 						FWResourceType.EMERALD, 4).withDescription("Teleport to where it lands"),
 				new FWShopItem(GrapplingHookItem.NAME, 2, 6, GrapplingHookItem.create(),
-						FWResourceType.GOLD, 12).withDisplayAmount(1).withDescription("Swing and grapple across the map"),
+						FWResourceType.GOLD, 12).withDescription("Swing and grapple across the map"),
 				new FWShopItem(ThrowableTntItem.NAME, 2, 7, ThrowableTntItem.create(),
 						FWResourceType.GOLD, 6).withDescription("Toss an explosive at enemies"),
 				new FWShopItem(BridgeEggItem.NAME, 3, 3, BridgeEggItem.create(),
-						FWResourceType.EMERALD, 1).withDescription("Instantly bridge a gap with your team's colored wool"),
+						FWResourceType.EMERALD, 1).withDescription("Throw it to bridge a gap with your team's colored wool")
+						.withStat("&rBridge: &bUp to 20 blocks, 3 blocks wide"),
 				new FWShopItem(TeleportBowItem.NAME, 3, 4, TeleportBowItem.create(),
 						FWResourceType.EMERALD, 4).withDescription("Teleport to where the arrow lands"),
 				new FWShopItem(FreezeRayItem.NAME, 3, 5, FreezeRayItem.create(),
-						FWResourceType.IRON, 30).withDescription("Freeze enemies in place"),
+						FWResourceType.IRON, 30).withDescription("Freeze enemies in place")
+						.withStat("&rRange: &a10 blocks"),
 				new FWShopItem(UnstableBridgeItem.NAME, 3, 6, UnstableBridgeItem.create(),
-						FWResourceType.GOLD, 6).withDescription("Gradually build a 3x10 bridge that collapses 5s after it finishes")
+						FWResourceType.GOLD, 6).withDescription("Gradually build a bridge that collapses 5s after it finishes")
+						.withStat("&rSize: &e3x10 blocks")
 		);
 	}
 

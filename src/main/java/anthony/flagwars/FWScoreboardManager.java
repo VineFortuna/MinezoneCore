@@ -6,6 +6,7 @@ import fr.mrmicky.fastboard.FastBoard;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
+import org.bukkit.scoreboard.NameTagVisibility;
 import org.bukkit.scoreboard.Team;
 
 import java.util.ArrayList;
@@ -180,6 +181,22 @@ public class FWScoreboardManager {
 
 		sbTeam.setPrefix(nameTagPrefix(team));
 		if (!sbTeam.hasEntry(player.getName())) sbTeam.addEntry(player.getName());
+	}
+
+	private static final String HIDDEN_NAME_TAG_TEAM = "fw_hidden";
+
+	/**
+	 * Invisibility Potion: no name tag above their head. 1.8 clients still show an invisible player's tag when
+	 * their team's tags are always visible, so they're moved to a team that never shows it until applyNameTag
+	 * puts them back.
+	 */
+	public void hideNameTag(Player player) {
+		Team hidden = nameTagScoreboard().getTeam(HIDDEN_NAME_TAG_TEAM);
+		if (hidden == null) {
+			hidden = nameTagScoreboard().registerNewTeam(HIDDEN_NAME_TAG_TEAM);
+			hidden.setNameTagVisibility(NameTagVisibility.NEVER);
+		}
+		if (!hidden.hasEntry(player.getName())) hidden.addEntry(player.getName());
 	}
 
 	/** Spectators don't get a team prefix of their own, but still need the shared scoreboard to see everyone else's. */

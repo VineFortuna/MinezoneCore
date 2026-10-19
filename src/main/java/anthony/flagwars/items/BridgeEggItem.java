@@ -20,8 +20,8 @@ public final class BridgeEggItem {
 
 	public static ItemStack create() {
 		return ItemHelper.setDetails(new ItemStack(Material.EGG), "&b" + NAME,
-				"&7Right-click to instantly build a bridge",
-				"&7of your team's color, straight ahead of you",
+				"&7Right-click to throw an egg that builds",
+				"&7a bridge of your team's color behind it",
 				"",
 				"&rBridge: &bUp to 20 blocks, 3 blocks wide");
 	}

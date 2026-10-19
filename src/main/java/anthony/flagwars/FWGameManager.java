@@ -293,6 +293,22 @@ public class FWGameManager {
 	 * (a message was already sent to them either way).
 	 */
 	public boolean joinGame(Player player, FWGameMode mode) {
+		return joinGame(player, mode, null);
+	}
+
+	/** A playable map by name (case-insensitive), or null if there's no such fully set-up map. */
+	public FWMapConfig getPlayableMap(String name) {
+		for (FWMapConfig config : getPlayableMaps()) {
+			if (config.getWorldName().equalsIgnoreCase(name)) return config;
+		}
+		return null;
+	}
+
+	/**
+	 * Same, but only on the given map (/join fw <map>): its open match of this mode, or a new one on a fresh copy
+	 * of it. A null map means any map.
+	 */
+	public boolean joinGame(Player player, FWGameMode mode, FWMapConfig onlyMap) {
 		if (getInstanceOfPlayer(player) != null || getInstanceOfSpectator(player) != null) {
 			player.sendMessage(main.color("&c&l(!) &rYou are already in Flag Wars!"));
 			return false;
@@ -305,6 +321,7 @@ public class FWGameManager {
 
 		for (FWGameInstance instance : activeInstances) {
 			if (instance.getMode() == mode
+					&& (onlyMap == null || instance.getMapConfig().getWorldName().equals(onlyMap.getWorldName()))
 					&& (instance.getState() == FWGameState.WAITING || instance.getState() == FWGameState.STARTING)
 					&& instance.hasSpace()) {
 				return instance.addPlayer(player);
@@ -320,7 +337,8 @@ public class FWGameManager {
 			return false;
 		}
 
-		FWMapConfig map = playableMaps.get(ThreadLocalRandom.current().nextInt(playableMaps.size()));
+		FWMapConfig map = onlyMap != null ? onlyMap
+				: playableMaps.get(ThreadLocalRandom.current().nextInt(playableMaps.size()));
 		World world = provisionWorld(map);
 		if (world == null) {
 			player.sendMessage(main.color(

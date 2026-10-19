@@ -24,6 +24,7 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Egg;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Fireball;
@@ -64,6 +65,7 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.potion.PotionEffect;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
@@ -96,9 +98,11 @@ public class FWPlayerListener implements Listener {
 	private final FWGameManager fwGameManager;
 	private final Map<UUID, CooldownNatowski> teleportBowCooldowns = new HashMap<>();
 	private final List<CooldownItem> cooldownItems;
+	private final FWInvisibilityManager invisibility;
 
 	public FWPlayerListener(FWGameManager fwGameManager) {
 		this.fwGameManager = fwGameManager;
+		this.invisibility = new FWInvisibilityManager(fwGameManager);
 		this.cooldownItems = Arrays.asList(
 				new CooldownItem(TeleportBowItem.NAME, TeleportBowItem::matches, teleportBowCooldowns)
 		);
@@ -426,6 +430,9 @@ public class FWPlayerListener implements Listener {
 
 		applyTeleportBow(event.getDamager(), player.getLocation());
 
+		// Getting hit by an enemy ends the Invisibility Potion and shows their armor again
+		if (!event.isCancelled() && attacker != null && attacker != player) invisibility.reveal(player);
+
 		if (!event.isCancelled() && event.getFinalDamage() >= player.getHealth() - 0.2) {
 			event.setCancelled(true);
 			// Self-damage (e.g. your own TNT) shouldn't credit you a kill against yourself -
@@ -692,6 +699,8 @@ public class FWPlayerListener implements Listener {
 		ItemStack item = event.getItem();
 
 		if (ThrowableTntItem.matches(item)) {
+			// Aimed at a block, vanilla would also place it (and onBlockPlace would prime that one too)
+			event.setCancelled(true);
 			throwTnt(player);
 		} else if (item != null && item.getType() == Material.FIREBALL) {
 			throwFireCharge(player, item);
@@ -879,6 +888,12 @@ public class FWPlayerListener implements Listener {
 	 * to) a block, yank the player toward it. Far more reliable than a manual
 	 * line-of-sight raycast since it rides on vanilla's own hook physics.
 	 */
+	/** The hook's durability bar only shows its uses (see GrapplingHookItem), so vanilla never damages it. */
+	@EventHandler
+	public void onGrapplingHookDamage(org.bukkit.event.player.PlayerItemDamageEvent event) {
+		if (GrapplingHookItem.matches(event.getItem())) event.setCancelled(true);
+	}
+
 	@EventHandler
 	public void onFish(PlayerFishEvent event) {
 		Player player = event.getPlayer();
@@ -904,12 +919,18 @@ public class FWPlayerListener implements Listener {
 		}
 		if (!grapple) return;
 
-		// Consume one use: rebuild the item so lore and durability bar both update
-		int usesLeft = player.getItemInHand().getAmount() - 1;
-		if (usesLeft == 0) {
+		/*
+		 * Consume one use off the hook's counter. The held item is changed in place, not replaced: right after
+		 * this event vanilla puts the rod it started with back in the hand if that rod changed, which used to
+		 * undo a use. On the last use it's taken away (the old rod is left as it was, so vanilla doesn't put it
+		 * back). Vanilla's own rod durability damage is cancelled in onGrapplingHookDamage.
+		 */
+		ItemStack rod = player.getItemInHand();
+		int usesLeft = GrapplingHookItem.getUses(rod) - 1;
+		if (usesLeft <= 0) {
 			player.setItemInHand(null);
 		} else {
-			player.setItemInHand(GrapplingHookItem.create(usesLeft));
+			GrapplingHookItem.setUses(rod, usesLeft);
 		}
 
 		Vector toHook = hook.getLocation().toVector().subtract(player.getLocation().toVector()).normalize();
@@ -919,9 +940,8 @@ public class FWPlayerListener implements Listener {
 	}
 
 	/**
-	 * Real Hypixel Bridge Egg: no waiting for a thrown egg to actually fly and land - the whole
-	 * bridge appears immediately, in the exact direction the player is looking (see
-	 * buildBridgeInLookDirection). No egg projectile is even launched.
+	 * Throws an egg that builds the bridge behind it as it flies, in the exact direction the player is
+	 * looking (see buildBridgeInLookDirection).
 	 */
 	private void launchBridgeEgg(Player player, FWGameInstance instance) {
 		buildBridgeInLookDirection(player, instance);
@@ -937,84 +957,109 @@ public class FWPlayerListener implements Listener {
 	}
 
 	/**
-	 * Builds a flat 3-wide line of the thrower's team-colored Wool from their feet out to wherever
-	 * they're looking - raytraced to the first solid block in the way, or BRIDGE_EGG_MAX_LENGTH (its
-	 * max range) if nothing's in range. Looking basically straight up/down naturally builds nothing
-	 * at all, since totalDist bails out below before any blocks get placed (the raytrace lands
-	 * almost directly below/above the thrower, leaving ~0 horizontal distance to bridge).
-	 * Solid blocks (map terrain and player-placed alike) are never replaced.
+	 * Throws a real egg (it flies in a normal arc, like any thrown egg) that lays a 3-wide row of the thrower's
+	 * team-colored Wool BRIDGE_EGG_DROP blocks under it as it goes, so the bridge follows its path. The wool is only
+	 * ever placed under where the egg has already been, so it can't fly into it. It stops (and the egg is removed)
+	 * once it's BRIDGE_EGG_MAX_LENGTH blocks away from the thrower, when the egg hits something, or right before the
+	 * bridge would reach another player, so nobody gets walled in. Solid blocks are never replaced.
 	 */
-	@SuppressWarnings("deprecation")
 	private void buildBridgeInLookDirection(Player shooter, FWGameInstance instance) {
 		FWTeam team = instance.findTeamOf(shooter);
 		if (team == null) return;
 
-		Location eye = shooter.getEyeLocation();
-		Vector dir = eye.getDirection();
-
-		Location impact = eye.clone().add(dir.clone().multiply(BRIDGE_EGG_MAX_LENGTH));
-		BlockIterator iter = new BlockIterator(eye, 0, BRIDGE_EGG_MAX_LENGTH);
-		while (iter.hasNext()) {
-			Block hit = iter.next();
-			if (hit.getType().isSolid()) {
-				impact = hit.getLocation().add(0.5, 0.5, 0.5);
-				break;
-			}
-		}
-
-		Location shooterFeet = shooter.getLocation();
-
-		// XZ direction from thrower toward impact
-		double dx = impact.getX() - shooterFeet.getX();
-		double dz = impact.getZ() - shooterFeet.getZ();
-		double totalDist = Math.sqrt(dx * dx + dz * dz);
-		if (totalDist < 0.01) return;
-
-		double bridgeDist = Math.min(totalDist, BRIDGE_EGG_MAX_LENGTH);
-		dx /= totalDist;
-		dz /= totalDist;
-
-		// Perpendicular vector for the 3-wide bridge
-		double px = -dz;
-		double pz = dx;
-
 		org.bukkit.World world = shooter.getWorld();
-
-		// Interpolate Y from the thrower's feet to the impact point, proportionally
-		// capped if bridgeDist < totalDist so the slope matches the actual look angle
-		double startY = shooterFeet.getY();
-		double endY   = startY + (impact.getY() - startY) * (bridgeDist / totalDist);
+		Egg egg = shooter.launchProjectile(Egg.class);
+		egg.setVelocity(egg.getVelocity().multiply(BRIDGE_EGG_SPEED));
+		egg.setMetadata(BRIDGE_EGG_METADATA, new FixedMetadataValue(fwGameManager.getMain(), true));
 
 		byte woolData = team.getColor().getWoolData();
 		BlockTexture woolTex = new BlockTexture(Material.WOOL, woolData);
 		// Track placed XZ positions so the 0.5 sub-step sampling doesn't double-place
 		Set<Long> visited = new HashSet<>();
+		double originX = shooter.getLocation().getX();
+		double originZ = shooter.getLocation().getZ();
 
-		// Step at 0.5 to guarantee no grid cell is skipped on any diagonal angle
-		for (double t = 1.0; t <= bridgeDist; t += 0.5) {
-			double cx   = shooterFeet.getX() + dx * t;
-			double cz   = shooterFeet.getZ() + dz * t;
-			int    blockY = (int) Math.floor(startY + (endY - startY) * (t / bridgeDist));
+		new BukkitRunnable() {
+			Location last = egg.getLocation();
+			int ticks = 0;
 
-			for (int w = -1; w <= 1; w++) {
-				int bx = (int) Math.floor(cx + px * w);
-				int bz = (int) Math.floor(cz + pz * w);
-
-				long key = ((long) bx << 32) | (bz & 0xFFFFFFFFL);
-				if (!visited.add(key)) continue;
-
-				Block block = world.getBlockAt(bx, blockY, bz);
-				if (block.getType().isSolid()) continue;
-				if (instance.getMapConfig().isProtectedFromBuilding(block.getLocation())) continue;
-
-				instance.recordBlockChange(block.getState());
-				block.setTypeIdAndData(Material.WOOL.getId(), woolData, true);
-				instance.markPlaced(block);
-
-				// 3 wool-crack particles per block - visible but won't spike packet counts
-				Location center = block.getLocation().add(0.5, 0.5, 0.5);
-				ParticleEffect.BLOCK_CRACK.display(center, 0.3f, 0.2f, 0.3f, 0f, 3, woolTex);
+			@Override
+			public void run() {
+				if (instance.getState() != FWGameState.IN_PROGRESS || fwGameManager.getInstanceForWorld(world) != instance
+						|| ++ticks > BRIDGE_EGG_MAX_TICKS) {
+					stop();
+					return;
+				}
+				// Where the egg is now (or where it hit something this tick)
+				Location now = egg.getLocation();
+				double hx = now.getX() - last.getX();
+				double hz = now.getZ() - last.getZ();
+				double step = Math.sqrt(hx * hx + hz * hz);
+				if (step > 1.0E-3) {
+					// Perpendicular to the way it's flying, for the 3-wide row
+					double px = -hz / step;
+					double pz = hx / step;
+					// Every 0.5 blocks between where it was and where it is, so no grid cell is skipped
+					int samples = (int) Math.ceil(step / 0.5);
+					for (int i = 1; i <= samples; i++) {
+						double f = (double) i / samples;
+						double x = last.getX() + hx * f;
+						double z = last.getZ() + hz * f;
+						double y = last.getY() + (now.getY() - last.getY()) * f - BRIDGE_EGG_DROP;
+						double fromThrower = Math.sqrt((x - originX) * (x - originX) + (z - originZ) * (z - originZ));
+						if (fromThrower > BRIDGE_EGG_MAX_LENGTH) {
+							stop();
+							return;
+						}
+						if (fromThrower < BRIDGE_EGG_START) continue; // not under the thrower themselves
+						if (playerInBridgePath(instance, shooter, new Location(world, x, y, z))) {
+							stop();
+							return;
+						}
+						placeBridgeStep(instance, world, x, z, (int) Math.floor(y), px, pz, woolData, woolTex, visited);
+					}
+				}
+				last = now;
+				if (!egg.isValid()) stop(); // it hit something
 			}
+
+			private void stop() {
+				egg.remove();
+				cancel();
+			}
+		}.runTaskTimer(fwGameManager.getMain(), 1L, 1L);
+	}
+
+	/** Whether a player in the match (other than the thrower) is where the 3-wide bridge is about to go. */
+	private boolean playerInBridgePath(FWGameInstance instance, Player shooter, Location eggAt) {
+		for (Entity nearby : eggAt.getWorld().getNearbyEntities(eggAt, 1.8, 1.8, 1.8)) {
+			if (nearby instanceof Player && nearby != shooter && instance.hasPlayer((Player) nearby)) return true;
+		}
+		return false;
+	}
+
+	/** Places the bridge's 3-wide row of wool at one point along it. */
+	@SuppressWarnings("deprecation")
+	private void placeBridgeStep(FWGameInstance instance, org.bukkit.World world, double cx, double cz, int blockY,
+								 double px, double pz, byte woolData, BlockTexture woolTex, Set<Long> visited) {
+		for (int w = -1; w <= 1; w++) {
+			int bx = (int) Math.floor(cx + px * w);
+			int bz = (int) Math.floor(cz + pz * w);
+
+			long key = ((long) bx << 32) | (bz & 0xFFFFFFFFL);
+			if (!visited.add(key)) continue;
+
+			Block block = world.getBlockAt(bx, blockY, bz);
+			if (block.getType().isSolid()) continue;
+			if (instance.getMapConfig().isProtectedFromBuilding(block.getLocation())) continue;
+
+			instance.recordBlockChange(block.getState());
+			block.setTypeIdAndData(Material.WOOL.getId(), woolData, true);
+			instance.markPlaced(block);
+
+			// 3 wool-crack particles per block - visible but won't spike packet counts
+			Location center = block.getLocation().add(0.5, 0.5, 0.5);
+			ParticleEffect.BLOCK_CRACK.display(center, 0.3f, 0.2f, 0.3f, 0f, 3, woolTex);
 		}
 	}
 
@@ -1256,6 +1301,21 @@ public class FWPlayerListener implements Listener {
 	}
 
 	private static final int BRIDGE_EGG_MAX_LENGTH = 20;
+	/** The egg's speed compared to a normally thrown egg. */
+	private static final double BRIDGE_EGG_SPEED = 0.7;
+	/** How far under the egg the wool goes (thrown from eye height, that's about the ground the thrower stands on). */
+	private static final double BRIDGE_EGG_DROP = 2.0;
+	/** No wool this close to the thrower, so it isn't placed on them. */
+	private static final double BRIDGE_EGG_START = 1.5;
+	/** Safety net: the egg is removed after this long even if it somehow never lands. */
+	private static final int BRIDGE_EGG_MAX_TICKS = 10 * 20;
+	private static final String BRIDGE_EGG_METADATA = "fw_bridge_egg";
+
+	/** A Bridge Egg that runs into a player never hatches chickens. */
+	@EventHandler
+	public void onBridgeEggHatch(org.bukkit.event.player.PlayerEggThrowEvent event) {
+		if (event.getEgg().hasMetadata(BRIDGE_EGG_METADATA)) event.setHatching(false);
+	}
 
 	private static final String FIRE_CHARGE_METADATA = "fw_fire_charge";
 
@@ -1460,9 +1520,17 @@ public class FWPlayerListener implements Listener {
 	 */
 	@EventHandler
 	public void onPotionSplashShopkeeper(PotionSplashEvent event) {
+		boolean invisibilityPotion = false;
+		for (PotionEffect effect : event.getPotion().getEffects()) {
+			if (effect.getType().equals(PotionEffectType.INVISIBILITY)) invisibilityPotion = true;
+		}
 		for (LivingEntity affected : event.getAffectedEntities()) {
 			if (affected instanceof Villager && fwGameManager.getInstanceForWorld(affected.getWorld()) != null) {
 				event.setIntensity(affected, 0.0);
+			} else if (invisibilityPotion && affected instanceof Player && event.getIntensity(affected) > 0
+					&& fwGameManager.getInstanceOfPlayer((Player) affected) != null) {
+				// Their armor gets hidden too - see FWInvisibilityManager
+				invisibility.track((Player) affected);
 			}
 		}
 	}
@@ -1500,9 +1568,9 @@ public class FWPlayerListener implements Listener {
 	private static final String TNT_OWNER_METADATA = "fw_tnt_owner";
 
 	private static final double TNT_KNOCKBACK_RADIUS     = 4.0;
-	private static final double TNT_KNOCKBACK_HORIZONTAL = 2.5;
-	private static final double TNT_KNOCKBACK_VERTICAL   = 1.25;
-	private static final double TNT_KNOCKBACK_MAX_VERTICAL = 2.0; // keeps side-on blasts from launching you into orbit
+	private static final double TNT_KNOCKBACK_HORIZONTAL = 1.597;
+	private static final double TNT_KNOCKBACK_VERTICAL   = 0.799;
+	private static final double TNT_KNOCKBACK_MAX_VERTICAL = 1.307; // keeps side-on blasts from launching you into orbit
 	private static final double TNT_DAMAGE               = 2.0; // 1 heart
 	private static final long   TNT_NO_FALL_GRACE_MS     = 500;
 

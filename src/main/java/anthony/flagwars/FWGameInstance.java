@@ -609,10 +609,7 @@ public class FWGameInstance {
 	}
 
 	/**
-	 * 0=none, 1=wood, 2=stone, 3=iron, 4=diamond - unlike FWShopCatalog's own pickaxe tier check
-	 * (which deliberately ignores Wood, since it was never a real purchase), this one tracks Wood
-	 * too, because a death downgrade can leave a player holding a plain Wood Pickaxe rather than
-	 * losing the tool outright.
+	 * 0=none, 1=wood, 2=stone, 3=iron, 4=diamond - same ladder FWShopCatalog's own pickaxeTierOf uses.
 	 */
 	private int pickaxeTierOf(Player player) {
 		for (ItemStack item : player.getInventory().getContents()) {
@@ -643,7 +640,7 @@ public class FWGameInstance {
 			case 4: return ItemHelper.addEnchant(new ItemStack(Material.DIAMOND_PICKAXE), Enchantment.DIG_SPEED, 1);
 			case 3: return ItemHelper.addEnchant(new ItemStack(Material.IRON_PICKAXE), Enchantment.DIG_SPEED, 1);
 			case 2: return ItemHelper.addEnchant(new ItemStack(Material.STONE_PICKAXE), Enchantment.DIG_SPEED, 1);
-			case 1: return new ItemStack(Material.WOOD_PICKAXE);
+			case 1: return ItemHelper.addEnchant(new ItemStack(Material.WOOD_PICKAXE), Enchantment.DIG_SPEED, 1);
 			default: return null;
 		}
 	}

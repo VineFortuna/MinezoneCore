@@ -1,5 +1,6 @@
 package anthony.flagwars.shop;
 
+import anthony.flagwars.items.GrapplingHookItem;
 import anthony.SuperCraftBrawl.Core;
 import anthony.util.ItemHelper;
 import anthony.flagwars.FWGameInstance;
@@ -261,6 +262,8 @@ public class FWShopGUI implements InventoryProvider {
 				givePickaxe(player, upgraded);
 			} else if (piece.getType().name().endsWith("_AXE")) {
 				giveAxe(player, upgraded);
+			} else if (GrapplingHookItem.matches(upgraded)) {
+				giveGrapplingHook(player, upgraded);
 			} else {
 				player.getInventory().addItem(upgraded);
 			}
@@ -389,6 +392,17 @@ public class FWShopGUI implements InventoryProvider {
 			}
 		}
 		player.getInventory().setItem(keeperSlot, newSword);
+	}
+
+	/** Buying another Grappling Hook adds its uses to the one they already have, instead of a second hook. */
+	private void giveGrapplingHook(Player player, ItemStack newHook) {
+		for (ItemStack item : player.getInventory().getContents()) {
+			if (GrapplingHookItem.matches(item)) {
+				GrapplingHookItem.addUses(item, GrapplingHookItem.getUses(newHook));
+				return;
+			}
+		}
+		player.getInventory().addItem(newHook);
 	}
 
 	/** Buying a pickaxe tier replaces the previous one in-slot, same held-slot-preferring rule as giveSword. */
