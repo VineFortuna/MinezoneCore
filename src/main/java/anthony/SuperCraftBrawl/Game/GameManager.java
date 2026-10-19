@@ -2013,7 +2013,7 @@ public class GameManager implements Listener, PluginMessageListener {
         game.giveCustomGameHostItems(leader);
         CustomGamesGUI.refreshOpenMenus();
         game.TellAll(main.color("&6&l(!) &rWelcome to " + leader.getName() + "'s &6Custom Game&r! They can change "
-                + "the map, the Game Modifiers (including making it public) and start the countdown."));
+                + "the map, the Game Settings (including making it public) and start the countdown."));
     }
 
     /*
@@ -2063,7 +2063,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
         GameInstance next = moveCustomGame(old, DEFAULT_CUSTOM_GAME_MAP, leader);
         next.TellAll(main.color("&6&l(!) &rBack in the &6Custom Game &rlobby! " + leader.getName()
-                + " can change the map and Game Modifiers and start the next game."));
+                + " can change the map and Game Settings and start the next game."));
         return true;
     }
 
@@ -2086,6 +2086,7 @@ public class GameManager implements Listener, PluginMessageListener {
         next.setCustomGamePublic(old.isCustomGamePublic());
         next.gameType = old.gameType;
         next.getGameSettings().copyModifiersFrom(old.getGameSettings());
+        next.copyKickedPlayersFrom(old);
 
         for (Player p : moving) old.forceRemovePlayer(p);
         removeGame(old); // its world is deleted once everyone has moved over
@@ -2189,12 +2190,12 @@ public class GameManager implements Listener, PluginMessageListener {
         String itemName = item.hasItemMeta() && item.getItemMeta().hasDisplayName()
                 ? ChatColor.stripColor(item.getItemMeta().getDisplayName()) : "";
         if (item.getType() == Material.REDSTONE_COMPARATOR
-                && (itemName.contains("Game Modifiers") || itemName.contains("Game Settings"))) {
+                && itemName.contains("Game Settings")) {
 
             event.setCancelled(true);
 
-            // Game Settings stops the countdown (if it's running) and gives back Game Modifiers + Start Game
-            if (itemName.contains("Game Settings")) {
+            // Once the countdown is running, Game Settings stops it and gives back the Game Settings + Start Game items
+            if (instance.isCustomGameCountdownStarted()) {
                 if (!instance.canEditCustomGame(player)) {
                     player.sendMessage(main.color("&c&l(!) &rOnly the custom game's host and co-host can stop the countdown."));
                     return;

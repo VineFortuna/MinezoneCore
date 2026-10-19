@@ -7,5 +7,6 @@ public enum GameReason {
     ALREADYPLAYING,
     FULL,
     SPECTATOR,
+    KICKED, // kicked from this custom game (they're told why)
     FAIL;
 }

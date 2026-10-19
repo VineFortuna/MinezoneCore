@@ -30,17 +30,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /*
- * Private game modifiers. Toggles flip on any click; cycling settings go back on left click and
+ * Game Settings (a custom game's modifiers). Toggles flip on any click; cycling settings go back on left click and
  * forward on right click (Left Click << | >> Right Click).
  */
 public class GameModifiersGUI implements InventoryProvider {
 
-    private static final int[] DROP_TIMES = {5, 10, 15, 20, 25, 30, 45};
-    private static final String[] DROP_TIME_LABELS = {"5s", "10s", "15s", "20s", "25s", "30s", "45s"};
+    private static final int[] DROP_TIMES = {0, 5, 10, 15, 20, 25, 30, 45}; // 0 = disabled
+    private static final String[] DROP_TIME_LABELS = {"Disabled", "5s", "10s", "15s", "20s", "25s", "30s", "45s"};
     private static final int[] CLASS_SWITCH_TIMES = {0, 15, 30, 45, 60}; // 0 = disabled
     private static final String[] CLASS_SWITCH_LABELS = {"Disabled", "15s", "30s", "45s", "1m"};
-    private static final int[] LIVES = {1, 2, 3, 4, 5, 10};
-    private static final String[] LIVES_LABELS = {"1", "2", "3", "4", "5", "10"};
+    private static final int[] LIVES = {1, 2, 3, 4, 5, 10, 20, 50};
+    private static final String[] LIVES_LABELS = {"1", "2", "3", "4", "5", "10", "20", "50"};
     private static final int[] RESPAWN_TIMES = {0, 1, 2, 3, 4, 5, 10};
     private static final String[] RESPAWN_TIME_LABELS = {"None", "1s", "2s", "3s", "4s", "5s", "10s"};
     private static final int[] SPAWN_PROTECTION_TIMES = {0, 3, 5}; // 0 = disabled
@@ -72,7 +72,7 @@ public class GameModifiersGUI implements InventoryProvider {
                 .id("gameModifiers")
                 .provider(this)
                 .size(5, 9)
-                .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Game Modifiers")
+                .title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + "Game Settings")
                 .build();
     }
 
@@ -138,6 +138,7 @@ public class GameModifiersGUI implements InventoryProvider {
 
         // Last row
         addVisibilityModifier(contents, player);        // 4,3
+        addKickPlayerModifier(contents, player);        // 4,4
         addCoHostModifier(contents, player);            // 4,5
     }
 
@@ -196,7 +197,7 @@ public class GameModifiersGUI implements InventoryProvider {
                 main.color("&fCurrent: " + (coHost != null ? "&a" + coHost.getName() : "&7None")),
                 "",
                 main.color("&7A player who can change the"),
-                main.color("&7Game Modifiers with the host"),
+                main.color("&7Game Settings with the host"),
                 "",
                 main.color(isHost ? "&eClick to choose" : "&cOnly the host can choose the co-host"));
 
@@ -209,6 +210,22 @@ public class GameModifiersGUI implements InventoryProvider {
 
             SoundManager.playClickSound(player);
             new CoHostGUI(main, game, this).inv.open(player);
+        }));
+    }
+
+    private void addKickPlayerModifier(InventoryContents contents, Player player) {
+        ItemStack item = ItemHelper.setDetails(new ItemStack(Material.IRON_DOOR),
+                main.color("&e&lKick Player"),
+                "",
+                main.color("&7Remove a player from this game."),
+                main.color("&7They can't join it again."),
+                "",
+                main.color("&eClick to choose"));
+
+        contents.set(4, 4, ClickableItem.of(item, e -> {
+            if (!canModify(player)) return;
+            SoundManager.playClickSound(player);
+            new KickPlayerGUI(main, game, this).inv.open(player);
         }));
     }
 
@@ -376,16 +393,21 @@ public class GameModifiersGUI implements InventoryProvider {
 
     private void addLightningDropRateModifier(InventoryContents contents, Player player) {
         int index = indexOf(DROP_TIMES, game.getGameSettings().dropTimer);
+        int seconds = DROP_TIMES[index];
 
         contents.set(0, 8, ClickableItem.of(cycleItem(new ItemStack(Material.NETHER_STAR), "&e&lLightning Drop Rate",
-                DROP_TIME_LABELS, index, DROP_TIMES[index], true,
+                DROP_TIME_LABELS, index, seconds, seconds > 0,
                 "&7How often lightning drops", "&7spawn on the map"
         ), e -> {
             SoundManager.playClickSound(player);
 
-            game.getGameSettings().dropTimer = DROP_TIMES[step(index, DROP_TIMES.length, e)];
-            game.TellAll(main.color("&2&l(!) &rLightning drops will now spawn every &e&l"
-                    + game.getGameSettings().dropTimer + "s&r."));
+            int next = DROP_TIMES[step(index, DROP_TIMES.length, e)];
+            game.getGameSettings().dropTimer = next;
+            if (next > 0) {
+                game.TellAll(main.color("&2&l(!) &rLightning drops will now spawn every &e&l" + next + "s&r."));
+            } else {
+                game.TellAll(main.color("&2&l(!) &rLightning drops have been &cdisabled"));
+            }
 
             inv.open(player);
             game.refreshEditorMenus(player);

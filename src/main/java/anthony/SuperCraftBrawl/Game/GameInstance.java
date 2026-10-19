@@ -7,6 +7,7 @@ import fr.minuskube.inv.content.InventoryProvider;
 import anthony.SuperCraftBrawl.gui.games.ItemListGUI;
 import anthony.SuperCraftBrawl.gui.games.GameModifiersGUI;
 import anthony.SuperCraftBrawl.gui.games.CoHostGUI;
+import anthony.SuperCraftBrawl.gui.games.KickPlayerGUI;
 import anthony.SuperCraftBrawl.gui.games.ClassListGUI;
 import anthony.SuperCraftBrawl.gui.games.CustomGamesGUI;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
@@ -128,7 +129,8 @@ public class GameInstance {
     private UUID customGameHost;
     private boolean worldDiscarded = false;
     private boolean customGamePublic = false; // a custom game anyone can join, not just the leader's party
-    private UUID customGameCoHost; // can change the Game Modifiers too (there's only ever one)
+    private UUID customGameCoHost; // can change the Game Settings too (there's only ever one)
+    private final Set<UUID> kickedFromCustomGame = new HashSet<>(); // can't join this custom game (or its next rounds) again
     private boolean classSelectorRemoved = false; // Frenzy: classes are random, so the selector goes once settings are final
 
     // Constructors:
@@ -363,7 +365,7 @@ public class GameInstance {
         if (!open.isPresent()) return false;
         InventoryProvider provider = open.get().getProvider();
         return provider instanceof GameModifiersGUI || provider instanceof ClassListGUI
-                || provider instanceof ItemListGUI || provider instanceof CoHostGUI;
+                || provider instanceof ItemListGUI || provider instanceof CoHostGUI || provider instanceof KickPlayerGUI;
     }
 
     /*
@@ -382,6 +384,27 @@ public class GameInstance {
                     .map(contents -> contents.pagination().getPage()).orElse(0);
             open.get().open(editor, page);
         }
+    }
+
+    /**
+     * Game Settings > Kick Player: the host or co-host takes a player out of this custom game, and they can't join
+     * it again (nor its next rounds). Nobody can kick the host.
+     */
+    public void kickFromCustomGame(Player kicker, Player target) {
+        if (!customGame || !canEditCustomGame(kicker) || isCustomGameHost(target) || target == kicker) return;
+        if (!players.contains(target)) return;
+
+        kickedFromCustomGame.add(target.getUniqueId());
+        if (isCustomGameCoHost(target)) setCustomGameCoHost(null);
+        if (isCustomGameMenu(target)) target.closeInventory();
+        gameManager.getMain().getCommands().removeFromGame(target);
+        target.sendMessage(color("&c&l(!) &rYou were kicked from &e" + getCustomGameHostName() + "&r's custom game."));
+        TellAll(color("&c&l(!) &e" + target.getName() + " &rwas kicked from the game by &e" + kicker.getName() + "&r."));
+    }
+
+    /** A custom game's next round (or new map) keeps out the players kicked from this one. */
+    public void copyKickedPlayersFrom(GameInstance other) {
+        kickedFromCustomGame.addAll(other.kickedFromCustomGame);
     }
 
     public boolean isCustomGameCountdownStarted() {
@@ -460,7 +483,7 @@ public class GameInstance {
         }
     }
 
-    /** Reopens the Game Modifiers menu - goes in the 8th hotbar slot once the leader has started the countdown. */
+    /** Stops the countdown (back to the Game Settings items) - goes in the 8th hotbar slot once the countdown has started. */
     public static ItemStack getGameSettingsItem() {
         return ItemHelper.setDetails(
                 new ItemStack(Material.REDSTONE_COMPARATOR),
@@ -477,7 +500,7 @@ public class GameInstance {
 
         ItemStack modifiers = ItemHelper.setDetails(
                 new ItemStack(Material.REDSTONE_COMPARATOR),
-                color("&eGame Modifiers &7(Right Click)"),
+                color("&eGame Settings &7(Right Click)"),
                 "",
                 color("&7Click to modify this custom game.")
         );
@@ -576,7 +599,7 @@ public class GameInstance {
         TellAll(color("&fItem List: &e" + (settings.enabledDrops.isEmpty() ? "Default" : settings.enabledDrops.size()
                 + "&7/&e" + GameLootDrops.values().length + " items")));
         TellAll(color("&fOP Item Drops: " + (settings.opDrops ? "&aEnabled" : "&cDisabled")));
-        TellAll(color("&fLightning Drop Rate: &e" + settings.dropTimer + "s"));
+        TellAll(color("&fLightning Drop Rate: &e" + formatSecondsOrDisabled(settings.dropTimer)));
         TellAll(color("&fTime of Day: &e" + timeOfDay));
         TellAll(color("&8&m------------------------------------"));
     }
@@ -674,6 +697,10 @@ public class GameInstance {
 
         if (this.state == GameState.WAITING) {
             if (!this.players.contains(player)) {
+                if (customGame && kickedFromCustomGame.contains(player.getUniqueId())) {
+                    player.sendMessage(color("&c&l(!) &rYou were kicked from this custom game."));
+                    return GameReason.KICKED;
+                }
                 if (isLobbyFull(player)) return GameReason.FULL;
 
                 players.add(player);
@@ -847,8 +874,10 @@ public class GameInstance {
                             + "The game is now starting...");
                 }
                 if (ticks == 30) {
-                    for (Player p : players) {
-                        if (!p.getInventory().contains(votePaper)) p.getInventory().addItem(votePaper);
+                    if (!customGame) { // custom games are set up with the Game Settings instead of votes
+                        for (Player p : players) {
+                            if (!p.getInventory().contains(votePaper)) p.getInventory().addItem(votePaper);
+                        }
                     }
                     gameStartingMessage(map.toString());
                 }
@@ -869,17 +898,19 @@ public class GameInstance {
                         FastBoard board = boards.get(p.getUniqueId());
                         if (board != null) board.updateLine(7, color("&fStarting In: &e" + ticks + "s"));
 
-                        if (ticks > 5 && !p.getInventory().contains(votePaper)) {
+                        if (ticks > 5 && !customGame && !p.getInventory().contains(votePaper)) {
                             p.getInventory().addItem(votePaper);
                         }
                     }
                 }
 
                 if (ticks == 5) {
-                    getGameSettings().changeGameType(false);
-                    getGameSettings().increaseLightningRate();
-                    getGameSettings().setTimeOfDay();
-                    getGameSettings().enableSantaFlyover();
+                    if (!customGame) { // the vote results - custom games have no voting
+                        getGameSettings().changeGameType(false);
+                        getGameSettings().increaseLightningRate();
+                        getGameSettings().setTimeOfDay();
+                        getGameSettings().enableSantaFlyover();
+                    }
                     removeVotePaper();
                     removeClassSelectors(); // after the game type vote, which can switch to Frenzy
                 }
@@ -969,7 +1000,7 @@ public class GameInstance {
             TellAll(color("&2[&aTip&2] &aExecute double jump by tapping the space bar twice!"));
         else if (chance == 1)
             TellAll(color("&2[&aTip&2] &aConsider purchasing a rank at our /store for more SCB perks!"));
-        else if (chance == 2)
+        else if (chance == 2 || customGame) // custom games have no vote paper
             TellAll(color("&2[&aTip&2] &aBe sure to select a class by using the enchanted book!"));
         else
             TellAll(color("&2[&aTip&2] &aUse the vote paper to ready up or vote for game settings!"));
@@ -1498,6 +1529,7 @@ public class GameInstance {
 
     public void startLightningDropsTimer() {
         int seconds = getGameSettings().dropTimer;
+        if (seconds <= 0) return; // Lightning Drop Rate set to Disabled
         lightningDropCountdown = seconds;
         nextItemToDrop = getItemToDrop();
 

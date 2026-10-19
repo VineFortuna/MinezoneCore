@@ -65,7 +65,9 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 	@Override
 	public void tick(int gameTicks) {
 		if (instance.classes.get(player).getLives() <= 0) return;
-		String nextItemString = instance.getNextItemToDrop().getItemMeta().getDisplayName();
+		ItemStack nextItem = instance.getNextItemToDrop();
+		if (nextItem == null) return; // lightning drops are disabled in this custom game
+		String nextItemString = nextItem.getItemMeta().getDisplayName();
 		int index = nextItemString.indexOf("§7(");
 		if (index != -1) { // Check if "§7(" exists in the string
 			nextItemString = nextItemString.substring(0, index).trim(); // Trim to remove any trailing spaces
