@@ -9,6 +9,7 @@ import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticManager;
 import anthony.SuperCraftBrawl.gui.ClassMasteryGUI;
+import anthony.SuperCraftBrawl.mastery.MasteryHeads;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
@@ -235,7 +236,7 @@ public abstract class BaseClass {
 		PlayerData data = instance.getGameManager().getMain().getDataManager().getPlayerData(player);
 		ClassDetails details = data.playerClasses.get(this.getType().getID());
 		if (details != null && details.reward5)
-			return ClassMasteryGUI.headReward(this.getType());
+			return MasteryHeads.headReward(this.getType());
 		return helmet;
 	}
 
@@ -397,7 +398,7 @@ public abstract class BaseClass {
 				if (lastDamage instanceof EntityDamageByEntityEvent) {
 					Entity damager = ((EntityDamageByEntityEvent) lastDamage).getDamager();
 
-					if (damager instanceof Player && killer == null) {
+					if (damager instanceof Player) {
 						killer = (Player) damager;
 					} else if (damager instanceof LivingEntity && damager.getCustomName() != null) {
 						creature = (LivingEntity) damager;
