@@ -8,7 +8,6 @@ import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticManager;
-import anthony.SuperCraftBrawl.gui.ClassMasteryGUI;
 import anthony.SuperCraftBrawl.mastery.MasteryHeads;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
