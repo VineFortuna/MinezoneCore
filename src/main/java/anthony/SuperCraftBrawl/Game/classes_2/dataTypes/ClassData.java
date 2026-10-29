@@ -6,7 +6,7 @@ import java.util.List;
 
 public record ClassData(
     ClassArmour armour,
-    List<Pair<Timer, Integer>> timers,
+    List<Integer> timerLengths,
     ClassItem weapon,
     List<ClassItem> items
 ) {}
