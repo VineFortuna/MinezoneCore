@@ -1,12 +1,29 @@
 package anthony.util;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import org.bukkit.*;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.*;
+import org.bukkit.material.Dye;
+import org.bukkit.potion.Potion;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionType;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+
+import static org.bukkit.potion.PotionEffectType.*;
 
 public class ItemHelper {
-	public static ItemStack setDetails(ItemStack item, String name, String...lore) {
+	private static ItemStack setDetailsImpl(ItemStack item, String name, List<String> lore, List<String> addition) {
 		List<String> coloredLore = new ArrayList<>();
 
 		if (lore != null) {
@@ -15,22 +32,34 @@ public class ItemHelper {
 			}
 		}
 
-		return setDetails(item, name, coloredLore);
+		if (addition != null) {
+			if (addition.size() >= 2 || addition.get(0) != null) {
+				coloredLore.addAll(addition);
+            }
+		}
+
+		ItemMeta itemMeta = item.getItemMeta();
+		itemMeta.setDisplayName(ChatColorHelper.color(name));
+		itemMeta.setLore(coloredLore);
+		item.setItemMeta(itemMeta);
+
+		return item;
+	}
+
+	public static ItemStack setDetails(ItemStack item, String name, String... lore) {
+		return setDetailsImpl(item, name, Arrays.asList(lore), null);
 	}
 
 	public static ItemStack setDetails(ItemStack item, String name, List<String> lore) {
-		return setDetails(item, name, lore, (String) null);
+		return setDetailsImpl(item, name, lore, null);
 	}
 
 	public static ItemStack setDetails(ItemStack item, String name, List<String> lore, String... addon) {
-		ItemMeta im = item.getItemMeta();
-		im.setDisplayName(ChatColorHelper.color(name));
-		if(addon != null){
-			if(addon.length >= 2 || addon[0] != null) lore.addAll(Arrays.asList(addon));
-		}
-		im.setLore(lore);
-		item.setItemMeta(im);
-		return item;
+		return setDetailsImpl(item, name, lore, Arrays.asList(addon));
+	}
+
+	public static ItemStack setDetails(ItemStack item, String name, List<String> lore, List<String> addon) {
+		return setDetailsImpl(item, name, lore, addon);
 	}
 
 	public static ItemStack addEnchant(ItemStack item, Enchantment type, int level) {
@@ -199,6 +228,10 @@ public class ItemHelper {
 		itemStack.setItemMeta(skullMeta);
 
 		return itemStack;
+	}
+
+	public static ItemStack createSkullBlock(Material block) {
+		return new ItemStack(block, 1, (short) 3);
 	}
 	
 	public static ItemStack createSkullTexture(String textureUrl) {
@@ -489,7 +522,7 @@ public class ItemHelper {
 		return ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " ");
 	}
 
-    public enum StainedClayColor {
+	public enum StainedClayColor {
 		WHITE(0),
 		ORANGE(1),
 		MAGENTA(2),
