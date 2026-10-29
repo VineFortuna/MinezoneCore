@@ -128,5 +128,10 @@
 			<artifactId>jackson-module-parameter-names</artifactId>
 			<version>2.22.4</version>
 		</dependency>
+		<dependency>
+			<groupId>io.vavr</groupId>
+			<artifactId>vavr</artifactId>
+			<version>1.0.1</version>
+		</dependency>
 	</dependencies>
 </project>
