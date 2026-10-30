@@ -1,13 +1,16 @@
 package anthony.SuperCraftBrawl.Game.classes_2.dataTypes;
 
 import anthony.util.ItemHelper;
-import org.apache.commons.lang3.tuple.Pair;
+import anthony.util.Pair;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.EnumSet;
 import java.util.List;
+
+import static anthony.SuperCraftBrawl.Game.classes_2.dataTypes.ClassItemFlags.GLOWING;
+import static anthony.SuperCraftBrawl.Game.classes_2.dataTypes.ClassItemFlags.HIDEFLAGS;
 
 public record ClassItem(
     Material item,
@@ -16,11 +19,10 @@ public record ClassItem(
     List<Pair<ClassItemEnchantment, Integer>> enchantments,
 
     EnumSet<ItemFlag> flags,
-    Boolean hideFlags,
-    Boolean isGlowing
+    EnumSet<ClassItemFlags> classItemFlags
 ) {
    public ItemStack createItemStack() {
-       ItemStack itemStack = ItemHelper.create(item, name, lore, hideFlags, isGlowing);
+       ItemStack itemStack = ItemHelper.create(item, name, lore, classItemFlags.contains(HIDEFLAGS), classItemFlags.contains(GLOWING));
 
        for (int i = 0; i <= enchantments.size(); i++) {
            ItemHelper.addEnchant(itemStack,
@@ -28,7 +30,7 @@ public record ClassItem(
                    enchantments.get(i).getRight());
        }
 
-       if (!hideFlags) {
+       if (!classItemFlags.contains(HIDEFLAGS)) {
            ItemHelper.setFlags(itemStack, flags.toArray(new ItemFlag[0]));
        }
 
