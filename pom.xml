@@ -131,7 +131,12 @@
 		<dependency>
 			<groupId>io.vavr</groupId>
 			<artifactId>vavr</artifactId>
-			<version>1.0.1</version>
+			<version>0.10.3</version>
+		</dependency>
+		<dependency>
+			<groupId>io.vavr</groupId>
+			<artifactId>vavr-jackson</artifactId>
+			<version>0.10.3</version>
 		</dependency>
 	</dependencies>
 </project>

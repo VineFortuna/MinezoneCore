@@ -12,19 +12,21 @@ import java.util.stream.Stream;
 import anthony.SuperCraftBrawl.Game.classes_2.dataTypes.ClassData;
 import anthony.util.UtilClassName;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.vavr.jackson.datatype.VavrModule;
 
 public class ClassDataManager {
     private static final String CONFIG_DIRECTORY = System.getProperty("user.dir") + File.separator + "config" + File.separator + "classData";
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final String FILE_EXTENSION = ".json";
     private static final Map<String, ClassData> classDataConfigs = new HashMap<>();
 
     private static ClassData loadSpecificConfig(String filename) {
         if (classDataConfigs.containsKey(filename))
             return classDataConfigs.get(filename);
 
-        String fullPath = CONFIG_DIRECTORY + File.separator + filename + ".json";
+        String fullPath = CONFIG_DIRECTORY + File.separator + filename + FILE_EXTENSION;
         File file = new File(fullPath);
         try {
+            ObjectMapper mapper = new ObjectMapper().registerModule(new VavrModule());
             return mapper.readValue(file, ClassData.class);
         } catch (IOException e) {
             throw new RuntimeException("Config file reading failed! (malformed file?): " + fullPath, e);
@@ -39,7 +41,7 @@ public class ClassDataManager {
         }
 
         try (Stream<Path> paths = Files.list(directory)) {
-            paths.filter(path -> path.toString().endsWith(".json")).forEach(path -> {
+            paths.filter(path -> path.toString().endsWith(FILE_EXTENSION)).forEach(path -> {
                 String fullFileName = path.getFileName().toString();
                 String className = fullFileName.substring(0, fullFileName.lastIndexOf('.'));
                 classDataConfigs.put(className, loadSpecificConfig(className));
@@ -55,7 +57,7 @@ public class ClassDataManager {
         Optional<String> className = UtilClassName.getCallingClassName();
 
         if (className.isPresent()) {
-            return loadSpecificConfig(className.get());
+            return loadSpecificConfig(className.get() + FILE_EXTENSION);
         } else {
             throw new RuntimeException("Failed to properly find calling class name!");
         }
