@@ -3,15 +3,12 @@ package anthony.SuperCraftBrawl.Game.classes_2;
 import anthony.SuperCraftBrawl.Game.classes_2.dataTypes.ClassData;
 import anthony.SuperCraftBrawl.Game.classes_2.dataTypes.ClassItem;
 import anthony.SuperCraftBrawl.Timer;
-import anthony.util.ItemHelper;
 import org.apache.commons.lang3.tuple.Pair;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -77,6 +74,10 @@ public abstract class ClassBase {
         assignTimers();
 
         /* ... */
+    }
+
+    public void tick() {
+        /* TODO: */
     }
 
     public void setNameTag() {
