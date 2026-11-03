@@ -5,17 +5,12 @@ import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
-import net.md_5.bungee.api.ChatColor;
-import net.minecraft.server.v1_8_R3.EntityLiving;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -25,35 +20,25 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.util.Vector;
-import xyz.xenondevs.particle.ParticleEffect;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SantaClass extends BaseClass {
 
 	private static final int REINDEER_FLIGHT_TICKS = 6 * 20;
-	private static final int REINDEER_WARNING_TICKS = 3 * 20;
-	private static final double REINDEER_SPEED = 0.7; // blocks per tick
-	private static final double REINDEER_VERTICAL_SPEED = 0.5; // blocks per tick
-	private static final int SNEAK_HOLD_TICKS = 2; // sneak counts as held this many ticks after the last exit attempt
-	private static final Field RIDER_JUMP_FIELD = findRiderJumpField();
 
 	private int cookieUses;
-	private Horse reindeer;
-	private BukkitTask reindeerTask;
-	private int flightTicks;
-	private int lastSneakTick;
+	private final ReindeerFlight reindeer;
 
 	public SantaClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19",
 				"FF0000", 6, "Santa");
+		reindeer = new ReindeerFlight(player, REINDEER_FLIGHT_TICKS,
+				() -> instance.state == GameState.STARTED && instance.classes.get(player) == this
+						&& player.getGameMode() != GameMode.SPECTATOR);
 	}
 
 	@Override
@@ -157,110 +142,23 @@ public class SantaClass extends BaseClass {
 	}
 
 	/*
-	 * Spawns Santa's flying Reindeer and mounts the player on it. While riding:
-	 * WASD flies horizontally (relative to where you face), Space flies up, Sneak flies down,
-	 * and letting go of every key hovers in place. Sneaking never dismounts during the flight.
+	 * Spawns Santa's flying Reindeer and mounts the player on it (see ReindeerFlight for the controls).
 	 */
 	private void spawnReindeer() {
-		if (reindeer != null)
+		if (reindeer.isFlying())
 			return;
 
-		Horse horse = (Horse) player.getWorld().spawnEntity(player.getLocation(), EntityType.HORSE);
-		horse.setTamed(true);
-		horse.setAdult();
-		horse.setVariant(Horse.Variant.HORSE);
-		horse.setColor(Horse.Color.DARK_BROWN);
-		horse.setStyle(Horse.Style.NONE);
-		horse.setCustomName("" + ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Reindeer");
-		horse.setOwner(player);
-		horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
-		horse.setPassenger(player);
-
-		reindeer = horse;
-		flightTicks = 0;
-		lastSneakTick = Integer.MIN_VALUE / 2;
-
-		// The rider's keys arrive in steer packets every tick and are stored on the NMS player
-		EntityPlayer rider = ((CraftPlayer) player).getHandle();
-
-		reindeerTask = instance.trackClassTask(new BukkitRunnable() {
-			@Override
-			public void run() {
-				if (flightTicks++ >= REINDEER_FLIGHT_TICKS || !horse.isValid() || horse.getPassenger() != player
-						|| instance.state != GameState.STARTED || instance.classes.get(player) != SantaClass.this
-						|| player.getGameMode() == GameMode.SPECTATOR) {
-					endReindeerFlight();
-					return;
-				}
-
-				float forward = Math.signum(rider.ba);
-				float strafe = Math.signum(rider.aZ); // positive = A (left)
-				int vertical = (isJumping(rider) ? 1 : 0) - (flightTicks - lastSneakTick <= SNEAK_HOLD_TICKS ? 1 : 0);
-
-				double yaw = Math.toRadians(player.getLocation().getYaw());
-				double dirX = -Math.sin(yaw);
-				double dirZ = Math.cos(yaw);
-				Vector horizontal = new Vector(dirX * forward + dirZ * strafe, 0, dirZ * forward - dirX * strafe);
-				if (horizontal.lengthSquared() > 1) horizontal.normalize();
-
-				horse.setVelocity(horizontal.multiply(REINDEER_SPEED).setY(vertical * REINDEER_VERTICAL_SPEED));
-
-				// Flying never builds fall damage for the reindeer or Santa
-				horse.setFallDistance(0);
-				player.setFallDistance(0);
-
-				// Magic trail + sleigh bells
-				ParticleEffect.FIREWORKS_SPARK.display(horse.getLocation());
-				// Warning beeps for the last 3 seconds before the reindeer disappears
-				if (flightTicks >= REINDEER_FLIGHT_TICKS - REINDEER_WARNING_TICKS && flightTicks % 10 == 0) {
-					horse.getWorld().playSound(horse.getLocation(), Sound.NOTE_PLING, 0.6f, 2.0f);
-				}
-			}
-		}.runTaskTimer(instance.getGameManager().getMain(), 1, 1));
+		instance.trackClassTask(reindeer.start(instance.getGameManager().getMain()));
 	}
 
-	/** Ends the flight: stops the controller, drops Santa off and removes the reindeer. Safe to call twice. */
+	/** Ends the flight: drops Santa off and removes the reindeer. Safe to call twice. */
 	public void endReindeerFlight() {
-		if (reindeer == null)
-			return;
-
-		Horse horse = reindeer;
-		reindeer = null; // clear first so the eject below isn't blocked by shouldBlockReindeerExit
-		reindeerTask.cancel();
-		horse.eject();
-		horse.remove();
-		player.setFallDistance(0);
+		reindeer.end();
 	}
 
-	/*
-	 * Called from GameManager's VehicleExitEvent. Vanilla dismounts a rider every tick they hold
-	 * Sneak, so blocking that exit keeps Santa mounted and doubles as our "Sneak is held" signal.
-	 */
+	/** Called from GameManager's VehicleExitEvent: Sneak flies down instead of dismounting. */
 	public boolean shouldBlockReindeerExit(Entity vehicle) {
-		if (reindeer == null || vehicle != reindeer || !reindeer.isValid() || player.isDead())
-			return false;
-
-		lastSneakTick = flightTicks;
-		return true;
-	}
-
-	private static boolean isJumping(EntityPlayer rider) {
-		try {
-			return RIDER_JUMP_FIELD != null && RIDER_JUMP_FIELD.getBoolean(rider);
-		} catch (IllegalAccessException e) {
-			return false;
-		}
-	}
-
-	// EntityLiving.aY is the protected "jump key held" flag set from the rider's steer packet (1.8.8 mapping)
-	private static Field findRiderJumpField() {
-		try {
-			Field field = EntityLiving.class.getDeclaredField("aY");
-			field.setAccessible(true);
-			return field;
-		} catch (NoSuchFieldException e) {
-			return null;
-		}
+		return reindeer.shouldBlockExit(vehicle);
 	}
 
 	@Override

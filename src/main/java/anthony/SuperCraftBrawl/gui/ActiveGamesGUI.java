@@ -7,6 +7,7 @@ import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.util.ItemHelper;
+import anthony.util.SoundManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
@@ -65,10 +66,7 @@ public class ActiveGamesGUI implements InventoryProvider {
 									"&fPlayers: &a" + game.players.size() + "/"
 											+ game.getMaxPlayerCount(),
 									"", "&r&nClick to join!"),
-							e -> {
-								main.getGameManager().JoinGame(player, game);
-								inv.close(player);
-							}));
+							e -> joinClicked(player, game, false)));
 				} else {
 					contents.set(count, i, ClickableItem.of(
 							ItemHelper.setDetails(displayItem,
@@ -79,10 +77,7 @@ public class ActiveGamesGUI implements InventoryProvider {
 									"&fPlayers: &a" + game.players.size() + "/"
 											+ game.getMaxPlayerCount(),
 									"", "&r&nClick to join!"),
-							e -> {
-								main.getGameManager().JoinGame(player, game);
-								inv.close(player);
-							}));
+							e -> joinClicked(player, game, false)));
 				}
 			} else if (game.state == GameState.STARTED) {
 				String state = "In Progress";
@@ -95,10 +90,7 @@ public class ActiveGamesGUI implements InventoryProvider {
 								"&fPlayers: &a" + game.players.size() + "/"
 										+ game.getMaxPlayerCount(),
 								"&fSpectators: &a" + game.spectators.size(), "", "&r&nClick to spectate!"),
-						e -> {
-							main.getGameManager().SpectatorJoinGame(player, game);
-							inv.close(player);
-						}));
+						e -> joinClicked(player, game, true)));
 			}
 			if (i > 8) {
 				count++;
@@ -106,6 +98,18 @@ public class ActiveGamesGUI implements InventoryProvider {
 			}
 			i++;
 		}
+	}
+
+	/** A private custom game the player can't access just plays the error sound and leaves the menu open. */
+	private void joinClicked(Player player, GameInstance game, boolean spectate) {
+		if (game.isCustomGame() && !game.canAccessCustomGame(player)) {
+			SoundManager.playErrorSound(player);
+			return;
+		}
+
+		if (spectate) main.getGameManager().SpectatorJoinGame(player, game);
+		else main.getGameManager().JoinGame(player, game);
+		inv.close(player);
 	}
 
 	@Override

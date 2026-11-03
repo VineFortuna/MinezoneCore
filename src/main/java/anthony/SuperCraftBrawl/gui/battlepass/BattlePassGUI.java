@@ -44,7 +44,9 @@ public class BattlePassGUI implements InventoryProvider {
 
 		contents.set(1, 3, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.IRON_INGOT),
 				main.color("&f&lFREE PASS"),
-				"&7Rewards everyone can claim.",
+				"&7Rewards everyone can claim, including",
+				"&7the &2&lElf&7, &6GingerBread&0Man &7and",
+				"&c&lSanta &7classes!",
 				"",
 				"&7Unclaimed rewards: &e" + countClaimable(progress, BattlePassTrack.FREE),
 				"",
@@ -53,8 +55,9 @@ public class BattlePassGUI implements InventoryProvider {
 
 		contents.set(1, 5, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR),
 				main.color("&6&lPREMIUM PASS"),
-				"&7Extra rewards, including the",
-				"&7exclusive &c&lSanta &7class at &eTier " + BattlePassSeason.MAX_TIER + "&7!",
+				"&7Extra rewards, and &a+" + Math.round((BattlePassSeason.PREMIUM_XP_MULTIPLIER - 1) * 100)
+						+ "% Battle Pass XP",
+				"&7from everything you do!",
 				"",
 				premium ? "&7Unclaimed rewards: &e" + countClaimable(progress, BattlePassTrack.PREMIUM)
 						: "&c&lLOCKED",

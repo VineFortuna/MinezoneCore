@@ -27,7 +27,7 @@ import java.util.List;
  */
 public class CoHostGUI implements InventoryProvider {
 
-    private static final int ROWS = 4;
+    private static final int ROWS = 5;
 
     private final Core main;
     private final GameInstance game;
@@ -80,7 +80,7 @@ public class CoHostGUI implements InventoryProvider {
         }));
 
         if (heads.isEmpty()) {
-            contents.set(1, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BARRIER),
+            contents.set(2, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BARRIER),
                     "&cNobody Else Here", "&7There's nobody in this game", "&7to make co-host yet."), e -> {}));
         }
 

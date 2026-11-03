@@ -18,6 +18,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -31,7 +32,9 @@ import java.util.Optional;
  */
 public class CustomGamesGUI implements InventoryProvider {
 
-    private static final int ROWS = 4;
+    private static final int ROWS = 4; // games in the 2nd row, the glass + Create button in the 4th
+    private static final int GAMES_ROW = 1; // games go from (1,1) to (1,7), with the page arrows on the sides
+    private static final int GAMES_PER_PAGE = 7;
 
     private final Core main;
     public final SmartInventory inv;
@@ -59,33 +62,36 @@ public class CustomGamesGUI implements InventoryProvider {
         }
 
         pagination.setItems(items.toArray(new ClickableItem[0]));
-        pagination.setItemsPerPage(27);
+        pagination.setItemsPerPage(GAMES_PER_PAGE);
 
         for (int column = 0; column < 9; column++) {
             contents.set(ROWS - 1, column, ClickableItem.of(ItemHelper.getGlassFiller(), e -> {}));
         }
 
+        // Page arrows on the sides of the games row, like the maps menu
         if (!pagination.isFirst()) {
-            contents.set(ROWS - 1, 0, ClickableItem.of(ItemHelper.getPreviousPageItem(), e -> {
+            contents.set(GAMES_ROW, 0, ClickableItem.of(ItemHelper.getPreviousPageItem(), e -> {
                 SoundManager.playClickSound(player);
                 inv.open(player, pagination.previous().getPage());
             }));
         }
         if (!pagination.isLast()) {
-            contents.set(ROWS - 1, 8, ClickableItem.of(ItemHelper.getNextPageItem(), e -> {
+            contents.set(GAMES_ROW, 8, ClickableItem.of(ItemHelper.getNextPageItem(), e -> {
                 SoundManager.playClickSound(player);
                 inv.open(player, pagination.next().getPage());
             }));
         }
 
-        contents.set(ROWS - 1, 4, ClickableItem.of(getCreateItem(player), e -> handleCreateClick(player)));
+        contents.set(ROWS - 1, 4, ClickableItem.of(getCreateItem(player), e -> handleCreateClick(player, e)));
 
         if (items.isEmpty()) {
-            contents.set(1, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BARRIER),
-                    "&cNo Custom Games", "&7Nobody is running a custom game", "&7right now. Create one below!"), e -> {}));
+            contents.set(GAMES_ROW, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BARRIER),
+                    "&cNo Custom Games", "&7No active Custom Games", "&7Create one below!"), e -> {}));
         }
 
-        SlotIterator iterator = contents.newIterator(SlotIterator.Type.HORIZONTAL, SlotPos.of(0, 0));
+        SlotIterator iterator = contents.newIterator(SlotIterator.Type.HORIZONTAL, SlotPos.of(GAMES_ROW, 1));
+        iterator.blacklist(GAMES_ROW, 0);
+        iterator.blacklist(GAMES_ROW, 8);
         iterator.allowOverride(false);
         pagination.addToIterator(iterator);
     }
@@ -118,11 +124,12 @@ public class CustomGamesGUI implements InventoryProvider {
         lore.add("&7with custom modes and rules");
         lore.add("");
         if (main.canHostCustomGames(player)) {
-            lore.add("&eClick to create!");
+            lore.add("&eLeft Click &7to create!");
         } else {
             lore.add("&cYou need &6&lLEGENDARY &cto");
             lore.add("&ccreate a custom game!");
         }
+        lore.add("&eRight Click &7to preview the settings");
         return ItemHelper.setDetails(new ItemStack(Material.WORKBENCH), "&aCreate", lore.toArray(new String[0]));
     }
 
@@ -147,7 +154,13 @@ public class CustomGamesGUI implements InventoryProvider {
         else main.getGameManager().JoinGame(player, game);
     }
 
-    private void handleCreateClick(Player player) {
+    private void handleCreateClick(Player player, InventoryClickEvent e) {
+        if (e.isRightClick()) {
+            SoundManager.playClickSound(player);
+            new GameSettingsPreviewGUI(main).inv.open(player);
+            return;
+        }
+
         if (!main.canHostCustomGames(player)) {
             SoundManager.playErrorSound(player);
             player.sendMessage(main.color("&c&l(!) &rCustom Games need &6&lLEGENDARY&r!"));

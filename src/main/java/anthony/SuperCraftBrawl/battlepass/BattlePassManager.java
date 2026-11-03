@@ -127,13 +127,18 @@ public class BattlePassManager implements Listener {
 		if (progress == null || progress.xp >= BattlePassSeason.maxXp())
 			return;
 
+		// Premium Pass owners earn extra XP
+		boolean premiumBonus = hasPremium(progress);
+		if (premiumBonus)
+			amount = (int) Math.round(amount * BattlePassSeason.PREMIUM_XP_MULTIPLIER);
+
 		int oldTier = progress.getTier();
 		progress.xp = Math.min(BattlePassSeason.maxXp(), progress.xp + amount);
 		int newTier = progress.getTier();
 		save(player.getUniqueId(), progress);
 		refreshLobbyBoard(player);
 
-		player.sendMessage(main.color("&6&l(!) &r+" + amount + " &6Battle Pass XP"));
+		player.sendMessage(main.color("&6&l(!) &r+" + amount + " &6Battle Pass XP" + (premiumBonus ? " &7(Premium bonus)" : "")));
 
 		if (newTier > oldTier) {
 			player.sendMessage(main.color("&8&m---------------------------"));

@@ -162,9 +162,15 @@ commands:
    battlepass:
       description: Open the Battle Pass
       aliases: [bp, pass]
+   customgame:
+      description: Create a custom game (with your party if you're in one)
+      aliases: [cg]
    joincustomgame:
       description: Join a custom game (used by the Click here to Join messages)
       usage: /joincustomgame <host>
+   joingame:
+      description: Join a specific game (used by the /invite Click here to join message)
+      usage: /joingame <game>
    scbsetup:
       description: Edit the original map worlds (games play on copies of them)
       usage: /scbsetup <tp <map>|save|leave>

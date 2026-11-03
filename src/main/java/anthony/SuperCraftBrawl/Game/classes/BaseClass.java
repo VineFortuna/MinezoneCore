@@ -333,6 +333,10 @@ public abstract class BaseClass {
 
 			if (!instance.savesStats()) {
 				p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Placed #" + instance.alivePlayers);
+				p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Kills: " + ChatColor.GREEN
+						+ baseClassDead.totalKills);
+				if (instance.firstBlood == player)
+					p.sendMessage(ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  " + ChatColor.GREEN + "First Blood");
 				p.sendMessage(ChatColor.BOLD + "||");
 				p.sendMessage(ChatColor.BOLD + "=====================");
 				p.sendMessage(instance.color("&2&l(!) &rCustom games don't give Tokens, EXP or stats."));
@@ -580,6 +584,26 @@ public abstract class BaseClass {
 		}, 5 * 20);
 	}
 
+	private static final String KILL_HEALTH_POT_NAME = "HEALING I";
+
+	/** The splash Healing I potion killers get (Healing on Kill). */
+	public static ItemStack getKillHealthPot() {
+		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
+				String.valueOf(ChatColor.RED) + ChatColor.BOLD + KILL_HEALTH_POT_NAME);
+
+		Potion pot = new Potion(1);
+		pot.setType(PotionType.INSTANT_HEAL);
+		pot.setSplash(true);
+		pot.apply(item);
+		return item;
+	}
+
+	public static boolean isKillHealthPot(ItemStack item) {
+		return item != null && item.getType() == Material.POTION && item.hasItemMeta()
+				&& item.getItemMeta().hasDisplayName()
+				&& ChatColor.stripColor(item.getItemMeta().getDisplayName()).equals(KILL_HEALTH_POT_NAME);
+	}
+
 	// Giving health potions on kill
 	protected void giveHealthPot(Player killer) {
 		GameSettings.HealthPotMode potMode = instance.getGameSettings().healthPotMode;
@@ -606,15 +630,7 @@ public abstract class BaseClass {
 				if (potMode == GameSettings.HealthPotMode.HALF_HEALTH && killer.getHealth() / killer.getMaxHealth() > 0.5)
 					return;
 
-				ItemStack item = ItemHelper.setDetails(new ItemStack(Material.POTION, 1),
-						String.valueOf(ChatColor.RED) + ChatColor.BOLD + "HEALING I");
-
-				Potion pot = new Potion(1);
-				pot.setType(PotionType.INSTANT_HEAL);
-				pot.setSplash(true);
-				pot.apply(item);
-
-				killer.getInventory().addItem(item);
+				killer.getInventory().addItem(getKillHealthPot());
 
 				Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new Runnable() {
 					@Override

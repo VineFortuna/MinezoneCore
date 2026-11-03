@@ -12,7 +12,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionType;
 
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
@@ -25,20 +27,19 @@ public enum GameLootDrops {
 	SKELE_EGG(Rarity.COMMON), MILK(Rarity.COMMON), SLIME_EGG(Rarity.COMMON), SILVERFISH_EGG(Rarity.COMMON),
 
 	// UNCOMMON:
-	NUKE(Rarity.RARE), SPEED2(Rarity.RARE), INSTAGIB(Rarity.RARE), BAZOOKA(Rarity.RARE),
-	WITCH_EGG(Rarity.RARE), CREEPER_EGG(Rarity.RARE), FIRE_FLOWER(Rarity.RARE), CAVE_SPIDER_EGG(Rarity.RARE),
-	SNOWBALL_LAUNCHER(Rarity.RARE),
+	NUKE(Rarity.UNCOMMON), SPEED2(Rarity.UNCOMMON), INSTAGIB(Rarity.UNCOMMON), BAZOOKA(Rarity.UNCOMMON),
+	WITCH_EGG(Rarity.UNCOMMON), CREEPER_EGG(Rarity.UNCOMMON), FIRE_FLOWER(Rarity.UNCOMMON),
+	CAVE_SPIDER_EGG(Rarity.UNCOMMON), SNOWBALL_LAUNCHER(Rarity.UNCOMMON),
 
 	// RARE:
-	HEALTH2(Rarity.MYTHIC), BROOMS(Rarity.MYTHIC), HAMMER(Rarity.MYTHIC), ENDER_PEARL(Rarity.MYTHIC),
-	GOLDEN_APPLE(Rarity.MYTHIC),
+	HEALTH2(Rarity.RARE), BROOMS(Rarity.RARE), HAMMER(Rarity.RARE), ENDER_PEARL(Rarity.RARE),
+	GOLDEN_APPLE(Rarity.RARE),
 
 	// LEGENDARY:
 	BOMB(Rarity.LEGENDARY), NOTCH_APPLE(Rarity.LEGENDARY), EXTRA_LIFE(Rarity.LEGENDARY);
 
-	// Iron horse armor has no durability bar, so the Snowball Launcher tracks its uses in a lore line
+	// The Snowball Launcher's item amount is its uses left
 	public static final int SNOWBALL_LAUNCHER_USES = 3;
-	public static final String SNOWBALL_LAUNCHER_USES_PREFIX = "&7Uses left: &e";
 
 	private static final Random RANDOM = new Random();
 
@@ -55,38 +56,27 @@ public enum GameLootDrops {
 	/*
 	 * A random lightning drop out of the enabled ones (all of them when none are enabled). A rarity is rolled
 	 * first, out of the rarities that have an enabled item, so disabling a whole rarity doesn't stop drops.
-	 * OP drops only give Rare and Legendary items (no Extra Lives), or any enabled item if none of those are enabled.
 	 */
-	public static GameLootDrops getDrop(Set<GameLootDrops> enabled, boolean op) {
+	public static GameLootDrops getDrop(Set<GameLootDrops> enabled) {
 		if (enabled.isEmpty()) enabled = EnumSet.allOf(GameLootDrops.class);
 
-		if (op) {
-			GameLootDrops drop = rollDrop(enabled, true);
-			if (drop != null) return drop;
-		}
-		return rollDrop(enabled, false);
-	}
-
-	private static GameLootDrops rollDrop(Set<GameLootDrops> enabled, boolean op) {
 		Map<Rarity, List<GameLootDrops>> byRarity = new EnumMap<>(Rarity.class);
 		for (GameLootDrops drop : enabled) {
-			if (drop.r.getChance(op) == 0 || (op && drop == EXTRA_LIFE)) continue;
 			byRarity.computeIfAbsent(drop.r, k -> new ArrayList<>()).add(drop);
 		}
 
 		int total = 0;
-		for (Rarity rarity : byRarity.keySet()) total += rarity.getChance(op);
-		if (total == 0) return null;
+		for (Rarity rarity : byRarity.keySet()) total += rarity.getChance();
 
 		int roll = RANDOM.nextInt(total);
 		for (Map.Entry<Rarity, List<GameLootDrops>> entry : byRarity.entrySet()) {
-			roll -= entry.getKey().getChance(op);
+			roll -= entry.getKey().getChance();
 			if (roll < 0) {
 				List<GameLootDrops> drops = entry.getValue();
 				return drops.get(RANDOM.nextInt(drops.size()));
 			}
 		}
-		return null;
+		return values()[0]; // unreachable: roll < total
 	}
 
     public static boolean isLootDropItem(ItemStack item) {
@@ -110,6 +100,28 @@ public enum GameLootDrops {
             }
         }
 
+        return false;
+    }
+
+    /** Whether this item's amount is more than a slot normally holds (the Snowball Launcher: 3 uses on a 1-stack item). */
+    public static boolean isOversizedStack(ItemStack item) {
+        return item != null && item.getAmount() > item.getMaxStackSize();
+    }
+
+    /*
+     * Gives a drop to the player, false if they have no room. addItem would split an oversized stack into several
+     * single items (the Snowball Launcher's uses are its amount), so those go whole into the first free slot.
+     */
+    public static boolean giveToPlayer(Player player, ItemStack item) {
+        PlayerInventory inventory = player.getInventory();
+        if (!isOversizedStack(item)) return inventory.addItem(item).isEmpty();
+
+        for (int slot = 0; slot < 36; slot++) { // the hotbar, then the rest of the inventory (not the armor slots)
+            if (inventory.getItem(slot) == null) {
+                inventory.setItem(slot, item);
+                return true;
+            }
+        }
         return false;
     }
 
@@ -215,10 +227,9 @@ public enum GameLootDrops {
 				break;
 
 			case SNOWBALL_LAUNCHER:
-				item = ItemHelper.setDetails(new ItemStack(Material.IRON_BARDING),
+				item = ItemHelper.setDetails(new ItemStack(Material.IRON_BARDING, SNOWBALL_LAUNCHER_USES),
 						"&f&lSNOWBALL LAUNCHER",
-						"&7Fire a burst of 3 snowballs that", "&7launch enemies back and up!", "",
-						SNOWBALL_LAUNCHER_USES_PREFIX + SNOWBALL_LAUNCHER_USES, "", "&2&lUNCOMMON");
+						"&7Fire a burst of 3 snowballs that", "&7launch enemies back and up!", "", "&2&lUNCOMMON");
 				break;
 
 	        // ===== RARE =====
@@ -275,19 +286,17 @@ public enum GameLootDrops {
 
 	// Shown as Common / Uncommon / Rare / Legendary (the item lore names). Chances are out of 100.
 	public enum Rarity {
-		COMMON("Common", "&7", 50, 0), RARE("Uncommon", "&2", 35, 0), MYTHIC("Rare", "&9", 12, 70),
-		LEGENDARY("Legendary", "&6", 3, 30);
+		COMMON("Common", "&7", 50), UNCOMMON("Uncommon", "&2", 35), RARE("Rare", "&9", 12),
+		LEGENDARY("Legendary", "&6", 3);
 
 		private final String name;
 		private final String color;
 		private final int chance;
-		private final int opChance; // with OP Item Drops on
 
-		Rarity(String name, String color, int chance, int opChance) {
+		Rarity(String name, String color, int chance) {
 			this.name = name;
 			this.color = color;
 			this.chance = chance;
-			this.opChance = opChance;
 		}
 
 		public String getName() {
@@ -298,8 +307,8 @@ public enum GameLootDrops {
 			return color;
 		}
 
-		public int getChance(boolean op) {
-			return op ? opChance : chance;
+		public int getChance() {
+			return chance;
 		}
 	}
 }

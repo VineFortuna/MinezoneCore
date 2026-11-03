@@ -8,8 +8,12 @@ import anthony.SuperCraftBrawl.gui.games.ItemListGUI;
 import anthony.SuperCraftBrawl.gui.games.GameModifiersGUI;
 import anthony.SuperCraftBrawl.gui.games.CoHostGUI;
 import anthony.SuperCraftBrawl.gui.games.KickPlayerGUI;
+import anthony.SuperCraftBrawl.gui.games.PresetsGUI;
 import anthony.SuperCraftBrawl.gui.games.ClassListGUI;
 import anthony.SuperCraftBrawl.gui.games.CustomGamesGUI;
+import anthony.SuperCraftBrawl.gui.games.OneForAllClassGUI;
+import anthony.SuperCraftBrawl.gui.games.OneForAllVotesGUI;
+import anthony.SuperCraftBrawl.Game.GameSettings.OneForAllMode;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.all.LargeFernClass;
@@ -88,8 +92,6 @@ public class GameInstance {
     public int timeToStartSeconds = 30;
     List<BukkitRunnable> runnables = new ArrayList<>();
     public int blindness = 0;
-    public ItemStack votePaper = ItemHelper.setDetails(new ItemStack(Material.PAPER),
-            color("&eVote &7(Right Click)"));
     public int alivePlayers = 0;
     public int aliveTeams = 0;
     public Sign s;
@@ -123,6 +125,7 @@ public class GameInstance {
 
     //PARTY SYSTEM
     public static final int CUSTOM_GAME_MAX_PLAYERS = 100;
+    private static final int CUSTOM_GAME_COUNTDOWN_SECONDS = 45;
     private boolean customGame = false;
     private boolean cancellingCustomGame = false; // everyone's being sent home - nobody should be declared the winner
     private boolean customGameCountdownStarted = false;
@@ -132,6 +135,10 @@ public class GameInstance {
     private UUID customGameCoHost; // can change the Game Settings too (there's only ever one)
     private final Set<UUID> kickedFromCustomGame = new HashSet<>(); // can't join this custom game (or its next rounds) again
     private boolean classSelectorRemoved = false; // Frenzy: classes are random, so the selector goes once settings are final
+    // One For All: the class everyone plays, picked once the host starts the countdown
+    private ClassType oneForAllClass; // Host/Co-Host mode: their pick (null = a random class)
+    private final Map<UUID, ClassType> oneForAllVotes = new HashMap<>(); // Voting mode: a null class is a vote for a random one
+    private boolean oneForAllVotingEnded; // Voting mode: the vote closed at 5s, its winner is in oneForAllClass
 
     // Constructors:
     public GameInstance(GameManager gameManager, Maps map) {
@@ -324,6 +331,7 @@ public class GameInstance {
                 gameManager.getMain().getLobbyItems().gameLobbyItems(old);
             }
         }
+        if (old != null && old != coHost && isOneForAllMenu(old) && !hasClassSelector(old)) old.closeInventory();
         if (coHost != null) giveEditorItems(coHost);
         refreshWaitingLine(old);
         refreshWaitingLine(coHost);
@@ -365,7 +373,8 @@ public class GameInstance {
         if (!open.isPresent()) return false;
         InventoryProvider provider = open.get().getProvider();
         return provider instanceof GameModifiersGUI || provider instanceof ClassListGUI
-                || provider instanceof ItemListGUI || provider instanceof CoHostGUI || provider instanceof KickPlayerGUI;
+                || provider instanceof ItemListGUI || provider instanceof CoHostGUI || provider instanceof KickPlayerGUI
+                || provider instanceof PresetsGUI;
     }
 
     /*
@@ -532,8 +541,29 @@ public class GameInstance {
         GameSettings settings = getGameSettings();
         if (gameType == GameType.FRENZY) return "Frenzy";
         if (settings.randomClasses) return "Class Switch";
-        if (settings.oneForAll) return "One For All";
+        if (settings.oneForAllMode != OneForAllMode.DISABLED) return "One For All";
         return "Classic";
+    }
+
+    /*
+     * The scoreboard's Mode: the game type, or for Classic/Frenzy games the class selection modifier
+     * (Class Switch with its interval, e.g. "Class Switch (15s)").
+     */
+    public String getModeName() {
+        if (gameType != GameType.CLASSIC && gameType != GameType.FRENZY) return gameType.getName();
+
+        String name = getClassSelectionName();
+        if (gameType != GameType.FRENZY && getGameSettings().randomClasses)
+            name += " (" + formatSeconds(getGameSettings().randomClassCycleSeconds) + ")";
+        return name;
+    }
+
+    /** Puts the current Mode on everyone's lobby scoreboard (after a class selection modifier changed). */
+    public void updateModeLine() {
+        for (Player player : players) {
+            FastBoard board = boards.get(player.getUniqueId());
+            if (board != null) board.updateLine(1, color("&fMode: &a" + getModeName()));
+        }
     }
 
     /** Returns whether the countdown started (the host/co-host keep their items if it didn't). */
@@ -559,8 +589,10 @@ public class GameInstance {
         }
 
         customGameCountdownStarted = true;
+        resetOneForAllChoice();
         removeClassSelectors(); // settings can't be changed anymore
         for (Player editor : getEditors()) giveCountdownItems(editor);
+        updateClassSelectionItems(); // One For All: the class selector (and Voting Paper) are handed out now
 
         TellAll(color("&e&l(!) &e" + player.getName() + " &rstarted the game"));
         announcePrivateGameSettings();
@@ -574,6 +606,7 @@ public class GameInstance {
 
         String classSelection = getClassSelectionName();
         if (settings.randomClasses) classSelection += " (" + formatSeconds(settings.randomClassCycleSeconds) + ")";
+        if (settings.oneForAllMode != OneForAllMode.DISABLED) classSelection += " (" + settings.oneForAllMode.getName() + ")";
 
         long time = mapWorld.getTime();
         String timeOfDay = time >= 13000 && time <= 23000 ? "Night" : time >= 11000 && time < 13000 ? "Sunset" : "Day";
@@ -587,8 +620,9 @@ public class GameInstance {
         TellAll(color("&6&lGAME SETTINGS"));
         TellAll(color("&fVisibility: " + (customGamePublic ? "&aPublic" : "&cPrivate")));
         TellAll(color("&fClass Selection: &e" + classSelection));
-        TellAll(color("&fClass List: &e" + (enabledClasses == 0 ? "Default" : enabledClasses + "&7/&e"
+        TellAll(color("&fClass List: &e" + (settings.isDefaultClassList() ? "Default" : enabledClasses + "&7/&e"
                 + ClassType.getPlayableClasses().length + " classes")));
+        TellAll(color("&fPassive Healing: " + (settings.passiveHealing ? "&aEnabled" : "&cDisabled")));
         TellAll(color("&fLives: &e" + settings.startingLives));
         TellAll(color("&fRespawn Time: &e" + (settings.respawnSeconds == 0 ? "None" : settings.respawnSeconds + "s")));
         TellAll(color("&fSpawn Protection: &e" + formatSecondsOrDisabled(settings.spawnProtectionSeconds)));
@@ -596,9 +630,8 @@ public class GameInstance {
         TellAll(color("&fHealing on Kill: &e" + settings.healthPotMode.getName()));
         TellAll(color("&fStrength on Kill: &e" + formatSecondsOrDisabled(settings.strengthOnKillSeconds)));
         TellAll(color("&fLow Gravity: " + (settings.lowGravity ? "&aEnabled" : "&cDisabled")));
-        TellAll(color("&fItem List: &e" + (settings.enabledDrops.isEmpty() ? "Default" : settings.enabledDrops.size()
+        TellAll(color("&fItem List: &e" + (settings.isDefaultItemList() ? "Default" : settings.enabledDrops.size()
                 + "&7/&e" + GameLootDrops.values().length + " items")));
-        TellAll(color("&fOP Item Drops: " + (settings.opDrops ? "&aEnabled" : "&cDisabled")));
         TellAll(color("&fLightning Drop Rate: &e" + formatSecondsOrDisabled(settings.dropTimer)));
         TellAll(color("&fTime of Day: &e" + timeOfDay));
         TellAll(color("&8&m------------------------------------"));
@@ -609,7 +642,7 @@ public class GameInstance {
     }
 
     private static String formatSecondsOrDisabled(int seconds) {
-        return seconds > 0 ? seconds + "s" : "&cDisabled";
+        return seconds > 0 ? formatSeconds(seconds) : "&cDisabled";
     }
 
     /*
@@ -631,8 +664,11 @@ public class GameInstance {
         }
         customGameCountdownStarted = false;
         timeToStartSeconds = getSecondsUntilStart();
-        removeVotePaper();
+        removeReadyItems();
+        getGameSettings().clearReady();
         restoreClassSelectors(); // Frenzy might get turned off
+        resetOneForAllChoice();
+        updateClassSelectionItems(); // One For All's selector and Voting Paper go until it's started again
 
         for (Player p : players) {
             p.setLevel(0);
@@ -805,9 +841,9 @@ public class GameInstance {
     }
 
     public int getSecondsUntilStart() {
-        if (!gameManager.getMain().tournament)
-            return timeToStartSeconds = 30;
-        return timeToStartSeconds = 60;
+        if (gameManager.getMain().tournament)
+            return timeToStartSeconds = 60;
+        return timeToStartSeconds = customGame ? CUSTOM_GAME_COUNTDOWN_SECONDS : 30;
     }
 
     // Legacy start timer – now tracked
@@ -873,14 +909,7 @@ public class GameInstance {
                     TellAll(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "(!) " + ChatColor.RESET
                             + "The game is now starting...");
                 }
-                if (ticks == 30) {
-                    if (!customGame) { // custom games are set up with the Game Settings instead of votes
-                        for (Player p : players) {
-                            if (!p.getInventory().contains(votePaper)) p.getInventory().addItem(votePaper);
-                        }
-                    }
-                    gameStartingMessage(map.toString());
-                }
+                if (ticks == 30) gameStartingMessage(map.toString());
 
                 if (ticks == 18) tipMessages();
 
@@ -898,21 +927,15 @@ public class GameInstance {
                         FastBoard board = boards.get(p.getUniqueId());
                         if (board != null) board.updateLine(7, color("&fStarting In: &e" + ticks + "s"));
 
-                        if (ticks > 5 && !customGame && !p.getInventory().contains(votePaper)) {
-                            p.getInventory().addItem(votePaper);
-                        }
+                        // Also hands it to players who joined during the countdown
+                        if (ticks > 5) giveReadyItem(p);
                     }
                 }
 
                 if (ticks == 5) {
-                    if (!customGame) { // the vote results - custom games have no voting
-                        getGameSettings().changeGameType(false);
-                        getGameSettings().increaseLightningRate();
-                        getGameSettings().setTimeOfDay();
-                        getGameSettings().enableSantaFlyover();
-                    }
-                    removeVotePaper();
-                    removeClassSelectors(); // after the game type vote, which can switch to Frenzy
+                    removeReadyItems(); // too late to ready up
+                    removeClassSelectors(); // /frenzy can still have switched the game type
+                    if (isOneForAllVoting()) endOneForAllVoting();
                 }
 
                 timeToStartSeconds--;
@@ -978,18 +1001,301 @@ public class GameInstance {
         classSelectorRemoved = false;
 
         for (Player player : players) {
-            player.getInventory().setItem(0, LobbyItems.getClassSelectorItem());
+            if (hasClassSelector(player)) player.getInventory().setItem(0, LobbyItems.getClassSelectorItem());
         }
     }
 
-    private void removeVotePaper() {
+    /*
+     * Whether the player should have the class selector in the game lobby. A custom game's host and co-host have
+     * the Game Settings items instead until they start it, and One For All only hands it out once it's started:
+     * to the host and co-host (Host/Co-Host) or to everyone (Voting).
+     */
+    public boolean hasClassSelector(Player player) {
+        if (classSelectorRemoved) return false;
+        if (!customGame) return true;
+        if (!customGameCountdownStarted && canEditCustomGame(player)) return false;
+
+        switch (getGameSettings().oneForAllMode) {
+            case HOST:
+                return customGameCountdownStarted && canEditCustomGame(player);
+            case VOTING:
+                return customGameCountdownStarted && !oneForAllVotingEnded;
+            default:
+                return true;
+        }
+    }
+
+    /** Gives the player the class selector (and One For All's Voting Paper) if they should have them. */
+    public void giveClassSelectionItems(Player player) {
+        if (hasClassSelector(player)) player.getInventory().setItem(0, LobbyItems.getClassSelectorItem());
+        if (isOneForAllVoting()) player.getInventory().setItem(1, getOneForAllVotePaper());
+        if (isChoosingOneForAllClass()) updateOneForAllClassLine(player); // e.g. joined after the host picked
+    }
+
+    /** Gives or takes everyone's class selector and Voting Paper to match the current settings. */
+    public void updateClassSelectionItems() {
         for (Player player : players) {
-            if (player.getInventory().contains(votePaper)) {
-                if (player.getOpenInventory() != null && player.getOpenInventory().getTitle().contains("Vote"))
+            if (!hasClassSelector(player)) {
+                if (player.getOpenInventory() != null && player.getOpenInventory().getTitle().contains("Class"))
                     player.closeInventory();
-                player.getInventory().removeItem(votePaper);
+                player.getInventory().remove(Material.ENCHANTED_BOOK);
+            }
+            if (!isOneForAllVoting()) {
+                if (isOneForAllMenu(player) && !hasClassSelector(player)) player.closeInventory();
+                player.getInventory().remove(Material.PAPER); // custom games have no other paper
+            }
+            giveClassSelectionItems(player);
+        }
+    }
+
+    // ===== One For All =====
+
+    public boolean isOneForAll() {
+        return customGame && getGameSettings().oneForAllMode != OneForAllMode.DISABLED;
+    }
+
+    /** One For All's class is picked (or voted on) during the countdown. */
+    public boolean isChoosingOneForAllClass() {
+        return isOneForAll() && customGameCountdownStarted && state == GameState.WAITING;
+    }
+
+    public boolean isOneForAllVoting() {
+        return isChoosingOneForAllClass() && getGameSettings().oneForAllMode == OneForAllMode.VOTING
+                && !oneForAllVotingEnded;
+    }
+
+    /*
+     * Voting mode, when the countdown reaches 5s: the vote closes, so the class selector and Voting Paper go, and
+     * everyone hears (and sees on their Class line) what won. A Random win is only revealed once the game starts.
+     */
+    private void endOneForAllVoting() {
+        boolean noVotes = oneForAllVotes.isEmpty();
+        oneForAllClass = pickOneForAllVote();
+        oneForAllVotingEnded = true;
+        oneForAllVotes.clear();
+
+        closeOneForAllMenus();
+        updateClassSelectionItems();
+        for (Player player : players) updateOneForAllClassLine(player);
+
+        String winner = oneForAllClass == null ? ONE_FOR_ALL_RANDOM : oneForAllClass.getTag();
+        if (noVotes) {
+            TellAll(color("&2&l(!) &rOne For All voting has ended! Nobody voted, so it's " + winner + "&r!"));
+        } else {
+            TellAll(color("&2&l(!) &rOne For All voting has ended! " + winner + " &rwon the vote!"));
+        }
+    }
+
+    /** Host/Co-Host mode's pick (null = random). */
+    public ClassType getOneForAllClass() {
+        return oneForAllClass;
+    }
+
+    /** Whether the player has voted, and so whether getOneForAllVote means a class or a random one. */
+    public boolean hasOneForAllVote(Player player) {
+        return oneForAllVotes.containsKey(player.getUniqueId());
+    }
+
+    /** The class the player voted for (null = random, or no vote - see hasOneForAllVote). */
+    public ClassType getOneForAllVote(Player player) {
+        return oneForAllVotes.get(player.getUniqueId());
+    }
+
+    /** Votes per option, a null key being Random. Options without votes aren't in it. */
+    public Map<ClassType, Integer> getOneForAllVoteCounts() {
+        Map<ClassType, Integer> counts = new HashMap<>();
+        for (ClassType type : oneForAllVotes.values()) {
+            Integer count = counts.get(type);
+            counts.put(type, count == null ? 1 : count + 1);
+        }
+        return counts;
+    }
+
+    public static final String ONE_FOR_ALL_RANDOM = "&cR&6a&en&ad&bo&3m";
+
+    public static ItemStack getOneForAllVotePaper() {
+        return ItemHelper.setDetails(new ItemStack(Material.PAPER),
+                "&eVoting Paper &7(Right Click)", "", "&7Click to see the classes with votes");
+    }
+
+    /*
+     * One For All: picks the class everyone plays (Host/Co-Host) or votes for it (Voting); a null type is a random
+     * class. With toggle (a menu click), choosing the class you already voted for takes the vote back.
+     */
+    public void chooseOneForAllClass(Player player, ClassType type, boolean toggle) {
+        if (!players.contains(player)) return;
+        if (!isChoosingOneForAllClass()) {
+            player.sendMessage(color("&c&l(!) &rIn &eOne For All &rthe class is chosen once the host starts the game."));
+            return;
+        }
+        if (oneForAllVotingEnded) {
+            player.sendMessage(color("&c&l(!) &rOne For All voting has already ended."));
+            return;
+        }
+        if (type != null && !isClassSelectable(type)) {
+            player.sendMessage(color("&c&l(!) &rThat class is disabled in this custom game"));
+            return;
+        }
+
+        String name = type == null ? ONE_FOR_ALL_RANDOM : "a " + type.getTag() + " &rclass";
+        if (getGameSettings().oneForAllMode == OneForAllMode.HOST) {
+            if (!canEditCustomGame(player)) {
+                player.sendMessage(color("&c&l(!) &rOnly the host and co-host choose the class in &eOne For All&r."));
+                return;
+            }
+            if (type == oneForAllClass) {
+                player.sendMessage(color("&c&l(!) &rEveryone is already playing " + name + "&r."));
+                return;
+            }
+
+            oneForAllClass = type;
+            TellAll(color("&2&l(!) &e" + player.getName() + " &rchose " + name + " &rfor everyone!"));
+            for (Player p : players) updateOneForAllClassLine(p);
+        } else {
+            UUID id = player.getUniqueId();
+            if (oneForAllVotes.containsKey(id) && oneForAllVotes.get(id) == type) {
+                if (!toggle) {
+                    player.sendMessage(color("&c&l(!) &rYou already voted for " + name + "&r."));
+                    return;
+                }
+                oneForAllVotes.remove(id);
+                player.sendMessage(color("&2&l(!) &rYou removed your vote for " + name + "&r."));
+            } else {
+                oneForAllVotes.put(id, type);
+                player.sendMessage(color("&2&l(!) &rYou voted for " + name + "&r."));
             }
         }
+
+        player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
+        refreshOneForAllMenus();
+    }
+
+    /** Host/Co-Host mode: the scoreboard's Class line shows the class everyone will play. */
+    private void updateOneForAllClassLine(Player player) {
+        FastBoard board = boards.get(player.getUniqueId());
+        if (board == null) return;
+
+        ClassType shown = getGameSettings().oneForAllMode == OneForAllMode.HOST || oneForAllVotingEnded
+                ? oneForAllClass : null;
+        board.updateLine(3, color(shown == null ? "&fClass: &cR&6a&en&ad&bo&3m" : "&fClass: &a" + shown.toString()));
+    }
+
+    /** Clears the One For All pick and votes, and everyone's Class line goes back to Random. */
+    private void resetOneForAllChoice() {
+        oneForAllClass = null;
+        oneForAllVotes.clear();
+        oneForAllVotingEnded = false;
+        if (!isOneForAll()) return;
+        for (Player player : players) {
+            classSelection.remove(player); // classes picked before the countdown don't count
+            favClassSelection.remove(player);
+            updateOneForAllClassLine(player);
+        }
+    }
+
+    /** The most voted option (ties are picked at random), or null for Random / no votes. */
+    private ClassType pickOneForAllVote() {
+        List<ClassType> top = new ArrayList<>();
+        int most = 0;
+        for (Map.Entry<ClassType, Integer> entry : getOneForAllVoteCounts().entrySet()) {
+            if (entry.getKey() != null && !isClassSelectable(entry.getKey())) continue;
+            if (entry.getValue() > most) {
+                most = entry.getValue();
+                top.clear();
+            }
+            if (entry.getValue() == most) top.add(entry.getKey());
+        }
+        return top.isEmpty() ? null : top.get(random.nextInt(top.size()));
+    }
+
+    /** The class everyone plays: the host's pick or the vote's winner (a random enabled class for Random). */
+    private ClassType pickOneForAllClass() {
+        ClassType chosen;
+        if (getGameSettings().oneForAllMode == OneForAllMode.HOST || oneForAllVotingEnded) chosen = oneForAllClass;
+        else chosen = pickOneForAllVote();
+
+        // Random won, or nothing was picked: a random enabled class
+        if (chosen == null || !isClassSelectable(chosen)) {
+            ClassType[] selectable = getSelectableClasses();
+            chosen = selectable[random.nextInt(selectable.length)];
+        }
+        return chosen;
+    }
+
+    private static boolean isOneForAllMenu(Player player) {
+        Optional<SmartInventory> open = SmartInvsPlugin.manager().getInventory(player);
+        if (!open.isPresent()) return false;
+        InventoryProvider provider = open.get().getProvider();
+        return provider instanceof OneForAllClassGUI || provider instanceof OneForAllVotesGUI;
+    }
+
+    /** A pick or vote changed: everyone's open One For All menus are reopened (on the same page) to show it. */
+    private void refreshOneForAllMenus() {
+        for (Player player : players) {
+            if (!isOneForAllMenu(player)) continue;
+            Optional<SmartInventory> open = SmartInvsPlugin.manager().getInventory(player);
+            int page = SmartInvsPlugin.manager().getContents(player)
+                    .map(contents -> contents.pagination().getPage()).orElse(0);
+            open.get().open(player, page);
+        }
+    }
+
+    private void closeOneForAllMenus() {
+        for (Player player : players) {
+            if (isOneForAllMenu(player)) player.closeInventory();
+        }
+    }
+
+    // ===== Ready up =====
+
+    /** The ready-up dye: gray while the player isn't ready, green once they are. */
+    public static ItemStack getReadyItem(boolean ready) {
+        if (ready) {
+            return ItemHelper.setDetails(new ItemStack(Material.INK_SACK, 1, (short) 10),
+                    "&aReady &7(Right Click)", "", "&7Click to cancel", "&7The game starts early once", "&7everyone is ready");
+        }
+        return ItemHelper.setDetails(new ItemStack(Material.INK_SACK, 1, (short) 8),
+                "&7Not Ready &7(Right Click)", "", "&7Click to ready up", "&7The game starts early once", "&7everyone is ready");
+    }
+
+    /** The waiting lobby has no other dyes. */
+    public static boolean isReadyItem(ItemStack item) {
+        return item != null && item.getType() == Material.INK_SACK;
+    }
+
+    public boolean isReady(Player player) {
+        return getGameSettings().startVotes.contains(player);
+    }
+
+    private int findReadyItemSlot(Player player) {
+        ItemStack[] contents = player.getInventory().getContents();
+        for (int slot = 0; slot < contents.length; slot++) {
+            if (isReadyItem(contents[slot])) return slot;
+        }
+        return -1;
+    }
+
+    /** Gives the player the ready-up dye (in their current ready state) if they don't have it. */
+    private void giveReadyItem(Player player) {
+        if (findReadyItemSlot(player) == -1) player.getInventory().addItem(getReadyItem(isReady(player)));
+    }
+
+    private void removeReadyItems() {
+        for (Player player : players) player.getInventory().remove(Material.INK_SACK);
+    }
+
+    /** The player clicked the ready-up dye: they're ready now (or not anymore), and the dye shows it. */
+    public void toggleReady(Player player) {
+        if (state != GameState.WAITING || gameStartTime == null || !players.contains(player)) return;
+
+        player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
+        getGameSettings().toggleReady(player, this);
+
+        // Everyone being ready starts the game, and that clears their inventories
+        if (state != GameState.WAITING) return;
+        int slot = findReadyItemSlot(player);
+        if (slot != -1) player.getInventory().setItem(slot, getReadyItem(isReady(player)));
+        player.updateInventory();
     }
 
     private void tipMessages() {
@@ -1000,10 +1306,10 @@ public class GameInstance {
             TellAll(color("&2[&aTip&2] &aExecute double jump by tapping the space bar twice!"));
         else if (chance == 1)
             TellAll(color("&2[&aTip&2] &aConsider purchasing a rank at our /store for more SCB perks!"));
-        else if (chance == 2 || customGame) // custom games have no vote paper
+        else if (chance == 2)
             TellAll(color("&2[&aTip&2] &aBe sure to select a class by using the enchanted book!"));
         else
-            TellAll(color("&2[&aTip&2] &aUse the vote paper to ready up or vote for game settings!"));
+            TellAll(color("&2[&aTip&2] &aUse the dye to ready up and start the game early!"));
 
         for (Player player : players)
             player.playSound(player.getLocation(), Sound.LEVEL_UP, 1, 1);
@@ -1100,6 +1406,8 @@ public class GameInstance {
     }
 
     private void giveRandomItemDrop() {
+        if (gameSettings.dropTimer <= 0) return; // Lightning Drop Rate set to Disabled
+
         for (Player player : this.players) {
             BaseClass bc = this.classes.get(player);
             if (bc != null) {
@@ -1149,8 +1457,13 @@ public class GameInstance {
             TellAll(color("&e&l----------------------------------------"));
         }
 
+        closeOneForAllMenus();
         this.state = GameState.STARTED;
-        if (customGame) CustomGamesGUI.refreshOpenMenus(); // Lobby -> Playing
+        if (customGame) {
+            CustomGamesGUI.refreshOpenMenus(); // Lobby -> Playing
+            // The Passive Healing modifier (custom games play on their own copy of the map)
+            mapWorld.setGameRuleValue("naturalRegeneration", String.valueOf(gameSettings.passiveHealing));
+        }
         resetState();
         LoadClasses();
         // Private game "Lives" modifier (5 by default)
@@ -1175,11 +1488,12 @@ public class GameInstance {
         trackInstanceTask(task);
     }
 
+    /** The items a player keeps when Class Switch changes their class: lightning drops and kill health pots. */
     private List<ItemStack> getSavedLootDropItems(Player player) {
         List<ItemStack> savedDrops = new ArrayList<>();
 
         for (ItemStack item : player.getInventory().getContents()) {
-            if (GameLootDrops.isLootDropItem(item)) {
+            if (GameLootDrops.isLootDropItem(item) || BaseClass.isKillHealthPot(item)) {
                 savedDrops.add(item.clone());
             }
         }
@@ -1191,8 +1505,21 @@ public class GameInstance {
         if (!getGameSettings().randomClasses) return;
         if (getGameSettings().randomClassCycleSeconds <= 0) return;
 
+        int playableEnabled = 0;
+        for (ClassType type : getGameSettings().enabledClasses) {
+            if (type.isPlayable()) playableEnabled++;
+        }
+        // Always switching to the same single class every 5s: the countdown sounds have nothing to announce
+        final boolean skipCountdownSound = getGameSettings().randomClassCycleSeconds == 5 && playableEnabled == 1;
+        // 1s: no countdown, titles or sounds - the class just switches every second (and with a single class
+        // enabled there's no class to announce either). The countdown below takes a second more than the setting,
+        // so 1s counts from 0 to switch every second
+        final boolean everySecond = getGameSettings().randomClassCycleSeconds == 1;
+        final boolean showClassLabel = !everySecond || playableEnabled != 1;
+        final int cycleStart = everySecond ? 0 : getGameSettings().randomClassCycleSeconds;
+
         BukkitRunnable runnable = new BukkitRunnable() {
-            int seconds = getGameSettings().randomClassCycleSeconds;
+            int seconds = cycleStart;
 
             @Override
             public void run() {
@@ -1207,25 +1534,26 @@ public class GameInstance {
                 }
 
                 if (seconds <= 0) {
-                    TellAll(color("&d&l(!) &rRandomizing classes..."));
-
                     for (Player player : new ArrayList<>(players)) {
                         BaseClass oldClass = classes.get(player);
 
                         if (oldClass == null) continue;
                         if (oldClass.getLives() <= 0) continue;
-                        if (oldClass.isDead) continue;
 
-                        List<ItemStack> savedDrops = new ArrayList<>();
-
-                        for (ItemStack item : player.getInventory().getContents()) {
-                            if (GameLootDrops.isLootDropItem(item)) {
-                                savedDrops.add(item.clone());
-                            }
+                        if (oldClass.isDead) {
+                            // Waiting to respawn: they get a new class too, which the respawn then loads
+                            reRandomizeClass(player, false);
+                            BaseClass respawningClass = classes.get(player);
+                            if (respawningClass != null) respawningClass.isDead = true;
+                            continue;
                         }
 
-                        player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.3F);
-                        player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1.0F, 1.8F);
+                        List<ItemStack> savedDrops = getSavedLootDropItems(player);
+
+                        if (!everySecond) {
+                            player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.3F);
+                            player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1.0F, 1.8F);
+                        }
 
                         removeOldClassPotionEffects(player, oldClass);
                         getGameManager().getMain().getListener().resetPotionEffects(player);
@@ -1233,7 +1561,7 @@ public class GameInstance {
                         player.getInventory().clear();
                         player.getInventory().setArmorContents(null);
 
-                        reRandomizeClass(player);
+                        reRandomizeClass(player, false); // Class Switch: no "class was randomly selected" spam
 
                         BaseClass newClass = classes.get(player);
 
@@ -1242,22 +1570,26 @@ public class GameInstance {
 
                             for (ItemStack savedDrop : savedDrops) {
                                 if (savedDrop != null && savedDrop.getType() != Material.AIR) {
-                                    player.getInventory().addItem(savedDrop);
+                                    GameLootDrops.giveToPlayer(player, savedDrop);
                                 }
                             }
 
                             player.updateInventory();
 
-                            TitleUtil.sendTimes(player, 1, 30, 10);
-                            TitleUtil.setSubtitle(player, "" + newClass.getType().getTag());
-                            TitleUtil.setTitle(player, "");
+                            if (showClassLabel) {
+                                TitleUtil.sendTimes(player, 1, 30, 10);
+                                TitleUtil.setSubtitle(player, "" + newClass.getType().getTag());
+                                TitleUtil.setTitle(player, "");
+                            }
 
-                            player.playSound(player.getLocation(), Sound.HORSE_ARMOR, 1.0F, 1.0F);
-                            player.playSound(player.getLocation(), Sound.LEVEL_UP, 1.0F, 1.2F);
+                            if (!everySecond) {
+                                player.playSound(player.getLocation(), Sound.HORSE_ARMOR, 1.0F, 1.0F);
+                                player.playSound(player.getLocation(), Sound.LEVEL_UP, 1.0F, 1.2F);
+                            }
                         }
                     }
 
-                    seconds = getGameSettings().randomClassCycleSeconds;
+                    seconds = cycleStart;
                     return;
                 }
 
@@ -1270,7 +1602,7 @@ public class GameInstance {
                         TitleUtil.sendTimes(player, 0, 25, 5);
                         TitleUtil.setSubtitle(player, "&e" + seconds);
                         TitleUtil.setTitle(player, "");
-                        player.playSound(player.getLocation(), Sound.NOTE_PLING, 1.0F, 1.0F);
+                        if (!skipCountdownSound) player.playSound(player.getLocation(), Sound.NOTE_PLING, 1.0F, 1.0F);
                     }
                 }
 
@@ -1532,6 +1864,9 @@ public class GameInstance {
         if (seconds <= 0) return; // Lightning Drop Rate set to Disabled
         lightningDropCountdown = seconds;
         nextItemToDrop = getItemToDrop();
+        // The countdown runs down to 0 before a drop, which takes a second more than the setting - so 1s counts
+        // from 0 to drop every second
+        final int countdownStart = seconds == 1 ? 0 : seconds;
 
         BukkitRunnable runnable = new BukkitRunnable() {
             @Override
@@ -1552,7 +1887,7 @@ public class GameInstance {
                     for (Player gamePlayer : players) {
                         BaseClass bc = classes.get(gamePlayer);
                     }
-                    lightningDropCountdown = seconds;
+                    lightningDropCountdown = countdownStart;
                     nextItemToDrop = getItemToDrop();
                 } else {
                     lightningDropCountdown--;
@@ -1566,7 +1901,7 @@ public class GameInstance {
 
     public ItemStack getItemToDrop() {
         GameSettings settings = getGameSettings();
-        return GameLootDrops.getDrop(settings.enabledDrops, settings.opDrops).getItem();
+        return GameLootDrops.getDrop(settings.enabledDrops).getItem();
     }
 
     public String truncateString(String string, int length) {
@@ -1609,7 +1944,7 @@ public class GameInstance {
                 }
                 Score line = o.getScore("" + ChatColor.DARK_GRAY + ChatColor.STRIKETHROUGH + "--------------------");
                 line.setScore(0);
-                Score game = o.getScore(color("&fMode: &a" + this.gameType.getName()));
+                Score game = o.getScore(color("&fMode: &a" + getModeName()));
                 game.setScore(0);
                 time = o.getScore(color("&fTime: &a" + gameTime + "m"));
                 time.setScore(0);
@@ -1704,7 +2039,7 @@ public class GameInstance {
 
             // Handle class changes (Frenzy/GunGame) while dead
             if (this.gameType == GameType.FRENZY && baseClass.getLives() > 0) {
-                reRandomizeClass(player);
+                reRandomizeClass(player, true);
             } else if (this.gameType == GameType.GUNGAME && baseClass.getLives() > 0) {
                 nextClass(player);
             }
@@ -1723,7 +2058,10 @@ public class GameInstance {
                         return;
                     }
 
-                    if (finalBaseClass.getLives() > 0) {
+                    // Class Switch can give them a new class while they wait to respawn
+                    final BaseClass respawnClass = classes.getOrDefault(player, finalBaseClass);
+
+                    if (respawnClass.getLives() > 0) {
                         if (this.ticks == 0) {
                             // Finish countdown -> respawn if still valid
                             if (state != GameState.STARTED || !players.contains(player) || getWinnerList().contains(player)) {
@@ -1743,19 +2081,21 @@ public class GameInstance {
                             if (!GameInstance.this.players.contains(player)) {
                                 GameInstance.this.getGameManager().getMain().ResetPlayer(player);
                             } else {
-                                finalBaseClass.loadPlayer();
+                                respawnClass.loadPlayer();
 
                                 if (GameInstance.this.gameType == GameType.FRENZY
                                         || GameInstance.this.gameType == GameType.GUNGAME) {
                                     TitleUtil.sendTimes(player, 1, 30, 10);
-                                    TitleUtil.setSubtitle(player, "" + finalBaseClass.getType().getTag());
+                                    TitleUtil.setSubtitle(player, "" + respawnClass.getType().getTag());
                                     TitleUtil.setTitle(player, "");
                                 } else {
                                     TitleUtil.sendTimes(player, 1, 30, 10);
-                                    TitleUtil.setSubtitle(player, "");
+                                    // Class Switch: tell them which class they respawned as
+                                    TitleUtil.setSubtitle(player, getGameSettings().randomClasses
+                                            ? "" + respawnClass.getType().getTag() : "");
                                     TitleUtil.setTitle(player, "&eRespawned");
                                 }
-                                finalBaseClass.isDead = false;
+                                respawnClass.isDead = false;
                             }
                             cancel();
                             return;
@@ -2076,6 +2416,14 @@ public class GameInstance {
                 winner.sendMessage("" + ChatColor.BOLD + "||");
                 winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.YELLOW + ChatColor.BOLD + "  GAME WON");
                 winner.sendMessage("" + ChatColor.BOLD + "||");
+                winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Placed #1");
+                if (baseClass != null) {
+                    winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  Kills: "
+                            + ChatColor.GREEN + baseClass.totalKills);
+                }
+                if (this.firstBlood == winner)
+                    winner.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RESET + "  " + ChatColor.GREEN + "First Blood");
+                winner.sendMessage("" + ChatColor.BOLD + "||");
                 winner.sendMessage("" + ChatColor.BOLD + "===========================");
                 winner.sendMessage(color("&2&l(!) &rCustom games don't give Tokens, EXP or stats."));
                 continue;
@@ -2390,7 +2738,8 @@ public class GameInstance {
         return picked;
     }
 
-    private void reRandomizeClass(Player player) {
+    /** announce: whether to tell the player their new class in chat (Frenzy does, Class Switch doesn't). */
+    private void reRandomizeClass(Player player, boolean announce) {
         BaseClass baseClass = classes.get(player);
         if (baseClass.getLives() > 0) {
             ClassType classType = pickUnplayedClass(player);
@@ -2420,7 +2769,7 @@ public class GameInstance {
             allClasses.put(player, newBaseClass);
             sendScoreboardUpdate(player);
 
-            player.sendMessage(color("&2&l(!) &rYour class was randomly selected to " + classType.getTag()));
+            if (announce) player.sendMessage(color("&2&l(!) &rYour class was randomly selected to " + classType.getTag()));
 
             if (player.hasPermission("scb.chat"))
                 player.setDisplayName("" + player.getName() + " " + classType.getTag());
@@ -2472,6 +2821,18 @@ public class GameInstance {
         Random rand = new Random();
         int attempts = 0;
 
+        // One For All: everyone plays the same class
+        ClassType oneForAll = null;
+        if (isOneForAll()) {
+            boolean announced = oneForAllVotingEnded && oneForAllClass != null; // the vote's winning class already was
+            oneForAll = pickOneForAllClass();
+            oneForAllClass = null;
+            oneForAllVotes.clear();
+            oneForAllVotingEnded = false;
+            if (!announced)
+                TellAll(color("&2&l(!) &e&lOne For All&r: everyone is playing " + oneForAll.getTag() + "&r!"));
+        }
+
         for (Player player : players) {
             player.getInventory().clear();
             PlayerData playerData = gameManager.getMain().getDataManager().getPlayerData(player);
@@ -2485,6 +2846,7 @@ public class GameInstance {
             if (selectedClass != null && !isClassSelectable(selectedClass)) selectedClass = null;
 
             if (gameType == GameType.GUNGAME) selectedClass = classList.get(0);
+            if (oneForAll != null) selectedClass = oneForAll;
 
             if (selectedClass == null) {
                 if (!randomClass && this.favClassSelection.contains(player) && !playerData.customIntegers.isEmpty()) {
@@ -2572,6 +2934,11 @@ public class GameInstance {
         player.setAllowFlight(true);
         this.playerPosition.remove(player);
         removeSpectator(player);
+        if (isOneForAllMenu(player)) player.closeInventory();
+        if (oneForAllVotes.containsKey(player.getUniqueId())) {
+            oneForAllVotes.remove(player.getUniqueId());
+            refreshOneForAllMenus();
+        }
 
         if (this.players.remove(player)) {
             player.setDisplayName(player.getName());
@@ -2609,6 +2976,8 @@ public class GameInstance {
                         for (Player gamePlayer : this.players) {
                             // Private games keep the leader's modifiers
                             if (!customGame) this.gameSettings = new GameSettings(this); // reset vars
+                            else this.gameSettings.clearReady();
+                            gamePlayer.getInventory().remove(Material.INK_SACK); // the ready-up dye
                             if (gamePlayer.getInventory().contains(Material.PAPER)) {
                                 if (gamePlayer.getOpenInventory() != null
                                         && gamePlayer.getOpenInventory().getTitle().contains("Vote"))
@@ -2621,11 +2990,13 @@ public class GameInstance {
                             if (fb != null) fb.updateLine(7, getWaitingLine(gamePlayer));
                         }
 
-                        restoreClassSelectors(); // the game type can be voted on / changed again
+                        restoreClassSelectors(); // the game type can be changed again
 
                         // The leader has to press Start Game again, so give their leader items back
                         if (customGame) {
                             customGameCountdownStarted = false;
+                            resetOneForAllChoice();
+                            updateClassSelectionItems();
                             Player leader = Bukkit.getPlayer(customGameHost);
                             for (Player editor : getEditors()) giveCustomGameHostItems(editor);
                         }

@@ -269,6 +269,7 @@ public class ClassListGUI implements InventoryProvider {
             game.TellAll(main.color("&2&l(!) &rClass selection has been &ereset &rto the default classes."));
         } else if (e.isLeftClick()) {
             enabled.addAll(Arrays.asList(ClassType.getPlayableClasses()));
+            status = Status.ENABLED;
             game.TellAll(main.color("&2&l(!) &rAll classes have been &aenabled&r, including vaulted ones."));
         } else if (e.isRightClick()) {
             enabled.clear();

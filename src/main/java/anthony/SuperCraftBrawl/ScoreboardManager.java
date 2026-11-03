@@ -167,7 +167,7 @@ public class ScoreboardManager {
 
         if (game.getMap() != null) {
             board.updateTitle(main.color("&e&l" + game.getMap()));
-            board.updateLines("", main.color("&fMode: &a" + game.gameType.getName()),
+            board.updateLines("", main.color("&fMode: &a" + game.getModeName()),
                     "", main.color("&fClass: &cR&6a&en&ad&bo&3m"), "",
                     main.color("Players: &e"
                             + (game.getMap().GetInstance().gameType == GameType.FRENZY

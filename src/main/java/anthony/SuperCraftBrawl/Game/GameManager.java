@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.all.ReindeerFlight;
 import anthony.SuperCraftBrawl.Game.classes.all.SantaClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
@@ -13,6 +14,8 @@ import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.gui.games.CustomGamesGUI;
 import anthony.SuperCraftBrawl.gui.games.GameModifiersGUI;
+import anthony.SuperCraftBrawl.gui.games.OneForAllClassGUI;
+import anthony.SuperCraftBrawl.gui.games.OneForAllVotesGUI;
 import anthony.SuperCraftBrawl.party.Party;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -93,7 +96,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
     /*
-    * This function removes a player from game settings votes.
+    * This function removes a player from the ready players of their game.
     * Function is called in onQuit in Core.java
      */
     public void removePlayerFromVotes(Player player) {
@@ -101,9 +104,6 @@ public class GameManager implements Listener, PluginMessageListener {
 
         if (game != null && game.getGameSettings() != null) {
             game.getGameSettings().removeFromStartVotes(player);
-            game.getGameSettings().removeFromGameTypeVotes(player);
-            game.getGameSettings().removeFromLightningVotes(player);
-            game.getGameSettings().removeFromTimeVotes(player);
         }
     }
 
@@ -969,8 +969,8 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
     /*
-    * This function handles the interactivity with the 'Vote' paper
-    * in a game lobby, and will open a GUI if the item is a paper
+    * This function handles the interactivity with the One For All 'Voting Paper'
+    * in a custom game lobby, and will open its GUI if the item is a paper
      */
 	@EventHandler
 	public void votePaper(PlayerInteractEvent event) {
@@ -979,8 +979,24 @@ public class GameManager implements Listener, PluginMessageListener {
 		GameInstance game = this.GetInstanceOfPlayer(player);
 
 		if (game != null)
-			if (item != null && item.getType() == Material.PAPER)
-				new VoteGameSettingsGUI(main).inv.open(player);
+			if (item != null && item.getType() == Material.PAPER && game.isOneForAllVoting())
+				new OneForAllVotesGUI(main, game).inv.open(player);
+	}
+
+    /*
+    * This function handles the interactivity with the ready-up dye in a game lobby:
+    * right clicking it flips the player between ready (green) and not ready (gray)
+     */
+	@EventHandler
+	public void readyUpItem(PlayerInteractEvent event) {
+		if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK)
+			return;
+
+		Player player = event.getPlayer();
+		GameInstance game = this.GetInstanceOfPlayer(player);
+
+		if (game != null && GameInstance.isReadyItem(event.getItem()))
+			game.toggleReady(player);
 	}
 
     /*
@@ -1126,6 +1142,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	private static final double SNOWBALL_LAUNCHER_KB_HORIZONTAL = 2.5;
 	private static final double SNOWBALL_LAUNCHER_KB_VERTICAL = 1.0;
 	private static final String SNOWBALL_LAUNCHER_META = "SnowballLauncher";
+	private static final int SNOWBALL_LAUNCHER_TRAIL_MAX_TICKS = 5 * 20; // in case it never lands
 
 	/*
 	 * This function deals with the 'Snowball Launcher' lightning drop item. Each right click uses
@@ -1178,35 +1195,12 @@ public class GameManager implements Listener, PluginMessageListener {
 		}.runTaskTimer(main, 0, SNOWBALL_LAUNCHER_SHOT_DELAY_TICKS);
 	}
 
-	/** Takes one use off the held launcher's "Uses left" lore line, removing it on the last use. */
+	/** Takes one use off the held launcher (its item amount), removing it on the last use. */
 	private void useSnowballLauncherCharge(Player player, ItemStack item) {
-		ItemMeta meta = item.getItemMeta();
-		List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
-		String prefix = main.color(GameLootDrops.SNOWBALL_LAUNCHER_USES_PREFIX);
-
-		int line = -1;
-		int uses = GameLootDrops.SNOWBALL_LAUNCHER_USES;
-		for (int i = 0; i < lore.size(); i++) {
-			if (lore.get(i).startsWith(prefix)) {
-				line = i;
-				try {
-					uses = Integer.parseInt(lore.get(i).substring(prefix.length()));
-				} catch (NumberFormatException ignored) {
-				}
-				break;
-			}
-		}
-
-		if (--uses <= 0) {
+		if (item.getAmount() <= 1)
 			player.getInventory().clear(player.getInventory().getHeldItemSlot());
-			return;
-		}
-		if (line >= 0)
-			lore.set(line, prefix + uses);
 		else
-			lore.add(prefix + uses);
-		meta.setLore(lore);
-		item.setItemMeta(meta);
+			item.setAmount(item.getAmount() - 1);
 	}
 
 	private void shootLauncherSnowball(GameInstance instance, Player shooter, int shotIndex) {
@@ -1218,6 +1212,22 @@ public class GameManager implements Listener, PluginMessageListener {
 		// A real snowball, tagged so only snowballLauncherHit handles it (never the Slowballs effect)
 		Snowball snowball = shooter.launchProjectile(Snowball.class);
 		snowball.setMetadata(SNOWBALL_LAUNCHER_META, new FixedMetadataValue(main, true));
+
+		// Frosty trail until the snowball lands
+		instance.trackClassTask(new BukkitRunnable() {
+			private int ticks = 0;
+
+			@Override
+			public void run() {
+				if (!snowball.isValid() || ++ticks > SNOWBALL_LAUNCHER_TRAIL_MAX_TICKS) {
+					cancel();
+					return;
+				}
+				Location loc = snowball.getLocation();
+				ParticleEffect.SNOW_SHOVEL.display(loc, 0.08f, 0.08f, 0.08f, 0.01f, 2, null);
+				if (ticks % 2 == 0) ParticleEffect.FIREWORKS_SPARK.display(loc, 0.05f, 0.05f, 0.05f, 0.0f, 1, null);
+			}
+		}.runTaskTimer(main, 1, 1));
 	}
 
 	/*
@@ -1276,16 +1286,28 @@ public class GameManager implements Listener, PluginMessageListener {
 		BaseClass bc = instance.classes.get(player);
 		if (bc instanceof SantaClass && ((SantaClass) bc).shouldBlockReindeerExit(event.getVehicle()))
 			event.setCancelled(true);
+
+		ReindeerFlight winFlight = getWinEffectReindeer(instance, player);
+		if (winFlight != null && winFlight.shouldBlockExit(event.getVehicle()))
+			event.setCancelled(true);
+	}
+
+	/** The Santa win effect's Reindeer the player is flying, if any. */
+	private static ReindeerFlight getWinEffectReindeer(GameInstance instance, Player player) {
+		WinEffects effects = instance.effects.get(player);
+		return effects == null ? null : effects.getReindeerFlight();
 	}
 
 	/*
 	 * Teleports dismount the rider right after this event fires, so end the Reindeer flight first
-	 * (otherwise the blocked dismount would teleport Santa while still mounted).
+	 * (otherwise the blocked dismount would teleport Santa while still mounted). The server's own
+	 * position corrections (UNKNOWN) don't dismount anyone and happen all the time for newer clients
+	 * joining through ViaVersion while riding, so they mustn't end the flight.
 	 */
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onReindeerRiderTeleport(PlayerTeleportEvent event) {
 		Player player = event.getPlayer();
-		if (!(player.getVehicle() instanceof Horse))
+		if (event.getCause() == TeleportCause.UNKNOWN || !(player.getVehicle() instanceof Horse))
 			return;
 
 		GameInstance instance = this.GetInstanceOfPlayer(player);
@@ -1295,6 +1317,10 @@ public class GameManager implements Listener, PluginMessageListener {
 		BaseClass bc = instance.classes.get(player);
 		if (bc instanceof SantaClass)
 			((SantaClass) bc).endReindeerFlight();
+
+		ReindeerFlight winFlight = getWinEffectReindeer(instance, player);
+		if (winFlight != null)
+			winFlight.end();
 	}
 
 	@EventHandler
@@ -1438,8 +1464,21 @@ public class GameManager implements Listener, PluginMessageListener {
 	public void OnPickupItem(PlayerPickupItemEvent event) {
 		Item item = event.getItem();
 
-		if (projManager.isProjectile(item))
+		if (projManager.isProjectile(item)) {
 			event.setCancelled(true);
+			return;
+		}
+
+		// The Snowball Launcher is a single item whose amount is its uses: the vanilla pickup would split it
+		// into three launchers, so it's moved into the inventory whole instead
+		ItemStack stack = item.getItemStack();
+		if (GameLootDrops.isOversizedStack(stack) && GameLootDrops.isLootDropItem(stack)) {
+			event.setCancelled(true);
+			if (GameLootDrops.giveToPlayer(event.getPlayer(), stack)) {
+				item.remove();
+				event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ITEM_PICKUP, 0.2f, 1.5f);
+			}
+		}
 	}
 
 	// Disables portals usage
@@ -2032,6 +2071,22 @@ public class GameManager implements Listener, PluginMessageListener {
         player.sendMessage(main.color("&c&l(!) &rThat custom game isn't running anymore."));
     }
 
+    /*
+     * /joingame <world> (the /invite "Click here to join!"): joins that exact game. Every game plays on its own
+     * copy of the map's world, so /join <map> could send you to a different game on the same map.
+     */
+    public void joinGameByWorld(Player player, String worldName) {
+        for (GameInstance game : games) {
+            if (game.getMapWorld() == null || !game.getMapWorld().getName().equals(worldName)) continue;
+
+            if (game.state == GameState.STARTED) SpectatorJoinGame(player, game);
+            else if (game.state == GameState.WAITING) JoinGame(player, game);
+            else player.sendMessage(main.color("&c&l(!) &rThat game has already ended."));
+            return;
+        }
+        player.sendMessage(main.color("&c&l(!) &rThat game isn't running anymore."));
+    }
+
     /** The leader picked a different map with the Change Map item: everyone moves to a new game on it. */
     public void changeCustomGameMap(Player leader, Maps map) {
         GameInstance game = GetInstanceOfPlayer(leader);
@@ -2045,14 +2100,14 @@ public class GameManager implements Listener, PluginMessageListener {
             return;
         }
 
-        GameInstance next = moveCustomGame(game, map, leader);
+        GameInstance next = moveCustomGame(game, map);
         next.TellAll(main.color("&6&l(!) &e" + leader.getName() + " &rchanged the map to &e" + map.toString() + "&r."));
     }
 
     /*
      * A custom game just ended (everyone is back in the lobby): its players go straight into a new custom game
-     * on the default map with the same leader, Game Modifiers and public/private setting, so the leader only has
-     * to change what they want. Returns false (and nothing happens) if it isn't a custom game or its leader
+     * on a fresh copy of the same map with the same leader, Game Modifiers and public/private setting, so the
+     * leader only has to change what they want. Returns false (and nothing happens) if it isn't a custom game or its leader
      * isn't there anymore.
      */
     public boolean restartCustomGame(GameInstance old) {
@@ -2061,7 +2116,7 @@ public class GameManager implements Listener, PluginMessageListener {
         Player leader = old.getCustomGameHost() == null ? null : Bukkit.getPlayer(old.getCustomGameHost());
         if (leader == null || !old.players.contains(leader) || !main.canHostCustomGames(leader)) return false;
 
-        GameInstance next = moveCustomGame(old, DEFAULT_CUSTOM_GAME_MAP, leader);
+        GameInstance next = moveCustomGame(old, old.getMap()); // a fresh copy of the map just played
         next.TellAll(main.color("&6&l(!) &rBack in the &6Custom Game &rlobby! " + leader.getName()
                 + " can change the map and Game Settings and start the next game."));
         return true;
@@ -2069,20 +2124,23 @@ public class GameManager implements Listener, PluginMessageListener {
 
     /*
      * Moves a custom game's players to a new custom game on the given map (a new copy of it), keeping the
-     * leader, Game Modifiers, game type, time of day and public/private setting. The old game and its world
-     * copy are removed.
+     * host (even if a co-host triggered the move), the co-host, Game Modifiers, game type, time of day and
+     * public/private setting. The old game and its world copy are removed.
      */
-    private GameInstance moveCustomGame(GameInstance old, Maps map, Player leader) {
+    private GameInstance moveCustomGame(GameInstance old, Maps map) {
         List<Player> moving = new ArrayList<>();
         for (Player p : old.players) {
             if (p.isOnline()) moving.add(p);
         }
 
+        Player host = old.getCustomGameHost() == null ? null : Bukkit.getPlayer(old.getCustomGameHost());
+        if (host == null) return old; // the host leaving closes the custom game, so this shouldn't happen
+
         GameInstance next = new GameInstance(this, map,
-                main.getMapWorldManager().createCustomGameWorld(map.GetInstance().worldName, leader.getName()));
+                main.getMapWorldManager().createCustomGameWorld(map.GetInstance().worldName, host.getName()));
         next.getMapWorld().setTime(old.getMapWorld().getTime()); // the Time of Day modifier
         games.add(next);
-        next.enableCustomGame(leader);
+        next.enableCustomGame(host);
         next.setCustomGamePublic(old.isCustomGamePublic());
         next.gameType = old.gameType;
         next.getGameSettings().copyModifiersFrom(old.getGameSettings());
@@ -2094,7 +2152,7 @@ public class GameManager implements Listener, PluginMessageListener {
         for (Player p : moving) {
             joinSinglePlayerToGame(p, map, next);
         }
-        if (next.HasPlayer(leader)) next.giveCustomGameHostItems(leader);
+        if (next.HasPlayer(host)) next.giveCustomGameHostItems(host);
         Player coHost = old.getCustomGameCoHost() == null ? null : Bukkit.getPlayer(old.getCustomGameCoHost());
         if (coHost != null && next.HasPlayer(coHost)) next.setCustomGameCoHost(coHost);
         CustomGamesGUI.refreshOpenMenus();
@@ -2720,10 +2778,6 @@ public class GameManager implements Listener, PluginMessageListener {
 			}
 
 			instance.getGameSettings().removeFromStartVotes(player);
-			instance.getGameSettings().removeFromLightningVotes(player);
-			instance.getGameSettings().removeFromGameTypeVotes(player);
-			instance.getGameSettings().removeFromTimeVotes(player);
-			instance.getGameSettings().removeFromSantaVotes(player);
 		}
 
 		return found;
@@ -2967,7 +3021,9 @@ public class GameManager implements Listener, PluginMessageListener {
 			}
 		case ENCHANTED_BOOK:
 			if (gameInstance != null) {
-				if (gameInstance.state == GameState.WAITING) {
+				if (gameInstance.isChoosingOneForAllClass()) {
+					new OneForAllClassGUI(main, gameInstance).inv.open(player);
+				} else if (gameInstance.state == GameState.WAITING) {
 					PlayerData data = main.getDataManager().getPlayerData(player);
 					for (ClassType type : ClassType.getAvailableClasses()) {
 						ClassDetails details = data.playerClasses.get(type.getID());

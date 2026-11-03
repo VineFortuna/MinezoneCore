@@ -25,6 +25,8 @@ public final class BattlePassSeason {
 	public static final int XP_WIN = 100;
 	public static final int XP_KILL = 10;
 	public static final int XP_GAME_PLAYED = 25;
+	/** Premium Pass owners earn this much more XP from every source (1.5 = +50%). */
+	public static final double PREMIUM_XP_MULTIPLIER = 1.5;
 
 	// TESTING FLAGS - flip both to false before the real launch
 	/** Everyone is treated as owning the Premium Pass. */

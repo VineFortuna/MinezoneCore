@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.Game;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.Game.classes.all.ReindeerFlight;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.util.ItemHelper;
@@ -37,6 +38,8 @@ public class WinEffects {
     private boolean floodEffect = false;
     private boolean treasureEffect = false;
     private boolean ritualEffect = false;
+
+    private ReindeerFlight reindeerFlight; // Santa win effect
 
     private ArrayList<Item> fish = new ArrayList<>();
     private final List<Bat> ritualBats = new ArrayList<>();
@@ -114,12 +117,15 @@ public class WinEffects {
         player.getInventory().setBoots(makeRed(
                 ItemHelper.addEnchant(new ItemStack(Material.LEATHER_BOOTS), Enchantment.PROTECTION_ENVIRONMENTAL, 4)));
 
-        final Horse horse = (Horse) player.getWorld().spawnEntity(player.getLocation(), EntityType.HORSE);
-        horse.setTamed(true);
-        horse.setOwner(player);
-        horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
-        player.teleport(horse.getLocation());
-        horse.setPassenger(player);
+        // Santa's class Reindeer: flown (and sparkling) until the win effects are removed
+        reindeerFlight = new ReindeerFlight(player, 0,
+                () -> instance.state == GameState.ENDED && player.getWorld() == instance.getMapWorld());
+        instance.trackClassTask(reindeerFlight.start(instance.getGameManager().getMain()));
+    }
+
+    /** The Santa win effect's Reindeer (null for the other win effects). */
+    public ReindeerFlight getReindeerFlight() {
+        return reindeerFlight;
     }
 
     private void fireParticlesEffect() {
@@ -479,6 +485,10 @@ public class WinEffects {
     // REMOVE WIN EFFECTS:
 
     public void removeWinEffects() {
+        if (reindeerFlight != null) {
+            reindeerFlight.end();
+            reindeerFlight = null;
+        }
         if (this.dragon != null && !(this.dragon.isDead())) {
             this.dragon.remove();
         } else if (this.defaultEffect) {

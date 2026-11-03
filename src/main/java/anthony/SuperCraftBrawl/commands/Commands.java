@@ -152,6 +152,15 @@ public class Commands implements CommandExecutor, TabCompleter {
 				this.leaveGame(player);
 				break;
 
+			case "joingame":
+				if (args.length < 1) player.sendMessage(main.color("&c&l(!) &rUsage: /joingame <game>"));
+				else main.getGameManager().joinGameByWorld(player, String.join(" ", args)); // world names can have spaces
+				break;
+
+			case "customgame": // creates a custom game, taking your party with you if you're in one
+				main.getGameManager().createCustomGame(player);
+				break;
+
 			case "joincustomgame":
 				if (args.length < 1) player.sendMessage(main.color("&c&l(!) &rUsage: /joincustomgame <host>"));
 				else main.getGameManager().joinCustomGame(player, args[0]);
@@ -469,6 +478,15 @@ public class Commands implements CommandExecutor, TabCompleter {
             return;
         }
 
+        // /party <player> is a shortcut for /party invite <player>
+        if (args.length == 1) {
+            Player target = Bukkit.getPlayer(args[0]);
+            if (target != null) {
+                main.getPartyManager().invite(player, target);
+                return;
+            }
+        }
+
         sendPartyHelp(player);
     }
 
@@ -476,7 +494,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         player.sendMessage(main.color("&8&m------------------------------------"));
         player.sendMessage(main.color("&6&lPARTY COMMANDS"));
         player.sendMessage(main.color("&e/party create -> &rCreate a party by yourself"));
-        player.sendMessage(main.color("&e/party invite <player> -> &rInvite a player"));
+        player.sendMessage(main.color("&e/party [invite] <player> -> &rInvite a player"));
         player.sendMessage(main.color("&e/party accept <player> -> &rAccept an invite"));
         player.sendMessage(main.color("&e/party reject <player> -> &rReject an invite"));
         player.sendMessage(main.color("&e/party leave -> &rLeave your party"));
@@ -1424,7 +1442,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
-		game.getGameSettings().changeGameType(true);
+		game.getGameSettings().changeGameType();
 		// Frenzy gives random classes: no class selector. Switching back to Classic gives it back
 		if (game.gameType == GameType.FRENZY) game.removeClassSelectors();
 		else game.restoreClassSelectors();
@@ -1816,6 +1834,22 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 
 		String className = args[0];
+
+		// One For All: the class is chosen by the host / co-host, or voted on (a null class is a random one)
+		if (game != null && game.isOneForAll() && game.state == GameState.WAITING) {
+			if (className.equalsIgnoreCase("random")) {
+				game.chooseOneForAllClass(player, null, false);
+				return;
+			}
+			ClassType type = getClassType(className);
+			if (type == null || !type.isPlayable() || !game.isClassSelectable(type)) {
+				player.sendMessage(main.color("&c&l(!) &rThat class isn't enabled in this custom game"));
+				return;
+			}
+			game.chooseOneForAllClass(player, type, false);
+			return;
+		}
+
 		if (className.equalsIgnoreCase("random") && game != null && game.state == GameState.WAITING) {
 			selectRandomClass(player, playerData);
 			player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);

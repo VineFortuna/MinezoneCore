@@ -26,7 +26,7 @@ import java.util.List;
  */
 public class KickPlayerGUI implements InventoryProvider {
 
-    private static final int ROWS = 4;
+    private static final int ROWS = 5;
 
     private final Core main;
     private final GameInstance game;
@@ -79,7 +79,7 @@ public class KickPlayerGUI implements InventoryProvider {
         }));
 
         if (heads.isEmpty()) {
-            contents.set(1, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BARRIER),
+            contents.set(2, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BARRIER),
                     "&cNobody to Kick", "&7There's nobody else in this", "&7game you can kick."), e -> {}));
         }
 

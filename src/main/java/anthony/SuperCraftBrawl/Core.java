@@ -772,7 +772,7 @@ public class Core extends JavaPlugin implements Listener {
      * This function registers & enables all commands from Commands.java
      */
     private void enableCommands() {
-        String[] commandTypes = { "maps", "join", "party", "partychat", "friends", "token", "cosmetics", "fishing", "server", "fly", "leave", "joincustomgame", "players",
+        String[] commandTypes = { "maps", "join", "party", "partychat", "friends", "token", "cosmetics", "fishing", "server", "fly", "leave", "customgame", "joincustomgame", "joingame", "players",
                 "class", "socials", "spectate", "startgame", "frenzy", "gamestats", "setlives", "purchases", "kit",
                 "items", "color", "sound", "soundnms", "heal", "forceclass", "lactate", "sh", "shr" };
 
@@ -1488,7 +1488,10 @@ public class Core extends JavaPlugin implements Listener {
                                     + "invited all players in the Lobby to join " + ChatColor.YELLOW + mapName);
                             TextComponent message = new TextComponent(
                                     "" + "     " + ChatColor.GREEN + ChatColor.BOLD + "Click here to join!");
-                            message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/join " + mapName));
+                            // Joins this exact game - /join <map> could pick another game on the same map
+                            String joinCommand = instance.getMap() != null && instance.getMapWorld() != null
+                                    ? "/joingame " + instance.getMapWorld().getName() : "/join " + mapName;
+                            message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, joinCommand));
                             Bukkit.spigot().broadcast(message);
                         } else {
                             player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET

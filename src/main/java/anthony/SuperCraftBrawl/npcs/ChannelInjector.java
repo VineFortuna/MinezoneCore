@@ -1,6 +1,8 @@
 package anthony.SuperCraftBrawl.npcs;
 
+import anthony.SuperCraftBrawl.Game.classes.all.ReindeerFlight;
 import io.netty.channel.*;
+import net.minecraft.server.v1_8_R3.PacketPlayInSteerVehicle;
 import net.minecraft.server.v1_8_R3.PacketPlayInUseEntity;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -29,7 +31,9 @@ public final class ChannelInjector {
                 @Override
                 public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                     try {
-                        if (msg instanceof PacketPlayInUseEntity) {
+                        if (msg instanceof PacketPlayInSteerVehicle) {
+                            ReindeerFlight.onSteerPacket(p.getUniqueId(), (PacketPlayInSteerVehicle) msg);
+                        } else if (msg instanceof PacketPlayInUseEntity) {
                             PacketPlayInUseEntity packet = (PacketPlayInUseEntity) msg;
 
                             int id = getEntityId(packet);

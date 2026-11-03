@@ -63,10 +63,11 @@ public class LobbyItems {
 			player.getInventory().clear();
 
 
-			// Frenzy games take the class selector away once classes can't be changed anymore
+			// Frenzy games take the class selector away once classes can't be changed anymore, and
+			// One For All only hands it out (with its Voting Paper) once the custom game is started
 			GameInstance game = core.getGameManager().GetInstanceOfPlayer(player);
-			if (game == null || !game.isClassSelectorRemoved())
-				player.getInventory().setItem(0, getClassSelectorItem());
+			if (game == null) player.getInventory().setItem(0, getClassSelectorItem());
+			else game.giveClassSelectionItems(player);
 			player.getInventory().setItem(4, getProfileItem(player));
 			player.getInventory().setItem(8, getLeaveGameItem());
 		}
@@ -87,14 +88,6 @@ public class LobbyItems {
 				"&eClasses &7(Right Click)", "", "&7Click to choose a class");
 	}
 
-	/*
-	 * This function gives a player the SCB Vote paper wheen
-	 * they join a game to vote for game settings
-	 */
-	public void addVotePaper(Player player) {
-		
-	}
-	
 	/*
 	 * This function assigns Spectator items to a player
 	 * spectating a game

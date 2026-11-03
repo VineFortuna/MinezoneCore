@@ -5,6 +5,7 @@ import net.md_5.bungee.api.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -25,58 +26,57 @@ public class GameSettings {
 		}
 	}
 
+	/** One For All: everyone plays the same class, chosen by the host/co-host or voted on by everyone. */
+	public enum OneForAllMode {
+		DISABLED("Disabled"), HOST("Host/Co-Host"), VOTING("Voting");
+
+		private final String name;
+
+		OneForAllMode(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+	}
+
 	private GameInstance game;
-	public int totalStartVotes;
-	public int totalTimeVotes;
-	public int totalGameTypeVotes;
-	public int totalSantaVotes;
-	public int lightningDropSec;
+	public int totalStartVotes; // how many players are ready
 	public int dropTimer;
 	public boolean santaFlyover;
-	public List<Player> startVotes;
-	public List<Player> timeVotes;
-	public List<Player> gameTypeVotes;
-	public List<Player> lightningVotes;
-	public List<Player> santaVotes;
-    public boolean opDrops;
+	public List<Player> startVotes; // the players who are ready (the ready-up dye)
     public int strengthOnKillSeconds; // 0 = off
     public HealthPotMode healthPotMode; // Healing on Kill: when killers get a health pot, or a full heal
     public int maxHealthHearts; // each life's max health
-    public boolean oneForAll; // everyone plays the same class (not implemented yet)
+    public OneForAllMode oneForAllMode; // everyone plays the same class
     public int spawnProtectionSeconds; // 0 = no spawn protection
     public boolean randomClasses;
     public int randomClassCycleSeconds;
     public int startingLives;
     public int respawnSeconds;
     public boolean lowGravity;
+    public boolean passiveHealing; // natural regeneration (custom games only)
     public Set<ClassType> enabledClasses; // classes players may pick in a private game
     public Set<GameLootDrops> enabledDrops; // items lightning drops can be (none = all of them)
 
 	public GameSettings(GameInstance game) {
 		this.game = game;
 		this.totalStartVotes = 0;
-		this.totalTimeVotes = 0;
-		this.totalGameTypeVotes = 0;
-		this.totalSantaVotes = 0;
-		this.lightningDropSec = 0;
 		this.dropTimer = 30; // Default lightning drop time
 		this.santaFlyover = false;
 		this.startVotes = new ArrayList<Player>();
-		this.timeVotes = new ArrayList<Player>();
-		this.gameTypeVotes = new ArrayList<Player>();
-		this.lightningVotes = new ArrayList<Player>();
-		this.santaVotes = new ArrayList<Player>();
-        this.opDrops = false;
         this.strengthOnKillSeconds = 0;
         this.healthPotMode = HealthPotMode.HALF_HEALTH;
         this.maxHealthHearts = 10;
-        this.oneForAll = false;
+        this.oneForAllMode = OneForAllMode.DISABLED;
         this.spawnProtectionSeconds = 3; // the Spawn Protection modifier (custom games only)
         this.randomClasses = false;
         this.randomClassCycleSeconds = 15;
         this.startingLives = 5; // Default lives
         this.respawnSeconds = 3; // Default respawn countdown
         this.lowGravity = false;
+        this.passiveHealing = true;
         this.enabledClasses = EnumSet.noneOf(ClassType.class);
         for (ClassType type : ClassType.getAvailableClasses()) {
             this.enabledClasses.add(type); // default: every non-vaulted class
@@ -87,21 +87,35 @@ public class GameSettings {
 	/** Takes over another game's Game Modifiers - a custom game's next round keeps the leader's settings. */
 	public void copyModifiersFrom(GameSettings other) {
 		this.dropTimer = other.dropTimer;
-		this.opDrops = other.opDrops;
 		this.strengthOnKillSeconds = other.strengthOnKillSeconds;
 		this.healthPotMode = other.healthPotMode;
 		this.maxHealthHearts = other.maxHealthHearts;
-		this.oneForAll = other.oneForAll;
+		this.oneForAllMode = other.oneForAllMode;
 		this.spawnProtectionSeconds = other.spawnProtectionSeconds;
 		this.randomClasses = other.randomClasses;
 		this.randomClassCycleSeconds = other.randomClassCycleSeconds;
 		this.startingLives = other.startingLives;
 		this.respawnSeconds = other.respawnSeconds;
 		this.lowGravity = other.lowGravity;
+		this.passiveHealing = other.passiveHealing;
 		this.enabledClasses.clear();
 		this.enabledClasses.addAll(other.enabledClasses);
 		this.enabledDrops.clear();
 		this.enabledDrops.addAll(other.enabledDrops);
+	}
+
+	/** The Class List is untouched: every non-vaulted class (none enabled also falls back to those). */
+	public boolean isDefaultClassList() {
+		Set<ClassType> playable = EnumSet.noneOf(ClassType.class);
+		for (ClassType type : enabledClasses) {
+			if (type.isPlayable()) playable.add(type);
+		}
+		return playable.isEmpty() || playable.equals(EnumSet.copyOf(Arrays.asList(ClassType.getAvailableClasses())));
+	}
+
+	/** The Item List is untouched: every item (none enabled also falls back to every item). */
+	public boolean isDefaultItemList() {
+		return enabledDrops.isEmpty() || enabledDrops.size() == GameLootDrops.values().length;
 	}
 
 	// GETTER METHODS:
@@ -110,42 +124,9 @@ public class GameSettings {
 		return this.totalStartVotes;
 	}
 
-	public int getTotalTimeVotes() {
-		return this.totalTimeVotes;
-	}
-
-	public int getTotalGameTypeVotes() {
-		return this.totalGameTypeVotes;
-	}
-
-	public int getLightningVotes() {
-		return this.lightningDropSec;
-	}
-
-	public int getSantaVotes() {
-		return this.totalSantaVotes;
-	}
-
-	/**
-	 * This function sets the time of day in game
-	 */
-	public void setTimeOfDay() {
-		if (game != null) {
-			if (this.totalTimeVotes >= game.players.size() / 2 + 1) {
-				if (game.getMapWorld().getTime() == 1000) {
-					game.TellAll(color("&2&l(!) &rThe time has been set to &c&lNight"));
-					game.getMapWorld().setTime(18000);
-				} else {
-					game.TellAll(color("&2&l(!) &rThe time has been set to &e&lDay"));
-					game.getMapWorld().setTime(1000);
-				}
-			}
-		}
-	}
-
 	/*
 	 * This function starts the game if the command /startgame is used or if
-	 * everyone in the waiting lobby votes to start
+	 * everyone in the waiting lobby is ready
 	 */
 	public void forceStartGame(boolean startGameCommand) {
 		// Custom games only start from their host's or co-host's countdown, never from votes
@@ -155,7 +136,6 @@ public class GameSettings {
 				return;
 			}
 		}
-		checkOtherSettings(); // Set other settings too if enough votes
 		game.TellAll(color("&2&l(!) &rGame is now starting"));
 		if (game.gameStartTime != null) {
 			game.gameStartTime.cancel();
@@ -164,43 +144,19 @@ public class GameSettings {
 		game.StartGame();
 	}
 
-	public void changeGameType(boolean isCommand) {
+	public void changeGameType() {
 		if (game == null) return;
-		if (!isCommand && totalGameTypeVotes < game.players.size() / 2 + 1)  return;
 		game.gameType = (game.gameType == GameType.FRENZY) ?  GameType.CLASSIC : GameType.FRENZY;
 		game.TellAll(color("&2&l(!) &rThe game mode has been set to &e&l" + game.gameType.getName()));
 		updateModeOnBoard();
 	}
 	
 	private void updateModeOnBoard() {
-		for (Player gamePlayer : game.players) {
-			game.boards.get(gamePlayer.getUniqueId()).updateLine(1, game.color("&fMode: &a" + game.gameType.getName()));
-		}
+		game.updateModeLine();
 	}
 
-	/**
-	 * This function increases the lightning drop spawn rate on the map to 2x the
-	 * speed if the votes are equal to the player size
-	 */
-	public void increaseLightningRate() {
-		if (game != null) {
-			if (getLightningVotes() >= game.players.size() / 2 + 1) {
-				this.dropTimer /= 2;
-				game.TellAll(color("&2&l(!) &rLoot drops spawn rate is now &e&l2x"));
-			}
-		}
-	}
-
-	public void enableSantaFlyover() {
-		if (game != null) {
-			if (getSantaVotes() >= game.players.size() / 2 + 1) {
-				this.santaFlyover = true;
-				game.TellAll(color("&2&l(!) &e&lSanta &rwill fly over the map and deliver items"));
-			}
-		}
-	}
-
-	public void handleVoteGameStart(Player player, GameInstance game) {
+	/** The player clicked the ready-up dye: ready <-> not ready. Everyone being ready starts the game. */
+	public void toggleReady(Player player, GameInstance game) {
 		GameSettings gs = null;
 
 		if (game != null && game.getGameSettings() != null) {
@@ -217,64 +173,10 @@ public class GameSettings {
 		}
 	}
 
-	public void handleVoteGameType(Player player, GameInstance game) {
-		GameSettings gs = null;
-
-		if (game != null && game.getGameSettings() != null) {
-			gs = game.getGameSettings();
-			if (!(gs.gameTypeVotes.contains(player))) {
-				gs.totalGameTypeVotes++;
-				gs.gameTypeVotes.add(player);
-			} else {
-				gs.totalGameTypeVotes--;
-				gs.gameTypeVotes.remove(player);
-			}
-		}
-	}
-
-	public void handleLightningRate(Player player, GameInstance game) {
-		GameSettings gs = null;
-
-		if (game != null && game.getGameSettings() != null) {
-			gs = game.getGameSettings();
-			if (!(gs.lightningVotes.contains(player))) {
-				gs.lightningDropSec++;
-				gs.lightningVotes.add(player);
-			} else {
-				gs.lightningDropSec--;
-				gs.lightningVotes.remove(player);
-			}
-		}
-	}
-
-	public void handleVoteTime(Player player, GameInstance game) {
-		GameSettings gs = null;
-
-		if (game != null && game.getGameSettings() != null) {
-			gs = game.getGameSettings();
-			if (!(gs.timeVotes.contains(player))) {
-				gs.totalTimeVotes++;
-				gs.timeVotes.add(player);
-			} else {
-				gs.totalTimeVotes--;
-				gs.timeVotes.remove(player);
-			}
-		}
-	}
-
-	public void handleVoteSanta(Player player, GameInstance game) {
-		GameSettings gs = null;
-
-		if (game != null && game.getGameSettings() != null) {
-			gs = game.getGameSettings();
-			if (!(gs.santaVotes.contains(player))) {
-				gs.totalSantaVotes++;
-				gs.santaVotes.add(player);
-			} else {
-				gs.totalSantaVotes--;
-				gs.santaVotes.remove(player);
-			}
-		}
+	/** Nobody is ready anymore (the countdown stopped). */
+	public void clearReady() {
+		startVotes.clear();
+		totalStartVotes = 0;
 	}
 
 	public void updateGameStartVoteStatus(Player player, GameInstance game, ChatColor color) {
@@ -287,19 +189,8 @@ public class GameSettings {
 			game.getGameSettings().forceStartGame(false);
 	}
 
-	/**
-	 * This function makes sure if the game is force started to check for votes on
-	 * the other game settings
-	 */
-	private void checkOtherSettings() {
-		changeGameType(false);
-		increaseLightningRate();
-		setTimeOfDay();
-		enableSantaFlyover();
-	}
-
 	/*
-	 * This function handles removing players from start votes if they leave the
+	 * This function handles removing players from the ready players if they leave the
 	 * server or the game lobby
 	 */
 	public void removeFromStartVotes(Player player) {
@@ -309,62 +200,6 @@ public class GameSettings {
 			if (gs.startVotes.contains(player)) {
 				gs.totalStartVotes--;
 				gs.startVotes.remove(player);
-			}
-		}
-	}
-
-	/*
-	 * This function handles removing players from start votes if they leave the
-	 * server or the game lobby
-	 */
-	public void removeFromGameTypeVotes(Player player) {
-		if (game != null && game.getGameSettings() != null) {
-			GameSettings gs = game.getGameSettings();
-
-			if (gs.gameTypeVotes.contains(player)) {
-				gs.totalGameTypeVotes--;
-				gs.gameTypeVotes.remove(player);
-			}
-		}
-	}
-
-	/*
-	 * This function handles removing players from start votes if they leave the
-	 * server or the game lobby
-	 */
-	public void removeFromLightningVotes(Player player) {
-		if (game != null && game.getGameSettings() != null) {
-			GameSettings gs = game.getGameSettings();
-
-			if (gs.lightningVotes.contains(player)) {
-				gs.lightningDropSec--;
-				gs.lightningVotes.remove(player);
-			}
-		}
-	}
-
-	/*
-	 * This function handles removing players from start votes if they leave the
-	 * server or the game lobby
-	 */
-	public void removeFromTimeVotes(Player player) {
-		if (game != null && game.getGameSettings() != null) {
-			GameSettings gs = game.getGameSettings();
-
-			if (gs.timeVotes.contains(player)) {
-				gs.totalTimeVotes--;
-				gs.timeVotes.remove(player);
-			}
-		}
-	}
-
-	public void removeFromSantaVotes(Player player) {
-		if (game != null && game.getGameSettings() != null) {
-			GameSettings gs = game.getGameSettings();
-
-			if (gs.santaVotes.contains(player)) {
-				gs.totalSantaVotes--;
-				gs.santaVotes.remove(player);
 			}
 		}
 	}

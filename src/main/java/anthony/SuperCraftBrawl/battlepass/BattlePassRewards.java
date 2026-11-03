@@ -19,17 +19,17 @@ public final class BattlePassRewards {
 			BattlePassReward.mysteryChests(1),   // 7
 			BattlePassReward.tokens(125),        // 8
 			BattlePassReward.tokens(125),        // 9
-			BattlePassReward.levels(1),          // 10
+			BattlePassReward.classUnlock(ClassType.Elf, Material.CAKE, 500), // 10
 			BattlePassReward.tokens(150),        // 11
 			BattlePassReward.mysteryChests(2),   // 12
 			BattlePassReward.tokens(150),        // 13
 			BattlePassReward.tokens(175),        // 14
-			BattlePassReward.levels(2),          // 15
+			BattlePassReward.classUnlock(ClassType.GingerBreadMan, Material.COOKIE, 500), // 15
 			BattlePassReward.tokens(200),        // 16
 			BattlePassReward.mysteryChests(2),   // 17
 			BattlePassReward.tokens(250),        // 18
 			BattlePassReward.tokens(300),        // 19
-			BattlePassReward.mysteryChests(3),   // 20
+			BattlePassReward.classUnlock(ClassType.Santa, Material.REDSTONE_BLOCK, 1000), // 20
 	};
 
 	private static final BattlePassReward[] PREMIUM = {
@@ -52,7 +52,7 @@ public final class BattlePassRewards {
 			BattlePassReward.tokens(500),        // 17
 			BattlePassReward.mysteryChests(5),   // 18
 			BattlePassReward.tokens(750),        // 19
-			BattlePassReward.classUnlock(ClassType.Santa, Material.REDSTONE_BLOCK, 1000), // 20
+			BattlePassReward.tokens(1000),       // 20
 	};
 
 	static {
