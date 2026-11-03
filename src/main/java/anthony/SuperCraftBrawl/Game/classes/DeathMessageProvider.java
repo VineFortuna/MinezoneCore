@@ -84,7 +84,9 @@ public class DeathMessageProvider {
     }
 
     private DeathCategory resolveDeathCategory(Player victim, Player killer, EntityDamageEvent lastDamage) {
-        DamageCause cause = lastDamage.getCause();
+        // lastDamage can be null (e.g. the damage cause was cleared or never recorded) - fall back on the
+        // location/killer checks below instead of throwing and leaving the player stuck mid-death
+        DamageCause cause = lastDamage != null ? lastDamage.getCause() : null;
 
         if (victim.getLocation().getY() <= 50) {
             if (killer == null || killer.equals(victim)) {
