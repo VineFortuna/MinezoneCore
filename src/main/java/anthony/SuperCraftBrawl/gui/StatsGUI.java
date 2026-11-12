@@ -156,7 +156,7 @@ public class StatsGUI implements InventoryProvider {
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
 							main.color("&e&lFishing Stats"),
 							main.color("&fCaught: &a" + data.totalcaught),
-							main.color("&fUnique Caught: &a" + uniqueCaught + "/" + FishType.values().length),
+							main.color("&fSpecies Caught: &a" + uniqueCaught + "/" + FishType.values().length),
 							main.color("&fTreasure Caught: &a" + treasure)), e -> {
 					}));
 
@@ -181,7 +181,7 @@ public class StatsGUI implements InventoryProvider {
                     ClickableItem.of(ItemHelper.setDetails(ItemHelper.createSkullTexture(fishingTexture),
                             main.color("&e&lFishing Stats"),
                             main.color("&fCaught: &a" + data.totalcaught),
-                            main.color("&fUnique Caught: &a" + uniqueCaught + "/" + FishType.values().length),
+                            main.color("&fSpecies Caught: &a" + uniqueCaught + "/" + FishType.values().length),
                             main.color("&fTreasure Caught: &a" + treasure),
                             "",
                             main.color("&aClick to open Fishingpedia")), e -> {

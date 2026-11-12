@@ -390,7 +390,7 @@ public class SnowGolemClass extends BaseClass {
                     "&7▶ &7&oSlowness&r &e3 &rfor &e3s"
             );
 
-            if (damagerPlayer.getInventory().getItem(2) == null &&
+            if (damagerPlayer.getInventory().getItem(2) != null &&
                     damagerPlayer.getInventory().getItem(2).getType() != Material.SNOW_BALL) {
                 damagerPlayer.getInventory().setItem(2, slowballs);
                 outOfSlowballs = false;
