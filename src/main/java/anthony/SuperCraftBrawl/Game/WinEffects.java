@@ -4,7 +4,9 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.all.ReindeerFlight;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
+import anthony.SuperCraftBrawl.cosmetics.ParticleHelper;
 import anthony.util.ItemHelper;
+import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.PacketPlayOutNamedSoundEffect;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -38,10 +40,13 @@ public class WinEffects {
     private boolean floodEffect = false;
     private boolean treasureEffect = false;
     private boolean ritualEffect = false;
+    private boolean presentEffect = false;
+    private boolean winterEffect = false;
 
     private ReindeerFlight reindeerFlight; // Santa win effect
 
     private ArrayList<Item> fish = new ArrayList<>();
+    private final List<Item> presents = new ArrayList<>();
     private final List<Bat> ritualBats = new ArrayList<>();
 
     // reference to spawned Herobrine ArmorStand for cleanup
@@ -71,6 +76,8 @@ public class WinEffects {
             case "flood": floodEffect(); break;
             case "treasure_hoard": treasureEffect(); break;
             case "ritual": ritualEffect(); break;
+            case "present_rain": presentRainEffect(); break;
+            case "winter_wonderland": winterWonderlandEffect(); break;
             default: defaultEffect();
         }
     }
@@ -174,6 +181,129 @@ public class WinEffects {
             }
         };
         runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 1);
+    }
+
+    // --- Present Rain (Battle Pass): fish rain, but with gift boxes ---
+
+    /** Wool colours used as gift boxes: red, green, white, yellow. */
+    private static final short[] GIFT_COLORS = { 14, 13, 0, 4 };
+
+    private void presentRainEffect() {
+        final World world = player.getWorld();
+        if (world != instance.getMapWorld()) return;
+        this.presentEffect = true;
+        startFireworksRunnable(world, CHRISTMAS_PALETTE);
+
+        BukkitRunnable runnable = new BukkitRunnable() {
+            final Random rand = new Random();
+            int rep = 0;
+
+            @Override
+            public void run() {
+                if (rep >= 160 || !player.isOnline() || player.getWorld() != world) {
+                    this.cancel();
+                    return;
+                }
+
+                ItemStack gift = rand.nextInt(6) == 0
+                        ? new ItemStack(Material.COOKIE)
+                        : new ItemStack(Material.WOOL, 1, GIFT_COLORS[rand.nextInt(GIFT_COLORS.length)]);
+                Item item = world.dropItem(getItemRainLoc(), gift);
+                item.setPickupDelay(Integer.MAX_VALUE); // for looks only, nobody can pick them up
+                presents.add(item);
+                rep++;
+            }
+        };
+        instance.trackClassTask(runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 1));
+    }
+
+    // --- Winter Wonderland (Battle Pass): snow, a glittering particle Christmas tree and jingle bells ---
+
+    private static final double TREE_HEIGHT = 5.0;
+    private static final double TREE_RADIUS = 2.2;
+    private static final int TREE_GROW_TICKS = 40;
+
+    /** Jingle Bells: when each note plays (ticks into an 80 tick loop) and its note (0 = F#3, 12 = F#4, 24 = F#5). */
+    private static final int[] JINGLE_AT = { 0, 5, 10, 20, 25, 30, 40, 45, 50, 57, 60 };
+    private static final int[] JINGLE_NOTE = { 10, 10, 10, 10, 10, 10, 10, 13, 6, 8, 10 };
+
+    private void winterWonderlandEffect() {
+        final World world = player.getWorld();
+        if (world != instance.getMapWorld()) return;
+        this.winterEffect = true;
+        startFireworksRunnable(world, CHRISTMAS_PALETTE);
+
+        // The tree stands where the winner was standing when they won
+        final Location treeBase = findGround(player.getLocation()).add(0, 1, 0);
+
+        BukkitRunnable runnable = new BukkitRunnable() {
+            int tick = 0;
+
+            @Override
+            public void run() {
+                if (tick >= 240 || !player.isOnline() || player.getWorld() != world) {
+                    this.cancel();
+                    return;
+                }
+
+                // Snow falls around every player in the map, so it's visible wherever they are
+                if (tick % 2 == 0) {
+                    for (Player viewer : world.getPlayers()) {
+                        Location above = viewer.getLocation().add(0, 5, 0);
+                        ParticleHelper.playTo(viewer, above, EnumParticle.SNOW_SHOVEL, 7f, 2.5f, 7f, 0f, 25);
+                    }
+                }
+
+                drawChristmasTree(treeBase, tick);
+                playJingle(world, tick % 80);
+                tick++;
+            }
+        };
+        instance.trackClassTask(runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 1));
+    }
+
+    /** One tick of the particle tree: it grows for the first couple of seconds, then twinkles. */
+    private void drawChristmasTree(Location base, int tick) {
+        Random rand = new Random();
+        double grow = Math.min(1.0, tick / (double) TREE_GROW_TICKS);
+
+        // Garland spiralling up the tree
+        for (int k = 0; k < 3; k++) {
+            double h = ((tick * 0.03) + k / 3.0) % 1.0; // how far up the tree, 0 - 1
+            double angle = h * 6 * Math.PI + tick * 0.2;
+            double radius = TREE_RADIUS * (1 - h) * grow;
+            Location point = base.clone().add(Math.cos(angle) * radius, h * TREE_HEIGHT * grow, Math.sin(angle) * radius);
+            ParticleHelper.dust(point, 255, 215, 0);
+        }
+
+        // Green foliage filling in the cone
+        for (int k = 0; k < 4; k++) {
+            double h = rand.nextDouble();
+            double angle = rand.nextDouble() * 2 * Math.PI;
+            double radius = TREE_RADIUS * (1 - h) * rand.nextDouble() * grow;
+            Location point = base.clone().add(Math.cos(angle) * radius, h * TREE_HEIGHT * grow, Math.sin(angle) * radius);
+            ParticleHelper.dust(point, 30, 160, 50);
+        }
+
+        // A red ornament somewhere on the surface
+        double h = rand.nextDouble() * 0.85;
+        double angle = rand.nextDouble() * 2 * Math.PI;
+        double radius = TREE_RADIUS * (1 - h) * grow;
+        ParticleHelper.dust(base.clone().add(Math.cos(angle) * radius, h * TREE_HEIGHT * grow, Math.sin(angle) * radius), 220, 30, 30);
+
+        // Star on top
+        if (tick % 3 == 0)
+            ParticleHelper.play(base.clone().add(0, TREE_HEIGHT * grow + 0.2, 0), EnumParticle.FIREWORKS_SPARK, 0.15f, 0.15f, 0.15f, 0.02f, 3);
+    }
+
+    private void playJingle(World world, int loopTick) {
+        for (int i = 0; i < JINGLE_AT.length; i++) {
+            if (JINGLE_AT[i] != loopTick) continue;
+
+            float pitch = (float) Math.pow(2.0, (JINGLE_NOTE[i] - 12) / 12.0);
+            for (Player viewer : world.getPlayers())
+                viewer.playSound(viewer.getLocation(), Sound.NOTE_PLING, 0.8f, pitch);
+        }
     }
 
     private void floodEffect() {
@@ -444,7 +574,23 @@ public class WinEffects {
         }
     }
 
+    private static final org.bukkit.Color[] DEFAULT_PALETTE = new org.bukkit.Color[] {
+            org.bukkit.Color.fromRGB(255, 165, 0),   // orange
+            org.bukkit.Color.fromRGB(0, 0, 0),       // black
+            org.bukkit.Color.fromRGB(128, 0, 128)    // purple
+    };
+
+    private static final org.bukkit.Color[] CHRISTMAS_PALETTE = new org.bukkit.Color[] {
+            org.bukkit.Color.fromRGB(220, 30, 30),   // red
+            org.bukkit.Color.fromRGB(30, 160, 50),   // green
+            org.bukkit.Color.fromRGB(255, 255, 255)  // white
+    };
+
     private void startFireworksRunnable(World world) {
+        startFireworksRunnable(world, DEFAULT_PALETTE);
+    }
+
+    private void startFireworksRunnable(World world, final org.bukkit.Color[] palette) {
         BukkitRunnable runnable = new BukkitRunnable() {
             int sec = 0;
             @Override
@@ -452,25 +598,20 @@ public class WinEffects {
                 if (sec == 9) {
                     this.cancel();
                 } else {
-                    playFireworks(world);
+                    playFireworks(world, palette);
                 }
                 sec++;
             }
         };
-        runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+        // Tracked so it stops if the game is removed before it finishes
+        instance.trackClassTask(runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20));
     }
 
-    private void playFireworks(World world) {
-        // Palette-locked: ORANGE, BLACK, PURPLE only
+    private void playFireworks(World world, org.bukkit.Color[] palette) {
         Firework fw = (Firework) world.spawnEntity(player.getLocation(), EntityType.FIREWORK);
         FireworkMeta fwm = fw.getFireworkMeta();
         fwm.setPower(1);
 
-        org.bukkit.Color ORANGE = org.bukkit.Color.fromRGB(255, 165, 0);
-        org.bukkit.Color BLACK  = org.bukkit.Color.fromRGB(0, 0, 0);
-        org.bukkit.Color PURPLE = org.bukkit.Color.fromRGB(128, 0, 128);
-
-        org.bukkit.Color[] palette = new org.bukkit.Color[] { ORANGE, BLACK, PURPLE };
         org.bukkit.Color c = palette[new Random().nextInt(palette.length)];
 
         fwm.addEffect(FireworkEffect.builder()
@@ -512,6 +653,12 @@ public class WinEffects {
                 herobrineNPC = null;
             }
             this.ritualEffect = false;
+        } else if (this.presentEffect) {
+            for (Item i : presents) i.remove();
+            presents.clear();
+            this.presentEffect = false;
+        } else if (this.winterEffect) {
+            this.winterEffect = false;
         }
     }
 }

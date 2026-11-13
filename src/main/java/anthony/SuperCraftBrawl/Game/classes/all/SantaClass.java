@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Timer;
 import anthony.util.ItemHelper;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -27,8 +28,10 @@ import java.util.List;
 public class SantaClass extends BaseClass {
 
 	private static final int REINDEER_FLIGHT_TICKS = 6 * 20;
+	private static final int MILK_COOLDOWN_MILLIS = 5000;
 
 	private int cookieUses;
+	private Timer milkCooldown = new Timer();
 	private final ReindeerFlight reindeer;
 
 	public SantaClass(GameInstance instance, Player player) {
@@ -36,6 +39,7 @@ public class SantaClass extends BaseClass {
 		createArmor(null,
 				"e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19",
 				"FF0000", 6, "Santa");
+		baseVerticalJump = 0.9; // a lower double jump (the default is 1.0)
 		reindeer = new ReindeerFlight(player, REINDEER_FLIGHT_TICKS,
 				() -> instance.state == GameState.STARTED && instance.classes.get(player) == this
 						&& player.getGameMode() != GameMode.SPECTATOR);
@@ -58,12 +62,13 @@ public class SantaClass extends BaseClass {
 	@Override
 	public void setItems(Inventory playerInv) {
 		this.cookieUses = 0;
+		this.milkCooldown = new Timer(); // ready again on every life
 
 		playerInv.setItem(0, getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.MILK_BUCKET), instance.color("&r&lSanta's Milk"), "",
 						instance.color("&7Right click to remove effects including"),
-						instance.color("&7cookie effects")));
+						instance.color("&7cookie effects (5s cooldown)")));
 		playerInv.setItem(2, horseSpawnEgg());
 	}
 
@@ -89,25 +94,18 @@ public class SantaClass extends BaseClass {
 				if (this.cookieUses == 0) {
 					player.playSound(player.getLocation(), Sound.EAT, 1, 1);
 					player.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 999999999, 0));
-					player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 0));
+					player.removePotionEffect(PotionEffectType.SLOW);
+					player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 1));
 					player.sendMessage(instance.color("&2&l(!) &c&lHO HO HO! &rDat cookie was delicious"));
-					player.sendMessage(instance.color("&2&l(!) &rYou were given &eStrength 1 & Slow 1"));
+					player.sendMessage(instance.color("&2&l(!) &rYou were given &eStrength 1 & Slow 2"));
 					this.cookieUses++;
 				} else if (this.cookieUses == 1) {
 					player.playSound(player.getLocation(), Sound.EAT, 1, 1);
 					player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
 					player.removePotionEffect(PotionEffectType.SLOW);
-					player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 1));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 3));
 					player.sendMessage(instance.color("&2&l(!) &c&lHO HO HO! &rDat cookie was delicious"));
-					player.sendMessage(instance.color("&2&l(!) &rYou were given &eResistance 1 & Slow 2"));
-					this.cookieUses++;
-				} else if (this.cookieUses == 2) {
-					player.playSound(player.getLocation(), Sound.EAT, 1, 1);
-					player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 3));
-					player.removePotionEffect(PotionEffectType.SLOW);
-					player.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 999999999, 2));
-					player.sendMessage(instance.color("&2&l(!) &c&lHO HO HO! &rDat cookie was delicious"));
-					player.sendMessage(instance.color("&2&l(!) &rYou were given &eJump 4 & Slow 3"));
+					player.sendMessage(instance.color("&2&l(!) &rYou were given &eResistance 1 & Slow 4"));
 					this.cookieUses++;
 				} else {
 					player.sendMessage(
@@ -117,6 +115,14 @@ public class SantaClass extends BaseClass {
 		} else if (item != null && item.getType() == Material.MILK_BUCKET) {
 			event.setCancelled(true);
 			if (player.getGameMode() != GameMode.SPECTATOR) {
+				int remaining = MILK_COOLDOWN_MILLIS - milkCooldown.getTime();
+				if (remaining > 0) {
+					player.sendMessage(instance.color("&c&l(!) &rYour Santa's Milk is on cooldown for &e"
+							+ (int) Math.ceil(remaining / 1000.0) + "s"));
+					return;
+				}
+				milkCooldown.restart();
+
 				List<PotionEffectType> effectsToRemove = new ArrayList<>();
 				for (PotionEffect effect : player.getActivePotionEffects()) {
 					// Check if the potion effect is NOT one of the allowed ones
@@ -176,9 +182,8 @@ public class SantaClass extends BaseClass {
 		ItemStack item = ItemHelper.setUnbreakable(ItemHelper.addEnchant(
 				ItemHelper.addEnchant(
 						ItemHelper.setDetails(new ItemStack(Material.COOKIE), instance.color("&6&lDelicious Cookie"),
-								"", instance.color("&r- &71st Use: Strength 1 & Slow 1"),
-								instance.color("&r- &72nd Use: Resistance 1 & Slow 2"),
-								instance.color("&r- &73rd Use: Jump 4 & Slow 3")),
+								"", instance.color("&r- &71st Use: Strength 1 & Slow 2"),
+								instance.color("&r- &72nd Use: Resistance 1 & Slow 4")),
 						Enchantment.DAMAGE_ALL, 3),
 				Enchantment.KNOCKBACK, 1));
 		return item;

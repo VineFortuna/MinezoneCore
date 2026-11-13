@@ -64,6 +64,19 @@ public class ElfClass extends BaseClass {
 		}
 	}
 
+	private ItemStack getBarrier() {
+		return ItemHelper.setDetails(new ItemStack(Material.BARRIER),
+				instance.color("&c&lOut of Sugar Bombs!"),
+				"",
+				instance.color("&7Each kill regenerates 2 sugar bombs"));
+	}
+
+	/** The last one was used: a barrier shows in the ability slot until a kill gives more. */
+	private void showBarrier() {
+		ItemStack first = player.getInventory().getItem(1);
+		if (first == null || first.getType() == Material.AIR) player.getInventory().setItem(1, getBarrier());
+	}
+
 	@Override
 	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
@@ -75,9 +88,10 @@ public class ElfClass extends BaseClass {
 				int amount = item.getAmount();
 				if (amount > 0) {
 					amount--;
-					if (amount == 0)
+					if (amount == 0) {
 						player.getInventory().clear(player.getInventory().getHeldItemSlot());
-					else
+						showBarrier();
+					} else
 						item.setAmount(amount);
 
 					ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
@@ -146,6 +160,21 @@ public class ElfClass extends BaseClass {
 					this.isUsed = true;
 				}
 			}
+		}
+	}
+
+	@Override
+	public void killEvent(Player damagerPlayer) {
+		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+			ItemStack bombs = getSugarBombs();
+			bombs.setAmount(2);
+
+			ItemStack current = damagerPlayer.getInventory().getItem(1);
+			if (current == null || current.getType() == Material.AIR || current.getType() == Material.BARRIER)
+				damagerPlayer.getInventory().setItem(1, bombs);
+			else damagerPlayer.getInventory().addItem(bombs);
+
+			damagerPlayer.sendMessage(instance.color("&2&l(!) &rYou got a kill and gained 2 &cSugar Bombs"));
 		}
 	}
 

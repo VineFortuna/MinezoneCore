@@ -62,7 +62,7 @@ public class PresetsGUI implements InventoryProvider {
             if (!player.isOnline() || game.state != GameState.WAITING) return; // e.g. the game started while loading
             if (presets == null) {
                 SoundManager.playErrorSound(player);
-                player.sendMessage(main.color("&c&l(!) &rYour presets couldn't be loaded. Please try again later."));
+                player.sendMessage(main.color("&c&l(!) &rCouldn't load your presets. Try again later."));
                 return;
             }
             new PresetsGUI(main, game, parent, presets).inv.open(player);
@@ -174,7 +174,7 @@ public class PresetsGUI implements InventoryProvider {
         GamePreset preset = GamePreset.capture(game);
         customPresets[index] = preset;
         GamePresetDAO.save(main, player.getUniqueId(), number, preset);
-        player.sendMessage(main.color("&2&l(!) &rThe current settings have been saved as preset &e#" + number + "&r."));
+        player.sendMessage(main.color("&2&l(!) &rSaved as preset &e#" + number + "&r."));
         inv.open(player);
     }
 
@@ -206,7 +206,17 @@ public class PresetsGUI implements InventoryProvider {
     private void load(Player player, GamePreset preset, String name) {
         SoundManager.playClickSound(player);
         preset.applyTo(game);
-        game.TellAll(main.color("&2&l(!) &rThe " + name + " &rpreset has been loaded."));
+        game.TellAll(main.color("&2&l(!) &rLoaded the " + name + " &rpreset."));
+
+        // A preset saved on another map moves everyone to it (with the settings just loaded)
+        if (preset.map != null && preset.map != game.getMap()) {
+            GameInstance next = main.getGameManager().changeCustomGameMap(player, preset.map);
+            if (next != null && next != game) {
+                new GameModifiersGUI(main, next).inv.open(player); // the settings of the new game
+                next.refreshEditorMenus(player);
+                return;
+            }
+        }
 
         parent.inv.open(player); // straight back to the settings, showing the new values
         game.refreshEditorMenus(player);
@@ -225,6 +235,9 @@ public class PresetsGUI implements InventoryProvider {
         boolean defaultItems = s.isDefaultItemList();
 
         List<String> lore = new ArrayList<>();
+        if (preset.map != null) {
+            lore.add("&fMap: &e" + preset.map.toString());
+        }
         if (!preset.isDefaultClassSelection()) {
             lore.add("&fClass Selection: &e" + preset.getClassSelection());
         }
@@ -251,6 +264,9 @@ public class PresetsGUI implements InventoryProvider {
         }
         if (s.lowGravity != defaults.lowGravity) {
             lore.add("&fLow Gravity: " + (s.lowGravity ? "&aEnabled" : "&cDisabled"));
+        }
+        if (s.effectRouletteSeconds != defaults.effectRouletteSeconds) {
+            lore.add("&fEffect Roulette: " + secondsOrDisabled(s.effectRouletteSeconds));
         }
         return lore;
     }

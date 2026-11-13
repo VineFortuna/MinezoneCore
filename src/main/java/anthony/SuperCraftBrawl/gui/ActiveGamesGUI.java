@@ -12,11 +12,14 @@ import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
+import fr.minuskube.inv.SmartInvsPlugin;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class ActiveGamesGUI implements InventoryProvider {
 
@@ -51,7 +54,7 @@ public class ActiveGamesGUI implements InventoryProvider {
 			GameType gameType = game.gameType;
 			// Custom games show how players get their class (Classic, Frenzy, Class Switch or One For All)
 			String mode = game.isCustomGame() ? game.getClassSelectionName() : gameType.getName();
-			if (game.isCustomGame()) mode += game.isCustomGamePublic() ? " &6(Custom Game)" : " &c(Private Custom Game)";
+			if (game.isCustomGame()) mode += " &6(" + game.getCustomGameVisibility().getTag() + " &6Custom Game)";
 
 			System.out.println(mode);
 
@@ -100,16 +103,25 @@ public class ActiveGamesGUI implements InventoryProvider {
 		}
 	}
 
-	/** A private custom game the player can't access just plays the error sound and leaves the menu open. */
+	/** A custom game the player can't access plays the error sound, says why and leaves the menu open. */
 	private void joinClicked(Player player, GameInstance game, boolean spectate) {
 		if (game.isCustomGame() && !game.canAccessCustomGame(player)) {
 			SoundManager.playErrorSound(player);
+			player.sendMessage(game.getCustomGameAccessMessage());
 			return;
 		}
 
 		if (spectate) main.getGameManager().SpectatorJoinGame(player, game);
 		else main.getGameManager().JoinGame(player, game);
 		inv.close(player);
+	}
+
+	/** Reopens every player's open Quick Join menu, so it shows the latest games (e.g. a custom game's visibility changed). */
+	public static void refreshOpenMenus() {
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			Optional<SmartInventory> open = SmartInvsPlugin.manager().getInventory(player);
+			if (open.isPresent() && open.get().getProvider() instanceof ActiveGamesGUI) open.get().open(player);
+		}
 	}
 
 	@Override

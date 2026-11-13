@@ -79,7 +79,7 @@ public class ClassListGUI implements InventoryProvider {
     public final SmartInventory inv;
 
     private Category category = Category.ALL;
-    private Status status = Status.ENABLED;
+    private Status status;
     private Sorter sorter = Sorter.ALPHABETICAL;
     private int randomCountIndex = 1; // 10 classes
 
@@ -87,6 +87,8 @@ public class ClassListGUI implements InventoryProvider {
         this.main = main;
         this.game = game;
         this.parent = parent;
+        // Opens on the Enabled list, or on the Disabled one when nothing is enabled (e.g. right after Disable All)
+        this.status = hasEnabledClass() ? Status.ENABLED : Status.DISABLED;
 
         this.inv = SmartInventory.builder()
                 .id("classList")
@@ -253,8 +255,8 @@ public class ClassListGUI implements InventoryProvider {
         enabled.addAll(pool.subList(0, Math.min(RANDOM_COUNTS[randomCountIndex], pool.size())));
 
         SoundManager.playClickSound(player);
-        game.TellAll(main.color("&2&l(!) &rThe class list has been &erandomized&r: &a" + enabled.size()
-                + " &rclasses are enabled."));
+        game.TellAll(main.color("&2&l(!) &rClass list &erandomized&r: &a" + enabled.size()
+                + " &renabled."));
         inv.open(player);
         game.refreshEditorMenus(player);
     }
@@ -266,15 +268,15 @@ public class ClassListGUI implements InventoryProvider {
         if (e.isShiftClick()) {
             enabled.clear();
             enabled.addAll(Arrays.asList(ClassType.getAvailableClasses()));
-            game.TellAll(main.color("&2&l(!) &rClass selection has been &ereset &rto the default classes."));
+            game.TellAll(main.color("&2&l(!) &rClass list &ereset &rto default."));
         } else if (e.isLeftClick()) {
             enabled.addAll(Arrays.asList(ClassType.getPlayableClasses()));
             status = Status.ENABLED;
-            game.TellAll(main.color("&2&l(!) &rAll classes have been &aenabled&r, including vaulted ones."));
+            game.TellAll(main.color("&2&l(!) &rAll classes &aenabled&r, including vaulted."));
         } else if (e.isRightClick()) {
             enabled.clear();
             status = Status.DISABLED;
-            game.TellAll(main.color("&2&l(!) &rAll classes have been &cdisabled&r."));
+            game.TellAll(main.color("&2&l(!) &rAll classes &cdisabled&r."));
             warnIfNoneEnabled(player);
         } else {
             return;
@@ -304,8 +306,7 @@ public class ClassListGUI implements InventoryProvider {
 
     private void warnIfNoneEnabled(Player player) {
         if (game.getGameSettings().enabledClasses.isEmpty())
-            player.sendMessage(main.color("&e&l(!) &rNo classes are enabled - players will pick from the "
-                    + "default classes until you enable some."));
+            player.sendMessage(main.color("&e&l(!) &rNo classes enabled. The default classes will be used."));
     }
 
     private boolean canModify(Player player) {
@@ -313,6 +314,14 @@ public class ClassListGUI implements InventoryProvider {
             return true;
         player.sendMessage(main.color("&c&l(!) &rThis game can no longer be modified."));
         inv.close(player);
+        return false;
+    }
+
+    /** Whether any class that can be played right now is enabled. */
+    private boolean hasEnabledClass() {
+        for (ClassType type : game.getGameSettings().enabledClasses) {
+            if (type.isPlayable()) return true;
+        }
         return false;
     }
 

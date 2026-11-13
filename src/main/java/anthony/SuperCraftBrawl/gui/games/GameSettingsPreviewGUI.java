@@ -51,16 +51,17 @@ public class GameSettingsPreviewGUI implements InventoryProvider {
         addFrenzyModifier(contents);            // 0,0
         addClassSwitchModifier(contents);       // 0,1
         addOneForAllModifier(contents);         // 0,2
-        addLowGravityModifier(contents);        // 0,4
-        addStrengthOnKillModifier(contents);    // 0,5
-        addHealingOnKillModifier(contents);     // 0,6
-        addMaxHealthModifier(contents);         // 0,7
+        addEffectRouletteModifier(contents);    // 0,4
+        addLowGravityModifier(contents);        // 0,5
+        addStrengthOnKillModifier(contents);    // 0,6
+        addHealingOnKillModifier(contents);     // 0,7
         addLightningDropRateModifier(contents); // 0,8
 
         // Bottom row
         addClassListModifier(contents);         // 2,0
         addItemListModifier(contents);          // 2,1
-        addPassiveHealingModifier(contents);    // 2,4
+        addPassiveHealingModifier(contents);    // 2,3
+        addMaxHealthModifier(contents);         // 2,4
         addLivesModifier(contents);             // 2,5
         addRespawnTimeModifier(contents);       // 2,6
         addSpawnProtectionModifier(contents);   // 2,7
@@ -100,8 +101,18 @@ public class GameSettingsPreviewGUI implements InventoryProvider {
         ))));
     }
 
+    private void addEffectRouletteModifier(InventoryContents contents) {
+        int index = GameModifiersGUI.indexOf(GameModifiersGUI.ROULETTE_TIMES, defaults.effectRouletteSeconds);
+        ItemStack potion = ItemHelper.setHideFlags(new ItemStack(Material.POTION, 1, (short) 8194), true);
+
+        contents.set(0, 4, inert(GameModifiersGUI.cycleItem(main, potion, "&e&lEffect Roulette",
+                GameModifiersGUI.ROULETTE_LABELS, index, 1, GameModifiersGUI.ROULETTE_TIMES[index] > 0,
+                "&7Everyone gets a random effect", "&7every so often"
+        )));
+    }
+
     private void addLowGravityModifier(InventoryContents contents) {
-        contents.set(0, 4, inert(GameModifiersGUI.toggleItem(main, new ItemStack(Material.FEATHER), defaults.lowGravity,
+        contents.set(0, 5, inert(GameModifiersGUI.toggleItem(main, new ItemStack(Material.FEATHER), defaults.lowGravity,
                 "&e&lLow Gravity",
                 "&7Everyone gets permanent",
                 "&bJump Boost X &7while alive"
@@ -112,7 +123,7 @@ public class GameSettingsPreviewGUI implements InventoryProvider {
         int index = GameModifiersGUI.indexOf(GameModifiersGUI.STRENGTH_TIMES, defaults.strengthOnKillSeconds);
         int seconds = GameModifiersGUI.STRENGTH_TIMES[index];
 
-        contents.set(0, 5, inert(GameModifiersGUI.cycleItem(main, new ItemStack(Material.BLAZE_POWDER), "&e&lStrength on Kill",
+        contents.set(0, 6, inert(GameModifiersGUI.cycleItem(main, new ItemStack(Material.BLAZE_POWDER), "&e&lStrength on Kill",
                 GameModifiersGUI.STRENGTH_LABELS, index, seconds, seconds > 0,
                 "&7Killers gain &4Strength I", "&7for the chosen duration after", "&7getting a kill"
         )));
@@ -126,7 +137,7 @@ public class GameSettingsPreviewGUI implements InventoryProvider {
 
         ItemStack potion = ItemHelper.setHideFlags(new ItemStack(Material.POTION, 1, (short) 16421), true);
 
-        contents.set(0, 6, inert(GameModifiersGUI.cycleItem(main, potion, "&e&lHealing on Kill",
+        contents.set(0, 7, inert(GameModifiersGUI.cycleItem(main, potion, "&e&lHealing on Kill",
                 labels, mode.ordinal(), 1, mode != HealthPotMode.DISABLED,
                 "&7How killers get healed",
                 "&7after getting a kill"
@@ -136,7 +147,7 @@ public class GameSettingsPreviewGUI implements InventoryProvider {
     private void addMaxHealthModifier(InventoryContents contents) {
         int index = GameModifiersGUI.indexOf(GameModifiersGUI.MAX_HEALTH_HEARTS, defaults.maxHealthHearts);
 
-        contents.set(0, 7, inert(GameModifiersGUI.cycleItem(main, new ItemStack(Material.GOLDEN_APPLE), "&e&lMax Health",
+        contents.set(2, 4, inert(GameModifiersGUI.cycleItem(main, new ItemStack(Material.GOLDEN_APPLE), "&e&lMax Health",
                 GameModifiersGUI.MAX_HEALTH_LABELS, index, GameModifiersGUI.MAX_HEALTH_HEARTS[index], false,
                 "&7How much health everyone", "&7has on each life"
         )));
@@ -187,7 +198,7 @@ public class GameSettingsPreviewGUI implements InventoryProvider {
     private void addPassiveHealingModifier(InventoryContents contents) {
         ItemStack potion = ItemHelper.setHideFlags(new ItemStack(Material.POTION, 1, (short) 8193), true);
 
-        contents.set(2, 4, inert(GameModifiersGUI.toggleItem(main, potion, defaults.passiveHealing, "&e&lPassive Healing",
+        contents.set(2, 3, inert(GameModifiersGUI.toggleItem(main, potion, defaults.passiveHealing, "&e&lPassive Healing",
                 "&7Players slowly regenerate",
                 "&7health over time"
         )));

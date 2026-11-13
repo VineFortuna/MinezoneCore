@@ -4,6 +4,8 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticRegistry;
+import anthony.SuperCraftBrawl.cosmetics.ParticleHelper;
+import anthony.SuperCraftBrawl.cosmetics.PassCosmetic;
 import anthony.util.ItemHelper;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
@@ -25,6 +27,62 @@ public final class TrailCosmetics {
         registry.register(snowParticles(main));
         registry.register(candyCaneSwirl(main));
         registry.register(candyAura(main));
+        registry.register(snowfall(main));
+        registry.register(hollyWreath(main));
+    }
+
+    /** Snowflakes drifting down from above the player's head. Lobby only, like the other trails. */
+    private static Cosmetic snowfall(Core main) {
+        return new PassCosmetic(main, CosmeticCategory.TRAIL, "snowfall", "Snowfall", "&bSnowfall",
+                Material.SNOW_BALL, 0, "&7Snow gently falls over you", "&7wherever you go.") {
+            @Override
+            public long getTickPeriod() {
+                return 2L;
+            }
+
+            @Override
+            public void tick(Player player) {
+                if (!main.isInLobby(player)) return;
+
+                Location above = player.getLocation().add(0, 2.6, 0);
+                ParticleHelper.play(above, EnumParticle.SNOW_SHOVEL, 0.6f, 0.15f, 0.6f, 0f, 4);
+                ParticleHelper.play(above, EnumParticle.CLOUD, 0.5f, 0.1f, 0.5f, 0f, 1);
+            }
+        };
+    }
+
+    /** A ring of holly leaves and berries slowly circling the player. Lobby only, like the other trails. */
+    private static Cosmetic hollyWreath(Core main) {
+        return new PassCosmetic(main, CosmeticCategory.TRAIL, "holly_wreath", "Holly Wreath", "&aHolly Wreath",
+                Material.LEAVES, 1, "&7A wreath of holly leaves and", "&7red berries circles around you.") {
+            @Override
+            public long getTickPeriod() {
+                return 2L;
+            }
+
+            @Override
+            public void tick(Player player) {
+                if (!main.isInLobby(player)) return;
+
+                // Driven by how long the player has been online, so no per-player state is kept
+                int ticks = player.getTicksLived();
+                double rotation = ticks * 0.12;
+                Location base = player.getLocation();
+
+                int points = 6;
+                for (int i = 0; i < points; i++) {
+                    double angle = rotation + i * 2 * Math.PI / points;
+                    double bob = Math.sin(ticks * 0.1 + i) * 0.1;
+                    Location point = base.clone().add(Math.cos(angle) * 0.9, 1.0 + bob, Math.sin(angle) * 0.9);
+
+                    // Two red berries for every four green leaves
+                    if (i % 3 == 1)
+                        ParticleHelper.dust(point, 220, 30, 30);
+                    else
+                        ParticleHelper.dust(point, 30, 160, 50);
+                }
+            }
+        };
     }
 
     private static Cosmetic snowParticles(Core main) {

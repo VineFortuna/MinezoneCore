@@ -7,6 +7,7 @@ public enum CosmeticCategory {
     TRAIL("Particles", "Particles"),
     TITLE("Title", "Titles"),
     HOOK_TRAIL("Hook Trail", "Hook Trails"),
+    DOUBLE_JUMP("Double Jump", "Double Jumps"),
     WIN_EFFECT("Win Effect", "Win Effects"),
     DEATH_EFFECT("Death Effect", "Death Effects");
 

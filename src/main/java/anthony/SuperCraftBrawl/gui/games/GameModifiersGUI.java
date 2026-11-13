@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.gui.games;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.Game.CustomGameVisibility;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameLootDrops;
 import anthony.SuperCraftBrawl.Game.GameSettings;
@@ -49,6 +50,8 @@ public class GameModifiersGUI implements InventoryProvider {
     static final String[] SPAWN_PROTECTION_LABELS = {"Disabled", "3s", "5s"};
     static final int[] STRENGTH_TIMES = {0, 5, 10, 20, 30}; // 0 = disabled
     static final String[] STRENGTH_LABELS = {"Disabled", "5s", "10s", "20s", "30s"};
+    static final int[] ROULETTE_TIMES = {0, 5, 15, 30}; // 0 = disabled
+    static final String[] ROULETTE_LABELS = {"Disabled", "5s", "15s", "30s"};
     static final int[] MAX_HEALTH_HEARTS = {1, 3, 5, 10, 15, 20, 40};
     static final String[] MAX_HEALTH_LABELS = {"1 Heart", "3 Hearts", "5 Hearts", "10 Hearts", "15 Hearts", "20 Hearts", "40 Hearts"};
 
@@ -123,16 +126,17 @@ public class GameModifiersGUI implements InventoryProvider {
         addFrenzyModifier(contents, player);            // 0,0
         addClassSwitchModifier(contents, player);       // 0,1
         addOneForAllModifier(contents, player);         // 0,2
-        addLowGravityModifier(contents, player);        // 0,4
-        addStrengthOnKillModifier(contents, player);    // 0,5
-        addHealingOnKillModifier(contents, player);     // 0,6
-        addMaxHealthModifier(contents, player);         // 0,7
+        addEffectRouletteModifier(contents, player);    // 0,4
+        addLowGravityModifier(contents, player);        // 0,5
+        addStrengthOnKillModifier(contents, player);    // 0,6
+        addHealingOnKillModifier(contents, player);     // 0,7
         addLightningDropRateModifier(contents, player); // 0,8
 
         // Bottom row
         addClassListModifier(contents, player);         // 2,0
         addItemListModifier(contents, player);          // 2,1
-        addPassiveHealingModifier(contents, player);    // 2,4
+        addPassiveHealingModifier(contents, player);    // 2,3
+        addMaxHealthModifier(contents, player);         // 2,4
         addLivesModifier(contents, player);             // 2,5
         addRespawnTimeModifier(contents, player);       // 2,6
         addSpawnProtectionModifier(contents, player);   // 2,7
@@ -162,7 +166,7 @@ public class GameModifiersGUI implements InventoryProvider {
             SoundManager.playClickSound(player);
 
             new GamePreset().applyTo(game);
-            game.TellAll(main.color("&2&l(!) &rAll Game Settings have been reset to their &edefault&r values."));
+            game.TellAll(main.color("&2&l(!) &rGame Settings reset to &edefault&r."));
 
             inv.open(player);
             game.refreshEditorMenus(player);
@@ -190,27 +194,40 @@ public class GameModifiersGUI implements InventoryProvider {
     }
 
     private void addVisibilityModifier(InventoryContents contents, Player player) {
-        boolean isPublic = game.isCustomGamePublic();
+        CustomGameVisibility current = game.getCustomGameVisibility();
 
-        ItemStack item = ItemHelper.setDetails(new ItemStack(isPublic ? Material.EMERALD_BLOCK : Material.REDSTONE_BLOCK),
-                main.color("&e&lVisibility"),
-                "",
-                main.color("&fCurrent: " + (isPublic ? "&aPublic" : "&cPrivate")),
-                "",
-                main.color(isPublic ? "&7Anyone can join this game from" : "&7Only the host's party can join"),
-                main.color(isPublic ? "&7the Custom Games NPC" : "&7this game"),
-                "",
-                main.color("&eClick to make it " + (isPublic ? "&cprivate" : "&apublic")));
+        List<String> lore = new ArrayList<>();
+        lore.add("");
+        lore.add("&fCurrent: " + current.getTag());
+        lore.add("");
+        if (current == CustomGameVisibility.PUBLIC) {
+            lore.add("&7Anyone can join this game");
+            lore.add("&7from the Custom Games NPC");
+        } else if (current == CustomGameVisibility.FRIENDS) {
+            lore.add("&7Only your friends and");
+            lore.add("&7your party can join");
+        } else {
+            lore.add("&7Only your party can");
+            lore.add("&7join this game");
+        }
+        lore.add("");
+        lore.add("&7Next: " + current.next().getTag());
+        lore.add("&eClick to cycle");
+
+        ItemStack item = ItemHelper.setDetails(new ItemStack(current.getBlock()),
+                main.color("&e&lVisibility"), lore.toArray(new String[0]));
 
         contents.set(4, 3, ClickableItem.of(item, e -> {
             if (!canModify(player)) return;
+            if (!e.isLeftClick() && !e.isRightClick()) return;
             SoundManager.playClickSound(player);
 
-            game.setCustomGamePublic(!isPublic);
-            game.TellAll(main.color("&2&l(!) &rThis custom game is now " + (!isPublic
-                    ? "&apublic&r - anyone can join it from the Custom Games NPC." : "&cprivate&r - only the host's party can join it.")));
-            if (!isPublic) announcePublicGame();
-            CustomGamesGUI.refreshOpenMenus(); // the game shows up / changes block for anyone looking
+            CustomGameVisibility now = game.getCustomGameVisibility();
+            CustomGameVisibility next = now.next();
+            game.setCustomGameVisibility(next);
+            game.TellAll(main.color("&2&l(!) &rVisibility set to " + next.getTag() + "&r."));
+            if (next == CustomGameVisibility.PUBLIC) announcePublicGame();
+            CustomGamesGUI.refreshOpenMenus(); // the game changes block for anyone looking, in Quick Join too
 
             inv.open(player);
             game.refreshEditorMenus(player);
@@ -322,7 +339,7 @@ public class GameModifiersGUI implements InventoryProvider {
             if (nextSeconds > 0) settings.randomClassCycleSeconds = nextSeconds;
 
             if (nextSeconds > 0) {
-                game.TellAll(main.color("&2&l(!) &rClass Switch has been &aenabled&r. Classes will change every &e&l"
+                game.TellAll(main.color("&2&l(!) &rClass Switch &aenabled&r: classes change every &e&l"
                         + CLASS_SWITCH_LABELS[next]));
             } else {
                 game.TellAll(main.color("&2&l(!) &rClass Switch has been &cdisabled"));
@@ -363,10 +380,37 @@ public class GameModifiersGUI implements InventoryProvider {
         }));
     }
 
+    private void addEffectRouletteModifier(InventoryContents contents, Player player) {
+        int index = indexOf(ROULETTE_TIMES, game.getGameSettings().effectRouletteSeconds);
+        int seconds = ROULETTE_TIMES[index];
+
+        // Potion of Swiftness (potions don't stack, so there's no amount on the icon)
+        ItemStack potion = ItemHelper.setHideFlags(new ItemStack(Material.POTION, 1, (short) 8194), true);
+
+        contents.set(0, 4, ClickableItem.of(cycleItem(main, potion, "&e&lEffect Roulette",
+                ROULETTE_LABELS, index, 1, seconds > 0,
+                "&7Everyone gets a random effect", "&7every so often"
+        ), e -> {
+            SoundManager.playClickSound(player);
+
+            int next = ROULETTE_TIMES[step(index, ROULETTE_TIMES.length, e)];
+            game.getGameSettings().effectRouletteSeconds = next;
+
+            if (next > 0) {
+                game.TellAll(main.color("&2&l(!) &rEffect Roulette &aenabled&r: a new effect every &e&l" + next + "s&r."));
+            } else {
+                game.TellAll(main.color("&2&l(!) &rEffect Roulette has been &cdisabled"));
+            }
+
+            inv.open(player);
+            game.refreshEditorMenus(player);
+        }));
+    }
+
     private void addLowGravityModifier(InventoryContents contents, Player player) {
         boolean enabled = game.getGameSettings().lowGravity;
 
-        contents.set(0, 4, ClickableItem.of(toggleItem(main, new ItemStack(Material.FEATHER), enabled, "&e&lLow Gravity",
+        contents.set(0, 5, ClickableItem.of(toggleItem(main, new ItemStack(Material.FEATHER), enabled, "&e&lLow Gravity",
                 "&7Everyone gets permanent",
                 "&bJump Boost X &7while alive"
         ), e -> {
@@ -384,7 +428,7 @@ public class GameModifiersGUI implements InventoryProvider {
         int index = indexOf(STRENGTH_TIMES, game.getGameSettings().strengthOnKillSeconds);
         int seconds = STRENGTH_TIMES[index];
 
-        contents.set(0, 5, ClickableItem.of(cycleItem(main, new ItemStack(Material.BLAZE_POWDER), "&e&lStrength on Kill",
+        contents.set(0, 6, ClickableItem.of(cycleItem(main, new ItemStack(Material.BLAZE_POWDER), "&e&lStrength on Kill",
                 STRENGTH_LABELS, index, seconds, seconds > 0,
                 "&7Killers gain &4Strength I", "&7for the chosen duration after", "&7getting a kill"
         ), e -> {
@@ -394,8 +438,8 @@ public class GameModifiersGUI implements InventoryProvider {
             game.getGameSettings().strengthOnKillSeconds = next;
 
             if (next > 0) {
-                game.TellAll(main.color("&2&l(!) &rStrength on Kill has been &aenabled&r: &e&l" + next
-                        + "s &rof Strength I after every kill."));
+                game.TellAll(main.color("&2&l(!) &rStrength on Kill &aenabled&r: &e&l" + next
+                        + "s &rafter every kill."));
             } else {
                 game.TellAll(main.color("&2&l(!) &rStrength on Kill has been &cdisabled"));
             }
@@ -414,7 +458,7 @@ public class GameModifiersGUI implements InventoryProvider {
         // Splash Potion of Instant Health
         ItemStack potion = ItemHelper.setHideFlags(new ItemStack(Material.POTION, 1, (short) 16421), true);
 
-        contents.set(0, 6, ClickableItem.of(cycleItem(main, potion, "&e&lHealing on Kill",
+        contents.set(0, 7, ClickableItem.of(cycleItem(main, potion, "&e&lHealing on Kill",
                 labels, mode.ordinal(), 1, mode != HealthPotMode.DISABLED,
                 "&7How killers get healed",
                 "&7after getting a kill"
@@ -433,7 +477,7 @@ public class GameModifiersGUI implements InventoryProvider {
     private void addMaxHealthModifier(InventoryContents contents, Player player) {
         int index = indexOf(MAX_HEALTH_HEARTS, game.getGameSettings().maxHealthHearts);
 
-        contents.set(0, 7, ClickableItem.of(cycleItem(main, new ItemStack(Material.GOLDEN_APPLE), "&e&lMax Health",
+        contents.set(2, 4, ClickableItem.of(cycleItem(main, new ItemStack(Material.GOLDEN_APPLE), "&e&lMax Health",
                 MAX_HEALTH_LABELS, index, MAX_HEALTH_HEARTS[index], false,
                 "&7How much health everyone", "&7has on each life"
         ), e -> {
@@ -461,7 +505,7 @@ public class GameModifiersGUI implements InventoryProvider {
             int next = step(index, DROP_TIMES.length, e);
             game.getGameSettings().dropTimer = DROP_TIMES[next];
             if (DROP_TIMES[next] > 0) {
-                game.TellAll(main.color("&2&l(!) &rLightning drops will now spawn every &e&l" + DROP_TIME_LABELS[next] + "&r."));
+                game.TellAll(main.color("&2&l(!) &rLightning drops now spawn every &e&l" + DROP_TIME_LABELS[next] + "&r."));
             } else {
                 game.TellAll(main.color("&2&l(!) &rLightning drops have been &cdisabled"));
             }
@@ -524,7 +568,7 @@ public class GameModifiersGUI implements InventoryProvider {
         // Potion of Regeneration
         ItemStack potion = ItemHelper.setHideFlags(new ItemStack(Material.POTION, 1, (short) 8193), true);
 
-        contents.set(2, 4, ClickableItem.of(toggleItem(main, potion, enabled, "&e&lPassive Healing",
+        contents.set(2, 3, ClickableItem.of(toggleItem(main, potion, enabled, "&e&lPassive Healing",
                 "&7Players slowly regenerate",
                 "&7health over time"
         ), e -> {
@@ -570,7 +614,7 @@ public class GameModifiersGUI implements InventoryProvider {
             game.getGameSettings().respawnSeconds = next;
 
             if (next == 0) {
-                game.TellAll(main.color("&2&l(!) &rPlayers will now respawn &e&linstantly&r."));
+                game.TellAll(main.color("&2&l(!) &rPlayers now respawn &e&linstantly&r."));
             } else {
                 game.TellAll(main.color("&2&l(!) &rRespawn time was set to &e&l" + next + "s&r."));
             }
@@ -746,8 +790,7 @@ public class GameModifiersGUI implements InventoryProvider {
         if (active == null) return false;
 
         SoundManager.playErrorSound(player);
-        player.sendMessage(main.color("&c&l(!) &rOnly one class selection modifier (&eFrenzy&r, &eClass Switch &ror "
-                + "&eOne For All&r) can be active at a time. Disable &e" + active + " &rto enable &e" + modifier + "&r."));
+        player.sendMessage(main.color("&c&l(!) &rDisable &e" + active + " &rfirst to enable &e" + modifier + "&r."));
         return true;
     }
 

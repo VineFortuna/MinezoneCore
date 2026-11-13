@@ -2,14 +2,20 @@ package anthony.SuperCraftBrawl.battlepass;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * A single reward on a Battle Pass tier. Use the static factories to build them.
+ * Icon, name and description are resolved per player (not stored) so cosmetic rewards can take
+ * them straight from the cosmetic itself.
  */
 public class BattlePassReward {
 
@@ -31,12 +37,23 @@ public class BattlePassReward {
 		this.grant = grant;
 	}
 
-	public ItemStack createIcon() {
+	public ItemStack createIcon(Core main, Player player) {
 		return new ItemStack(icon, Math.max(1, Math.min(64, iconAmount)), iconData);
 	}
 
-	public String getName() {
+	/** Raw name with & color codes. */
+	public String getName(Core main, Player player) {
 		return name;
+	}
+
+	/** Extra lines shown under the tier line in the GUI (raw & color codes). */
+	public List<String> getDescription(Core main, Player player) {
+		return Collections.emptyList();
+	}
+
+	/** True if claiming this reward unlocks that exact cosmetic. */
+	public boolean grantsCosmetic(CosmeticCategory category, String cosmeticId) {
+		return false;
 	}
 
 	public void grant(Core main, Player player, PlayerData data) {
@@ -92,5 +109,15 @@ public class BattlePassReward {
 					details.setPurchased();
 					player.sendMessage(main.color("&aYou unlocked the " + className + " &aClass!"));
 				});
+	}
+
+	/** Permanently unlocks a cosmetic that is registered with the CosmeticRegistry. */
+	public static BattlePassReward cosmetic(CosmeticCategory category, String cosmeticId) {
+		return new CosmeticReward(category, cosmeticId);
+	}
+
+	/** Several rewards on one tier. */
+	public static BattlePassReward bundle(BattlePassReward... rewards) {
+		return new BundleReward(rewards);
 	}
 }

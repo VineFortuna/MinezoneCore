@@ -104,7 +104,7 @@ public class PartySettingsGUI implements InventoryProvider {
     private Party getPartyToModify(Player player) {
         Party party = main.getPartyManager().getOrCreateParty(player);
         if (!party.isLeader(player.getUniqueId())) {
-            player.sendMessage(main.color("&c&l(!) &rOnly the party leader can change party settings."));
+            player.sendMessage(main.color("&c&l(!) &rOnly the party leader can change settings."));
             return null;
         }
         return party;

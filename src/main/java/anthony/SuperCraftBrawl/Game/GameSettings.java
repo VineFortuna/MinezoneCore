@@ -57,6 +57,7 @@ public class GameSettings {
     public int respawnSeconds;
     public boolean lowGravity;
     public boolean passiveHealing; // natural regeneration (custom games only)
+    public int effectRouletteSeconds; // Effect Roulette: how often everyone gets a random effect, 0 = off
     public Set<ClassType> enabledClasses; // classes players may pick in a private game
     public Set<GameLootDrops> enabledDrops; // items lightning drops can be (none = all of them)
 
@@ -77,6 +78,7 @@ public class GameSettings {
         this.respawnSeconds = 3; // Default respawn countdown
         this.lowGravity = false;
         this.passiveHealing = true;
+        this.effectRouletteSeconds = 0;
         this.enabledClasses = EnumSet.noneOf(ClassType.class);
         for (ClassType type : ClassType.getAvailableClasses()) {
             this.enabledClasses.add(type); // default: every non-vaulted class
@@ -98,6 +100,7 @@ public class GameSettings {
 		this.respawnSeconds = other.respawnSeconds;
 		this.lowGravity = other.lowGravity;
 		this.passiveHealing = other.passiveHealing;
+		this.effectRouletteSeconds = other.effectRouletteSeconds;
 		this.enabledClasses.clear();
 		this.enabledClasses.addAll(other.enabledClasses);
 		this.enabledDrops.clear();

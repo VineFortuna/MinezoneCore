@@ -34,8 +34,8 @@ import java.util.function.BooleanSupplier;
 public class ReindeerFlight {
 
 	private static final int WARNING_TICKS = 3 * 20;
-	private static final double SPEED = 0.7; // blocks per tick
-	private static final double VERTICAL_SPEED = 0.5; // blocks per tick
+	private static final double SPEED = 0.45; // blocks per tick
+	private static final double VERTICAL_SPEED = 0.3; // blocks per tick
 	private static final Field RIDER_JUMP_FIELD = findRiderJumpField();
 	private static final Field STEER_SNEAK_FIELD = findSteerSneakField();
 	// Riders currently flying, looked up from the netty thread when their steer packets arrive

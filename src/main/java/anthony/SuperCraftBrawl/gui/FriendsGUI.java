@@ -181,13 +181,27 @@ public class FriendsGUI implements InventoryProvider {
 
                 player.closeInventory();
 
-                GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+                // Playing a match: one clear message, whatever the friend is doing
+                if (main.getGameManager().GetInstanceOfPlayer(player) != null) {
+                    player.sendMessage(main.color("&c&l(!) &rYou cannot teleport to friends while in game!"));
+                    return;
+                }
+
+                // Watching a game: a friend in that same game is just a teleport, not a new spectate
+                final GameInstance watching = main.getGameManager().GetInstanceOfSpectator(player);
+                if (watching != null && (watching == main.getGameManager().GetInstanceOfPlayer(onlineFriend)
+                        || watching == main.getGameManager().GetInstanceOfSpectator(onlineFriend))) {
+                    player.teleport(onlineFriend.getLocation());
+                    return;
+                }
+                // Going anywhere else: they stop watching first
+                Runnable stopWatching = () -> {
+                    if (watching != null) main.getCommands().removeFromGame(player);
+                };
+
+                GameInstance game;
 
                 if (onlineFriend.getWorld() == main.getLobbyWorld()) {
-                    if (game != null) {
-                        player.sendMessage(main.color("&c&l(!) &rYou cannot teleport to friends while in game!"));
-                        return;
-                    }
                     if (main.getParkour().hasPlayer(onlineFriend)) {
                         player.sendMessage(main.color("&c&l(!) &rYou cannot teleport to &a" + onlineFriend.getName() +
                                 " &rwhile in parkour!"));
@@ -197,17 +211,22 @@ public class FriendsGUI implements InventoryProvider {
                         player.sendMessage(main.color("&c&l(!) &rYou cannot teleport while in parkour!"));
                         return;
                     }
+                    stopWatching.run();
                     player.teleport(onlineFriend.getLocation());
                 }
 
                 game = main.getGameManager().GetInstanceOfPlayer(onlineFriend);
 
                 if (game != null) {
-                    if (game.state == GameState.STARTED)
+                    if (game.state == GameState.STARTED) {
+                        stopWatching.run();
                         main.getGameManager().SpectatorJoinGame(player, game);
-                    else if (game.state == GameState.WAITING)
-                        if (!game.isLobbyFull(player))
+                    } else if (game.state == GameState.WAITING) {
+                        if (!game.isLobbyFull(player)) {
+                            stopWatching.run();
                             main.getGameManager().JoinGame(player, game);
+                        }
+                    }
 
                     return;
                 }
@@ -216,6 +235,7 @@ public class FriendsGUI implements InventoryProvider {
 
                 if (game != null) {
                     if (game.state == GameState.STARTED) {
+                        stopWatching.run();
                         main.getGameManager().SpectatorJoinGame(player, game);
                     }
                 }

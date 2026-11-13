@@ -20,6 +20,10 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticManager;
+import anthony.SuperCraftBrawl.cosmetics.DoubleJumpAnimation;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 
 public class DoubleJumpManager implements Listener {
@@ -75,6 +79,12 @@ public class DoubleJumpManager implements Listener {
             return;
         }
 
+        // Riding the lobby sleigh: Space is the horse's jump key, not a double jump
+        if (main.getSleighManager() != null && main.getSleighManager().isRiding(player)) {
+            event.setCancelled(true);
+            return;
+        }
+
         GameInstance i = main.getGameManager().GetInstanceOfPlayer(player);
         PlayerData playerData = main.getDataManager().getPlayerData(player);
 
@@ -122,9 +132,8 @@ public class DoubleJumpManager implements Listener {
                     forwards.normalize().multiply(forwardsFactor + forwardsStrength / 5.0D);
                 }
 
-                player.getWorld().playEffect(player.getLocation(), Effect.SNOWBALL_BREAK, 0);
                 player.setVelocity(new Vector(forwards.getX(), upFactor, forwards.getZ()));
-                player.getWorld().playEffect(player.getLocation(), Effect.SNOWBALL_BREAK, 0);
+                playJumpEffect(player);
             } else {
                 // If can't double jump, restore last known velocity (original behavior)
                 player.setVelocity(jumpData.lastVelocity);
@@ -136,6 +145,24 @@ public class DoubleJumpManager implements Listener {
 
         // Always cancel so flight toggle doesn't engage vanilla flying
         event.setCancelled(true);
+    }
+
+    /** The equipped double jump cosmetic, or the classic snowball poof if they have none. */
+    private void playJumpEffect(Player player) {
+        try {
+            CosmeticManager cosmetics = main.getCosmeticManager();
+            Cosmetic equipped = cosmetics == null ? null : cosmetics.getEquipped(player, CosmeticCategory.DOUBLE_JUMP);
+            if (equipped instanceof DoubleJumpAnimation && equipped.isUnlocked(player)) {
+                ((DoubleJumpAnimation) equipped).play(player);
+                return;
+            }
+        } catch (Exception e) {
+            // A broken cosmetic must never break the jump itself, fall back to the classic poof
+            e.printStackTrace();
+        }
+
+        player.getWorld().playEffect(player.getLocation(), Effect.SNOWBALL_BREAK, 0);
+        player.getWorld().playEffect(player.getLocation(), Effect.SNOWBALL_BREAK, 0);
     }
 
     @EventHandler

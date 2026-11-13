@@ -353,26 +353,7 @@ public class Commands implements CommandExecutor, TabCompleter {
             return;
         }
 
-        if (args.length == 0) {
-            main.getPartyManager().togglePartyChat(player);
-            return;
-        }
-
-        main.getPartyManager().sendPartyMessage(player, joinArgs(args, 0));
-    }
-
-    private String joinArgs(String[] args, int start) {
-        StringBuilder builder = new StringBuilder();
-
-        for (int i = start; i < args.length; i++) {
-            if (i > start) {
-                builder.append(" ");
-            }
-
-            builder.append(args[i]);
-        }
-
-        return builder.toString();
+        main.getPartyManager().togglePartyChat(player);
     }
 
     private void partyCommand(String[] args, Player player) {
@@ -396,11 +377,6 @@ public class Commands implements CommandExecutor, TabCompleter {
 
             Player target = Bukkit.getPlayer(args[1]);
             main.getPartyManager().invite(player, target);
-            return;
-        }
-
-        if (sub.equals("create")) {
-            main.getPartyManager().create(player);
             return;
         }
 
@@ -468,16 +444,6 @@ public class Commands implements CommandExecutor, TabCompleter {
             return;
         }
 
-        if (sub.equals("chat") || sub.equals("c")) {
-            if (args.length == 1) {
-                main.getPartyManager().togglePartyChat(player);
-                return;
-            }
-
-            main.getPartyManager().sendPartyMessage(player, joinArgs(args, 1));
-            return;
-        }
-
         // /party <player> is a shortcut for /party invite <player>
         if (args.length == 1) {
             Player target = Bukkit.getPlayer(args[0]);
@@ -493,18 +459,16 @@ public class Commands implements CommandExecutor, TabCompleter {
     public void sendPartyHelp(Player player) {
         player.sendMessage(main.color("&8&m------------------------------------"));
         player.sendMessage(main.color("&6&lPARTY COMMANDS"));
-        player.sendMessage(main.color("&e/party create -> &rCreate a party by yourself"));
-        player.sendMessage(main.color("&e/party [invite] <player> -> &rInvite a player"));
-        player.sendMessage(main.color("&e/party accept <player> -> &rAccept an invite"));
-        player.sendMessage(main.color("&e/party reject <player> -> &rReject an invite"));
-        player.sendMessage(main.color("&e/party leave -> &rLeave your party"));
-        player.sendMessage(main.color("&e/party list -> &rView party members"));
-        player.sendMessage(main.color("&e/party kick <player> -> &rKick a member"));
-        player.sendMessage(main.color("&e/party promote <player> -> &rMake someone leader"));
-        player.sendMessage(main.color("&e/party disband -> &rDisband the party"));
-        player.sendMessage(main.color("&e/party chat [message] -> &rToggle/send party chat"));
-        player.sendMessage(main.color("&e/partychat [message] -> &rToggle/send party chat"));
-        player.sendMessage(main.color("&e/party settings -> &rCustom settings to your party"));
+        player.sendMessage(main.color("&e/party [invite] <player>&7: &rInvite a player"));
+        player.sendMessage(main.color("&e/party accept <player>&7: &rAccept an invite"));
+        player.sendMessage(main.color("&e/party reject <player>&7: &rReject an invite"));
+        player.sendMessage(main.color("&e/party leave&7: &rLeave your party"));
+        player.sendMessage(main.color("&e/party list&7: &rView members"));
+        player.sendMessage(main.color("&e/party kick <player>&7: &rKick a member"));
+        player.sendMessage(main.color("&e/party promote <player>&7: &rMake someone leader"));
+        player.sendMessage(main.color("&e/party disband&7: &rDisband the party"));
+        player.sendMessage(main.color("&e/partychat&7: &rToggle party chat"));
+        player.sendMessage(main.color("&e/party settings&7: &rParty settings"));
         player.sendMessage(main.color("&8&m------------------------------------"));
     }
 
@@ -692,13 +656,13 @@ public class Commands implements CommandExecutor, TabCompleter {
 
     public void sendFriendsHelp(Player player) {
         player.sendMessage(main.color("&a&lFriends Commands"));
-        player.sendMessage(main.color("&e/friends &7- Open your friends list"));
-        player.sendMessage(main.color("&e/friends list &7- List your friends in chat"));
-        player.sendMessage(main.color("&e/friends add <player> &7- Send a friend request"));
-        player.sendMessage(main.color("&e/friends accept <player> &7- Accept a request"));
-        player.sendMessage(main.color("&e/friends reject <player> &7- Reject a request"));
-        player.sendMessage(main.color("&e/friends remove <player> &7- Remove a friend"));
-        player.sendMessage(main.color("&e/friends requests &7- View requests"));
+        player.sendMessage(main.color("&e/friends&7: &rOpen your friends list"));
+        player.sendMessage(main.color("&e/friends list&7: &rList your friends"));
+        player.sendMessage(main.color("&e/friends add <player>&7: &rSend a request"));
+        player.sendMessage(main.color("&e/friends accept <player>&7: &rAccept a request"));
+        player.sendMessage(main.color("&e/friends reject <player>&7: &rReject a request"));
+        player.sendMessage(main.color("&e/friends remove <player>&7: &rRemove a friend"));
+        player.sendMessage(main.color("&e/friends requests&7: &rView requests"));
     }
 
 	private void candyAuraCommand(String[] args, Player player) {
@@ -2008,6 +1972,14 @@ public class Commands implements CommandExecutor, TabCompleter {
         // Only the members in the leader's game go with them (not ones in the lobby or elsewhere), and only
         // they get told. The leader goes last, so the game isn't closed on members who are leaving anyway
         GameInstance leaderGame = getGameOf(leader);
+
+        // The host of a custom game that's already playing leaves on their own, so it keeps running for the party
+        if (leaderGame != null && leaderGame.isCustomGame() && leaderGame.isCustomGameHost(leader)
+                && leaderGame.state != GameState.WAITING) {
+            leaveSinglePlayerGame(leader, false);
+            return;
+        }
+
         List<Player> leaving = new ArrayList<>();
         for (Player member : party.getOnlineMembers()) {
             if (member != leader && leaderGame != null && getGameOf(member) == leaderGame) leaving.add(member);
@@ -2129,7 +2101,7 @@ public class Commands implements CommandExecutor, TabCompleter {
             }
         } else if (cmd.getName().equalsIgnoreCase("party")) {
             if (args.length == 1) {
-                List<String> options = Arrays.asList("create", "invite", "accept", "reject", "leave", "list", "kick", "promote", "disband", "chat", "settings");
+                List<String> options = Arrays.asList("invite", "accept", "reject", "leave", "list", "kick", "promote", "disband", "settings");
                 return StringUtil.copyPartialMatches(args[0], options, new ArrayList<>());
             }
         } else if (cmd.getName().equalsIgnoreCase("sound")) {

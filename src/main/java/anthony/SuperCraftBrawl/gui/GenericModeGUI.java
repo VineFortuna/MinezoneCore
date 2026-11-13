@@ -28,6 +28,8 @@ public class GenericModeGUI implements InventoryProvider {
 	public SmartInventory inv;
 	public GameType gamemode;
 
+	private static final String RANDOM_TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM0ZTA2M2NhZmI0NjdhNWM4ZGU0M2VjNzg2MTkzOTlmMzY5ZjRhNTI0MzRkYTgwMTdhOTgzY2RkOTI1MTZhMCJ9fX0=";
+
 	private List<Maps> maps;
 
 	private Maps randomMap = null;
@@ -52,7 +54,10 @@ public class GenericModeGUI implements InventoryProvider {
 	public int totalRows;
 	public int totalColumns;
 
-	private Consumer<Maps> onMapPicked; // set when the map is being picked for something else, e.g. a custom game
+	private Consumer<Maps> onMapPicked; // set when the map is being picked for something else, e.g. a custom game. Gets null for Random
+	private boolean showSelection = false; // the current choice is marked, see withSelected
+	private Maps selectedMap = null; // the marked map, or null when Random is the current choice
+	private String selectedLabel = "";
 
 	public GenericModeGUI(Core main, SmartInventory parent, GameType gamemode, String title, int totalRows, int totalColumns) {
 		this.gamemode = gamemode;
@@ -75,6 +80,14 @@ public class GenericModeGUI implements InventoryProvider {
 						  Consumer<Maps> onMapPicked) {
 		this(main, parent, gamemode, title, totalRows, totalColumns);
 		this.onMapPicked = onMapPicked;
+	}
+
+	/** Marks the current choice: that map glows (Random, when map is null) and says label instead of the click line. */
+	public GenericModeGUI withSelected(Maps map, String label) {
+		this.showSelection = true;
+		this.selectedMap = map;
+		this.selectedLabel = label;
+		return this;
 	}
 
 	@Override
@@ -114,7 +127,12 @@ public class GenericModeGUI implements InventoryProvider {
 		}));}
 
 		// Randomizer
-		setItem(contents, 0, 4, getRandomizerItem(), e -> handleRandomizerClick(e, player));
+		if (onMapPicked != null) {
+			// Picking a map for something else: Random is an option like any map (like One For All's class menu)
+			contents.set(0, 4, ClickableItem.of(getRandomOptionItem(), e -> handleRandomOptionClick(player)));
+		} else {
+			setItem(contents, 0, 4, getRandomizerItem(), e -> handleRandomizerClick(e, player));
+		}
 
 		// Map Category
 		setItem(contents, totalRows - 1, 0, getMapCategoryItem(), e -> handleMapCategoryClick(e, player));
@@ -176,6 +194,25 @@ public class GenericModeGUI implements InventoryProvider {
 		}
 
 		return ItemHelper.setDetails(item, nome, lore);
+	}
+
+	/** Random, as an option next to the maps (null is passed to onMapPicked for it). */
+	private ItemStack getRandomOptionItem() {
+		boolean selected = showSelection && selectedMap == null;
+
+		ItemStack item = ItemHelper.setDetails(ItemHelper.createSkullTexture(RANDOM_TEXTURE),
+				GameInstance.ONE_FOR_ALL_RANDOM,
+				"&7A random map",
+				"",
+				selected ? "&a" + selectedLabel : "&r&nClick to pick a random map!");
+		if (selected) item = ItemHelper.setGlowing(item, true);
+		return item;
+	}
+
+	private void handleRandomOptionClick(Player player) {
+		SoundManager.playClickSound(player);
+		inv.close(player);
+		onMapPicked.accept(null); // Random
 	}
 
 	private ItemStack getMapCategoryItem() {
@@ -294,7 +331,10 @@ public class GenericModeGUI implements InventoryProvider {
 		// Picking a map for something else (e.g. a custom game): just the map, nothing about games on it
 		if (onMapPicked != null) {
 			ItemHelper.setGlowing(displayItem, false);
-			return ItemHelper.setDetails(displayItem, mapName, mapGameplay, mapSize, "", "&r&nClick to pick this map!");
+			boolean selected = showSelection && map == selectedMap;
+			if (selected) ItemHelper.setGlowing(displayItem, true);
+			return ItemHelper.setDetails(displayItem, mapName, mapGameplay, mapSize, "",
+					selected ? "&a" + selectedLabel : "&r&nClick to pick this map!");
 		}
 
 		if (game == null) {

@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticRegistry;
+import anthony.SuperCraftBrawl.cosmetics.PassCosmetic;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ItemHelper;
 import org.bukkit.Material;
@@ -30,6 +31,13 @@ public final class TitleCosmetics {
         main.getTitlePacket().registerTitle("SCB Halloween Champ 2024", main.color("&6&lSCB HALLOWEEN CHAMP (2024)"), 0.2);
         main.getTitlePacket().registerTitle("SCB Winter Champ 2025", main.color("&b&lSCB WINTER CHAMP (2025)"), 0.2);
 
+        registry.register(passTitle(main, "Jolly", "&a&lJolly", Material.COOKIE, 0,
+                "&7Spread some holiday cheer", "&7above your head!"));
+        registry.register(passTitle(main, "Winter Warrior", "&b&lWinter Warrior", Material.IRON_SWORD, 0,
+                "&7For those who brave", "&7the coldest winter."));
+        registry.register(passTitle(main, "Christmas Legend", "&6&lChristmas &c&lLegend", Material.SAPLING, 1,
+                "&7Awarded to those who", "&7conquered the whole Christmas Pass."));
+
         registry.register(trickOrTreater(main));
         registry.register(freddyFazbear(main));
         registry.register(fiestaDeLaNoche(main));
@@ -45,6 +53,26 @@ public final class TitleCosmetics {
                 "&6&lSCB HALLOWEEN CHAMP (2024)", "2024 Halloween Champion", "Jessey2105"));
         registry.register(nameLockedTitle(main, "SCB Winter Champ 2025", Material.SNOW_BLOCK,
                 "&b&lSCB WINTER CHAMP (2025)", "2025 Winter Champion", "CowNecromancer"));
+    }
+
+    /**
+     * A title earned from the Battle Pass. The id doubles as the title key, and the text shown above
+     * the player's head is registered here too, so a pass title is defined in exactly one place.
+     */
+    private static Cosmetic passTitle(Core main, String id, String text, Material icon, int iconData,
+                                      String... description) {
+        main.getTitlePacket().registerTitle(id, main.color(text), 0.2);
+        return new PassCosmetic(main, CosmeticCategory.TITLE, id, id, text, icon, iconData, description) {
+            @Override
+            public void onEquip(Player player) {
+                main.getTitlePacket().setTitle(player, id);
+            }
+
+            @Override
+            public void onUnequip(Player player) {
+                main.getTitlePacket().clearTitle(player);
+            }
+        };
     }
 
     private static Cosmetic trickOrTreater(Core main) {

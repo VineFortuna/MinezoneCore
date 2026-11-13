@@ -1,8 +1,10 @@
 package anthony.SuperCraftBrawl.gui.games;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.Game.CustomGameVisibility;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
 import fr.minuskube.inv.ClickableItem;
@@ -26,9 +28,9 @@ import java.util.List;
 import java.util.Optional;
 
 /*
- * Custom Games NPC: every active custom game (public ones as emerald blocks - anyone can join; private ones as
- * redstone blocks - only the host's party can join), and Create Custom Game, which takes you (and your party)
- * straight to a new custom game on the default map.
+ * Custom Games NPC: every active custom game, as an emerald block (Public, anyone can join), a gold block
+ * (Friends, the host's friends and party) or a redstone block (Party, only the host's party), and Create Custom
+ * Game, which takes you (and your party) straight to a new custom game on the default map.
  */
 public class CustomGamesGUI implements InventoryProvider {
 
@@ -99,12 +101,12 @@ public class CustomGamesGUI implements InventoryProvider {
     // ===== Items =====
 
     private ItemStack getGameItem(GameInstance game) {
-        boolean isPublic = game.isCustomGamePublic();
+        CustomGameVisibility visibility = game.getCustomGameVisibility();
         String host = getHostName(game);
         boolean playing = game.state == GameState.STARTED;
 
         List<String> lore = new ArrayList<>();
-        lore.add(isPublic ? "&7Public - anyone can join" : "&7Private - only " + host + "'s party can join");
+        lore.add("&fVisibility: " + visibility.getTag());
         lore.add("");
         lore.add("&fPlayers: &e" + game.players.size());
         lore.add("&fStatus: " + (playing ? "&ePlaying" : "&aLobby"));
@@ -113,15 +115,15 @@ public class CustomGamesGUI implements InventoryProvider {
         lore.add("");
         lore.add(playing ? "&eClick to spectate!" : "&eClick to join!");
 
-        ItemStack item = new ItemStack(isPublic ? Material.EMERALD_BLOCK : Material.REDSTONE_BLOCK);
-        return ItemHelper.setDetails(item, (isPublic ? "&a&l" : "&c&l") + host + "'s Custom Game",
+        ItemStack item = new ItemStack(visibility.getBlock());
+        return ItemHelper.setDetails(item, visibility.getColor() + "&l" + host + "'s Custom Game",
                 lore.toArray(new String[0]));
     }
 
     private ItemStack getCreateItem(Player player) {
         List<String> lore = new ArrayList<>();
-        lore.add("&7Create a private/public game");
-        lore.add("&7with custom modes and rules");
+        lore.add("&7Create a game with your");
+        lore.add("&7own modes and rules");
         lore.add("");
         if (main.canHostCustomGames(player)) {
             lore.add("&eLeft Click &7to create!");
@@ -143,8 +145,7 @@ public class CustomGamesGUI implements InventoryProvider {
         }
         if (!game.canAccessCustomGame(player)) {
             SoundManager.playErrorSound(player);
-            player.sendMessage(main.color("&c&l(!) &rThat custom game is private - only &e" + getHostName(game)
-                    + "&r's party can join it."));
+            player.sendMessage(game.getCustomGameAccessMessage());
             return;
         }
 
@@ -182,6 +183,8 @@ public class CustomGamesGUI implements InventoryProvider {
                     .map(contents -> contents.pagination().getPage()).orElse(0);
             open.get().open(player, page);
         }
+
+        ActiveGamesGUI.refreshOpenMenus(); // Quick Join lists custom games too
     }
 
     private static String getHostName(GameInstance game) {

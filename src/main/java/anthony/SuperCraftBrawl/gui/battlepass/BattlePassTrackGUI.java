@@ -17,36 +17,34 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * One pass (Free or Premium), 7 tiers per page:
- *   row 1 = rewards, row 2 = tier progress, row 3 = navigation.
+ * One pass (Free or Premium), laid out like the class mastery menu: every tier has a colored status
+ * pane (lime = reached, yellow = next, red = locked) with its reward right underneath.
+ *
+ *   row 0  your progress (top center)
+ *   row 1  tiers 1-5 status       row 2  tiers 1-5 rewards
+ *   row 3  tiers 6-10 status      row 4  tiers 6-10 rewards
+ *   row 5  back arrow (bottom right)
  */
 public class BattlePassTrackGUI implements InventoryProvider {
 
-	private static final int TIERS_PER_PAGE = 7;
-	private static final int REWARD_ROW = 1, TIER_ROW = 2, NAV_ROW = 3;
+	private static final int TIERS_PER_BLOCK = 5;
+	/** Centers a block of 5 tiers in the 9 columns (columns 2-6). */
+	private static final int FIRST_TIER_COLUMN = 2;
 
 	private final Core main;
 	private final BattlePassTrack track;
-	private final int page;
 	public SmartInventory inv;
 
-	public BattlePassTrackGUI(Core main, BattlePassTrack track) {
-		this(main, track, -1);
-	}
-
-	/** @param page 0-based page, or -1 to open on the page with the player's current tier */
-	public BattlePassTrackGUI(Core main, BattlePassTrack track, int page) {
+	public BattlePassTrackGUI(Core main, BattlePassTrack track, SmartInventory parent) {
 		this.main = main;
 		this.track = track;
-		this.page = page;
 		String title = track == BattlePassTrack.PREMIUM ? "Premium Pass" : "Free Pass";
-		this.inv = SmartInventory.builder().id("battlePassTrack").provider(this).size(4, 9)
-				.title(ChatColor.DARK_GRAY + "" + ChatColor.BOLD + title).build();
-	}
-
-	private static int pageCount() {
-		return (BattlePassSeason.MAX_TIER + TIERS_PER_PAGE - 1) / TIERS_PER_PAGE;
+		this.inv = SmartInventory.builder().id("myInventory").provider(this).size(6, 9)
+				.title("" + ChatColor.DARK_GRAY + ChatColor.BOLD + title).parent(parent).build();
 	}
 
 	@Override
@@ -56,37 +54,26 @@ public class BattlePassTrackGUI implements InventoryProvider {
 		if (progress == null)
 			return;
 
-		int currentTier = progress.getTier();
-		int shownPage = page >= 0 ? page
-				: Math.min(pageCount() - 1, Math.max(0, currentTier - 1) / TIERS_PER_PAGE);
 		boolean premium = manager.hasPremium(progress);
 
 		contents.fill(ClickableItem.empty(ItemHelper.getGlassFiller()));
 
-		contents.set(0, 4, ClickableItem.empty(createInfoItem(main, progress, premium)));
+		contents.set(0, 4, ClickableItem.empty(BattlePassGUI.createProgressHead(main, player, progress, premium)));
 
-		int firstTier = shownPage * TIERS_PER_PAGE + 1;
-		for (int i = 0; i < TIERS_PER_PAGE; i++) {
-			int tier = firstTier + i;
-			if (tier > BattlePassSeason.MAX_TIER)
-				break;
-			int col = i + 1;
+		for (int tier = 1; tier <= BattlePassSeason.MAX_TIER; tier++) {
+			int block = (tier - 1) / TIERS_PER_BLOCK; // 0 = tiers 1-5, 1 = tiers 6-10
+			int col = FIRST_TIER_COLUMN + (tier - 1) % TIERS_PER_BLOCK;
+			int statusRow = 1 + block * 2;
 
-			contents.set(REWARD_ROW, col, createRewardItem(player, progress, tier, premium, shownPage));
-			contents.set(TIER_ROW, col, ClickableItem.empty(createTierMarker(tier, progress)));
+			contents.set(statusRow, col, ClickableItem.empty(createTierItem(progress, tier)));
+			contents.set(statusRow + 1, col, createRewardItem(player, progress, tier, premium));
 		}
 
-		if (shownPage > 0)
-			contents.set(NAV_ROW, 0, ClickableItem.of(ItemHelper.getPreviousPageItem(),
-					e -> new BattlePassTrackGUI(main, track, shownPage - 1).inv.open(player)));
-		if (shownPage < pageCount() - 1)
-			contents.set(NAV_ROW, 8, ClickableItem.of(ItemHelper.getNextPageItem(),
-					e -> new BattlePassTrackGUI(main, track, shownPage + 1).inv.open(player)));
-
-		contents.set(NAV_ROW, 3, ClickableItem.of(ItemHelper.getGoBackItem(),
-				e -> new BattlePassGUI(main).inv.open(player)));
-		contents.set(NAV_ROW, 4, ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BARRIER), main.color("&cClose")),
-				e -> inv.close(player)));
+		if (inv.getParent().isPresent()) {
+			contents.set(5, 8, ClickableItem.of(
+					ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"),
+					e -> inv.getParent().get().open(player)));
+		}
 	}
 
 	@Override
@@ -95,60 +82,29 @@ public class BattlePassTrackGUI implements InventoryProvider {
 
 	// ---------------------------------------------------------------- items
 
-	/** Season/progress summary, shared with the main menu. */
-	static ItemStack createInfoItem(Core main, BattlePassProgress progress, boolean premium) {
-		int tier = progress.getTier();
-		String status;
-		if (!BattlePassSeason.hasStarted())
-			status = "&cStarts on &e" + BattlePassSeason.START.getMonthValue() + "/" + BattlePassSeason.START.getDayOfMonth();
-		else if (BattlePassSeason.hasEnded())
-			status = "&cThis season has ended!";
-		else
-			status = "&aSeason active!";
-
-		String xpLine;
-		if (tier >= BattlePassSeason.MAX_TIER) {
-			xpLine = "&a&lMAX TIER REACHED!";
-		} else {
-			int into = progress.xp - tier * BattlePassSeason.XP_PER_TIER;
-			xpLine = "&7Next tier: " + progressBar(into, BattlePassSeason.XP_PER_TIER) + " &e" + into + "&7/&e" + BattlePassSeason.XP_PER_TIER;
-		}
-
-		return ItemHelper.setDetails(new ItemStack(Material.BOOK), main.color(BattlePassSeason.NAME),
-				status,
-				"",
-				"&7Tier: &e" + tier + "&7/&e" + BattlePassSeason.MAX_TIER,
-				"&7Total XP: &e" + progress.xp,
-				xpLine,
-				"&7Pass: " + (premium ? "&6&lPREMIUM" : "&fFree"),
-				"",
-				"&6How to earn Battle Pass XP:",
-				"&7- Win a game: &e+" + BattlePassSeason.XP_WIN + " XP",
-				"&7- Get a kill: &e+" + BattlePassSeason.XP_KILL + " XP",
-				"&7- Play a game: &e+" + BattlePassSeason.XP_GAME_PLAYED + " XP");
-	}
-
-	private ItemStack createTierMarker(int tier, BattlePassProgress progress) {
+	/** The colored pane above each reward. Its stack size is the tier number. */
+	private ItemStack createTierItem(BattlePassProgress progress, int tier) {
 		int currentTier = progress.getTier();
+
 		short color;
-		String state;
+		List<String> lore = new ArrayList<>();
 		if (tier <= currentTier) {
 			color = 5; // lime
-			state = "&a&lUNLOCKED";
+			lore.add(main.color("&a&lREACHED"));
 		} else if (tier == currentTier + 1) {
 			color = 4; // yellow
-			int into = progress.xp - currentTier * BattlePassSeason.XP_PER_TIER;
-			state = "&e" + into + "&7/&e" + BattlePassSeason.XP_PER_TIER + " XP";
+			lore.add(main.color("&fProgress:"));
+			lore.add(main.progressBar(progress.xp - currentTier * BattlePassSeason.XP_PER_TIER, BattlePassSeason.XP_PER_TIER, 25));
 		} else {
 			color = 14; // red
-			state = "&c&lLOCKED";
+			lore.add(main.color("&c&lLOCKED"));
 		}
 
 		return ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, tier, color),
-				main.color("&e&lTIER " + tier), state);
+				main.color("&e&lTier " + tier), lore.toArray(new String[0]));
 	}
 
-	private ClickableItem createRewardItem(Player player, BattlePassProgress progress, int tier, boolean premium, int shownPage) {
+	private ClickableItem createRewardItem(Player player, BattlePassProgress progress, int tier, boolean premium) {
 		BattlePassReward reward = BattlePassRewards.get(track, tier);
 		boolean claimed = progress.hasClaimed(track, tier);
 		boolean unlocked = tier <= progress.getTier();
@@ -162,16 +118,19 @@ public class BattlePassTrackGUI implements InventoryProvider {
 		else if (!BattlePassSeason.isActive())
 			stateLine = "&cSeason not active";
 		else if (unlocked)
-			stateLine = "&e&lCLICK TO CLAIM";
+			stateLine = "&eClick to claim reward";
 		else
 			stateLine = "&cReach Tier " + tier + " to unlock";
 
-		String trackName = track == BattlePassTrack.PREMIUM ? "&6Premium" : "&fFree";
-		ItemStack icon = ItemHelper.setDetails(reward.createIcon(),
-				main.color(reward.getName()),
-				trackName + " &7- Tier " + tier,
-				"",
-				stateLine);
+		// What the reward is (type and description), then its state
+		List<String> lore = new ArrayList<>();
+		for (String line : reward.getDescription(main, player))
+			lore.add(main.color(line));
+		lore.add("");
+		lore.add(main.color(stateLine));
+
+		ItemStack icon = ItemHelper.setDetails(reward.createIcon(main, player), main.color(reward.getName(main, player)),
+				lore.toArray(new String[0]));
 		ItemHelper.setHideFlags(icon, true);
 		if (unlocked && !claimed && !needsPremium && BattlePassSeason.isActive())
 			ItemHelper.setGlowing(icon, true);
@@ -183,7 +142,7 @@ public class BattlePassTrackGUI implements InventoryProvider {
 
 			switch (manager.claim(player, track, tier)) {
 				case SUCCESS:
-					new BattlePassTrackGUI(main, track, shownPage).inv.open(player); // refresh
+					inv.open(player); // refresh
 					break;
 				case ALREADY_CLAIMED:
 					player.sendMessage(main.color("&c&l(!) &rYou already claimed this reward!"));
@@ -202,17 +161,5 @@ public class BattlePassTrackGUI implements InventoryProvider {
 					break;
 			}
 		});
-	}
-
-	private static String progressBar(int value, int max) {
-		int bars = 20;
-		int filled = max <= 0 ? 0 : Math.min(bars, value * bars / max);
-		StringBuilder sb = new StringBuilder("&a");
-		for (int i = 0; i < bars; i++) {
-			if (i == filled)
-				sb.append("&8");
-			sb.append('|');
-		}
-		return sb.toString();
 	}
 }

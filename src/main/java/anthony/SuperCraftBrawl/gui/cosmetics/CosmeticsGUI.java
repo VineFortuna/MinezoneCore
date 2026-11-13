@@ -29,12 +29,10 @@ public class CosmeticsGUI implements InventoryProvider {
             CosmeticCategory.PET,
             CosmeticCategory.TITLE,
             CosmeticCategory.HOOK_TRAIL,
+            CosmeticCategory.DOUBLE_JUMP,
             CosmeticCategory.DEATH_EFFECT,
             CosmeticCategory.WIN_EFFECT
     };
-
-    /** Categories before this index are lobby cosmetics; the rest are game cosmetics. A divider pane sits between them. */
-    private static final int LOBBY_CATEGORY_COUNT = 6;
 
     public Core main;
     public SmartInventory inv;
@@ -60,9 +58,14 @@ public class CosmeticsGUI implements InventoryProvider {
         return -1;
     }
 
-    /** Maps a category index to its tab column, leaving a gap at LOBBY_CATEGORY_COUNT for the divider pane. */
-    private static int tabColumn(int index) {
-        return index < LOBBY_CATEGORY_COUNT ? index : index + 1;
+    /** Where a category's cosmetics show up, shown in the lore of its tab. */
+    private static String categoryScope(CosmeticCategory category) {
+        switch (category) {
+            case DOUBLE_JUMP: return "&7Lobby & Game Cosmetic";
+            case DEATH_EFFECT:
+            case WIN_EFFECT: return "&7Game Cosmetic";
+            default: return "&7Lobby Cosmetic";
+        }
     }
 
     private static ItemStack categoryIcon(CosmeticCategory category) {
@@ -73,6 +76,7 @@ public class CosmeticsGUI implements InventoryProvider {
             case PET: return ItemHelper.createMonsterEgg(EntityType.PIG, 1);
             case TITLE: return new ItemStack(Material.NAME_TAG);
             case HOOK_TRAIL: return new ItemStack(Material.FISHING_ROD);
+            case DOUBLE_JUMP: return new ItemStack(Material.FEATHER);
             case DEATH_EFFECT: return new ItemStack(Material.REDSTONE);
             case WIN_EFFECT: return new ItemStack(Material.FIREWORK);
             default: return new ItemStack(Material.STAINED_GLASS_PANE);
@@ -92,7 +96,7 @@ public class CosmeticsGUI implements InventoryProvider {
         CosmeticCategory selected = selectedCategory.computeIfAbsent(player.getUniqueId(), id -> CATEGORIES[0]);
         CosmeticManager manager = main.getCosmeticManager();
 
-        int selectedCol = tabColumn(indexOf(selected));
+        int selectedCol = indexOf(selected);
 
         // divider row under the category tabs, lime under selected category
         for (int col = 0; col < 9; col++) {
@@ -104,25 +108,18 @@ public class CosmeticsGUI implements InventoryProvider {
 
         for (int i = 0; i < CATEGORIES.length; i++) {
             CosmeticCategory category = CATEGORIES[i];
-            int col = tabColumn(i);
             boolean isSelected = category == selected;
 
-            ItemStack tabIcon = ItemHelper.setDetails(categoryIcon(category), ChatColor.YELLOW + category.pluralLabel);
+            ItemStack tabIcon = ItemHelper.setDetails(categoryIcon(category), ChatColor.YELLOW + category.pluralLabel,
+                    categoryScope(category));
             if (isSelected) tabIcon = CosmeticGuiUtil.withStatusLore(tabIcon, "&aCurrently Viewing");
 
-            contents.set(0, col, ClickableItem.of(tabIcon, e -> {
+            contents.set(0, i, ClickableItem.of(tabIcon, e -> {
                 selectedCategory.put(player.getUniqueId(), category);
                 SoundManager.playClickSound(player);
                 inv.open(player);
             }));
         }
-
-        ItemStack divider = ItemHelper.setDetails(
-                new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 1),
-                ChatColor.GOLD + "" + ChatColor.BOLD + "Categories",
-                "&6« &eLobby Cosmetics", "&eGame Cosmetics &6»");
-        contents.set(0, LOBBY_CATEGORY_COUNT, ClickableItem.of(divider, e -> {
-        }));
 
         int i = 0;
         for (Cosmetic cosmetic : manager.registry().getAll(selected)) {

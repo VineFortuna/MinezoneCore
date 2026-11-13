@@ -120,7 +120,7 @@ public class CoHostGUI implements InventoryProvider {
             game.TellAll(main.color("&2&l(!) &e" + target.getName() + " &ris no longer the co-host."));
         } else {
             game.setCustomGameCoHost(target);
-            game.TellAll(main.color("&2&l(!) &e" + target.getName() + " &ris now the co-host and can change the game settings."));
+            game.TellAll(main.color("&2&l(!) &e" + target.getName() + " &ris now the co-host."));
         }
 
         parent.inv.open(host);

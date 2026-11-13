@@ -13,12 +13,14 @@ public final class BattlePassSeason {
 	/** Stored in every DB row, so old seasons' progress is kept but never mixed with the new one. */
 	public static final String ID = "christmas_2026";
 	public static final String NAME = "&c&lChristmas &f&lPass";
+	/** Colorless name, used in cosmetic requirement lines ("Christmas 2026 Pass - Free Tier 3"). */
+	public static final String PLAIN_NAME = "Christmas 2026 Pass";
 
 	public static final ZoneId ZONE = ZoneId.of("America/New_York");
 	public static final LocalDate START = LocalDate.of(2026, 12, 1);
 	public static final LocalDate END = LocalDate.of(2026, 12, 31); // inclusive
 
-	public static final int MAX_TIER = 20;
+	public static final int MAX_TIER = 10;
 	public static final int XP_PER_TIER = 500;
 
 	// XP sources

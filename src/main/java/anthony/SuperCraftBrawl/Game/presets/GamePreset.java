@@ -7,6 +7,7 @@ import anthony.SuperCraftBrawl.Game.GameSettings.HealthPotMode;
 import anthony.SuperCraftBrawl.Game.GameSettings.OneForAllMode;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.map.Maps;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -16,7 +17,7 @@ import java.util.EnumSet;
 
 /*
  * A snapshot of a custom game's Game Settings: its modifiers (the same ones copyModifiersFrom carries over),
- * Frenzy and the time of day. Visibility, co-host and kicked players are never part of a preset.
+ * Frenzy, the time of day and the map. Visibility, co-host and kicked players are never part of a preset.
  */
 public class GamePreset {
 
@@ -26,6 +27,7 @@ public class GamePreset {
     public final GameSettings settings = new GameSettings(null); // only holds modifier values, never a game
     public boolean frenzy = false;
     public long timeOfDay = DAY;
+    public Maps map = null; // the map it was saved on (loading it moves the game there), null = leave the map alone
     public String name = null; // a player's own name for it, null = just "Preset #n"
 
     /** A typed preset name made safe for the menus: no color codes, single spaces, trimmed and capped. Null if empty. */
@@ -42,6 +44,7 @@ public class GamePreset {
         preset.settings.copyModifiersFrom(game.getGameSettings());
         preset.frenzy = game.gameType == GameType.FRENZY;
         preset.timeOfDay = game.getMapWorld().getTime();
+        preset.map = game.getMap();
         return preset;
     }
 
@@ -90,8 +93,10 @@ public class GamePreset {
         put(sb, "respawn", settings.respawnSeconds);
         put(sb, "gravity", settings.lowGravity);
         put(sb, "passive", settings.passiveHealing);
+        put(sb, "roulette", settings.effectRouletteSeconds);
         put(sb, "frenzy", frenzy);
         put(sb, "time", timeOfDay);
+        if (map != null) put(sb, "map", map.name());
         putClassList(sb);
         put(sb, "drops", join(settings.enabledDrops.toArray(new Enum[0])));
         return sb.toString();
@@ -134,6 +139,8 @@ public class GamePreset {
                     case "respawn": s.respawnSeconds = Integer.parseInt(value); break;
                     case "gravity": s.lowGravity = Boolean.parseBoolean(value); break;
                     case "passive": s.passiveHealing = Boolean.parseBoolean(value); break;
+                    case "roulette": s.effectRouletteSeconds = Integer.parseInt(value); break;
+                    case "map": preset.map = Maps.valueOf(value); break; // a removed map is skipped (bad value below)
                     case "frenzy": preset.frenzy = Boolean.parseBoolean(value); break;
                     case "time": preset.timeOfDay = Long.parseLong(value); break;
                     case "name": preset.name = cleanName(decode(value)); break;

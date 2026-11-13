@@ -9,6 +9,7 @@ import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticManager;
+import anthony.SuperCraftBrawl.cosmetics.DeathEffectAnimation;
 import anthony.SuperCraftBrawl.gui.ClassMasteryGUI;
 import anthony.SuperCraftBrawl.mastery.MasteryHeads;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
@@ -553,6 +554,14 @@ public abstract class BaseClass {
 
 	private void deathParticles(PlayerData data, Player p) {
 		Location pLocation = p.getLocation();
+
+		// Death effects that draw their own animation (e.g. from the Battle Pass). Unlike the classic
+		// item ring below, these don't need the scb.deathParticles permission - unlocking is enough.
+		Cosmetic equipped = instance.getGameManager().getMain().getCosmeticManager().getEquipped(p, CosmeticCategory.DEATH_EFFECT);
+		if (equipped instanceof DeathEffectAnimation && equipped.isUnlocked(p)) {
+			((DeathEffectAnimation) equipped).play(pLocation);
+			return;
+		}
 		List<Item> deathParticles = new ArrayList<>();
 
 		Material mat = checkDeathEffect(data, p);

@@ -67,6 +67,19 @@ public class GingerBreadManClass extends BaseClass {
 		playerInv.setItem(1, this.chocChips);
 	}
 
+	private ItemStack getBarrier() {
+		return ItemHelper.setDetails(new ItemStack(Material.BARRIER),
+				instance.color("&c&lOut of Chocolate Chips!"),
+				"",
+				instance.color("&7Each kill regenerates 2 chocolate chips"));
+	}
+
+	/** The last one was used: a barrier shows in the ability slot until a kill gives more. */
+	private void showBarrier() {
+		ItemStack first = player.getInventory().getItem(1);
+		if (first == null || first.getType() == Material.AIR) player.getInventory().setItem(1, getBarrier());
+	}
+
 	@Override
 	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
@@ -78,9 +91,10 @@ public class GingerBreadManClass extends BaseClass {
 					int amount = item.getAmount();
 					if (amount > 0) {
 						amount--;
-						if (amount == 0)
+						if (amount == 0) {
 							player.getInventory().clear(player.getInventory().getHeldItemSlot());
-						else
+							showBarrier();
+						} else
 							item.setAmount(amount);
 
 						ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
@@ -125,7 +139,7 @@ public class GingerBreadManClass extends BaseClass {
 
 									for (Player gamePlayer : instance.players) {
 										gamePlayer.playSound(hitLoc, Sound.EXPLODE, 2, 1);
-										gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_HUGE, 1);
+										gamePlayer.playEffect(hitLoc, Effect.EXPLOSION_LARGE, 1);
 									}
 								}
 
@@ -137,6 +151,21 @@ public class GingerBreadManClass extends BaseClass {
 					}
 				}
 			}
+		}
+	}
+
+	@Override
+	public void killEvent(Player damagerPlayer) {
+		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+			ItemStack chips = this.chocChips.clone();
+			chips.setAmount(2);
+
+			ItemStack current = damagerPlayer.getInventory().getItem(1);
+			if (current == null || current.getType() == Material.AIR || current.getType() == Material.BARRIER)
+				damagerPlayer.getInventory().setItem(1, chips);
+			else damagerPlayer.getInventory().addItem(chips);
+
+			damagerPlayer.sendMessage(instance.color("&2&l(!) &rYou got a kill and gained 2 &cChocolate Chips"));
 		}
 	}
 

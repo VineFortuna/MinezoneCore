@@ -25,6 +25,7 @@ import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.PlayerListener;
 import anthony.SuperCraftBrawl.Timer;
 import anthony.SuperCraftBrawl.lobbyitems.LobbyItems;
+import anthony.SuperCraftBrawl.friends.FriendsManager;
 import anthony.SuperCraftBrawl.party.Party;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -131,9 +132,15 @@ public class GameInstance {
     private boolean customGameCountdownStarted = false;
     private UUID customGameHost;
     private boolean worldDiscarded = false;
-    private boolean customGamePublic = false; // a custom game anyone can join, not just the leader's party
+    private CustomGameVisibility customGameVisibility = CustomGameVisibility.PARTY; // who can join: everyone, the host's friends and party, or only the host's party
     private UUID customGameCoHost; // can change the Game Settings too (there's only ever one)
     private final Set<UUID> kickedFromCustomGame = new HashSet<>(); // can't join this custom game (or its next rounds) again
+    private final Set<UUID> keptPlayers = new HashSet<>(); // being moved in from the previous game: let in whatever the visibility is
+
+    /** How long after using the ready-up dye a player has to wait to use it again. */
+    private static final long READY_COOLDOWN_MILLIS = 3000L;
+    /** When each player may use the ready-up dye again (UUID keys, so nothing here holds on to a player). */
+    private final Map<UUID, Long> readyCooldownEnds = new HashMap<>();
     private boolean classSelectorRemoved = false; // Frenzy: classes are random, so the selector goes once settings are final
     // One For All: the class everyone plays, picked once the host starts the countdown
     private ClassType oneForAllClass; // Host/Co-Host mode: their pick (null = a random class)
@@ -352,7 +359,7 @@ public class GameInstance {
     }
 
     /*
-     * The host's and co-host's items: Game Modifiers / Start Game / Change Map (with Profile and Leave Game) in
+     * The host's and co-host's items: Game Modifiers / Start Game / Maps (with Profile and Leave Game) in
      * the lobby, or the normal lobby items plus Game Settings (to stop it) once the countdown is running.
      */
     private void giveEditorItems(Player editor) {
@@ -432,42 +439,104 @@ public class GameInstance {
         return cancellingCustomGame;
     }
 
+    public CustomGameVisibility getCustomGameVisibility() {
+        return customGameVisibility;
+    }
+
+    public void setCustomGameVisibility(CustomGameVisibility visibility) {
+        this.customGameVisibility = visibility;
+    }
+
     public boolean isCustomGamePublic() {
-        return customGamePublic;
+        return customGameVisibility == CustomGameVisibility.PUBLIC;
     }
 
-    public void setCustomGamePublic(boolean customGamePublic) {
-        this.customGamePublic = customGamePublic;
-    }
-
+    /** Public: anyone. Friends: the host's friends and party. Party: only the host's party. The host is always in. */
     public boolean canAccessCustomGame(Player player) {
-        if (!customGame || customGamePublic) return true;
+        if (!customGame || customGameVisibility == CustomGameVisibility.PUBLIC) return true;
         if (player == null) return false;
 
-        if (isCustomGameHost(player)) return true;
+        if (isCustomGameHost(player) || keptPlayers.contains(player.getUniqueId())) return true;
 
-        if (gameManager.getMain().getPartyManager() == null) {
-            return false;
+        if (gameManager.getMain().getPartyManager() != null && customGameHost != null) {
+            Player leader = Bukkit.getPlayer(customGameHost);
+            Party party = leader == null ? null : gameManager.getMain().getPartyManager().getParty(leader);
+            if (party != null && party.contains(player.getUniqueId())) return true;
         }
 
-        Player leader = Bukkit.getPlayer(customGameHost);
+        // The host's friends can join a Friends game, even while the host is away from it
+        FriendsManager friends = gameManager.getMain().getFriendsManager();
+        return customGameVisibility == CustomGameVisibility.FRIENDS && friends != null && customGameHost != null
+                && friends.areFriends(customGameHost, player.getUniqueId());
+    }
 
-        if (leader == null) {
-            return false;
-        }
+    /** The players of the previous game, moving in: nobody is left out between games, even if the visibility changed. */
+    public void keepPlayers(List<Player> players) {
+        for (Player player : players) keptPlayers.add(player.getUniqueId());
+    }
 
-        Party party = gameManager.getMain().getPartyManager().getParty(leader);
+    public void clearKeptPlayers() {
+        keptPlayers.clear();
+    }
 
-        if (party == null) {
-            return false;
-        }
+    /** Closes the custom game menu the player has open, if any (e.g. they're moving to another game). */
+    public void closeEditorMenu(Player player) {
+        if (isCustomGameMenu(player)) player.closeInventory();
+    }
 
-        return party.contains(player.getUniqueId());
+    /** What a player is told when this custom game isn't open to them. */
+    public String getCustomGameAccessMessage() {
+        return color("&c&l(!) &rThis custom game is "
+                + (customGameVisibility == CustomGameVisibility.FRIENDS ? "friends only." : "party only."));
     }
 
     /** Ends a private game with no winner: everyone in it (and watching it) goes back to the lobby. */
     public void cancelCustomGame(String reason) {
         cancelCustomGame(reason, null);
+    }
+
+    /*
+     * The host ended this playing custom game from the sideline: nobody is declared the winner and nothing is
+     * recorded. Everyone playing, and the host who is watching, is reset the way the end of a game resets them,
+     * ready to be moved into a new lobby (see GameManager.endPlayingCustomGame). Anyone else watching is told too
+     * and goes back to the lobby when this game is removed.
+     */
+    public void abortCustomGame(String reason, Player spectatingHost) {
+        if (!customGame) return;
+        cancellingCustomGame = true;
+
+        for (Player player : new ArrayList<>(players)) {
+            player.sendMessage(color(reason));
+
+            BaseClass baseClass = classes.get(player);
+            try {
+                if (baseClass != null) baseClass.GameEnd();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            resetToLobby(player);
+        }
+
+        for (Player spectator : new ArrayList<>(spectators)) {
+            spectator.sendMessage(color(reason));
+            if (spectator == spectatingHost) resetToLobby(spectator);
+        }
+    }
+
+    private void resetToLobby(Player player) {
+        gameManager.getMain().getListener().resetArmor(player);
+        player.spigot().setCollidesWithEntities(true);
+        for (PotionEffect effect : player.getActivePotionEffects()) player.removePotionEffect(effect.getType());
+
+        gameManager.getMain().ResetPlayer(player);
+        player.setDisplayName(player.getName());
+        player.setAllowFlight(false);
+        player.setAllowFlight(true);
+
+        for (Player other : Bukkit.getOnlinePlayers()) {
+            player.showPlayer(other);
+            other.showPlayer(player);
+        }
     }
 
     /** Same, but leaves out the player who is already leaving (they're removed by their own leave). */
@@ -502,6 +571,47 @@ public class GameInstance {
         );
     }
 
+    /** Red Dye: the host of a custom game that kept running without them ends it for everyone with this. */
+    public static ItemStack getEndGameItem() {
+        return ItemHelper.setDetails(new ItemStack(Material.INK_SACK, 1, (short) 1),
+                "&c&lEnd Game &7(Right Click)", "", "&7Click to end this game for everyone");
+    }
+
+    public static boolean isEndGameItem(ItemStack item) {
+        return item != null && item.getType() == Material.INK_SACK && item.getDurability() == 1;
+    }
+
+    /** The host came back to watch their playing custom game: they get the Red Dye to end it. */
+    public void giveHostEndGameItem(Player host) {
+        if (customGame && isCustomGameHost(host)) host.getInventory().setItem(4, getEndGameItem());
+    }
+
+    /** The Maps item: right click changes this game's map, left click picks the player's own default map (shown on it). */
+    private ItemStack getMapsItem(Player editor) {
+        Maps preferred = gameManager.getCustomGameMaps().getPreferred(editor);
+
+        return ItemHelper.setDetails(
+                new ItemStack(Material.EMPTY_MAP),
+                color("&eMaps &7(Left/Right Click)"),
+                "",
+                color("&7Your default map is the one"),
+                color("&7your custom games start on"),
+                "",
+                color("&fDefault Map: &e" + (preferred == null ? "Random" : preferred.getName())),
+                "",
+                color("&eLeft Click &7to choose your default map"),
+                color("&eRight Click &7to change this game's map")
+        );
+    }
+
+    /** Their default map changed: the Maps item shows the new one. */
+    public void refreshMapsItem(Player editor) {
+        if (state != GameState.WAITING || !canEditCustomGame(editor)) return;
+
+        ItemStack current = editor.getInventory().getItem(2);
+        if (current != null && current.getType() == Material.EMPTY_MAP) editor.getInventory().setItem(2, getMapsItem(editor));
+    }
+
     public void giveCustomGameHostItems(Player leader) {
         if (leader == null) return;
         if (!canEditCustomGame(leader)) return;
@@ -521,12 +631,7 @@ public class GameInstance {
                 color("&7Click to start the countdown.")
         );
 
-        ItemStack changeMap = ItemHelper.setDetails(
-                new ItemStack(Material.EMPTY_MAP),
-                color("&eChange Map &7(Right Click)"),
-                "",
-                color("&7Click to move this game to another map.")
-        );
+        ItemStack changeMap = getMapsItem(leader);
 
         leader.getInventory().clear();
         leader.getInventory().setItem(0, modifiers);
@@ -574,17 +679,17 @@ public class GameInstance {
         }
 
         if (!canEditCustomGame(player)) {
-            player.sendMessage(color("&c&l(!) &rOnly the custom game's host and co-host can start it."));
+            player.sendMessage(color("&c&l(!) &rOnly the host and co-host can start the game."));
             return false;
         }
 
         if (players.size() < 2) {
-            player.sendMessage(color("&c&l(!) &rYou need at least 2 players to start the game."));
+            player.sendMessage(color("&c&l(!) &rYou need at least 2 players."));
             return false;
         }
 
         if (gameStartTime != null) {
-            player.sendMessage(color("&c&l(!) &rThe game countdown has already started."));
+            player.sendMessage(color("&c&l(!) &rThe countdown has already started."));
             return false;
         }
 
@@ -618,7 +723,7 @@ public class GameInstance {
 
         TellAll(color("&8&m------------------------------------"));
         TellAll(color("&6&lGAME SETTINGS"));
-        TellAll(color("&fVisibility: " + (customGamePublic ? "&aPublic" : "&cPrivate")));
+        TellAll(color("&fVisibility: " + customGameVisibility.getTag()));
         TellAll(color("&fClass Selection: &e" + classSelection));
         TellAll(color("&fClass List: &e" + (settings.isDefaultClassList() ? "Default" : enabledClasses + "&7/&e"
                 + ClassType.getPlayableClasses().length + " classes")));
@@ -630,6 +735,7 @@ public class GameInstance {
         TellAll(color("&fHealing on Kill: &e" + settings.healthPotMode.getName()));
         TellAll(color("&fStrength on Kill: &e" + formatSecondsOrDisabled(settings.strengthOnKillSeconds)));
         TellAll(color("&fLow Gravity: " + (settings.lowGravity ? "&aEnabled" : "&cDisabled")));
+        TellAll(color("&fEffect Roulette: &e" + formatSecondsOrDisabled(settings.effectRouletteSeconds)));
         TellAll(color("&fItem List: &e" + (settings.isDefaultItemList() ? "Default" : settings.enabledDrops.size()
                 + "&7/&e" + GameLootDrops.values().length + " items")));
         TellAll(color("&fLightning Drop Rate: &e" + formatSecondsOrDisabled(settings.dropTimer)));
@@ -677,7 +783,7 @@ public class GameInstance {
             if (fb != null) fb.updateLine(7, getWaitingLine(p));
         }
 
-        TellAll(color("&e&l(!) &e" + leader.getName() + " &rstopped the countdown to change the game settings."));
+        TellAll(color("&e&l(!) &e" + leader.getName() + " &rstopped the countdown."));
         for (Player editor : getEditors()) giveCustomGameHostItems(editor);
     }
 
@@ -741,6 +847,8 @@ public class GameInstance {
 
                 players.add(player);
                 player.sendMessage(color("&2&l(!) &rYou have joined &e&l" + map.toString()));
+                if (customGame)
+                    player.sendMessage(color("&6&l(!) &rWelcome to &e" + getCustomGameHostName() + "'s &6Custom Game&r!"));
                 if (this.gameType == GameType.FRENZY)
                     TitleUtil.sendTitle(player, "&e&l" + map.toString(), "&fYour class will be randomly selected", 10, 60, 5);
                 else
@@ -955,7 +1063,7 @@ public class GameInstance {
         // (/join only finds normal games)
         String custom = "";
         if (customGame) {
-            if (!customGamePublic) join = null;
+            if (customGameVisibility != CustomGameVisibility.PUBLIC) join = null;
             else {
                 custom = "&6&lCUSTOM ";
                 join.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/joincustomgame " + getCustomGameHostName()));
@@ -1125,7 +1233,7 @@ public class GameInstance {
     public void chooseOneForAllClass(Player player, ClassType type, boolean toggle) {
         if (!players.contains(player)) return;
         if (!isChoosingOneForAllClass()) {
-            player.sendMessage(color("&c&l(!) &rIn &eOne For All &rthe class is chosen once the host starts the game."));
+            player.sendMessage(color("&c&l(!) &rThe class is chosen when the host starts the game."));
             return;
         }
         if (oneForAllVotingEnded) {
@@ -1133,14 +1241,14 @@ public class GameInstance {
             return;
         }
         if (type != null && !isClassSelectable(type)) {
-            player.sendMessage(color("&c&l(!) &rThat class is disabled in this custom game"));
+            player.sendMessage(color("&c&l(!) &rThat class is disabled."));
             return;
         }
 
         String name = type == null ? ONE_FOR_ALL_RANDOM : "a " + type.getTag() + " &rclass";
         if (getGameSettings().oneForAllMode == OneForAllMode.HOST) {
             if (!canEditCustomGame(player)) {
-                player.sendMessage(color("&c&l(!) &rOnly the host and co-host choose the class in &eOne For All&r."));
+                player.sendMessage(color("&c&l(!) &rOnly the host and co-host can choose the class."));
                 return;
             }
             if (type == oneForAllClass) {
@@ -1287,6 +1395,15 @@ public class GameInstance {
     /** The player clicked the ready-up dye: they're ready now (or not anymore), and the dye shows it. */
     public void toggleReady(Player player) {
         if (state != GameState.WAITING || gameStartTime == null || !players.contains(player)) return;
+
+        long now = System.currentTimeMillis();
+        Long cooldownEnd = readyCooldownEnds.get(player.getUniqueId());
+        if (cooldownEnd != null && now < cooldownEnd) {
+            int seconds = (int) Math.ceil((cooldownEnd - now) / 1000.0);
+            player.sendMessage(color("&c&l(!) &rYou can use this again in &e" + seconds + "s"));
+            return;
+        }
+        readyCooldownEnds.put(player.getUniqueId(), now + READY_COOLDOWN_MILLIS);
 
         player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
         getGameSettings().toggleReady(player, this);
@@ -1782,6 +1899,12 @@ public class GameInstance {
                 if (gameTicks % 5 == 0 && gameSettings.lowGravity && state == GameState.STARTED) {
                     applyLowGravity();
                 }
+
+                // Effect Roulette: a new effect for everyone, right at the start and then every interval
+                if (gameSettings.effectRouletteSeconds > 0 && state == GameState.STARTED
+                        && gameTicks % (gameSettings.effectRouletteSeconds * 20) == 0) {
+                    EffectRoulette.roll(GameInstance.this);
+                }
                 gameTicks++;
             }
         };
@@ -2086,12 +2209,13 @@ public class GameInstance {
                                 if (GameInstance.this.gameType == GameType.FRENZY
                                         || GameInstance.this.gameType == GameType.GUNGAME) {
                                     TitleUtil.sendTimes(player, 1, 30, 10);
-                                    TitleUtil.setSubtitle(player, "" + respawnClass.getType().getTag());
+                                    TitleUtil.setSubtitle(player, getSelectableClasses().length > 1 || gameType == GameType.GUNGAME
+                                            ? "" + respawnClass.getType().getTag() : "");
                                     TitleUtil.setTitle(player, "");
                                 } else {
                                     TitleUtil.sendTimes(player, 1, 30, 10);
-                                    // Class Switch: tell them which class they respawned as
-                                    TitleUtil.setSubtitle(player, getGameSettings().randomClasses
+                                    // Class Switch: tell them which class they respawned as (nothing to tell with a single class)
+                                    TitleUtil.setSubtitle(player, getGameSettings().randomClasses && getSelectableClasses().length > 1
                                             ? "" + respawnClass.getType().getTag() : "");
                                     TitleUtil.setTitle(player, "&eRespawned");
                                 }
@@ -2769,7 +2893,7 @@ public class GameInstance {
             allClasses.put(player, newBaseClass);
             sendScoreboardUpdate(player);
 
-            if (announce) player.sendMessage(color("&2&l(!) &rYour class was randomly selected to " + classType.getTag()));
+            if (announce) player.sendMessage(color("&2&l(!) &rYour class was randomly selected as " + classType.getTag()));
 
             if (player.hasPermission("scb.chat"))
                 player.setDisplayName("" + player.getName() + " " + classType.getTag());

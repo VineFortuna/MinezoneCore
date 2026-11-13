@@ -73,6 +73,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	public static HashMap<String, Integer> playercount;
 
 	private final ProjectileManager projManager;
+	private final CustomGameMaps customGameMaps; // each player's default custom game map
 	private final Core main;
 	public GameState state;
 	public GameType gameType;
@@ -87,6 +88,11 @@ public class GameManager implements Listener, PluginMessageListener {
 		this.spawnProt = new HashMap<>();
 		this.main.getServer().getPluginManager().registerEvents(this, main);
 		this.projManager = new ProjectileManager(this);
+		this.customGameMaps = new CustomGameMaps(main);
+	}
+
+	public CustomGameMaps getCustomGameMaps() {
+		return customGameMaps;
 	}
 
 	// GETTERS:
@@ -1534,7 +1540,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
             if (party != null) {
                 if (!party.isLeader(player.getUniqueId())) {
-                    player.sendMessage(main.color("&c&l(!) &rOnly the party leader can join games for the party."));
+                    player.sendMessage(main.color("&c&l(!) &rOnly the party leader can join games."));
                     return;
                 }
 
@@ -1569,7 +1575,7 @@ public class GameManager implements Listener, PluginMessageListener {
             Maps map = maps.get(new Random().nextInt(maps.size()));
             this.JoinMap(player, map);
         } else {
-            player.sendMessage(main.color("&c&l(!) &rNo games have enough space for your party! Try again later."));
+            player.sendMessage(main.color("&c&l(!) &rNo game has room for your party."));
         }
     }
 
@@ -1903,7 +1909,7 @@ public class GameManager implements Listener, PluginMessageListener {
                     return;
                 }
 
-                player.sendMessage(main.color("&c&l(!) &rOnly the party leader can join games for the party."));
+                player.sendMessage(main.color("&c&l(!) &rOnly the party leader can join games."));
                 return;
             }
 
@@ -1930,7 +1936,7 @@ public class GameManager implements Listener, PluginMessageListener {
         } else if (getPartyLeaderGame(party) == game) {
             joinSinglePlayerToGame(player, game.getMap(), game);
         } else {
-            player.sendMessage(main.color("&c&l(!) &rOnly the party leader can join games for the party."));
+            player.sendMessage(main.color("&c&l(!) &rOnly the party leader can join games."));
         }
     }
 
@@ -1952,7 +1958,7 @@ public class GameManager implements Listener, PluginMessageListener {
         GameInstance existingInstance = game != null ? game : getInstanceOfMap(map);
 
         if (existingInstance != null && existingInstance.isCustomGame() && !existingInstance.canAccessCustomGame(leader)) {
-            leader.sendMessage(main.color("&c&l(!) &rThis custom game is private - only its host's party can join it."));
+            leader.sendMessage(existingInstance.getCustomGameAccessMessage());
             return;
         }
         if (existingInstance != null && existingInstance.state != GameState.WAITING) {
@@ -2010,13 +2016,13 @@ public class GameManager implements Listener, PluginMessageListener {
         return true;
     }
 
-    /** Where custom games start, and where everyone goes back to after each custom game. */
+    /** Only used when there is no curated map to pick from: players who haven't chosen a default map get a random one. */
     public static final Maps DEFAULT_CUSTOM_GAME_MAP = Maps.PileOfBodies;
 
     /*
-     * Custom Games NPC: a new private custom game on the default map (on its own copy named <leader>_CustomGame).
-     * The leader (and their party) are taken straight there and the leader gets the Game Modifiers / Start Game /
-     * Change Map items. Game Modifiers can make it public, so anyone can join it from the Custom Games NPC.
+     * Custom Games NPC: a new custom game on the leader's default map (on its own copy named <leader>_CustomGame).
+     * The leader (and their party) are taken straight there and the leader gets the Game Settings / Start Game /
+     * Maps items. Game Settings can make it public, so anyone can join it from the Custom Games NPC.
      */
     public void createCustomGame(Player leader) {
         if (!main.canHostCustomGames(leader)) {
@@ -2024,16 +2030,23 @@ public class GameManager implements Listener, PluginMessageListener {
             return;
         }
 
+        GameInstance running = getRunningCustomGame(leader);
+        if (running != null) {
+            leader.sendMessage(main.color("&e&l(!) &rYour custom game is still playing."));
+            returnHostToGame(leader, running);
+            return;
+        }
+
         Party party = main.getPartyManager() == null ? null : main.getPartyManager().getParty(leader);
         if (party != null && !party.isLeader(leader.getUniqueId())) {
-            leader.sendMessage(main.color("&c&l(!) &rOnly the party leader can create a custom game for the party."));
+            leader.sendMessage(main.color("&c&l(!) &rOnly the party leader can create a custom game."));
             return;
         }
 
         List<Player> members = party == null ? Collections.singletonList(leader) : party.getOnlineMembers();
         if (!canAllJoin(leader, members)) return;
 
-        Maps map = DEFAULT_CUSTOM_GAME_MAP;
+        Maps map = customGameMaps.resolve(leader);
         GameInstance game = new GameInstance(this, map,
                 main.getMapWorldManager().createCustomGameWorld(map.GetInstance().worldName, leader.getName()));
         games.add(game);
@@ -2049,8 +2062,19 @@ public class GameManager implements Listener, PluginMessageListener {
 
         game.giveCustomGameHostItems(leader);
         CustomGamesGUI.refreshOpenMenus();
-        game.TellAll(main.color("&6&l(!) &rWelcome to " + leader.getName() + "'s &6Custom Game&r! They can change "
-                + "the map, the Game Settings (including making it public) and start the countdown."));
+    }
+
+    /** The custom game this player hosts that is still playing, if any (a game keeps running when its host leaves). */
+    private GameInstance getRunningCustomGame(Player host) {
+        for (GameInstance game : games) {
+            if (game.isCustomGame() && game.isCustomGameHost(host) && game.state == GameState.STARTED) return game;
+        }
+        return null;
+    }
+
+    /** The host of a playing custom game goes back to it as a spectator, on their own (their party isn't brought along). */
+    private void returnHostToGame(Player host, GameInstance game) {
+        if (game.getMap() != null) spectateSinglePlayerGame(host, game.getMap(), game);
     }
 
     /*
@@ -2085,21 +2109,22 @@ public class GameManager implements Listener, PluginMessageListener {
         player.sendMessage(main.color("&c&l(!) &rThat game isn't running anymore."));
     }
 
-    /** The leader picked a different map with the Change Map item: everyone moves to a new game on it. */
-    public void changeCustomGameMap(Player leader, Maps map) {
+    /** The leader picked a different map with the Maps item (or a preset): everyone moves to a new game on it. Null if nothing changed. */
+    public GameInstance changeCustomGameMap(Player leader, Maps map) {
         GameInstance game = GetInstanceOfPlayer(leader);
         if (game == null || !game.isCustomGame() || !game.canEditCustomGame(leader)
                 || game.state != GameState.WAITING || game.isCustomGameCountdownStarted()) {
-            leader.sendMessage(main.color("&c&l(!) &rThe map can only be changed in your custom game's lobby."));
-            return;
+            leader.sendMessage(main.color("&c&l(!) &rThe map can only be changed in the lobby."));
+            return null;
         }
         if (game.getMap() == map) {
-            leader.sendMessage(main.color("&c&l(!) &rYour custom game is already on &e" + map.toString() + "&r."));
-            return;
+            leader.sendMessage(main.color("&c&l(!) &rAlready on &e" + map.toString() + "&r."));
+            return null;
         }
 
-        GameInstance next = moveCustomGame(game, map);
+        GameInstance next = moveCustomGame(game, map, null);
         next.TellAll(main.color("&6&l(!) &e" + leader.getName() + " &rchanged the map to &e" + map.toString() + "&r."));
+        return next;
     }
 
     /*
@@ -2114,22 +2139,23 @@ public class GameManager implements Listener, PluginMessageListener {
         Player leader = old.getCustomGameHost() == null ? null : Bukkit.getPlayer(old.getCustomGameHost());
         if (leader == null || !old.players.contains(leader) || !main.canHostCustomGames(leader)) return false;
 
-        GameInstance next = moveCustomGame(old, old.getMap()); // a fresh copy of the map just played
-        next.TellAll(main.color("&6&l(!) &rBack in the &6Custom Game &rlobby! " + leader.getName()
-                + " can change the map and Game Settings and start the next game."));
+        moveCustomGame(old, old.getMap(), null); // a fresh copy of the map just played
         return true;
     }
 
     /*
      * Moves a custom game's players to a new custom game on the given map (a new copy of it), keeping the
      * host (even if a co-host triggered the move), the co-host, Game Modifiers, game type, time of day and
-     * public/private setting. The old game and its world copy are removed.
+     * visibility. Every player moves on, even if the visibility no longer fits them. The old game and its world
+     * copy are removed.
      */
-    private GameInstance moveCustomGame(GameInstance old, Maps map) {
+    private GameInstance moveCustomGame(GameInstance old, Maps map, Player spectatingHost) {
         List<Player> moving = new ArrayList<>();
         for (Player p : old.players) {
             if (p.isOnline()) moving.add(p);
         }
+        // The host watching their own game moves too (see endPlayingCustomGame)
+        if (spectatingHost != null && spectatingHost.isOnline() && !moving.contains(spectatingHost)) moving.add(spectatingHost);
 
         Player host = old.getCustomGameHost() == null ? null : Bukkit.getPlayer(old.getCustomGameHost());
         if (host == null) return old; // the host leaving closes the custom game, so this shouldn't happen
@@ -2139,22 +2165,39 @@ public class GameManager implements Listener, PluginMessageListener {
         next.getMapWorld().setTime(old.getMapWorld().getTime()); // the Time of Day modifier
         games.add(next);
         next.enableCustomGame(host);
-        next.setCustomGamePublic(old.isCustomGamePublic());
+        next.setCustomGameVisibility(old.getCustomGameVisibility());
         next.gameType = old.gameType;
         next.getGameSettings().copyModifiersFrom(old.getGameSettings());
         next.copyKickedPlayersFrom(old);
 
-        for (Player p : moving) old.forceRemovePlayer(p);
+        next.keepPlayers(moving);
+        for (Player p : moving) {
+            old.closeEditorMenu(p); // an open menu would still be editing the old game
+            old.forceRemovePlayer(p);
+        }
         removeGame(old); // its world is deleted once everyone has moved over
 
         for (Player p : moving) {
             joinSinglePlayerToGame(p, map, next);
         }
+        next.clearKeptPlayers();
         if (next.HasPlayer(host)) next.giveCustomGameHostItems(host);
         Player coHost = old.getCustomGameCoHost() == null ? null : Bukkit.getPlayer(old.getCustomGameCoHost());
         if (coHost != null && next.HasPlayer(coHost)) next.setCustomGameCoHost(coHost);
         CustomGamesGUI.refreshOpenMenus();
         return next;
+    }
+
+    /*
+     * The host ended their playing custom game (the Red Dye): it's over with no winner, and everyone in it, the
+     * host included, goes to a new lobby on the same map with the same host and settings.
+     */
+    public void endPlayingCustomGame(GameInstance old, Player host) {
+        if (!games.contains(old) || !old.isCustomGame() || old.state != GameState.STARTED || old.getMap() == null) return;
+        if (!old.isCustomGameHost(host) || !host.isOnline()) return;
+
+        old.abortCustomGame("&e&l(!) &rThe host ended the game.", host);
+        moveCustomGame(old, old.getMap(), host);
     }
 
     public void sendAcceptedPartyMemberToLeaderGame(Player leader, Player newMember) {
@@ -2183,7 +2226,7 @@ public class GameManager implements Listener, PluginMessageListener {
         }
 
         if (main.getParkour().hasPlayer(newMember)) {
-            newMember.sendMessage(main.color("&c&l(!) &rYou cannot join your party leader while in parkour."));
+            newMember.sendMessage(main.color("&c&l(!) &rYou cannot join the leader while in parkour."));
             return;
         }
 
@@ -2199,10 +2242,10 @@ public class GameManager implements Listener, PluginMessageListener {
                     main.getSignManager().updateSign(map.GetInstance(), leaderInstance);
                 }
 
-                newMember.sendMessage(main.color("&a&l(!) &rYou joined your party leader's game."));
+                newMember.sendMessage(main.color("&a&l(!) &rYou joined the leader's game."));
                 leader.sendMessage(main.color("&a&l(!) &e" + newMember.getName() + " &rjoined your game."));
             } else {
-                newMember.sendMessage(main.color("&c&l(!) &rYou joined the party, but could not join your party leader's game."));
+                newMember.sendMessage(main.color("&c&l(!) &rYou could not join the leader's game."));
             }
 
             return;
@@ -2211,12 +2254,12 @@ public class GameManager implements Listener, PluginMessageListener {
         if (leaderInstance.state == GameState.STARTED) {
             spectateSinglePlayerGame(newMember, map, leaderInstance);
 
-            newMember.sendMessage(main.color("&a&l(!) &rYou are now spectating your party leader's game."));
+            newMember.sendMessage(main.color("&a&l(!) &rYou are now spectating the leader's game."));
             leader.sendMessage(main.color("&a&l(!) &e" + newMember.getName() + " &ris now spectating your game."));
             return;
         }
 
-        newMember.sendMessage(main.color("&e&l(!) &rYou joined the party, but your party leader's game is no longer available."));
+        newMember.sendMessage(main.color("&e&l(!) &rThe leader's game is no longer available."));
     }
 
     @EventHandler
@@ -2225,13 +2268,52 @@ public class GameManager implements Listener, PluginMessageListener {
         ItemStack item = event.getItem();
 
         if (item == null || item.getType() == Material.AIR) return;
-        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        boolean rightClick = event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK;
+        boolean leftClick = event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK;
+        if (!rightClick && !leftClick) return; // only the Maps item reacts to a left click
 
         GameInstance instance = GetInstanceOfPlayer(player);
 
         if (instance == null) return;
         if (instance.state != GameState.WAITING) return;
         if (!instance.isCustomGame()) return;
+
+        String itemName = item.hasItemMeta() && item.getItemMeta().hasDisplayName()
+                ? ChatColor.stripColor(item.getItemMeta().getDisplayName()) : "";
+
+        if (item.getType() == Material.EMPTY_MAP && itemName.contains("Maps")) {
+            event.setCancelled(true); // right clicking an empty map would make a real map
+
+            // Newer clients also swing their arm on a right click, which arrives as a left click once the menu is open
+            if (leftClick && player.getOpenInventory().getType() != org.bukkit.event.inventory.InventoryType.CRAFTING) return;
+
+            if (!instance.canEditCustomGame(player)) {
+                player.sendMessage(main.color("&c&l(!) &rOnly the host and co-host can change the map."));
+                return;
+            }
+
+            if (leftClick) {
+                // The map this player's own custom games start on (Random until they pick one)
+                new GenericModeGUI(main, null, GameType.CLASSIC, "Default Map", 6, 9, map -> {
+                    customGameMaps.set(player, map);
+                    player.sendMessage(main.color("&2&l(!) &rYour default map is now &e"
+                            + (map == null ? "Random" : map.getName()) + "&r."));
+
+                    GameInstance current = GetInstanceOfPlayer(player);
+                    if (current != null) current.refreshMapsItem(player); // the Maps item shows it
+                }).withSelected(customGameMaps.getPreferred(player), "Your default map").inv.open(player);
+            } else {
+                // This game's map. Random is any map but the one it's on
+                new GenericModeGUI(main, null, GameType.CLASSIC, "Select Map", 6, 9, map -> {
+                    GameInstance current = GetInstanceOfPlayer(player);
+                    changeCustomGameMap(player, map != null ? map
+                            : CustomGameMaps.randomMap(current == null ? null : current.getMap()));
+                }).withSelected(instance.getMap(), "This game's map").inv.open(player);
+            }
+            return;
+        }
+
+        if (!rightClick) return;
 
         if (item.getType() == Material.EMERALD && item.hasItemMeta()
                 && item.getItemMeta().hasDisplayName()
@@ -2243,8 +2325,6 @@ public class GameManager implements Listener, PluginMessageListener {
             return;
         }
 
-        String itemName = item.hasItemMeta() && item.getItemMeta().hasDisplayName()
-                ? ChatColor.stripColor(item.getItemMeta().getDisplayName()) : "";
         if (item.getType() == Material.REDSTONE_COMPARATOR
                 && itemName.contains("Game Settings")) {
 
@@ -2253,7 +2333,7 @@ public class GameManager implements Listener, PluginMessageListener {
             // Once the countdown is running, Game Settings stops it and gives back the Game Settings + Start Game items
             if (instance.isCustomGameCountdownStarted()) {
                 if (!instance.canEditCustomGame(player)) {
-                    player.sendMessage(main.color("&c&l(!) &rOnly the custom game's host and co-host can stop the countdown."));
+                    player.sendMessage(main.color("&c&l(!) &rOnly the host and co-host can stop the countdown."));
                     return;
                 }
                 instance.cancelCustomGameCountdown(player);
@@ -2261,24 +2341,12 @@ public class GameManager implements Listener, PluginMessageListener {
             }
 
             if (!instance.canEditCustomGame(player)) {
-                player.sendMessage(main.color("&c&l(!) &rOnly the custom game's host and co-host can change its settings."));
+                player.sendMessage(main.color("&c&l(!) &rOnly the host and co-host can change the settings."));
                 return;
             }
 
             new GameModifiersGUI(main, instance).inv.open(player);
             return;
-        }
-
-        if (item.getType() == Material.EMPTY_MAP && itemName.contains("Change Map")) {
-            event.setCancelled(true); // right clicking an empty map would make a real map
-
-            if (!instance.canEditCustomGame(player)) {
-                player.sendMessage(main.color("&c&l(!) &rOnly the custom game's host and co-host can change the map."));
-                return;
-            }
-
-            new GenericModeGUI(main, null, GameType.CLASSIC, "Select Map", 6, 9,
-                    map -> changeCustomGameMap(player, map)).inv.open(player);
         }
     }
 
@@ -2336,6 +2404,12 @@ public class GameManager implements Listener, PluginMessageListener {
     }
 
     private void SpectatorJoinGame(Player player, Maps map, GameInstance game) {
+        // The host of a playing custom game goes back to it on their own, as a spectator
+        if (game != null && game.isCustomGame() && game.isCustomGameHost(player)) {
+            spectateSinglePlayerGame(player, map, game);
+            return;
+        }
+
         if (main.getPartyManager() != null) {
             Party party = main.getPartyManager().getParty(player);
 
@@ -2347,7 +2421,7 @@ public class GameManager implements Listener, PluginMessageListener {
                         return;
                     }
 
-                    player.sendMessage(main.color("&c&l(!) &rOnly the party leader can spectate games for the party."));
+                    player.sendMessage(main.color("&c&l(!) &rOnly the party leader can spectate games."));
                     return;
                 }
 
@@ -2395,6 +2469,11 @@ public class GameManager implements Listener, PluginMessageListener {
     }
 
     private void spectateSinglePlayerGame(Player player, Maps map, GameInstance game) {
+        if (game != null && game.spectators.contains(player)) {
+            player.sendMessage(main.color("&c&l(!) &rYou are already spectating this game."));
+            return;
+        }
+
         GameReason result = game == null ? AddSpectatorToMap(player, map) : AddSpectatorToGame(player, game);
 
         switch (result) {
@@ -2405,6 +2484,7 @@ public class GameManager implements Listener, PluginMessageListener {
                 player.spigot().setCollidesWithEntities(false);
                 player.getInventory().clear();
                 main.getLobbyItems().spectatorItems(player);
+                if (game != null) game.giveHostEndGameItem(player); // the host can end their own game
                 break;
 
             case ALREADY_IN:
@@ -2427,11 +2507,8 @@ public class GameManager implements Listener, PluginMessageListener {
 	public GameReason AddSpectatorToMap(Player player, Maps map) {
 		GameInstance instance = null;
 
-        //If a player is already in a game, do not spectate
-		if (GetInstanceOfPlayer(player) != null) {
-            player.sendMessage(main.color("&c&l(!) &rYou have to leave your game to Spectate"));
-			return GameReason.IN_ANOTHER;
-		}
+        //If a player is already in a game, do not spectate (the caller tells them)
+		if (GetInstanceOfPlayer(player) != null) return GameReason.IN_ANOTHER;
 
 		instance = getSpectatableGame(map);
 		if (instance == null) return GameReason.FAIL; // nothing to watch on this map
@@ -2440,14 +2517,11 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	public GameReason AddSpectatorToGame(Player player, GameInstance game) {
-		if (GetInstanceOfPlayer(player) != null) {
-			player.sendMessage(main.color("&c&l(!) &rYou have to leave your game to Spectate"));
-			return GameReason.IN_ANOTHER;
-		}
+		if (GetInstanceOfPlayer(player) != null) return GameReason.IN_ANOTHER; // the caller tells them
 		if (game == null || !games.contains(game)) return GameReason.FAIL;
 		if (game.isCustomGame() && !game.canAccessCustomGame(player)) {
-			player.sendMessage(main.color("&c&l(!) &rThis custom game is private - only its host's party can watch it."));
-			return GameReason.ALREADY_IN;
+			player.sendMessage(game.getCustomGameAccessMessage());
+			return GameReason.NO_ACCESS; // already told why, nothing more to say
 		}
 
 		return game.AddSpectator(player);
@@ -2476,7 +2550,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		if (!games.contains(instance) && !gameMap2.containsValue(instance)) return GameReason.FAIL;
 
         if (instance.isCustomGame() && !instance.canAccessCustomGame(player)) {
-            player.sendMessage(main.color("&c&l(!) &rThis custom game is private - only its host's party can join it."));
+            player.sendMessage(instance.getCustomGameAccessMessage());
             discardIfEmpty(instance);
             return GameReason.FAIL;
         }
@@ -2719,8 +2793,8 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	/*
-	 * A custom game's host is leaving it (/leave, quitting, ...): the custom game is cancelled for everyone,
-	 * whether it's in its lobby or playing. The host carries on leaving like anyone else.
+	 * A custom game's host is leaving its lobby (/leave, quitting, ...): the custom game is cancelled for everyone.
+	 * A game that's already playing isn't closed (see RemovePlayerFromAll). The host carries on leaving like anyone else.
 	 */
 	private void closeCustomGame(GameInstance game, Player leaving) {
 		if (game.players.size() <= 1 && game.spectators.isEmpty()) return; // nobody else - removed once they're out
@@ -2736,11 +2810,13 @@ public class GameManager implements Listener, PluginMessageListener {
 		GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
 		boolean found = false;
 
-		if (instance != null && instance.isCustomGame() && instance.isCustomGameHost(player) && !instance.isCancellingCustomGame())
+		// The host leaving the lobby closes the game, but one that's already playing keeps running without them
+		if (instance != null && instance.isCustomGame() && instance.isCustomGameHost(player) && !instance.isCancellingCustomGame()
+				&& instance.state == GameState.WAITING)
 			closeCustomGame(instance, player);
 		if (instance != null && instance.isCustomGameCoHost(player) && !instance.isCancellingCustomGame()) {
 			instance.setCustomGameCoHost(null);
-			instance.TellAll(main.color("&e&l(!) &e" + player.getName() + " &rleft, so this custom game has no co-host now."));
+			instance.TellAll(main.color("&e&l(!) &e" + player.getName() + " &rleft. There is no co-host now."));
 		}
 
 		if (instance != null) {
@@ -3045,6 +3121,13 @@ public class GameManager implements Listener, PluginMessageListener {
 				(new LeaveGameGUI(this.main)).inv.open(player);
 			if (gameInstance != null && gameInstance.state == GameState.WAITING)
 				new LeaveGameGUI(this.main).inv.open(player);
+			break;
+		case INK_SACK:
+			// Red Dye: the host of a playing custom game, spectating it, can end it for everyone
+			if (gameInstanceSpectator != null && gameInstanceSpectator.spectators.contains(player)
+					&& gameInstanceSpectator.isCustomGameHost(player) && GameInstance.isEndGameItem(item)
+					&& (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK))
+				new EndGameGUI(this.main, gameInstanceSpectator).inv.open(player);
 			break;
 		case MONSTER_EGG:
 			if (gameInstance != null && gameInstance.state == GameState.STARTED) {

@@ -229,8 +229,8 @@ public class ItemListGUI implements InventoryProvider {
         enabled.addAll(pool.subList(0, Math.min(RANDOM_COUNTS[randomCountIndex], pool.size())));
 
         SoundManager.playClickSound(player);
-        game.TellAll(main.color("&2&l(!) &rThe item list has been &erandomized&r: &a" + enabled.size()
-                + " &r" + (enabled.size() == 1 ? "item is" : "items are") + " enabled."));
+        game.TellAll(main.color("&2&l(!) &rItem list &erandomized&r: &a" + enabled.size()
+                + " &renabled."));
         inv.open(player);
         game.refreshEditorMenus(player);
     }
@@ -241,11 +241,11 @@ public class ItemListGUI implements InventoryProvider {
         Set<GameLootDrops> enabled = game.getGameSettings().enabledDrops;
         if (e.isLeftClick()) {
             enabled.addAll(Arrays.asList(GameLootDrops.values()));
-            game.TellAll(main.color("&2&l(!) &rAll lightning drop items have been &aenabled&r."));
+            game.TellAll(main.color("&2&l(!) &rAll items &aenabled&r."));
         } else if (e.isRightClick()) {
             enabled.clear();
             status = Status.DISABLED; // show what was just disabled
-            game.TellAll(main.color("&2&l(!) &rAll lightning drop items have been &cdisabled&r."));
+            game.TellAll(main.color("&2&l(!) &rAll items &cdisabled&r."));
             warnIfNoneEnabled(player);
         } else {
             return;
@@ -275,8 +275,7 @@ public class ItemListGUI implements InventoryProvider {
 
     private void warnIfNoneEnabled(Player player) {
         if (game.getGameSettings().enabledDrops.isEmpty())
-            player.sendMessage(main.color("&e&l(!) &rNo items are enabled - lightning drops will use every "
-                    + "item until you enable some."));
+            player.sendMessage(main.color("&e&l(!) &rNo items enabled. Every item will be used."));
     }
 
     private boolean canModify(Player player) {

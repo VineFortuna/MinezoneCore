@@ -52,16 +52,6 @@ public class PartyManager {
         return party != null ? party : createParty(player);
     }
 
-    /** /party create: a party with just the player in it, without having to invite anyone. */
-    public void create(Player player) {
-        if (getParty(player) != null) {
-            player.sendMessage(main.color("&c&l(!) &rYou are already in a party."));
-            return;
-        }
-
-        createParty(player);
-    }
-
     public boolean isInParty(Player player) {
         return getParty(player) != null;
     }
@@ -103,7 +93,7 @@ public class PartyManager {
         }
 
         if (inviter.equals(target)) {
-            inviter.sendMessage(main.color("&c&l(!) &rYou cannot invite yourself to a party."));
+            inviter.sendMessage(main.color("&c&l(!) &rYou cannot invite yourself."));
             return;
         }
 
@@ -219,12 +209,12 @@ public class PartyManager {
         Map<UUID, Long> playerInvites = invites.get(player.getUniqueId());
 
         if (playerInvites == null || !playerInvites.containsKey(inviter.getUniqueId())) {
-            player.sendMessage(main.color("&c&l(!) &rYou do not have a party invite from that player."));
+            player.sendMessage(main.color("&c&l(!) &rNo invite from that player."));
             return;
         }
 
         if (getParty(player) != null) {
-            player.sendMessage(main.color("&c&l(!) &rYou are already in a party. Leave it first with &e/party leave&r."));
+            player.sendMessage(main.color("&c&l(!) &rYou are already in a party."));
             return;
         }
 
@@ -261,7 +251,7 @@ public class PartyManager {
         Map<UUID, Long> playerInvites = invites.get(player.getUniqueId());
 
         if (playerInvites == null || !playerInvites.containsKey(inviter.getUniqueId())) {
-            player.sendMessage(main.color("&c&l(!) &rYou do not have a party invite from that player."));
+            player.sendMessage(main.color("&c&l(!) &rNo invite from that player."));
             return;
         }
 
@@ -302,14 +292,14 @@ public class PartyManager {
             party.setLeader(newLeader.getUniqueId());
             partyByLeader.put(newLeader.getUniqueId(), party);
 
-            broadcast(party, "&e&l(!) &e" + player.getName() + " &rhas left the party. &e" + newLeader.getName() + " &ris now the party leader.");
+            broadcast(party, "&e&l(!) &e" + player.getName() + " &rleft the party. &e" + newLeader.getName() + " &ris the new leader.");
             player.sendMessage(main.color(message));
         } else {
             party.removeMember(player.getUniqueId());
             partyByMember.remove(player.getUniqueId());
             partyChatToggled.remove(player.getUniqueId());
 
-            broadcast(party, "&e&l(!) &e" + player.getName() + " &rhas left the party.");
+            broadcast(party, "&e&l(!) &e" + player.getName() + " &rleft the party.");
             player.sendMessage(main.color(message));
         }
 
@@ -325,7 +315,7 @@ public class PartyManager {
     private void disbandIfAlone(Party party) {
         if (party.size() > 1) return;
 
-        broadcast(party, "&e&l(!) &rThe party was disbanded because only one player was left.");
+        broadcast(party, "&e&l(!) &rThe party was disbanded.");
         removeParty(party);
     }
 
@@ -342,7 +332,7 @@ public class PartyManager {
         }
 
         if (leader.equals(target)) {
-            leader.sendMessage(main.color("&c&l(!) &rYou cannot kick yourself. Use &e/party disband &ror &e/party leave&r."));
+            leader.sendMessage(main.color("&c&l(!) &rYou cannot kick yourself."));
             return;
         }
 
@@ -477,12 +467,12 @@ public class PartyManager {
             party.setLeader(newLeader.getUniqueId());
             partyByLeader.put(newLeader.getUniqueId(), party);
 
-            broadcast(party, "&e&l(!) &e" + player.getName() + " &rleft the server. &e" + newLeader.getName() + " &ris now the party leader.");
+            broadcast(party, "&e&l(!) &e" + player.getName() + " &rleft the server. &e" + newLeader.getName() + " &ris the new leader.");
         } else {
             party.removeMember(player.getUniqueId());
             partyByMember.remove(player.getUniqueId());
 
-            broadcast(party, "&e&l(!) &e" + player.getName() + " &rleft the server and was removed from the party.");
+            broadcast(party, "&e&l(!) &e" + player.getName() + " &rleft the server.");
         }
 
         disbandIfAlone(party);
@@ -493,8 +483,6 @@ public class PartyManager {
 
         partyByLeader.put(leader.getUniqueId(), party);
         partyByMember.put(leader.getUniqueId(), party);
-
-        leader.sendMessage(main.color("&a&l(!) &rParty created. Invite players with &e/party invite <player>&r."));
 
         return party;
     }

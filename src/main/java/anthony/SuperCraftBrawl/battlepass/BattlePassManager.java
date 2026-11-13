@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.battlepass;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -13,6 +14,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.sql.SQLException;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -35,6 +37,8 @@ public class BattlePassManager implements Listener {
 	private final Core main;
 	private final BattlePassDAO dao;
 	private final Map<UUID, BattlePassProgress> cache = new ConcurrentHashMap<>();
+	/** Cosmetics each online player has unlocked from the pass (kept forever, across seasons). */
+	private final Map<UUID, Set<String>> unlocks = new ConcurrentHashMap<>();
 	private final ExecutorService dbThread;
 	private boolean enabled = false;
 
@@ -81,6 +85,7 @@ public class BattlePassManager implements Listener {
 	public void onQuit(PlayerQuitEvent event) {
 		// Nothing to save: every change is already written when it happens.
 		cache.remove(event.getPlayer().getUniqueId());
+		unlocks.remove(event.getPlayer().getUniqueId());
 	}
 
 	private void load(Player player) {
@@ -116,6 +121,61 @@ public class BattlePassManager implements Listener {
 		return BattlePassSeason.PREMIUM_FREE_FOR_TESTING || progress.premium;
 	}
 
+	// ---------------------------------------------------------------- cosmetic unlocks
+
+	/**
+	 * Main thread only. Whether they unlocked this cosmetic through the Battle Pass.
+	 * Loaded from MySQL the first time it's asked for (and then cached until they quit), instead
+	 * of with the rest of their progress: the cosmetics system checks this on join to re-equip
+	 * their cosmetics, which happens before the async pass load finishes.
+	 */
+	public boolean hasCosmetic(Player player, CosmeticCategory category, String cosmeticId) {
+		return enabled && getUnlocks(player).contains(unlockKey(category, cosmeticId));
+	}
+
+	/** Main thread only. Permanently unlocks a cosmetic and saves it. */
+	public void unlockCosmetic(Player player, CosmeticCategory category, String cosmeticId) {
+		if (!enabled)
+			return;
+
+		String key = unlockKey(category, cosmeticId);
+		if (!getUnlocks(player).add(key))
+			return;
+
+		UUID uuid = player.getUniqueId();
+		dbThread.execute(() -> {
+			try {
+				dao.insertUnlock(uuid, BattlePassSeason.ID, key);
+			} catch (SQLException e) {
+				main.getLogger().warning("[BattlePass] Failed to save cosmetic unlock " + key + " for " + uuid + ": " + e.getMessage());
+			}
+		});
+	}
+
+	private static String unlockKey(CosmeticCategory category, String cosmeticId) {
+		return category.name() + ":" + cosmeticId;
+	}
+
+	private Set<String> getUnlocks(Player player) {
+		UUID uuid = player.getUniqueId();
+		Set<String> keys = unlocks.get(uuid);
+		if (keys != null)
+			return keys;
+
+		keys = ConcurrentHashMap.newKeySet();
+		try {
+			keys.addAll(dao.loadUnlocks(uuid));
+		} catch (SQLException e) {
+			main.getLogger().warning("[BattlePass] Failed to load cosmetic unlocks for " + uuid + ": " + e.getMessage());
+			return keys; // not cached, so the next check tries the database again
+		}
+
+		// Only cache for players who are still online, or the entry would never be removed
+		if (player.isOnline())
+			unlocks.put(uuid, keys);
+		return keys;
+	}
+
 	// ---------------------------------------------------------------- XP
 
 	/** Main thread only. Call from game code - does nothing if the pass is off/out of season. */
@@ -140,13 +200,39 @@ public class BattlePassManager implements Listener {
 
 		player.sendMessage(main.color("&6&l(!) &r+" + amount + " &6Battle Pass XP" + (premiumBonus ? " &7(Premium bonus)" : "")));
 
-		if (newTier > oldTier) {
-			player.sendMessage(main.color("&8&m---------------------------"));
-			player.sendMessage(main.color("&6&l✦✦ &e&lBATTLE PASS TIER UP! &6&l✦✦"));
-			player.sendMessage(main.color("&rYou reached &eTier " + newTier + "&r! Type &e/battlepass &rto claim your rewards."));
-			player.sendMessage(main.color("&8&m---------------------------"));
-			player.playSound(player.getLocation(), Sound.LEVEL_UP, 1.0f, 1.3f);
-		}
+		if (newTier > oldTier)
+			announceTierUp(player, newTier, progress);
+	}
+
+	/** The tier up announcement and sound. */
+	private void announceTierUp(Player player, int tier, BattlePassProgress progress) {
+		BattlePassMessages.sendTierUp(main, player, tier, hasPremium(progress));
+		player.playSound(player.getLocation(), Sound.LEVEL_UP, 1.0f, 1.3f);
+	}
+
+	/**
+	 * Admin/testing: moves a player one tier up (delta 1) or down (delta -1) by setting their XP to the
+	 * start of that tier. Going up shows the normal tier up announcement. Rewards they already
+	 * claimed stay claimed. Returns the new tier (unchanged at the first/last tier), or -1 if
+	 * their progress hasn't loaded.
+	 */
+	public int shiftTier(Player player, int delta) {
+		BattlePassProgress progress = getProgress(player);
+		if (!enabled || progress == null)
+			return -1;
+
+		int oldTier = progress.getTier();
+		int newTier = Math.max(0, Math.min(BattlePassSeason.MAX_TIER, oldTier + delta));
+		if (newTier == oldTier)
+			return newTier;
+
+		progress.xp = newTier * BattlePassSeason.XP_PER_TIER;
+		save(player.getUniqueId(), progress);
+		refreshLobbyBoard(player);
+
+		if (newTier > oldTier)
+			announceTierUp(player, newTier, progress);
+		return newTier;
 	}
 
 	public void setXp(Player player, int xp) {
@@ -217,6 +303,8 @@ public class BattlePassManager implements Listener {
 	public void reset(Player player) {
 		UUID uuid = player.getUniqueId();
 		cache.remove(uuid);
+		// Empty (not removed): reloading now could read the old rows before the queued delete runs
+		unlocks.put(uuid, ConcurrentHashMap.<String>newKeySet());
 		dbThread.execute(() -> {
 			try {
 				dao.reset(uuid, BattlePassSeason.ID);

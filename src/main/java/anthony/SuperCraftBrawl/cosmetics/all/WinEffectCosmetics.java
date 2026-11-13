@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticRegistry;
+import anthony.SuperCraftBrawl.cosmetics.PassCosmetic;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ItemHelper;
 import org.bukkit.Material;
@@ -27,6 +28,21 @@ public final class WinEffectCosmetics {
         registry.register(flood(main));
         registry.register(treasureHoard(main));
         registry.register(ritual(main));
+        registry.register(presentRain(main));
+        registry.register(winterWonderland(main));
+    }
+
+    // The effects themselves run in Game/WinEffects, picked by these ids.
+
+    private static Cosmetic presentRain(Core main) {
+        return new PassCosmetic(main, CosmeticCategory.WIN_EFFECT, "present_rain", "Present Rain", "&ePresent Rain",
+                Material.WOOL, 14, "&7Cover the map with presents", "&7falling from the sky!");
+    }
+
+    private static Cosmetic winterWonderland(Core main) {
+        return new PassCosmetic(main, CosmeticCategory.WIN_EFFECT, "winter_wonderland", "Winter Wonderland",
+                "&eWinter Wonderland", Material.SNOW_BLOCK, 0,
+                "&7Snow falls over the map as a", "&7glittering Christmas tree rises", "&7to the sound of jingle bells!");
     }
 
     private static Cosmetic defaultEffect(Core main) {

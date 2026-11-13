@@ -162,6 +162,15 @@ commands:
    battlepass:
       description: Open the Battle Pass
       aliases: [bp, pass]
+   sleigh:
+      description: Ride Santa's sleigh in the lobby (toggle on and off)
+      usage: /sleigh
+   bpupgrade:
+      description: Move up one Battle Pass tier (Staff only, for testing)
+      usage: /bpupgrade [player]
+   bpdowngrade:
+      description: Move down one Battle Pass tier (Staff only, for testing)
+      usage: /bpdowngrade [player]
    customgame:
       description: Create a custom game (with your party if you're in one)
       aliases: [cg]

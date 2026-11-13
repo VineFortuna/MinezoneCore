@@ -9,6 +9,7 @@ import anthony.SuperCraftBrawl.cosmetics.CosmeticManager;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticRegistry;
 import anthony.SuperCraftBrawl.cosmetics.GadgetListener;
 import anthony.SuperCraftBrawl.cosmetics.all.DeathEffectCosmetics;
+import anthony.SuperCraftBrawl.cosmetics.all.DoubleJumpCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.GadgetCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.OutfitCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.PetCosmetics;
@@ -202,6 +203,7 @@ public class Core extends JavaPlugin implements Listener {
 
     //BATTLE PASS (null if it failed to start):
     private anthony.SuperCraftBrawl.battlepass.BattlePassManager battlePassManager;
+    private anthony.SuperCraftBrawl.sleigh.SleighManager sleighManager;
 
     public Core() {
         this.staffchat = new ArrayList<Player>();
@@ -225,6 +227,11 @@ public class Core extends JavaPlugin implements Listener {
     /** May be null if the Battle Pass failed to start - always null-check. */
     public anthony.SuperCraftBrawl.battlepass.BattlePassManager getBattlePassManager() {
         return battlePassManager;
+    }
+
+    /** May be null if the sleigh failed to start - always null-check. */
+    public anthony.SuperCraftBrawl.sleigh.SleighManager getSleighManager() {
+        return sleighManager;
     }
 
     /** Safe to call from anywhere in game code; does nothing if the Battle Pass is off. */
@@ -766,6 +773,7 @@ public class Core extends JavaPlugin implements Listener {
         TitleCosmetics.registerAll(this, cosmeticRegistry);
         WinEffectCosmetics.registerAll(this, cosmeticRegistry);
         DeathEffectCosmetics.registerAll(this, cosmeticRegistry);
+        DoubleJumpCosmetics.registerAll(this, cosmeticRegistry);
     }
 
     /*
@@ -795,6 +803,22 @@ public class Core extends JavaPlugin implements Listener {
             battlePassCommand.setExecutor(new anthony.SuperCraftBrawl.battlepass.BattlePassCommand(this));
         else
             System.out.print("battlepass was null!");
+
+        PluginCommand sleighCommand = getCommand("sleigh");
+        if (sleighCommand != null)
+            sleighCommand.setExecutor(new anthony.SuperCraftBrawl.sleigh.SleighCommand(this));
+        else
+            System.out.print("sleigh was null!");
+
+        anthony.SuperCraftBrawl.battlepass.BattlePassTierCommand tierCommand =
+                new anthony.SuperCraftBrawl.battlepass.BattlePassTierCommand(this);
+        for (String name : new String[] { "bpupgrade", "bpdowngrade" }) {
+            PluginCommand tierPluginCommand = getCommand(name);
+            if (tierPluginCommand != null)
+                tierPluginCommand.setExecutor(tierCommand);
+            else
+                System.out.print(name + " was null!");
+        }
 
         claimPartyAlias();
         // Again once every plugin has finished enabling, in case one registers /p late
@@ -904,6 +928,15 @@ public class Core extends JavaPlugin implements Listener {
         } catch (Throwable t) {
             battlePassManager = null;
             getLogger().severe("[BattlePass] Failed to start, Battle Pass is disabled: " + t);
+            t.printStackTrace();
+        }
+
+        // Isolated like the Battle Pass: an experimental feature must never stop the plugin from loading
+        try {
+            sleighManager = new anthony.SuperCraftBrawl.sleigh.SleighManager(this);
+        } catch (Throwable t) {
+            sleighManager = null;
+            getLogger().severe("[Sleigh] Failed to start, the sleigh is disabled: " + t);
             t.printStackTrace();
         }
 
@@ -2290,6 +2323,8 @@ public class Core extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        if (sleighManager != null)
+            sleighManager.shutdown(); // remove its horses and stands before the lobby world is saved
         if (battlePassManager != null)
             battlePassManager.shutdown();
         if (lobbyBuildManager != null)
