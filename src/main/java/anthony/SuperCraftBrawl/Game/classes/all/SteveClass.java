@@ -3,37 +3,69 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.gui.CraftableItemsGUI;
 import anthony.util.ItemHelper;
+import org.bukkit.Bukkit;
+import org.bukkit.Effect;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class SteveClass extends BaseClass {
 
-	private ItemStack stonePick = ItemHelper.setUnbreakable(
-			ItemHelper.setDetails(new ItemStack(Material.STONE_PICKAXE),
-					instance.getGameManager().getMain().color("&rStone Pickaxe &7(Right Click)")));
-	private ItemStack gold = new ItemStack(Material.GOLD_INGOT, goldAmt);
-	private ItemStack coal = new ItemStack(Material.COAL, coalAmt);
-	private ItemStack diamond = new ItemStack(Material.DIAMOND, diaAmt);
-	private boolean kb1 = false;
-	private boolean kb2 = false;
-	private int kb = 1;
-	private int sharp = 1;
-	private int fortune = 0;
-	//private int blind = 0;
+	private static final int ORES_PER_UPGRADE = 5;
+	private static final int MAX_UPGRADE_TIER = 2;
+
+	/** The coal upgrade puts this effect on enemies with every pickaxe hit. Tier 1 is amplifier 0, tier 2 is amplifier 1. */
+	private static final PotionEffectType COAL_EFFECT = PotionEffectType.SLOW;
+	private static final int COAL_EFFECT_SECONDS = 3;
+
+	/** How long a mined ore stays on the ground before it disappears. */
+	private static final long ORE_DROP_TICKS = 20L;
+
+	private enum Ore {
+		COAL("Coal", "&8", Material.COAL, null),
+		GOLD("Gold", "&6", Material.GOLD_INGOT, Enchantment.KNOCKBACK),
+		DIAMOND("Diamond", "&b", Material.DIAMOND, Enchantment.DAMAGE_ALL);
+
+		private final String label;
+		private final String color;
+		private final Material item;
+		/** What this ore's upgrade puts on the pickaxe, or null when it does something else (coal slows enemies). */
+		private final Enchantment enchantment;
+
+		Ore(String label, String color, Material item, Enchantment enchantment) {
+			this.label = label;
+			this.color = color;
+			this.item = item;
+			this.enchantment = enchantment;
+		}
+	}
+
+	private final Random random = new Random();
+	private final ItemStack pickaxe;
+	private final ItemStack craftingTable;
+
+	/** Both are indexed by Ore#ordinal(). Ores are kept through deaths, like the upgrades. */
+	private final int[] ores = new int[Ore.values().length];
+	private final int[] tiers = new int[Ore.values().length];
 
 	public SteveClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -46,181 +78,195 @@ public class SteveClass extends BaseClass {
 				6,
 				"Steve"
 		);
+
+		// Weapon
+		pickaxe = ItemHelper.setDetails(
+				new ItemStack(Material.STONE_PICKAXE),
+				"&3&lPickaxe",
+				"",
+				"&7Hit enemies to mine &8&oCoal&r, &6&oGold&r &7and &b&oDiamonds&r&7",
+				"&7and use them to upgrade your pickaxe"
+		);
+		ItemHelper.setUnbreakable(pickaxe);
+
+		// Crafting
+		craftingTable = ItemHelper.setDetails(
+				new ItemStack(Material.WORKBENCH),
+				"&f&lCrafting",
+				"",
+				"&7Craft your ores into permanent upgrades,",
+				"&7with each type having " + MAX_UPGRADE_TIER + " different tiers:",
+				oreLine(Ore.COAL, "&3&o" + effectName(COAL_EFFECT) + " &r&e1 &7and &e" + MAX_UPGRADE_TIER
+						+ " &7on hit for &e" + COAL_EFFECT_SECONDS + "s"),
+				oreLine(Ore.GOLD, "&oKnockback&r &e1 &7and &e" + MAX_UPGRADE_TIER),
+				oreLine(Ore.DIAMOND, "&oSharpness&r &e&o1&r &7and &e&o" + MAX_UPGRADE_TIER)
+		);
 	}
 
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
+	private static String oreLine(Ore ore, String upgrade) {
+		return "&7▸ " + ore.color + ORES_PER_UPGRADE + " " + ore.label + " &7- " + upgrade;
+	}
+
+	/** The name Minecraft shows for an effect ("Slowness", where the API says SLOW), so the lore follows whatever effect is set above. */
+	private static String effectName(PotionEffectType type) {
+		switch (type.getName()) {
+			case "SLOW": return "Slowness";
+			case "SLOW_DIGGING": return "Mining Fatigue";
+			case "FAST_DIGGING": return "Haste";
+			case "INCREASE_DAMAGE": return "Strength";
+			case "JUMP": return "Jump Boost";
+			case "CONFUSION": return "Nausea";
+			case "DAMAGE_RESISTANCE": return "Resistance";
+			case "HARM": return "Instant Damage";
+			case "HEAL": return "Instant Health";
+			default:
+				String name = type.getName().toLowerCase().replace('_', ' ');
+				return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+		}
 	}
 
 	@Override
 	public void setItems(Inventory playerInv) {
-		playerInv.setItem(0, stonePick);
-		playerInv.setItem(1, new ItemStack(Material.WORKBENCH));
+		playerInv.setItem(0, pickaxe);
+		playerInv.setItem(1, craftingTable);
+	}
 
-		if (goldAmt > 0)
-			playerInv.setItem(2, new ItemStack(Material.GOLD_INGOT, goldAmt));
-		if (coalAmt > 0)
-			playerInv.setItem(3, new ItemStack(Material.COAL, coalAmt));
-		if (diaAmt > 0)
-			playerInv.setItem(4, new ItemStack(Material.DIAMOND, diaAmt));
+	@Override
+	public void tick(int gameTicks) {
+		if (!isPlayerAlive()) return;
+
+		String oreAmounts = "&0" + ores[Ore.COAL.ordinal()]
+				+ " &6" + ores[Ore.GOLD.ordinal()]
+				+ " &b" + ores[Ore.DIAMOND.ordinal()];
+		getActionBarManager().setActionBar(player, "steve.ores", instance.color(oreAmounts), 2);
 	}
 
 	@Override
 	public void doDamage(EntityDamageByEntityEvent event) {
-		BaseClass bc = instance.classes.get(player);
-		if (bc != null && bc.getLives() <= 0)
-			return;
+		if (!isPlayerAlive()) return;
+		if (event.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) return;
+		if (!(event.getEntity() instanceof Player)) return;
 
-		if (event.getDamager() instanceof Player && event.getEntity() instanceof Player) {
-			Player attacker = (Player) event.getDamager();
-			if (attacker.getInventory().getItemInHand().getType() == Material.STONE_PICKAXE) {
-				Random rand = new Random();
-				int chance = rand.nextInt(3);
-				if (chance == 0) {
-					if (!(attacker.getInventory().contains(new ItemStack(Material.COAL, 4)))) {
-						attacker.getInventory().addItem(new ItemStack(Material.COAL));
-						coalAmt++;
-					} else
-						attacker.sendMessage("Reached maximum number of coal");
-				} else if (chance == 1)
-					if (!(attacker.getInventory().contains(new ItemStack(Material.GOLD_INGOT, 4)))) {
-						attacker.getInventory().addItem(new ItemStack(Material.GOLD_INGOT));
-						goldAmt++;
-					} else
-						attacker.sendMessage("Reached maximum number of gold");
-				else if (chance == 2)
-					if (!(attacker.getInventory().contains(new ItemStack(Material.DIAMOND, 4)))) {
-						attacker.getInventory().addItem(new ItemStack(Material.DIAMOND));
-						diaAmt++;
-					} else
-						attacker.sendMessage("Reached maximum number of diamond");
+		ItemStack heldItem = player.getInventory().getItem(player.getInventory().getHeldItemSlot());
+		if (heldItem == null || heldItem.getType() != Material.STONE_PICKAXE) return;
 
-				if (instance.blindness == 1) {
-					Random rand1 = new Random();
-					int chance1 = rand1.nextInt(10);
+		Player victim = (Player) event.getEntity();
 
-					if (chance1 == 1 || chance1 == 5 || chance1 == 7) {
-						if (event.getEntity() instanceof LivingEntity) {
-							((LivingEntity) event.getEntity())
-									.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 60, 0, true));
-						}
-					}
-				} else if (instance.blindness == 2) {
-					Random rand2 = new Random();
-					int chance2 = rand2.nextInt(10);
+		if (instance.duosMap != null)
+			if (instance.team.get(victim).equals(instance.team.get(player)))
+				return;
 
-					if (chance2 == 1 || chance2 == 5 || chance2 == 2) {
-						if (event.getEntity() instanceof LivingEntity) {
-							((LivingEntity) event.getEntity())
-									.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 65, 1, true));
-						}
-					}
-				} else if (instance.blindness == 3) {
-					Random rand3 = new Random();
-					int chance3 = rand3.nextInt(10);
-
-					if (chance3 == 1 || chance3 == 5 || chance3 == 7 || chance3 == 4) {
-						if (event.getEntity() instanceof LivingEntity) {
-							((LivingEntity) event.getEntity())
-									.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 100, 2, true));
-						}
-					}
-				}
-			}
-		}
+		if (tier(Ore.COAL) > 0) victim.addPotionEffect(coalEffect(tier(Ore.COAL)));
+		mineOre(victim);
 	}
 
-	private void abilityMsg() {
-		player.sendMessage("");
-		player.sendMessage(instance.getGameManager().getMain().color(
-				"&e&lCLASS TIP> &rHit other players to gain items, and when you have 4 of an item, use the crafting table to craft and then right click that block you crafted to give you cool things!"));
-		player.sendMessage("");
+	private PotionEffect coalEffect(int tier) {
+		return new PotionEffect(COAL_EFFECT, COAL_EFFECT_SECONDS * 20, tier - 1, false, true);
+	}
+
+	private int tier(Ore ore) {
+		return tiers[ore.ordinal()];
+	}
+
+	private int amount(Ore ore) {
+		return ores[ore.ordinal()];
+	}
+
+	/**
+	 * Gives one random ore. An ore whose upgrade is maxed is never mined, and neither is one you
+	 * already hold enough of for the next tier (craft it first).
+	 */
+	private void mineOre(Player victim) {
+		List<Ore> minable = new ArrayList<>();
+		for (Ore ore : Ore.values())
+			if (tier(ore) < MAX_UPGRADE_TIER && amount(ore) < ORES_PER_UPGRADE)
+				minable.add(ore);
+		if (minable.isEmpty()) return;
+
+		Ore ore = minable.get(random.nextInt(minable.size()));
+		ores[ore.ordinal()]++;
+		playMineAnimation(victim.getLocation().add(0, 1, 0), ore);
+	}
+
+	/** Stone breaking particles, and the ore pops out of the enemy for a moment, but can't be picked up. */
+	private void playMineAnimation(Location at, Ore ore) {
+		World world = at.getWorld();
+		world.playEffect(at, Effect.STEP_SOUND, Material.STONE);
+
+		final Item drop = world.dropItem(at, new ItemStack(ore.item));
+		drop.setPickupDelay(Integer.MAX_VALUE);
+		drop.setVelocity(new Vector(
+				(random.nextDouble() - 0.5) * 0.4,
+				0.25 + random.nextDouble() * 0.2,
+				(random.nextDouble() - 0.5) * 0.4));
+
+		Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new Runnable() {
+			@Override
+			public void run() {
+				drop.remove();
+			}
+		}, ORE_DROP_TICKS);
 	}
 
 	@Override
 	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
+		Action action = event.getAction();
 
-		if (item != null && item.getType() == Material.WORKBENCH
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			new CraftableItemsGUI(instance.getGameManager().getMain()).inv.open(player);
-		} else if (item != null && item.getType() == Material.STONE_PICKAXE
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			this.abilityMsg();
-		} else if (item != null && item.getType() == Material.GOLD_BLOCK
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			if (kb == 1) {
-				ItemHelper.addEnchant(stonePick, Enchantment.KNOCKBACK, kb);
-				player.getInventory().setItem(0, stonePick);
-				player.getInventory().remove(new ItemStack(Material.GOLD_BLOCK));
-				player.sendMessage("Your pickaxe is now Knockback " + kb);
-				kb++;
-			} else if (kb == 2) {
-				ItemHelper.addEnchant(stonePick, Enchantment.KNOCKBACK, kb);
-				player.getInventory().setItem(0, stonePick);
-				player.getInventory().remove(new ItemStack(Material.GOLD_BLOCK));
-				player.sendMessage("Your pickaxe is now Knockback " + kb);
-				kb++;
-			} else {
-				player.sendMessage("Reached maximum Knockback Level");
-			}
-		} else if (item != null && item.getType() == Material.DIAMOND_BLOCK
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			if (sharp == 1) {
-				ItemHelper.addEnchant(stonePick, Enchantment.DAMAGE_ALL, sharp);
-				player.getInventory().setItem(0, stonePick);
-				player.getInventory().remove(new ItemStack(Material.DIAMOND_BLOCK));
-				player.sendMessage("Your pickaxe is now Sharpness " + sharp);
-				sharp++;
-			} else if (sharp == 2) {
-				ItemHelper.addEnchant(stonePick, Enchantment.DAMAGE_ALL, sharp);
-				player.getInventory().setItem(0, stonePick);
-				player.getInventory().remove(new ItemStack(Material.DIAMOND_BLOCK));
-				player.sendMessage("Your pickaxe is now Sharpness " + sharp);
-				sharp++;
-			} /*
-				 * else if (sharp == 3) { ItemHelper.addEnchant(stonePick,
-				 * Enchantment.DAMAGE_ALL, sharp); player.getInventory().setItem(0, stonePick);
-				 * player.getInventory().remove(new ItemStack(Material.DIAMOND_BLOCK));
-				 * player.sendMessage("Your pickaxe is now Sharpness " + sharp); sharp++; }
-				 */ else {
-				player.sendMessage("Reached maximum Sharpness Level");
-			}
-		} /*
-			 * else if (item != null && item.getType() == Material.IRON_BLOCK &&
-			 * (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() ==
-			 * Action.RIGHT_CLICK_BLOCK)) { if (fortune == 0) { fortune++;
-			 * ItemHelper.addEnchant(woodPick, Enchantment.LOOT_BONUS_BLOCKS, fortune);
-			 * player.getInventory().setItem(0, woodPick); player.getInventory().remove(new
-			 * ItemStack(Material.IRON_BLOCK));
-			 * player.sendMessage("Your pickaxe is now Fortune " + fortune); } else if
-			 * (fortune == 1) { fortune++; ItemHelper.addEnchant(woodPick,
-			 * Enchantment.LOOT_BONUS_BLOCKS, fortune); player.getInventory().setItem(0,
-			 * woodPick); player.getInventory().remove(new ItemStack(Material.IRON_BLOCK));
-			 * player.sendMessage("Your pickaxe is now Fortune " + fortune); } else if
-			 * (fortune == 2) { fortune++; ItemHelper.addEnchant(woodPick,
-			 * Enchantment.LOOT_BONUS_BLOCKS, fortune); player.getInventory().setItem(0,
-			 * woodPick); player.getInventory().remove(new ItemStack(Material.IRON_BLOCK));
-			 * player.sendMessage("Your pickaxe is now Fortune " + fortune); } else {
-			 * player.sendMessage("Reached maximum Fortune Level"); } }
-			 */ else if (item != null && item.getType() == Material.COAL_BLOCK
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			if (instance.blindness == 0) {
-				instance.blindness++;
-				player.getInventory().remove(new ItemStack(Material.COAL_BLOCK));
-				player.sendMessage("You can now give other players Blindness " + instance.blindness);
-			} else if (instance.blindness == 1) {
-				instance.blindness++;
-				player.getInventory().remove(new ItemStack(Material.COAL_BLOCK));
-				player.sendMessage("You can now give other players Blindness " + instance.blindness);
-			} else if (instance.blindness == 2) {
-				instance.blindness++;
-				player.getInventory().remove(new ItemStack(Material.COAL_BLOCK));
-				player.sendMessage("You can now give other players Blindness " + instance.blindness);
-			} else {
-				player.sendMessage("Reached maximum Blindness Level");
-			}
+		if (item == null || item.getType() != Material.WORKBENCH) return;
+		if (player.getGameMode() == GameMode.SPECTATOR) return;
+		if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) return;
+
+		event.setCancelled(true);
+		craftUpgrades();
+	}
+
+	/** Turns every ore you have enough of into its next upgrade. */
+	private void craftUpgrades() {
+		boolean crafted = false;
+		for (Ore ore : Ore.values()) {
+			if (tier(ore) >= MAX_UPGRADE_TIER || amount(ore) < ORES_PER_UPGRADE) continue;
+
+			ores[ore.ordinal()] -= ORES_PER_UPGRADE;
+			tiers[ore.ordinal()]++;
+			applyUpgrade(ore);
+			crafted = true;
+		}
+
+		if (crafted) {
+			player.playSound(player.getLocation(), Sound.ANVIL_USE, 1, 1);
+			return;
+		}
+
+		boolean maxed = true;
+		for (Ore ore : Ore.values())
+			if (tier(ore) < MAX_UPGRADE_TIER) maxed = false;
+
+		player.sendMessage(instance.color(maxed
+				? "&c&l(!) &rYour pickaxe is fully upgraded!"
+				: "&c&l(!) &rYou need &e" + ORES_PER_UPGRADE + " &rof an ore to craft an upgrade!"));
+		player.playSound(player.getLocation(), Sound.VILLAGER_NO, 1, 1);
+	}
+
+	private void applyUpgrade(Ore ore) {
+		int tier = tier(ore);
+
+		if (ore.enchantment != null) {
+			pickaxe.addUnsafeEnchantment(ore.enchantment, tier);
+			int slot = player.getInventory().first(Material.STONE_PICKAXE);
+			player.getInventory().setItem(slot == -1 ? 0 : slot, pickaxe);
+		}
+
+		switch (ore) {
+			case COAL:
+				player.sendMessage(instance.color("&2&l(!) &rYour hits now give &3&o"
+						+ effectName(COAL_EFFECT) + " &e" + tier));
+				break;
+			case GOLD:
+				player.sendMessage(instance.color("&2&l(!) &rYour pickaxe now has &6&oKnockback &e" + tier));
+				break;
+			default:
+				player.sendMessage(instance.color("&2&l(!) &rYour pickaxe now has &b&oSharpness &e" + tier));
 		}
 	}
 
@@ -230,14 +276,7 @@ public class SteveClass extends BaseClass {
 	}
 
 	@Override
-	public void setNameTag() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = this.stonePick;
-		return item;
+		return pickaxe;
 	}
 }

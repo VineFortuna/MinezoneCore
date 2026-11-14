@@ -52,9 +52,9 @@ public class ZombieClass extends BaseClass {
 				"&2&lGrave Digger",
 				"",
 				"&7Inflict one of 3 effects on enemies:",
-				"&7▶ &2&oPoison &e" + (poison.getAmplifier() + 1) + " &7for &e" + poison.getDuration() / 20 + "s",
-				"&7▶ &3&oSlowness &e" + (slowness.getAmplifier() + 1) + " &7for &e" + slowness.getDuration() / 20 + "s",
-				"&7▶ &f&oWeakness &e" + (weakness.getAmplifier() + 1) + " &7for &e" + weakness.getDuration() / 20 + "s"
+				"&7▸ &2&oPoison &e" + (poison.getAmplifier() + 1) + " &7for &e" + poison.getDuration() / 20 + "s",
+				"&7▸ &3&oSlowness &e" + (slowness.getAmplifier() + 1) + " &7for &e" + slowness.getDuration() / 20 + "s",
+				"&7▸ &f&oWeakness &e" + (weakness.getAmplifier() + 1) + " &7for &e" + weakness.getDuration() / 20 + "s"
 		);
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 1);
 		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);

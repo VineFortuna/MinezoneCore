@@ -377,13 +377,13 @@ public enum ClassType {
 			case Creeper:
 				return "" + ChatColor.GREEN + "Creeper" + ChatColor.RESET;
 			case Notch:
-				return "" + ChatColor.DARK_AQUA + ChatColor.BOLD + "Notch" + ChatColor.RESET;
+				return "" + ChatColor.DARK_AQUA + ChatColor.BOLD + ChatColor.ITALIC + "Notch" + ChatColor.RESET;
 			case Blaze:
 				return "" + ChatColor.DARK_RED + "Blaze" + ChatColor.RESET;
 			case Potato:
 				return "" + ChatColor.YELLOW + ChatColor.ITALIC + "Potato" + ChatColor.RESET;
 			case Steve:
-				return "" + ChatColor.AQUA + "Steve" + ChatColor.RESET;
+				return "" + ChatColor.DARK_AQUA + ChatColor.BOLD + "Steve" + ChatColor.RESET;
 			case PiglinBrute:
 				return "" + ChatColor.YELLOW + ChatColor.BOLD + ChatColor.ITALIC + "PiglinBrute" + ChatColor.RESET;
 			case Herobrine:

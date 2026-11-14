@@ -90,11 +90,11 @@ public class HerobrineClass extends BaseClass {
                 new ItemStack(Material.DIAMOND),
                 despairAbility.getAbilityNameRightClickMessage(),
                 "&7Cast one of 4 effects:",
-                "&7▶ &2Poison " + (poison.getAmplifier() + 1) + " &rfor &a" + poison.getDuration() / 20 +
+                "&7▸ &2Poison " + (poison.getAmplifier() + 1) + " &rfor &a" + poison.getDuration() / 20 +
                         "s &ron enemies",
-                "&7▶ &cFire&r lightning at enemies",
-                "&7▶ &4Rising Ruin&r erupts damaging blocks around you",
-                "&7▶ &8Invoke&r a zombie upon each enemy",
+                "&7▸ &cFire&r lightning at enemies",
+                "&7▸ &4Rising Ruin&r erupts damaging blocks around you",
+                "&7▸ &8Invoke&r a zombie upon each enemy",
                 "",
                 "&rRange: &a" + rangeDisplay + " blocks"
         );

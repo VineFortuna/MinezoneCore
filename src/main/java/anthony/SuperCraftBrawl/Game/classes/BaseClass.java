@@ -93,10 +93,6 @@ public abstract class BaseClass {
 	public boolean hunterDash = true;
 	public boolean wolfPackAdd = false;
 
-	public int goldAmt = 0; // For Steve Class
-	public int coalAmt = 0; // For Steve Class
-	public int diaAmt = 0; // For Steve Class
-
 	// Armor fields
 	protected ItemStack playerHead;
 	protected ItemStack chestplate;

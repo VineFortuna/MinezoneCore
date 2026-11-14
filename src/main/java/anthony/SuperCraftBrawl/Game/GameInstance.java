@@ -92,7 +92,6 @@ public class GameInstance {
     public BukkitRunnable gameStartTime;
     public int timeToStartSeconds = 30;
     List<BukkitRunnable> runnables = new ArrayList<>();
-    public int blindness = 0;
     public int alivePlayers = 0;
     public int aliveTeams = 0;
     public Sign s;
