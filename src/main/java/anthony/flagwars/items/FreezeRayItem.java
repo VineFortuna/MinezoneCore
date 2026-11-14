@@ -18,10 +18,9 @@ public final class FreezeRayItem {
 
 	public static ItemStack create() {
 		return ItemHelper.setDetails(new ItemStack(Material.ICE), "&b" + NAME,
-				"&7Right-click to shoot a freeze ray",
-				"&7through enemies in its path.",
+				"&7Right click to slow and damage",
+				"&7enemies in a straight line.",
 				"",
-				"&rEffect: &aDamage &r& &aSlowness II",
 				"&rRange: &a10 blocks");
 	}
 

@@ -20,10 +20,11 @@ public final class BridgeEggItem {
 
 	public static ItemStack create() {
 		return ItemHelper.setDetails(new ItemStack(Material.EGG), "&b" + NAME,
-				"&7Right-click to throw an egg that builds",
-				"&7a bridge of your team's color behind it",
+				"&7Right click to throw it. It builds",
+				"&7a bridge of your team's wool.",
 				"",
-				"&rBridge: &bUp to 20 blocks, 3 blocks wide");
+				"&rLength: &a20 blocks",
+				"&rWidth: &a3 blocks");
 	}
 
 	public static boolean matches(ItemStack item) {

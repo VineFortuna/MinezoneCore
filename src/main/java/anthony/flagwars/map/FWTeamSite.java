@@ -161,4 +161,22 @@ public class FWTeamSite {
 				&& loc.getY() >= minY && loc.getY() <= maxY
 				&& loc.getZ() >= minZ && loc.getZ() <= maxZ;
 	}
+
+	/**
+	 * Like isWithinBoundary but ignores height: true if loc is anywhere above or below this island's
+	 * boundary box. The two corners are set from a staff member's position, so their Y values are
+	 * rarely a real floor and ceiling, and a player standing on a tower or in the air above the
+	 * island still counts as being at it. Always false if no boundary is set.
+	 */
+	public boolean isWithinFootprint(Location loc) {
+		if (!hasBoundary() || !loc.getWorld().equals(boundaryCorner1.getWorld())) return false;
+
+		double minX = Math.min(boundaryCorner1.getX(), boundaryCorner2.getX());
+		double maxX = Math.max(boundaryCorner1.getX(), boundaryCorner2.getX());
+		double minZ = Math.min(boundaryCorner1.getZ(), boundaryCorner2.getZ());
+		double maxZ = Math.max(boundaryCorner1.getZ(), boundaryCorner2.getZ());
+
+		return loc.getX() >= minX && loc.getX() <= maxX
+				&& loc.getZ() >= minZ && loc.getZ() <= maxZ;
+	}
 }

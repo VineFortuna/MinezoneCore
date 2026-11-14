@@ -82,7 +82,6 @@ public class FWScoreboardManager {
 		lines.add("");
 		if (own != null) {
 			lines.add(main().color("&rKills: &a" + instance.getKills(player)));
-			lines.add(main().color("&rFlags: &a" + instance.getFlagCaptures(player) + "/" + instance.getRequiredCaptures()));
 		}
 
 		if (own != null && instance.getFlagManager().isCarrying(player)) {
@@ -92,7 +91,8 @@ public class FWScoreboardManager {
 		lines.add("");
 
 		for (FWTeam team : instance.getTeams().values()) {
-			if (team.isEmpty()) continue;
+			// A team that never had a player isn't listed. One that left stays, since its flag is still at its base.
+			if (team.isEmpty() && !team.isInactive()) continue;
 			lines.add(main().color(teamStatusLine(own, team)));
 		}
 
@@ -136,11 +136,34 @@ public class FWScoreboardManager {
 		return FWGameConstants.chatColorCodeFor(team.getColor()) + team.getName();
 	}
 
-	/** No checkmark by default - one only shows up next to a team once the viewer's own team has captured that team's flag. */
+	/**
+	 * U+27A1, picked by measuring the 1.8 client font: about 8 px wide and 5 px tall, centered on the
+	 * text line, so it sits level with the letters. U+2192 is only 3 px wide and U+279C is as tall as a
+	 * capital letter. Written as an escape so a look-alike arrow can't sneak in through a copy and paste.
+	 */
+	private static final String ARROW = "\u27A1";
+	private static final String YOU_TAG = " &7&oYou";
+	/** FastBoard on 1.8 throws on a line over 30 characters (color codes count). */
+	private static final int MAX_LINE_LENGTH = 30;
+
+	/**
+	 * "Red (arrow) 0/3", with the flag count green. The viewer's own team ends with "You". A team that left
+	 * is all gray and crossed out. The client draws a strikethrough in the color of the text it
+	 * crosses, so a line in a different color than its text isn't possible. No checkmark by default, one only shows up next to a team once the viewer's
+	 * own team has captured that team's flag.
+	 */
 	private String teamStatusLine(FWTeam viewerTeam, FWTeam team) {
 		String icon = viewerTeam != null && viewerTeam.hasCapturedFrom(team.getSiteId()) ? "&a✔ " : "";
-		return icon + teamLabel(team) + " &7- &e" + team.getCapturedFlags()
-				+ "&7/&e" + instance.getRequiredCaptures();
+		String score = team.getCapturedFlags() + "/" + instance.getRequiredCaptures();
+
+		if (team.isEmpty()) {
+			// One color code for the whole line, since any other one would end the strikethrough
+			return icon + "&7&m" + team.getName() + " " + ARROW + " " + score;
+		}
+
+		String line = icon + teamLabel(team) + " &7" + ARROW + " &a" + score;
+		if (team == viewerTeam && (line + YOU_TAG).length() <= MAX_LINE_LENGTH) line += YOU_TAG;
+		return line;
 	}
 
 	public void remove(Player player) {

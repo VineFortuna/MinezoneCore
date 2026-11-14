@@ -6,9 +6,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 /**
- * Shooting a player with this bow teleports the shooter to them, per the
- * user's preferred variant (no ground-teleport option). Behavior is wired
- * up in FWPlayerListener once items are interactive (see matches()).
+ * Shooting with this bow teleports the shooter to wherever the arrow lands (a player or a block), once:
+ * the bow is used up by the shot. Behavior is wired up in FWPlayerListener (see matches()).
  */
 public final class TeleportBowItem {
 
@@ -19,8 +18,10 @@ public final class TeleportBowItem {
 
 	public static ItemStack create() {
 		return ItemHelper.setDetails(new ItemStack(Material.BOW), "&d" + NAME,
-				"&7Shoot a player to teleport",
-				"&7yourself to them.");
+				"&7Shoot an arrow to teleport to",
+				"&7where it lands.",
+				"",
+				"&cSingle use");
 	}
 
 	public static boolean matches(ItemStack item) {

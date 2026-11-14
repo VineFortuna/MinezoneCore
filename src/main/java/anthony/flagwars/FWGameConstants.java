@@ -19,10 +19,10 @@ public final class FWGameConstants {
 	/** Indexed by (siteId - 1), matching FWMapConfig.TEAM_COUNT (8). */
 	public static final DyeColor[] TEAM_COLORS = {
 			DyeColor.LIME, DyeColor.YELLOW, DyeColor.CYAN, DyeColor.BLUE,
-			DyeColor.RED, DyeColor.WHITE, DyeColor.PINK, DyeColor.GRAY
+			DyeColor.RED, DyeColor.WHITE, DyeColor.PINK, DyeColor.GREEN
 	};
 	public static final String[] TEAM_NAMES = {
-			"Lime", "Yellow", "Cyan", "Blue", "Red", "White", "Pink", "Gray"
+			"Lime", "Yellow", "Cyan", "Blue", "Red", "White", "Pink", "Green"
 	};
 
 	private FWGameConstants() {
@@ -76,7 +76,7 @@ public final class FWGameConstants {
 			case RED: return "&c";
 			case WHITE: return "&f";
 			case PINK: return "&d";
-			case GRAY: return "&7";
+			case GREEN: return "&2";
 			default: return "&7";
 		}
 	}

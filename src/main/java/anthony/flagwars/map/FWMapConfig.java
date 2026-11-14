@@ -55,7 +55,7 @@ public class FWMapConfig {
 		this.size = size;
 	}
 
-	/** 4-player maps only start once all 4 bases have a player, so the full 3 captures are always needed to win. */
+	/** A 4-player map: exactly 4 teams. It still starts with fewer players, and the captures needed to win scale down to match. */
 	public boolean isFourPlayerMap() {
 		return size == SIZE_FOUR;
 	}

@@ -7,6 +7,7 @@ import anthony.flagwars.items.BridgeEggItem;
 import anthony.flagwars.items.FreezeRayItem;
 import anthony.flagwars.items.GrapplingHookItem;
 import anthony.flagwars.items.TeleportBowItem;
+import anthony.flagwars.items.PokeballItem;
 import anthony.flagwars.items.ThrowableTntItem;
 import anthony.flagwars.items.UnstableBridgeItem;
 import anthony.flagwars.map.FWTeamSite;
@@ -99,10 +100,13 @@ public class FWPlayerListener implements Listener {
 	private final Map<UUID, CooldownNatowski> teleportBowCooldowns = new HashMap<>();
 	private final List<CooldownItem> cooldownItems;
 	private final FWInvisibilityManager invisibility;
+	private final FWPokeballManager pokeballs;
 
 	public FWPlayerListener(FWGameManager fwGameManager) {
 		this.fwGameManager = fwGameManager;
 		this.invisibility = new FWInvisibilityManager(fwGameManager);
+		this.pokeballs = new FWPokeballManager(fwGameManager);
+		Bukkit.getPluginManager().registerEvents(pokeballs, fwGameManager.getMain());
 		this.cooldownItems = Arrays.asList(
 				new CooldownItem(TeleportBowItem.NAME, TeleportBowItem::matches, teleportBowCooldowns)
 		);
@@ -291,6 +295,15 @@ public class FWPlayerListener implements Listener {
 			return;
 		}
 
+		// Blocks from the Cage Trap just disappear instead of dropping bars or wool
+		if (instance.getTrapManager().takeTrapBlock(event.getBlock())) {
+			event.setCancelled(true);
+			instance.recordBlockChange(event.getBlock().getState());
+			instance.unmarkPlaced(event.getBlock());
+			event.getBlock().setType(Material.AIR);
+			return;
+		}
+
 		instance.recordBlockChange(event.getBlock().getState());
 		instance.unmarkPlaced(event.getBlock());
 	}
@@ -454,7 +467,8 @@ public class FWPlayerListener implements Listener {
 			Object value = damager.getMetadata(TNT_OWNER_METADATA).get(0).value();
 			if (value instanceof UUID) return Bukkit.getPlayer((UUID) value);
 		}
-		return null;
+		// A Zombie/Skeleton Pokeball mob (or its arrow) counts for whoever threw it
+		return pokeballs.ownerOf(damager);
 	}
 
 	private static final double GENERATOR_SPLIT_RADIUS = 1.5;
@@ -580,6 +594,29 @@ public class FWPlayerListener implements Listener {
 				new FixedMetadataValue(fwGameManager.getMain(), shooter.getUniqueId()));
 		event.getProjectile().setMetadata(TELEPORT_BOW_DIRECTION_METADATA,
 				new FixedMetadataValue(fwGameManager.getMain(), shooter.getLocation().clone()));
+
+		// Single use: the bow is spent as soon as the arrow is loosed (a miss still costs it).
+		// Taken a tick later so it isn't pulled out of the inventory in the middle of the shot.
+		Bukkit.getScheduler().runTask(fwGameManager.getMain(), () -> consumeTeleportBow(shooter));
+	}
+
+	/** Removes one Teleport Bow from the shooter's inventory (see onShootBow). */
+	private void consumeTeleportBow(Player shooter) {
+		if (!shooter.isOnline()) return;
+
+		for (int slot = 0; slot < shooter.getInventory().getSize(); slot++) {
+			ItemStack item = shooter.getInventory().getItem(slot);
+			if (!TeleportBowItem.matches(item)) continue;
+
+			if (item.getAmount() > 1) {
+				item.setAmount(item.getAmount() - 1);
+				shooter.getInventory().setItem(slot, item);
+			} else {
+				shooter.getInventory().setItem(slot, null);
+			}
+			shooter.updateInventory();
+			return;
+		}
 	}
 
 	/** Teleport Bow hitting a block instead of a player - same metadata-tagged arrow, just resolved here instead of onEntityDamageByEntity. */
@@ -625,7 +662,11 @@ public class FWPlayerListener implements Listener {
 		if (instance == null || instance.getState() != FWGameState.IN_PROGRESS) return;
 
 		Integer ownerSiteId = instance.getFlagManager().siteIdLookingAt(player, FLAG_CLICK_REACH);
-		if (ownerSiteId == null) return;
+		if (ownerSiteId == null) {
+			// Not a real flag. It may be a decoy from a Decoy Flag Trap, which looks the same.
+			if (instance.getTrapManager().clickDecoy(player)) event.setCancelled(true);
+			return;
+		}
 
 		// Don't cancel the event if it's the player's own flag — they should still be
 		// able to mine blocks around it. attemptSteal already handles the rejection message.
@@ -697,6 +738,7 @@ public class FWPlayerListener implements Listener {
 		if (instance.getFlagManager().siteIdLookingAt(player, FLAG_CLICK_REACH) != null) return;
 
 		ItemStack item = event.getItem();
+		PokeballItem.Type pokeball = PokeballItem.typeOf(item);
 
 		if (ThrowableTntItem.matches(item)) {
 			// Aimed at a block, vanilla would also place it (and onBlockPlace would prime that one too)
@@ -713,6 +755,9 @@ public class FWPlayerListener implements Listener {
 		} else if (UnstableBridgeItem.matches(item)) {
 			event.setCancelled(true);
 			launchUnstableBridge(player, instance);
+		} else if (pokeball != null) {
+			event.setCancelled(true); // it's a spawn egg, which would spawn the mob right where it's clicked
+			pokeballs.throwPokeball(player, instance, pokeball);
 		}
 	}
 
@@ -1682,10 +1727,6 @@ public class FWPlayerListener implements Listener {
 		if (instance.getFlagManager().isCarrying(player)) {
 			checkForCapture(instance, player);
 		}
-
-		if (!fwGameManager.isSpawnProtected(player)) {
-			instance.getTrapManager().checkEntry(player);
-		}
 	}
 
 	/**
@@ -1704,13 +1745,7 @@ public class FWPlayerListener implements Listener {
 		if (site.hasBoundary()) {
 			// Y is intentionally excluded: a carrier jumping or in the air above their
 			// base's footprint should capture just like one standing on the ground.
-			Location c1 = site.getBoundaryCorner1();
-			Location c2 = site.getBoundaryCorner2();
-			double minX = Math.min(c1.getX(), c2.getX()), maxX = Math.max(c1.getX(), c2.getX());
-			double minZ = Math.min(c1.getZ(), c2.getZ()), maxZ = Math.max(c1.getZ(), c2.getZ());
-			home = carrierLoc.getWorld().equals(c1.getWorld())
-					&& carrierLoc.getX() >= minX && carrierLoc.getX() <= maxX
-					&& carrierLoc.getZ() >= minZ && carrierLoc.getZ() <= maxZ;
+			home = site.isWithinFootprint(carrierLoc);
 		} else {
 			Location flagLoc = site.getFlagLoc();
 			home = flagLoc != null

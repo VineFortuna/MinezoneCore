@@ -18,6 +18,7 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
+import org.bukkit.Difficulty;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -26,6 +27,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -41,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * One Flag Wars match: lobby -> countdown -> in-progress -> reset. Several of these can run
@@ -75,6 +78,8 @@ public class FWGameInstance {
 	private boolean settingsLocked = false;
 	private int requiredCaptures = FWGameConstants.MAX_WINNING_FLAG_CAPTURES;
 	private final List<WinEffects> activeWinEffects = new ArrayList<>();
+	/** Zombie/Skeleton Pokeball mobs alive in this match (entity UUID -> thrower and team), so nothing outlives the match. */
+	private final Map<UUID, PokeballMob> pokeballMobs = new HashMap<>();
 
 	public FWGameInstance(FWGameManager manager, FWGameMode mode, World world, FWMapConfig map) {
 		this.manager = manager;
@@ -89,6 +94,9 @@ public class FWGameInstance {
 		this.gameSettings = new FWGameSettings(this);
 		this.chestHologramManager = new FWChestHologramManager(this);
 		this.trapManager = new FWTrapManager(this);
+
+		// Peaceful removes hostile mobs the moment they spawn (the Pokeball Zombies and Skeletons)
+		if (world.getDifficulty() == Difficulty.PEACEFUL) world.setDifficulty(Difficulty.EASY);
 
 		// Only sites actually created via /fwsetup team <color> get a runtime team - an uncreated
 		// slot has no configured spawn/flag/shop, so letting players get assigned to it would break.
@@ -185,6 +193,30 @@ public class FWGameInstance {
 
 	public List<Player> getSpectators() {
 		return spectators;
+	}
+
+	/** Who threw a Pokeball mob and which team it fights for. UUID and number only, so it never holds a player or entity. */
+	public static final class PokeballMob {
+		public final UUID owner;
+		public final int teamSiteId;
+
+		PokeballMob(UUID owner, int teamSiteId) {
+			this.owner = owner;
+			this.teamSiteId = teamSiteId;
+		}
+	}
+
+	public void addPokeballMob(Entity mob, UUID owner, FWTeam team) {
+		pokeballMobs.put(mob.getUniqueId(), new PokeballMob(owner, team.getSiteId()));
+	}
+
+	/** The Pokeball info of this entity, or null if it isn't one of this match's Pokeball mobs. */
+	public PokeballMob getPokeballMob(Entity entity) {
+		return entity == null ? null : pokeballMobs.get(entity.getUniqueId());
+	}
+
+	public void removePokeballMob(Entity entity) {
+		pokeballMobs.remove(entity.getUniqueId());
 	}
 
 	public boolean hasPlayer(Player player) {
@@ -298,6 +330,7 @@ public class FWGameInstance {
 						+ "'s &rbase has been vacated!"));
 			}
 			checkForWin();
+			if (state == FWGameState.IN_PROGRESS) announcePlayersLeft();
 			refreshScoreboards();
 
 			// Save now rather than only at match end, so kills/deaths/captures earned before
@@ -312,12 +345,19 @@ public class FWGameInstance {
 		manager.getMain().getListener().resetPotionEffects(player); // nor any Speed/Jump/Invisibility potions bought from the shop
 	}
 
+	/** Same wording as SCB's waiting board ("Waiting for 1 player"), with the real number still needed to start. */
+	/** Same as SCB's GameInstance#announcePlayersLeft: a chat line with the count, and a ping for everyone still in the match. */
+	private void announcePlayersLeft() {
+		TellAll(manager.getMain().color("&2&l(!) &rThere are &e" + countPlayers() + "&r players left!"));
+		playSoundForAll(Sound.NOTE_PLING, 1f, 1f);
+	}
+
 	private String waitingStatusLine() {
-		return state == FWGameState.STARTING
-				? "&rStarting In: &a" + FWGameConstants.STARTING_COUNTDOWN_SECONDS + "s"
-				: mapConfig.isFourPlayerMap()
-						? "&7&oWaiting for all 4 teams..."
-						: "&7&oWaiting for players...";
+		if (state == FWGameState.STARTING) {
+			return "&rStarting In: &a" + FWGameConstants.STARTING_COUNTDOWN_SECONDS + "s";
+		}
+		int needed = Math.max(1, mode.getMinPlayers() - countPlayers());
+		return "&7&oWaiting for &a" + needed + " &7&oplayer" + (needed == 1 ? "" : "s");
 	}
 
 	/**
@@ -401,12 +441,12 @@ public class FWGameInstance {
 	}
 
 	/**
-	 * Enough players for the countdown to run. A 4-player map also needs a player on every base: you can only
-	 * capture each flag once, so with fewer teams in play the 3 captures needed to win would be impossible.
+	 * Enough players for the countdown to run. Empty bases are fine on any map size: the win target scales
+	 * down with the number of occupied bases (see FWGameConstants#requiredCapturesFor), so 3 players on a
+	 * 4-player map just play to 2 captures.
 	 */
 	private boolean hasEnoughToStart() {
-		if (countPlayers() < mode.getMinPlayers()) return false;
-		return !mapConfig.isFourPlayerMap() || countActiveTeams() == teams.size();
+		return countPlayers() >= mode.getMinPlayers();
 	}
 
 	private void startCountdown() {
@@ -556,7 +596,7 @@ public class FWGameInstance {
 
 		flagManager.spawnAll();
 		chestHologramManager.start();
-		trapManager.reset();
+		trapManager.start();
 		resourceGenerator.start();
 		teamUpgradeManager.start();
 		scoreboardManager.refreshAllGame();
@@ -774,15 +814,22 @@ public class FWGameInstance {
 	private static final FWResourceType[] LOOT_FEEDBACK_ORDER =
 			{FWResourceType.IRON, FWResourceType.GOLD, FWResourceType.DIAMOND, FWResourceType.EMERALD};
 
+	/** Vanilla plays one pickup pop per item stack collected; a kill plays up to this many so a huge haul isn't a wall of noise. */
+	private static final int MAX_LOOT_POPS = 6;
+	private static final long LOOT_POP_INTERVAL_TICKS = 2L;
+	private static final float LOOT_POP_VOLUME = 1.0f;
+
 	/**
 	 * Bedwars rule: a kill loots the victim's iron/gold/emerald/diamond straight into the killer's
-	 * inventory instead of dropping it. One sound per resource TYPE actually looted (not one per
-	 * unit, and not the same sound repeated for every type) - see FWResourceType#getPickupSound.
+	 * inventory instead of dropping it. The killer hears Minecraft's normal item pickup sound once
+	 * per stack looted (see playLootPickupSounds), so a bigger haul sounds like picking up more
+	 * items, and nothing plays when the victim had no resources.
 	 * Also tells the killer exactly what they picked up, one "&lt;color&gt;+N &lt;Name&gt;" line per
 	 * type looted, so a kill's payoff is visible without opening the inventory.
 	 */
 	private void lootResourcesToKiller(Player victim, Player killer) {
 		List<String> feedback = new ArrayList<>();
+		int stacks = 0;
 
 		for (FWResourceType type : LOOT_FEEDBACK_ORDER) {
 			int amount = FWEconomy.count(victim, type);
@@ -790,13 +837,52 @@ public class FWGameInstance {
 
 			FWEconomy.withdraw(victim, type, amount);
 			killer.getInventory().addItem(new ItemStack(type.getMaterial(), amount));
-			killer.playSound(killer.getLocation(), type.getPickupSound(), 1f, 1f);
+			stacks += (amount + type.getMaterial().getMaxStackSize() - 1) / type.getMaterial().getMaxStackSize();
 			feedback.add(type.getColorCode() + "+" + amount + " " + type.getDisplayName());
 		}
+
+		playLootPickupSounds(killer, stacks);
 
 		for (String line : feedback) {
 			killer.sendMessage(manager.getMain().color(line));
 		}
+	}
+
+	/** One vanilla pickup pop per looted stack (capped), a couple of ticks apart so several are heard as several. Nothing for 0. */
+	private void playLootPickupSounds(Player killer, int stacks) {
+		int pops = Math.min(stacks, MAX_LOOT_POPS);
+		if (pops <= 0) return;
+
+		playPickupPop(killer);
+		if (pops == 1) return;
+
+		UUID killerId = killer.getUniqueId();
+		new BukkitRunnable() {
+			int left = pops - 1;
+
+			@Override
+			public void run() {
+				Player p = Bukkit.getPlayer(killerId);
+				if (p == null || state != FWGameState.IN_PROGRESS) {
+					cancel();
+					return;
+				}
+
+				playPickupPop(p);
+				if (--left <= 0) cancel();
+			}
+		}.runTaskTimer(manager.getMain(), LOOT_POP_INTERVAL_TICKS, LOOT_POP_INTERVAL_TICKS);
+	}
+
+	/**
+	 * Minecraft's own item pickup sound ("random.pop") with its randomized pitch (the client caps it
+	 * at 2.0). Vanilla plays it at volume 0.2, which is far too quiet to hear over a fight, so this
+	 * uses the loudest the client will play (volume above 1.0 only widens the range, not the loudness).
+	 */
+	private static void playPickupPop(Player player) {
+		ThreadLocalRandom random = ThreadLocalRandom.current();
+		float pitch = ((random.nextFloat() - random.nextFloat()) * 0.7f + 1.0f) * 2.0f;
+		player.playSound(player.getLocation(), Sound.ITEM_PICKUP, LOOT_POP_VOLUME, Math.max(0.5f, Math.min(2.0f, pitch)));
 	}
 
 	private void beginRespawn(Player player, FWTeam team) {
@@ -1091,7 +1177,7 @@ public class FWGameInstance {
 	private void resetAndClear() {
 		resourceGenerator.stop();
 		chestHologramManager.stop();
-		trapManager.reset();
+		trapManager.stop();
 		flagManager.despawnAll();
 		teamUpgradeManager.stop();
 		scoreboardManager.removeAll();
@@ -1104,6 +1190,7 @@ public class FWGameInstance {
 
 	/** Leftover mobs/NPCs/arrows/dropped items/etc. from the match - everything except players themselves. */
 	private void clearNonPlayerEntities() {
+		pokeballMobs.clear();
 		for (org.bukkit.entity.Entity entity : world.getEntities()) {
 			if (!(entity instanceof Player)) {
 				entity.remove();

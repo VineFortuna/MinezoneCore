@@ -1,7 +1,6 @@
 package anthony.flagwars.resources;
 
 import org.bukkit.Material;
-import org.bukkit.Sound;
 
 import java.util.Map;
 
@@ -40,20 +39,6 @@ public enum FWResourceType {
 			case DIAMOND: return "&b";
 			case EMERALD: return "&a";
 			default: return "&7";
-		}
-	}
-
-	/**
-	 * Distinct pickup sound per resource, escalating with rarity - the same sounds this codebase
-	 * already uses for similarly-valenced events (ORB_PICKUP on a shop purchase, NOTE_PLING on a
-	 * Quick Buy toggle, LEVEL_UP on a flag capture/team upgrade) rather than inventing new ones.
-	 */
-	public Sound getPickupSound() {
-		switch (this) {
-			case GOLD: return Sound.ORB_PICKUP;
-			case EMERALD: return Sound.NOTE_PLING;
-			case DIAMOND: return Sound.LEVEL_UP;
-			default: return Sound.ITEM_PICKUP;
 		}
 	}
 

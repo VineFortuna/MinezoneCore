@@ -60,6 +60,8 @@ public class FWFlagManager {
 	private final Map<UUID, ItemStack> savedHelmets = new HashMap<>();
 	/** playerUUID -> set of site IDs they've already successfully captured this match (blocks re-captures by the same player). */
 	private final Map<UUID, Set<Integer>> playerCaptures = new HashMap<>();
+	/** site id to the System.currentTimeMillis() until which that team's flag can't be taken. See lockSteals. */
+	private final Map<Integer, Long> stealLockedUntil = new HashMap<>();
 
 	public FWFlagManager(FWGameInstance instance) {
 		this.instance = instance;
@@ -157,6 +159,7 @@ public class FWFlagManager {
 		carrying.clear();
 		savedHelmets.clear();
 		playerCaptures.clear();
+		stealLockedUntil.clear();
 	}
 
 	public Integer findSiteByShopkeeper(Entity entity) {
@@ -203,70 +206,89 @@ public class FWFlagManager {
 	 */
 	public Integer siteIdLookingAt(Player player, double reach) {
 		Location eye = player.getEyeLocation();
-		double ox = eye.getX(), oy = eye.getY(), oz = eye.getZ();
-		Vector direction = eye.getDirection().normalize();
-		double dx = direction.getX(), dy = direction.getY(), dz = direction.getZ();
 
 		Integer closestSite = null;
 		double closestEntryT = reach;
 
 		for (Map.Entry<Integer, Location> entry : flagLocs.entrySet()) {
-			Location flagLoc = entry.getValue();
-			if (!flagLoc.getWorld().equals(eye.getWorld())) continue;
+			double entryT = flagHitDistance(eye, entry.getValue(), reach);
+			if (entryT < 0) continue; // genuine miss
+			if (entryT >= closestEntryT) continue; // a closer flag already claimed this hit
 
-			double horizDirSq = dx * dx + dz * dz;
-			if (horizDirSq < 1.0E-6) continue; // looking straight up/down - no meaningful column hit
-
-			double x0 = flagLoc.getX() + 0.5;
-			double z0 = flagLoc.getZ() + 0.5;
-
-			// Ray vs. infinite cylinder of radius FLAG_RADIUS around (x0, z0): solve
-			// |((ox,oz) + t*(dx,dz)) - (x0,z0)| <= FLAG_RADIUS for the entry/exit t-range.
-			double ax = ox - x0, az = oz - z0;
-			double a = horizDirSq;
-			double b = 2 * (ax * dx + az * dz);
-			double c = ax * ax + az * az - FLAG_RADIUS * FLAG_RADIUS;
-			double discriminant = b * b - 4 * a * c;
-			if (discriminant < 0) continue; // ray's horizontal line never comes within radius of the axis
-
-			double sqrtDisc = Math.sqrt(discriminant);
-			double tEnter = (-b - sqrtDisc) / (2 * a);
-			double tExit = (-b + sqrtDisc) / (2 * a);
-
-			// Clip that range to the column's actual height band [flagLoc.Y, flagLoc.Y + FLAG_HEIGHT].
-			double minY = flagLoc.getY();
-			double maxY = flagLoc.getY() + FLAG_HEIGHT;
-
-			if (Math.abs(dy) < 1.0E-9) {
-				if (oy < minY || oy > maxY) continue; // looking flat, and not even level with the column
-			} else {
-				double tAtMinY = (minY - oy) / dy;
-				double tAtMaxY = (maxY - oy) / dy;
-				tEnter = Math.max(tEnter, Math.min(tAtMinY, tAtMaxY));
-				tExit = Math.min(tExit, Math.max(tAtMinY, tAtMaxY));
-			}
-
-			// And clip to reach.
-			tEnter = Math.max(tEnter, 0);
-			tExit = Math.min(tExit, reach);
-
-			if (tEnter > tExit) continue; // no overlap left between the cylinder, the height band and reach - genuine miss
-			if (tEnter >= closestEntryT) continue; // a closer flag already claimed this hit
-
-			// Checked against the actual point the ray enters the cylinder - i.e. wherever the
-			// crosshair is really landing - not a fixed point like the flag's center. A fixed
-			// center used to cause its own bugs: a block sitting right above the banner could
-			// block line-of-sight to the (higher, fixed) center even while aiming at a perfectly
-			// clear lower section, and vice versa. hasLineOfSight excludes the flag's own block
-			// from the obstruction check below, so this is safe to aim anywhere on the column.
-			Location actualHit = new Location(eye.getWorld(), ox + tEnter * dx, oy + tEnter * dy, oz + tEnter * dz);
-			if (!hasLineOfSight(eye, actualHit, flagLoc.getBlock())) continue; // walls/blocks between the player and the flag block the steal
-
-			closestEntryT = tEnter;
+			closestEntryT = entryT;
 			closestSite = entry.getKey();
 		}
 
 		return closestSite;
+	}
+
+	/**
+	 * Whether the player is aiming at the banner block at flagLoc within reach. This is the same check the
+	 * real flags use, so a decoy flag (see FWDecoyFlags) can be grabbed exactly the same way.
+	 */
+	public boolean isLookingAtBanner(Player player, Location flagLoc, double reach) {
+		return flagHitDistance(player.getEyeLocation(), flagLoc, reach) >= 0;
+	}
+
+	/**
+	 * How far along the look ray it enters the banner at flagLoc, or -1 for a miss. A miss is aiming at
+	 * blank space beside it, out of reach, or with a wall in the way.
+	 */
+	private double flagHitDistance(Location eye, Location flagLoc, double reach) {
+		if (!flagLoc.getWorld().equals(eye.getWorld())) return -1;
+
+		double ox = eye.getX(), oy = eye.getY(), oz = eye.getZ();
+		Vector direction = eye.getDirection().normalize();
+		double dx = direction.getX(), dy = direction.getY(), dz = direction.getZ();
+
+		double horizDirSq = dx * dx + dz * dz;
+		if (horizDirSq < 1.0E-6) return -1; // looking straight up/down - no meaningful column hit
+
+		double x0 = flagLoc.getX() + 0.5;
+		double z0 = flagLoc.getZ() + 0.5;
+
+		// Ray vs. infinite cylinder of radius FLAG_RADIUS around (x0, z0): solve
+		// |((ox,oz) + t*(dx,dz)) - (x0,z0)| <= FLAG_RADIUS for the entry/exit t-range.
+		double ax = ox - x0, az = oz - z0;
+		double a = horizDirSq;
+		double b = 2 * (ax * dx + az * dz);
+		double c = ax * ax + az * az - FLAG_RADIUS * FLAG_RADIUS;
+		double discriminant = b * b - 4 * a * c;
+		if (discriminant < 0) return -1; // ray's horizontal line never comes within radius of the axis
+
+		double sqrtDisc = Math.sqrt(discriminant);
+		double tEnter = (-b - sqrtDisc) / (2 * a);
+		double tExit = (-b + sqrtDisc) / (2 * a);
+
+		// Clip that range to the column's actual height band [flagLoc.Y, flagLoc.Y + FLAG_HEIGHT].
+		double minY = flagLoc.getY();
+		double maxY = flagLoc.getY() + FLAG_HEIGHT;
+
+		if (Math.abs(dy) < 1.0E-9) {
+			if (oy < minY || oy > maxY) return -1; // looking flat, and not even level with the column
+		} else {
+			double tAtMinY = (minY - oy) / dy;
+			double tAtMaxY = (maxY - oy) / dy;
+			tEnter = Math.max(tEnter, Math.min(tAtMinY, tAtMaxY));
+			tExit = Math.min(tExit, Math.max(tAtMinY, tAtMaxY));
+		}
+
+		// And clip to reach.
+		tEnter = Math.max(tEnter, 0);
+		tExit = Math.min(tExit, reach);
+
+		if (tEnter > tExit) return -1; // no overlap left between the cylinder, the height band and reach
+
+		// Checked against the actual point the ray enters the cylinder - i.e. wherever the
+		// crosshair is really landing - not a fixed point like the flag's center. A fixed
+		// center used to cause its own bugs: a block sitting right above the banner could
+		// block line-of-sight to the (higher, fixed) center even while aiming at a perfectly
+		// clear lower section, and vice versa. hasLineOfSight excludes the flag's own block
+		// from the obstruction check below, so this is safe to aim anywhere on the column.
+		Location actualHit = new Location(eye.getWorld(), ox + tEnter * dx, oy + tEnter * dy, oz + tEnter * dz);
+		if (!hasLineOfSight(eye, actualHit, flagLoc.getBlock())) return -1; // walls/blocks between the player and the flag block
+
+		return tEnter;
 	}
 
 	/**
@@ -336,6 +358,33 @@ public class FWFlagManager {
 	}
 
 	/**
+	 * For a short time nobody can take this team's flag. The Decoy Flag Trap uses it right after the real
+	 * flag reappears: one click can reach the server as two events in the same tick, and without this the
+	 * second one would take the real flag that the first one just put back.
+	 */
+	public void lockSteals(int siteId, long millis) {
+		stealLockedUntil.put(siteId, System.currentTimeMillis() + millis);
+	}
+
+	/** The block the team's real flag stands on right now, or null while it is stolen. */
+	public Location getFlagLocation(int siteId) {
+		return flagLocs.get(siteId);
+	}
+
+	/**
+	 * Moves the team's real flag to a new spot: the banner goes up there and that is where it can be
+	 * taken from now on. The banner at the old spot is left alone, so the caller decides what happens
+	 * to it (the Decoy Flag Trap leaves it standing as the decoy).
+	 */
+	public void moveFlag(int siteId, Location newSpot) {
+		FWTeam team = instance.getTeams().get(siteId);
+		if (team == null || !flagLocs.containsKey(siteId)) return;
+
+		placeFlagBlock(newSpot, team);
+		flagLocs.put(siteId, newSpot.getBlock().getLocation());
+	}
+
+	/**
 	 * Called when a player left-clicks a flag block. Blocks self-steals, carrying
 	 * two flags at once (only one helmet slot to hold one in), and re-capturing
 	 * the same victim a second time - everyone else stays free to steal it.
@@ -361,6 +410,9 @@ public class FWFlagManager {
 			return;
 		}
 
+		// Silent on purpose: this only ever catches the second half of a click that just sprang a decoy
+		if (System.currentTimeMillis() < stealLockedUntil.getOrDefault(ownerSiteId, 0L)) return;
+
 		carrying.put(attacker.getUniqueId(), ownerSiteId);
 		savedHelmets.put(attacker.getUniqueId(), attacker.getInventory().getHelmet());
 		attacker.getInventory().setHelmet(flagBannerItem(ownerTeam));
@@ -368,6 +420,9 @@ public class FWFlagManager {
 		// Remove the flag block so only one carrier can go for it at a time
 		Location stolenLoc = flagLocs.remove(ownerSiteId);
 		if (stolenLoc != null) stolenLoc.getBlock().setType(Material.AIR);
+
+		// If that flag was hidden by a Decoy Flag Trap, the decoy has no job left
+		instance.getTrapManager().onFlagStolen(ownerTeam);
 
 		String attackerColor = FWGameConstants.chatColorCodeFor(attackerTeam.getColor());
 		String ownerColor = FWGameConstants.chatColorCodeFor(ownerTeam.getColor());

@@ -49,9 +49,9 @@ public final class GrapplingHookItem {
 	private static void setUses(ItemStack rod, int usesLeft, int totalUses) {
 		String useLine = "&c&l" + usesLeft + "/" + totalUses + " use" + (totalUses == 1 ? "" : "s") + " remaining.";
 		ItemStack details = ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD), "&a&l" + NAME,
-				"&7Right-click to cast it like a",
-				"&7fishing rod - it'll yank you toward",
-				"&7whatever block it lands on.",
+				"&7Right click to cast it like a",
+				"&7fishing rod. It pulls you to",
+				"&7where it lands.",
 				"", useLine);
 		rod.setItemMeta(details.getItemMeta());
 		// Full at all uses left; never reaches MAX_DUR, which would break it

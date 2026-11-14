@@ -22,11 +22,10 @@ public final class UnstableBridgeItem {
 
 	public static ItemStack create() {
 		return ItemHelper.setDetails(new ItemStack(Material.SAND), "&e" + NAME,
-				"&7Right-click to build a bridge of",
-				"&7Sand, Red Sand and Gravel",
+				"&7Right click to build a sand bridge.",
+				"&7It falls apart 5 seconds after it is built.",
 				"",
-				"&rCollapses 5s after it finishes building",
-				"&rSize: &e3x10 blocks");
+				"&rSize: &a3x10 blocks");
 	}
 
 	public static boolean matches(ItemStack item) {

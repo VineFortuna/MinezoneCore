@@ -18,8 +18,8 @@ public final class ThrowableTntItem {
 
 	public static ItemStack create() {
 		return ItemHelper.setDetails(new ItemStack(Material.TNT), "&c" + NAME,
-				"&7Right-click to throw a primed",
-				"&7TNT at an enemy's base.");
+				"&7Right click to throw lit TNT.",
+				"&7It explodes after 3 seconds.");
 	}
 
 	public static boolean matches(ItemStack item) {

@@ -409,7 +409,7 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 		return siteId;
 	}
 
-	/** /fwsetup size <4|8> - a 4-player map has 4 teams, needs all of them filled to start, and takes 3 captures to win. */
+	/** /fwsetup size <4|8> - a 4-player map has exactly 4 teams; it still starts with fewer players, and the captures needed to win scale down. */
 	private void handleSize(Player player, FWMapConfig config, String[] args) {
 		int size;
 		try {
@@ -433,7 +433,7 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 
 		config.setSize(size);
 		String rules = size == FWMapConfig.SIZE_FOUR
-				? " &7Needs exactly 4 teams, starts once all 4 bases have a player, and takes 3 captures to win."
+				? " &7Needs exactly 4 teams. Games still start with fewer players, and the captures needed to win scale down."
 				: "";
 		player.sendMessage(fwGameManager.getMain().color("&2&l(!) &e" + player.getWorld().getName()
 				+ " &ris now a &e" + size + "-player &rmap." + rules + " &7Run &e/fwsetup save &7to keep it."));
@@ -522,7 +522,7 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup tp <map> &7-> &rTeleport into a map (loads it if needed)"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup createmap <map> &7-> &rCreate a new void world"));
 		player.sendMessage(fwGameManager.getMain().color("&7(Stand in the target map world for all commands below)"));
-		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup size <4|8> &7- 4-player maps need all 4 teams to start and 3 captures to win"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup size <4|8> &7- 4-player maps have exactly 4 teams (games still start with fewer players)"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup lobby"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup spectator"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup team <color> &7- also creates that team if it isn't already on this map"));

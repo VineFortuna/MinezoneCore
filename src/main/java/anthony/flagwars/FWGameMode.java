@@ -3,7 +3,7 @@ package anthony.flagwars;
 /** Solo (1 per island) or Duos (2 per island) - chosen when a player queues up. Actual max players scales with however many teams a given map has created; see FWGameInstance#getMaxPlayers. */
 public enum FWGameMode {
 	SOLO("Solo", 1, 2),
-	DUO("Duos", 2, 4);
+	DUO("Duos", 2, 3);
 
 	private final String label;
 	private final int teamCapacity;

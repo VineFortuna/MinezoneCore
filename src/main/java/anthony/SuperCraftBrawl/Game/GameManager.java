@@ -258,6 +258,10 @@ public class GameManager implements Listener, PluginMessageListener {
      */
 	@EventHandler
 	public void Target(EntityTargetLivingEntityEvent event) {
+		// Flag Wars has its own mob targeting (FWPokeballManager)
+		if (main.getFwGameManager() != null && main.getFwGameManager().getInstanceForWorld(event.getEntity().getWorld()) != null)
+			return;
+
 		if (event.getTarget() instanceof Player) {
 			Player player = (Player) event.getTarget();
 			GameInstance i = this.GetInstanceOfPlayer(player);

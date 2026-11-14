@@ -33,6 +33,18 @@ public enum FWTeamUpgrade {
 		return maxTier;
 	}
 
+	/** One short line for the shop tooltip. */
+	public String getDescription() {
+		switch (this) {
+			case RESOURCE_RUSH:     return "More iron and faster gold for your team.";
+			case SHARPENED_SWORDS:  return "Sharpness I on your team's swords.";
+			case REINFORCED_ARMOR:  return "Protection on your team's armor.";
+			case HEAL_POOL:         return "Regeneration inside your base.";
+			case FEATHER_FALLING:   return "Feather Falling II on your team's boots.";
+			default:                return "";
+		}
+	}
+
 	/** Tier every team starts the match at - 0 for all upgrades (nothing unlocked by default). */
 	public int getBaseTier() {
 		return 0;
