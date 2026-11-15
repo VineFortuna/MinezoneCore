@@ -1759,6 +1759,10 @@ public class GameManager implements Listener, PluginMessageListener {
 				if (!event.isCancelled() && event.getFinalDamage() >= player.getHealth() - 0.2) {
 					event.setCancelled(true);
 
+					if (event instanceof EntityDamageByEntityEvent) {
+						player.setLastDamageCause(event);
+					}
+
 					instance.PlayerDeath(player);
 
 				} else if (instance.classes.containsKey(player)) {
