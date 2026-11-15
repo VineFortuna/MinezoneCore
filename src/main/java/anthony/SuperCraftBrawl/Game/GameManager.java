@@ -828,7 +828,11 @@ public class GameManager implements Listener, PluginMessageListener {
 	public void onItemConsumeEvent(PlayerItemConsumeEvent event) {
 		Player player = event.getPlayer();
 		GameInstance gameInstance = GetInstanceOfPlayer(player);
-		gameInstance.classes.get(player).onConsumingItem(event);
+		// Not in a Super Craft Bros game (e.g. eating a golden apple in Flag Wars), so there is no class to tell
+		if (gameInstance == null) return;
+		BaseClass playerClass = gameInstance.classes.get(player);
+		if (playerClass == null) return;
+		playerClass.onConsumingItem(event);
 	}
 
 	@EventHandler

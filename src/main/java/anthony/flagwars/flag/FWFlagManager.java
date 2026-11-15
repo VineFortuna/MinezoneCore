@@ -10,6 +10,7 @@ import anthony.flagwars.map.FWTeamSite;
 import anthony.util.ItemHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -394,6 +395,11 @@ public class FWFlagManager {
 		FWTeam ownerTeam = instance.getTeams().get(ownerSiteId);
 		FWTeam attackerTeam = instance.findTeamOf(attacker);
 		if (ownerTeam == null || attackerTeam == null) return;
+
+		// A dead player waiting to respawn is in GameMode.SPECTATOR, standing next to their killer (see
+		// FWGameInstance#teleportToDeathView), which is often right beside a flag. They must not be able to
+		// steal: the respawn teleport would carry the flag home and capture it for them.
+		if (attacker.getGameMode() != GameMode.SURVIVAL) return;
 
 		if (ownerTeam == attackerTeam) {
 			attacker.sendMessage(main.color("&c&l(!) &rYou can't steal your own flag!"));

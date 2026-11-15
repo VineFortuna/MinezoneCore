@@ -661,6 +661,9 @@ public class FWPlayerListener implements Listener {
 		FWGameInstance instance = fwGameManager.getInstanceOfPlayer(player);
 		if (instance == null || instance.getState() != FWGameState.IN_PROGRESS) return;
 
+		// Respawning players are GameMode.SPECTATOR and still fire click events, so they can't steal or spring decoys
+		if (player.getGameMode() != GameMode.SURVIVAL) return;
+
 		Integer ownerSiteId = instance.getFlagManager().siteIdLookingAt(player, FLAG_CLICK_REACH);
 		if (ownerSiteId == null) {
 			// Not a real flag. It may be a decoy from a Decoy Flag Trap, which looks the same.
