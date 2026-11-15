@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
+import anthony.util.SoundManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.GameMode;
@@ -30,7 +31,7 @@ import java.util.Random;
 
 public class SteveClass extends BaseClass {
 
-	private static final int ORES_PER_UPGRADE = 5;
+	private static final int ORES_PER_UPGRADE = 7;
 	private static final int MAX_UPGRADE_TIER = 2;
 
 	/** The coal upgrade puts this effect on enemies with every pickaxe hit. Tier 1 is amplifier 0, tier 2 is amplifier 1. */
@@ -84,7 +85,7 @@ public class SteveClass extends BaseClass {
 				new ItemStack(Material.STONE_PICKAXE),
 				"&3&lPickaxe",
 				"",
-				"&7Hit enemies to mine &8&oCoal&r, &6&oGold&r &7and &b&oDiamonds&r&7",
+				"&7Hit enemies to mine &8&oCoal&7, &6&oGold&r &7and &b&oDiamonds&r&7",
 				"&7and use them to upgrade your pickaxe"
 		);
 		ItemHelper.setUnbreakable(pickaxe);
@@ -92,14 +93,14 @@ public class SteveClass extends BaseClass {
 		// Crafting
 		craftingTable = ItemHelper.setDetails(
 				new ItemStack(Material.WORKBENCH),
-				"&f&lCrafting",
+				"&f&lCrafting &7(Right Click)",
 				"",
 				"&7Craft your ores into permanent upgrades,",
 				"&7with each type having " + MAX_UPGRADE_TIER + " different tiers:",
 				oreLine(Ore.COAL, "&3&o" + effectName(COAL_EFFECT) + " &r&e1 &7and &e" + MAX_UPGRADE_TIER
 						+ " &7on hit for &e" + COAL_EFFECT_SECONDS + "s"),
 				oreLine(Ore.GOLD, "&oKnockback&r &e1 &7and &e" + MAX_UPGRADE_TIER),
-				oreLine(Ore.DIAMOND, "&oSharpness&r &e&o1&r &7and &e&o" + MAX_UPGRADE_TIER)
+				oreLine(Ore.DIAMOND, "&oSharpness&r &e1 &7and &e" + MAX_UPGRADE_TIER)
 		);
 	}
 
@@ -135,10 +136,17 @@ public class SteveClass extends BaseClass {
 	public void tick(int gameTicks) {
 		if (!isPlayerAlive()) return;
 
-		String oreAmounts = "&0" + ores[Ore.COAL.ordinal()]
-				+ " &6" + ores[Ore.GOLD.ordinal()]
-				+ " &b" + ores[Ore.DIAMOND.ordinal()];
-		getActionBarManager().setActionBar(player, "steve.ores", instance.color(oreAmounts), 2);
+		// Only ores whose upgrade isn't maxed yet. Once all are maxed there is nothing to show, and
+		// the bar (which only lasts 2 ticks per set) simply stops being refreshed.
+		StringBuilder oreAmounts = new StringBuilder();
+		for (Ore ore : Ore.values()) {
+			if (tier(ore) >= MAX_UPGRADE_TIER) continue;
+			if (oreAmounts.length() > 0) oreAmounts.append(" &7| ");
+			oreAmounts.append(ore.color).append(amount(ore));
+		}
+		if (oreAmounts.length() == 0) return;
+
+		getActionBarManager().setActionBar(player, "steve.ores", instance.color(oreAmounts.toString()), 2);
 	}
 
 	@Override
@@ -245,7 +253,7 @@ public class SteveClass extends BaseClass {
 		player.sendMessage(instance.color(maxed
 				? "&c&l(!) &rYour pickaxe is fully upgraded!"
 				: "&c&l(!) &rYou need &e" + ORES_PER_UPGRADE + " &rof an ore to craft an upgrade!"));
-		player.playSound(player.getLocation(), Sound.VILLAGER_NO, 1, 1);
+		SoundManager.playErrorSound(player);
 	}
 
 	private void applyUpgrade(Ore ore) {
@@ -259,7 +267,7 @@ public class SteveClass extends BaseClass {
 
 		switch (ore) {
 			case COAL:
-				player.sendMessage(instance.color("&2&l(!) &rYour hits now give &3&o"
+				player.sendMessage(instance.color("&2&l(!) &rYour pickaxe now applies &3&o"
 						+ effectName(COAL_EFFECT) + " &e" + tier));
 				break;
 			case GOLD:
