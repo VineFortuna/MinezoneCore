@@ -24,7 +24,7 @@ public class VillagerClass extends BaseClass {
 	private final ItemStack weapon;
 	private final ItemStack potatoItem;
 	private final Ability tradeAbility = new Ability("&a&lTrade", player);
-	private final Ability potatoAbility = new Ability("&6&lPotato Throw", 4, player);
+	private final Ability potatoAbility = new Ability("&6&lPotato", 4, player);
 	private static final int MAX_POTATO_AMOUNT = 4;
 	private int emeraldsCount;
 
@@ -112,16 +112,12 @@ public class VillagerClass extends BaseClass {
 		if (potatoStack == null) return;
 
 		int potatoes = potatoStack.getType() == Material.BARRIER ? 0 : potatoStack.getAmount() ;
+		// Nothing to show while all potatoes are there, the amount itself is on the item
+		if (potatoes >= MAX_POTATO_AMOUNT) return;
+
 		long timeLeft = potatoAbility.getCooldownInstance().getRemainingCooldownMillis();
-
-		String message = ChatColorHelper.color("&6&lPotatoes: &r&e" + potatoes + "/" + MAX_POTATO_AMOUNT);;
-		if (potatoes < MAX_POTATO_AMOUNT) {
-			// Regenerating case
-			int secondsLeft = (int) (timeLeft > 0 ? (timeLeft / 1000) + 1 : 0);
-			String regenText = "&8 ┃ &fRegenerating in &e" + secondsLeft + "s";
-
-			message += ChatColorHelper.color(regenText);
-		}
+		int secondsLeft = (int) (timeLeft > 0 ? (timeLeft / 1000) + 1 : 0);
+		String message = ChatColorHelper.color(potatoAbility.getAbilityName() + " &rregenerates in &e" + secondsLeft + "s");
 
 		getActionBarManager().setActionBar(player, "villager.potato", message, 2);
 	}
@@ -180,7 +176,7 @@ public class VillagerClass extends BaseClass {
 			amount--;
 
 			if (amount == 0)
-				player.getInventory().setItem(1, new ItemStack(Material.BARRIER));
+				player.getInventory().setItem(1, ItemHelper.setDetails(new ItemStack(Material.BARRIER), "&c&lOut of Potatoes!"));
 			else {
 				item.setAmount(amount);
 			}

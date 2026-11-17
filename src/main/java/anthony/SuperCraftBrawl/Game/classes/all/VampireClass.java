@@ -1,30 +1,33 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameManager;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class VampireClass extends BaseClass {
 
-	private boolean hitPlayer = false;
-	private boolean launched = false;
-	private BukkitRunnable r;
-	private final int cooldownTicks = 7;
+	/** How much health every hit of the Fang gives back, in health points. */
+	private static final double FANG_HEAL = 0.5;
+
+	private final ItemStack weapon;
+	private final ItemStack bowItem;
+	private final Ability bowAbility = new Ability("&4&lBow", 7, player);
+	private final PotionEffect poison = new PotionEffect(PotionEffectType.POISON, 4 * 20, 1);
 
 	public VampireClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -37,6 +40,30 @@ public class VampireClass extends BaseClass {
 				6,
 				"Vampire"
 		);
+
+		// Weapon
+		weapon = ItemHelper.setDetails(
+				new ItemStack(Material.GHAST_TEAR),
+				"&f&lFang",
+				"",
+				"&7Hits steal health of living entities,",
+				"&7healing you for &e" + ItemHelper.formatDouble(FANG_HEAL / 2) + " &c❤"
+		);
+		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
+		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
+
+		// Bow Ability
+		bowItem = ItemHelper.setDetails(
+				new ItemStack(Material.BOW),
+				bowAbility.getAbilityNameRightClickMessage(),
+				"&7Apply &2&o" + ItemHelper.getPotionEffectName(poison.getType()) + "&r &e" + (poison.getAmplifier() + 1)
+						+ " &7for &e" + poison.getDuration() / 20 + "s",
+				"",
+				"&7Landing a shot restores the cooldown"
+		);
+		bowItem.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
+		ItemHelper.setUnbreakable(bowItem);
+		ItemHelper.setHideFlags(bowItem, true);
 	}
 
 	@Override
@@ -45,128 +72,67 @@ public class VampireClass extends BaseClass {
 	}
 
 	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
-	}
-
-	@Override
-	public void setNameTag() {
-
-	}
-
-	@Override
 	public void setItems(Inventory playerInv) {
-		this.launched = false;
-		this.hitPlayer = false;
-		playerInv.setItem(0, this.getAttackWeapon());
-		playerInv.setItem(1,
-				ItemHelper.setUnbreakable(
-						ItemHelper.addEnchant(new ItemStack(Material.BOW),
-								Enchantment.ARROW_INFINITE, 1)));
+		bowAbility.getCooldownInstance().reset();
+
+		playerInv.setItem(0, weapon);
+		playerInv.setItem(1, bowItem);
 		playerInv.setItem(35, new ItemStack(Material.ARROW));
+	}
+
+	@Override
+	public void tick(int gameTicks) {
+		if (!isPlayerAlive()) return;
+		bowAbility.updateActionBar(player, this);
 	}
 
 	@Override
 	public void doDamage(EntityDamageByEntityEvent event) {
 		if (event.getDamager() instanceof Arrow) {
-			Arrow a = (Arrow) event.getDamager();
-			if (a.getShooter() instanceof Player) {
-				if (event.getEntity() instanceof Player) {
-					Player p = (Player) event.getEntity();
-					if (instance.duosMap != null)
-						if (instance.team.get(p).equals(instance.team.get(player)))
-							return;
+			if (!(event.getEntity() instanceof Player)) return;
 
-					p.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 4 * 20, 1));
-					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 4 * 20, 1));
-					this.hitPlayer = true;
-					if (r != null) {
-						r.cancel();
-						r = null;
-					}
-				}
-			}
+			Player hit = (Player) event.getEntity();
+			if (instance.duosMap != null && instance.team.get(hit).equals(instance.team.get(player))) return;
+
+			hit.addPotionEffect(poison);
+			// Landing a shot restores the cooldown of the bow
+			bowAbility.getCooldownInstance().reset();
+		} else {
+			healFromFang(event);
 		}
+	}
+
+	/** Hitting a mob, like the summons of another player, steals health too. */
+	@Override
+	public void doDamageToMob(EntityDamageByEntityEvent event) {
+		Player owner = GameManager.getMobOwner((LivingEntity) event.getEntity());
+		if (owner != null && (owner == player
+				|| (instance.duosMap != null && instance.team.get(owner).equals(instance.team.get(player))))) return;
+
+		healFromFang(event);
+	}
+
+	private void healFromFang(EntityDamageByEntityEvent event) {
+		if (!isPlayerAlive()) return;
+		if (event.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) return;
+		if (!weapon.equals(player.getInventory().getItemInHand())) return;
+
+		player.setHealth(Math.min(player.getMaxHealth(), player.getHealth() + FANG_HEAL));
 	}
 
 	@Override
 	public void projectileLaunch(ProjectileLaunchEvent event) {
-		if (event.getEntity() instanceof Arrow) {
-			if (r != null)
-				event.setCancelled(true);
+		if (!(event.getEntity() instanceof Arrow)) return;
 
-			this.launched = true;
-			this.hitPlayer = false;
-			cooldown();
+		if (!bowAbility.isReady()) {
+			event.setCancelled(true);
+			return;
 		}
-	}
-
-	@Override
-	public void tick(int gameTicks) {
-		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Vampire
-				&& instance.classes.get(player).getLives() > 0) {
-			if (r == null) {
-				String msg = instance.getGameManager().getMain().color("&9&l(!) &rYou can now use &eVampire's Bow");
-				getActionBarManager().setActionBar(player, "vampire.cooldown", msg, 2);
-			}
-		}
-	}
-
-	private void restart() {
-		this.launched = false;
-		this.hitPlayer = false;
-	}
-
-	private void cooldown() {
-		if (r == null) {
-			r = new BukkitRunnable() {
-				int ticks = cooldownTicks;
-
-				@Override
-				public void run() {
-					// Ends even if they died or left meanwhile - otherwise it would never stop
-					if (ticks <= 0) {
-						restart();
-						r = null;
-						this.cancel();
-						return;
-					}
-					if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Vampire
-							&& instance.classes.get(player).getLives() > 0) {
-						String msg = instance.getGameManager().getMain()
-								.color("&9&l(!) &eVampire's Bow Cooldown: " + ticks + "s");
-						getActionBarManager().setActionBar(player, "vampire.cooldown", msg, 2);
-					}
-					ticks--;
-				}
-			};
-			instance.trackClassTask(r.runTaskTimer(instance.getGameManager().getMain(), 0, 20));
-		}
-	}
-
-	private void abilityMsg() {
-		player.sendMessage("");
-		player.sendMessage(instance.getGameManager().getMain()
-				.color("&e&lCLASS TIP> &rShoot players with your bow to infect them with Poison II for 4 seconds"));
-		player.sendMessage("");
-	}
-
-	@Override
-	public void useItem(PlayerInteractEvent event) {
-		ItemStack item = event.getItem();
-		if (item != null && item.getType() == Material.GHAST_TEAR
-				&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-			this.abilityMsg();
-		}
+		bowAbility.use();
 	}
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.GHAST_TEAR),
-						instance.getGameManager().getMain().color("Fang &7(Right Click)")),
-				Enchantment.DAMAGE_ALL, 2), Enchantment.KNOCKBACK, 1);
-		return item;
+		return weapon;
 	}
-
 }

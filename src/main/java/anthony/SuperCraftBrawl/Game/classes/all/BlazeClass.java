@@ -10,10 +10,12 @@ import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -31,6 +33,9 @@ public class BlazeClass extends BaseClass {
 	private final Ability armyAbility = new Ability("&6&lArmy", player);
 	private static final double ARMY_ABILITY_DURATION = 25;
 	private static final int FIREBALL_AMOUNT = 10;
+	/** The blazes of the army that is out, and the task that despawns them. */
+	private final List<Blaze> armyBlazes = new ArrayList<>();
+	private BukkitTask armyDespawnTask;
 
 	public BlazeClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -58,7 +63,7 @@ public class BlazeClass extends BaseClass {
 		// Fireball Launcher Ability
 		fireballItem = ItemHelper.setDetails(
 				new ItemStack(Material.BOW),
-				fireballAbility.getAbilityName() + " Shooter &7(Right click)",
+				fireballAbility.getAbilityName() + " Shooter &7(Right Click)",
 				"&7Shoot up to &e" + FIREBALL_AMOUNT + " &7fireballs before recharging",
 				"&7Fireballs do damage and set fire",
 				"",
@@ -78,6 +83,7 @@ public class BlazeClass extends BaseClass {
 				"",
 				"&7Duration: &a" + durationDisplay + "&as"
 		);
+		ItemHelper.setHideFlags(armyItem, true);
 	}
 
 	@Override
@@ -199,8 +205,9 @@ public class BlazeClass extends BaseClass {
 		player.playSound(player.getLocation(), Sound.FIZZ, 1, 0);
 	}
 
+	@SuppressWarnings("deprecation")
 	private void spawnBlazes(Location loc) {
-		List<Blaze> blazes = new ArrayList<>();
+		endArmy(false);
 		armyAbility.sendCustomMessage("&2&l(!) &rYou spawned your &6&lBlaze Army");
 
 		// Helper method to spawn a Blaze with given location
@@ -208,7 +215,7 @@ public class BlazeClass extends BaseClass {
 			Blaze blaze = (Blaze) player.getWorld().spawnCreature(spawnLoc, EntityType.BLAZE);
 			blaze.setCustomName(ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Blaze Army");
 			blaze.setTarget(instance.getNearestPlayer(player, blaze, 150));
-			blazes.add(blaze);
+			armyBlazes.add(blaze);
 		};
 
 		// Spawn blazes at offsets
@@ -218,12 +225,38 @@ public class BlazeClass extends BaseClass {
 
 
 		// Remove all blazes after duration
-		Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
-			blazes.stream()
-					.filter(b -> b != null && !b.isDead())
-					.forEach(Blaze::remove);
+		armyDespawnTask = instance.trackClassTask(Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(),
+				() -> endArmy(true), (long) (ARMY_ABILITY_DURATION * 20)));
+	}
+
+	/**
+	 * Removes the blazes and stops the task that would. The player is only told it despawned if it ran
+	 * out by itself while they are still playing, not when they died or left meanwhile.
+	 */
+	private void endArmy(boolean ranOut) {
+		if (armyDespawnTask != null) {
+			armyDespawnTask.cancel();
+			armyDespawnTask = null;
+		}
+
+		boolean hadArmy = !armyBlazes.isEmpty();
+		for (Blaze blaze : armyBlazes)
+			if (blaze != null && !blaze.isDead()) blaze.remove();
+		armyBlazes.clear();
+
+		if (ranOut && hadArmy && isPlayerAlive())
 			armyAbility.sendCustomMessage("&2&l(!) &rYour &6&lBlaze Army &rdespawned");
-		}, (long) (ARMY_ABILITY_DURATION * 20));
+	}
+
+	@Override
+	public void onDeath(PlayerDeathEvent e) {
+		super.onDeath(e);
+		endArmy(false);
+	}
+
+	@Override
+	public void GameEnd() {
+		endArmy(false);
 	}
 
 

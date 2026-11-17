@@ -72,11 +72,11 @@ public class MelonClass extends BaseClass {
                 instance.color("&rMelon Soup &7(Right Click)"),
                 "",
                 instance.color("&7Right click to gain one of these effects:"),
-                instance.color("&7▶ &eAbsorption&r &a1"),
-                instance.color("&7▶ &d&oHealth Boost&r &a2"),
-                instance.color("&7▶ &c&oStrength&r &a1"),
-                instance.color("&7▶ &8&oResistance&r &a1"),
-                instance.color("&7▶ &b&oSpeed&r &a3"));
+                instance.color("&7▸ &eAbsorption&r &a1"),
+                instance.color("&7▸ &d&oHealth Boost&r &a2"),
+                instance.color("&7▸ &c&oStrength&r &a1"),
+                instance.color("&7▸ &8&oResistance&r &a1"),
+                instance.color("&7▸ &b&oSpeed&r &a3"));
 		return soup;
 	}
 
@@ -90,7 +90,7 @@ public class MelonClass extends BaseClass {
 
 	public ItemStack getRegenerators() {
         ItemStack regenerators = ItemHelper.setDetails(new ItemStack(Material.INK_SACK, 1),
-                instance.color("&aRegenerators"),
+                instance.color("&aRegenerators &7(Right Click)"),
                 "",
                 instance.color("&7Right click to gain:"),
                 instance.color("&c&lREGEN II &a- 5s"));

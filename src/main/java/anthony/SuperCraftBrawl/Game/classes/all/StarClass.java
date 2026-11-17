@@ -138,7 +138,7 @@ public class StarClass extends BaseClass {
 	}
 
 	private final ItemStack jeffrey = ItemHelper.setDetails(ItemHelper.createMonsterEgg(EntityType.PIG, 1),
-			instance.getGameManager().getMain().color("&e&lJeffrey Pokeball"), "",
+			instance.getGameManager().getMain().color("&e&lJeffrey Pokeball &7(Right Click)"), "",
 			instance.getGameManager().getMain().color("&7Spawn your Jeffrey to heal you!"),
 			instance.getGameManager().getMain().color("   &rMax 10 heal uses"),
 			instance.getGameManager().getMain().color("   &rHeals 2 hearts per sec"));

@@ -52,7 +52,7 @@ public class GhastClass extends BaseClass {
 		// Bow
 		bowItem = ItemHelper.setDetails(
 				new ItemStack(Material.BOW),
-				"&f&lBow &7(Right click)",
+				"&f&lBow &7(Right Click)",
 				"",
 				"&7Gain arrows by hitting enemies",
 				"&7Gain &e" + ON_KILL_ARROWS_AMOUNT + " &7arrows on kill",

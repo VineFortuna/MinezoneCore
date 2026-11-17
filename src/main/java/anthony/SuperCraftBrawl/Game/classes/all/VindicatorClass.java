@@ -42,13 +42,13 @@ public class VindicatorClass extends BaseClass {
         vindication.startTime = System.currentTimeMillis() - 100000;
         playerInv.setItem(0, this.getAttackWeapon());
         playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.EMERALD),
-                "" + ChatColor.RESET + ChatColor.RED + ChatColor.BOLD + "Vindication"));
+                "" + ChatColor.RESET + ChatColor.RED + ChatColor.BOLD + "Vindication &7(Right Click)"));
     }
     
     @Override
     public void tick(int gameTicks) {
         if (!(player.getActivePotionEffects().contains(PotionEffectType.WEAKNESS)))
-            player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1, false, false));
         
         if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Vindicator
                 && instance.classes.get(player).getLives() > 0) {

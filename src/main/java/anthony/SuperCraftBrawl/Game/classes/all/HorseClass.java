@@ -58,9 +58,9 @@ public class HorseClass extends BaseClass {
 				"&6&lHay Bale",
 				"",
 				"&7On kill, receive one of 3 treats:",
-				"&7▶ " + speedString,
-				"&7▶ " + strengthString,
-				"&7▶ " + resistanceString,
+				"&7▸ " + speedString,
+				"&7▸ " + strengthString,
+				"&7▸ " + resistanceString,
 				"",
 				"&7All treats give " + absorptionString
 		);
@@ -78,23 +78,23 @@ public class HorseClass extends BaseClass {
 		// Treat ability
 			// Speed Treat
 		goldenCarrotItem = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_CARROT),
-				"&b&lSpeed Treat",
-				"&7▶ " + speedString,
-				"&7▶ " + absorptionString
+				"&b&lSpeed Treat &7(Right Click)",
+				"&7▸ " + speedString,
+				"&7▸ " + absorptionString
 		);
 
 			// Strength treat
 		goldenAppleItem = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE),
-				"&4&lStrength Treat",
-				"&7▶ " + strengthString,
-				"&7▶ " + absorptionString
+				"&4&lStrength Treat &7(Right Click)",
+				"&7▸ " + strengthString,
+				"&7▸ " + absorptionString
 		);
 
 			// Resistance treat
 		notchAppleItem = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE),
-				"&f&lResistance Treat",
-				"&7▶ " + resistanceString,
-				"&7▶ " + absorptionString
+				"&f&lResistance Treat &7(Right Click)",
+				"&7▸ " + resistanceString,
+				"&7▸ " + absorptionString
 		);
 		notchAppleItem.setDurability((short) 1);
 	}

@@ -397,6 +397,19 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
+	/** Lets the class of a player know about the hits they make on mobs, like the summons of other players. */
+	@EventHandler(ignoreCancelled = true)
+	public void onMobHit(EntityDamageByEntityEvent event) {
+		if (!(event.getDamager() instanceof Player) || event.getEntity() instanceof Player) return;
+		if (!(event.getEntity() instanceof LivingEntity)) return;
+
+		Player attacker = (Player) event.getDamager();
+		GameInstance instance = this.GetInstanceOfPlayer(attacker);
+		if (instance == null || instance.state != GameState.STARTED || !instance.classes.containsKey(attacker)) return;
+
+		instance.classes.get(attacker).doDamageToMob(event);
+	}
+
 	@EventHandler
 	public void onCaveSpiderPlayerHit(EntityDamageByEntityEvent event) {
 		Entity damager = event.getDamager();
@@ -1059,6 +1072,9 @@ public class GameManager implements Listener, PluginMessageListener {
 	 */
 	@EventHandler
 	public void onPlayerDropItem(PlayerDropItemEvent e) {
+		GameInstance instance = this.GetInstanceOfPlayer(e.getPlayer());
+		if (instance != null && instance.classes.containsKey(e.getPlayer()))
+			instance.classes.get(e.getPlayer()).onItemDropped();
 		e.setCancelled(true);
 	}
 
@@ -1475,6 +1491,13 @@ public class GameManager implements Listener, PluginMessageListener {
 			return;
 		}
 
+		// The class of the player can handle the pickup itself
+		GameInstance instance = this.GetInstanceOfPlayer(event.getPlayer());
+		if (instance != null && instance.classes.containsKey(event.getPlayer())) {
+			instance.classes.get(event.getPlayer()).onItemPickup(event);
+			if (event.isCancelled()) return;
+		}
+
 		// The Snowball Launcher is a single item whose amount is its uses: the vanilla pickup would split it
 		// into three launchers, so it's moved into the inventory whole instead
 		ItemStack stack = item.getItemStack();
@@ -1485,6 +1508,21 @@ public class GameManager implements Listener, PluginMessageListener {
 				event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ITEM_PICKUP, 0.2f, 1.5f);
 			}
 		}
+	}
+
+	private static final double WITHER_SKULL_EXPLOSION_POWER = 1.0;
+
+	/**
+	 * The push an explosion gives to a player, worked out like the game does: the closer the feet are to the
+	 * explosion the stronger it is, and it goes from the explosion to the eyes. A cancelled damage event also
+	 * cancels it, so it is applied here instead for the explosions that must not do damage.
+	 */
+	private void pushAwayFromExplosion(Player player, Location explosion, double power) {
+		double distance = player.getLocation().distance(explosion) / (power * 2);
+		Vector away = player.getEyeLocation().toVector().subtract(explosion.toVector());
+		if (distance > 1 || away.lengthSquared() == 0) return;
+
+		player.setVelocity(player.getVelocity().add(away.normalize().multiply(1 - distance)));
 	}
 
 	// Disables portals usage
@@ -1505,28 +1543,8 @@ public class GameManager implements Listener, PluginMessageListener {
 					Player hitPlayer = (Player) event.getEntity();
 					GameInstance i = this.GetInstanceOfPlayer(hitPlayer);
 
-					if (i != null) {
-						if (i.duosMap != null) {
-							if (!(i.team.get(shooter).equals(i.team.get(hitPlayer)))) {
-								if (i.classes.get(shooter).getType() == ClassType.SnowGolem)
-									hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness
-								// 3 -
-								// Snowgolem
-								else
-									hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 0)); // Slowness
-								// 1
-							}
-						} else {
-							if (i.classes.get(shooter).getType() == ClassType.SnowGolem)
-								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2)); // Slowness
-							// 3
-							// -
-							// Snowgolem
-							else
-								hitPlayer.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 3 * 20, 0)); // Slowness
-							// 1
-						}
-					}
+					if (i != null && (i.duosMap == null || !i.team.get(shooter).equals(i.team.get(hitPlayer))))
+						hitPlayer.addPotionEffect(GameLootDrops.SLOWBALL_EFFECT);
 				}
 			}
 		}
@@ -1670,6 +1688,13 @@ public class GameManager implements Listener, PluginMessageListener {
 
 						if (s.getShooter() instanceof Player) {
 							Player shoot = (Player) s.getShooter();
+							// Skulls never hurt (or wither) the one who shot them, but still push them
+							if (shoot.equals(player)) {
+								event.setCancelled(true);
+								if (event.getCause() == DamageCause.ENTITY_EXPLOSION)
+									pushAwayFromExplosion(player, s.getLocation(), WITHER_SKULL_EXPLOSION_POWER);
+								return;
+							}
 							if (instance.duosMap != null) {
 								if (!(instance.team.get(player).equals(instance.team.get(shoot)))) {
 									player.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 120, 0, true));

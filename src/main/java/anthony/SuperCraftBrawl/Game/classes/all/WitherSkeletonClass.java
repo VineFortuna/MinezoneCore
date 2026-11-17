@@ -8,13 +8,10 @@ import anthony.util.ItemHelper;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -25,6 +22,18 @@ import java.util.List;
 import java.util.Random;
 
 public class WitherSkeletonClass extends BaseClass {
+
+    private static final String BOW_NAME = "&7&lWitherSkeleton Bow";
+
+    // Damage a hit of the bow adds, in health points, and how often each one is rolled
+    private static final double BOW_DAMAGE = 8.0;
+    private static final double STRONG_BOW_DAMAGE = 10.0;
+    private static final double RARE_BOW_DAMAGE = 18.0;
+    private static final int STRONG_BOW_CHANCE_PERCENT = 41;
+    private static final int RARE_BOW_CHANCE_PERCENT = 2;
+
+    private final PotionEffect witherShot = new PotionEffect(PotionEffectType.WITHER, 5 * 20, 1);
+    private final Random random = new Random();
 
     private int cooldown = 0;
     private boolean used = false;
@@ -54,7 +63,7 @@ public class WitherSkeletonClass extends BaseClass {
                                 .addEnchant(
                                         ItemHelper.setDetails(new ItemStack(Material.EYE_OF_ENDER),
                                                 instance.getGameManager().getMain()
-                                                        .color("&rEye of Ender &7(Right Click)")),
+                                                        .color("&rEye of Ender")),
                                         Enchantment.DAMAGE_ALL, 1),
                         Enchantment.KNOCKBACK, 1);
         return item;
@@ -165,17 +174,9 @@ public class WitherSkeletonClass extends BaseClass {
                         this.used = false;
                         this.cooldown = 0;
                         player.getInventory().remove(Material.BOW);
-                        player.getInventory()
-                                .addItem(
-                                        ItemHelper.setUnbreakable(
-                                                ItemHelper
-                                                        .addEnchant(
-                                                                ItemHelper.setDetails(new ItemStack(Material.BOW),
-                                                                        instance.getGameManager().getMain()
-                                                                                .color("&7&lWitherSk Bow")),
-                                                                Enchantment.ARROW_INFINITE, 1)));
+                        player.getInventory().addItem(createBow());
                         String msg = instance.getGameManager().getMain()
-                                .color("&9&l(!) &eYou can now use &7&lWither's Bow");
+                                .color("&rYou can now use " + BOW_NAME);
                         getActionBarManager().setActionBar(player, "wither.skeleton.cooldown", msg, 2);
                     }
                 }
@@ -198,22 +199,8 @@ public class WitherSkeletonClass extends BaseClass {
                         }
                     }
 
-                    Random r = new Random();
-                    int chance = r.nextInt(100);
-                    double dmg = 5.0;
-
-                    if (chance >= 0 && chance < 2)
-                        dmg = 18.0;
-                    else if (chance >= 10 && chance <= 50)
-                        dmg = 10.0;
-                    else
-                        dmg = 8.0;
-
-                    @SuppressWarnings("deprecation")
-                    EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.WITHER, dmg);
-                    instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
-                    p.damage(dmg, player);
-                    p.addPotionEffect(new PotionEffect(PotionEffectType.WITHER, 100, 1));
+                    p.damage(rollBowDamage(), player);
+                    p.addPotionEffect(witherShot);
 
                     // Creeper-face firework — power 1 keeps the explosion low, roughly 4-5 blocks up
                     Firework fw = (Firework) p.getWorld().spawnEntity(p.getLocation(), EntityType.FIREWORK);
@@ -221,8 +208,8 @@ public class WitherSkeletonClass extends BaseClass {
                     fwm.setPower(1);
                     fwm.addEffect(FireworkEffect.builder()
                             .with(FireworkEffect.Type.CREEPER)
-                            .withColor(Color.GREEN, Color.BLACK)
-                            .withFade(Color.LIME)
+                            .withColor(Color.RED, Color.BLACK)
+                            .withFade(Color.MAROON)
                             .trail(true)
                             .flicker(false)
                             .build());
@@ -237,8 +224,7 @@ public class WitherSkeletonClass extends BaseClass {
             BaseClass bc = instance.classes.get(player);
             if (bc != null && bc.getLives() <= 0)
                 return;
-            Random rand = new Random();
-            int chance = rand.nextInt(9);
+            int chance = random.nextInt(9);
 
             if (chance == 5 || chance == 1 || chance == 3 || chance == 7) {
                 if (event.getEntity() instanceof Player) {
@@ -253,38 +239,40 @@ public class WitherSkeletonClass extends BaseClass {
         }
     }
 
+    /** The extra damage a hit adds. Most shots are the normal one, some are stronger and a few are rare. */
+    private double rollBowDamage() {
+        int roll = random.nextInt(100);
+        if (roll < RARE_BOW_CHANCE_PERCENT) return RARE_BOW_DAMAGE;
+        if (roll < RARE_BOW_CHANCE_PERCENT + STRONG_BOW_CHANCE_PERCENT) return STRONG_BOW_DAMAGE;
+        return BOW_DAMAGE;
+    }
+
+    private ItemStack createBow() {
+        ItemStack item = ItemHelper.setDetails(
+                new ItemStack(Material.BOW),
+                BOW_NAME + " &7(Right Click)",
+                "&7Hits apply &8&oWither &e" + (witherShot.getAmplifier() + 1) + " &7for &e" + witherShot.getDuration() / 20 + "s",
+                "&7and deal &e" + ItemHelper.formatDouble(BOW_DAMAGE / 2) + " &c❤ &7of extra damage",
+                "",
+                "&7Strong shots (&e" + STRONG_BOW_CHANCE_PERCENT + "%&7) deal &e"
+                        + ItemHelper.formatDouble(STRONG_BOW_DAMAGE / 2) + " &c❤ &7extra",
+                "&7Rare shots (&e" + RARE_BOW_CHANCE_PERCENT + "%&7) deal &e"
+                        + ItemHelper.formatDouble(RARE_BOW_DAMAGE / 2) + " &c❤ &7extra"
+        );
+        item.addUnsafeEnchantment(Enchantment.DURABILITY, 1000);
+        item.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
+        return ItemHelper.setHideFlags(item, true);
+    }
+
     @Override
     public void setItems(Inventory playerInv) {
         this.cooldown = 0;
         this.used = false;
-        this.bow = ItemHelper
-                .addEnchant(ItemHelper.addEnchant(
-                        ItemHelper.setDetails(new ItemStack(Material.BOW),
-                                instance.getGameManager().getMain().color("&7&lWitherSkeleton Bow")),
-                        Enchantment.DURABILITY, 1000), Enchantment.ARROW_INFINITE, 1);
+        this.bow = createBow();
 
         playerInv.setItem(0, this.getAttackWeapon());
         playerInv.setItem(1, this.bow);
         playerInv.setItem(35, new ItemStack(Material.ARROW));
     }
 
-    private void abilityMsg() {
-        player.sendMessage("");
-        player.sendMessage(instance.getGameManager().getMain().color(
-                "&e&lCLASS TIP> &rShoot players with your bow to give Wither effect, & do damage. Also very rare chance to do INSANE damage :)"));
-        player.sendMessage("");
-    }
-
-    @Override
-    public void useItem(PlayerInteractEvent event) {
-        ItemStack item = event.getItem();
-
-        if (item != null) {
-            if (item.getType() == Material.EYE_OF_ENDER
-                    && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-                event.setCancelled(true);
-                this.abilityMsg();
-            }
-        }
-    }
 }

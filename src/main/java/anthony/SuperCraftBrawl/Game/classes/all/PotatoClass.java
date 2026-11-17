@@ -51,7 +51,7 @@ public class PotatoClass extends BaseClass {
 	@Override
 	public void setArmor(EntityEquipment playerEquip) {
 		setArmorNew(playerEquip);
-		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0, false, false));
 	}
 
 	@Override
@@ -135,7 +135,7 @@ public class PotatoClass extends BaseClass {
 							player.getInventory().setItem(0, ItemHelper.addEnchant(ItemHelper.addEnchant(
 									new ItemStack(Material.POTATO_ITEM), Enchantment.DAMAGE_ALL, sharpness),
 									Enchantment.KNOCKBACK, 1));
-							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 4 - sharpness));
+							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 4 - sharpness, false, false));
 						}
 					}.runTaskLater(instance.getGameManager().getMain(), 1);
 					
@@ -159,7 +159,7 @@ public class PotatoClass extends BaseClass {
 													ItemHelper.addEnchant(new ItemStack(Material.BAKED_POTATO),
 															Enchantment.DAMAGE_ALL, sharpness),
 													Enchantment.FIRE_ASPECT, 1), Enchantment.KNOCKBACK, 1));
-							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 4 - sharpness));
+							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 4 - sharpness, false, false));
 						}
 					}.runTaskLater(instance.getGameManager().getMain(), 1);
 					
@@ -182,7 +182,7 @@ public class PotatoClass extends BaseClass {
 											ItemHelper.addEnchant(ItemHelper.addEnchant(
 													new ItemStack(Material.POISONOUS_POTATO),
 													Enchantment.DAMAGE_ALL, sharpness), Enchantment.KNOCKBACK, 1));
-							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 4 - sharpness));
+							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 4 - sharpness, false, false));
 						}
 					}.runTaskLater(instance.getGameManager().getMain(), 1);
 					

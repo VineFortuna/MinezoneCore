@@ -1,22 +1,24 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
+import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -24,15 +26,40 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class FireworkClass extends BaseClass {
 
+	private static final int ROCKET_POWER = 8;
+	private static final double ROCKET_UP_VELOCITY = 1;
+
+	/** The effects a shot of the bow can infect with, and the color of the firework that goes off on the one hit. */
+	private enum Infection {
+		POISON("&2", new PotionEffect(PotionEffectType.POISON, 5 * 20, 1), Color.GREEN),
+		BLINDNESS("&8", new PotionEffect(PotionEffectType.BLINDNESS, 3 * 20, 0), Color.BLACK),
+		SLOWNESS("&3", new PotionEffect(PotionEffectType.SLOW, 5 * 20, 2), Color.SILVER),
+		WEAKNESS("&7", new PotionEffect(PotionEffectType.WEAKNESS, 5 * 20, 3), Color.GRAY);
+
+		private final String color;
+		private final PotionEffect effect;
+		private final Color fireworkColor;
+
+		Infection(String color, PotionEffect effect, Color fireworkColor) {
+			this.color = color;
+			this.effect = effect;
+			this.fireworkColor = fireworkColor;
+		}
+	}
+
+	private final ItemStack bowItem;
+	private final ItemStack rocketItem;
+	private final Ability bowAbility = new Ability("&c&lBow", 5, player);
+	private final Ability rocketAbility = new Ability("&c&lRocket", player);
+	private final Random random = new Random();
+	/** The Rocket can only be used once every life. */
 	private boolean used = false;
-	private int cooldown = 0;
-	private String msg = "";
-	private CraftPlayer craft = (CraftPlayer) player;
-	private Random r = new Random();
 
 	public FireworkClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -46,6 +73,34 @@ public class FireworkClass extends BaseClass {
 				6,
 				"Firework"
 		);
+
+		// Rocket Ability, which is also the weapon
+		rocketItem = ItemHelper.setDetails(
+				new ItemStack(Material.FIREWORK),
+				rocketAbility.getAbilityNameRightClickMessage(),
+				"&7Ride ur firework highhhh!!"
+		);
+		rocketItem.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
+		rocketItem.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
+		ItemHelper.setHideFlags(rocketItem, true);
+
+		// Bow Ability
+		List<String> bowLore = new ArrayList<>();
+		bowLore.add("&7Shoot players to apply one of these effects:");
+		for (Infection infection : Infection.values()) {
+			PotionEffect effect = infection.effect;
+			bowLore.add("&7▸ " + infection.color + "&o" + ItemHelper.getPotionEffectName(effect.getType())
+					+ " &e" + (effect.getAmplifier() + 1) + " &7for &e" + effect.getDuration() / 20 + "s");
+		}
+
+		bowItem = ItemHelper.setDetails(
+				new ItemStack(Material.BOW),
+				bowAbility.getAbilityNameRightClickMessage(),
+				bowLore.toArray(new String[0])
+		);
+		bowItem.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
+		ItemHelper.setUnbreakable(bowItem);
+		ItemHelper.setHideFlags(bowItem, true);
 	}
 
 	@Override
@@ -54,161 +109,78 @@ public class FireworkClass extends BaseClass {
 	}
 
 	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
-	}
-
-	@Override
 	public void setItems(Inventory playerInv) {
 		this.used = false; // Reset each life
-		this.cooldown = 0; // Reset each life
-		this.msg = "";
+		bowAbility.getCooldownInstance().reset(); // Reset each life
 
-		playerInv.setItem(0, this.getAttackWeapon());
-		playerInv
-				.setItem(1,
-						ItemHelper.setUnbreakable(ItemHelper.addEnchant(
-								ItemHelper.setDetails(new ItemStack(Material.BOW),
-										"" + ChatColor.RED + ChatColor.BOLD + "Firework Bow", "",
-										instance.getGameManager().getMain()
-												.color("&7Shoot players and infect with either:"),
-										instance.getGameManager().getMain().color("   &r6 sec Poison II"),
-										instance.getGameManager().getMain().color("   &r5 sec Blindness II"),
-										instance.getGameManager().getMain().color("   &r5 sec Slowness III"),
-										instance.getGameManager().getMain().color("   &r10 sec Weakness II")),
-								Enchantment.ARROW_INFINITE, 1)));
+		playerInv.setItem(0, rocketItem);
+		playerInv.setItem(1, bowItem);
 		playerInv.setItem(35, new ItemStack(Material.ARROW));
-
-		msg = instance.getGameManager().getMain().color("&9&l(!) &eYou can use &c&lFirework Bow");
-		getActionBarManager().setActionBar(player, "firework.cooldown", msg, 2);
 	}
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper
-				.addEnchant(
-						ItemHelper.addEnchant(
-								ItemHelper.setDetails(new ItemStack(Material.FIREWORK), "", "",
-										instance.getGameManager().getMain()
-												.color("&7Right click to ride ur firework highhhh!!")),
-								Enchantment.DAMAGE_ALL, 3),
-						Enchantment.KNOCKBACK, 1);
-		return item;
-	}
-
-	@Override
-	public void setNameTag() {
-		// TODO Auto-generated method stub
-
+		return rocketItem;
 	}
 
 	@Override
 	public void tick(int gameTicks) {
-		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Firework
-				&& instance.classes.get(player).getLives() > 0) {
-			if (gameTicks % 20 == 0)
-				if (this.cooldown > 0) {
-					this.cooldown--;
-					msg = instance.getGameManager().getMain()
-							.color("&9&l(!) &c&lFirework Bow &ecooldown: " + this.cooldown + "s");
-					getActionBarManager().setActionBar(player, "firework.cooldown", msg, 2);
-				}
-			if (this.cooldown == 0) {
-				msg = instance.getGameManager().getMain().color("&9&l(!) &eYou can use &c&lFirework Bow");
-				getActionBarManager().setActionBar(player, "firework.cooldown", msg, 2);
-			}
-		}
+		if (!isPlayerAlive()) return;
+		bowAbility.updateActionBar(player, this);
 	}
 
 	@Override
 	public void projectileLaunch(ProjectileLaunchEvent event) {
-		Entity e = event.getEntity();
+		if (!(event.getEntity() instanceof Arrow)) return;
 
-		if (e instanceof Arrow) {
-			if (this.cooldown == 0) {
-				this.cooldown = 5;
-			} else if (this.cooldown > 0) {
-				event.setCancelled(true);
-				player.sendMessage(instance.getGameManager().getMain().color(
-						"&c&l(!) &rYour &c&lFirework Bow &ris still on cooldown for &e" + this.cooldown + " seconds"));
-			}
+		if (!bowAbility.isReady()) {
+			event.setCancelled(true);
+			bowAbility.sendPlayerRemainingCooldownChatMessage();
+			return;
 		}
+		bowAbility.use();
 	}
 
 	@Override
 	public void doDamage(EntityDamageByEntityEvent event) {
-		if (event.getEntity() instanceof Player) {
-			Player target = (Player) event.getEntity();
-			if (event.getDamager() instanceof Arrow) {
-				int chance = r.nextInt(4);
+		if (!(event.getEntity() instanceof Player)) return;
+		if (!(event.getDamager() instanceof Arrow)) return;
 
-				if (chance == 0) {
-					target.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 5 * 20, 1));
-					Firework fw = (Firework) target.getLocation().getWorld().spawnEntity(target.getLocation(),
-							EntityType.FIREWORK);
-					FireworkMeta fwm = fw.getFireworkMeta();
+		Player target = (Player) event.getEntity();
+		Infection infection = Infection.values()[random.nextInt(Infection.values().length)];
+		target.addPotionEffect(infection.effect);
 
-					fwm.setPower(0);
-					fwm.addEffect(FireworkEffect.builder().withColor(Color.GREEN).flicker(true).build());
-					fw.setFireworkMeta(fwm);
-				} else if (chance == 1) {
-					target.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 3 * 20, 0));
-					Firework fw = (Firework) target.getLocation().getWorld().spawnEntity(target.getLocation(),
-							EntityType.FIREWORK);
-					FireworkMeta fwm = fw.getFireworkMeta();
-
-					fwm.setPower(0);
-					fwm.addEffect(FireworkEffect.builder().withColor(Color.BLACK).flicker(true).build());
-					fw.setFireworkMeta(fwm);
-				} else if (chance == 2) {
-					target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 5 * 20, 2));
-					Firework fw = (Firework) target.getLocation().getWorld().spawnEntity(target.getLocation(),
-							EntityType.FIREWORK);
-					FireworkMeta fwm = fw.getFireworkMeta();
-
-					fwm.setPower(0);
-					fwm.addEffect(FireworkEffect.builder().withColor(Color.SILVER).flicker(true).build());
-					fw.setFireworkMeta(fwm);
-				} else if (chance == 3) {
-					target.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 5 * 20, 3));
-					Firework fw = (Firework) target.getLocation().getWorld().spawnEntity(target.getLocation(),
-							EntityType.FIREWORK);
-					FireworkMeta fwm = fw.getFireworkMeta();
-
-					fwm.setPower(0);
-					fwm.addEffect(FireworkEffect.builder().withColor(Color.GRAY).flicker(true).build());
-					fw.setFireworkMeta(fwm);
-				}
-			}
-		}
+		Firework firework = (Firework) target.getWorld().spawnEntity(target.getLocation(), EntityType.FIREWORK);
+		FireworkMeta meta = firework.getFireworkMeta();
+		meta.setPower(0);
+		meta.addEffect(FireworkEffect.builder().withColor(infection.fireworkColor).flicker(true).build());
+		firework.setFireworkMeta(meta);
 	}
 
 	@Override
 	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
-		Player player = event.getPlayer();
+		Action action = event.getAction();
 
-		if (item != null && item.getType() == Material.FIREWORK) {
-			event.setCancelled(true);
-			if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-				if (!this.used) {
-					this.used = true;
-					Location newLoc = new Location(player.getWorld(), player.getLocation().getX() + 0.5,
-							player.getLocation().getY() + 1, player.getLocation().getZ() + 0.5);
-					Firework fw = (Firework) newLoc.getWorld().spawnEntity(newLoc, EntityType.FIREWORK);
-					FireworkMeta fwm = fw.getFireworkMeta();
+		if (item == null || item.getType() != Material.FIREWORK) return;
+		event.setCancelled(true);
+		if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) return;
 
-					fwm.setPower(8);
-					fwm.addEffect(FireworkEffect.builder().withColor(Color.RED).flicker(true).build());
-					Vector velocity = new Vector(0, 1, 0);
-					fw.setVelocity(velocity);
-					fw.setFireworkMeta(fwm);
-					fw.setPassenger(player);
-					player.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rFlyyy me to the moon!"));
-				} else
-					player.sendMessage(instance.getGameManager().getMain()
-							.color("&c&l(!) &rYou already used your Firework ability this life!"));
-			}
+		if (used) {
+			rocketAbility.sendCustomMessage("&c&l(!) &rYou already used your Firework ability this life!");
+			return;
 		}
+		used = true;
+
+		Location rocketLocation = player.getLocation().add(0.5, 1, 0.5);
+		Firework firework = (Firework) rocketLocation.getWorld().spawnEntity(rocketLocation, EntityType.FIREWORK);
+		FireworkMeta meta = firework.getFireworkMeta();
+		meta.setPower(ROCKET_POWER);
+		meta.addEffect(FireworkEffect.builder().withColor(Color.RED).flicker(true).build());
+		firework.setVelocity(new Vector(0, ROCKET_UP_VELOCITY, 0));
+		firework.setFireworkMeta(meta);
+		firework.setPassenger(player);
+
+		player.sendMessage(ChatColorHelper.color("&2&l(!) &rFlyyy me to the moon!"));
 	}
 }

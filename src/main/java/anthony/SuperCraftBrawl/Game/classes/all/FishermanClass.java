@@ -45,21 +45,21 @@ public class FishermanClass extends BaseClass {
     private ArrayList<Item> puffer = new ArrayList<>();
     
     private final ItemStack flyingFish = ItemHelper.setDetails(new ItemStack(Material.RAW_FISH),
-            "&a&lFlying Fish",
+            "&a&lFlying Fish &7(Right Click)",
             "&7Launch at enemies to fishslap them");
     
     private final ItemStack pufferFish = ItemHelper.setDetails(new ItemStack(Material.RAW_FISH, 1, (short) 3),
-            "&e&lTactical Fish",
+            "&e&lTactical Fish &7(Right Click)",
             "&7Explodes when approached by an enemy",
             "&7Inflicts &2&oPoison&r &e1 &7for &e6 &7seconds",
             "&7Detonates after &e15s");
     
     private final ItemStack speedFish = ItemHelper.setDetails(new ItemStack(Material.RAW_FISH, 1, (short) 2),
-            "&b&lTricky Fish",
+            "&b&lTricky Fish &7(Right Click)",
             "&7Swim away with &b&oSpeed&e 1 &7for &e5 &7s");
     
     private final ItemStack healFish = ItemHelper.setDetails(new ItemStack(Material.COOKED_FISH, 1, (short) 1),
-            "&c&lHearty Fish",
+            "&c&lHearty Fish &7(Right Click)",
             "&7Heals &e0.5 &c❤");
     
     public FishermanClass(GameInstance instance, Player player) {

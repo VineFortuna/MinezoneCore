@@ -57,7 +57,7 @@ public class SlimeClass extends BaseClass {
 
 	public ItemStack getSlimeBall() {
 		return ItemHelper.setDetails(new ItemStack(Material.SLIME_BALL, 1),
-				"" + ChatColor.RESET + ChatColor.GREEN + ChatColor.BOLD + "Gooey Grenade");
+				"" + ChatColor.RESET + ChatColor.GREEN + ChatColor.BOLD + "Gooey Grenade &7(Right Click)");
 	}
 
 	@Override

@@ -80,7 +80,7 @@ public class CloudClass extends BaseClass {
 	@Override
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.WOOD_SWORD),
-				instance.color("&b&lCloud Sword"),
+				instance.color("&b&lCloud Sword &7(Right Click)"),
                 "",
                 instance.color("&7Right click your sword to use"),
                 instance.color("&7one of your cloud abilities"));

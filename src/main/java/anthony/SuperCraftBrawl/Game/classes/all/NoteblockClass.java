@@ -47,7 +47,7 @@ public class NoteblockClass extends BaseClass {
 	public void setArmor(EntityEquipment playerEquip) {
 		setArmorNew(playerEquip);
 		player.removePotionEffect(PotionEffectType.SPEED);
-		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0, false, false));
 	}
 
 	@Override
@@ -102,10 +102,10 @@ public class NoteblockClass extends BaseClass {
 		d.setDurability((short) 4);
 		count = 0; // To reset count
 
-		player.getInventory().setItem(1, ItemHelper.setDetails(a, instance.getGameManager().getMain().color("&eA")));
-		player.getInventory().setItem(2, ItemHelper.setDetails(b, instance.getGameManager().getMain().color("&eB")));
-		player.getInventory().setItem(3, ItemHelper.setDetails(c, instance.getGameManager().getMain().color("&eC")));
-		player.getInventory().setItem(4, ItemHelper.setDetails(d, instance.getGameManager().getMain().color("&eD")));
+		player.getInventory().setItem(1, ItemHelper.setDetails(a, instance.getGameManager().getMain().color("&eA &7(Right Click)")));
+		player.getInventory().setItem(2, ItemHelper.setDetails(b, instance.getGameManager().getMain().color("&eB &7(Right Click)")));
+		player.getInventory().setItem(3, ItemHelper.setDetails(c, instance.getGameManager().getMain().color("&eC &7(Right Click)")));
+		player.getInventory().setItem(4, ItemHelper.setDetails(d, instance.getGameManager().getMain().color("&eD &7(Right Click)")));
 		/*player.getInventory().setItem(5, ItemHelper.setDetails(new ItemStack(Material.BUCKET),
 				instance.getGameManager().getMain().color("&2&lErase Your Work")));*/
 	}
@@ -119,9 +119,9 @@ public class NoteblockClass extends BaseClass {
 		}
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)) && !res) {
 			if (speed)
-				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1, false, false));
 			else
-				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0));
+				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 0, false, false));
 		}
 	}
 	
@@ -250,7 +250,7 @@ public class NoteblockClass extends BaseClass {
 						player.sendMessage(instance.getGameManager().getMain()
 								.color("&r&l(!) &rYour song skills rewarded you with &eSpeed 2"));
 					}
-					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1, false, false));
 					
 				} else
 					player.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYou played this song already!"));
@@ -258,7 +258,7 @@ public class NoteblockClass extends BaseClass {
 			case 4:
 				if (!res) {
 					player.removePotionEffect(PotionEffectType.SPEED);
-					player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0, false, false));
 					player.sendMessage(instance.getGameManager().getMain().color(
 							"&r&l(!) &rYour song skills rewarded you with &eResistance 1&r, but unfortunately you had to give up your Speed effect for it"));
 					speed = false;

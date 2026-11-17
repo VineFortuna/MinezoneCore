@@ -45,15 +45,15 @@ public class EnderdragonClass extends BaseClass {
 	public void setItems(Inventory playerInv) {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.ENDER_PEARL, 5),
-				"" + ChatColor.BLACK + ChatColor.BOLD + "Teleporters"));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
+				"" + ChatColor.BLACK + ChatColor.BOLD + "Teleporters &7(Right Click)"));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1, false, false));
 	}
 
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void tick(int gameTicks) {
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.WEAKNESS)))
-			player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1, false, false));
 
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.EnderDragon
 				&& instance.classes.get(player).getLives() > 0) {

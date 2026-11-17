@@ -43,7 +43,7 @@ public class ChickenClass extends BaseClass {
 
     public ItemStack getEggs() {
         ItemStack eggs = ItemHelper.setDetails(new ItemStack(Material.EGG, 10),
-                instance.color("&eExplosive Eggs"),
+                instance.color("&eExplosive Eggs &7(Right Click)"),
                 "",
                 instance.color("&7Right click to throw DEADLY eggs!"));
         return eggs;
@@ -139,7 +139,7 @@ public class ChickenClass extends BaseClass {
         if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
             ItemStack item = ItemHelper.setDetails(
                     new ItemStack(Material.EGG, 2),
-                    instance.color("&eExplosive Eggs"),
+                    instance.color("&eExplosive Eggs &7(Right Click)"),
                     "",
                     instance.color("&7Right click to throw DEADLY eggs!")
             );

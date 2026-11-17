@@ -1,25 +1,36 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameState;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
-import net.md_5.bungee.api.ChatColor;
-import org.bukkit.*;
+import org.bukkit.Effect;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 public class PiglinBruteClass extends BaseClass {
+
+	private static final int STARTING_GOLD_BALLS = 5;
+	private static final int GOLD_BALLS_PER_KILL = 2;
+	private static final double GOLD_BALL_DAMAGE = 4.0;
+	private static final double GOLD_BALL_RADIUS = 3.0;
+	private static final double GOLD_BALL_SPEED = 2.5;
+
+	private final ItemStack weapon;
+	private final ItemStack goldBallsItem;
+	private final ItemStack barrierItem;
+	private final Ability goldBallsAbility = new Ability("&e&lGold Balls", player);
 
 	public PiglinBruteClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -32,92 +43,90 @@ public class PiglinBruteClass extends BaseClass {
 				6,
 				"PiglinBrute"
 		);
-	}
 
-	@Override
-	public void setArmor(EntityEquipment playerEquip) {
-		setArmorNew(playerEquip);
-	}
+		// Weapon
+		weapon = ItemHelper.setDetails(new ItemStack(Material.GOLD_AXE), "&e&lAxe");
+		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 3);
+		ItemHelper.setUnbreakable(weapon);
 
-	public ItemStack getGoldBalls() {
-		return ItemHelper.setDetails(new ItemStack(Material.GOLD_BLOCK, 1),
-				"&eGold Balls",
-				 "&7Right click to throw DEADLY gold balls!");
-	}
+		// Gold Balls
+		goldBallsItem = ItemHelper.setDetails(
+				new ItemStack(Material.GOLD_BLOCK),
+				goldBallsAbility.getAbilityNameRightClickMessage(),
+				"&7Throw DEADLY gold balls!"
+		);
 
-	@Override
-	public void tick(int gameTicks) {
-		if (!isPlayerAlive()) return;
-		if (instance.state == GameState.ENDED) return;
-
-		if (player.getInventory().getItem(1).getType() != Material.GOLD_BLOCK)
-			player.getInventory().setItem(1, getBarrier());
-	}
-
-	private ItemStack getBarrier() {
-		ItemStack barrier = ItemHelper.setDetails(new ItemStack(Material.BARRIER),
-				instance.color("&c&lOut of Gold Balls!"),
-				instance.color("&7Get a kill to regen 2 Gold Balls"));
-		return barrier;
+		// Barrier, for when there are no gold balls left
+		barrierItem = ItemHelper.setDetails(
+				new ItemStack(Material.BARRIER),
+				"&c&lOut of Gold Balls!",
+				"",
+				"&7Each kill regenerates " + GOLD_BALLS_PER_KILL + " gold balls"
+		);
 	}
 
 	@Override
 	public void setItems(Inventory playerInv) {
-		playerInv.setItem(0, this.getAttackWeapon());
-		ItemStack goldBalls = getGoldBalls();
-		goldBalls.setAmount(5);
+		ItemStack goldBalls = goldBallsItem.clone();
+		goldBalls.setAmount(STARTING_GOLD_BALLS);
+
+		playerInv.setItem(0, weapon);
 		playerInv.setItem(1, goldBalls);
 	}
 
 	@Override
 	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
-		if (item != null && item.getType() == Material.GOLD_BLOCK) {
-			if (player.getGameMode() != GameMode.SPECTATOR) {
-				int amount = item.getAmount();
-				if (amount > 0) {
-					amount--;
-					if (amount == 0)
-						player.getInventory().clear(player.getInventory().getHeldItemSlot());
-					else
-						item.setAmount(amount);
-					ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
-						@Override
-						public void onHit(Player hit) {
-							if (hit == null || hit.getGameMode() != GameMode.SPECTATOR) {
-								Location hitLoc = this.getBaseProj().getEntity().getLocation();
-								player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
+		Action action = event.getAction();
 
-								for (Player gamePlayer : this.getNearby(3.0)) {
-									if (instance.duosMap != null) {
-										if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
-											EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-													DamageCause.PROJECTILE, 4.0);
-											instance.getGameManager().getMain().getServer().getPluginManager()
-													.callEvent(damageEvent);
-											gamePlayer.damage(4.0, player);
-										}
-									} else {
-										EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
-												DamageCause.PROJECTILE, 4.0);
-										instance.getGameManager().getMain().getServer().getPluginManager()
-												.callEvent(damageEvent);
-										gamePlayer.damage(4.0, player);
-									}
-								}
-								player.getWorld().playSound(hitLoc, Sound.EXPLODE, 2, 1);
-								player.getWorld().playEffect(hitLoc, Effect.EXPLOSION_HUGE, 1);
+		if (item == null || item.getType() != Material.GOLD_BLOCK) return;
+		if (player.getGameMode() == GameMode.SPECTATOR) return;
+		if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) return;
 
-							}
-						}
+		event.setCancelled(true);
 
-					}, new ItemStack(Material.GOLD_BLOCK));
-					instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
-							player.getLocation().getDirection().multiply(2.5D));
+		if (item.getAmount() > 1) item.setAmount(item.getAmount() - 1);
+		else player.getInventory().setItem(1, barrierItem);
+
+		ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
+			@Override
+			public void onHit(Player hit) {
+				if (hit != null && hit.getGameMode() == GameMode.SPECTATOR) return;
+
+				Location hitLoc = this.getBaseProj().getEntity().getLocation();
+				player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
+
+				for (Player gamePlayer : this.getNearby(GOLD_BALL_RADIUS)) {
+					if (instance.duosMap != null && instance.team.get(gamePlayer).equals(instance.team.get(player)))
+						continue;
+					gamePlayer.damage(GOLD_BALL_DAMAGE, player);
 				}
-				event.setCancelled(true);
+
+				player.getWorld().playSound(hitLoc, Sound.EXPLODE, 2, 1);
+				player.getWorld().playEffect(hitLoc, Effect.EXPLOSION_HUGE, 1);
 			}
-		}
+		}, new ItemStack(Material.GOLD_BLOCK));
+
+		instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
+				player.getLocation().getDirection().multiply(GOLD_BALL_SPEED));
+	}
+
+	@Override
+	public void killEvent(Player damagerPlayer) {
+		if (!instance.classes.containsKey(damagerPlayer) || checkIfDead(player, instance)) return;
+
+		damagerPlayer.sendMessage(instance.color("&2&l(!) &rYou got a kill and gained &e"
+				+ GOLD_BALLS_PER_KILL + " &rextra &eGold Balls"));
+
+		ItemStack goldBalls = goldBallsItem.clone();
+		goldBalls.setAmount(GOLD_BALLS_PER_KILL);
+
+		// Replace the barrier if there is one, or add to the gold balls left
+		ItemStack current = damagerPlayer.getInventory().getItem(1);
+		if (current == null || current.getType() != Material.GOLD_BLOCK)
+			damagerPlayer.getInventory().setItem(1, goldBalls);
+		else
+			damagerPlayer.getInventory().addItem(goldBalls);
 	}
 
 	@Override
@@ -126,28 +135,7 @@ public class PiglinBruteClass extends BaseClass {
 	}
 
 	@Override
-	public void setNameTag() {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.GOLD_AXE), ChatColor.YELLOW + "Gold Axe"),
-				Enchantment.KNOCKBACK, 3);
-		ItemMeta meta = item.getItemMeta();
-		meta.spigot().setUnbreakable(true);
-		item.setItemMeta(meta);
-		return item;
+		return weapon;
 	}
-
-	@Override
-	public void killEvent(Player damagerPlayer) {
-		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
-			damagerPlayer.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rYou got a kill and gained an extra &eGold Ball"));
-			damagerPlayer.getInventory().addItem(getGoldBalls());
-		}
-	}
-
 }

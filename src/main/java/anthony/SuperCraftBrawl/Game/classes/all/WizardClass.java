@@ -87,10 +87,10 @@ public class WizardClass extends BaseClass {
                 new ItemStack(Material.BOOK),
                 instance.color("&6&lSpell Book &7(Right Click)"),
                 instance.color("&7Cast one of the following spells:"),
-                instance.color("&7▶ &6&oFireballs"),
-                instance.color("&7▶ &5&oTeleport"),
-                instance.color("&7▶ &8&oDarkness"),
-                instance.color("&7▶ &b&oSpeedy Speedy Jumpy Jumpy")
+                instance.color("&7▸ &6&oFireballs"),
+                instance.color("&7▸ &5&oTeleport"),
+                instance.color("&7▸ &8&oDarkness"),
+                instance.color("&7▸ &b&oSpeedy Speedy Jumpy Jumpy")
         );
     }
 

@@ -28,6 +28,7 @@ import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -90,7 +91,6 @@ public abstract class BaseClass {
 	public Timer wolfBite = new Timer();
 	public Timer freddyCooldown = new Timer();
 	public boolean bedrockInvincibility = false;
-	public boolean hunterDash = true;
 	public boolean wolfPackAdd = false;
 
 	// Armor fields
@@ -101,12 +101,27 @@ public abstract class BaseClass {
 
 	public Player bountyTarget = null;
 
+	/** When the player last tried to drop an item, see droppedItemRecently. */
+	private long lastItemDropTime = 0;
+
 	public int gunGamePos = 0;
 
 	// This would also take in a SuperClass.
 	public BaseClass(GameInstance instance, Player player) {
 		this.instance = instance;
 		this.player = player;
+	}
+
+	public void onItemDropped() {
+		lastItemDropTime = System.currentTimeMillis();
+	}
+
+	/**
+	 * Dropping an item also swings the player's arm, which shows up as a left click in the air. The ability
+	 * of the item must not be used then.
+	 */
+	public boolean droppedItemRecently() {
+		return System.currentTimeMillis() - lastItemDropTime < 250;
 	}
 
 	public ActionBarManager getActionBarManager() {
@@ -149,7 +164,13 @@ public abstract class BaseClass {
 
 	public void doDamage2(EntityDamageByEntityEvent event) {}
 
+	/** A hit this player made on a mob (not a player), like a summon of another player. */
+	public void doDamageToMob(EntityDamageByEntityEvent event) {}
+
 	public void onEntityTarget(EntityTargetLivingEntityEvent event) {}
+
+	/** This player is about to pick up an item from the ground. Cancel the event to handle the pickup yourself. */
+	public void onItemPickup(PlayerPickupItemEvent event) {}
 
 	public void onPlayerMove(PlayerMoveEvent event) {}
 
@@ -600,6 +621,8 @@ public abstract class BaseClass {
 		pot.setType(PotionType.INSTANT_HEAL);
 		pot.setSplash(true);
 		pot.apply(item);
+		// No custom effects on it, the effect line is the base potion's: Instant Health
+		ItemHelper.showPotionEffects(item, new PotionEffect(PotionEffectType.HEAL, 1, 0));
 		return item;
 	}
 

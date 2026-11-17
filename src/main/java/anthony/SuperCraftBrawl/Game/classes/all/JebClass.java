@@ -67,7 +67,7 @@ public class JebClass extends BaseClass {
         pullAbility.getCooldownInstance().reset();
         playerInv.setItem(0, weapon);
         playerInv.setItem(1, pushItem);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1, false, false));
     }
 
     @Override
@@ -75,7 +75,7 @@ public class JebClass extends BaseClass {
         if (!isPlayerAlive()) return;
 
         if (!(player.getActivePotionEffects().contains(PotionEffectType.WEAKNESS)))
-            player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1, false, false));
 
         pullAbility.updateActionBar(player, this);
 

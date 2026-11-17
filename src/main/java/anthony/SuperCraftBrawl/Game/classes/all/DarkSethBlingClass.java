@@ -54,10 +54,10 @@ public class DarkSethBlingClass extends BaseClass implements Listener {
 		playerInv.setItem(0, getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.COMMAND),
-						"" + ChatColor.RED + ChatColor.BOLD + "Item Stealer",
+						"" + ChatColor.RED + ChatColor.BOLD + "Item Stealer &7(Right Click)",
 						"", ChatColor.GRAY + "Steal an item from one of your opponents"));
 		this.teleporterItem = ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR),
-				"" + ChatColor.RED + ChatColor.BOLD + "Item Teleporter",
+				"" + ChatColor.RED + ChatColor.BOLD + "Item Teleporter &7(Right Click)",
 				"", ChatColor.GRAY + "Teleport to a recent lightning drop");
 		playerInv.setItem(2, this.teleporterItem);
 	}

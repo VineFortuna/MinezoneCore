@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ChatColorHelper;
@@ -15,19 +16,12 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.potion.Potion;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionType;
-import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -36,11 +30,17 @@ public class HunterClass extends BaseClass {
 	private final ItemStack weapon;
 	private final ItemStack bloodLustItem;
 	private final ItemStack dashItem;
+	private final ItemStack barrierItem;
 	private static final int MAX_BLOODLUST_AMOUNT = 8;
+	private static final int STARTING_DASH_STACKS = 1;
+	private static final double DASH_SPEED = 1.6;
+	private final Ability dashAbility = new Ability("&6&lDash", player);
 	private final PotionEffect strength = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 5 * 20, 0, true);
 	private final PotionEffect resistance = new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 15 * 20, 1, false, true);
 
 	private int bloodLust = 0;
+	/** How many dashes are left. They are shown as the amount of the dash item. */
+	private int dashStacks = STARTING_DASH_STACKS;
 
 	public HunterClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -59,12 +59,12 @@ public class HunterClass extends BaseClass {
 
 		List<String> lore = new ArrayList<>();
 		lore.add("&7At &a" + MAX_BLOODLUST_AMOUNT + " &7Bloodlust, gain one of two potions:");
-		lore.add(strengthString);
-		lore.add(resistanceString);
+		lore.add("&7▸ " + strengthString);
+		lore.add("&7▸ " + resistanceString);
 
 		weapon = ItemHelper.setDetails(
 				new ItemStack(Material.GOLD_SWORD),
-				"&6&lHunter's Sword",
+				"&6&lDagger",
 				"",
 				"&7Hit enemies to gain Bloodlust",
 				"",
@@ -78,10 +78,17 @@ public class HunterClass extends BaseClass {
 		// Dash Item
 		dashItem = ItemHelper.setDetails(
 				new ItemStack(Material.FEATHER),
-				"&6&lDash",
+				dashAbility.getAbilityNameRightClickMessage(),
 				"&7A fast escape or ambush"
 		);
-		ItemHelper.setGlowing(dashItem, true);
+
+		// Barrier, for when there are no dashes left
+		barrierItem = ItemHelper.setDetails(
+				new ItemStack(Material.BARRIER),
+				"&c&lOut of Dashes!",
+				"",
+				"&7Each kill regenerates 1 dash"
+		);
 
 		// BloodLust Item
 		bloodLustItem = ItemHelper.setDetails(
@@ -146,17 +153,17 @@ public class HunterClass extends BaseClass {
 		String displayName = displayNamePrefix + " " + ItemHelper.getRomanNumeral(effect.getAmplifier() + 1) +
 				" &7(" + (effect.getDuration() / 20) + " sec)";
 
-		// Create the potion item with the dynamic display name
-		return ItemHelper.setDetails(
+		// Create the potion item with the dynamic display name, and the effect as lore
+		return ItemHelper.showPotionEffects(ItemHelper.setDetails(
 				ItemHelper.createPotionItem(effect, true, false),
 				displayName
-		);
+		));
 	}
 
 	@Override
 	public void setItems(Inventory playerInv) {
 		bloodLust = 0;
-		hunterDash = true;
+		dashStacks = STARTING_DASH_STACKS;
 		player.sendMessage("" + ChatColor.BOLD + "===============================");
 		player.sendMessage("" + ChatColor.BOLD + "|| " + "        " + ChatColor.RED + ChatColor.BOLD
 				+ ChatColor.UNDERLINE + "  Hunter:");
@@ -165,31 +172,34 @@ public class HunterClass extends BaseClass {
 		player.sendMessage("" + ChatColor.BOLD + "||");
 		player.sendMessage("" + ChatColor.BOLD + "===============================");
 		player.getInventory().setItem(0, weapon);
-		player.getInventory().setItem(1, dashItem);
+		updateDashItem();
+	}
+
+	/** Shows the dashes left as the amount of the dash item, or the barrier when there are none. */
+	private void updateDashItem() {
+		if (dashStacks > 0) {
+			ItemStack dash = dashItem.clone();
+			dash.setAmount(dashStacks);
+			player.getInventory().setItem(1, dash);
+		} else {
+			player.getInventory().setItem(1, barrierItem);
+		}
 	}
 
 	@Override
 	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
-		if (item != null) {
-			if (item.getType() == Material.FEATHER
-					&& (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-				if (hunterDash) {
-					double boosterStrength = 1.6;
-					for (Player gamePlayer : instance.players)
-						gamePlayer.playSound(player.getLocation(), Sound.BAT_TAKEOFF, 1, 1);
-					Vector vel = player.getLocation().getDirection().multiply(boosterStrength);
-					player.setVelocity(vel);
-					hunterDash = false;
-					ItemStack dash = ItemHelper.setDetails(new ItemStack(Material.FEATHER),
-							instance.getGameManager().getMain().color("&b&lDash"),
-							instance.getGameManager().getMain().color("&7A quick escape or attack"));
-					player.getInventory().setItem(1, dash);
-				} else {
-					player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You already used your dash");
-				}
-			}
-		}
+		Action action = event.getAction();
+
+		if (item == null || item.getType() != Material.FEATHER) return;
+		if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) return;
+		if (dashStacks <= 0) return;
+
+		for (Player gamePlayer : instance.players)
+			gamePlayer.playSound(player.getLocation(), Sound.BAT_TAKEOFF, 1, 1);
+		player.setVelocity(player.getLocation().getDirection().multiply(DASH_SPEED));
+		dashStacks--;
+		updateDashItem();
 	}
 
 	@Override
@@ -205,14 +215,9 @@ public class HunterClass extends BaseClass {
 	@Override
 	public void killEvent(Player damagerPlayer) {
 		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
-			if (!hunterDash) {
-				damagerPlayer.sendMessage(instance.getGameManager().getMain().color("&r&l(!) &rYour &r&lDash &rhas been regenerated for getting a kill!"));
-				hunterDash = true;
-				ItemStack dash = ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.FEATHER),
-								instance.getGameManager().getMain().color("&b&lDash"), instance.getGameManager().getMain().color("&7A quick escape or attack")),
-						Enchantment.PROTECTION_ENVIRONMENTAL, 1);
-				player.getInventory().setItem(1, dash);
-			}
+			dashStacks++;
+			updateDashItem();
+			damagerPlayer.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rYou got a kill and gained an extra &6&lDash"));
 		}
 	}
 }

@@ -68,13 +68,13 @@ public class SpiderClass extends BaseClass {
 		// Weapon
 		weapon = ItemHelper.setDetails(
 				new ItemStack(Material.SPIDER_EYE),
-				"&c&lEye",
+				mutateAbility.getAbilityNameRightClickMessage(),
 				"",
 				"&7Mutate to gain one of these effects:",
-				"&7▶ &b&oSpeed &e" + (speed.getAmplifier() + 1) + " &7for &e" + speed.getDuration() / 20 + "s",
-				"&7▶ &2&oVenom &7for &e" + poison.getDuration() / 20 + "s",
-				"&7▶ &4&oStrength &e" + (strength.getAmplifier() + 1) + " &7for &e" + strength.getDuration() / 20 + "s",
-				"&7▶ &d&oRegeneration &e" + (regen.getAmplifier() + 1) + " &7for &e" + regen.getDuration() / 20 + "s"
+				"&7▸ &b&oSpeed &e" + (speed.getAmplifier() + 1) + " &7for &e" + speed.getDuration() / 20 + "s",
+				"&7▸ &2&oVenom &7for &e" + poison.getDuration() / 20 + "s",
+				"&7▸ &4&oStrength &e" + (strength.getAmplifier() + 1) + " &7for &e" + strength.getDuration() / 20 + "s",
+				"&7▸ &d&oRegeneration &e" + (regen.getAmplifier() + 1) + " &7for &e" + regen.getDuration() / 20 + "s"
 		);
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
 
@@ -336,7 +336,7 @@ public class SpiderClass extends BaseClass {
 
 	private void handleEmptyWebStackCase(int remainingWebs) {
 		if (remainingWebs == 0) {
-			player.getInventory().setItem(1, new ItemStack(Material.BARRIER));
+			player.getInventory().setItem(1, ItemHelper.setDetails(new ItemStack(Material.BARRIER), "&c&lOut of Webs!"));
 		}
 	}
 

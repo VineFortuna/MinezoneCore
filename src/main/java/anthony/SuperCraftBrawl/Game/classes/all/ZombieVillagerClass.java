@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
@@ -11,7 +12,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -23,6 +23,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ZombieVillagerClass extends BaseClass {
+
+    private static final int STARTING_POTATOES = 7;
+    private static final int POTATOES_PER_KILL = 2;
+    private static final double POTATO_SPEED = 2.0;
+    private static final double POTATO_RADIUS = 2.5;
+    private final PotionEffect poison = new PotionEffect(PotionEffectType.POISON, 80, 2);
+    private final Ability potatoAbility = new Ability("&2&lPoisonous Potato", player);
 
     public ZombieVillagerClass(GameInstance instance, Player player) {
         super(instance, player);
@@ -43,28 +50,47 @@ public class ZombieVillagerClass extends BaseClass {
     }
 
     @Override
-    public void setArmor(EntityEquipment playerEquip) {
-        setArmorNew(playerEquip);
-    }
-
-    @Override
     public ItemStack getAttackWeapon() {
         ItemStack item = ItemHelper.addEnchant(
-                ItemHelper.addEnchant(new ItemStack(Material.ROTTEN_FLESH), Enchantment.DAMAGE_ALL, 3),
+                ItemHelper.addEnchant(ItemHelper.setDetails(new ItemStack(Material.ROTTEN_FLESH), "&6&lFlesh"),
+                        Enchantment.DAMAGE_ALL, 3),
                 Enchantment.KNOCKBACK, 2);
         return item;
     }
 
     @Override
-    public void setNameTag() {}
-
-    @Override
     public void setItems(Inventory playerInv) {
         playerInv.setItem(0, this.getAttackWeapon());
-        playerInv.setItem(1,
-                ItemHelper.setDetails(new ItemStack(Material.POISONOUS_POTATO, 7), "", "",
-                        instance.getGameManager().getMain().color("&7Throw at enemies to inflict:"),
-                        instance.getGameManager().getMain().color("&7▶ &2&oPoison&r &e3")));
+        playerInv.setItem(1, getPotatoes(STARTING_POTATOES));
+    }
+
+    private ItemStack getPotatoes(int amount) {
+        return ItemHelper.setDetails(new ItemStack(Material.POISONOUS_POTATO, amount),
+                potatoAbility.getAbilityNameRightClickMessage(),
+                "&7Throw at enemies to inflict:",
+                "&7▸ &2&oPoison&r &e" + (poison.getAmplifier() + 1));
+    }
+
+    private ItemStack getBarrier() {
+        return ItemHelper.setDetails(new ItemStack(Material.BARRIER),
+                "&c&lOut of Potatoes!",
+                "",
+                "&7Each kill regenerates " + POTATOES_PER_KILL + " potatoes");
+    }
+
+    @Override
+    public void killEvent(Player damagerPlayer) {
+        if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
+            damagerPlayer.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rYou got a kill and gained &e"
+                    + POTATOES_PER_KILL + " &rextra &2Poisonous Potatoes"));
+
+            // Replace the barrier if there is one, or add to the potatoes left
+            ItemStack current = damagerPlayer.getInventory().getItem(1);
+            if (current == null || current.getType() != Material.POISONOUS_POTATO)
+                damagerPlayer.getInventory().setItem(1, getPotatoes(POTATOES_PER_KILL));
+            else
+                damagerPlayer.getInventory().addItem(getPotatoes(POTATOES_PER_KILL));
+        }
     }
 
     @Override
@@ -81,7 +107,7 @@ public class ZombieVillagerClass extends BaseClass {
                 item.setAmount(amount);
 
                 if (amount <= 0) {
-                    player.getInventory().clear(player.getInventory().getHeldItemSlot());
+                    player.getInventory().setItem(1, getBarrier());
                 }
 
                 ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
@@ -94,14 +120,14 @@ public class ZombieVillagerClass extends BaseClass {
 
                             List<Player> affectedPlayers = new ArrayList<Player>();
 
-                            for (Player gamePlayer : this.getNearby(2.5)) {
+                            for (Player gamePlayer : this.getNearby(POTATO_RADIUS)) {
                                 if (instance.duosMap != null) {
                                     if (!(instance.team.get(gamePlayer).equals(instance.team.get(player)))) {
-                                        gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 80, 2));
+                                        gamePlayer.addPotionEffect(poison);
                                         affectedPlayers.add(gamePlayer);
                                     }
                                 } else if (gamePlayer != player) {
-                                    gamePlayer.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 80, 2));
+                                    gamePlayer.addPotionEffect(poison);
                                     affectedPlayers.add(gamePlayer);
                                 }
                             }
@@ -130,7 +156,7 @@ public class ZombieVillagerClass extends BaseClass {
                 instance.getGameManager().getProjManager().shootProjectile(
                         proj,
                         player.getEyeLocation(),
-                        player.getLocation().getDirection().multiply(2.0D)
+                        player.getLocation().getDirection().multiply(POTATO_SPEED)
                 );
             }
         }

@@ -56,7 +56,7 @@ public class SheepClass extends BaseClass {
 
 	public ItemStack getStartEnchanter() {
 		return ItemHelper.setDetails(new ItemStack(Material.ENCHANTMENT_TABLE, 1),
-				ChatColor.BLUE + "Wool Enchanter", ChatColor.YELLOW + "Right click!");
+				ChatColor.BLUE + "Wool Enchanter &7(Right Click)");
 	}
 
 	private ItemStack getBarrier() {
@@ -383,7 +383,7 @@ public class SheepClass extends BaseClass {
 
 			ItemStack currentItem = damagerPlayer.getInventory().getItem(1);
 			ItemStack woolEnchanter = ItemHelper.setDetails(new ItemStack(Material.ENCHANTMENT_TABLE, 1),
-					ChatColor.BLUE + "Wool Enchanter", ChatColor.YELLOW + "Right click!");
+					ChatColor.BLUE + "Wool Enchanter &7(Right Click)");
 
 			if (currentItem == null || currentItem.getType() != Material.ENCHANTMENT_TABLE) {
 				damagerPlayer.getInventory().setItem(1, woolEnchanter);

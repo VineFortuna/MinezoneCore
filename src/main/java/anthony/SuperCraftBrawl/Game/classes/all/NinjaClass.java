@@ -50,7 +50,7 @@ public class NinjaClass extends BaseClass {
 	}
 
 	public ItemStack getShuriken() {
-		return ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR, 1), ChatColor.GRAY + "Shuriken", "",
+		return ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR, 1), ChatColor.GRAY + "Shuriken &7(Right Click)", "",
 				ChatColor.YELLOW + "Right click to throw a deadly star!");
 	}
 
@@ -279,7 +279,7 @@ public class NinjaClass extends BaseClass {
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper
 				.addEnchant(ItemHelper.addEnchant(
-						ItemHelper.setDetails(new ItemStack(Material.STICK), ChatColor.GRAY + "Katana", "",
+						ItemHelper.setDetails(new ItemStack(Material.STICK), ChatColor.GRAY + "Katana &7(Right Click)", "",
 								ChatColor.YELLOW + "Right click to boost the way you're looking!"),
 						Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 1);
 		return item;

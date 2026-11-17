@@ -43,14 +43,14 @@ public class ElfClass extends BaseClass {
 		this.isUsed = false;
 		playerInv.setItem(0, getAttackWeapon());
 		playerInv.setItem(1, getSugarBombs());
-		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1, false, false));
 	}
 
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void tick(int gameTicks) {
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
-			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1, false, false));
 
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Zombie
 				&& instance.classes.get(player).getLives() > 0) {
@@ -194,14 +194,14 @@ public class ElfClass extends BaseClass {
 		ItemStack item = ItemHelper
 				.setUnbreakable(
 						ItemHelper.addEnchant(ItemHelper.addEnchant(
-								ItemHelper.setDetails(new ItemStack(Material.CAKE), instance.color("&2&lElf's Cake"),
+								ItemHelper.setDetails(new ItemStack(Material.CAKE), instance.color("&2&lElf's Cake &7(Right Click)"),
 										"", instance.color("&7Right click to heal! 1 use per life")),
 								Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 1));
 		return item;
 	}
 
 	public ItemStack getSugarBombs() {
-		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.SUGAR, 7), instance.color("&cSugar Bombs"), "",
+		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.SUGAR, 7), instance.color("&cSugar Bombs &7(Right Click)"), "",
 						instance.color("&7Aim at other players to explode"), instance.color("&7them & give nausea!"));
 		return item;
 	}

@@ -69,7 +69,7 @@ public class NotchClass extends BaseClass {
         pullAbility.getCooldownInstance().reset();
         playerInv.setItem(0, weapon);
         playerInv.setItem(1, pullItem);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1, false, false));
     }
 
     @Override
@@ -77,7 +77,7 @@ public class NotchClass extends BaseClass {
         if (!isPlayerAlive()) return;
 
         if (!(player.getActivePotionEffects().contains(PotionEffectType.WEAKNESS)))
-            player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1));
+            player.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1, false, false));
 
         pullAbility.updateActionBar(player, this);
 

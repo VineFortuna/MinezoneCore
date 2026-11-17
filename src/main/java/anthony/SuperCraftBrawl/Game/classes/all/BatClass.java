@@ -37,9 +37,9 @@ public class BatClass extends BaseClass {
 	@Override
 	public void setItems(Inventory playerInv) {
 		playerInv.setItem(0, this.getAttackWeapon());
-		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 999999999, 1));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1, false, false));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 999999999, 1, false, false));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0, false, false));
 	}
 
 	/*
@@ -51,11 +51,11 @@ public class BatClass extends BaseClass {
 	@Override
 	public void tick(int gameTicks) {
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
-			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1, false, false));
 		else if (!(player.getActivePotionEffects().contains(PotionEffectType.INVISIBILITY)))
-			player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 999999999, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 999999999, 1, false, false));
 		else if (!(player.getActivePotionEffects().contains(PotionEffectType.DAMAGE_RESISTANCE)))
-			player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0, false, false));
 	}
 
 	@Override

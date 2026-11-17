@@ -119,7 +119,7 @@ public class FlintAndSteelClass extends BaseClass {
 		player.getInventory().remove(flintItem);
 		player.getInventory().remove(steelItem);
 		player.getInventory().setItem(0, flintAndSteel);
-		player.getInventory().setItem(1, ItemHelper.setDetails(new ItemStack(Material.BARRIER), ""));
+		player.getInventory().setItem(1, ItemHelper.setDetails(new ItemStack(Material.BARRIER), " "));
 
 		player.getWorld().playEffect(player.getLocation(), Effect.BLAZE_SHOOT, 1);
 		spawnParticles();

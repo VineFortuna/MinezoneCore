@@ -40,7 +40,7 @@ public class ButterBroClass extends BaseClass {
 
 	public ItemStack getFlowerCharge() {
 		return ItemHelper.setDetails(new ItemStack(Material.RED_ROSE, 1),
-				instance.getGameManager().getMain().color("&c&lFlower Charges"), "",
+				instance.getGameManager().getMain().color("&c&lFlower Charges &7(Right Click)"), "",
 				instance.getGameManager().getMain().color("&7Right click to throw explosive/firey charges!"));
 	}
 

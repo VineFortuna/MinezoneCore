@@ -86,12 +86,12 @@ public class ShulkerClass extends BaseClass {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv
 				.setItem(1,
-						ItemHelper.setUnbreakable(ItemHelper.addEnchant(
+						ItemHelper.setHideFlags(ItemHelper.setUnbreakable(ItemHelper.addEnchant(
 								ItemHelper.setDetails(new ItemStack(Material.BOW),
-										"" + ChatColor.DARK_PURPLE + "Levitator Bow", "",
+										"" + ChatColor.DARK_PURPLE + "Levitator Bow &7(Right Click)", "",
 										instance.getGameManager().getMain()
 												.color("&7Levitate your opponents by shooting them!")),
-								Enchantment.ARROW_INFINITE, 1)));
+								Enchantment.ARROW_INFINITE, 1)), true));
 		playerInv.setItem(35, new ItemStack(Material.ARROW));
 	}
 

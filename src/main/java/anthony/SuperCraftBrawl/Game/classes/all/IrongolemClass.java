@@ -19,11 +19,15 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 public class IrongolemClass extends BaseClass {
 
 	private int cooldownSec;
+	/** Permanent Weakness, to balance. */
+	private final PotionEffect weakness = new PotionEffect(PotionEffectType.WEAKNESS, 999999999, 1, false, false);
 
 	public IrongolemClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -46,9 +50,10 @@ public class IrongolemClass extends BaseClass {
 	@Override
 	public void setItems(Inventory playerInv) {
 		playerInv.setItem(0, this.getAttackWeapon());
+		player.addPotionEffect(weakness);
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.RED_ROSE, 1),
-						"" + ChatColor.RESET + ChatColor.RED + ChatColor.BOLD + "Rose of Elevation", "",
+						"" + ChatColor.RESET + ChatColor.RED + ChatColor.BOLD + "Rose of Elevation &7(Right Click)", "",
 						instance.getGameManager().getMain().color("&7Throw at enemies to levitate & do damage!")));
 	}
 
@@ -56,6 +61,8 @@ public class IrongolemClass extends BaseClass {
 	public void tick(int gameTicks) {
 		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.IronGolem
 				&& instance.classes.get(player).getLives() > 0) {
+			if (!player.hasPotionEffect(weakness.getType())) player.addPotionEffect(weakness);
+
 			this.cooldownSec = (5000 - golem.getTime()) / 1000 + 1;
 
 			if (golem.getTime() < 5000) {

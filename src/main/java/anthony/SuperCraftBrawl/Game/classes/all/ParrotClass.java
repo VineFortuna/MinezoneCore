@@ -21,6 +21,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import xyz.xenondevs.particle.ParticleEffect;
 
 import java.util.Random;
 
@@ -34,6 +35,9 @@ public class ParrotClass extends BaseClass {
     private static final double DANCE_ABILITY_DURATION = 10;
     private static final double HEAL_PER_SECOND = 1.0 ;
     private static final int JUMP_BOOST_AMP = 1;
+    private static final double FLAP_UP_VELOCITY = 0.9;
+    private static final double FLAP_FORWARD_VELOCITY = 0.7;
+    private static final int HEAL_HEART_PARTICLES = 3;
 
     private static final Material[] RECORDS= {
             Material.RECORD_3,
@@ -67,7 +71,7 @@ public class ParrotClass extends BaseClass {
                 new ItemStack(Material.FEATHER),
                 flapAbility.getAbilityNameRightClickMessage(),
                 "",
-                "&7Flap your wings up"
+                "&7Flap your wings up and forward"
         );
         weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 4);
 
@@ -109,6 +113,7 @@ public class ParrotClass extends BaseClass {
     private void handleHealing() {
         if (isDanceAbilityActive() && isInArea()) {
             player.setHealth(Math.min(player.getHealth() + HEAL_PER_SECOND, player.getMaxHealth()));
+            ParticleEffect.HEART.display(player.getLocation().add(0, 1.5, 0), 0.4f, 0.3f, 0.4f, 0f, HEAL_HEART_PARTICLES, null);
             selectDanceArmor(armorColorCounter++);
         }
     }
@@ -167,7 +172,11 @@ public class ParrotClass extends BaseClass {
             if (item.equals(weapon)) {
                 if (!flapAbility.isReady()) return;
 
-                player.setVelocity(new Vector(0, 0.9, 0));
+                // Up, and a little the way the player is looking (only sideways, so looking up or down changes nothing)
+                Vector forward = player.getLocation().getDirection().setY(0);
+                if (forward.lengthSquared() > 0.0001) forward.normalize().multiply(FLAP_FORWARD_VELOCITY);
+                else forward = new Vector(0, 0, 0);
+                player.setVelocity(new Vector(forward.getX(), FLAP_UP_VELOCITY, forward.getZ()));
                 SoundManager.playSoundToAll(player, Sound.BAT_TAKEOFF, 0.8f, 1.6f);
 
                 flapAbility.use();
@@ -226,10 +235,12 @@ public class ParrotClass extends BaseClass {
             danceRunnable = null;
         }
 
-        // Stopping Disc
-        player.getWorld().playEffect(danceTargetBlock.getLocation(), Effect.RECORD_PLAY, 0);
-
         if (danceTargetBlock != null) {
+            // Stopping Disc
+            player.getWorld().playEffect(danceTargetBlock.getLocation(), Effect.RECORD_PLAY, 0);
+
+            // The jukebox breaks, with the particles and the sound of it
+            player.getWorld().playEffect(danceTargetBlock.getLocation(), Effect.STEP_SOUND, Material.JUKEBOX);
             danceTargetBlock.setType(Material.AIR);
             danceTargetBlock = null;
         }

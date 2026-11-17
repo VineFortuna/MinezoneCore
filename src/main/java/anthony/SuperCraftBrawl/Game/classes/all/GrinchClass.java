@@ -84,7 +84,7 @@ public class GrinchClass extends BaseClass {
 	}
 
 	private ItemStack getStickyFingers() {
-		return ItemHelper.setDetails(new ItemStack(Material.TRIPWIRE_HOOK), instance.color("&2&lSticky Fingers"),
+		return ItemHelper.setDetails(new ItemStack(Material.TRIPWIRE_HOOK), instance.color("&2&lSticky Fingers &7(Right Click)"),
 				"", instance.color("&7Throw it at an enemy to swap the"),
 				instance.color("&7weapon you're holding for theirs."),
 				instance.color("&7Reusable every &e7s &7- keep passing"),

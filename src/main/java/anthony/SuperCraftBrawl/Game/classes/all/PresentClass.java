@@ -59,15 +59,15 @@ public class PresentClass extends BaseClass {
 		baseVerticalJump = 1.0;
 		playerInv.setItem(0,
 				ItemHelper.setDetails(new ItemStack(Material.CHEST, 1),
-						"" + ChatColor.RESET + ChatColor.ITALIC + "Agressive Gift", "",
+						"" + ChatColor.RESET + ChatColor.ITALIC + "Agressive Gift &7(Right Click)", "",
 						"" + ChatColor.RESET + ChatColor.YELLOW + "Steals another player's main item"));
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.TRAPPED_CHEST, 1),
-						"" + ChatColor.RESET + ChatColor.ITALIC + "Defensive Gift", "",
+						"" + ChatColor.RESET + ChatColor.ITALIC + "Defensive Gift &7(Right Click)", "",
 						"" + ChatColor.RESET + ChatColor.YELLOW + "Steals another player's armor"));
 		playerInv.setItem(2,
 				ItemHelper.setDetails(new ItemStack(Material.ENDER_CHEST, 1),
-						"" + ChatColor.RESET + ChatColor.ITALIC + "Mythical Gift", "",
+						"" + ChatColor.RESET + ChatColor.ITALIC + "Mythical Gift &7(Right Click)", "",
 						"" + ChatColor.RESET + ChatColor.YELLOW + "Steals another player's effect or double jump!"));
 		playerInv.setItem(35, new ItemStack(Material.ARROW));
 	}
@@ -181,7 +181,7 @@ public class PresentClass extends BaseClass {
 			damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
 					"&r&l(!) &rYour &r&lAggressive Gift has regenerated and you can get a new weapon if you'd like!"));
 			damagerPlayer.getInventory().addItem(ItemHelper.setDetails(new ItemStack(Material.CHEST, 1),
-					String.valueOf(ChatColor.RESET) + ChatColor.ITALIC + "Agressive Gift", "",
+					String.valueOf(ChatColor.RESET) + ChatColor.ITALIC + "Agressive Gift &7(Right Click)", "",
 					String.valueOf(ChatColor.RESET) + ChatColor.YELLOW + "Steals another player's main item"));
 		}
 	}

@@ -1941,6 +1941,18 @@ public class GameInstance {
         }
     }
 
+    /**
+     * Shows or hides the name tag above a player's head for everyone in the game. Every player is in a
+     * scoreboard team of their own (see sendScoreboardUpdate), so only theirs is changed.
+     */
+    @SuppressWarnings("deprecation")
+    public void setNameTagVisible(Player player, boolean visible) {
+        if (c == null) return;
+
+        Team team = c.getPlayerTeam(player);
+        if (team != null) team.setNameTagVisibility(visible ? NameTagVisibility.ALWAYS : NameTagVisibility.NEVER);
+    }
+
     /** Mirrors TablistManager.orderFor — lower = higher in tab. */
     private int rankOrder(Rank r) {
         switch (r) {
@@ -3139,7 +3151,7 @@ public class GameInstance {
 
                 if (baseClass != null && baseClass.getType() == ClassType.LargeFern) {
                     LargeFernClass largeFernClass = (LargeFernClass) baseClass;
-                    if (largeFernClass.transfernRunnable != null) largeFernClass.transfernRunnable.cancel();
+                    largeFernClass.endTransfern();
                 } else if (baseClass != null && baseClass.getType() == ClassType.Parrot) {
                     ParrotClass parrotClass = (ParrotClass) baseClass;
                     if (parrotClass.isDanceAbilityActive()) parrotClass.cleanupDanceAbility();
@@ -3237,6 +3249,8 @@ public class GameInstance {
                         }
                     }
                 }
+                // Dropping an item swings the arm too, which is not a click
+                if (event.getAction() == Action.LEFT_CLICK_AIR && baseClass.droppedItemRecently()) return true;
                 baseClass.useItem(event);
             }
             return true;

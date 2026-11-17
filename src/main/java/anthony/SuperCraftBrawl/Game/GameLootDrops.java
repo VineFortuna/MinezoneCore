@@ -15,6 +15,8 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
@@ -40,6 +42,9 @@ public enum GameLootDrops {
 
 	// The Snowball Launcher's item amount is its uses left
 	public static final int SNOWBALL_LAUNCHER_USES = 3;
+
+	// What a Slowball gives to the player it hits, whoever threw it
+	public static final PotionEffect SLOWBALL_EFFECT = new PotionEffect(PotionEffectType.SLOW, 3 * 20, 2);
 
 	private static final Random RANDOM = new Random();
 
@@ -133,12 +138,15 @@ public enum GameLootDrops {
 	        case SLOWNESS:
 	            item = ItemHelper.createPotionItem(PotionType.SLOWNESS, 1, 15, true, true, true);
 	            ItemHelper.setDetails(item, "&8&lSLOWNESS II &7(15 sec)", "", "&7&lCOMMON");
+	            ItemHelper.showPotionEffects(item);
 	            break;
 
 	        case SLOWBALLS:
 	            item = ItemHelper.setDetails(new ItemStack(Material.SNOW_BALL, 8),
 	                    "&f&lSLOWBALLS",
-	                    "&7Give Slowness 1 for 3s to an enemy", "", "&7&lCOMMON");
+	                    "&7Apply &3&o" + ItemHelper.getPotionEffectName(SLOWBALL_EFFECT.getType()) + "&r &e"
+	                    + (SLOWBALL_EFFECT.getAmplifier() + 1) + " &7for &e" + SLOWBALL_EFFECT.getDuration() / 20 + "s",
+	                    "", "&7&lCOMMON");
 	            break;
 
 	        case BLOOPER:
@@ -186,6 +194,7 @@ public enum GameLootDrops {
 	        case SPEED2:
 	            item = ItemHelper.createPotionItem(PotionType.SPEED, 1, 30, true, true, true);
 	            ItemHelper.setDetails(item, "&b&lSPEED II &7(30 sec)", "", "&2&lUNCOMMON");
+	            ItemHelper.showPotionEffects(item);
 	            break;
 
 	        case INSTAGIB:
@@ -236,6 +245,7 @@ public enum GameLootDrops {
 	        case HEALTH2:
 	            item = ItemHelper.createPotionItem(PotionType.INSTANT_HEAL, 1, 0, true, true, true);
 	            ItemHelper.setDetails(item, "&c&lHEALING II", "", "&9&lRARE");
+	            ItemHelper.showPotionEffects(item);
 	            break;
 
 	        case BROOMS:
@@ -264,6 +274,7 @@ public enum GameLootDrops {
 	        case BOMB:
 	            item = ItemHelper.createPotionItem(PotionType.INSTANT_DAMAGE, 1000, 0, true, true, true);
 	            ItemHelper.setDetails(item, "&4&lBOMB", "&7Be careful!", "&7Instantly kills... anyone", "", "&6&lLEGENDARY");
+	            ItemHelper.hidePotionEffects(item);
 	            break;
 
 	        case NOTCH_APPLE:

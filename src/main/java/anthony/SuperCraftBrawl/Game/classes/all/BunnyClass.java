@@ -50,18 +50,18 @@ public class BunnyClass extends BaseClass {
 						instance.getGameManager().getMain().color("&7Right click to gain:"),
 						instance.getGameManager().getMain().color("   &r5 sec Regeneration II"),
 						instance.getGameManager().getMain().color("   &r5 sec Speed V")));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 2));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2, false, false));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 2, false, false));
 	}
 
 	@SuppressWarnings("unlikely-arg-type")
 	@Override
 	public void tick(int gameTicks) {
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED))) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2, false, false));
 		}
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.JUMP)))
-			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 2));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 999999999, 2, false, false));
 	}
 
 	private void carrotEffect() {
@@ -78,7 +78,7 @@ public class BunnyClass extends BaseClass {
 					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 110, 1));
 				} else if (ticks == 0) {
 					player.removePotionEffect(PotionEffectType.SPEED);
-					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 2, false, false));
 					this.cancel();
 				}
 

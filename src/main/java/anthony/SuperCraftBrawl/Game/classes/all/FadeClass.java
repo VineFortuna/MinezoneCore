@@ -22,7 +22,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 public class FadeClass extends BaseClass {
 
 	private ItemStack string = ItemHelper.setDetails(new ItemStack(Material.STRING),
-			"" + ChatColor.RESET + "Fade Ability");
+			"" + ChatColor.RESET + "Fade Ability &7(Right Click)");
 	private int cooldownSec = 0;
 	private BukkitRunnable r;
 

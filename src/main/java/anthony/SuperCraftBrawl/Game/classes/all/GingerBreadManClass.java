@@ -24,7 +24,7 @@ import org.bukkit.util.Vector;
 public class GingerBreadManClass extends BaseClass {
 
 	private ItemStack chocChips = ItemHelper.setDetails(new ItemStack(Material.INK_SACK, 1, (short) 3),
-			ChatColor.RED + "Chocolate Chips", "", instance.color("&7Aim at players to knock back"),
+			ChatColor.RED + "Chocolate Chips &7(Right Click)", "", instance.color("&7Aim at players to knock back"),
 			instance.color("&7& give blindness!"));
 
 	public GingerBreadManClass(GameInstance instance, Player player) {

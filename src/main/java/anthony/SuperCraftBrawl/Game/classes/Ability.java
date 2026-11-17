@@ -94,6 +94,11 @@ public class Ability {
         return abilityName;
     }
 
+    /** For an ability whose name changes, like one that is colored after what it does next. */
+    public void setAbilityName(String name) {
+        this.abilityName = name;
+    }
+
     public double getCooldownDurationSeconds() {
         return cooldown.getCooldownDurationSeconds();
     }

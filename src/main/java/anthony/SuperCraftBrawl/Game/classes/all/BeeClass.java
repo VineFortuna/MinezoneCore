@@ -60,10 +60,10 @@ public class BeeClass extends BaseClass {
 						ItemHelper
 								.addEnchant(
 										ItemHelper.setDetails(new ItemStack(Material.GLOWSTONE_DUST),
-												instance.color("&eNectar"), "",
+												instance.color("&eNectar &7(Right Click)"), "",
 												instance.color("&7Right click to gain energy:"),
-												instance.color("&7▶ &b&oSpeed&r &e1 &7for &e5s"),
-												instance.color("&7▶ &4&oStrength&r &e1 &7for &e5s")),
+												instance.color("&7▸ &b&oSpeed&r &e1 &7for &e5s"),
+												instance.color("&7▸ &4&oStrength&r &e1 &7for &e5s")),
 										Enchantment.DAMAGE_ALL, 3),
 						Enchantment.KNOCKBACK, 1);
 
@@ -72,10 +72,10 @@ public class BeeClass extends BaseClass {
 
 	private ItemStack getPollen() {
 		ItemStack pollen = ItemHelper.setDetails(new ItemStack(Material.RED_ROSE, 1, (short) 6),
-				instance.color("Pollen"), "",
+				instance.color("Pollen &7(Right Click)"), "",
 				instance.color("&7Right click to get nutrients:"),
-				instance.color("&7▶ &c&oRegeneration&r &e3 &7for &e3s"),
-				instance.color("&7▶ &8&oResistance&r &e1 &7for &e5s"));
+				instance.color("&7▸ &c&oRegeneration&r &e3 &7for &e3s"),
+				instance.color("&7▸ &8&oResistance&r &e1 &7for &e5s"));
 		return pollen;
 	}
 

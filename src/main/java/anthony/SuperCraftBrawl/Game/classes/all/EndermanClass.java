@@ -74,7 +74,7 @@ public class EndermanClass extends BaseClass {
 
         blockItem = ItemHelper.setDetails(
                 new ItemStack(Material.STICK),
-                blockAbility.getAbilityName() + " Pickup &7(Right click)",
+                blockAbility.getAbilityName() + " Pickup &7(Right Click)",
                 "&7Grab the block you're standing on",
                 "&7You can throw it to damage and knock players",
                 "",

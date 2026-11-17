@@ -66,7 +66,7 @@ public class SantaClass extends BaseClass {
 
 		playerInv.setItem(0, getAttackWeapon());
 		playerInv.setItem(1,
-				ItemHelper.setDetails(new ItemStack(Material.MILK_BUCKET), instance.color("&r&lSanta's Milk"), "",
+				ItemHelper.setDetails(new ItemStack(Material.MILK_BUCKET), instance.color("&r&lSanta's Milk &7(Right Click)"), "",
 						instance.color("&7Right click to remove effects including"),
 						instance.color("&7cookie effects (5s cooldown)")));
 		playerInv.setItem(2, horseSpawnEgg());
@@ -181,7 +181,7 @@ public class SantaClass extends BaseClass {
 	public ItemStack getAttackWeapon() {
 		ItemStack item = ItemHelper.setUnbreakable(ItemHelper.addEnchant(
 				ItemHelper.addEnchant(
-						ItemHelper.setDetails(new ItemStack(Material.COOKIE), instance.color("&6&lDelicious Cookie"),
+						ItemHelper.setDetails(new ItemStack(Material.COOKIE), instance.color("&6&lDelicious Cookie &7(Right Click)"),
 								"", instance.color("&r- &71st Use: Strength 1 & Slow 2"),
 								instance.color("&r- &72nd Use: Resistance 1 & Slow 4")),
 						Enchantment.DAMAGE_ALL, 3),

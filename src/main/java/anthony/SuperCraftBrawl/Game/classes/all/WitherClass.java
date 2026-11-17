@@ -56,7 +56,8 @@ public class WitherClass extends BaseClass {
 				"&7Shoot up to &e" + SKULL_AMOUNT + " &7skulls before recharging",
 				"&7Skulls explode and apply &8&oWither &e" + (wither.getAmplifier() + 1) + " &7for &e" + wither.getDuration() / 20 + "s",
 				"",
-				"&7You can spam this ability"
+				"&7You can spam this ability",
+				"&7Shoot down to boost yourself up"
 		);
 		bow.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
 		ItemHelper.setUnbreakable(bow);

@@ -59,7 +59,7 @@ public class EnchantTableClass extends BaseClass {
 		this.weapon = weapon;
 
 		// Enchant Ability
-		ItemStack enchantItem = ItemHelper.create(Material.ENCHANTMENT_TABLE, ChatColorHelper.color("&dEnchant Weapon"),
+		ItemStack enchantItem = ItemHelper.create(Material.ENCHANTMENT_TABLE, ChatColorHelper.color("&dEnchant Weapon &7(Right Click)"),
 				ChatColorHelper.color("&7Right click to enchant your sword"),
 				ChatColorHelper.color("&7Get level by getting kills"));
 

@@ -212,14 +212,14 @@ public class FreddyClass extends BaseClass {
 	}
 
 	public ItemStack getStunAbility() {
-		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.REDSTONE, 1), instance.color("&cStun"),
+		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.REDSTONE, 1), instance.color("&cStun &7(Right Click)"),
 				instance.color("&7Stuns players within 8 blocks"), "", instance.color("&7Effects:"),
 				instance.color("&r&oNausea 3 &7for &e5s"), instance.color("&8&oSlowness 1 &7for &e5s"));
 		return item;
 	}
 
 	public ItemStack getScareAbility() {
-		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.BEACON, 1), instance.color("&cJump Scare"),
+		ItemStack item = ItemHelper.setDetails(new ItemStack(Material.BEACON, 1), instance.color("&cJump Scare &7(Right Click)"),
 				instance.color("&7Blinds everyone in the game and teleports"),
 				instance.color("&7you to a random player"), "", instance.color("&cOne use per life!"));
 		return item;

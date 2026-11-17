@@ -38,12 +38,12 @@ public class GrimReaperClass extends BaseClass {
 
 	@Override
 	public void setItems(Inventory playerInv) {
-		ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
+		ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL &7(Right Click)");
 
 		playerInv.setItem(0, getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.REDSTONE),
-						"" + ChatColor.RED + ChatColor.BOLD + "Spirit Shackles", "",
+						"" + ChatColor.RED + ChatColor.BOLD + "Spirit Shackles &7(Right Click)", "",
 						"" + ChatColor.RESET + "Right-click to receieve strength & give",
 						"" + ChatColor.RESET + "Slowness & Blindness to enemies in a",
 						"" + ChatColor.RESET + "10 block radius"));
@@ -195,7 +195,7 @@ public class GrimReaperClass extends BaseClass {
 	@Override
 	public void killEvent(Player damagerPlayer) {
 		if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
-			ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL");
+			ItemStack zombieEgg = ItemHelper.createMonsterEgg(EntityType.ZOMBIE, 1, "&2&lZOMBIE POKEBALL &7(Right Click)");
 			damagerPlayer.getInventory().setItem(2, zombieEgg);
 		}
 	}

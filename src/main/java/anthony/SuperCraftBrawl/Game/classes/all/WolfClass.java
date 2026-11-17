@@ -133,7 +133,7 @@ public class WolfClass extends BaseClass {
 
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1, ItemHelper.setDetails(new ItemStack(Material.RAW_BEEF),
-				instance.getGameManager().getMain().color("&6&lThrill of the Hunt")));
+				instance.getGameManager().getMain().color("&6&lThrill of the Hunt &7(Right Click)")));
 		used = false;
 	}
 

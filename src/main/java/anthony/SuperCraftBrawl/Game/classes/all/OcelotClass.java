@@ -49,7 +49,7 @@ public class OcelotClass extends BaseClass {
 	@Override
 	public void setArmor(EntityEquipment playerEquip) {
 		setArmorNew(playerEquip);
-		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1, false, false));
 
 	}
 
@@ -70,7 +70,7 @@ public class OcelotClass extends BaseClass {
 			}
 		}
 		if (!(player.getActivePotionEffects().contains(PotionEffectType.SPEED)))
-			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1, false, false));
 	}
 
 	@Override
@@ -80,10 +80,10 @@ public class OcelotClass extends BaseClass {
 		playerInv.setItem(0, this.getAttackWeapon());
 		playerInv.setItem(1,
 				ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
-						instance.getGameManager().getMain().color("&7&lPurr Attack"), "",
+						instance.getGameManager().getMain().color("&7&lPurr Attack &7(Right Click)"), "",
 						"" + ChatColor.RESET + "Right click to effect players with:",
 						instance.getGameManager().getMain().color("   &r10 sec Slowness II")));
-		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1));
+		player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 999999999, 1, false, false));
 	}
 
 	@Override

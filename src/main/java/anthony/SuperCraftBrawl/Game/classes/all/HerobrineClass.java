@@ -41,17 +41,11 @@ import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import net.md_5.bungee.api.ChatColor;
 
 public class HerobrineClass extends BaseClass {
 
-    private final ItemStack weapon;
-    private final ItemStack despairItem;
-    private final Ability despairAbility = new Ability("&b&lDiamond of Despair", DESPAIR_ABILITY_COOLDOWN / 1000, player);
-    private static final double DESPAIR_ABILITY_COOLDOWN = 15 * 1000;
+    private static final double DESPAIR_ABILITY_COOLDOWN_SECONDS = 15;
     private static final double DESPAIR_ABILITY_RANGE = 10;
-
-    private final PotionEffect poison = new PotionEffect(PotionEffectType.POISON, 4 * 20, 1, true, true);
 
     // Rising Ruin constants
     private static final double RUIN_EXPLOSION_RADIUS = 3.5;
@@ -70,6 +64,13 @@ public class HerobrineClass extends BaseClass {
             {-1,  2}, {0,  2}, {1,  2}, {2,  2}
     };
 
+    private final ItemStack weapon;
+    private final ItemStack despairItem;
+    private final Ability despairAbility = new Ability("&b&lDiamond of Despair", DESPAIR_ABILITY_COOLDOWN_SECONDS, player);
+    private final PotionEffect poison = new PotionEffect(PotionEffectType.POISON, 4 * 20, 1, true, true);
+    /** Permanent Resistance, without particles. */
+    private final PotionEffect resistance = new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0, false, false);
+
     public HerobrineClass(GameInstance instance, Player player) {
         super(instance, player);
         baseVerticalJump = 1.1;
@@ -85,42 +86,32 @@ public class HerobrineClass extends BaseClass {
         weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2);
         ItemHelper.setUnbreakable(weapon);
 
-        String rangeDisplay = ItemHelper.formatDouble(DESPAIR_ABILITY_RANGE);
         despairItem = ItemHelper.setDetails(
                 new ItemStack(Material.DIAMOND),
                 despairAbility.getAbilityNameRightClickMessage(),
                 "&7Cast one of 4 effects:",
-                "&7▸ &2Poison " + (poison.getAmplifier() + 1) + " &rfor &a" + poison.getDuration() / 20 +
-                        "s &ron enemies",
-                "&7▸ &cFire&r lightning at enemies",
-                "&7▸ &4Rising Ruin&r erupts damaging blocks around you",
-                "&7▸ &8Invoke&r a zombie upon each enemy",
+                "&7▸ &2&o" + ItemHelper.getPotionEffectName(poison.getType()) + " &e" + (poison.getAmplifier() + 1)
+                        + " &7for &e" + poison.getDuration() / 20 + "s &7on enemies",
+                "&7▸ &cFire&7 lightning at enemies",
+                "&7▸ &4Rising Ruin&7 erupts damaging blocks around you",
+                "&7▸ &8Invoke&7 a zombie upon each enemy",
                 "",
-                "&rRange: &a" + rangeDisplay + " blocks"
+                "&7Range: &a" + ItemHelper.formatDouble(DESPAIR_ABILITY_RANGE) + " &7blocks"
         );
     }
 
     @Override
     public void setItems(Inventory playerInv) {
-        herobrine.startTime = System.currentTimeMillis() - 100000;
+        despairAbility.getCooldownInstance().reset();
         playerInv.setItem(0, weapon);
         playerInv.setItem(1, despairItem);
-        player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 999999999, 0));
+        player.addPotionEffect(resistance);
     }
 
     @Override
     public void tick(int gameTicks) {
-        if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Herobrine
-                && instance.classes.get(player).getLives() > 0) {
-            int cooldownSec = (int) ((DESPAIR_ABILITY_COOLDOWN - herobrine.getTime()) / 1000 + 1);
-            if (herobrine.getTime() < DESPAIR_ABILITY_COOLDOWN) {
-                String msg = instance.color("&b&lDiamond of Despair &rregenerates in: &e" + cooldownSec + "s");
-                getActionBarManager().setActionBar(player, "herobrine.cooldown", msg, 2);
-            } else {
-                String msg = instance.color("&rYou can use &b&lDiamond of Despair");
-                getActionBarManager().setActionBar(player, "herobrine.cooldown", msg, 2);
-            }
-        }
+        if (!isPlayerAlive()) return;
+        despairAbility.updateActionBar(player, this);
     }
 
     @Override
@@ -130,10 +121,8 @@ public class HerobrineClass extends BaseClass {
                 && (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
             event.setCancelled(true);
 
-            if (herobrine.getTime() < DESPAIR_ABILITY_COOLDOWN) {
-                int seconds = (int) ((DESPAIR_ABILITY_COOLDOWN - herobrine.getTime()) / 1000 + 1);
-                player.sendMessage(instance.color("&c&l(!) &rYour &b&lDiamond of Despair&r is still " +
-                        "regenerating for &a" + seconds + "s"));
+            if (!despairAbility.isReady()) {
+                despairAbility.sendPlayerRemainingCooldownChatMessage();
             } else {
                 searchForPlayers();
             }
@@ -154,7 +143,7 @@ public class HerobrineClass extends BaseClass {
         }
 
         if (!playersInRange.isEmpty()) {
-            herobrine.restart();
+            despairAbility.use();
 
             switch (new Random().nextInt(4)) {
                 case 0:

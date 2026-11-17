@@ -33,6 +33,7 @@ public class CreeperClass extends BaseClass {
 	private ItemStack potionItem;
 	private ItemStack tntItem;
 	private ItemStack suicideItem;
+	private ItemStack barrierItem;
 	private final Ability potionAbility = new Ability("&a&lDamage Potion", 3, player);
 	private final Ability tntAbility = new Ability("&a&lDestructionators", 10, player);
 	private final Ability suicideAbility = new Ability("&a&lSelf Explode", 1, player);
@@ -69,6 +70,14 @@ public class CreeperClass extends BaseClass {
 		Potion potion = new Potion(PotionType.INSTANT_DAMAGE);
 		potion.setSplash(true);
 		potion.apply(potionItem);
+
+		// Barrier, shown while the potion is on cooldown
+		barrierItem = ItemHelper.setDetails(
+				new ItemStack(Material.BARRIER),
+				"&c&lOn Cooldown!",
+				"",
+				"&7A new potion every &e" + ItemHelper.formatDouble(potionAbility.getCooldownDurationSeconds()) + "s"
+		);
 
 		// Tnt ability
 		tntItem = ItemHelper.setDetails(
@@ -124,7 +133,7 @@ public class CreeperClass extends BaseClass {
 		// Set the barrier after 1 tick (fix I found othewise the barrier won't be set at all)
 		Bukkit.getScheduler().runTaskLater(
 				instance.getGameManager().getMain(),
-				() -> shooter.getInventory().setItem(1, new ItemStack(Material.BARRIER)),
+				() -> shooter.getInventory().setItem(1, barrierItem),
 				1L
 		);
 

@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.Game.classes.all;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
 import org.bukkit.Bukkit;
@@ -21,6 +22,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -31,12 +33,18 @@ import java.util.Random;
 
 public class SteveClass extends BaseClass {
 
-	private static final int ORES_PER_UPGRADE = 7;
-	private static final int MAX_UPGRADE_TIER = 2;
+	private static final int ORES_PER_UPGRADE = 5;
+	private static final int MAX_UPGRADE_TIER = 3;
 
-	/** The coal upgrade puts this effect on enemies with every pickaxe hit. Tier 1 is amplifier 0, tier 2 is amplifier 1. */
+	/** The coal upgrade puts this effect on enemies with every pickaxe hit. Tier 1 is amplifier 0, tier 2 is amplifier 1, and so on. */
 	private static final PotionEffectType COAL_EFFECT = PotionEffectType.SLOW;
 	private static final int COAL_EFFECT_SECONDS = 3;
+
+	/** The pickaxe starts as the first one. The diamond upgrade at tier N turns it into entry N. */
+	private static final Material[] PICKAXE_MATERIALS = {
+			Material.WOOD_PICKAXE, Material.STONE_PICKAXE, Material.IRON_PICKAXE, Material.DIAMOND_PICKAXE
+	};
+	private static final String[] PICKAXE_MATERIAL_NAMES = {"&6&oWooden", "&8&oStone", "&f&oIron", "&b&oDiamond"};
 
 	/** How long a mined ore stays on the ground before it disappears. */
 	private static final long ORE_DROP_TICKS = 20L;
@@ -44,12 +52,12 @@ public class SteveClass extends BaseClass {
 	private enum Ore {
 		COAL("Coal", "&8", Material.COAL, null),
 		GOLD("Gold", "&6", Material.GOLD_INGOT, Enchantment.KNOCKBACK),
-		DIAMOND("Diamond", "&b", Material.DIAMOND, Enchantment.DAMAGE_ALL);
+		DIAMOND("Diamond", "&b", Material.DIAMOND, null);
 
 		private final String label;
 		private final String color;
 		private final Material item;
-		/** What this ore's upgrade puts on the pickaxe, or null when it does something else (coal slows enemies). */
+		/** What this ore's upgrade puts on the pickaxe, or null when it does something else (coal slows enemies, diamond changes the material). */
 		private final Enchantment enchantment;
 
 		Ore(String label, String color, Material item, Enchantment enchantment) {
@@ -62,6 +70,8 @@ public class SteveClass extends BaseClass {
 
 	private final Random random = new Random();
 	private final ItemStack pickaxe;
+	/** The description of the pickaxe. The upgrades are listed above it, like enchantments, and a blank line separates them. */
+	private final List<String> pickaxeLore;
 	private final ItemStack craftingTable;
 
 	/** Both are indexed by Ore#ordinal(). Ores are kept through deaths, like the upgrades. */
@@ -82,25 +92,24 @@ public class SteveClass extends BaseClass {
 
 		// Weapon
 		pickaxe = ItemHelper.setDetails(
-				new ItemStack(Material.STONE_PICKAXE),
-				"&3&lPickaxe",
-				"",
+				new ItemStack(PICKAXE_MATERIALS[0]),
+				"&3&lI am Steve!",
 				"&7Hit enemies to mine &8&oCoal&7, &6&oGold&r &7and &b&oDiamonds&r&7",
 				"&7and use them to upgrade your pickaxe"
 		);
 		ItemHelper.setUnbreakable(pickaxe);
+		pickaxeLore = pickaxe.getItemMeta().getLore();
 
 		// Crafting
 		craftingTable = ItemHelper.setDetails(
 				new ItemStack(Material.WORKBENCH),
 				"&f&lCrafting &7(Right Click)",
-				"",
 				"&7Craft your ores into permanent upgrades,",
 				"&7with each type having " + MAX_UPGRADE_TIER + " different tiers:",
-				oreLine(Ore.COAL, "&3&o" + effectName(COAL_EFFECT) + " &r&e1 &7and &e" + MAX_UPGRADE_TIER
+				oreLine(Ore.COAL, "&3&o" + ItemHelper.getPotionEffectName(COAL_EFFECT) + " &r" + tierList()
 						+ " &7on hit for &e" + COAL_EFFECT_SECONDS + "s"),
-				oreLine(Ore.GOLD, "&oKnockback&r &e1 &7and &e" + MAX_UPGRADE_TIER),
-				oreLine(Ore.DIAMOND, "&oSharpness&r &e1 &7and &e" + MAX_UPGRADE_TIER)
+				oreLine(Ore.GOLD, "&oKnockback&r " + tierList()),
+				oreLine(Ore.DIAMOND, materialList() + " &7Pickaxes")
 		);
 	}
 
@@ -108,22 +117,24 @@ public class SteveClass extends BaseClass {
 		return "&7▸ " + ore.color + ORES_PER_UPGRADE + " " + ore.label + " &7- " + upgrade;
 	}
 
-	/** The name Minecraft shows for an effect ("Slowness", where the API says SLOW), so the lore follows whatever effect is set above. */
-	private static String effectName(PotionEffectType type) {
-		switch (type.getName()) {
-			case "SLOW": return "Slowness";
-			case "SLOW_DIGGING": return "Mining Fatigue";
-			case "FAST_DIGGING": return "Haste";
-			case "INCREASE_DAMAGE": return "Strength";
-			case "JUMP": return "Jump Boost";
-			case "CONFUSION": return "Nausea";
-			case "DAMAGE_RESISTANCE": return "Resistance";
-			case "HARM": return "Instant Damage";
-			case "HEAL": return "Instant Health";
-			default:
-				String name = type.getName().toLowerCase().replace('_', ' ');
-				return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+	/** "&e1&7, &e2 &7and &e3", one entry per upgrade tier. */
+	private static String tierList() {
+		StringBuilder list = new StringBuilder();
+		for (int tier = 1; tier <= MAX_UPGRADE_TIER; tier++) {
+			if (tier > 1) list.append(tier == MAX_UPGRADE_TIER ? " &7and " : "&7, ");
+			list.append("&e").append(tier);
 		}
+		return list.toString();
+	}
+
+	/** The materials the diamond upgrade goes through, past the one the pickaxe starts as. */
+	private static String materialList() {
+		StringBuilder list = new StringBuilder();
+		for (int tier = 1; tier <= MAX_UPGRADE_TIER; tier++) {
+			if (tier > 1) list.append(tier == MAX_UPGRADE_TIER ? " &7and " : "&7, ");
+			list.append(PICKAXE_MATERIAL_NAMES[tier]);
+		}
+		return list.toString();
 	}
 
 	@Override
@@ -141,7 +152,7 @@ public class SteveClass extends BaseClass {
 		StringBuilder oreAmounts = new StringBuilder();
 		for (Ore ore : Ore.values()) {
 			if (tier(ore) >= MAX_UPGRADE_TIER) continue;
-			if (oreAmounts.length() > 0) oreAmounts.append(" &7| ");
+			if (oreAmounts.length() > 0) oreAmounts.append(" &7┃ ");
 			oreAmounts.append(ore.color).append(amount(ore));
 		}
 		if (oreAmounts.length() == 0) return;
@@ -156,7 +167,7 @@ public class SteveClass extends BaseClass {
 		if (!(event.getEntity() instanceof Player)) return;
 
 		ItemStack heldItem = player.getInventory().getItem(player.getInventory().getHeldItemSlot());
-		if (heldItem == null || heldItem.getType() != Material.STONE_PICKAXE) return;
+		if (heldItem == null || heldItem.getType() != pickaxe.getType()) return;
 
 		Player victim = (Player) event.getEntity();
 
@@ -259,23 +270,42 @@ public class SteveClass extends BaseClass {
 	private void applyUpgrade(Ore ore) {
 		int tier = tier(ore);
 
-		if (ore.enchantment != null) {
-			pickaxe.addUnsafeEnchantment(ore.enchantment, tier);
-			int slot = player.getInventory().first(Material.STONE_PICKAXE);
-			player.getInventory().setItem(slot == -1 ? 0 : slot, pickaxe);
-		}
+		// The item in the inventory is a copy, so find it by its type before that changes
+		int slot = player.getInventory().first(pickaxe.getType());
 
 		switch (ore) {
 			case COAL:
 				player.sendMessage(instance.color("&2&l(!) &rYour pickaxe now applies &3&o"
-						+ effectName(COAL_EFFECT) + " &e" + tier));
+						+ ItemHelper.getPotionEffectName(COAL_EFFECT) + " &e" + tier));
 				break;
 			case GOLD:
+				pickaxe.addUnsafeEnchantment(ore.enchantment, tier);
 				player.sendMessage(instance.color("&2&l(!) &rYour pickaxe now has &6&oKnockback &e" + tier));
 				break;
 			default:
-				player.sendMessage(instance.color("&2&l(!) &rYour pickaxe now has &b&oSharpness &e" + tier));
+				pickaxe.setType(PICKAXE_MATERIALS[tier]);
+				player.sendMessage(instance.color("&2&l(!) &rYour pickaxe is now " + PICKAXE_MATERIAL_NAMES[tier]));
 		}
+
+		updatePickaxeLore();
+		player.getInventory().setItem(slot == -1 ? 0 : slot, pickaxe);
+	}
+
+	/**
+	 * Lists the coal upgrade on the pickaxe like an enchantment would be: gray, above the description. Once
+	 * the pickaxe has an enchantment or the coal upgrade, a blank line separates them from the description.
+	 */
+	private void updatePickaxeLore() {
+		List<String> lore = new ArrayList<>();
+		if (tier(Ore.COAL) > 0)
+			lore.add(ChatColorHelper.color("&7" + ItemHelper.getPotionEffectName(COAL_EFFECT)
+					+ " " + ItemHelper.getRomanNumeral(tier(Ore.COAL))));
+		if (tier(Ore.COAL) > 0 || tier(Ore.GOLD) > 0) lore.add("");
+		lore.addAll(pickaxeLore);
+
+		ItemMeta meta = pickaxe.getItemMeta();
+		meta.setLore(lore);
+		pickaxe.setItemMeta(meta);
 	}
 
 	@Override

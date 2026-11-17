@@ -395,6 +395,100 @@ public class ItemHelper {
 		}
 	}
 
+	/** The name Minecraft shows for an effect ("Slowness", where the API says SLOW). */
+	public static String getPotionEffectName(PotionEffectType type) {
+		switch (type.getName()) {
+			case "SLOW": return "Slowness";
+			case "SLOW_DIGGING": return "Mining Fatigue";
+			case "FAST_DIGGING": return "Haste";
+			case "INCREASE_DAMAGE": return "Strength";
+			case "JUMP": return "Jump Boost";
+			case "CONFUSION": return "Nausea";
+			case "DAMAGE_RESISTANCE": return "Resistance";
+			case "HARM": return "Instant Damage";
+			case "HEAL": return "Instant Health";
+			default:
+				StringBuilder name = new StringBuilder();
+				for (String word : type.getName().toLowerCase().split("_")) {
+					if (word.isEmpty()) continue;
+					if (name.length() > 0) name.append(' ');
+					name.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
+				}
+				return name.toString();
+		}
+	}
+
+	/** Effects the client shows in red. Everything else is blue, like in the vanilla potion tooltip. */
+	private static boolean isHarmfulPotionEffect(PotionEffectType type) {
+		switch (type.getName()) {
+			case "SLOW":
+			case "SLOW_DIGGING":
+			case "HARM":
+			case "CONFUSION":
+			case "BLINDNESS":
+			case "HUNGER":
+			case "WEAKNESS":
+			case "POISON":
+			case "WITHER":
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * The line a potion tooltip has for an effect, styled like vanilla: "Speed II (0:30)", blue when the
+	 * effect is helpful and red when it is harmful. Level I and instant effects have no duration or level
+	 * shown, and so do levels above X (the Bomb's Instant Damage 1001 would only read as noise).
+	 */
+	public static String getPotionEffectLine(PotionEffect effect) {
+		StringBuilder line = new StringBuilder(isHarmfulPotionEffect(effect.getType()) ? "&c" : "&9");
+		line.append(getPotionEffectName(effect.getType()));
+
+		if (effect.getAmplifier() >= 1 && effect.getAmplifier() <= 9)
+			line.append(' ').append(getRomanNumeral(effect.getAmplifier() + 1));
+
+		int seconds = effect.getDuration() / 20;
+		if (effect.getDuration() > 20)
+			line.append(String.format(" (%d:%02d)", seconds / 60, seconds % 60));
+
+		return ChatColorHelper.color(line.toString());
+	}
+
+	/** Hides the effect info the client builds by itself on a potion, with nothing written in its place. */
+	public static ItemStack hidePotionEffects(ItemStack potion) {
+		ItemMeta meta = potion.getItemMeta();
+		meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+		potion.setItemMeta(meta);
+		return potion;
+	}
+
+	/**
+	 * Hides the effect info the client builds by itself on a potion and writes it as lore instead, above the
+	 * lore the item already has. Newer clients show the item's own effect and the one of its base potion
+	 * type next to each other, so the same effect would be listed twice.
+	 */
+	public static ItemStack showPotionEffects(ItemStack potion, PotionEffect... effects) {
+		ItemMeta meta = potion.getItemMeta();
+		meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+
+		List<String> lore = new ArrayList<>();
+		for (PotionEffect effect : effects)
+			lore.add(getPotionEffectLine(effect));
+		if (meta.hasLore())
+			lore.addAll(meta.getLore());
+
+		meta.setLore(lore);
+		potion.setItemMeta(meta);
+		return potion;
+	}
+
+	/** Same as the other overload, for the custom effects the potion already carries. */
+	public static ItemStack showPotionEffects(ItemStack potion) {
+		PotionMeta meta = (PotionMeta) potion.getItemMeta();
+		return showPotionEffects(potion, meta.getCustomEffects().toArray(new PotionEffect[0]));
+	}
+
 	public static ItemStack setUnbreakable(ItemStack item) {
 		ItemMeta meta = item.getItemMeta();
 		meta.spigot().setUnbreakable(true);
