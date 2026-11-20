@@ -286,13 +286,14 @@ public class FWGameInstance {
 
 		checkForStart();
 
-		// The vote paper only goes out once the countdown is actually running (2+ players),
-		// matching SCB's own vote paper - never handed out while still alone in the lobby.
+		// The ready-up dye only goes out once the countdown is actually running (2+ players),
+		// matching SCB's own ready-up - never handed out while still alone in the lobby. Players who
+		// join during the countdown get one too, and anyone who already has it keeps theirs.
 		if (state == FWGameState.STARTING) {
 			for (FWTeam t : teams.values()) {
 				for (UUID uuid : t.getMembers()) {
 					Player p = Bukkit.getPlayer(uuid);
-					if (p != null) FWLobbyItems.giveVotePaper(p);
+					if (p != null) FWLobbyItems.giveReadyItem(p, gameSettings.isReady(p));
 				}
 			}
 		}
@@ -307,6 +308,7 @@ public class FWGameInstance {
 
 		team.removeMember(player.getUniqueId());
 		scoreboardManager.remove(player);
+		readyCooldownEnds.remove(player.getUniqueId());
 
 		if (state == FWGameState.WAITING || state == FWGameState.STARTING) {
 			TellAll(manager.getMain().color("&2&l(!) &e" + player.getName() + " &chas left the game!"));
@@ -508,7 +510,43 @@ public class FWGameInstance {
 		}
 	}
 
-	/** Used by the lobby vote menu to skip the rest of the queued countdown once every player votes to start. */
+	/** How long a player has to wait between two clicks on the ready-up dye, so it can't be spammed. Same as SCB. */
+	private static final long READY_COOLDOWN_MILLIS = 3000L;
+
+	/** Player to the System.currentTimeMillis() until which they can't click the ready-up dye again. Dropped when they leave. */
+	private final Map<UUID, Long> readyCooldownEnds = new HashMap<>();
+
+	/**
+	 * The player clicked the ready-up dye: they're ready now, or not anymore, and the dye shows it. Same as SCB's
+	 * GameInstance#toggleReady, including the 3 second cooldown. Only works while the countdown is running, which
+	 * is the only time the dye is handed out.
+	 */
+	public void toggleReady(Player player) {
+		if (state != FWGameState.STARTING || !hasPlayer(player)) return;
+
+		long now = System.currentTimeMillis();
+		int secondsLeft = readyCooldownSecondsLeft(readyCooldownEnds.get(player.getUniqueId()), now);
+		if (secondsLeft > 0) {
+			player.sendMessage(manager.getMain().color("&c&l(!) &rYou can use this again in &e" + secondsLeft + "s"));
+			return;
+		}
+		readyCooldownEnds.put(player.getUniqueId(), now + READY_COOLDOWN_MILLIS);
+
+		player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
+		gameSettings.toggleReady(player);
+
+		// Everyone being ready starts the match, and that clears their inventories
+		if (state != FWGameState.STARTING) return;
+		FWLobbyItems.updateReadyItem(player, gameSettings.isReady(player));
+	}
+
+	/** Whole seconds (rounded up) until a player may click the ready-up dye again, given when their cooldown ends (null if they never clicked). 0 means they can click now. */
+	static int readyCooldownSecondsLeft(Long cooldownEnd, long now) {
+		if (cooldownEnd == null || now >= cooldownEnd) return 0;
+		return (int) Math.ceil((cooldownEnd - now) / 1000.0);
+	}
+
+	/** Used by the ready-up dye to skip the rest of the queued countdown once every player is ready. */
 	public void forceStartNow() {
 		if (state != FWGameState.STARTING) return;
 		forceStartGame();
@@ -530,10 +568,10 @@ public class FWGameInstance {
 	}
 
 	/**
-	 * Removes every vote paper and applies whichever lobby votes passed - mirrors SCB locking its
-	 * own settings (time of day, drop rate, etc.) in 5 seconds before the match actually begins.
-	 * Guarded so it only ever runs once, since it can be reached both from the countdown's 5-second
-	 * mark and from forceStartNow() skipping straight past it.
+	 * Takes away every ready-up dye (it's too late to ready up) and applies whichever lobby votes passed -
+	 * mirrors SCB locking its own settings (time of day, drop rate, etc.) in 5 seconds before the match
+	 * actually begins. Guarded so it only ever runs once, since it can be reached both from the countdown's
+	 * 5-second mark and from forceStartNow() skipping straight past it.
 	 */
 	private void lockInVoteSettings() {
 		if (settingsLocked) return;
@@ -542,7 +580,7 @@ public class FWGameInstance {
 		for (FWTeam team : teams.values()) {
 			for (UUID uuid : team.getMembers()) {
 				Player p = Bukkit.getPlayer(uuid);
-				if (p != null) FWLobbyItems.removeVotePaper(p);
+				if (p != null) FWLobbyItems.removeReadyItem(p);
 			}
 		}
 
@@ -564,10 +602,12 @@ public class FWGameInstance {
 		state = FWGameState.WAITING;
 		TellAll(manager.getMain().color("&c&l(!) &rNot enough players, countdown cancelled."));
 
+		// Nobody is ready anymore, and the dye is handed out again when the next countdown starts
+		gameSettings.clearReady();
 		for (FWTeam team : teams.values()) {
 			for (UUID uuid : team.getMembers()) {
 				Player p = Bukkit.getPlayer(uuid);
-				if (p != null) FWLobbyItems.removeVotePaper(p);
+				if (p != null) FWLobbyItems.removeReadyItem(p);
 			}
 		}
 

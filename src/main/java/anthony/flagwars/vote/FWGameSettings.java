@@ -7,22 +7,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Tallies Flag Wars's lobby votes - mirrors SuperCraftBros' GameSettings.
- * The game-start vote fires immediately once every player is ready (skips
- * the rest of the queued countdown, see FWGameInstance#forceStartNow); the
- * night-time and double-generator-rate votes just need a majority and are
+ * Tracks Flag Wars's lobby settings - mirrors SuperCraftBros' GameSettings.
+ * Ready-up (the ready dye, see FWLobbyItems) fires immediately once every
+ * player is ready, skipping the rest of the queued countdown (see
+ * FWGameInstance#forceStartNow).
+ * <p>
+ * The night-time and double-generator-rate votes just need a majority and are
  * only read once - in FWGameInstance#lockInVoteSettings, 5 seconds before
- * the match begins, exactly like SCB locks its own settings in.
+ * the match begins, exactly like SCB locks its own settings in. Nothing in the
+ * lobby lets players cast them since the vote paper was replaced by the ready
+ * dye, so they never pass for now; they are kept for a settings menu to use.
  */
 public class FWGameSettings {
 
 	private final FWGameInstance instance;
 
-	private int startVotes;
+	private int readyCount;
 	private int nightVotes;
 	private int doubleGeneratorVotes;
 
-	private final List<Player> startVoters = new ArrayList<>();
+	private final List<Player> readyPlayers = new ArrayList<>();
 	private final List<Player> nightVoters = new ArrayList<>();
 	private final List<Player> doubleGeneratorVoters = new ArrayList<>();
 
@@ -30,8 +34,18 @@ public class FWGameSettings {
 		this.instance = instance;
 	}
 
-	public int getStartVotes() {
-		return startVotes;
+	public int getReadyCount() {
+		return readyCount;
+	}
+
+	public boolean isReady(Player player) {
+		return readyPlayers.contains(player);
+	}
+
+	/** Nobody is ready anymore, for when the countdown stops. */
+	public void clearReady() {
+		readyPlayers.clear();
+		readyCount = 0;
 	}
 
 	public int getNightVotes() {
@@ -51,19 +65,19 @@ public class FWGameSettings {
 	}
 
 	/**
-	 * Mirrors SCB's GameSettings#updateGameStartVoteStatus: every toggle is announced in chat, and
-	 * - unlike the night-time/double-generator votes - this one requires every player ready (not
-	 * just a majority) before it fires, exactly matching SCB's totalStartVotes == players.size().
+	 * The player clicked the ready-up dye: ready <-> not ready. Mirrors SCB's GameSettings#toggleReady: every
+	 * toggle is announced in chat, and every player has to be ready (not just a majority) before the game
+	 * starts early, exactly matching SCB's total ready == players.size().
 	 */
-	public void handleVoteGameStart(Player player) {
-		boolean nowReady = !startVoters.contains(player);
-		startVotes = toggleVote(startVoters, player, startVotes);
+	public void toggleReady(Player player) {
+		boolean nowReady = !readyPlayers.contains(player);
+		readyCount = toggleVote(readyPlayers, player, readyCount);
 
 		String status = nowReady ? "&a is Ready " : "&c is no longer Ready ";
 		instance.TellAll(instance.getManager().getMain().color("&2&l(!) &r" + player.getName() + status
-				+ "(" + startVotes + "/" + instance.countPlayers() + ")"));
+				+ "(" + readyCount + "/" + instance.countPlayers() + ")"));
 
-		if (startVotes == instance.countPlayers()) {
+		if (readyCount == instance.countPlayers()) {
 			instance.forceStartNow();
 		}
 	}
@@ -76,9 +90,9 @@ public class FWGameSettings {
 		doubleGeneratorVotes = toggleVote(doubleGeneratorVoters, player, doubleGeneratorVotes);
 	}
 
-	/** Strips a player from every vote they cast - called when they leave mid-lobby. */
+	/** Strips a player from being ready and from every vote they cast - called when they leave mid-lobby. */
 	public void removePlayer(Player player) {
-		if (startVoters.remove(player)) startVotes--;
+		if (readyPlayers.remove(player)) readyCount--;
 		if (nightVoters.remove(player)) nightVotes--;
 		if (doubleGeneratorVoters.remove(player)) doubleGeneratorVotes--;
 	}

@@ -14,8 +14,8 @@ import anthony.flagwars.map.FWTeamSite;
 import anthony.flagwars.resources.FWResourceGenerator;
 import anthony.flagwars.shop.FWShopGUI;
 import anthony.flagwars.vote.FWLeaveGameGUI;
+import anthony.flagwars.vote.FWLobbyItems;
 import anthony.flagwars.vote.FWSpectatorGUI;
-import anthony.flagwars.vote.FWVoteGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -865,7 +865,7 @@ public class FWPlayerListener implements Listener {
 		return type == InventoryType.CHEST || type == InventoryType.ENDER_CHEST;
 	}
 
-	/** Pre-game lobby items (Vote / My Profile / Leave Game), given out by FWLobbyItems while WAITING or STARTING. */
+	/** Pre-game lobby items (Ready Up / My Profile / Leave Game), given out by FWLobbyItems while WAITING or STARTING. */
 	@EventHandler
 	public void onLobbyItemInteract(PlayerInteractEvent event) {
 		if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
@@ -880,8 +880,8 @@ public class FWPlayerListener implements Listener {
 
 		String name = ChatColor.stripColor(item.getItemMeta().getDisplayName());
 
-		if (item.getType() == Material.PAPER && name.contains("Vote")) {
-			new FWVoteGUI(instance).open(player);
+		if (FWLobbyItems.isReadyItem(item) && name.contains("Ready")) {
+			instance.toggleReady(player);
 		} else if (item.getType() == Material.SKULL_ITEM && name.contains("My Profile")) {
 			new StatsGUI(fwGameManager.getMain()).inv.open(player);
 		} else if (item.getType() == Material.BARRIER && name.contains("Leave Game")) {
