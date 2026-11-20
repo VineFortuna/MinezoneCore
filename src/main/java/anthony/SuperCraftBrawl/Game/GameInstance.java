@@ -3230,25 +3230,6 @@ public class GameInstance {
         if (players.contains(player)) {
             if (classes.containsKey(player)) {
                 BaseClass baseClass = classes.get(player);
-                if (event.getPlayer().getItemInHand().getType() == Material.ENDER_PEARL
-                        && event.getPlayer().getItemInHand().hasItemMeta()
-                        && event.getPlayer().getItemInHand().getItemMeta().getDisplayName().contains("Teleporter")
-                        && (event.getAction() == Action.RIGHT_CLICK_AIR
-                        || event.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-
-                    // Enderman has no pearl cooldown.
-                    // Other classes, like EnderDragon, still use the normal pearlTimer cooldown.
-                    if (baseClass.getType() != ClassType.Enderman) {
-                        if (baseClass.pearlTimer.getTime() < 10000) {
-                            int seconds = (10000 - baseClass.pearlTimer.getTime()) / 1000 + 1;
-                            event.setCancelled(true);
-                            player.sendMessage(color("&c&l(!) &rYour ender pearl is still on cooldown for &a" +
-                                    seconds + "s"));
-                        } else {
-                            baseClass.pearlTimer.restart();
-                        }
-                    }
-                }
                 // Dropping an item swings the arm too, which is not a click
                 if (event.getAction() == Action.LEFT_CLICK_AIR && baseClass.droppedItemRecently()) return true;
                 baseClass.useItem(event);

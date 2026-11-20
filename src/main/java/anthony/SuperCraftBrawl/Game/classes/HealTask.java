@@ -15,12 +15,15 @@ import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 
 public class HealTask implements Runnable {
 
-	private static final int TOTAL_DURATION_TICKS = 20 * 3;
+	/** The numbers below are public since the Ender Dragon's sword describes them. */
+	public static final int TOTAL_DURATION_TICKS = 20 * 3;
 	private static final int TASK_INTERVAL_TICKS = 2;
 	private static final int HEAL_INTERVAL_TICKS = 20;
+	/** A crystal heals this many times at the most. */
+	public static final int MAX_HEALS = 3;
 
-	private static final double HEAL_AMOUNT = 1.0; // 0.5 hearts per second
-	private static final double HEAL_RANGE = 10.0;
+	public static final double HEAL_AMOUNT = 1.0; // 0.5 hearts per second
+	public static final double HEAL_RANGE = 10.0;
 	private static final double HEAL_RANGE_SQUARED = HEAL_RANGE * HEAL_RANGE;
 
 	/*
@@ -92,7 +95,7 @@ public class HealTask implements Runnable {
 			nextHealTick += HEAL_INTERVAL_TICKS;
 		}
 
-		if (elapsedTicks >= TOTAL_DURATION_TICKS || healsGiven >= 3) {
+		if (elapsedTicks >= TOTAL_DURATION_TICKS || healsGiven >= MAX_HEALS) {
 			cleanup();
 		}
 	}

@@ -1,31 +1,40 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
-import net.md_5.bungee.api.ChatColor;
+import anthony.util.SoundManager;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TNTPrimed;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import java.util.List;
-
 public class TNTClass extends BaseClass {
 
-    private int cooldownSec;
-    private static final int TNT_COOLDOWN = 10 * 1000;
+    private static final double TNT_COOLDOWN = 10;
+    /** The nearest enemy this many blocks around the player gets the TNT... */
+    private static final double TNT_RANGE = 20;
+    /** ...and this many blocks up and down. */
+    private static final double TNT_RANGE_VERTICAL = 25;
+    private static final int TNT_SPAWN_HEIGHT = 5;
+    private static final int TNT_FUSE_TICKS = 40;
+    private static final PotionEffect TNT_SLOWNESS = new PotionEffect(PotionEffectType.SLOW, 100, 1);
+
+    private final Ability tntAbility = new Ability("&c&lTNT", TNT_COOLDOWN, player);
+    private final ItemStack weapon;
+    private final ItemStack tntItem;
 
     public TNTClass(GameInstance instance, Player player) {
         super(instance, player);
@@ -36,6 +45,16 @@ public class TNTClass extends BaseClass {
                 6,
                 "Tnt"
         );
+
+        weapon = ItemHelper.setUnbreakable(ItemHelper.addEnchant(new ItemStack(Material.WOOD_SWORD), Enchantment.KNOCKBACK, 1));
+
+        tntItem = ItemHelper.setDetails(
+                new ItemStack(Material.TNT),
+                tntAbility.getAbilityNameRightClickMessage(),
+                "&7Spawn TNT on the nearest enemy around you",
+                "",
+                "&7Range: &a" + ItemHelper.formatDouble(TNT_RANGE) + " &7blocks"
+        );
     }
 
     @Override
@@ -43,81 +62,77 @@ public class TNTClass extends BaseClass {
         setArmorNew(playerEquip);
     }
 
-    public ItemStack getTNT() {
-        return ItemHelper.setDetails(new ItemStack(Material.TNT, 1), "", "",
-                instance.getGameManager().getMain().color("&7Spawn TNT to a random player around you"));
-    }
-
     @Override
     public void setItems(Inventory playerInv) {
-        tntItem.startTime = System.currentTimeMillis() - 100000;
-        playerInv.setItem(0, this.getAttackWeapon());
-        playerInv.setItem(1, this.getTNT());
+        tntAbility.getCooldownInstance().reset();
+
+        playerInv.setItem(0, weapon);
+        playerInv.setItem(1, tntItem);
     }
 
     @Override
     public void tick(int gameTicks) {
-        if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.TNT
-                && instance.classes.get(player).getLives() > 0) {
-            this.cooldownSec = (TNT_COOLDOWN - tntItem.getTime()) / 1000 + 1;
+        if (!isPlayerAlive()) return;
 
-            if (tntItem.getTime() < TNT_COOLDOWN) {
-                String msg = instance.color("&c&lTNT &rregenerates in: &a" + this.cooldownSec + "s");
-                getActionBarManager().setActionBar(player, "tnt.cooldown", msg, 2);
-            } else {
-                String msg = instance.getGameManager().getMain().color("&rYou can use &c&lTNT");
-                getActionBarManager().setActionBar(player, "tnt.cooldown", msg, 2);
-            }
-        }
+        tntAbility.updateActionBar(player, this);
     }
 
     @Override
     public void useItem(PlayerInteractEvent event) {
         ItemStack item = event.getItem();
-        if (item != null && item.getType() == Material.TNT && item.getAmount() == 1) {
-            if (player.getGameMode() != GameMode.SPECTATOR) {
-                if (tntItem.getTime() < TNT_COOLDOWN) {
-                    int seconds = (TNT_COOLDOWN - tntItem.getTime()) / 1000 + 1;
-                    event.setCancelled(true);
-                    player.sendMessage(instance.color("&c&l(!) &rYour &c&lTNT&r is still regenerating for &a" +
-                            seconds + "s"));
-                } else {
-                    List<Entity> near = player.getNearbyEntities(20.0D, 25.0D, 20.0D);
+        Action action = event.getAction();
 
-                    // Find the nearest valid player rather than a random one
-                    Player nearest = null;
-                    double nearestDist = Double.MAX_VALUE;
+        if (item == null || !item.isSimilar(tntItem)) return;
+        if (player.getGameMode() == GameMode.SPECTATOR) return;
 
-                    for (Entity entity : near) {
-                        if (!(entity instanceof Player)) continue;
-                        Player playerInRange = (Player) entity;
+        // The TNT is never placed as a block
+        event.setCancelled(true);
+        if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) return;
 
-                        if (!instance.classes.containsKey(playerInRange)) continue;
-                        if (instance.classes.get(playerInRange).getLives() <= 0) continue;
-                        if (playerInRange.getGameMode() == GameMode.SPECTATOR) continue;
-                        if (instance.duosMap != null &&
-                                instance.team.get(playerInRange).equals(instance.team.get(player))) continue;
+        if (!tntAbility.isReady()) {
+            long seconds = tntAbility.getCooldownInstance().getRemainingCooldownSeconds() + 1;
+            tntAbility.sendCustomMessage("&c&l(!) &rYour " + tntAbility.getAbilityName()
+                    + "&r is still regenerating for &a" + seconds + "s");
+            return;
+        }
 
-                        double dist = player.getLocation().distanceSquared(playerInRange.getLocation());
-                        if (dist < nearestDist) {
-                            nearestDist = dist;
-                            nearest = playerInRange;
-                        }
-                    }
+        Player target = findNearestEnemy();
+        if (target == null) {
+            tntAbility.sendCustomMessage("&c&l(!) &rNo nearby players have been found!");
+            return;
+        }
 
-                    if (nearest != null) {
-                        nearest.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 100, 1));
-                        TNTPrimed tnt = nearest.getWorld().spawn(nearest.getLocation().add(0, 5, 0), TNTPrimed.class);
-                        tnt.setFuseTicks(40);
-                        player.sendMessage(instance.getGameManager().getMain()
-                                .color("&e&l(!) &rSpawning a TNT at &e" + nearest.getName() + "'s &rlocation"));
-                        tntItem.restart();
-                    } else {
-                        player.sendMessage(ChatColorHelper.color("&c&l(!) &rNo nearby players have been found!"));
-                    }
-                }
+        target.addPotionEffect(TNT_SLOWNESS);
+        TNTPrimed tnt = target.getWorld().spawn(target.getLocation().add(0, TNT_SPAWN_HEIGHT, 0), TNTPrimed.class);
+        tnt.setFuseTicks(TNT_FUSE_TICKS);
+        // Everyone hears it where it is, so they can see it coming
+        SoundManager.playSoundToAll(player, target.getLocation(), Sound.FUSE, 1, 1);
+
+        tntAbility.sendCustomMessage("&e&l(!) &rSpawning a TNT at &e" + target.getName() + "'s &rlocation");
+        tntAbility.use();
+    }
+
+    /** The closest player in range who can be hit, or null if there is none. */
+    private Player findNearestEnemy() {
+        Player nearest = null;
+        double nearestDistance = Double.MAX_VALUE;
+
+        for (Entity entity : player.getNearbyEntities(TNT_RANGE, TNT_RANGE_VERTICAL, TNT_RANGE)) {
+            if (!(entity instanceof Player)) continue;
+            Player other = (Player) entity;
+
+            if (!instance.classes.containsKey(other)) continue;
+            if (instance.classes.get(other).getLives() <= 0) continue;
+            if (other.getGameMode() == GameMode.SPECTATOR) continue;
+            if (instance.duosMap != null && instance.team.get(other).equals(instance.team.get(player))) continue;
+
+            double distance = player.getLocation().distanceSquared(other.getLocation());
+            if (distance < nearestDistance) {
+                nearestDistance = distance;
+                nearest = other;
             }
         }
+        return nearest;
     }
 
     @Override
@@ -130,10 +145,6 @@ public class TNTClass extends BaseClass {
 
     @Override
     public ItemStack getAttackWeapon() {
-        ItemStack sword = ItemHelper.addEnchant(new ItemStack(Material.WOOD_SWORD), Enchantment.KNOCKBACK, 1);
-        ItemMeta meta = sword.getItemMeta();
-        meta.spigot().setUnbreakable(true);
-        sword.setItemMeta(meta);
-        return sword;
+        return weapon;
     }
 }

@@ -397,6 +397,18 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
+	/** An invincible Bedrock can't hit mobs either (players are covered in OnEntityDamage). Before onMobHit hears of it. */
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onInvincibleMobHit(EntityDamageByEntityEvent event) {
+		if (!(event.getDamager() instanceof Player) || event.getEntity() instanceof Player) return;
+
+		Player attacker = (Player) event.getDamager();
+		GameInstance instance = this.GetInstanceOfPlayer(attacker);
+		if (instance == null || !instance.classes.containsKey(attacker)) return;
+
+		if (instance.classes.get(attacker).bedrockInvincibility) event.setCancelled(true);
+	}
+
 	/** Lets the class of a player know about the hits they make on mobs, like the summons of other players. */
 	@EventHandler(ignoreCancelled = true)
 	public void onMobHit(EntityDamageByEntityEvent event) {

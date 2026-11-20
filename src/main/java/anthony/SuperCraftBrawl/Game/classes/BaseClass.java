@@ -64,10 +64,8 @@ public abstract class BaseClass {
 	public Timer snowballLauncher = new Timer();
 
 	public boolean flintUsed = false;
-	public Timer pearlTimer = new Timer();
 	public Timer tnt = new Timer();
 	public Timer slimeBall = new Timer();
-	public Timer tntItem = new Timer();
 	public Timer ice = new Timer();
 	public Timer golem = new Timer();
 	public Timer herobrine = new Timer();

@@ -1,6 +1,5 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
-import anthony.SuperCraftBrawl.Game.ActionBarManager;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.Ability;
@@ -39,10 +38,38 @@ import java.util.Set;
 
 public class EndermanClass extends BaseClass {
 
+    // Teleporter
+    private static final int BLOCK_SLOT = 1;
+    private static final int TELEPORTER_SLOT = 2;
+    private static final int STARTING_TELEPORTERS = 3;
+    private static final int TELEPORTERS_PER_KILL = 1;
+
+    // Block
+    private static final double BLOCK_THROW_SPEED = 2.0;
+    /** Added to the vertical speed of a thrown block, so it flies a bit higher than the aim. */
+    private static final double BLOCK_THROW_LIFT = 0.15;
+    private static final double BLOCK_DAMAGE = 4.5;
+    /** The vertical speed of an enemy a block hits. They are also knocked back the way it flew. */
+    private static final double BLOCK_KNOCKBACK_UP = 1.0;
+    private static final double BLOCK_HIT_RADIUS = 0.2;
+    private static final int BLOCK_LIFETIME_TICKS = 80;
+
+    /** Blocks that have a different look for each data value, which is kept on the item. */
+    private static final Set<Material> DATA_BLOCKS = new HashSet<>(Arrays.asList(
+            Material.STONE, Material.DIRT, Material.WOOD, Material.SAND, Material.SPONGE, Material.SANDSTONE,
+            Material.WOOL, Material.STEP, Material.STAINED_GLASS, Material.STAINED_GLASS_PANE, Material.MONSTER_EGG,
+            Material.SMOOTH_BRICK, Material.WOOD_STEP, Material.COBBLE_WALL, Material.QUARTZ_BLOCK,
+            Material.PRISMARINE, Material.RED_SANDSTONE
+    ));
+    /** Same, but only the first 2 bits of the data are the look. The rest is the direction. */
+    private static final Set<Material> MASKED_DATA_BLOCKS = new HashSet<>(Arrays.asList(
+            Material.LEAVES, Material.LEAVES_2, Material.LOG, Material.LOG_2
+    ));
+
     private final ItemStack weapon;
-    private final ItemStack teleportItem;
     private final ItemStack blockItem;
-    private final Ability teleportAbility = new Ability("&5&lTeleporter", 0, player);
+    /** No cooldown, so it only gives the ability its name. */
+    private final Ability teleportAbility = new Ability("&5&lTeleporter", player);
     private final Ability blockAbility = new Ability("&5&lBlock", 7, player);
     private final Ability blockThrowAbility = new Ability("&5&lBlock Throw", player);
 
@@ -67,18 +94,17 @@ public class EndermanClass extends BaseClass {
         weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
         weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
 
-        teleportItem = ItemHelper.setDetails(
-                new ItemStack(Material.ENDER_PEARL, 3),
-                teleportAbility.getAbilityNameRightClickMessage()
-        );
-
         blockItem = ItemHelper.setDetails(
                 new ItemStack(Material.STICK),
                 blockAbility.getAbilityName() + " Pickup &7(Right Click)",
-                "&7Grab the block you're standing on",
-                "&7You can throw it to damage and knock players",
-                "",
-                blockAbility.getOnGroundItemMessage()
+                "&7Grab a block and throw it to damage and knock players up and back"
+        );
+    }
+
+    private ItemStack getTeleporters(int amount) {
+        return ItemHelper.setDetails(
+                new ItemStack(Material.ENDER_PEARL, amount),
+                teleportAbility.getAbilityNameRightClickMessage()
         );
     }
 
@@ -92,12 +118,11 @@ public class EndermanClass extends BaseClass {
     @Override
     public void setItems(Inventory playerInv) {
         used = false;
-        teleportAbility.getCooldownInstance().reset();
         blockAbility.getCooldownInstance().reset();
 
         playerInv.setItem(0, weapon);
-        playerInv.setItem(1, blockItem);
-        playerInv.setItem(2, teleportItem);
+        playerInv.setItem(BLOCK_SLOT, blockItem);
+        playerInv.setItem(TELEPORTER_SLOT, getTeleporters(STARTING_TELEPORTERS));
     }
 
     @Override
@@ -106,20 +131,17 @@ public class EndermanClass extends BaseClass {
         if (instance.state == GameState.ENDED)
             return;
 
-        ActionBarManager actionBarManager = this.getActionBarManager();
-        ActionBarManager.AbilityActionBar abilityActionBar = new ActionBarManager.AbilityActionBar(this, actionBarManager);
-        abilityActionBar.setActionBarAbility(player, blockAbility, null);
+        blockAbility.updateActionBar(player, this);
 
         Inventory inventory = player.getInventory();
 
         if (!inventory.contains(weapon)) {
-            player.getInventory().setItem(0, weapon);
+            inventory.setItem(0, weapon);
         }
 
-        ItemStack slot2 = player.getInventory().getItem(2);
-
-        if (slot2 == null || slot2.getType() != Material.ENDER_PEARL) {
-            player.getInventory().setItem(2, getBarrier());
+        // A pearl that was the last one leaves the slot empty, and a barrier takes its place
+        if (inventory.getItem(TELEPORTER_SLOT) == null) {
+            inventory.setItem(TELEPORTER_SLOT, getBarrier());
         }
     }
 
@@ -149,27 +171,14 @@ public class EndermanClass extends BaseClass {
                 return;
             }
 
-            if (!player.isOnGround()) {
-                blockAbility.sendCustomMessage(blockAbility.getOnGroundChatMessage());
-                return;
-            }
-
             if (!blockAbility.isReady()) return;
 
-            getBlockAbility();
-            return;
-        }
-
-        if (item.isSimilar(teleportItem)) {
-            if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR) {
+            if (action != Action.RIGHT_CLICK_BLOCK) {
+                blockAbility.sendCustomMessage("&c&l(!) &rClick a block to grab it");
                 return;
             }
 
-            if (!teleportAbility.isReady()) {
-                return;
-            }
-
-            teleportAbility.use();
+            grabBlock(event.getClickedBlock());
             return;
         }
 
@@ -184,44 +193,18 @@ public class EndermanClass extends BaseClass {
         }
     }
 
-    private void getBlockAbility() {
-        final Set<Material> maskedSubidBlocks = new HashSet<>(Arrays.asList(
-                Material.LEAVES, Material.LEAVES_2, Material.LOG, Material.LOG_2
-        ));
+    /** "Grabs" the block that was clicked: the player gets an item of it to throw, and the block itself stays. */
+    private void grabBlock(Block block) {
+        Material blockMaterial = block.getType();
 
-        final Set<Material> subidBlocks = new HashSet<>(Arrays.asList(
-                Material.STONE, Material.DIRT, Material.WOOD, Material.SAND, Material.SPONGE, Material.SANDSTONE,
-                Material.WOOL, Material.STEP, Material.STAINED_GLASS, Material.STAINED_GLASS_PANE, Material.MONSTER_EGG,
-                Material.SMOOTH_BRICK, Material.WOOD_STEP, Material.COBBLE_WALL, Material.QUARTZ_BLOCK,
-                Material.PRISMARINE, Material.RED_SANDSTONE,
-            Material.STONE, Material.DIRT, Material.WOOD, Material.SAND, Material.SPONGE, Material.SANDSTONE,
-            Material.WOOL, Material.STAINED_GLASS, Material.STAINED_GLASS_PANE, Material.MONSTER_EGG, Material.SMOOTH_BRICK,
-            Material.COBBLE_WALL, Material.QUARTZ_BLOCK, Material.PRISMARINE, Material.RED_SANDSTONE
-        ));
-
-        Location playerLocation = player.getLocation();
-        World playerWorld = player.getWorld();
-
-        Block block = playerWorld.getBlockAt(
-                playerLocation.getBlockX(),
-                playerLocation.getBlockY() - 1,
-                playerLocation.getBlockZ()
-        );
-
-        Block blockInside = playerWorld.getBlockAt(playerLocation);
-
-        boolean isInsideBlock = blockInside.getType().isSolid() && playerLocation.getY() % 1 != 0;
-
-        if (!isInsideBlock && !block.getType().isSolid()) {
-            player.sendMessage(instance.color("&c&l(!) &rThere is no block under you. Please try again"));
+        if (!blockMaterial.isSolid()) {
+            player.sendMessage(instance.color("&c&l(!) &rYou can't grab that block"));
             return;
         }
 
-        Material blockMaterial = isInsideBlock ? blockInside.getType() : block.getType();
-
-        if (maskedSubidBlocks.contains(blockMaterial))
+        if (MASKED_DATA_BLOCKS.contains(blockMaterial))
             newItem = new ItemStack(blockMaterial, 1, (short) 0, (byte) (block.getData() & 3));
-        else if (subidBlocks.contains(blockMaterial))
+        else if (DATA_BLOCKS.contains(blockMaterial))
             newItem = new ItemStack(blockMaterial, 1, (short) 0, (byte) block.getData());
         else
             newItem = new ItemStack(blockMaterial, 1, (short) 0, (byte) 0);
@@ -251,7 +234,7 @@ public class EndermanClass extends BaseClass {
         ItemHelper.setDetails(newItem, instance.getGameManager().getMain().color("&e&lBlock"));
         ItemHelper.setDetails(newItem, blockThrowAbility.getAbilityNameLeftClickMessage());
 
-        player.getInventory().setItem(1, newItem);
+        player.getInventory().setItem(BLOCK_SLOT, newItem);
         player.playSound(player.getLocation(), Sound.ITEM_PICKUP, 1, 1);
         SoundManager.playSoundToAll(player, Sound.ENDERMAN_IDLE, 1, 1);
 
@@ -288,10 +271,10 @@ public class EndermanClass extends BaseClass {
         );
 
         player.getInventory().remove(newItem);
-        player.getInventory().setItem(1, blockItem);
+        player.getInventory().setItem(BLOCK_SLOT, blockItem);
 
         fallingBlock.setDropItem(false);
-        fallingBlock.setVelocity(direction.clone().multiply(2.0D).setY(direction.getY() + 0.15D));
+        fallingBlock.setVelocity(direction.clone().multiply(BLOCK_THROW_SPEED).setY(direction.getY() + BLOCK_THROW_LIFT));
 
         // Sound when the block is thrown
         SoundManager.playSoundToAll(player, spawnLocation, Sound.CHICKEN_EGG_POP, 1.0f, 0.75f);
@@ -345,14 +328,14 @@ public class EndermanClass extends BaseClass {
                     return;
                 }
 
-                if (ticks > 80) {
+                if (ticks > BLOCK_LIFETIME_TICKS) {
                     fallingBlock.remove();
                     HandlerList.unregisterAll(blockLandListener);
                     cancel();
                     return;
                 }
 
-                for (Entity entity : fallingBlock.getNearbyEntities(0.2D, 0.2D, 0.2D)) {
+                for (Entity entity : fallingBlock.getNearbyEntities(BLOCK_HIT_RADIUS, BLOCK_HIT_RADIUS, BLOCK_HIT_RADIUS)) {
                     if (!(entity instanceof Player)) continue;
 
                     Player hitPlayer = (Player) entity;
@@ -370,14 +353,14 @@ public class EndermanClass extends BaseClass {
 
                     Location location = hitPlayer.getLocation();
 
-                    EntityDamageEvent damageEvent = new EntityDamageEvent(hitPlayer, DamageCause.PROJECTILE, 4.5);
+                    EntityDamageEvent damageEvent = new EntityDamageEvent(hitPlayer, DamageCause.PROJECTILE, BLOCK_DAMAGE);
                     instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 
                     if (!damageEvent.isCancelled()) {
-                        hitPlayer.damage(4.5, player);
+                        hitPlayer.damage(BLOCK_DAMAGE, player);
 
                         Vector knockback = direction.clone();
-                        knockback.setY(1.0D);
+                        knockback.setY(BLOCK_KNOCKBACK_UP);
                         hitPlayer.setVelocity(knockback);
 
                         spawnBlockCollisionParticles(
@@ -468,21 +451,16 @@ public class EndermanClass extends BaseClass {
     @Override
     public void killEvent(Player damagerPlayer) {
         if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
-            ItemStack item = ItemHelper.setDetails(
-                    new ItemStack(Material.ENDER_PEARL, 1),
-                    instance.color("&5&lTeleporter &7(Right Click)")
-            );
+            damagerPlayer.sendMessage(instance.getGameManager().getMain().color("&2&l(!) &rYou got a kill and gained &e"
+                    + TELEPORTERS_PER_KILL + " &rextra " + teleportAbility.getAbilityName()));
 
-            damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
-                    "&2&l(!) &rYou got a kill and gained an extra &5&lTeleporter"
-            ));
-
-            ItemStack currentItem = damagerPlayer.getInventory().getItem(2);
+            // Adds to the pearls left, or replaces the barrier
+            ItemStack currentItem = damagerPlayer.getInventory().getItem(TELEPORTER_SLOT);
 
             if (currentItem == null || currentItem.getType() != Material.ENDER_PEARL) {
-                damagerPlayer.getInventory().setItem(2, item);
+                damagerPlayer.getInventory().setItem(TELEPORTER_SLOT, getTeleporters(TELEPORTERS_PER_KILL));
             } else {
-                damagerPlayer.getInventory().addItem(item);
+                currentItem.setAmount(currentItem.getAmount() + TELEPORTERS_PER_KILL);
             }
         }
     }

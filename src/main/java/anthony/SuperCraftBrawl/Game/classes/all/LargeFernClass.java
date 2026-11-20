@@ -48,7 +48,7 @@ public class LargeFernClass extends BaseClass {
     private static final double SPORE_DAMAGE = SPORE_EFFECTIVE_DAMAGE / CLASS_ARMOR_MITIGATION;
     private static final double SPORE_SPEED = 1.5;
     /** How far the corner spores are off the aim, for every block they fly. */
-    private static final double SPORE_SPREAD = 0.15;
+    private static final double SPORE_SPREAD = 0.12;
     /** The spores of a burst land within a few ticks of each other, the damage is dealt once they all did. */
     private static final long SPORE_DAMAGE_DELAY_TICKS = 3;
     private static final int SPORE_AMOUNT = 5;

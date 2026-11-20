@@ -87,17 +87,16 @@ public class CloudClass extends BaseClass {
 				"&7Condition: &eOn the ground",
 				"&7Range: &a" + ItemHelper.formatDouble(BREEZE_RANGE) + " &7blocks"),
 		BLIZZARD("&f&lBlizzard", DyeColor.WHITE,
-				"&7Throw snowballs all around you that help you combo and apply",
-				"&3&o" + ItemHelper.getPotionEffectName(GameLootDrops.SLOWBALL_EFFECT.getType()) + " &e"
-						+ (GameLootDrops.SLOWBALL_EFFECT.getAmplifier() + 1) + " &7for &e"
-						+ GameLootDrops.SLOWBALL_EFFECT.getDuration() / 20 + "s &7on hit",
+				"&7Throw snowballs all around to help",
+				"&7you combo and apply &3&o" + ItemHelper.getPotionEffectName(GameLootDrops.SLOWBALL_EFFECT.getType()) + " &e"
+						+ (GameLootDrops.SLOWBALL_EFFECT.getAmplifier() + 1),
+				"&7for &e" + GameLootDrops.SLOWBALL_EFFECT.getDuration() / 20 + "s &7on hit",
 				"",
 				"&7Condition: &eUp to " + ItemHelper.formatDouble(LOW_AIR_HEIGHT) + " blocks above ground",
 				"&7Duration: &a" + ItemHelper.formatDouble(BLIZZARD_TICKS / 20.0) + "&as"),
 		LIGHTNING("&e&lLightning", DyeColor.YELLOW,
-				"&7Strike lightning where you aim,",
-				"&7damaging and setting enemies",
-				"&c&oon fire",
+				"&7Strike a lightning at the aimed block,",
+				"&7damaging and setting enemies &c&oon fire",
 				"",
 				"&7Condition: &eOver " + ItemHelper.formatDouble(LOW_AIR_HEIGHT) + " blocks above ground",
 				"&7Range: &a" + ItemHelper.formatDouble(LIGHTNING_RANGE) + " &7blocks");
@@ -137,11 +136,11 @@ public class CloudClass extends BaseClass {
 		weapon = ItemHelper.setUnbreakable(ItemHelper.setDetails(
 				new ItemStack(Material.WOOD_SWORD),
 				"&3&lStormbringer &7(Right Click)",
-				"&7Cast different abilities depending on:",
-				"&7▸ &bBreeze: &7While on the ground",
-				"&7▸ &fBlizzard: &7While up to &e" + ItemHelper.formatDouble(LOW_AIR_HEIGHT) + " &7blocks above ground",
-				"&7▸ &eLightning: &7While over &e" + ItemHelper.formatDouble(LOW_AIR_HEIGHT) + "&7 blocks above ground",
-				"&7▸ &4TNT Rain: &7While sneaking"
+				"&7Cast abilities depending on conditions:",
+				"&7▸ &4TNT Rain: &7Sneaking",
+				"&7▸ &bBreeze: &7On the ground",
+				"&7▸ &fBlizzard: &7Up to &e" + ItemHelper.formatDouble(LOW_AIR_HEIGHT) + " &7blocks above ground",
+				"&7▸ &eLightning: &7Over &e" + ItemHelper.formatDouble(LOW_AIR_HEIGHT) + "&7 blocks above ground"
 		));
 
 		barrierItem = ItemHelper.setDetails(
@@ -346,6 +345,8 @@ public class CloudClass extends BaseClass {
 					TNTPrimed tnt = target.getWorld().spawn(target.getLocation().add(0, TNT_RAIN_HEIGHT, 0), TNTPrimed.class);
 					tnt.setFuseTicks(TNT_FUSE_TICKS);
 					target.addPotionEffect(TNT_RAIN_SLOWNESS);
+					// Only the enemy it falls on hears the fuse, for each TNT
+					target.playSound(target.getLocation(), Sound.FUSE, 1f, 1f);
 				}
 			}
 		}.runTaskTimer(instance.getGameManager().getMain(), 0, TNT_RAIN_WAVE_TICKS));
