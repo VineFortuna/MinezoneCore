@@ -21,6 +21,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BannerMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -788,8 +789,18 @@ public class FWShopGUI implements InventoryProvider {
 			}
 		}
 
-		return ItemHelper.setDetails(new ItemStack(trapIconFor(trap)),
-				main.color("&6&l" + trap.getDisplayName()), lore);
+		// The decoy flag is shown as a banner in the color of the team looking at the shop
+		ItemStack icon = trap == FWTrap.DECOY_FLAG ? teamBanner() : new ItemStack(trapIconFor(trap));
+		return ItemHelper.setDetails(icon, main.color("&6&l" + trap.getDisplayName()), lore);
+	}
+
+	/** A banner in the color of the team the shop belongs to, the same color its flag has. */
+	private ItemStack teamBanner() {
+		ItemStack banner = new ItemStack(Material.BANNER);
+		BannerMeta meta = (BannerMeta) banner.getItemMeta();
+		meta.setBaseColor(team.getColor());
+		banner.setItemMeta(meta);
+		return banner;
 	}
 
 	private Material trapIconFor(FWTrap trap) {
