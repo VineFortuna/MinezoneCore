@@ -8,8 +8,6 @@ import anthony.SuperCraftBrawl.Game.GameLootDrops;
 import anthony.SuperCraftBrawl.Game.GameSettings;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.friends.FriendProfile;
 import anthony.SuperCraftBrawl.party.Party;
@@ -107,9 +105,9 @@ public class Commands implements CommandExecutor, TabCompleter {
 				itemsCommand(args, player);
 				break;
 
-			case "setlives":
-				setLivesCommand(args, player);
-				break;
+//			case "setlives":
+//				setLivesCommand(args, player);
+//				break;
 
 			case "gamestats":
 				gameStatsCommand(args, player);
@@ -131,9 +129,9 @@ public class Commands implements CommandExecutor, TabCompleter {
 				spectateCommand(args, player);
 				break;
 
-			case "class":
-				classCommand(args, player);
-				break;
+//			case "class":
+//				classCommand(args, player);
+//				break;
 
 			case "leave":
 				this.leaveGame(player);
@@ -166,10 +164,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 			case "heal":
 				healCommand(player, args);
 				break;
-
-			case "forceclass":
-				forceClassCommand(player, args);
-				break;
+//
+//			case "forceclass":
+//				forceClassCommand(player, args);
+//				break;
 
                 case "party":
                     partyCommand(args, player);
@@ -668,6 +666,8 @@ public class Commands implements CommandExecutor, TabCompleter {
         player.sendMessage(main.color("&r&m----------------------------"));
 	}
 
+    // TODO:
+    /*
 	private void forceClassCommand(Player player, String[] args) {
 		if (!player.hasPermission("scb.forceclass")) {
 			player.sendMessage(main.color("&c&l(!) &rYou do not have permission for that!"));
@@ -767,6 +767,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		String message = "&a&l(!) &r&e" + targetPlayer.getName() + "&r's class was set to " + selectedClass.getTag();
 		newBaseClass.tellAll(main.color(message));
 	}
+*/
 
 	private void healCommand(Player player, String[] args) {
         GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
@@ -1116,9 +1117,9 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 
 		switch (args[0].toLowerCase()) {
-		case "get":
-			purchaseGetCommand(player, args);
-			break;
+//		case "get":
+//			purchaseGetCommand(player, args);
+//			break;
 		case "buy":
 			if (args.length == 1) {
 				player.sendMessage("Not enough arguments");
@@ -1130,6 +1131,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 	}
 
+    // TODO:
+    /*
     private void purchaseGetCommand(Player player, String[] args) {
         PlayerData data = main.getDataManager().getPlayerData(player);
 
@@ -1198,6 +1201,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 
         player.sendMessage(main.color("&6&l======================================="));
     }
+    */
 
     private String boolColor(boolean value) {
         return value ? "&a" : "&c";
@@ -1357,6 +1361,8 @@ public class Commands implements CommandExecutor, TabCompleter {
         return prefix + "received " + itemName;
     }
 
+    // TODO:
+    /*
     private void setLivesCommand(String[] args, Player player) {
 		if (args.length < 2) {
 			player.sendMessage(main.color("&c&l(!) &rIncorrect usage! Try doing: &e/setlives <player> <num>"));
@@ -1412,6 +1418,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		player.sendMessage(main.color("&2&l(!) &rYou set &e" + target.getName() + "&r's lives to &e" + num));
 		baseClass.score.setScore(baseClass.lives);
 	}
+    */
 
 	private void gameStatsCommand(String[] args, Player player) {
 		GameInstance currentGame = main.getGameManager().GetInstanceOfPlayer(player);
@@ -1644,6 +1651,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 		player.sendMessage(main.color("l--> " + players));
 	}
 
+    // TODO:
+    /*
 	private void classCommand(String[] args, Player player) {
 		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 
@@ -1763,6 +1772,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		}
 		return null;
 	}
+    */
 
     public void leaveGame(Player player) {
         if (main.getPartyManager() != null) {
@@ -1874,7 +1884,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 
                 return StringUtil.copyPartialMatches(args[0], mapNames, new ArrayList<>());
             }
-        } else if (cmd.getName().equalsIgnoreCase("class")
+        }
+        // TODO:
+        /*
+        else if (cmd.getName().equalsIgnoreCase("class")
                 || cmd.getName().equalsIgnoreCase("purchases")
                 || cmd.getName().equalsIgnoreCase("forceclass")) {
             List<String> classNames = Arrays.stream(ClassType.getAvailableClasses())
@@ -1891,7 +1904,9 @@ public class Commands implements CommandExecutor, TabCompleter {
                 String partial = isPurchasesCmd ? args[1] : args[0];
                 return StringUtil.copyPartialMatches(partial, classNames, new ArrayList<>());
             }
-        } else if (cmd.getName().equalsIgnoreCase("friends")) {
+        } */
+
+        else if (cmd.getName().equalsIgnoreCase("friends")) {
             if (args.length == 1) {
                 List<String> options = Arrays.asList("add", "accept", "reject", "remove", "requests", "list", "help");
                 return StringUtil.copyPartialMatches(args[0], options, new ArrayList<>());

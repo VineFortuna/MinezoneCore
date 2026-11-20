@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -15,39 +16,48 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.bukkit.potion.PotionEffectType.*;
 
 public class ItemHelper {
-	public static ItemStack setDetails(ItemStack item, String name, String...lore) {
+    // TODO: add more descriptive names, ie, 'setDetailsWithAddon'.
+    // TODO: 'addition' parameter is stupid, remove it and fix the usages.
+	private static ItemStack setDetailsImpl(ItemStack item, String name, List<String> lore, List<String> addition) {
 		List<String> coloredLore = new ArrayList<>();
-
 		if (lore != null) {
-			for (String line : lore) {
-				coloredLore.add(ChatColorHelper.color(line));
-			}
+            coloredLore = lore.stream().map(ChatColorHelper::color).collect(Collectors.toList());
 		}
 
-		return setDetails(item, name, coloredLore);
+		if (addition != null) {
+			if (addition.get(0) != null || addition.size() >= 2) {
+				coloredLore.addAll(addition);
+            }
+		}
+
+		ItemMeta itemMeta = item.getItemMeta();
+		itemMeta.setDisplayName(ChatColorHelper.color(name));
+		itemMeta.setLore(coloredLore);
+		item.setItemMeta(itemMeta);
+
+		return item;
+	}
+
+	public static ItemStack setDetails(ItemStack item, String name, String... lore) {
+		return setDetailsImpl(item, name, Arrays.asList(lore), null);
 	}
 
 	public static ItemStack setDetails(ItemStack item, String name, List<String> lore) {
-		return setDetails(item, name, lore, (String) null);
+		return setDetailsImpl(item, name, lore, null);
 	}
 
 	public static ItemStack setDetails(ItemStack item, String name, List<String> lore, String... addon) {
-		ItemMeta im = item.getItemMeta();
-		im.setDisplayName(ChatColorHelper.color(name));
-		if(addon != null){
-			if(addon.length >= 2 || addon[0] != null) lore.addAll(Arrays.asList(addon));
-		}
-		im.setLore(lore);
-		item.setItemMeta(im);
-		return item;
+		return setDetailsImpl(item, name, lore, Arrays.asList(addon));
+	}
+
+	public static ItemStack setDetails(ItemStack item, String name, List<String> lore, List<String> addon) {
+		return setDetailsImpl(item, name, lore, addon);
 	}
 
 	public static ItemStack addEnchant(ItemStack item, Enchantment type, int level) {
@@ -55,92 +65,72 @@ public class ItemHelper {
 		return item;
 	}
 
-	// killercreepr
-	public static ItemStack create(Material mat) {
-		return new ItemStack(mat);
+    // TODO: Replace with more descriptive names, ie 'createWithGlowing', or 'createWithFlags', etc. And add vaargs for lores.
+    private static ItemStack createImpl(Material mat, String name, int amount, List<String> lore, boolean hideFlags, boolean isGlowing) {
+        ItemStack item = new ItemStack(mat);
+        ItemMeta meta = item.getItemMeta();
+
+        if (meta != null) {
+            if (name != null)
+                meta.setDisplayName(ChatColorHelper.color(name));
+
+            if (lore != null)
+                meta.setLore(ChatColorHelper.colorList(lore));
+
+            if (hideFlags) {
+                meta.addItemFlags(ItemFlag.values());
+            } else {
+                meta.removeItemFlags(ItemFlag.values());
+            }
+
+            item.setItemMeta(meta);
+        }
+
+        item.setAmount(amount);
+        setGlowing(item, isGlowing);
+
+        return item;
+    }
+
+    public static ItemStack create(Material mat, String name, int amount, List<String> lore, boolean hideFlags, boolean isGlowing) {
+        return createImpl(mat, name, amount, lore, hideFlags, isGlowing);
+    }
+
+    public static ItemStack create(Material mat) {
+		return createImpl(mat, null, 1, null, false, false);
 	}
 
 	public static ItemStack create(Material mat, String name) {
-		ItemStack item = create(mat);
-		ItemMeta meta = item.getItemMeta();
-		if (meta == null)
-			return item;
-
-		meta.setDisplayName(ChatColorHelper.color(name));
-		item.setItemMeta(meta);
-		return item;
+        return createImpl(mat, name, 1, null, false, false);
 	}
 
 	public static ItemStack create(Material mat, String name, int amount) {
-		ItemStack item = create(mat, name);
-
-		item.setAmount(amount);
-		return item;
+        return createImpl(mat, name, amount, null, false, false);
 	}
 
 	public static ItemStack create(Material mat, String name, List<String> lore) {
-		ItemStack item = create(mat, name);
-		ItemMeta meta = item.getItemMeta();
-		if (meta == null)
-			return item;
-		meta.setLore(ChatColorHelper.colorList(lore));
-		item.setItemMeta(meta);
-		return item;
+        return createImpl(mat, name, 1, lore, false, false);
 	}
 
 	public static ItemStack create(Material mat, String name, String loreLine1) {
-		ItemStack item = create(mat, name);
-		ItemMeta meta = item.getItemMeta();
-		if (meta == null)
-			return item;
-		List<String> loreList = new ArrayList<>();
-
-		loreList.add(ChatColorHelper.color(loreLine1));
-
-		meta.setLore(loreList);
-		item.setItemMeta(meta);
-		return item;
+        return createImpl(mat, name, 1, List.of(loreLine1), false, false);
 	}
 
+    // Who the hell is using this overload? Fixme:
 	public static ItemStack create(Material mat, String name, String loreLine1, String loreLine2) {
-		ItemStack item = create(mat, name);
-		ItemMeta meta = item.getItemMeta();
-		if (meta == null)
-			return item;
-		List<String> loreList = new ArrayList<>();
-
-		loreList.add(ChatColorHelper.color(loreLine1));
-		loreList.add(ChatColorHelper.color(loreLine2));
-
-		meta.setLore(loreList);
-		item.setItemMeta(meta);
-		return item;
+        return createImpl(mat, name, 1, List.of(loreLine1, loreLine2), false, false);
 	}
 
 	public static ItemStack create(Material mat, String name, List<String> lore, int amount) {
-		ItemStack item = create(mat, name, lore);
-
-		item.setAmount(amount);
-
-		return item;
+        return createImpl(mat, name, amount, lore, false, false);
 	}
 
 	public static ItemStack create(Material mat, String name, List<String> lore, boolean hideFlags) {
-		ItemStack item = create(mat, name, lore);
-		ItemMeta meta = item.getItemMeta();
-		if (meta == null)
-			return item;
-		if (hideFlags)
-			meta.addItemFlags(ItemFlag.values());
-		else
-			meta.removeItemFlags(ItemFlag.values());
-		item.setItemMeta(meta);
-		return item;
+        return createImpl(mat, name, 1, lore, hideFlags, false);
 	}
 
 	public static ItemStack create(Material mat, String name, List<String> lore, boolean hideFlags, boolean isGlowing) {
-		ItemStack item = create(mat, name, lore, hideFlags);
-		return setGlowing(item, isGlowing);
+        return createImpl(mat, name, 1, lore, hideFlags, isGlowing);
 	}
 
 	// Natowski
@@ -163,59 +153,65 @@ public class ItemHelper {
 		return itemStack;
 	}
 
+    private static ItemStack createSkullHeadImpl(SkullType skullType, int amount, String displayName, List<String> lore) {
+        ItemStack itemStack = new ItemStack(Material.SKULL_ITEM, amount, (short) skullType.ordinal());
+        SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
+
+        if (displayName != null) {
+            skullMeta.setDisplayName(ChatColorHelper.color(displayName));
+        }
+
+        if (lore != null) {
+            skullMeta.setLore(ChatColorHelper.colorList(lore));
+        }
+
+        itemStack.setItemMeta(skullMeta);
+        return itemStack;
+    }
+
 	public static ItemStack createSkullHead(int amount, SkullType skullType) {
-		return new ItemStack(Material.SKULL_ITEM, 1, (short) skullType.ordinal());
+		return createSkullHeadImpl(skullType, amount, null, null);
 	}
 
 	public static ItemStack createSkullHead(int amount, SkullType skullType, String displayName) {
-		ItemStack itemStack = createSkullHead(amount, skullType);
-		SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
-
-		skullMeta.setDisplayName(ChatColorHelper.color(displayName));
-		itemStack.setItemMeta(skullMeta);
-
-		return itemStack;
+        return createSkullHeadImpl(skullType, amount, displayName, null);
 	}
 
 	public static ItemStack createSkullHead(int amount, SkullType skullType, String displayName, List<String> lore) {
-		ItemStack itemStack = createSkullHead(amount, skullType, displayName);
-		SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
-
-		skullMeta.setDisplayName(ChatColorHelper.color(displayName));
-		skullMeta.setLore(ChatColorHelper.colorList(lore));
-		itemStack.setItemMeta(skullMeta);
-
-		return itemStack;
+        return createSkullHeadImpl(skullType, amount, displayName, lore);
 	}
+
+    private static ItemStack createSkullHeadPlayerImpl(String owner, int amount, String displayName, List<String> lore) {
+        ItemStack itemStack = new ItemStack(Material.SKULL_ITEM, amount, (short) SkullType.PLAYER.ordinal());
+        SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
+        skullMeta.setOwner(owner);
+
+        if (displayName != null) {
+            skullMeta.setDisplayName(ChatColorHelper.color(displayName));
+        }
+
+        if (lore != null) {
+            skullMeta.setLore(ChatColorHelper.colorList(lore));
+        }
+
+        itemStack.setItemMeta(skullMeta);
+        return itemStack;
+    }
 
 	public static ItemStack createSkullHeadPlayer(int amount, String owner) {
-		ItemStack itemStack = new ItemStack(Material.SKULL_ITEM, amount, (short) SkullType.PLAYER.ordinal());
-		SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
-
-		skullMeta.setOwner(owner);
-		itemStack.setItemMeta(skullMeta);
-
-		return itemStack;
-	}
+        return createSkullHeadPlayerImpl(owner, amount, null, null);
+    }
 
 	public static ItemStack createSkullHeadPlayer(int amount, String owner, String displayName) {
-		ItemStack itemStack = createSkullHeadPlayer(amount, owner);
-		SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
-
-		skullMeta.setDisplayName(ChatColorHelper.color(displayName));
-		itemStack.setItemMeta(skullMeta);
-
-		return itemStack;
+        return createSkullHeadPlayerImpl(owner, amount, displayName, null);
 	}
 
 	public static ItemStack createSkullHeadPlayer(int amount, String owner, String displayName, List<String> lore) {
-		ItemStack itemStack = createSkullHeadPlayer(amount, owner, displayName);
-		SkullMeta skullMeta = (SkullMeta) itemStack.getItemMeta();
+        return createSkullHeadPlayerImpl(owner, amount, displayName, lore);
+	}
 
-		skullMeta.setLore(ChatColorHelper.colorList(lore));
-		itemStack.setItemMeta(skullMeta);
-
-		return itemStack;
+	public static ItemStack createSkullBlock(Material block) {
+		return new ItemStack(block, 1, (short) SkullType.PLAYER.ordinal());
 	}
 	
 	public static ItemStack createSkullTexture(String textureUrl) {
@@ -443,6 +439,22 @@ public class ItemHelper {
 		return item;
 	}
 
+    public static ItemStack setFlag(ItemStack item, ItemFlag flag) {
+        ItemMeta meta = item.getItemMeta();
+        meta.addItemFlags(flag);
+        item.setItemMeta(meta);
+
+        return item;
+    }
+
+    public static ItemStack setFlags(ItemStack item, ItemFlag... flag) {
+        ItemMeta meta = item.getItemMeta();
+        meta.addItemFlags(flag);
+        item.setItemMeta(meta);
+
+        return item;
+    }
+
 	public static ItemStack setLore(ItemStack item, List<String> lore) {
 		if (item == null)
 			return null;
@@ -506,7 +518,7 @@ public class ItemHelper {
 		return ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " ");
 	}
 
-    public enum StainedClayColor {
+	public enum StainedClayColor {
 		WHITE(0),
 		ORANGE(1),
 		MAGENTA(2),

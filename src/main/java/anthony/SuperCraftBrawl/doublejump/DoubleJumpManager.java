@@ -19,7 +19,6 @@ import org.bukkit.util.Vector;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 
 public class DoubleJumpManager implements Listener {
@@ -33,12 +32,14 @@ public class DoubleJumpManager implements Listener {
 
     private double getVerticalVel(Player player) {
         GameInstance instance = main.getGameManager().GetInstanceOfPlayer(player);
-        if (instance != null) {
-            BaseClass bc = instance.classes.get(player);
-            if (bc != null) {
-                return bc.baseVerticalJump;
-            }
-        }
+//        if (instance != null) {
+//            BaseClass bc = instance.classes.get(player);
+//            if (bc != null) {
+//                return bc.baseVerticalJump;
+//            }
+//        }
+        // TODO: Find a better way to get an active class's data.
+
         return 1.0;
     }
 
@@ -85,10 +86,12 @@ public class DoubleJumpManager implements Listener {
 
         // In a started/ended game, prevent spectators or 0-life players from double jumping
         if (i != null && (i.state == GameState.STARTED || i.state == GameState.ENDED)) {
-            BaseClass bc = i.classes.get(player);
-            if (bc != null && bc.getLives() <= 0) {
-                return;
-            }
+//            BaseClass bc = i.classes.get(player);
+//            if (bc != null && bc.getLives() <= 0) {
+//                return;
+//            }
+            return;
+            // TODO:
         } else {
             // If spectating a started/ended game and not in the lobby world, skip
             i = main.getGameManager().GetInstanceOfSpectator(player);

@@ -1,5 +1,5 @@
 name: MinezoneCore
-main: anthony.SuperCraftBrawl.Core
+main: anthony.Core
 version: 1.0
 softdepend: [MinezonePunish]
 commands:

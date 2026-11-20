@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.playerdata;
 
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.Game.classes.ClassBase;
+import anthony.SuperCraftBrawl.Game.classes.ClassMetaDataManager;
 import anthony.SuperCraftBrawl.ranks.Rank;
 
 import java.util.*;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 import org.bukkit.entity.Player;
 
 public class PlayerData {
+	public ClassMetaDataManager metaDataManager;
 	public UUID playerUUID;
 
 	public String playerName, playerIP;
@@ -140,12 +142,15 @@ public class PlayerData {
 		this.hohohoTitle = hohohoTitle;
 	}
 
-	public boolean isPurchased(ClassType type) {
-		return this.playerClasses.get(type.getID()) != null && this.playerClasses.get(type.getID()).purchased
-				|| type.getTokenCost() == 0;
+	public boolean isPurchased(Class<? extends ClassBase> gameClass) {
+		return this.playerClasses.get(metaDataManager.getClassUniqueIdentifier(gameClass)) != null &&
+			   this.playerClasses.get(metaDataManager.getClassUniqueIdentifier(gameClass)).purchased ||
+			   metaDataManager.getClassTokenCount(gameClass).isEmpty();
 	}
 
 	public PlayerData(UUID playerUUID, String playerName, String playerIP) {
+		this.metaDataManager = new ClassMetaDataManager();
+
 		this.playerUUID = playerUUID;
 		this.playerName = playerName;
 		this.playerIP = playerIP;

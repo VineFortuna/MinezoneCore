@@ -1,8 +1,8 @@
 package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.mastery.MasteryHeads;
+import anthony.SuperCraftBrawl.Game.classes.ClassBase;
+import anthony.SuperCraftBrawl.Game.classes.ClassMetaDataManager;
 import anthony.SuperCraftBrawl.mastery.MasteryReward;
 import anthony.SuperCraftBrawl.mastery.MasteryStatus;
 import anthony.SuperCraftBrawl.mastery.MasteryTier;
@@ -24,22 +24,22 @@ import java.util.Arrays;
 public class ClassMasteryGUI implements InventoryProvider {
 
     public Core main;
-    public ClassType type;
-    public SmartInventory inv;
+    public Class<? extends ClassBase> gameclass;
+    public SmartInventory inventory;
 
     private static final String[] NUMERALS = {"I", "II", "III", "IV", "V"};
 
-    public ClassMasteryGUI(Core main, ClassType type, SmartInventory parent) {
-        inv = SmartInventory.builder()
+    public ClassMasteryGUI(Core main, Class<? extends ClassBase> gameclass, SmartInventory parent) {
+        inventory = SmartInventory.builder()
                 .id("myInventory")
                 .provider(this)
                 .size(3, 9)
-                .title(main.color("&8&l" + type.name() + " Mastery"))
+                .title(main.color("&8&l" + ClassMetaDataManager.getClassTitle(gameclass) + " Mastery"))
                 .parent(parent)
                 .build();
 
         this.main = main;
-        this.type = type;
+        this.gameclass = gameclass;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class ClassMasteryGUI implements InventoryProvider {
                 e -> {}));
 
         PlayerData data = main.getDataManager().getPlayerData(player);
-        ClassDetails details = data.playerClasses.get(type.getID());
+        ClassDetails details = data.playerClasses.get(ClassMetaDataManager.getClassUniqueIdentifier(gameclass));
 
         MasteryTier[] tiers = new MasteryTier[]{
                 new MasteryTier(10,  new MasteryReward(10,  20,  Material.GOLD_PLATE),  1),
@@ -101,7 +101,7 @@ public class ClassMasteryGUI implements InventoryProvider {
         // Back button
         contents.set(2, 8, ClickableItem.of(
                 ItemHelper.setDetails(new ItemStack(Material.ARROW), ChatColor.GRAY + "Go Back"),
-                e -> inv.getParent().get().open(player)));
+                e -> inventory.getParent().get().open(player)));
     }
 
     @Override
@@ -144,7 +144,7 @@ public class ClassMasteryGUI implements InventoryProvider {
         int played = MasteryTier.getProgress(details);
 
         ItemStack head = ItemHelper.setDetails(
-                MasteryHeads.headReward(type),
+                ItemHelper.createSkullHeadPlayer(1, ClassMetaDataManager.getClassMasteryHead(gameclass)),
                 main.color("&e&lTier " + NUMERALS[4]));
 
         if (played < 100) {
@@ -182,11 +182,11 @@ public class ClassMasteryGUI implements InventoryProvider {
                 tier.setClaimed(details, enabling);
                 player.sendMessage(main.color("&2&l(!) &r"
                         + (enabling ? "Enabled" : "Disabled")
-                        + " alternate head for " + type.getTag()));
+                        + " alternate head for " + ClassMetaDataManager.getClassTitle(gameclass)));
                 player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 2);
                 details.hasUpdated = true;
                 main.getDataManager().saveData(data);
-                inv.open(player);
+                inventory.open(player);
             }
             return;
         }
@@ -209,7 +209,7 @@ public class ClassMasteryGUI implements InventoryProvider {
             player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1, 0);
             details.hasUpdated = true;
             main.getDataManager().saveData(data);
-            inv.open(player);
+            inventory.open(player);
         }
     }
 }

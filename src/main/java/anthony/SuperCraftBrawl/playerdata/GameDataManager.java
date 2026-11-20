@@ -2,7 +2,7 @@ package anthony.SuperCraftBrawl.playerdata;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameType;
-import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import anthony.SuperCraftBrawl.Game.classes.ClassBase;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -85,7 +85,7 @@ public class GameDataManager {
             String mapName,
             int durationMinutes,
             List<Player> winners,
-            Map<Player, BaseClass> classes,
+            Map<Player, Class<? extends ClassBase>> classes,
             Player firstBlood) {
 
         Bukkit.getScheduler().runTaskAsynchronously(main, () -> {
@@ -102,17 +102,19 @@ public class GameDataManager {
                 keys.close();
                 stmt.close();
 
-                for (Map.Entry<Player, BaseClass> entry : classes.entrySet()) {
+                for (Map.Entry<Player, Class<? extends ClassBase>> entry : classes.entrySet()) {
                     Player player = entry.getKey();
-                    BaseClass bc = entry.getValue();
+                    Class<? extends ClassBase> bc = entry.getValue();
                     Statement ps = db.getConnection().createStatement();
-                    ps.execute(
-                            "INSERT INTO scb_game_players (game_id, uuid, class_id, placement, kills, deaths, lives, winner, firstblood) VALUES ("
-                                    + gameId + ", '" + player.getUniqueId() + "', " + bc.getType().getID() + ", "
-                                    + bc.placement + ", " + bc.totalKills + ", " + bc.totalDeaths + ", " + bc.getLives() + ", "
-                                    + (winners.contains(player) ? 1 : 0) + ", "
-                                    + (firstBlood != null && firstBlood.equals(player) ? 1 : 0) + ")"
-                    );
+//                    ps.execute(
+//                            "INSERT INTO scb_game_players (game_id, uuid, class_id, placement, kills, deaths, lives, winner, firstblood) VALUES ("
+//                                    + gameId + ", '" + player.getUniqueId() + "', " + bc.getType().getID() + ", "
+//                                    + bc.placement + ", " + bc.totalKills + ", " + bc.totalDeaths + ", " + bc.getLives() + ", "
+//                                    + (winners.contains(player) ? 1 : 0) + ", "
+//                                    + (firstBlood != null && firstBlood.equals(player) ? 1 : 0) + ")"
+//                    );
+                    // TODO: This stuff should not be owned by BaseClass.
+
                     ps.close();
                 }
             } catch (Exception e) {

@@ -192,7 +192,8 @@ public class ChristmasRewardsGUI implements InventoryProvider {
 				break;
 
 			case 8:
-				int classID = ClassType.SnowGolem.getID();
+				/* TODO: Snow golam metadata id check */
+				int classID = 12;
 				ClassDetails details = data.playerClasses.get(classID);
 				if (details == null) {
 					details = new ClassDetails();
