@@ -33,7 +33,7 @@ public class FWCommand implements CommandExecutor, TabExecutor {
 	/** Join/leave moved to the shared /join and /leave commands - this is just a pointer to those now. */
 	private void sendHelp(Player player) {
 		player.sendMessage(fwGameManager.getMain().color("&6&lFLAG WARS COMMANDS"));
-		player.sendMessage(fwGameManager.getMain().color("&e/join flagwars <solo|duo> -> &rJoin a match (defaults to solo)"));
+		player.sendMessage(fwGameManager.getMain().color("&e/join flagwars [solo] -> &rJoin a match"));
 		player.sendMessage(fwGameManager.getMain().color("&e/leave -> &rLeave the match"));
 	}
 

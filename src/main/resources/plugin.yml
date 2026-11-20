@@ -5,7 +5,7 @@ softdepend: [MinezonePunish]
 commands:
    join:
       description: Join a game
-      usage: /join [map name | flagwars [solo|duo]]
+      usage: /join [map name | flagwars [solo]]
    hub:
       description: Hub command
       aliases: [h, lobby]

@@ -59,7 +59,7 @@ public class NPCManager implements Listener {
 		scbClassic.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));
 		scbClassic.create();
 
-		flagwars = npcLib.createNPC(Arrays.asList(main.color("&6&lFLAG WARS &r&lNEW!"), main.color("&rModes: &aSolo, Duos"),
+		flagwars = npcLib.createNPC(Arrays.asList(main.color("&6&lFLAG WARS &r&lNEW!"), main.color("&rMode: &aSolo"),
 				main.color("&eClick to Play!")));
 		flagwars.setLocation(new Location(main.getLobbyWorld(), 187.5, 106, 657.5, -174, 3));
 		flagwars.setSkin(flagWarsSkin);

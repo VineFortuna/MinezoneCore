@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/** Opened from the lobby NPC - lets a player pick Solo or Duos before queuing for Flag Wars. */
+/** Opened from the lobby NPC - lets a player pick one of the available modes (see FWGameMode#isAvailable) before queuing for Flag Wars. */
 public class FWModeSelectGUI implements InventoryProvider {
 
 	private static final List<String> SOLO_DESCRIPTION = Arrays.asList(
@@ -70,15 +70,20 @@ public class FWModeSelectGUI implements InventoryProvider {
 			}
 		}
 
-		contents.set(1, 3, ClickableItem.of(modeIcon(main, blueBanner(), FWGameMode.SOLO, SOLO_DESCRIPTION), e -> {
-			inv.close(player);
-			fwGameManager.joinGame(player, FWGameMode.SOLO);
-		}));
+		// Only the modes that can be joined right now. One sits in the middle, two sit either side of it.
+		List<FWGameMode> modes = FWGameMode.availableModes();
+		int[] columns = modes.size() == 1 ? new int[] {4} : new int[] {3, 5};
 
-		contents.set(1, 5, ClickableItem.of(modeIcon(main, steveHead(), FWGameMode.DUO, DUO_DESCRIPTION), e -> {
-			inv.close(player);
-			fwGameManager.joinGame(player, FWGameMode.DUO);
-		}));
+		for (int i = 0; i < modes.size() && i < columns.length; i++) {
+			final FWGameMode mode = modes.get(i);
+			ItemStack icon = mode == FWGameMode.SOLO ? blueBanner() : steveHead();
+			List<String> description = mode == FWGameMode.SOLO ? SOLO_DESCRIPTION : DUO_DESCRIPTION;
+
+			contents.set(1, columns[i], ClickableItem.of(modeIcon(main, icon, mode, description), e -> {
+				inv.close(player);
+				fwGameManager.joinGame(player, mode);
+			}));
+		}
 	}
 
 	private ItemStack blueBanner() {
