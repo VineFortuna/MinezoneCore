@@ -68,7 +68,8 @@ public class DatabaseManager {
 		}
 	}
 
-	private static final String[] FLAG_WARS_STAT_COLUMNS = {
+	/** The Flag Wars stat columns of PlayerData. Public since /fwsetup resetstats clears exactly these. */
+	public static final String[] FLAG_WARS_STAT_COLUMNS = {
 			"FWWins", "FWMatchMvps", "FWLosses", "FWCurrentWinstreak", "FWBestWinstreak",
 			"FWKills", "FWDeaths", "FWFlagsCaptured"
 	};

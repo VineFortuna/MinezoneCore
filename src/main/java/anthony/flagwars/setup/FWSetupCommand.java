@@ -1,5 +1,8 @@
 package anthony.flagwars.setup;
 
+import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.playerdata.DatabaseManager;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
 import anthony.flagwars.FWGameConstants;
 import anthony.flagwars.FWGameManager;
@@ -37,7 +40,8 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 
 	private static final List<String> SUBCOMMANDS = Arrays.asList(
 			"tp", "createmap", "size", "lobby", "spectator", "team", "flag", "shop",
-			"generator", "boundary1", "boundary2", "importantarea", "chesthologram", "list", "maplist", "delete", "save");
+			"generator", "boundary1", "boundary2", "importantarea", "chesthologram", "list", "maplist", "delete", "save",
+			"resetstats");
 	private static final long DELETE_CONFIRM_MILLIS = 15_000L;
 	private static final String IMPORTANT_AREA_USAGE = "/fwsetup importantarea <color> <id> <X> <Y> <Z> &7or &e<id> remove";
 	private static final List<String> RESOURCE_TYPES = Arrays.asList("iron", "gold", "emerald", "diamond");
@@ -48,6 +52,8 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 	// player -> map they asked to delete and when, so /fwsetup delete has to be run twice to go through
 	private final Map<UUID, String> pendingDeleteMap = new HashMap<>();
 	private final Map<UUID, Long> pendingDeleteTime = new HashMap<>();
+	// staff member -> when they asked to reset everyone's stats, so /fwsetup resetstats all has to be run twice too
+	private final Map<UUID, Long> pendingResetAllTime = new HashMap<>();
 
 	public FWSetupCommand(FWGameManager fwGameManager) {
 		this.fwGameManager = fwGameManager;
@@ -84,6 +90,11 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 
 		if (sub.equals("delete")) {
 			handleDelete(player, manager, args);
+			return true;
+		}
+
+		if (sub.equals("resetstats")) {
+			handleResetStats(player, args);
 			return true;
 		}
 
@@ -511,6 +522,110 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 		player.sendMessage(fwGameManager.getMain().color("&2&l(!) &rDeleted the Flag Wars setup for &e" + mapName + "&r."));
 	}
 
+	/**
+	 * /fwsetup resetstats <player> - sets that player's Flag Wars stats back to zero, whether they are online or not.
+	 * /fwsetup resetstats all - does it for everyone, and has to be run twice within 15 seconds to confirm.
+	 * What a player had is written to the console log first, since there is no way back from a reset.
+	 * See FWStatsReset for everything that gets cleared and why.
+	 */
+	private void handleResetStats(Player staff, String[] args) {
+		Core main = fwGameManager.getMain();
+
+		if (args.length < 2) {
+			staff.sendMessage(main.color("&c&l(!) &rTry: &e/fwsetup resetstats <player> &ror &e/fwsetup resetstats all"));
+			return;
+		}
+
+		DatabaseManager db = main.getDatabaseManager();
+		if (db == null || db.getConnection() == null) {
+			staff.sendMessage(main.color("&c&l(!) &rThe database isn't connected, so nothing can be reset."));
+			return;
+		}
+
+		if (args[1].equalsIgnoreCase("all")) {
+			resetAllStats(staff, main, db);
+			return;
+		}
+
+		String name = args[1];
+		if (!FWStatsReset.isPlayerName(name)) {
+			staff.sendMessage(main.color("&c&l(!) &e" + name + " &risn't a valid player name."));
+			return;
+		}
+
+		String uuid;
+		String shownName;
+		String before;
+
+		Player online = Bukkit.getPlayerExact(name);
+		PlayerData data = online != null ? main.getDataManager().getPlayerData(online) : null;
+		if (data != null) {
+			// On the server their stats are held in memory and saved back later, so those have to be zeroed too
+			uuid = data.playerUUID.toString();
+			shownName = data.playerName;
+			before = FWStatsReset.describe(data.fwWins, data.fwMatchMvps, data.fwLosses, data.fwCurrentWinstreak,
+					data.fwBestWinstreak, data.fwKills, data.fwDeaths, data.fwFlagsCaptured);
+			data.resetFlagWarsStats();
+		} else {
+			final List<String[]> found = new ArrayList<>();
+			db.executeQueryCommand(FWStatsReset.lookupSql(name), rows -> {
+				while (rows.next()) {
+					found.add(new String[] {
+							rows.getString("UUID"),
+							rows.getString("LastPlayerName"),
+							FWStatsReset.describe(rows.getInt("FWWins"), rows.getInt("FWMatchMvps"), rows.getInt("FWLosses"),
+									rows.getInt("FWCurrentWinstreak"), rows.getInt("FWBestWinstreak"), rows.getInt("FWKills"),
+									rows.getInt("FWDeaths"), rows.getInt("FWFlagsCaptured"))});
+				}
+			});
+
+			if (found.isEmpty()) {
+				staff.sendMessage(main.color("&c&l(!) &rNo player called &e" + name + " &rhas joined, so there is nothing to reset."));
+				return;
+			}
+			if (found.size() > 1) {
+				// Names can be passed on to someone else, so resetting every match could hit the wrong account
+				staff.sendMessage(main.color("&c&l(!) &rMore than one account last played as &e" + name + "&r, so nothing was reset."));
+				return;
+			}
+			uuid = found.get(0)[0];
+			shownName = found.get(0)[1];
+			before = found.get(0)[2];
+		}
+
+		for (String sql : FWStatsReset.resetStatements(uuid)) db.executeUpdateCommand(sql);
+
+		main.getLogger().info("[Flag Wars] " + staff.getName() + " reset the Flag Wars stats of " + shownName + " (" + uuid
+				+ "). They were: " + before);
+		staff.sendMessage(main.color("&2&l(!) &rReset the Flag Wars stats of &e" + shownName + "&r."));
+		staff.sendMessage(main.color("&7Were: " + before));
+	}
+
+	private void resetAllStats(Player staff, Core main, DatabaseManager db) {
+		UUID id = staff.getUniqueId();
+		Long askedAt = pendingResetAllTime.get(id);
+		boolean confirmed = askedAt != null && System.currentTimeMillis() - askedAt <= DELETE_CONFIRM_MILLIS;
+
+		if (!confirmed) {
+			pendingResetAllTime.put(id, System.currentTimeMillis());
+			staff.sendMessage(main.color("&e&l(!) &rThis sets the Flag Wars stats of &eEVERY player &rback to zero and clears"
+					+ " the Flag Wars leaderboards. It can't be undone, so take a database backup first if you may want them back."));
+			staff.sendMessage(main.color("&e&l(!) &rRun &e/fwsetup resetstats all &ragain within 15 seconds to confirm."));
+			return;
+		}
+		pendingResetAllTime.remove(id);
+
+		// Players on the server hold their stats in memory and save them back, so those are zeroed as well
+		for (Player online : Bukkit.getOnlinePlayers()) {
+			PlayerData data = main.getDataManager().getPlayerData(online);
+			if (data != null) data.resetFlagWarsStats();
+		}
+		for (String sql : FWStatsReset.resetStatements(null)) db.executeUpdateCommand(sql);
+
+		main.getLogger().info("[Flag Wars] " + staff.getName() + " reset the Flag Wars stats of every player");
+		staff.sendMessage(main.color("&2&l(!) &rReset the Flag Wars stats of &eevery player&r."));
+	}
+
 	private void sendMapList(Player player, FWMapConfigManager manager) {
 		List<FWMapConfig> all = new ArrayList<>(manager.getAllConfigs());
 		player.sendMessage(fwGameManager.getMain().color("&6&lFLAG WARS MAPS &7(" + all.size() + " known)"));
@@ -534,6 +649,7 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup maplist &7-> &rPlayable maps in &agreen&r, unfinished ones in &cred"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup delete <map> &7-> &rDelete a map's Flag Wars setup (asks to confirm)"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup tp <map> &7-> &rTeleport into a map (loads it if needed)"));
+		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup resetstats <player|all> &7-> &rSet Flag Wars stats back to zero (all asks to confirm)"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup createmap <map> &7-> &rCreate a new void world"));
 		player.sendMessage(fwGameManager.getMain().color("&7(Stand in the target map world for all commands below)"));
 		player.sendMessage(fwGameManager.getMain().color("&e/fwsetup size <4|8> &7- 4-player maps have exactly 4 teams (games still start with fewer players)"));
@@ -565,6 +681,12 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 			List<String> mapNames = new ArrayList<>(fwGameManager.getMapConfigManager().getAllConfigs()
 					.stream().map(FWMapConfig::getWorldName).collect(Collectors.toList()));
 			return StringUtil.copyPartialMatches(args[1], mapNames, new ArrayList<>());
+		}
+
+		if (args.length == 2 && args[0].equalsIgnoreCase("resetstats")) {
+			List<String> names = new ArrayList<>(Collections.singletonList("all"));
+			for (Player online : Bukkit.getOnlinePlayers()) names.add(online.getName());
+			return StringUtil.copyPartialMatches(args[1], names, new ArrayList<>());
 		}
 
 		if (args.length == 2 && args[0].equalsIgnoreCase("generator")) {
