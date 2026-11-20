@@ -309,6 +309,12 @@ public class FWGameManager {
 	 * of it. A null map means any map.
 	 */
 	public boolean joinGame(Player player, FWGameMode mode, FWMapConfig onlyMap) {
+		// Also catches an old "Click here to join!" message in chat that still points at a mode that is switched off
+		if (!mode.isAvailable()) {
+			player.sendMessage(main.color("&c&l(!) &r" + mode.getLabel() + " isn't available yet! Try &e/join flagwars solo"));
+			return false;
+		}
+
 		if (getInstanceOfPlayer(player) != null || getInstanceOfSpectator(player) != null) {
 			player.sendMessage(main.color("&c&l(!) &rYou are already in Flag Wars!"));
 			return false;

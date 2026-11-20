@@ -32,8 +32,7 @@ public class GameSelectorGUI implements InventoryProvider {
 	private static final List<String> FLAG_WARS_DESCRIPTION = java.util.Arrays.asList(
 			"&7Steal flags from enemies and rush it back",
 			"&7to your base while defending your own.",
-			"&7Capture the most flags to win! You can",
-			"&7play Solo or team up in Duos!"
+			"&7Capture the most flags to win!"
 	);
 
 	public Core main;
@@ -199,7 +198,7 @@ public class GameSelectorGUI implements InventoryProvider {
 			return banner;
 		}
 
-		/** Summed across every concurrent Flag Wars instance (Solo + Duos) - FWGameManager can run more than one at once. */
+		/** Summed across every concurrent Flag Wars instance - FWGameManager can run more than one at once. */
 		private int flagWarsPlayerCount() {
 			int total = 0;
 			for (anthony.flagwars.FWGameInstance instance : main.getFwGameManager().getActiveInstances()) {

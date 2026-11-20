@@ -1637,7 +1637,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 				map = main.getFwGameManager().getPlayableMap(args[i]);
 				if (map == null) {
 					player.sendMessage(main.color("&c&l(!) &rThere's no Flag Wars map called &e" + args[i]
-							+ "&r. Try: &e/join flagwars <map> [solo|duo]"));
+							+ "&r. Try: &e/join flagwars <map>"));
 					return;
 				}
 			}
@@ -1941,7 +1941,10 @@ public class Commands implements CommandExecutor, TabCompleter {
 
             if (cmd.getName().equalsIgnoreCase("join") && (args.length == 2 || args.length == 3)
                     && (args[0].equalsIgnoreCase("flagwars") || args[0].equalsIgnoreCase("fw"))) {
-                List<String> options = new ArrayList<>(Arrays.asList("solo", "duo"));
+                List<String> options = new ArrayList<>();
+                for (anthony.flagwars.FWGameMode mode : anthony.flagwars.FWGameMode.availableModes()) {
+                    options.add(mode == anthony.flagwars.FWGameMode.SOLO ? "solo" : "duo");
+                }
                 for (anthony.flagwars.map.FWMapConfig map : main.getFwGameManager().getPlayableMaps()) {
                     options.add(map.getWorldName());
                 }
