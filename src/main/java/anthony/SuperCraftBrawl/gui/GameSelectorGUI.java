@@ -107,7 +107,7 @@ public class GameSelectorGUI implements InventoryProvider {
 						modeSelectorDisplayItem(blueBanner(), "&6&lFLAG WARS &r&lNEW!", FLAG_WARS_DESCRIPTION, flagWarsPlayerCount()),
 						e -> {
 							SoundManager.playClickSound(player);
-							new FWModeSelectGUI(main.getFwGameManager()).open(player);
+							FWModeSelectGUI.openOrJoin(main.getFwGameManager(), player);
 						}));
 
 		// Fishing
