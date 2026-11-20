@@ -49,8 +49,8 @@ public final class FWShopCatalog {
 						FWResourceType.GOLD, 4).withDescription("Strong blocks. Break them\nfaster with an axe."),
 				new FWShopItem("Ladder", new ItemStack(Material.LADDER, 16),
 						FWResourceType.IRON, 4).withDescription("Climb up walls."),
-				new FWShopItem("Obsidian", new ItemStack(Material.OBSIDIAN, 2),
-						FWResourceType.EMERALD, 2).withDescription("Very hard to mine.\nExplosions can't break it."),
+				new FWShopItem("Obsidian", new ItemStack(Material.OBSIDIAN, 3),
+						FWResourceType.EMERALD, 3).withDescription("Very hard to mine.\nExplosions can't break it."),
 				new FWShopItem("Packed Ice", new ItemStack(Material.PACKED_ICE, 8),
 						FWResourceType.IRON, 8).withDescription("Slippery blocks for bridging.")
 		);
@@ -222,9 +222,11 @@ public final class FWShopCatalog {
 						FWResourceType.GOLD, 6).withDescription("Builds a sand bridge that falls\napart 5 seconds after it is done.")
 						.withStat("&rSize: &a3x10 blocks"),
 				new FWShopItem(PokeballItem.Type.ZOMBIE.getName(), PokeballItem.create(PokeballItem.Type.ZOMBIE),
-						FWResourceType.IRON, 20).withDescription(PokeballItem.Type.ZOMBIE.getDescription()),
+						FWResourceType.IRON, 20).withDescription(PokeballItem.Type.ZOMBIE.getDescription())
+						.withStat(PokeballItem.despawnStat()),
 				new FWShopItem(PokeballItem.Type.SKELETON.getName(), PokeballItem.create(PokeballItem.Type.SKELETON),
 						FWResourceType.GOLD, 6).withDescription(PokeballItem.Type.SKELETON.getDescription())
+						.withStat(PokeballItem.despawnStat())
 		);
 	}
 

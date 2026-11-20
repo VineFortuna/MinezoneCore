@@ -112,6 +112,10 @@ public class FWTeamUpgradeManager {
 
 		if (UNBREAKABLE_TYPES.contains(item.getType())) {
 			ItemHelper.setUnbreakable(item);
+			// A 1.8 client draws an unbreakable item that already has damage as a purple missing-texture block (it only
+			// looks up the model by damage when the item can't break). The upgrades are re-applied to everything a
+			// player carries (see reapplyToCurrentGear), so tools used before they became unbreakable would turn purple.
+			item.setDurability((short) 0);
 		}
 
 		return item;

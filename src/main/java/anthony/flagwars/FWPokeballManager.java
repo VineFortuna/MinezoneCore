@@ -6,6 +6,7 @@ import anthony.flagwars.items.PokeballItem;
 import anthony.util.ChatColorHelper;
 import anthony.util.ItemHelper;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -39,12 +40,13 @@ import java.util.UUID;
  * Zombie / Skeleton Pokeballs in Flag Wars. The throw is the one Super Craft Bros uses for its Pokeballs
  * (ProjectileManager): the egg is dropped as an item flying at 2x the thrower's look direction, and the mob is
  * spawned where it stops against a block, runs into a player, or after 10 seconds at the latest. The mobs
- * are made the same way too (named after the thrower, armored Zombie, Skeleton with a Punch bow, aimed at the
- * nearest player within 150 blocks).
+ * are made the same way too (named after the thrower, Skeleton with a Punch bow, aimed at the nearest player
+ * within 150 blocks).
  *
  * What's different here is that it's a team game: the ball flies through teammates, and the mobs fight for the
  * thrower's team (they only target enemy players, can't hurt teammates, and teammates can't hurt them). Kills they
- * make count for whoever threw them.
+ * make count for whoever threw them. The mobs wear the team's color (a Zombie full leather armor, a Skeleton a
+ * leather chestplate) and are taken away after PokeballItem.MOB_LIFETIME_SECONDS.
  */
 public class FWPokeballManager implements Listener {
 
@@ -52,6 +54,8 @@ public class FWPokeballManager implements Listener {
 	private static final double THROW_SPEED = 2.0;
 	private static final int MAX_AGE_TICKS = 20 * 10;
 	private static final double TARGET_RANGE = 150;
+	/** A mob is taken away this long after it was spawned, if it hasn't died by then. */
+	private static final int MOB_LIFETIME_TICKS = 20 * PokeballItem.MOB_LIFETIME_SECONDS;
 	private static final Vector PLAYER_BOX = new Vector(0.3, 0.8, 0.3);
 	private static final Vector BALL_BOX = new Vector(0.3, 0.3, 0.3);
 
@@ -152,15 +156,19 @@ public class FWPokeballManager implements Listener {
 	private void spawnMob(FWGameInstance instance, FWTeam team, UUID ownerId, String ownerName,
 						  PokeballItem.Type type, Location where) {
 		LivingEntity mob = (LivingEntity) where.getWorld().spawnEntity(where, type.getEntityType());
-		instance.addPokeballMob(mob, ownerId, team);
+		PokeballMob info = instance.addPokeballMob(mob, ownerId, team);
+		// Taken away when its time is up. The match forgetting the mob (it died, or the match ended) cancels this.
+		info.setDespawnTask(Bukkit.getScheduler().runTaskLater(fwGameManager.getMain(),
+				() -> despawnMob(instance, mob), MOB_LIFETIME_TICKS));
 
 		mob.setRemoveWhenFarAway(false);
 		mob.setCanPickupItems(false);
 		mob.setCustomName(ChatColorHelper.color("&c" + ownerName + "'s &e" + typeName(type.getEntityType())));
 		mob.setCustomNameVisible(true);
 
-		if (mob instanceof Zombie) armorZombie((Zombie) mob);
-		else if (mob instanceof Skeleton) equipSkeleton((Skeleton) mob);
+		Color teamColor = team.getColor().getColor();
+		if (mob instanceof Zombie) armorZombie((Zombie) mob, teamColor);
+		else if (mob instanceof Skeleton) equipSkeleton((Skeleton) mob, teamColor);
 
 		if (mob instanceof Creature) {
 			Player target = nearestEnemy(instance, team.getSiteId(), mob.getLocation());
@@ -172,23 +180,46 @@ public class FWPokeballManager implements Listener {
 		return entityType == EntityType.ZOMBIE ? "Zombie" : "Skeleton";
 	}
 
-	private void armorZombie(Zombie zombie) {
+	/** Full leather armor in the team's color and a diamond sword. */
+	private void armorZombie(Zombie zombie, Color teamColor) {
 		zombie.setBaby(false);
 
 		EntityEquipment equipment = zombie.getEquipment();
-		equipment.setHelmet(ItemHelper.setUnbreakable(ItemHelper.create(Material.DIAMOND_HELMET)));
-		equipment.setChestplate(ItemHelper.setUnbreakable(ItemHelper.create(Material.DIAMOND_CHESTPLATE)));
-		equipment.setLeggings(ItemHelper.setUnbreakable(ItemHelper.create(Material.DIAMOND_LEGGINGS)));
-		equipment.setBoots(ItemHelper.setUnbreakable(ItemHelper.create(Material.DIAMOND_BOOTS)));
+		equipment.setHelmet(teamLeather(Material.LEATHER_HELMET, teamColor));
+		equipment.setChestplate(teamLeather(Material.LEATHER_CHESTPLATE, teamColor));
+		equipment.setLeggings(teamLeather(Material.LEATHER_LEGGINGS, teamColor));
+		equipment.setBoots(teamLeather(Material.LEATHER_BOOTS, teamColor));
 		equipment.setItemInHand(ItemHelper.setUnbreakable(ItemHelper.create(Material.DIAMOND_SWORD)));
 	}
 
-	private void equipSkeleton(Skeleton skeleton) {
+	/** A Punch bow and a leather chestplate in the team's color. */
+	private void equipSkeleton(Skeleton skeleton, Color teamColor) {
 		ItemStack punchBow = ItemHelper.create(Material.BOW);
 		punchBow.addEnchantment(Enchantment.ARROW_KNOCKBACK, 1);
 		ItemHelper.setUnbreakable(punchBow);
 
-		skeleton.getEquipment().setItemInHand(punchBow);
+		EntityEquipment equipment = skeleton.getEquipment();
+		equipment.setItemInHand(punchBow);
+		equipment.setChestplate(teamLeather(Material.LEATHER_CHESTPLATE, teamColor));
+	}
+
+	/** A piece of leather armor dyed in the team's color, unbreakable like everything else the mobs carry. */
+	private ItemStack teamLeather(Material piece, Color teamColor) {
+		return ItemHelper.setUnbreakable(ItemHelper.setColor(new ItemStack(piece), teamColor));
+	}
+
+	/** The mob's time is up: take it away and tell its owner, unless it already died or the match ended and forgot it. */
+	private void despawnMob(FWGameInstance instance, LivingEntity mob) {
+		PokeballMob info = instance.getPokeballMob(mob);
+		if (info == null) return;
+
+		instance.removePokeballMob(mob);
+		mob.remove();
+
+		Player owner = Bukkit.getPlayer(info.owner);
+		if (owner != null && instance.hasPlayer(owner)) {
+			owner.sendMessage(fwGameManager.getMain().color("&2&l(!) &rYour &a" + typeName(mob.getType()) + " &rhas despawned!"));
+		}
 	}
 
 	/** The closest enemy player (in the match, alive) within range of the mob, or null. */

@@ -44,6 +44,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.IntFunction;
+import java.util.function.ToIntFunction;
 
 /**
  * One Flag Wars match: lobby -> countdown -> in-progress -> reset. Several of these can run
@@ -202,19 +204,36 @@ public class FWGameInstance {
 		return spectators;
 	}
 
-	/** Who threw a Pokeball mob and which team it fights for. UUID and number only, so it never holds a player or entity. */
+	/**
+	 * Who threw a Pokeball mob and which team it fights for. UUID and number only, plus the timer that takes the mob
+	 * away, which is cancelled as soon as the mob is forgotten so it never keeps the mob or the match alive.
+	 */
 	public static final class PokeballMob {
 		public final UUID owner;
 		public final int teamSiteId;
+		private BukkitTask despawnTask;
 
 		PokeballMob(UUID owner, int teamSiteId) {
 			this.owner = owner;
 			this.teamSiteId = teamSiteId;
 		}
+
+		void setDespawnTask(BukkitTask task) {
+			this.despawnTask = task;
+		}
+
+		private void cancelDespawn() {
+			if (despawnTask != null) {
+				despawnTask.cancel();
+				despawnTask = null;
+			}
+		}
 	}
 
-	public void addPokeballMob(Entity mob, UUID owner, FWTeam team) {
-		pokeballMobs.put(mob.getUniqueId(), new PokeballMob(owner, team.getSiteId()));
+	public PokeballMob addPokeballMob(Entity mob, UUID owner, FWTeam team) {
+		PokeballMob info = new PokeballMob(owner, team.getSiteId());
+		pokeballMobs.put(mob.getUniqueId(), info);
+		return info;
 	}
 
 	/** The Pokeball info of this entity, or null if it isn't one of this match's Pokeball mobs. */
@@ -223,7 +242,8 @@ public class FWGameInstance {
 	}
 
 	public void removePokeballMob(Entity entity) {
-		pokeballMobs.remove(entity.getUniqueId());
+		PokeballMob info = pokeballMobs.remove(entity.getUniqueId());
+		if (info != null) info.cancelDespawn();
 	}
 
 	public boolean hasPlayer(Player player) {
@@ -668,10 +688,10 @@ public class FWGameInstance {
 
 	/** Level 1 kit per the design doc: a sword plus team-colored leather armor - everything else is bought from the shop. */
 	public void giveStarterKit(Player player, FWTeam team) {
-		// A copy, since the inventory is wiped below
-		ItemStack diedWithPickaxe = bestPickaxeOf(player);
-		int axeTier = axeTierOf(player);
-		// Unlike the pickaxe/axe progressions, Shears have no tiers to reset - a bought pair is
+		// Copies, since the inventory is wiped below
+		ItemStack diedWithPickaxe = bestToolOf(player, FWGameInstance::pickaxeTierOf);
+		ItemStack diedWithAxe = bestToolOf(player, FWGameInstance::axeTierOf);
+		// Unlike the pickaxe and axe, Shears have no tiers to drop - a bought pair is
 		// just kept as-is across deaths instead of being lost like the rest of the starter-kit wipe.
 		boolean hadShears = hasToolType(player, "SHEARS");
 
@@ -682,16 +702,16 @@ public class FWGameInstance {
 		player.setItemOnCursor(new ItemStack(Material.AIR));
 		player.getInventory().addItem(teamUpgradeManager.applyUpgrades(team, new ItemStack(Material.WOOD_SWORD)));
 
-		// Dying drops a tool down exactly one tier instead of resetting it to the bottom. The pickaxe never goes
-		// below wood (Diamond -> Iron -> Stone -> Wood, and Wood stays Wood) and keeps its enchants. The axe
-		// still loses its last tier: Diamond -> Iron -> Stone -> Wood -> gone.
-		ItemStack respawnPickaxe = pickaxeAfterDeath(diedWithPickaxe, team);
+		// Dying drops a pickaxe or axe down exactly one tier instead of resetting it to the bottom. Neither goes below
+		// wood (Diamond -> Iron -> Stone -> Wood, and Wood stays Wood). Everything handed back goes through the team
+		// upgrades, which also makes it unbreakable like the same item bought in the shop.
+		ItemStack respawnPickaxe = toolAfterDeath(diedWithPickaxe, team, FWGameInstance::pickaxeTierOf, this::pickaxeForTier, true);
 		if (respawnPickaxe != null) player.getInventory().addItem(respawnPickaxe);
 
-		ItemStack downgradedAxe = axeForTier(axeTier - 1);
-		if (downgradedAxe != null) player.getInventory().addItem(downgradedAxe);
+		ItemStack respawnAxe = toolAfterDeath(diedWithAxe, team, FWGameInstance::axeTierOf, this::axeForTier, false);
+		if (respawnAxe != null) player.getInventory().addItem(respawnAxe);
 
-		if (hadShears) player.getInventory().addItem(new ItemStack(Material.SHEARS));
+		if (hadShears) player.getInventory().addItem(teamUpgradeManager.applyUpgrades(team, new ItemStack(Material.SHEARS)));
 		giveStarterArmorIfUnequipped(player, team);
 	}
 
@@ -714,53 +734,54 @@ public class FWGameInstance {
 		}
 	}
 
-	/** The tier a pickaxe comes back as after dying: one lower, but never lower than wood. No pickaxe (0) stays none. */
-	static int pickaxeTierAfterDeath(int tier) {
+	/** 0=none, 1=wood, 2=stone, 3=iron, 4=diamond - same ladder FWShopCatalog's own axeTierOf uses. */
+	private static int axeTierOf(Material type) {
+		switch (type) {
+			case DIAMOND_AXE: return 4;
+			case IRON_AXE: return 3;
+			case STONE_AXE: return 2;
+			case WOOD_AXE: return 1;
+			default: return 0;
+		}
+	}
+
+	/** The tier a pickaxe or axe comes back as after dying: one lower, but never lower than wood. No tool (0) stays none. */
+	static int toolTierAfterDeath(int tier) {
 		return tier <= 0 ? 0 : Math.max(1, tier - 1);
 	}
 
-	/** A copy of the best pickaxe the player carries (a pickup can leave a lower spare next to it), or null if there is none. */
-	private ItemStack bestPickaxeOf(Player player) {
+	/** A copy of the best tool of one kind (pickaxe or axe) the player carries (a pickup can leave a lower spare next to it), or null if there is none. */
+	private ItemStack bestToolOf(Player player, ToIntFunction<Material> tierOf) {
 		ItemStack best = null;
 		for (ItemStack item : player.getInventory().getContents()) {
 			if (item == null) continue;
-			if (pickaxeTierOf(item.getType()) > (best == null ? 0 : pickaxeTierOf(best.getType()))) best = item;
+			if (tierOf.applyAsInt(item.getType()) > (best == null ? 0 : tierOf.applyAsInt(best.getType()))) best = item;
 		}
 		return best == null ? null : best.clone();
 	}
 
 	/**
-	 * The pickaxe a player respawns with, or null if they had none. A wood pickaxe comes back exactly as it was.
-	 * A higher tier comes back one tier lower with the same enchants, and like every pickaxe the team's
-	 * upgrades are applied to it, which also keeps it unbreakable.
+	 * The pickaxe or axe a player respawns with, or null if they had none. A wood one comes back exactly as it was.
+	 * A higher tier is made again one tier lower, with that tier's own enchants, or with the enchants the old one had
+	 * when keepEnchants is set. The team's upgrades are applied to it like to everything a player is given, which
+	 * also keeps it unbreakable.
 	 */
-	private ItemStack pickaxeAfterDeath(ItemStack died, FWTeam team) {
+	private ItemStack toolAfterDeath(ItemStack died, FWTeam team, ToIntFunction<Material> tierOf,
+									 IntFunction<ItemStack> forTier, boolean keepEnchants) {
 		if (died == null) return null;
 
-		int tier = pickaxeTierOf(died.getType());
-		int respawnTier = pickaxeTierAfterDeath(tier);
+		int tier = tierOf.applyAsInt(died.getType());
+		int respawnTier = toolTierAfterDeath(tier);
 		if (respawnTier == 0) return null;
 
-		ItemStack pickaxe;
+		ItemStack tool;
 		if (respawnTier == tier) {
-			pickaxe = died;
+			tool = died;
 		} else {
-			pickaxe = pickaxeForTier(respawnTier);
-			pickaxe.addUnsafeEnchantments(died.getEnchantments());
+			tool = forTier.apply(respawnTier);
+			if (keepEnchants) tool.addUnsafeEnchantments(died.getEnchantments());
 		}
-		return teamUpgradeManager.applyUpgrades(team, pickaxe);
-	}
-
-	/** 0=none, 1=wood, 2=stone, 3=iron, 4=diamond - same ladder FWShopCatalog's own axeTierOf uses. */
-	private int axeTierOf(Player player) {
-		for (ItemStack item : player.getInventory().getContents()) {
-			if (item == null) continue;
-			if (item.getType() == Material.DIAMOND_AXE) return 4;
-			if (item.getType() == Material.IRON_AXE) return 3;
-			if (item.getType() == Material.STONE_AXE) return 2;
-			if (item.getType() == Material.WOOD_AXE) return 1;
-		}
-		return 0;
+		return teamUpgradeManager.applyUpgrades(team, tool);
 	}
 
 	/** Enchanted the same way FWShopCatalog.tools() enchants each pickaxe tier - Efficiency I across the board. Null at tier &lt;= 0 (nothing to give). */
@@ -1279,6 +1300,7 @@ public class FWGameInstance {
 
 	/** Leftover mobs/NPCs/arrows/dropped items/etc. from the match - everything except players themselves. */
 	private void clearNonPlayerEntities() {
+		for (PokeballMob info : pokeballMobs.values()) info.cancelDespawn();
 		pokeballMobs.clear();
 		for (org.bukkit.entity.Entity entity : world.getEntities()) {
 			if (!(entity instanceof Player)) {
