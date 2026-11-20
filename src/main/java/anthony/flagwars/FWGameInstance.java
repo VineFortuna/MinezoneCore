@@ -1016,12 +1016,12 @@ public class FWGameInstance {
 					return;
 				}
 
-				String sub = "&eRespawning in &c" + secondsLeft + "&e...";
+				// Same as Super Craft Bros: the title is sent once and stays for the whole countdown, then only the number changes
+				String seconds = "&c" + secondsLeft;
 				if (secondsLeft == RESPAWN_SECONDS) {
-					TitleUtil.sendTitle(p, "&c&lYOU DIED", sub, 5, 25, 5);
+					TitleUtil.sendTitle(p, "&eRespawning In", seconds, 1, RESPAWN_SECONDS * 20, 1);
 				} else {
-					TitleUtil.sendTimes(p, 0, 25, 5);
-					TitleUtil.setSubtitle(p, sub);
+					TitleUtil.updateTitleText(p, null, seconds);
 				}
 				secondsLeft--;
 			}
@@ -1043,8 +1043,10 @@ public class FWGameInstance {
 		manager.getMain().getListener().resetPotionEffects(player); // Speed/Jump/Invisibility etc. shouldn't survive a death
 		giveStarterKit(player, team);
 		manager.grantSpawnProtection(player, this);
-		TitleSequence.sendSequence(manager.getMain(), player,
-				Collections.singletonList(new TitleSequence.TitleSpec("&a&lRESPAWNED", "", 5, 40, 10)));
+		// Same as Super Craft Bros
+		TitleUtil.sendTimes(player, 1, 30, 10);
+		TitleUtil.setSubtitle(player, "");
+		TitleUtil.setTitle(player, "&eRespawned");
 		player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1f, 1f);
 	}
 
@@ -1086,7 +1088,7 @@ public class FWGameInstance {
 				Player p = Bukkit.getPlayer(uuid);
 				if (p != null) {
 					TitleSequence.sendSequence(manager.getMain(), p,
-							Collections.singletonList(new TitleSequence.TitleSpec("&6&lVICTORY", "&eYou won the game!", 10, 100, 20)));
+							Collections.singletonList(new TitleSequence.TitleSpec("&e&lVICTORY", "&aYou won the game!", 10, 100, 20)));
 
 					WinEffects winEffects = new WinEffects(p, new FWWinEffectsHost(this, p));
 					winEffects.checkWinEffect();
