@@ -83,7 +83,7 @@ public class CloudClass extends BaseClass {
 				instance.color("&b&lCloud Sword"),
                 "",
                 instance.color("&7Right click your sword to use"),
-                instance.color("one of your cloud abilities"));
+                instance.color("&7one of your cloud abilities"));
 		ItemMeta meta = item.getItemMeta();
 		meta.spigot().setUnbreakable(true);
 		item.setItemMeta(meta);

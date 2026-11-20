@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.Game.classes;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.all.*;
+import anthony.SuperCraftBrawl.halloween.Halloween;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
@@ -98,8 +99,9 @@ public enum ClassType {
 	Elf(101, 0, 0, true),
 	GingerBreadMan(102, 0, 0, true),
 	Santa(103, 0, 0, true),
-	GrimReaper(104, 0, 0, true),
-	Freddy(105, 0, 0, false);
+	// The Halloween classes are vaulted (not playable) unless Halloween is on, see Halloween#ENABLED
+	GrimReaper(104, 0, 0, !Halloween.ENABLED),
+	Freddy(105, 0, 0, !Halloween.ENABLED);
 
 	private final int id;
 	private int tokenCost = 0;

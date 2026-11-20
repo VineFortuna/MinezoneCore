@@ -1533,7 +1533,6 @@ public class GameManager implements Listener, PluginMessageListener {
 							Player p = (Player) damager.getShooter();
 							BaseClass bc = instance.classes.get(p);
 							if (bc.getType() == ClassType.Fisherman) {
-								// damager.setBounce(true);
 								event.setCancelled(true);
 							}
 						}
@@ -1543,7 +1542,6 @@ public class GameManager implements Listener, PluginMessageListener {
 				if (!event.isCancelled() && event.getFinalDamage() >= player.getHealth() - 0.2) {
 					event.setCancelled(true);
 
-					player.setLastDamageCause(event);
 					instance.PlayerDeath(player);
 
 				} else if (instance.classes.containsKey(player)) {

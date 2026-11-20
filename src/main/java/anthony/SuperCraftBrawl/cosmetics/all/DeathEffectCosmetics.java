@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.cosmetics.all;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
+import anthony.SuperCraftBrawl.halloween.Halloween;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticRegistry;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
@@ -23,7 +24,7 @@ public final class DeathEffectCosmetics {
         registry.register(simple("exp_bottle", "Exp Bottle", Material.EXP_BOTTLE));
         registry.register(simple("blaze_powder", "Blaze Powder", Material.BLAZE_POWDER));
         registry.register(snowball(main));
-        registry.register(pumpkinPie(main));
+        if (Halloween.ENABLED) registry.register(pumpkinPie(main)); // a Halloween hunt reward
     }
 
     /** The always-unlocked death particles have same format, different icon/name. */

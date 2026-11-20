@@ -295,8 +295,8 @@ public class PlayerListener implements Listener {
 
         //Send news to players with titles when they join
         TitleSequence.sendChained(main, player,
-                new TitleSequence.TitleSpec("&6&lMINEZONE", "&c&lHUGE CLASSES REVAMP!", 10, 70, 0),
-                new TitleSequence.TitleSpec("&6&lMINEZONE", "&e&lFRIENDS LIST! &e-> /friends", 0, 70, 10)
+                new TitleSequence.TitleSpec("&6&lMINEZONE", "&6&lFLAGWARS &e&lBETA RELEASE!", 10, 70, 0),
+                new TitleSequence.TitleSpec("&6&lMINEZONE", "&c&lCHRISTMAS UPDATE &r- &r&lNOVEMBER 27", 0, 70, 10)
         );
 
         listFriendsOnline(player);

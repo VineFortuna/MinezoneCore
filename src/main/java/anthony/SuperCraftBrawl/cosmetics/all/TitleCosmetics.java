@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.cosmetics.all;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
+import anthony.SuperCraftBrawl.halloween.Halloween;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticRegistry;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ItemHelper;
@@ -19,8 +20,11 @@ public final class TitleCosmetics {
     }
 
     public static void registerAll(Core main, CosmeticRegistry registry) {
-        main.getTitlePacket().registerTitle("Trick-or-Treater", main.color("&6&lTrick-or-Treater"), 0.2);
-        main.getTitlePacket().registerTitle("Freddy Fazbear", main.color("&6&lFreddy Fazbear"), 0.2);
+        // The two Halloween hunt titles only exist while Halloween is on. The Halloween Champ 2024 award below stays.
+        if (Halloween.ENABLED) {
+            main.getTitlePacket().registerTitle("Trick-or-Treater", main.color("&6&lTrick-or-Treater"), 0.2);
+            main.getTitlePacket().registerTitle("Freddy Fazbear", main.color("&6&lFreddy Fazbear"), 0.2);
+        }
         main.getTitlePacket().registerTitle("Fiesta De La Noche", main.color("&b&lFIESTA DE LA NOCHE"), 0.2);
         main.getTitlePacket().registerTitle("Merry", main.color("&c&lMerry"), 0.2);
         main.getTitlePacket().registerTitle("Ho Ho Ho", main.color("&c&lHO &2&lHO &c&lHO"), 0.2);
@@ -30,8 +34,10 @@ public final class TitleCosmetics {
         main.getTitlePacket().registerTitle("SCB Halloween Champ 2024", main.color("&6&lSCB HALLOWEEN CHAMP (2024)"), 0.2);
         main.getTitlePacket().registerTitle("SCB Winter Champ 2025", main.color("&b&lSCB WINTER CHAMP (2025)"), 0.2);
 
-        registry.register(trickOrTreater(main));
-        registry.register(freddyFazbear(main));
+        if (Halloween.ENABLED) {
+            registry.register(trickOrTreater(main));
+            registry.register(freddyFazbear(main));
+        }
         registry.register(fiestaDeLaNoche(main));
         registry.register(merry(main));
         registry.register(hoHoHo(main));

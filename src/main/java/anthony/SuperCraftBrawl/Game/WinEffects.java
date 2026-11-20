@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.Game;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
+import anthony.SuperCraftBrawl.halloween.Halloween;
 import anthony.util.ItemHelper;
 import net.minecraft.server.v1_8_R3.PacketPlayOutNamedSoundEffect;
 import org.bukkit.*;
@@ -83,7 +84,8 @@ public class WinEffects {
             case "fish_rain": fishRainEffect(); break;
             case "flood": floodEffect(); break;
             case "treasure_hoard": treasureEffect(); break;
-            case "ritual": ritualEffect(); break;
+            // Someone can still have Ritual equipped from the hunt, and this reads the saved id, so it has to be off here too
+            case "ritual": if (Halloween.ENABLED) ritualEffect(); else defaultEffect(); break;
             default: defaultEffect();
         }
     }

@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.mastery.MasteryTier;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
@@ -52,7 +53,7 @@ public class FreeClassesGUI implements InventoryProvider {
 				lore.addAll(getUnlockedDescriptionText(player, type));
 			}
 
-				// Click Messages
+			// Click Messages
 			String chooseClassString = "&e&nLeft Click&r &eto choose a class";
 			String viewMasteryString = "&e&nRight Click&r &eto view mastery";
 			String favoriteClassString = "&e&nShift Click&r &eto add a favorite class";
@@ -61,9 +62,9 @@ public class FreeClassesGUI implements InventoryProvider {
 			lore.add(main.color(favoriteClassString));
 			lore.add("");
 
-				// Class Mastery
+			// Class Mastery
 			ClassDetails details = data.playerClasses.get(type.getID());
-			lore.addAll(getNextRewardAndProgressBar(details));
+			lore.addAll(MasteryTier.getRewardAndProgressBar(details));
 
 			if (item == null) item = new ItemStack(Material.WOOD);
 			contents.set(a, b,
@@ -145,27 +146,6 @@ public class FreeClassesGUI implements InventoryProvider {
 		stringList.add("");
 
 		return stringList;
-	}
-
-	private List<String> getNextRewardAndProgressBar(ClassDetails details) {
-		List<String> rewardLines = new ArrayList<>();
-
-		int played = details.gamesPlayed + 2 * details.gamesWon;
-		int nextLevel = 10;
-
-		if (played >= 75)
-			nextLevel = 100;
-		else if (played >= 50)
-			nextLevel = 75;
-		else if (played >= 25)
-			nextLevel = 50;
-		else if (played >= 10)
-			nextLevel = 25;
-
-		rewardLines.add(main.color("&aNext reward:"));
-		rewardLines.add(main.progressBar(played, nextLevel, 25));
-
-		return rewardLines;
 	}
 
 	@Override

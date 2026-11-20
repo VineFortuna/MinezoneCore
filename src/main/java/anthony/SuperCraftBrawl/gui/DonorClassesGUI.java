@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.gui;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.mastery.MasteryTier;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
@@ -15,6 +16,8 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
 
 public class DonorClassesGUI implements InventoryProvider {
 
@@ -41,28 +44,19 @@ public class DonorClassesGUI implements InventoryProvider {
 
 		for (ClassType type : ClassType.sortAlphabetically(ClassType.getDonorClasses(false))) {
 			ClassDetails details = data.playerClasses.get(type.getID());
-			int played = details.gamesPlayed + 2 * details.gamesWon;
-			int nextLevel = 10;
 
-			if (played >= 75)
-				nextLevel = 100;
-			else if (played >= 50)
-				nextLevel = 75;
-			else if (played >= 25)
-				nextLevel = 50;
-			else if (played >= 10)
-				nextLevel = 25;
+			List<String> lore = type.buildDescription();
+			lore.add("");
+			lore.add(main.color("&e&nLeft Click&r &eto choose a class"));
+			lore.add(main.color("&e&nRight Click&r &eto view mastery"));
+			lore.add(main.color("&e&nShift Click&r &eto add a favorite class"));
+			lore.add("");
+			lore.addAll(MasteryTier.getRewardAndProgressBar(details));
+
 
 			contents.set(a, b,
 					ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true),
-							type.getTag(), type.buildDescription(), "",
-							"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Left Click" + ChatColor.RESET
-									+ ChatColor.YELLOW + " to choose a class",
-							"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Right Click" + ChatColor.RESET
-									+ ChatColor.YELLOW + " to view mastery",
-							"" + ChatColor.YELLOW + ChatColor.UNDERLINE + "Shift Click" + ChatColor.RESET
-									+ ChatColor.YELLOW + " to add a favorite class",
-							"", main.color("&aNext reward:"), main.progressBar(played, nextLevel, 25)), e -> {
+							type.getTag(), lore), e -> {
 						Rank donor = type.getMinRank();
 
 						if (donor == null
