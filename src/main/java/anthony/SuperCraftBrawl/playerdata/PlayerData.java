@@ -38,6 +38,18 @@ public class PlayerData {
 	public int fwWins = 0, fwMatchMvps = 0, fwLosses = 0, fwCurrentWinstreak = 0, fwBestWinstreak = 0,
 			fwKills = 0, fwDeaths = 0, fwFlagsCaptured = 0;
 
+	/** Sets every Flag Wars stat back to zero, for /fwsetup resetstats. Doesn't save; the caller does that. */
+	public void resetFlagWarsStats() {
+		fwWins = 0;
+		fwMatchMvps = 0;
+		fwLosses = 0;
+		fwCurrentWinstreak = 0;
+		fwBestWinstreak = 0;
+		fwKills = 0;
+		fwDeaths = 0;
+		fwFlagsCaptured = 0;
+	}
+
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
 	public HashMap<Integer, FishingDetails> playerFishing = new HashMap<>();
 	public HashMap<Integer, ParkourDetails> playerParkour = new HashMap<>();
