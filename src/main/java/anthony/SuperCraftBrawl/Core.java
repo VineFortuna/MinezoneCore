@@ -23,6 +23,7 @@ import anthony.SuperCraftBrawl.floatingblock.FloatingBlocks;
 import anthony.SuperCraftBrawl.friends.FriendsManager;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.halloween.CandyAuraManager;
+import anthony.SuperCraftBrawl.halloween.Halloween;
 import anthony.SuperCraftBrawl.halloween.HalloweenHuntManager;
 import anthony.SuperCraftBrawl.halloween.TreatsAdminCommand;
 import anthony.SuperCraftBrawl.halloween.TrickTitleCommand;
@@ -738,7 +739,8 @@ public class Core extends JavaPlugin implements Listener {
         // Title keys are registered with trickTitle by TitleCosmetics.registerAll(), alongside
         // the matching Cosmetic definitions, so there's one place that owns the title list.
 
-        getCommand("tricktitle").setExecutor(new TrickTitleCommand(trickTitle));
+        getCommand("tricktitle").setExecutor(Halloween.ENABLED
+                ? new TrickTitleCommand(trickTitle) : Halloween.offExecutor(this));
     }
 
     private void enableCosmeticsSystem() {
@@ -773,7 +775,8 @@ public class Core extends JavaPlugin implements Listener {
                 System.out.print(command + " was null!");
         }
 
-        getCommand("treatsadmin").setExecutor(new TreatsAdminCommand(halloweenHunt));
+        getCommand("treatsadmin").setExecutor(Halloween.ENABLED
+                ? new TreatsAdminCommand(halloweenHunt) : Halloween.offExecutor(this));
 
         anthony.flagwars.FWCommand fwCommand = new anthony.flagwars.FWCommand(fwGameManager);
         getCommand("fw").setExecutor(fwCommand);
@@ -830,8 +833,12 @@ public class Core extends JavaPlugin implements Listener {
         fishing = new Fishing(this);
         signManager = new SignManager(this);
         lobbyItems = new anthony.SuperCraftBrawl.lobbyitems.LobbyItems(this);
-        halloweenHunt = new HalloweenHuntManager(this);
-        candyAura = new CandyAuraManager(this, "lobby-1");
+        // The basket hunt and the Candy Aura only run while Halloween is on (see Halloween#ENABLED). Both stay null
+        // otherwise, which everything that reads them already allows for.
+        if (Halloween.ENABLED) {
+            halloweenHunt = new HalloweenHuntManager(this);
+            candyAura = new CandyAuraManager(this, "lobby-1");
+        }
         lobbyWorld = getServer().createWorld(new WorldCreator("lobby-1"));
         if (lobbyWorld != null) {
             lobbyWorld.setAutoSave(false);
