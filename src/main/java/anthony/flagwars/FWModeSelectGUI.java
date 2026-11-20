@@ -6,11 +6,9 @@ import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BannerMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,7 +88,7 @@ public class FWModeSelectGUI implements InventoryProvider {
 
 		for (int i = 0; i < modes.size() && i < columns.length; i++) {
 			final FWGameMode mode = modes.get(i);
-			ItemStack icon = mode == FWGameMode.SOLO ? blueBanner() : steveHead();
+			ItemStack icon = mode == FWGameMode.SOLO ? ItemHelper.createFlagWarsBanner() : steveHead();
 			List<String> description = mode == FWGameMode.SOLO ? SOLO_DESCRIPTION : DUO_DESCRIPTION;
 
 			contents.set(1, columns[i], ClickableItem.of(modeIcon(main, icon, mode, description), e -> {
@@ -98,14 +96,6 @@ public class FWModeSelectGUI implements InventoryProvider {
 				fwGameManager.joinGame(player, mode);
 			}));
 		}
-	}
-
-	private ItemStack blueBanner() {
-		ItemStack banner = new ItemStack(Material.BANNER);
-		BannerMeta meta = (BannerMeta) banner.getItemMeta();
-		meta.setBaseColor(DyeColor.BLUE);
-		banner.setItemMeta(meta);
-		return banner;
 	}
 
 	/** Plain player head with no owner set - renders as the default Steve skin. */

@@ -139,7 +139,7 @@ public class LeaderboardScopeGUI implements InventoryProvider {
     private ItemStack buildModeToggle(LeaderboardStatsMode selected) {
         ItemStack it = selected == LeaderboardStatsMode.SCB
                 ? ItemHelper.createSkullHeadPlayer(1, "SethBling")
-                : new ItemStack(Material.BANNER);
+                : ItemHelper.createFlagWarsBanner();
 
         ItemMeta meta = it.getItemMeta();
 

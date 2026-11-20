@@ -112,7 +112,7 @@ public class ActiveGamesGUI implements InventoryProvider {
 		}
 
 		for (FWGameInstance fwGame : main.getFwGameManager().getActiveInstances()) {
-			ItemStack displayItem = new ItemStack(Material.BANNER);
+			ItemStack displayItem = ItemHelper.createFlagWarsBanner();
 			int maxPlayers = fwGame.getMaxPlayers();
 
 			if (fwGame.getState() == FWGameState.WAITING || fwGame.getState() == FWGameState.STARTING) {

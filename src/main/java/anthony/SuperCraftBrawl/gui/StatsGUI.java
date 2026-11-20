@@ -124,7 +124,7 @@ public class StatsGUI implements InventoryProvider {
 							}));
 
 			contents.set(3, 4,
-					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BANNER),
+					ClickableItem.of(ItemHelper.setDetails(ItemHelper.createFlagWarsBanner(),
 							main.color("&e&lFLAG WARS Stats"),
                             main.color("&rWins: &a" + data.fwWins),
                             main.color("&rMatch MVPs: &a" + data.fwMatchMvps),

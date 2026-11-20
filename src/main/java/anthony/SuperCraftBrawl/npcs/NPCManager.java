@@ -13,7 +13,6 @@ import net.jitse.npclib.api.skin.Skin;
 import net.jitse.npclib.api.state.NPCSlot;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
-import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -21,7 +20,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Arrays;
@@ -63,7 +61,7 @@ public class NPCManager implements Listener {
 				main.color("&eClick to Play!")));
 		flagwars.setLocation(new Location(main.getLobbyWorld(), 187.5, 106, 657.5, -174, 3));
 		flagwars.setSkin(flagWarsSkin);
-		flagwars.setItem(NPCSlot.MAINHAND, blueBanner());
+		flagwars.setItem(NPCSlot.MAINHAND, ItemHelper.createFlagWarsBanner());
 		flagwars.create();
 
 		parkour = npcLib.createNPC(Arrays.asList(main.color("&6&lPARKOUR"), main.color("&eClick to Play!")));
@@ -82,14 +80,6 @@ public class NPCManager implements Listener {
 		fishing.setSkin(fishermanSkin);
 		fishing.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.FISHING_ROD));
 		fishing.create();
-	}
-
-	private ItemStack blueBanner() {
-		ItemStack banner = new ItemStack(Material.BANNER);
-		BannerMeta meta = (BannerMeta) banner.getItemMeta();
-		meta.setBaseColor(DyeColor.BLUE);
-		banner.setItemMeta(meta);
-		return banner;
 	}
 
 	private void update() { // Updates NPCs
