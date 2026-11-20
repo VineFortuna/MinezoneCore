@@ -616,7 +616,8 @@ public class FWGameInstance {
 
 	/** Level 1 kit per the design doc: a sword plus team-colored leather armor - everything else is bought from the shop. */
 	public void giveStarterKit(Player player, FWTeam team) {
-		int pickaxeTier = pickaxeTierOf(player);
+		// A copy, since the inventory is wiped below
+		ItemStack diedWithPickaxe = bestPickaxeOf(player);
 		int axeTier = axeTierOf(player);
 		// Unlike the pickaxe/axe progressions, Shears have no tiers to reset - a bought pair is
 		// just kept as-is across deaths instead of being lost like the rest of the starter-kit wipe.
@@ -629,10 +630,11 @@ public class FWGameInstance {
 		player.setItemOnCursor(new ItemStack(Material.AIR));
 		player.getInventory().addItem(teamUpgradeManager.applyUpgrades(team, new ItemStack(Material.WOOD_SWORD)));
 
-		// Dying drops a tool down exactly one tier instead of resetting it to the bottom -
-		// Diamond -> Iron -> Stone -> Wood -> gone, the same ladder for both pickaxe and axe.
-		ItemStack downgradedPickaxe = pickaxeForTier(pickaxeTier - 1);
-		if (downgradedPickaxe != null) player.getInventory().addItem(downgradedPickaxe);
+		// Dying drops a tool down exactly one tier instead of resetting it to the bottom. The pickaxe never goes
+		// below wood (Diamond -> Iron -> Stone -> Wood, and Wood stays Wood) and keeps its enchants. The axe
+		// still loses its last tier: Diamond -> Iron -> Stone -> Wood -> gone.
+		ItemStack respawnPickaxe = pickaxeAfterDeath(diedWithPickaxe, team);
+		if (respawnPickaxe != null) player.getInventory().addItem(respawnPickaxe);
 
 		ItemStack downgradedAxe = axeForTier(axeTier - 1);
 		if (downgradedAxe != null) player.getInventory().addItem(downgradedAxe);
@@ -649,18 +651,52 @@ public class FWGameInstance {
 		return false;
 	}
 
-	/**
-	 * 0=none, 1=wood, 2=stone, 3=iron, 4=diamond - same ladder FWShopCatalog's own pickaxeTierOf uses.
-	 */
-	private int pickaxeTierOf(Player player) {
+	/** 0=none, 1=wood, 2=stone, 3=iron, 4=diamond - same ladder FWShopCatalog's own pickaxeTierOf uses. */
+	private static int pickaxeTierOf(Material type) {
+		switch (type) {
+			case DIAMOND_PICKAXE: return 4;
+			case IRON_PICKAXE: return 3;
+			case STONE_PICKAXE: return 2;
+			case WOOD_PICKAXE: return 1;
+			default: return 0;
+		}
+	}
+
+	/** The tier a pickaxe comes back as after dying: one lower, but never lower than wood. No pickaxe (0) stays none. */
+	static int pickaxeTierAfterDeath(int tier) {
+		return tier <= 0 ? 0 : Math.max(1, tier - 1);
+	}
+
+	/** A copy of the best pickaxe the player carries (a pickup can leave a lower spare next to it), or null if there is none. */
+	private ItemStack bestPickaxeOf(Player player) {
+		ItemStack best = null;
 		for (ItemStack item : player.getInventory().getContents()) {
 			if (item == null) continue;
-			if (item.getType() == Material.DIAMOND_PICKAXE) return 4;
-			if (item.getType() == Material.IRON_PICKAXE) return 3;
-			if (item.getType() == Material.STONE_PICKAXE) return 2;
-			if (item.getType() == Material.WOOD_PICKAXE) return 1;
+			if (pickaxeTierOf(item.getType()) > (best == null ? 0 : pickaxeTierOf(best.getType()))) best = item;
 		}
-		return 0;
+		return best == null ? null : best.clone();
+	}
+
+	/**
+	 * The pickaxe a player respawns with, or null if they had none. A wood pickaxe comes back exactly as it was.
+	 * A higher tier comes back one tier lower with the same enchants, and like every pickaxe the team's
+	 * upgrades are applied to it, which also keeps it unbreakable.
+	 */
+	private ItemStack pickaxeAfterDeath(ItemStack died, FWTeam team) {
+		if (died == null) return null;
+
+		int tier = pickaxeTierOf(died.getType());
+		int respawnTier = pickaxeTierAfterDeath(tier);
+		if (respawnTier == 0) return null;
+
+		ItemStack pickaxe;
+		if (respawnTier == tier) {
+			pickaxe = died;
+		} else {
+			pickaxe = pickaxeForTier(respawnTier);
+			pickaxe.addUnsafeEnchantments(died.getEnchantments());
+		}
+		return teamUpgradeManager.applyUpgrades(team, pickaxe);
 	}
 
 	/** 0=none, 1=wood, 2=stone, 3=iron, 4=diamond - same ladder FWShopCatalog's own axeTierOf uses. */
