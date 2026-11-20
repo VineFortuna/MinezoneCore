@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.flagwars.resources.FWResourceGenerator;
 import fr.mrmicky.fastboard.FastBoard;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.NameTagVisibility;
@@ -47,7 +48,7 @@ public class FWScoreboardManager {
 		int playerCount = instance.countPlayers();
 		int maxPlayers = instance.getMaxPlayers();
 
-		board.updateLines(
+		board.updateLines(fit(
 				"",
 				main().color("&rMap: &a" + instance.getMapName()),
 				"",
@@ -58,7 +59,25 @@ public class FWScoreboardManager {
 				main().color(statusLine),
 				"",
 				main().color(FOOTER)
-		);
+		));
+	}
+
+	/**
+	 * FastBoard on 1.8 throws on a line over MAX_LINE_LENGTH characters, and these boards are refreshed from inside
+	 * joining and leaving a match, so one long line (a long map name, a long status) would break the join itself.
+	 * Cuts such a line short instead, without leaving half of a color code at the end.
+	 */
+	private static String[] fit(String... lines) {
+		String[] fitted = new String[lines.length];
+		for (int i = 0; i < lines.length; i++) {
+			String line = lines[i];
+			if (line.length() > MAX_LINE_LENGTH) {
+				line = line.substring(0, MAX_LINE_LENGTH);
+				if (line.charAt(line.length() - 1) == ChatColor.COLOR_CHAR) line = line.substring(0, line.length() - 1);
+			}
+			fitted[i] = line;
+		}
+		return fitted;
 	}
 
 	public void refreshAllWaiting(String statusLine) {
@@ -99,7 +118,7 @@ public class FWScoreboardManager {
 		lines.add("");
 		lines.add(main().color(FOOTER));
 
-		board.updateLines(lines.toArray(new String[0]));
+		board.updateLines(fit(lines.toArray(new String[0])));
 	}
 
 	public void refreshAllGame() {

@@ -357,7 +357,8 @@ public class FWGameInstance {
 			return "&rStarting In: &a" + FWGameConstants.STARTING_COUNTDOWN_SECONDS + "s";
 		}
 		int needed = Math.max(1, mode.getMinPlayers() - countPlayers());
-		return "&7&oWaiting for &a" + needed + " &7&oplayer" + (needed == 1 ? "" : "s");
+		// "...&7&oplayers" was 31 chars, one over what a scoreboard line can hold on 1.8, so this stays short
+		return "&7&oWaiting for &a" + needed + " &7&omore";
 	}
 
 	/**
