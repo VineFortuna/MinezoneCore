@@ -585,4 +585,16 @@ public class ItemHelper {
 	public static String formatDouble(double value) {
 		return (value % 1 == 0) ? String.valueOf((int) value) : String.valueOf(value);
 	}
+
+	/**
+	 * The Flag Wars icon: a banner with a blue base. Every GUI and NPC that shows Flag Wars uses this one, so the
+	 * flag is always the same blue (a plain banner has no base color set and shows up black).
+	 */
+	public static ItemStack createFlagWarsBanner() {
+		ItemStack banner = new ItemStack(Material.BANNER);
+		BannerMeta meta = (BannerMeta) banner.getItemMeta();
+		meta.setBaseColor(DyeColor.BLUE);
+		banner.setItemMeta(meta);
+		return banner;
+	}
 }

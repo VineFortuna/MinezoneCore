@@ -13,12 +13,10 @@ import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 
 import anthony.util.SoundManager;
-import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BannerMeta;
 
 import anthony.util.ItemHelper;
 import anthony.SuperCraftBrawl.Core;
@@ -104,7 +102,7 @@ public class GameSelectorGUI implements InventoryProvider {
 		// Flag Wars
 		contents.set(1, 6,
 				ClickableItem.of(
-						modeSelectorDisplayItem(blueBanner(), "&6&lFLAG WARS &r&lNEW!", FLAG_WARS_DESCRIPTION, flagWarsPlayerCount()),
+						modeSelectorDisplayItem(ItemHelper.createFlagWarsBanner(), "&6&lFLAG WARS &r&lNEW!", FLAG_WARS_DESCRIPTION, flagWarsPlayerCount()),
 						e -> {
 							SoundManager.playClickSound(player);
 							FWModeSelectGUI.openOrJoin(main.getFwGameManager(), player);
@@ -188,14 +186,6 @@ public class GameSelectorGUI implements InventoryProvider {
 			lore.add(main.color("&a" + playerCount + " &rplaying!"));
 
 			return ItemHelper.setDetails(icon, main.color(title), lore);
-		}
-
-		private ItemStack blueBanner() {
-			ItemStack banner = new ItemStack(Material.BANNER);
-			BannerMeta meta = (BannerMeta) banner.getItemMeta();
-			meta.setBaseColor(DyeColor.BLUE);
-			banner.setItemMeta(meta);
-			return banner;
 		}
 
 		/** Summed across every concurrent Flag Wars instance - FWGameManager can run more than one at once. */
