@@ -35,7 +35,7 @@ public enum FWTrap {
 			case MLG:                 return "Launches enemies into the air with\na water bucket to land with.";
 			case SLOWNESS_BLINDNESS:  return "Slows and blinds enemies\nfor 6 seconds.";
 			case CAGE:                return "Traps the enemy in iron bars for\n4 seconds. Breaking out takes time.";
-			case DECOY_FLAG:          return "Right away, hides your flag nearby\nand leaves a decoy in its place. An\nenemy who grabs the decoy is launched\nback, then your flag returns home.";
+			case DECOY_FLAG:          return "Right away, hides your flag nearby\nand leaves a decoy in its place. An\nenemy who grabs the decoy is launched\nback, and your flag stays hidden.";
 			default: return "";
 		}
 	}

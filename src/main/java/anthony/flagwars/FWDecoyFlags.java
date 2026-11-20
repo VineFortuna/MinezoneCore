@@ -24,9 +24,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * The Decoy Flag Trap. The moment it is bought, the team's real flag is hidden at a random spot on their
  * island and a decoy banner is left at the flag's normal spot (it is never queued like the other traps).
  * The first enemy to grab the decoy hears a cackle and is thrown backwards and up, the team gets the usual
- * "triggered" chat line, the decoy is used up and the real flag goes back to its normal spot. The real flag
- * can be taken at its hidden spot like any flag, and doing that cancels the decoy. It waits until someone
- * tries, and a team needs to buy the trap again for another decoy.
+ * "triggered" chat line and the decoy is taken down. The real flag stays at its hidden spot, it does not go back
+ * to its normal one. The real flag can be taken at its hidden spot like any flag, and doing that cancels the
+ * decoy. It waits until someone tries. A team can buy the trap again once its flag is back at its normal spot.
  */
 public class FWDecoyFlags {
 
@@ -40,7 +40,7 @@ public class FWDecoyFlags {
 	private static final int HIDE_HEIGHT = 2;
 	/** Same reach as taking a real flag (see FWPlayerListener#onClickFlag). */
 	private static final double GRAB_REACH = 5.0;
-	/** How long the real flag can't be taken after it comes back, so one click can't take both flags. */
+	/** How long the real flag can't be taken after the decoy is grabbed, so one click can't take both flags. */
 	private static final long REAL_FLAG_LOCK_MILLIS = 500L;
 	/** Like the Iron Golem's Rose of Elevation: sent back with an upward speed of 1.0. */
 	private static final double PUSH_HORIZONTAL = 1.0;
@@ -50,13 +50,10 @@ public class FWDecoyFlags {
 		final FWTeam owner;
 		/** The flag's normal spot. The decoy banner stands here. */
 		final Location home;
-		/** Where the real flag is hidden for now. */
-		final Location hidden;
 
-		Decoy(FWTeam owner, Location home, Location hidden) {
+		Decoy(FWTeam owner, Location home) {
 			this.owner = owner;
 			this.home = home;
-			this.hidden = hidden;
 		}
 	}
 
@@ -103,7 +100,7 @@ public class FWDecoyFlags {
 
 		// The banner at home stays where it is and becomes the decoy. The real one goes up at the new spot.
 		instance.getFlagManager().moveFlag(siteId, hiding.getLocation());
-		decoys.put(siteId, new Decoy(owner, home, hiding.getLocation()));
+		decoys.put(siteId, new Decoy(owner, home));
 
 		home.getWorld().playSound(home, Sound.ENDERMAN_TELEPORT, 1f, 1.5f);
 		tellTeam(owner, "&2&l(!) &rYour flag moved. A decoy is at its old spot.");
@@ -136,7 +133,7 @@ public class FWDecoyFlags {
 		return false;
 	}
 
-	/** The witch laughs, the grabber is thrown back and up, the decoy goes away and the real flag returns home. */
+	/** The witch laughs, the grabber is thrown back and up and the decoy goes away. The real flag stays hidden where it is. */
 	private void spring(Player grabber, Decoy decoy) {
 		decoys.remove(decoy.owner.getSiteId());
 
@@ -147,11 +144,10 @@ public class FWDecoyFlags {
 		// The same chat lines every other trap sends when someone sets it off
 		instance.getTrapManager().announceTriggered(decoy.owner, grabber, FWTrap.DECOY_FLAG);
 
-		// The real flag goes back to its normal spot, where the decoy was. It can't be taken for a moment, so
-		// the click that sprang the decoy (or its twin event) can't also take the real flag.
+		// The decoy banner is used up. The real flag stays at its hidden spot. It can't be taken for a moment, so
+		// the click that sprang the decoy (or its twin event) can't also take the real flag if they're in line.
 		instance.getFlagManager().lockSteals(decoy.owner.getSiteId(), REAL_FLAG_LOCK_MILLIS);
-		instance.getFlagManager().moveFlag(decoy.owner.getSiteId(), decoy.home);
-		removeBanner(decoy.hidden);
+		removeBanner(decoy.home);
 	}
 
 	/**
