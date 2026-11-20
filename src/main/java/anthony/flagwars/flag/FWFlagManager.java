@@ -94,7 +94,12 @@ public class FWFlagManager {
 		startPinning();
 	}
 
+	/** Puts the team's banner on the block at loc, turned the way loc faces. For a flag's own spot that is the way staff faced during /fwsetup flag. */
 	private void placeFlagBlock(Location loc, FWTeam team) {
+		placeFlagBlock(loc, loc.getYaw(), team);
+	}
+
+	private void placeFlagBlock(Location loc, float yaw, FWTeam team) {
 		Block block = loc.getBlock();
 		block.setType(Material.STANDING_BANNER);
 
@@ -102,8 +107,19 @@ public class FWFlagManager {
 		if (state instanceof Banner) {
 			Banner banner = (Banner) state;
 			banner.setBaseColor(team.getColor());
+			banner.setRawData((byte) bannerRotation(yaw));
 			banner.update(true);
 		}
+	}
+
+	/**
+	 * A standing banner turns in 16 steps, the same way as a sign post: 0 faces south, 4 west, 8 north and 12 east,
+	 * which is the order a player's yaw goes in (0 south, 90 west, 180 north, 270 east). So the banner faces the way
+	 * the yaw does, rounded to the nearest 22.5 degrees. Yaw can be any angle, negative or past 360.
+	 */
+	static int bannerRotation(float yaw) {
+		float degrees = ((yaw % 360f) + 360f) % 360f;
+		return Math.round(degrees / 22.5f) & 15;
 	}
 
 	/** Forces every tracked shopkeeper back to its spawn spot and zeroes velocity, so it never wanders or shows knockback. */
@@ -381,7 +397,11 @@ public class FWFlagManager {
 		FWTeam team = instance.getTeams().get(siteId);
 		if (team == null || !flagLocs.containsKey(siteId)) return;
 
-		placeFlagBlock(newSpot, team);
+		// A moved flag keeps facing the way the team's flag was set up to face
+		FWTeamSite site = instance.getMapConfig().getTeamSite(siteId);
+		float yaw = site != null && site.getFlagLoc() != null ? site.getFlagLoc().getYaw() : newSpot.getYaw();
+
+		placeFlagBlock(newSpot, yaw, team);
 		flagLocs.put(siteId, newSpot.getBlock().getLocation());
 	}
 
