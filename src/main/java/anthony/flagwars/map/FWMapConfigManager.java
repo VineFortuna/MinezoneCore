@@ -64,6 +64,22 @@ public class FWMapConfigManager {
 		loadAll();
 	}
 
+	/**
+	 * Re-reads one map's saved config from disk, for when its world has just been loaded. The configs are read when
+	 * the plugin starts, before the map worlds are loaded, so every Location in them has no World until then (see
+	 * readLocation). Does nothing if the map was never saved. Only meant for a world that wasn't loaded until now:
+	 * with its world not loaded nobody could have changed that map's config since it was read, so nothing is lost.
+	 */
+	public void reloadFromDisk(String worldName) {
+		File file = new File(configDir, worldName + ".yml");
+		if (!file.exists()) {
+			file = new File(new File(main.getDataFolder(), "flagdefense"), worldName + ".yml");
+		}
+		if (file.exists()) {
+			configs.put(worldName, loadFromFile(file, worldName));
+		}
+	}
+
 	/** Returns the config for the primary game map (MAP_WORLD_NAME). Used by the game engine. */
 	public FWMapConfig getConfig() {
 		return getOrCreate(FWGameConstants.MAP_WORLD_NAME);
