@@ -29,13 +29,6 @@ import fr.minuskube.inv.content.InventoryProvider;
 
 public class GameSelectorGUI implements InventoryProvider {
 
-	private static final List<String> SCB_DESCRIPTION = java.util.Arrays.asList(
-			"&7Select from a wide range of classes, each",
-			"&7with unique abilities. Fight Free For All",
-			"&7to be the last one standing, or go 1v1 &",
-			"&7fight to the death in Duels!"
-	);
-
 	private static final List<String> FLAG_WARS_DESCRIPTION = java.util.Arrays.asList(
 			"&7Steal flags from enemies and rush it back",
 			"&7to your base while defending your own.",
@@ -47,8 +40,7 @@ public class GameSelectorGUI implements InventoryProvider {
 	public SmartInventory inv;
 
 	public GameSelectorGUI(Core main) {
-		inv = SmartInventory.builder().id("myInventory").provider(this).size(3
-						, 9)
+		inv = SmartInventory.builder().id("myInventory").provider(this).size(5, 9)
 				.title(ChatColorHelper.color("&8&lGame Selector")).build();
 		this.main = main;
 
@@ -57,26 +49,61 @@ public class GameSelectorGUI implements InventoryProvider {
 	@Override
 	public void init(Player player, InventoryContents contents) {
 		ItemStack pane = ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " ");
-		for (int row = 0; row < 3; row++) {
+		for (int row = 0; row < 5; row++) {
 			for (int col = 0; col < 9; col++) {
-				if (row == 0 || row == 2 || col == 0 || col == 8) {
+				if (row == 0 || row == 4 || col == 0 || col == 8) {
 					contents.set(row, col, ClickableItem.of(pane, e -> {}));
 				}
 			}
 		}
 
-		// Super Craft Bros - opens a Classic/Duels sub-menu (the same two icons that used to live here directly)
-		ItemStack scbIcon = ItemHelper.createSkullTexture("e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I4NmI4MjE1YjM2MTBlYWE2NDhjMjNjNGEyMGFkNjc1OWYyNTFlZjg1NDc2ODI5ZGQ2ZDE4NDI4MjNiMTEzIn19fQ==");
-		contents.set(1, 3,
+		// SCB Classic: left click picks a map, right click joins a random curated one
+		ItemStack scbClassic = ItemHelper.createSkullTexture("e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2I4NmI4MjE1YjM2MTBlYWE2NDhjMjNjNGEyMGFkNjc1OWYyNTFlZjg1NDc2ODI5ZGQ2ZDE4NDI4MjNiMTEzIn19fQ==");
+		contents.set(1, 2,
 				ClickableItem.of(
-						modeSelectorDisplayItem(scbIcon, "&6&lSUPER CRAFT BROS", SCB_DESCRIPTION, scbPlayerCount()),
+						ItemHelper.setDetails(scbClassic,
+								"&e&lSuper Craft Brothers",
+								"&fMode: &aClassic",
+								"",
+								"&7Free for all, kill everyone",
+								"",
+								"&e&nLeft Click&r&e to choose a map",
+								"&e&nRight Click&r&e to join a random map"),
 						e -> {
-							SoundManager.playClickSound(player);
-							new SCBModeSelectGUI(main).inv.open(player);
+							// If item was Left-clicked opens GUI to choose map
+							if (e.isLeftClick()) {
+								SoundManager.playClickSound(player);
+								new ClassicModeGUI(main, inv).inv.open(player);
+							// If item was Right-clicked join random game
+							} else if (e.isRightClick()) {
+								main.getGameManager().JoinMap(player, randomizeMap(GameType.CLASSIC));
+							}
 						}));
 
-		// Flag Wars - replaces the old standalone Duels icon's slot
-		contents.set(1, 5,
+		// SCB Duels: same, for 1v1 maps
+		contents.set(1, 4,
+				ClickableItem.of(
+						ItemHelper.setDetails(new ItemStack(Material.IRON_SWORD),
+								"&e&lSuper Craft Brothers",
+								"&fMode: &aDuels",
+								"",
+								"&71v1 someone to the death",
+								"",
+								"&e&nLeft Click&r&e to choose a map",
+								"&e&nRight Click&r&e to join a random map"),
+						e -> {
+							// If item was Left-clicked opens GUI to choose map
+							if (e.isLeftClick()) {
+								SoundManager.playClickSound(player);
+								new DuelsModeGUI(main, inv).inv.open(player);
+							// If item was Right-clicked join random game
+							} else if (e.isRightClick()) {
+								main.getGameManager().JoinMap(player, randomizeMap(GameType.DUEL));
+							}
+						}));
+
+		// Flag Wars
+		contents.set(1, 6,
 				ClickableItem.of(
 						modeSelectorDisplayItem(blueBanner(), "&6&lFLAG WARS &r&lNEW!", FLAG_WARS_DESCRIPTION, flagWarsPlayerCount()),
 						e -> {
@@ -85,7 +112,7 @@ public class GameSelectorGUI implements InventoryProvider {
 						}));
 
 		// Fishing
-		contents.set(1, 1,
+		contents.set(3, 3,
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.FISHING_ROD),
 								"&6&lFISHING",
@@ -108,7 +135,7 @@ public class GameSelectorGUI implements InventoryProvider {
 						}));
 
 		// Parkour
-		contents.set(1, 7,
+		contents.set(3, 5,
 				ClickableItem.of(
 						ItemHelper.setDetails(new ItemStack(Material.GRASS),
 								"&6&lPARKOUR",
@@ -170,15 +197,6 @@ public class GameSelectorGUI implements InventoryProvider {
 			meta.setBaseColor(DyeColor.BLUE);
 			banner.setItemMeta(meta);
 			return banner;
-		}
-
-		/** Summed across every active Classic/Duels instance - both GameTypes share the same gameMap/Maps pool. */
-		private int scbPlayerCount() {
-			int total = 0;
-			for (GameInstance instance : main.getGameManager().gameMap.values()) {
-				if (instance != null) total += instance.players.size();
-			}
-			return total;
 		}
 
 		/** Summed across every concurrent Flag Wars instance (Solo + Duos) - FWGameManager can run more than one at once. */
