@@ -474,10 +474,10 @@ public class GameInstance implements WinEffects.Host {
         join.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/join " + mapName));
 
         if (gameType == GameType.FRENZY) {
-            String msg = color("&2&l(!) &a&lA &7&oFrenzy &a&lgame on&f&l " + mapName + " &a&lis starting in 30 seconds");
+            String msg = color("&2&l(!) &a&lAn &6&lSCB &7&oFrenzy &a&lgame on&f&l " + mapName + " &a&lis starting in 30 seconds");
             broadcastToWorld(lobby, msg, join);
         } else if (gameType == GameType.CLASSIC) {
-            String msg = color("&2&l(!) &a&lA game on&f&l " + mapName + " &a&lis starting in 30 seconds");
+            String msg = color("&2&l(!) &a&lAn &6&lSCB&a&l game on&f&l " + mapName + " &a&lis starting in 30 seconds");
             broadcastToWorld(lobby, msg, join);
         }
 
