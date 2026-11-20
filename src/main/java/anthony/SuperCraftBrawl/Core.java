@@ -849,6 +849,7 @@ public class Core extends JavaPlugin implements Listener {
         floatingBlocks = new FloatingBlocks(this);
         armorStandManager = new ArmorStandManager(this);
         lbSettingsHolo = new SettingsHologram(this);
+        getServer().getPluginManager().registerEvents(lbSettingsHolo, this); // removes leftover hologram stands in chunks that load
         staffHelpManager = new StaffHelpManager(this);
         levelManager = new LevelManager(this);
         dailyRewards = new DailyRewards(this);
