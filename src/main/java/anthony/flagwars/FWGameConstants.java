@@ -13,6 +13,11 @@ public final class FWGameConstants {
 	/** Capture target never goes higher than this, no matter how many players are in the match. */
 	public static final int MAX_WINNING_FLAG_CAPTURES = 4;
 
+	/** A match with exactly this many players (a 1v1) is a duel, see isDuel. */
+	public static final int DUEL_PLAYERS = 2;
+	/** A duel has a single flag to take, so that same flag has to be captured this many times to win. */
+	public static final int DUEL_REQUIRED_CAPTURES = 2;
+
 	/** How close a carrier must be to their own base's flag spot to bank a capture. */
 	public static final double FLAG_CAPTURE_RADIUS = 3.0;
 
@@ -33,10 +38,17 @@ public final class FWGameConstants {
 	 * captures that may never happen - one fewer than the number of occupied islands (not raw
 	 * player count, which would overcount in Duos - a team can only ever capture each other
 	 * team's flag once, so the ceiling is always teamCount - 1), floored at 1 and capped at
-	 * MAX_WINNING_FLAG_CAPTURES. E.g. 2 teams need 1 capture, 3 need 2, 4 need 3, 5+ need the full 4.
+	 * MAX_WINNING_FLAG_CAPTURES. E.g. 3 teams need 2 captures, 4 need 3, 5+ need the full 4.
+	 * The one exception is a duel (see isDuel), which needs DUEL_REQUIRED_CAPTURES captures of the same flag.
 	 */
-	public static int requiredCapturesFor(int teamCount) {
+	public static int requiredCapturesFor(int teamCount, int playerCount) {
+		if (isDuel(teamCount, playerCount)) return DUEL_REQUIRED_CAPTURES;
 		return Math.max(1, Math.min(teamCount - 1, MAX_WINNING_FLAG_CAPTURES));
+	}
+
+	/** A 1v1: exactly two players, each alone on their own island. Any other match is played the normal way. */
+	public static boolean isDuel(int teamCount, int playerCount) {
+		return teamCount == 2 && playerCount == DUEL_PLAYERS;
 	}
 
 	/**

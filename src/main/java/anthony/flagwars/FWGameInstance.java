@@ -77,6 +77,8 @@ public class FWGameInstance {
 	private int countdownSecondsLeft;
 	private boolean settingsLocked = false;
 	private int requiredCaptures = FWGameConstants.MAX_WINNING_FLAG_CAPTURES;
+	/** Set when the match starts: a 1v1, where the same flag is captured twice instead of every flag once. */
+	private boolean duel = false;
 	private final List<WinEffects> activeWinEffects = new ArrayList<>();
 	/** Zombie/Skeleton Pokeball mobs alive in this match (entity UUID -> thrower and team), so nothing outlives the match. */
 	private final Map<UUID, PokeballMob> pokeballMobs = new HashMap<>();
@@ -185,6 +187,11 @@ public class FWGameInstance {
 	/** How many flags the winning team needs this match - scaled down for small player counts, see FWGameConstants#requiredCapturesFor. */
 	public int getRequiredCaptures() {
 		return requiredCaptures;
+	}
+
+	/** True in a 1v1, where the one enemy flag has to be captured more than once, see FWGameConstants#isDuel. */
+	public boolean isDuel() {
+		return duel;
 	}
 
 	public Map<Integer, FWTeam> getTeams() {
@@ -616,7 +623,8 @@ public class FWGameInstance {
 
 	private void startMatch() {
 		state = FWGameState.IN_PROGRESS;
-		requiredCaptures = FWGameConstants.requiredCapturesFor(countActiveTeams());
+		duel = FWGameConstants.isDuel(countActiveTeams(), countPlayers());
+		requiredCaptures = FWGameConstants.requiredCapturesFor(countActiveTeams(), countPlayers());
 
 		for (FWTeam team : teams.values()) {
 			if (team.isEmpty()) continue;
@@ -650,7 +658,11 @@ public class FWGameInstance {
 		TellAll(manager.getMain().color("&r          Defend your flag from thieves!"));
 		TellAll(manager.getMain().color("&r                    Good Luck!"));
 		TellAll(manager.getMain().color("&e&l----------------------------------------"));
-		TellAll(manager.getMain().color("&a&l(!) &rCapture &e" + requiredCaptures + " &rflags to win!"));
+		if (duel) {
+			TellAll(manager.getMain().color("&a&l(!) &rIt's a 1v1! Capture your opponent's flag &e" + requiredCaptures + " &rtimes to win!"));
+		} else {
+			TellAll(manager.getMain().color("&a&l(!) &rCapture &e" + requiredCaptures + " &rflags to win!"));
+		}
 		playSoundForAll(Sound.ENDERDRAGON_GROWL, 0.35f, 1.0f);
 	}
 

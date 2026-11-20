@@ -59,7 +59,7 @@ public class FWFlagManager {
 	private final Map<UUID, Integer> carrying = new HashMap<>();
 	/** carrierUUID -> their real helmet, saved while a flag banner occupies that slot. */
 	private final Map<UUID, ItemStack> savedHelmets = new HashMap<>();
-	/** playerUUID -> set of site IDs they've already successfully captured this match (blocks re-captures by the same player). */
+	/** playerUUID -> set of site IDs they've already successfully captured this match (blocks re-captures by the same player, except in a 1v1). */
 	private final Map<UUID, Set<Integer>> playerCaptures = new HashMap<>();
 	/** site id to the System.currentTimeMillis() until which that team's flag can't be taken. See lockSteals. */
 	private final Map<Integer, Long> stealLockedUntil = new HashMap<>();
@@ -409,6 +409,8 @@ public class FWFlagManager {
 	 * Called when a player left-clicks a flag block. Blocks self-steals, carrying
 	 * two flags at once (only one helmet slot to hold one in), and re-capturing
 	 * the same victim a second time - everyone else stays free to steal it.
+	 * A 1v1 is the exception: there is only one flag to take, and it has to be
+	 * captured more than once to win (see FWGameConstants#isDuel).
 	 */
 	public void attemptSteal(int ownerSiteId, Player attacker) {
 		Core main = instance.getManager().getMain();
@@ -431,7 +433,7 @@ public class FWFlagManager {
 			return;
 		}
 
-		if (playerCaptures.getOrDefault(attacker.getUniqueId(), Collections.emptySet()).contains(ownerSiteId)) {
+		if (!instance.isDuel() && playerCaptures.getOrDefault(attacker.getUniqueId(), Collections.emptySet()).contains(ownerSiteId)) {
 			attacker.sendMessage(main.color("&c&l(!) &rYou've already captured this flag! Steal from someone else."));
 			return;
 		}

@@ -172,7 +172,8 @@ public class FWScoreboardManager {
 	 * own team has captured that team's flag.
 	 */
 	private String teamStatusLine(FWTeam viewerTeam, FWTeam team) {
-		String icon = viewerTeam != null && viewerTeam.hasCapturedFrom(team.getSiteId()) ? "&a✔ " : "";
+		// Never in a 1v1: that one flag has to be captured again, so a check mark would say it is done
+		String icon = !instance.isDuel() && viewerTeam != null && viewerTeam.hasCapturedFrom(team.getSiteId()) ? "&a✔ " : "";
 		String score = team.getCapturedFlags() + "/" + instance.getRequiredCaptures();
 
 		if (team.isEmpty()) {
