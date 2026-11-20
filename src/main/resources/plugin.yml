@@ -5,7 +5,7 @@ softdepend: [MinezonePunish]
 commands:
    join:
       description: Join a game
-      usage: /join [map name]
+      usage: /join [map name | flagwars [solo|duo]]
    hub:
       description: Hub command
       aliases: [h, lobby]
@@ -171,6 +171,13 @@ commands:
    partychat:
      description: Party chat command
      aliases: [ pc, pchat ]
+   fw:
+      description: Flag Wars gamemode command
+      usage: /fw help (join/leave moved to /join flagwars and /leave)
+      aliases: [flagwars, fd, vd]
+   fwsetup:
+      description: Staff tool to configure a Flag Wars map
+      permission: fw.admin
 
 permissions:
    scb.admin:
@@ -182,6 +189,7 @@ permissions:
          scb.broadcast: true
          scb.ignite: true
          scb.give: true
+         fw.admin: true
          scb.purchases: true
          punish.networkban: true
    scb.developer:

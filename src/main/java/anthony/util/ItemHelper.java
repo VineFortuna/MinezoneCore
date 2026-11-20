@@ -443,6 +443,22 @@ public class ItemHelper {
 		return item;
 	}
 
+	/**
+	 * Hides the vanilla "Effect Name (m:ss)" tooltip line(s) a potion shows by default - for spots
+	 * (like the Flag Wars shop) where the item's own lore already states its effect and duration,
+	 * so the vanilla line would just be redundant.
+	 */
+	public static ItemStack hidePotionEffectLore(ItemStack item) {
+		if (item == null)
+			return null;
+		ItemMeta meta = item.getItemMeta();
+		if (meta == null)
+			return item;
+		meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+		item.setItemMeta(meta);
+		return item;
+	}
+
 	public static ItemStack setLore(ItemStack item, List<String> lore) {
 		if (item == null)
 			return null;

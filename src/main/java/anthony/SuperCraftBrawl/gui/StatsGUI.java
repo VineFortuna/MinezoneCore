@@ -106,7 +106,7 @@ public class StatsGUI implements InventoryProvider {
 									main.color("&fLevel: &a" + data.level),
 									main.color("&fEXP: &a" + data.exp + "/2500"),
 									main.color("&fMatches Played: &a" + (data.wins + data.losses)))), e-> {}));
-			contents.set(2, 4,
+			contents.set(1, 4,
 					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND_SWORD),
 							main.color("&e&lSCB Stats"),
                             main.color("&fWins: &a" + data.wins),
@@ -119,6 +119,23 @@ public class StatsGUI implements InventoryProvider {
                             "",
                             main.color("&fKills: &a" + data.kills),
                             main.color("&fDeaths: &a" + data.deaths)),
+                            e -> {
+                                //Do nothing when clicked
+							}));
+
+			contents.set(3, 4,
+					ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.BANNER),
+							main.color("&e&lFLAG WARS Stats"),
+                            main.color("&rWins: &a" + data.fwWins),
+                            main.color("&rMatch MVPs: &a" + data.fwMatchMvps),
+                            main.color("&rLosses: &a" + data.fwLosses),
+                            "",
+                            main.color("&rCurrent Winstreak: &a" + data.fwCurrentWinstreak),
+                            main.color("&rBest Winstreak: &a" + data.fwBestWinstreak),
+                            "",
+                            main.color("&rKills: &a" + data.fwKills),
+                            main.color("&rDeaths: &a" + data.fwDeaths),
+                            main.color("&rFlags Captured: &a" + data.fwFlagsCaptured)),
                             e -> {
                                 //Do nothing when clicked
 							}));

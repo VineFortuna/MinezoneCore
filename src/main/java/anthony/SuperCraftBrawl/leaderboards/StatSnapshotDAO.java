@@ -62,11 +62,16 @@ public class StatSnapshotDAO {
      * If missing, insert one with the player's current total so period math works: (current - snapshot).
      */
     public void ensureSnapshotForPlayer(String uuid, String metric, LeaderboardScope scope, int currentTotal) {
+        ensureSnapshotForPlayer(uuid, metric, scope, currentTotal, "scb_stat_snapshots");
+    }
+
+    /** Same as above but targeting a specific snapshot table - e.g. "fw_stat_snapshots" for Flag Wars metrics. */
+    public void ensureSnapshotForPlayer(String uuid, String metric, LeaderboardScope scope, int currentTotal, String table) {
         if (scope == LeaderboardScope.LIFETIME) return;
 
         java.sql.Date periodStart = startFor(scope);
         final String checkSql =
-                "SELECT total_value FROM scb_stat_snapshots " +
+                "SELECT total_value FROM " + table + " " +
                         "WHERE metric='" + metric + "' AND uuid='" + uuid + "' " +
                         "AND period='" + scope.name() + "' AND period_start='" + periodStart + "'";
 
@@ -75,7 +80,7 @@ public class StatSnapshotDAO {
                 boolean exists = rs.next();  // <-- can throw SQLException
                 if (!exists) {
                     final String ins =
-                            "INSERT INTO scb_stat_snapshots(metric, uuid, period, period_start, total_value) VALUES (" +
+                            "INSERT INTO " + table + "(metric, uuid, period, period_start, total_value) VALUES (" +
                                     "'" + metric + "','" + uuid + "','" + scope.name() + "','" + periodStart + "'," + currentTotal + ")";
                     core.getDatabaseManager().executeUpdateCommand(ins);
                 }
@@ -91,11 +96,16 @@ public class StatSnapshotDAO {
      * `playerDataColumn` is the column name in PlayerData (e.g., Wins, Kills, FlawlessWins, TotalCaught).
      */
     public void ensureSnapshotsForAll(String metric, LeaderboardScope scope, String playerDataColumn) {
+        ensureSnapshotsForAll(metric, scope, playerDataColumn, "scb_stat_snapshots");
+    }
+
+    /** Same as above but targeting a specific snapshot table - e.g. "fw_stat_snapshots" for Flag Wars metrics. */
+    public void ensureSnapshotsForAll(String metric, LeaderboardScope scope, String playerDataColumn, String table) {
         if (scope == LeaderboardScope.LIFETIME) return;
 
         java.sql.Date periodStart = startFor(scope);
         final String sql =
-                "INSERT IGNORE INTO scb_stat_snapshots(metric, uuid, period, period_start, total_value) " +
+                "INSERT IGNORE INTO " + table + "(metric, uuid, period, period_start, total_value) " +
                         "SELECT '" + metric + "', pd.UUID, '" + scope.name() + "', '" + periodStart + "', pd." + playerDataColumn + " " +
                         "FROM PlayerData pd";
 
@@ -128,6 +138,11 @@ public class StatSnapshotDAO {
     }
 
     public void recordPeriodWinstreak(String uuid, int currentWinstreak) {
+        recordPeriodWinstreak(uuid, currentWinstreak, "scb_period_winstreaks");
+    }
+
+    /** Same as above but targeting a specific table - e.g. "fw_period_winstreaks" for Flag Wars. */
+    public void recordPeriodWinstreak(String uuid, int currentWinstreak, String table) {
         if (uuid == null) {
             return;
         }
@@ -140,7 +155,7 @@ public class StatSnapshotDAO {
             java.sql.Date periodStart = startFor(scope);
 
             String sql =
-                    "INSERT INTO scb_period_winstreaks(uuid, period, period_start, best_value) VALUES (" +
+                    "INSERT INTO " + table + "(uuid, period, period_start, best_value) VALUES (" +
                             "'" + uuid + "'," +
                             "'" + scope.name() + "'," +
                             "'" + periodStart + "'," +

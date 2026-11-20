@@ -2,7 +2,9 @@ package anthony.SuperCraftBrawl.gui.leaderboard;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.leaderboards.LeaderboardScope;
+import anthony.SuperCraftBrawl.leaderboards.LeaderboardStatsMode;
 import anthony.util.ChatColorHelper;
+import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
 import fr.minuskube.inv.ClickableItem;
 import fr.minuskube.inv.SmartInventory;
@@ -43,7 +45,7 @@ public class LeaderboardScopeGUI implements InventoryProvider {
 
         for (int r = 0; r < 3; r++) {
             for (int c = 0; c < 9; c++) {
-                if (r == 1 && c == 4) {
+                if ((r == 1 && c == 3) || (r == 1 && c == 5)) {
                     continue;
                 }
 
@@ -52,6 +54,7 @@ public class LeaderboardScopeGUI implements InventoryProvider {
         }
 
         setClock(contents, player);
+        setModeToggle(contents, player);
     }
 
     @Override
@@ -66,7 +69,7 @@ public class LeaderboardScopeGUI implements InventoryProvider {
 
         ItemStack clock = buildClock(current);
 
-        contents.set(1, 4, ClickableItem.of(clock, (InventoryClickEvent e) -> {
+        contents.set(1, 3, ClickableItem.of(clock, (InventoryClickEvent e) -> {
             LeaderboardScope next = nextScope(main.leaderboardScopeByViewer.getOrDefault(
                     player.getUniqueId(),
                     LeaderboardScope.LIFETIME
@@ -98,6 +101,59 @@ public class LeaderboardScopeGUI implements InventoryProvider {
             String l4 = (selected == LeaderboardScope.LIFETIME ? check : dot) + ChatColor.YELLOW + "Lifetime";
 
             meta.setLore(Arrays.asList(ChatColor.GRAY + "Click to cycle", "", l1, l2, l3, l4));
+            it.setItemMeta(meta);
+        }
+
+        return it;
+    }
+
+    private void setModeToggle(InventoryContents contents, Player player) {
+        LeaderboardStatsMode current = main.leaderboardModeByViewer.getOrDefault(
+                player.getUniqueId(),
+                LeaderboardStatsMode.SCB
+        );
+
+        ItemStack icon = buildModeToggle(current);
+
+        contents.set(1, 5, ClickableItem.of(icon, (InventoryClickEvent e) -> {
+            LeaderboardStatsMode next = main.leaderboardModeByViewer.getOrDefault(
+                    player.getUniqueId(),
+                    LeaderboardStatsMode.SCB
+            ) == LeaderboardStatsMode.SCB ? LeaderboardStatsMode.FLAG_WARS : LeaderboardStatsMode.SCB;
+
+            main.leaderboardModeByViewer.put(player.getUniqueId(), next);
+
+            SoundManager.playClickSound(player);
+            player.sendMessage(main.color("&r&l(!) &rShowing &e" + next.display() + " &rstats on leaderboards"));
+
+            setModeToggle(contents, player);
+
+            LeaderboardScope scope = main.leaderboardScopeByViewer.getOrDefault(
+                    player.getUniqueId(),
+                    LeaderboardScope.LIFETIME
+            );
+            repaintAllBoardsFor(player, scope);
+        }));
+    }
+
+    private ItemStack buildModeToggle(LeaderboardStatsMode selected) {
+        ItemStack it = selected == LeaderboardStatsMode.SCB
+                ? ItemHelper.createSkullHeadPlayer(1, "SethBling")
+                : new ItemStack(Material.BANNER);
+
+        ItemMeta meta = it.getItemMeta();
+
+        if (meta != null) {
+            String shownMode = selected == LeaderboardStatsMode.SCB ? "Super Craft Bros" : "Flag Wars";
+            meta.setDisplayName(main.color("&rShowing &a" + shownMode + " &rStats"));
+
+            String check = ChatColor.GREEN + "✔ ";
+            String dot = ChatColor.DARK_GRAY + "• ";
+
+            String l1 = (selected == LeaderboardStatsMode.SCB ? check : dot) + ChatColor.YELLOW + "Super Craft Bros";
+            String l2 = (selected == LeaderboardStatsMode.FLAG_WARS ? check : dot) + ChatColor.YELLOW + "Flag Wars";
+
+            meta.setLore(Arrays.asList(ChatColor.GRAY + "Click to cycle!", "", l1, l2));
             it.setItemMeta(meta);
         }
 
