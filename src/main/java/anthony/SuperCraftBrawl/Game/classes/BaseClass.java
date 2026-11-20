@@ -424,6 +424,17 @@ public abstract class BaseClass {
 					}
 				}
 
+				// The one who hit them last may have left since, which unloads their data and leaves nobody to credit.
+				// Void deaths are fired by the plugin and never update the last damage cause, so a hit from long ago
+				// still names that player. Without this the death below threw halfway through, after a life was
+				// already taken, and the player kept falling and lost another life on every move.
+				if (killer != null && (!killer.isOnline()
+						|| instance.getGameManager().getMain().getDataManager().getPlayerData(killer) == null)) {
+					killer = null;
+					creature = null;
+					lastDamage = null;
+				}
+
 				BaseClass baseClassDead = instance.classes.get(p);
 
 				baseClassDead.totalDeaths++;
@@ -435,10 +446,11 @@ public abstract class BaseClass {
 
 				// Death message
 				DeathMessageProvider deathMessage = new DeathMessageProvider();
-				PlayerData killerData = instance.getGameManager().getMain().getDataManager().getPlayerData(killer);
+				PlayerData killerData = killer != null
+						? instance.getGameManager().getMain().getDataManager().getPlayerData(killer) : null;
 				// check if killer has custom kill messages enabled
-				// if there is no killer, use victim's settings
-				boolean customEnabled = killer != null ? killerData.killMsgs == 1 : data.killMsgs == 1;
+				// if there is no killer (or no data for them), use victim's settings
+				boolean customEnabled = killerData != null ? killerData.killMsgs == 1 : data.killMsgs == 1;
 
 				tellAll(instance.color(deathMessage.getDeathMessage(player, killer, creature, lastDamage, customEnabled)));
 
