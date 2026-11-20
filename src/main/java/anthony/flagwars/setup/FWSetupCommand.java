@@ -18,6 +18,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -93,12 +94,21 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 			}
 			String mapName = args[1];
 			World world = Bukkit.getWorld(mapName);
+			boolean justLoaded = false;
 			if (world == null) {
+				// Only a world that is already on disk is loaded. createWorld on a name with no folder makes a brand
+				// new empty void world, so a typo or a map that isn't on this server would leave one behind.
+				if (!new File(new File(Bukkit.getWorldContainer(), mapName), "level.dat").exists()) {
+					player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rThere's no world folder called &e" + mapName
+							+ "&r on this server. To make a new one: &e/fwsetup createmap " + mapName));
+					return true;
+				}
 				try {
 					world = Bukkit.createWorld(new WorldCreator(mapName)
 							.environment(World.Environment.NORMAL)
 							.generateStructures(false)
 							.generator(new VoidGenerator()));
+					justLoaded = true;
 				} catch (Throwable t) {
 					player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rFailed to load world: &e" + t.getMessage()));
 					return true;
@@ -108,7 +118,11 @@ public class FWSetupCommand implements CommandExecutor, TabExecutor {
 				player.sendMessage(fwGameManager.getMain().color("&c&l(!) &rWorld &e" + mapName + "&r doesn't exist."));
 				return true;
 			}
-			FWMapConfig cfg = manager.getOrCreate(mapName);
+
+			// The saved locations are read when the plugin starts, before this world exists, so they have no world
+			// and the lobby below would be skipped for the world's spawn. Now that it is loaded, read them again.
+			if (justLoaded) manager.reloadFromDisk(world.getName());
+			FWMapConfig cfg = manager.getOrCreate(world.getName());
 			Location dest = cfg.getLobby() != null && cfg.getLobby().getWorld() != null
 					? cfg.getLobby() : world.getSpawnLocation();
 			player.teleport(dest);
