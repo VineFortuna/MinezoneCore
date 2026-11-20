@@ -18,11 +18,11 @@ public final class FWGameConstants {
 
 	/** Indexed by (siteId - 1), matching FWMapConfig.TEAM_COUNT (8). */
 	public static final DyeColor[] TEAM_COLORS = {
-			DyeColor.LIME, DyeColor.YELLOW, DyeColor.CYAN, DyeColor.BLUE,
-			DyeColor.RED, DyeColor.WHITE, DyeColor.PINK, DyeColor.GREEN
+			DyeColor.GRAY, DyeColor.YELLOW, DyeColor.CYAN, DyeColor.BLUE,
+			DyeColor.RED, DyeColor.WHITE, DyeColor.PINK, DyeColor.LIME
 	};
 	public static final String[] TEAM_NAMES = {
-			"Lime", "Yellow", "Cyan", "Blue", "Red", "White", "Pink", "Green"
+			"Gray", "Yellow", "Cyan", "Blue", "Red", "White", "Pink", "Lime"
 	};
 
 	private FWGameConstants() {
@@ -56,7 +56,7 @@ public final class FWGameConstants {
 		return null;
 	}
 
-	/** Display-friendly list of valid /fwsetup color identifiers, e.g. "Lime, Yellow, ...". */
+	/** Display-friendly list of valid /fwsetup color identifiers, e.g. "Gray, Yellow, ...". */
 	public static String colorNameList() {
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < TEAM_NAMES.length; i++) {
@@ -69,14 +69,14 @@ public final class FWGameConstants {
 	/** Closest vanilla chat color code (with leading &) for a team's DyeColor, for scoreboards/chat. */
 	public static String chatColorCodeFor(DyeColor color) {
 		switch (color) {
-			case LIME: return "&a";
+			case GRAY: return "&8";
 			case YELLOW: return "&e";
 			case CYAN: return "&3";
 			case BLUE: return "&9";
 			case RED: return "&c";
 			case WHITE: return "&f";
 			case PINK: return "&d";
-			case GREEN: return "&2";
+			case LIME: return "&a";
 			default: return "&7";
 		}
 	}
@@ -85,6 +85,7 @@ public final class FWGameConstants {
 	 * Compact tag for the above-head nametag: the first letter of each word - "Lime" -> "L",
 	 * "Light Blue" -> "LB" - rather than the full name. Multi-word names naturally get more than
 	 * one letter, which is what keeps "Lime" and "Light Blue" from both collapsing to the same "L".
+	 * The current names all start with a different letter.
 	 */
 	public static String abbreviateTeamName(String name) {
 		StringBuilder builder = new StringBuilder();
