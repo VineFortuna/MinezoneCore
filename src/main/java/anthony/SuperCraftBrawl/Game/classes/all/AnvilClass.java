@@ -76,8 +76,8 @@ public class AnvilClass extends BaseClass {
         stompItem = ItemHelper.setDetails(
                 new ItemStack(Material.ANVIL),
                 stompAbility.getAbilityNameRightClickMessage(),
-                "&7Slam down on your enemies",
-                "&7The damage increases with height",
+                "&7Slam down on your enemies and do",
+                "&7damage based on fallen distance",
                 "",
                 "&rRange: &a" + displayRangeWide + " &rblocks wide",
                 "&rRange: &a" + displayRangeY + " &rblocks up and down"

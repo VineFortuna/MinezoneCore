@@ -46,9 +46,8 @@ public class SquidClass extends BaseClass {
 				new ItemStack(Material.INK_SACK),
 				inkAbility.getAbilityNameRightClickMessage(),
 				"",
-				"&7Blind enemies around you",
+				"&7Give enemies &8&oBlindness &7for &e" + blindness.getDuration() / 20 + "s",
 				"",
-				"&8&oBlindness &7for &e" + blindness.getDuration() / 20 + "s",
 				"&7Range: &a" + rangeDisplay + " &7blocks"
 		);
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);

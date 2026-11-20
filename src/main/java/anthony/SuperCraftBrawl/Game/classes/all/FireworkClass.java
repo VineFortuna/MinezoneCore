@@ -22,6 +22,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -55,6 +56,7 @@ public class FireworkClass extends BaseClass {
 
 	private final ItemStack bowItem;
 	private final ItemStack rocketItem;
+	private final ItemStack rocketUsedItem;
 	private final Ability bowAbility = new Ability("&c&lBow", 5, player);
 	private final Ability rocketAbility = new Ability("&c&lRocket", player);
 	private final Random random = new Random();
@@ -78,11 +80,20 @@ public class FireworkClass extends BaseClass {
 		rocketItem = ItemHelper.setDetails(
 				new ItemStack(Material.FIREWORK),
 				rocketAbility.getAbilityNameRightClickMessage(),
-				"&7Ride ur firework highhhh!!"
+				"&7Ride ur firework highhhh!!",
+				"",
+				"&7You can use this once per life"
 		);
 		rocketItem.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
 		rocketItem.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
 		ItemHelper.setHideFlags(rocketItem, true);
+
+		// The same rocket without the click message, which replaces it once it is used since it can't be used again
+		// until the next life
+		rocketUsedItem = rocketItem.clone();
+		ItemMeta usedMeta = rocketUsedItem.getItemMeta();
+		usedMeta.setDisplayName(ChatColorHelper.color(rocketAbility.getAbilityName()));
+		rocketUsedItem.setItemMeta(usedMeta);
 
 		// Bow Ability
 		List<String> bowLore = new ArrayList<>();
@@ -171,6 +182,7 @@ public class FireworkClass extends BaseClass {
 			return;
 		}
 		used = true;
+		player.getInventory().setItem(player.getInventory().getHeldItemSlot(), rocketUsedItem);
 
 		Location rocketLocation = player.getLocation().add(0.5, 1, 0.5);
 		Firework firework = (Firework) rocketLocation.getWorld().spawnEntity(rocketLocation, EntityType.FIREWORK);

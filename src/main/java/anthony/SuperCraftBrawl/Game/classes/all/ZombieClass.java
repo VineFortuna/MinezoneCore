@@ -29,7 +29,7 @@ public class ZombieClass extends BaseClass {
 
 	private final ItemStack weapon;
 	private final ItemStack hordeItem;
-	private final Ability hordeAbility = new Ability("&2&lHorde Call", player);
+	private final Ability hordeAbility = new Ability("&6&lHorde Call", player);
 	private final PotionEffect weakness = new PotionEffect(PotionEffectType.WEAKNESS, 5 * 20, 3, false, true);
 	private final PotionEffect poison = new PotionEffect(PotionEffectType.POISON, 5 * 20, 0, false, true);
 	private final PotionEffect slowness = new PotionEffect(PotionEffectType.SLOW, 5 * 20, 0, false, true);
@@ -51,7 +51,7 @@ public class ZombieClass extends BaseClass {
 				new ItemStack(Material.IRON_SPADE),
 				"&2&lGrave Digger",
 				"",
-				"&7Inflict one of 3 effects on enemies:",
+				"&7Inflict one of 3 effects on hit:",
 				"&7▸ &2&oPoison &e" + (poison.getAmplifier() + 1) + " &7for &e" + poison.getDuration() / 20 + "s",
 				"&7▸ &3&oSlowness &e" + (slowness.getAmplifier() + 1) + " &7for &e" + slowness.getDuration() / 20 + "s",
 				"&7▸ &f&oWeakness &e" + (weakness.getAmplifier() + 1) + " &7for &e" + weakness.getDuration() / 20 + "s"

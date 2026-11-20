@@ -79,7 +79,9 @@ public class HunterClass extends BaseClass {
 		dashItem = ItemHelper.setDetails(
 				new ItemStack(Material.FEATHER),
 				dashAbility.getAbilityNameRightClickMessage(),
-				"&7A fast escape or ambush"
+				"&7A fast escape or ambush",
+				"",
+				ItemHelper.gainOnKillLine(1, "use", "uses")
 		);
 
 		// Barrier, for when there are no dashes left

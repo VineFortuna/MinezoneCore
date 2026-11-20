@@ -45,7 +45,7 @@ public class MagmaCubeClass extends BaseClass {
 				"MagmaCube"
 		);
 
-		weapon = ItemHelper.setDetails(new ItemStack(Material.WOOD_SWORD), "&4&lSword");
+		weapon = ItemHelper.setDetails(new ItemStack(Material.WOOD_SWORD), "&6&lSword");
 		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
 		ItemHelper.setUnbreakable(weapon);
 	}
@@ -73,7 +73,14 @@ public class MagmaCubeClass extends BaseClass {
 	}
 
 	private ItemStack getPokeballs(int amount) {
-		return ItemHelper.createMonsterEgg(EntityType.MAGMA_CUBE, amount, pokeballAbility.getAbilityNameRightClickMessage());
+		return ItemHelper.setDetails(
+				ItemHelper.createMonsterEgg(EntityType.MAGMA_CUBE, amount),
+				pokeballAbility.getAbilityNameRightClickMessage(),
+				"&7Throw it to summon a MagmaCube where it",
+				"&7lands, that attacks the nearest enemy",
+				"",
+				ItemHelper.gainOnKillLine(POKEBALLS_PER_KILL, "pokeball", "pokeballs")
+		);
 	}
 
 	private ItemStack getBarrier() {

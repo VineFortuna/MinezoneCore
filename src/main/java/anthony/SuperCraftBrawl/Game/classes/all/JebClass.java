@@ -57,7 +57,7 @@ public class JebClass extends BaseClass {
                 pullAbility.getAbilityNameRightClickMessage(),
                 "&7Shoot a beam that pushes enemies",
                 "",
-                "&7Stronger at close distances",
+                "&7Effective at close distances",
                 "&7Range: &a" + displayRange + " &7blocks"
         );
     }

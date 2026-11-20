@@ -59,7 +59,7 @@ public class NotchClass extends BaseClass {
                 pullAbility.getAbilityNameRightClickMessage(),
                 "&7Shoot a beam that pulls enemies",
                 "",
-                "&7Stronger at farther distances",
+                "&7Effective at farther distances",
                 "&7Range: &a" + displayRange + " &7blocks"
         );
     }

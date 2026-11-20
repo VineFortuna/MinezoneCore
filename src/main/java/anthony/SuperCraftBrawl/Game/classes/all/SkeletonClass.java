@@ -45,9 +45,10 @@ public class SkeletonClass extends BaseClass {
 				new ItemStack(Material.BONE),
 				arrowAbility.getAbilityNameRightClickMessage(),
 				"",
-				"&7Quickly shoot an arrow",
+				"&7Quickly shoot an arrow, if it hits",
+				"&7an enemy gain &e1&7 arrow",
 				"",
-				"&7If you hit an enemy, gain an arrow"
+				"&7Hit enemies to gain arrows"
 		);
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
 		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);

@@ -53,7 +53,9 @@ public class PiglinBruteClass extends BaseClass {
 		goldBallsItem = ItemHelper.setDetails(
 				new ItemStack(Material.GOLD_BLOCK),
 				goldBallsAbility.getAbilityNameRightClickMessage(),
-				"&7Throw DEADLY gold balls!"
+				"&7Throw DEADLY gold balls!",
+				"",
+				ItemHelper.gainOnKillLine(GOLD_BALLS_PER_KILL, "gold ball", "gold balls")
 		);
 
 		// Barrier, for when there are no gold balls left
@@ -97,6 +99,7 @@ public class PiglinBruteClass extends BaseClass {
 				player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
 
 				for (Player gamePlayer : this.getNearby(GOLD_BALL_RADIUS)) {
+					if (gamePlayer == player) continue; // The gold balls don't hurt the one who throws them
 					if (instance.duosMap != null && instance.team.get(gamePlayer).equals(instance.team.get(player)))
 						continue;
 					gamePlayer.damage(GOLD_BALL_DAMAGE, player);

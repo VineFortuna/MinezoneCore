@@ -26,6 +26,8 @@ public class VillagerClass extends BaseClass {
 	private final Ability tradeAbility = new Ability("&a&lTrade", player);
 	private final Ability potatoAbility = new Ability("&6&lPotato", 4, player);
 	private static final int MAX_POTATO_AMOUNT = 4;
+	/** The gold of the dust a thrown potato leaves behind. */
+	private static final java.awt.Color POTATO_TRAIL_COLOR = new java.awt.Color(255, 170, 0);
 	private int emeraldsCount;
 
 	public VillagerClass(GameInstance instance, Player player) {
@@ -46,7 +48,7 @@ public class VillagerClass extends BaseClass {
 				tradeAbility.getAbilityNameRightClickMessage(),
 				"",
 				"&7Hit enemies to gain emeralds",
-				"&7Trade emeralds for items"
+				"&7and trade them for items"
 		);
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 3);
 		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
@@ -199,6 +201,7 @@ public class VillagerClass extends BaseClass {
 				playerHit.damage(0, player);
 			}
 		}, new ItemStack(Material.BAKED_POTATO));
+		projectile.setTrailColor(POTATO_TRAIL_COLOR);
 		instance.getGameManager().getProjManager().shootProjectile(projectile, player.getEyeLocation(),
 				player.getLocation().getDirection().multiply(1.5D));
 	}

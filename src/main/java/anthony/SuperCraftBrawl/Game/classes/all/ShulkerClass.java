@@ -1,14 +1,13 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -18,11 +17,22 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import xyz.xenondevs.particle.ParticleBuilder;
+import xyz.xenondevs.particle.ParticleEffect;
+
+import java.util.Random;
 
 public class ShulkerClass extends BaseClass {
 
-	private int cooldown = 0;
+	private static final int BULLET_COOLDOWN_SECONDS = 7;
+	/** The enemy goes up for this long, and explodes when it is over. */
+	private static final int LEVITATION_TICKS = 20;
+	private static final java.awt.Color TRAIL_COLOR = new java.awt.Color(170, 60, 255);
+
+	private final Ability bulletAbility = new Ability("&5&lShulker Bullet", BULLET_COOLDOWN_SECONDS, player);
+	private final Random random = new Random();
 	private Vector dir;
 
 	public ShulkerClass(GameInstance instance, Player player) {
@@ -49,11 +59,23 @@ public class ShulkerClass extends BaseClass {
 
 	@Override
 	public ItemStack getAttackWeapon() {
-		ItemStack item = ItemHelper.addEnchant(
-				ItemHelper.addEnchant(new ItemStack(Material.STAINED_CLAY, 1, (byte) DyeColor.PURPLE.getData()),
-						Enchantment.DAMAGE_ALL, 3),
-				Enchantment.KNOCKBACK, 1);
-		return item;
+		ItemStack item = ItemHelper.setDetails(
+				new ItemStack(Material.STAINED_CLAY, 1, (byte) DyeColor.PURPLE.getData()),
+				"&5&lShell"
+		);
+		ItemHelper.addEnchant(item, Enchantment.DAMAGE_ALL, 3);
+		return ItemHelper.addEnchant(item, Enchantment.KNOCKBACK, 1);
+	}
+
+	private ItemStack createBow() {
+		ItemStack bow = ItemHelper.setDetails(
+				new ItemStack(Material.BOW),
+				bulletAbility.getAbilityNameRightClickMessage(),
+				"&7Levitate and explode the shot enemy"
+		);
+		ItemHelper.addEnchant(bow, Enchantment.ARROW_INFINITE, 1);
+		ItemHelper.setUnbreakable(bow);
+		return ItemHelper.setHideFlags(bow, true);
 	}
 
 	@Override
@@ -63,54 +85,30 @@ public class ShulkerClass extends BaseClass {
 
 	@Override
 	public void tick(int gameTicks) {
-		if (instance.classes.containsKey(player) && instance.classes.get(player).getType() == ClassType.Shulker
-				&& instance.classes.get(player).getLives() > 0) {
-			if (this.cooldown > 0) {
-				String msg = instance.getGameManager().getMain()
-						.color("&9&lLevitator Bow &rArrow regenerates in: &e" + this.cooldown + "s");
-				getActionBarManager().setActionBar(player, "shulker.cooldown", msg, 2);
-			} else {
-				String msg = instance.getGameManager().getMain().color("&rYou can use &9&lLevitator Bow");
-				getActionBarManager().setActionBar(player, "shulker.cooldown", msg, 2);
-			}
-		}
-
-		if (gameTicks % 20 == 0)
-			if (cooldown != 0)
-				cooldown--;
+		if (!isPlayerAlive()) return;
+		bulletAbility.updateActionBar(player, this);
 	}
 
 	@Override
 	public void setItems(Inventory playerInv) {
-		this.cooldown = 0; // Reset each life
+		bulletAbility.getCooldownInstance().reset(); // Reset each life
 		playerInv.setItem(0, this.getAttackWeapon());
-		playerInv
-				.setItem(1,
-						ItemHelper.setHideFlags(ItemHelper.setUnbreakable(ItemHelper.addEnchant(
-								ItemHelper.setDetails(new ItemStack(Material.BOW),
-										"" + ChatColor.DARK_PURPLE + "Levitator Bow &7(Right Click)", "",
-										instance.getGameManager().getMain()
-												.color("&7Levitate your opponents by shooting them!")),
-								Enchantment.ARROW_INFINITE, 1)), true));
+		playerInv.setItem(1, createBow());
 		playerInv.setItem(35, new ItemStack(Material.ARROW));
 	}
 
 	@Override
 	public void projectileLaunch(ProjectileLaunchEvent event) {
-		Entity e = event.getEntity();
+		if (!(event.getEntity() instanceof Arrow)) return;
 
-		if (e instanceof Arrow) {
-			if (this.cooldown == 0) {
-				this.cooldown = 7;
-				Arrow a = (Arrow) e;
-				Player p = (Player) a.getShooter();
-				this.dir = p.getLocation().getDirection();
-			} else if (this.cooldown > 0) {
-				event.setCancelled(true);
-				player.sendMessage(instance.getGameManager().getMain().color(
-						"&c&l(!) &rYour &eLevitator Bow &ris still on cooldown for &e" + this.cooldown + " seconds"));
-			}
+		if (!bulletAbility.isReady()) {
+			event.setCancelled(true);
+			bulletAbility.sendPlayerRemainingCooldownChatMessage();
+			return;
 		}
+
+		bulletAbility.use();
+		this.dir = player.getLocation().getDirection();
 	}
 
 	@Override
@@ -127,6 +125,8 @@ public class ShulkerClass extends BaseClass {
 				for (Player gamePlayer : instance.players)
 					gamePlayer.playSound(loc, Sound.EXPLODE, 1, 1);
 
+				showLevitationTrail(p);
+
 				Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
 					for (Player gamePlayer : instance.players) {
 						gamePlayer.playEffect(p.getLocation(), Effect.EXPLOSION_HUGE, 1);
@@ -136,9 +136,33 @@ public class ShulkerClass extends BaseClass {
 					EntityDamageEvent damageEvent = new EntityDamageEvent(p, DamageCause.VOID, 10.0);
 					instance.getGameManager().getMain().getServer().getPluginManager().callEvent(damageEvent);
 					p.damage(10.0, player);
-				}, 20);
+				}, LEVITATION_TICKS);
 			}
 		}
+	}
+
+	/** A light trail of purple dust follows the enemy while they go up, a single particle each tick. */
+	private void showLevitationTrail(final Player target) {
+		instance.trackClassTask(new BukkitRunnable() {
+			private int ticks = 0;
+
+			@Override
+			public void run() {
+				if (ticks++ >= LEVITATION_TICKS || !target.isOnline() || !instance.players.contains(target)) {
+					cancel();
+					return;
+				}
+
+				Location feet = target.getLocation().add(
+						(random.nextDouble() - 0.5) * 0.3, 0.3, (random.nextDouble() - 0.5) * 0.3);
+
+				ParticleBuilder particle = new ParticleBuilder(ParticleEffect.REDSTONE);
+				particle.setColor(TRAIL_COLOR);
+				particle.setLocation(feet);
+				particle.setOffset(0.0f, 0.0f, 0.0f);
+				particle.display(instance.players);
+			}
+		}.runTaskTimer(instance.getGameManager().getMain(), 0, 1));
 	}
 
 	@Override

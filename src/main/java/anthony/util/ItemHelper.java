@@ -50,6 +50,11 @@ public class ItemHelper {
 		return item;
 	}
 
+	/** The lore line that says what a kill gives, with the item in singular or plural to match the amount. */
+	public static String gainOnKillLine(int amount, String singular, String plural) {
+		return "&7Gain &e" + amount + " &7" + (amount == 1 ? singular : plural) + " on kill";
+	}
+
 	public static ItemStack addEnchant(ItemStack item, Enchantment type, int level) {
 		item.addUnsafeEnchantment(type, level);
 		return item;

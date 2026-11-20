@@ -44,7 +44,9 @@ public class GhastClass extends BaseClass {
 		// Weapon
 		weapon = ItemHelper.setDetails(
 				new ItemStack(Material.GHAST_TEAR),
-				"&f&lTear"
+				"&f&lTear",
+				"",
+				"&7Hit enemies to gain arrows"
 		);
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
 		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);

@@ -84,7 +84,8 @@ public class SpiderClass extends BaseClass {
 		webItem = ItemHelper.setDetails(
 				new ItemStack(Material.STRING),
 				webAbility.getAbilityNameRightClickMessage(),
-				"&7Throw an attachable cobweb to trap enemies",
+				"&7Throw an attachable cobweb to",
+				"&7trap enemies in place",
 				"",
 				"&7Duration: &a" + durationDisplay + "&as"
 		);

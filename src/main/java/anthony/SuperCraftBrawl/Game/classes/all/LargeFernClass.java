@@ -40,7 +40,12 @@ import java.util.Map;
 public class LargeFernClass extends BaseClass {
 
     // Spore Burst
-    private static final double SPORE_DAMAGE = 2.25;
+    /** What a spore does to a player in the class armor (6 armor points, Protection 6 on the head): about 0.5 ❤. */
+    private static final double SPORE_EFFECTIVE_DAMAGE = 1.0;
+    /** How much of a hit is left on average after the class armor. */
+    private static final double CLASS_ARMOR_MITIGATION = 0.53;
+    /** The damage a spore is dealt with, before the armor lowers it to SPORE_EFFECTIVE_DAMAGE. */
+    private static final double SPORE_DAMAGE = SPORE_EFFECTIVE_DAMAGE / CLASS_ARMOR_MITIGATION;
     private static final double SPORE_SPEED = 1.5;
     /** How far the corner spores are off the aim, for every block they fly. */
     private static final double SPORE_SPREAD = 0.15;
@@ -59,13 +64,13 @@ public class LargeFernClass extends BaseClass {
     private static final byte FERN_DATA = 2;
     private static final byte LARGE_FERN_BOTTOM_DATA = 3;
     private static final byte LARGE_FERN_TOP_DATA = 11;
+    private static final PotionEffect REGENERATION = new PotionEffect(PotionEffectType.REGENERATION, 9999999, 2, false, false);
+    private static final PotionEffect INVISIBILITY = new PotionEffect(PotionEffectType.INVISIBILITY, 99999, 0, false, false);
 
     private final ItemStack weapon;
     private final ItemStack transfernItem;
     private final Ability sporeAbility = new Ability("&2&lSpore Burst", 4, player);
     private final Ability transfernAbility = new Ability("&2&lTransfern", player);
-    private final PotionEffect regeneration = new PotionEffect(PotionEffectType.REGENERATION, 9999999, 2, false, false);
-    private final PotionEffect invisibility = new PotionEffect(PotionEffectType.INVISIBILITY, 99999, 0, false, false);
     private TransfernRunnable transfernRunnable;
 
     public LargeFernClass(GameInstance instance, Player player) {
@@ -84,7 +89,7 @@ public class LargeFernClass extends BaseClass {
                 sporeAbility.getAbilityNameRightClickMessage(),
                 "",
                 "&7Launch a burst of spores in an X pattern",
-                "&7Each spore that hits deals &e" + ItemHelper.formatDouble(SPORE_DAMAGE / 2) + " &c❤",
+                "&7Each spore that hits deals &e" + ItemHelper.formatDouble(SPORE_EFFECTIVE_DAMAGE / 2) + " &c❤",
                 "",
                 "&7Effective at close range"
         );
@@ -304,7 +309,7 @@ public class LargeFernClass extends BaseClass {
         private void setSmallFern() {
             smallFernSet = true;
             SoundManager.playSoundToAll(player, Sound.DIG_GRASS, 1, 1);
-            player.addPotionEffect(invisibility);
+            player.addPotionEffect(INVISIBILITY);
             instance.setNameTagVisible(player, false);
             sendArmor(true);
 
@@ -328,7 +333,7 @@ public class LargeFernClass extends BaseClass {
             if (largeFernSet) return;
             largeFernSet = true;
             SoundManager.playSoundToAll(player, Sound.DIG_GRASS, 1, 1);
-            player.addPotionEffect(regeneration);
+            player.addPotionEffect(REGENERATION);
 
             // Replace the small fern with the large one, the bottom part and the top part
             Block bottomBlock = fernLocation.getBlock();
@@ -351,14 +356,15 @@ public class LargeFernClass extends BaseClass {
             cancel();
             if (transfernRunnable == this) transfernRunnable = null;
 
-            player.removePotionEffect(invisibility.getType());
-            player.removePotionEffect(regeneration.getType());
+            player.removePotionEffect(INVISIBILITY.getType());
+            player.removePotionEffect(REGENERATION.getType());
             if (smallFernSet) {
                 instance.setNameTagVisible(player, true);
                 sendArmor(false);
             }
 
             // The fern goes away before the ground it grows on is restored, or it would break off and drop seeds
+            if (smallFernSet) SoundManager.playSoundToAll(player, fernLocation, Sound.DIG_GRASS, 1, 1);
             if (largeFernSet) {
                 removeBlock(fernLocation.clone().add(0, 1, 0).getBlock(), Material.DOUBLE_PLANT, LARGE_FERN_TOP_DATA);
                 removeBlock(fernLocation.getBlock(), Material.DOUBLE_PLANT, LARGE_FERN_BOTTOM_DATA);

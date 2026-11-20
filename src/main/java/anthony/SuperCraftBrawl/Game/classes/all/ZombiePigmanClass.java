@@ -70,7 +70,14 @@ public class ZombiePigmanClass extends BaseClass {
 	}
 
 	private ItemStack getPokeballs(int amount) {
-		return ItemHelper.createMonsterEgg(EntityType.PIG_ZOMBIE, amount, pokeballAbility.getAbilityNameRightClickMessage());
+		return ItemHelper.setDetails(
+				ItemHelper.createMonsterEgg(EntityType.PIG_ZOMBIE, amount),
+				pokeballAbility.getAbilityNameRightClickMessage(),
+				"&7Throw it to summon a ZombiePigman where it",
+				"&7lands, that attacks the nearest enemy",
+				"",
+				ItemHelper.gainOnKillLine(POKEBALLS_PER_KILL, "pokeball", "pokeballs")
+		);
 	}
 
 	private ItemStack getBarrier() {

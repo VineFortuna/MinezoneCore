@@ -28,6 +28,8 @@ public class ZombieVillagerClass extends BaseClass {
     private static final int POTATOES_PER_KILL = 2;
     private static final double POTATO_SPEED = 2.0;
     private static final double POTATO_RADIUS = 2.5;
+    /** The green of the dust a thrown potato leaves behind, the same one as the ring of a hit. */
+    private static final java.awt.Color POTATO_TRAIL_COLOR = new java.awt.Color(50, 205, 50);
     private final PotionEffect poison = new PotionEffect(PotionEffectType.POISON, 80, 2);
     private final Ability potatoAbility = new Ability("&2&lPoisonous Potato", player);
 
@@ -67,8 +69,11 @@ public class ZombieVillagerClass extends BaseClass {
     private ItemStack getPotatoes(int amount) {
         return ItemHelper.setDetails(new ItemStack(Material.POISONOUS_POTATO, amount),
                 potatoAbility.getAbilityNameRightClickMessage(),
-                "&7Throw at enemies to inflict:",
-                "&7▸ &2&oPoison&r &e" + (poison.getAmplifier() + 1));
+                "&7Throw to apply &2&o" + ItemHelper.getPotionEffectName(poison.getType()) + "&r &e"
+                        + (poison.getAmplifier() + 1) + " &7for &e" + poison.getDuration() / 20 + "s",
+                "&7to enemies in the hit area",
+                "",
+                ItemHelper.gainOnKillLine(POTATOES_PER_KILL, "potato", "potatoes"));
     }
 
     private ItemStack getBarrier() {
@@ -152,6 +157,7 @@ public class ZombieVillagerClass extends BaseClass {
                         }
                     }
                 }, new ItemStack(Material.POISONOUS_POTATO));
+                proj.setTrailColor(POTATO_TRAIL_COLOR);
 
                 instance.getGameManager().getProjManager().shootProjectile(
                         proj,

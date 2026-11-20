@@ -90,7 +90,8 @@ public class CreeperClass extends BaseClass {
 		suicideItem = ItemHelper.setDetails(
 				new ItemStack(Material.STONE_BUTTON),
 				suicideAbility.getAbilityNameRightClickMessage(),
-				"&7Explode yourself, doing damage to &oeveryone"
+				"&7Explode yourself, doing damage",
+				"&7to &oeveryone"
 		);
 	}
 

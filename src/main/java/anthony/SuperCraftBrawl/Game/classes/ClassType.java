@@ -178,7 +178,7 @@ public enum ClassType {
 			case Hunter:
 				return "Damage your enemies to gain Blood Lust and special potions!";
 			case Jeb:
-				return "Shoot a beam that pushes enemies, stronger at closer distances";
+				return "Shoot a beam that pushes enemies, effective at closer distances";
 			case Bee:
 				return "Sting enemies and sustain yourself from the flower sources";
 			case Ice:
@@ -224,7 +224,7 @@ public enum ClassType {
 			case Wither:
 				return "Utilize your explosive skulls to defeat your enemies!";
 			case Notch:
-				return "Shoot a beam that pulls enemies, stronger at further distances";
+				return "Shoot a beam that pulls enemies, effective at further distances";
 			case Blaze:
 				return "Use your fire abilities to defeat enemies";
 			case Steve:

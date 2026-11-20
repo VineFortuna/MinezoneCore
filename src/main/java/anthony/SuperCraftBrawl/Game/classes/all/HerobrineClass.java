@@ -93,7 +93,7 @@ public class HerobrineClass extends BaseClass {
                 "&7▸ &2&o" + ItemHelper.getPotionEffectName(poison.getType()) + " &e" + (poison.getAmplifier() + 1)
                         + " &7for &e" + poison.getDuration() / 20 + "s &7on enemies",
                 "&7▸ &cFire&7 lightning at enemies",
-                "&7▸ &4Rising Ruin&7 erupts damaging blocks around you",
+                "&7▸ &4Rising Ruin&7 erupts damaging blocks",
                 "&7▸ &8Invoke&7 a zombie upon each enemy",
                 "",
                 "&7Range: &a" + ItemHelper.formatDouble(DESPAIR_ABILITY_RANGE) + " &7blocks"

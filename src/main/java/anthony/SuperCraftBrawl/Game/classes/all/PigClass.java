@@ -25,15 +25,32 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class PigClass extends BaseClass {
 
-	private ItemStack pork = ItemHelper.addEnchant(
-			ItemHelper.addEnchant(ItemHelper.setUnbreakable(new ItemStack(Material.PORK)), Enchantment.DAMAGE_ALL, 4),
-			Enchantment.KNOCKBACK, 1);
-	private ItemStack speedPork = ItemHelper.addEnchant(
-			ItemHelper.addEnchant(ItemHelper.setUnbreakable(new ItemStack(Material.PORK)), Enchantment.DAMAGE_ALL, 3),
-			Enchantment.KNOCKBACK, 1);
-	private ItemStack firePork = ItemHelper.addEnchant(ItemHelper.addEnchant(
-			ItemHelper.addEnchant(ItemHelper.setUnbreakable(new ItemStack(Material.GRILLED_PORK)), Enchantment.DAMAGE_ALL, 3),
-			Enchantment.KNOCKBACK, 1), Enchantment.FIRE_ASPECT, 1);
+	/** Taking damage gives this Speed for this long. */
+	private static final int SPEED_AMPLIFIER = 2;
+	private static final int SPEED_SECONDS = 5;
+
+	private ItemStack pork = createBacon(Material.PORK, 4, false);
+	private ItemStack speedPork = createBacon(Material.PORK, 3, false);
+	private ItemStack firePork = createBacon(Material.GRILLED_PORK, 3, true);
+
+	/** The porkchop in the hand changes with what the Pig is going through, but it is always the same Bacon. */
+	private static ItemStack createBacon(Material material, int sharpness, boolean fireAspect) {
+		ItemStack bacon = ItemHelper.setDetails(
+				new ItemStack(material),
+				"&d&lBacon",
+				"",
+				"&7On receiving damage, gain",
+				"&b&oSpeed&r &e" + (SPEED_AMPLIFIER + 1) + " &7for &e" + SPEED_SECONDS + "s",
+				"",
+				"&7On catching on fire, gain",
+				"&c&oFire Aspect 1"
+		);
+		ItemHelper.setUnbreakable(bacon);
+		bacon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, sharpness);
+		bacon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
+		if (fireAspect) bacon.addUnsafeEnchantment(Enchantment.FIRE_ASPECT, 1);
+		return bacon;
+	}
 
 	public PigClass(GameInstance instance, Player player) {
 		super(instance, player);
@@ -117,7 +134,7 @@ public class PigClass extends BaseClass {
 
 	private void giveSpeedPork() {
 		Bukkit.getScheduler().runTask(instance.getGameManager().getMain(), () -> {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 5, 2, true), true);
+			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * SPEED_SECONDS, SPEED_AMPLIFIER, true), true);
 
 			// Don't override firePork if the player is currently burning
 			if (player.getFireTicks() > 0) return;

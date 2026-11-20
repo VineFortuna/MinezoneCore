@@ -76,10 +76,8 @@ public abstract class BaseClass {
 	public Timer aggressiveGift = new Timer();
 	public Timer defensiveGift = new Timer();
 	public Timer mythicalGift = new Timer();
-	public Timer wizard = new Timer();
 	public Timer magmaCube = new Timer();
 	public Timer ocelot = new Timer();
-	public Timer cloud = new Timer();
 	public Timer snowGolem = new Timer();
 	public Timer santa = new Timer();
 	public Timer cookie = new Timer();

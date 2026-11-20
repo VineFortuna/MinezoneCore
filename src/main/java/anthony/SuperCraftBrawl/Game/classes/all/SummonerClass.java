@@ -28,6 +28,9 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 public class SummonerClass extends BaseClass {
@@ -117,10 +120,15 @@ public class SummonerClass extends BaseClass {
 	private ItemStack createSummonItem(int amount) {
 		summonAbility.setAbilityName(nextMob.color + "&lSummons Call");
 
+		// The description of the mob, a blank line, and what a kill gives
+		List<String> lore = new ArrayList<>(Arrays.asList(nextMob.description));
+		lore.add("");
+		lore.add(ItemHelper.gainOnKillLine(SUMMONS_PER_KILL, "summon", "summons"));
+
 		return ItemHelper.setDetails(
 				ItemHelper.createMonsterEgg(nextMob.type, amount),
 				summonAbility.getAbilityNameRightClickMessage(),
-				nextMob.description
+				lore.toArray(new String[0])
 		);
 	}
 

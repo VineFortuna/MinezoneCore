@@ -38,6 +38,8 @@ public class SnowGolemClass extends BaseClass {
     private static final int SLOWBALL_SLOT = 2;
     private static final int STARTING_SLOWBALLS = 8;
     private static final int SLOWBALLS_PER_KILL = 3;
+    /** Snowballs stack to 16 normally, the slowballs of the Snow Golem stack as far as any other item does. */
+    private static final int MAX_SLOWBALLS = 64;
     /** A thrown slowball leaves its snow trail for this long at most, in case it never lands. */
     private static final int SLOWBALL_TRAIL_MAX_TICKS = 5 * 20;
     private static final int SLOWBALL_TRAIL_PERIOD_TICKS = 3;
@@ -127,7 +129,8 @@ public class SnowGolemClass extends BaseClass {
     public void tick(int gameTicks) {
         if (!isPlayerAlive()) return;
 
-        platformAbility.updateActionBar(player, this);
+        // The name is white, so the words around it are light gray
+        platformAbility.updateActionBarWhite(player, this);
 
         ItemStack slowballSlot = player.getInventory().getItem(SLOWBALL_SLOT);
         boolean slowballsGone = slowballSlot == null
@@ -138,19 +141,41 @@ public class SnowGolemClass extends BaseClass {
         }
     }
 
-    /** Picking up slowballs of a drop while there are none left replaces the barrier, like the ones of a kill do. */
+    /**
+     * Adds slowballs to the slowball slot, replacing the barrier if there is one. They all go in one stack, which
+     * can hold more than a stack of snowballs does. Returns how many didn't fit.
+     */
+    private int addSlowballs(int amount) {
+        ItemStack slowballSlot = player.getInventory().getItem(SLOWBALL_SLOT);
+
+        if (slowballSlot != null && slowballSlot.getType() == Material.SNOW_BALL) {
+            int added = Math.min(amount, MAX_SLOWBALLS - slowballSlot.getAmount());
+            slowballSlot.setAmount(slowballSlot.getAmount() + added);
+            return amount - added;
+        }
+
+        int added = Math.min(amount, MAX_SLOWBALLS);
+        player.getInventory().setItem(SLOWBALL_SLOT, createSlowballs(added));
+        outOfSlowballs = false;
+        return amount - added;
+    }
+
+    /** Picking up the slowballs of a drop adds them to the stack, like the ones of a kill do. */
     @Override
     public void onItemPickup(PlayerPickupItemEvent event) {
         ItemStack picked = event.getItem().getItemStack();
         if (picked.getType() != Material.SNOW_BALL || !GameLootDrops.isLootDropItem(picked)) return;
 
-        ItemStack slowballSlot = player.getInventory().getItem(SLOWBALL_SLOT);
-        if (slowballSlot == null || slowballSlot.getType() != Material.BARRIER) return;
+        int left = addSlowballs(picked.getAmount());
+        if (left == picked.getAmount()) return; // The stack is full, so the pickup works as it always does
 
         event.setCancelled(true);
-        event.getItem().remove();
-        player.getInventory().setItem(SLOWBALL_SLOT, picked);
-        outOfSlowballs = false;
+        if (left == 0) {
+            event.getItem().remove();
+        } else {
+            picked.setAmount(left);
+            event.getItem().setItemStack(picked);
+        }
         player.playSound(player.getLocation(), Sound.ITEM_PICKUP, 0.2f, 1.5f);
     }
 
@@ -323,17 +348,7 @@ public class SnowGolemClass extends BaseClass {
     public void killEvent(Player damagerPlayer) {
         if (!instance.classes.containsKey(damagerPlayer) || checkIfDead(player, instance)) return;
 
-        ItemStack slowballs = createSlowballs(SLOWBALLS_PER_KILL);
-        ItemStack slowballSlot = damagerPlayer.getInventory().getItem(SLOWBALL_SLOT);
-
-        // Replaces the barrier, or adds to the slowballs left
-        if (slowballSlot != null && slowballSlot.getType() != Material.SNOW_BALL) {
-            damagerPlayer.getInventory().setItem(SLOWBALL_SLOT, slowballs);
-            outOfSlowballs = false;
-        } else {
-            damagerPlayer.getInventory().addItem(slowballs);
-        }
-
+        addSlowballs(SLOWBALLS_PER_KILL);
         damagerPlayer.sendMessage(instance.color("&2&l(!) &rYou got a kill and gained &e" + SLOWBALLS_PER_KILL
                 + " &rextra &f&lSLOWBALLS"));
     }

@@ -70,7 +70,9 @@ public class BedrockClass extends BaseClass {
 		weapon = ItemHelper.setDetails(
 				new ItemStack(Material.BEDROCK),
 				invincibilityAbility.getAbilityNameRightClickMessage(),
-				"&7Be invincible to all damage",
+				"",
+				"&7Become invincible to all damage",
+				"",
 				"&7You can not hit other players",
 				"",
 				"&rDuration: &a" + durationDisplay + "&as"

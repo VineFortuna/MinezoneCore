@@ -1,5 +1,7 @@
 package anthony.SuperCraftBrawl.Game.projectile;
 
+import java.awt.Color;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -16,7 +18,9 @@ public abstract class BaseProjectile {
 	private final int maxAge;
     private int age = 0;
 	public Vector lastVel = new Vector(0, 0, 0);
-	
+	/** The color of the particle trail the projectile leaves while it flies, or null for no trail. */
+	private Color trailColor;
+
 	public BaseProjectile(GameInstance instance, Player shooter, ProjectileOnHit onHit, int ageInTicks) {
 		this.instance = instance;
 		this.shooter = shooter;
@@ -39,6 +43,15 @@ public abstract class BaseProjectile {
 	
 	public Player getShooter() {
 		return shooter;
+	}
+
+	public Color getTrailColor() {
+		return trailColor;
+	}
+
+	/** Makes the projectile leave a trail of particles of this color while it flies. */
+	public void setTrailColor(Color trailColor) {
+		this.trailColor = trailColor;
 	}
 	
 	public GameInstance getInstance() {

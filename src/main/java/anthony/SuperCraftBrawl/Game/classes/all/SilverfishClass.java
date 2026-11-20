@@ -90,8 +90,8 @@ public class SilverfishClass extends BaseClass {
 				"&7Create a wall of infested stone",
 				"&7that slowly breaks, spawning silverfish",
 				"",
-				"&e&nLeft Click&7 to place &ofurther",
-				"&e&nRight Click&7 to place &ocloser"
+				"&eLeft Click&7 to place &ofurther",
+				"&eRight Click&7 to place &ocloser"
 		);
 		wallItem.setDurability((short) 2);
 

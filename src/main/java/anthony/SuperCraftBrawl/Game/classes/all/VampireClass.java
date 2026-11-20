@@ -1,7 +1,6 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
-import anthony.SuperCraftBrawl.Game.GameManager;
 import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
@@ -9,7 +8,6 @@ import anthony.util.ItemHelper;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -22,7 +20,7 @@ import org.bukkit.potion.PotionEffectType;
 public class VampireClass extends BaseClass {
 
 	/** How much health every hit of the Fang gives back, in health points. */
-	private static final double FANG_HEAL = 0.5;
+	private static final double FANG_HEAL = 1;
 
 	private final ItemStack weapon;
 	private final ItemStack bowItem;
@@ -46,8 +44,8 @@ public class VampireClass extends BaseClass {
 				new ItemStack(Material.GHAST_TEAR),
 				"&f&lFang",
 				"",
-				"&7Hits steal health of living entities,",
-				"&7healing you for &e" + ItemHelper.formatDouble(FANG_HEAL / 2) + " &c❤"
+				"&7Hits steal health from players and",
+				"&7mobs, healing you for &e" + ItemHelper.formatDouble(FANG_HEAL / 2) + " &c❤"
 		);
 		weapon.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2);
 		weapon.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1);
@@ -102,13 +100,9 @@ public class VampireClass extends BaseClass {
 		}
 	}
 
-	/** Hitting a mob, like the summons of another player, steals health too. */
+	/** Hitting any mob steals health too, whoever it belongs to: the summons of enemies, of teammates and the own ones. */
 	@Override
 	public void doDamageToMob(EntityDamageByEntityEvent event) {
-		Player owner = GameManager.getMobOwner((LivingEntity) event.getEntity());
-		if (owner != null && (owner == player
-				|| (instance.duosMap != null && instance.team.get(owner).equals(instance.team.get(player))))) return;
-
 		healFromFang(event);
 	}
 

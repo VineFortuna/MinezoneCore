@@ -22,6 +22,9 @@ import org.bukkit.util.Vector;
 
 public class ChickenClass extends BaseClass {
 
+    private static final int STARTING_EGGS = 10;
+    private static final int EGGS_PER_KILL = 2;
+
     public ChickenClass(GameInstance instance, Player player) {
         super(instance, player);
         baseVerticalJump = 1.1;
@@ -42,11 +45,15 @@ public class ChickenClass extends BaseClass {
     }
 
     public ItemStack getEggs() {
-        ItemStack eggs = ItemHelper.setDetails(new ItemStack(Material.EGG, 10),
-                instance.color("&eExplosive Eggs &7(Right Click)"),
+        return createEggs(STARTING_EGGS);
+    }
+
+    private ItemStack createEggs(int amount) {
+        return ItemHelper.setDetails(new ItemStack(Material.EGG, amount),
+                "&e&lExplosive Eggs &7(Right Click)",
+                "&7Throw DEADLY eggs!",
                 "",
-                instance.color("&7Right click to throw DEADLY eggs!"));
-        return eggs;
+                ItemHelper.gainOnKillLine(EGGS_PER_KILL, "egg", "eggs"));
     }
 
     @Override
@@ -59,7 +66,7 @@ public class ChickenClass extends BaseClass {
         ItemStack barrier = ItemHelper.setDetails(new ItemStack(Material.BARRIER),
                 instance.color("&c&lOut of Eggs!"),
                 "",
-                instance.color("&7Each kill regenerates 2 eggs"));
+                instance.color("&7Each kill regenerates " + EGGS_PER_KILL + " eggs"));
 
         return barrier;
     }
@@ -95,6 +102,8 @@ public class ChickenClass extends BaseClass {
                                 player.playSound(hitLoc, Sound.SUCCESSFUL_HIT, 1, 1);
 
                                 for (Player gamePlayer : this.getNearby(2.0)) {
+                                    if (gamePlayer == player) continue; // The eggs don't hurt the one who throws them
+
                                     EntityDamageEvent damageEvent = new EntityDamageEvent(gamePlayer,
                                             DamageCause.PROJECTILE, 4.0);
                                     instance.getGameManager().getMain().getServer().getPluginManager()
@@ -127,25 +136,18 @@ public class ChickenClass extends BaseClass {
 
     @Override
     public ItemStack getAttackWeapon() {
-        ItemStack sword = ItemHelper.addEnchant(new ItemStack(Material.WOOD_SWORD), Enchantment.KNOCKBACK, 1);
-        ItemMeta meta = sword.getItemMeta();
-        meta.spigot().setUnbreakable(true);
-        sword.setItemMeta(meta);
-        return sword;
+        ItemStack sword = ItemHelper.setDetails(new ItemStack(Material.WOOD_SWORD), "&6&lEggscalibur");
+        ItemHelper.addEnchant(sword, Enchantment.KNOCKBACK, 1);
+        return ItemHelper.setUnbreakable(sword);
     }
 
     @Override
     public void killEvent(Player damagerPlayer) {
         if (instance.classes.containsKey(damagerPlayer) && !checkIfDead(player, instance)) {
-            ItemStack item = ItemHelper.setDetails(
-                    new ItemStack(Material.EGG, 2),
-                    instance.color("&eExplosive Eggs &7(Right Click)"),
-                    "",
-                    instance.color("&7Right click to throw DEADLY eggs!")
-            );
+            ItemStack item = createEggs(EGGS_PER_KILL);
 
             damagerPlayer.sendMessage(instance.getGameManager().getMain().color(
-                    "&2&l(!) &rYou got a kill and gained 2 extra &eExplosive Eggs"
+                    "&2&l(!) &rYou got a kill and gained " + EGGS_PER_KILL + " extra &eExplosive Eggs"
             ));
 
             ItemStack currentItem = damagerPlayer.getInventory().getItem(1);
