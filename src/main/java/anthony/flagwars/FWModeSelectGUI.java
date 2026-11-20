@@ -48,6 +48,20 @@ public class FWModeSelectGUI implements InventoryProvider {
 		inv.open(player);
 	}
 
+	/**
+	 * What clicking Flag Wars in the lobby does: with only one mode available there is nothing to choose, so the
+	 * player is queued for it right away, and the menu only opens once there is more than one.
+	 */
+	public static void openOrJoin(FWGameManager fwGameManager, Player player) {
+		List<FWGameMode> modes = FWGameMode.availableModes();
+		if (modes.size() == 1) {
+			player.closeInventory(); // the game selector, if that is where they clicked
+			fwGameManager.joinGame(player, modes.get(0));
+			return;
+		}
+		new FWModeSelectGUI(fwGameManager).open(player);
+	}
+
 	@Override
 	public void init(Player player, InventoryContents contents) {
 		render(player, contents);

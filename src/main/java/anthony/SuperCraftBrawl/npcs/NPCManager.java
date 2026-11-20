@@ -176,7 +176,7 @@ public class NPCManager implements Listener {
 		} else if (e.getNPC() == scbClassic) {
 			new SCBModeSelectGUI(main).inv.open(player);
 		} else if (e.getNPC() == flagwars) {
-			new anthony.flagwars.FWModeSelectGUI(main.getFwGameManager()).open(player);
+			anthony.flagwars.FWModeSelectGUI.openOrJoin(main.getFwGameManager(), player);
 		} else if (e.getNPC() == parkour) {
             SoundManager.playClickSound(player);
             mainParkour(player);
