@@ -1036,8 +1036,10 @@ public class FWGameInstance {
 		manager.clearAttackerHistory(player);
 
 		FWTeamSite site = mapConfig.getTeamSite(team.getSiteId());
-		player.setGameMode(GameMode.SURVIVAL);
+		// Spawn first, Survival second: switching first leaves them live (able to fall, take damage or
+		// trigger things) at the spot they watched from for a moment before they arrive home.
 		player.teleport(site.getSpawn());
+		player.setGameMode(GameMode.SURVIVAL);
 		player.setHealth(20.0);
 		player.setFoodLevel(20);
 		manager.getMain().getListener().resetPotionEffects(player); // Speed/Jump/Invisibility etc. shouldn't survive a death
