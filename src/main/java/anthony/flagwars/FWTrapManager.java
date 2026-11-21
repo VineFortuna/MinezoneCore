@@ -416,7 +416,11 @@ public class FWTrapManager {
 		List<Player> bodies = new ArrayList<>();
 		bodies.add(target);
 		for (Entity entity : target.getNearbyEntities(4, 4, 4)) {
-			if (entity instanceof Player) bodies.add((Player) entity);
+			if (!(entity instanceof Player)) continue;
+			// A spectator floating nearby (or someone waiting to respawn) isn't in the way, and would leave a hole in the cage
+			Player nearby = (Player) entity;
+			if (instance.hasSpectator(nearby) || nearby.getGameMode() == GameMode.SPECTATOR) continue;
+			bodies.add(nearby);
 		}
 
 		Set<Block> occupied = new HashSet<>();

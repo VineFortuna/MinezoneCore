@@ -107,6 +107,7 @@ public class FWPlayerListener implements Listener {
 		this.invisibility = new FWInvisibilityManager(fwGameManager);
 		this.pokeballs = new FWPokeballManager(fwGameManager);
 		Bukkit.getPluginManager().registerEvents(pokeballs, fwGameManager.getMain());
+		Bukkit.getPluginManager().registerEvents(new FWSpectatorListener(fwGameManager), fwGameManager.getMain());
 		this.cooldownItems = Arrays.asList(
 				new CooldownItem(TeleportBowItem.NAME, TeleportBowItem::matches, teleportBowCooldowns)
 		);
@@ -411,6 +412,8 @@ public class FWPlayerListener implements Listener {
 		Player attacker = resolveKiller(event.getDamager());
 
 		// Spectators can't deal damage - same as SCB's own onEntityDamageByEntity spectator check.
+		// FWSpectatorListener already cancelled the event (for every victim, not just players); this
+		// return is what keeps a cancelled spectator hit from being recorded as a recent attacker below.
 		if (attacker != null && fwGameManager.getInstanceOfSpectator(attacker) != null) {
 			event.setCancelled(true);
 			return;
@@ -1081,7 +1084,10 @@ public class FWPlayerListener implements Listener {
 	/** Whether a player in the match (other than the thrower) is where the 3-wide bridge is about to go. */
 	private boolean playerInBridgePath(FWGameInstance instance, Player shooter, Location eggAt) {
 		for (Entity nearby : eggAt.getWorld().getNearbyEntities(eggAt, 1.8, 1.8, 1.8)) {
-			if (nearby instanceof Player && nearby != shooter && instance.hasPlayer((Player) nearby)) return true;
+			if (!(nearby instanceof Player) || nearby == shooter) continue;
+			Player other = (Player) nearby;
+			// Someone waiting to respawn (GameMode.SPECTATOR) has no body to build around
+			if (instance.hasPlayer(other) && other.getGameMode() != GameMode.SPECTATOR) return true;
 		}
 		return false;
 	}
@@ -1513,6 +1519,10 @@ public class FWPlayerListener implements Listener {
 				FIRE_CHARGE_PROXIMITY_RADIUS, FIRE_CHARGE_PROXIMITY_RADIUS, FIRE_CHARGE_PROXIMITY_RADIUS)) {
 			if (!(nearby instanceof Player)) continue;
 			Player player = (Player) nearby;
+			// Only players actually fighting in this match. A spectator hovering nearby was being launched
+			// (and killPlayer even credited the shooter a kill for them), and someone waiting to respawn
+			// (GameMode.SPECTATOR) could be "killed" a second time.
+			if (fwGameManager.getInstanceOfPlayer(player) != instance || player.getGameMode() == GameMode.SPECTATOR) continue;
 
 			knockBackFromFireCharge(player, impact);
 
@@ -1665,7 +1675,7 @@ public class FWPlayerListener implements Listener {
 				TNT_KNOCKBACK_RADIUS, TNT_KNOCKBACK_RADIUS, TNT_KNOCKBACK_RADIUS)) {
 			if (!(nearby instanceof Player)) continue;
 			Player player = (Player) nearby;
-			if (fwGameManager.getInstanceOfPlayer(player) != instance) continue;
+			if (fwGameManager.getInstanceOfPlayer(player) != instance || player.getGameMode() == GameMode.SPECTATOR) continue;
 
 			knockBackFromTnt(player, impact);
 
