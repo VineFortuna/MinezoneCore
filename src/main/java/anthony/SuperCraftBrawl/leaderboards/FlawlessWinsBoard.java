@@ -166,6 +166,8 @@ public class FlawlessWinsBoard extends LeaderboardBase {
             y -= 0.24;
         }
 
+        sendClickHitboxGlobalSelective(title, y - 0.44);
+
         Location base = new Location(title.getWorld(), title.getX(), y, title.getZ());
 
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -273,6 +275,8 @@ public class FlawlessWinsBoard extends LeaderboardBase {
                     ChatColor.GREEN + viewer.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + yourVal
             );
         }
+
+        sendClickHitboxToViewer(viewer, title, y - 0.20);
     }
 
     public void paintFor(Player viewer, LeaderboardScope scope) {
@@ -455,6 +459,25 @@ public class FlawlessWinsBoard extends LeaderboardBase {
         ((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) viewer).getHandle().playerConnection.sendPacket(spawn);
 
         viewerEntityIds.computeIfAbsent(viewer.getUniqueId(), k -> new ArrayList<Integer>()).add(customId);
+    }
+
+    /** The invisible hitbox that makes the board clickable, sent to the same viewers as the global lines. */
+    private void sendClickHitboxGlobalSelective(Location title, double lowestLineY) {
+        BoardClickHitbox.Hitbox hitbox = BoardClickHitbox.create(title, lowestLineY);
+        globalEntityIds.add(hitbox.id);
+
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (usesGlobalBoard(player)) {
+                hitbox.sendTo(player);
+            }
+        }
+    }
+
+    /** The same for one viewer's own board. It goes in their list, so it is destroyed with their lines. */
+    private void sendClickHitboxToViewer(Player viewer, Location title, double lowestLineY) {
+        BoardClickHitbox.Hitbox hitbox = BoardClickHitbox.create(title, lowestLineY);
+        hitbox.sendTo(viewer);
+        viewerEntityIds.computeIfAbsent(viewer.getUniqueId(), k -> new ArrayList<Integer>()).add(hitbox.id);
     }
 
     private EntityArmorStand makeStand(Location loc, String name) {

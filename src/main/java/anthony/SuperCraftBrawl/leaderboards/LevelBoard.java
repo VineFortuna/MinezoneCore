@@ -74,6 +74,7 @@ public class LevelBoard extends LeaderboardBase {
 
 		Location loc = new Location(main.getLobbyWorld(), 189.5, 106.5, 686.5);
 		sendArmorStandPacket(loc, ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + "Top Levels");
+		Location title = loc.clone();
 		loc.setY(loc.getY() - 0.4);
 
 		int count = 1;
@@ -86,6 +87,8 @@ public class LevelBoard extends LeaderboardBase {
 			count++;
 		}
 		
+		sendClickHitbox(title, loc.getY() - 0.44);
+
 		// after you've finished drawing the top 10 using 'loc'
 		Location base = loc.clone(); // freeze the baseline after the top list
 
@@ -123,6 +126,15 @@ public class LevelBoard extends LeaderboardBase {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) player).getHandle().playerConnection
 					.sendPacket(packet);
+		}
+	}
+
+	/** The invisible hitbox that makes the board clickable. */
+	private void sendClickHitbox(Location title, double lowestLineY) {
+		BoardClickHitbox.Hitbox hitbox = BoardClickHitbox.create(title, lowestLineY);
+		entityIds.add(hitbox.id);
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			hitbox.sendTo(player);
 		}
 	}
 
