@@ -55,12 +55,22 @@ public class FWTrapManager {
 	private static final int MLG_MAX_WATCH_TICKS = 15 * 20;
 	/** If the launch hasn't lifted them off the ground by now (a low ceiling), they count as landed. */
 	private static final int MLG_LAUNCH_GRACE_TICKS = 10;
+	/** How long the water an MLG bucket places stays on the ground before it's taken away again (half a second). */
+	private static final long MLG_WATER_TICKS = 10L;
+
+	/** One pouring of MLG water: the block it went into, everything it has flowed into since, and the task that clears it. */
+	private static final class MlgWater {
+		final Set<Block> blocks = new HashSet<>();
+		BukkitTask removal;
+	}
 
 	private final FWGameInstance instance;
 	/** siteId → System.currentTimeMillis() when that team's traps can fire again. */
 	private final Map<Integer, Long> cooldownEndsAt = new HashMap<>();
 	/** Players launched by an MLG Trap who haven't landed yet. Each entry is removed when its watch ends. */
 	private final Map<UUID, BukkitTask> mlgWatches = new HashMap<>();
+	/** MLG water that is still on the ground. Each entry is removed when its half second is up, so this stays tiny. */
+	private final List<MlgWater> mlgWater = new ArrayList<>();
 	private final FWTemporaryBlocks tempBlocks;
 	private final FWDecoyFlags decoys;
 	private BukkitTask task;
@@ -88,6 +98,11 @@ public class FWTrapManager {
 		cooldownEndsAt.clear();
 		for (BukkitTask watch : mlgWatches.values()) watch.cancel();
 		mlgWatches.clear();
+		for (MlgWater water : mlgWater) {
+			if (water.removal != null) water.removal.cancel();
+			clearWater(water);
+		}
+		mlgWater.clear();
 		tempBlocks.clearAll();
 		decoys.clearAll();
 	}
@@ -284,10 +299,56 @@ public class FWTrapManager {
 				"", "&7Gone when you land.");
 	}
 
-	private boolean isMlgBucket(ItemStack item) {
+	/** True only for the bucket an MLG Trap hands out, never for a Water Bucket bought from the shop. */
+	public boolean isMlgBucket(ItemStack item) {
 		if (item == null || item.getType() != Material.WATER_BUCKET || !item.hasItemMeta()) return false;
 		String name = item.getItemMeta().getDisplayName();
 		return name != null && ChatColor.stripColor(name).equals(MLG_BUCKET_NAME);
+	}
+
+	/**
+	 * The MLG bucket's water was just poured at this block (see FWPlayerListener#onBucketEmpty). It is only
+	 * there to break the fall, so it, and anything it has spread into, is taken away again half a second later.
+	 * Water that was already in that spot isn't the trap's, so it's left alone.
+	 */
+	public void onMlgWaterPlaced(Block placedAt) {
+		if (isWater(placedAt)) return;
+
+		MlgWater water = new MlgWater();
+		water.blocks.add(placedAt);
+		mlgWater.add(water);
+		water.removal = Bukkit.getScheduler().runTaskLater(instance.getManager().getMain(), () -> {
+			mlgWater.remove(water);
+			clearWater(water);
+		}, MLG_WATER_TICKS);
+	}
+
+	/**
+	 * Called for every liquid flow in the match (see FWPlayerListener#onLiquidFlow). When it's MLG water
+	 * spreading, the block it flows into is taken away with the rest. Blocks that were already water are
+	 * skipped, so the map's own water and a shop bucket's water are never removed by mistake.
+	 */
+	public void onLiquidFlow(Block from, Block to) {
+		if (mlgWater.isEmpty() || isWater(to)) return;
+
+		for (MlgWater water : mlgWater) {
+			if (water.blocks.contains(from)) {
+				water.blocks.add(to);
+				return;
+			}
+		}
+	}
+
+	/** Turns the block back to air, but only where it is still water (something may have been built there since). */
+	private void clearWater(MlgWater water) {
+		for (Block block : water.blocks) {
+			if (isWater(block)) block.setType(Material.AIR);
+		}
+	}
+
+	private static boolean isWater(Block block) {
+		Material type = block.getType();
+		return type == Material.WATER || type == Material.STATIONARY_WATER;
 	}
 
 	private int firstMlgBucketSlot(PlayerInventory inventory) {

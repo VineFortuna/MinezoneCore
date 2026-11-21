@@ -245,6 +245,11 @@ public class FWPlayerListener implements Listener {
 			return;
 		}
 
+		// The MLG Trap's water is only there for the landing, so it's taken off the ground again half a second later
+		if (instance.getTrapManager().isMlgBucket(event.getPlayer().getItemInHand())) {
+			instance.getTrapManager().onMlgWaterPlaced(target);
+		}
+
 		// Remove the empty bucket vanilla gives back after placing water - single use in Bedwars style.
 		Player bucketPlayer = event.getPlayer();
 		Bukkit.getScheduler().runTaskLater(fwGameManager.getMain(), () -> {
@@ -274,7 +279,11 @@ public class FWPlayerListener implements Listener {
 				|| toType == Material.LAVA || toType == Material.STATIONARY_LAVA;
 		if (toType != Material.AIR && !toLiquid && !instance.isPlacedByPlayer(to)) {
 			event.setCancelled(true);
+			return;
 		}
+
+		// MLG Trap water spreading: lets the trap take what it flowed into away with the rest
+		instance.getTrapManager().onLiquidFlow(event.getBlock(), to);
 	}
 
 	/**
