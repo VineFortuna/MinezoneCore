@@ -10,6 +10,7 @@ import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticManager;
 import anthony.SuperCraftBrawl.cosmetics.DeathEffectAnimation;
+import anthony.SuperCraftBrawl.cosmetics.all.DeathEffectCosmetics;
 import anthony.SuperCraftBrawl.gui.ClassMasteryGUI;
 import anthony.SuperCraftBrawl.mastery.MasteryHeads;
 import anthony.SuperCraftBrawl.playerdata.ClassDetails;
@@ -574,8 +575,6 @@ public abstract class BaseClass {
 			((DeathEffectAnimation) equipped).play(pLocation);
 			return;
 		}
-		List<Item> deathParticles = new ArrayList<>();
-
 		Material mat = checkDeathEffect(data, p);
 
 		ItemStack particleItem;
@@ -585,24 +584,8 @@ public abstract class BaseClass {
 		else
 			particleItem = new ItemStack(mat);
 
-		// Spawn the particles in a circle around the player
-		for (int i = 0; i < 10; i++) {
-			double angle = i * Math.PI / 5;
-			double x = pLocation.getX() + Math.cos(angle) * 0.5;
-			double y = pLocation.getY() + 1.5;
-			double z = pLocation.getZ() + Math.sin(angle) * 0.5;
-
-			Item particle = pLocation.getWorld().dropItem(new Location(pLocation.getWorld(), x, y, z), particleItem);
-			particle.setPickupDelay(Integer.MAX_VALUE);
-			deathParticles.add(particle);
-		}
-
-		// Schedule a task to remove the particles after 5 seconds
-		Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), () -> {
-			for (Item particle : deathParticles) {
-				particle.remove();
-			}
-		}, 5 * 20);
+		// A ring of the items around the player, removed after 5 seconds (shared with the Gift Explosion effect)
+		DeathEffectCosmetics.dropItemRing(instance.getGameManager().getMain(), pLocation, particleItem);
 	}
 
 	private static final String KILL_HEALTH_POT_NAME = "HEALING I";

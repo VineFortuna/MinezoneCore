@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.all.ReindeerFlight;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.cosmetics.ParticleHelper;
+import anthony.SuperCraftBrawl.cosmetics.PresentHeads;
 import anthony.SuperCraftBrawl.halloween.Halloween;
 import anthony.util.ItemHelper;
 import net.minecraft.server.v1_8_R3.EnumParticle;
@@ -23,6 +24,7 @@ import org.bukkit.util.Vector;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -212,10 +214,46 @@ public class WinEffects {
         runnable.runTaskTimer(instance.getPlugin(), 0, 1);
     }
 
-    // --- Present Rain (Battle Pass): fish rain, but with gift boxes ---
+    // --- The map's area, for the effects that cover all of it ---
 
-    /** Wool colours used as gift boxes: red, green, white, yellow. */
-    private static final short[] GIFT_COLORS = { 14, 13, 0, 4 };
+    /** A rectangle of the map, in block coordinates (both ends included). */
+    private static final class Area {
+        final int minX, maxX, minZ, maxZ;
+
+        Area(int minX, int maxX, int minZ, int maxZ) {
+            this.minX = minX;
+            this.maxX = maxX;
+            this.minZ = minZ;
+            this.maxZ = maxZ;
+        }
+
+        Area grow(int by) {
+            return new Area(minX - by, maxX + by, minZ - by, maxZ + by);
+        }
+    }
+
+    /**
+     * The map's bounds (the same ones the flood effect uses, so Flag Wars gives the area around the winner's base),
+     * or 48 blocks around the winner for a map that doesn't have any.
+     */
+    private Area getMapArea() {
+        double boundsX = instance.getFloodBoundsX();
+        double boundsZ = instance.getFloodBoundsZ();
+
+        if (boundsX > 0 && boundsZ > 0) {
+            Vector center = instance.getFloodCenter();
+            return new Area((int) Math.floor(center.getX() - boundsX), (int) Math.ceil(center.getX() + boundsX),
+                    (int) Math.floor(center.getZ() - boundsZ), (int) Math.ceil(center.getZ() + boundsZ));
+        }
+        Location at = player.getLocation();
+        return new Area(at.getBlockX() - 48, at.getBlockX() + 48, at.getBlockZ() - 48, at.getBlockZ() + 48);
+    }
+
+    // --- Present Rain (Battle Pass): red and blue present heads rain over the whole map ---
+
+    private static final int PRESENTS_PER_TICK = 2;
+    private static final int PRESENT_RAIN_TICKS = 160;
+    private static final int PRESENT_DROP_HEIGHT = 25;
 
     private void presentRainEffect() {
         final World world = player.getWorld();
@@ -223,27 +261,46 @@ public class WinEffects {
         this.presentEffect = true;
         startFireworksRunnable(world, CHRISTMAS_PALETTE);
 
+        final Area area = getMapArea();
         BukkitRunnable runnable = new BukkitRunnable() {
             final Random rand = new Random();
             int rep = 0;
 
             @Override
             public void run() {
-                if (rep >= 160 || !player.isOnline() || player.getWorld() != world) {
+                if (rep >= PRESENT_RAIN_TICKS || !player.isOnline() || player.getWorld() != world) {
                     this.cancel();
                     return;
                 }
 
-                ItemStack gift = rand.nextInt(6) == 0
-                        ? new ItemStack(Material.COOKIE)
-                        : new ItemStack(Material.WOOL, 1, GIFT_COLORS[rand.nextInt(GIFT_COLORS.length)]);
-                Item item = world.dropItem(getItemRainLoc(), gift);
-                item.setPickupDelay(Integer.MAX_VALUE); // for looks only, nobody can pick them up
-                presents.add(item);
+                for (int k = 0; k < PRESENTS_PER_TICK; k++) {
+                    Location loc = getPresentDropLoc(world, area, rand);
+                    if (loc == null) continue;
+
+                    Item item = world.dropItem(loc, PresentHeads.random(rand));
+                    item.setPickupDelay(Integer.MAX_VALUE); // for looks only, nobody can pick them up
+                    presents.add(item);
+                }
                 rep++;
             }
         };
         instance.trackTask(runnable.runTaskTimer(instance.getPlugin(), 0, 1));
+    }
+
+    /**
+     * Somewhere above a random spot of the map, or null if that spot is empty (void) or isn't loaded.
+     * Only loaded chunks are used, so this never loads (or generates) a chunk and lag the server.
+     */
+    private Location getPresentDropLoc(World world, Area area, Random rand) {
+        int x = area.minX + rand.nextInt(area.maxX - area.minX + 1);
+        int z = area.minZ + rand.nextInt(area.maxZ - area.minZ + 1);
+        if (!world.isChunkLoaded(x >> 4, z >> 4)) return null;
+
+        int ground = world.getHighestBlockYAt(x, z);
+        if (ground <= 1) return null;
+
+        return new Location(world, x + 0.2 + rand.nextDouble() * 0.6, Math.min(255, ground + PRESENT_DROP_HEIGHT),
+                z + 0.2 + rand.nextDouble() * 0.6);
     }
 
     // --- Winter Wonderland (Battle Pass): snow, a glittering particle Christmas tree and jingle bells ---
@@ -252,9 +309,52 @@ public class WinEffects {
     private static final double TREE_RADIUS = 2.2;
     private static final int TREE_GROW_TICKS = 40;
 
-    /** Jingle Bells: when each note plays (ticks into an 80 tick loop) and its note (0 = F#3, 12 = F#4, 24 = F#5). */
-    private static final int[] JINGLE_AT = { 0, 5, 10, 20, 25, 30, 40, 45, 50, 57, 60 };
-    private static final int[] JINGLE_NOTE = { 10, 10, 10, 10, 10, 10, 10, 13, 6, 8, 10 };
+    private static final int WINTER_TICKS = 240; // the win effects last 12 seconds
+    private static final int SNOW_CHUNKS_PER_TICK = 10;
+    private static final int SNOW_MARGIN = 16; // snow goes a bit past the map's bounds too
+
+    /*
+     * Jingle Bells, the whole chorus (verse, "Oh what fun", then the verse again), one tick-exact note per
+     * entry: a note letter then its length in beats. A beat is 5 ticks, so these 12 bars (48 beats) are exactly
+     * the 12 seconds the win effects last. The notes are all in C: C D E F G.
+     */
+    private static final String JINGLE_BELLS =
+            // Jingle bells, jingle bells, jingle all the way
+            "E1 E1 E2  E1 E1 E2  E1 G1 C1.5 D.5  E4  " +
+            // Oh what fun it is to ride in a one-horse open sleigh, hey!
+            "F1 F1 F1.5 F.5  F1 E1 E1 E.5 E.5  E1 D1 D1 E1  D2 G2  " +
+            // Jingle bells, jingle bells, jingle all the way
+            "E1 E1 E2  E1 E1 E2  E1 G1 C1.5 D.5  E4";
+    private static final int JINGLE_TICKS_PER_BEAT = 5;
+
+    /** When each note plays (ticks into the song) and which it is (0 = F#3, 12 = F#4, 24 = F#5). Built from JINGLE_BELLS. */
+    private static final int[] JINGLE_AT;
+    private static final int[] JINGLE_NOTE;
+    private static final int JINGLE_LENGTH; // ticks
+
+    static {
+        String[] notes = JINGLE_BELLS.trim().split("\\s+");
+        JINGLE_AT = new int[notes.length];
+        JINGLE_NOTE = new int[notes.length];
+
+        double beat = 0;
+        for (int i = 0; i < notes.length; i++) {
+            JINGLE_AT[i] = (int) Math.round(beat * JINGLE_TICKS_PER_BEAT);
+            JINGLE_NOTE[i] = jingleNote(notes[i].charAt(0));
+            beat += Double.parseDouble(notes[i].substring(1));
+        }
+        JINGLE_LENGTH = (int) Math.round(beat * JINGLE_TICKS_PER_BEAT);
+    }
+
+    private static int jingleNote(char letter) {
+        switch (letter) {
+            case 'C': return 6;
+            case 'D': return 8;
+            case 'E': return 10;
+            case 'F': return 11;
+            default: return 13; // G
+        }
+    }
 
     private void winterWonderlandEffect() {
         final World world = player.getWorld();
@@ -265,30 +365,103 @@ public class WinEffects {
         // The tree stands where the winner was standing when they won
         final Location treeBase = findGround(player.getLocation()).add(0, 1, 0);
 
+        // The snow covers the map from the winner outwards, so it's right there on the first tick. The world
+        // is thrown away when the game is removed, so there's nothing to clean up afterwards.
+        // (Not the weather: the maps are plains, which rain instead of snow, and the client fades weather in slowly.)
+        final Area snowArea = getMapArea().grow(SNOW_MARGIN);
+        final List<int[]> snowChunks = getChunksNearestFirst(snowArea, treeBase);
+
         BukkitRunnable runnable = new BukkitRunnable() {
             int tick = 0;
+            int nextChunk = 0;
 
             @Override
             public void run() {
-                if (tick >= 240 || !player.isOnline() || player.getWorld() != world) {
+                if (tick >= WINTER_TICKS || !player.isOnline() || player.getWorld() != world) {
                     this.cancel();
                     return;
                 }
 
-                // Snow falls around every player in the map, so it's visible wherever they are
-                if (tick % 2 == 0) {
-                    for (Player viewer : world.getPlayers()) {
-                        Location above = viewer.getLocation().add(0, 5, 0);
-                        ParticleHelper.playTo(viewer, above, EnumParticle.SNOW_SHOVEL, 7f, 2.5f, 7f, 0f, 25);
-                    }
+                // Snow falls thickly around every player in the map, so it's visible wherever they are
+                for (Player viewer : world.getPlayers()) {
+                    Location above = viewer.getLocation().add(0, 6, 0);
+                    ParticleHelper.playTo(viewer, above, EnumParticle.SNOW_SHOVEL, 8f, 3f, 8f, 0f, 30);
+                }
+
+                for (int n = 0; n < SNOW_CHUNKS_PER_TICK && nextChunk < snowChunks.size(); n++) {
+                    int[] chunk = snowChunks.get(nextChunk++);
+                    coverChunkInSnow(world, snowArea, chunk[0], chunk[1]);
                 }
 
                 drawChristmasTree(treeBase, tick);
-                playJingle(world, tick % 80);
+                playJingle(world, tick % JINGLE_LENGTH);
                 tick++;
             }
         };
         instance.trackTask(runnable.runTaskTimer(instance.getPlugin(), 0, 1));
+    }
+
+    /** Every chunk (x, z) of the area, the ones closest to the given spot first. */
+    private List<int[]> getChunksNearestFirst(Area area, Location from) {
+        final int fromX = from.getBlockX() >> 4;
+        final int fromZ = from.getBlockZ() >> 4;
+
+        List<int[]> chunks = new ArrayList<>();
+        for (int cx = area.minX >> 4; cx <= area.maxX >> 4; cx++)
+            for (int cz = area.minZ >> 4; cz <= area.maxZ >> 4; cz++)
+                chunks.add(new int[] { cx, cz });
+
+        Collections.sort(chunks, (a, b) -> {
+            int distA = (a[0] - fromX) * (a[0] - fromX) + (a[1] - fromZ) * (a[1] - fromZ);
+            int distB = (b[0] - fromX) * (b[0] - fromX) + (b[1] - fromZ) * (b[1] - fromZ);
+            return Integer.compare(distA, distB);
+        });
+        return chunks;
+    }
+
+    /** Puts a layer of snow on top of everything open to the sky in the chunk (only if it's loaded, so nothing is loaded for this). */
+    private void coverChunkInSnow(World world, Area area, int chunkX, int chunkZ) {
+        if (!world.isChunkLoaded(chunkX, chunkZ)) return;
+
+        for (int x = chunkX << 4; x < (chunkX << 4) + 16; x++) {
+            if (x < area.minX || x > area.maxX) continue;
+            for (int z = chunkZ << 4; z < (chunkZ << 4) + 16; z++) {
+                if (z < area.minZ || z > area.maxZ) continue;
+                coverColumnInSnow(world, x, z);
+            }
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private void coverColumnInSnow(World world, int x, int z) {
+        // The height map skips see-through blocks (glass, fences...), so look a bit higher to find the real top
+        int top = Math.min(254, world.getHighestBlockYAt(x, z) + 12);
+
+        for (int y = top; y >= 1; y--) {
+            Block block = world.getBlockAt(x, y, z);
+            Material type = block.getType();
+            if (type == Material.AIR) continue;
+
+            // Tall grass and dead bushes get snowed over, which then sits on whatever was under them
+            if (type == Material.LONG_GRASS || type == Material.DEAD_BUSH) {
+                if (canHoldSnow(world.getBlockAt(x, y - 1, z).getType()))
+                    block.setTypeIdAndData(Material.SNOW.getId(), (byte) 0, false);
+                return;
+            }
+
+            if (canHoldSnow(type)) {
+                Block above = world.getBlockAt(x, y + 1, z);
+                if (above.getType() == Material.AIR)
+                    above.setTypeIdAndData(Material.SNOW.getId(), (byte) 0, false); // no physics: nothing needs to update
+            }
+            return; // the first thing from the top is what the snow lands on (or doesn't, e.g. water, glass)
+        }
+    }
+
+    /** Full solid blocks and leaves, like the real snow layer. */
+    private boolean canHoldSnow(Material type) {
+        if (type == Material.LEAVES || type == Material.LEAVES_2) return true;
+        return type.isOccluding() && type != Material.BARRIER && type != Material.ICE && type != Material.PACKED_ICE;
     }
 
     /** One tick of the particle tree: it grows for the first couple of seconds, then twinkles. */
@@ -325,9 +498,9 @@ public class WinEffects {
             ParticleHelper.play(base.clone().add(0, TREE_HEIGHT * grow + 0.2, 0), EnumParticle.FIREWORKS_SPARK, 0.15f, 0.15f, 0.15f, 0.02f, 3);
     }
 
-    private void playJingle(World world, int loopTick) {
+    private void playJingle(World world, int songTick) {
         for (int i = 0; i < JINGLE_AT.length; i++) {
-            if (JINGLE_AT[i] != loopTick) continue;
+            if (JINGLE_AT[i] != songTick) continue;
 
             float pitch = (float) Math.pow(2.0, (JINGLE_NOTE[i] - 12) / 12.0);
             for (Player viewer : world.getPlayers())
@@ -699,6 +872,7 @@ public class WinEffects {
             presents.clear();
             this.presentEffect = false;
         } else if (this.winterEffect) {
+            // The snow stays: the game's map copy is deleted right after the win effects end
             this.winterEffect = false;
         }
     }

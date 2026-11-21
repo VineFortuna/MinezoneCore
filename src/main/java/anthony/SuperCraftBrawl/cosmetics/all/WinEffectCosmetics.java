@@ -43,7 +43,7 @@ public final class WinEffectCosmetics {
     private static Cosmetic winterWonderland(Core main) {
         return new PassCosmetic(main, CosmeticCategory.WIN_EFFECT, "winter_wonderland", "Winter Wonderland",
                 "&eWinter Wonderland", Material.SNOW_BLOCK, 0,
-                "&7Snow falls over the map as a", "&7glittering Christmas tree rises", "&7to the sound of jingle bells!");
+                "&7Snow falls and covers the map as a", "&7glittering Christmas tree rises", "&7to the sound of jingle bells!");
     }
 
     private static Cosmetic defaultEffect(Core main) {
