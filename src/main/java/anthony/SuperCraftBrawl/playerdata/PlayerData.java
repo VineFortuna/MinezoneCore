@@ -49,6 +49,11 @@ public class PlayerData {
 		fwDeaths = 0;
 		fwFlagsCaptured = 0;
 	}
+	/** Preferences (1 = on). The game starting sound is on until the player turns it off. */
+	public int gameStartSound = 1, buildOnJoin = 0;
+
+	/** 1 once a LEGENDARY (or higher) player has logged in with Building Mode on for the first time. */
+	public int legendaryBuildGiven = 0;
 
 	public HashMap<Integer, ClassDetails> playerClasses = new HashMap<>();
 	public HashMap<Integer, FishingDetails> playerFishing = new HashMap<>();

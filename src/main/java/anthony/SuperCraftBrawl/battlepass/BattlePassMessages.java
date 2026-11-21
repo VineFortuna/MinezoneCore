@@ -38,9 +38,9 @@ final class BattlePassMessages {
 		player.sendMessage("");
 
 		// What this tier gives, so they know whether it's worth opening the menu right now
-		player.sendMessage(centered(main, "&a&lFREE  " + BattlePassRewards.get(BattlePassTrack.FREE, tier).getName(main, player)));
+		player.sendMessage(centered(main, "&a&lFREE  " + BattlePassRewards.get(BattlePassTrack.FREE, tier).getChatName(main, player)));
 		String premiumReward = premium
-				? BattlePassRewards.get(BattlePassTrack.PREMIUM, tier).getName(main, player)
+				? BattlePassRewards.get(BattlePassTrack.PREMIUM, tier).getChatName(main, player)
 				: "&8Locked";
 		player.sendMessage(centered(main, "&6&lPREMIUM  " + premiumReward));
 		player.sendMessage("");

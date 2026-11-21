@@ -207,6 +207,12 @@ commands:
    fwsetup:
       description: Staff tool to configure a Flag Wars map
       permission: fw.admin
+   partychatmute:
+     description: Disable party messages
+     aliases: [ pcm ]
+   building:
+     description: Toggle Building Mode
+     aliases: [ bd ]
 
 permissions:
    scb.admin:

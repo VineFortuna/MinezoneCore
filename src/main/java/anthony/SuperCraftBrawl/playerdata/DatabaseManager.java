@@ -48,6 +48,13 @@ public class DatabaseManager {
 		ensurePlayerDataColumn("LastDailyReward", "BIGINT NOT NULL DEFAULT 0");
 	}
 
+	/** The Game Starting Sound and Building Mode preferences. */
+	public void ensurePreferenceColumns() {
+		ensurePlayerDataColumn("GameStartSound", "INT NOT NULL DEFAULT 1");
+		ensurePlayerDataColumn("BuildOnJoin", "INT NOT NULL DEFAULT 0");
+		ensurePlayerDataColumn("LegendaryBuildGiven", "INT NOT NULL DEFAULT 0");
+	}
+
 	/** Adds a column to PlayerData if it isn't there yet. */
 	private void ensurePlayerDataColumn(String column, String definition) {
 		if (getConnection() == null) {

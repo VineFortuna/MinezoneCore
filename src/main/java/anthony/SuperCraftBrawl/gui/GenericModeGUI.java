@@ -58,6 +58,7 @@ public class GenericModeGUI implements InventoryProvider {
 	private boolean showSelection = false; // the current choice is marked, see withSelected
 	private Maps selectedMap = null; // the marked map, or null when Random is the current choice
 	private String selectedLabel = "";
+	private boolean randomIsOption = false; // Random is a choice of its own (the default map) instead of the Randomizer
 
 	public GenericModeGUI(Core main, SmartInventory parent, GameType gamemode, String title, int totalRows, int totalColumns) {
 		this.gamemode = gamemode;
@@ -87,6 +88,12 @@ public class GenericModeGUI implements InventoryProvider {
 		this.showSelection = true;
 		this.selectedMap = map;
 		this.selectedLabel = label;
+		return this;
+	}
+
+	/** Random becomes a choice of its own that passes null to onMapPicked, instead of the Randomizer. */
+	public GenericModeGUI withRandomOption() {
+		this.randomIsOption = true;
 		return this;
 	}
 
@@ -127,8 +134,8 @@ public class GenericModeGUI implements InventoryProvider {
 		}));}
 
 		// Randomizer
-		if (onMapPicked != null) {
-			// Picking a map for something else: Random is an option like any map (like One For All's class menu)
+		if (onMapPicked != null && randomIsOption) {
+			// Picking a default map: Random is an option like any map (like One For All's class menu)
 			contents.set(0, 4, ClickableItem.of(getRandomOptionItem(), e -> handleRandomOptionClick(player)));
 		} else {
 			setItem(contents, 0, 4, getRandomizerItem(), e -> handleRandomizerClick(e, player));
@@ -202,9 +209,10 @@ public class GenericModeGUI implements InventoryProvider {
 
 		ItemStack item = ItemHelper.setDetails(ItemHelper.createSkullTexture(RANDOM_TEXTURE),
 				GameInstance.ONE_FOR_ALL_RANDOM,
-				"&7A random map",
+				"&7A random map every time",
+				"&7you create a custom game",
 				"",
-				selected ? "&a" + selectedLabel : "&r&nClick to pick a random map!");
+				selected ? "&a" + selectedLabel : "&r&nClick to select it!");
 		if (selected) item = ItemHelper.setGlowing(item, true);
 		return item;
 	}

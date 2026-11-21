@@ -214,6 +214,7 @@ public class PlayerDataManager implements Listener {
 			data.lastDailyReward = lastDailyReward;
 			data.flagWarsQuickBuy = flagWarsQuickBuy != null ? flagWarsQuickBuy : "";
 			applyFlagWarsStats(set, data);
+			loadPreferences(set, data);
 		}
 
 		set.close();
@@ -437,6 +438,7 @@ public class PlayerDataManager implements Listener {
 			data.lastDailyReward = lastDailyReward;
 			data.flagWarsQuickBuy = flagWarsQuickBuy != null ? flagWarsQuickBuy : "";
 			applyFlagWarsStats(set, data);
+			loadPreferences(set, data);
 		}
 		set.close();
 		stmt.close();
@@ -515,8 +517,19 @@ public class PlayerDataManager implements Listener {
 		manager.executeUpdateCommand("UPDATE PlayerData SET Points = 0");
 	}
 
+	/** The newer preference columns, read on their own so a missing column just leaves the defaults. */
+	private static void loadPreferences(ResultSet set, PlayerData data) {
+		try { data.gameStartSound = set.getInt("GameStartSound"); } catch (Exception ignored) {}
+		try { data.buildOnJoin = set.getInt("BuildOnJoin"); } catch (Exception ignored) {}
+		try { data.legendaryBuildGiven = set.getInt("LegendaryBuildGiven"); } catch (Exception ignored) {}
+	}
+
 	public void saveData(PlayerData data) {
 		System.out.print("Saving data for " + data.playerName);
+		// Saved apart from the rest so a missing column can never stop the main data from saving
+		manager.executeUpdateCommand("UPDATE PlayerData SET GameStartSound = " + data.gameStartSound
+				+ ", BuildOnJoin = " + data.buildOnJoin + ", LegendaryBuildGiven = " + data.legendaryBuildGiven
+				+ " WHERE UUID = '" + data.playerUUID.toString() + "';");
 		manager.executeUpdateCommand("UPDATE PlayerData SET LastPlayerName = '" + data.playerName + "', LastIP = '"
 				+ data.playerIP + "', RoleID = " + data.roleID + ", Tokens = " + data.tokens + ", Kills = " + data.kills
 				+ ", MatchMvps = " + data.matchMvps + ", Challenge100 = " + data.challenge100 + ", Challenge101 = "

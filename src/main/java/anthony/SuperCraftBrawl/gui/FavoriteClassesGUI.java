@@ -49,15 +49,14 @@ public class FavoriteClassesGUI implements InventoryProvider {
 
 						List<String> lore = type.buildDescription();
 						lore.add("");
-						lore.add(main.color("&e&nLeft Click&r &eto choose a class"));
-						lore.add(main.color("&e&nRight Click&r &eto view mastery"));
+						TagTeamClasses.addChooseLines(main, player, type, lore);
 						lore.add(main.color("&e&nShift Click&r &eto remove a favorite class"));
 						lore.add("");
 						lore.addAll(MasteryTier.getRewardAndProgressBar(details));
 
 
 						contents.set(y, x,
-								ClickableItem.of(ItemHelper.setDetails(ItemHelper.setHideFlags(type.getItem(), true),
+								ClickableItem.of(ItemHelper.setDetails(TagTeamClasses.glowIfPicked(main, player, type, ItemHelper.setHideFlags(type.getItem(), true)),
 												type.getTag(), lore),
 										e -> {
 											if (e.isShiftClick()) {
@@ -70,6 +69,10 @@ public class FavoriteClassesGUI implements InventoryProvider {
 														inv.open(player);
 													}
 												}
+											} else if (e.isLeftClick() && TagTeamClasses.pick(main, player, type, 1)) {
+												inv.open(player); // Tag Team: stays open to pick the 2nd class too
+											} else if (e.isRightClick() && TagTeamClasses.pick(main, player, type, 2)) {
+												inv.open(player);
 											} else if (e.isLeftClick()) {
 												main.getGameManager().playerSelectClass(player, type);
 												player.sendMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD

@@ -1014,6 +1014,21 @@ public class GameManager implements Listener, PluginMessageListener {
 			game.toggleReady(player);
 	}
 
+	/** Right clicking the Frenzy vote TNT in a game lobby votes for Frenzy (or takes the vote back). */
+	@EventHandler
+	public void frenzyVoteItem(PlayerInteractEvent event) {
+		if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK)
+			return;
+
+		Player player = event.getPlayer();
+		GameInstance game = this.GetInstanceOfPlayer(player);
+
+		if (game != null && game.state == GameState.WAITING && GameInstance.isFrenzyVoteItem(event.getItem())) {
+			event.setCancelled(true); // it's TNT, so it would be placed
+			game.toggleFrenzyVote(player);
+		}
+	}
+
     /*
     * This function handles the interactivity with the 'Extra Life' item. When
     * used, a player will receieve an additional life in a game
@@ -1068,13 +1083,24 @@ public class GameManager implements Listener, PluginMessageListener {
 	 */
 	@EventHandler
 	public void onPlayerDropItem(PlayerDropItemEvent e) {
-		Player player = e.getPlayer();
+		final Player player = e.getPlayer();
 		anthony.flagwars.FWGameInstance fwInstance = getMain().getFwGameManager().getInstanceOfPlayer(player);
 		if (fwInstance != null && fwInstance.getState() == anthony.flagwars.FWGameState.IN_PROGRESS) {
 			return; // Flag Wars players can drop items mid-match
 		}
 
 		e.setCancelled(true);
+
+		// Tag Team: dropping any item swaps classes. A tick later, once the cancelled drop has put the item back
+		final GameInstance instance = GetInstanceOfPlayer(player);
+		if (instance != null && instance.isTagTeamSwapDrop(player)) {
+			Bukkit.getScheduler().runTask(main, new Runnable() {
+				@Override
+				public void run() {
+					instance.swapTagTeamClass(player);
+				}
+			});
+		}
 	}
 
 	@EventHandler
@@ -2105,11 +2131,48 @@ public class GameManager implements Listener, PluginMessageListener {
             if (!game.isCustomGame() || !game.getCustomGameHostName().equalsIgnoreCase(hostName)) continue;
 
             if (game.state == GameState.STARTED) SpectatorJoinGame(player, game);
-            else if (game.state == GameState.WAITING) JoinGame(player, game);
+            else if (game.state == GameState.WAITING) {
+                if (leaveLobbyToJoin(player, game, game.getMap())) JoinGame(player, game);
+            }
             else player.sendMessage(main.color("&c&l(!) &rThat custom game has already ended."));
             return;
         }
         player.sendMessage(main.color("&c&l(!) &rThat custom game isn't running anymore."));
+    }
+
+    /*
+     * Join links (the /invite and "game is starting" messages) work from inside another game's lobby too: the
+     * player leaves that lobby, with their party if they lead one, and joins the new game. Returns false if they
+     * can't join it (they're told why) and stay where they are. With no target game, any open game on the map will do.
+     */
+    public boolean leaveLobbyToJoin(Player player, GameInstance target, Maps map) {
+        GameInstance current = GetInstanceOfPlayer(player);
+        if (current == null || current.state != GameState.WAITING) return true; // nothing to leave (a running game is left with /leave)
+        if (current == target || (target == null && current.getMap() == map)) return true; // the join says they're already there
+
+        Party party = getPartyOf(player);
+        if (party != null && !party.isLeader(player.getUniqueId())) return true; // only the leader moves the party, the join says so
+
+        if (current.isCustomGame() && current.isCustomGameHost(player)) {
+            player.sendMessage(main.color("&c&l(!) &rLeave your custom game first."));
+            return false;
+        }
+
+        // Don't leave for a game they can't get into
+        GameInstance joining = target != null ? target : (map != null ? getInstanceOfMap(map) : null);
+        if (joining != null && joining.state == GameState.WAITING) {
+            if (joining.isCustomGame() && !joining.canAccessCustomGame(player)) {
+                player.sendMessage(joining.getCustomGameAccessMessage());
+                return false;
+            }
+            if (!joining.isOpen()) {
+                player.sendMessage(main.color("&c&l(!) &rThis game is full!"));
+                return false;
+            }
+        }
+
+        main.getCommands().leaveGame(player);
+        return GetInstanceOfPlayer(player) == null;
     }
 
     /*
@@ -2121,7 +2184,9 @@ public class GameManager implements Listener, PluginMessageListener {
             if (game.getMapWorld() == null || !game.getMapWorld().getName().equals(worldName)) continue;
 
             if (game.state == GameState.STARTED) SpectatorJoinGame(player, game);
-            else if (game.state == GameState.WAITING) JoinGame(player, game);
+            else if (game.state == GameState.WAITING) {
+                if (leaveLobbyToJoin(player, game, game.getMap())) JoinGame(player, game);
+            }
             else player.sendMessage(main.color("&c&l(!) &rThat game has already ended."));
             return;
         }
@@ -2222,6 +2287,16 @@ public class GameManager implements Listener, PluginMessageListener {
     public void sendAcceptedPartyMemberToLeaderGame(Player leader, Player newMember) {
         if (leader == null || newMember == null) return;
 
+        // A custom game host who joined a party closes their lobby (for everyone in it) and follows the leader
+        GameInstance ownGame = GetInstanceOfPlayer(newMember);
+        if (ownGame != null && ownGame.isCustomGame() && ownGame.isCustomGameHost(newMember)
+                && ownGame.state == GameState.WAITING) {
+            if (GetInstanceOfPlayer(leader) == ownGame) return; // the leader is already in their lobby
+
+            main.getCommands().removeFromGame(newMember);
+            newMember.sendMessage(main.color("&e&l(!) &rYour custom game was cancelled."));
+        }
+
         GameInstance leaderInstance = GetInstanceOfPlayer(leader);
 
         if (leaderInstance == null) {
@@ -2315,19 +2390,17 @@ public class GameManager implements Listener, PluginMessageListener {
                 // The map this player's own custom games start on (Random until they pick one)
                 new GenericModeGUI(main, null, GameType.CLASSIC, "Default Map", 6, 9, map -> {
                     customGameMaps.set(player, map);
-                    player.sendMessage(main.color("&2&l(!) &rYour default map is now &e"
-                            + (map == null ? "Random" : map.getName()) + "&r."));
+                    player.sendMessage(main.color("&2&l(!) &rYour default map is now "
+                            + (map == null ? GameInstance.ONE_FOR_ALL_RANDOM : "&e" + map.getName()) + "&r."));
 
                     GameInstance current = GetInstanceOfPlayer(player);
                     if (current != null) current.refreshMapsItem(player); // the Maps item shows it
-                }).withSelected(customGameMaps.getPreferred(player), "Your default map").inv.open(player);
+                }).withRandomOption().withSelected(customGameMaps.getPreferred(player), "Your default map").inv.open(player);
             } else {
-                // This game's map. Random is any map but the one it's on
-                new GenericModeGUI(main, null, GameType.CLASSIC, "Select Map", 6, 9, map -> {
-                    GameInstance current = GetInstanceOfPlayer(player);
-                    changeCustomGameMap(player, map != null ? map
-                            : CustomGameMaps.randomMap(current == null ? null : current.getMap()));
-                }).withSelected(instance.getMap(), "This game's map").inv.open(player);
+                // This game's map: the Randomizer picks a map (Left Click) and selects it (Right Click)
+                new GenericModeGUI(main, null, GameType.CLASSIC, "Select Map", 6, 9,
+                        map -> changeCustomGameMap(player, map)
+                ).withSelected(instance.getMap(), "This game's map").inv.open(player);
             }
             return;
         }
@@ -2539,11 +2612,8 @@ public class GameManager implements Listener, PluginMessageListener {
 	public GameReason AddSpectatorToGame(Player player, GameInstance game) {
 		if (GetInstanceOfPlayer(player) != null) return GameReason.IN_ANOTHER; // the caller tells them
 		if (game == null || !games.contains(game)) return GameReason.FAIL;
-		if (game.isCustomGame() && !game.canAccessCustomGame(player)) {
-			player.sendMessage(game.getCustomGameAccessMessage());
-			return GameReason.NO_ACCESS; // already told why, nothing more to say
-		}
 
+		// Visibility only decides who can join: anyone can watch a custom game, whoever it's open to
 		return game.AddSpectator(player);
 	}
 

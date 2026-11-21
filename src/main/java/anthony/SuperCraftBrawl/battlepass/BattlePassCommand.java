@@ -43,7 +43,7 @@ public class BattlePassCommand implements CommandExecutor {
 				player.sendMessage(main.color("&c&l(!) &rYour Battle Pass is still loading, try again in a moment!"));
 				return true;
 			}
-			new BattlePassGUI(main).inv.open(player);
+			new BattlePassGUI(main).open(player);
 			return true;
 		}
 

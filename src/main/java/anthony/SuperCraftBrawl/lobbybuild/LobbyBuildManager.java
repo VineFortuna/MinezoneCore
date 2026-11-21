@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.lobbybuild;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import net.minecraft.server.v1_8_R3.BlockPosition;
 import net.minecraft.server.v1_8_R3.PacketPlayOutBlockBreakAnimation;
@@ -24,8 +25,10 @@ import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.InventoryCreativeEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.scheduler.BukkitRunnable;
 import xyz.xenondevs.particle.ParticleEffect;
 import xyz.xenondevs.particle.data.texture.BlockTexture;
@@ -36,12 +39,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 /*
- * LEGENDARY players are in creative mode in the lobby and can build there. Every block they place slowly cracks
- * and is gone a minute later. They can't build inside the important areas set with /setimportantarea, and
- * they can only take plain building blocks out of the creative menu. Opped players build normally.
+ * Building Mode (/building or /bd): LEGENDARY players, staff and ops can switch to creative mode in the lobby and
+ * build there. Every block they place slowly cracks and is gone a minute later. They can't build inside the
+ * important areas set with /setimportantarea or break the lobby's own blocks, and they can only take plain
+ * building blocks out of the creative menu. It starts on for a first-time LEGENDARY login and for players with the
+ * "Building Mode on Join" preference. Ops outside of Building Mode build normally.
  */
 public class LobbyBuildManager implements Listener, CommandExecutor {
 
@@ -105,6 +112,7 @@ public class LobbyBuildManager implements Listener, CommandExecutor {
     private final Map<Location, PlacedBlock> placedBlocks = new HashMap<>();
     private final List<Area> importantAreas = new ArrayList<>();
     private int nextAnimationId = Integer.MAX_VALUE; // fake entity ids for the crack animation, counting down
+    private final Set<UUID> building = new HashSet<>(); // players with Building Mode on (UUIDs only, dropped on quit)
 
     public LobbyBuildManager(Core main) {
         this.main = main;
@@ -120,19 +128,80 @@ public class LobbyBuildManager implements Listener, CommandExecutor {
 
     // ===== Gamemode =====
 
-    public boolean hasLobbyCreative(Player player) {
-        return main.getRankManager().getRank(player) == Rank.LEGENDARY;
+    /** LEGENDARY and above (every staff rank), and ops: the same players who can host custom games. */
+    public boolean canBuild(Player player) {
+        return main.canHostCustomGames(player);
     }
 
-    /** Creative for LEGENDARY players, adventure for everyone else. */
+    public boolean isBuildingMode(Player player) {
+        return building.contains(player.getUniqueId()) && canBuild(player);
+    }
+
+    /** Creative while Building Mode is on, adventure otherwise. */
     public GameMode getLobbyGameMode(Player player) {
-        return hasLobbyCreative(player) ? GameMode.CREATIVE : GameMode.ADVENTURE;
+        return isBuildingMode(player) ? GameMode.CREATIVE : GameMode.ADVENTURE;
     }
 
-    /** A LEGENDARY player building under the lobby rules - ops aren't restricted. */
+    /** A player building under the lobby rules: in Building Mode, in creative, in the lobby (ops too). */
     public boolean isLobbyBuilder(Player player) {
-        return !player.isOp() && player.getGameMode() == GameMode.CREATIVE && hasLobbyCreative(player)
-                && main.isInLobby(player);
+        return isBuildingMode(player) && player.getGameMode() == GameMode.CREATIVE && main.isInLobby(player);
+    }
+
+    /** Joining: Building Mode starts on for a first-time LEGENDARY (or above) login and with "Building Mode on Join". */
+    public void onJoin(Player player, PlayerData data) {
+        if (data == null || !canBuild(player)) return;
+
+        // The first-login start is a LEGENDARY rank perk, staff and ops only get it with the preference
+        boolean first = data.legendaryBuildGiven == 0 && main.getRankManager().getRank(player) == Rank.LEGENDARY;
+        if (!first && data.buildOnJoin != 1) return;
+
+        building.add(player.getUniqueId());
+        player.sendMessage(main.color(first ? "&a&l(!) &rBuilding Mode &aenabled&r. Use &e/building &rto toggle it."
+                : "&a&l(!) &rBuilding Mode &aenabled&r."));
+
+        if (first) {
+            data.legendaryBuildGiven = 1;
+            main.getDataManager().saveData(data);
+        }
+    }
+
+    /** /building: switches Building Mode on or off. */
+    private void toggleBuildingMode(Player player) {
+        if (!canBuild(player)) {
+            player.sendMessage(main.color("&c&l(!) &rYou need the rank &6&lLEGENDARY &rto use Building Mode!"));
+            return;
+        }
+        if (!main.isInLobby(player) || main.getParkour().hasPlayer(player)) {
+            player.sendMessage(main.color("&c&l(!) &rYou can only use Building Mode in the lobby."));
+            return;
+        }
+
+        if (building.remove(player.getUniqueId())) {
+            player.setGameMode(GameMode.ADVENTURE);
+            player.setAllowFlight(true);
+            clearBuildingItems(player);
+            player.sendMessage(main.color("&a&l(!) &rBuilding Mode &cdisabled&r."));
+        } else {
+            building.add(player.getUniqueId());
+            player.setGameMode(GameMode.CREATIVE);
+            player.setAllowFlight(true);
+            player.sendMessage(main.color("&a&l(!) &rBuilding Mode &aenabled&r."));
+        }
+    }
+
+    // Blocks taken from the creative menu go when it's switched off, the plugin's own items stay
+    private void clearBuildingItems(Player player) {
+        PlayerInventory inventory = player.getInventory();
+        for (int slot = 0; slot < inventory.getSize(); slot++) {
+            ItemStack item = inventory.getItem(slot);
+            if (!isEmpty(item) && !isPluginItem(item)) inventory.setItem(slot, null);
+        }
+        player.updateInventory();
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        building.remove(event.getPlayer().getUniqueId());
     }
 
     // ===== Building =====
@@ -169,7 +238,11 @@ public class LobbyBuildManager implements Listener, CommandExecutor {
     public void onBlockBreak(BlockBreakEvent event) {
         Block block = event.getBlock();
         PlacedBlock placed = placedBlocks.remove(block.getLocation());
-        if (placed == null) return;
+        if (placed == null) {
+            // The lobby's own blocks stay protected, even from ops while they're in Building Mode
+            if (isLobbyBuilder(event.getPlayer())) event.setCancelled(true);
+            return;
+        }
 
         event.setCancelled(false);
         sendCrack(block, placed, -1);
@@ -352,6 +425,12 @@ public class LobbyBuildManager implements Listener, CommandExecutor {
             return true;
         }
         Player player = (Player) sender;
+
+        if (cmd.getName().equalsIgnoreCase("building")) {
+            toggleBuildingMode(player);
+            return true;
+        }
+
         if (!player.isOp() && !player.hasPermission("scb.setimportantarea")) {
             player.sendMessage(main.color("&c&l(!) &rYou don't have permission to do this!"));
             return true;

@@ -57,9 +57,10 @@ public class GamePreset {
         game.updateModeLine();
     }
 
-    /** Classic: no Frenzy, Class Switch or One For All. */
+    /** Classic: no Frenzy, Class Switch, One For All or Tag Team. */
     public boolean isDefaultClassSelection() {
-        return !frenzy && !settings.randomClasses && settings.oneForAllMode == OneForAllMode.DISABLED;
+        return !frenzy && !settings.randomClasses && settings.oneForAllMode == OneForAllMode.DISABLED
+                && settings.tagTeamSeconds == 0;
     }
 
     /** How players get their class with this preset. */
@@ -67,6 +68,7 @@ public class GamePreset {
         if (frenzy) return "Frenzy";
         if (settings.randomClasses) return "Class Switch (" + settings.randomClassCycleSeconds + "s)";
         if (settings.oneForAllMode != OneForAllMode.DISABLED) return "One For All (" + settings.oneForAllMode.getName() + ")";
+        if (settings.tagTeamSeconds > 0) return "Tag Team (" + settings.tagTeamSeconds + "s)";
         return "Classic";
     }
 
@@ -89,6 +91,7 @@ public class GamePreset {
         put(sb, "spawnprot", settings.spawnProtectionSeconds);
         put(sb, "switch", settings.randomClasses);
         put(sb, "switchsec", settings.randomClassCycleSeconds);
+        put(sb, "tagteam", settings.tagTeamSeconds);
         put(sb, "lives", settings.startingLives);
         put(sb, "respawn", settings.respawnSeconds);
         put(sb, "gravity", settings.lowGravity);
@@ -135,6 +138,7 @@ public class GamePreset {
                     case "spawnprot": s.spawnProtectionSeconds = Integer.parseInt(value); break;
                     case "switch": s.randomClasses = Boolean.parseBoolean(value); break;
                     case "switchsec": s.randomClassCycleSeconds = Integer.parseInt(value); break;
+                    case "tagteam": s.tagTeamSeconds = Integer.parseInt(value); break;
                     case "lives": s.startingLives = Integer.parseInt(value); break;
                     case "respawn": s.respawnSeconds = Integer.parseInt(value); break;
                     case "gravity": s.lowGravity = Boolean.parseBoolean(value); break;

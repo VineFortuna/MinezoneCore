@@ -2,7 +2,6 @@ package anthony.SuperCraftBrawl.battlepass;
 
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
-import org.bukkit.Material;
 
 /**
  * Reward list for the current season. Index 0 = Tier 1, index 9 = Tier 10.
@@ -12,16 +11,16 @@ import org.bukkit.Material;
 public final class BattlePassRewards {
 
 	private static final BattlePassReward[] FREE = {
-			BattlePassReward.classUnlock(ClassType.Elf, Material.CAKE, 500), // 1
+			BattlePassReward.classUnlock(ClassType.Elf, 500), // 1
 			BattlePassReward.tokens(100),                                      // 2
 			BattlePassReward.cosmetic(CosmeticCategory.DEATH_EFFECT, "snow_flurry"), // 3
 			BattlePassReward.mysteryChests(2),                                 // 4
-			BattlePassReward.classUnlock(ClassType.GingerBreadMan, Material.COOKIE, 500), // 5
+			BattlePassReward.classUnlock(ClassType.GingerBreadMan, 500), // 5
 			BattlePassReward.cosmetic(CosmeticCategory.TITLE, "Jolly"),        // 6
 			BattlePassReward.cosmetic(CosmeticCategory.TRAIL, "snowfall"),     // 7
 			BattlePassReward.cosmetic(CosmeticCategory.DOUBLE_JUMP, "snow_puff"), // 8
 			BattlePassReward.bundle(BattlePassReward.tokens(200), BattlePassReward.mysteryChests(1)), // 9
-			BattlePassReward.classUnlock(ClassType.Santa, Material.REDSTONE_BLOCK, 1000), // 10
+			BattlePassReward.classUnlock(ClassType.Santa, 1000), // 10
 	};
 
 	private static final BattlePassReward[] PREMIUM = {

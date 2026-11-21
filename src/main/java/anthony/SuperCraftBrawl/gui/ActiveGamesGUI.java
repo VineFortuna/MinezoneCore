@@ -21,6 +21,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 public class ActiveGamesGUI implements InventoryProvider {
@@ -59,7 +61,6 @@ public class ActiveGamesGUI implements InventoryProvider {
 			GameType gameType = game.gameType;
 			// Custom games show how players get their class (Classic, Frenzy, Class Switch or One For All)
 			String mode = game.isCustomGame() ? game.getClassSelectionName() : gameType.getName();
-			if (game.isCustomGame()) mode += " &6(" + game.getCustomGameVisibility().getTag() + " &6Custom Game)";
 
 			System.out.println(mode);
 
@@ -68,23 +69,23 @@ public class ActiveGamesGUI implements InventoryProvider {
 					contents.set(count, i, ClickableItem.of(
 							ItemHelper.setDetails(displayItem,
 									"&e&l" + mapName,
-									"&fMode: &a" + mode,
+									lore(game, "&fMode: &a" + mode,
 									"",
 									"&fStarting In: &a" + game.timeToStartSeconds + "s",
 									"&fPlayers: &a" + game.players.size() + "/"
 											+ game.getMaxPlayerCount(),
-									"", "&r&nClick to join!"),
+									"", "&r&nClick to join!")),
 							e -> joinClicked(player, game, false)));
 				} else {
 					contents.set(count, i, ClickableItem.of(
 							ItemHelper.setDetails(displayItem,
 									"&e&l" + mapName,
-									"&fMode: &a" + mode,
+									lore(game, "&fMode: &a" + mode,
 									"",
 									"&fWaiting for Players",
 									"&fPlayers: &a" + game.players.size() + "/"
 											+ game.getMaxPlayerCount(),
-									"", "&r&nClick to join!"),
+									"", "&r&nClick to join!")),
 							e -> joinClicked(player, game, false)));
 				}
 			} else if (game.state == GameState.STARTED) {
@@ -92,12 +93,12 @@ public class ActiveGamesGUI implements InventoryProvider {
 				contents.set(count, i, ClickableItem.of(
 						ItemHelper.setDetails(ItemHelper.setGlowing(displayItem, true),
 								"&e&l" + mapName,
-								"&fMode: &a" + mode,
+								lore(game, "&fMode: &a" + mode,
 								"",
 								"&f" + state,
 								"&fPlayers: &a" + game.players.size() + "/"
 										+ game.getMaxPlayerCount(),
-								"&fSpectators: &a" + game.spectators.size(), "", "&r&nClick to spectate!"),
+								"&fSpectators: &a" + game.spectators.size(), "", "&r&nClick to spectate!")),
 						e -> joinClicked(player, game, true)));
 			}
 			if (i > 8) {
@@ -155,9 +156,21 @@ public class ActiveGamesGUI implements InventoryProvider {
 		}
 	}
 
-	/** A custom game the player can't access plays the error sound, says why and leaves the menu open. */
+	/** The lines under a game's name. A custom game starts with its host and visibility. */
+	private String[] lore(GameInstance game, String... lines) {
+		List<String> lore = new ArrayList<>();
+		if (game.isCustomGame()) {
+			lore.add("&7" + game.getCustomGameHostName() + "'s Custom Game");
+			lore.add("&fVisibility: " + game.getCustomGameVisibility().getTag());
+			lore.add("");
+		}
+		lore.addAll(Arrays.asList(lines));
+		return lore.toArray(new String[0]);
+	}
+
+	/** A custom game the player can't join plays the error sound, says why and leaves the menu open (anyone can spectate). */
 	private void joinClicked(Player player, GameInstance game, boolean spectate) {
-		if (game.isCustomGame() && !game.canAccessCustomGame(player)) {
+		if (!spectate && game.isCustomGame() && !game.canAccessCustomGame(player)) {
 			SoundManager.playErrorSound(player);
 			player.sendMessage(game.getCustomGameAccessMessage());
 			return;

@@ -13,7 +13,6 @@ import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.friends.FriendProfile;
 import anthony.SuperCraftBrawl.party.Party;
-import anthony.SuperCraftBrawl.party.gui.PartySettingsGUI;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
@@ -219,6 +218,14 @@ public class Commands implements CommandExecutor, TabCompleter {
                 partyChatCommand(args, player);
                 break;
 
+            case "partychatmute":
+                if (main.getPartyManager() == null) {
+                    player.sendMessage(main.color("&c&l(!) &rParty system is not loaded."));
+                } else {
+                    main.getPartyManager().togglePartyChatMute(player);
+                }
+                break;
+
 			case "practice":
 				new SCBPractice(player, Game.BowPractice, main);
 				break;
@@ -381,11 +388,6 @@ public class Commands implements CommandExecutor, TabCompleter {
             return;
         }
 
-        if (sub.equals("settings")) {
-            new PartySettingsGUI(main).inv.open(player);
-            return;
-        }
-
         if (sub.equals("accept") || sub.equals("join")) {
             if (args.length < 2) {
                 player.sendMessage(main.color("&c&l(!) &rIncorrect Usage! Try doing: &e/party accept <player>"));
@@ -469,7 +471,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         player.sendMessage(main.color("&e/party promote <player>&7: &rMake someone leader"));
         player.sendMessage(main.color("&e/party disband&7: &rDisband the party"));
         player.sendMessage(main.color("&e/partychat&7: &rToggle party chat"));
-        player.sendMessage(main.color("&e/party settings&7: &rParty settings"));
+        player.sendMessage(main.color("&e/partychatmute&7: &rDisable party messages"));
         player.sendMessage(main.color("&8&m------------------------------------"));
     }
 
@@ -1764,6 +1766,9 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
+		// The "game is starting" link works from another game's lobby too
+		if (!main.getGameManager().leaveLobbyToJoin(player, null, map)) return;
+
 		main.getGameManager().JoinMap(player, map);
 	}
 
@@ -1880,10 +1885,12 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
-		handleClassSelection(player, game, playerData, selectedClassType);
+		handleClassSelection(player, game, playerData, selectedClassType, args.length > 1 && args[1].equals("2"));
 	}
 
-	private void handleClassSelection(Player player, GameInstance game, PlayerData playerData, ClassType type) {
+	/** second: /class <name> 2 picks the 2nd class of a Tag Team game (the menus use right click for it). */
+	private void handleClassSelection(Player player, GameInstance game, PlayerData playerData, ClassType type,
+			boolean second) {
 		ClassDetails classDetails = playerData.playerClasses.get(type.getID());
 		boolean ignoreRequirements = game != null && game.ignoresClassRequirements(type);
 
@@ -1901,6 +1908,14 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 		if (game != null && game.isCustomGame() && !game.isClassSelectable(type)) {
 			player.sendMessage(main.color("&c&l(!) &rThat class is disabled in this custom game"));
+			return;
+		}
+
+		if (second && game != null && game.isTagTeam()) {
+			if (game.setSecondClass(player, type)) {
+				player.sendMessage(main.color("&2&l(!) &rYou have selected the " + type.getTag() + "&f class as your 2nd class!"));
+				player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
+			}
 			return;
 		}
 
@@ -2008,7 +2023,14 @@ public class Commands implements CommandExecutor, TabCompleter {
             }
         }
 
+        boolean wasInGame = getGameOf(player) != null;
         leaveSinglePlayerGame(player, true);
+
+        // A party member who leaves a game, in any way (command, item or menu), leaves the party too
+        if (wasInGame && getGameOf(player) == null && main.getPartyManager() != null
+                && main.getPartyManager().isInParty(player)) {
+            main.getPartyManager().leave(player);
+        }
         return true;
     }
 
@@ -2177,7 +2199,7 @@ public class Commands implements CommandExecutor, TabCompleter {
             }
         } else if (cmd.getName().equalsIgnoreCase("party")) {
             if (args.length == 1) {
-                List<String> options = Arrays.asList("invite", "accept", "reject", "leave", "list", "kick", "promote", "disband", "settings");
+                List<String> options = Arrays.asList("invite", "accept", "reject", "leave", "list", "kick", "promote", "disband");
                 return StringUtil.copyPartialMatches(args[0], options, new ArrayList<>());
             }
         } else if (cmd.getName().equalsIgnoreCase("sound")) {

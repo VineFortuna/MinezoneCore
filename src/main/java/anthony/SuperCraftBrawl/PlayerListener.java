@@ -242,6 +242,9 @@ public class PlayerListener implements Listener {
         Rank rank = main.getRankManager().getRank(player); // Gets the player's rank
         String tag = rank.getTagWithSpace(); // Gets the player's rank tag
 
+        // Building Mode starts on for a first-time LEGENDARY login and with "Building Mode on Join" (before the lobby gamemode is set)
+        if (main.getLobbyBuildManager() != null) main.getLobbyBuildManager().onJoin(player, data);
+
         hitGlitchFix(player);
         giveLeaderboards(player);
         resetDoubleJump(player);

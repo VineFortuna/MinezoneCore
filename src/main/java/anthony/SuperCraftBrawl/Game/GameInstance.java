@@ -70,6 +70,8 @@ public class GameInstance implements WinEffects.Host {
     public DuosMaps duosMap;
     private World mapWorld;
     public int gameTicks = -1;
+    // The Effect Roulette effect each player was last given (UUIDs only, so nothing here keeps a player or world alive)
+    public final Map<UUID, PotionEffectType> rouletteEffects = new HashMap<>();
     public GameState state;
     public List<Player> players;
     public List<Player> spectators;
@@ -88,6 +90,11 @@ public class GameInstance implements WinEffects.Host {
     public Map<UUID, FastBoard> boards = new HashMap<>();
 
     public final HashMap<Player, ClassType> classSelection = new HashMap<>();
+
+    // Tag Team (UUID keys, so nothing holds on to a player)
+    private final Map<UUID, ClassType> secondClassSelection = new HashMap<>(); // the lobby's 2nd class picks
+    private final Map<UUID, ClassType[]> tagTeamClasses = new HashMap<>(); // in the game: {1st class, 2nd class}
+    private final Map<UUID, Long> tagTeamSwapReadyAt = new HashMap<>(); // when each player may swap classes again
     public HashMap<Player, Timer> cooldowns = new HashMap<Player, Timer>();
     private final List<Player> winnerList;
     public BukkitRunnable gameStartTime;
@@ -142,6 +149,12 @@ public class GameInstance implements WinEffects.Host {
     private static final long READY_COOLDOWN_MILLIS = 3000L;
     /** When each player may use the ready-up dye again (UUID keys, so nothing here holds on to a player). */
     private final Map<UUID, Long> readyCooldownEnds = new HashMap<>();
+    /** How long after using the Frenzy vote a player has to wait to use it again. */
+    private static final long FRENZY_VOTE_COOLDOWN_MILLIS = 3000L;
+    /** Who voted to make this game Frenzy, and when each may vote again (UUIDs only, so nothing holds on to a player). */
+    private final Set<UUID> frenzyVotes = new HashSet<>();
+    private boolean frenzyFromVote = false; // the vote made this Frenzy, so it goes back to Classic if the countdown stops
+    private final Map<UUID, Long> frenzyVoteCooldownEnds = new HashMap<>();
     private boolean classSelectorRemoved = false; // Frenzy: classes are random, so the selector goes once settings are final
     // One For All: the class everyone plays, picked once the host starts the countdown
     private ClassType oneForAllClass; // Host/Co-Host mode: their pick (null = a random class)
@@ -489,6 +502,34 @@ public class GameInstance implements WinEffects.Host {
         return customGameVisibility == CustomGameVisibility.PUBLIC;
     }
 
+    /** A custom game just went public (or its host used /invite): the lobby hears about it, with a click to join. */
+    public void announcePublicCustomGame(Player inviter) {
+        String message = color("&6&l(!) &e" + inviter.getName() + " &rinvited all players to a &6&lCUSTOM GAME&r!");
+        TextComponent join = new TextComponent(color("     &a&lClick here to Join"));
+        join.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/joincustomgame " + getCustomGameHostName()));
+
+        // Everyone in the lobby, and everyone waiting in another game's lobby
+        Set<Player> recipients = new LinkedHashSet<>(gameManager.getMain().getLobbyWorld().getPlayers());
+        for (GameInstance other : gameManager.games) {
+            if (other != this && other.state == GameState.WAITING) recipients.addAll(other.players);
+        }
+
+        for (Player p : recipients) {
+            p.sendMessage(message);
+            p.spigot().sendMessage(join);
+        }
+    }
+
+    /** /invite in a custom game: it becomes public if it isn't yet, then the lobby hears about it. */
+    public void inviteAllToCustomGame(Player inviter) {
+        if (!isCustomGamePublic()) {
+            customGameVisibility = CustomGameVisibility.PUBLIC;
+            TellAll(color("&2&l(!) &rVisibility set to " + customGameVisibility.getTag() + "&r."));
+            refreshEditorMenus(inviter); // the game changes block for anyone looking, in Quick Join too
+        }
+        announcePublicCustomGame(inviter);
+    }
+
     /** Public: anyone. Friends: the host's friends and party. Party: only the host's party. The host is always in. */
     public boolean canAccessCustomGame(Player player) {
         if (!customGame || customGameVisibility == CustomGameVisibility.PUBLIC) return true;
@@ -679,12 +720,13 @@ public class GameInstance implements WinEffects.Host {
         leader.getInventory().setItem(8, LobbyItems.getLeaveGameItem());
     }
 
-    /** How players get their class: Classic, Frenzy, Class Switch or One For All. */
+    /** How players get their class: Classic, Frenzy, Class Switch, One For All or Tag Team. */
     public String getClassSelectionName() {
         GameSettings settings = getGameSettings();
         if (gameType == GameType.FRENZY) return "Frenzy";
         if (settings.randomClasses) return "Class Switch";
         if (settings.oneForAllMode != OneForAllMode.DISABLED) return "One For All";
+        if (settings.tagTeamSeconds > 0) return "Tag Team";
         return "Classic";
     }
 
@@ -698,6 +740,8 @@ public class GameInstance implements WinEffects.Host {
         String name = getClassSelectionName();
         if (gameType != GameType.FRENZY && getGameSettings().randomClasses)
             name += " (" + formatSeconds(getGameSettings().randomClassCycleSeconds) + ")";
+        else if (gameType != GameType.FRENZY && getGameSettings().tagTeamSeconds > 0)
+            name += " (" + formatSeconds(getGameSettings().tagTeamSeconds) + ")";
         return name;
     }
 
@@ -750,6 +794,7 @@ public class GameInstance implements WinEffects.Host {
         String classSelection = getClassSelectionName();
         if (settings.randomClasses) classSelection += " (" + formatSeconds(settings.randomClassCycleSeconds) + ")";
         if (settings.oneForAllMode != OneForAllMode.DISABLED) classSelection += " (" + settings.oneForAllMode.getName() + ")";
+        if (settings.tagTeamSeconds > 0) classSelection += " (" + formatSeconds(settings.tagTeamSeconds) + ")";
 
         long time = mapWorld.getTime();
         String timeOfDay = time >= 13000 && time <= 23000 ? "Night" : time >= 11000 && time < 13000 ? "Sunset" : "Day";
@@ -964,6 +1009,13 @@ public class GameInstance implements WinEffects.Host {
     public FastBoard board;
 
     public void setClass(Player player, ClassType type) {
+        // Tag Team: picking the class that is the 2nd one makes the 1st one the 2nd instead (they trade places)
+        if (isTagTeam() && type == secondClassSelection.get(player.getUniqueId())) {
+            ClassType previous = classSelection.get(player);
+            if (previous != null) secondClassSelection.put(player.getUniqueId(), previous);
+            else secondClassSelection.remove(player.getUniqueId());
+        }
+
         classSelection.put(player, type);
         if (gameType != GameType.FRENZY && gameType != GameType.GUNGAME) {
             board = boards.get(player.getUniqueId());
@@ -1023,6 +1075,10 @@ public class GameInstance implements WinEffects.Host {
         for (Player p : world.getPlayers()) {
             if (plainMsg != null) p.sendMessage(plainMsg);
             if (clickableMsg != null && clickableMsg.length > 0) p.spigot().sendMessage(clickableMsg);
+
+            // The "Game Starting Sound" preference: a ping along with the announcement
+            PlayerData data = gameManager.getMain().getDataManager().getPlayerData(p);
+            if (data != null && data.gameStartSound == 1) p.playSound(p.getLocation(), Sound.NOTE_PLING, 1, 1);
         }
     }
 
@@ -1035,6 +1091,7 @@ public class GameInstance implements WinEffects.Host {
 
         final SignManager sm = getGameManager().getMain().getSignManager();
         timeToStartSeconds = getSecondsUntilStart();
+        final int countdownSeconds = timeToStartSeconds;
 
         gameStartTime = new BukkitRunnable() {
             @Override
@@ -1055,7 +1112,8 @@ public class GameInstance implements WinEffects.Host {
                     TellAll(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "(!) " + ChatColor.RESET
                             + "The game is now starting...");
                 }
-                if (ticks == 30) gameStartingMessage(map.toString());
+                // A custom game says so as soon as the host starts it, with its own (longer) countdown
+                if (customGame ? ticks == countdownSeconds : ticks == 30) gameStartingMessage(map.toString(), ticks);
 
                 if (ticks == 18) tipMessages();
 
@@ -1074,12 +1132,17 @@ public class GameInstance implements WinEffects.Host {
                         if (board != null) board.updateLine(7, color("&fStarting In: &e" + ticks + "s"));
 
                         // Also hands it to players who joined during the countdown
-                        if (ticks > 5) giveReadyItem(p);
+                        if (ticks > 5) {
+                            giveReadyItem(p);
+                            giveFrenzyVoteItem(p);
+                        }
                     }
                 }
 
                 if (ticks == 5) {
                     removeReadyItems(); // too late to ready up
+                    removeFrenzyVoteItems(); // and to vote for Frenzy
+                    convertToFrenzyIfVoted();
                     removeClassSelectors(); // /frenzy can still have switched the game type
                     if (isOneForAllVoting()) endOneForAllVoting();
                 }
@@ -1091,7 +1154,12 @@ public class GameInstance implements WinEffects.Host {
         trackInstanceTask(task);
     }
 
-    private void gameStartingMessage(String mapName) {
+    /** The lobby hears that a game is starting at most this often, so stopping and restarting the countdown doesn't repeat it. */
+    private static final long STARTING_MESSAGE_COOLDOWN_MILLIS = 5000L;
+    private long lastStartingMessageTime = 0L;
+
+    /** seconds: how long the countdown has left (30 for a normal game, the whole countdown for a custom one). */
+    private void gameStartingMessage(String mapName, int seconds) {
         World lobby = getGameManager().getMain().getLobbyWorld();
 
         TextComponent join = new TextComponent("     " + color("&a&lClick here to join!"));
@@ -1108,15 +1176,21 @@ public class GameInstance implements WinEffects.Host {
             }
         }
 
-        if (join != null && gameType == GameType.FRENZY) {
-            String msg = color("&2&l(!) &a&l" + custom + "&7&oFrenzy &a&lgame on&f&l " + mapName + " &a&lis starting in 30 seconds");
+        // Starting again right after it stopped (the host cancelled it, or someone left and came back) isn't announced again
+        long now = System.currentTimeMillis();
+        boolean announce = now - lastStartingMessageTime >= STARTING_MESSAGE_COOLDOWN_MILLIS;
+
+        if (announce && join != null && gameType == GameType.FRENZY) {
+            String msg = color("&2&l(!) &a&l" + custom + "&7&oFrenzy &a&lgame on&f&l " + mapName + " &a&lis starting in " + seconds + " seconds");
             broadcastToWorld(lobby, msg, join);
-        } else if (join != null && gameType == GameType.CLASSIC) {
-            String msg = color("&2&l(!) &a&l" + custom + "&a&lgame on&f&l " + mapName + " &a&lis starting in 30 seconds");
+            lastStartingMessageTime = now;
+        } else if (announce && join != null && gameType == GameType.CLASSIC) {
+            String msg = color("&2&l(!) &a&l" + custom + "&a&lgame on&f&l " + mapName + " &a&lis starting in " + seconds + " seconds");
             broadcastToWorld(lobby, msg, join);
+            lastStartingMessageTime = now;
         }
 
-        TellAll(color("&2&l(!) &r30 seconds to game start!"));
+        TellAll(color("&2&l(!) &r" + seconds + " seconds to game start!"));
 
         for (Player player : players)
             player.playSound(player.getLocation(), Sound.NOTE_PLING, 1, 1);
@@ -1398,10 +1472,12 @@ public class GameInstance implements WinEffects.Host {
     public static ItemStack getReadyItem(boolean ready) {
         if (ready) {
             return ItemHelper.setDetails(new ItemStack(Material.INK_SACK, 1, (short) 10),
-                    "&aReady &7(Right Click)", "", "&7Click to cancel", "&7The game starts early once", "&7everyone is ready");
+                    "&aReady &7(Right Click)", "", "&7Start the game early", "", "&7Click to unready",
+                    "&7(require &ntotality&r&7 of votes)");
         }
         return ItemHelper.setDetails(new ItemStack(Material.INK_SACK, 1, (short) 8),
-                "&7Not Ready &7(Right Click)", "", "&7Click to ready up", "&7The game starts early once", "&7everyone is ready");
+                "&7Not Ready &7(Right Click)", "", "&7Start the game early", "", "&7Click to ready up",
+                "&7(require &ntotality&r&7 of votes)");
     }
 
     /** The waiting lobby has no other dyes. */
@@ -1451,6 +1527,328 @@ public class GameInstance implements WinEffects.Host {
         int slot = findReadyItemSlot(player);
         if (slot != -1) player.getInventory().setItem(slot, getReadyItem(isReady(player)));
         player.updateInventory();
+    }
+
+    // ===== Tag Team =====
+
+    /*
+     * Tag Team (custom games): everyone picks 2 classes in the lobby (left click the 1st, right click the 2nd).
+     * They play the 1st, and swap to the 2nd and back by dropping any item. Every swap starts a cooldown (the
+     * modifier's setting) before they can swap again, and a swap gives a fresh class, like Class Switch does.
+     * Every life starts with the 1st class and a ready swap.
+     */
+    public boolean isTagTeam() {
+        GameSettings settings = getGameSettings();
+        return customGame && gameType == GameType.CLASSIC && settings.tagTeamSeconds > 0
+                && !settings.randomClasses && settings.oneForAllMode == OneForAllMode.DISABLED;
+    }
+
+    /** The class the player picked in the lobby as their 2nd one (null = none, they get a random one). */
+    public ClassType getSecondClass(Player player) {
+        return secondClassSelection.get(player.getUniqueId());
+    }
+
+    /** The lobby's 2nd class picks only mean something while Tag Team is on. */
+    public void clearTagTeamSelections() {
+        secondClassSelection.clear();
+    }
+
+    /** The player picked their 2nd class. Picking their 1st class (when they have a 2nd) trades the two places. */
+    public boolean setSecondClass(Player player, ClassType type) {
+        ClassType first = classSelection.get(player);
+        ClassType previousSecond = secondClassSelection.get(player.getUniqueId());
+
+        if (type == first) {
+            if (previousSecond == null) {
+                player.sendMessage(color("&c&l(!) &r" + type.getTag() + " &ris already your 1st class"));
+                return false;
+            }
+            setClass(player, previousSecond); // the 2nd becomes the 1st, and the 1st takes its place
+            return true;
+        }
+
+        secondClassSelection.put(player.getUniqueId(), type);
+        return true;
+    }
+
+    /** The game started: their 2nd class is the one they picked, or a random one they can play. */
+    private void setUpTagTeam(Player player, PlayerData playerData, ClassType first) {
+        ClassType second = secondClassSelection.get(player.getUniqueId());
+        if (second != null && (second == first || !isClassSelectable(second))) second = null; // disabled since it was picked
+        if (second == null) second = pickRandomUsableClass(player, playerData, first);
+
+        tagTeamClasses.put(player.getUniqueId(), new ClassType[] { first, second });
+        tagTeamSwapReadyAt.remove(player.getUniqueId());
+
+        if (second == first) return; // the only class there is: nothing to swap to
+        player.sendMessage(color("&2&l(!) &rTag Team classes: " + first.getTag() + "&r and " + second.getTag()));
+        player.sendMessage(color("&2&l(!) &rDrop any item to swap classes"));
+    }
+
+    /** A random selectable class this player can play, other than the given one (that one if there's no other). */
+    private ClassType pickRandomUsableClass(Player player, PlayerData playerData, ClassType exclude) {
+        List<ClassType> usable = new ArrayList<>();
+        for (ClassType type : getSelectableClasses()) {
+            if (type != exclude && canPlayClass(player, playerData, type)) usable.add(type);
+        }
+        return usable.isEmpty() ? exclude : usable.get(new Random().nextInt(usable.size()));
+    }
+
+    /** Whether the player has this class unlocked (or this game lets everyone play it). */
+    private boolean canPlayClass(Player player, PlayerData playerData, ClassType type) {
+        if (ignoresClassRequirements(type)) return true;
+
+        ClassDetails details = playerData.playerClasses.get(type.getID());
+        if (!((details != null && details.purchased) || type.getTokenCost() == 0)) return false;
+        if (playerData.level < type.getLevel()) return false;
+        if (type == ClassType.Fisherman && !getGameManager().getMain().getFishing().hasUnlockedFisherman(player)) return false;
+
+        Rank donor = type.getMinRank();
+        return donor == null || player.hasPermission("scb." + donor.toString().toLowerCase());
+    }
+
+    /** Whether a player dropping an item (any item) should swap their class: they're alive in a started Tag Team game. */
+    public boolean isTagTeamSwapDrop(Player player) {
+        if (!isTagTeam() || state != GameState.STARTED || !players.contains(player)) return false;
+
+        BaseClass baseClass = classes.get(player);
+        return baseClass != null && !baseClass.isDead && baseClass.getLives() > 0
+                && tagTeamClasses.containsKey(player.getUniqueId());
+    }
+
+    /** The player dropped their weapon: they swap to their other class, unless the last swap was too recent. */
+    public void swapTagTeamClass(Player player) {
+        if (!isTagTeam() || state != GameState.STARTED || !players.contains(player)) return;
+
+        UUID id = player.getUniqueId();
+        BaseClass oldClass = classes.get(player);
+        ClassType[] pair = tagTeamClasses.get(id);
+        if (oldClass == null || pair == null || oldClass.isDead || oldClass.getLives() <= 0
+                || player.getGameMode() == GameMode.SPECTATOR || pair[0] == pair[1]) return;
+
+        long now = System.currentTimeMillis();
+        Long readyAt = tagTeamSwapReadyAt.get(id);
+        if (readyAt != null && now < readyAt) {
+            player.sendMessage(color("&c&l(!) &rYou can swap classes again in &e"
+                    + (int) Math.ceil((readyAt - now) / 1000.0) + "s"));
+            player.playSound(player.getLocation(), Sound.NOTE_BASS, 1f, 0.5f);
+            return;
+        }
+        long nextSwap = now + getGameSettings().tagTeamSeconds * 1000L;
+        tagTeamSwapReadyAt.put(id, nextSwap);
+        startTagTeamCountdown(id, nextSwap);
+
+        ClassType target = oldClass.getType() == pair[0] ? pair[1] : pair[0];
+        List<ItemStack> savedDrops = getSavedLootDropItems(player);
+
+        // The same sounds as Class Switch
+        player.playSound(player.getLocation(), Sound.ENDERMAN_TELEPORT, 1.0F, 1.3F);
+        player.playSound(player.getLocation(), Sound.ORB_PICKUP, 1.0F, 1.8F);
+
+        endClassEffects(player, oldClass);
+        removeOldClassPotionEffects(player, oldClass);
+        getGameManager().getMain().getListener().resetPotionEffects(player);
+
+        player.getInventory().clear();
+        player.getInventory().setArmorContents(null);
+
+        switchClassTo(player, target);
+
+        BaseClass newClass = classes.get(player);
+        newClass.loadPlayer();
+        for (ItemStack savedDrop : savedDrops) {
+            if (savedDrop != null && savedDrop.getType() != Material.AIR) GameLootDrops.giveToPlayer(player, savedDrop);
+        }
+        player.updateInventory();
+
+        TitleUtil.sendTimes(player, 1, 30, 10);
+        TitleUtil.setSubtitle(player, "" + target.getTag());
+        TitleUtil.setTitle(player, "");
+        player.playSound(player.getLocation(), Sound.HORSE_ARMOR, 1.0F, 1.0F);
+        player.playSound(player.getLocation(), Sound.LEVEL_UP, 1.0F, 1.2F);
+    }
+
+    /*
+     * The last 3 seconds of the swap cooldown count down on the subtitle (3, 2, 1 with a ping), like Class Switch's
+     * countdown, so they know when they can swap again. It stops if they swap, die or leave, which end that cooldown.
+     */
+    private void startTagTeamCountdown(final UUID id, final long readyAt) {
+        long delayTicks = Math.max(1L, getGameSettings().tagTeamSeconds * 20L - 3 * 20L);
+
+        BukkitRunnable countdown = new BukkitRunnable() {
+            int seconds = 3;
+
+            @Override
+            public void run() {
+                Player player = Bukkit.getPlayer(id);
+                Long current = tagTeamSwapReadyAt.get(id);
+                BaseClass baseClass = player == null ? null : classes.get(player);
+
+                if (state != GameState.STARTED || baseClass == null || baseClass.isDead || baseClass.getLives() <= 0
+                        || current == null || current != readyAt) {
+                    cancel();
+                    return;
+                }
+
+                TitleUtil.sendTimes(player, 0, 25, 5);
+                TitleUtil.setSubtitle(player, "&e" + seconds);
+                TitleUtil.setTitle(player, "");
+                player.playSound(player.getLocation(), Sound.NOTE_PLING, 1.0F, 1.0F);
+
+                if (--seconds <= 0) cancel();
+            }
+        };
+        trackClassTask(countdown.runTaskTimer(gameManager.getMain(), delayTicks, 20L));
+    }
+
+    /** They died: every life starts with the 1st class and a swap that's ready. */
+    private void resetTagTeamClass(Player player) {
+        ClassType[] pair = tagTeamClasses.get(player.getUniqueId());
+        tagTeamSwapReadyAt.remove(player.getUniqueId());
+
+        BaseClass current = classes.get(player);
+        if (pair == null || current == null || current.getType() == pair[0]) return;
+
+        endClassEffects(player, current);
+        switchClassTo(player, pair[0]);
+    }
+
+    /** The class is being replaced mid-game: stop what it still has running (Bedrock's lava, Santa's Reindeer...). */
+    private void endClassEffects(Player player, BaseClass oldClass) {
+        try {
+            oldClass.GameEnd();
+            if (oldClass instanceof anthony.SuperCraftBrawl.Game.classes.all.SantaClass)
+                ((anthony.SuperCraftBrawl.Game.classes.all.SantaClass) oldClass).endReindeerFlight();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ===== Frenzy vote =====
+
+    /** The TNT that votes for Frenzy: plain until the player has voted, enchanted once they have. */
+    public static ItemStack getFrenzyVoteItem(boolean voted) {
+        if (voted) {
+            return ItemHelper.setGlowing(ItemHelper.setDetails(new ItemStack(Material.TNT),
+                    "&aVoted for Frenzy &7(Right Click)", "", "&7Get a random class on each life", "",
+                    "&7Click to unvote for Frenzy", "&7(require &nmajority&r&7 of votes)"), true);
+        }
+        return ItemHelper.setDetails(new ItemStack(Material.TNT),
+                "&eVote for Frenzy &7(Right Click)", "", "&7Get a random class on each life", "",
+                "&7Click to vote for Frenzy", "&7(require &nmajority&r&7 of votes)");
+    }
+
+    /** The waiting lobby has no other TNT. */
+    public static boolean isFrenzyVoteItem(ItemStack item) {
+        return item != null && item.getType() == Material.TNT;
+    }
+
+    /** Only normal Classic games can be voted into Frenzy (a custom game's host picks its mode). */
+    private boolean canVoteForFrenzy() {
+        return !customGame && map != null && gameType == GameType.CLASSIC;
+    }
+
+    /** Votes count from the countdown until it reaches 5s, when the game turns Frenzy or stays as it is. */
+    private boolean isFrenzyVoteOpen() {
+        return canVoteForFrenzy() && state == GameState.WAITING && gameStartTime != null && timeToStartSeconds >= 5;
+    }
+
+    public boolean hasVotedForFrenzy(Player player) {
+        return frenzyVotes.contains(player.getUniqueId());
+    }
+
+    private int countFrenzyVotes() {
+        int votes = 0;
+        for (Player player : players) {
+            if (frenzyVotes.contains(player.getUniqueId())) votes++;
+        }
+        return votes;
+    }
+
+    /** More than half of the players have to vote for it. */
+    private int frenzyVotesNeeded() {
+        return players.size() / 2 + 1;
+    }
+
+    private int findFrenzyVoteSlot(Player player) {
+        ItemStack[] contents = player.getInventory().getContents();
+        for (int slot = 0; slot < contents.length; slot++) {
+            if (isFrenzyVoteItem(contents[slot])) return slot;
+        }
+        return -1;
+    }
+
+    /** Gives the player the Frenzy vote (in their current vote state) if they don't have it. */
+    private void giveFrenzyVoteItem(Player player) {
+        if (canVoteForFrenzy() && findFrenzyVoteSlot(player) == -1)
+            player.getInventory().addItem(getFrenzyVoteItem(hasVotedForFrenzy(player)));
+    }
+
+    private void removeFrenzyVoteItems() {
+        if (customGame) return;
+        for (Player player : players) player.getInventory().remove(Material.TNT);
+    }
+
+    /** The countdown stopped: nobody has voted anymore. */
+    private void clearFrenzyVotes() {
+        frenzyVotes.clear();
+        removeFrenzyVoteItems();
+
+        if (frenzyFromVote) { // it was only Frenzy because of the vote
+            frenzyFromVote = false;
+            gameType = GameType.CLASSIC;
+            TellAll(color("&2&l(!) &rThe game mode has been set to &e&lClassic"));
+            updateModeLine();
+        }
+    }
+
+    /** The game type was switched (/frenzy): the vote is only there while the game is Classic. */
+    public void updateFrenzyVoteItems() {
+        if (customGame) return;
+        for (Player player : players) {
+            if (isFrenzyVoteOpen() && players.size() >= 2) giveFrenzyVoteItem(player);
+            else player.getInventory().remove(Material.TNT);
+        }
+    }
+
+    /** The player clicked the Frenzy vote: they voted for it (or took the vote back), and the TNT shows it. */
+    public void toggleFrenzyVote(Player player) {
+        if (!isFrenzyVoteOpen() || !players.contains(player)) return;
+
+        long now = System.currentTimeMillis();
+        Long cooldownEnd = frenzyVoteCooldownEnds.get(player.getUniqueId());
+        if (cooldownEnd != null && now < cooldownEnd) {
+            int seconds = (int) Math.ceil((cooldownEnd - now) / 1000.0);
+            player.sendMessage(color("&c&l(!) &rYou can use this again in &e" + seconds + "s"));
+            return;
+        }
+        frenzyVoteCooldownEnds.put(player.getUniqueId(), now + FRENZY_VOTE_COOLDOWN_MILLIS);
+
+        boolean voted = frenzyVotes.add(player.getUniqueId());
+        if (!voted) frenzyVotes.remove(player.getUniqueId());
+
+        player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
+        TellAll(color("&2&l(!) &e" + player.getName() + " &r" + (voted ? "voted for" : "unvoted for")
+                + " &e&lFrenzy &a(" + countFrenzyVotes() + "/" + frenzyVotesNeeded() + " needed)"));
+
+        int slot = findFrenzyVoteSlot(player);
+        if (slot != -1) player.getInventory().setItem(slot, getFrenzyVoteItem(voted));
+        player.updateInventory();
+    }
+
+    /** The countdown reached 5s: the game turns Frenzy if most players voted for it. */
+    private void convertToFrenzyIfVoted() {
+        if (!canVoteForFrenzy()) return;
+
+        int votes = countFrenzyVotes();
+        if (votes == 0) return;
+
+        if (votes < frenzyVotesNeeded()) return;
+
+        gameType = GameType.FRENZY;
+        frenzyFromVote = true;
+        TellAll(color("&2&l(!) &rThe game mode has been set to &e&lFrenzy"));
+        updateModeLine();
     }
 
     private void tipMessages() {
@@ -2203,6 +2601,8 @@ public class GameInstance implements WinEffects.Host {
                 reRandomizeClass(player, true);
             } else if (this.gameType == GameType.GUNGAME && baseClass.getLives() > 0) {
                 nextClass(player);
+            } else if (isTagTeam() && baseClass.getLives() > 0) {
+                resetTagTeamClass(player); // every life starts with the 1st class
             }
             final BaseClass finalBaseClass = this.classes.get(player);
             finalBaseClass.isDead = true; // Frenzy / GunGame just gave them a new class, which isn't marked dead yet
@@ -2258,6 +2658,7 @@ public class GameInstance implements WinEffects.Host {
                                     TitleUtil.setTitle(player, "&eRespawned");
                                 }
                                 respawnClass.isDead = false;
+                                EffectRoulette.giveOnRespawn(GameInstance.this, player);
                             }
                             cancel();
                             return;
@@ -2905,39 +3306,47 @@ public class GameInstance implements WinEffects.Host {
         BaseClass baseClass = classes.get(player);
         if (baseClass.getLives() > 0) {
             ClassType classType = pickUnplayedClass(player);
-            BaseClass newBaseClass = classType.GetClassInstance(this, player);
-            BaseClass oldBaseClass = classes.get(player);
-            oldClasses.put(player, oldBaseClass);
-
-            if (oldBaseClass.score != null) {
-                try { oldBaseClass.score.getScoreboard().resetScores(oldBaseClass.score.getEntry()); }
-                catch (Exception e) { e.printStackTrace(); }
-            }
-
-            newBaseClass.lives = oldBaseClass.lives;
-            newBaseClass.tokens = oldBaseClass.tokens;
-            newBaseClass.totalTokens = oldBaseClass.totalTokens;
-            newBaseClass.totalExp = oldBaseClass.totalExp;
-            newBaseClass.totalKills = oldBaseClass.totalKills;
-            newBaseClass.totalDeaths = oldBaseClass.totalDeaths;
-            newBaseClass.bountyTarget = oldBaseClass.bountyTarget;
-
-            String scoreEntry = truncateString("" + classType.getTag() + " " + ChatColor.WHITE + player.getName(), 40);
-            Score newScore = livesObjective.getScore(scoreEntry);
-            newBaseClass.score = newScore;
-            newScore.setScore(newBaseClass.lives);
-
-            classes.put(player, newBaseClass);
-            allClasses.put(player, newBaseClass);
-            sendScoreboardUpdate(player);
+            switchClassTo(player, classType);
 
             if (announce) player.sendMessage(color("&2&l(!) &rYour class was randomly selected as " + classType.getTag()));
-
-            if (player.hasPermission("scb.chat"))
-                player.setDisplayName("" + player.getName() + " " + classType.getTag());
-            else
-                player.setDisplayName("" + player.getName() + " " + classType.getTag() + ChatColor.GRAY);
         }
+    }
+
+    /*
+     * Gives the player a new instance of this class (so its cooldowns and ability uses start over), keeping their
+     * lives, kills and the rest of what they've earned. The caller loads its items.
+     */
+    private void switchClassTo(Player player, ClassType classType) {
+        BaseClass newBaseClass = classType.GetClassInstance(this, player);
+        BaseClass oldBaseClass = classes.get(player);
+        oldClasses.put(player, oldBaseClass);
+
+        if (oldBaseClass.score != null) {
+            try { oldBaseClass.score.getScoreboard().resetScores(oldBaseClass.score.getEntry()); }
+            catch (Exception e) { e.printStackTrace(); }
+        }
+
+        newBaseClass.lives = oldBaseClass.lives;
+        newBaseClass.tokens = oldBaseClass.tokens;
+        newBaseClass.totalTokens = oldBaseClass.totalTokens;
+        newBaseClass.totalExp = oldBaseClass.totalExp;
+        newBaseClass.totalKills = oldBaseClass.totalKills;
+        newBaseClass.totalDeaths = oldBaseClass.totalDeaths;
+        newBaseClass.bountyTarget = oldBaseClass.bountyTarget;
+
+        String scoreEntry = truncateString("" + classType.getTag() + " " + ChatColor.WHITE + player.getName(), 40);
+        Score newScore = livesObjective.getScore(scoreEntry);
+        newBaseClass.score = newScore;
+        newScore.setScore(newBaseClass.lives);
+
+        classes.put(player, newBaseClass);
+        allClasses.put(player, newBaseClass);
+        sendScoreboardUpdate(player);
+
+        if (player.hasPermission("scb.chat"))
+            player.setDisplayName("" + player.getName() + " " + classType.getTag());
+        else
+            player.setDisplayName("" + player.getName() + " " + classType.getTag() + ChatColor.GRAY);
     }
 
     private void nextClass(Player player) {
@@ -3053,6 +3462,7 @@ public class GameInstance implements WinEffects.Host {
 
             BaseClass baseClass = selectedClass.GetClassInstance(this, player);
             recordClassPlayed(player, selectedClass);
+            if (isTagTeam() && oneForAll == null && gameType != GameType.GUNGAME) setUpTagTeam(player, playerData, selectedClass);
 
             if (player.hasPermission("scb.chat"))
                 player.setDisplayName("" + player.getName() + " " + selectedClass.getTag());
@@ -3122,6 +3532,10 @@ public class GameInstance implements WinEffects.Host {
             } catch (Exception e) { e.printStackTrace(); }
 
             removeFromDuos(player);
+            frenzyVotes.remove(player.getUniqueId());
+            secondClassSelection.remove(player.getUniqueId());
+            tagTeamClasses.remove(player.getUniqueId());
+            tagTeamSwapReadyAt.remove(player.getUniqueId());
 
             if (this.state == GameState.WAITING) {
                 if (this.map != null) {
@@ -3134,6 +3548,7 @@ public class GameInstance implements WinEffects.Host {
                         this.gameStartTime.cancel();
                         this.gameStartTime = null;
                         TellAll(color("&c&l(!) &rGame start cancelled, not enough players!"));
+                        clearFrenzyVotes();
 
                         for (Player gamePlayer : this.players) {
                             // Private games keep the leader's modifiers

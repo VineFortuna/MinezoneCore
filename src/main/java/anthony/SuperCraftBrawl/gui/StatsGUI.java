@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.fishing.FishRarity;
 import anthony.SuperCraftBrawl.fishing.FishType;
 import anthony.SuperCraftBrawl.gui.fishing.FishingGUI;
+import anthony.SuperCraftBrawl.party.Party;
 import anthony.SuperCraftBrawl.playerdata.FishingDetails;
 import anthony.SuperCraftBrawl.playerdata.ParkourDetails;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
@@ -31,6 +32,7 @@ public class StatsGUI implements InventoryProvider {
 	public SmartInventory inv;
 	private Player target;
     private PlayerData targetData;
+	private SmartInventory previous; // the stats menu the player came from, if any
 
 	public StatsGUI(Core main) {
 		inv = SmartInventory.builder().id("myInventory").provider(this).size(5, 9)
@@ -52,6 +54,12 @@ public class StatsGUI implements InventoryProvider {
 		this.target = target;
 	}
 
+	/** Adds a Go Back button that returns to the given menu (e.g. the stats of the player they were checking). */
+	public StatsGUI withPrevious(SmartInventory previous) {
+		this.previous = previous;
+		return this;
+	}
+
 	@Override
 	public void init(Player player, InventoryContents contents) {
         PlayerData data = main.getDataManager().getPlayerData(player);
@@ -66,11 +74,16 @@ public class StatsGUI implements InventoryProvider {
 				new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7), " "), e-> {}));
 
         if (this.target != null && target.isOnline() && !target.getUniqueId().equals(player.getUniqueId())) {
+            Party ownParty = main.getPartyManager() == null ? null : main.getPartyManager().getParty(player);
+            boolean inParty = ownParty != null && ownParty.contains(target.getUniqueId());
+
             contents.set(0, 8,
                     ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.DIAMOND),
-                            main.color("&a&lInvite to Party"),
+                            main.color(inParty ? "&a&lIn Party" : "&a&lInvite to Party"),
                             "",
-                            main.color("&rClick to invite &a" + target.getName())), e -> {
+                            main.color(inParty ? "&rAlready in party with &a" + target.getName()
+                                    : "&rClick to invite &a" + target.getName())), e -> {
+                        if (inParty) return;
 
                         player.closeInventory();
 
@@ -90,9 +103,14 @@ public class StatsGUI implements InventoryProvider {
 		contents.set(4, 4, ClickableItem.of(ItemHelper.setGlowing(ItemHelper.setDetails(new ItemStack(Material.BOOK),
 				"" + ChatColor.RESET + ChatColor.YELLOW + "My Stats"),
 				data.playerName.equals(player.getName())), e -> {
+			// Their own stats, with a way back to the ones they were checking
 			if (this.target != null && this.target != player)
-				new StatsGUI(main).inv.open(player);
+				new StatsGUI(main).withPrevious(inv).inv.open(player);
 		}));
+
+		if (previous != null) {
+			contents.set(4, 8, ClickableItem.of(ItemHelper.getGoBackItem(), e -> previous.open(player)));
+		}
 
 		String rankName = "";
 		Rank rank = data.getRank();
@@ -110,7 +128,7 @@ public class StatsGUI implements InventoryProvider {
 
 				contents.set(0, 0,
 						ClickableItem.of(ItemHelper.setDetails(new ItemStack(Material.EMERALD),
-								"&a&lSend Friend Request",
+								areFriends ? "&a&lFriends" : "&a&lSend Friend Request",
 								"",
 								message),
 								inventoryClickEvent -> {

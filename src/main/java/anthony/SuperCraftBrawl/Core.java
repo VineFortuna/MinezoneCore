@@ -464,6 +464,26 @@ public class Core extends JavaPlugin implements Listener {
         return player.hasPermission(permission) ? 10 : 0;
     }
 
+    /** How long /invite can't be used again after it was. */
+    private static final long INVITE_COOLDOWN_MILLIS = 5000L;
+    /** When each player may /invite again (UUID keys, so nothing here holds on to a player). */
+    private final Map<UUID, Long> inviteCooldownEnds = new HashMap<>();
+
+    /** True (and tells the player how long is left) if they used /invite a moment ago. Otherwise starts the cooldown. */
+    private boolean isOnInviteCooldown(Player player) {
+        long now = System.currentTimeMillis();
+        inviteCooldownEnds.values().removeIf(end -> end <= now); // nothing piles up
+
+        Long end = inviteCooldownEnds.get(player.getUniqueId());
+        if (end != null) {
+            player.sendMessage(color("&c&l(!) &rYou can invite again in &e" + (int) Math.ceil((end - now) / 1000.0) + "s"));
+            return true;
+        }
+
+        inviteCooldownEnds.put(player.getUniqueId(), now + INVITE_COOLDOWN_MILLIS);
+        return false;
+    }
+
     /** Ranks that can host custom (private) games: LEGENDARY and above, which includes every staff rank. */
     private static final Set<Rank> CUSTOM_GAME_HOST_RANKS = EnumSet.of(Rank.LEGENDARY, Rank.TRAINEE, Rank.MODERATOR,
             Rank.SR_MODERATOR, Rank.ADMIN, Rank.DEVELOPER, Rank.SUPERVISOR, Rank.OWNER, Rank.QA);
@@ -475,7 +495,7 @@ public class Core extends JavaPlugin implements Listener {
         return CUSTOM_GAME_HOST_RANKS.contains(getRankManager().getRank(player));
     }
 
-    /** Creative for LEGENDARY players (so they can build in the lobby), adventure for everyone else. */
+    /** Creative while the player's Building Mode is on (see LobbyBuildManager), adventure otherwise. */
     public GameMode getLobbyGameMode(Player player) {
         return lobbyBuildManager != null ? lobbyBuildManager.getLobbyGameMode(player) : GameMode.ADVENTURE;
     }
@@ -821,7 +841,7 @@ public class Core extends JavaPlugin implements Listener {
      * This function registers & enables all commands from Commands.java
      */
     private void enableCommands() {
-        String[] commandTypes = { "maps", "join", "party", "partychat", "friends", "token", "cosmetics", "fishing", "server", "fly", "leave", "customgame", "joincustomgame", "joingame", "players",
+        String[] commandTypes = { "maps", "join", "party", "partychat", "partychatmute", "friends", "token", "cosmetics", "fishing", "server", "fly", "leave", "customgame", "joincustomgame", "joingame", "players",
                 "class", "socials", "spectate", "startgame", "frenzy", "gamestats", "setlives", "purchases", "kit",
                 "items", "color", "sound", "soundnms", "heal", "forceclass", "lactate", "sh", "shr" };
 
@@ -837,6 +857,11 @@ public class Core extends JavaPlugin implements Listener {
         getCommand("treatsadmin").setExecutor(Halloween.ENABLED
                 ? new TreatsAdminCommand(halloweenHunt) : Halloween.offExecutor(this));
         getCommand("setimportantarea").setExecutor(lobbyBuildManager);
+        PluginCommand buildingCommand = getCommand("building");
+        if (buildingCommand != null)
+            buildingCommand.setExecutor(lobbyBuildManager);
+        else
+            System.out.print("building was null!");
         getCommand("scbsetup").setExecutor(mapWorldManager);
         getCommand("scbsetup").setTabCompleter(mapWorldManager);
 
@@ -937,6 +962,7 @@ public class Core extends JavaPlugin implements Listener {
         databaseManager.ensureLastDailyRewardColumn();
         databaseManager.ensureFlagWarsQuickBuyColumn();
         databaseManager.ensureFlagWarsStatsColumns();
+        databaseManager.ensurePreferenceColumns();
         packetMain = new PacketMain(this);
         dataManager = new PlayerDataManager(this);
         gameDataManager = new GameDataManager(this);
@@ -1573,7 +1599,14 @@ public class Core extends JavaPlugin implements Listener {
 
                 if (player.hasPermission("scb.invite")) {
                     if (instance != null) {
-                        if (instance.state == GameState.WAITING) {
+                        if (instance.state == GameState.WAITING && instance.isCustomGame()) {
+                            // Makes the game public and says so, the same as the Visibility button does
+                            if (!instance.canEditCustomGame(player))
+                                player.sendMessage(color("&c&l(!) &rOnly the host can invite players."));
+                            else if (!isOnInviteCooldown(player)) instance.inviteAllToCustomGame(player);
+                        } else if (instance.state == GameState.WAITING) {
+                            if (isOnInviteCooldown(player)) return true;
+
                             String mapName = "";
                             if (instance.getMap() != null)
                                 mapName = "" + instance.getMap();
@@ -1583,7 +1616,7 @@ public class Core extends JavaPlugin implements Listener {
                             Bukkit.broadcastMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
                                     + getRankManager().getRank(player).getTagWithSpace() + ChatColor.YELLOW
                                     + player.getName() + " " + ChatColor.RESET
-                                    + "invited all players in the Lobby to join " + ChatColor.YELLOW + mapName);
+                                    + "invited all players to join " + ChatColor.YELLOW + mapName);
                             TextComponent message = new TextComponent(
                                     "" + "     " + ChatColor.GREEN + ChatColor.BOLD + "Click here to join!");
                             // Joins this exact game - /join <map> could pick another game on the same map

@@ -52,12 +52,22 @@ class CosmeticReward extends BattlePassReward {
 	}
 
 	@Override
+	public String getChatName(Core main, Player player) {
+		return getName(main, player) + " &7" + category.label;
+	}
+
+	@Override
 	public List<String> getDescription(Core main, Player player) {
 		List<String> lines = new ArrayList<>();
-		lines.add("&7" + category.label);
+		lines.add("&7" + category.label); // the type comes first (BundleReward reads it from here)
 		Cosmetic cosmetic = find(main);
-		if (cosmetic instanceof PassCosmetic)
-			Collections.addAll(lines, ((PassCosmetic) cosmetic).getDescription());
+		if (cosmetic instanceof PassCosmetic) {
+			String[] description = ((PassCosmetic) cosmetic).getDescription();
+			if (description.length > 0) {
+				lines.add("");
+				Collections.addAll(lines, description);
+			}
+		}
 		return lines;
 	}
 
