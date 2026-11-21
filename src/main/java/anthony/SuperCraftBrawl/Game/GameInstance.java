@@ -14,6 +14,7 @@ import anthony.SuperCraftBrawl.gui.games.CustomGamesGUI;
 import anthony.SuperCraftBrawl.gui.games.OneForAllClassGUI;
 import anthony.SuperCraftBrawl.gui.games.OneForAllVotesGUI;
 import anthony.SuperCraftBrawl.Game.GameSettings.OneForAllMode;
+import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.all.LargeFernClass;
@@ -57,7 +58,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-public class GameInstance {
+public class GameInstance implements WinEffects.Host {
 
     // Variables
     private final GameManager gameManager;
@@ -208,6 +209,43 @@ public class GameInstance {
 
     public World getMapWorld() {
         return this.mapWorld;
+    }
+
+    // WinEffects.Host plumbing - lets WinEffects.java be shared with other gamemodes
+    // (e.g. Flag Wars) without depending on this concrete class. Pure delegation,
+    // no behavior change for SCB itself.
+    @Override
+    public Core getPlugin() {
+        return gameManager.getMain();
+    }
+
+    @Override
+    public Vector getFloodCenter() {
+        return getMapInstance().center.clone();
+    }
+
+    @Override
+    public double getFloodBoundsX() {
+        return getMapInstance().boundsX;
+    }
+
+    @Override
+    public double getFloodBoundsZ() {
+        return getMapInstance().boundsZ;
+    }
+
+    private MapInstance getMapInstance() {
+        return (map != null) ? map.GetInstance() : duosMap.GetInstance();
+    }
+
+    @Override
+    public boolean isCelebrating() {
+        return state == GameState.ENDED;
+    }
+
+    @Override
+    public BukkitTask trackTask(BukkitTask task) {
+        return trackClassTask(task);
     }
 
     public void setSign(Sign s) {
@@ -1061,20 +1099,20 @@ public class GameInstance {
 
         // Private custom games aren't announced. Public ones say CUSTOM, and the click joins this custom game
         // (/join only finds normal games)
-        String custom = "";
+        String custom = "An &6&lSCB ";
         if (customGame) {
             if (customGameVisibility != CustomGameVisibility.PUBLIC) join = null;
             else {
-                custom = "&6&lCUSTOM ";
+                custom = "A &6&lCUSTOM ";
                 join.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/joincustomgame " + getCustomGameHostName()));
             }
         }
 
         if (join != null && gameType == GameType.FRENZY) {
-            String msg = color("&2&l(!) &a&lA " + custom + "&7&oFrenzy &a&lgame on&f&l " + mapName + " &a&lis starting in 30 seconds");
+            String msg = color("&2&l(!) &a&l" + custom + "&7&oFrenzy &a&lgame on&f&l " + mapName + " &a&lis starting in 30 seconds");
             broadcastToWorld(lobby, msg, join);
         } else if (join != null && gameType == GameType.CLASSIC) {
-            String msg = color("&2&l(!) &a&lA " + custom + "&a&lgame on&f&l " + mapName + " &a&lis starting in 30 seconds");
+            String msg = color("&2&l(!) &a&l" + custom + "&a&lgame on&f&l " + mapName + " &a&lis starting in 30 seconds");
             broadcastToWorld(lobby, msg, join);
         }
 
@@ -2696,19 +2734,19 @@ public class GameInstance {
                 }
                 if (winnerList.get(0).hasPermission("scb.customWin")) {
                     if (data.cwm == 1) customFlawWinMsg(winnerList.get(0));
-                    else Bukkit.broadcastMessage(color("&2&l(!) &e" + winnerList.get(0).getName()
+                    else Bukkit.broadcastMessage(color("&6&lSCB> &e" + winnerList.get(0).getName()
                             + " &rjust &r&lFLAWLESSLY &rwon on &e&l" + map.toString()));
                 } else {
-                    Bukkit.broadcastMessage(color("&2&l(!) &e" + winnerList.get(0).getName()
+                    Bukkit.broadcastMessage(color("&6&lSCB> &e" + winnerList.get(0).getName()
                             + " &rjust &r&lFLAWLESSLY &rwon on &e&l" + map.toString()));
                 }
             } else {
                 if (winnerList.get(0).hasPermission("scb.customWin")) {
                     if (data.cwm == 1) customWinMsg(winnerList.get(0));
-                    else Bukkit.broadcastMessage(color("&2&l(!) &e" + winnerList.get(0).getName()
+                    else Bukkit.broadcastMessage(color("&6&lSCB> &e" + winnerList.get(0).getName()
                             + " &rjust won on &e&l" + map.toString()));
                 } else {
-                    Bukkit.broadcastMessage(color("&2&l(!) &e" + winnerList.get(0).getName()
+                    Bukkit.broadcastMessage(color("&6&lSCB> &e" + winnerList.get(0).getName()
                             + " &rjust won on &e&l" + map.toString()));
                 }
             }
@@ -2726,12 +2764,12 @@ public class GameInstance {
                 }
                 if (display.hasPermission("scb.customWin")) {
                     if (data.cwm == 1) customFlawWinMsg(display);
-                    else Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.YELLOW + team.get(display)
+                    else Bukkit.broadcastMessage("" + ChatColor.GOLD + ChatColor.BOLD + "SCB> " + ChatColor.YELLOW + team.get(display)
                             + " Team" + ChatColor.WHITE + " just " + ChatColor.BOLD + "FLAWLESSLY "
                             + ChatColor.RESET + "won on " + ChatColor.BOLD + ChatColor.WHITE + ChatColor.YELLOW
                             + ChatColor.BOLD + duosMap.toString());
                 } else {
-                    Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.YELLOW + team.get(display)
+                    Bukkit.broadcastMessage("" + ChatColor.GOLD + ChatColor.BOLD + "SCB> " + ChatColor.YELLOW + team.get(display)
                             + " Team" + ChatColor.WHITE + " just " + ChatColor.BOLD + "FLAWLESSLY " + ChatColor.RESET
                             + "won on " + ChatColor.BOLD + ChatColor.WHITE + ChatColor.YELLOW + ChatColor.BOLD
                             + duosMap.toString());
@@ -2739,11 +2777,11 @@ public class GameInstance {
             } else {
                 if (display.hasPermission("scb.customWin")) {
                     if (data.cwm == 1) customWinMsg(display);
-                    else Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.YELLOW + team.get(display)
+                    else Bukkit.broadcastMessage("" + ChatColor.GOLD + ChatColor.BOLD + "SCB> " + ChatColor.YELLOW + team.get(display)
                             + " Team" + ChatColor.WHITE + " just won on " + ChatColor.BOLD + ChatColor.WHITE
                             + ChatColor.YELLOW + ChatColor.BOLD + duosMap.toString());
                 } else {
-                    Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.YELLOW + team.get(display)
+                    Bukkit.broadcastMessage("" + ChatColor.GOLD + ChatColor.BOLD + "SCB> " + ChatColor.YELLOW + team.get(display)
                             + " Team" + ChatColor.WHITE + " just won on " + ChatColor.BOLD + ChatColor.WHITE
                             + ChatColor.YELLOW + ChatColor.BOLD + duosMap.toString());
                 }
@@ -2763,25 +2801,25 @@ public class GameInstance {
         if (map != null) {
             if (chance == 0) {
                 Bukkit.broadcastMessage(
-                        color("&2&l(!) &e" + winner.getName() + " &rgot a Victory Royale on &e&l" + map.toString()));
+                        color("&6&lSCB> &e" + winner.getName() + " &rgot a Victory Royale on &e&l" + map.toString()));
             } else if (chance == 1) {
-                Bukkit.broadcastMessage(color("&2&l(!) &e" + winner.getName()
+                Bukkit.broadcastMessage(color("&6&lSCB> &e" + winner.getName()
                         + " &rjust showed the entire lobby who's boss on &e&l" + map.toString()));
             } else if (chance == 2) {
                 Bukkit.broadcastMessage(
-                        color("&2&l(!) &e" + winner.getName() + " &rjust won on &e&l" + map.toString()));
+                        color("&6&lSCB> &e" + winner.getName() + " &rjust won on &e&l" + map.toString()));
             }
         } else {
             if (chance == 0) {
-                Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.YELLOW + team.get(winner) + " Team"
+                Bukkit.broadcastMessage("" + ChatColor.GOLD + ChatColor.BOLD + "SCB> " + ChatColor.YELLOW + team.get(winner) + " Team"
                         + ChatColor.WHITE + " got a Victory Royale on " + ChatColor.BOLD + ChatColor.WHITE
                         + ChatColor.YELLOW + ChatColor.BOLD + duosMap.toString());
             } else if (chance == 1) {
-                Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.YELLOW + team.get(winner) + " Team"
+                Bukkit.broadcastMessage("" + ChatColor.GOLD + ChatColor.BOLD + "SCB> " + ChatColor.YELLOW + team.get(winner) + " Team"
                         + ChatColor.WHITE + " just showed the entire lobby who's boss on " + ChatColor.BOLD
                         + ChatColor.WHITE + ChatColor.YELLOW + ChatColor.BOLD + duosMap.toString());
             } else if (chance == 2) {
-                Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.YELLOW + team.get(winner) + " Team"
+                Bukkit.broadcastMessage("" + ChatColor.GOLD + ChatColor.BOLD + "SCB> " + ChatColor.YELLOW + team.get(winner) + " Team"
                         + ChatColor.WHITE + " just won on " + ChatColor.BOLD + ChatColor.WHITE + ChatColor.YELLOW
                         + ChatColor.BOLD + duosMap.toString());
             }
@@ -2795,33 +2833,33 @@ public class GameInstance {
 
         if (map != null) {
             if (chance == 0) {
-                Bukkit.broadcastMessage(color("&2&l(!) &e" + winner.getName()
+                Bukkit.broadcastMessage(color("&6&lSCB> &e" + winner.getName()
                         + " &rjust &r&lABSOLUTELY DESTROYED &ron &e&l" + map.toString()));
             } else if (chance == 1) {
                 Bukkit.broadcastMessage(
-                        color("&2&l(!) &e" + winner.getName() + " &rjust &r&lFLAWLESSLY &ron &e&l" + map.toString()));
+                        color("&6&lSCB> &e" + winner.getName() + " &rjust &r&lFLAWLESSLY &ron &e&l" + map.toString()));
             } else if (chance == 2) {
-                Bukkit.broadcastMessage(color("&2&l(!) &rThe game on &e&l" + map.toString()
+                Bukkit.broadcastMessage(color("&6&lSCB> &rThe game on &e&l" + map.toString()
                         + " &rwas too easy for &e" + winner.getName()));
             } else if (chance == 3) {
-                Bukkit.broadcastMessage(color("&2&l(!) &rGet &r&lOUTTA THE WAY &rfor &e" + winner.getName()
+                Bukkit.broadcastMessage(color("&6&lSCB> &rGet &r&lOUTTA THE WAY &rfor &e" + winner.getName()
                         + "&r. They dominated on &e&l" + map.toString()));
             }
         } else {
             if (chance == 0) {
-                Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.YELLOW + team.get(winner) + " Team"
+                Bukkit.broadcastMessage("" + ChatColor.GOLD + ChatColor.BOLD + "SCB> " + ChatColor.YELLOW + team.get(winner) + " Team"
                         + ChatColor.WHITE + " just " + ChatColor.BOLD + "ABSOLUTELY DESTROYED " + ChatColor.RESET
                         + "everyone on " + ChatColor.BOLD + ChatColor.WHITE + ChatColor.YELLOW + ChatColor.BOLD
                         + duosMap.toString());
             } else if (chance == 1) {
-                Bukkit.broadcastMessage("" + ChatColor.BOLD + "(!) " + ChatColor.YELLOW + team.get(winner) + " Team"
+                Bukkit.broadcastMessage("" + ChatColor.GOLD + ChatColor.BOLD + "SCB> " + ChatColor.YELLOW + team.get(winner) + " Team"
                         + ChatColor.WHITE + " just " + ChatColor.BOLD + "FLAWLESSLY " + ChatColor.RESET + "won on "
                         + ChatColor.BOLD + ChatColor.WHITE + ChatColor.YELLOW + ChatColor.BOLD + duosMap.toString());
             } else if (chance == 2) {
-                Bukkit.broadcastMessage(this.getGameManager().getMain().color("&r&l(!) &rThe game on &e&l"
+                Bukkit.broadcastMessage(this.getGameManager().getMain().color("&6&lSCB> &rThe game on &e&l"
                         + duosMap.toString() + " &rwas too easy for " + tag + "&e" + winner.getName()));
             } else if (chance == 3) {
-                Bukkit.broadcastMessage(this.getGameManager().getMain().color("&r&l(!) &rGet out of the way for " + tag
+                Bukkit.broadcastMessage(this.getGameManager().getMain().color("&6&lSCB> &rGet out of the way for " + tag
                         + "&e" + winner.getName() + ". &rThey &r&lDOMINATED &ron &e&l" + duosMap.toString()));
             }
         }
