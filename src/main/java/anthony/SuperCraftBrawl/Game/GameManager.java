@@ -50,6 +50,7 @@ import org.bukkit.event.vehicle.VehicleExitEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.plugin.Plugin;
@@ -593,43 +594,48 @@ public class GameManager implements Listener, PluginMessageListener {
 	public BukkitRunnable pRunnable;
 
 	/**
-	 * This function handles when a player right clicks a chest in their inventory
-	 * and detects if name is "Present". This is used for Christmas updates for 2
-	 * free game loot drops
+	 * The Christmas 'Present' lightning drop: right clicking it uses it up (1 use) and gives 2 items, one
+	 * COMMON/UNCOMMON and one RARE/LEGENDARY (see GameLootDrops#openPresent).
 	 *
 	 * @param e which is the Player interaction event with items
 	 */
 	@EventHandler
 	public void present(PlayerInteractEvent e) {
-		Player player = e.getPlayer();
+		if (e.getAction() != Action.RIGHT_CLICK_AIR && e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+
 		ItemStack item = e.getItem();
+		if (!GameLootDrops.isPresent(item)) return;
+
+		Player player = e.getPlayer();
 		GameInstance game = this.GetInstanceOfPlayer(player);
+		if (game == null || game.state != GameState.STARTED) return;
 
-		if (game != null) {
-			if (game.state == GameState.STARTED) {
-				if (item != null) {
-					if (item.getType() == Material.TRAPPED_CHEST
-							&& (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-						ItemMeta meta = item.getItemMeta();
-						if (meta.getDisplayName().contains("Present")) {
-							int amount = item.getAmount();
-							if (amount > 0) {
-								amount--;
-								if (amount == 0)
-									player.getInventory().remove(Material.TRAPPED_CHEST);
-								else
-									item.setAmount(amount);
-							}
-							player.getInventory().addItem(game.getItemToDrop());
-							player.getInventory().addItem(game.getItemToDrop());
-							player.sendMessage(
-									main.color("&r(&c&l!&r&l) &c&lMerry Christmas! &rYou received 2 items!"));
-						}
-					}
-				}
-			}
+		e.setCancelled(true); // it's a chest: don't place it
 
+		// Use up one Present - only the one in hand, not every trapped chest the player has
+		PlayerInventory inventory = player.getInventory();
+		int slot = inventory.getHeldItemSlot();
+		if (item.getAmount() > 1) {
+			ItemStack remaining = item.clone();
+			remaining.setAmount(item.getAmount() - 1);
+			inventory.setItem(slot, remaining);
+		} else {
+			inventory.setItem(slot, null);
 		}
+
+		ItemStack[] rewards = GameLootDrops.openPresent(game.getGameSettings().enabledDrops);
+		StringBuilder names = new StringBuilder();
+		for (ItemStack reward : rewards) {
+			if (!GameLootDrops.giveToPlayer(player, reward)) {
+				player.getWorld().dropItem(player.getLocation(), reward); // no room: don't lose it
+			}
+			if (names.length() > 0) names.append("&r and ");
+			names.append("&e").append(reward.getItemMeta().getDisplayName());
+		}
+
+		player.updateInventory();
+		player.playSound(player.getLocation(), Sound.CHEST_OPEN, 1f, 1f);
+		player.sendMessage(main.color("&c&l(!) &c&lMerry Christmas! &rYou received " + names + "&r!"));
 	}
 
 	private HashMap<Player, BukkitRunnable> borderRunnables = new HashMap<>();
