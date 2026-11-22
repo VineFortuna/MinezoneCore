@@ -1602,7 +1602,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		String mapName = args[0];
 		GameInstance gameSpectator = main.getGameManager().GetInstanceOfSpectator(player);
 
-		if (gameSpectator != null) {
+		if (gameSpectator != null || main.getFwGameManager().getInstanceOfSpectator(player) != null) {
 			player.sendMessage(main.color("&c&l(!) &rYou are currently spectating a game!"));
 			return;
 		}
