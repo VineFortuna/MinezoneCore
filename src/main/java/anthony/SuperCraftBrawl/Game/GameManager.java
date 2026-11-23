@@ -2059,6 +2059,12 @@ public class GameManager implements Listener, PluginMessageListener {
                 return false;
             }
 
+            if (main.getFwGameManager().getInstanceOfPlayer(member) != null
+                    || main.getFwGameManager().getInstanceOfSpectator(member) != null) {
+                leader.sendMessage(main.color("&c&l(!) &e" + member.getName() + " &ris already in a game."));
+                return false;
+            }
+
             if (main.getParkour().hasPlayer(member)) {
                 leader.sendMessage(main.color("&c&l(!) &e" + member.getName() + " &ris currently in parkour."));
                 return false;
@@ -2550,6 +2556,12 @@ public class GameManager implements Listener, PluginMessageListener {
                 return;
             }
 
+            if (main.getFwGameManager().getInstanceOfPlayer(member) != null
+                    || main.getFwGameManager().getInstanceOfSpectator(member) != null) {
+                leader.sendMessage(main.color("&c&l(!) &e" + member.getName() + " &ris already in a game."));
+                return;
+            }
+
             if (main.getParkour().hasPlayer(member)) {
                 leader.sendMessage(main.color("&c&l(!) &e" + member.getName() + " &ris currently in parkour."));
                 return;
@@ -2605,9 +2617,12 @@ public class GameManager implements Listener, PluginMessageListener {
 	public GameReason AddSpectatorToMap(Player player, Maps map) {
 		GameInstance instance = null;
 
-        //If a player is already in a game, do not spectate (the caller tells them)
-		if (GetInstanceOfPlayer(player) != null || getMain().getFwGameManager().getInstanceOfPlayer(player) != null)
+        // Playing or spectating any game (SCB or Flag Wars) blocks spectating another one. Without the
+        // spectator half, a spectator could be listed in two games at once and the first game ending
+        // would drag them out of the second. The caller already tells the player why.
+		if (main.isPlayerInAnyGame(player)) {
 			return GameReason.IN_ANOTHER;
+		}
 
 		instance = getSpectatableGame(map);
 		if (instance == null) return GameReason.FAIL; // nothing to watch on this map
@@ -2630,8 +2645,10 @@ public class GameManager implements Listener, PluginMessageListener {
 	public GameReason AddPlayerToMap(Player player, Maps map) {
 		GameInstance instance = null;
 
-		if (GetInstanceOfPlayer(player) != null || getMain().getParkour().hasPlayer(player)
-				|| getMain().getFwGameManager().getInstanceOfPlayer(player) != null)
+		// Includes spectators of SCB and Flag Wars games, not just players. A Flag Wars spectator who joined
+		// an SCB game stayed listed in both, so the Flag Wars game ending teleported them out of the SCB game
+		// while they were still in its player list.
+		if (main.isPlayerInAnyGame(player) || getMain().getParkour().hasPlayer(player))
 			return GameReason.IN_ANOTHER;
 
         instance = getInstanceOfMap(map);

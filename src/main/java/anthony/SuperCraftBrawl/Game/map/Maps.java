@@ -189,7 +189,7 @@ public enum Maps {
 					.setSource(MapSource.MINECADE)
 	),
 	
-	/*HauntedMansion(
+	HauntedMansion(
 			"HauntedMansion",
 			new Gameplay[]{Gameplay.INDOOR},
 			Size.MEDIUM,
@@ -209,7 +209,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(-1207.500, 138, 959.500))
 					.setBounds(new Vector(-1207.500, 138, 959.500), 100, 100)
 					.setSource(MapSource.COMMUNITY)
-	),*/
+	),
 	
 	CliffSide(
 			"CliffSide",
