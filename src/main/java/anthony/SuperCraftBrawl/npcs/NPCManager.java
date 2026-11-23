@@ -35,8 +35,8 @@ public class NPCManager implements Listener {
 
 	// NPCS HERE:
     private net.jitse.npclib.api.NPC fishing, scbClassic, flagwars, socialMedia, parkour, survey;
-	private List<String> surveyFrameGreen, surveyFrameWhite;
-	private BukkitTask surveyTask;
+	private List<String> surveyFrameGreen, surveyFrameWhite, flagWarsFrameWhite, flagWarsFrameYellow;
+	private BukkitTask animationTask;
 
 	private static final String SURVEY_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfPqu6WDrVQW59YjzzVT0O5ZWa-8cHibHt3w7MBlHjInpOWyA/viewform?usp=dialog";
 
@@ -71,8 +71,12 @@ public class NPCManager implements Listener {
 		scbClassic.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));
 		scbClassic.create();
 
-		flagwars = npcLib.createNPC(Arrays.asList(main.color("&6&lFLAG WARS &r&lNEW!"), main.color("&rMode: &aSolo"),
-				main.color("&eClick to Play!")));
+		// Two shared immutable frames, the NEW! tag flips between white and yellow
+		flagWarsFrameWhite = Arrays.asList(main.color("&6&lFLAG WARS &f&lNEW!"), main.color("&rMode: &aSolo"),
+				main.color("&eClick to Play!"));
+		flagWarsFrameYellow = Arrays.asList(main.color("&6&lFLAG WARS &e&lNEW!"), main.color("&rMode: &aSolo"),
+				main.color("&eClick to Play!"));
+		flagwars = npcLib.createNPC(flagWarsFrameWhite);
 		flagwars.setLocation(new Location(main.getLobbyWorld(), 187.5, 106, 657.5, -174, 3));
 		flagwars.setSkin(flagWarsSkin);
 		flagwars.setItem(NPCSlot.MAINHAND, ItemHelper.createFlagWarsBanner());
@@ -104,18 +108,22 @@ public class NPCManager implements Listener {
 		survey.setLocation(new Location(main.getLobbyWorld(), 184.5, 108, 640.5, -155.3f, -0.2f));
 		survey.setSkin(angelinoSkin);
 		survey.create();
-		animateSurvey();
+		animateNpcs();
 	}
 
-	/** Every 0.5 seconds the survey reward line swaps color. Cancelled in {@link #shutdown()}. */
-	private void animateSurvey() {
-		surveyTask = new BukkitRunnable() {
-			boolean white = false;
+	/**
+	 * Every 0.5 seconds the survey reward line and the Flag Wars NEW! tag swap color, both on one task so they stay
+	 * in step. Cancelled in {@link #shutdown()}.
+	 */
+	private void animateNpcs() {
+		animationTask = new BukkitRunnable() {
+			boolean flipped = false;
 
 			@Override
 			public void run() {
-				white = !white;
-				survey.setText(white ? surveyFrameWhite : surveyFrameGreen);
+				flipped = !flipped;
+				survey.setText(flipped ? surveyFrameWhite : surveyFrameGreen);
+				flagwars.setText(flipped ? flagWarsFrameYellow : flagWarsFrameWhite);
 			}
 		}.runTaskTimer(main, 10L, 10L);
 	}
@@ -255,9 +263,9 @@ public class NPCManager implements Listener {
     }
 
     public void shutdown() {
-        if (surveyTask != null) {
-            surveyTask.cancel();
-            surveyTask = null;
+        if (animationTask != null) {
+            animationTask.cancel();
+            animationTask = null;
         }
 
         net.jitse.npclib.api.NPC[] all = { fishing, scbClassic, flagwars, socialMedia, parkour, survey };

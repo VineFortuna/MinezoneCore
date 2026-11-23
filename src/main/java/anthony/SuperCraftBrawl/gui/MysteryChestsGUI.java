@@ -129,28 +129,8 @@ public class MysteryChestsGUI implements InventoryProvider {
     private void hologram(Player player) {
         PlayerData data = main.getDataManager().getPlayerData(player);
         if (data != null && main.msHologram.get(player) != null) {
-            World lobby = main.getLobbyWorld();
-            if (player.getWorld() == lobby) {
-                EntityArmorStand stand = main.msHologram.get(player);
-                PacketPlayOutEntityDestroy destroyPacket = new PacketPlayOutEntityDestroy(stand.getId());
-                ((CraftPlayer) player).getHandle().playerConnection.sendPacket(destroyPacket);
-
-                // fixed hologram position (adjust if needed)
-                loc = new Location(lobby, 198.5, 105.2, 652.5);
-
-                WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
-                stand = new EntityArmorStand(s);
-
-                stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-                stand.setCustomName(main.color("&a" + data.mysteryChests + " &rto open!"));
-                stand.setCustomNameVisible(true);
-                stand.setGravity(false);
-                stand.setInvisible(true);
-
-                PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(stand);
-                ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-
-                main.msHologram.put(player, stand);
+            if (player.getWorld() == main.getLobbyWorld()) {
+                main.getMysteryChestManager().removeAndAddMysteryStand(player);
                 main.getDataManager().saveData(data);
             }
         }

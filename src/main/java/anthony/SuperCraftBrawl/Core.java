@@ -2005,17 +2005,8 @@ public class Core extends JavaPlugin implements Listener {
     }
 
     public void mysteryChestHologram(Player p) {
-        PlayerData data = this.getDataManager().getPlayerData(p);
-
-        if (data != null) {
-            Location loc = new Location(this.getLobbyWorld(), 198.5, 105.5, 652.5);
-            String name = color("&d&lMYSTERY CHEST");
-            this.armorStandManager.addMysteryChestHologram(p, loc, name);
-
-            loc = new Location(this.getLobbyWorld(), 198.5, 105.2, 652.5);
-            name = color("&a" + data.mysteryChests + " &rto open!");
-            this.armorStandManager.addMysteryChestHologram(p, loc, name);
-        }
+        if (mysteryChestManager != null)
+            mysteryChestManager.spawnHologram(p);
     }
 
     public void parkourHolograms(Player p) {
@@ -2483,6 +2474,7 @@ public class Core extends JavaPlugin implements Listener {
 
         if (getNPCManager() != null) {
             try { getNPCManager().shutdown(); } catch (Throwable ignored) {}
+            try { if (mysteryChestManager != null) mysteryChestManager.shutdown(); } catch (Throwable ignored) {}
         }
 
         try { if (getParkour() != null) getParkour().cleanupAll(); } catch (Throwable ignored) {}
