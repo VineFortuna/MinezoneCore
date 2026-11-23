@@ -2156,11 +2156,11 @@ public class Core extends JavaPlugin implements Listener {
         PlayerData data = this.getDataManager().getPlayerData(p);
 
         if (data != null) {
-            Location loc = new Location(this.getLobbyWorld(), 198.5, 105.5, 650.5);
+            Location loc = new Location(this.getLobbyWorld(), 198.5, 105.5, 652.5);
             String name = color("&d&lMYSTERY CHEST");
             this.armorStandManager.addMysteryChestHologram(p, loc, name);
 
-            loc = new Location(this.getLobbyWorld(), 198.5, 105.2, 650.5);
+            loc = new Location(this.getLobbyWorld(), 198.5, 105.2, 652.5);
             name = color("&a" + data.mysteryChests + " &rto open!");
             this.armorStandManager.addMysteryChestHologram(p, loc, name);
         }

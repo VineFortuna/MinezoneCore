@@ -65,7 +65,7 @@ public class MysteryChestManager implements Listener {
             ((CraftPlayer) player).getHandle().playerConnection.sendPacket(destroyPacket);
         }
 
-        Location loc = new Location(lobby, 198.5, 105.2, 650.5);
+        Location loc = new Location(lobby, 198.5, 105.2, 652.5);
 
         WorldServer worldServer = ((CraftWorld) lobby).getHandle();
         EntityArmorStand newStand = new EntityArmorStand(worldServer);
