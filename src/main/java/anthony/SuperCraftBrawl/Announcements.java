@@ -4,7 +4,7 @@ import net.md_5.bungee.api.ChatColor;
 
 public enum Announcements {
 
-	Lightning(color("&2&l(!) &rLook out for lightning as they can spawn powerups!")),
+	Website(color("&2&l(!) &rVisit &e&nwww.minezone.club&r for more info, statistics and our store!")),
 	
 	Discord(color("&2&l(!) &rJoin our Discord by using &e/socials")),
 	

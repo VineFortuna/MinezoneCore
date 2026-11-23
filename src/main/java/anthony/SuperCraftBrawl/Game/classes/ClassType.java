@@ -2,6 +2,7 @@ package anthony.SuperCraftBrawl.Game.classes;
 
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.classes.all.*;
+import anthony.SuperCraftBrawl.halloween.Halloween;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
@@ -100,8 +101,8 @@ public enum ClassType {
 	GingerBreadMan(102, true), // Christmas
 	Elf(101, true), // Christmas
 	Grinch(106, true), // Christmas
-	GrimReaper(104, false), // Halloween
-	Freddy(105, false); // Halloween
+	GrimReaper(104, Halloween.ENABLED), // Halloween
+	Freddy(105, Halloween.ENABLED); // Halloween
 
 	private final int id;
 	private int tokenCost = 0;

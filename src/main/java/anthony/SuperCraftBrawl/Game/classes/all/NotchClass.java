@@ -154,6 +154,8 @@ public class NotchClass extends BaseClass {
 
         for (Player targetPlayer : instance.players) {
             if (targetPlayer == player) continue;
+            // Someone listed in the game can be standing in another world (Location math throws across worlds)
+            if (!targetPlayer.getWorld().equals(player.getWorld())) continue;
             if (instance.getGameManager().spawnProt.containsKey(targetPlayer)) continue;
             Vector playerVector = targetPlayer.getLocation().add(0, 1, 0).subtract(player.getEyeLocation()).toVector();
             double distance = playerVector.dot(direction);

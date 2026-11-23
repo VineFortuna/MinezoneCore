@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class KillsBoard extends LeaderboardBase {
     private final Core main;
 
-    // Global (Lifetime) data
+    // Global (Lifetime, SCB - the default board) data
     private final List<UUID> lifetimeTopIds = new ArrayList<>();
     private final List<String> lifetimeTopNames = new ArrayList<>();
     private final Map<UUID, Integer> lifetimeKills = new HashMap<>();
@@ -25,10 +25,15 @@ public class KillsBoard extends LeaderboardBase {
     // Global entity IDs (destroy for everyone on global redraw)
     private final List<Integer> globalEntityIds = new ArrayList<>();
 
-    // Scoped caches (used by per-viewer preview)
+    // Scoped caches (used by per-viewer preview) - SCB stats
     private final Map<LeaderboardScope, List<UUID>> topIds = new EnumMap<>(LeaderboardScope.class);
     private final Map<LeaderboardScope, List<String>> topNames = new EnumMap<>(LeaderboardScope.class);
     private final Map<LeaderboardScope, Map<UUID, Integer>> topValues = new EnumMap<>(LeaderboardScope.class);
+
+    // Same, but for Flag Wars stats (FWKills)
+    private final Map<LeaderboardScope, List<UUID>> topIdsFW = new EnumMap<>(LeaderboardScope.class);
+    private final Map<LeaderboardScope, List<String>> topNamesFW = new EnumMap<>(LeaderboardScope.class);
+    private final Map<LeaderboardScope, Map<UUID, Integer>> topValuesFW = new EnumMap<>(LeaderboardScope.class);
 
     // Per-viewer holograms (IDs to destroy only for that viewer)
     private final Map<UUID, List<Integer>> viewerEntityIds = new HashMap<>();
@@ -44,13 +49,16 @@ public class KillsBoard extends LeaderboardBase {
             topIds.put(s, new ArrayList<>());
             topNames.put(s, new ArrayList<>());
             topValues.put(s, new HashMap<>());
+            topIdsFW.put(s, new ArrayList<>());
+            topNamesFW.put(s, new ArrayList<>());
+            topValuesFW.put(s, new HashMap<>());
         }
     }
 
     // ---------- SQL helpers ----------
-    private String sqlForScope(LeaderboardScope scope) {
-        final String col = "Kills";
-        final String metric = "Kills";
+    private String sqlForScope(LeaderboardScope scope, LeaderboardStatsMode mode) {
+        final String col = mode == LeaderboardStatsMode.FLAG_WARS ? "FWKills" : "Kills";
+        final String metric = col;
         final String label = "KillsVal";
 
         if (scope == LeaderboardScope.LIFETIME) {
@@ -60,12 +68,13 @@ public class KillsBoard extends LeaderboardBase {
                     "ORDER BY " + label + " DESC LIMIT 10";
         }
 
+        final String table = mode == LeaderboardStatsMode.FLAG_WARS ? "fw_stat_snapshots" : "scb_stat_snapshots";
         java.sql.Date ps = main.snapshotDAO.startFor(scope);
 
         return "SELECT pd.UUID, pd.LastPlayerName, " +
                 "(pd." + col + " - IFNULL(s.total_value, 0)) AS " + label + ", pd.RoleID " +
                 "FROM PlayerData pd " +
-                "LEFT JOIN scb_stat_snapshots s " +
+                "LEFT JOIN " + table + " s " +
                 "  ON s.uuid = pd.UUID AND s.metric = '" + metric + "' " +
                 " AND s.period = '" + scope.name() + "' AND s.period_start = '" + ps + "' " +
                 "HAVING " + label + " > 0 " +
@@ -77,30 +86,12 @@ public class KillsBoard extends LeaderboardBase {
     public void asyncUpdate() throws SQLException {
         try (Statement st = main.getDatabaseManager().getConnection().createStatement()) {
             for (LeaderboardScope scope : LeaderboardScope.values()) {
-                List<UUID> ids = new ArrayList<>();
-                List<String> names = new ArrayList<>();
-                Map<UUID, Integer> vals = new HashMap<>();
-
-                try (ResultSet rs = st.executeQuery(sqlForScope(scope))) {
-                    while (rs.next()) {
-                        String uuidStr = rs.getString("UUID");
-                        String name = rs.getString("LastPlayerName");
-                        int value = rs.getInt("KillsVal");
-                        if (uuidStr == null || name == null) continue;
-                        UUID id = UUID.fromString(uuidStr);
-                        ids.add(id);
-                        names.add(name);
-                        vals.put(id, value);
-                    }
-                }
-
-                topIds.put(scope, ids);
-                topNames.put(scope, names);
-                topValues.put(scope, vals);
+                fetchInto(st, scope, LeaderboardStatsMode.SCB, topIds, topNames, topValues);
+                fetchInto(st, scope, LeaderboardStatsMode.FLAG_WARS, topIdsFW, topNamesFW, topValuesFW);
             }
         }
 
-        // copy lifetime into global fields
+        // copy lifetime (SCB only) into global fields
         lifetimeTopIds.clear();
         lifetimeTopNames.clear();
         lifetimeKills.clear();
@@ -109,13 +100,39 @@ public class KillsBoard extends LeaderboardBase {
         lifetimeKills.putAll(topValues.getOrDefault(LeaderboardScope.LIFETIME, Collections.emptyMap()));
     }
 
-    // ---------- Global render (Lifetime for everyone who DIDN'T pick a scoped view) ----------
+    private void fetchInto(Statement st, LeaderboardScope scope, LeaderboardStatsMode mode,
+                            Map<LeaderboardScope, List<UUID>> idsMap,
+                            Map<LeaderboardScope, List<String>> namesMap,
+                            Map<LeaderboardScope, Map<UUID, Integer>> valsMap) throws SQLException {
+        List<UUID> ids = new ArrayList<>();
+        List<String> names = new ArrayList<>();
+        Map<UUID, Integer> vals = new HashMap<>();
+
+        try (ResultSet rs = st.executeQuery(sqlForScope(scope, mode))) {
+            while (rs.next()) {
+                String uuidStr = rs.getString("UUID");
+                String name = rs.getString("LastPlayerName");
+                int value = rs.getInt("KillsVal");
+                if (uuidStr == null || name == null) continue;
+                UUID id = UUID.fromString(uuidStr);
+                ids.add(id);
+                names.add(name);
+                vals.put(id, value);
+            }
+        }
+
+        idsMap.put(scope, ids);
+        namesMap.put(scope, names);
+        valsMap.put(scope, vals);
+    }
+
+    // ---------- Global render (SCB Lifetime - the default board) ----------
     @Override
     public void updateLeaderboard(boolean init) {
         removeOldLeaderboards();
 
         Location title = ensureWorld(KILLS_TITLE_LOC, main.getLobbyWorld());
-        // Send the global title/lines ONLY to players who are on Lifetime
+        // Send the global title/lines ONLY to players on SCB + Lifetime (the default combination)
         sendArmorStandPacketGlobalSelective(title, ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE + "Lifetime Kills");
 
         double y = title.getY() - 0.40;
@@ -131,12 +148,12 @@ public class KillsBoard extends LeaderboardBase {
             y -= 0.24;
         }
 
-        // player's own lifetime line if not in top 10 — only for Lifetime viewers
+        // player's own lifetime line if not in top 10 — only for default-board viewers
         Location base = new Location(title.getWorld(), title.getX(), y, title.getZ());
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!isViewerLifetime(player)) continue;
+            if (!usesGlobalBoard(player)) continue;
 
-            // IMPORTANT: clear any previous per-viewer lines for Lifetime viewers
+            // IMPORTANT: clear any previous per-viewer lines for default-board viewers
             clearViewerHologram(player);
 
             PlayerData data = main.getDataManager().getPlayerData(player);
@@ -145,10 +162,10 @@ public class KillsBoard extends LeaderboardBase {
 
             if (!lifetimeTopIds.contains(data.playerUUID)) {
                 Location line1 = base.clone().add(0, -0.24, 0);
-                sendStandToOnePlayerLifetimeOnly(line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------", player);
+                sendStandToOnePlayerGlobalOnly(line1, "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH + "-----------------", player);
 
                 Location line2 = base.clone().add(0, -0.44, 0);
-                sendStandToOnePlayerLifetimeOnly(
+                sendStandToOnePlayerGlobalOnly(
                         line2,
                         "" + ChatColor.GREEN + player.getName() + ChatColor.RESET + " - " + ChatColor.WHITE + val,
                         player
@@ -156,19 +173,11 @@ public class KillsBoard extends LeaderboardBase {
             }
         }
 
-        // Repaint scoped selections so they don't get overwritten by the global refresh
+        // Repaint scoped/moded selections so they don't get overwritten by the global refresh
         for (Player p : Bukkit.getOnlinePlayers()) {
-            if (!isViewerLifetime(p)) {
+            if (!usesGlobalBoard(p)) {
                 hideGlobalForViewer(p);
-                LeaderboardScope sel = getViewerScopeOrLifetime(p);
-                if (sel != LeaderboardScope.LIFETIME) {
-                    showToViewer(p, sel);
-                } else {
-                    clearViewerHologram(p);
-                }
-            } else {
-                // On Lifetime, ensure no stale scoped lines remain
-                // (already cleared above for each lifetime viewer)
+                showToViewer(p, getViewerScopeOrLifetime(p));
             }
         }
     }
@@ -177,24 +186,29 @@ public class KillsBoard extends LeaderboardBase {
     public void showToViewer(Player viewer, LeaderboardScope scope) {
         if (viewer == null || !viewer.isOnline()) return;
 
-        // clear previous temp lines (now also clears lifetime personal lines)
+        LeaderboardStatsMode mode = getViewerMode(viewer);
+
+        // clear previous temp lines (now also clears default-board personal lines)
         clearViewerHologram(viewer);
 
-        // hide global lifetime lines for THIS viewer when showing a scoped view
-        if (scope != LeaderboardScope.LIFETIME) {
-            hideGlobalForViewer(viewer);
-        } else {
-            return; // lifetime uses the global board
+        if (scope == LeaderboardScope.LIFETIME && mode == LeaderboardStatsMode.SCB) {
+            return; // default combination uses the global board
         }
+        hideGlobalForViewer(viewer);
 
         Location title = ensureWorld(KILLS_TITLE_LOC, main.getLobbyWorld());
+        String statLabel = "Kills";
         sendLineToViewer(viewer, title, ChatColor.YELLOW + "" + ChatColor.BOLD + ChatColor.UNDERLINE
-                + scope.display() + " Kills");
+                + scope.display() + " " + statLabel);
 
         double y = title.getY() - 0.40;
-        List<UUID> ids = topIds.getOrDefault(scope, Collections.emptyList());
-        List<String> names = topNames.getOrDefault(scope, Collections.emptyList());
-        Map<UUID, Integer> vals = topValues.getOrDefault(scope, Collections.emptyMap());
+        Map<LeaderboardScope, List<UUID>> idsSrc = mode == LeaderboardStatsMode.FLAG_WARS ? topIdsFW : topIds;
+        Map<LeaderboardScope, List<String>> namesSrc = mode == LeaderboardStatsMode.FLAG_WARS ? topNamesFW : topNames;
+        Map<LeaderboardScope, Map<UUID, Integer>> valuesSrc = mode == LeaderboardStatsMode.FLAG_WARS ? topValuesFW : topValues;
+
+        List<UUID> ids = idsSrc.getOrDefault(scope, Collections.emptyList());
+        List<String> names = namesSrc.getOrDefault(scope, Collections.emptyList());
+        Map<UUID, Integer> vals = valuesSrc.getOrDefault(scope, Collections.emptyMap());
 
         int rank = 1;
         for (int i = 0; i < ids.size() && rank <= 10; i++, rank++) {
@@ -216,7 +230,7 @@ public class KillsBoard extends LeaderboardBase {
         }
 
         // --- your own value for this scope, even if not in top 10 ---
-        int yourVal = getScopedKillsFor(viewer, scope);
+        int yourVal = getScopedKillsFor(viewer, scope, mode);
         boolean youInTop = ids.contains(viewer.getUniqueId());
 
         if (!youInTop) {
@@ -234,22 +248,26 @@ public class KillsBoard extends LeaderboardBase {
         }
     }
 
-    // Compute the viewer's stat value for the chosen scope
-    private int getScopedKillsFor(Player viewer, LeaderboardScope scope) {
+    // Compute the viewer's stat value for the chosen scope + mode
+    private int getScopedKillsFor(Player viewer, LeaderboardScope scope, LeaderboardStatsMode mode) {
+        final String column = mode == LeaderboardStatsMode.FLAG_WARS ? "FWKills" : "Kills";
+        final String table = mode == LeaderboardStatsMode.FLAG_WARS ? "fw_stat_snapshots" : "scb_stat_snapshots";
+
         try {
-            if (scope == LeaderboardScope.LIFETIME) {
-                PlayerData d = main.getDataManager().getPlayerData(viewer);
-                return (d != null) ? d.kills : 0;
-            }
-            int current = 0;
             PlayerData d = main.getDataManager().getPlayerData(viewer);
-            if (d != null) current = d.kills;
+
+            if (scope == LeaderboardScope.LIFETIME) {
+                return (d != null) ? (mode == LeaderboardStatsMode.FLAG_WARS ? d.fwKills : d.kills) : 0;
+            }
+
+            int current;
+            if (d != null) current = mode == LeaderboardStatsMode.FLAG_WARS ? d.fwKills : d.kills;
             else {
                 try (PreparedStatement ps = main.getDatabaseManager().getConnection()
-                        .prepareStatement("SELECT Kills FROM PlayerData WHERE UUID=? LIMIT 1")) {
+                        .prepareStatement("SELECT " + column + " FROM PlayerData WHERE UUID=? LIMIT 1")) {
                     ps.setString(1, viewer.getUniqueId().toString());
                     try (ResultSet rs = ps.executeQuery()) {
-                        if (rs.next()) current = rs.getInt(1);
+                        current = rs.next() ? rs.getInt(1) : 0;
                     }
                 }
             }
@@ -257,21 +275,22 @@ public class KillsBoard extends LeaderboardBase {
             java.sql.Date psDate = main.snapshotDAO.startFor(scope);
             int snap = 0;
             try (PreparedStatement ps = main.getDatabaseManager().getConnection().prepareStatement(
-                    "SELECT total_value FROM scb_stat_snapshots WHERE uuid=? AND metric='Kills' AND period=? AND period_start=? LIMIT 1")) {
+                    "SELECT total_value FROM " + table + " WHERE uuid=? AND metric=? AND period=? AND period_start=? LIMIT 1")) {
                 ps.setString(1, viewer.getUniqueId().toString());
-                ps.setString(2, scope.name());
-                ps.setDate(3, psDate);
+                ps.setString(2, column);
+                ps.setString(3, scope.name());
+                ps.setDate(4, psDate);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) snap = rs.getInt(1);
                 }
             }
 
-            int diff = current - snap;
-            return Math.max(0, diff);
+            return Math.max(0, current - snap);
         } catch (Exception e) {
             e.printStackTrace();
             PlayerData d = main.getDataManager().getPlayerData(viewer);
-            return (d != null) ? d.kills : 0;
+            if (d == null) return 0;
+            return mode == LeaderboardStatsMode.FLAG_WARS ? d.fwKills : d.kills;
         }
     }
 
@@ -330,10 +349,10 @@ public class KillsBoard extends LeaderboardBase {
         ((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) viewer).getHandle().playerConnection.sendPacket(destroy);
     }
 
-    /** Paint exactly what this player should see, based on scope. */
+    /** Paint exactly what this player should see, based on scope + their current stats-mode selection. */
     public void paintFor(Player viewer, LeaderboardScope scope) {
         if (viewer == null || !viewer.isOnline()) return;
-        if (scope == LeaderboardScope.LIFETIME) {
+        if (scope == LeaderboardScope.LIFETIME && getViewerMode(viewer) == LeaderboardStatsMode.SCB) {
             clearViewerHologram(viewer);
             return;
         }
@@ -349,17 +368,17 @@ public class KillsBoard extends LeaderboardBase {
         globalEntityIds.add(id);
         PacketPlayOutSpawnEntityLiving spawn = new PacketPlayOutSpawnEntityLiving(stand);
         for (Player p : Bukkit.getOnlinePlayers()) {
-            if (isViewerLifetime(p)) {
+            if (usesGlobalBoard(p)) {
                 ((org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer) p).getHandle().playerConnection.sendPacket(spawn);
             }
         }
     }
 
     /**
-     * Lifetime personal line -> track as per-viewer so we can destroy later.
+     * Default-board personal line -> track as per-viewer so we can destroy later.
      */
-    private void sendStandToOnePlayerLifetimeOnly(Location loc, String customName, Player player) {
-        if (!isViewerLifetime(player)) return;
+    private void sendStandToOnePlayerGlobalOnly(Location loc, String customName, Player player) {
+        if (!usesGlobalBoard(player)) return;
         // Reuse the per-viewer helper so the id is tracked in viewerEntityIds
         sendLineToViewer(player, loc, customName);
     }
@@ -418,14 +437,17 @@ public class KillsBoard extends LeaderboardBase {
             topIds.get(s).clear();
             topNames.get(s).clear();
             topValues.get(s).clear();
+            topIdsFW.get(s).clear();
+            topNamesFW.get(s).clear();
+            topValuesFW.get(s).clear();
         }
     }
 
-    // ---------- Helpers to know viewer's chosen scope ----------
-    private boolean isViewerLifetime(Player p) {
+    // ---------- Helpers to know viewer's chosen scope/mode ----------
+    /** True only for the default combination (Lifetime + SCB) - the only one that uses the cheap shared global board. */
+    private boolean usesGlobalBoard(Player p) {
         try {
-            LeaderboardScope sel = getViewerScopeOrLifetime(p);
-            return sel == LeaderboardScope.LIFETIME;
+            return getViewerScopeOrLifetime(p) == LeaderboardScope.LIFETIME && getViewerMode(p) == LeaderboardStatsMode.SCB;
         } catch (Throwable t) {
             return true;
         }
@@ -434,5 +456,10 @@ public class KillsBoard extends LeaderboardBase {
     private LeaderboardScope getViewerScopeOrLifetime(Player p) {
         if (main.leaderboardScopeByViewer == null) return LeaderboardScope.LIFETIME;
         return main.leaderboardScopeByViewer.getOrDefault(p.getUniqueId(), LeaderboardScope.LIFETIME);
+    }
+
+    private LeaderboardStatsMode getViewerMode(Player p) {
+        if (main.leaderboardModeByViewer == null) return LeaderboardStatsMode.SCB;
+        return main.leaderboardModeByViewer.getOrDefault(p.getUniqueId(), LeaderboardStatsMode.SCB);
     }
 }

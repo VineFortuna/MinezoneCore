@@ -266,6 +266,10 @@ public class GameManager implements Listener, PluginMessageListener {
      */
 	@EventHandler
 	public void Target(EntityTargetLivingEntityEvent event) {
+		// Flag Wars has its own mob targeting (FWPokeballManager)
+		if (main.getFwGameManager() != null && main.getFwGameManager().getInstanceForWorld(event.getEntity().getWorld()) != null)
+			return;
+
 		if (event.getTarget() instanceof Player) {
 			Player player = (Player) event.getTarget();
 			GameInstance i = this.GetInstanceOfPlayer(player);
@@ -481,11 +485,12 @@ public class GameManager implements Listener, PluginMessageListener {
 	@EventHandler
 	public void onEnderPearl(PlayerTeleportEvent event) {
 		if (event.getCause() != TeleportCause.ENDER_PEARL) return;
-		event.setCancelled(true);
 
 		Player player = event.getPlayer();
 		GameInstance instance = this.GetInstanceOfPlayer(player);
-		if (instance == null) return;
+		if (instance == null) return; // not in an SCB game - let vanilla (or FW) handle it
+
+		event.setCancelled(true);
 
 		BaseClass baseClass = instance.classes.get(player);
 		if (baseClass == null || baseClass.isDead) return;
@@ -856,7 +861,11 @@ public class GameManager implements Listener, PluginMessageListener {
 	public void onItemConsumeEvent(PlayerItemConsumeEvent event) {
 		Player player = event.getPlayer();
 		GameInstance gameInstance = GetInstanceOfPlayer(player);
-		gameInstance.classes.get(player).onConsumingItem(event);
+		// Not in a Super Craft Bros game (e.g. eating a golden apple in Flag Wars), so there is no class to tell
+		if (gameInstance == null) return;
+		BaseClass playerClass = gameInstance.classes.get(player);
+		if (playerClass == null) return;
+		playerClass.onConsumingItem(event);
 	}
 
 	@EventHandler
@@ -1084,9 +1093,15 @@ public class GameManager implements Listener, PluginMessageListener {
 	 */
 	@EventHandler
 	public void onPlayerDropItem(PlayerDropItemEvent e) {
-		GameInstance instance = this.GetInstanceOfPlayer(e.getPlayer());
-		if (instance != null && instance.classes.containsKey(e.getPlayer()))
-			instance.classes.get(e.getPlayer()).onItemDropped();
+		Player player = e.getPlayer();
+		anthony.flagwars.FWGameInstance fwInstance = getMain().getFwGameManager().getInstanceOfPlayer(player);
+		if (fwInstance != null && fwInstance.getState() == anthony.flagwars.FWGameState.IN_PROGRESS) {
+			return; // Flag Wars players can drop items mid-match
+		}
+
+		GameInstance instance = this.GetInstanceOfPlayer(player);
+		if (instance != null && instance.classes.containsKey(player))
+			instance.classes.get(player).onItemDropped();
 		e.setCancelled(true);
 	}
 
@@ -2045,6 +2060,12 @@ public class GameManager implements Listener, PluginMessageListener {
                 return false;
             }
 
+            if (main.getFwGameManager().getInstanceOfPlayer(member) != null
+                    || main.getFwGameManager().getInstanceOfSpectator(member) != null) {
+                leader.sendMessage(main.color("&c&l(!) &e" + member.getName() + " &ris already in a game."));
+                return false;
+            }
+
             if (main.getParkour().hasPlayer(member)) {
                 leader.sendMessage(main.color("&c&l(!) &e" + member.getName() + " &ris currently in parkour."));
                 return false;
@@ -2489,6 +2510,12 @@ public class GameManager implements Listener, PluginMessageListener {
                 return;
             }
 
+            if (main.getFwGameManager().getInstanceOfPlayer(member) != null
+                    || main.getFwGameManager().getInstanceOfSpectator(member) != null) {
+                leader.sendMessage(main.color("&c&l(!) &e" + member.getName() + " &ris already in a game."));
+                return;
+            }
+
             if (main.getParkour().hasPlayer(member)) {
                 leader.sendMessage(main.color("&c&l(!) &e" + member.getName() + " &ris currently in parkour."));
                 return;
@@ -2544,8 +2571,12 @@ public class GameManager implements Listener, PluginMessageListener {
 	public GameReason AddSpectatorToMap(Player player, Maps map) {
 		GameInstance instance = null;
 
-        //If a player is already in a game, do not spectate (the caller tells them)
-		if (GetInstanceOfPlayer(player) != null) return GameReason.IN_ANOTHER;
+        // Playing or spectating any game (SCB or Flag Wars) blocks spectating another one. Without the
+        // spectator half, a spectator could be listed in two games at once and the first game ending
+        // would drag them out of the second. The caller already tells the player why.
+		if (main.isPlayerInAnyGame(player)) {
+			return GameReason.IN_ANOTHER;
+		}
 
 		instance = getSpectatableGame(map);
 		if (instance == null) return GameReason.FAIL; // nothing to watch on this map
@@ -2571,7 +2602,10 @@ public class GameManager implements Listener, PluginMessageListener {
 	public GameReason AddPlayerToMap(Player player, Maps map) {
 		GameInstance instance = null;
 
-		if (GetInstanceOfPlayer(player) != null || getMain().getParkour().hasPlayer(player))
+		// Includes spectators of SCB and Flag Wars games, not just players. A Flag Wars spectator who joined
+		// an SCB game stayed listed in both, so the Flag Wars game ending teleported them out of the SCB game
+		// while they were still in its player list.
+		if (main.isPlayerInAnyGame(player) || getMain().getParkour().hasPlayer(player))
 			return GameReason.IN_ANOTHER;
 
         instance = getInstanceOfMap(map);
@@ -2718,6 +2752,9 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	@EventHandler
 	public void onBlowUp(EntityExplodeEvent e) {
+		// Flag Wars' own Fire Charge handles its own explosion (FWPlayerListener#onFireChargeExplode) - skip it here.
+		if (e.getEntity().hasMetadata("fw_fire_charge")) return;
+
 		if (e.getEntity() instanceof SmallFireball || e.getEntity() instanceof Fireball) {
 			e.blockList().clear();
 			e.setCancelled(true);
@@ -2737,6 +2774,9 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	@EventHandler
 	public void FireballDamage(EntityExplodeEvent event) {
+		// Flag Wars' own Fire Charge/TNT handle their own explosions (FWPlayerListener#onFireChargeExplode/onTntExplode) - skip them here.
+		if (event.getEntity().hasMetadata("fw_fire_charge") || event.getEntity().hasMetadata("fw_tnt")) return;
+
 		if (event.getEntity() instanceof SmallFireball || event.getEntity() instanceof Fireball) {
 			event.setCancelled(true);
 			((Fireball) event.getEntity()).setIsIncendiary(false);

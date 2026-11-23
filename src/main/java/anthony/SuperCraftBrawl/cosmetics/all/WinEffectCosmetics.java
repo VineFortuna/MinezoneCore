@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.cosmetics.all;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
+import anthony.SuperCraftBrawl.halloween.Halloween;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticRegistry;
 import anthony.SuperCraftBrawl.cosmetics.PassCosmetic;
 import anthony.SuperCraftBrawl.ranks.Rank;
@@ -27,7 +28,7 @@ public final class WinEffectCosmetics {
         registry.register(fishRain(main));
         registry.register(flood(main));
         registry.register(treasureHoard(main));
-        registry.register(ritual(main));
+        if (Halloween.ENABLED) registry.register(ritual(main)); // a Halloween hunt reward
         registry.register(presentRain(main));
         registry.register(winterWonderland(main));
     }

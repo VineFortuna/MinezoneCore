@@ -5,6 +5,7 @@ import anthony.SuperCraftBrawl.Game.classes.all.ReindeerFlight;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.cosmetics.ParticleHelper;
+import anthony.SuperCraftBrawl.halloween.Halloween;
 import anthony.util.ItemHelper;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.PacketPlayOutNamedSoundEffect;
@@ -18,6 +19,7 @@ import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import java.lang.reflect.Field;
@@ -32,8 +34,32 @@ import com.mojang.authlib.properties.Property;
 
 public class WinEffects {
 
+    /**
+     * The slice of a game mode's match state WinEffects actually needs - lets this
+     * class be shared by any gamemode (SCB's GameInstance, Flag Wars's FWGameInstance
+     * via a small adapter, etc.) without depending on SCB's concrete GameInstance.
+     */
+    public interface Host {
+        World getMapWorld();
+        Core getPlugin();
+        Location GetRespawnLoc();
+        Vector getFloodCenter();
+        double getFloodBoundsX();
+        double getFloodBoundsZ();
+
+        /** Whether the match is still in its win celebration (the Santa effect's Reindeer stops flying once it isn't). */
+        default boolean isCelebrating() {
+            return true;
+        }
+
+        /** Registers a task the game cancels itself if it's removed before the task finishes. Returns the task. */
+        default BukkitTask trackTask(BukkitTask task) {
+            return task;
+        }
+    }
+
     private Player player;
-    private GameInstance instance;
+    private Host instance;
     private EnderDragon dragon;
     private boolean defaultEffect = false;
     private boolean rainEffect = false;
@@ -44,6 +70,9 @@ public class WinEffects {
     private boolean winterEffect = false;
 
     private ReindeerFlight reindeerFlight; // Santa win effect
+
+    private BukkitRunnable floodRunnable;
+    private Boat floodBoat;
 
     private ArrayList<Item> fish = new ArrayList<>();
     private final List<Item> presents = new ArrayList<>();
@@ -56,7 +85,7 @@ public class WinEffects {
     // Example format inside the decoded value: {"textures":{"SKIN":{"url":"http://textures.minecraft.net/texture/<hash>"}}}
     private static final String HEROBRINE_TEXTURE_VALUE = ""; // <--- paste Base64 here (optional)
 
-    public WinEffects(Player player, GameInstance instance) {
+    public WinEffects(Player player, Host instance) {
         this.player = player;
         this.instance = instance;
     }
@@ -64,7 +93,7 @@ public class WinEffects {
     public void checkWinEffect() {
         if (instance == null) return;
 
-        Core main = instance.getGameManager().getMain();
+        Core main = instance.getPlugin();
         String id = main.getCosmeticManager().getEquippedId(player, CosmeticCategory.WIN_EFFECT);
         if (id == null) id = "default";
 
@@ -75,7 +104,8 @@ public class WinEffects {
             case "fish_rain": fishRainEffect(); break;
             case "flood": floodEffect(); break;
             case "treasure_hoard": treasureEffect(); break;
-            case "ritual": ritualEffect(); break;
+            // Someone can still have Ritual equipped from the hunt, and this reads the saved id, so it has to be off here too
+            case "ritual": if (Halloween.ENABLED) ritualEffect(); else defaultEffect(); break;
             case "present_rain": presentRainEffect(); break;
             case "winter_wonderland": winterWonderlandEffect(); break;
             default: defaultEffect();
@@ -126,8 +156,8 @@ public class WinEffects {
 
         // Santa's class Reindeer: flown (and sparkling) until the win effects are removed
         reindeerFlight = new ReindeerFlight(player, 0,
-                () -> instance.state == GameState.ENDED && player.getWorld() == instance.getMapWorld());
-        instance.trackClassTask(reindeerFlight.start(instance.getGameManager().getMain()));
+                () -> instance.isCelebrating() && player.getWorld() == instance.getMapWorld());
+        instance.trackTask(reindeerFlight.start(instance.getPlugin()));
     }
 
     /** The Santa win effect's Reindeer (null for the other win effects). */
@@ -180,7 +210,7 @@ public class WinEffects {
                 rep++;
             }
         };
-        runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 1);
+        runnable.runTaskTimer(instance.getPlugin(), 0, 1);
     }
 
     // --- Present Rain (Battle Pass): fish rain, but with gift boxes ---
@@ -214,7 +244,7 @@ public class WinEffects {
                 rep++;
             }
         };
-        instance.trackClassTask(runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 1));
+        instance.trackTask(runnable.runTaskTimer(instance.getPlugin(), 0, 1));
     }
 
     // --- Winter Wonderland (Battle Pass): snow, a glittering particle Christmas tree and jingle bells ---
@@ -259,7 +289,7 @@ public class WinEffects {
                 tick++;
             }
         };
-        instance.trackClassTask(runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 1));
+        instance.trackTask(runnable.runTaskTimer(instance.getPlugin(), 0, 1));
     }
 
     /** One tick of the particle tree: it grows for the first couple of seconds, then twinkles. */
@@ -309,28 +339,31 @@ public class WinEffects {
     private void floodEffect() {
         World world = player.getWorld();
         if (world != instance.getMapWorld()) return;
+        this.floodEffect = true;
         startFireworksRunnable(world);
         world.setStorm(true);
         world.setThundering(true);
 
-        MapInstance map = instance.getMap().GetInstance();
-        Vector center = map.center.clone();
+        Vector center = instance.getFloodCenter();
         double centerX = center.getX();
         double centerY = player.getLocation().clone().getY() - 5;
         double centerZ = center.getZ();
-        double width  = map.boundsX;
-        double length = map.boundsZ;
+        double width  = instance.getFloodBoundsX();
+        double length = instance.getFloodBoundsZ();
 
-        final Boat boat = (Boat) player.getWorld().spawnEntity(player.getLocation(), EntityType.BOAT);
-        player.teleport(boat.getLocation());
-        boat.setPassenger(player);
+        this.floodBoat = (Boat) player.getWorld().spawnEntity(player.getLocation(), EntityType.BOAT);
+        player.teleport(floodBoat.getLocation());
+        floodBoat.setPassenger(player);
 
-        BukkitRunnable runnable = new BukkitRunnable() {
+        this.floodRunnable = new BukkitRunnable() {
             int rep = 0;
             double y = centerY;
             @Override
             public void run() {
-                if (rep == 100) {
+                // 9 reps (9s), same budget startFireworksRunnable uses - rises well past the player
+                // and finishes on its own a second before FD's 10-second win-celebration cleanup runs,
+                // instead of getting cut off mid-rise.
+                if (rep == 9 || floodBoat == null || floodBoat.isDead()) {
                     this.cancel();
                 } else {
                     for (int x = (int) (centerX - width); x <= centerX + width; x++) {
@@ -343,12 +376,12 @@ public class WinEffects {
                         }
                     }
                     y++;
-                    boat.teleport(boat.getLocation().add(0, 1, 0));
+                    floodBoat.teleport(floodBoat.getLocation().add(0, 1, 0));
                 }
                 rep++;
             }
         };
-        runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20);
+        floodRunnable.runTaskTimer(instance.getPlugin(), 0, 20);
     }
 
     public void treasureEffect() {
@@ -393,13 +426,13 @@ public class WinEffects {
                             ));
                             new BukkitRunnable() {
                                 @Override public void run() { if (!item.isDead()) item.remove(); }
-                            }.runTaskLater(instance.getGameManager().getMain(), 40L);
+                            }.runTaskLater(instance.getPlugin(), 40L);
                         }
                     }
                 }
                 tick++;
             }
-        }.runTaskTimer(instance.getGameManager().getMain(), 0L, 4L);
+        }.runTaskTimer(instance.getPlugin(), 0L, 4L);
     }
 
     private void playRecord11Compat(World world, Location loc, float volume, float pitch) {
@@ -530,7 +563,7 @@ public class WinEffects {
 
                 try { world.playSound(top, Sound.WITHER_SPAWN, 1.0f, 0.7f); } catch (Throwable ignored) {}
             }
-        }.runTaskLater(instance.getGameManager().getMain(), 60L); // 3 seconds later
+        }.runTaskLater(instance.getPlugin(), 60L); // 3 seconds later
 
         // Cleanup after ~10 seconds
         new BukkitRunnable() {
@@ -554,7 +587,7 @@ public class WinEffects {
                 world.setTime(prevTime);
                 ritualEffect = false;
             }
-        }.runTaskLater(instance.getGameManager().getMain(), 200L);
+        }.runTaskLater(instance.getPlugin(), 200L);
     }
 
     private Location findGround(Location start) {
@@ -604,7 +637,7 @@ public class WinEffects {
             }
         };
         // Tracked so it stops if the game is removed before it finishes
-        instance.trackClassTask(runnable.runTaskTimer(instance.getGameManager().getMain(), 0, 20));
+        instance.trackTask(runnable.runTaskTimer(instance.getPlugin(), 0, 20));
     }
 
     private void playFireworks(World world, org.bukkit.Color[] palette) {
@@ -640,6 +673,15 @@ public class WinEffects {
             for (Item i : fish) i.remove();
             this.rainEffect = false;
         } else if (this.floodEffect) {
+            if (this.floodRunnable != null) {
+                try { this.floodRunnable.cancel(); } catch (IllegalStateException ignored) {}
+                this.floodRunnable = null;
+            }
+            if (this.floodBoat != null && !this.floodBoat.isDead()) {
+                this.floodBoat.eject();
+                this.floodBoat.remove();
+            }
+            this.floodBoat = null;
             player.getWorld().setStorm(false);
             player.getWorld().setThundering(false);
             this.floodEffect = false;

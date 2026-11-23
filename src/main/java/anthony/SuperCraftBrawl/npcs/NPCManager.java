@@ -4,7 +4,7 @@ import anthony.SuperCraftBrawl.gui.games.CustomGamesGUI;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.GameManager;
 import anthony.SuperCraftBrawl.gui.ClassicModeGUI;
-import anthony.SuperCraftBrawl.gui.DuelsModeGUI;
+import anthony.SuperCraftBrawl.gui.SCBModeSelectGUI;
 import anthony.SuperCraftBrawl.gui.fishing.FishingGUI;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
@@ -13,6 +13,8 @@ import net.jitse.npclib.api.events.NPCInteractEvent;
 import net.jitse.npclib.api.skin.Skin;
 import net.jitse.npclib.api.state.NPCSlot;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -20,9 +22,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class NPCManager implements Listener {
 
@@ -30,7 +35,11 @@ public class NPCManager implements Listener {
 	private NPCLib npcLib;
 
 	// NPCS HERE:
-    private net.jitse.npclib.api.NPC fishing, scbClassic, scbDuels, socialMedia, parkour, customGames;
+    private net.jitse.npclib.api.NPC fishing, scbClassic, flagwars, socialMedia, parkour, customGames, survey;
+	private List<String> surveyFrameGreen, surveyFrameWhite;
+	private BukkitTask surveyTask;
+
+	private static final String SURVEY_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfPqu6WDrVQW59YjzzVT0O5ZWa-8cHibHt3w7MBlHjInpOWyA/viewform?usp=dialog";
 
     public NPCManager(Core main) {
 		this.main = main;
@@ -46,24 +55,33 @@ public class NPCManager implements Listener {
 		Skin fishermanSkin = new Skin(
 				"ewogICJ0aW1lc3RhbXAiIDogMTYxNDE3ODA2NzIzNywKICAicHJvZmlsZUlkIiA6ICJmZDYwZjM2ZjU4NjE0ZjEyYjNjZDQ3YzJkODU1Mjk5YSIsCiAgInByb2ZpbGVOYW1lIiA6ICJSZWFkIiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlL2I2MTY0YTNjM2JlYjFiYzAzMTAwMzBmMjgxNTU4OTE5ODEzZjBhMTVjMmQ3Y2I3NzIyNGMxZDk0ZmZmMjE0NDQiCiAgICB9CiAgfQp9",
 				"GsrpTxzgihotEuasiq0cefZtiIzhyASNyAcXiHfFI+HqsC8aAZP/P6HYRa7zC3iQqMvDaVMZYFnmBui3B4KC49STqXy7UheGPT5xylV3dfjurinwpOUYJMNRcJYW9pLb98jVZ+bQW9LKHUdRbxgkGJxpJQQ+LQlROfpZ9DaM/fdVjImiMSUyUeCF5WyMxadRrEWeo+a1Cn25IrNWo+KWQy7OWLJONeZcuboZGqobuckZKfIRvW1Vtt2v45PXRI5ec/6YO6kr+yGVS51xlAZOzxjaaGACA+/5gHLeEu0Oka/hdGY0HdukqKcg3TXf1cZZ7qB/VCpnAuWOguTfXU09gh2BGRvOizsQpL5tRpg4lA/l5Q70t2jtj+79M2yRYC7LQs/SrUUIX6VJ3w8ylKKqTjLE+PVCmgwgW1bYX3tpt9xEhRJ5kPv47iX0DkVcGxE2QW3xd8gyJfE5BzeKhcXjEV+GJNa2NOiHnVIKJPuj+trJnOiKDainhcR00+Ncna5I9TomGm2r0TGUrO/bPqW7b2yvpBNUnAweUYjU/eG2E9uY5IzVPwO9M+PqulqD5Reqq3MW32WAcmLkO417Tn48tZnAmYjVoM5zb16ZN/J9LQgHMf9L0/ZgguBgKOx0UQeedJjwgkA9BZdL6LuTiLwfcEt2ZxSwvvAXfBWVmrSlVns=");
+		Skin angelinoSkin = new Skin(
+				"ewogICJ0aW1lc3RhbXAiIDogMTc5NTM4OTExMzYyOCwKICAicHJvZmlsZUlkIiA6ICI3OTUyYWI4MTM5NTE0MDViODdlYjAyMmMzYzZiYzkyNyIsCiAgInByb2ZpbGVOYW1lIiA6ICJBbmdlbGlubzExIiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzNjZDhmMDI1MDE3ODVkMTZiMDkzZjRkNjU5Njk4YTc5ZmNkNTBhMDA5NGY1MzM0OWQ0OGQ2NjMyZmM2ZTEzMmQiCiAgICB9CiAgfQp9",
+				"NUFSw3okBHfms33ztfGV2WK2QYjNuZBOWxAYvAeoXQDBPT8bqycyn/fIyOUFnqOyh1ph63gzNnAfD4AmA+KDKbDaXiIkVGNvfTHiAuoe8pnWs7oY2+o09S/On0GsOj/DvppPX9oWNcggqGN6N5nW21BKN6WPsb/g8KE1kWoi/gfLLFcZEp5EJa8vUq2/6c+emefFvMQPr1PnqtJTZN1qCpqhjtr98oOM26TE5TLIUE657mWoLbK/UjXdbdIm6cnxcdulZJVIlWyM18v6Ade4f1KsOoFZ0EIyxtvYU9RZFQYK+/IydnANPbFIrvf1PvXAB4vTMho8102xAGHZezPxBeV80TkrertZ9IFE3XkV5qIJTVfTczeiM1gn5Z4cTx+agFEhvOhjTeIaiixKqei6Z719lTMgESMI7ZxMq/byTtrNP/759MqrLW6OOsa9PSUGoFSXx1tBn1wRLohSZyciAbQqlMNR7pRjUEeFt5Y7jsS4wnNS0QsBQyVjUNiwyY/ZR9u8ca+7fZ+w/hQXqhP46YoKm+/VrltDoufy2T02O7JwXB2g1CpZsv7dbcXRysB7xZD3mcaHoZdUVL7JUlaTfR13mJubZt5bbPblHGojVX4TodzROvAZ5ekwJ4/EN8rqkoTf4pjAH2HTdsO6Fq0vWFtHAti5fl7TUuwHJGrFmGc=");
+		Skin drewpSkin = new Skin(
+				"ewogICJ0aW1lc3RhbXAiIDogMTc5NTM4ODQ0NTgxNSwKICAicHJvZmlsZUlkIiA6ICIyMzYwZTc3MzU0Y2U0MjZmYmQ2OTc4Njg1ZDdhYmJkYSIsCiAgInByb2ZpbGVOYW1lIiA6ICJkcmV3cCIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS9kODEwM2JlNWJmZGU2ODNjMTU5YzM3MzkzMWU4N2VkOTViM2Y3ZThiMDg2NDVmMWUzZTg1ZWM3NGZhOWI1NDciLAogICAgICAibWV0YWRhdGEiIDogewogICAgICAgICJtb2RlbCIgOiAic2xpbSIKICAgICAgfQogICAgfSwKICAgICJDQVBFIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS83YzQxOGRmYmQzNzQxMmE1NWU5ZjE0MjVjOTgwN2E1OTFhZDEwY2Y3MWIxZWRiNTc2YTU4N2JlOTExNGMyNzdmIgogICAgfQogIH0KfQ==",
+				"NnC5yUHd5BlzC3JkqCKBJ2tOvCiG9zaEUgrHvFXjTnSrg5EecK/kztXXtqEuh/LUOcc2hGdzADFJ95H4e4mWwgSmoM7RXTfsQiyEvvvErWwkzvxM++M6Ehmq+0MIJ9AWo3ZVjEAcpkZxs8Qhz/dFX5uKxn9pZzCkdeDg7F0uZnRp0PgLXqwToej9CoW2ZlXYAcQmN4eAp9J4DzLrOZszKUDiYDYAgo9bPGCW8Jv3L4vKLaBcTp67r7barVCRSEFq+bqOIgB2lz8dUNa95mDAgRYQBEAKMeosUBfLPDepFEGAD1dsHMqgTG4JgTvlRMXMyMWzziGTW4uNwLocEJS9JmQCBX2Dtw6Rrtcc9BqMFhij29XCGhuI9PBEOjVyxpS2yJHvN0dmKa7JtPnBxXnUhJcG+YUWdeuC9WcdrxNyzSJdhVVOyr7ilXDi3riQOrJQX3Hh6f8RY1a0xOZ67LdfHMGayvA4didT5Lc5ziRYxlfXAk0z5C9JuknhOICrmuN/CsqpID+qrxGag4o+/OC6E44qyF6vFa0Z4JYI/VtKdsr6fmnZC0nTurnXnsnfF4F8yX3bgbdqLJkjVfE3+UBHluRDk/Y+GW9U1CurlXav7XQXmY+O6up9FjEn9ZpAM6iRxMJpIgkArV5olHYTbsBEi4u3Wt3HYj3w0yvozL33WNw=");
+		Skin flagWarsSkin = new Skin(
+				"ewogICJ0aW1lc3RhbXAiIDogMTc4MjM0MzczNjcxNCwKICAicHJvZmlsZUlkIiA6ICI0N2Q1ZjY1ZWQyOWM0ZTU0OWRmNjlmNGNiZmExNTg3OCIsCiAgInByb2ZpbGVOYW1lIiA6ICJQaWtlcnkiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZmIxMjc3Zjk5ZjJkZmU1MWQ0YjhkNTU4OTcwYmI1NTMyYTk1OWE3NGIzYmMyM2ZmMWRiZjA3ODljZGQ0NDVlOCIKICAgIH0KICB9Cn0=",
+				"IFTvnqG3xZCYkQ6fe3U8IcVsbd+RkfFuHJv2uK21cnwIhaie0ABMGDbLgMTcutfZo+ujtxAMaAJYdljyp4Gg5b34AJhhGTo6dyuzZ0lmH7x73GAA5IstrfuVNK7vSIFnP/5I0C5zjK5joW3NqtkxXzRPwgxbP6NuuSDhiwOYQrTEGPoHCq5RFyaJ5LSpiqUMNU+i+vynlWNLnE7p90ZbSholPp4oB+DvP1lDy+n2xD8lQLrJeDHa/MtDr+C6oZZx5pkULOCV5iZfI/RDjhodA6RZAu6/Ij0o0YT2zPXJQBb6OT5oHr/Xl2ZgTlKVY4g6xYjmpZbPzkyGlK6meP6RMq9fKukMtjzTL9hAdMwWa7Wdll1MM6ynoxMF5nIhHeUWkRBocfYVGpsXQuGBCyWgoCYJRzkJT7O9uwKUUncn9mRG4ZbU+hwCQth30hUOfqZVNOmLiYeD0eWqqB0/XwOwK8rnYoNkhtPW3EedSMQqhvI9XcV/XZNTzC4c93waPt+yPtTqVMX/ReBtavaQMFKAqtSRWPBpA+fVMaBGkkdI+ZEU80QaSDQ3oQJLq3kza0kgJx3/UPwt+cIMwpi3g3nt5JJk1zMg7SEeiYPsriZ2VeeWmWylcmrlLz7yqhouTcHdVRKzd6JK6I+xzPxX7Nohmrk24d9Xo7cZQpvy7ItF0XI=");
 
-		scbClassic = npcLib.createNPC(Arrays.asList(main.color("&6&lSUPER CRAFT BROS"), main.color("&fMode: &aClassic"),
+		scbClassic = npcLib.createNPC(Arrays.asList(main.color("&6&lSUPER CRAFT BROS"), main.color("&fModes: &aClassic, Duels"),
 				main.color("&eClick to Play!")));
 		scbClassic.setLocation(new Location(main.getLobbyWorld(), 191.5, 106, 657.5, 174, 2));
 		scbClassic.setSkin(sethblingSkin);
 		scbClassic.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));
 		scbClassic.create();
 
-		scbDuels = npcLib.createNPC(Arrays.asList(main.color("&6&lSUPER CRAFT BROS"), main.color("&fMode: &aDuels"),
+		flagwars = npcLib.createNPC(Arrays.asList(main.color("&6&lFLAG WARS &r&lNEW!"), main.color("&rMode: &aSolo"),
 				main.color("&eClick to Play!")));
-		scbDuels.setLocation(new Location(main.getLobbyWorld(), 187.5, 106, 657.5, -174, 3));
-		scbDuels.setSkin(sethblingSkin);
-		scbDuels.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));
-		scbDuels.create();
+		flagwars.setLocation(new Location(main.getLobbyWorld(), 187.5, 106, 657.5, -174, 3));
+		flagwars.setSkin(flagWarsSkin);
+		flagwars.setItem(NPCSlot.MAINHAND, ItemHelper.createFlagWarsBanner());
+		flagwars.create();
 
 		parkour = npcLib.createNPC(Arrays.asList(main.color("&6&lPARKOUR"), main.color("&eClick to Play!")));
-		parkour.setLocation(new Location(main.getLobbyWorld(), 183.5, 106, 656.5, -158, 2));
-		parkour.setSkin(sethblingSkin);
+		parkour.setLocation(new Location(main.getLobbyWorld(), 165.5, 109, 670.5, -38f, 2.5f));
+		parkour.setSkin(drewpSkin);
 		parkour.create();
 
 		socialMedia = npcLib.createNPC(Arrays.asList("" + ChatColor.AQUA + ChatColor.BOLD + "View Social Medias", "",
@@ -79,10 +97,34 @@ public class NPCManager implements Listener {
 		customGames.create();
 
 		fishing = npcLib.createNPC(Arrays.asList(main.color("&6&lFISHING"), main.color("&eClick to view!")));
-		fishing.setLocation(new Location(main.getLobbyWorld(), 195.5, 106, 656.5, 162, 3));
+		fishing.setLocation(new Location(main.getLobbyWorld(), 215.5, 106, 665.5, -0.3f, 0.5f));
 		fishing.setSkin(fishermanSkin);
 		fishing.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.FISHING_ROD));
 		fishing.create();
+
+		// Two shared immutable frames, the reward line flips between green and white
+		surveyFrameGreen = Arrays.asList(main.color("&6&lSERVER SURVEY"), main.color("&a300 Token Reward!"),
+				main.color("&eClick to view!"));
+		surveyFrameWhite = Arrays.asList(main.color("&6&lSERVER SURVEY"), main.color("&f300 Token Reward!"),
+				main.color("&eClick to view!"));
+		survey = npcLib.createNPC(surveyFrameGreen);
+		survey.setLocation(new Location(main.getLobbyWorld(), 184.5, 108, 640.5, -155.3f, -0.2f));
+		survey.setSkin(angelinoSkin);
+		survey.create();
+		animateSurvey();
+	}
+
+	/** Every 0.5 seconds the survey reward line swaps color. Cancelled in {@link #shutdown()}. */
+	private void animateSurvey() {
+		surveyTask = new BukkitRunnable() {
+			boolean white = false;
+
+			@Override
+			public void run() {
+				white = !white;
+				survey.setText(white ? surveyFrameWhite : surveyFrameGreen);
+			}
+		}.runTaskTimer(main, 10L, 10L);
 	}
 
 	private void update() { // Updates NPCs
@@ -167,15 +209,23 @@ public class NPCManager implements Listener {
 		if (e.getNPC() == fishing) {
 			new FishingGUI(main, null).inv.open(player);
 		} else if (e.getNPC() == scbClassic) {
-			new ClassicModeGUI(main, null).inv.open(player);
-		} else if (e.getNPC() == scbDuels) {
-			new DuelsModeGUI(main, null).inv.open(player);
+			new SCBModeSelectGUI(main).inv.open(player);
+		} else if (e.getNPC() == flagwars) {
+			anthony.flagwars.FWModeSelectGUI.openOrJoin(main.getFwGameManager(), player);
 		} else if (e.getNPC() == customGames) {
 			SoundManager.playClickSound(player);
 			new CustomGamesGUI(main).inv.open(player);
 		} else if (e.getNPC() == parkour) {
             SoundManager.playClickSound(player);
             mainParkour(player);
+		} else if (e.getNPC() == survey) {
+			TextComponent message = new TextComponent(main.color("&5&l(!) "));
+			TextComponent link = new TextComponent(main.color("&e&l&nCLICK HERE"));
+			link.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, SURVEY_URL));
+			message.addExtra(link);
+			message.addExtra(new TextComponent(main.color("&f to fill out our &o5min&f survey and claim your &a300 Tokens&f, "
+					+ "and your chance to win 1 month of &6&lLEGENDARY&r&f rank! Survey ends &7&nNovember 30th")));
+			player.spigot().sendMessage(message);
 		} else if (e.getNPC() == socialMedia) {
 			player.sendMessage(main.color("&8&m-------&8[Social Media]&8&m-------"));
 			player.sendMessage("");
@@ -203,15 +253,25 @@ public class NPCManager implements Listener {
 			Bukkit.getScheduler().runTask(main, () -> fishing.show(e.getPlayer()));
 			Bukkit.getScheduler().runTask(main, () -> scbClassic.show(e.getPlayer()));
 			//Bukkit.getScheduler().runTask(main, () -> socialMedia.show(e.getPlayer()));
-			Bukkit.getScheduler().runTask(main, () -> scbDuels.show(e.getPlayer()));
+			Bukkit.getScheduler().runTask(main, () -> flagwars.show(e.getPlayer()));
 			Bukkit.getScheduler().runTask(main, () -> parkour.show(e.getPlayer()));
 			Bukkit.getScheduler().runTask(main, () -> customGames.show(e.getPlayer()));
+			Bukkit.getScheduler().runTask(main, () -> survey.show(e.getPlayer()));
 		}, 20L);
 		// }
 	}
 
+    public NPCLib getNpcLib() {
+        return npcLib;
+    }
+
     public void shutdown() {
-        net.jitse.npclib.api.NPC[] all = { fishing, scbClassic, scbDuels, socialMedia, parkour, customGames };
+        if (surveyTask != null) {
+            surveyTask.cancel();
+            surveyTask = null;
+        }
+
+        net.jitse.npclib.api.NPC[] all = { fishing, scbClassic, flagwars, socialMedia, parkour, customGames, survey };
 
         for (net.jitse.npclib.api.NPC npc : all) {
             if (npc == null) continue;
