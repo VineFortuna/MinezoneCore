@@ -61,14 +61,19 @@ public final class HookTrailCosmetics {
                 Location location = tracker.getFlyingLocation(player);
                 if (location == null) return;
 
-                // Count 0 makes the 1.8 client read the offsets as an RGB colour instead of a spread.
+                // Count 0 makes the 1.8 client read the offsets as an RGB colour instead of a spread, so a
+                // second, slightly offset packet is sent to thicken the trail without losing the colour.
                 // A red offset of exactly 0 is read as full red, so it's kept just above 0 here.
-                PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(EnumParticle.REDSTONE, false,
+                PacketPlayOutWorldParticles packet1 = new PacketPlayOutWorldParticles(EnumParticle.REDSTONE, false,
                         (float) location.getX(), (float) location.getY(), (float) location.getZ(),
+                        1f, 0.92f, 0f, 1f, 0);
+                PacketPlayOutWorldParticles packet2 = new PacketPlayOutWorldParticles(EnumParticle.REDSTONE, false,
+                        (float) location.getX() + 0.1f, (float) location.getY() + 0.1f, (float) location.getZ() - 0.1f,
                         1f, 0.92f, 0f, 1f, 0);
 
                 for (Player online : Bukkit.getOnlinePlayers()) {
-                    ((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
+                    ((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet1);
+                    ((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet2);
                 }
             }
         };
@@ -107,14 +112,19 @@ public final class HookTrailCosmetics {
                 Location location = tracker.getFlyingLocation(player);
                 if (location == null) return;
 
-                // Count 0 makes the 1.8 client read the offsets as an RGB colour instead of a spread.
+                // Count 0 makes the 1.8 client read the offsets as an RGB colour instead of a spread, so a
+                // second, slightly offset packet is sent to thicken the trail without losing the colour.
                 // A red offset of exactly 0 is read as full red, so it's kept just above 0 here.
-                PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(EnumParticle.REDSTONE, false,
+                PacketPlayOutWorldParticles packet1 = new PacketPlayOutWorldParticles(EnumParticle.REDSTONE, false,
                         (float) location.getX(), (float) location.getY(), (float) location.getZ(),
+                        0.001f, 0.4f, 1f, 1f, 0);
+                PacketPlayOutWorldParticles packet2 = new PacketPlayOutWorldParticles(EnumParticle.REDSTONE, false,
+                        (float) location.getX() + 0.1f, (float) location.getY() + 0.1f, (float) location.getZ() - 0.1f,
                         0.001f, 0.4f, 1f, 1f, 0);
 
                 for (Player online : Bukkit.getOnlinePlayers()) {
-                    ((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
+                    ((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet1);
+                    ((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet2);
                 }
             }
         };
@@ -159,7 +169,7 @@ public final class HookTrailCosmetics {
 
                 PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(EnumParticle.SNOW_SHOVEL, false,
                         (float) location.getX(), (float) location.getY(), (float) location.getZ(),
-                        0f, 0f, 0f, 0f, 1);
+                        0.05f, 0.05f, 0.05f, 0f, 2);
 
                 for (Player online : Bukkit.getOnlinePlayers()) {
                     ((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
