@@ -1,7 +1,7 @@
 package anthony.SuperCraftBrawl.cosmetics.all;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.Game.classes.all.ReindeerFlight;
+import anthony.SuperCraftBrawl.christmas.ReindeerFlight;
 import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticRegistry;
@@ -14,13 +14,17 @@ import net.minecraft.server.v1_8_R3.EntityLiving;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowman;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -36,10 +40,44 @@ public final class PetCosmetics {
         registry.register(rudolph(main));
     }
 
-    /** The Rudolph Pet, unlocked by finding 8 Christmas presents. Flies exactly like Santa's Reindeer. */
+    /**
+     * The Rudolph Pet, unlocked by finding 8 Christmas presents. Equipping it spawns an idle Reindeer next
+     * to the player instead of mounting them automatically - right-clicking it is what starts the flight
+     * (exactly like Santa's Reindeer), and only the owner can ride it.
+     */
     private static Cosmetic rudolph(Core main) {
-        final Map<UUID, ReindeerFlight> flights = new HashMap<>();
-        final Set<UUID> equippedPlayers = ConcurrentHashMap.newKeySet();
+        final Map<UUID, Horse> idlePets = new HashMap<>();          // owner uuid -> their standing Reindeer
+        final Map<UUID, ReindeerFlight> flights = new HashMap<>();  // owner uuid -> their active flight
+        final Map<UUID, UUID> ownerByHorse = new ConcurrentHashMap<>(); // horse uuid -> owner uuid
+
+        main.getServer().getPluginManager().registerEvents(new Listener() {
+            @EventHandler(ignoreCancelled = true)
+            public void onClickReindeer(PlayerInteractEntityEvent event) {
+                if (!(event.getRightClicked() instanceof Horse)) return;
+                UUID ownerId = ownerByHorse.get(event.getRightClicked().getUniqueId());
+                if (ownerId == null) return; // not one of our reindeer
+
+                event.setCancelled(true); // never let vanilla mount/open its inventory
+                Player clicker = event.getPlayer();
+
+                if (!clicker.getUniqueId().equals(ownerId)) {
+                    clicker.sendMessage(main.color("&c&l(!) &rThis isn't your Reindeer!"));
+                    return;
+                }
+                if (flights.containsKey(ownerId)) return; // already riding it
+
+                Horse idle = idlePets.remove(ownerId);
+                if (idle != null) {
+                    ownerByHorse.remove(idle.getUniqueId());
+                    idle.remove();
+                }
+
+                ReindeerFlight flight = new ReindeerFlight(clicker, 0,
+                        () -> clicker.isOnline() && main.isInLobby(clicker));
+                flights.put(ownerId, flight);
+                flight.start(main);
+            }
+        }, main);
 
         return new Cosmetic("rudolph", CosmeticCategory.PET, "Rudolph Pet",
                 "Christmas 2026 Exclusive") {
@@ -62,24 +100,64 @@ public final class PetCosmetics {
 
             public void onEquip(Player player) {
                 UUID uuid = player.getUniqueId();
-                equippedPlayers.add(uuid);
 
-                ReindeerFlight existing = flights.remove(uuid);
-                if (existing != null) existing.end();
+                Horse existingIdle = idlePets.remove(uuid);
+                if (existingIdle != null) {
+                    ownerByHorse.remove(existingIdle.getUniqueId());
+                    existingIdle.remove();
+                }
+                ReindeerFlight existingFlight = flights.remove(uuid);
+                if (existingFlight != null) existingFlight.end();
 
-                ReindeerFlight flight = new ReindeerFlight(player, 0,
-                        () -> equippedPlayers.contains(uuid) && player.isOnline() && main.isInLobby(player));
-                flights.put(uuid, flight);
-                flight.start(main);
+                Horse idle = spawnIdleReindeer(player);
+                idlePets.put(uuid, idle);
+                ownerByHorse.put(idle.getUniqueId(), uuid);
             }
 
             public void onUnequip(Player player) {
                 UUID uuid = player.getUniqueId();
-                equippedPlayers.remove(uuid);
+
+                Horse idle = idlePets.remove(uuid);
+                if (idle != null) {
+                    ownerByHorse.remove(idle.getUniqueId());
+                    idle.remove();
+                }
                 ReindeerFlight flight = flights.remove(uuid);
                 if (flight != null) flight.end();
             }
+
+            @Override
+            public long getTickPeriod() {
+                return 20L;
+            }
+
+            @Override
+            public void tick(Player player) {
+                UUID uuid = player.getUniqueId();
+                Horse idle = idlePets.get(uuid);
+                if (idle == null) return;
+
+                if (!idle.isValid() || !main.isInLobby(player)) {
+                    ownerByHorse.remove(idle.getUniqueId());
+                    idle.remove();
+                    idlePets.remove(uuid);
+                }
+            }
         };
+    }
+
+    /** Spawns an idle (unmounted) Reindeer beside the player - styled the same as Santa's. */
+    private static Horse spawnIdleReindeer(Player player) {
+        Horse horse = (Horse) player.getWorld().spawnEntity(player.getLocation().add(1, 0, 1), EntityType.HORSE);
+        horse.setTamed(true);
+        horse.setAdult();
+        horse.setVariant(Horse.Variant.HORSE);
+        horse.setColor(Horse.Color.DARK_BROWN);
+        horse.setStyle(Horse.Style.NONE);
+        horse.setCustomName(ChatColor.RED + player.getName() + "'s " + ChatColor.YELLOW + "Reindeer");
+        horse.setOwner(player);
+        horse.getInventory().setSaddle(new ItemStack(Material.SADDLE));
+        return horse;
     }
 
     private static Cosmetic snowman(Core main) {

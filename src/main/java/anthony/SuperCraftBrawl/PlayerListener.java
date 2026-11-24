@@ -230,11 +230,12 @@ public class PlayerListener implements Listener {
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        // Safety net: if this player is somehow still riding an EnderDragon from a previous session, eject and remove it
+        // Safety net: if this player is somehow still riding a vehicle from a previous session (EnderDragon,
+        // Rudolph pet's Horse, etc.), eject and remove it so they don't log in stuck.
         if (player.isInsideVehicle()) {
             Entity vehicle = player.getVehicle();
             player.leaveVehicle();
-            if (vehicle instanceof EnderDragon) vehicle.remove();
+            if (vehicle != null) vehicle.remove();
         }
 
         PlayerData data = main.getDataManager().getPlayerData(player); // Gets the player data from database
