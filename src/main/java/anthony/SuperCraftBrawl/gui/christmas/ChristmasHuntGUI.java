@@ -29,10 +29,7 @@ public class ChristmasHuntGUI implements InventoryProvider {
             "Parkour",
             "Houses",
             "Pond",
-            "Markets",
-            "City Hospital",
-            "City Park",
-            "Castle"
+            "Markets"
     };
 
     public Core main;
