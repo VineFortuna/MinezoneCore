@@ -11,11 +11,13 @@ import anthony.SuperCraftBrawl.cosmetics.GadgetListener;
 import anthony.SuperCraftBrawl.cosmetics.all.DeathEffectCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.DoubleJumpCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.GadgetCosmetics;
+import anthony.SuperCraftBrawl.cosmetics.all.HookTrailCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.OutfitCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.PetCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.TitleCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.TrailCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.WinEffectCosmetics;
+import anthony.SuperCraftBrawl.christmas.ChristmasHuntManager;
 import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.fishing.FishArea;
 import anthony.SuperCraftBrawl.fishing.Fishing;
@@ -151,6 +153,9 @@ public class Core extends JavaPlugin implements Listener {
     // HALLOWEEN CLASSES:
     private HalloweenHuntManager halloweenHunt;
     private TitleCosmeticPackets trickTitle;
+
+    // CHRISTMAS HUNT:
+    private ChristmasHuntManager christmasHunt;
 
     //PARKOUR VARIABLES:
     public final Set<UUID> sentMysteryHolos = new HashSet<>();
@@ -294,6 +299,10 @@ public class Core extends JavaPlugin implements Listener {
 
     public HalloweenHuntManager getHalloweenManager() {
         return this.halloweenHunt;
+    }
+
+    public ChristmasHuntManager getChristmasManager() {
+        return this.christmasHunt;
     }
 
     public LevelBoard getLevelBoard() {
@@ -832,6 +841,7 @@ public class Core extends JavaPlugin implements Listener {
         PetCosmetics.registerAll(this, cosmeticRegistry);
         TrailCosmetics.registerAll(this, cosmeticRegistry);
         TitleCosmetics.registerAll(this, cosmeticRegistry);
+        HookTrailCosmetics.registerAll(this, cosmeticRegistry);
         WinEffectCosmetics.registerAll(this, cosmeticRegistry);
         DeathEffectCosmetics.registerAll(this, cosmeticRegistry);
         DoubleJumpCosmetics.registerAll(this, cosmeticRegistry);
@@ -988,6 +998,7 @@ public class Core extends JavaPlugin implements Listener {
             halloweenHunt = new HalloweenHuntManager(this);
             candyAura = new CandyAuraManager(this, "lobby-1");
         }
+        christmasHunt = new ChristmasHuntManager(this);
         lobbyWorld = getServer().createWorld(new WorldCreator("lobby-1"));
         if (lobbyWorld != null) {
             lobbyWorld.setAutoSave(false);
