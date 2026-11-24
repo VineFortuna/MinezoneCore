@@ -30,7 +30,7 @@ public final class TitleCosmetics {
         main.getTitlePacket().registerTitle("Fiesta De La Noche", main.color("&b&lFIESTA DE LA NOCHE"), 0.2);
         main.getTitlePacket().registerTitle("Merry", main.color("&c&lMerry"), 0.2);
         main.getTitlePacket().registerTitle("Ho Ho Ho", main.color("&c&lHO &2&lHO &c&lHO"), 0.2);
-        main.getTitlePacket().registerTitle("Mr. Grinch", main.color("&a&lMR. GRINCH"), 0.2);
+        main.getTitlePacket().registerTitle("Mr. Grinch", main.color("&2&lMR. GRINCH"), 0.2);
         main.getTitlePacket().registerTitle("SCB Summer Champ 2021", main.color("&b&lSCB SUMMER CHAMP (2021)"), 0.2);
         main.getTitlePacket().registerTitle("SCB Summer Champ 2022", main.color("&b&lSCB SUMMER CHAMP (2022)"), 0.2);
         main.getTitlePacket().registerTitle("SCB Cash Cup Champ 2023", main.color("&a&lSCB CASH CUP CHAMP (2023)"), 0.2);
@@ -221,7 +221,7 @@ public final class TitleCosmetics {
                 "Christmas 2026 Exclusive") {
             public ItemStack getIcon(Player player) {
                 int found = main.getChristmasManager() != null ? main.getChristmasManager().getFoundCount(player.getUniqueId()) : 0;
-                return withRequirementLore(ItemHelper.createSkullTexture(GRINCH_TEXTURE, main.color("&a&lMR. GRINCH"), "",
+                return withRequirementLore(ItemHelper.createSkullTexture(GRINCH_TEXTURE, main.color("&2&lMR. GRINCH"), "",
                         main.color("&7Progress: &e" + Math.min(found, 3) + "&7/3 presents")));
             }
 
@@ -231,7 +231,7 @@ public final class TitleCosmetics {
             }
 
             public String getUnlockMessage(Player player) {
-                return main.color("&c&l(!) &rYou need to find &e3 presents &rto use &a&lMR. GRINCH &rtitle.");
+                return main.color("&c&l(!) &rYou need to find &e3 presents &rto use &2&lMR. GRINCH &rtitle.");
             }
 
             public void onEquip(Player player) {

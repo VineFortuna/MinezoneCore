@@ -273,7 +273,7 @@ public final class OutfitCosmetics {
             public ItemStack getIcon(Player player) {
                 int found = main.getChristmasManager() != null
                         ? main.getChristmasManager().getFoundCount(player.getUniqueId()) : 0;
-                return withRequirementLore(ItemHelper.createSkullTexture(GRINCH_TEXTURE, main.color("&a&lGrinch Outfit"), "",
+                return withRequirementLore(ItemHelper.createSkullTexture(GRINCH_TEXTURE, main.color("&2&lGrinch Outfit"), "",
                         main.color("&7Progress: &e" + Math.min(found, 5) + "&7/5 presents")));
             }
 

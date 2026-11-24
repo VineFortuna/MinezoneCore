@@ -13,6 +13,7 @@ import org.bukkit.event.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -132,14 +133,14 @@ public class ChristmasHuntManager implements Listener {
                 giveMysteryChests(p, 2);
                 break;
             case 3:
-                p.sendMessage(core.color(PREFIX + "You unlocked: &a&lMR. GRINCH &rtitle cosmetic"));
+                p.sendMessage(core.color(PREFIX + "You unlocked: &2&lMR. GRINCH &rtitle cosmetic"));
                 break;
             case 4:
                 p.sendMessage(core.color(PREFIX + "You were rewarded with &e50 Tokens"));
                 giveTokensReward(p, 50);
                 break;
             case 5:
-                p.sendMessage(core.color(PREFIX + "You unlocked: &a&lGrinch &routfit cosmetic"));
+                p.sendMessage(core.color(PREFIX + "You unlocked: &2&lGrinch &routfit cosmetic"));
                 break;
             case 6:
                 p.sendMessage(core.color(PREFIX + "You were rewarded with &e150 EXP"));
@@ -160,45 +161,59 @@ public class ChristmasHuntManager implements Listener {
 
     private void reward(Player p) {
         Bukkit.broadcastMessage(core
-                .color("&8[&c&lPRESENT HUNT&8] &e" + p.getName() + " &6has found all 10 Presents! Merry Christmas!"));
+                .color("&8[&c&lPRESENT HUNT&8] &e" + p.getName() + " &ahas found all 10 Presents! Merry Christmas!"));
 
-        World w = p.getWorld();
-        Location base = p.getLocation();
-        Random rand = new Random();
+        launchCelebrationFireworks(p);
+    }
 
-        org.bukkit.Color[] palette = new org.bukkit.Color[] {
-                org.bukkit.Color.RED,
-                org.bukkit.Color.GREEN,
-                org.bukkit.Color.WHITE,
-                org.bukkit.Color.YELLOW
-        };
+    // Launches fireworks one after the other, alternating red and green/yellow
+    private void launchCelebrationFireworks(final Player p) {
+        final int count = 10;
+        final long intervalTicks = 8L;
+        final Random rand = new Random();
 
-        FireworkEffect.Type[] shapes = new FireworkEffect.Type[] {
+        final FireworkEffect.Type[] shapes = new FireworkEffect.Type[] {
                 FireworkEffect.Type.BALL,
                 FireworkEffect.Type.BALL_LARGE,
                 FireworkEffect.Type.STAR,
                 FireworkEffect.Type.BURST
         };
 
-        for (int i = 0; i < 10; i++) {
-            // small random offset around the player
-            Location spawn = base.clone().add((rand.nextDouble() - 0.5) * 2.5, 0, (rand.nextDouble() - 0.5) * 2.5);
+        new BukkitRunnable() {
+            int launched = 0;
 
-            Firework fw = (Firework) w.spawnEntity(spawn, EntityType.FIREWORK);
-            FireworkMeta meta = fw.getFireworkMeta();
-            meta.setPower(1 + rand.nextInt(2));
+            @Override
+            public void run() {
+                if (launched >= count || !p.isOnline()) {
+                    cancel();
+                    return;
+                }
 
-            FireworkEffect effect = FireworkEffect.builder()
-                    .with(shapes[rand.nextInt(shapes.length)])
-                    .withColor(palette[rand.nextInt(palette.length)], palette[rand.nextInt(palette.length)])
-                    .withFade(palette[rand.nextInt(palette.length)])
-                    .flicker(rand.nextBoolean())
-                    .trail(true)
-                    .build();
+                // small random offset around the player
+                Location spawn = p.getLocation().add((rand.nextDouble() - 0.5) * 2.5, 0,
+                        (rand.nextDouble() - 0.5) * 2.5);
 
-            meta.addEffect(effect);
-            fw.setFireworkMeta(meta);
-        }
+                Firework fw = (Firework) spawn.getWorld().spawnEntity(spawn, EntityType.FIREWORK);
+                FireworkMeta meta = fw.getFireworkMeta();
+                meta.setPower(1);
+
+                FireworkEffect.Builder builder = FireworkEffect.builder()
+                        .with(shapes[rand.nextInt(shapes.length)])
+                        .flicker(rand.nextBoolean())
+                        .trail(true);
+
+                if (launched % 2 == 0)
+                    builder.withColor(org.bukkit.Color.RED).withFade(org.bukkit.Color.RED);
+                else
+                    builder.withColor(org.bukkit.Color.GREEN, org.bukkit.Color.YELLOW)
+                            .withFade(org.bukkit.Color.YELLOW);
+
+                meta.addEffect(builder.build());
+                fw.setFireworkMeta(meta);
+
+                launched++;
+            }
+        }.runTaskTimer(core, 0L, intervalTicks);
     }
 
     // True once the player has found every present (unlocks Grinch class)
