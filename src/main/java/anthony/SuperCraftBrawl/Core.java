@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl;
 import anthony.SuperCraftBrawl.Game.*;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.armorstands.ArmorStandManager;
+import anthony.SuperCraftBrawl.christmas.ChristmasHuntManager;
 import anthony.SuperCraftBrawl.commands.Commands;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticDataDAO;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticManager;
@@ -15,6 +16,7 @@ import anthony.SuperCraftBrawl.cosmetics.all.OutfitCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.PetCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.TitleCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.TrailCosmetics;
+import anthony.SuperCraftBrawl.cosmetics.all.HookTrailCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.WinEffectCosmetics;
 import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.fishing.FishArea;
@@ -150,6 +152,9 @@ public class Core extends JavaPlugin implements Listener {
     private HalloweenHuntManager halloweenHunt;
     private TitleCosmeticPackets trickTitle;
 
+    // CHRISTMAS HUNT:
+    private ChristmasHuntManager christmasHunt;
+
     //PARKOUR VARIABLES:
     public final Set<UUID> sentMysteryHolos = new HashSet<>();
     public final Set<UUID> sentParkourHolos = new HashSet<>();
@@ -158,7 +163,7 @@ public class Core extends JavaPlugin implements Listener {
     public LobbyExplorerManager explorerManager;
 
     //LEADERBOARDS:
-    public final java.util.Map<java.util.UUID, anthony.SuperCraftBrawl.leaderboards.LeaderboardScope>
+    public final java.util.Map<UUID, LeaderboardScope>
             leaderboardScopeByViewer = new java.util.HashMap<>();
     public anthony.SuperCraftBrawl.leaderboards.StatSnapshotDAO snapshotDAO;
     public SettingsHologram lbSettingsHolo;
@@ -290,6 +295,10 @@ public class Core extends JavaPlugin implements Listener {
 
     public HalloweenHuntManager getHalloweenManager() {
         return this.halloweenHunt;
+    }
+
+    public ChristmasHuntManager getChristmasManager() {
+        return this.christmasHunt;
     }
 
     public LevelBoard getLevelBoard() {
@@ -771,6 +780,7 @@ public class Core extends JavaPlugin implements Listener {
         PetCosmetics.registerAll(this, cosmeticRegistry);
         TrailCosmetics.registerAll(this, cosmeticRegistry);
         TitleCosmetics.registerAll(this, cosmeticRegistry);
+        HookTrailCosmetics.registerAll(this, cosmeticRegistry);
         WinEffectCosmetics.registerAll(this, cosmeticRegistry);
         DeathEffectCosmetics.registerAll(this, cosmeticRegistry);
         DoubleJumpCosmetics.registerAll(this, cosmeticRegistry);
@@ -900,6 +910,7 @@ public class Core extends JavaPlugin implements Listener {
         signManager = new SignManager(this);
         lobbyItems = new anthony.SuperCraftBrawl.lobbyitems.LobbyItems(this);
         halloweenHunt = new HalloweenHuntManager(this);
+        christmasHunt = new ChristmasHuntManager(this);
         candyAura = new CandyAuraManager(this, "lobby-1");
         lobbyWorld = getServer().createWorld(new WorldCreator("lobby-1"));
         if (lobbyWorld != null) {
