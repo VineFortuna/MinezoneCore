@@ -20,6 +20,7 @@ public final class OutfitCosmetics {
     private static final String PIRATE_TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjlhYzgwNGEyYzVhOGVhNTdlZjY5NjU3YWI2NDM0N2QxZWQzNmIzNGNhNzBhMjE4ZjZhNjNkNWI2YWEyZmU5ZiJ9fX0=";
     private static final String FREDDY_TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWRiMjdjY2I0ZjEyNjQwZjFiNThlYTYyZDkwY2RhY2U0NGMwZjJkYTlmMzkwOGUyNWViMTZiZGI1YmJiNWE2NSJ9fX0=";
     private static final String RUDOLPH_TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWJkNDZiMzhiMjFiMzQyY2FmOTE3YWQ5Y2E0MmFmYjY4Mzg4YTU1OTFiY2M5YWRlZDFlOGUzNDZlMTg4OTAifX19";
+    private static final String GRINCH_TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWVkYmRjNDFiZjQ4OWNjMWU5NjhmNDA0YWFjNWYyNDEwZTllZjk1MzViYjBhYWU3ZGEyZDljYTQxYWI1ZmY4MyJ9fX0=";
 
     private OutfitCosmetics() {
     }
@@ -33,6 +34,7 @@ public final class OutfitCosmetics {
         registry.register(diamond(main));
         registry.register(freddy(main));
         registry.register(rudolph(main));
+        registry.register(grinch(main));
     }
 
     private static Cosmetic astronaut(Core main) {
@@ -256,6 +258,36 @@ public final class OutfitCosmetics {
 
             public void onEquip(Player player) {
                 skullAndLeatherOutfit(displayName, getIcon(player), "7F3A1A", false).equip(player);
+            }
+
+            public void onUnequip(Player player) {
+                main.getListener().resetArmor(player);
+            }
+        };
+    }
+
+    private static Cosmetic grinch(Core main) {
+        return new Cosmetic("grinch", CosmeticCategory.OUTFIT, "Grinch Outfit",
+                "Christmas 2026 Exclusive") {
+            public ItemStack getIcon(Player player) {
+                int found = main.getChristmasManager() != null
+                        ? main.getChristmasManager().getFoundCount(player.getUniqueId()) : 0;
+                return withRequirementLore(ItemHelper.createSkullTexture(GRINCH_TEXTURE, main.color("&a&lGrinch Outfit"), "",
+                        main.color("&7Progress: &e" + Math.min(found, 5) + "&7/5 presents")));
+            }
+
+            public boolean isUnlocked(Player player) {
+                int found = main.getChristmasManager() != null
+                        ? main.getChristmasManager().getFoundCount(player.getUniqueId()) : 0;
+                return found >= 5;
+            }
+
+            public String getUnlockMessage(Player player) {
+                return main.color("&c&l(!) &rYou need to find &e5 presents &rto use this!");
+            }
+
+            public void onEquip(Player player) {
+                skullAndLeatherOutfit(displayName, getIcon(player), "5DB77A", false).equip(player);
             }
 
             public void onUnequip(Player player) {

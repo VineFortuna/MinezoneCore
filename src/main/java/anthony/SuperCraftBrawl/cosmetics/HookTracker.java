@@ -23,7 +23,8 @@ public class HookTracker implements Listener {
         main.getServer().getPluginManager().registerEvents(this, main);
     }
 
-    /** Returns the hook's location while it is in the air, or null if there is no hook or it has stopped. */
+    /** Returns the hook's location while it is in the air, or null if there is no hook, it has stopped,
+     *  or this is the first poll right after casting (so the trail doesn't start in the player's face). */
     public Location getFlyingLocation(Player player) {
         UUID uuid = player.getUniqueId();
         FishHook hook = hooks.get(uuid);
@@ -37,6 +38,9 @@ public class HookTracker implements Listener {
             stop(uuid);
             return null;
         }
+
+        // previous is only null on the first poll right after a cast (lastLocations was cleared in onFish).
+        if (previous == null) return null;
         return location;
     }
 

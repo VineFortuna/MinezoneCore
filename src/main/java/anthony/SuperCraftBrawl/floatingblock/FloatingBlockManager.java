@@ -1,7 +1,9 @@
 package anthony.SuperCraftBrawl.floatingblock;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.gui.christmas.ChristmasHuntGUI;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
+import anthony.util.ItemHelper;
 import org.bukkit.*;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
@@ -144,6 +146,9 @@ public final class FloatingBlockManager {
                     }
             );
 
+            // SCB CLASSES - swapped out for the PRESENT HUNT block during the holiday season.
+            // Left in place (not deleted) so it's easy to bring back once the event is over.
+            /*
             this.core.floatingBlocks.add(
                     classesLoc,
                     new ItemStack(Material.ENCHANTMENT_TABLE, 1, (short) 0),
@@ -151,6 +156,18 @@ public final class FloatingBlockManager {
                     "&aRight Click",
                     (player) -> {
                         player.performCommand("classes");
+                    }
+            );
+            */
+
+            this.core.floatingBlocks.add(
+                    classesLoc,
+                    ItemHelper.createSkullTexture(
+                            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjFiYzlkNDJiMDA0MWU4Zjk1Y2I5YjI2NjI4ZmRhZjUwY2QwZTM2ZjdiYjlkNmIzYTRkMmFmMzk0OWRhOTdkNiJ9fX0="),
+                    "&c&lPRESENT HUNT",
+                    "&eClick to View",
+                    (player) -> {
+                        new ChristmasHuntGUI(this.core).inv.open(player);
                     }
             );
 

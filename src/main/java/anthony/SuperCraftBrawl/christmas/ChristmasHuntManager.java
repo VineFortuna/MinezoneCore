@@ -31,16 +31,16 @@ public class ChristmasHuntManager implements Listener {
 
     private static final String WORLD = "lobby-1";
     private static final List<int[]> PRESENTS = Arrays.asList(
-            new int[] { 197, 105, 689 }, // map selection (#1)
-            new int[] { 115, 114, 643 }, // houses (#2)
-            new int[] { 126, 111, 702 }, // city parkour (#3)
-            new int[] { 282, 112, 660 }, // cobweb cave (#4)
-            new int[] { 205, 105, 574 }, // woods (#5)
-            new int[] { 295, 94, 532 }, // pond (#6)
-            new int[] { 229, 86, 569 }, // market (#7)
-            new int[] { 8, 112, 841 }, // hospital (#8)
-            new int[] { 72, 116, 929 }, // city park (#9)
-            new int[] { 253, 143, 626 } // castle (#10)
+            new int[] { 177, 105, 671 }, // christmas tree freebie (#1)
+            new int[] { 288, 109, 627 }, // lush cave (#2)
+            new int[] { 253, 144, 638 }, // castle (#3)
+            new int[] { 25, 114, 772 }, // casino (#4)
+            new int[] { 63, 114, 873 }, // ice cream parlour (#5)
+            new int[] { 77, 116, 926 }, // park (#6)
+            new int[] { 185, 104, 566 }, // parkour (#7)
+            new int[] { 115, 114, 643 }, // town house (#8)
+            new int[] { 316, 93, 512 }, // pond house (#9)
+            new int[] { 229, 86, 565 } // market (#10)
     );
 
     public ChristmasHuntManager(Core core) {
@@ -133,7 +133,6 @@ public class ChristmasHuntManager implements Listener {
                 break;
             case 3:
                 p.sendMessage(core.color(PREFIX + "You unlocked: &a&lMR. GRINCH &rtitle cosmetic"));
-                // TODO: unlock MR. GRINCH title
                 break;
             case 4:
                 p.sendMessage(core.color(PREFIX + "You were rewarded with &e50 Tokens"));
@@ -141,7 +140,6 @@ public class ChristmasHuntManager implements Listener {
                 break;
             case 5:
                 p.sendMessage(core.color(PREFIX + "You unlocked: &a&lGrinch &routfit cosmetic"));
-                // TODO: unlock Grinch outfit
                 break;
             case 6:
                 p.sendMessage(core.color(PREFIX + "You were rewarded with &e150 EXP"));
@@ -149,11 +147,9 @@ public class ChristmasHuntManager implements Listener {
                 break;
             case 7:
                 p.sendMessage(core.color(PREFIX + "You unlocked: &bSnowflake &rhook trail"));
-                // TODO: unlock Snowflake hook trail
                 break;
             case 8:
                 p.sendMessage(core.color(PREFIX + "You unlocked: &c&lRudolph &rpet cosmetic"));
-                // TODO: unlock Rudolph pet (flyable, same as Santa class reindeer)
                 break;
             case 10:
                 p.sendMessage(core.color("&c&l(!) &rYou found all &e10 &rpresents!"));
@@ -164,7 +160,7 @@ public class ChristmasHuntManager implements Listener {
 
     private void reward(Player p) {
         Bukkit.broadcastMessage(core
-                .color("&8[&c&lCHRISTMAS HUNT&8] &e" + p.getName() + " &6has found all 10 Presents! Merry Christmas!"));
+                .color("&8[&c&lPRESENT HUNT&8] &e" + p.getName() + " &6has found all 10 Presents! Merry Christmas!"));
 
         World w = p.getWorld();
         Location base = p.getLocation();

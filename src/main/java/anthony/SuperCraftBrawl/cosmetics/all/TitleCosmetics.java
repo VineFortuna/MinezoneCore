@@ -15,6 +15,7 @@ public final class TitleCosmetics {
 
     private static final String FREDDY_TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZWRiMjdjY2I0ZjEyNjQwZjFiNThlYTYyZDkwY2RhY2U0NGMwZjJkYTlmMzkwOGUyNWViMTZiZGI1YmJiNWE2NSJ9fX0";
     private static final String HOHOHO_TEXTURE = "e3RleHR1cmVzOntTS0lOOnt1cmw6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTExYjFiM2U3NzI4ZWQzZTI2NzMzZGZhYjljNTBhNmM3YzY4OTEzODk3MTU3ZDY4MmY4Njg3NTZkYzY2YWUifX19";
+    private static final String GRINCH_TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWVkYmRjNDFiZjQ4OWNjMWU5NjhmNDA0YWFjNWYyNDEwZTllZjk1MzViYjBhYWU3ZGEyZDljYTQxYWI1ZmY4MyJ9fX0=";
 
     private TitleCosmetics() {
     }
@@ -25,6 +26,7 @@ public final class TitleCosmetics {
         main.getTitlePacket().registerTitle("Fiesta De La Noche", main.color("&b&lFIESTA DE LA NOCHE"), 0.2);
         main.getTitlePacket().registerTitle("Merry", main.color("&c&lMerry"), 0.2);
         main.getTitlePacket().registerTitle("Ho Ho Ho", main.color("&c&lHO &2&lHO &c&lHO"), 0.2);
+        main.getTitlePacket().registerTitle("Mr. Grinch", main.color("&a&lMR. GRINCH"), 0.2);
         main.getTitlePacket().registerTitle("SCB Summer Champ 2021", main.color("&b&lSCB SUMMER CHAMP (2021)"), 0.2);
         main.getTitlePacket().registerTitle("SCB Summer Champ 2022", main.color("&b&lSCB SUMMER CHAMP (2022)"), 0.2);
         main.getTitlePacket().registerTitle("SCB Cash Cup Champ 2023", main.color("&a&lSCB CASH CUP CHAMP (2023)"), 0.2);
@@ -43,6 +45,7 @@ public final class TitleCosmetics {
         registry.register(fiestaDeLaNoche(main));
         registry.register(merry(main));
         registry.register(hoHoHo(main));
+        registry.register(mrGrinch(main));
         registry.register(nameLockedTitle(main, "SCB Summer Champ 2021", Material.SAND,
                 "&b&lSCB SUMMER CHAMP (2021)", "2021 Summer Champion", "CowNecromancer"));
         registry.register(nameLockedTitle(main, "SCB Summer Champ 2022", Material.SAND,
@@ -195,6 +198,34 @@ public final class TitleCosmetics {
 
             public String getUnlockMessage(Player player) {
                 return main.color("&c&l(!) &rYou must claim the &eChristmas Day reward &rto use the &c&lHO &2&lHO &c&lHO &rtitle.");
+            }
+
+            public void onEquip(Player player) {
+                main.getTitlePacket().setTitle(player, id);
+            }
+
+            public void onUnequip(Player player) {
+                main.getTitlePacket().clearTitle(player);
+            }
+        };
+    }
+
+    private static Cosmetic mrGrinch(Core main) {
+        return new Cosmetic("Mr. Grinch", CosmeticCategory.TITLE, "Mr. Grinch",
+                "Christmas 2026 Exclusive") {
+            public ItemStack getIcon(Player player) {
+                int found = main.getChristmasManager() != null ? main.getChristmasManager().getFoundCount(player.getUniqueId()) : 0;
+                return withRequirementLore(ItemHelper.createSkullTexture(GRINCH_TEXTURE, main.color("&a&lMR. GRINCH"), "",
+                        main.color("&7Progress: &e" + Math.min(found, 3) + "&7/3 presents")));
+            }
+
+            public boolean isUnlocked(Player player) {
+                int found = main.getChristmasManager() != null ? main.getChristmasManager().getFoundCount(player.getUniqueId()) : 0;
+                return found >= 3;
+            }
+
+            public String getUnlockMessage(Player player) {
+                return main.color("&c&l(!) &rYou need to find &e3 presents &rto use &a&lMR. GRINCH &rtitle.");
             }
 
             public void onEquip(Player player) {

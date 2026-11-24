@@ -2,11 +2,13 @@ package anthony.SuperCraftBrawl.cosmetics.all;
 
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.cosmetics.*;
+import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.PacketPlayOutWorldParticles;
 import org.bukkit.Bukkit;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -21,25 +23,26 @@ public final class HookTrailCosmetics {
     public static void registerAll(Core main, CosmeticRegistry registry) {
         HookTracker tracker = new HookTracker(main);
 
-        registry.register(simple(tracker, "hook_flame", "Flame", Material.BLAZE_POWDER, EnumParticle.FLAME));
-        registry.register(simple(tracker, "hook_hearts", "Hearts", Material.RED_ROSE, EnumParticle.HEART));
-        registry.register(simple(tracker, "hook_magic", "Magic", Material.BREWING_STAND_ITEM, EnumParticle.SPELL_WITCH));
+        registry.register(snowflake(main, tracker));
+        registry.register(golden(main, tracker));
+        registry.register(blue(main, tracker));
     }
 
-    /** The always-unlocked hook trails have same format, different icon/name/particle. */
-    private static Cosmetic simple(HookTracker tracker, String id, String displayName, Material iconMaterial,
-                                   EnumParticle particle) {
-        return new Cosmetic(id, CosmeticCategory.HOOK_TRAIL, displayName) {
+    /** The Golden hook trail, locked to the LEGENDARY rank. */
+    private static Cosmetic golden(Core main, HookTracker tracker) {
+        return new Cosmetic("hook_golden", CosmeticCategory.HOOK_TRAIL, "Golden",
+                Rank.LEGENDARY.getTag() + " Exclusive") {
             public ItemStack getIcon(Player player) {
-                return ItemHelper.create(iconMaterial, ChatColor.YELLOW + displayName);
+                return withRequirementLore(ItemHelper.create(Material.GOLD_NUGGET, ChatColor.GOLD + "Golden"));
             }
 
             public boolean isUnlocked(Player player) {
-                return true;
+                return player.hasPermission("scb.legendary");
             }
 
             public String getUnlockMessage(Player player) {
-                return "";
+                return main.color("&c&l(!) &rYou need the rank ") + Rank.LEGENDARY.getTag()
+                        + ChatColor.RESET + " to use this!";
             }
 
             public void onEquip(Player player) {
@@ -58,7 +61,103 @@ public final class HookTrailCosmetics {
                 Location location = tracker.getFlyingLocation(player);
                 if (location == null) return;
 
-                PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particle, false,
+                // Count 0 makes the 1.8 client read the offsets as an RGB colour instead of a spread.
+                // A red offset of exactly 0 is read as full red, so it's kept just above 0 here.
+                PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(EnumParticle.REDSTONE, false,
+                        (float) location.getX(), (float) location.getY(), (float) location.getZ(),
+                        1f, 0.92f, 0f, 1f, 0);
+
+                for (Player online : Bukkit.getOnlinePlayers()) {
+                    ((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
+                }
+            }
+        };
+    }
+
+    /** The Blue hook trail, locked to the PRO rank. */
+    private static Cosmetic blue(Core main, HookTracker tracker) {
+        return new Cosmetic("hook_blue", CosmeticCategory.HOOK_TRAIL, "Blue",
+                Rank.PRO.getTag() + " Exclusive") {
+            public ItemStack getIcon(Player player) {
+                return withRequirementLore(ItemHelper.createDye(DyeColor.BLUE, 1, ChatColor.BLUE + "Blue"));
+            }
+
+            public boolean isUnlocked(Player player) {
+                return player.hasPermission("scb.pro");
+            }
+
+            public String getUnlockMessage(Player player) {
+                return main.color("&c&l(!) &rYou need the rank ") + Rank.PRO.getTag()
+                        + ChatColor.RESET + " to use this!";
+            }
+
+            public void onEquip(Player player) {
+            }
+
+            public void onUnequip(Player player) {
+            }
+
+            @Override
+            public long getTickPeriod() {
+                return 2L;
+            }
+
+            @Override
+            public void tick(Player player) {
+                Location location = tracker.getFlyingLocation(player);
+                if (location == null) return;
+
+                // Count 0 makes the 1.8 client read the offsets as an RGB colour instead of a spread.
+                // A red offset of exactly 0 is read as full red, so it's kept just above 0 here.
+                PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(EnumParticle.REDSTONE, false,
+                        (float) location.getX(), (float) location.getY(), (float) location.getZ(),
+                        0.001f, 0.4f, 1f, 1f, 0);
+
+                for (Player online : Bukkit.getOnlinePlayers()) {
+                    ((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
+                }
+            }
+        };
+    }
+
+    /** The Snowflake hook trail, unlocked by finding 7 Christmas presents. */
+    private static Cosmetic snowflake(Core main, HookTracker tracker) {
+        return new Cosmetic("hook_snowflake", CosmeticCategory.HOOK_TRAIL, "Snowflake",
+                "Christmas 2026 Exclusive") {
+            public ItemStack getIcon(Player player) {
+                int found = main.getChristmasManager() != null
+                        ? main.getChristmasManager().getFoundCount(player.getUniqueId()) : 0;
+                return withRequirementLore(ItemHelper.setDetails(new ItemStack(Material.SNOW_BALL), ChatColor.AQUA + "Snowflake",
+                        main.color("&7Progress: &e" + Math.min(found, 7) + "&7/7 presents")));
+            }
+
+            public boolean isUnlocked(Player player) {
+                int found = main.getChristmasManager() != null
+                        ? main.getChristmasManager().getFoundCount(player.getUniqueId()) : 0;
+                return found >= 7;
+            }
+
+            public String getUnlockMessage(Player player) {
+                return main.color("&c&l(!) &rYou need to find &e7 presents &rto use &bSnowflake &rhook trail.");
+            }
+
+            public void onEquip(Player player) {
+            }
+
+            public void onUnequip(Player player) {
+            }
+
+            @Override
+            public long getTickPeriod() {
+                return 2L;
+            }
+
+            @Override
+            public void tick(Player player) {
+                Location location = tracker.getFlyingLocation(player);
+                if (location == null) return;
+
+                PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(EnumParticle.SNOW_SHOVEL, false,
                         (float) location.getX(), (float) location.getY(), (float) location.getZ(),
                         0f, 0f, 0f, 0f, 1);
 

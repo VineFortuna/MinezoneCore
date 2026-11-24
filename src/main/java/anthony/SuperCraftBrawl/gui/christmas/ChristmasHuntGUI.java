@@ -16,16 +16,18 @@ import net.md_5.bungee.api.ChatColor;
 
 public class ChristmasHuntGUI implements InventoryProvider {
 
-    // TODO: swap in the real present head textures
-    private static final String FOUND_TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYTdlZGM5MDk4MDg5NDBmNjU2NGU5NjA4NmM5Yjk4Y2RhYTg1OWY2MjdlZWQ1NTZlYzM3NWQ2ZWQyNzA0YzUwNiJ9fX0=";
-    private static final String NOT_FOUND_TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjIzZDdlNjU1ZGViZGQ1OTFkMDk5ZDc2ZmYwMDBkNzU1NWJlNGFlMTFiMWUyNmI5YWRmMjQ0YWUwMjJiMjljOCJ9fX0=";
+    private static final String FOUND_TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvM2FhMDNmODE3MzQxY2FhNTZmYmZjNmQzZjI4MTFhZGI5ODliNjExNzgxMTYyYzEyYWY0YzU4YWYxOGM1M2M3MiJ9fX0=";
+    private static final String NOT_FOUND_TEXTURE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjFiYzlkNDJiMDA0MWU4Zjk1Y2I5YjI2NjI4ZmRhZjUwY2QwZTM2ZjdiYjlkNmIzYTRkMmFmMzk0OWRhOTdkNiJ9fX0=";
 
     private static final String[] HINTS = {
-            "Map selection",
+            "Christmas Tree",
+            "Lush Cave",
+            "Castle",
+            "City Casino",
+            "City Ice Cream Parlour",
+            "City Park",
+            "Parkour",
             "Houses",
-            "City Parkour",
-            "Cobweb Cave (A.K.A Lush Cave)",
-            "The Woods",
             "Pond",
             "Markets",
             "City Hospital",
@@ -42,7 +44,7 @@ public class ChristmasHuntGUI implements InventoryProvider {
                 .id("christmasHunt")
                 .provider(this)
                 .size(4, 9)
-                .title(String.valueOf(ChatColor.DARK_GRAY) + "Christmas Hunt")
+                .title(ChatColor.DARK_GRAY + "Present Hunt")
                 .build();
     }
 
