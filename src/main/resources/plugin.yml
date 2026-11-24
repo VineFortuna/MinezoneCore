@@ -165,6 +165,9 @@ commands:
    sleigh:
       description: Ride Santa's sleigh in the lobby (toggle on and off)
       usage: /sleigh
+   presentreset:
+      description: Reset Present Hunt progress (Staff only, for testing)
+      usage: /presentreset [player]
    bpupgrade:
       description: Move up one Battle Pass tier (Staff only, for testing)
       usage: /bpupgrade [player]

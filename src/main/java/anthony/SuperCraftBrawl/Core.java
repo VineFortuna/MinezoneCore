@@ -916,6 +916,12 @@ public class Core extends JavaPlugin implements Listener {
         else
             System.out.print("sleigh was null!");
 
+        PluginCommand presentResetCommand = getCommand("presentreset");
+        if (presentResetCommand != null)
+            presentResetCommand.setExecutor(new anthony.SuperCraftBrawl.christmas.PresentResetCommand(this));
+        else
+            System.out.print("presentreset was null!");
+
         anthony.SuperCraftBrawl.battlepass.BattlePassTierCommand tierCommand =
                 new anthony.SuperCraftBrawl.battlepass.BattlePassTierCommand(this);
         for (String name : new String[] { "bpupgrade", "bpdowngrade" }) {
