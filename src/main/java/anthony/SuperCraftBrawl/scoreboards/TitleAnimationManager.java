@@ -29,7 +29,107 @@ public class TitleAnimationManager {
 
     public TitleAnimationManager(Core main) { this.main = main; }
 
+    // ===== Christmas animation (temporary) =====
+    // Set CHRISTMAS to false when Christmas is over to bring back the normal animation (startClassic below is
+    // the original, untouched). The Christmas one can then be deleted, or kept for next year.
+    private static final boolean CHRISTMAS = true;
+
+    private static final ChatColor RED   = ChatColor.RED;
+    private static final ChatColor WHITE = ChatColor.WHITE;
+
+    private static final String XMAS_TEXT = "MERRY CHRISTMAS";
+    private static final int XMAS_LETTERS = XMAS_TEXT.replace(" ", "").length();
+    private static final int XMAS_CYCLE_TICKS         = 200; // it plays every 10 seconds (start to start)
+    private static final int XMAS_INITIAL_REST_TICKS  = 20;  // MINEZONE shows for a second after joining, then the first one
+    private static final int XMAS_LETTER_DELAY_TICKS  = 4;   // one character at a time
+    private static final int XMAS_FLICKER_DELAY_TICKS = 5;   // red <-> white
+    private static final int XMAS_FLICKER_TICKS       = 60;  // flickers for 3 seconds
+    // MINEZONE shows for whatever is left of the 10 seconds
+    private static final int XMAS_REST_TICKS = XMAS_CYCLE_TICKS - XMAS_LETTERS * XMAS_LETTER_DELAY_TICKS - XMAS_FLICKER_TICKS;
+
+    private enum XmasPhase { REST, WRITE, FLICKER }
+
     public void start(Player player, FastBoard board) {
+        if (CHRISTMAS) startChristmas(player, board);
+        else startClassic(player, board);
+    }
+
+    /*
+     * MINEZONE for a bit, then "MERRY CHRISTMAS" is written out in red one character at a time, flickers
+     * between red and white for 3 seconds, then goes back to MINEZONE. Repeats every 10 seconds.
+     */
+    private void startChristmas(Player player, FastBoard board) {
+        stop(player);
+
+        BukkitTask task = new BukkitRunnable() {
+            XmasPhase phase = XmasPhase.REST;
+            boolean first = true;
+            int wait = XMAS_INITIAL_REST_TICKS;
+            int shown = 0;        // how many characters of the text are written
+            int flickerLeft = 0;  // ticks of flickering left
+            boolean white = true; // the next flicker colour
+
+            @Override
+            public void run() {
+                if (!player.isOnline() || !main.getScoreboardManager().hasLobbyBoard(player)) {
+                    cancel();
+                    tasks.remove(player.getUniqueId());
+                    return;
+                }
+
+                if (first) { // the lobby board starts out yellow, the resting title is gold like the normal animation's
+                    first = false;
+                    board.updateTitle(safeTitle32(GOLD.toString() + BOLD + WORD));
+                }
+
+                if (phase == XmasPhase.REST) {
+                    if (--wait > 0) return;
+                    phase = XmasPhase.WRITE;
+                    shown = 0;
+                    wait = 0; // the first character goes up straight away
+                }
+
+                if (phase == XmasPhase.WRITE) {
+                    if (--wait > 0) return;
+
+                    shown++;
+                    // The space isn't a step of its own, it goes up together with the letter after it (MERRY -> MERRY C)
+                    if (XMAS_TEXT.charAt(shown - 1) == ' ' && shown < XMAS_TEXT.length()) shown++;
+                    board.updateTitle(safeTitle32(RED.toString() + BOLD + XMAS_TEXT.substring(0, shown)));
+                    wait = XMAS_LETTER_DELAY_TICKS;
+
+                    if (shown >= XMAS_TEXT.length()) {
+                        phase = XmasPhase.FLICKER;
+                        flickerLeft = XMAS_FLICKER_TICKS;
+                        white = true;
+                    }
+                    return;
+                }
+
+                // FLICKER
+                if (--wait > 0) return;
+
+                if (flickerLeft <= 0) {
+                    // Done: back to MINEZONE until the next time
+                    board.updateTitle(safeTitle32(GOLD.toString() + BOLD + WORD));
+                    phase = XmasPhase.REST;
+                    wait = XMAS_REST_TICKS;
+                    return;
+                }
+
+                board.updateTitle(safeTitle32((white ? WHITE : RED).toString() + BOLD + XMAS_TEXT));
+                white = !white;
+                flickerLeft -= XMAS_FLICKER_DELAY_TICKS;
+                wait = XMAS_FLICKER_DELAY_TICKS;
+            }
+        }.runTaskTimer(main, 0L, 1L);
+
+        tasks.put(player.getUniqueId(), task);
+    }
+
+    // ===== The normal animation (what the title does when it isn't Christmas) =====
+
+    private void startClassic(Player player, FastBoard board) {
         stop(player);
 
         BukkitTask task = new BukkitRunnable() {

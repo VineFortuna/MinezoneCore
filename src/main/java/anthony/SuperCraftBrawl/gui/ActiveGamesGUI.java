@@ -6,6 +6,8 @@ import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.GameType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
+import anthony.flagwars.FWGameInstance;
+import anthony.flagwars.FWGameState;
 import anthony.util.ItemHelper;
 import anthony.util.SoundManager;
 import fr.minuskube.inv.ClickableItem;
@@ -19,6 +21,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 public class ActiveGamesGUI implements InventoryProvider {
@@ -37,7 +41,10 @@ public class ActiveGamesGUI implements InventoryProvider {
 		int count = 0;
 		int i = 0;
 
-		if (main.getGameManager().getNumOfGames() == 0) {
+		boolean noScbGames = main.getGameManager().getNumOfGames() == 0;
+		boolean noFwGames = main.getFwGameManager().getActiveInstances().isEmpty();
+
+		if (noScbGames && noFwGames) {
 			contents.set(1, 4, ClickableItem.of(
 					ItemHelper.setDetails(new ItemStack(Material.BARRIER), main.color("&c&lNo games!"),
 							main.color("&7Start a game by using"), main.color("&7the Game Selector")),
@@ -54,7 +61,6 @@ public class ActiveGamesGUI implements InventoryProvider {
 			GameType gameType = game.gameType;
 			// Custom games show how players get their class (Classic, Frenzy, Class Switch or One For All)
 			String mode = game.isCustomGame() ? game.getClassSelectionName() : gameType.getName();
-			if (game.isCustomGame()) mode += " &6(" + game.getCustomGameVisibility().getTag() + " &6Custom Game)";
 
 			System.out.println(mode);
 
@@ -63,23 +69,23 @@ public class ActiveGamesGUI implements InventoryProvider {
 					contents.set(count, i, ClickableItem.of(
 							ItemHelper.setDetails(displayItem,
 									"&e&l" + mapName,
-									"&fMode: &a" + mode,
+									lore(game, "&fMode: &a" + mode,
 									"",
 									"&fStarting In: &a" + game.timeToStartSeconds + "s",
 									"&fPlayers: &a" + game.players.size() + "/"
 											+ game.getMaxPlayerCount(),
-									"", "&r&nClick to join!"),
+									"", "&r&nClick to join!")),
 							e -> joinClicked(player, game, false)));
 				} else {
 					contents.set(count, i, ClickableItem.of(
 							ItemHelper.setDetails(displayItem,
 									"&e&l" + mapName,
-									"&fMode: &a" + mode,
+									lore(game, "&fMode: &a" + mode,
 									"",
 									"&fWaiting for Players",
 									"&fPlayers: &a" + game.players.size() + "/"
 											+ game.getMaxPlayerCount(),
-									"", "&r&nClick to join!"),
+									"", "&r&nClick to join!")),
 							e -> joinClicked(player, game, false)));
 				}
 			} else if (game.state == GameState.STARTED) {
@@ -87,12 +93,12 @@ public class ActiveGamesGUI implements InventoryProvider {
 				contents.set(count, i, ClickableItem.of(
 						ItemHelper.setDetails(ItemHelper.setGlowing(displayItem, true),
 								"&e&l" + mapName,
-								"&fMode: &a" + mode,
+								lore(game, "&fMode: &a" + mode,
 								"",
 								"&f" + state,
 								"&fPlayers: &a" + game.players.size() + "/"
 										+ game.getMaxPlayerCount(),
-								"&fSpectators: &a" + game.spectators.size(), "", "&r&nClick to spectate!"),
+								"&fSpectators: &a" + game.spectators.size(), "", "&r&nClick to spectate!")),
 						e -> joinClicked(player, game, true)));
 			}
 			if (i > 8) {
@@ -101,11 +107,70 @@ public class ActiveGamesGUI implements InventoryProvider {
 			}
 			i++;
 		}
+
+		for (FWGameInstance fwGame : main.getFwGameManager().getActiveInstances()) {
+			ItemStack displayItem = ItemHelper.createFlagWarsBanner();
+			int maxPlayers = fwGame.getMaxPlayers();
+
+			if (fwGame.getState() == FWGameState.WAITING || fwGame.getState() == FWGameState.STARTING) {
+				String startLine = fwGame.getState() == FWGameState.STARTING
+						? "&fStarting In: &a" + fwGame.getCountdownSecondsLeft() + "s"
+						: "&fWaiting for Players";
+
+				contents.set(count, i, ClickableItem.of(
+						ItemHelper.setDetails(displayItem,
+								"&e&lFlag Wars",
+								"&fMap: &a" + fwGame.getMapName(),
+								"&fMode: &a" + fwGame.getMode().getLabel(),
+								"",
+								startLine,
+								"&fPlayers: &a" + fwGame.countPlayers() + "/" + maxPlayers,
+								"", "&r&nClick to join!"),
+						e -> {
+							main.getFwGameManager().joinGame(player, fwGame.getMode());
+							inv.close(player);
+						}));
+			} else if (fwGame.getState() == FWGameState.IN_PROGRESS) {
+				contents.set(count, i, ClickableItem.of(
+						ItemHelper.setDetails(ItemHelper.setGlowing(displayItem, true),
+								"&e&lFlag Wars",
+								"&fMap: &a" + fwGame.getMapName(),
+								"&fMode: &a" + fwGame.getMode().getLabel(),
+								"",
+								"&fIn Progress",
+								"&fPlayers: &a" + fwGame.countPlayers() + "/" + maxPlayers,
+								"&fSpectators: &a" + fwGame.getSpectators().size(), "", "&r&nClick to spectate!"),
+						e -> {
+							main.getFwGameManager().spectateGame(player, fwGame);
+							inv.close(player);
+						}));
+			} else {
+				continue; // ENDING - mid-reset, don't list it
+			}
+
+			if (i > 8) {
+				count++;
+				i = 0;
+			}
+			i++;
+		}
 	}
 
-	/** A custom game the player can't access plays the error sound, says why and leaves the menu open. */
+	/** The lines under a game's name. A custom game starts with its host and visibility. */
+	private String[] lore(GameInstance game, String... lines) {
+		List<String> lore = new ArrayList<>();
+		if (game.isCustomGame()) {
+			lore.add("&7" + game.getCustomGameHostName() + "'s Custom Game");
+			lore.add("&fVisibility: " + game.getCustomGameVisibility().getTag());
+			lore.add("");
+		}
+		lore.addAll(Arrays.asList(lines));
+		return lore.toArray(new String[0]);
+	}
+
+	/** A custom game the player can't join plays the error sound, says why and leaves the menu open (anyone can spectate). */
 	private void joinClicked(Player player, GameInstance game, boolean spectate) {
-		if (game.isCustomGame() && !game.canAccessCustomGame(player)) {
+		if (!spectate && game.isCustomGame() && !game.canAccessCustomGame(player)) {
 			SoundManager.playErrorSound(player);
 			player.sendMessage(game.getCustomGameAccessMessage());
 			return;

@@ -443,6 +443,22 @@ public class ItemHelper {
 		return item;
 	}
 
+	/**
+	 * Hides the vanilla "Effect Name (m:ss)" tooltip line(s) a potion shows by default - for spots
+	 * (like the Flag Wars shop) where the item's own lore already states its effect and duration,
+	 * so the vanilla line would just be redundant.
+	 */
+	public static ItemStack hidePotionEffectLore(ItemStack item) {
+		if (item == null)
+			return null;
+		ItemMeta meta = item.getItemMeta();
+		if (meta == null)
+			return item;
+		meta.addItemFlags(ItemFlag.HIDE_POTION_EFFECTS);
+		item.setItemMeta(meta);
+		return item;
+	}
+
 	public static ItemStack setLore(ItemStack item, List<String> lore) {
 		if (item == null)
 			return null;
@@ -568,5 +584,17 @@ public class ItemHelper {
 	 */
 	public static String formatDouble(double value) {
 		return (value % 1 == 0) ? String.valueOf((int) value) : String.valueOf(value);
+	}
+
+	/**
+	 * The Flag Wars icon: a banner with a blue base. Every GUI and NPC that shows Flag Wars uses this one, so the
+	 * flag is always the same blue (a plain banner has no base color set and shows up black).
+	 */
+	public static ItemStack createFlagWarsBanner() {
+		ItemStack banner = new ItemStack(Material.BANNER);
+		BannerMeta meta = (BannerMeta) banner.getItemMeta();
+		meta.setBaseColor(DyeColor.BLUE);
+		banner.setItemMeta(meta);
+		return banner;
 	}
 }

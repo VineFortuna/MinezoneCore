@@ -51,6 +51,7 @@ public class GameSettingsPreviewGUI implements InventoryProvider {
         addFrenzyModifier(contents);            // 0,0
         addClassSwitchModifier(contents);       // 0,1
         addOneForAllModifier(contents);         // 0,2
+        addTagTeamModifier(contents);           // 0,3
         addEffectRouletteModifier(contents);    // 0,4
         addLowGravityModifier(contents);        // 0,5
         addStrengthOnKillModifier(contents);    // 0,6
@@ -101,13 +102,20 @@ public class GameSettingsPreviewGUI implements InventoryProvider {
         ))));
     }
 
+    private void addTagTeamModifier(InventoryContents contents) {
+        contents.set(0, 3, inert(GameModifiersGUI.classSelectionTag(main, GameModifiersGUI.cycleItem(
+                main, new ItemStack(Material.NAME_TAG), "&e&lTag Team",
+                GameModifiersGUI.TAG_TEAM_LABELS, 0, 0, false, GameModifiersGUI.tagTeamDescription()
+        ))));
+    }
+
     private void addEffectRouletteModifier(InventoryContents contents) {
         int index = GameModifiersGUI.indexOf(GameModifiersGUI.ROULETTE_TIMES, defaults.effectRouletteSeconds);
         ItemStack potion = ItemHelper.setHideFlags(new ItemStack(Material.POTION, 1, (short) 8194), true);
 
         contents.set(0, 4, inert(GameModifiersGUI.cycleItem(main, potion, "&e&lEffect Roulette",
                 GameModifiersGUI.ROULETTE_LABELS, index, 1, GameModifiersGUI.ROULETTE_TIMES[index] > 0,
-                "&7Everyone gets a random effect", "&7every so often"
+                "&7Everyone receives a random", "&7positive effect every so often"
         )));
     }
 

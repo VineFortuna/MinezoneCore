@@ -3,6 +3,7 @@ package anthony.SuperCraftBrawl.cosmetics.all;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
+import anthony.SuperCraftBrawl.halloween.Halloween;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticRegistry;
 import anthony.SuperCraftBrawl.cosmetics.PassCosmetic;
 import anthony.SuperCraftBrawl.ranks.Rank;
@@ -27,7 +28,7 @@ public final class WinEffectCosmetics {
         registry.register(fishRain(main));
         registry.register(flood(main));
         registry.register(treasureHoard(main));
-        registry.register(ritual(main));
+        if (Halloween.ENABLED) registry.register(ritual(main)); // a Halloween hunt reward
         registry.register(presentRain(main));
         registry.register(winterWonderland(main));
     }
@@ -42,7 +43,7 @@ public final class WinEffectCosmetics {
     private static Cosmetic winterWonderland(Core main) {
         return new PassCosmetic(main, CosmeticCategory.WIN_EFFECT, "winter_wonderland", "Winter Wonderland",
                 "&eWinter Wonderland", Material.SNOW_BLOCK, 0,
-                "&7Snow falls over the map as a", "&7glittering Christmas tree rises", "&7to the sound of jingle bells!");
+                "&7Snow falls and covers the map as a", "&7glittering Christmas tree rises", "&7to the sound of jingle bells!");
     }
 
     private static Cosmetic defaultEffect(Core main) {

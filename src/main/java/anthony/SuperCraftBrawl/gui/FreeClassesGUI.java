@@ -54,11 +54,8 @@ public class FreeClassesGUI implements InventoryProvider {
 			}
 
 			// Click Messages
-			String chooseClassString = "&e&nLeft Click&r &eto choose a class";
-			String viewMasteryString = "&e&nRight Click&r &eto view mastery";
 			String favoriteClassString = "&e&nShift Click&r &eto add a favorite class";
-			lore.add(main.color(chooseClassString));
-			lore.add(main.color(viewMasteryString));
+			TagTeamClasses.addChooseLines(main, player, type, lore);
 			lore.add(main.color(favoriteClassString));
 			lore.add("");
 
@@ -70,7 +67,7 @@ public class FreeClassesGUI implements InventoryProvider {
 			contents.set(a, b,
 					ClickableItem.of(
 							ItemHelper.setDetails(
-									ItemHelper.setHideFlags(item, true),
+									TagTeamClasses.glowIfPicked(main, player, type, ItemHelper.setHideFlags(item, true)),
 									type.getTag(),
 									lore
 							),
@@ -87,6 +84,10 @@ public class FreeClassesGUI implements InventoryProvider {
 													main.color("&c&l(!) &r" + type.getTag() + " &ris already one of your favorites!"));
 										}
 									}
+								} else if (e.isLeftClick() && TagTeamClasses.pick(main, player, type, 1)) {
+									inv.open(player); // Tag Team: stays open to pick the 2nd class too
+								} else if (e.isRightClick() && TagTeamClasses.pick(main, player, type, 2)) {
+									inv.open(player);
 								} else if (e.isLeftClick()) {
 									main.getGameManager().playerSelectClass(player, type);
 									player.sendMessage(main.color("&2&l============================================="));

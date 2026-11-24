@@ -18,8 +18,6 @@ import fr.minuskube.inv.SmartInventory;
 import fr.minuskube.inv.content.InventoryContents;
 import fr.minuskube.inv.content.InventoryProvider;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.SkullType;
@@ -42,6 +40,8 @@ public class GameModifiersGUI implements InventoryProvider {
     static final String[] DROP_TIME_LABELS = {"Disabled", "1s", "5s", "10s", "15s", "20s", "25s", "30s", "45s", "1m"};
     static final int[] CLASS_SWITCH_TIMES = {0, 1, 5, 15, 30, 45, 60}; // 0 = disabled
     static final String[] CLASS_SWITCH_LABELS = {"Disabled", "1s", "5s", "15s", "30s", "45s", "1m"};
+    static final int[] TAG_TEAM_TIMES = {0, 15, 30, 60}; // 0 = disabled
+    static final String[] TAG_TEAM_LABELS = {"Disabled", "15s", "30s", "1m"};
     static final int[] LIVES = {1, 2, 3, 4, 5, 10, 20, 50};
     static final String[] LIVES_LABELS = {"1", "2", "3", "4", "5", "10", "20", "50"};
     static final int[] RESPAWN_TIMES = {0, 1, 2, 3, 4, 5, 10};
@@ -63,7 +63,8 @@ public class GameModifiersGUI implements InventoryProvider {
     private static final int OPTIONS_LINE_LENGTH = 40; // options lists longer than this wrap onto another line
 
     // Class selection modifiers: only one can be active per game (none = Classic)
-    private static final String FRENZY = "Frenzy", CLASS_SWITCH = "Class Switch", ONE_FOR_ALL = "One For All";
+    private static final String FRENZY = "Frenzy", CLASS_SWITCH = "Class Switch", ONE_FOR_ALL = "One For All",
+            TAG_TEAM = "Tag Team";
 
     private final Core main;
     private final GameInstance game;
@@ -126,6 +127,7 @@ public class GameModifiersGUI implements InventoryProvider {
         addFrenzyModifier(contents, player);            // 0,0
         addClassSwitchModifier(contents, player);       // 0,1
         addOneForAllModifier(contents, player);         // 0,2
+        addTagTeamModifier(contents, player);           // 0,3
         addEffectRouletteModifier(contents, player);    // 0,4
         addLowGravityModifier(contents, player);        // 0,5
         addStrengthOnKillModifier(contents, player);    // 0,6
@@ -226,25 +228,12 @@ public class GameModifiersGUI implements InventoryProvider {
             CustomGameVisibility next = now.next();
             game.setCustomGameVisibility(next);
             game.TellAll(main.color("&2&l(!) &rVisibility set to " + next.getTag() + "&r."));
-            if (next == CustomGameVisibility.PUBLIC) announcePublicGame();
+            if (next == CustomGameVisibility.PUBLIC) game.announcePublicCustomGame(player);
             CustomGamesGUI.refreshOpenMenus(); // the game changes block for anyone looking, in Quick Join too
 
             inv.open(player);
             game.refreshEditorMenus(player);
         }));
-    }
-
-    /** A custom game just went public: everyone in the lobby hears about it, with a click to join. */
-    private void announcePublicGame() {
-        String host = game.getCustomGameHostName();
-        String message = main.color("&6&l(!) &e" + host + " &rcreated a &6&lCUSTOM &rgame!");
-        TextComponent join = new TextComponent(main.color("     &a&lClick here to Join"));
-        join.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/joincustomgame " + host));
-
-        for (Player p : main.getLobbyWorld().getPlayers()) {
-            p.sendMessage(message);
-            p.spigot().sendMessage(join);
-        }
     }
 
     private void addCoHostModifier(InventoryContents contents, Player player) {
@@ -380,6 +369,42 @@ public class GameModifiersGUI implements InventoryProvider {
         }));
     }
 
+    private void addTagTeamModifier(InventoryContents contents, Player player) {
+        GameSettings settings = game.getGameSettings();
+        int index = indexOf(TAG_TEAM_TIMES, settings.tagTeamSeconds);
+        int seconds = TAG_TEAM_TIMES[index];
+
+        contents.set(0, 3, ClickableItem.of(classSelectionTag(main, cycleItem(main, new ItemStack(Material.NAME_TAG), "&e&lTag Team",
+                TAG_TEAM_LABELS, index, seconds, seconds > 0, tagTeamDescription()
+        )), e -> {
+            int next = step(index, TAG_TEAM_TIMES.length, e);
+            int nextSeconds = TAG_TEAM_TIMES[next];
+            if (seconds == 0 && nextSeconds > 0 && isOtherClassSelectionModifierActive(player, TAG_TEAM)) return;
+            SoundManager.playClickSound(player);
+
+            settings.tagTeamSeconds = nextSeconds;
+
+            if (nextSeconds > 0) {
+                game.TellAll(main.color("&2&l(!) &rTag Team &aenabled&r: swap cooldown is &e&l" + TAG_TEAM_LABELS[next]));
+            } else {
+                game.TellAll(main.color("&2&l(!) &rTag Team has been &cdisabled"));
+            }
+            game.clearTagTeamSelections(); // the second classes only count while it's on
+            game.updateModeLine();
+
+            inv.open(player);
+            game.refreshEditorMenus(player);
+        }));
+    }
+
+    /** What Tag Team does and how to swap, for the setting's icon here and in the settings preview. */
+    static String[] tagTeamDescription() {
+        return new String[] {
+                "&7Everyone picks 2 classes and can", "&7swap between them every so often", "",
+                "&eDrop any item (Q) to swap"
+        };
+    }
+
     private void addEffectRouletteModifier(InventoryContents contents, Player player) {
         int index = indexOf(ROULETTE_TIMES, game.getGameSettings().effectRouletteSeconds);
         int seconds = ROULETTE_TIMES[index];
@@ -389,7 +414,7 @@ public class GameModifiersGUI implements InventoryProvider {
 
         contents.set(0, 4, ClickableItem.of(cycleItem(main, potion, "&e&lEffect Roulette",
                 ROULETTE_LABELS, index, 1, seconds > 0,
-                "&7Everyone gets a random effect", "&7every so often"
+                "&7Everyone receives a random", "&7positive effect every so often"
         ), e -> {
             SoundManager.playClickSound(player);
 
@@ -686,7 +711,7 @@ public class GameModifiersGUI implements InventoryProvider {
         return false;
     }
 
-    /** Frenzy, Class Switch and One For All: a dark grey tag above the item's blank line and Status/Current. */
+    /** Frenzy, Class Switch, One For All and Tag Team: a dark grey tag above the item's blank line and Status/Current. */
     static ItemStack classSelectionTag(Core main, ItemStack item) {
         ItemMeta meta = item.getItemMeta();
         List<String> lore = meta.hasLore() ? new ArrayList<>(meta.getLore()) : new ArrayList<String>();
@@ -778,7 +803,7 @@ public class GameModifiersGUI implements InventoryProvider {
     }
 
     /*
-     * Frenzy, Class Switch and One For All all decide how players get their class, so only one can be on at a time.
+     * Frenzy, Class Switch, One For All and Tag Team all decide how players get their class, so only one can be on at a time.
      * If one other than the given one is already on, tells the leader to turn it off first and returns true.
      */
     private boolean isOtherClassSelectionModifierActive(Player player, String modifier) {
@@ -787,6 +812,7 @@ public class GameModifiersGUI implements InventoryProvider {
         if (game.gameType == GameType.FRENZY && !modifier.equals(FRENZY)) active = FRENZY;
         else if (settings.randomClasses && !modifier.equals(CLASS_SWITCH)) active = CLASS_SWITCH;
         else if (settings.oneForAllMode != OneForAllMode.DISABLED && !modifier.equals(ONE_FOR_ALL)) active = ONE_FOR_ALL;
+        else if (settings.tagTeamSeconds > 0 && !modifier.equals(TAG_TEAM)) active = TAG_TEAM;
         if (active == null) return false;
 
         SoundManager.playErrorSound(player);

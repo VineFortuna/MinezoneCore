@@ -33,13 +33,16 @@ public enum GameLootDrops {
 
 	// RARE:
 	HEALTH2(Rarity.RARE), BROOMS(Rarity.RARE), HAMMER(Rarity.RARE), ENDER_PEARL(Rarity.RARE),
-	GOLDEN_APPLE(Rarity.RARE),
+	GOLDEN_APPLE(Rarity.RARE), PRESENT(Rarity.RARE), // PRESENT: Christmas, opens into 2 more items
 
 	// LEGENDARY:
 	BOMB(Rarity.LEGENDARY), NOTCH_APPLE(Rarity.LEGENDARY), EXTRA_LIFE(Rarity.LEGENDARY);
 
 	// The Snowball Launcher's item amount is its uses left
 	public static final int SNOWBALL_LAUNCHER_USES = 3;
+
+	// The Present's name (colored &c&l on the item) - what isPresent matches
+	private static final String PRESENT_NAME = "Present";
 
 	private static final Random RANDOM = new Random();
 
@@ -77,6 +80,40 @@ public enum GameLootDrops {
 			}
 		}
 		return values()[0]; // unreachable: roll < total
+	}
+
+	/** Whether this is the Christmas Present (a single-use item that opens into 2 more drops, see openPresent). */
+	public static boolean isPresent(ItemStack item) {
+		if (item == null || item.getType() != Material.TRAPPED_CHEST) return false;
+		if (!item.hasItemMeta() || !item.getItemMeta().hasDisplayName()) return false;
+		// Exact name: the Present class' own Defensive Gift is a trapped chest too
+		return ChatColor.stripColor(item.getItemMeta().getDisplayName()).equals(PRESENT_NAME);
+	}
+
+	/*
+	 * What opening a Present gives: one COMMON/UNCOMMON drop and one RARE/LEGENDARY drop, each rolled like a normal
+	 * drop (so Common is likelier than Uncommon, Rare than Legendary). They come out of the enabled items, and never
+	 * another Present.
+	 */
+	public static ItemStack[] openPresent(Set<GameLootDrops> enabled) {
+		return new ItemStack[] {
+				getPresentDrop(enabled, Rarity.COMMON, Rarity.UNCOMMON).getItem(),
+				getPresentDrop(enabled, Rarity.RARE, Rarity.LEGENDARY).getItem()
+		};
+	}
+
+	private static GameLootDrops getPresentDrop(Set<GameLootDrops> enabled, Rarity first, Rarity second) {
+		Set<GameLootDrops> pool = EnumSet.noneOf(GameLootDrops.class);
+		Set<GameLootDrops> everything = EnumSet.noneOf(GameLootDrops.class);
+
+		for (GameLootDrops drop : values()) {
+			if (drop == PRESENT || (drop.r != first && drop.r != second)) continue;
+			everything.add(drop);
+			if (enabled.isEmpty() || enabled.contains(drop)) pool.add(drop);
+		}
+
+		// None of these rarities is enabled: like getDrop, the settings don't stop the item from being given
+		return getDrop(pool.isEmpty() ? everything : pool);
 	}
 
     public static boolean isLootDropItem(ItemStack item) {
@@ -258,6 +295,16 @@ public enum GameLootDrops {
 	        case GOLDEN_APPLE:
 	            item = ItemHelper.setDetails(new ItemStack(Material.GOLDEN_APPLE),
 	                    "&6&lGOLDEN APPLE", "", "&9&lRARE");
+	            break;
+
+	        case PRESENT:
+	            item = ItemHelper.setDetails(new ItemStack(Material.TRAPPED_CHEST),
+	                    "&c&l" + PRESENT_NAME,
+	                    "&7Right click to open it and",
+	                    "&7receive 2 items:",
+	                    "&7- 1 Common or &2Uncommon",
+	                    "&7- 1 &9Rare &7or &6Legendary",
+	                    "&71 use", "", "&9&lRARE");
 	            break;
 
 	        // ===== LEGENDARY =====

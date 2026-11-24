@@ -122,10 +122,11 @@ public class ReindeerFlight {
 	// Magic trail: sparks, snow and red/green dust behind the reindeer, plus sleigh bells
 	private void showTrail(Location loc) {
 		Location body = loc.clone().add(0, 0.8, 0);
-		ParticleEffect.FIREWORKS_SPARK.display(body, 0.4f, 0.3f, 0.4f, 0.02f, 4, null);
-		ParticleEffect.SNOW_SHOVEL.display(body, 0.5f, 0.3f, 0.5f, 0.02f, 3, null);
-		ParticleEffect.REDSTONE.display(body.clone().add(0, 0.4, 0), flightTicks % 2 == 0 ? RED : GREEN);
-		ParticleEffect.REDSTONE.display(loc.clone().add(0, 0.2, 0), flightTicks % 2 == 0 ? GREEN : RED);
+		ParticleEffect.FIREWORKS_SPARK.display(body, 0.4f, 0.3f, 0.4f, 0.02f, 2, null);
+		ParticleEffect.SNOW_SHOVEL.display(body, 0.5f, 0.3f, 0.5f, 0.02f, 2, null);
+		// One dust puff per tick, alternating between the upper (red) and the lower (green) one
+		if (flightTicks % 2 == 0) ParticleEffect.REDSTONE.display(body.clone().add(0, 0.4, 0), RED);
+		else ParticleEffect.REDSTONE.display(loc.clone().add(0, 0.2, 0), GREEN);
 		if (flightTicks % 20 == 0) loc.getWorld().playSound(loc, Sound.ORB_PICKUP, 0.4f, 1.8f);
 	}
 

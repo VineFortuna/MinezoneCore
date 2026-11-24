@@ -113,6 +113,8 @@ public class ClassListGUI implements InventoryProvider {
 
         pagination.setItems(items);
         pagination.setItemsPerPage(28);
+        // Enabling or disabling a class can empty the last page of a filtered list: go back to the new last one
+        pagination.page(Math.min(pagination.getPage(), Math.max(0, (items.length - 1) / 28)));
 
         contents.fillBorders(ClickableItem.of(ItemHelper.getGlassFiller(), e -> {}));
 

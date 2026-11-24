@@ -3,10 +3,12 @@ package anthony.SuperCraftBrawl.cosmetics.all;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
+import anthony.SuperCraftBrawl.halloween.Halloween;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticRegistry;
 import anthony.SuperCraftBrawl.cosmetics.DeathEffectAnimation;
 import anthony.SuperCraftBrawl.cosmetics.ParticleHelper;
 import anthony.SuperCraftBrawl.cosmetics.PassCosmetic;
+import anthony.SuperCraftBrawl.cosmetics.PresentHeads;
 import anthony.util.ItemHelper;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.EnumParticle;
@@ -18,11 +20,9 @@ import org.bukkit.World;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public final class DeathEffectCosmetics {
 
@@ -37,7 +37,7 @@ public final class DeathEffectCosmetics {
         registry.register(simple("exp_bottle", "Exp Bottle", Material.EXP_BOTTLE));
         registry.register(simple("blaze_powder", "Blaze Powder", Material.BLAZE_POWDER));
         registry.register(snowball(main));
-        registry.register(pumpkinPie(main));
+        if (Halloween.ENABLED) registry.register(pumpkinPie(main)); // a Halloween hunt reward
         registry.register(snowFlurry(main));
         registry.register(giftExplosion(main));
     }
@@ -75,48 +75,40 @@ public final class DeathEffectCosmetics {
         };
     }
 
-    private static final ItemStack[] GIFTS = {
-            new ItemStack(Material.WOOL, 1, (short) 14), // red
-            new ItemStack(Material.WOOL, 1, (short) 13), // green
-            new ItemStack(Material.WOOL, 1, (short) 0),  // white
-            new ItemStack(Material.WOOL, 1, (short) 4)   // yellow
-    };
+    /**
+     * The classic death effect: a ring of items dropped around where the player was eliminated. Nobody can
+     * pick them up and they're removed after 5 seconds. The ring's i-th item is items[i % items.length].
+     */
+    public static void dropItemRing(Core main, Location where, ItemStack... items) {
+        World world = where.getWorld();
+        final List<Item> dropped = new ArrayList<>();
 
-    private static PassDeathEffect giftExplosion(Core main) {
+        for (int i = 0; i < 10; i++) {
+            double angle = i * Math.PI / 5;
+            Location at = new Location(world, where.getX() + Math.cos(angle) * 0.5, where.getY() + 1.5,
+                    where.getZ() + Math.sin(angle) * 0.5);
+            Item item = world.dropItem(at, items[i % items.length]);
+            item.setPickupDelay(Integer.MAX_VALUE);
+            dropped.add(item);
+        }
+
+        Bukkit.getScheduler().runTaskLater(main, new Runnable() {
+            public void run() {
+                for (Item item : dropped)
+                    item.remove();
+            }
+        }, 5 * 20L);
+    }
+
+    // The same ring as the item death effects (golden apple etc.), but of red and blue present heads
+    private static PassDeathEffect giftExplosion(final Core main) {
         return new PassDeathEffect(main, "gift_explosion", "Gift Explosion", Material.CHEST,
-                "&7Presents burst out in every", "&7direction when you're eliminated!") {
+                "&7A ring of presents pops out", "&7where you were eliminated!") {
             public void play(Location where) {
-                World world = where.getWorld();
-                Location center = where.clone().add(0, 1, 0);
-                Random random = new Random();
-
-                world.playSound(center, Sound.FIREWORK_BLAST, 1f, 1f);
-                ParticleHelper.play(center, EnumParticle.FIREWORKS_SPARK, 0.1f, 0.1f, 0.1f, 0.25f, 25);
-                for (int i = 0; i < 6; i++) {
-                    ParticleHelper.dust(center.clone().add(random.nextDouble() - 0.5, random.nextDouble() - 0.5,
-                            random.nextDouble() - 0.5), 220, 30, 30);
-                    ParticleHelper.dust(center.clone().add(random.nextDouble() - 0.5, random.nextDouble() - 0.5,
-                            random.nextDouble() - 0.5), 30, 160, 50);
-                }
-
-                // Gift boxes flung outwards. Nobody can pick them up and they're gone after 1.5 seconds.
-                final List<Item> presents = new ArrayList<>();
-                int count = 10;
-                for (int i = 0; i < count; i++) {
-                    double angle = i * 2 * Math.PI / count;
-                    Item present = world.dropItem(center, GIFTS[i % GIFTS.length].clone());
-                    present.setPickupDelay(Integer.MAX_VALUE);
-                    present.setVelocity(new Vector(Math.cos(angle) * 0.25, 0.4 + random.nextDouble() * 0.15,
-                            Math.sin(angle) * 0.25));
-                    presents.add(present);
-                }
-
-                Bukkit.getScheduler().runTaskLater(main, new Runnable() {
-                    public void run() {
-                        for (Item present : presents)
-                            present.remove();
-                    }
-                }, 30L);
+                ItemStack[] presents = new ItemStack[10];
+                for (int i = 0; i < presents.length; i++)
+                    presents[i] = i % 2 == 0 ? PresentHeads.red() : PresentHeads.blue();
+                dropItemRing(main, where, presents);
             }
         };
     }

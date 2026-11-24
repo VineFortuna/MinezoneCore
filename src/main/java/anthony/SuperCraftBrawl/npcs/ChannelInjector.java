@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.npcs;
 
 import anthony.SuperCraftBrawl.Game.classes.all.ReindeerFlight;
+import anthony.SuperCraftBrawl.leaderboards.BoardClickHitbox;
 import io.netty.channel.*;
 import net.minecraft.server.v1_8_R3.PacketPlayInSteerVehicle;
 import net.minecraft.server.v1_8_R3.PacketPlayInUseEntity;
@@ -19,6 +20,7 @@ public final class ChannelInjector {
     // simple debounce to avoid accidental double-fires
     private static final Map<String, Long> DEBOUNCE = new ConcurrentHashMap<>();
     private static final long DEBOUNCE_MS = 150L;
+    private static final long BOARD_CLICK_DEBOUNCE_MS = 300L;
 
     private ChannelInjector() {}
 
@@ -28,6 +30,9 @@ public final class ChannelInjector {
             if (channel == null || channel.pipeline().get(HANDLER_NAME) != null) return;
 
             ChannelDuplexHandler handler = new ChannelDuplexHandler() {
+                // Only read by this player's own network thread, and gone with the handler when they leave
+                private long lastBoardClick;
+
                 @Override
                 public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                     try {
@@ -39,8 +44,16 @@ public final class ChannelInjector {
                             int id = getEntityId(packet);
                             String action = getActionName(packet); // "INTERACT", "ATTACK", "INTERACT_AT"
 
-                            // Only handle right-click "INTERACT" once. Ignore INTERACT_AT to prevent double fire.
-                            if ("INTERACT".equalsIgnoreCase(action)) {
+                            if (BoardClickHitbox.isHitbox(id)) {
+                                // A leaderboard. Left click, right click and the extra packet a right click sends all
+                                // count, so one click is let through every BOARD_CLICK_DEBOUNCE_MS.
+                                long now = System.currentTimeMillis();
+                                if (now - lastBoardClick >= BOARD_CLICK_DEBOUNCE_MS) {
+                                    lastBoardClick = now;
+                                    BoardClickHitbox.onClick(p);
+                                }
+                            } else if ("INTERACT".equalsIgnoreCase(action)) {
+                                // Only handle right-click "INTERACT" once. Ignore INTERACT_AT to prevent double fire.
                                 // debounce per (player, entity)
                                 String key = p.getUniqueId() + ":" + id;
                                 long now = System.currentTimeMillis();

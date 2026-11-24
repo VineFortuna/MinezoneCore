@@ -3,7 +3,6 @@ package anthony.SuperCraftBrawl;
 import anthony.SuperCraftBrawl.Game.*;
 import anthony.SuperCraftBrawl.Game.classes.Cooldown;
 import anthony.SuperCraftBrawl.armorstands.ArmorStandManager;
-import anthony.SuperCraftBrawl.christmas.ChristmasHuntManager;
 import anthony.SuperCraftBrawl.commands.Commands;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticDataDAO;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticManager;
@@ -16,7 +15,6 @@ import anthony.SuperCraftBrawl.cosmetics.all.OutfitCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.PetCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.TitleCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.TrailCosmetics;
-import anthony.SuperCraftBrawl.cosmetics.all.HookTrailCosmetics;
 import anthony.SuperCraftBrawl.cosmetics.all.WinEffectCosmetics;
 import anthony.SuperCraftBrawl.doublejump.DoubleJumpManager;
 import anthony.SuperCraftBrawl.fishing.FishArea;
@@ -26,6 +24,7 @@ import anthony.SuperCraftBrawl.floatingblock.FloatingBlocks;
 import anthony.SuperCraftBrawl.friends.FriendsManager;
 import anthony.SuperCraftBrawl.gui.*;
 import anthony.SuperCraftBrawl.halloween.CandyAuraManager;
+import anthony.SuperCraftBrawl.halloween.Halloween;
 import anthony.SuperCraftBrawl.halloween.HalloweenHuntManager;
 import anthony.SuperCraftBrawl.halloween.TreatsAdminCommand;
 import anthony.SuperCraftBrawl.halloween.TrickTitleCommand;
@@ -100,6 +99,7 @@ public class Core extends JavaPlugin implements Listener {
     public Version version;
     public FreeClassesGUI inventoryGUI;
     public anthony.CrystalWars.game.GameManager gm;
+    public anthony.flagwars.FWGameManager fwGameManager;
     public DonorClassesGUI donorGUI;
     public GameSelectorGUI hubGUI;
     public Commands commands;
@@ -152,9 +152,6 @@ public class Core extends JavaPlugin implements Listener {
     private HalloweenHuntManager halloweenHunt;
     private TitleCosmeticPackets trickTitle;
 
-    // CHRISTMAS HUNT:
-    private ChristmasHuntManager christmasHunt;
-
     //PARKOUR VARIABLES:
     public final Set<UUID> sentMysteryHolos = new HashSet<>();
     public final Set<UUID> sentParkourHolos = new HashSet<>();
@@ -163,8 +160,10 @@ public class Core extends JavaPlugin implements Listener {
     public LobbyExplorerManager explorerManager;
 
     //LEADERBOARDS:
-    public final java.util.Map<UUID, LeaderboardScope>
+    public final java.util.Map<java.util.UUID, anthony.SuperCraftBrawl.leaderboards.LeaderboardScope>
             leaderboardScopeByViewer = new java.util.HashMap<>();
+    public final java.util.Map<java.util.UUID, anthony.SuperCraftBrawl.leaderboards.LeaderboardStatsMode>
+            leaderboardModeByViewer = new java.util.HashMap<>();
     public anthony.SuperCraftBrawl.leaderboards.StatSnapshotDAO snapshotDAO;
     public SettingsHologram lbSettingsHolo;
 
@@ -297,10 +296,6 @@ public class Core extends JavaPlugin implements Listener {
         return this.halloweenHunt;
     }
 
-    public ChristmasHuntManager getChristmasManager() {
-        return this.christmasHunt;
-    }
-
     public LevelBoard getLevelBoard() {
         return this.levelBoard;
     }
@@ -331,6 +326,17 @@ public class Core extends JavaPlugin implements Listener {
 
     public anthony.CrystalWars.game.GameManager getCwManager() {
         return gm;
+    }
+
+    public anthony.flagwars.FWGameManager getFwGameManager() {
+        return fwGameManager;
+    }
+
+    public boolean isPlayerInAnyGame(Player player) {
+        return getGameManager().GetInstanceOfPlayer(player) != null
+                || getGameManager().GetInstanceOfSpectator(player) != null
+                || fwGameManager.getInstanceOfPlayer(player) != null
+                || fwGameManager.getInstanceOfSpectator(player) != null;
     }
 
     public FlawlessWinsBoard getFlawlessWinsBoard() {
@@ -458,6 +464,26 @@ public class Core extends JavaPlugin implements Listener {
         return player.hasPermission(permission) ? 10 : 0;
     }
 
+    /** How long /invite can't be used again after it was. */
+    private static final long INVITE_COOLDOWN_MILLIS = 5000L;
+    /** When each player may /invite again (UUID keys, so nothing here holds on to a player). */
+    private final Map<UUID, Long> inviteCooldownEnds = new HashMap<>();
+
+    /** True (and tells the player how long is left) if they used /invite a moment ago. Otherwise starts the cooldown. */
+    private boolean isOnInviteCooldown(Player player) {
+        long now = System.currentTimeMillis();
+        inviteCooldownEnds.values().removeIf(end -> end <= now); // nothing piles up
+
+        Long end = inviteCooldownEnds.get(player.getUniqueId());
+        if (end != null) {
+            player.sendMessage(color("&c&l(!) &rYou can invite again in &e" + (int) Math.ceil((end - now) / 1000.0) + "s"));
+            return true;
+        }
+
+        inviteCooldownEnds.put(player.getUniqueId(), now + INVITE_COOLDOWN_MILLIS);
+        return false;
+    }
+
     /** Ranks that can host custom (private) games: LEGENDARY and above, which includes every staff rank. */
     private static final Set<Rank> CUSTOM_GAME_HOST_RANKS = EnumSet.of(Rank.LEGENDARY, Rank.TRAINEE, Rank.MODERATOR,
             Rank.SR_MODERATOR, Rank.ADMIN, Rank.DEVELOPER, Rank.SUPERVISOR, Rank.OWNER, Rank.QA);
@@ -469,7 +495,7 @@ public class Core extends JavaPlugin implements Listener {
         return CUSTOM_GAME_HOST_RANKS.contains(getRankManager().getRank(player));
     }
 
-    /** Creative for LEGENDARY players (so they can build in the lobby), adventure for everyone else. */
+    /** Creative while the player's Building Mode is on (see LobbyBuildManager), adventure otherwise. */
     public GameMode getLobbyGameMode(Player player) {
         return lobbyBuildManager != null ? lobbyBuildManager.getLobbyGameMode(player) : GameMode.ADVENTURE;
     }
@@ -580,13 +606,17 @@ public class Core extends JavaPlugin implements Listener {
         getDatabaseManager().ensureSnapshotTable();
         getDatabaseManager().ensurePeriodWinstreakTable();
         getDatabaseManager().ensurePeriodParkourTable();
+        getDatabaseManager().ensureFwSnapshotTable();
+        getDatabaseManager().ensureFwPeriodWinstreakTable();
 
         this.snapshotDAO = new anthony.SuperCraftBrawl.leaderboards.StatSnapshotDAO(this);
 
         ensureAllLeaderboardSnapshots();
+        ensureAllFlagWarsLeaderboardSnapshots();
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             ensureAllLeaderboardSnapshots();
+            ensureAllFlagWarsLeaderboardSnapshots();
 
             try {
                 if (getLeaderboard() != null) {
@@ -761,12 +791,34 @@ public class Core extends JavaPlugin implements Listener {
         }
     }
 
+    /** Flag Wars equivalent of ensureAllLeaderboardSnapshots() above - same idea, fw_stat_snapshots table, FW* columns. */
+    private void ensureAllFlagWarsLeaderboardSnapshots() {
+        if (snapshotDAO == null) {
+            return;
+        }
+
+        try {
+            for (anthony.SuperCraftBrawl.leaderboards.LeaderboardScope scope : new anthony.SuperCraftBrawl.leaderboards.LeaderboardScope[]{
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.DAILY,
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.WEEKLY,
+                    anthony.SuperCraftBrawl.leaderboards.LeaderboardScope.MONTHLY
+            }) {
+                snapshotDAO.ensureSnapshotsForAll("FWWins", scope, "FWWins", "fw_stat_snapshots");
+                snapshotDAO.ensureSnapshotsForAll("FWKills", scope, "FWKills", "fw_stat_snapshots");
+                snapshotDAO.ensureSnapshotsForAll("FWFlagsCaptured", scope, "FWFlagsCaptured", "fw_stat_snapshots");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void enableTitlesCosmetic() {
         this.trickTitle = new TitleCosmeticPackets(this, "lobby-1"); // change world name if needed
         // Title keys are registered with trickTitle by TitleCosmetics.registerAll(), alongside
         // the matching Cosmetic definitions, so there's one place that owns the title list.
 
-        getCommand("tricktitle").setExecutor(new TrickTitleCommand(trickTitle));
+        getCommand("tricktitle").setExecutor(Halloween.ENABLED
+                ? new TrickTitleCommand(trickTitle) : Halloween.offExecutor(this));
     }
 
     private void enableCosmeticsSystem() {
@@ -780,7 +832,6 @@ public class Core extends JavaPlugin implements Listener {
         PetCosmetics.registerAll(this, cosmeticRegistry);
         TrailCosmetics.registerAll(this, cosmeticRegistry);
         TitleCosmetics.registerAll(this, cosmeticRegistry);
-        HookTrailCosmetics.registerAll(this, cosmeticRegistry);
         WinEffectCosmetics.registerAll(this, cosmeticRegistry);
         DeathEffectCosmetics.registerAll(this, cosmeticRegistry);
         DoubleJumpCosmetics.registerAll(this, cosmeticRegistry);
@@ -790,7 +841,7 @@ public class Core extends JavaPlugin implements Listener {
      * This function registers & enables all commands from Commands.java
      */
     private void enableCommands() {
-        String[] commandTypes = { "maps", "join", "party", "partychat", "friends", "token", "cosmetics", "fishing", "server", "fly", "leave", "customgame", "joincustomgame", "joingame", "players",
+        String[] commandTypes = { "maps", "join", "party", "partychat", "partychatmute", "friends", "token", "cosmetics", "fishing", "server", "fly", "leave", "customgame", "joincustomgame", "joingame", "players",
                 "class", "socials", "spectate", "startgame", "frenzy", "gamestats", "setlives", "purchases", "kit",
                 "items", "color", "sound", "soundnms", "heal", "forceclass", "lactate", "sh", "shr" };
 
@@ -803,8 +854,14 @@ public class Core extends JavaPlugin implements Listener {
                 System.out.print(command + " was null!");
         }
 
-        getCommand("treatsadmin").setExecutor(new TreatsAdminCommand(halloweenHunt));
+        getCommand("treatsadmin").setExecutor(Halloween.ENABLED
+                ? new TreatsAdminCommand(halloweenHunt) : Halloween.offExecutor(this));
         getCommand("setimportantarea").setExecutor(lobbyBuildManager);
+        PluginCommand buildingCommand = getCommand("building");
+        if (buildingCommand != null)
+            buildingCommand.setExecutor(lobbyBuildManager);
+        else
+            System.out.print("building was null!");
         getCommand("scbsetup").setExecutor(mapWorldManager);
         getCommand("scbsetup").setTabCompleter(mapWorldManager);
 
@@ -838,6 +895,15 @@ public class Core extends JavaPlugin implements Listener {
                 claimPartyAlias();
             }
         });
+
+        anthony.flagwars.FWCommand fwCommand = new anthony.flagwars.FWCommand(fwGameManager);
+        getCommand("fw").setExecutor(fwCommand);
+        getCommand("fw").setTabCompleter(fwCommand);
+
+        anthony.flagwars.setup.FWSetupCommand fwSetupCommand =
+                new anthony.flagwars.setup.FWSetupCommand(fwGameManager);
+        getCommand("fwsetup").setExecutor(fwSetupCommand);
+        getCommand("fwsetup").setTabCompleter(fwSetupCommand);
     }
 
     /*
@@ -864,6 +930,9 @@ public class Core extends JavaPlugin implements Listener {
         Bukkit.getServer().getPluginManager().registerEvents(lobbyBuildManager, this);
         Bukkit.getServer().getPluginManager().registerEvents(maxHealthGuard, this);
         Bukkit.getServer().getPluginManager().registerEvents(mapWorldManager, this);
+        anthony.flagwars.FWPlayerListener fwPlayerListener = new anthony.flagwars.FWPlayerListener(fwGameManager);
+        fwGameManager.setPlayerListener(fwPlayerListener);
+        Bukkit.getServer().getPluginManager().registerEvents(fwPlayerListener, this);
         Bukkit.getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         Bukkit.getMessenger().registerIncomingPluginChannel(this, "BungeeCord", gameManager);
     }
@@ -874,6 +943,7 @@ public class Core extends JavaPlugin implements Listener {
         msg = new ArrayList<>();
         listener = new PlayerListener(this);
         gameManager = new GameManager(this);
+        fwGameManager = new anthony.flagwars.FWGameManager(this);
         mapWorldManager = new anthony.SuperCraftBrawl.Game.map.MapWorldManager(this);
         try {
             mapWorldManager.deleteUnloadedCopies(); // map copies left behind if the server crashed
@@ -890,6 +960,9 @@ public class Core extends JavaPlugin implements Listener {
         djManager = new DoubleJumpManager(this);
         databaseManager = new DatabaseManager(this);
         databaseManager.ensureLastDailyRewardColumn();
+        databaseManager.ensureFlagWarsQuickBuyColumn();
+        databaseManager.ensureFlagWarsStatsColumns();
+        databaseManager.ensurePreferenceColumns();
         packetMain = new PacketMain(this);
         dataManager = new PlayerDataManager(this);
         gameDataManager = new GameDataManager(this);
@@ -909,9 +982,12 @@ public class Core extends JavaPlugin implements Listener {
         fishing = new Fishing(this);
         signManager = new SignManager(this);
         lobbyItems = new anthony.SuperCraftBrawl.lobbyitems.LobbyItems(this);
-        // halloweenHunt = new HalloweenHuntManager(this); // disabled
-        christmasHunt = new ChristmasHuntManager(this);
-        candyAura = new CandyAuraManager(this, "lobby-1");
+        // The basket hunt and the Candy Aura only run while Halloween is on (see Halloween#ENABLED). Both stay null
+        // otherwise, which everything that reads them already allows for.
+        if (Halloween.ENABLED) {
+            halloweenHunt = new HalloweenHuntManager(this);
+            candyAura = new CandyAuraManager(this, "lobby-1");
+        }
         lobbyWorld = getServer().createWorld(new WorldCreator("lobby-1"));
         if (lobbyWorld != null) {
             lobbyWorld.setAutoSave(false);
@@ -929,6 +1005,7 @@ public class Core extends JavaPlugin implements Listener {
         floatingBlocks = new FloatingBlocks(this);
         armorStandManager = new ArmorStandManager(this);
         lbSettingsHolo = new SettingsHologram(this);
+        getServer().getPluginManager().registerEvents(lbSettingsHolo, this); // removes leftover hologram stands in chunks that load
         staffHelpManager = new StaffHelpManager(this);
         levelManager = new LevelManager(this);
         dailyRewards = new DailyRewards(this);
@@ -1215,6 +1292,9 @@ public class Core extends JavaPlugin implements Listener {
                         || this.getGameManager().GetInstanceOfSpectator(player) != null) {
                     if (!this.getCommands().leaveGame(player))
                         return true;
+                } else if (fwGameManager.getInstanceOfPlayer(player) != null
+                        || fwGameManager.getInstanceOfSpectator(player) != null) {
+                    fwGameManager.leaveGame(player);
                 } else if (this.getParkour().hasPlayer(player)) {
                     this.getParkour().removePlayer(player);
                     this.ResetPlayer(player);
@@ -1519,7 +1599,14 @@ public class Core extends JavaPlugin implements Listener {
 
                 if (player.hasPermission("scb.invite")) {
                     if (instance != null) {
-                        if (instance.state == GameState.WAITING) {
+                        if (instance.state == GameState.WAITING && instance.isCustomGame()) {
+                            // Makes the game public and says so, the same as the Visibility button does
+                            if (!instance.canEditCustomGame(player))
+                                player.sendMessage(color("&c&l(!) &rOnly the host can invite players."));
+                            else if (!isOnInviteCooldown(player)) instance.inviteAllToCustomGame(player);
+                        } else if (instance.state == GameState.WAITING) {
+                            if (isOnInviteCooldown(player)) return true;
+
                             String mapName = "";
                             if (instance.getMap() != null)
                                 mapName = "" + instance.getMap();
@@ -1529,7 +1616,7 @@ public class Core extends JavaPlugin implements Listener {
                             Bukkit.broadcastMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
                                     + getRankManager().getRank(player).getTagWithSpace() + ChatColor.YELLOW
                                     + player.getName() + " " + ChatColor.RESET
-                                    + "invited all players in the Lobby to join " + ChatColor.YELLOW + mapName);
+                                    + "invited all players to join " + ChatColor.YELLOW + mapName);
                             TextComponent message = new TextComponent(
                                     "" + "     " + ChatColor.GREEN + ChatColor.BOLD + "Click here to join!");
                             // Joins this exact game - /join <map> could pick another game on the same map
@@ -1542,8 +1629,24 @@ public class Core extends JavaPlugin implements Listener {
                                     + "You must be in a Waiting Lobby to use this command");
                         }
                     } else {
-                        player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
-                                + "You need to be in a game to use this command");
+                        anthony.flagwars.FWGameInstance fwInstance = getFwGameManager().getInstanceOfPlayer(player);
+
+                        if (fwInstance != null && (fwInstance.getState() == anthony.flagwars.FWGameState.WAITING
+                                || fwInstance.getState() == anthony.flagwars.FWGameState.STARTING)) {
+                            Bukkit.broadcastMessage("" + ChatColor.DARK_GREEN + ChatColor.BOLD + "(!) "
+                                    + getRankManager().getRank(player).getTagWithSpace() + ChatColor.YELLOW
+                                    + player.getName() + " " + ChatColor.RESET
+                                    + "invited all players in the Lobby to join " + ChatColor.GOLD + ChatColor.BOLD
+                                    + "Flag Wars");
+                            TextComponent message = new TextComponent(
+                                    "" + "     " + ChatColor.GREEN + ChatColor.BOLD + "Click here to join!");
+                            message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                    "/join flagwars " + (fwInstance.getMode() == anthony.flagwars.FWGameMode.SOLO ? "solo" : "duo")));
+                            Bukkit.spigot().broadcast(message);
+                        } else {
+                            player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET
+                                    + "You need to be in a game to use this command");
+                        }
                     }
                 } else {
                     player.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "You need the rank "
@@ -2049,11 +2152,7 @@ public class Core extends JavaPlugin implements Listener {
     public void sendScoreboardUpdate(Player trigger) {
         for (Player p : Bukkit.getOnlinePlayers()) {
             try {
-                boolean inGame =
-                        getGameManager().GetInstanceOfPlayer(p) != null
-                                || getGameManager().GetInstanceOfSpectator(p) != null;
-
-                if (!inGame) {
+                if (!isPlayerInAnyGame(p)) {
                     restoreLobbyNameTag(p);
                 }
                 // else: the game scoreboard owns nametag/class; do nothing.
@@ -2087,17 +2186,8 @@ public class Core extends JavaPlugin implements Listener {
     }
 
     public void mysteryChestHologram(Player p) {
-        PlayerData data = this.getDataManager().getPlayerData(p);
-
-        if (data != null) {
-            Location loc = new Location(this.getLobbyWorld(), 198.5, 105.5, 650.5);
-            String name = color("&d&lMYSTERY CHEST");
-            this.armorStandManager.addMysteryChestHologram(p, loc, name);
-
-            loc = new Location(this.getLobbyWorld(), 198.5, 105.2, 650.5);
-            name = color("&a" + data.mysteryChests + " &rto open!");
-            this.armorStandManager.addMysteryChestHologram(p, loc, name);
-        }
+        if (mysteryChestManager != null)
+            mysteryChestManager.spawnHologram(p);
     }
 
     public void parkourHolograms(Player p) {
@@ -2586,6 +2676,7 @@ public class Core extends JavaPlugin implements Listener {
 
         if (getNPCManager() != null) {
             try { getNPCManager().shutdown(); } catch (Throwable ignored) {}
+            try { if (mysteryChestManager != null) mysteryChestManager.shutdown(); } catch (Throwable ignored) {}
         }
 
         try { if (getParkour() != null) getParkour().cleanupAll(); } catch (Throwable ignored) {}

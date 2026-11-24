@@ -84,6 +84,23 @@ public class PartyManager {
         }
     }
 
+    /** /partychatmute: the leader stops (or lets) the other members send party chat messages. */
+    public void togglePartyChatMute(Player player) {
+        // Players without a party can still change it, a party just for them is made on the first change
+        Party party = getOrCreateParty(player);
+        if (!party.isLeader(player.getUniqueId())) {
+            player.sendMessage(main.color("&c&l(!) &rOnly the party leader can do this."));
+            return;
+        }
+
+        party.setPartyChatMuted(!party.isPartyChatMuted());
+        if (party.isPartyChatMuted()) {
+            player.sendMessage(main.color("&a&l(!) &rParty chat has been &cmuted&r."));
+        } else {
+            player.sendMessage(main.color("&a&l(!) &rParty chat has been &aunmuted&r."));
+        }
+    }
+
     public void invite(Player inviter, Player target) {
         cleanupExpiredInvites();
 

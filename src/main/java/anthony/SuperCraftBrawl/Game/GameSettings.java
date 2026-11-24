@@ -53,6 +53,7 @@ public class GameSettings {
     public int spawnProtectionSeconds; // 0 = no spawn protection
     public boolean randomClasses;
     public int randomClassCycleSeconds;
+    public int tagTeamSeconds; // Tag Team: how long after swapping classes a player can swap again, 0 = off
     public int startingLives;
     public int respawnSeconds;
     public boolean lowGravity;
@@ -74,6 +75,7 @@ public class GameSettings {
         this.spawnProtectionSeconds = 3; // the Spawn Protection modifier (custom games only)
         this.randomClasses = false;
         this.randomClassCycleSeconds = 15;
+        this.tagTeamSeconds = 0;
         this.startingLives = 5; // Default lives
         this.respawnSeconds = 3; // Default respawn countdown
         this.lowGravity = false;
@@ -96,6 +98,7 @@ public class GameSettings {
 		this.spawnProtectionSeconds = other.spawnProtectionSeconds;
 		this.randomClasses = other.randomClasses;
 		this.randomClassCycleSeconds = other.randomClassCycleSeconds;
+		this.tagTeamSeconds = other.tagTeamSeconds;
 		this.startingLives = other.startingLives;
 		this.respawnSeconds = other.respawnSeconds;
 		this.lowGravity = other.lowGravity;
@@ -152,6 +155,7 @@ public class GameSettings {
 		game.gameType = (game.gameType == GameType.FRENZY) ?  GameType.CLASSIC : GameType.FRENZY;
 		game.TellAll(color("&2&l(!) &rThe game mode has been set to &e&l" + game.gameType.getName()));
 		updateModeOnBoard();
+		game.updateFrenzyVoteItems(); // only Classic games can be voted into Frenzy
 	}
 	
 	private void updateModeOnBoard() {

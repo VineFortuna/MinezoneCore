@@ -13,7 +13,6 @@ import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.map.Maps;
 import anthony.SuperCraftBrawl.friends.FriendProfile;
 import anthony.SuperCraftBrawl.party.Party;
-import anthony.SuperCraftBrawl.party.gui.PartySettingsGUI;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
 import anthony.SuperCraftBrawl.gui.ActiveGamesGUI;
 import anthony.SuperCraftBrawl.gui.GameSelectorGUI;
@@ -25,6 +24,7 @@ import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.practice.Game;
 import anthony.SuperCraftBrawl.practice.SCBPractice;
 import anthony.SuperCraftBrawl.ranks.Rank;
+import anthony.flagwars.FWGameMode;
 import anthony.util.SoundManager;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -218,6 +218,14 @@ public class Commands implements CommandExecutor, TabCompleter {
                 partyChatCommand(args, player);
                 break;
 
+            case "partychatmute":
+                if (main.getPartyManager() == null) {
+                    player.sendMessage(main.color("&c&l(!) &rParty system is not loaded."));
+                } else {
+                    main.getPartyManager().togglePartyChatMute(player);
+                }
+                break;
+
 			case "practice":
 				new SCBPractice(player, Game.BowPractice, main);
 				break;
@@ -380,11 +388,6 @@ public class Commands implements CommandExecutor, TabCompleter {
             return;
         }
 
-        if (sub.equals("settings")) {
-            new PartySettingsGUI(main).inv.open(player);
-            return;
-        }
-
         if (sub.equals("accept") || sub.equals("join")) {
             if (args.length < 2) {
                 player.sendMessage(main.color("&c&l(!) &rIncorrect Usage! Try doing: &e/party accept <player>"));
@@ -468,7 +471,7 @@ public class Commands implements CommandExecutor, TabCompleter {
         player.sendMessage(main.color("&e/party promote <player>&7: &rMake someone leader"));
         player.sendMessage(main.color("&e/party disband&7: &rDisband the party"));
         player.sendMessage(main.color("&e/partychat&7: &rToggle party chat"));
-        player.sendMessage(main.color("&e/party settings&7: &rParty settings"));
+        player.sendMessage(main.color("&e/partychatmute&7: &rDisable party messages"));
         player.sendMessage(main.color("&8&m------------------------------------"));
     }
 
@@ -1364,25 +1367,46 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
 
-		if (game == null) {
+		if (game != null) {
+			if (game.state != GameState.WAITING) {
+				if (game.state == GameState.STARTED)
+					player.sendMessage(main.color("&c&l(!) &rGame is already in progress!"));
+				else if (game.state == GameState.ENDED)
+					player.sendMessage(main.color("&c&l(!) &rGame has already ended!"));
+				return;
+			}
+
+			if (game.players.size() == 0) {
+				player.sendMessage(main.color("&c&l(!) &rNot enough players to start!"));
+				return;
+			}
+
+			game.getGameSettings().forceStartGame(true);
+			return;
+		}
+
+		anthony.flagwars.FWGameInstance fwGame = main.getFwGameManager().getInstanceOfPlayer(player);
+
+		if (fwGame == null) {
 			player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
 			return;
 		}
 
-		if (game.state != GameState.WAITING) {
-			if (game.state == GameState.STARTED)
-				player.sendMessage(main.color("&c&l(!) &rGame is already in progress!"));
-			else if (game.state == GameState.ENDED)
-				player.sendMessage(main.color("&c&l(!) &rGame has already ended!"));
+		if (fwGame.getState() == anthony.flagwars.FWGameState.IN_PROGRESS) {
+			player.sendMessage(main.color("&c&l(!) &rGame is already in progress!"));
+			return;
+		}
+		if (fwGame.getState() == anthony.flagwars.FWGameState.ENDING) {
+			player.sendMessage(main.color("&c&l(!) &rGame has already ended!"));
 			return;
 		}
 
-		if (game.players.size() == 0) {
+		if (fwGame.countPlayers() == 0) {
 			player.sendMessage(main.color("&c&l(!) &rNot enough players to start!"));
 			return;
 		}
 
-		game.getGameSettings().forceStartGame(true);
+		fwGame.forceStartGame();
 	}
 
 	private void setFrenzyCommand(Player player) {
@@ -1715,10 +1739,15 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
+		if (args[0].equalsIgnoreCase("flagwars") || args[0].equalsIgnoreCase("fw")) {
+			joinFlagWars(args, player);
+			return;
+		}
+
 		String mapName = args[0];
 		GameInstance gameSpectator = main.getGameManager().GetInstanceOfSpectator(player);
 
-		if (gameSpectator != null) {
+		if (gameSpectator != null || main.getFwGameManager().getInstanceOfSpectator(player) != null) {
 			player.sendMessage(main.color("&c&l(!) &rYou are currently spectating a game!"));
 			return;
 		}
@@ -1737,7 +1766,32 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
+		// The "game is starting" link works from another game's lobby too
+		if (!main.getGameManager().leaveLobbyToJoin(player, null, map)) return;
+
 		main.getGameManager().JoinMap(player, map);
+	}
+
+	/** /join flagwars [solo|duo] [map], in either order - solo and any map by default. */
+	private void joinFlagWars(String[] args, Player player) {
+		FWGameMode mode = FWGameMode.SOLO;
+		anthony.flagwars.map.FWMapConfig map = null;
+		for (int i = 1; i < args.length; i++) {
+			if (args[i].equalsIgnoreCase("duo") || args[i].equalsIgnoreCase("duos")) {
+				mode = FWGameMode.DUO;
+			} else if (args[i].equalsIgnoreCase("solo") || args[i].equalsIgnoreCase("solos")) {
+				mode = FWGameMode.SOLO;
+			} else {
+				map = main.getFwGameManager().getPlayableMap(args[i]);
+				if (map == null) {
+					player.sendMessage(main.color("&c&l(!) &rThere's no Flag Wars map called &e" + args[i]
+							+ "&r. Try: &e/join flagwars <map>"));
+					return;
+				}
+			}
+		}
+
+		main.getFwGameManager().joinGame(player, mode, map);
 	}
 
 	private void spectateCommand(String[] args, Player player) {
@@ -1831,10 +1885,12 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
-		handleClassSelection(player, game, playerData, selectedClassType);
+		handleClassSelection(player, game, playerData, selectedClassType, args.length > 1 && args[1].equals("2"));
 	}
 
-	private void handleClassSelection(Player player, GameInstance game, PlayerData playerData, ClassType type) {
+	/** second: /class <name> 2 picks the 2nd class of a Tag Team game (the menus use right click for it). */
+	private void handleClassSelection(Player player, GameInstance game, PlayerData playerData, ClassType type,
+			boolean second) {
 		ClassDetails classDetails = playerData.playerClasses.get(type.getID());
 		boolean ignoreRequirements = game != null && game.ignoresClassRequirements(type);
 
@@ -1852,6 +1908,14 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 		if (game != null && game.isCustomGame() && !game.isClassSelectable(type)) {
 			player.sendMessage(main.color("&c&l(!) &rThat class is disabled in this custom game"));
+			return;
+		}
+
+		if (second && game != null && game.isTagTeam()) {
+			if (game.setSecondClass(player, type)) {
+				player.sendMessage(main.color("&2&l(!) &rYou have selected the " + type.getTag() + "&f class as your 2nd class!"));
+				player.playSound(player.getLocation(), Sound.SUCCESSFUL_HIT, 0.5f, 1);
+			}
 			return;
 		}
 
@@ -1940,6 +2004,16 @@ public class Commands implements CommandExecutor, TabCompleter {
 
     /** The party leader takes the whole party out of the game; anyone else just leaves by themselves. */
     public boolean leaveGame(Player player) {
+        if (main.getFwGameManager().getInstanceOfPlayer(player) != null
+                || main.getFwGameManager().getInstanceOfSpectator(player) != null) {
+            if (main.getFwGameManager().leaveGame(player)) {
+                player.sendMessage(main.color("&2&l(!) &rYou left Flag Wars."));
+            } else {
+                player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));
+            }
+            return true;
+        }
+
         if (main.getPartyManager() != null) {
             Party party = main.getPartyManager().getParty(player);
 
@@ -1949,7 +2023,14 @@ public class Commands implements CommandExecutor, TabCompleter {
             }
         }
 
+        boolean wasInGame = getGameOf(player) != null;
         leaveSinglePlayerGame(player, true);
+
+        // A party member who leaves a game, in any way (command, item or menu), leaves the party too
+        if (wasInGame && getGameOf(player) == null && main.getPartyManager() != null
+                && main.getPartyManager().isInParty(player)) {
+            main.getPartyManager().leave(player);
+        }
         return true;
     }
 
@@ -2068,7 +2149,24 @@ public class Commands implements CommandExecutor, TabCompleter {
                         .map(Enum::name)
                         .collect(Collectors.toList());
 
+                if (cmd.getName().equalsIgnoreCase("join")) {
+                    mapNames = new ArrayList<>(mapNames);
+                    mapNames.add("flagwars");
+                }
+
                 return StringUtil.copyPartialMatches(args[0], mapNames, new ArrayList<>());
+            }
+
+            if (cmd.getName().equalsIgnoreCase("join") && (args.length == 2 || args.length == 3)
+                    && (args[0].equalsIgnoreCase("flagwars") || args[0].equalsIgnoreCase("fw"))) {
+                List<String> options = new ArrayList<>();
+                for (anthony.flagwars.FWGameMode mode : anthony.flagwars.FWGameMode.availableModes()) {
+                    options.add(mode == anthony.flagwars.FWGameMode.SOLO ? "solo" : "duo");
+                }
+                for (anthony.flagwars.map.FWMapConfig map : main.getFwGameManager().getPlayableMaps()) {
+                    options.add(map.getWorldName());
+                }
+                return StringUtil.copyPartialMatches(args[args.length - 1], options, new ArrayList<>());
             }
         } else if (cmd.getName().equalsIgnoreCase("class")
                 || cmd.getName().equalsIgnoreCase("purchases")
@@ -2101,7 +2199,7 @@ public class Commands implements CommandExecutor, TabCompleter {
             }
         } else if (cmd.getName().equalsIgnoreCase("party")) {
             if (args.length == 1) {
-                List<String> options = Arrays.asList("invite", "accept", "reject", "leave", "list", "kick", "promote", "disband", "settings");
+                List<String> options = Arrays.asList("invite", "accept", "reject", "leave", "list", "kick", "promote", "disband");
                 return StringUtil.copyPartialMatches(args[0], options, new ArrayList<>());
             }
         } else if (cmd.getName().equalsIgnoreCase("sound")) {

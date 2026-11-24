@@ -40,6 +40,17 @@ class BundleReward extends BattlePassReward {
 	}
 
 	@Override
+	public String getChatName(Core main, Player player) {
+		StringBuilder name = new StringBuilder();
+		for (int i = 0; i < parts.length; i++) {
+			if (i > 0)
+				name.append(" &7+ ");
+			name.append(parts[i].getChatName(main, player));
+		}
+		return name.toString();
+	}
+
+	@Override
 	public List<String> getDescription(Core main, Player player) {
 		List<String> lines = new ArrayList<>();
 		lines.add("&7Includes:");

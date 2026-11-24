@@ -76,7 +76,8 @@ public enum CuratedPreset {
                 break;
             case BULLSEYE:
                 setClasses(s, ClassType.Skeleton, ClassType.Firework, ClassType.Blaze, ClassType.Wither,
-                        ClassType.WitherSkeleton, ClassType.Shulker, ClassType.Vampire); // Shulker = the Levitator
+                        ClassType.WitherSkeleton, ClassType.Shulker, ClassType.Vampire, // Shulker = the Levitator
+                        ClassType.Ghast);
                 classSwitch(s, 15);
                 break;
             case OP_ITEM_DROPS:

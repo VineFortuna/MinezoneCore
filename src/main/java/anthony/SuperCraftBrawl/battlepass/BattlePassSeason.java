@@ -18,7 +18,7 @@ public final class BattlePassSeason {
 
 	public static final ZoneId ZONE = ZoneId.of("America/New_York");
 	public static final LocalDate START = LocalDate.of(2026, 12, 1);
-	public static final LocalDate END = LocalDate.of(2026, 12, 31); // inclusive
+	public static final LocalDate END = LocalDate.of(2027, 1, 8); // inclusive
 
 	public static final int MAX_TIER = 10;
 	public static final int XP_PER_TIER = 500;

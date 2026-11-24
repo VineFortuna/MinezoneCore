@@ -563,26 +563,7 @@ public class Fishing implements Listener {
         PlayerData data = main.getDataManager().getPlayerData(player);
         if (data != null && main.msHologram.get(player) != null) {
             if (player.getWorld() == main.getLobbyWorld()) {
-                EntityArmorStand stand = main.msHologram.get(player);
-                PacketPlayOutEntityDestroy destroyPacket = new PacketPlayOutEntityDestroy(
-                        stand.getId());
-                ((CraftPlayer) player).getHandle().playerConnection
-                        .sendPacket(destroyPacket);
-                Location loc = new Location(main.getLobbyWorld(), 194.520, 115.7, 641.500);
-
-                WorldServer s = ((CraftWorld) loc.getWorld()).getHandle();
-                stand = new EntityArmorStand(s);
-
-                stand.setLocation(loc.getX(), loc.getY(), loc.getZ(), 0, 0);
-                stand.setCustomName(
-                        main.color("&e&l" + data.mysteryChests + " &eto open!"));
-                stand.setCustomNameVisible(true);
-                stand.setGravity(false);
-                stand.setInvisible(true);
-                PacketPlayOutSpawnEntityLiving packet = new PacketPlayOutSpawnEntityLiving(
-                        stand);
-                ((CraftPlayer) player).getHandle().playerConnection.sendPacket(packet);
-                main.msHologram.put(player, stand);
+                main.getMysteryChestManager().removeAndAddMysteryStand(player);
                 main.getDataManager().saveData(data);
             }
         }

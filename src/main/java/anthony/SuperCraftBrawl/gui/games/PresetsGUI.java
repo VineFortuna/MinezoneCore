@@ -34,7 +34,7 @@ public class PresetsGUI implements InventoryProvider {
 
     private static final int ROWS = 5;
     private static final int CUSTOM_ROW = 1, CURATED_ROW = 2, CURATED_ROWS = 2, SLOTS_PER_ROW = 7;
-    private static final short GRAY = 7, GREEN = 5, ORANGE = 1, RED = 14;
+    private static final short GRAY = 7, GREEN = 5, ORANGE = 1, RED = 14, BLACK = 15;
 
     private final Core main;
     private final GameInstance game;
@@ -73,9 +73,9 @@ public class PresetsGUI implements InventoryProvider {
     public void init(Player player, InventoryContents contents) {
         contents.fill(ClickableItem.empty(glass(GRAY, " ")));
 
-        contents.set(CUSTOM_ROW, 0, ClickableItem.empty(glass(GRAY, "&a&lYour Presets",
+        contents.set(CUSTOM_ROW, 0, ClickableItem.empty(glass(BLACK, "&a&lYour Presets",
                 "", "&7Save the current settings as", "&7one of your own presets")));
-        contents.set(CURATED_ROW, 0, ClickableItem.empty(glass(GRAY, "&6&lCurated Presets",
+        contents.set(CURATED_ROW, 0, ClickableItem.empty(glass(BLACK, "&6&lCurated Presets",
                 "", "&7Ready-made presets that", "&7everyone can use")));
 
         for (int i = 0; i < GamePresetDAO.MAX_PRESETS; i++) {

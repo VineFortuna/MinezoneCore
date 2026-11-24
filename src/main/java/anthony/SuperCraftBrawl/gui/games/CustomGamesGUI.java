@@ -143,7 +143,8 @@ public class CustomGamesGUI implements InventoryProvider {
             inv.open(player);
             return;
         }
-        if (!game.canAccessCustomGame(player)) {
+        // Visibility decides who can join, anyone can spectate
+        if (game.state != GameState.STARTED && !game.canAccessCustomGame(player)) {
             SoundManager.playErrorSound(player);
             player.sendMessage(game.getCustomGameAccessMessage());
             return;

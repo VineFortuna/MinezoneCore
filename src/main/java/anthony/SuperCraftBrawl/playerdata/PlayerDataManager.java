@@ -197,6 +197,8 @@ public class PlayerDataManager implements Listener {
 			int hohohoTitle = set.getInt("HoHoHoTitle");
 			long lastDailyReward = 0;
 			try { lastDailyReward = set.getLong("LastDailyReward"); } catch (Exception ignored) {}
+			String flagWarsQuickBuy = "";
+			try { flagWarsQuickBuy = set.getString("FlagWarsQuickBuy"); } catch (Exception ignored) {}
 
 			data = new PlayerData(uuid, playerName, lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
@@ -210,6 +212,9 @@ public class PlayerDataManager implements Listener {
 					snowmanPet, candycaneParticles, snowball, floodEffect, treasureEffect, treasureOpened, color,
 					fishingWarps, treasureLoc, pumpkinPie, ritualEffect, rudolphOutfit, merryTitle, hohohoTitle);
 			data.lastDailyReward = lastDailyReward;
+			data.flagWarsQuickBuy = flagWarsQuickBuy != null ? flagWarsQuickBuy : "";
+			applyFlagWarsStats(set, data);
+			loadPreferences(set, data);
 		}
 
 		set.close();
@@ -288,6 +293,26 @@ public class PlayerDataManager implements Listener {
 		customState.close();
 
 		return data;
+	}
+
+	/** Reads the Flag Wars columns onto data, defaulting each to 0 if the column isn't there yet (fresh install, migration not run). */
+	private void applyFlagWarsStats(ResultSet set, PlayerData data) {
+		data.fwWins = readIntOrDefault(set, "FWWins");
+		data.fwMatchMvps = readIntOrDefault(set, "FWMatchMvps");
+		data.fwLosses = readIntOrDefault(set, "FWLosses");
+		data.fwCurrentWinstreak = readIntOrDefault(set, "FWCurrentWinstreak");
+		data.fwBestWinstreak = readIntOrDefault(set, "FWBestWinstreak");
+		data.fwKills = readIntOrDefault(set, "FWKills");
+		data.fwDeaths = readIntOrDefault(set, "FWDeaths");
+		data.fwFlagsCaptured = readIntOrDefault(set, "FWFlagsCaptured");
+	}
+
+	private int readIntOrDefault(ResultSet set, String column) {
+		try {
+			return set.getInt(column);
+		} catch (Exception ignored) {
+			return 0;
+		}
 	}
 
 	public PlayerData getSavedData(Player player) throws SQLException {
@@ -396,6 +421,8 @@ public class PlayerDataManager implements Listener {
 			int hohohoTitle = set.getInt("HoHoHoTitle");
 			long lastDailyReward = 0;
 			try { lastDailyReward = set.getLong("LastDailyReward"); } catch (Exception ignored) {}
+			String flagWarsQuickBuy = "";
+			try { flagWarsQuickBuy = set.getString("FlagWarsQuickBuy"); } catch (Exception ignored) {}
 
 			data = new PlayerData(uuid, player.getName(), lastIp, roleID, tokens, wins, kills, deaths, flawlessWins,
 					losses, winstreak, cwm, melon, astronaut, pm, votes, mysteryChests, blue, red, green, yellow, muted,
@@ -409,6 +436,9 @@ public class PlayerDataManager implements Listener {
 					snowmanPet, candycaneParticles, snowball, floodEffect, treasureEffect, treasureOpened, color,
 					fishingWarps, treasureLoc, pumpkinPie, ritualEffect, rudolphOutfit, merryTitle, hohohoTitle);
 			data.lastDailyReward = lastDailyReward;
+			data.flagWarsQuickBuy = flagWarsQuickBuy != null ? flagWarsQuickBuy : "";
+			applyFlagWarsStats(set, data);
+			loadPreferences(set, data);
 		}
 		set.close();
 		stmt.close();
@@ -487,8 +517,19 @@ public class PlayerDataManager implements Listener {
 		manager.executeUpdateCommand("UPDATE PlayerData SET Points = 0");
 	}
 
+	/** The newer preference columns, read on their own so a missing column just leaves the defaults. */
+	private static void loadPreferences(ResultSet set, PlayerData data) {
+		try { data.gameStartSound = set.getInt("GameStartSound"); } catch (Exception ignored) {}
+		try { data.buildOnJoin = set.getInt("BuildOnJoin"); } catch (Exception ignored) {}
+		try { data.legendaryBuildGiven = set.getInt("LegendaryBuildGiven"); } catch (Exception ignored) {}
+	}
+
 	public void saveData(PlayerData data) {
 		System.out.print("Saving data for " + data.playerName);
+		// Saved apart from the rest so a missing column can never stop the main data from saving
+		manager.executeUpdateCommand("UPDATE PlayerData SET GameStartSound = " + data.gameStartSound
+				+ ", BuildOnJoin = " + data.buildOnJoin + ", LegendaryBuildGiven = " + data.legendaryBuildGiven
+				+ " WHERE UUID = '" + data.playerUUID.toString() + "';");
 		manager.executeUpdateCommand("UPDATE PlayerData SET LastPlayerName = '" + data.playerName + "', LastIP = '"
 				+ data.playerIP + "', RoleID = " + data.roleID + ", Tokens = " + data.tokens + ", Kills = " + data.kills
 				+ ", MatchMvps = " + data.matchMvps + ", Challenge100 = " + data.challenge100 + ", Challenge101 = "
@@ -526,6 +567,11 @@ public class PlayerDataManager implements Listener {
 				+ data.ritualEffect + ", RudolphOutfit = " + data.rudolphOutfit + ", MerryTitle = " + data.merryTitle
 				+ ", HoHoHoTitle = " + data.hohohoTitle
 				+ ", LastDailyReward = " + data.lastDailyReward
+				+ ", FlagWarsQuickBuy = '" + data.flagWarsQuickBuy
+				+ "', FWWins = " + data.fwWins + ", FWMatchMvps = " + data.fwMatchMvps + ", FWLosses = " + data.fwLosses
+				+ ", FWCurrentWinstreak = " + data.fwCurrentWinstreak + ", FWBestWinstreak = " + data.fwBestWinstreak
+				+ ", FWKills = " + data.fwKills + ", FWDeaths = " + data.fwDeaths
+				+ ", FWFlagsCaptured = " + data.fwFlagsCaptured
 				+ " WHERE UUID = '" + data.playerUUID.toString() + "';");
 		String updateCMD = "INSERT INTO PlayerClasses (UUID, ClassID, TimePurchased, Purchased, GamesPlayed, GamesWon, "
 				+ "Reward1, Reward2, Reward3, Reward4, Reward5) VALUES ";
