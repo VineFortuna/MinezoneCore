@@ -1,7 +1,7 @@
 package anthony.SuperCraftBrawl.Game;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.Game.classes.all.ReindeerFlight;
+import anthony.SuperCraftBrawl.christmas.ReindeerFlight;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.cosmetics.ParticleHelper;
 import anthony.SuperCraftBrawl.cosmetics.PresentHeads;

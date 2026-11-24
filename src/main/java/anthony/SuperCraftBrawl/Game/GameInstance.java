@@ -2992,6 +2992,17 @@ public class GameInstance implements WinEffects.Host {
                 continue;
             }
 
+            // Battle Pass XP for the win and its quests. Given here, before the summary below, so that can report it
+            int battlePassXp = gameManager.getMain().giveBattlePassXp(winner,
+                    anthony.SuperCraftBrawl.battlepass.BattlePassSeason.XP_WIN);
+            battlePassXp += gameManager.getMain().battlePassQuest(winner, anthony.SuperCraftBrawl.battlepass.BattlePassQuest.VICTORY, 1);
+            battlePassXp += gameManager.getMain().battlePassQuest(winner, anthony.SuperCraftBrawl.battlepass.BattlePassQuest.WARM_UP, 1);
+            if (baseClass != null && baseClass.getType() == ClassType.Creeper) {
+                battlePassXp += gameManager.getMain().battlePassQuest(winner, anthony.SuperCraftBrawl.battlepass.BattlePassQuest.CREEPER_WIN, 1);
+            }
+            if (baseClass != null)
+                baseClass.totalBattlePassXp += battlePassXp;
+
             if (baseClass != null) {
                 if (baseClass.getLives() < 5) {
                     PlayerData data = gameManager.getMain().getDataManager().getPlayerData(winner);
@@ -3028,6 +3039,7 @@ public class GameInstance implements WinEffects.Host {
                     winner.sendMessage("" + ChatColor.BOLD + "===========================");
                     winner.sendMessage(color("&2&l(!) &rYou earned &a" + baseClass.totalTokens +
                             " &fTokens and &a" + baseClass.totalExp + "&f EXP!"));
+                    gameManager.getMain().sendBattlePassXpEarned(winner, baseClass.totalBattlePassXp);
 
                     if (data != null) data.tokens += baseClass.totalTokens;
                 } else {
@@ -3083,6 +3095,7 @@ public class GameInstance implements WinEffects.Host {
                     }
                     winner.sendMessage(color("&2&l(!) &rYou earned &a" + baseClass.totalTokens +
                             " &fTokens and &a" + baseClass.totalExp + "&f EXP!"));
+                    gameManager.getMain().sendBattlePassXpEarned(winner, baseClass.totalBattlePassXp);
 
                     if (data != null) data.tokens += baseClass.totalTokens;
                 }
@@ -3092,8 +3105,6 @@ public class GameInstance implements WinEffects.Host {
                 data.wins += 1;
                 data.winstreak += 1;
                 data.exp += 113;
-                gameManager.getMain().giveBattlePassXp(winner,
-                        anthony.SuperCraftBrawl.battlepass.BattlePassSeason.XP_WIN);
 
                 if (data.winstreak >= data.bestWinstreak) {
                     data.bestWinstreak = data.winstreak;

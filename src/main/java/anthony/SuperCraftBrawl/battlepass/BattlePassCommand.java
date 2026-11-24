@@ -9,7 +9,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 /**
- * /battlepass                              - open the menu
+ * /battlepass                              - open the menu (the quests are a button in its corner)
+ * /battlepass completequest <player> <n>   - admin, finishes quest number n (or a quest id)
  * /battlepass givexp <player> <amount>      - admin
  * /battlepass setxp <player> <amount>       - admin
  * /battlepass premium <player> <true|false> - admin
@@ -100,9 +101,41 @@ public class BattlePassCommand implements CommandExecutor {
 					sender.sendMessage(main.color("&7(Premium is currently free for everyone, so this has no visible effect yet.)"));
 				return true;
 			}
+			case "completequest": {
+				if (args.length < 3) {
+					sendAdminHelp(sender, label);
+					return true;
+				}
+				BattlePassQuestManager quests = manager.getQuests();
+				if (quests == null) {
+					sender.sendMessage(main.color("&c&l(!) &rQuests are disabled."));
+					return true;
+				}
+
+				// A number is the quest's place in the menu (1 is the first), otherwise it's the quest id
+				BattlePassQuest quest = null;
+				BattlePassQuest[] all = BattlePassQuest.values();
+				try {
+					int number = Integer.parseInt(args[2]);
+					if (number >= 1 && number <= all.length)
+						quest = all[number - 1];
+				} catch (NumberFormatException e) {
+					quest = BattlePassQuest.byId(args[2].toLowerCase());
+				}
+				if (quest == null) {
+					sender.sendMessage(main.color("&c&l(!) &rNo such quest. Use a number from 1 to " + all.length + " or a quest id."));
+					return true;
+				}
+
+				if (!quests.forceComplete(target, quest))
+					sender.sendMessage(main.color("&c&l(!) &r" + target.getName() + "'s quests haven't loaded yet."));
+				else
+					sender.sendMessage(main.color("&aCompleted &e" + quest.getName() + " &afor " + target.getName() + "&a."));
+				return true;
+			}
 			case "reset":
 				manager.reset(target);
-				sender.sendMessage(main.color("&aReset " + target.getName() + "'s Battle Pass progress for this season."));
+				sender.sendMessage(main.color("&aReset " + target.getName() + "'s Battle Pass progress and quests for this season."));
 				return true;
 			default:
 				sendAdminHelp(sender, label);
@@ -128,6 +161,7 @@ public class BattlePassCommand implements CommandExecutor {
 		sender.sendMessage(main.color("&e/" + label + " givexp <player> <amount>"));
 		sender.sendMessage(main.color("&e/" + label + " setxp <player> <amount>"));
 		sender.sendMessage(main.color("&e/" + label + " premium <player> <true|false>"));
+		sender.sendMessage(main.color("&e/" + label + " completequest <player> <1-" + BattlePassQuest.values().length + ">"));
 		sender.sendMessage(main.color("&e/" + label + " reset <player>"));
 	}
 }

@@ -76,6 +76,7 @@ public class DailyRewards {
             player.sendMessage(this.core.color("&rCome back tomorrow for more!"));
             player.sendMessage(this.core.color("&8&m------------------------------"));
             player.playSound(player.getLocation(), org.bukkit.Sound.LEVEL_UP, 1f, 1f);
+            this.core.battlePassQuest(player, anthony.SuperCraftBrawl.battlepass.BattlePassQuest.DAILY_REWARD, 1);
 
             data.tokens += 20;
             data.exp += 100;

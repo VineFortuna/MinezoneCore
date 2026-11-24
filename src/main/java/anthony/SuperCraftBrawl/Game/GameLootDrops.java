@@ -13,8 +13,11 @@ import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
@@ -43,6 +46,18 @@ public enum GameLootDrops {
 
 	// The Present's name (colored &c&l on the item) - what isPresent matches
 	private static final String PRESENT_NAME = "Present";
+
+	// The BOMB is an Instant Damage splash potion with this absurd amplifier - what isBomb matches
+	private static final int BOMB_AMPLIFIER = 1000;
+
+	/** Whether a thrown splash potion is the BOMB loot drop. */
+	public static boolean isBomb(ThrownPotion potion) {
+		for (PotionEffect effect : potion.getEffects()) {
+			if (effect.getType().equals(PotionEffectType.HARM) && effect.getAmplifier() >= BOMB_AMPLIFIER)
+				return true;
+		}
+		return false;
+	}
 
 	private static final Random RANDOM = new Random();
 
@@ -138,6 +153,26 @@ public enum GameLootDrops {
         }
 
         return false;
+    }
+
+    /** Which lightning drop this item is (matched like isLootDropItem), or null if it isn't one. */
+    public static GameLootDrops fromItem(ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) return null;
+        if (!item.hasItemMeta() || !item.getItemMeta().hasDisplayName()) return null;
+
+        String itemName = ChatColor.stripColor(item.getItemMeta().getDisplayName());
+
+        for (GameLootDrops drop : GameLootDrops.values()) {
+            ItemStack dropItem = drop.getItem();
+            if (dropItem == null || !dropItem.hasItemMeta() || !dropItem.getItemMeta().hasDisplayName()) continue;
+
+            if (item.getType() == dropItem.getType()
+                    && item.getDurability() == dropItem.getDurability()
+                    && itemName.equalsIgnoreCase(ChatColor.stripColor(dropItem.getItemMeta().getDisplayName()))) {
+                return drop;
+            }
+        }
+        return null;
     }
 
     /** Whether this item's amount is more than a slot normally holds (the Snowball Launcher: 3 uses on a 1-stack item). */
@@ -309,7 +344,7 @@ public enum GameLootDrops {
 
 	        // ===== LEGENDARY =====
 	        case BOMB:
-	            item = ItemHelper.createPotionItem(PotionType.INSTANT_DAMAGE, 1000, 0, true, true, true);
+	            item = ItemHelper.createPotionItem(PotionType.INSTANT_DAMAGE, BOMB_AMPLIFIER, 0, true, true, true);
 	            ItemHelper.setDetails(item, "&4&lBOMB", "&7Be careful!", "&7Instantly kills... anyone", "", "&6&lLEGENDARY");
 	            break;
 

@@ -5,6 +5,7 @@ import anthony.SuperCraftBrawl.Game.GameState;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Timer;
+import anthony.SuperCraftBrawl.christmas.ReindeerFlight;
 import anthony.util.ItemHelper;
 import org.bukkit.GameMode;
 import org.bukkit.Location;

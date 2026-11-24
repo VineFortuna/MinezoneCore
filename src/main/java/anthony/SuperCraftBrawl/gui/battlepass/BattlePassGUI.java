@@ -4,6 +4,8 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.battlepass.BattlePassManager;
 import anthony.SuperCraftBrawl.battlepass.BattlePassProgress;
+import anthony.SuperCraftBrawl.battlepass.BattlePassQuest;
+import anthony.SuperCraftBrawl.battlepass.BattlePassQuestManager;
 import anthony.SuperCraftBrawl.battlepass.BattlePassReward;
 import anthony.SuperCraftBrawl.battlepass.BattlePassRewards;
 import anthony.SuperCraftBrawl.battlepass.BattlePassSeason;
@@ -20,10 +22,8 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * /battlepass: the Free Pass and the Premium Pass in one menu, 5 tiers per page (page arrows on the sides, like the
@@ -34,7 +34,7 @@ import java.util.Locale;
  *   row 0  your progress (top center)
  *   row 1  free tier status       row 2  free rewards
  *   row 3  premium tier status    row 4  premium rewards
- *   row 5  how to earn XP (bottom center)
+ *   row 5  how to earn XP (bottom center), the quests (bottom right corner)
  */
 public class BattlePassGUI implements InventoryProvider {
 
@@ -97,7 +97,7 @@ public class BattlePassGUI implements InventoryProvider {
 
 		contents.fill(ClickableItem.empty(ItemHelper.getGlassFiller()));
 
-		contents.set(0, 4, ClickableItem.empty(createProgressHead(main, player, progress, premium)));
+		contents.set(0, 4, ClickableItem.empty(BattlePassMenuItems.progressHead(main, player, progress, premium)));
 
 		// What each section is, on the glass next to it (like the presets menu)
 		contents.set(FREE_STATUS_ROW, SECTION_COLUMN, ClickableItem.empty(createFreeSectionItem(progress)));
@@ -131,6 +131,10 @@ public class BattlePassGUI implements InventoryProvider {
 		}
 
 		contents.set(5, 4, ClickableItem.empty(createXpInfoItem()));
+
+		// The quests, in the bottom right corner
+		contents.set(5, 8, ClickableItem.of(createQuestsItem(manager, player, premium), e ->
+				new BattlePassQuestsGUI(main).open(player)));
 	}
 
 	@Override
@@ -138,34 +142,6 @@ public class BattlePassGUI implements InventoryProvider {
 	}
 
 	// ---------------------------------------------------------------- items
-
-	/** Your tier, XP and progress to the next tier. */
-	private static ItemStack createProgressHead(Core main, Player player, BattlePassProgress progress, boolean premium) {
-		int tier = progress.getTier();
-
-		List<String> lore = new ArrayList<>();
-		lore.add(main.color("&fTier: &a" + tier + "/" + BattlePassSeason.MAX_TIER));
-		lore.add(main.color("&fTotal XP: &a" + fmt(progress.xp)));
-		lore.add(main.color("&fPass: " + (premium ? "&6Premium" : "&aFree")));
-		lore.add("");
-
-		if (tier >= BattlePassSeason.MAX_TIER) {
-			lore.add(main.color("&a&lMAX TIER REACHED"));
-		} else {
-			lore.add(main.color("&fNext tier:"));
-			lore.add(main.progressBar(progress.xp - tier * BattlePassSeason.XP_PER_TIER, BattlePassSeason.XP_PER_TIER, 25));
-		}
-
-		lore.add("");
-		if (!BattlePassSeason.hasStarted())
-			lore.add(main.color("&cStarts on &e" + BattlePassSeason.START.getMonthValue() + "/" + BattlePassSeason.START.getDayOfMonth()));
-		else if (BattlePassSeason.hasEnded())
-			lore.add(main.color("&cThis season has ended!"));
-		else
-			lore.add(main.color("&fSeason ends: &a" + String.format("%02d/%02d", BattlePassSeason.END.getMonthValue(), BattlePassSeason.END.getDayOfMonth())));
-
-		return ItemHelper.createSkullHeadPlayer(1, player.getName(), main.color("&e&lChristmas Pass"), lore);
-	}
 
 	private ItemStack createFreeSectionItem(BattlePassProgress progress) {
 		return ItemHelper.setDetails(new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 15), // black
@@ -199,12 +175,37 @@ public class BattlePassGUI implements InventoryProvider {
 				main.color("&e&lPremium Pass"), lore.toArray(new String[0]));
 	}
 
+	/** The button to the quests. Locked for anyone without the Premium Pass. */
+	private ItemStack createQuestsItem(BattlePassManager manager, Player player, boolean premium) {
+		BattlePassQuestManager quests = manager.getQuests();
+
+		List<String> lore = new ArrayList<>();
+		lore.add("");
+		lore.add(main.color("&7Finish quests for extra"));
+		lore.add(main.color("&7Battle Pass XP."));
+		lore.add("");
+
+		if (quests == null) {
+			lore.add(main.color("&cQuests are unavailable"));
+		} else if (!premium) {
+			lore.add(main.color("&6Requires the Premium Pass"));
+		} else {
+			lore.add(main.color("&fCompleted: &a" + quests.getCompletedCount(player) + "&7/&a" + BattlePassQuest.values().length));
+			lore.add("");
+			lore.add(main.color("&e&nLeft Click&r&e to open"));
+		}
+
+		// Not a map: the 1.8 client adds an "Unknown map" line to every filled map's tooltip
+		return ItemHelper.setDetails(new ItemStack(Material.BOOK), main.color("&6&lQuests"), lore.toArray(new String[0]));
+	}
+
 	private ItemStack createXpInfoItem() {
 		return ItemHelper.setDetails(new ItemStack(Material.PAPER),
 				main.color("&e&lEarn XP"),
 				main.color("&fGetting a kill: &a+" + BattlePassSeason.XP_KILL + " XP"),
 				main.color("&fPlaying a game: &a+" + BattlePassSeason.XP_GAME_PLAYED + " XP"),
 				main.color("&fWinning a game: &a+" + BattlePassSeason.XP_WIN + " XP"),
+				main.color("&fFinishing a quest: &a+" + BattlePassSeason.QUEST_XP + " XP &7(Premium)"),
 				"",
 				main.color("&fPremium bonus: &6+" + Math.round((BattlePassSeason.PREMIUM_XP_MULTIPLIER - 1) * 100) + "% XP"));
 	}
@@ -303,7 +304,4 @@ public class BattlePassGUI implements InventoryProvider {
 		return count;
 	}
 
-	private static String fmt(long n) {
-		return NumberFormat.getIntegerInstance(Locale.US).format(n);
-	}
 }

@@ -67,7 +67,7 @@ public class NPCManager implements Listener {
 
 		scbClassic = npcLib.createNPC(Arrays.asList(main.color("&6&lSUPER CRAFT BROS"), main.color("&fModes: &aClassic, Duels"),
 				main.color("&eClick to Play!")));
-		scbClassic.setLocation(new Location(main.getLobbyWorld(), 191.5, 106, 657.5, 174, 2));
+		scbClassic.setLocation(new Location(main.getLobbyWorld(), 191.5, 106, 660.5, 174, 2));
 		scbClassic.setSkin(sethblingSkin);
 		scbClassic.setItem(NPCSlot.MAINHAND, ItemHelper.create(Material.COMPASS));
 		scbClassic.create();
@@ -78,7 +78,7 @@ public class NPCManager implements Listener {
 		flagWarsFrameYellow = Arrays.asList(main.color("&6&lFLAG WARS &e&lNEW!"), main.color("&rMode: &aSolo"),
 				main.color("&eClick to Play!"));
 		flagwars = npcLib.createNPC(flagWarsFrameWhite);
-		flagwars.setLocation(new Location(main.getLobbyWorld(), 187.5, 106, 657.5, -174, 3));
+		flagwars.setLocation(new Location(main.getLobbyWorld(), 187.5, 106, 660.5, -174, 3));
 		flagwars.setSkin(flagWarsSkin);
 		flagwars.setItem(NPCSlot.MAINHAND, ItemHelper.createFlagWarsBanner());
 		flagwars.create();
@@ -96,7 +96,7 @@ public class NPCManager implements Listener {
 
 		// Where the stats NPC used to stand
 		customGames = npcLib.createNPC(Arrays.asList(main.color("&6&lCUSTOM GAMES"), main.color("&eClick to View!")));
-		customGames.setLocation(new Location(main.getLobbyWorld(), 180.5, 105, 650.5, -90, 1)); // facing east
+		customGames.setLocation(new Location(main.getLobbyWorld(), 180.5, 106, 652.5, -90, 1)); // facing east
 		customGames.setSkin(sethblingSkin);
 		customGames.create();
 

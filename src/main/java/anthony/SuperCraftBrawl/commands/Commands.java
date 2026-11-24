@@ -880,6 +880,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		newBaseClass.tokens = oldBaseClass.tokens;
 		newBaseClass.totalTokens = oldBaseClass.totalTokens;
 		newBaseClass.totalExp = oldBaseClass.totalExp;
+		newBaseClass.totalBattlePassXp = oldBaseClass.totalBattlePassXp;
 		newBaseClass.totalKills = oldBaseClass.totalKills;
         newBaseClass.totalDeaths = oldBaseClass.totalDeaths;
 		newBaseClass.bountyTarget = oldBaseClass.bountyTarget;
@@ -2006,7 +2007,8 @@ public class Commands implements CommandExecutor, TabCompleter {
     public boolean leaveGame(Player player) {
         if (main.getFwGameManager().getInstanceOfPlayer(player) != null
                 || main.getFwGameManager().getInstanceOfSpectator(player) != null) {
-            if (main.getFwGameManager().leaveGame(player)) {
+            // The party leader takes the party with them, and a member who leaves leaves the party
+            if (main.getFwGameManager().leaveGameWithParty(player)) {
                 player.sendMessage(main.color("&2&l(!) &rYou left Flag Wars."));
             } else {
                 player.sendMessage(main.color("&c&l(!) &rYou are not in a game!"));

@@ -56,6 +56,8 @@ public abstract class BaseClass {
 	public int placement = 0;
 	public int eachLifeKills = 0;
 	public int totalExp = 0;
+	/** Battle Pass XP earned this game (kills, finishing, quests), reported in the end-of-game summary. */
+	public int totalBattlePassXp = 0;
     public Score score;
 
 	public double baseVerticalJump = 1.0;
@@ -286,8 +288,10 @@ public abstract class BaseClass {
 		if (data != null && instance.savesStats()) {
 			data.losses += 1;
 			data.winstreak = 0;
-			instance.getGameManager().getMain().giveBattlePassXp(p,
+			baseClassDead.totalBattlePassXp += instance.getGameManager().getMain().giveBattlePassXp(p,
 					anthony.SuperCraftBrawl.battlepass.BattlePassSeason.XP_GAME_PLAYED);
+			baseClassDead.totalBattlePassXp += instance.getGameManager().getMain().battlePassQuest(p,
+					anthony.SuperCraftBrawl.battlepass.BattlePassQuest.WARM_UP, 1);
 
 			ClassType type = baseClassDead.getType();
 			ClassDetails details = data.playerClasses.get(type.getID());
@@ -384,6 +388,7 @@ public abstract class BaseClass {
 			p.sendMessage(ChatColor.BOLD + "=====================");
 			p.sendMessage(instance.color("&2&l(!) &rYou earned &a" + baseClassDead.totalTokens +
 					" &rTokens and &a" + baseClassDead.totalExp + " &rEXP!"));
+			instance.getGameManager().getMain().sendBattlePassXpEarned(p, baseClassDead.totalBattlePassXp);
 
 			instance.getGameManager().getMain().getLevelManager().checkLevelUp(p);
 		}
@@ -661,6 +666,10 @@ public abstract class BaseClass {
 					tellAll(instance.color("&2&l(!) &r" + killer.getName() + " &adrew first blood!"));
 					tellAll("");
 					baseClass.totalTokens += 10;
+					if (instance.savesStats()) {
+						baseClass.totalBattlePassXp += instance.getGameManager().getMain().battlePassQuest(killer,
+								anthony.SuperCraftBrawl.battlepass.BattlePassQuest.FIRST_BLOOD, 1);
+					}
 					if (instance.getGameManager().getMain().tournament && instance.savesStats()) {
 						if (instance.gameType != GameType.DUEL) {
 							data.points += 2;
@@ -674,7 +683,7 @@ public abstract class BaseClass {
 						data.kills += 1;
 						data.exp += 29;
 						baseClass.totalExp += 29;
-						instance.getGameManager().getMain().giveBattlePassXp(killer,
+						baseClass.totalBattlePassXp += instance.getGameManager().getMain().giveBattlePassXp(killer,
 								anthony.SuperCraftBrawl.battlepass.BattlePassSeason.XP_KILL);
 						if (instance.getGameManager().getMain().tournament) {
 							if (instance.gameType != GameType.DUEL) {
@@ -690,6 +699,10 @@ public abstract class BaseClass {
 						baseClass.totalTokens += 1;
 						baseClass.totalKills++;
 						baseClass.eachLifeKills++;
+						if (instance.savesStats()) {
+							baseClass.totalBattlePassXp += instance.getGameManager().getMain().battlePassQuestReach(killer,
+									anthony.SuperCraftBrawl.battlepass.BattlePassQuest.KILLING_SPREE, baseClass.totalKills);
+						}
 
 						int strengthSeconds = instance.getGameSettings().strengthOnKillSeconds;
 						if (strengthSeconds > 0) {

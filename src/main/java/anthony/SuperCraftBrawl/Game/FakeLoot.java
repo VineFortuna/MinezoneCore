@@ -1,0 +1,214 @@
+package anthony.SuperCraftBrawl.Game;
+
+import anthony.SuperCraftBrawl.Core;
+import net.minecraft.server.v1_8_R3.NBTTagCompound;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EnderPearl;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
+import org.bukkit.Location;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+import java.util.WeakHashMap;
+
+/**
+ * The Grinch's fake Lightning Drops (see GrinchClass and its Counterfeit Loot).
+ * <p>
+ * A fake drop is the real drop's item, identical in every way a player can see, with a hidden tag on it that says it
+ * is fake and which Grinch threw it. The tag lives in the item's NBT, so it follows the item into an inventory and
+ * through every use. Each real drop's code checks {@link #isFake} and does the sneaky thing instead, see the
+ * handlers in GameManager, plus FakeLootListener for the drops that have no handler of their own (potions, apples,
+ * the Hammer).
+ * <p>
+ * Nothing in here keeps a player, game or world alive: the entity sets are weak.
+ */
+public final class FakeLoot {
+
+	/** The drops with no fake version: the Witch Pokeball (none was asked for) and the Present (it opens into more drops). */
+	private static final Set<GameLootDrops> NOT_FAKEABLE = EnumSet.of(GameLootDrops.WITCH_EGG, GameLootDrops.PRESENT);
+
+	private static final String TAG_FAKE = "scbFakeLoot";
+	private static final String TAG_OWNER = "scbFakeOwner";
+
+	// Fake projectiles and TNT, and fake drops on the ground whose pick up the Grinch was already told about.
+	// Weak so an entity that is gone (and its world) isn't kept alive by this.
+	private static final Set<Entity> MARKED = Collections.newSetFromMap(new WeakHashMap<Entity, Boolean>());
+	private static final Set<Entity> NOTIFIED = Collections.newSetFromMap(new WeakHashMap<Entity, Boolean>());
+	// When each fake pearl was thrown. The value is a number, so it can't keep its key alive.
+	private static final Map<Entity, Long> THROWN_AT = new WeakHashMap<>();
+
+	/** Effects that count as good for a fake Milk to take away. */
+	private static final Set<PotionEffectType> GOOD_EFFECTS = new HashSet<>(Arrays.asList(
+			PotionEffectType.SPEED, PotionEffectType.FAST_DIGGING, PotionEffectType.INCREASE_DAMAGE,
+			PotionEffectType.JUMP, PotionEffectType.REGENERATION, PotionEffectType.DAMAGE_RESISTANCE,
+			PotionEffectType.FIRE_RESISTANCE, PotionEffectType.WATER_BREATHING, PotionEffectType.INVISIBILITY,
+			PotionEffectType.NIGHT_VISION, PotionEffectType.HEALTH_BOOST, PotionEffectType.ABSORPTION,
+			PotionEffectType.SATURATION));
+
+	/** An effect with more time left than this is a class's permanent one (from its kit), not one from an item. */
+	private static final int PERMANENT_EFFECT_TICKS = 20 * 60 * 20;
+
+	private FakeLoot() {
+	}
+
+	// ---------------------------------------------------------------- the tag
+
+	/** A copy of this item marked as fake, owned by the Grinch who threw it. The original is left alone. */
+	public static ItemStack mark(ItemStack item, UUID owner) {
+		net.minecraft.server.v1_8_R3.ItemStack nms = CraftItemStack.asNMSCopy(item);
+		NBTTagCompound tag = nms.hasTag() ? nms.getTag() : new NBTTagCompound();
+		tag.setBoolean(TAG_FAKE, true);
+		tag.setString(TAG_OWNER, owner.toString());
+		nms.setTag(tag);
+		return CraftItemStack.asBukkitCopy(nms);
+	}
+
+	public static boolean isFake(ItemStack item) {
+		if (item == null || item.getType() == Material.AIR)
+			return false;
+		net.minecraft.server.v1_8_R3.ItemStack nms = CraftItemStack.asNMSCopy(item);
+		return nms != null && nms.hasTag() && nms.getTag().getBoolean(TAG_FAKE);
+	}
+
+	/** The Grinch who threw this fake, or null if it isn't one. */
+	public static UUID ownerOf(ItemStack item) {
+		if (item == null || item.getType() == Material.AIR)
+			return null;
+		net.minecraft.server.v1_8_R3.ItemStack nms = CraftItemStack.asNMSCopy(item);
+		if (nms == null || !nms.hasTag() || !nms.getTag().hasKey(TAG_OWNER))
+			return null;
+		try {
+			return UUID.fromString(nms.getTag().getString(TAG_OWNER));
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+	}
+
+	// ---------------------------------------------------------------- which drop to fake
+
+	/**
+	 * A random drop to fake, rolled like a real lightning drop (rarer ones less often), out of the drops that have a
+	 * fake version and are enabled in the game's settings. If the settings leave none, any fakeable drop.
+	 */
+	public static GameLootDrops pickDrop(Set<GameLootDrops> enabled) {
+		Set<GameLootDrops> pool = EnumSet.complementOf(EnumSet.copyOf(NOT_FAKEABLE));
+		if (enabled != null && !enabled.isEmpty()) {
+			Set<GameLootDrops> allowed = EnumSet.copyOf(pool);
+			allowed.retainAll(enabled);
+			if (!allowed.isEmpty())
+				pool = allowed;
+		}
+		return GameLootDrops.getDrop(pool);
+	}
+
+	// ---------------------------------------------------------------- marking entities (snowballs, pearls, TNT)
+
+	public static void markEntity(Entity entity) {
+		MARKED.add(entity);
+	}
+
+	public static boolean isMarked(Entity entity) {
+		return entity != null && MARKED.contains(entity);
+	}
+
+	// ---------------------------------------------------------------- picking one up
+
+	/**
+	 * A player is about to pick up a drop. Returns true if that must be cancelled: the Grinch who threw a fake can't
+	 * take it back. When anyone else picks a fake up, the Grinch is told (once per drop).
+	 */
+	public static boolean handlePickup(Core main, Player picker, Item drop) {
+		ItemStack stack = drop.getItemStack();
+		if (!isFake(stack))
+			return false;
+
+		UUID owner = ownerOf(stack);
+		if (picker.getUniqueId().equals(owner))
+			return true;
+
+		if (NOTIFIED.add(drop)) {
+			Player grinch = owner == null ? null : Bukkit.getPlayer(owner);
+			if (grinch != null && stack.hasItemMeta() && stack.getItemMeta().hasDisplayName()) {
+				grinch.sendMessage(main.color("&2&l(!) &e" + picker.getName() + " &rpicked up your fake "
+						+ stack.getItemMeta().getDisplayName() + "&r!"));
+			}
+		}
+		return false;
+	}
+
+	// ---------------------------------------------------------------- effects the fakes share
+
+	/**
+	 * The fake Milk: takes away ONE of the good effects that came from items (Speed, Regeneration, Absorption...),
+	 * picked at random, but never a class's permanent ones. Does nothing if they have none.
+	 */
+	public static void removeOneGoodEffect(Player player) {
+		List<PotionEffect> removable = new ArrayList<>();
+		for (PotionEffect effect : player.getActivePotionEffects()) {
+			if (GOOD_EFFECTS.contains(effect.getType()) && effect.getDuration() < PERMANENT_EFFECT_TICKS)
+				removable.add(effect);
+		}
+		if (!removable.isEmpty())
+			player.removePotionEffect(removable.get(new Random().nextInt(removable.size())).getType());
+	}
+
+	/** The fake Fire Flower: plants a poppy on the ground where it landed. */
+	@SuppressWarnings("deprecation")
+	public static void plantPoppy(Location where) {
+		Block block = where.getBlock();
+		if (block.getType().isSolid())
+			block = block.getRelative(BlockFace.UP);
+
+		// Fall to the ground if it landed in the air (a block or two)
+		for (int i = 0; i < 4 && block.getType() == Material.AIR; i++) {
+			Block below = block.getRelative(BlockFace.DOWN);
+			if (below.getType().isSolid()) {
+				// No physics update, or a flower on stone would pop straight off as an item
+				block.setTypeIdAndData(Material.RED_ROSE.getId(), (byte) 0, false);
+				return;
+			}
+			block = below;
+		}
+	}
+
+	/**
+	 * The fake ender pearl that is teleporting this player, or null if it is a normal one (see FakeLootListener,
+	 * which marks the pearls a Grinch's fake drop threw). The pearl is still in the world while its teleport event runs.
+	 */
+	public static EnderPearl findFakePearl(Player player, Location landing) {
+		for (EnderPearl pearl : landing.getWorld().getEntitiesByClass(EnderPearl.class)) {
+			if (player.equals(pearl.getShooter()) && isMarked(pearl)
+					&& pearl.getLocation().distanceSquared(landing) <= 4.0)
+				return pearl;
+		}
+		return null;
+	}
+
+	/** Remembers when a fake pearl was thrown, since its delay counts from the throw and not from the landing. */
+	public static void markThrown(Entity entity) {
+		THROWN_AT.put(entity, System.currentTimeMillis());
+	}
+
+	/** When the pearl was thrown (milliseconds), or 0 if it isn't known. */
+	public static long thrownAt(Entity entity) {
+		Long time = THROWN_AT.get(entity);
+		return time == null ? 0L : time;
+	}
+}

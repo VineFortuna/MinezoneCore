@@ -1,4 +1,4 @@
-package anthony.SuperCraftBrawl.Game.classes.all;
+package anthony.SuperCraftBrawl.christmas;
 
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.server.v1_8_R3.EntityLiving;

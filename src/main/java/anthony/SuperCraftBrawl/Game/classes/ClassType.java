@@ -153,7 +153,7 @@ public enum ClassType {
 			case Santa:
 				return "HO HO HO! MERRRRRRYYYY CHRISTMASSSSS";
 			case Grinch:
-				return "You're a mean one! Steal your enemies' weapons and stick them with your Roast Beast";
+				return "You're a mean one! Steal your enemies' weapons, then trick them with fake loot drops";
 			case GingerBreadMan:
 				return "DO YOU KNOW? THE GINGERBREADMAN!?!?!";
 			case Elf:

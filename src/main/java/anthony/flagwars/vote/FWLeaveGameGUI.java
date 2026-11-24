@@ -8,6 +8,7 @@ import anthony.flagwars.FWGameManager;
 public class FWLeaveGameGUI extends ConfirmationGUI {
 
 	public FWLeaveGameGUI(Core main, FWGameManager fwGameManager) {
-		super(main, "Leave game?", player -> fwGameManager.leaveGame(player), null);
+		// Through /leave's own path, so the party leader takes the party with them like in every other game
+		super(main, "Leave game?", player -> main.getCommands().leaveGame(player), null);
 	}
 }
