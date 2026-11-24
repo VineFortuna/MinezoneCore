@@ -909,7 +909,7 @@ public class Core extends JavaPlugin implements Listener {
         fishing = new Fishing(this);
         signManager = new SignManager(this);
         lobbyItems = new anthony.SuperCraftBrawl.lobbyitems.LobbyItems(this);
-        halloweenHunt = new HalloweenHuntManager(this);
+        // halloweenHunt = new HalloweenHuntManager(this); // disabled
         christmasHunt = new ChristmasHuntManager(this);
         candyAura = new CandyAuraManager(this, "lobby-1");
         lobbyWorld = getServer().createWorld(new WorldCreator("lobby-1"));
