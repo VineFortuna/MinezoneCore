@@ -168,7 +168,8 @@ public class Fishing implements Listener {
             data.caught++;
             details.addCaught(1);
             main.getDataManager().saveData(data);
-            
+            main.battlePassQuest(p, anthony.SuperCraftBrawl.battlepass.BattlePassQuest.GONE_FISHING, 1);
+
             if (caughtRecent.containsKey(p))
                 caughtRecent.put(p, caughtRecent.get(p) + 1);
             else

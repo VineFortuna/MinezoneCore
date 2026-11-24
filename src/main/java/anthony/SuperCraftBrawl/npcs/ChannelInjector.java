@@ -1,6 +1,6 @@
 package anthony.SuperCraftBrawl.npcs;
 
-import anthony.SuperCraftBrawl.Game.classes.all.ReindeerFlight;
+import anthony.SuperCraftBrawl.christmas.ReindeerFlight;
 import anthony.SuperCraftBrawl.leaderboards.BoardClickHitbox;
 import io.netty.channel.*;
 import net.minecraft.server.v1_8_R3.PacketPlayInSteerVehicle;

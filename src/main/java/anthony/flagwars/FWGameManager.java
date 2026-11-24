@@ -1,6 +1,7 @@
 package anthony.flagwars;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.party.Party;
 import anthony.SuperCraftBrawl.worldgen.VoidGenerator;
 import anthony.flagwars.map.FWMapConfig;
 import anthony.flagwars.map.FWMapConfigManager;
@@ -22,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -325,37 +327,207 @@ public class FWGameManager {
 			return false;
 		}
 
+		// Same party rules as every other game: the leader brings the whole party, a member can only go to the
+		// match their leader is in
+		Party party = partyOf(player);
+		if (party != null) {
+			if (!party.isLeader(player.getUniqueId()))
+				return followPartyLeader(player, party, mode, onlyMap);
+			return joinParty(player, party, mode, onlyMap);
+		}
+
+		FWGameInstance instance = openMatch(player, mode, onlyMap, 1);
+		return instance != null && instance.addPlayer(player);
+	}
+
+	/**
+	 * An open match (waiting or starting) with room to seat a party of this size together, or else a new one on a
+	 * fresh copy of a map. Null if there isn't one to be had, and then the player who asked has been told why.
+	 */
+	private FWGameInstance openMatch(Player asker, FWGameMode mode, FWMapConfig onlyMap, int partySize) {
 		for (FWGameInstance instance : activeInstances) {
 			if (instance.getMode() == mode
 					&& (onlyMap == null || instance.getMapConfig().getWorldName().equals(onlyMap.getWorldName()))
 					&& (instance.getState() == FWGameState.WAITING || instance.getState() == FWGameState.STARTING)
-					&& instance.hasSpace()) {
-				return instance.addPlayer(player);
+					&& instance.canSeatTogether(partySize)) {
+				return instance;
 			}
 		}
 
-		// No open match - start a new one on a random map out of every fully set-up map.
+		// No open match - start a new one on a random map out of every fully set-up map that is big enough.
 		List<FWMapConfig> playableMaps = getPlayableMaps();
 		if (playableMaps.isEmpty()) {
-			player.sendMessage(main.color(
+			asker.sendMessage(main.color(
 					"&c&l(!) &rNo Flag Wars maps have been fully configured yet!"
 			));
-			return false;
+			return null;
 		}
 
-		FWMapConfig map = onlyMap != null ? onlyMap
-				: playableMaps.get(ThreadLocalRandom.current().nextInt(playableMaps.size()));
+		List<FWMapConfig> bigEnough = new ArrayList<>();
+		for (FWMapConfig candidate : onlyMap != null ? Collections.singletonList(onlyMap) : playableMaps) {
+			if (teamCountOf(candidate) * mode.getTeamCapacity() >= partySize) bigEnough.add(candidate);
+		}
+		if (bigEnough.isEmpty()) {
+			asker.sendMessage(main.color("&c&l(!) &rYour party is too large for Flag Wars."));
+			return null;
+		}
+
+		FWMapConfig map = bigEnough.get(ThreadLocalRandom.current().nextInt(bigEnough.size()));
 		World world = provisionWorld(map);
 		if (world == null) {
-			player.sendMessage(main.color(
+			asker.sendMessage(main.color(
 					"&c&l(!) &rFlag Wars's map failed to load. Tell staff to check the console."
 			));
-			return false;
+			return null;
 		}
 
 		FWGameInstance instance = new FWGameInstance(this, mode, world, map);
 		activeInstances.add(instance);
-		return instance.addPlayer(player);
+		return instance;
+	}
+
+	/** How many islands this map has set up, which is how many teams a match on it has. */
+	private static int teamCountOf(FWMapConfig map) {
+		int count = 0;
+		for (int siteId = 1; siteId <= FWMapConfig.TEAM_COUNT; siteId++) {
+			if (map.getTeamSite(siteId).isCreated()) count++;
+		}
+		return count;
+	}
+
+	// ---------------------------------------------------------------- parties
+
+	private Party partyOf(Player player) {
+		return main.getPartyManager() == null ? null : main.getPartyManager().getParty(player);
+	}
+
+	/** The match the party's leader is playing or spectating, if any. */
+	private FWGameInstance getPartyLeaderMatch(Party party) {
+		Player leader = Bukkit.getPlayer(party.getLeaderId());
+		if (leader == null) return null;
+
+		FWGameInstance match = getInstanceOfPlayer(leader);
+		return match != null ? match : getInstanceOfSpectator(leader);
+	}
+
+	/**
+	 * The party leader brings the whole party into one match, each member on their own island in Solo and together in
+	 * pairs in Duos. If any of them can't go (in another game, say) nobody does and the leader is told who.
+	 */
+	private boolean joinParty(Player leader, Party party, FWGameMode mode, FWMapConfig onlyMap) {
+		List<Player> members = party.getOnlineMembers();
+		if (members.isEmpty()) {
+			leader.sendMessage(main.color("&c&l(!) &rYour party has no online members."));
+			return false;
+		}
+		if (!main.getGameManager().canAllJoin(leader, members)) return false;
+
+		FWGameInstance match = openMatch(leader, mode, onlyMap, members.size());
+		if (match == null) return false;
+
+		match.addParty(members);
+		for (Player member : members) {
+			member.sendMessage(main.color("&a&l(!) &rYour party has joined &eFlag Wars&r."));
+		}
+		return true;
+	}
+
+	/**
+	 * A party member who isn't the leader can't start a match, but can join (or watch, if it's already playing) the
+	 * one their leader is in, like going back to it after /leave.
+	 */
+	private boolean followPartyLeader(Player member, Party party, FWGameMode mode, FWMapConfig onlyMap) {
+		FWGameInstance match = getPartyLeaderMatch(party);
+		boolean sameKind = match != null && match.getMode() == mode
+				&& (onlyMap == null || match.getMapConfig().getWorldName().equals(onlyMap.getWorldName()));
+		if (!sameKind) {
+			member.sendMessage(main.color("&c&l(!) &rOnly the party leader can join games."));
+			return false;
+		}
+		return sendToMatch(member, match);
+	}
+
+	/**
+	 * Puts a player into this match: as a player while it hasn't started, watching once it has.
+	 * Tells them why if it can't be done.
+	 */
+	private boolean sendToMatch(Player player, FWGameInstance match) {
+		FWGameState state = match.getState();
+		if (state == FWGameState.WAITING || state == FWGameState.STARTING) {
+			if (!match.hasSpace()) {
+				player.sendMessage(main.color("&c&l(!) &rFlag Wars is full!"));
+				return false;
+			}
+			return match.addPlayer(player);
+		}
+		if (state == FWGameState.IN_PROGRESS) {
+			match.addSpectator(player);
+			player.sendMessage(main.color("&2&l(!) &rYou are now spectating Flag Wars. Use &a/leave &rto leave"));
+			return true;
+		}
+		player.sendMessage(main.color("&e&l(!) &rThe leader's game is no longer available."));
+		return false;
+	}
+
+	/**
+	 * Someone just joined a party whose leader is in Flag Wars: they follow, joining that match or watching it. Called
+	 * by the party's accept, which then has nothing more to do. Returns false if the leader isn't in Flag Wars, so
+	 * the Classic games get their turn.
+	 */
+	public boolean sendAcceptedPartyMemberToLeaderMatch(Player leader, Player newMember) {
+		FWGameInstance match = getInstanceOfPlayer(leader);
+		if (match == null) match = getInstanceOfSpectator(leader);
+		if (match == null) return false;
+
+		if (getInstanceOfPlayer(newMember) == match || getInstanceOfSpectator(newMember) == match) return true; // already there
+		if (main.isPlayerInAnyGame(newMember)) {
+			newMember.sendMessage(main.color("&c&l(!) &rYou are already in a game."));
+			return true;
+		}
+		if (main.getParkour().hasPlayer(newMember)) {
+			newMember.sendMessage(main.color("&c&l(!) &rYou cannot join the leader while in parkour."));
+			return true;
+		}
+
+		if (sendToMatch(newMember, match)) {
+			newMember.sendMessage(main.color("&a&l(!) &rYou joined the leader's game."));
+			leader.sendMessage(main.color("&a&l(!) &e" + newMember.getName() + " &rjoined your game."));
+		}
+		return true;
+	}
+
+	/**
+	 * What /leave, the Leave item and the menu do: the party leader takes everyone in their match out with them, and
+	 * a member who leaves also leaves the party, like in the other games. Returns false if they weren't in one.
+	 * Nothing else should use this for a player who is just disconnecting (see leaveGame).
+	 */
+	public boolean leaveGameWithParty(Player player) {
+		FWGameInstance match = getInstanceOfPlayer(player);
+		if (match == null) match = getInstanceOfSpectator(player);
+		if (match == null) return false;
+
+		Party party = partyOf(player);
+		if (party != null && party.isLeader(player.getUniqueId())) {
+			// Only the members in this match go with them, and the leader goes last
+			List<Player> leaving = new ArrayList<>();
+			for (Player member : party.getOnlineMembers()) {
+				if (member.equals(player)) continue;
+				if (getInstanceOfPlayer(member) == match || getInstanceOfSpectator(member) == match) leaving.add(member);
+			}
+
+			for (Player member : leaving) leaveGame(member);
+			leaveGame(player);
+
+			for (Player member : leaving) {
+				member.sendMessage(main.color("&e&l(!) &rYour party leader left the game, so the whole party was removed."));
+			}
+			return true;
+		}
+
+		boolean left = leaveGame(player);
+		if (left && party != null && main.getPartyManager() != null && main.getPartyManager().isInParty(player))
+			main.getPartyManager().leave(player);
+		return left;
 	}
 
 	/**
@@ -393,6 +565,28 @@ public class FWGameManager {
 		if (main.isPlayerInAnyGame(player) || main.getParkour().hasPlayer(player)) {
 			player.sendMessage(main.color("&c&l(!) &rYou have to leave your current game first!"));
 			return false;
+		}
+
+		Party party = partyOf(player);
+		if (party != null) {
+			if (!party.isLeader(player.getUniqueId())) {
+				// A party member can only watch the match their leader is in
+				if (getPartyLeaderMatch(party) == instance) {
+					instance.addSpectator(player);
+					return true;
+				}
+				player.sendMessage(main.color("&c&l(!) &rOnly the party leader can spectate games."));
+				return false;
+			}
+
+			// The leader brings the whole party to watch the same match
+			List<Player> members = party.getOnlineMembers();
+			if (!main.getGameManager().canAllJoin(player, members)) return false;
+			for (Player member : members) {
+				instance.addSpectator(member);
+				member.sendMessage(main.color("&a&l(!) &rYour party is now spectating &eFlag Wars&r."));
+			}
+			return true;
 		}
 
 		instance.addSpectator(player);

@@ -239,9 +239,38 @@ public class Core extends JavaPlugin implements Listener {
     }
 
     /** Safe to call from anywhere in game code; does nothing if the Battle Pass is off. */
-    public void giveBattlePassXp(Player player, int amount) {
+    public int giveBattlePassXp(Player player, int amount) {
         if (battlePassManager != null && player != null)
-            battlePassManager.addXp(player, amount);
+            return battlePassManager.addXp(player, amount);
+        return 0;
+    }
+
+    /**
+     * Under a game's "You earned X Tokens and Y EXP!" line: how much Battle Pass XP they got in that game. Says
+     * nothing for 0, which is also what you get once the whole pass is finished (or in a custom game, or out of season).
+     */
+    public void sendBattlePassXpEarned(Player player, int xp) {
+        if (player != null && xp > 0)
+            player.sendMessage(color("&2&l(!) &rYou earned &a" + xp + " &rBattle Pass XP!"));
+    }
+
+    /**
+     * Adds to a Battle Pass quest (catching a fish, finishing a game). Safe to call from anywhere in game code: does
+     * nothing if the Battle Pass or its quests are off, or the player isn't Premium.
+     *
+     * @return the Battle Pass XP it earned (0 unless it finished the quest), which a game adds to its end summary
+     */
+    public int battlePassQuest(Player player, anthony.SuperCraftBrawl.battlepass.BattlePassQuest quest, int amount) {
+        if (battlePassManager != null && battlePassManager.getQuests() != null)
+            return battlePassManager.getQuests().progress(player, quest, amount);
+        return 0;
+    }
+
+    /** Like battlePassQuest, but sets the quest to at least this value (kills in a single game). */
+    public int battlePassQuestReach(Player player, anthony.SuperCraftBrawl.battlepass.BattlePassQuest quest, int value) {
+        if (battlePassManager != null && battlePassManager.getQuests() != null)
+            return battlePassManager.getQuests().reach(player, quest, value);
+        return 0;
     }
 
     public LevelManager getLevelManager() {
@@ -1294,7 +1323,7 @@ public class Core extends JavaPlugin implements Listener {
                         return true;
                 } else if (fwGameManager.getInstanceOfPlayer(player) != null
                         || fwGameManager.getInstanceOfSpectator(player) != null) {
-                    fwGameManager.leaveGame(player);
+                    fwGameManager.leaveGameWithParty(player); // party aware, like the Classic games above
                 } else if (this.getParkour().hasPlayer(player)) {
                     this.getParkour().removePlayer(player);
                     this.ResetPlayer(player);

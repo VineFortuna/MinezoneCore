@@ -1,6 +1,7 @@
 package anthony.flagwars;
 
 import anthony.SuperCraftBrawl.Game.WinEffects;
+import anthony.SuperCraftBrawl.party.Party;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.SuperCraftBrawl.titles.TitleSequence;
 import anthony.SuperCraftBrawl.titles.TitleUtil;
@@ -66,6 +67,8 @@ public class FWGameInstance {
 	private final Set<Block> placedBlocks = new HashSet<>();
 	private final Map<UUID, Integer> kills = new HashMap<>();
 	private final Map<UUID, Integer> flagCaptures = new HashMap<>();
+	/** Battle Pass XP each player earned this match (quests), reported in the end-of-match summary. Gone with the match. */
+	private final Map<UUID, Integer> battlePassXp = new HashMap<>();
 	private final FWFlagManager flagManager;
 	private final FWResourceGenerator resourceGenerator;
 	private final FWScoreboardManager scoreboardManager;
@@ -285,12 +288,20 @@ public class FWGameInstance {
 			return false;
 		}
 
-		FWTeam freeTeam = teams.values().stream().filter(FWTeam::hasSpace).findFirst().orElse(null);
+		// On the same team as their party, if a team holds more than one player and has room for them
+		FWTeam freeTeam = teamWithPartyMate(player);
+		if (freeTeam == null)
+			freeTeam = teams.values().stream().filter(FWTeam::hasSpace).findFirst().orElse(null);
 		if (freeTeam == null) {
 			player.sendMessage(manager.getMain().color("&c&l(!) &rFlag Wars is full!"));
 			return false;
 		}
 
+		return seat(player, freeTeam);
+	}
+
+	/** Seats the player on this team (which must have room) and does everything else joining a match does. */
+	private boolean seat(Player player, FWTeam freeTeam) {
 		freeTeam.addMember(player.getUniqueId());
 		player.getInventory().clear();
 		player.getEnderChest().clear();
@@ -327,6 +338,71 @@ public class FWGameInstance {
 
 		scoreboardManager.refreshAllWaiting(waitingStatusLine());
 		return true;
+	}
+
+	/**
+	 * A team that has someone from this player's party on it and room for them, or null. Only matters in a mode where
+	 * a team holds more than one player (Solo teams are one player, so a party there is spread over its own islands).
+	 */
+	private FWTeam teamWithPartyMate(Player player) {
+		if (mode.getTeamCapacity() <= 1 || manager.getMain().getPartyManager() == null) return null;
+
+		Party party = manager.getMain().getPartyManager().getParty(player);
+		if (party == null) return null;
+
+		for (FWTeam team : teams.values()) {
+			if (!team.hasSpace()) continue;
+			for (UUID member : team.getMembers()) {
+				if (party.contains(member)) return team;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Whether a party this big fits in this match with its members kept together: whole teams for as many of them as
+	 * fill one, then a team with room for the rest. In Solo that is simply one free island each.
+	 */
+	public boolean canSeatTogether(int partySize) {
+		int capacity = mode.getTeamCapacity();
+		int wholeTeams = partySize / capacity;
+		int rest = partySize % capacity;
+
+		int empty = 0;
+		for (FWTeam team : teams.values()) {
+			if (team.isEmpty()) empty++;
+		}
+		if (empty < wholeTeams) return false;
+		if (rest == 0 || empty > wholeTeams) return true;
+
+		for (FWTeam team : teams.values()) {
+			if (!team.isEmpty() && team.freeSpace() >= rest) return true;
+		}
+		return false;
+	}
+
+	/** Seats a whole party (check canSeatTogether first), keeping its members together on teams that hold more than one. */
+	public void addParty(List<Player> members) {
+		if (state != FWGameState.WAITING && state != FWGameState.STARTING) return;
+
+		int capacity = mode.getTeamCapacity();
+		List<Player> waiting = new ArrayList<>(members);
+		while (!waiting.isEmpty()) {
+			int group = Math.min(capacity, waiting.size());
+
+			// The snuggest team that has room for the group, so a small group fills a gap and empty teams stay free
+			FWTeam team = null;
+			for (FWTeam candidate : teams.values()) {
+				if (candidate.freeSpace() < group) continue;
+				if (team == null || candidate.freeSpace() < team.freeSpace()) team = candidate;
+			}
+
+			for (int i = 0; i < group; i++) {
+				Player member = waiting.remove(0);
+				if (team != null) seat(member, team);
+				else addPlayer(member);
+			}
+		}
 	}
 
 	public void removePlayer(Player player) {
@@ -868,6 +944,14 @@ public class FWGameInstance {
 
 		PlayerData data = playerDataOf(carrier);
 		if (data != null) data.fwFlagsCaptured++;
+
+		addBattlePassXp(carrier, manager.getMain().battlePassQuest(carrier,
+				anthony.SuperCraftBrawl.battlepass.BattlePassQuest.FLAG_WARS_CAPTURE, 1));
+	}
+
+	private void addBattlePassXp(Player player, int xp) {
+		if (xp > 0)
+			battlePassXp.merge(player.getUniqueId(), xp, Integer::sum);
 	}
 
 	/** Null-safe shorthand for the per-player stats record used throughout this class - never null for an online player. */
@@ -1147,6 +1231,11 @@ public class FWGameInstance {
 				PlayerData data = playerDataOf(p);
 				if (data == null) continue;
 
+				// Battle Pass quests: they were on a team when the match ended
+				addBattlePassXp(p, manager.getMain().battlePassQuest(p, anthony.SuperCraftBrawl.battlepass.BattlePassQuest.FLAG_WARS_PLAY, 1));
+				if (won && winner != null)
+					addBattlePassXp(p, manager.getMain().battlePassQuest(p, anthony.SuperCraftBrawl.battlepass.BattlePassQuest.FLAG_WARS_WIN, 1));
+
 				if (winner != null) {
 					if (won) {
 						data.fwWins++;
@@ -1251,6 +1340,7 @@ public class FWGameInstance {
 		player.sendMessage(manager.getMain().color("&l||"));
 		player.sendMessage(manager.getMain().color(border));
 		player.sendMessage(manager.getMain().color("&2&l(!) &rYou earned &a" + totalTokens + " &rTokens and &a" + totalExp + " &rEXP!"));
+		manager.getMain().sendBattlePassXpEarned(player, battlePassXp.getOrDefault(player.getUniqueId(), 0));
 
 		data.tokens += totalTokens;
 		data.exp += totalExp;

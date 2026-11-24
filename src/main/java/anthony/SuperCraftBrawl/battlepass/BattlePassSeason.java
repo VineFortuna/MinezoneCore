@@ -30,6 +30,15 @@ public final class BattlePassSeason {
 	/** Premium Pass owners earn this much more XP from every source (1.5 = +50%). */
 	public static final double PREMIUM_XP_MULTIPLIER = 1.5;
 
+	// Quests are a Premium Pass feature: each one can be finished once per season, whenever
+	/** XP for finishing one quest, before the Premium bonus (so Premium owners get 75). */
+	public static final int QUEST_XP = 50;
+
+	/** What a finished quest is actually worth to a Premium Pass owner. */
+	public static int questRewardXp() {
+		return (int) Math.round(QUEST_XP * PREMIUM_XP_MULTIPLIER);
+	}
+
 	// TESTING FLAGS - flip both to false before the real launch
 	/** Everyone is treated as owning the Premium Pass. */
 	public static final boolean PREMIUM_FREE_FOR_TESTING = true;

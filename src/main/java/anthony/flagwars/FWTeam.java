@@ -60,6 +60,11 @@ public class FWTeam {
 		return members.size() < capacity;
 	}
 
+	/** How many more players fit on this team. */
+	public int freeSpace() {
+		return capacity - members.size();
+	}
+
 	public boolean addMember(UUID id) {
 		if (!hasSpace()) return false;
 		return members.add(id);

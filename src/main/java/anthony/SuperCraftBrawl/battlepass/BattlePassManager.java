@@ -19,6 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +42,8 @@ public class BattlePassManager implements Listener {
 	private final Map<UUID, Set<String>> unlocks = new ConcurrentHashMap<>();
 	private final ExecutorService dbThread;
 	private boolean enabled = false;
+	/** Null if the quest table couldn't be created. The rest of the pass works without it. */
+	private BattlePassQuestManager quests;
 
 	public BattlePassManager(Core main) {
 		this.main = main;
@@ -63,6 +66,14 @@ public class BattlePassManager implements Listener {
 			return;
 		}
 
+		// Quests are a separate table and their own switch: if it fails, only the quests are off
+		try {
+			quests = new BattlePassQuestManager(main, this);
+		} catch (Throwable t) {
+			quests = null;
+			main.getLogger().severe("[BattlePass] Quests failed to start, Battle Pass quests are disabled: " + t);
+		}
+
 		main.getServer().getPluginManager().registerEvents(this, main);
 
 		// Covers /reload while players are online
@@ -72,6 +83,20 @@ public class BattlePassManager implements Listener {
 
 	public boolean isEnabled() {
 		return enabled;
+	}
+
+	/** Null if quests are off (the quest table failed to start), so always null-check. */
+	public BattlePassQuestManager getQuests() {
+		return quests;
+	}
+
+	/** Runs something on the Battle Pass database thread, so it lands in order with every other write. */
+	void runDb(Runnable task) {
+		try {
+			dbThread.execute(task);
+		} catch (RejectedExecutionException e) {
+			// The plugin is shutting down, nothing more can be saved
+		}
 	}
 
 	// ---------------------------------------------------------------- loading
@@ -86,6 +111,8 @@ public class BattlePassManager implements Listener {
 		// Nothing to save: every change is already written when it happens.
 		cache.remove(event.getPlayer().getUniqueId());
 		unlocks.remove(event.getPlayer().getUniqueId());
+		if (quests != null)
+			quests.unload(event.getPlayer().getUniqueId());
 	}
 
 	private void load(Player player) {
@@ -104,6 +131,9 @@ public class BattlePassManager implements Listener {
 				main.getLogger().warning("[BattlePass] Failed to load progress for " + uuid + ": " + e.getMessage());
 			}
 		});
+
+		if (quests != null)
+			quests.load(player);
 	}
 
 	/** Null if the pass is disabled or their data hasn't finished loading yet. */
@@ -178,30 +208,50 @@ public class BattlePassManager implements Listener {
 
 	// ---------------------------------------------------------------- XP
 
-	/** Main thread only. Call from game code - does nothing if the pass is off/out of season. */
-	public void addXp(Player player, int amount) {
+	/**
+	 * Main thread only. Call from game code - does nothing if the pass is off/out of season.
+	 * Says nothing in chat by itself (the end-of-game summary reports the total, see Core#sendBattlePassXpEarned),
+	 * except for the tier up announcement.
+	 *
+	 * @return the XP they actually got (with the Premium bonus, and cut off at the end of the pass): 0 if none,
+	 *         for example because they already finished the whole pass
+	 */
+	public int addXp(Player player, int amount) {
 		if (!enabled || amount <= 0 || !BattlePassSeason.isActive())
-			return;
+			return 0;
 
 		BattlePassProgress progress = getProgress(player);
 		if (progress == null || progress.xp >= BattlePassSeason.maxXp())
-			return;
+			return 0;
 
-		// Premium Pass owners earn extra XP
-		boolean premiumBonus = hasPremium(progress);
-		if (premiumBonus)
-			amount = (int) Math.round(amount * BattlePassSeason.PREMIUM_XP_MULTIPLIER);
-
+		int oldXp = progress.xp;
 		int oldTier = progress.getTier();
-		progress.xp = Math.min(BattlePassSeason.maxXp(), progress.xp + amount);
+		progress.xp = Math.min(BattlePassSeason.maxXp(), progress.xp + withPremiumBonus(progress, amount));
 		int newTier = progress.getTier();
 		save(player.getUniqueId(), progress);
 		refreshLobbyBoard(player);
 
-		player.sendMessage(main.color("&6&l(!) &r+" + amount + " &6Battle Pass XP" + (premiumBonus ? " &7(Premium bonus)" : "")));
-
 		if (newTier > oldTier)
 			announceTierUp(player, newTier, progress);
+		return progress.xp - oldXp;
+	}
+
+	/** What addXp would give right now for this amount, without giving it. 0 if it would give nothing. */
+	public int previewXp(Player player, int amount) {
+		if (!enabled || amount <= 0 || !BattlePassSeason.isActive())
+			return 0;
+
+		BattlePassProgress progress = getProgress(player);
+		if (progress == null || progress.xp >= BattlePassSeason.maxXp())
+			return 0;
+		return Math.min(BattlePassSeason.maxXp() - progress.xp, withPremiumBonus(progress, amount));
+	}
+
+	/** Premium Pass owners earn extra XP. */
+	private int withPremiumBonus(BattlePassProgress progress, int amount) {
+		if (hasPremium(progress))
+			return (int) Math.round(amount * BattlePassSeason.PREMIUM_XP_MULTIPLIER);
+		return amount;
 	}
 
 	/** The tier up announcement and sound. */
@@ -312,6 +362,8 @@ public class BattlePassManager implements Listener {
 				main.getLogger().warning("[BattlePass] Failed to reset " + uuid + ": " + e.getMessage());
 			}
 		});
+		if (quests != null)
+			quests.reset(player);
 		load(player); // queued after the reset on the same thread
 	}
 

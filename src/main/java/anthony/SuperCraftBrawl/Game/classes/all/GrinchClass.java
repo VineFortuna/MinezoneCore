@@ -1,16 +1,21 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
+import anthony.SuperCraftBrawl.Game.FakeLoot;
 import anthony.SuperCraftBrawl.Game.GameInstance;
+import anthony.SuperCraftBrawl.Game.GameLootDrops;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.Game.classes.CooldownNatowski;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -28,13 +33,24 @@ import java.util.WeakHashMap;
  * The Grinch: fights with his Roast Beast, and throws his Sticky Fingers hook to trade whatever weapon he's
  * holding for whatever weapon the player it hits is holding. The hook is never used up, only put on
  * cooldown, so a Grinch can keep passing stolen weapons around. Everyone keeps what they end up with until they die.
+ *
+ * His Counterfeit Loot throws a fake Lightning Drop on the ground. He can't pick it up, everyone else can, and
+ * when they use it, it does something sneaky instead (see FakeLoot).
  */
 public class GrinchClass extends BaseClass {
 
 	private static final int HOOK_SLOT = 1;
 	private static final double HOOK_COOLDOWN_SECONDS = 7;
 
+	private static final int FAKE_DROP_SLOT = 2;
+	private static final double FAKE_DROP_COOLDOWN_SECONDS = 15;
+	/** A fake drop nobody takes is cleaned up after this long. */
+	private static final long FAKE_DROP_LIFETIME_TICKS = 60 * 20L;
+	/** How fast a fake drop is thrown out of his hands. */
+	private static final double FAKE_DROP_THROW_SPEED = 0.6;
+
 	private final CooldownNatowski hookCooldown = new CooldownNatowski(HOOK_COOLDOWN_SECONDS);
+	private final CooldownNatowski fakeDropCooldown = new CooldownNatowski(FAKE_DROP_COOLDOWN_SECONDS);
 
 	/*
 	 * The weapon each player was last handed by a Grinch swap, shared across every Grinch so they can find a
@@ -91,10 +107,24 @@ public class GrinchClass extends BaseClass {
 				instance.color("&7stolen weapons around!"));
 	}
 
+	private ItemStack getCounterfeitLoot() {
+		return ItemHelper.setDetails(new ItemStack(Material.CHEST), instance.color("&2&lCounterfeit Loot"),
+				"", instance.color("&7Throws a fake Lightning Drop on"),
+				instance.color("&7the ground. You can't pick it up,"),
+				instance.color("&7but every other player can."),
+				"", instance.color("&7It looks like the real thing, but"),
+				instance.color("&7it does something sneaky when used."),
+				instance.color("&7A Bazooka that heals, a Nuke that"),
+				instance.color("&7only knocks back, and so on."),
+				"", instance.color("&7You're told when someone takes one."),
+				instance.color("&7Reusable every &e" + (int) FAKE_DROP_COOLDOWN_SECONDS + "s"));
+	}
+
 	@Override
 	public void setItems(Inventory playerInv) {
 		playerInv.setItem(0, getAttackWeapon());
 		playerInv.setItem(HOOK_SLOT, getStickyFingers());
+		playerInv.setItem(FAKE_DROP_SLOT, getCounterfeitLoot());
 	}
 
 	@Override
@@ -102,24 +132,28 @@ public class GrinchClass extends BaseClass {
 		if (!isPlayerAlive())
 			return;
 
-		String msg;
-		if (hookCooldown.isReady())
-			msg = instance.color("&rThrow &2Sticky Fingers &rat an enemy");
-		else
-			msg = instance.color("&2Sticky Fingers &rready in &e" + getHookCooldownLeft() + "s");
-		getActionBarManager().setActionBar(player, "grinch.cooldown", msg, 2);
+		String hook = hookCooldown.isReady() ? "&2Sticky Fingers &aready"
+				: "&2Sticky Fingers &e" + getHookCooldownLeft() + "s";
+		String loot = fakeDropCooldown.isReady() ? "&2Counterfeit Loot &aready"
+				: "&2Counterfeit Loot &e" + getFakeDropCooldownLeft() + "s";
+		getActionBarManager().setActionBar(player, "grinch.cooldown", instance.color(hook + " &8| " + loot), 2);
 	}
 
 	@Override
 	public void useItem(PlayerInteractEvent event) {
 		ItemStack item = event.getItem();
 		Action action = event.getAction();
-		if (item == null || item.getType() != Material.TRIPWIRE_HOOK
+		if (item == null || (item.getType() != Material.TRIPWIRE_HOOK && item.getType() != Material.CHEST)
 				|| (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK)
 				|| player.getGameMode() == GameMode.SPECTATOR)
 			return;
 
-		event.setCancelled(true);
+		event.setCancelled(true); // for the chest too, so it can't be placed
+		if (item.getType() == Material.CHEST) {
+			throwFakeDrop();
+			return;
+		}
+
 		if (!hookCooldown.isReady()) {
 			player.sendMessage(instance.color("&c&l(!) &rSticky Fingers is on cooldown for &e"
 					+ getHookCooldownLeft() + "s"));
@@ -147,6 +181,42 @@ public class GrinchClass extends BaseClass {
 
 	private long getHookCooldownLeft() {
 		return (hookCooldown.getRemainingCooldownMillis() + 999) / 1000;
+	}
+
+	private long getFakeDropCooldownLeft() {
+		return (fakeDropCooldown.getRemainingCooldownMillis() + 999) / 1000;
+	}
+
+	/*
+	 * Throws a fake Lightning Drop: a random drop that has a fake version, rolled like a real one (so the rarer
+	 * ones are rarer), tagged as his so he can't pick it up (everyone else can, see FakeLoot).
+	 */
+	private void throwFakeDrop() {
+		if (!fakeDropCooldown.isReady()) {
+			player.sendMessage(instance.color("&c&l(!) &rCounterfeit Loot is on cooldown for &e"
+					+ getFakeDropCooldownLeft() + "s"));
+			return;
+		}
+		fakeDropCooldown.use();
+
+		GameLootDrops drop = FakeLoot.pickDrop(instance.getGameSettings().enabledDrops);
+		ItemStack fake = FakeLoot.mark(drop.getItem(), player.getUniqueId());
+
+		Location from = player.getEyeLocation();
+		final Item thrown = player.getWorld().dropItem(from, fake);
+		thrown.setVelocity(from.getDirection().multiply(FAKE_DROP_THROW_SPEED));
+		thrown.setPickupDelay(20);
+
+		player.getWorld().playSound(player.getLocation(), Sound.ITEM_PICKUP, 1, 0.8f);
+		player.sendMessage(instance.color("&2&l(!) &rYou threw a fake " + itemName(fake) + "&r."));
+
+		// A fake nobody takes is cleaned up after a while. Tracked, so it's cancelled if the game ends first
+		instance.trackClassTask(Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new Runnable() {
+			@Override
+			public void run() {
+				thrown.remove();
+			}
+		}, FAKE_DROP_LIFETIME_TICKS));
 	}
 
 	private boolean isValidTarget(Player target) {

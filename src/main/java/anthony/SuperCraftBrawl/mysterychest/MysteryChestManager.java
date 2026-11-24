@@ -29,7 +29,7 @@ public class MysteryChestManager implements Listener {
 
     // The two hologram lines above the chest
     private static final double HOLOGRAM_X = 198.5, HOLOGRAM_Z = 652.5;
-    private static final double TITLE_Y = 105.5, COUNT_Y = 105.2;
+    private static final double TITLE_Y = 106.5, COUNT_Y = 106.2;
 
     // The title flashes purple 3 times (pink, purple, pink, purple, pink, purple, pink), a third of a second per
     // step, then holds pink for 2 seconds and repeats. A third of a second isn't a whole number of ticks, so the
@@ -43,8 +43,8 @@ public class MysteryChestManager implements Listener {
     private static final double TITLE_VIEW_DISTANCE_SQUARED = 64 * 64;
 
     // The portal swirl that always plays around the chest, same numbers as:
-    // /particle portal 198.5 106 652.5 0.4 0.8 0.4 0.1 10
-    private static final float PORTAL_X = 198.5f, PORTAL_Y = 106f, PORTAL_Z = 652.5f;
+    // /particle portal 198.5 107 652.5 0.4 0.8 0.4 0.1 10
+    private static final float PORTAL_X = 198.5f, PORTAL_Y = 107f, PORTAL_Z = 652.5f;
     private static final long PORTAL_PERIOD_TICKS = 5L;
     private static final double PORTAL_VIEW_DISTANCE_SQUARED = 40 * 40;
 
