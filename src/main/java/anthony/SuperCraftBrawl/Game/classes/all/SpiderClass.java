@@ -46,8 +46,8 @@ public class SpiderClass extends BaseClass {
 	private final PotionEffect regen = new PotionEffect(PotionEffectType.REGENERATION, 5 * 20, 1, false, true);
 	private final PotionEffect poison = new PotionEffect(PotionEffectType.POISON, 4 * 20, 0, false, true);
 	private static final int VENOM_ABILITY_DURATION = 6;
-	public int invisTaskId;
-	private int venomTaskId;
+	public int invisTaskId = -1;
+	private int venomTaskId = -1;
 
 	public SpiderClass(GameInstance instance, Player player) {
 		super(instance, player);
