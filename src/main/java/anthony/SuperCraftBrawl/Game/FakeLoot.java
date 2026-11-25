@@ -1,8 +1,10 @@
 package anthony.SuperCraftBrawl.Game;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import net.minecraft.server.v1_8_R3.NBTTagCompound;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -41,8 +43,15 @@ import java.util.WeakHashMap;
  */
 public final class FakeLoot {
 
-	/** The drops with no fake version: the Witch Pokeball (none was asked for) and the Present (it opens into more drops). */
-	private static final Set<GameLootDrops> NOT_FAKEABLE = EnumSet.of(GameLootDrops.WITCH_EGG, GameLootDrops.PRESENT);
+	/** The drops with no fake version: the Witch Pokeball (none was asked for). */
+	private static final Set<GameLootDrops> NOT_FAKEABLE = EnumSet.of(GameLootDrops.WITCH_EGG);
+
+	/** Whether this drop has a fake version. */
+	public static boolean isFakeable(GameLootDrops drop) {
+		return drop != null && !NOT_FAKEABLE.contains(drop);
+	}
+
+	private static final Random RANDOM = new Random();
 
 	private static final String TAG_FAKE = "scbFakeLoot";
 	private static final String TAG_OWNER = "scbFakeOwner";
@@ -51,8 +60,10 @@ public final class FakeLoot {
 	// Weak so an entity that is gone (and its world) isn't kept alive by this.
 	private static final Set<Entity> MARKED = Collections.newSetFromMap(new WeakHashMap<Entity, Boolean>());
 	private static final Set<Entity> NOTIFIED = Collections.newSetFromMap(new WeakHashMap<Entity, Boolean>());
-	// When each fake pearl was thrown. The value is a number, so it can't keep its key alive.
+	// When each fake pearl was thrown, and how many times its thrower had died by then. The values are numbers, so
+	// they can't keep their key alive.
 	private static final Map<Entity, Long> THROWN_AT = new WeakHashMap<>();
+	private static final Map<Entity, Integer> DEATHS_AT_THROW = new WeakHashMap<>();
 
 	/** Effects that count as good for a fake Milk to take away. */
 	private static final Set<PotionEffectType> GOOD_EFFECTS = new HashSet<>(Arrays.asList(
@@ -116,6 +127,36 @@ public final class FakeLoot {
 				pool = allowed;
 		}
 		return GameLootDrops.getDrop(pool);
+	}
+
+	/**
+	 * What a fake Present opens into: 2 fake drops (one Common/Uncommon, one Rare/Legendary like the real one), thrown
+	 * by the same Grinch as the Present, instead of the real drops.
+	 */
+	public static ItemStack[] openPresent(Set<GameLootDrops> enabled, UUID owner) {
+		ItemStack[] drops = GameLootDrops.openPresent(enabled, NOT_FAKEABLE);
+		for (int i = 0; i < drops.length; i++)
+			drops[i] = mark(drops[i], owner != null ? owner : new UUID(0L, 0L));
+		return drops;
+	}
+
+	/** Two times out of three: how often the fakes that only sometimes do their sneaky thing do it. */
+	public static boolean sneaky() {
+		return RANDOM.nextInt(3) < 2;
+	}
+
+	/** Whether this player is in Spectator mode. */
+	public static boolean isSpectating(Player player) {
+		return player.getGameMode() == GameMode.SPECTATOR;
+	}
+
+	/**
+	 * Whether this player is out of the game, so no fake ever pushes them around or does anything to them: in
+	 * Spectator mode, waiting to respawn, or eliminated. An eliminated player (no lives left) is NOT in Spectator
+	 * mode: they stay in Adventure mode, flying and hidden, so the game mode alone doesn't tell.
+	 */
+	public static boolean isOut(Player player, BaseClass baseClass) {
+		return isSpectating(player) || (baseClass != null && (baseClass.isDead || baseClass.getLives() <= 0));
 	}
 
 	// ---------------------------------------------------------------- marking entities (snowballs, pearls, TNT)
@@ -201,9 +242,19 @@ public final class FakeLoot {
 		return null;
 	}
 
-	/** Remembers when a fake pearl was thrown, since its delay counts from the throw and not from the landing. */
-	public static void markThrown(Entity entity) {
+	/**
+	 * Remembers when a fake pearl was thrown, since its delay counts from the throw and not from the landing, and how
+	 * many times its thrower had died, so a thrower who dies before the teleport is never teleported.
+	 */
+	public static void markThrown(Entity entity, int throwerDeaths) {
 		THROWN_AT.put(entity, System.currentTimeMillis());
+		DEATHS_AT_THROW.put(entity, throwerDeaths);
+	}
+
+	/** How many times the pearl's thrower had died when they threw it. */
+	public static int deathsAtThrow(Entity entity) {
+		Integer deaths = DEATHS_AT_THROW.get(entity);
+		return deaths == null ? 0 : deaths;
 	}
 
 	/** When the pearl was thrown (milliseconds), or 0 if it isn't known. */

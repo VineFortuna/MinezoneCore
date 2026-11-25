@@ -1,11 +1,12 @@
 package anthony.SuperCraftBrawl.Game.classes.all;
 
+import anthony.SuperCraftBrawl.Game.ActionBarManager;
 import anthony.SuperCraftBrawl.Game.FakeLoot;
 import anthony.SuperCraftBrawl.Game.GameInstance;
 import anthony.SuperCraftBrawl.Game.GameLootDrops;
+import anthony.SuperCraftBrawl.Game.classes.Ability;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
-import anthony.SuperCraftBrawl.Game.classes.CooldownNatowski;
 import anthony.SuperCraftBrawl.Game.projectile.ItemProjectile;
 import anthony.SuperCraftBrawl.Game.projectile.ProjectileOnHit;
 import anthony.util.ItemHelper;
@@ -22,11 +23,15 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 import xyz.xenondevs.particle.ParticleEffect;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.WeakHashMap;
 
 /*
@@ -40,7 +45,7 @@ import java.util.WeakHashMap;
 public class GrinchClass extends BaseClass {
 
 	private static final int HOOK_SLOT = 1;
-	private static final double HOOK_COOLDOWN_SECONDS = 7;
+	private static final double HOOK_COOLDOWN_SECONDS = 5;
 
 	private static final int FAKE_DROP_SLOT = 2;
 	private static final double FAKE_DROP_COOLDOWN_SECONDS = 15;
@@ -49,8 +54,9 @@ public class GrinchClass extends BaseClass {
 	/** How fast a fake drop is thrown out of his hands. */
 	private static final double FAKE_DROP_THROW_SPEED = 0.6;
 
-	private final CooldownNatowski hookCooldown = new CooldownNatowski(HOOK_COOLDOWN_SECONDS);
-	private final CooldownNatowski fakeDropCooldown = new CooldownNatowski(FAKE_DROP_COOLDOWN_SECONDS);
+	// Both are shown on the action bar together, the same as Spider's Mutate and Web
+	private final Ability hookAbility = new Ability("&2&lSticky Fingers", HOOK_COOLDOWN_SECONDS, player);
+	private final Ability fakeDropAbility = new Ability("&6&lCounterfeit Loot", FAKE_DROP_COOLDOWN_SECONDS, player);
 
 	/*
 	 * The weapon each player was last handed by a Grinch swap, shared across every Grinch so they can find a
@@ -65,8 +71,11 @@ public class GrinchClass extends BaseClass {
 		final WeakReference<BaseClass> holderClass;
 		final int deathsAtSwap;
 		final ItemStack weapon;
+		// The Grinch whose swap put it there, so it can be taken back when that Grinch dies
+		final UUID grinch;
 
-		HeldWeapon(BaseClass holderClass, int deathsAtSwap, ItemStack weapon) {
+		HeldWeapon(UUID grinch, BaseClass holderClass, int deathsAtSwap, ItemStack weapon) {
+			this.grinch = grinch;
 			this.holderClass = new WeakReference<>(holderClass);
 			this.deathsAtSwap = deathsAtSwap;
 			this.weapon = weapon;
@@ -93,35 +102,37 @@ public class GrinchClass extends BaseClass {
 	@Override
 	public ItemStack getAttackWeapon() {
 		return ItemHelper.addEnchant(ItemHelper.addEnchant(
-				ItemHelper.setDetails(new ItemStack(Material.COOKED_BEEF), instance.color("&2&lRoast Beast"),
+				ItemHelper.setDetails(new ItemStack(Material.COOKED_BEEF), instance.color("&4&lRoast Beast"),
 						"", instance.color("&7The Grinch's stolen Who-feast."),
 						instance.color("&7Turns out it hits pretty hard...")),
 				Enchantment.DAMAGE_ALL, 3), Enchantment.KNOCKBACK, 1);
 	}
 
 	private ItemStack getStickyFingers() {
-		return ItemHelper.setDetails(new ItemStack(Material.TRIPWIRE_HOOK), instance.color("&2&lSticky Fingers"),
-				"", instance.color("&7Throw it at an enemy to swap the"),
-				instance.color("&7weapon you're holding for theirs."),
-				instance.color("&7Reusable every &e7s &7- keep passing"),
-				instance.color("&7stolen weapons around!"));
+		return ItemHelper.setDetails(new ItemStack(Material.TRIPWIRE_HOOK), instance.color(hookAbility.getAbilityNameRightClickMessage()),
+				instance.color("&7Throw it at a player to swap weapons"),
+				instance.color("&7with them, unabling abilities they"),
+				instance.color("&7would activate with it"),
+				"",
+				instance.color("&7Reusable, so you can keep passing"),
+				instance.color("&7stolen weapons around"));
 	}
 
 	private ItemStack getCounterfeitLoot() {
-		return ItemHelper.setDetails(new ItemStack(Material.CHEST), instance.color("&2&lCounterfeit Loot"),
-				"", instance.color("&7Throws a fake Lightning Drop on"),
-				instance.color("&7the ground. You can't pick it up,"),
-				instance.color("&7but every other player can."),
-				"", instance.color("&7It looks like the real thing, but"),
-				instance.color("&7it does something sneaky when used."),
-				instance.color("&7A Bazooka that heals, a Nuke that"),
-				instance.color("&7only knocks back, and so on."),
-				"", instance.color("&7You're told when someone takes one."),
-				instance.color("&7Reusable every &e" + (int) FAKE_DROP_COOLDOWN_SECONDS + "s"));
+		return ItemHelper.setDetails(new ItemStack(Material.CHEST), instance.color(fakeDropAbility.getAbilityNameRightClickMessage()),
+				instance.color("&7Throws a counterfeit Lightning Drop"),
+				instance.color("&7item on the ground for other players"),
+				instance.color("&7to pick up."),
+				"",
+				instance.color("&7They look like the real item but do"),
+				instance.color("&7something sneaky when used: A healing"),
+				instance.color("&7potion that hurts, a speed potion that"),
+				instance.color("&7gives slowness and so on."));
 	}
 
 	@Override
 	public void setItems(Inventory playerInv) {
+		fakeDropAbility.getCooldownInstance().reset(); // a new life starts with Counterfeit Loot ready
 		playerInv.setItem(0, getAttackWeapon());
 		playerInv.setItem(HOOK_SLOT, getStickyFingers());
 		playerInv.setItem(FAKE_DROP_SLOT, getCounterfeitLoot());
@@ -132,11 +143,9 @@ public class GrinchClass extends BaseClass {
 		if (!isPlayerAlive())
 			return;
 
-		String hook = hookCooldown.isReady() ? "&2Sticky Fingers &aready"
-				: "&2Sticky Fingers &e" + getHookCooldownLeft() + "s";
-		String loot = fakeDropCooldown.isReady() ? "&2Counterfeit Loot &aready"
-				: "&2Counterfeit Loot &e" + getFakeDropCooldownLeft() + "s";
-		getActionBarManager().setActionBar(player, "grinch.cooldown", instance.color(hook + " &8| " + loot), 2);
+		ActionBarManager.AbilityActionBar actionBar = new ActionBarManager.AbilityActionBar(this, getActionBarManager());
+		// The short wording ("Name in 5s"): both names together are too long for "regenerates in"
+		actionBar.setActionBarAbilityWhiteShort(player, hookAbility, fakeDropAbility);
 	}
 
 	@Override
@@ -154,13 +163,12 @@ public class GrinchClass extends BaseClass {
 			return;
 		}
 
-		if (!hookCooldown.isReady()) {
-			player.sendMessage(instance.color("&c&l(!) &rSticky Fingers is on cooldown for &e"
-					+ getHookCooldownLeft() + "s"));
+		if (!hookAbility.isReady()) {
+			hookAbility.sendPlayerRemainingCooldownChatMessage();
 			return;
 		}
 
-		hookCooldown.use();
+		hookAbility.use();
 		player.getWorld().playSound(player.getLocation(), Sound.SHOOT_ARROW, 1, 0.7f);
 		int grinchDeathsAtThrow = totalDeaths;
 
@@ -179,44 +187,82 @@ public class GrinchClass extends BaseClass {
 				player.getLocation().getDirection().multiply(2.0D));
 	}
 
-	private long getHookCooldownLeft() {
-		return (hookCooldown.getRemainingCooldownMillis() + 999) / 1000;
-	}
-
-	private long getFakeDropCooldownLeft() {
-		return (fakeDropCooldown.getRemainingCooldownMillis() + 999) / 1000;
-	}
-
 	/*
 	 * Throws a fake Lightning Drop: a random drop that has a fake version, rolled like a real one (so the rarer
 	 * ones are rarer), tagged as his so he can't pick it up (everyone else can, see FakeLoot).
 	 */
 	private void throwFakeDrop() {
-		if (!fakeDropCooldown.isReady()) {
-			player.sendMessage(instance.color("&c&l(!) &rCounterfeit Loot is on cooldown for &e"
-					+ getFakeDropCooldownLeft() + "s"));
+		if (!fakeDropAbility.isReady()) {
+			fakeDropAbility.sendPlayerRemainingCooldownChatMessage();
 			return;
 		}
-		fakeDropCooldown.use();
+		fakeDropAbility.use();
 
 		GameLootDrops drop = FakeLoot.pickDrop(instance.getGameSettings().enabledDrops);
-		ItemStack fake = FakeLoot.mark(drop.getItem(), player.getUniqueId());
 
 		Location from = player.getEyeLocation();
-		final Item thrown = player.getWorld().dropItem(from, fake);
+		Item thrown = dropFake(from, drop);
 		thrown.setVelocity(from.getDirection().multiply(FAKE_DROP_THROW_SPEED));
 		thrown.setPickupDelay(20);
 
 		player.getWorld().playSound(player.getLocation(), Sound.ITEM_PICKUP, 1, 0.8f);
-		player.sendMessage(instance.color("&2&l(!) &rYou threw a fake " + itemName(fake) + "&r."));
+		player.sendMessage(instance.color("&2&l(!) &rYou threw a fake " + itemName(thrown.getItemStack()) + "&r."));
+	}
 
-		// A fake nobody takes is cleaned up after a while. Tracked, so it's cancelled if the game ends first
+	/*
+	 * He picked up a real drop: a fake copy of it stays where it lay (no message, so it looks like nothing happened),
+	 * for whoever walks by next.
+	 */
+	public void leaveFakeBehind(Location where, GameLootDrops drop) {
+		Item left = dropFake(where, drop);
+		left.setVelocity(new Vector(0, 0, 0));
+		left.setPickupDelay(10);
+	}
+
+	/** Drops a fake of this drop (his, so he can't take it) at a spot. A fake nobody takes is cleaned up after a while. */
+	private Item dropFake(Location at, GameLootDrops drop) {
+		final Item dropped = at.getWorld().dropItem(at, FakeLoot.mark(drop.getItem(), player.getUniqueId()));
+
+		// Tracked, so it's cancelled if the game ends first
 		instance.trackClassTask(Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new Runnable() {
 			@Override
 			public void run() {
-				thrown.remove();
+				dropped.remove();
 			}
 		}, FAKE_DROP_LIFETIME_TICKS));
+		return dropped;
+	}
+
+	/*
+	 * He died: every weapon he swapped around goes back. Each player he left holding a swapped weapon (his Roast Beast, or
+	 * one stolen from someone else) gets their own class weapon again, the same as if they had respawned.
+	 */
+	@Override
+	public void onPlayerDied() {
+		UUID grinchId = player.getUniqueId();
+		List<Player> holders = new ArrayList<>();
+		for (Map.Entry<Player, HeldWeapon> entry : HELD_WEAPONS.entrySet()) {
+			if (grinchId.equals(entry.getValue().grinch))
+				holders.add(entry.getKey());
+		}
+
+		for (Player holder : holders) {
+			HeldWeapon held = HELD_WEAPONS.remove(holder);
+			BaseClass holderClass = instance.classes.get(holder);
+			// Himself: he respawns with his own kit. Anyone who died or changed class since already has theirs back
+			if (held == null || holder == player || holderClass == null || !holder.isOnline()
+					|| held.holderClass.get() != holderClass || held.deathsAtSwap != holderClass.totalDeaths
+					|| holderClass.getLives() <= 0)
+				continue;
+
+			int slot = findWeaponSlot(holder.getInventory(), held.weapon);
+			if (slot < 0)
+				continue;
+
+			holder.getInventory().setItem(slot, holderClass.getAttackWeapon().clone());
+			holder.playSound(holder.getLocation(), Sound.ITEM_PICKUP, 1, 1.2f);
+			holder.sendMessage(instance.color("&2&l(!) &rThe &2&l&oGrinch &rdied, you got your weapon back!"));
+		}
 	}
 
 	private boolean isValidTarget(Player target) {
@@ -262,7 +308,7 @@ public class GrinchClass extends BaseClass {
 
 	private void setHeldWeapon(Player holder, ItemStack weapon) {
 		BaseClass holderClass = instance.classes.get(holder);
-		HELD_WEAPONS.put(holder, new HeldWeapon(holderClass, holderClass.totalDeaths, weapon.clone()));
+		HELD_WEAPONS.put(holder, new HeldWeapon(player.getUniqueId(), holderClass, holderClass.totalDeaths, weapon.clone()));
 	}
 
 	/*

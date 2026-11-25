@@ -242,10 +242,23 @@ public class FWScoreboardManager {
 		if (!hidden.hasEntry(player.getName())) hidden.addEntry(player.getName());
 	}
 
+	/** How a player is named in the tab list of everyone in the match: the same "[Y] Name" as above their head, gray for a spectator. */
+	public String tabName(Player player, FWTeam team) {
+		if (team == null) return "" + ChatColor.GRAY + ChatColor.ITALIC + player.getName();
+		return nameTagPrefix(team) + player.getName();
+	}
+
 	/** Spectators don't get a team prefix of their own, but still need the shared scoreboard to see everyone else's. */
 	public void joinNameTagScoreboard(Player player) {
 		player.setScoreboard(nameTagScoreboard());
+
+		// A team that sorts after the "fw_" + island teams, so spectators are listed below the players in the tab list
+		Team spectators = nameTagScoreboard().getTeam(SPECTATOR_TEAM);
+		if (spectators == null) spectators = nameTagScoreboard().registerNewTeam(SPECTATOR_TEAM);
+		if (!spectators.hasEntry(player.getName())) spectators.addEntry(player.getName());
 	}
+
+	private static final String SPECTATOR_TEAM = "fw_zz_spectators";
 
 	/**
 	 * Compact "[Y]"/"[R]"-style tag (see FWGameConstants#abbreviateTeamName) rather than the full

@@ -130,6 +130,18 @@ public class ActionBarManager {
 			actionBarManager.setActionBar(player, name + baseClass, createAbilityMessage(ability1, ability2, true), 2);
 		}
 
+		/** Same as the white one, but on cooldown it reads "Name in 5s" instead of "Name regenerates in 5s" (for long names). */
+		public void setActionBarAbilityWhiteShort(Player player, Ability ability1, Ability ability2) {
+			String name = ability1.getAbilityName();
+
+			if (ability2 != null) name += ability2.getAbilityName();
+
+			String message = constructAbilityMessage(ability1, true, true);
+			if (ability2 != null)
+				message += org.bukkit.ChatColor.DARK_GRAY + " ┃ " + constructAbilityMessage(ability2, true, true);
+			actionBarManager.setActionBar(player, name + baseClass, message, 2);
+		}
+
 		public String createAbilityMessage(Ability ability1, @Nullable Ability ability2, boolean isWhite) {
 			String message1 = constructAbilityMessage(ability1, isWhite);
 
@@ -140,6 +152,10 @@ public class ActionBarManager {
 		}
 
 		String constructAbilityMessage(Ability ability, boolean isWhite) {
+			return constructAbilityMessage(ability, isWhite, false);
+		}
+
+		String constructAbilityMessage(Ability ability, boolean isWhite, boolean shortCooldownText) {
 			long remainingTime = ability.getCooldownInstance().getRemainingCooldownSeconds();
 
 			String colorString;
@@ -147,7 +163,8 @@ public class ActionBarManager {
 			else colorString = "&r";
 
 			if (!ability.isReady()) {
-				return ChatColorHelper.color(ability.getAbilityName() + colorString + " regenerates in &e" + (remainingTime + 1) + "s");
+				String cooldownText = shortCooldownText ? " in &e" : " regenerates in &e";
+				return ChatColorHelper.color(ability.getAbilityName() + colorString + cooldownText + (remainingTime + 1) + "s");
 			} else {
 				return ChatColorHelper.color(colorString + "You can use " + ability.getAbilityName());
 			}

@@ -4,6 +4,7 @@ import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.Game.classes.BaseClass;
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.SuperCraftBrawl.christmas.ReindeerFlight;
+import anthony.SuperCraftBrawl.Game.classes.all.GrinchClass;
 import anthony.SuperCraftBrawl.Game.classes.all.SantaClass;
 import anthony.SuperCraftBrawl.Game.map.DuosMaps;
 import anthony.SuperCraftBrawl.Game.map.MapInstance;
@@ -495,45 +496,74 @@ public class GameManager implements Listener, PluginMessageListener {
 			return;
 		}
 
-        if (baseClass.getType() == ClassType.Enderman)
+		EnderPearl fakePearl = FakeLoot.findFakePearl(player, to);
+
+		// (a fake pearl plays it when the teleport really happens, further down)
+        if (baseClass.getType() == ClassType.Enderman && fakePearl == null)
             SoundManager.playSoundToAll(player, Sound.ENDERMAN_TELEPORT, 1, 1);
 
 		// A fake Ender Pearl (the Grinch's): the teleport is held back and the spot it landed on is kept, and the
-		// player goes there 3 seconds after the THROW (straight away if the flight took longer than that)
-		EnderPearl fakePearl = FakeLoot.findFakePearl(player, to);
+		// player goes there 5 seconds after the THROW (straight away if the flight took longer than that). Not at all
+		// if they died since they threw it
 		if (fakePearl != null) {
+			int deathsAtThrow = FakeLoot.deathsAtThrow(fakePearl);
+			if (baseClass.totalDeaths != deathsAtThrow)
+				return;
+
 			long remainingMs = FAKE_PEARL_DELAY_MS - (System.currentTimeMillis() - FakeLoot.thrownAt(fakePearl));
 			if (remainingMs > 0) {
-				teleportAfterDelay(instance, player, to, (remainingMs + 49) / 50);
+				teleportAfterDelay(instance, player, to, (remainingMs + 49) / 50, deathsAtThrow);
 				return;
 			}
+			fakePearlTeleport(player, to, false);
+			return;
 		}
 
 		player.teleport(to);
 	}
 
-	private static final long FAKE_PEARL_DELAY_MS = 3000L;
+	private static final long FAKE_PEARL_DELAY_MS = 5000L;
 
 	/**
 	 * The held back teleport of a fake Ender Pearl: only goes through if they are still alive and playing when it
-	 * comes, and they keep looking the way they are by then.
+	 * comes, and have not died since they threw it (dying cancels it, even if they respawned by then). They keep
+	 * looking the way they are by then.
 	 */
-	private void teleportAfterDelay(final GameInstance instance, final Player player, final Location to, long ticks) {
+	private void teleportAfterDelay(final GameInstance instance, final Player player, final Location to, long ticks,
+			final int deathsAtThrow) {
 		instance.trackClassTask(Bukkit.getScheduler().runTaskLater(main, new Runnable() {
 			@Override
 			public void run() {
 				if (!player.isOnline() || instance.state != GameState.STARTED || GetInstanceOfPlayer(player) != instance)
 					return;
 				BaseClass baseClass = instance.classes.get(player);
-				if (baseClass == null || baseClass.isDead || baseClass.getLives() <= 0 || !instance.isInBounds(to))
+				if (baseClass == null || baseClass.isDead || baseClass.getLives() <= 0
+						|| baseClass.totalDeaths != deathsAtThrow || !instance.isInBounds(to))
 					return;
 
-				Location destination = to.clone();
-				destination.setYaw(player.getLocation().getYaw());
-				destination.setPitch(player.getLocation().getPitch());
-				player.teleport(destination);
+				fakePearlTeleport(player, to, true);
 			}
 		}, ticks));
+	}
+
+	/**
+	 * Takes the player to where their fake pearl landed. Once they are there, everyone in the world hears the Enderman
+	 * teleport sound, both where they left and where they arrived.
+	 */
+	private void fakePearlTeleport(Player player, Location to, boolean keepLooking) {
+		Location from = player.getLocation();
+		Location destination = to.clone();
+		if (keepLooking) {
+			destination.setYaw(from.getYaw());
+			destination.setPitch(from.getPitch());
+		}
+		player.teleport(destination);
+
+		// Sent to each player (not just to who the server thinks is in range) at both spots
+		for (Player listener : new ArrayList<>(destination.getWorld().getPlayers())) {
+			listener.playSound(from, Sound.ENDERMAN_TELEPORT, 1, 1);
+			listener.playSound(destination, Sound.ENDERMAN_TELEPORT, 1, 1);
+		}
 	}
 
 	/**
@@ -648,6 +678,10 @@ public class GameManager implements Listener, PluginMessageListener {
 
 		e.setCancelled(true); // it's a chest: don't place it
 
+		// A fake Present (the Grinch's) opens into 2 fake drops (his), not the real ones
+		boolean fakePresent = FakeLoot.isFake(item);
+		UUID fakeOwner = FakeLoot.ownerOf(item);
+
 		// Use up one Present - only the one in hand, not every trapped chest the player has
 		PlayerInventory inventory = player.getInventory();
 		int slot = inventory.getHeldItemSlot();
@@ -659,7 +693,8 @@ public class GameManager implements Listener, PluginMessageListener {
 			inventory.setItem(slot, null);
 		}
 
-		ItemStack[] rewards = GameLootDrops.openPresent(game.getGameSettings().enabledDrops);
+		ItemStack[] rewards = fakePresent ? FakeLoot.openPresent(game.getGameSettings().enabledDrops, fakeOwner)
+				: GameLootDrops.openPresent(game.getGameSettings().enabledDrops);
 		StringBuilder names = new StringBuilder();
 		for (ItemStack reward : rewards) {
 			if (!GameLootDrops.giveToPlayer(player, reward)) {
@@ -672,7 +707,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		player.updateInventory();
 		player.playSound(player.getLocation(), Sound.CHEST_OPEN, 1f, 1f);
 		player.sendMessage(main.color("&c&l(!) &c&lMerry Christmas! &rYou received " + names + "&r!"));
-		if (game.savesStats()) {
+		if (game.savesStats() && !fakePresent) { // a fake Present doesn't count for the quest
 			int battlePassXp = main.battlePassQuest(player, anthony.SuperCraftBrawl.battlepass.BattlePassQuest.EARLY_GIFT, 1);
 			if (game.classes.get(player) != null)
 				game.classes.get(player).totalBattlePassXp += battlePassXp;
@@ -823,7 +858,8 @@ public class GameManager implements Listener, PluginMessageListener {
 					// A fake Instagib (the Grinch's) shoots the opposite way to where you look
 						Location eye = player.getEyeLocation();
 						if (FakeLoot.isFake(item))
-							eye.setDirection(eye.getDirection().multiply(-1));
+							if (FakeLoot.sneaky()) // 2 times out of 3: the beam, the damage and the launch all go that way
+									eye.setDirection(eye.getDirection().multiply(-1));
 						Location endLoc = eye.clone();
 					BlockIterator b = new BlockIterator(eye, 0, range);
 
@@ -844,11 +880,12 @@ public class GameManager implements Listener, PluginMessageListener {
 
 					for (Player p : i.players) {
 						p.playSound(p.getLocation(), Sound.EXPLODE, 1, 2);
-						if (p != player && i.classes.containsKey(p) && i.classes.get(player).getLives() > 0) {
+						if (p != player && i.classes.containsKey(p) && i.classes.get(player).getLives() > 0
+								&& !FakeLoot.isOut(p, i.classes.get(p))) {
 							Vector d = p.getLocation().add(0, 1, 0).subtract(eye).toVector();
 							double dist = d.dot(dir);
 
-							if (dist < maxDist) {
+							if (dist > 0 && dist < maxDist) { // in front of the shot, never behind whoever fires it
 								Location closest = eye.clone().add(dir.clone().multiply(dist));
 
 								if (closest.distanceSquared(p.getLocation().add(0, 1, 0)) <= 1.5 * 1.5) {
@@ -1108,18 +1145,22 @@ public class GameManager implements Listener, PluginMessageListener {
 					BaseClass baseClass = instance.classes.get(player);
 					int amount = item.getAmount();
 					if (FakeLoot.isFake(item)) {
-						// A fake Extra Life (the Grinch's) costs a life instead, but never the last one
-						boolean lostLife = baseClass.lives > 1;
-						baseClass.lives = Math.max(1, baseClass.lives - 1);
-						baseClass.score.setScore(baseClass.lives);
-						if (lostLife)
+						// A fake Extra Life (the Grinch's) costs a life instead. On the last life it fails: no life is
+						// lost, nobody is told, and it only fizzles (it is still used up)
+						if (baseClass.lives > 1) {
+							baseClass.lives -= 1;
+							baseClass.score.setScore(baseClass.lives);
 							baseClass.tellAll(main.color("&c&l(!) &c" + player.getName() + "&r LOST A LIFE!"));
+							player.getWorld().playSound(player.getLocation(), Sound.LEVEL_UP, 1, 2);
+						} else {
+							player.getWorld().playSound(player.getLocation(), Sound.FIZZ, 1, 1);
+						}
 					} else {
 						baseClass.lives += 1;
 						baseClass.score.setScore(baseClass.lives);
 						baseClass.tellAll(main.color("&2&l(!) &a" + player.getName() + "&r used an extra life!"));
+						player.getWorld().playSound(player.getLocation(), Sound.LEVEL_UP, 1, 2);
 					}
-					player.getWorld().playSound(player.getLocation(), Sound.LEVEL_UP, 1, 2);
 
 					if (amount > 0) {
 						amount--;
@@ -1209,7 +1250,8 @@ public class GameManager implements Listener, PluginMessageListener {
 								}
 							}
 							bc.bazooka.restart();
-							if (FakeLoot.isFake(item)) {
+							// A fake Bazooka (the Grinch's) heals instead 2 times out of 3, the rest of the time it's the real one
+							if (FakeLoot.isFake(item) && FakeLoot.sneaky()) {
 								shootFakeBazooka(instance, player);
 								event.setCancelled(true);
 								return;
@@ -1257,7 +1299,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
-	private static final double FAKE_BAZOOKA_HEAL = 5.5; // what the real one does as damage
+	private static final double FAKE_BAZOOKA_HEAL = 4.0; // a bit less than the 5.5 the real one does as damage
 
 	/**
 	 * A fake Bazooka (the Grinch's): the same shot and the same explosion, but it heals everyone it hits, enemies
@@ -1273,7 +1315,7 @@ public class GameManager implements Listener, PluginMessageListener {
 
 				for (Player gamePlayer : this.getNearby(3.0)) {
 					BaseClass healed = instance.classes.get(gamePlayer);
-					if (healed == null || healed.getLives() <= 0 || gamePlayer.getGameMode() == GameMode.SPECTATOR)
+					if (healed == null || FakeLoot.isOut(gamePlayer, healed))
 						continue;
 					gamePlayer.setHealth(Math.min(gamePlayer.getMaxHealth(), gamePlayer.getHealth() + FAKE_BAZOOKA_HEAL));
 				}
@@ -1304,7 +1346,6 @@ public class GameManager implements Listener, PluginMessageListener {
 	private static final int SNOWBALL_LAUNCHER_COOLDOWN_MS = 1000; // covers the burst so uses can't overlap
 	private static final double SNOWBALL_LAUNCHER_KB_HORIZONTAL = 2.5;
 	private static final double SNOWBALL_LAUNCHER_KB_VERTICAL = 1.0;
-	private static final double FAKE_LAUNCHER_PULL_VERTICAL = 0.4; // a fake launcher drags enemies in, not up
 	private static final String SNOWBALL_LAUNCHER_META = "SnowballLauncher";
 	private static final int SNOWBALL_LAUNCHER_TRAIL_MAX_TICKS = 5 * 20; // in case it never lands
 
@@ -1338,7 +1379,8 @@ public class GameManager implements Listener, PluginMessageListener {
 			return;
 		bc.snowballLauncher.restart();
 
-		final boolean fake = FakeLoot.isFake(item); // a fake one (the Grinch's) pulls enemies in instead of pushing
+		// A fake one (the Grinch's): its snowballs mostly launch whoever fired them instead, see snowballLauncherHit
+		final boolean fake = FakeLoot.isFake(item);
 		useSnowballLauncherCharge(player, item);
 
 		new BukkitRunnable() {
@@ -1400,6 +1442,7 @@ public class GameManager implements Listener, PluginMessageListener {
 	/*
 	 * Launches enemies hit by a Snowball Launcher snowball back (along the snowball's flight) and up.
 	 * Runs first and always cancels the hit, so vanilla snowball knockback can't override the launch.
+	 * (A fake launcher from the Grinch launches the one who fired it instead, 2 hits out of 3.)
 	 */
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void snowballLauncherHit(EntityDamageByEntityEvent event) {
@@ -1426,15 +1469,23 @@ public class GameManager implements Listener, PluginMessageListener {
 
 		Vector push = snowball.getVelocity().setY(0);
 		push = push.lengthSquared() > 1.0E-4 ? push.normalize().multiply(SNOWBALL_LAUNCHER_KB_HORIZONTAL) : new Vector();
-		if (FakeLoot.isMarked(snowball)) // a fake launcher (the Grinch's) pulls them back along the shot, toward you
-			hit.setVelocity(push.multiply(-1).setY(FAKE_LAUNCHER_PULL_VERTICAL));
-		else
-			hit.setVelocity(push.setY(SNOWBALL_LAUNCHER_KB_VERTICAL));
+		// A fake launcher (the Grinch's): each snowball that hits has a 2 in 3 chance of launching whoever fired it
+		// instead of the one it hit, and the other way round (back, away from who was hit). Not if the shooter is out
+		Player launched = hit;
+		if (FakeLoot.isMarked(snowball) && FakeLoot.sneaky()
+				&& !FakeLoot.isOut(shooter, instance.classes.get(shooter))) {
+			launched = shooter;
+			push.multiply(-1);
+		}
+		launched.setVelocity(push.setY(SNOWBALL_LAUNCHER_KB_VERTICAL));
 
 		// Goofy "BOING" + a squeaky yelp from whoever got launched
-		Location launchLoc = hit.getLocation();
-		hit.getWorld().playSound(launchLoc, Sound.MAGMACUBE_JUMP, 1.5f, 0.6f);
-		hit.getWorld().playSound(launchLoc, Sound.VILLAGER_HIT, 1, 2.0f);
+		Location launchLoc = launched.getLocation();
+		launched.getWorld().playSound(launchLoc, Sound.MAGMACUBE_JUMP, 1.5f, 0.6f);
+		launched.getWorld().playSound(launchLoc, Sound.VILLAGER_HIT, 1, 2.0f);
+
+		if (launched != hit) // the one fired at wasn't pushed: nothing to credit
+			return;
 
 		// Credit the shooter if the launch knocks them into the void
 		hit.setLastDamageCause(new EntityDamageByEntityEvent(shooter, hit, DamageCause.ENTITY_ATTACK, 0));
@@ -1503,8 +1554,8 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (item != null && item.getType() == Material.WHEAT) {
 				ItemMeta meta = item.getItemMeta();
 				if (!(meta.getDisplayName().contains("Magic"))) {
-					// A fake Broom (the Grinch's) dashes you down instead, half of the time
-					boolean dashDown = FakeLoot.isFake(item) && new Random().nextBoolean();
+					// A fake Broom (the Grinch's) dashes you down instead, 2 times out of 3
+					boolean dashDown = FakeLoot.isFake(item) && FakeLoot.sneaky();
 					int amount = item.getAmount();
 					if (amount > 0) {
 						amount--;
@@ -1660,8 +1711,26 @@ public class GameManager implements Listener, PluginMessageListener {
 			if (GameLootDrops.giveToPlayer(event.getPlayer(), stack)) {
 				item.remove();
 				event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.ITEM_PICKUP, 0.2f, 1.5f);
+				grinchTookRealDrop(event.getPlayer(), item, stack);
 			}
+			return;
 		}
+		grinchTookRealDrop(event.getPlayer(), item, stack);
+	}
+
+	/*
+	 * When a Grinch picks up a real lightning drop, a counterfeit copy of it is left where it lay, so the next
+	 * player to walk by takes the fake. Fakes (any Grinch's) are never copied.
+	 */
+	private void grinchTookRealDrop(Player picker, Item item, ItemStack stack) {
+		GameInstance instance = GetInstanceOfPlayer(picker);
+		BaseClass baseClass = instance == null ? null : instance.classes.get(picker);
+		if (!(baseClass instanceof GrinchClass) || FakeLoot.isFake(stack))
+			return;
+
+		GameLootDrops drop = GameLootDrops.fromItem(stack);
+		if (FakeLoot.isFakeable(drop))
+			((GrinchClass) baseClass).leaveFakeBehind(item.getLocation(), drop);
 	}
 
 	// Disables portals usage
@@ -3816,6 +3885,10 @@ public class GameManager implements Listener, PluginMessageListener {
 		else
 			return;
 
+		// The Grinch who threw this fake drop: the Zombie and the Skeleton are named after him, not the player
+		UUID grinchId = FakeLoot.ownerOf(item);
+		final Player grinch = grinchId == null ? null : Bukkit.getPlayer(grinchId);
+
 		if (item.getAmount() <= 1)
 			player.getInventory().clear(player.getInventory().getHeldItemSlot());
 		else
@@ -3824,7 +3897,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		ItemProjectile proj = new ItemProjectile(instance, player, new ProjectileOnHit() {
 			@Override
 			public void onHit(Player hit) {
-				spawnFakePokeballMobs(instance, player, type, this.getBaseProj().getEntity().getLocation());
+				spawnFakePokeballMobs(instance, player, grinch, type, this.getBaseProj().getEntity().getLocation());
 			}
 		}, ItemHelper.createMonsterEgg(type, 1));
 		instance.getGameManager().getProjManager().shootProjectile(proj, player.getEyeLocation(),
@@ -3833,16 +3906,21 @@ public class GameManager implements Listener, PluginMessageListener {
 
 	/**
 	 * What a fake Pokeball spawns instead of the real mob: the Zombie a feeble one (leather, a wooden sword, 1 health),
-	 * the Skeleton one without a bow, the Slime 4 small slimes, the Silverfish 3 bats, the Creeper a pig and the
-	 * Cave Spider a chicken.
+	 * the Skeleton one with 1 health (and its bow), the Slime 4 small slimes, the Silverfish 3 bats, the Creeper a
+	 * pig and the Cave Spider a chicken.
+	 * <p>
+	 * The Zombie and the Skeleton are the Grinch's: they carry his name (so they go when he dies and never go after
+	 * him), and they go after whoever used the Pokeball (owner). The grinch is null if he has left.
 	 */
-	private void spawnFakePokeballMobs(final GameInstance instance, Player owner, EntityType type, Location loc) {
+	private void spawnFakePokeballMobs(final GameInstance instance, Player owner, Player grinch, EntityType type,
+			Location loc) {
 		World world = loc.getWorld();
+		Player namedAfter = grinch != null ? grinch : owner;
 
 		switch (type) {
 		case ZOMBIE: {
 			Zombie zombie = world.spawn(loc, Zombie.class);
-			customizeMob(zombie, owner);
+			customizeMob(zombie, namedAfter);
 			zombie.setBaby(false);
 			EntityEquipment equipment = zombie.getEquipment();
 			equipment.setHelmet(new ItemStack(Material.LEATHER_HELMET));
@@ -3852,18 +3930,20 @@ public class GameManager implements Listener, PluginMessageListener {
 			equipment.setItemInHand(new ItemStack(Material.WOOD_SWORD));
 			zombie.setMaxHealth(1.0);
 			zombie.setHealth(1.0);
-			zombie.setTarget(instance.getNearestPlayer(owner, zombie, 150));
+			zombie.setTarget(owner);
 			FakeLoot.markEntity(zombie); // any hit kills it, see FakeLootListener
-			reassertFakeMob(instance, zombie);
+			reassertFakeMob(instance, zombie, owner);
 			break;
 		}
 		case SKELETON: {
 			Skeleton skeleton = world.spawn(loc, Skeleton.class);
-			customizeMob(skeleton, owner);
-			skeleton.getEquipment().setItemInHand(new ItemStack(Material.AIR)); // no bow
-			skeleton.setTarget(instance.getNearestPlayer(owner, skeleton, 150));
-			FakeLoot.markEntity(skeleton); // it can't shoot, see FakeLootListener
-			reassertFakeMob(instance, skeleton);
+			customizeMob(skeleton, namedAfter);
+			customizeSkeleton(skeleton); // its bow, the same as the real one's
+			skeleton.setMaxHealth(1.0);
+			skeleton.setHealth(1.0);
+			skeleton.setTarget(owner);
+			FakeLoot.markEntity(skeleton); // 1 health: any hit kills it, see FakeLootListener
+			reassertFakeMob(instance, skeleton, owner);
 			break;
 		}
 		case SLIME:
@@ -3902,21 +3982,20 @@ public class GameManager implements Listener, PluginMessageListener {
 	}
 
 	/**
-	 * A tick after it spawns, makes sure the fake Zombie really has 1 health and the fake Skeleton really has no
-	 * bow, in case spawning (which gives mobs their gear) changed them back.
+	 * A tick after it spawns, makes sure the fake Zombie and Skeleton really have 1 health and still go after the
+	 * player who used the Pokeball, in case spawning (which picks the mob a target) changed them back.
 	 */
-	private void reassertFakeMob(GameInstance instance, final LivingEntity mob) {
+	private void reassertFakeMob(GameInstance instance, final LivingEntity mob, final Player target) {
 		Runnable reassert = new Runnable() {
 			@Override
 			public void run() {
 				if (!mob.isValid())
 					return;
-				if (mob instanceof Zombie) {
-					mob.setMaxHealth(1.0);
-					mob.setHealth(1.0);
-				} else if (mob instanceof Skeleton) {
-					((Skeleton) mob).getEquipment().setItemInHand(new ItemStack(Material.AIR));
-				}
+				mob.setMaxHealth(1.0);
+				mob.setHealth(1.0);
+				if (mob instanceof Creature && ((Creature) mob).getTarget() != target && target.isOnline()
+						&& !FakeLoot.isOut(target, instance.classes.get(target)))
+					((Creature) mob).setTarget(target);
 			}
 		};
 		// Twice, a tick and half a second after the spawn. Tracked, so they are cancelled if the game ends first

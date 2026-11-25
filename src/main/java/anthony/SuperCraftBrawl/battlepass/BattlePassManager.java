@@ -22,6 +22,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * Owns Battle Pass progress for online players.
@@ -116,7 +117,14 @@ public class BattlePassManager implements Listener {
 	}
 
 	private void load(Player player) {
-		UUID uuid = player.getUniqueId();
+		loadProgress(player.getUniqueId());
+
+		if (quests != null)
+			quests.load(player);
+	}
+
+	/** Reads their progress from the database and puts it in the cache once they're still online. */
+	private void loadProgress(UUID uuid) {
 		dbThread.execute(() -> {
 			try {
 				BattlePassProgress progress = dao.load(uuid, BattlePassSeason.ID);
@@ -131,9 +139,6 @@ public class BattlePassManager implements Listener {
 				main.getLogger().warning("[BattlePass] Failed to load progress for " + uuid + ": " + e.getMessage());
 			}
 		});
-
-		if (quests != null)
-			quests.load(player);
 	}
 
 	/** Null if the pass is disabled or their data hasn't finished loading yet. */
@@ -300,6 +305,77 @@ public class BattlePassManager implements Listener {
 			return;
 		progress.premium = premium;
 		save(player.getUniqueId(), progress);
+	}
+
+	/**
+	 * Store purchase (or staff): gives or takes the Premium Pass of a player by name, also when they're offline or
+	 * their progress is still loading. Written on the database thread in order with every other write, and put into
+	 * the cache when they're online. Main thread. onResult runs on the main thread: true if it was saved, false if
+	 * there is no such player or the database failed.
+	 */
+	public void setPremiumByName(String name, boolean premium, Consumer<Boolean> onResult) {
+		Player online = Bukkit.getPlayerExact(name);
+		if (online != null) {
+			grantPremium(online.getUniqueId(), premium, onResult);
+			return;
+		}
+
+		dbThread.execute(() -> {
+			UUID found = null;
+			try {
+				found = dao.findUuidByName(name);
+			} catch (SQLException e) {
+				main.getLogger().warning("[BattlePass] Could not look up " + name + ": " + e.getMessage());
+			}
+			final UUID uuid = found;
+			Bukkit.getScheduler().runTask(main, () -> {
+				if (uuid == null)
+					onResult.accept(false);
+				else
+					grantPremium(uuid, premium, onResult);
+			});
+		});
+	}
+
+	private void grantPremium(UUID uuid, boolean premium, Consumer<Boolean> onResult) {
+		BattlePassProgress progress = cache.get(uuid);
+		Player online = Bukkit.getPlayer(uuid);
+		if (progress != null && online != null) {
+			boolean changed = progress.premium != premium;
+			progress.premium = premium;
+			save(uuid, progress);
+			if (changed && premium)
+				announcePremium(online);
+			onResult.accept(true);
+			return;
+		}
+
+		// Offline, or online with the progress still loading: write it straight to the database. A player who is
+		// online gets their progress read again afterwards (queued behind this write), so the cache can't keep the old value
+		dbThread.execute(() -> {
+			boolean saved = false;
+			try {
+				dao.setPremium(uuid, BattlePassSeason.ID, premium);
+				saved = true;
+			} catch (SQLException e) {
+				main.getLogger().warning("[BattlePass] Failed to save the Premium Pass for " + uuid + ": " + e.getMessage());
+			}
+			final boolean ok = saved;
+			Bukkit.getScheduler().runTask(main, () -> {
+				Player p = Bukkit.getPlayer(uuid);
+				if (ok && p != null) {
+					loadProgress(uuid);
+					if (premium)
+						announcePremium(p);
+				}
+				onResult.accept(ok);
+			});
+		});
+	}
+
+	private void announcePremium(Player player) {
+		player.sendMessage(main.color("&6&l(!) &rThank you for supporting Minezone! Your &6&lPremium Battle Pass &ris now active."));
+		player.playSound(player.getLocation(), Sound.LEVEL_UP, 1.0f, 1.0f);
 	}
 
 	private void save(UUID uuid, BattlePassProgress progress) {

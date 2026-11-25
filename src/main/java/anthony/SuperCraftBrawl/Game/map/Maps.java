@@ -692,7 +692,7 @@ public enum Maps {
 					.setSource(MapSource.MINECADE)
 	),
 	
-	/*SnowGlobe(
+	SnowGlobe(
 			"SnowGlobe",
 			new Gameplay[]{Gameplay.INDOOR},
 			Size.SMALL,
@@ -715,7 +715,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(66.578, 100, -34.391))
 					.setBounds(new Vector(55.500, 174, -57.500), 58, 58)
 					.setSource(MapSource.COMMUNITY)
-	),*/
+	),
 	
 	Elven(
 			"Elven",
@@ -1486,7 +1486,7 @@ public enum Maps {
 					.setSource(MapSource.MINECADE)
 	),
 	
-	/*SantasWorkshop(
+	SantasWorkshop(
 			"SantasWorkshop",
 			new Gameplay[]{Gameplay.INDOOR, Gameplay.FLAT},
 			Size.MEDIUM,
@@ -1508,7 +1508,7 @@ public enum Maps {
 					.setSpecLoc(new Vector(55.654, 101, -50.585))
 					.setBounds(new Vector(55, 74, -43), 100, 100)
 					.setSource(MapSource.COMMUNITY)
-	),*/
+	),
 	
 	Slither(
 			"Slither",

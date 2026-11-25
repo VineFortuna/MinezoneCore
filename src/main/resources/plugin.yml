@@ -162,6 +162,10 @@ commands:
    battlepass:
       description: Open the Battle Pass
       aliases: [bp, pass]
+   ranksub:
+      description: Rank subscriptions bought on the store (give, end, info)
+      usage: /ranksub give <player> <rank> <time> | end <player> | info <player>
+      permission: scb.setrank
    sleigh:
       description: Ride Santa's sleigh in the lobby (toggle on and off)
       usage: /sleigh

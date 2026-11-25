@@ -138,8 +138,18 @@ public class WitchClass extends BaseClass {
 					if (bc != null && bc.getLives() <= 0)
 						return;
 					
+					// No Magic Broom in the inventory means it was swapped away (the Grinch's Sticky Fingers): nothing to
+					// regenerate, and the weapon she holds now must not be overwritten
+					int broomSlot = findBroomSlot();
+					if (broomSlot < 0)
+						return;
+					// Brooms that came back (swapped back, or a stack from another Witch) set the count to start from
+					regenBrooms = player.getInventory().getItem(broomSlot).getAmount();
+					if (regenBrooms >= 4)
+						return;
+
 					regenBrooms++;
-					player.getInventory().setItem(0,
+					player.getInventory().setItem(broomSlot,
 							ItemHelper.addEnchant(ItemHelper.addEnchant(
 									ItemHelper.setDetails(new ItemStack(Material.WHEAT, regenBrooms),
 											"" + ChatColor.BLACK + ChatColor.BOLD + "Magic Broom"),
@@ -147,6 +157,18 @@ public class WitchClass extends BaseClass {
 				}
 			}
 		}
+	}
+
+	/** Slot of the stack of Magic Brooms in the inventory, or -1 if there is none (swapped away by a Grinch). */
+	private int findBroomSlot() {
+		ItemStack[] contents = player.getInventory().getContents();
+		for (int slot = 0; slot < contents.length; slot++) {
+			ItemStack item = contents[slot];
+			if (item != null && item.getType() == Material.WHEAT && item.hasItemMeta()
+					&& item.getItemMeta().hasDisplayName() && item.getItemMeta().getDisplayName().contains("Magic Broom"))
+				return slot;
+		}
+		return -1;
 	}
 
 	@Override

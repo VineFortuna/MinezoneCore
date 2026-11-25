@@ -36,7 +36,8 @@ public enum GameLootDrops {
 
 	// RARE:
 	HEALTH2(Rarity.RARE), BROOMS(Rarity.RARE), HAMMER(Rarity.RARE), ENDER_PEARL(Rarity.RARE),
-	GOLDEN_APPLE(Rarity.RARE), PRESENT(Rarity.RARE), // PRESENT: Christmas, opens into 2 more items
+	GOLDEN_APPLE(Rarity.RARE),
+	PRESENT(Rarity.UNCOMMON), // Christmas, opens into 2 more items (it stays here so the order of the drops doesn't change)
 
 	// LEGENDARY:
 	BOMB(Rarity.LEGENDARY), NOTCH_APPLE(Rarity.LEGENDARY), EXTRA_LIFE(Rarity.LEGENDARY);
@@ -111,18 +112,24 @@ public enum GameLootDrops {
 	 * another Present.
 	 */
 	public static ItemStack[] openPresent(Set<GameLootDrops> enabled) {
+		return openPresent(enabled, EnumSet.noneOf(GameLootDrops.class));
+	}
+
+	/** Like openPresent, but never gives the excluded drops (the Grinch's fake Present has no fake Witch Pokeball). */
+	public static ItemStack[] openPresent(Set<GameLootDrops> enabled, Set<GameLootDrops> excluded) {
 		return new ItemStack[] {
-				getPresentDrop(enabled, Rarity.COMMON, Rarity.UNCOMMON).getItem(),
-				getPresentDrop(enabled, Rarity.RARE, Rarity.LEGENDARY).getItem()
+				getPresentDrop(enabled, excluded, Rarity.COMMON, Rarity.UNCOMMON).getItem(),
+				getPresentDrop(enabled, excluded, Rarity.RARE, Rarity.LEGENDARY).getItem()
 		};
 	}
 
-	private static GameLootDrops getPresentDrop(Set<GameLootDrops> enabled, Rarity first, Rarity second) {
+	private static GameLootDrops getPresentDrop(Set<GameLootDrops> enabled, Set<GameLootDrops> excluded, Rarity first,
+			Rarity second) {
 		Set<GameLootDrops> pool = EnumSet.noneOf(GameLootDrops.class);
 		Set<GameLootDrops> everything = EnumSet.noneOf(GameLootDrops.class);
 
 		for (GameLootDrops drop : values()) {
-			if (drop == PRESENT || (drop.r != first && drop.r != second)) continue;
+			if (drop == PRESENT || excluded.contains(drop) || (drop.r != first && drop.r != second)) continue;
 			everything.add(drop);
 			if (enabled.isEmpty() || enabled.contains(drop)) pool.add(drop);
 		}
@@ -205,6 +212,7 @@ public enum GameLootDrops {
 	        case SLOWNESS:
 	            item = ItemHelper.createPotionItem(PotionType.SLOWNESS, 1, 15, true, true, true);
 	            ItemHelper.setDetails(item, "&8&lSLOWNESS II &7(15 sec)", "", "&7&lCOMMON");
+	            ItemHelper.hidePotionEffectLore(item); // only the drop's own lore, not the vanilla effect line
 	            break;
 
 	        case SLOWBALLS:
@@ -258,6 +266,7 @@ public enum GameLootDrops {
 	        case SPEED2:
 	            item = ItemHelper.createPotionItem(PotionType.SPEED, 1, 30, true, true, true);
 	            ItemHelper.setDetails(item, "&b&lSPEED II &7(30 sec)", "", "&2&lUNCOMMON");
+	            ItemHelper.hidePotionEffectLore(item);
 	            break;
 
 	        case INSTAGIB:
@@ -308,6 +317,7 @@ public enum GameLootDrops {
 	        case HEALTH2:
 	            item = ItemHelper.createPotionItem(PotionType.INSTANT_HEAL, 1, 0, true, true, true);
 	            ItemHelper.setDetails(item, "&c&lHEALING II", "", "&9&lRARE");
+	            ItemHelper.hidePotionEffectLore(item);
 	            break;
 
 	        case BROOMS:
@@ -335,17 +345,17 @@ public enum GameLootDrops {
 	        case PRESENT:
 	            item = ItemHelper.setDetails(new ItemStack(Material.TRAPPED_CHEST),
 	                    "&c&l" + PRESENT_NAME,
-	                    "&7Right click to open it and",
-	                    "&7receive 2 items:",
+	                    "&7Receive 2 items:",
 	                    "&7- 1 Common or &2Uncommon",
 	                    "&7- 1 &9Rare &7or &6Legendary",
-	                    "&71 use", "", "&9&lRARE");
+	                    "", "&2&lUNCOMMON");
 	            break;
 
 	        // ===== LEGENDARY =====
 	        case BOMB:
 	            item = ItemHelper.createPotionItem(PotionType.INSTANT_DAMAGE, BOMB_AMPLIFIER, 0, true, true, true);
 	            ItemHelper.setDetails(item, "&4&lBOMB", "&7Be careful!", "&7Instantly kills... anyone", "", "&6&lLEGENDARY");
+	            ItemHelper.hidePotionEffectLore(item);
 	            break;
 
 	        case NOTCH_APPLE:

@@ -164,6 +164,9 @@ public abstract class BaseClass {
 
 	public void tick(int gameTicks) {}
 
+	/** This player just lost a life (a class can clean up what it left around). Runs once per death, after the death is counted. */
+	public void onPlayerDied() {}
+
 	public boolean isPlayerAlive() {
 		return instance.classes.containsKey(player)
 				&& player.getGameMode() == GameMode.ADVENTURE
@@ -466,6 +469,7 @@ public abstract class BaseClass {
 				BaseClass baseClassDead = instance.classes.get(p);
 
 				baseClassDead.totalDeaths++;
+				baseClassDead.onPlayerDied();
 				baseClassDead.eachLifeKills = 0;
 
 				if (killer != null && !killer.equals(player)) {

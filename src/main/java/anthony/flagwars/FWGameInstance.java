@@ -154,6 +154,12 @@ public class FWGameInstance {
 		return flagManager;
 	}
 
+	/** How this player is named in the tab list of everyone in the match. */
+	public String getTabName(Player player) {
+		// Someone who is watching is never listed with a team, even if they were on one before they were out
+		return scoreboardManager.tabName(player, spectators.contains(player) ? null : findTeamOf(player));
+	}
+
 	public FWScoreboardManager getScoreboardManager() {
 		return scoreboardManager;
 	}

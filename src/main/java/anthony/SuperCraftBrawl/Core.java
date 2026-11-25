@@ -48,6 +48,8 @@ import anthony.SuperCraftBrawl.playerdata.PlayerDataManager;
 import anthony.SuperCraftBrawl.practice.BowPractice;
 import anthony.SuperCraftBrawl.ranks.Rank;
 import anthony.SuperCraftBrawl.ranks.RankManager;
+import anthony.SuperCraftBrawl.ranks.RankSubscriptionCommand;
+import anthony.SuperCraftBrawl.ranks.RankSubscriptionManager;
 import anthony.SuperCraftBrawl.rewards.DailyRewards;
 import anthony.SuperCraftBrawl.signs.SignManager;
 import anthony.SuperCraftBrawl.staffhelp.StaffHelpManager;
@@ -110,6 +112,9 @@ public class Core extends JavaPlugin implements Listener {
     public DoubleJumpManager djManager;
     protected final Cooldown cooldownTime = null;
     public RankManager rankManager;
+    // Store subscriptions (LEGENDARY monthly/yearly); null if it failed to start
+    private RankSubscriptionManager rankSubscriptionManager;
+    private anthony.SuperCraftBrawl.tablist.GameTablistManager gameTablistManager;
     private anthony.SuperCraftBrawl.lobbybuild.LobbyBuildManager lobbyBuildManager;
     private anthony.SuperCraftBrawl.Game.map.MapWorldManager mapWorldManager;
     private anthony.SuperCraftBrawl.Game.MaxHealthGuard maxHealthGuard;
@@ -479,6 +484,11 @@ public class Core extends JavaPlugin implements Listener {
 
     public String format(String string) {
         return ChatColor.translateAlternateColorCodes('&', string);
+    }
+
+    /** Null if rank subscriptions failed to start, so always null-check. */
+    public RankSubscriptionManager getRankSubscriptionManager() {
+        return rankSubscriptionManager;
     }
 
     public RankManager getRankManager() {
@@ -910,6 +920,12 @@ public class Core extends JavaPlugin implements Listener {
         else
             System.out.print("battlepass was null!");
 
+        PluginCommand rankSubscriptionCommand = getCommand("ranksub");
+        if (rankSubscriptionCommand != null)
+            rankSubscriptionCommand.setExecutor(new RankSubscriptionCommand(this));
+        else
+            System.out.print("ranksub was null!");
+
         PluginCommand sleighCommand = getCommand("sleigh");
         if (sleighCommand != null)
             sleighCommand.setExecutor(new anthony.SuperCraftBrawl.sleigh.SleighCommand(this));
@@ -1012,6 +1028,15 @@ public class Core extends JavaPlugin implements Listener {
         dataManager = new PlayerDataManager(this);
         gameDataManager = new GameDataManager(this);
         rankManager = new RankManager(this);
+
+        // Isolated so a problem with the subscription table can never stop the rest of the plugin from loading
+        try {
+            rankSubscriptionManager = new RankSubscriptionManager(this);
+        } catch (Throwable t) {
+            rankSubscriptionManager = null;
+            getLogger().severe("[RankSubscriptions] Failed to start, rank subscriptions are disabled: " + t);
+            t.printStackTrace();
+        }
         lobbyBuildManager = new anthony.SuperCraftBrawl.lobbybuild.LobbyBuildManager(this);
         maxHealthGuard = new anthony.SuperCraftBrawl.Game.MaxHealthGuard(this);
         actionBarManager = new ActionBarManager(this);
@@ -1076,6 +1101,19 @@ public class Core extends JavaPlugin implements Listener {
 
         for (Arenas arena : Arenas.values()) {
             parkourBoards.add(new ParkourBoard(this, arena));
+        }
+
+        // Isolated like the Battle Pass: a tab list problem must never stop the plugin from loading
+        try {
+            // Switch: per-game-tablist: false in config.yml turns it off without a new build
+            if (getConfig().getBoolean("per-game-tablist", true))
+                gameTablistManager = new anthony.SuperCraftBrawl.tablist.GameTablistManager(this);
+            else
+                getLogger().info("[Tablist] per-game-tablist is false, everyone sees the full tab list");
+        } catch (Throwable t) {
+            gameTablistManager = null;
+            getLogger().severe("[Tablist] Failed to start, the per-game tab list is disabled: " + t);
+            t.printStackTrace();
         }
 
         getLogger().info("(!) You have enabled Minezone-Core");
@@ -1222,33 +1260,47 @@ public class Core extends JavaPlugin implements Listener {
         if (cmd.getName().equalsIgnoreCase("setrank")) {
             if (sender.hasPermission("scb.setrank")) {
                 if (args.length > 1) {
-                    Rank rank = Rank.getRankFromName(args[1]);
-                    Player target = Bukkit.getServer().getPlayerExact(args[0]);
+                    final Rank rank = Rank.getRankFromName(args[1]);
+                    final String targetName = args[0];
+                    final CommandSender rankSender = sender;
 
-                    if (target != null) {
-                        getRankManager().setRank(target, rank);
-                        String temp = "" + getRankManager().getRank(target);
-                        String temp2 = temp.toUpperCase();
-                        sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + target.getName()
-                                + "'s rank was set to " + ChatColor.YELLOW + temp2);
-                        target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Your rank has been set to "
-                                + ChatColor.YELLOW + temp2);
-                    } else {
-                        boolean success;
-                        try {
-                            success = dataManager.setOfflinePlayerRank(args[0], rank);
-                        } catch (SQLException e) {
-                            throw new RuntimeException(e);
+                    Runnable setRankNow = new Runnable() {
+                        @Override
+                        public void run() {
+                            Player target = Bukkit.getServer().getPlayerExact(targetName);
+
+                            if (target != null) {
+                                getRankManager().setRank(target, rank);
+                                String temp = "" + getRankManager().getRank(target);
+                                String temp2 = temp.toUpperCase();
+                                rankSender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + target.getName()
+                                        + "'s rank was set to " + ChatColor.YELLOW + temp2);
+                                target.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Your rank has been set to "
+                                        + ChatColor.YELLOW + temp2);
+                            } else {
+                                boolean success;
+                                try {
+                                    success = dataManager.setOfflinePlayerRank(targetName, rank);
+                                } catch (SQLException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                if (success) {
+                                    String temp = rank.name();
+                                    String temp2 = temp.toUpperCase();
+                                    rankSender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + targetName
+                                            + "'s rank was set to " + ChatColor.YELLOW + temp2);
+                                } else {
+                                    rankSender.sendMessage(color("&c&l(!) &rFailed to update player rank."));
+                                }
+                            }
                         }
-                        if (success) {
-                            String temp = rank.name();
-                            String temp2 = temp.toUpperCase();
-                            sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + args[0]
-                                    + "'s rank was set to " + ChatColor.YELLOW + temp2);
-                        } else {
-                            sender.sendMessage(color("&c&l(!) &rFailed to update player rank."));
-                        }
-                    }
+                    };
+
+                    // Someone with a running subscription keeps its rank: VIP/PRO set now becomes the rank they go back to
+                    if (rankSubscriptionManager != null)
+                        rankSubscriptionManager.setRankOrDefer(sender, targetName, rank, setRankNow);
+                    else
+                        setRankNow.run();
                 } else {
                     sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
                             + ChatColor.GREEN + "/setrank <player> <rank>");
@@ -2474,6 +2526,10 @@ public class Core extends JavaPlugin implements Listener {
             sleighManager.shutdown(); // remove its horses and stands before the lobby world is saved
         if (battlePassManager != null)
             battlePassManager.shutdown();
+        if (rankSubscriptionManager != null)
+            rankSubscriptionManager.shutdown();
+        if (gameTablistManager != null)
+            gameTablistManager.shutdown();
         if (lobbyBuildManager != null)
             lobbyBuildManager.clearPlacedBlocks();
         if (maxHealthGuard != null)

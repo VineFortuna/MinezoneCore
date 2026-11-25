@@ -502,8 +502,16 @@ public class GameInstance implements WinEffects.Host {
         return customGameVisibility == CustomGameVisibility.PUBLIC;
     }
 
-    /** A custom game just went public (or its host used /invite): the lobby hears about it, with a click to join. */
+    /** A custom game just went public: the lobby hears about it, with a click to join. */
     public void announcePublicCustomGame(Player inviter) {
+        announceCustomGame(inviter, false);
+    }
+
+    /**
+     * Tells the lobby, and everyone waiting in another game's lobby, about this custom game, with a click to join.
+     * With includeInviter (/invite) the host gets the very same message, so they see what everyone else sees.
+     */
+    private void announceCustomGame(Player inviter, boolean includeInviter) {
         String message = color("&6&l(!) &e" + inviter.getName() + " &rinvited all players to a &6&lCUSTOM GAME&r!");
         TextComponent join = new TextComponent(color("     &a&lClick here to Join"));
         join.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/joincustomgame " + getCustomGameHostName()));
@@ -514,6 +522,7 @@ public class GameInstance implements WinEffects.Host {
             if (other != this && other.state == GameState.WAITING) recipients.addAll(other.players);
         }
 
+        if (includeInviter) recipients.add(inviter);
         for (Player p : recipients) {
             p.sendMessage(message);
             p.spigot().sendMessage(join);
@@ -527,7 +536,7 @@ public class GameInstance implements WinEffects.Host {
             TellAll(color("&2&l(!) &rVisibility set to " + customGameVisibility.getTag() + "&r."));
             refreshEditorMenus(inviter); // the game changes block for anyone looking, in Quick Join too
         }
-        announcePublicCustomGame(inviter);
+        announceCustomGame(inviter, true); // the host sees the same invite as everyone else, also when it was public already
     }
 
     /** Public: anyone. Friends: the host's friends and party. Party: only the host's party. The host is always in. */
@@ -910,6 +919,7 @@ public class GameInstance implements WinEffects.Host {
                 gameManager.getMain().getScoreboardManager().removeLobbyBoard(player);
 
                 setGameScore(player); // spectator scoreboard
+                joinSpectatorTeam(player); // below the players in the tab list
                 return GameReason.SPECTATOR;
             } else return GameReason.ALREADY_IN;
         } else return GameReason.FAIL;
@@ -2357,7 +2367,9 @@ public class GameInstance implements WinEffects.Host {
         // Prefix the team name with a rank-order number so the tablist stays
         // sorted by rank in-game, matching the lobby TablistManager ordering.
         Rank rank = getGameManager().getMain().getRankManager().getRank(player);
-        String rankPrefix = String.format("%02d_", rankOrder(rank));
+        // Out of lives: sorted below everyone still playing, with the spectators ("99" is after every rank number)
+        String rankPrefix = this.classes.get(player).getLives() <= 0
+                ? SPECTATOR_SORT : String.format("%02d_", rankOrder(rank));
         String teamName = rankPrefix + player.getName();
         if (teamName.length() > 16) teamName = teamName.substring(0, 16);
 
@@ -2366,16 +2378,55 @@ public class GameInstance implements WinEffects.Host {
         Team team = board.getTeam(teamName);
         if (team == null) team = board.registerNewTeam(teamName);
 
-        if (!team.hasEntry(player.getName())) team.addEntry(player.getName());
-
-        if (this.classes.get(player).getLives() > 0) {
-            String baseName = classType.getSecondTag() != null ? classType.getSecondTag() : classType.getTag();
-            baseName += " ";
-            if (baseName.length() > 12) baseName = baseName.substring(0, Math.min(baseName.length(), 10)).trim() + " " + ChatColor.RESET;
-            team.setPrefix(baseName);
-        } else {
-            team.setPrefix("");
+        if (!team.hasEntry(player.getName())) {
+            Team old = board.getEntryTeam(player.getName());
+            team.addEntry(player.getName()); // Leaves the team they were in
+            if (old != null && old != team && old.getEntries().isEmpty()) old.unregister();
         }
+
+        team.setPrefix(getClassTagPrefix(player));
+    }
+
+    /** Sorts after "00_" to "13_", the rank numbers in the team names of the players. */
+    private static final String SPECTATOR_SORT = "99_";
+
+    /** Someone watching the game: a team of their own that sorts below the players in the tab list. */
+    private void joinSpectatorTeam(Player player) {
+        if (o == null) return;
+        Scoreboard board = o.getScoreboard();
+
+        String teamName = SPECTATOR_SORT + player.getName();
+        if (teamName.length() > 16) teamName = teamName.substring(0, 16);
+
+        Team team = board.getTeam(teamName);
+        if (team == null) team = board.registerNewTeam(teamName);
+        if (!team.hasEntry(player.getName())) team.addEntry(player.getName());
+    }
+
+    /** The class tag in front of a player's name above their head: nothing once they're out of lives. */
+    public String getClassTagPrefix(Player player) {
+        BaseClass playerClass = this.classes.get(player);
+        if (playerClass == null || playerClass.getType() == null || playerClass.getLives() <= 0) return "";
+
+        ClassType classType = playerClass.getType();
+        String baseName = classType.getSecondTag() != null ? classType.getSecondTag() : classType.getTag();
+        baseName += " ";
+        if (baseName.length() > 12) baseName = baseName.substring(0, Math.min(baseName.length(), 10)).trim() + " " + ChatColor.RESET;
+        return baseName;
+    }
+
+    /**
+     * How a player is named in the tab list of everyone in this game: the same as above their head while they're
+     * playing, gray and italic once they're out or watching, and null (their normal rank name) until the game starts.
+     */
+    public String getTabName(Player player) {
+        String spectator = "" + ChatColor.GRAY + ChatColor.ITALIC + player.getName();
+        if (!this.players.contains(player)) return spectator; // Watching
+
+        BaseClass playerClass = this.classes.get(player);
+        if (playerClass == null) return null; // Still waiting for the game to start
+        if (playerClass.getLives() <= 0) return spectator; // Out
+        return getClassTagPrefix(player) + player.getName();
     }
 
     /** Mirrors TablistManager.orderFor — lower = higher in tab. */

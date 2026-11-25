@@ -141,6 +141,29 @@ public class BattlePassDAO {
 		}
 	}
 
+	/** Gives or takes the Premium Pass without touching XP or claims. Works for a player who has no row yet. */
+	public void setPremium(UUID uuid, String season, boolean premium) throws SQLException {
+		try (PreparedStatement ps = connection().prepareStatement(
+				"INSERT INTO " + PROGRESS_TABLE + " (uuid, season, xp, premium) VALUES (?,?,0,?) " +
+						"ON DUPLICATE KEY UPDATE premium=VALUES(premium)")) {
+			ps.setString(1, uuid.toString());
+			ps.setString(2, season);
+			ps.setInt(3, premium ? 1 : 0);
+			ps.executeUpdate();
+		}
+	}
+
+	/** A player who isn't online, by name, from the main player table. Null if they never joined. */
+	public UUID findUuidByName(String name) throws SQLException {
+		try (PreparedStatement ps = connection().prepareStatement(
+				"SELECT UUID FROM PlayerData WHERE LastPlayerName = ? LIMIT 1")) {
+			ps.setString(1, name);
+			try (ResultSet rs = ps.executeQuery()) {
+				return rs.next() ? UUID.fromString(rs.getString("UUID")) : null;
+			}
+		}
+	}
+
 	public void insertClaim(UUID uuid, String season, BattlePassTrack track, int tier) throws SQLException {
 		try (PreparedStatement ps = connection().prepareStatement(
 				"INSERT IGNORE INTO " + CLAIMS_TABLE + " (uuid, season, track, tier) VALUES (?,?,?,?)")) {

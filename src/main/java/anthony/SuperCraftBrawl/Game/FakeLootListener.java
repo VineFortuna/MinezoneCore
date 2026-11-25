@@ -1,13 +1,17 @@
 package anthony.SuperCraftBrawl.Game;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.Game.classes.BaseClass;
+import net.minecraft.server.v1_8_R3.MobEffectList;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftLivingEntity;
 import org.bukkit.entity.EnderPearl;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
@@ -23,7 +27,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
@@ -49,14 +52,17 @@ import java.util.UUID;
  */
 public class FakeLootListener implements Listener {
 
-	// ---- Fake Potions
-	private static final int FAKE_EFFECT_TICKS = 15 * 20;
+	// ---- Fake Potions: the Speed one slows for 15s, the Slowness one speeds up for 30s
+	private static final int FAKE_SLOWNESS_TICKS = 15 * 20;
+	private static final int FAKE_SPEED_TICKS = 30 * 20;
+	/** Instant Damage I: 6 damage (3 hearts) at full strength, less the further from the splash. */
+	private static final int FAKE_HEALING_DAMAGE_AMPLIFIER = 0;
 
 	// ---- Fake Golden Apple: Absorption (2 hearts) and Poison I for 8s
 	private static final int GOLDEN_ABSORPTION_TICKS = 2 * 60 * 20;
 	private static final int GOLDEN_POISON_TICKS = 8 * 20;
 
-	// ---- Fake Notch Apple: its usual effects, but for 5 seconds, and more knockback taken for a while after
+	// ---- Fake Notch Apple: only its Absorption, for 5 seconds, and more knockback taken for a while after
 	private static final int NOTCH_EFFECT_TICKS = 5 * 20;
 	private static final long NOTCH_PENALTY_MS = 20_000;
 	private static final double NOTCH_KNOCKBACK_HORIZONTAL = 2.5;
@@ -66,8 +72,10 @@ public class FakeLootListener implements Listener {
 	private static final double REGULAR_HIT_HORIZONTAL = 0.4;
 	private static final double REGULAR_HIT_SPRINT_BONUS = 0.5; // a sprinting hit pushes further
 	private static final double REGULAR_HIT_VERTICAL = 0.4;
-	private static final double HAMMER_RECOIL_HORIZONTAL = 1.5;
-	private static final double HAMMER_RECOIL_VERTICAL = 0.6;
+	// Whoever swings it gets what a Knockback 10 hit gives: the hit's own 0.4 plus 0.5 per level, and 0.4 + 0.1 up
+	// (the client caps the speed it is sent at 3.9 per axis)
+	private static final double HAMMER_RECOIL_HORIZONTAL = 0.4 + 10 * 0.5;
+	private static final double HAMMER_RECOIL_VERTICAL = 0.5;
 
 	// ---- Fake Nuke: the TNT does no damage, only knockback
 	private static final double NUKE_KNOCKBACK_BASE = 0.5;
@@ -168,9 +176,22 @@ public class FakeLootListener implements Listener {
 		Material thrown = projectile instanceof Snowball ? Material.SNOW_BALL : Material.ENDER_PEARL;
 		if (pending.type == thrown) {
 			FakeLoot.markEntity(projectile);
-			if (projectile instanceof EnderPearl)
-				FakeLoot.markThrown(projectile); // its teleport is 3s after the throw, not the landing
+			if (projectile instanceof EnderPearl) // its teleport is 5s after the throw, not the landing
+				FakeLoot.markThrown(projectile, deathsOf((Player) projectile.getShooter()));
 		}
+	}
+
+	/** A spectator, or someone eliminated or waiting to respawn: no fake pushes them around or does anything to them. */
+	private boolean isOut(Player player) {
+		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+		return FakeLoot.isOut(player, game == null ? null : game.classes.get(player));
+	}
+
+	/** How many times this player has died in their game (0 if they aren't in one). */
+	private int deathsOf(Player player) {
+		GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
+		BaseClass baseClass = game == null ? null : game.classes.get(player);
+		return baseClass == null ? 0 : baseClass.totalDeaths;
 	}
 
 	// ---------------------------------------------------------------- fake potions
@@ -196,23 +217,27 @@ public class FakeLootListener implements Listener {
 			return;
 		}
 
-		// A fake Healing potion does nothing, but it fizzles like the dud Bomb
-		if (drop == GameLootDrops.HEALTH2) {
-			Location where = potion.getLocation();
-			where.getWorld().playSound(where, Sound.FIZZ, 1f, 1f);
-			return;
-		}
+		// The thrown potion and who threw it, for the Healing potion's damage
+		net.minecraft.server.v1_8_R3.Entity thrownPotion = ((CraftEntity) potion).getHandle();
+		net.minecraft.server.v1_8_R3.Entity thrower = potion.getShooter() instanceof CraftEntity
+				? ((CraftEntity) potion.getShooter()).getHandle() : null;
 
 		for (LivingEntity target : event.getAffectedEntities()) {
-			if (!(target instanceof Player) || ((Player) target).getGameMode() == GameMode.SPECTATOR)
+			if (!(target instanceof Player) || isOut((Player) target))
 				continue;
-			int ticks = (int) (FAKE_EFFECT_TICKS * event.getIntensity(target) + 0.5);
+			double intensity = event.getIntensity(target);
 
-			if (drop == GameLootDrops.SPEED2) // the Speed potion slows instead
-				target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, ticks, 1), true);
-			else if (drop == GameLootDrops.SLOWNESS) // the Slowness potion speeds up instead
-				target.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, ticks, 1), true);
-			// the Healing potion does nothing at all
+			if (drop == GameLootDrops.HEALTH2) {
+				// The Healing potion hurts instead, exactly what an Instant Damage I potion does (armor doesn't count)
+				MobEffectList.HARM.applyInstantEffect(thrownPotion, thrower, ((CraftLivingEntity) target).getHandle(),
+						FAKE_HEALING_DAMAGE_AMPLIFIER, intensity);
+			} else if (drop == GameLootDrops.SPEED2) { // the Speed potion slows instead
+				target.addPotionEffect(new PotionEffect(PotionEffectType.SLOW,
+						(int) (FAKE_SLOWNESS_TICKS * intensity + 0.5), 1), true);
+			} else if (drop == GameLootDrops.SLOWNESS) { // the Slowness potion speeds up instead
+				target.addPotionEffect(new PotionEffect(PotionEffectType.SPEED,
+						(int) (FAKE_SPEED_TICKS * intensity + 0.5), 1), true);
+			}
 		}
 	}
 
@@ -230,11 +255,8 @@ public class FakeLootListener implements Listener {
 		player.getWorld().playSound(player.getLocation(), Sound.BURP, 0.5f, 1f);
 
 		if (item.getDurability() == 1) {
-			// Notch Apple: the same effects, for 5 seconds only
-			player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, NOTCH_EFFECT_TICKS, 4), true);
+			// Notch Apple: only its Absorption (its usual level), for 5 seconds, and then more knockback taken
 			player.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, NOTCH_EFFECT_TICKS, 3), true);
-			player.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, NOTCH_EFFECT_TICKS, 0), true);
-			player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, NOTCH_EFFECT_TICKS, 0), true);
 			notchPenaltyUntil.put(player.getUniqueId(), System.currentTimeMillis() + NOTCH_PENALTY_MS);
 		} else {
 			// Golden Apple: Absorption, but Poison instead of Regeneration
@@ -266,7 +288,8 @@ public class FakeLootListener implements Listener {
 			return;
 		event.setCancelled(true);
 
-		if (!(event.getEntity() instanceof Player) || ((Player) event.getEntity()).getGameMode() == GameMode.SPECTATOR)
+		// Nobody who is out of the game (a spectator) is pushed
+		if (!(event.getEntity() instanceof Player) || isOut((Player) event.getEntity()))
 			return;
 		Player player = (Player) event.getEntity();
 
@@ -283,18 +306,12 @@ public class FakeLootListener implements Listener {
 
 	// ---------------------------------------------------------------- the fake Pokeballs' feeble mobs
 
-	/** A fake Zombie has 1 health: whatever hits it kills it, however little damage that does. */
+	/** A fake Zombie or Skeleton has 1 health: whatever hits it kills it, however little damage that does. */
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	public void onFeebleZombieHurt(EntityDamageEvent event) {
-		if (event.getEntity() instanceof Zombie && FakeLoot.isMarked(event.getEntity()) && event.getDamage() > 0)
+	public void onFeebleMobHurt(EntityDamageEvent event) {
+		Entity entity = event.getEntity();
+		if ((entity instanceof Zombie || entity instanceof Skeleton) && FakeLoot.isMarked(entity) && event.getDamage() > 0)
 			event.setDamage(Math.max(event.getDamage(), 1000.0));
-	}
-
-	/** A fake Skeleton has no bow, so even if one ended up in its hand it can't shoot. */
-	@EventHandler(ignoreCancelled = true)
-	public void onFakeSkeletonShoot(EntityShootBowEvent event) {
-		if (event.getEntity() instanceof Skeleton && FakeLoot.isMarked(event.getEntity()))
-			event.setCancelled(true);
 	}
 
 	// ---------------------------------------------------------------- the fake Hammer and the changed knockback

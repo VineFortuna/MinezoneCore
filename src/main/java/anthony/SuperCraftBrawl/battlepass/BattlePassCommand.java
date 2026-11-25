@@ -8,6 +8,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.function.Consumer;
+
 /**
  * /battlepass                              - open the menu (the quests are a button in its corner)
  * /battlepass completequest <player> <n>   - admin, finishes quest number n (or a quest id)
@@ -59,6 +61,12 @@ public class BattlePassCommand implements CommandExecutor {
 			return true;
 		}
 
+		// The store runs this one: it works for players who are offline or still loading too
+		if (sub.equals("premium")) {
+			setPremium(sender, args, label, manager);
+			return true;
+		}
+
 		Player target = Bukkit.getPlayerExact(args[1]);
 		if (target == null) {
 			sender.sendMessage(main.color("&c&l(!) &r" + args[1] + " is not online."));
@@ -87,18 +95,6 @@ public class BattlePassCommand implements CommandExecutor {
 				manager.setXp(target, amount);
 				sender.sendMessage(main.color("&aSet " + target.getName() + "'s XP to &e" + progress.xp
 						+ " &a(Tier &e" + progress.getTier() + "&a)."));
-				return true;
-			}
-			case "premium": {
-				if (args.length < 3) {
-					sendAdminHelp(sender, label);
-					return true;
-				}
-				boolean premium = Boolean.parseBoolean(args[2]);
-				manager.setPremium(target, premium);
-				sender.sendMessage(main.color("&aSet " + target.getName() + "'s Premium Pass to &e" + premium + "&a."));
-				if (BattlePassSeason.PREMIUM_FREE_FOR_TESTING)
-					sender.sendMessage(main.color("&7(Premium is currently free for everyone, so this has no visible effect yet.)"));
 				return true;
 			}
 			case "completequest": {
@@ -141,6 +137,35 @@ public class BattlePassCommand implements CommandExecutor {
 				sendAdminHelp(sender, label);
 				return true;
 		}
+	}
+
+	/** /battlepass premium <player> <true|false>: what the store runs when someone buys the Premium Pass. */
+	private void setPremium(final CommandSender sender, String[] args, String label, BattlePassManager manager) {
+		if (args.length < 3) {
+			sendAdminHelp(sender, label);
+			return;
+		}
+		final String name = args[1];
+		if (!args[2].equalsIgnoreCase("true") && !args[2].equalsIgnoreCase("false")) {
+			sender.sendMessage(main.color("&c&l(!) &rUse true or false, not " + args[2] + "."));
+			return;
+		}
+		final boolean premium = Boolean.parseBoolean(args[2]);
+
+		manager.setPremiumByName(name, premium, new Consumer<Boolean>() {
+			@Override
+			public void accept(Boolean saved) {
+				if (saved) {
+					sender.sendMessage(main.color("&aSet " + name + "'s Premium Pass to &e" + premium + "&a."));
+					if (BattlePassSeason.PREMIUM_FREE_FOR_TESTING)
+						sender.sendMessage(main.color("&7(Premium is currently free for everyone, so this has no visible effect yet.)"));
+				} else {
+					sender.sendMessage(main.color("&c&l(!) &rCouldn't set " + name + "'s Premium Pass: they have never joined, or the database failed."));
+					// A store command can't be retried by the store, so the console keeps a line to run by hand
+					main.getLogger().severe("[BattlePass] Failed, run by hand: /battlepass premium " + name + " " + premium);
+				}
+			}
+		});
 	}
 
 	private Integer parseInt(CommandSender sender, String[] args, int index) {

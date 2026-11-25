@@ -104,6 +104,12 @@ public final class DeathEffectCosmetics {
     private static PassDeathEffect giftExplosion(final Core main) {
         return new PassDeathEffect(main, "gift_explosion", "Gift Explosion", Material.CHEST,
                 "&7A ring of presents pops out", "&7where you were eliminated!") {
+            // The menu icon is a present head too, the same as the ones in the ring
+            @Override
+            protected ItemStack baseIcon() {
+                return PresentHeads.red();
+            }
+
             public void play(Location where) {
                 ItemStack[] presents = new ItemStack[10];
                 for (int i = 0; i < presents.length; i++)

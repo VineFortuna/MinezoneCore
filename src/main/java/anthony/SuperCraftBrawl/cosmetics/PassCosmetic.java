@@ -44,6 +44,11 @@ public class PassCosmetic extends Cosmetic {
         return description.clone();
     }
 
+    /** The plain item the icon is built on (a new one on every call). Override it for an icon that's a custom head. */
+    protected ItemStack baseIcon() {
+        return new ItemStack(iconMaterial, 1, iconData);
+    }
+
     @Override
     public ItemStack getIcon(Player player) {
         List<String> lore = new ArrayList<>();
@@ -51,8 +56,7 @@ public class PassCosmetic extends Cosmetic {
         for (String line : description)
             lore.add(line);
 
-        ItemStack icon = ItemHelper.setDetails(new ItemStack(iconMaterial, 1, iconData), iconName,
-                lore.toArray(new String[0]));
+        ItemStack icon = ItemHelper.setDetails(baseIcon(), iconName, lore.toArray(new String[0]));
         ItemHelper.setHideFlags(icon, true);
         return withRequirementLore(icon);
     }
