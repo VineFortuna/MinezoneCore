@@ -303,7 +303,7 @@ public class SheepClass extends BaseClass {
 		RED(ChatColor.RED, "FF0000"),
 		BLUE(ChatColor.BLUE, "0000FF"),
 		PURPLE(ChatColor.DARK_PURPLE, "800080"),
-		GREEN(ChatColor.DARK_GREEN, "00FF00"),
+		GREEN(ChatColor.DARK_GREEN, "008000"),
 		GRAY(ChatColor.GRAY, "808080"),
 		BLACK(ChatColor.BLACK, "000000"),
 		PINK(ChatColor.LIGHT_PURPLE, "FF69B4"),
