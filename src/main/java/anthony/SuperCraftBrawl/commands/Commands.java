@@ -1902,7 +1902,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 		boolean ignoreRequirements = game != null && game.ignoresClassRequirements(type);
 
 		if (!ignoreRequirements && (!isClassUnlocked(player, classDetails, type) || !isLevelUnlocked(player, playerData, type)
-				|| !isFishermanClassUnlocked(player, type)
+				|| !isFishermanClassUnlocked(player, type) || !isChristmasClassUnlocked(player, type)
 				|| !isRankRequirementMet(player, type)) || (game != null && !isGameStateWaiting(game, player))
 				|| (game != null && !isFrenzyGameType(game, player))) {
 			return;
@@ -1944,6 +1944,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 		if (playerData.playerClasses.get(classType.getID()) != null
 				&& playerData.playerClasses.get(classType.getID()).purchased || classType.getTokenCost() == 0) {
+			if (!main.getChristmasManager().hasUnlockedChristmasClass(player, classType)) return;
 			Rank donor = classType.getMinRank();
 
 			if (donor == null || player.hasPermission("scb." + donor.toString().toLowerCase())) {
@@ -1974,6 +1975,14 @@ public class Commands implements CommandExecutor, TabCompleter {
 	
 	private boolean isFishermanClassUnlocked(Player player, ClassType type) {
 		if (type == ClassType.Fisherman && !main.fishing.hasUnlockedFisherman(player) && !player.isOp()) {
+			player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isChristmasClassUnlocked(Player player, ClassType type) {
+		if (!main.getChristmasManager().hasUnlockedChristmasClass(player, type) && !player.isOp()) {
 			player.sendMessage(main.color("&c&l(!) &rYou have not unlocked this class yet!"));
 			return false;
 		}

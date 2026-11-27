@@ -395,6 +395,7 @@ public class ClassListGUI implements InventoryProvider {
         boolean bought = type.getTokenCost() == 0 || (details != null && details.purchased);
         if (!bought || data.level < type.getLevel()) return false;
         if (type == ClassType.Fisherman && !main.getFishing().hasUnlockedFisherman(viewer)) return false;
+        if (!main.getChristmasManager().hasUnlockedChristmasClass(viewer, type)) return false;
         return type.getMinRank() == null || viewer.hasPermission("scb." + type.getMinRank().toString().toLowerCase());
     }
 

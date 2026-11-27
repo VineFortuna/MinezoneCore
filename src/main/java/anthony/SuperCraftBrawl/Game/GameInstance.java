@@ -1650,6 +1650,7 @@ public class GameInstance implements WinEffects.Host {
         if (!((details != null && details.purchased) || type.getTokenCost() == 0)) return false;
         if (playerData.level < type.getLevel()) return false;
         if (type == ClassType.Fisherman && !getGameManager().getMain().getFishing().hasUnlockedFisherman(player)) return false;
+        if (!getGameManager().getMain().getChristmasManager().hasUnlockedChristmasClass(player, type)) return false;
 
         Rank donor = type.getMinRank();
         return donor == null || player.hasPermission("scb." + donor.toString().toLowerCase());
@@ -3550,8 +3551,10 @@ public class GameInstance implements WinEffects.Host {
                                     && playerData.playerClasses.get(classType.getID()).purchased
                                     || classType.getTokenCost() == 0) {
                                 if (playerData.level >= classType.getLevel()) {
-                                    if (classType != ClassType.Fisherman || this.getGameManager().getMain().getFishing()
-                                            .hasUnlockedFisherman(player)) {
+                                    if ((classType != ClassType.Fisherman || this.getGameManager().getMain().getFishing()
+                                            .hasUnlockedFisherman(player))
+                                            && this.getGameManager().getMain().getChristmasManager()
+                                            .hasUnlockedChristmasClass(player, classType)) {
                                         if (donor == null
                                                 || player.hasPermission("scb." + donor.toString().toLowerCase())) {
                                             selectedClass = classType;

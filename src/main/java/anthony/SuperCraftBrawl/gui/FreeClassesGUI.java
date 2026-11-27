@@ -43,13 +43,17 @@ public class FreeClassesGUI implements InventoryProvider {
 			if (type == ClassType.Fisherman &&  !main.fishing.hasUnlockedFisherman(player)) {
 				continue;
 			}
+			if (!main.getChristmasManager().hasUnlockedChristmasClass(player, type)) {
+				continue;
+			}
 
 			// Lore
 			List<String> lore = type.buildDescription();
 			lore.add("");
 
 				// Adds Unlocked lore text to Free but not regularly unlocked classes
-			if (type == ClassType.Fisherman) {
+			if (type == ClassType.Fisherman || type == ClassType.Elf || type == ClassType.GingerBreadMan
+					|| type == ClassType.Santa || type == ClassType.Grinch) {
 				lore.addAll(getUnlockedDescriptionText(player, type));
 			}
 
@@ -133,6 +137,12 @@ public class FreeClassesGUI implements InventoryProvider {
 		if (type == ClassType.Fisherman) {
 			isUnlocked = main.getFishing().hasUnlockedFisherman(player);
 			source = "Fishing";
+		} else if (type == ClassType.Grinch) {
+			isUnlocked = main.getChristmasManager().hasUnlockedChristmasClass(player, type);
+			source = "Present Hunt";
+		} else if (type == ClassType.Elf || type == ClassType.GingerBreadMan || type == ClassType.Santa) {
+			isUnlocked = main.getChristmasManager().hasUnlockedChristmasClass(player, type);
+			source = "Battle Pass";
 		}
 
 		String color = isUnlocked ? "&e" : "&c";

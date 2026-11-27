@@ -1,6 +1,8 @@
 package anthony.SuperCraftBrawl.christmas;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.Game.classes.ClassType;
+import anthony.SuperCraftBrawl.playerdata.ClassDetails;
 import anthony.SuperCraftBrawl.gui.christmas.ChristmasHuntGUI;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 
@@ -292,6 +294,23 @@ public class ChristmasHuntManager implements Listener {
     // True once the player has found every present (unlocks Grinch class)
     public boolean hasCompletedHunt(Player p) {
         return dao.isComplete(p.getUniqueId());
+    }
+
+    // Elf, Gingerbread Man and Santa come from the Battle Pass, Grinch from finding every present.
+    // True for any other class
+    public boolean hasUnlockedChristmasClass(Player p, ClassType type) {
+        switch (type) {
+            case Elf:
+            case GingerBreadMan:
+            case Santa:
+            case Grinch:
+                PlayerData data = core.getDataManager().getPlayerData(p);
+                ClassDetails details = data == null ? null : data.playerClasses.get(type.getID());
+                if (details != null && details.purchased) return true;
+                return type == ClassType.Grinch && hasCompletedHunt(p);
+            default:
+                return true;
+        }
     }
 
     // For the scoreboard
