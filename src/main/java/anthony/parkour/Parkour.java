@@ -15,6 +15,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.WeatherType;
 import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.v1_8_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
@@ -85,6 +86,9 @@ public class Parkour implements Listener {
 
         // Client-side checkpoint labels for THIS player (packet only)
         addHolograms(player, arena);
+
+        // Clear client-side weather
+        player.setPlayerWeather(WeatherType.CLEAR);
     }
 
     public void removePlayer(Player player) {
@@ -107,6 +111,10 @@ public class Parkour implements Listener {
         startTimeNs.remove(player);
         checkpoint.remove(player);
         players.remove(player);
+
+        // Restore client-side snow
+        if (player.getWorld() == main.getLobbyWorld()) player.setPlayerWeather(WeatherType.DOWNFALL);
+        else player.resetPlayerWeather();
 
         // Restore lobby state
         main.getScoreboardManager().lobbyBoard(player);

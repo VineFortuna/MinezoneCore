@@ -238,6 +238,9 @@ public class PlayerListener implements Listener {
             if (vehicle != null) vehicle.remove();
         }
 
+        // Client-side snow in the lobby
+        if (player.getWorld() == main.getLobbyWorld()) player.setPlayerWeather(WeatherType.DOWNFALL);
+
         PlayerData data = main.getDataManager().getPlayerData(player); // Gets the player data from database
         String name = player.getName();
         Rank rank = main.getRankManager().getRank(player); // Gets the player's rank
@@ -639,6 +642,10 @@ public class PlayerListener implements Listener {
     public void onPlayerChangedWorld(PlayerChangedWorldEvent e) {
         Player p = e.getPlayer();
         Core main = this.main; // adjust if you use a different accessor
+
+        // Client-side snow in the lobby only
+        if (p.getWorld() == main.getLobbyWorld()) p.setPlayerWeather(WeatherType.DOWNFALL);
+        else p.resetPlayerWeather();
 
         // 1) Remove lobby board if they left the lobby world
         try {

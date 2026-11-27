@@ -62,7 +62,9 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.*;
 import net.minecraft.server.v1_8_R3.*;
 import org.bukkit.Material;
+import org.bukkit.Chunk;
 import org.bukkit.World;
+import org.bukkit.block.Biome;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -76,6 +78,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerListPingEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.block.BlockFormEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -1088,6 +1092,8 @@ public class Core extends JavaPlugin implements Listener {
         lobbyWorld = getServer().createWorld(new WorldCreator("lobby-1"));
         if (lobbyWorld != null) {
             lobbyWorld.setAutoSave(false);
+            // Ice Plains so the lobby's client-side downfall renders as snow. New chunks get it in onLobbyChunkLoad
+            for (Chunk chunk : lobbyWorld.getLoadedChunks()) applyLobbyBiome(chunk);
         }
         lobbyScoreBoard = Bukkit.getScoreboardManager().getNewScoreboard();
         explorerManager = new LobbyExplorerManager(this);
@@ -2456,6 +2462,29 @@ public class Core extends JavaPlugin implements Listener {
 
     public World getLobbyWorld() {
         return lobbyWorld;
+    }
+
+    @EventHandler
+    public void onLobbyChunkLoad(ChunkLoadEvent event) {
+        if (lobbyWorld != null && event.getWorld() == lobbyWorld) applyLobbyBiome(event.getChunk());
+    }
+
+    // Ice Plains freezes still water on its own, so stop new ice forming in the lobby
+    @EventHandler
+    public void onLobbyBlockForm(BlockFormEvent event) {
+        if (lobbyWorld != null && event.getBlock().getWorld() == lobbyWorld
+                && event.getNewState().getType() == Material.ICE) {
+            event.setCancelled(true);
+        }
+    }
+
+    // Runs before the chunk is sent to players, so they receive it already as Ice Plains
+    private void applyLobbyBiome(Chunk chunk) {
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
+                chunk.getBlock(x, 0, z).setBiome(Biome.ICE_PLAINS);
+            }
+        }
     }
 
     public boolean isInLobby(Player player) {
