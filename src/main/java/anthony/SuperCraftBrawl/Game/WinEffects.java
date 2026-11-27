@@ -5,7 +5,6 @@ import anthony.SuperCraftBrawl.christmas.ReindeerFlight;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
 import anthony.SuperCraftBrawl.cosmetics.ParticleHelper;
 import anthony.SuperCraftBrawl.cosmetics.PresentHeads;
-import anthony.SuperCraftBrawl.halloween.Halloween;
 import anthony.util.ItemHelper;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import net.minecraft.server.v1_8_R3.PacketPlayOutNamedSoundEffect;
@@ -105,8 +104,7 @@ public class WinEffects {
             case "fish_rain": fishRainEffect(); break;
             case "flood": floodEffect(); break;
             case "treasure_hoard": treasureEffect(); break;
-            // Someone can still have Ritual equipped from the hunt, and this reads the saved id, so it has to be off here too
-            case "ritual": if (Halloween.ENABLED) ritualEffect(); else defaultEffect(); break;
+            case "ritual": ritualEffect(); break;
             case "present_rain": presentRainEffect(); break;
             case "winter_wonderland": winterWonderlandEffect(); break;
             default: defaultEffect();

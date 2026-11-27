@@ -3,7 +3,6 @@ package anthony.SuperCraftBrawl.cosmetics.all;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
-import anthony.SuperCraftBrawl.halloween.Halloween;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticRegistry;
 import anthony.SuperCraftBrawl.cosmetics.Outfit;
 import anthony.SuperCraftBrawl.ranks.Rank;
@@ -33,7 +32,7 @@ public final class OutfitCosmetics {
         registry.register(elf(main));
         registry.register(golden(main));
         registry.register(diamond(main));
-        if (Halloween.ENABLED) registry.register(freddy(main)); // a Halloween hunt reward
+        registry.register(freddy(main));
         registry.register(rudolph(main));
         registry.register(grinch(main));
     }

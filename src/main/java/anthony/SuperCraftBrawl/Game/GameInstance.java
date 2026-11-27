@@ -3101,7 +3101,7 @@ public class GameInstance implements WinEffects.Host {
             if (baseClass != null) {
                 if (baseClass.getLives() < 5) {
                     PlayerData data = gameManager.getMain().getDataManager().getPlayerData(winner);
-                    baseClass.totalExp += 113;
+                    baseClass.totalExp += gameManager.getMain().gameExp(winner, 113); // double for LEGENDARY
                     baseClass.placement = 1;
 
                     winner.sendMessage("" + ChatColor.BOLD + "===========================");
@@ -3141,11 +3141,12 @@ public class GameInstance implements WinEffects.Host {
                     PlayerData data = gameManager.getMain().getDataManager().getPlayerData(winner);
                     baseClass.totalTokens += 10;
 
+                    int flawlessExp = gameManager.getMain().gameExp(winner, 133); // double for LEGENDARY
                     if (data != null) {
                         data.flawlessWins += 1;
-                        data.exp += 133;
+                        data.exp += flawlessExp;
                     }
-                    baseClass.totalExp += 133;
+                    baseClass.totalExp += flawlessExp;
                     baseClass.placement = 1;
 
                     winner.sendMessage("" + ChatColor.BOLD + "===========================");
@@ -3199,7 +3200,7 @@ public class GameInstance implements WinEffects.Host {
             if (data != null) {
                 data.wins += 1;
                 data.winstreak += 1;
-                data.exp += 113;
+                data.exp += gameManager.getMain().gameExp(winner, 113); // double for LEGENDARY
 
                 if (data.winstreak >= data.bestWinstreak) {
                     data.bestWinstreak = data.winstreak;

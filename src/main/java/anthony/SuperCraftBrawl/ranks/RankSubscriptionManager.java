@@ -37,8 +37,8 @@ import java.util.regex.Pattern;
 /**
  * Timed ranks bought as a subscription on the store (LEGENDARY monthly or yearly).
  *
- * The store only has to run "/ranksub give <player> LEGENDARY 1m" (or 1y) when a payment goes through, the first one
- * and every renewal. Everything else happens here: each payment pushes the paid-through date forward, the rank
+ * The store only has to run "/setrank <player> LEGENDARY 1m" (or 1y, or 28d; "/ranksub give" does the same) when a payment
+ * goes through, the first one and every renewal. Everything else happens here: each payment pushes the paid-through date forward, the rank
  * is switched on, and once the paid time (plus a short grace for a late renewal) runs out the player gets the rank
  * they had before back, so VIP + a month of LEGENDARY ends as VIP again. Cancelling needs no command at all: the
  * renewals just stop coming.
@@ -281,6 +281,25 @@ public class RankSubscriptionManager implements Listener {
 				}
 			}
 		});
+	}
+
+	/**
+	 * A payment as it is typed: "/setrank <player> <rank> <time>" (or "/ranksub give ..."). Checks the rank and the time
+	 * (1m, 12m, 1y, 28d, 2w or a plain number of days) and tells the sender what is wrong with them, then gives it. Main thread.
+	 */
+	public void giveFromCommand(CommandSender sender, String name, String rankName, String timeText) {
+		Rank rank = Rank.getRankFromName(rankName);
+		// getRankFromName falls back to DEFAULT for a name it doesn't know
+		if (rank == Rank.DEFAULT && !rankName.equalsIgnoreCase("default")) {
+			sender.sendMessage(main.color("&c&l(!) &r" + rankName + " is not a rank."));
+			return;
+		}
+		Period period = parsePeriod(timeText);
+		if (period == null) {
+			sender.sendMessage(main.color("&c&l(!) &r" + timeText + " is not a time. Use 1m, 12m, 1y, 28d, 2w or a number of days."));
+			return;
+		}
+		give(sender, name, rank, period);
 	}
 
 	/** Ends their subscription right now (refund, chargeback, staff): they go back to the rank they had before. Main thread. */

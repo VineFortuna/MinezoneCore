@@ -46,7 +46,10 @@ public class HalloweenHuntManager implements Listener {
 	public HalloweenHuntManager(Core core) {
 		this.core = core;
 		this.dao = new HalloweenDAO(core, EVENT_KEY);
-		Bukkit.getPluginManager().registerEvents(this, core);
+		// Without the listener the baskets can't be clicked, but the saved progress can still be read, which is
+		// what keeps the hunt cosmetics unlocked for the players who earned them
+		if (Halloween.ENABLED)
+			Bukkit.getPluginManager().registerEvents(this, core);
 	}
 
 	private int indexOfBasket(Block block) {

@@ -33,8 +33,10 @@ public class LobbyItems {
         player.getInventory().setItem(0,
                 ItemHelper.setDetails(new ItemStack(Material.COMPASS), "&eGame Selector &7(Right Click)"));
 
+        player.getInventory().setItem(3, getLobbyClassesItem());
         player.getInventory().setItem(4,
                 ItemHelper.setDetails(new ItemStack(Material.CHEST), "&eCosmetics &7(Right Click)"));
+        player.getInventory().setItem(7, getBattlePassItem());
         ItemStack stats = ItemHelper.createSkullHeadPlayer(1, player.getName());
         player.getInventory().setItem(8, ItemHelper.setDetails(stats, "&eMy Profile &7(Right Click)"));
 
@@ -86,6 +88,21 @@ public class LobbyItems {
 	public static ItemStack getClassSelectorItem() {
 		return ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK),
 				"&eClasses &7(Right Click)", "", "&7Click to choose a class");
+	}
+
+	/** The lobby's Classes item (slot 4). Right clicking it opens the Class Selector, see PlayerListener#tokenClassGUI. */
+	public static ItemStack getLobbyClassesItem() {
+		return ItemHelper.setDetails(new ItemStack(Material.ENCHANTED_BOOK),
+				"&eClasses &7(Right Click)", "",
+				"&7Browse every Super Craft Bros class,",
+				"&7see which ones you have unlocked and",
+				"&7pick your favorites for your games.", "",
+				"&7Click to open the class selector");
+	}
+
+	/** The lobby's Battle Pass item (slot 8). Right clicking it opens the Battle Pass, see PlayerListener#someGuis. */
+	public static ItemStack getBattlePassItem() {
+		return ItemHelper.setDetails(new ItemStack(Material.NETHER_STAR), "&eBattle Pass &7(Right Click)");
 	}
 
 	/*

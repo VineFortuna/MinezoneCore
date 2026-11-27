@@ -43,7 +43,8 @@ commands:
       description: Msg command!
       aliases: [msg, t, whisper, w, reply, r]
    setrank:
-      description: Rank command!
+      description: Set a rank, or give it for a while (1m, 1y, 28d) and then go back to the old one
+      usage: /setrank <player> <rank> [1m|1y|28d]
       permission: scb.setrank
    setlives:
       description: Set lives command!

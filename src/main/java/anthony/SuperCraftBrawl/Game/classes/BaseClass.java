@@ -685,8 +685,9 @@ public abstract class BaseClass {
 				if (data != null) {
 					if (instance.savesStats()) {
 						data.kills += 1;
-						data.exp += 29;
-						baseClass.totalExp += 29;
+						int killExp = instance.getGameManager().getMain().gameExp(killer, 29); // double for LEGENDARY
+						data.exp += killExp;
+						baseClass.totalExp += killExp;
 						baseClass.totalBattlePassXp += instance.getGameManager().getMain().giveBattlePassXp(killer,
 								anthony.SuperCraftBrawl.battlepass.BattlePassSeason.XP_KILL);
 						if (instance.getGameManager().getMain().tournament) {

@@ -54,17 +54,23 @@ public final class MapSetupManager implements Listener {
     private static final double MARKER_SPACING = 2;
     /** Particles are only sent to players this close to them. */
     private static final int PARTICLE_RADIUS = 48;
+    /** The colour of the current spawn: gold, which no other point uses. */
+    private static final float CURRENT_RED = 1f;
+    private static final float CURRENT_GREEN = 0.8f;
+    private static final float CURRENT_BLUE = 0.05f;
 
     private final Core main;
     private final MapWorldManager worlds;
     private final Map<UUID, MapSetupSession> sessions = new HashMap<UUID, MapSetupSession>();
     private final AnvilPrompt anvil;
+    private final SpawnTool spawnTool;
     private BukkitTask markerTask;
 
     MapSetupManager(Core main, MapWorldManager worlds) {
         this.main = main;
         this.worlds = worlds;
         this.anvil = new AnvilPrompt(main);
+        this.spawnTool = new SpawnTool(main, this);
         Bukkit.getPluginManager().registerEvents(anvil, main);
     }
 
@@ -74,17 +80,67 @@ public final class MapSetupManager implements Listener {
         return sessions.get(player.getUniqueId());
     }
 
-    /** The player that is setting this map up right now, or null. */
+    /** The player that is setting this map up right now (the first of them, if there are several), or null. */
     Player editorOf(String id) {
         for (MapSetupSession session : sessions.values()) {
-            if (session.draft.id.equals(id)) return Bukkit.getPlayer(session.player);
+            if (!session.draft.id.equals(id)) continue;
+            Player player = Bukkit.getPlayer(session.player);
+            if (player != null) return player;
         }
         return null;
     }
 
+    /**
+     * Someone's session on this map (by its id or its world folder), or null if nobody is setting it up. A new map that
+     * was never saved counts: that is how a second player joins the first one's setup.
+     */
+    MapSetupSession sessionFor(String mapName) {
+        for (MapSetupSession session : sessions.values()) {
+            Player player = Bukkit.getPlayer(session.player);
+            if (player == null || !player.isOnline()) continue;
+            if (session.draft.id.equalsIgnoreCase(mapName) || session.draft.world.equalsIgnoreCase(mapName)) return session;
+        }
+        return null;
+    }
+
+    /** Everyone who is setting this map up. */
+    List<Player> editorsOf(MapDraft draft) {
+        List<Player> editors = new ArrayList<Player>();
+        for (MapSetupSession session : sessions.values()) {
+            Player player = Bukkit.getPlayer(session.player);
+            if (session.draft == draft && player != null && player.isOnline()) editors.add(player);
+        }
+        return editors;
+    }
+
+    /** The ids of the maps somebody is setting up right now. */
+    List<String> activeMapIds() {
+        List<String> ids = new ArrayList<String>();
+        for (MapSetupSession session : sessions.values()) {
+            if (!ids.contains(session.draft.id)) ids.add(session.draft.id);
+        }
+        return ids;
+    }
+
     /** Starts setting a map up: creative, an empty inventory with the tools. The player is already in the map's world. */
     void start(Player player, MapDraft draft, World world, boolean created) {
-        MapSetupSession session = new MapSetupSession(player.getUniqueId(), draft, world, created);
+        begin(player, new MapSetupSession(player.getUniqueId(), draft, world, created));
+    }
+
+    /**
+     * Joins the player to the map somebody else is setting up: the same draft, world and corners, so what either of them
+     * sets is what both see. The player is already in the map's world.
+     */
+    void join(Player player, MapSetupSession joined) {
+        begin(player, new MapSetupSession(player.getUniqueId(), joined));
+
+        for (Player other : editorsOf(joined.draft)) {
+            if (other != player) other.sendMessage(main.color("&a&l(!) &r" + player.getName() + " joined you in setting up &e"
+                    + joined.draft.id + "&r."));
+        }
+    }
+
+    private void begin(Player player, MapSetupSession session) {
         sessions.put(player.getUniqueId(), session);
 
         player.setGameMode(GameMode.CREATIVE);
@@ -100,10 +156,15 @@ public final class MapSetupManager implements Listener {
         MapSetupSession session = sessions.remove(player.getUniqueId());
         if (session == null) return;
 
+        session.cancelAuto();
         // Not left as a spectator, which can't use anything
         if (player.getGameMode() == GameMode.SPECTATOR) player.setGameMode(GameMode.CREATIVE);
         removeTools(player);
         if (sessions.isEmpty()) stopMarkers();
+
+        for (Player other : editorsOf(session.draft)) {
+            other.sendMessage(main.color("&e&l(!) &r" + player.getName() + " left the setup of &e" + session.draft.id + "&r."));
+        }
     }
 
     boolean isActive(Player player, MapSetupSession session) {
@@ -133,8 +194,21 @@ public final class MapSetupManager implements Listener {
         player.updateInventory();
     }
 
-    /** Brings what the tools say they are set to up to date, in whichever slots the player has put them. */
+    /**
+     * Brings what the tools say they are set to up to date, in whichever slots the player has put them. Everyone else who
+     * is setting up the same map gets theirs too, since the map is shared.
+     */
     void refresh(Player player, MapSetupSession session) {
+        refreshTools(player, session);
+
+        for (MapSetupSession other : new ArrayList<MapSetupSession>(sessions.values())) {
+            if (other == session || other.draft != session.draft) continue;
+            Player editor = Bukkit.getPlayer(other.player);
+            if (editor != null && editor.isOnline()) refreshTools(editor, other);
+        }
+    }
+
+    private void refreshTools(Player player, MapSetupSession session) {
         PlayerInventory inventory = player.getInventory();
         for (int slot = 0; slot < inventory.getSize(); slot++) {
             SetupTool tool = SetupTool.of(inventory.getItem(slot));
@@ -161,21 +235,14 @@ public final class MapSetupManager implements Listener {
                 if (spectating) lore.add("&7Or use &e/scbsetup mode&7.");
                 break;
             case SPAWNS:
-                lore.add("&7Where players start and respawn,");
-                lore.add("&7facing the way you look.");
-                lore.add("&7At least " + MapDraft.MIN_SPAWNS + " are needed.");
-                lore.add("");
-                lore.add("&fSpawns: " + (draft.spawns.size() >= MapDraft.MIN_SPAWNS ? "&a" : "&c") + draft.spawns.size());
-                lore.add("");
-                lore.add("&e&nLeft Click&r&e to add one where you stand");
-                lore.add("&e&nRight Click&r&e to remove the last one");
+                spawnTool.describe(lore, session);
                 break;
             case BOUNDS:
                 lore.add("&7The play area, seen from above.");
                 lore.add("&7Two corners make a rectangle.");
                 lore.add("");
-                lore.add("&fCorner 1: " + place(session.pos1));
-                lore.add("&fCorner 2: " + place(session.pos2));
+                lore.add("&fCorner 1: " + place(session.corners.pos1));
+                lore.add("&fCorner 2: " + place(session.corners.pos2));
                 if (draft.hasBounds()) {
                     lore.add("&fSize: &a" + Math.round(draft.boundsX * 2) + " by " + Math.round(draft.boundsZ * 2));
                 }
@@ -263,18 +330,8 @@ public final class MapSetupManager implements Listener {
                 break;
 
             case SPAWNS:
-                if (left) {
-                    draft.spawns.add(facing);
-                    ok(player, "Spawn " + draft.spawns.size() + " set, facing "
-                            + FacingVector.compass(player.getLocation().getYaw()) + ".");
-                } else if (draft.spawns.isEmpty()) {
-                    error(player, "There are no spawns to remove.");
-                    return;
-                } else {
-                    draft.spawns.remove(draft.spawns.size() - 1);
-                    ok(player, "Removed spawn " + (draft.spawns.size() + 1) + ", " + draft.spawns.size() + " left.");
-                }
-                break;
+                spawnTool.click(player, session, left);
+                return;
 
             case SPECTATOR:
                 draft.spectator = facing;
@@ -282,12 +339,12 @@ public final class MapSetupManager implements Listener {
                 break;
 
             case BOUNDS:
-                if (left) session.pos1 = here;
-                else session.pos2 = here;
+                if (left) session.corners.pos1 = here;
+                else session.corners.pos2 = here;
                 session.applyBounds();
 
                 String corner = left ? "Corner 1" : "Corner 2";
-                if (session.pos1 == null || session.pos2 == null) {
+                if (session.corners.pos1 == null || session.corners.pos2 == null) {
                     ok(player, corner + " set. Now set corner " + (left ? "2 with a right" : "1 with a left") + " click.");
                 } else if (!draft.hasBounds()) {
                     error(player, corner + " set, but both corners are in a line. Move one so they make a rectangle.");
@@ -332,7 +389,7 @@ public final class MapSetupManager implements Listener {
     }
 
     /** The same, and the way the player is looking, for the points that players are put at. */
-    private static Vector facing(Player player) {
+    static Vector facing(Player player) {
         Location location = player.getLocation();
         return new FacingVector(round(location.getX()), round(location.getY()), round(location.getZ()),
                 location.getYaw(), location.getPitch());
@@ -340,6 +397,33 @@ public final class MapSetupManager implements Listener {
 
     private static double round(double value) {
         return Math.round(value * 1000) / 1000.0;
+    }
+
+    // ---------------------------------------------------------------- spawns changed by someone
+
+    /** A spawn was moved: whoever else was on it follows it to where it is now. */
+    void spawnReplaced(MapDraft draft, Vector old, Vector moved) {
+        for (MapSetupSession other : sessions.values()) {
+            if (other.draft == draft && other.current == old) other.current = moved;
+        }
+    }
+
+    /** A spawn was deleted: whoever was on it is back at the start, and is told if it wasn't them who deleted it. */
+    void spawnRemoved(MapDraft draft, Vector removed, Player by) {
+        for (MapSetupSession other : new ArrayList<MapSetupSession>(sessions.values())) {
+            if (other.draft != draft || other.current != removed) continue;
+
+            SpawnTool.reset(other);
+            Player editor = Bukkit.getPlayer(other.player);
+            if (editor == null || editor == by) continue;
+            error(editor, "The spawn you were on was deleted by " + by.getName() + ", so you're back at the start.");
+            refresh(editor, other);
+        }
+    }
+
+    /** What the buttons of the spawn list in chat run. */
+    void spawnCommand(Player player, String[] args) {
+        spawnTool.command(player, args);
     }
 
     // ---------------------------------------------------------------- the name
@@ -574,6 +658,7 @@ public final class MapSetupManager implements Listener {
                 for (MapSetupSession session : new ArrayList<MapSetupSession>(sessions.values())) {
                     Player player = Bukkit.getPlayer(session.player);
                     if (player == null || !player.isOnline()) {
+                        session.cancelAuto();
                         sessions.remove(session.player);
                         continue;
                     }
@@ -590,17 +675,25 @@ public final class MapSetupManager implements Listener {
         markerTask = null;
     }
 
-    /** Dust where the points are, only seen by the player setting up: blue lobby, green spawns, white spectator, red bounds. */
+    /**
+     * Dust where the points are, only seen by the player setting up: blue lobby, green spawns, white spectator, red bounds,
+     * and gold for the spawn that is current (none of the others).
+     */
     private void drawMarkers(Player player, MapSetupSession session) {
         MapDraft draft = session.draft;
         World world = session.world;
 
         if (draft.lobby != null) column(player, world, draft.lobby, 0.2f, 0.45f, 1f);
         if (draft.spectator != null) column(player, world, draft.spectator, 1f, 1f, 1f);
-        for (Vector spawn : draft.spawns) column(player, world, spawn, 0.2f, 1f, 0.2f);
+        for (Vector spawn : draft.spawns) {
+            // The spawn being cycled to or edited has its own colour, only while it is
+            boolean current = spawn == session.current && session.spawnMode != MapSetupSession.SpawnMode.NORMAL;
+            if (current) column(player, world, spawn, CURRENT_RED, CURRENT_GREEN, CURRENT_BLUE);
+            else column(player, world, spawn, 0.2f, 1f, 0.2f);
+        }
 
-        Vector one = session.pos1;
-        Vector two = session.pos2;
+        Vector one = session.corners.pos1;
+        Vector two = session.corners.pos2;
         if (one != null) column(player, world, one, 1f, 0.15f, 0.15f);
         if (two != null) column(player, world, two, 1f, 0.15f, 0.15f);
         if (one == null || two == null) return;
@@ -650,7 +743,7 @@ public final class MapSetupManager implements Listener {
 
     // ---------------------------------------------------------------- messages
 
-    private void ok(Player player, String message) {
+    void ok(Player player, String message) {
         player.sendMessage(main.color("&a&l(!) &r" + message));
     }
 

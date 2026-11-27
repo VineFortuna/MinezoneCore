@@ -3,7 +3,6 @@ package anthony.SuperCraftBrawl.cosmetics.all;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
-import anthony.SuperCraftBrawl.halloween.Halloween;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticRegistry;
 import anthony.SuperCraftBrawl.cosmetics.ParticleHelper;
 import anthony.SuperCraftBrawl.cosmetics.PassCosmetic;
@@ -27,7 +26,7 @@ public final class TrailCosmetics {
     public static void registerAll(Core main, CosmeticRegistry registry) {
         registry.register(snowParticles(main));
         registry.register(candyCaneSwirl(main));
-        if (Halloween.ENABLED) registry.register(candyAura(main)); // a Halloween hunt reward
+        registry.register(candyAura(main));
         registry.register(snowfall(main));
         registry.register(hollyWreath(main));
     }

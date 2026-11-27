@@ -297,8 +297,8 @@ public class PlayerListener implements Listener {
 
         //Send news to players with titles when they join
         TitleSequence.sendChained(main, player,
-                new TitleSequence.TitleSpec("&6&lMINEZONE", "&6&lFLAGWARS &e&lBETA RELEASE!", 10, 70, 0),
-                new TitleSequence.TitleSpec("&6&lMINEZONE", "&c&lCHRISTMAS UPDATE &r- &r&lNOVEMBER 27", 0, 70, 10)
+                new TitleSequence.TitleSpec("&6&lMINEZONE", "&c&lCHRISTMAS UPDATE &f- &f&lOUT NOW!", 10, 70, 0),
+                new TitleSequence.TitleSpec("&6&lMINEZONE", "&6&lFLAG WARS &e&lBETA RELEASE!", 0, 70, 10)
         );
 
         listFriendsOnline(player);
@@ -924,8 +924,14 @@ public class PlayerListener implements Listener {
                         new TournamentGUI(main).inv.open(player);
                 }
             } else if (item.getType() == Material.NETHER_STAR) {
-                if (player.getWorld() == main.getLobbyWorld())
-                    new ChallengesGUI(main).inv.open(player);
+                if (player.getWorld() == main.getLobbyWorld()) {
+                    // The lobby's Battle Pass item runs /battlepass (same checks and messages as the command)
+                    if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()
+                            && item.getItemMeta().getDisplayName().contains("Battle Pass"))
+                        player.performCommand("battlepass");
+                    else
+                        new ChallengesGUI(main).inv.open(player);
+                }
             }
         }
     }

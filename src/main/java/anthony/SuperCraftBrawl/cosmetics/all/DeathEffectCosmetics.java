@@ -3,7 +3,6 @@ package anthony.SuperCraftBrawl.cosmetics.all;
 import anthony.SuperCraftBrawl.Core;
 import anthony.SuperCraftBrawl.cosmetics.Cosmetic;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticCategory;
-import anthony.SuperCraftBrawl.halloween.Halloween;
 import anthony.SuperCraftBrawl.cosmetics.CosmeticRegistry;
 import anthony.SuperCraftBrawl.cosmetics.DeathEffectAnimation;
 import anthony.SuperCraftBrawl.cosmetics.ParticleHelper;
@@ -37,7 +36,7 @@ public final class DeathEffectCosmetics {
         registry.register(simple("exp_bottle", "Exp Bottle", Material.EXP_BOTTLE));
         registry.register(simple("blaze_powder", "Blaze Powder", Material.BLAZE_POWDER));
         registry.register(snowball(main));
-        if (Halloween.ENABLED) registry.register(pumpkinPie(main)); // a Halloween hunt reward
+        registry.register(pumpkinPie(main));
         registry.register(snowFlurry(main));
         registry.register(giftExplosion(main));
     }

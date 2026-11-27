@@ -95,7 +95,7 @@ public class GrinchClass extends BaseClass {
 	public GrinchClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(null,
-				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmNhMWEzNjZhMmZlN2QwMzNlMWRkYzJiMjZmOWViYmJmOTZhZDVmZjgzNGU4ZjNkYmUwNmI0N2UzOGM3YjIyYiJ9fX0=",
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWVkYmRjNDFiZjQ4OWNjMWU5NjhmNDA0YWFjNWYyNDEwZTllZjk1MzViYjBhYWU3ZGEyZDljYTQxYWI1ZmY4MyJ9fX0=",
 				"5DB77A", 6, "Grinch");
 	}
 

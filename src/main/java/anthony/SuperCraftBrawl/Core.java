@@ -523,6 +523,14 @@ public class Core extends JavaPlugin implements Listener {
         return player.hasPermission(permission) ? 10 : 0;
     }
 
+    /**
+     * The EXP a player gets for something they earned in a game (a kill, a win...): double for LEGENDARY, as it is for
+     * everyone else. It is used where the EXP is given, so the "You earned" line says what they really got.
+     */
+    public int gameExp(Player player, int exp) {
+        return getRankManager().getRank(player) == Rank.LEGENDARY ? exp * 2 : exp;
+    }
+
     /** How long /invite can't be used again after it was. */
     private static final long INVITE_COOLDOWN_MILLIS = 5000L;
     /** When each player may /invite again (UUID keys, so nothing here holds on to a player). */
@@ -1082,12 +1090,12 @@ public class Core extends JavaPlugin implements Listener {
         fishing = new Fishing(this);
         signManager = new SignManager(this);
         lobbyItems = new anthony.SuperCraftBrawl.lobbyitems.LobbyItems(this);
-        // The basket hunt and the Candy Aura only run while Halloween is on (see Halloween#ENABLED). Both stay null
-        // otherwise, which everything that reads them already allows for.
-        if (Halloween.ENABLED) {
-            halloweenHunt = new HalloweenHuntManager(this);
-            candyAura = new CandyAuraManager(this, "lobby-1");
-        }
+        // Both are always created: the hunt manager is where the saved basket progress is read from, and that progress
+        // is what keeps the Halloween 2025 cosmetics unlocked for the players who earned them. The baskets themselves
+        // only become clickable while Halloween is on (HalloweenHuntManager registers its listener only then). The
+        // Candy Aura manager sits idle until somebody who earned the trail equips it.
+        halloweenHunt = new HalloweenHuntManager(this);
+        candyAura = new CandyAuraManager(this, "lobby-1");
         christmasHunt = new ChristmasHuntManager(this);
         lobbyWorld = getServer().createWorld(new WorldCreator("lobby-1"));
         if (lobbyWorld != null) {
@@ -1302,7 +1310,13 @@ public class Core extends JavaPlugin implements Listener {
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (cmd.getName().equalsIgnoreCase("setrank")) {
             if (sender.hasPermission("scb.setrank")) {
-                if (args.length > 1) {
+                if (args.length > 2) {
+                    // A time on the end (1m, 1y, 28d) makes it a subscription: the rank for that long, then back to the old one
+                    if (rankSubscriptionManager == null)
+                        sender.sendMessage(color("&c&l(!) &rRank subscriptions are unavailable, the database table didn't start."));
+                    else
+                        rankSubscriptionManager.giveFromCommand(sender, args[0], args[1], args[2]);
+                } else if (args.length > 1) {
                     final Rank rank = Rank.getRankFromName(args[1]);
                     final String targetName = args[0];
                     final CommandSender rankSender = sender;
@@ -1346,7 +1360,7 @@ public class Core extends JavaPlugin implements Listener {
                         setRankNow.run();
                 } else {
                     sender.sendMessage("" + ChatColor.BOLD + "(!) " + ChatColor.RESET + "Incorrect usage! Try doing: "
-                            + ChatColor.GREEN + "/setrank <player> <rank>");
+                            + ChatColor.GREEN + "/setrank <player> <rank> [1m|1y|28d]");
                 }
             } else {
                 sender.sendMessage(color("&c&l(!) &rYou do not have permission for that!"));

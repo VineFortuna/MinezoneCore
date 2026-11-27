@@ -1220,7 +1220,6 @@ public class FWGameInstance {
 	private static final int FLAG_CAPTURE_EXP = 40;
 	private static final int WIN_TOKENS = 10;
 	private static final int WIN_EXP = 100;
-	private static final int RANK_BONUS_TOKENS = 10;
 
 	private void applyMatchStats(FWTeam winner) {
 		UUID mvpUuid = topKillerUuid();
@@ -1324,11 +1323,13 @@ public class FWGameInstance {
 		int placeTokens = won ? WIN_TOKENS : 0;
 		int placeExp = won ? WIN_EXP : 0;
 
-		boolean rankBonus = won ? player.hasPermission("scb.rankBonusOne") : player.hasPermission("scb.rankBonus");
-		int rankBonusTokens = rankBonus ? RANK_BONUS_TOKENS : 0;
+		// 20 Tokens for LEGENDARY, 10 for the other ranks that have the permission, the same as Super Craft Bros
+		int rankBonusTokens = manager.getMain().getRankBonusTokens(player, won ? "scb.rankBonusOne" : "scb.rankBonus");
+		boolean rankBonus = rankBonusTokens > 0;
 
 		int totalTokens = killTokens + captureTokens + placeTokens + rankBonusTokens;
-		int totalExp = killExp + captureExp + placeExp;
+		// Double EXP for LEGENDARY, in the message and in what they get
+		int totalExp = manager.getMain().gameExp(player, killExp + captureExp + placeExp);
 
 		String border = won ? "&l===========================" : "&l=====================";
 		String title = won ? "&e&l  GAME WON" : "&c&l  GAME LOST";
@@ -1341,7 +1342,7 @@ public class FWGameInstance {
 		player.sendMessage(manager.getMain().color("&l|| " + "        &r  " + kills + " Kills: &a" + killTokens + " Tokens"));
 		player.sendMessage(manager.getMain().color("&l|| " + "        &r  " + captures + " Flags Captured: &a" + captureTokens + " Tokens"));
 		if (rankBonus) {
-			player.sendMessage(manager.getMain().color("&l|| " + "        &r  Rank Bonus: &a" + RANK_BONUS_TOKENS + " Tokens"));
+			player.sendMessage(manager.getMain().color("&l|| " + "        &r  Rank Bonus: &a" + rankBonusTokens + " Tokens"));
 		}
 		player.sendMessage(manager.getMain().color("&l||"));
 		player.sendMessage(manager.getMain().color(border));

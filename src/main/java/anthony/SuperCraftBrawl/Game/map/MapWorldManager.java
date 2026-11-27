@@ -64,6 +64,9 @@ public class MapWorldManager implements CommandExecutor, TabCompleter, Listener 
     // (the server stopped, or crashed, while it was being set up) is known to be one that can be thrown away
     private static final String UNSAVED_MARKER = ".scb-unsaved-map";
 
+    // A new map starts with one stone block on this layer, the player stands on it
+    private static final int PLATFORM_Y = 150;
+
     private final Core main;
     private final MapSetupManager setup;
     private final Set<String> setupWorlds = new HashSet<>(); // original worlds loaded by /scbsetup (lowercase)
@@ -280,6 +283,8 @@ public class MapWorldManager implements CommandExecutor, TabCompleter, Listener 
         } else if (sub.equals("create")) {
             if (args.length >= 2) createMap(player, args[1]);
             else error(player, "Say what the map is called: &e/scbsetup create <map>");
+        } else if (sub.equals("spawn")) {
+            setup.spawnCommand(player, args);
         } else if (sub.equals("save")) {
             saveCommand(player);
         } else if (sub.equals("leave")) {
@@ -344,6 +349,14 @@ public class MapWorldManager implements CommandExecutor, TabCompleter, Listener 
             return;
         }
 
+        MapSetupSession active = setup.sessionFor(id);
+        if (active != null) {
+            Player editor = setup.editorOf(active.draft.id);
+            error(player, "&e" + active.draft.id + " &ris already being set up" + (editor == null ? "" : " by &e" + editor.getName())
+                    + "&r. &e/scbsetup tp " + active.draft.id + " &rjoins in.");
+            return;
+        }
+
         String worldName = id.toLowerCase(Locale.ROOT);
         if (store.find(id) != null || store.worldTaken(worldName, null) || findDuosMap(id) != null
                 || findDuosMap(worldName) != null) {
@@ -377,10 +390,8 @@ public class MapWorldManager implements CommandExecutor, TabCompleter, Listener 
         world.setGameRuleValue("doMobSpawning", "false");
         world.setGameRuleValue("doDaylightCycle", "false");
         world.setTime(1000); // like the other arenas
-        world.setSpawnLocation(0, 64, 0);
-        for (int x = -3; x <= 3; x++) {
-            for (int z = -3; z <= 3; z++) world.getBlockAt(x, 63, z).setType(Material.STONE);
-        }
+        world.setSpawnLocation(0, PLATFORM_Y + 1, 0);
+        world.getBlockAt(0, PLATFORM_Y, 0).setType(Material.STONE); // one block to stand on, build from there
 
         setupWorlds.add(worldName);
         unsavedNewWorlds.add(worldName);
@@ -390,21 +401,24 @@ public class MapWorldManager implements CommandExecutor, TabCompleter, Listener 
             main.getLogger().warning("Couldn't mark " + worldName + " as a new map, it is kept if the server crashes: " + e);
         }
 
-        player.teleport(new Location(world, 0.5, 64, 0.5));
+        player.teleport(new Location(world, 0.5, PLATFORM_Y + 1, 0.5));
         setup.start(player, new MapDraft(id, worldName), world, true);
         player.sendMessage(main.color("&a&l(!) &rYou're in the new world for &e" + id + "&r. Use the items to set the "
                 + "map up, then &e/scbsetup save&r."));
         player.sendMessage(main.color("&7&e/scbsetup status &7shows what is still missing, &e/scbsetup leave &7throws "
-                + "an unsaved map away."));
+                + "an unsaved map away. Another player can join you with &e/scbsetup tp " + id + "&7."));
     }
 
     // ----- tp: an existing map
 
     private void teleportToMap(Player player, String mapName) {
+        // Somebody is setting this map up (one that was just made and isn't saved yet counts): join them, on the same map
+        MapSetupSession active = setup.sessionFor(mapName);
+
         MapStore store = main.getMapStore();
-        MapDraft draft = store == null ? null : store.find(mapName);
-        MapInstance duos = draft == null ? findDuosMap(mapName) : null;
-        if (draft == null && duos == null) {
+        MapDraft draft = active != null || store == null ? null : store.find(mapName);
+        MapInstance duos = active == null && draft == null ? findDuosMap(mapName) : null;
+        if (active == null && draft == null && duos == null) {
             error(player, "There's no map called &e" + mapName + "&r.");
             return;
         }
@@ -416,12 +430,9 @@ public class MapWorldManager implements CommandExecutor, TabCompleter, Listener 
             error(player, "You're already setting up a map. &e/scbsetup save&r it if you want it, then &e/scbsetup leave&r.");
             return;
         }
-        if (draft != null) {
-            Player other = setup.editorOf(draft.id);
-            if (other != null) {
-                error(player, "&e" + other.getName() + " &ris setting up &e" + draft.id + "&r right now.");
-                return;
-            }
+        if (active != null) {
+            joinSetup(player, active);
+            return;
         }
 
         String worldName = draft != null ? draft.world : duos.worldName;
@@ -446,6 +457,23 @@ public class MapWorldManager implements CommandExecutor, TabCompleter, Listener 
             player.setGameMode(GameMode.CREATIVE);
             player.sendMessage(main.color("&a&l(!) &rYou're in the original &e" + world.getName() + " &rworld. Changes are "
                     + "only kept if you use &e/scbsetup save&r - new games then use them. &e/scbsetup leave &rwhen you're done."));
+        }
+    }
+
+    /** /scbsetup tp on a map that somebody is already setting up: the same world and the same map, worked on together. */
+    private void joinSetup(Player player, MapSetupSession active) {
+        World world = active.world;
+        Vector lobby = active.draft.lobby;
+        if (lobby != null) player.teleport(FacingVector.toLocation(world, lobby)); // facing the way the lobby was set, if it was
+        else player.teleport(world.getSpawnLocation().add(0.5, 0, 0.5));
+
+        setup.join(player, active);
+        player.sendMessage(main.color("&a&l(!) &rYou joined the setup of &e" + active.draft.id + "&r. You share one map: "
+                + "build, and set the locations and settings, together. Either of you can &e/scbsetup save&r it."));
+        player.sendMessage(main.color("&7Unsaved changes are only thrown away when everyone has left. &e/scbsetup leave &7when "
+                + "you're done."));
+        if (!active.draft.isComplete()) {
+            player.sendMessage(main.color("&e&l(!) &r" + active.draft.id + " can't be played yet. &e/scbsetup status &rshows why."));
         }
     }
 
@@ -483,10 +511,16 @@ public class MapWorldManager implements CommandExecutor, TabCompleter, Listener 
         }
 
         boolean wasNew = unsavedNewWorlds.contains(world.getName().toLowerCase());
+        boolean othersStay = world.getPlayers().size() > 1; // the player is still counted
         setup.end(player); // takes the setup items back
         main.ResetPlayer(player); // the world change unloads it (see onLeaveSetupWorld)
-        player.sendMessage(main.color("&a&l(!) &rYou left &e" + world.getName() + "&r. Anything you didn't "
-                + "&e/scbsetup save &rwas " + (wasNew ? "thrown away, including the new world." : "discarded.")));
+        if (othersStay) {
+            player.sendMessage(main.color("&a&l(!) &rYou left &e" + world.getName() + "&r. Others are still setting it up, "
+                    + "so the map stays open and its unsaved changes stay with them."));
+        } else {
+            player.sendMessage(main.color("&a&l(!) &rYou left &e" + world.getName() + "&r. Anything you didn't "
+                    + "&e/scbsetup save &rwas " + (wasNew ? "thrown away, including the new world." : "discarded.")));
+        }
     }
 
     // ----- the rest
@@ -616,7 +650,8 @@ public class MapWorldManager implements CommandExecutor, TabCompleter, Listener 
         player.sendMessage(main.color("&8&m------------------------------------"));
         player.sendMessage(main.color("&6&lMAP SETUP"));
         player.sendMessage(main.color("&e/scbsetup create <map> &rMake a new map in a new void world"));
-        player.sendMessage(main.color("&e/scbsetup tp <map> &rGo to a map's original world to edit it"));
+        player.sendMessage(main.color("&e/scbsetup tp <map> &rGo to a map's original world to edit it, or join "
+                + "whoever is setting it up"));
         player.sendMessage(main.color("&e/scbsetup save &rSave the map you're in. It's playable once it has everything"));
         player.sendMessage(main.color("&e/scbsetup status &rWhat the map has and still needs"));
         player.sendMessage(main.color("&e/scbsetup tools &rPut the setup items back in their slots"));
@@ -650,6 +685,9 @@ public class MapWorldManager implements CommandExecutor, TabCompleter, Listener 
                 if (store != null) names.addAll(store.ids());
                 if (sub.equals("tp")) {
                     for (DuosMaps map : DuosMaps.values()) names.add(map.toString());
+                    for (String id : setup.activeMapIds()) {
+                        if (!names.contains(id)) names.add(id); // a new map somebody is setting up, not saved yet
+                    }
                 }
                 return StringUtil.copyPartialMatches(args[1], names, new ArrayList<>());
             }

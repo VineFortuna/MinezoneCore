@@ -46,7 +46,8 @@ public class NPCManager implements Listener {
 	/** When each player last clicked Santa, so a click the client sends twice runs /store once. Cleared on quit. */
 	private final Map<UUID, Long> santaClicks = new HashMap<UUID, Long>();
 
-	private static final String SURVEY_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfPqu6WDrVQW59YjzzVT0O5ZWa-8cHibHt3w7MBlHjInpOWyA/viewform?usp=dialog";
+	private static final String STORE_URL = "https://minezone.tebex.io";
+	private static final String SURVEY_URL ="https://docs.google.com/forms/d/e/1FAIpQLSfPqu6WDrVQW59YjzzVT0O5ZWa-8cHibHt3w7MBlHjInpOWyA/viewform?usp=dialog";
 
     public NPCManager(Core main) {
 		this.main = main;
@@ -297,23 +298,22 @@ public class NPCManager implements Listener {
 		}
 	}
 
-	/** Santa's click: runs /store for the player. Commands have to run on the main thread, and a double click counts once. */
+	/**
+	 * Santa's click: sends the player a chat link to the store. A server cannot open a browser by itself, so the
+	 * player clicks the link in chat (the same way the survey NPC works). A double click counts once.
+	 */
 	private void openStore(final Player player) {
 		long now = System.currentTimeMillis();
 		Long last = santaClicks.get(player.getUniqueId());
 		if (last != null && now - last < 600L) return;
 		santaClicks.put(player.getUniqueId(), now);
 
-		if (Bukkit.isPrimaryThread()) {
-			player.performCommand("store");
-		} else {
-			Bukkit.getScheduler().runTask(main, new Runnable() {
-				@Override
-				public void run() {
-					if (player.isOnline()) player.performCommand("store");
-				}
-			});
-		}
+		TextComponent message = new TextComponent(main.color("&d&l(!) "));
+		TextComponent link = new TextComponent(main.color("&e&l&nCLICK HERE"));
+		link.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, STORE_URL));
+		message.addExtra(link);
+		message.addExtra(new TextComponent(main.color("&f to visit our store at &e&nminezone.tebex.io")));
+		player.spigot().sendMessage(message);
 	}
 
 	@EventHandler

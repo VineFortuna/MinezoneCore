@@ -6,7 +6,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 /**
- * /ranksub give <player> <rank> <time>  - one more payment: 1m (a month), 12m or 1y (a year), 30d, 2w, or a number of days
+ * /ranksub give <player> <rank> <time>  - one more payment: 1m (a month), 12m or 1y (a year), 28d, 2w, or a number of days.
+ *                                         The same as "/setrank <player> <rank> <time>", which is what to use by hand.
  * /ranksub end <player>                 - ends it now (refund, chargeback), they go back to the rank they had before
  * /ranksub info <player>                - what they have and when it ends
  *
@@ -36,18 +37,7 @@ public class RankSubscriptionCommand implements CommandExecutor {
 		}
 
 		if (args.length >= 4 && args[0].equalsIgnoreCase("give")) {
-			Rank rank = Rank.getRankFromName(args[2]);
-			// getRankFromName falls back to DEFAULT for a name it doesn't know
-			if (rank == Rank.DEFAULT && !args[2].equalsIgnoreCase("default")) {
-				sender.sendMessage(main.color("&c&l(!) &r" + args[2] + " is not a rank."));
-				return true;
-			}
-			RankSubscriptionManager.Period period = RankSubscriptionManager.parsePeriod(args[3]);
-			if (period == null) {
-				sender.sendMessage(main.color("&c&l(!) &r" + args[3] + " is not a time. Use 1m, 12m, 1y, 30d, 2w or a number of days."));
-				return true;
-			}
-			manager.give(sender, args[1], rank, period);
+			manager.giveFromCommand(sender, args[1], args[2], args[3]);
 			return true;
 		}
 		if (args.length >= 2 && args[0].equalsIgnoreCase("end")) {

@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 import java.io.File;
 
 /**
- * Staff command: /minecadelobby takes you to the world called MinecadeLobby, at its spawn.
+ * Staff command: /minecadelobby (or /mcl) takes you to the world called MinecadeLobby, to 12 147 9.
  * If that world isn't loaded but its folder is in the server folder, it is loaded first. It never creates a world:
  * a folder that isn't there is an error, not a new empty world.
  */
@@ -21,6 +21,10 @@ public class MinecadeLobbyCommand implements CommandExecutor {
 
 	private static final String WORLD_NAME = "MinecadeLobby";
 	private static final String PERMISSION = "scb.minecadelobby";
+	/** Where it takes you: the block 12 147 9 of that world. */
+	private static final int X = 12;
+	private static final int Y = 147;
+	private static final int Z = 9;
 
 	private final Core main;
 
@@ -64,8 +68,8 @@ public class MinecadeLobbyCommand implements CommandExecutor {
 			}
 		}
 
-		Location spawn = world.getSpawnLocation().add(0.5, 0, 0.5);
-		player.teleport(spawn);
+		// The middle of the block 12 147 9
+		player.teleport(new Location(world, X + 0.5, Y, Z + 0.5));
 		player.sendMessage(main.color("&a&l(!) &rYou were taken to &e" + WORLD_NAME + "&r. &7(/hub takes you back)"));
 		return true;
 	}
