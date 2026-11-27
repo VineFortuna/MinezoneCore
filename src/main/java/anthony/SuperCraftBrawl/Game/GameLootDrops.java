@@ -1,5 +1,6 @@
 package anthony.SuperCraftBrawl.Game;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -10,8 +11,10 @@ import java.util.Set;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftEntity;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.ThrownPotion;
 import org.bukkit.inventory.ItemStack;
@@ -22,6 +25,7 @@ import org.bukkit.potion.PotionType;
 
 import anthony.SuperCraftBrawl.Game.classes.ClassType;
 import anthony.util.ItemHelper;
+import net.minecraft.server.v1_8_R3.EntityItem;
 
 public enum GameLootDrops {
 
@@ -137,6 +141,37 @@ public enum GameLootDrops {
 		// None of these rarities is enabled: like getDrop, the settings don't stop the item from being given
 		return getDrop(pool.isEmpty() ? everything : pool);
 	}
+
+    /** How long a lightning drop (real or the Grinch's fake) lies on the ground before it despawns: 10 minutes. */
+    public static final int DESPAWN_AFTER_TICKS = 10 * 60 * 20;
+
+    private static final Field ITEM_AGE = findItemAge();
+
+    private static Field findItemAge() {
+        try {
+            Field field = EntityItem.class.getDeclaredField("age");
+            field.setAccessible(true);
+            return field;
+        } catch (Throwable t) {
+            return null; // the drop keeps the server's own despawn time then
+        }
+    }
+
+    /**
+     * Makes this dropped item despawn after {@link #DESPAWN_AFTER_TICKS} instead of the server's own time (5 minutes
+     * unless item-despawn-rate was changed). The server removes an item when its age reaches its despawn rate, so
+     * the age is started that far below zero: it is still the server that removes it, with nothing here that could
+     * be left running, and it is the same length whatever the rate is set to.
+     */
+    public static void setDespawnTime(Item item) {
+        if (ITEM_AGE == null || item == null) return;
+        try {
+            EntityItem handle = (EntityItem) ((CraftEntity) item).getHandle();
+            ITEM_AGE.setInt(handle, handle.world.spigotConfig.itemDespawnRate - DESPAWN_AFTER_TICKS);
+        } catch (Throwable ignored) {
+            // The drop keeps the server's own despawn time
+        }
+    }
 
     public static boolean isLootDropItem(ItemStack item) {
         if (item == null || item.getType() == Material.AIR) return false;
@@ -255,7 +290,7 @@ public enum GameLootDrops {
 
 	        // ===== UNCOMMON =====
 			case NUKE:
-				item = ItemHelper.setDetails(new ItemStack(Material.TNT, 3),
+				item = ItemHelper.setDetails(new ItemStack(Material.TNT),
 						"&4&lNUKE",
 						"&7Spawn TNTs where you're looking",
 						"",

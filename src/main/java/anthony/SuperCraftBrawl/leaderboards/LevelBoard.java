@@ -132,7 +132,7 @@ public class LevelBoard extends LeaderboardBase {
 	/** The invisible hitbox that makes the board clickable. */
 	private void sendClickHitbox(Location title, double lowestLineY) {
 		BoardClickHitbox.Hitbox hitbox = BoardClickHitbox.create(title, lowestLineY);
-		entityIds.add(hitbox.id);
+		entityIds.addAll(hitbox.ids);
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			hitbox.sendTo(player);
 		}

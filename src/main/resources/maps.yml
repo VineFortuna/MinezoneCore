@@ -1,0 +1,1695 @@
+# Super Craft Bros maps. In game: /scbsetup create <map>, /scbsetup tp <map>, /scbsetup save.
+# This file is rewritten whenever a map is saved, so comments in it are not kept.
+# Edit it by hand only while the server is stopped. A map needs a world, a lobby, a spectator
+# location, at least 2 spawns, bounds, a source, size, gameplay, category and icon to be playable;
+# enabled: false keeps a complete map out of the game.
+maps:
+  NightDragon:
+    name: NightDragon
+    world: nightdragon
+    type: CLASSIC
+    source: MINECADE
+    category: CURATED
+    size: SMALL
+    gameplay: [VOIDY]
+    icon: CLAY
+    lobby: [162.522, 151.0, 369.52]
+    spectator: [211.499, 152.19487, 389.566]
+    bounds:
+      center: [216.5, 160.0, 382.5]
+      x: 35.0
+      z: 45.0
+    spawns:
+    - [206.442, 146.0, 372.38]
+    - [217.503, 150.0, 376.405]
+    - [230.433, 147.0, 366.369]
+    - [230.479, 146.0, 389.485]
+    - [214.47, 149.0, 409.434]
+    - [213.426, 143.0, 392.416]
+    enabled: true
+  TreeOfLife:
+    name: TreeOfLife
+    world: treeoflife
+    type: DUEL
+    source: COMMUNITY
+    category: CURATED
+    size: MEDIUM
+    gameplay: [ELEVATED]
+    icon: LOG
+    lobby: [173.5, 151.0, 347.5]
+    spectator: [174.5, 146.0, 389.5]
+    bounds:
+      center: [173.496, 147.0, 399.6]
+      x: 100.0
+      z: 39.0
+    spawns:
+    - [173.97, 147.0, 377.339]
+    - [153.385, 142.0, 393.5]
+    - [184.5, 142.0, 412.5]
+    - [178.5, 132.0, 401.5]
+    enabled: true
+  Village:
+    name: Village
+    world: village
+    type: CLASSIC
+    source: COMMUNITY
+    category: CURATED
+    size: MEDIUM
+    gameplay: [FLAT]
+    icon: GRASS
+    lobby: [-1259.48, 130.0, 1008.52]
+    spectator: [-1182.5, 147.0, 1016.5]
+    bounds:
+      center: [-1182.5, 147.0, 1016.5]
+      x: 42.0
+      z: 70.0
+    spawns:
+    - [-1186.492, 141.0, 1056.504]
+    - [-1186.505, 134.0, 1055.516]
+    - [-1174.615, 139.0, 1036.456]
+    - [-1199.511, 132.0, 985.438]
+    - [-1208.541, 134.0, 1020.386]
+    - [-1178.029, 137.0, 1016.004]
+    enabled: true
+  FloorIsLava:
+    name: FloorIsLava
+    world: floorislava
+    type: CLASSIC
+    source: COMMUNITY
+    category: VAULTED
+    size: MEDIUM
+    gameplay: [FLAT]
+    icon: LAVA_BUCKET
+    lobby: [-1274.005, 132.0, 1006.986]
+    spectator: [-1218.5, 141.0, 1007.5]
+    bounds:
+      center: [-1218.5, 141.0, 1007.5]
+      x: 40.0
+      z: 80.0
+    spawns:
+    - [-1217.498, 138.0, 968.41]
+    - [-1197.213, 131.0, 973.378]
+    - [-1205.511, 137.0, 988.48]
+    - [-1214.476, 139.0, 1026.483]
+    - [-1225.68, 138.0, 1048.468]
+    - [-1228.616, 133.0, 1048.462]
+    enabled: true
+  Burrows:
+    name: Burrows
+    world: burrows
+    type: CLASSIC
+    source: COMMUNITY
+    category: CURATED
+    size: SMALL
+    gameplay: [UNDERGROUND]
+    icon: DIRT:1
+    lobby: [-1268.452, 141.0, 1083.502]
+    spectator: [-1270.5, 143.0, 1036.5]
+    bounds:
+      center: [-1270.5, 143.0, 1036.5]
+      x: 35.0
+      z: 32.0
+    spawns:
+    - [-1284.53, 131.0, 1027.466]
+    - [-1283.548, 123.0, 1019.481]
+    - [-1260.378, 128.0, 1041.478]
+    - [-1270.486, 123.0, 1045.557]
+    - [-1276.509, 114.0, 1036.509]
+    - [-1272.527, 130.0, 1017.414]
+    enabled: true
+  CandyOverdose:
+    name: CandyOverdose
+    world: candyoverdose
+    type: CLASSIC
+    source: MINECADE
+    category: CURATED
+    size: MEDIUM
+    gameplay: [ELEVATED]
+    icon: WOOL:3
+    lobby: [-1238.522, 158.0, 1086.494]
+    spectator: [-1296.5, 149.0, 1081.5]
+    bounds:
+      center: [-1296.5, 149.0, 1081.5]
+      x: 42.0
+      z: 40.0
+    spawns:
+    - [-1281.535, 132.0, 1067.508]
+    - [-1278.571, 133.0, 1089.935]
+    - [-1300.621, 127.0, 1104.452]
+    - [-1320.966, 133.0, 1086.427]
+    - [-1306.504, 131.0, 1066.437]
+    - [-1306.449, 138.0, 1066.488]
+    enabled: true
+  NorthernSeas:
+    name: NorthernSeas
+    world: northernseas
+    type: CLASSIC
+    source: MINECADE
+    category: CASUAL
+    size: LARGE
+    gameplay: [VOIDY]
+    icon: WOOL:15
+    lobby: [-1239.519, 125.0, 890.484]
+    spectator: [-1241.538, 162.0, 969.491]
+    bounds:
+      center: [-1241.5, 165.0, 979.5]
+      x: 60.0
+      z: 60.0
+    spawns:
+    - [-1268.869, 165.0, 998.872]
+    - [-1273.602, 143.0, 984.472]
+    - [-1257.214, 117.0, 959.39]
+    - [-1241.536, 119.0, 941.453]
+    - [-1241.404, 158.0, 966.367]
+    - [-1222.527, 116.0, 962.654]
+    enabled: true
+  CandyLand:
+    name: CandyLand
+    world: candylandclassic
+    type: CLASSIC
+    source: MINECADE
+    category: CURATED
+    size: MEDIUM
+    gameplay: [VOIDY, ELEVATED]
+    icon: WOOL:6
+    lobby: [-1259.504, 136.0, 960.513]
+    spectator: [-1264.5, 157.0, 1011.5]
+    bounds:
+      center: [-1265.532, 160.0, 1010.443]
+      x: 50.0
+      z: 33.0
+    spawns:
+    - [-1260.987, 133.0, 1001.699]
+    - [-1246.512, 142.0, 1011.427]
+    - [-1244.523, 142.0, 1018.46]
+    - [-1238.533, 169.0, 1015.462]
+    - [-1266.582, 144.0, 1023.429]
+    - [-1279.072, 145.0, 1007.997]
+    enabled: true
+  HauntedMansion:
+    name: HauntedMansion
+    world: hauntedmansion
+    type: CLASSIC
+    source: COMMUNITY
+    category: HALLOWEEN
+    size: MEDIUM
+    gameplay: [INDOOR]
+    icon: WOOD:5
+    lobby: [-1143.578, 150.0, 961.426]
+    spectator: [-1207.5, 138.0, 959.5]
+    bounds:
+      center: [-1207.5, 138.0, 959.5]
+      x: 100.0
+      z: 100.0
+    spawns:
+    - [-1260.502, 133.0, 953.975]
+    - [-1250.084, 137.0, 946.5]
+    - [-1207.495, 132.0, 966.517]
+    - [-1210.034, 132.0, 928.918]
+    - [-1240.008, 137.0, 953.951]
+    - [-1200.022, 137.0, 968.914]
+    enabled: true
+  CliffSide:
+    name: CliffSide
+    world: cliffside
+    type: CLASSIC
+    source: COMMUNITY
+    category: CASUAL
+    size: MEDIUM
+    gameplay: [VOIDY, ELEVATED]
+    icon: STONE:5
+    lobby: [-1138.523, 160.0, 1031.516]
+    spectator: [-1137.465, 153.0, 976.451]
+    bounds:
+      center: [-1137.465, 153.0, 976.451]
+      x: 200.0
+      z: 200.0
+    spawns:
+    - [-1152.58, 153.0, 967.422]
+    - [-1119.486, 150.0, 960.466]
+    - [-1125.552, 116.0, 982.502]
+    - [-1141.509, 117.0, 996.459]
+    - [-1134.518, 136.0, 950.448]
+    - [-1145.985, 152.0, 986.381]
+    enabled: true
+  JungleRiver:
+    name: JungleRiver
+    world: jungleriver
+    type: CLASSIC
+    source: MINECADE
+    category: VAULTED
+    size: LARGE
+    gameplay: [ELEVATED]
+    icon: LEAVES:3
+    lobby: [-1328.46, 122.0, 972.52]
+    spectator: [-1241.064, 139.40382, 977.987]
+    bounds:
+      center: [-1249.0, 142.0, 976.499]
+      x: 60.0
+      z: 65.0
+    spawns:
+    - [-1286.582, 99.0, 963.44]
+    - [-1289.416, 111.0, 991.638]
+    - [-1255.538, 105.0, 998.475]
+    - [-1226.471, 121.0, 993.462]
+    - [-1229.484, 113.0, 957.462]
+    - [-1256.505, 134.0, 944.422]
+    enabled: true
+  WitchesBrew:
+    name: WitchesBrew
+    world: witchesbrew
+    type: CLASSIC
+    source: COMMUNITY
+    category: HALLOWEEN
+    size: SMALL
+    gameplay: [VOIDY]
+    icon: CAULDRON_ITEM
+    lobby: [-1390.467, 185.0, 978.483]
+    spectator: [-1328.5, 170.0, 981.5]
+    bounds:
+      center: [-1328.5, 170.0, 981.5]
+      x: 40.0
+      z: 100.0
+    spawns:
+    - [-1347.494, 157.0, 982.477]
+    - [-1346.491, 154.0, 967.477]
+    - [-1331.459, 151.0, 972.467]
+    - [-1318.47, 150.0, 961.64]
+    - [-1310.49, 162.0, 978.463]
+    - [-1315.387, 153.0, 993.508]
+    enabled: true
+  Stronghold:
+    name: Stronghold
+    world: stronghold
+    type: CLASSIC
+    source: MINECADE
+    category: CURATED
+    size: SMALL
+    gameplay: [VOIDY, FLAT]
+    icon: MONSTER_EGGS:4
+    lobby: [106.496, 152.0, -620.492]
+    spectator: [98.559, 155.27324, -561.96]
+    bounds:
+      center: [99.5, 163.0, -553.5]
+      x: 35.0
+      z: 50.0
+    spawns:
+    - [112.468, 152.0, -588.591]
+    - [99.516, 145.0, -586.557]
+    - [111.502, 150.0, -557.542]
+    - [96.431, 148.0, -551.543]
+    - [92.484, 151.0, -523.467]
+    - [81.435, 148.0, -539.514]
+    enabled: true
+  Icefall:
+    name: Icefall
+    world: iceland
+    type: CLASSIC
+    source: MINECADE
+    category: CURATED
+    size: MEDIUM
+    gameplay: [VOIDY]
+    icon: ICE
+    lobby: [-579.478, 115.0, 63.434]
+    spectator: [-572.825, 127.7725, -10.992]
+    bounds:
+      center: [-585.519, 129.0, -10.543]
+      x: 60.0
+      z: 55.0
+    spawns:
+    - [-617.635, 106.0, -10.515]
+    - [-599.636, 106.0, 4.459]
+    - [-554.533, 111.0, 25.511]
+    - [-578.518, 121.0, -38.583]
+    - [-585.487, 120.0, -21.634]
+    - [-559.512, 120.0, -31.692]
+    enabled: true
+  Marooned:
+    name: Marooned
+    world: marooned
+    type: CLASSIC
+    source: COMMUNITY
+    category: CASUAL
+    size: MEDIUM
+    gameplay: [VOIDY, FLAT]
+    icon: STAINED_GLASS:11
+    lobby: [61.508, 115.0, -77.462]
+    spectator: [46.857, 108.11874, 7.306]
+    bounds:
+      center: [70.5, 116.0, 7.5]
+      x: 60.0
+      z: 60.0
+    spawns:
+    - [41.0, 98.0, 2.0]
+    - [59.0, 103.0, 41.0]
+    - [78.0, 108.0, 18.0]
+    - [103.0, 98.0, 19.0]
+    - [93.0, 98.0, -7.0]
+    - [61.0, 106.0, -14.0]
+    enabled: true
+  Orbital:
+    name: Orbital
+    world: orbital
+    type: DUEL
+    source: MINECADE
+    category: CURATED
+    size: SMALL
+    gameplay: [VOIDY]
+    icon: STAINED_GLASS:2
+    lobby: [1.49, 100.0, 6.498]
+    spectator: [55.424, 113.0, 6.82]
+    bounds:
+      center: [55.484, 113.0, 6.503]
+      x: 35.0
+      z: 50.0
+    spawns:
+    - [50.3, 96.0, -18.5]
+    - [73.4, 100.5, -13.5]
+    - [73.4, 97.0, 11.4]
+    - [65.4, 114.0, 27.3]
+    - [51.5, 102.0, 27.4]
+    - [44.5, 97.0, 12.5]
+    enabled: true
+  SandTemple:
+    name: SandTemple
+    world: sandtemple
+    type: DUEL
+    source: COMMUNITY
+    category: CURATED
+    size: SMALL
+    gameplay: [VOIDY, FLAT]
+    icon: SANDSTONE
+    lobby: [-3.545, 144.0, -64.538]
+    spectator: [-5.48, 123.0, 8.448]
+    bounds:
+      center: [-5.48, 123.0, 8.448]
+      x: 40.0
+      z: 30.0
+    spawns:
+    - [-5.5, 128.0, -15.537]
+    - [16.546, 123.0, 8.46]
+    - [-5.516, 128.0, 32.497]
+    - [-29.543, 128.0, 8.484]
+    enabled: true
+  TheEnd:
+    name: TheEnd
+    world: theend
+    type: CLASSIC
+    source: MINECADE
+    category: CURATED
+    size: MEDIUM
+    gameplay: [FLAT]
+    icon: ENDER_STONE
+    lobby: [374.503, 151.0, 162.511]
+    spectator: [364.373, 161.05132, 215.139]
+    bounds:
+      center: [373.442, 159.0, 218.488]
+      x: 50.0
+      z: 40.0
+    spawns:
+    - [398.589, 162.0, 219.495]
+    - [365.481, 148.0, 234.525]
+    - [368.491, 147.0, 197.447]
+    - [348.422, 148.0, 215.429]
+    - [352.418, 163.0, 223.484]
+    - [391.487, 148.0, 209.432]
+    enabled: true
+  BlossomHill:
+    name: BlossomHill
+    world: blossomhill
+    type: CLASSIC
+    source: COMMUNITY
+    category: CASUAL
+    size: MEDIUM
+    gameplay: [UNDERGROUND]
+    icon: WOOL:6
+    lobby: [268.518, 164.0, 160.504]
+    spectator: [344.5, 163.0, 160.5]
+    bounds:
+      center: [344.5, 163.0, 160.5]
+      x: 40.0
+      z: 60.0
+    spawns:
+    - [349.429, 142.0, 172.509]
+    - [335.55, 146.0, 160.985]
+    - [327.473, 133.0, 140.444]
+    - [317.471, 140.0, 160.372]
+    - [344.456, 132.0, 196.486]
+    - [366.493, 132.0, 183.455]
+    enabled: true
+  Tropical:
+    name: Tropical
+    world: tropical
+    type: CLASSIC
+    source: MINECADE
+    category: CURATED
+    size: MEDIUM
+    gameplay: [FLAT, ELEVATED]
+    icon: SAND
+    lobby: [333.583, 90.0, 154.515]
+    spectator: [403.845, 124.41554, 157.094]
+    bounds:
+      center: [404.461, 123.0, 152.472]
+      x: 50.0
+      z: 50.0
+    spawns:
+    - [408.509, 101.0, 122.405]
+    - [436.509, 82.0, 156.559]
+    - [422.545, 82.0, 173.471]
+    - [380.358, 80.0, 155.491]
+    - [404.051, 96.0, 157.006]
+    - [424.504, 84.0, 140.493]
+    enabled: true
+  Waterfall:
+    name: Waterfall
+    world: waterfall
+    type: CLASSIC
+    source: COMMUNITY
+    category: CURATED
+    size: LARGE
+    gameplay: [FLAT]
+    icon: STAINED_GLASS:3
+    lobby: [240.525, 142.0, 171.456]
+    spectator: [317.5, 141.0, 175.5]
+    bounds:
+      center: [317.5, 141.0, 175.5]
+      x: 47.0
+      z: 40.0
+    spawns:
+    - [301.409, 134.0, 155.477]
+    - [297.236, 127.0, 194.664]
+    - [343.504, 132.0, 163.495]
+    - [338.481, 134.0, 182.448]
+    - [302.482, 117.0, 152.405]
+    - [345.456, 120.0, 151.498]
+    enabled: true
+  Canyon:
+    name: Canyon
+    world: canyon
+    type: DUEL
+    source: COMMUNITY
+    category: CURATED
+    size: SMALL
+    gameplay: [VOIDY, FLAT]
+    icon: STAINED_CLAY:1
+    lobby: [194.5, 151.0, 169.5]
+    spectator: [248.5, 155.0, 165.5]
+    bounds:
+      center: [260.5, 155.0, 167.5]
+      x: 50.0
+      z: 50.0
+    spawns:
+    - [275.479, 153.0, 168.49]
+    - [275.438, 149.0, 186.478]
+    - [260.484, 146.0, 188.486]
+    - [247.5, 143.0, 181.451]
+    - [247.4, 149.0, 178.459]
+    - [261.354, 151.0, 153.999]
+    enabled: true
+  HighIslands:
+    name: HighIslands
+    world: highislands
+    type: CLASSIC
+    source: COMMUNITY
+    category: CASUAL
+    size: MEDIUM
+    gameplay: [VOIDY, ELEVATED]
+    icon: HUGE_MUSHROOM_1:6
+    lobby: [243.396, 168.0, 209.481]
+    spectator: [245.5, 185.0, 137.5]
+    bounds:
+      center: [245.5, 185.0, 137.5]
+      x: 100.0
+      z: 50.0
+    spawns:
+    - [247.444, 148.0, 159.515]
+    - [268.53, 146.0, 141.428]
+    - [253.536, 142.0, 131.435]
+    - [263.553, 146.0, 120.491]
+    - [242.424, 147.0, 121.429]
+    - [230.509, 145.0, 145.528]
+    enabled: true
+  Gateway:
+    name: Gateway
+    world: gateway
+    type: DUEL
+    source: MINECADE
+    category: CURATED
+    size: MEDIUM
+    gameplay: [FLAT]
+    icon: HARD_CLAY
+    lobby: [369.458, 115.0, 258.441]
+    spectator: [372.435, 100.0, 188.626]
+    bounds:
+      center: [372.483, 128.0, 188.497]
+      x: 50.0
+      z: 50.0
+    spawns:
+    - [372.481, 102.0, 168.417]
+    - [392.537, 102.0, 188.44]
+    - [372.445, 102.0, 208.485]
+    - [353.42, 102.0, 188.476]
+    - [345.435, 104.0, 211.468]
+    - [345.507, 106.0, 162.408]
+    enabled: true
+  PaintBoardOG:
+    name: PaintBoardOG
+    world: paintboardog
+    type: CLASSIC
+    source: COMMUNITY
+    category: VAULTED
+    size: SMALL
+    gameplay: [VOIDY, FLAT]
+    icon: WOOL:2
+    lobby: [380.502, 151.0, 301.543]
+    spectator: [373.5, 158.0, 240.5]
+    bounds:
+      center: [373.5, 158.0, 240.5]
+      x: 50.0
+      z: 30.0
+    spawns:
+    - [372.466, 146.0, 255.51]
+    - [353.489, 146.0, 256.536]
+    - [355.405, 146.0, 232.042]
+    - [376.475, 146.0, 224.455]
+    - [386.497, 146.0, 238.394]
+    enabled: true
+  SimpleLand:
+    name: SimpleLand
+    world: simpleland
+    type: CLASSIC
+    source: COMMUNITY
+    category: CURATED
+    size: SMALL
+    gameplay: [VOIDY]
+    icon: STAINED_CLAY:5
+    lobby: [394.5, 173.0, 322.5]
+    spectator: [392.5, 150.0, 260.5]
+    bounds:
+      center: [392.5, 167.0, 260.5]
+      x: 40.0
+      z: 40.0
+    spawns:
+    - [373.5, 135.0, 270.5]
+    - [375.5, 137.0, 245.5]
+    - [392.49, 144.0, 244.49]
+    - [391.55, 144.0, 266.455]
+    - [417.4, 139.0, 240.4]
+    enabled: true
+  Pokemob:
+    name: Pokemob
+    world: pokemob
+    type: CLASSIC
+    source: MINECADE
+    category: CASUAL
+    size: SMALL
+    gameplay: [VOIDY, FLAT]
+    icon: WOOL:14
+    lobby: [286.56, 113.0, 254.505]
+    spectator: [362.537, 117.0, 230.92]
+    bounds:
+      center: [353.45, 125.0, 254.414]
+      x: 50.0
+      z: 50.0
+    spawns:
+    - [382.598, 109.0, 255.503]
+    - [372.513, 105.0, 237.486]
+    - [352.448, 110.0, 224.399]
+    - [321.346, 107.0, 254.454]
+    - [337.445, 105.0, 233.402]
+    - [373.408, 108.0, 275.57]
+    enabled: true
+  Revenge:
+    name: Revenge
+    world: atronach
+    type: CLASSIC
+    source: MINECADE
+    category: VAULTED
+    size: MEDIUM
+    gameplay: [FLAT, ELEVATED]
+    icon: DIAMOND_SWORD
+    lobby: [-8.435, 116.0, -2.488]
+    spectator: [87.665, 146.01941, 6.043]
+    bounds:
+      center: [83.5, 150.0, 3.5]
+      x: 60.0
+      z: 60.0
+    spawns:
+    - [47.3, 99.0, 1.4]
+    - [83.4, 99.0, -31.5]
+    - [120.4, 99.0, 3.4]
+    - [83.5, 99.0, 39.4]
+    - [87.4, 136.0, 5.4]
+    - [82.5, 103.0, 8.4]
+    enabled: true
+  Atronach:
+    name: Atronach
+    world: atronach2
+    type: CLASSIC
+    source: MINECADE
+    category: VAULTED
+    size: LARGE
+    gameplay: [VOIDY, FLAT]
+    icon: FIREBALL
+    lobby: [57.475, 109.3125, -130.494]
+    spectator: [59.525, 157.0, -64.436]
+    bounds:
+      center: [55.5, 174.0, -57.5]
+      x: 58.0
+      z: 58.0
+    spawns:
+    - [64.473, 107.0, -94.528]
+    - [87.499, 107.0, -70.563]
+    - [70.451, 107.0, -24.514]
+    - [41.474, 107.0, -22.505]
+    - [19.435, 107.0, -42.521]
+    - [19.404, 107.0, -67.537]
+    enabled: true
+  SnowGlobe:
+    name: SnowGlobe
+    world: snowglobe
+    type: CLASSIC
+    source: COMMUNITY
+    category: CHRISTMAS
+    size: SMALL
+    gameplay: [INDOOR]
+    icon: STAINED_GLASS
+    lobby: [57.475, 109.3125, -130.494]
+    spectator: [66.578, 100.0, -34.391]
+    bounds:
+      center: [55.5, 174.0, -57.5]
+      x: 58.0
+      z: 58.0
+    spawns:
+    - [57.534, 97.0, -58.306]
+    - [56.528, 85.0, -28.124]
+    - [72.41, 87.0, -36.435]
+    - [59.537, 88.0, -45.849]
+    - [71.164, 82.0, -65.119]
+    - [56.558, 101.0, -47.634]
+    - [65.324, 86.0, -70.961]
+    - [59.461, 87.0, -45.481]
+    - [50.451, 87.0, -66.228]
+    enabled: true
+  Elven:
+    name: Elven
+    world: elven
+    type: CLASSIC
+    source: MINECADE
+    category: VAULTED
+    size: HUGE
+    gameplay: [ELEVATED]
+    icon: LOG:3
+    lobby: [-20.511, 165.0, -123.424]
+    spectator: [-22.5, 254.0, 6.5]
+    bounds:
+      center: [-22.5, 254.0, 1.5]
+      x: 100.0
+      z: 100.0
+    spawns:
+    - [8.498, 150.0, -50.562]
+    - [23.065, 150.0, -26.283]
+    - [45.16, 150.0, -6.369]
+    - [48.377, 150.0, 16.092]
+    - [29.859, 150.0, 29.376]
+    - [8.354, 150.0, 71.438]
+    - [-8.759, 150.0, 50.796]
+    - [-37.138, 150.0, 74.446]
+    - [-63.676, 150.0, 48.281]
+    - [-86.45, 150.0, 19.555]
+    - [-87.639, 150.0, -1.816]
+    - [-48.328, 150.0, -38.65]
+    - [-19.484, 173.0, 15.608]
+    - [-16.459, 173.0, 0.535]
+    - [-21.527, 233.0, -4.469]
+    - [-40.583, 218.0, -38.567]
+    enabled: true
+  Limbo:
+    name: Limbo
+    world: limbo
+    type: CLASSIC
+    source: MINECADE
+    category: CASUAL
+    size: MEDIUM
+    gameplay: [VOIDY, ELEVATED]
+    icon: WEB
+    lobby: [-58.467, 159.0, -142.483]
+    spectator: [39.103, 189.01158, -155.759]
+    bounds:
+      center: [24.5, 162.0, -155.5]
+      x: 60.0
+      z: 60.0
+    spawns:
+    - [-7.567, 152.0, -171.522]
+    - [22.39, 153.0, -191.667]
+    - [62.603, 165.0, -176.552]
+    - [65.449, 152.0, -177.584]
+    - [40.46, 187.0, -155.496]
+    - [13.575, 151.0, -129.55]
+    enabled: true
+  Treehouse:
+    name: Treehouse
+    world: treehouse
+    type: CLASSIC
+    source: MINECADE
+    category: VAULTED
+    size: HUGE
+    gameplay: [ELEVATED]
+    icon: WOOD:2
+    lobby: [-49.531, 140.0, 88.486]
+    spectator: [-53.866, 161.16555, 158.849]
+    bounds:
+      center: [-45.518, 173.0, 162.461]
+      x: 60.0
+      z: 58.0
+    spawns:
+    - [-51.547, 110.0, 128.419]
+    - [-16.515, 110.0, 145.429]
+    - [-37.481, 110.0, 173.482]
+    - [-78.614, 110.0, 161.523]
+    - [-52.559, 138.0, 152.279]
+    - [-61.494, 160.0, 165.318]
+    enabled: true
+  Frigid:
+    name: Frigid
+    world: frigid
+    type: CLASSIC
+    source: MINECADE
+    category: CASUAL
+    size: LARGE
+    gameplay: [ELEVATED]
+    icon: PACKED_ICE
+    lobby: [45.44, 136.0, 93.448]
+    spectator: [-18.295, 140.0, 92.952]
+    bounds:
+      center: [-43.545, 146.0, 92.435]
+      x: 70.0
+      z: 70.0
+    spawns:
+    - [-3.453, 103.0, 91.461]
+    - [-28.521, 99.0, 95.573]
+    - [-39.67, 104.0, 97.445]
+    - [-21.557, 141.0, 92.255]
+    - [5.463, 135.0, 62.412]
+    - [-81.633, 119.0, 92.505]
+    enabled: true
+  DragonsDescent:
+    name: DragonsDescent
+    world: dragonsdescent
+    type: CLASSIC
+    source: MINECADE
+    category: CURATED
+    size: SMALL
+    gameplay: [VOIDY, FLAT]
+    icon: PUMPKIN
+    lobby: [498.491, 151.0, -71.452]
+    spectator: [525.965, 152.19487, -24.033]
+    bounds:
+      center: [511.485, 154.0, -17.473]
+      x: 55.0
+      z: 38.0
+    spawns:
+    - [482.369, 156.0, -9.502]
+    - [488.629, 142.0, -27.326]
+    - [530.886, 136.0, -38.717]
+    - [528.271, 133.0, 3.666]
+    - [526.471, 133.0, 12.314]
+    - [530.452, 136.0, -24.538]
+    enabled: true
+  LostTemple:
+    name: LostTemple
+    world: losttemple
+    type: CLASSIC
+    source: MINECADE
+    category: VAULTED
+    size: LARGE
+    gameplay: [FLAT]
+    icon: SMOOTH_BRICK:1
+    lobby: [1017.507, 172.0, -1131.436]
+    spectator: [1038.5, 162.0, -1099.5]
+    bounds:
+      center: [1015.5, 224.0, -1044.5]
+      x: 65.0
+      z: 65.0
+    spawns:
+    - [1015.432, 174.0, -1082.684]
+    - [1057.729, 175.0, -1044.553]
+    - [1015.528, 176.0, -998.423]
+    - [972.433, 174.0, -1044.578]
+    - [1025.582, 183.0, -1040.508]
+    - [979.472, 172.0, -1080.703]
+    enabled: true
+  Crescent:
+    name: Crescent
+    world: crescent
+    type: CLASSIC
+    source: COMMUNITY
+    category: CASUAL
+    size: SMALL
+    gameplay: [VOIDY, ELEVATED]
+    icon: MOSSY_COBBLESTONE
+    lobby: [5051.459, 129.0, 623.5]
+    spectator: [5050.5, 141.0, 686.5]
+    bounds:
+      center: [5052.5, 141.0, 696.5]
+      x: 45.0
+      z: 45.0
+    spawns:
+    - [5068.115, 129.0, 712.473]
+    - [5020.488, 129.0, 696.607]
+    - [5036.411, 129.0, 712.445]
+    - [5052.421, 129.0, 727.483]
+    - [5068.418, 129.0, 680.417]
+    - [5035.693, 129.0, 678.955]
+    - [5052.359, 141.0, 696.622]
+    enabled: true
+  WaterShrine:
+    name: WaterShrine
+    world: watershrine
+    type: DUEL
+    source: COMMUNITY
+    category: CASUAL
+    size: MEDIUM
+    gameplay: [UNDERGROUND]
+    icon: PRISMARINE:1
+    lobby: [4981.513, 154.0, 593.451]
+    spectator: [5052.006, 150.0, 594.466]
+    bounds:
+      center: [5052.006, 150.0, 594.466]
+      x: 30.0
+      z: 35.0
+    spawns:
+    - [5051.97, 131.0, 579.964]
+    - [5052.008, 131.0, 609.981]
+    - [5035.437, 131.0, 594.552]
+    - [5068.51, 131.0, 594.461]
+    enabled: true
+  Monolith:
+    name: Monolith
+    world: monolith
+    type: CLASSIC
+    source: MINECADE
+    category: VAULTED
+    size: LARGE
+    gameplay: [VOIDY, ELEVATED]
+    icon: OBSIDIAN
+    lobby: [5040.471, 149.0, 706.482]
+    spectator: [5045.5, 170.0, 671.5]
+    bounds:
+      center: [5044.516, 197.0, 634.462]
+      x: 40.0
+      z: 40.0
+    spawns:
+    - [5042.514, 123.0, 650.452]
+    - [5030.437, 123.0, 630.484]
+    - [5045.491, 123.0, 621.4]
+    - [5056.487, 123.0, 635.486]
+    - [5050.47, 123.0, 628.453]
+    - [5039.508, 123.0, 639.455]
+    enabled: true
+  JungleBoogie:
+    name: JungleBoogie
+    world: jungleboogie
+    type: CLASSIC
+    source: MINECADE
+    category: CURATED
+    size: SMALL
+    gameplay: [VOIDY, ELEVATED]
+    icon: LEAVES:3
+    lobby: [5046.492, 146.0, 617.47]
+    spectator: [5038.5, 159.0, 679.5]
+    bounds:
+      center: [5038.5, 159.0, 679.5]
+      x: 35.0
+      z: 40.0
+    spawns:
+    - [5042.456, 128.0, 663.371]
+    - [5053.438, 128.0, 678.547]
+    - [5028.437, 128.0, 696.431]
+    - [5025.982, 144.0, 696.978]
+    - [5043.984, 156.0, 661.968]
+    - [5043.993, 159.0, 686.96]
+    enabled: true
+  TiltedTowers:
+    name: TiltedTowers
+    world: tilted
+    type: CLASSIC
+    source: OTHER
+    category: VAULTED
+    size: HUGE
+    gameplay: [FLAT, ELEVATED]
+    icon: STAINED_CLAY:9
+    lobby: [5107.0, 187.0, 670.35]
+    spectator: [5082.0, 153.0, 637.0]
+    bounds:
+      center: [5120.586, 165.0, 662.533]
+      x: 200.0
+      z: 200.0
+    spawns:
+    - [5140.44, 132.0, 690.524]
+    - [5125.532, 132.0, 724.488]
+    - [5103.558, 142.0, 722.46]
+    - [5056.004, 136.0, 687.438]
+    - [5061.442, 148.0, 628.472]
+    - [5119.489, 132.0, 643.424]
+    enabled: true
+  BeachBowl:
+    name: BeachBowl
+    world: beachbowl
+    type: CLASSIC
+    source: COMMUNITY
+    category: CURATED
+    size: MEDIUM
+    gameplay: [FLAT, UNDERGROUND]
+    icon: BOWL
+    lobby: [5121.535, 168.0, 627.535]
+    spectator: [5122.5, 156.0, 687.5]
+    bounds:
+      center: [5120.5, 156.0, 693.5]
+      x: 37.0
+      z: 37.0
+    spawns:
+    - [5125.516, 155.0, 707.513]
+    - [5108.992, 156.0, 709.323]
+    - [5112.454, 138.0, 685.474]
+    - [5120.477, 134.0, 668.532]
+    - [5103.48, 145.0, 697.456]
+    - [5141.466, 145.0, 696.474]
+    enabled: true
+  FungiForest:
+    name: FungiForest
+    world: fungiforest
+    type: CLASSIC
+    source: MINECADE
+    category: CURATED
+    size: MEDIUM
+    gameplay: [ELEVATED]
+    icon: HUGE_MUSHROOM_2
+    lobby: [5060.003, 143.0, 545.986]
+    spectator: [5057.5, 144.0, 626.5]
+    bounds:
+      center: [5057.418, 156.0, 641.47]
+      x: 40.0
+      z: 40.0
+    spawns:
+    - [5056.517, 133.0, 624.424]
+    - [5074.509, 133.0, 634.432]
+    - [5059.555, 133.0, 656.499]
+    - [5068.976, 138.0, 657.977]
+    - [5038.478, 140.0, 637.514]
+    - [5057.418, 156.0, 641.47]
+    enabled: true
+  PaintBoard:
+    name: PaintBoard
+    world: paintboard
+    type: DUEL
+    source: COMMUNITY
+    category: CURATED
+    size: SMALL
+    gameplay: [FLAT]
+    icon: WOOD:3
+    lobby: [5088.459, 157.0, 626.472]
+    spectator: [5031.5, 148.0, 622.5]
+    bounds:
+      center: [5027.5, 157.0, 628.5]
+      x: 30.0
+      z: 50.0
+    spawns:
+    - [5038.546, 143.0, 626.512]
+    - [5020.45, 143.0, 633.495]
+    - [5020.435, 143.0, 617.543]
+    - [5011.502, 155.0, 646.445]
+    enabled: true
+  Multiverse:
+    name: Multiverse
+    world: multiverse
+    type: CLASSIC
+    source: COMMUNITY
+    category: CASUAL
+    size: LARGE
+    gameplay: [VOIDY, ELEVATED]
+    icon: ENDER_PORTAL_FRAME
+    lobby: [5042.516, 178.0, 657.538]
+    spectator: [5054.805, 187.05035, 716.117]
+    bounds:
+      center: [5059.5, 201.0, 732.5]
+      x: 90.0
+      z: 58.0
+    spawns:
+    - [5027.47, 178.0, 697.573]
+    - [5048.384, 159.5, 712.458]
+    - [5045.36, 174.0, 739.441]
+    - [5092.187, 164.0, 731.663]
+    - [5075.565, 166.0, 764.524]
+    - [5069.549, 192.0, 734.55]
+    enabled: true
+  Apex:
+    name: Apex
+    world: apex
+    type: CLASSIC
+    source: COMMUNITY
+    category: CASUAL
+    size: SMALL
+    gameplay: [VOIDY]
+    icon: STONE
+    lobby: [5035.477, 137.0, 597.452]
+    spectator: [5036.585, 140.16749, 668.634]
+    bounds:
+      center: [5038.5, 143.0, 676.5]
+      x: 50.0
+      z: 45.0
+    spawns:
+    - [5025.599, 123.0, 657.44]
+    - [5065.488, 123.0, 663.495]
+    - [5056.512, 127.0, 680.502]
+    - [5033.467, 125.0, 693.585]
+    - [5009.634, 123.0, 680.307]
+    - [5029.894, 139.0, 694.579]
+    enabled: true
+  NetherFortress:
+    name: NetherFortress
+    world: netherfortress
+    type: CLASSIC
+    source: MINECADE
+    category: CURATED
+    size: MEDIUM
+    gameplay: [FLAT, UNDERGROUND]
+    icon: NETHER_BRICK
+    lobby: [5000.521, 157.0, 597.435]
+    spectator: [5050.741, 160.0, 606.475]
+    bounds:
+      center: [5052.502, 160.0, 610.468]
+      x: 30.0
+      z: 45.0
+    spawns:
+    - [5031.383, 146.0, 585.477]
+    - [5060.463, 131.0, 591.422]
+    - [5065.498, 146.0, 630.511]
+    - [5038.497, 146.0, 635.504]
+    - [5059.595, 146.0, 606.429]
+    - [5038.436, 139.0, 591.371]
+    enabled: true
+  Plains:
+    name: Plains
+    world: plains
+    type: DUEL
+    source: COMMUNITY
+    category: CURATED
+    size: SMALL
+    gameplay: [VOIDY, FLAT]
+    icon: GRASS
+    lobby: [12.536, 186.0, -150.517]
+    spectator: [10.5, 176.0, -84.5]
+    bounds:
+      center: [10.5, 176.0, -84.5]
+      x: 50.0
+      z: 35.0
+    spawns:
+    - [26.542, 167.0, -84.494]
+    - [-6.535, 167.0, -84.533]
+    enabled: true
+  SandStorm:
+    name: SandStorm
+    world: sandstorm
+    type: DUEL
+    source: COMMUNITY
+    category: CURATED
+    size: SMALL
+    gameplay: [VOIDY, FLAT]
+    icon: SAND
+    lobby: [12.525, 187.0, -150.471]
+    spectator: [9.5, 183.0, -80.5]
+    bounds:
+      center: [9.5, 183.0, -80.5]
+      x: 50.0
+      z: 30.0
+    spawns:
+    - [-11.576, 176.0, -80.546]
+    - [30.519, 176.0, -80.498]
+    enabled: true
+  Clockwork:
+    name: Clockwork
+    world: clockwork
+    type: CLASSIC
+    source: MINECADE
+    category: CURATED
+    size: SMALL
+    gameplay: [VOIDY, ELEVATED]
+    icon: WOOD
+    lobby: [4941.517, 162.0, 596.499]
+    spectator: [5001.898, 175.41397, 605.166]
+    bounds:
+      center: [4999.434, 178.0, 604.478]
+      x: 35.0
+      z: 30.0
+    spawns:
+    - [5001.994, 174.0, 606.994]
+    - [5015.599, 158.0, 606.437]
+    - [5001.069, 134.0, 592.949]
+    - [5000.984, 160.0, 592.974]
+    - [4985.44, 151.0, 605.448]
+    - [5001.538, 152.0, 588.452]
+    enabled: true
+  PileOfBodies:
+    name: PileOfBodies
+    world: pileofbodies
+    type: CLASSIC
+    source: MINECADE
+    category: CURATED
+    size: MEDIUM
+    gameplay: [VOIDY, FLAT]
+    icon: WORKBENCH
+    lobby: [4946.512, 153.0, 631.445]
+    spectator: [4946.051, 154.19487, 570.383]
+    bounds:
+      center: [4947.534, 162.0, 548.541]
+      x: 60.0
+      z: 60.0
+    spawns:
+    - [4905.39, 141.0, 581.469]
+    - [4912.392, 149.0, 539.494]
+    - [4957.479, 145.0, 527.348]
+    - [4991.572, 145.0, 550.995]
+    - [4975.5, 150.0, 568.537]
+    - [4961.483, 146.0, 593.51]
+    enabled: true
+  Aperature:
+    name: Aperature
+    world: aperature
+    type: CLASSIC
+    source: COMMUNITY
+    category: CASUAL
+    size: SMALL
+    gameplay: [VOIDY]
+    icon: IRON_BLOCK
+    lobby: [4950.502, 173.0, 587.524]
+    spectator: [4947.441, 180.73035, 651.318]
+    bounds:
+      center: [4947.52, 180.0, 651.493]
+      x: 35.0
+      z: 35.0
+    spawns:
+    - [4962.509, 169.0, 630.467]
+    - [4950.443, 162.0, 633.424]
+    - [4929.372, 169.0, 633.473]
+    - [4929.443, 170.0, 670.44]
+    - [4963.443, 167.0, 670.54]
+    - [4945.54, 176.0, 656.476]
+    enabled: true
+  Mushroom:
+    name: Mushroom
+    world: mushroom
+    type: CLASSIC
+    source: MINECADE
+    category: CURATED
+    size: SMALL
+    gameplay: [VOIDY, FLAT]
+    icon: MYCEL
+    lobby: [4906.508, 156.0, 853.509]
+    spectator: [4977.357, 159.40111, 850.104]
+    bounds:
+      center: [4972.566, 160.0, 847.504]
+      x: 35.0
+      z: 60.0
+    spawns:
+    - [4983.498, 150.0, 806.436]
+    - [4989.533, 154.0, 831.486]
+    - [4970.462, 153.0, 840.35]
+    - [4959.44, 153.0, 858.484]
+    - [4983.457, 148.0, 887.48]
+    - [4985.492, 153.0, 856.439]
+    enabled: true
+  MushroomCastle:
+    name: MushroomCastle
+    world: mushroomcastle
+    type: DUEL
+    source: MINECADE
+    category: VAULTED
+    size: SMALL
+    gameplay: [ELEVATED]
+    icon: WOOL:14
+    lobby: [4907.468, 150.0, 944.508]
+    spectator: [4909.448, 195.0, 876.408]
+    bounds:
+      center: [4909.448, 195.0, 876.408]
+      x: 40.0
+      z: 40.0
+    spawns:
+    - [4909.508, 148.0, 861.517]
+    - [4932.512, 148.0, 876.49]
+    - [4909.417, 148.0, 892.463]
+    enabled: true
+  NetherCastle:
+    name: NetherCastle
+    world: nethercastle
+    type: CLASSIC
+    source: MINECADE
+    category: VAULTED
+    size: SMALL
+    gameplay: [ELEVATED]
+    icon: NETHERRACK
+    lobby: [4884.519, 146.0, 733.478]
+    spectator: [4956.479, 149.0, 738.454]
+    bounds:
+      center: [4956.479, 149.0, 738.454]
+      x: 50.0
+      z: 50.0
+    spawns:
+    - [4936.45, 148.0, 738.493]
+    - [4929.438, 154.0, 715.461]
+    - [4956.483, 148.0, 718.454]
+    - [4976.488, 148.0, 738.484]
+    - [4956.46, 155.0, 729.497]
+    enabled: true
+  CherryGrove:
+    name: CherryGrove
+    world: cherrygrove
+    type: CLASSIC
+    source: MINECADE
+    category: CASUAL
+    size: MEDIUM
+    gameplay: [ELEVATED]
+    icon: STAINED_GLASS:6
+    lobby: [4517.374, 197.0, 746.59]
+    spectator: [4574.5, 193.0, 736.498]
+    bounds:
+      center: [4592.5, 224.0, 743.5]
+      x: 50.0
+      z: 70.0
+    spawns:
+    - [4574.493, 190.0, 724.4]
+    - [4579.587, 204.0, 720.403]
+    - [4596.408, 189.0, 743.549]
+    - [4612.459, 184.0, 773.403]
+    - [4624.472, 205.0, 785.549]
+    enabled: true
+  Mountain:
+    name: Mountain
+    world: mountain
+    type: CLASSIC
+    source: MINECADE
+    category: VAULTED
+    size: LARGE
+    gameplay: [ELEVATED]
+    icon: DIRT
+    lobby: [4819.523, 186.0, 788.498]
+    spectator: [4885.436, 158.0, 790.454]
+    bounds:
+      center: [4885.436, 158.0, 790.454]
+      x: 45.0
+      z: 40.0
+    spawns:
+    - [4885.463, 152.0, 790.549]
+    - [4864.387, 152.0, 790.485]
+    - [4867.388, 168.0, 781.455]
+    - [4904.56, 187.0, 788.443]
+    - [4874.485, 160.0, 800.518]
+    enabled: true
+  Mansion:
+    name: Mansion
+    world: mansion
+    type: CLASSIC
+    source: MINECADE
+    category: CASUAL
+    size: MEDIUM
+    gameplay: [VOIDY, ELEVATED]
+    icon: WOOD:1
+    lobby: [4933.467, 151.0, 719.522]
+    spectator: [4922.493, 149.0, 812.282]
+    bounds:
+      center: [4932.483, 188.0, 811.481]
+      x: 50.0
+      z: 60.0
+    spawns:
+    - [4920.444, 152.0, 776.414]
+    - [4953.547, 152.0, 793.375]
+    - [4954.586, 145.0, 838.512]
+    - [4925.501, 149.0, 815.555]
+    - [4911.503, 157.0, 814.491]
+    enabled: true
+  TempleOfMars:
+    name: TempleOfMars
+    world: templeofmars
+    type: CLASSIC
+    source: MINECADE
+    category: CURATED
+    size: SMALL
+    gameplay: [VOIDY]
+    icon: QUARTZ_BLOCK:2
+    lobby: [4930.449, 163.0, 690.517]
+    spectator: [4930.428, 160.0, 772.552]
+    bounds:
+      center: [4930.428, 160.0, 772.552]
+      x: 60.0
+      z: 40.0
+    spawns:
+    - [4946.934, 151.0, 749.479]
+    - [4946.502, 153.0, 788.49]
+    - [4918.471, 149.0, 768.472]
+    - [4888.509, 148.0, 779.695]
+    - [4888.461, 158.0, 782.541]
+    enabled: true
+  ColdWar:
+    name: ColdWar
+    world: coldwar
+    type: CLASSIC
+    source: MINECADE
+    category: CASUAL
+    size: SMALL
+    gameplay: [VOIDY, FLAT]
+    icon: ICE
+    lobby: [1002.428, 152.0, 626.585]
+    spectator: [1000.5, 162.0, 706.5]
+    bounds:
+      center: [1000.5, 162.0, 706.5]
+      x: 60.0
+      z: 50.0
+    spawns:
+    - [1037.504, 152.0, 700.492]
+    - [1031.507, 150.0, 743.491]
+    - [991.467, 151.0, 719.53]
+    - [1004.478, 151.0, 711.965]
+    - [971.422, 151.0, 685.513]
+    enabled: true
+  WinterWorld:
+    name: WinterWorld
+    world: winterworld
+    type: CLASSIC
+    source: MINECADE
+    category: VAULTED
+    size: HUGE
+    gameplay: [VOIDY, ELEVATED]
+    icon: SNOW_BALL
+    lobby: [4933.545, 181.0, 755.508]
+    spectator: [4930.5, 180.0, 700.5]
+    bounds:
+      center: [4932.5, 215.0, 676.336]
+      x: 60.0
+      z: 60.0
+    spawns:
+    - [4922.576, 150.0, 717.625]
+    - [4913.556, 188.0, 671.417]
+    - [4945.453, 195.0, 666.471]
+    - [4933.438, 212.0, 668.595]
+    - [4953.467, 155.0, 680.587]
+    enabled: true
+  Winter:
+    name: Winter
+    world: winter
+    type: CLASSIC
+    source: MINECADE
+    category: CASUAL
+    size: MEDIUM
+    gameplay: [FLAT, ELEVATED]
+    icon: SNOW_BLOCK
+    lobby: [4829.66, 155.0, 684.561]
+    spectator: [4898.485, 159.0, 685.393]
+    bounds:
+      center: [4897.5, 182.0, 686.5]
+      x: 50.0
+      z: 50.0
+    spawns:
+    - [4860.441, 144.0, 689.485]
+    - [4879.495, 154.0, 694.437]
+    - [4881.514, 154.0, 670.416]
+    - [4916.444, 180.0, 673.484]
+    - [4898.445, 143.0, 660.404]
+    enabled: true
+  BarnYard:
+    name: BarnYard
+    world: barnyard
+    type: CLASSIC
+    source: COMMUNITY
+    category: CASUAL
+    size: LARGE
+    gameplay: [FLAT, ELEVATED]
+    icon: HAY_BLOCK
+    lobby: [4714.534, 157.0, 685.505]
+    spectator: [4784.51, 160.0, 686.47]
+    bounds:
+      center: [4786.5, 176.0, 686.5]
+      x: 51.0
+      z: 60.0
+    spawns:
+    - [4796.42, 170.0, 686.44]
+    - [4826.459, 152.0, 709.513]
+    - [4760.522, 152.0, 725.352]
+    - [4753.309, 153.0, 668.423]
+    - [4777.421, 150.0, 675.482]
+    - [4797.475, 150.0, 685.44]
+    enabled: true
+  YinYang:
+    name: YinYang
+    world: yingyang
+    type: CLASSIC
+    source: MINECADE
+    category: CURATED
+    size: SMALL
+    gameplay: [VOIDY, FLAT]
+    icon: WOOL:15
+    lobby: [4926.488, 156.0, 493.466]
+    spectator: [4925.49, 150.0, 558.485]
+    bounds:
+      center: [4925.49, 189.0, 558.485]
+      x: 45.0
+      z: 42.0
+    spawns:
+    - [4919.463, 152.0, 531.388]
+    - [4955.478, 148.0, 558.523]
+    - [4926.486, 147.0, 583.466]
+    - [4899.306, 148.0, 565.624]
+    - [4925.478, 146.0, 558.324]
+    enabled: true
+  SantasWorkshop:
+    name: SantasWorkshop
+    world: santafactory
+    type: CLASSIC
+    source: COMMUNITY
+    category: CHRISTMAS
+    size: MEDIUM
+    gameplay: [INDOOR, FLAT]
+    icon: WOOD
+    lobby: [57.0, 85.0, -150.0]
+    spectator: [55.654, 101.0, -50.585]
+    bounds:
+      center: [55.0, 74.0, -43.0]
+      x: 100.0
+      z: 100.0
+    spawns:
+    - [55.541, 83.5, -83.159]
+    - [73.0, 86.0, -43.0]
+    - [55.0, 77.0, -5.0]
+    - [35.0, 82.0, -51.0]
+    - [50.0, 74.0, -19.0]
+    - [74.0, 74.0, -62.0]
+    - [55.0, 74.0, -47.0]
+    - [33.0, 82.0, -21.0]
+    enabled: true
+  Slither:
+    name: Slither
+    world: slither
+    type: CLASSIC
+    source: COMMUNITY
+    category: CASUAL
+    size: MEDIUM
+    gameplay: [VOIDY, ELEVATED]
+    icon: STAINED_CLAY:14
+    lobby: [12.555, 184.0, -150.462]
+    spectator: [97.411, 171.0, -152.539]
+    bounds:
+      center: [97.411, 171.0, -152.539]
+      x: 55.0
+      z: 100.0
+    spawns:
+    - [68.402, 153.0, -135.507]
+    - [71.428, 151.0, -152.5]
+    - [89.496, 146.0, -170.644]
+    - [86.463, 144.0, -156.639]
+    - [108.003, 146.0, -146.034]
+    - [96.438, 147.0, -136.491]
+    enabled: true
+  Arid:
+    name: Arid
+    world: arid
+    type: CLASSIC
+    source: COMMUNITY
+    category: CURATED
+    size: SMALL
+    gameplay: [FLAT, ELEVATED]
+    icon: DEAD_BUSH
+    lobby: [-68.5, 160.0, -144.5]
+    spectator: [1.5, 159.0, -144.5]
+    bounds:
+      center: [1.5, 151.0, -144.5]
+      x: 55.0
+      z: 55.0
+    spawns:
+    - [-4.5, 149.0, -126.5]
+    - [9.5, 149.0, -148.5]
+    - [23.5, 152.0, -166.5]
+    - [32.5, 151.0, -139.5]
+    - [-17.5, 149.0, -145.5]
+    - [-4.5, 149.0, -163.5]
+    enabled: true
+  Alpine:
+    name: Alpine
+    world: alpine
+    type: DUEL
+    source: COMMUNITY
+    category: CURATED
+    size: SMALL
+    gameplay: [FLAT, ELEVATED]
+    icon: SNOW_BLOCK
+    lobby: [-7.5, 145.0, -66.5]
+    spectator: [-3.5, 137.0, -128.5]
+    bounds:
+      center: [-3.5, 137.0, -128.5]
+      x: 45.0
+      z: 45.0
+    spawns:
+    - [15.5, 140.0, -137.5]
+    - [7.5, 139.0, -117.5]
+    - [-15.5, 139.0, -119.5]
+    - [-15.5, 144.0, -135.5]
+    enabled: true
+  CoastGuard:
+    name: CoastGuard
+    world: coastguard
+    type: CLASSIC
+    source: COMMUNITY
+    category: CURATED
+    size: LARGE
+    gameplay: [INDOOR, ELEVATED]
+    icon: SANDSTONE
+    lobby: [-57.5, 134.0, -132.5]
+    spectator: [21.5, 143.0, -142.5]
+    bounds:
+      center: [25.5, 147.0, -133.5]
+      x: 66.0
+      z: 66.0
+    spawns:
+    - [42.5, 131.0, -120.5]
+    - [25.5, 151.0, -100.5]
+    - [27.5, 143.0, -128.5]
+    - [41.5, 145.0, -158.5]
+    - [17.5, 128.0, -151.5]
+    - [-4.5, 127.0, -144.5]
+    - [31.5, 129.0, -140.5]
+    enabled: true
+  Verdant:
+    name: Verdant
+    world: Verdant
+    type: DUEL
+    source: COMMUNITY
+    category: CURATED
+    size: SMALL
+    gameplay: [VOIDY, ELEVATED]
+    icon: LEAVES:3
+    lobby: [0.0, 172.0, 0.0]
+    spectator: [-1.0, 184.0, 63.0]
+    bounds:
+      center: [1.0, 184.0, 63.0]
+      x: 40.0
+      z: 40.0
+    spawns:
+    - [9.5, 162.0, 64.5]
+    - [9.5, 170.0, 45.5]
+    - [-1.5, 172.0, 45.5]
+    - [12.5, 174.0, 70.5]
+    - [13.5, 179.0, 55.5]
+    - [-14.5, 180.0, 75.5]
+    - [-16.5, 183.0, 49.5]
+    enabled: true
+  TheCraftOf87:
+    name: TheCraftOf87
+    world: thecraftof87
+    type: CLASSIC
+    source: COMMUNITY
+    category: HALLOWEEN
+    size: SMALL
+    gameplay: [INDOOR]
+    icon: REDSTONE_LAMP_OFF
+    lobby: [254.433, 150.0, 204.499]
+    spectator: [251.994, 145.0, 119.004]
+    bounds:
+      center: [251.994, 145.0, 119.004]
+      x: 200.0
+      z: 200.0
+    spawns:
+    - [252.02, 144.0, 147.423]
+    - [266.495, 144.0, 134.415]
+    - [282.45, 144.0, 124.553]
+    - [282.482, 144.0, 114.399]
+    - [251.963, 144.0, 113.506]
+    - [236.484, 145.0, 125.52]
+    enabled: false
+  Citadel:
+    name: Citadel
+    world: citadel
+    type: CLASSIC
+    source: COMMUNITY
+    category: VAULTED
+    size: LARGE
+    gameplay: [FLAT, ELEVATED]
+    icon: PRISMARINE
+    lobby: [233.481, 126.0, 137.495]
+    spectator: [329.5, 121.0, 162.5]
+    bounds:
+      center: [329.5, 121.0, 162.5]
+      x: 300.0
+      z: 300.0
+    spawns:
+    - [285.435, 113.0, 207.493]
+    - [340.411, 76.0, 207.442]
+    - [333.455, 88.0, 162.505]
+    - [296.493, 77.0, 204.466]
+    - [349.399, 77.0, 124.43]
+    - [379.467, 73.0, 151.452]
+    enabled: false
+  CommCollab:
+    name: CommCollab
+    world: communitycollab
+    type: CLASSIC
+    source: COMMUNITY
+    category: VAULTED
+    size: MEDIUM
+    gameplay: [INDOOR]
+    icon: STAINED_GLASS:1
+    lobby: [5042.537, 171.0, 679.629]
+    spectator: [5042.537, 171.0, 679.629]
+    bounds:
+      center: [5042.537, 171.0, 679.629]
+      x: 200.0
+      z: 200.0
+    spawns:
+    - [5036.418, 170.0, 673.516]
+    - [5033.403, 163.0, 692.514]
+    - [5046.517, 172.0, 660.409]
+    - [5050.492, 183.0, 695.451]
+    - [5028.525, 184.0, 667.601]
+    - [5055.977, 182.0, 667.015]
+    enabled: false
+  WizardTower:
+    name: WizardTower
+    world: wizardtower
+    type: CLASSIC
+    source: COMMUNITY
+    category: CURATED
+    size: LARGE
+    gameplay: [FLAT, ELEVATED]
+    icon: ENCHANTMENT_TABLE
+    lobby: [47.514, 154.0, -49.511]
+    spectator: [-68.442, 165.0, -52.477]
+    bounds:
+      center: [-65.477, 199.0, -52.517]
+      x: 80.0
+      z: 150.0
+    spawns:
+    - [-13.44, 146.0, -17.521]
+    - [-71.483, 147.0, -80.54]
+    - [-59.519, 148.0, -26.566]
+    - [-36.585, 148.0, -56.51]
+    - [-86.554, 149.0, -63.544]
+    - [-72.549, 134.0, -34.493]
+    - [-39.51, 146.0, -2.487]
+    enabled: false

@@ -658,7 +658,7 @@ public class Commands implements CommandExecutor, TabCompleter {
     }
 
     public void sendFriendsHelp(Player player) {
-        player.sendMessage(main.color("&a&lFriends Commands"));
+        player.sendMessage(main.color("&6&lFRIENDS COMMANDS"));
         player.sendMessage(main.color("&e/friends&7: &rOpen your friends list"));
         player.sendMessage(main.color("&e/friends list&7: &rList your friends"));
         player.sendMessage(main.color("&e/friends add <player>&7: &rSend a request"));
@@ -1852,6 +1852,12 @@ public class Commands implements CommandExecutor, TabCompleter {
 			return;
 		}
 
+		// A custom game's players pick their class during the countdown, not before it
+		if (game != null && game.isCustomGame() && game.state == GameState.WAITING && !game.isCustomGameCountdownStarted()) {
+			player.sendMessage(main.color("&c&l(!) &rYou can pick a class once the countdown starts."));
+			return;
+		}
+
 		String className = args[0];
 
 		// One For All: the class is chosen by the host / co-host, or voted on (a null class is a random one)
@@ -1942,10 +1948,8 @@ public class Commands implements CommandExecutor, TabCompleter {
 
 			if (donor == null || player.hasPermission("scb." + donor.toString().toLowerCase())) {
 				player.sendMessage(main.color("&2&l(!) " + "&rYou have selected to go a &aRandom &rclass"));
-				main.getGameManager().playerSelectClass(player, classType);
 				GameInstance game = main.getGameManager().GetInstanceOfPlayer(player);
-                game.board.updateLine(3, main.color("&fClass: &cR&6a&en&ad&bo&3m"));
-				player.setDisplayName(player.getName());
+				if (game != null) game.setRandomClass(player, classType); // shown as Random, the class itself is hidden
 			}
 		}
 	}
@@ -2148,7 +2152,7 @@ public class Commands implements CommandExecutor, TabCompleter {
                 || cmd.getName().equalsIgnoreCase("spectate")) {
             if (args.length == 1) {
                 List<String> mapNames = Arrays.stream(Maps.values())
-                        .map(Enum::name)
+                        .map(Maps::name)
                         .collect(Collectors.toList());
 
                 if (cmd.getName().equalsIgnoreCase("join")) {

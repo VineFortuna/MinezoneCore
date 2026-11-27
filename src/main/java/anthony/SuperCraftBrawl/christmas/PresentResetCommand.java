@@ -9,7 +9,8 @@ import org.bukkit.entity.Player;
 
 /**
  * Staff testing command:
- *   /presentreset [player] - wipes their Present Hunt progress so every present can be found again
+ *   /presentreset [player] - wipes their Present Hunt progress so every present can be found again, and what
+ *                            Mr. Grinch has said to them, so his chat starts over
  * Defaults to yourself.
  */
 public class PresentResetCommand implements CommandExecutor {
@@ -52,9 +53,9 @@ public class PresentResetCommand implements CommandExecutor {
 		hunt.getDao().reset(target.getUniqueId());
 		hunt.refreshLobbyBoard(target);
 
-		target.sendMessage(main.color("&6&l(!) &rYour Present Hunt progress was reset."));
+		target.sendMessage(main.color("&6&l(!) &rYour Present Hunt progress and your chat with Mr. Grinch were reset."));
 		if (!target.equals(sender))
-			sender.sendMessage(main.color("&6&l(!) &rReset &e" + target.getName() + "&r's Present Hunt progress."));
+			sender.sendMessage(main.color("&6&l(!) &rReset &e" + target.getName() + "&r's Present Hunt progress and Mr. Grinch's chat."));
 		return true;
 	}
 }

@@ -22,12 +22,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class NPCManager implements Listener {
 
@@ -35,9 +39,12 @@ public class NPCManager implements Listener {
 	private NPCLib npcLib;
 
 	// NPCS HERE:
-    private net.jitse.npclib.api.NPC fishing, scbClassic, flagwars, socialMedia, parkour, customGames, survey;
+    private net.jitse.npclib.api.NPC fishing, scbClassic, flagwars, socialMedia, parkour, customGames, survey, grinch, santa;
 	private List<String> surveyFrameGreen, surveyFrameWhite, flagWarsFrameWhite, flagWarsFrameYellow;
-	private BukkitTask animationTask;
+	private BukkitTask animationTask, santaAnimationTask;
+	private List<String> santaFrameRed, santaFrameWhite;
+	/** When each player last clicked Santa, so a click the client sends twice runs /store once. Cleared on quit. */
+	private final Map<UUID, Long> santaClicks = new HashMap<UUID, Long>();
 
 	private static final String SURVEY_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfPqu6WDrVQW59YjzzVT0O5ZWa-8cHibHt3w7MBlHjInpOWyA/viewform?usp=dialog";
 
@@ -115,7 +122,32 @@ public class NPCManager implements Listener {
 		survey.setLocation(new Location(main.getLobbyWorld(), 184.5, 108, 640.5, -155.3f, -0.2f));
 		survey.setSkin(angelinoSkin);
 		survey.create();
+
+		// Mr. Grinch, who the Present Hunt is opened through. The skin is "Grinch" from NameMC (slim arms), signed by
+		// Mojang through MineSkin since the client only accepts a skin that is
+		Skin grinchSkin = new Skin(
+				"ewogICJ0aW1lc3RhbXAiIDogMTc2NTIzNjUxNjIzMywKICAicHJvZmlsZUlkIiA6ICI5NjFlZjYzYTE0ZDQ0ZjdhODM1ZGFiMTRlMmFmNmUwOSIsCiAgInByb2ZpbGVOYW1lIiA6ICJ1UGlwZSIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS82Y2ExYTM2NmEyZmU3ZDAzM2UxZGRjMmIyNmY5ZWJiYmY5NmFkNWZmODM0ZThmM2RiZTA2YjQ3ZTM4YzdiMjJiIiwKICAgICAgIm1ldGFkYXRhIiA6IHsKICAgICAgICAibW9kZWwiIDogInNsaW0iCiAgICAgIH0KICAgIH0KICB9Cn0=",
+				"ukY+wecA9unbYrB4fT1MhAT2euPtoBgOj2AljKoVi3l0ox3sXYHYCPI0qNPks3++9EbpciQr9HS7rXIPCUvCi3RIpWideOd0zpTgvrxVkL/R9beEM12YWyXhknD++2DVJ1G4Hz8YweTYvGjiTA5E43zKNEBWlPqDfKCZLmuP7XVv522ewsIaGUmdBrbKSeSGZEz8nldOFLvfT7Bq0MphWE5DK6L/1BFyEOR479svKcmB49rjVh2SQ08nIP1FvU0LkmZBGY9xScSuJ9vlZ309XmAUv2n2MOubDcOZVv4mif2KNfkrOhm18itGfecAg9anFaUtJ2YN3t3EVbzxo0Ruxlg1+IGM4UyqGH4ZeYTZsUpIzC50Zcp9FYWXzfWyRoOob6QNqev5Unhe4A9Scb/goWXX77wL9Nn67QG6vJ0KxQT0VA0eF+qEbIT//y1m7SyEJYoW75T4EqvNGy7HhnsMGrBGIEqQ60eQloD/YrvS1/oi/eb60ihd1ygXSH885uZkZPTWC1k9nvWJif2RzLk8ydS7akSBpsQUd9LsK9kzXKpGbu1815+C6A/e1Qpry8HlyFfpJWP5+zX7Igj12u4nuRDB1WH71cDysBVFU9sDaTBkpXYC1KMaM+Eqs182JNlvVPHg0bBcthuFvbqyK0+LiGac0zElWWBq7nUcX5W18zA=");
+		grinch = npcLib.createNPC(Arrays.asList(main.color("&2&lMR. GRINCH"), main.color("&eClick me!")));
+		grinch.setLocation(new Location(main.getLobbyWorld(), 194.5, 108, 639.5, 152.8f, 0f));
+		grinch.setSkin(grinchSkin);
+		grinch.create();
+
+		// Santa, the Christmas rank sale. Skin of the "Santa" account, signed by Mojang. The title flips between red
+		// and white every 0.3 seconds, two shared immutable frames like the NPCs above
+		Skin santaSkin = new Skin(
+				"ewogICJ0aW1lc3RhbXAiIDogMTc5NTcyNDExNTc0MywKICAicHJvZmlsZUlkIiA6ICJjN2ZkZGI5YWFkZmQ0YmUzYjMyNmQ3MDBkZjI1MmU4OCIsCiAgInByb2ZpbGVOYW1lIiA6ICJTYW50YSIsCiAgInNpZ25hdHVyZVJlcXVpcmVkIiA6IHRydWUsCiAgInRleHR1cmVzIiA6IHsKICAgICJTS0lOIiA6IHsKICAgICAgInVybCIgOiAiaHR0cDovL3RleHR1cmVzLm1pbmVjcmFmdC5uZXQvdGV4dHVyZS8zZjg2NjgyMWJmYmY1MWMwNWZmNzk4YWYxMDk1NzVhZmZhMThjNzc5MTUxODEwYjUyZTk5YzU0N2MzMzc5ZWI3IgogICAgfQogIH0KfQ==",
+				"WNSydUq2iw8fhJgUQmGdSxewbkBzTqrwiB73scagSHHlYMWNbnnrCQpHNSAFn5hqiGEIQOsf3ZdxhcwDtVC8A4muf7W1twqW0FnPuBVPGpqA+yuIvYJlBM09l78Mrk2IhZNiVai0u4E7Jzy2ZVZDdJPvXc8Amfa2aWLYcuuaCrmNIM8qoD8AL/hPSZoisZpLQ+jhT0JpZfMJh/QoibA04Exq+Hn+o6z6Ex2lrihb8ZgwpUZ9FRRv4TsVc0eSP2+rhzilD5QIeLhoW/mn9oIPExXhW7KkIheg60NMzxnbYRgxbOmsMq1YRYv9BwQ/Hby2FI2e+i6EBqTpLbBrQhNu7lf5nh0yHkyTh2RxMfDnMv2o1RHjW2vvfh2pnN/cZ2cECSZYeuNcikcs9LqXDXG/BrFYOl55wzQAn2Kk1yXHPn2lvszhrq9kgkF/SUXcPaD7OYMFDh0VKAzeCuh8qT9qFAlYOF1+gPINoqMLtG4+0U4/Jqla5mVHPfg3YAl94KkEkQMw0TgJXAYqOMbxvJlslEWXnhhQfidN3w+RJ6qpjXvM8OOCm9RO1CiqBKKQdT6wUvLcGu+ADiRiptqKmYqLe1xCin+uWddvEm7FkgEEw5QrOueQUtaEiPwCmpZdfgeIQbegBWxo2teab85DibLGfE4cFPebz4VuqIUHxzO97V4=");
+		santaFrameRed = Arrays.asList(main.color("&c&lCHRISTMAS RANK SALE"), main.color("&b&l20% OFF PRO!"),
+				main.color("&eClick to visit our store!"));
+		santaFrameWhite = Arrays.asList(main.color("&f&lCHRISTMAS RANK SALE"), main.color("&b&l20% OFF PRO!"),
+				main.color("&eClick to visit our store!"));
+		santa = npcLib.createNPC(santaFrameRed);
+		santa.setLocation(new Location(main.getLobbyWorld(), 173.5, 105.5, 657.5, -116f, 0.9f));
+		santa.setSkin(santaSkin);
+		santa.create();
 		animateNpcs();
+		animateSanta();
 	}
 
 	/**
@@ -133,6 +165,19 @@ public class NPCManager implements Listener {
 				flagwars.setText(flipped ? flagWarsFrameYellow : flagWarsFrameWhite);
 			}
 		}.runTaskTimer(main, 10L, 10L);
+	}
+
+	/** Every 0.3 seconds (6 ticks) Santa's title swaps between red and white. Cancelled in {@link #shutdown()}. */
+	private void animateSanta() {
+		santaAnimationTask = new BukkitRunnable() {
+			boolean white = false;
+
+			@Override
+			public void run() {
+				white = !white;
+				santa.setText(white ? santaFrameWhite : santaFrameRed);
+			}
+		}.runTaskTimer(main, 6L, 6L);
 	}
 
 	private void update() { // Updates NPCs
@@ -234,6 +279,11 @@ public class NPCManager implements Listener {
 			message.addExtra(new TextComponent(main.color("&f to fill out our &o5min&f survey and claim your &a300 Tokens&f, "
 					+ "and your chance to win 1 month of &6&lLEGENDARY&r&f rank! Survey ends &7&nNovember 30th")));
 			player.spigot().sendMessage(message);
+		} else if (e.getNPC() == grinch) {
+			anthony.SuperCraftBrawl.christmas.ChristmasHuntManager hunt = main.getChristmasManager();
+			if (hunt != null) hunt.talkToGrinch(player, grinch.getLocation());
+		} else if (e.getNPC() == santa) {
+			openStore(player);
 		} else if (e.getNPC() == socialMedia) {
 			player.sendMessage(main.color("&8&m-------&8[Social Media]&8&m-------"));
 			player.sendMessage("");
@@ -245,6 +295,30 @@ public class NPCManager implements Listener {
 			player.sendMessage("");
 			player.sendMessage(main.color("&8&m----------------------------"));
 		}
+	}
+
+	/** Santa's click: runs /store for the player. Commands have to run on the main thread, and a double click counts once. */
+	private void openStore(final Player player) {
+		long now = System.currentTimeMillis();
+		Long last = santaClicks.get(player.getUniqueId());
+		if (last != null && now - last < 600L) return;
+		santaClicks.put(player.getUniqueId(), now);
+
+		if (Bukkit.isPrimaryThread()) {
+			player.performCommand("store");
+		} else {
+			Bukkit.getScheduler().runTask(main, new Runnable() {
+				@Override
+				public void run() {
+					if (player.isOnline()) player.performCommand("store");
+				}
+			});
+		}
+	}
+
+	@EventHandler
+	public void onQuit(PlayerQuitEvent e) {
+		santaClicks.remove(e.getPlayer().getUniqueId());
 	}
 
     private void mainParkour(Player player) {
@@ -265,6 +339,8 @@ public class NPCManager implements Listener {
 			Bukkit.getScheduler().runTask(main, () -> parkour.show(e.getPlayer()));
 			Bukkit.getScheduler().runTask(main, () -> customGames.show(e.getPlayer()));
 			Bukkit.getScheduler().runTask(main, () -> survey.show(e.getPlayer()));
+			Bukkit.getScheduler().runTask(main, () -> grinch.show(e.getPlayer()));
+			Bukkit.getScheduler().runTask(main, () -> santa.show(e.getPlayer()));
 		}, 20L);
 		// }
 	}
@@ -278,8 +354,13 @@ public class NPCManager implements Listener {
             animationTask.cancel();
             animationTask = null;
         }
+        if (santaAnimationTask != null) {
+            santaAnimationTask.cancel();
+            santaAnimationTask = null;
+        }
+        santaClicks.clear();
 
-        net.jitse.npclib.api.NPC[] all = { fishing, scbClassic, flagwars, socialMedia, parkour, customGames, survey };
+        net.jitse.npclib.api.NPC[] all = { fishing, scbClassic, flagwars, socialMedia, parkour, customGames, survey, grinch, santa };
 
         for (net.jitse.npclib.api.NPC npc : all) {
             if (npc == null) continue;

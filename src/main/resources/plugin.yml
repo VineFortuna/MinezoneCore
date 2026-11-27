@@ -162,6 +162,9 @@ commands:
    battlepass:
       description: Open the Battle Pass
       aliases: [bp, pass]
+   xmasmusic:
+      description: Stop the Christmas song that plays when you join
+      usage: /xmasmusic
    ranksub:
       description: Rank subscriptions bought on the store (give, end, info)
       usage: /ranksub give <player> <rank> <time> | end <player> | info <player>
@@ -169,6 +172,10 @@ commands:
    sleigh:
       description: Ride Santa's sleigh in the lobby (toggle on and off)
       usage: /sleigh
+   minecadelobby:
+      description: Go to the MinecadeLobby world (Staff only)
+      usage: /minecadelobby
+      aliases: [mcl]
    presentreset:
       description: Reset Present Hunt progress (Staff only, for testing)
       usage: /presentreset [player]
@@ -188,8 +195,8 @@ commands:
       description: Join a specific game (used by the /invite Click here to join message)
       usage: /joingame <game>
    scbsetup:
-      description: Edit the original map worlds (games play on copies of them)
-      usage: /scbsetup <tp <map>|save|leave>
+      description: Make new maps and edit the original map worlds (games play on copies of them)
+      usage: /scbsetup <create <map>|tp <map>|save|status|tools|mode|icon <item>|enable <map>|disable <map>|leave>
       aliases: [ss]
    setimportantarea:
       description: Protect an area of the lobby from Legendary building

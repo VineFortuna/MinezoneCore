@@ -49,8 +49,6 @@ public class GrinchClass extends BaseClass {
 
 	private static final int FAKE_DROP_SLOT = 2;
 	private static final double FAKE_DROP_COOLDOWN_SECONDS = 15;
-	/** A fake drop nobody takes is cleaned up after this long. */
-	private static final long FAKE_DROP_LIFETIME_TICKS = 60 * 20L;
 	/** How fast a fake drop is thrown out of his hands. */
 	private static final double FAKE_DROP_THROW_SPEED = 0.6;
 
@@ -64,6 +62,18 @@ public class GrinchClass extends BaseClass {
 	 * respawn with their own kit) or changes class.
 	 */
 	private static final Map<Player, HeldWeapon> HELD_WEAPONS = new WeakHashMap<>();
+
+	/**
+	 * Whether this player is holding a weapon a Grinch swapped into their hands (same class, no death since, and
+	 * still in their inventory). Classes that hand their own weapon back whenever it is missing must not do that,
+	 * or the swap would be undone a tick later.
+	 */
+	public static boolean isHoldingSwappedWeapon(Player holder, BaseClass holderClass) {
+		HeldWeapon held = HELD_WEAPONS.get(holder);
+		if (held == null || held.holderClass.get() != holderClass || held.deathsAtSwap != holderClass.totalDeaths)
+			return false;
+		return findWeaponSlot(holder.getInventory(), held.weapon) >= 0;
+	}
 
 	private static class HeldWeapon {
 		// Weak: the class holds its Player (this map's key, which would then never be cleared) and its game,
@@ -85,7 +95,7 @@ public class GrinchClass extends BaseClass {
 	public GrinchClass(GameInstance instance, Player player) {
 		super(instance, player);
 		createArmor(null,
-				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWVkYmRjNDFiZjQ4OWNjMWU5NjhmNDA0YWFjNWYyNDEwZTllZjk1MzViYjBhYWU3ZGEyZDljYTQxYWI1ZmY4MyJ9fX0=",
+				"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmNhMWEzNjZhMmZlN2QwMzNlMWRkYzJiMjZmOWViYmJmOTZhZDVmZjgzNGU4ZjNkYmUwNmI0N2UzOGM3YjIyYiJ9fX0=",
 				"5DB77A", 6, "Grinch");
 	}
 
@@ -219,17 +229,13 @@ public class GrinchClass extends BaseClass {
 		left.setPickupDelay(10);
 	}
 
-	/** Drops a fake of this drop (his, so he can't take it) at a spot. A fake nobody takes is cleaned up after a while. */
+	/**
+	 * Drops a fake of this drop (his, so he can't take it) at a spot. Nothing removes it but the server: it despawns on
+	 * its own after the same time as the real drops, which are given that time the same way.
+	 */
 	private Item dropFake(Location at, GameLootDrops drop) {
-		final Item dropped = at.getWorld().dropItem(at, FakeLoot.mark(drop.getItem(), player.getUniqueId()));
-
-		// Tracked, so it's cancelled if the game ends first
-		instance.trackClassTask(Bukkit.getScheduler().runTaskLater(instance.getGameManager().getMain(), new Runnable() {
-			@Override
-			public void run() {
-				dropped.remove();
-			}
-		}, FAKE_DROP_LIFETIME_TICKS));
+		Item dropped = at.getWorld().dropItem(at, FakeLoot.mark(drop.getItem(), player.getUniqueId()));
+		GameLootDrops.setDespawnTime(dropped);
 		return dropped;
 	}
 

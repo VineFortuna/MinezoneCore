@@ -1,7 +1,6 @@
 package anthony.SuperCraftBrawl.floatingblock;
 
 import anthony.SuperCraftBrawl.Core;
-import anthony.SuperCraftBrawl.gui.christmas.ChristmasHuntGUI;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 import anthony.util.ItemHelper;
 import org.bukkit.*;
@@ -124,30 +123,23 @@ public final class FloatingBlockManager {
                     }
             );
 
-            // 2) SOCIALS
+            // 2) SOCIALS & STORE, one block for both. /socials lists the store too. It stands where the Present Hunt
+            // block was (classesLoc); the old Socials and Store spots are empty now, and still in the cleanup above so
+            // the armor stands of those two blocks that were saved in the world are removed.
             this.core.floatingBlocks.add(
-                    socialsLoc,
-                    new ItemStack(Material.BOOKSHELF, 1, (short) 0),
-                    "&6&lSOCIALS",
-                    "&aRight Click",
+                    classesLoc,
+                    new ItemStack(Material.EMERALD_BLOCK, 1, (short) 0),
+                    "&6&lSOCIALS & STORE",
+                    "&eRight Click",
                     (player) -> {
                         player.performCommand("socials");
                     }
             );
 
-            // 3) STORE
-            this.core.floatingBlocks.add(
-                    storeLoc,
-                    new ItemStack(Material.EMERALD_BLOCK, 1, (short) 0),
-                    "&6&lSTORE",
-                    "&aRight Click",
-                    (player) -> {
-                        player.performCommand("store");
-                    }
-            );
-
-            // SCB CLASSES - swapped out for the PRESENT HUNT block during the holiday season.
-            // Left in place (not deleted) so it's easy to bring back once the event is over.
+            // SCB CLASSES - was swapped out for a PRESENT HUNT block during the holiday season, and that block is gone (the
+            // Present Hunt is opened through the Mr. Grinch NPC now, see NPCManager). This one is still off, and its
+            // old spot (classesLoc) is the SOCIALS & STORE block now, so it needs a spot of its own if it comes back.
+            // Left in place (not deleted) so it's easy to bring back.
             /*
             this.core.floatingBlocks.add(
                     classesLoc,
@@ -159,17 +151,6 @@ public final class FloatingBlockManager {
                     }
             );
             */
-
-            this.core.floatingBlocks.add(
-                    classesLoc,
-                    ItemHelper.createSkullTexture(
-                            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjFiYzlkNDJiMDA0MWU4Zjk1Y2I5YjI2NjI4ZmRhZjUwY2QwZTM2ZjdiYjlkNmIzYTRkMmFmMzk0OWRhOTdkNiJ9fX0="),
-                    "&c&lPRESENT HUNT",
-                    "&eClick to View",
-                    (player) -> {
-                        new ChristmasHuntGUI(this.core).inv.open(player);
-                    }
-            );
 
             this.core.floatingBlocks.spawnAll();
         }, 40L);

@@ -93,6 +93,7 @@ public class GameInstance implements WinEffects.Host {
 
     // Tag Team (UUID keys, so nothing holds on to a player)
     private final Map<UUID, ClassType> secondClassSelection = new HashMap<>(); // the lobby's 2nd class picks
+    private final Set<UUID> randomClassPickers = new HashSet<>(); // players whose class is a hidden pick, shown as Random
     private final Map<UUID, ClassType[]> tagTeamClasses = new HashMap<>(); // in the game: {1st class, 2nd class}
     private final Map<UUID, Long> tagTeamSwapReadyAt = new HashMap<>(); // when each player may swap classes again
     public HashMap<Player, Timer> cooldowns = new HashMap<Player, Timer>();
@@ -440,6 +441,7 @@ public class GameInstance implements WinEffects.Host {
      * Item List, Co-Host) are reopened so they show it too.
      */
     public void refreshEditorMenus(Player changedBy) {
+        resetDisabledClassPicks(); // a class that was just disabled can't stay picked
         CustomGamesGUI.refreshOpenMenus(); // its mode may have changed
         for (Player editor : getEditors()) {
             if (editor == changedBy) continue;
@@ -886,8 +888,7 @@ public class GameInstance implements WinEffects.Host {
      */
     public Location GetLobbyLoc() {
         MapInstance mapInstance = (map != null) ? map.GetInstance() : duosMap.GetInstance();
-        Vector lobbyVector = mapInstance.lobbyLoc;
-        return new Location(mapWorld, lobbyVector.getX(), lobbyVector.getY(), lobbyVector.getZ());
+        return anthony.SuperCraftBrawl.Game.map.FacingVector.toLocation(mapWorld, mapInstance.lobbyLoc);
     }
 
     public boolean isOpen() {
@@ -1019,6 +1020,7 @@ public class GameInstance implements WinEffects.Host {
     public FastBoard board;
 
     public void setClass(Player player, ClassType type) {
+        randomClassPickers.remove(player.getUniqueId()); // an actual pick, not Random
         // Tag Team: picking the class that is the 2nd one makes the 1st one the 2nd instead (they trade places)
         if (isTagTeam() && type == secondClassSelection.get(player.getUniqueId())) {
             ClassType previous = classSelection.get(player);
@@ -1035,6 +1037,48 @@ public class GameInstance implements WinEffects.Host {
                 player.setDisplayName("" + player.getName() + " " + type.getTag());
             else
                 player.setDisplayName("" + player.getName() + " " + type.getTag() + ChatColor.GRAY);
+        }
+    }
+
+    /** /class random: the player is given a class that nobody sees (it is shown as Random) and that is played unless they change it. */
+    public void setRandomClass(Player player, ClassType hidden) {
+        setClass(player, hidden);
+        showRandomClass(player);
+        randomClassPickers.add(player.getUniqueId());
+    }
+
+    /** The scoreboard's Class line says Random and the chat tag is gone. */
+    private void showRandomClass(Player player) {
+        FastBoard playerBoard = boards.get(player.getUniqueId());
+        if (playerBoard != null) playerBoard.updateLine(3, color("&fClass: " + ONE_FOR_ALL_RANDOM));
+        player.setDisplayName(player.getName());
+    }
+
+    /*
+     * The host or co-host disabled classes: a player whose class (or Tag Team 2nd class) is one of them goes back to
+     * Random, on their scoreboard and in their chat tag. A player that picked Random themselves only loses their
+     * hidden class: it isn't shown to anyone, so nothing changes for them and nothing is said.
+     */
+    public void resetDisabledClassPicks() {
+        if (!customGame || state != GameState.WAITING) return;
+
+        for (Player player : players) {
+            UUID uuid = player.getUniqueId();
+
+            ClassType picked = classSelection.get(player);
+            if (picked != null && !isClassSelectable(picked)) {
+                classSelection.remove(player);
+                if (!randomClassPickers.remove(uuid)) {
+                    showRandomClass(player);
+                    player.sendMessage(color("&c&l(!) &rThe " + picked.getTag() + " &rclass was disabled, so you are back on &aRandom&r."));
+                }
+            }
+
+            ClassType second = secondClassSelection.get(uuid);
+            if (second != null && !isClassSelectable(second)) {
+                secondClassSelection.remove(uuid);
+                player.sendMessage(color("&c&l(!) &rYour 2nd class " + second.getTag() + " &rwas disabled."));
+            }
         }
     }
 
@@ -1236,20 +1280,20 @@ public class GameInstance implements WinEffects.Host {
     }
 
     /*
-     * Whether the player should have the class selector in the game lobby. A custom game's host and co-host have
-     * the Game Settings items instead until they start it, and One For All only hands it out once it's started:
-     * to the host and co-host (Host/Co-Host) or to everyone (Voting).
+     * Whether the player should have the class selector in the game lobby. In a custom game nobody has it until the
+     * host or co-host starts the countdown (and it goes again if they stop it). Then One For All hands it out to the
+     * host and co-host (Host/Co-Host) or to everyone (Voting), and any other game to everyone.
      */
     public boolean hasClassSelector(Player player) {
         if (classSelectorRemoved) return false;
         if (!customGame) return true;
-        if (!customGameCountdownStarted && canEditCustomGame(player)) return false;
+        if (!customGameCountdownStarted) return false;
 
         switch (getGameSettings().oneForAllMode) {
             case HOST:
-                return customGameCountdownStarted && canEditCustomGame(player);
+                return canEditCustomGame(player);
             case VOTING:
-                return customGameCountdownStarted && !oneForAllVotingEnded;
+                return !oneForAllVotingEnded;
             default:
                 return true;
         }
@@ -1896,7 +1940,7 @@ public class GameInstance implements WinEffects.Host {
 
         for (int i = 0; i < players.size(); i++) {
             Vector spawn = shuffledSpawns.get(i % shuffledSpawns.size());
-            players.get(i).teleport(spawn.toLocation(world));
+            players.get(i).teleport(anthony.SuperCraftBrawl.Game.map.FacingVector.toLocation(world, spawn));
         }
     }
 
@@ -1912,14 +1956,13 @@ public class GameInstance implements WinEffects.Host {
             }
             lastSpawn = rand;
             Vector spawnPos = mapInstance.spawnPos.get(rand);
-            return new Location(mapWorld, spawnPos.getX(), spawnPos.getY(), spawnPos.getZ());
+            return anthony.SuperCraftBrawl.Game.map.FacingVector.toLocation(mapWorld, spawnPos);
         }
     }
 
     public Location GetSpecLoc() {
         MapInstance mapInstance = (map != null) ? map.GetInstance() : duosMap.GetInstance();
-        Vector v = mapInstance.specLoc;
-        return new Location(mapWorld, v.getX(), v.getY(), v.getZ());
+        return anthony.SuperCraftBrawl.Game.map.FacingVector.toLocation(mapWorld, mapInstance.specLoc);
     }
 
     public double boundsX, boundsZ;
@@ -2485,6 +2528,7 @@ public class GameInstance implements WinEffects.Host {
                     Location loc = getItemSpawnLoc();
                     ItemStack drop = nextItemToDrop;
                     Item item = mapWorld.dropItem(loc, drop);
+                    GameLootDrops.setDespawnTime(item);
                     item.setVelocity(new Vector(0, 0, 0));
                     mapWorld.strikeLightningEffect(loc);
 
@@ -3596,6 +3640,7 @@ public class GameInstance implements WinEffects.Host {
             removeFromDuos(player);
             frenzyVotes.remove(player.getUniqueId());
             secondClassSelection.remove(player.getUniqueId());
+            randomClassPickers.remove(player.getUniqueId());
             tagTeamClasses.remove(player.getUniqueId());
             tagTeamSwapReadyAt.remove(player.getUniqueId());
 

@@ -112,7 +112,7 @@ public class EndermanClass extends BaseClass {
 
         Inventory inventory = player.getInventory();
 
-        if (!inventory.contains(weapon)) {
+        if (!inventory.contains(weapon) && !GrinchClass.isHoldingSwappedWeapon(player, this)) {
             player.getInventory().setItem(0, weapon);
         }
 

@@ -55,7 +55,7 @@ public class CustomGameMaps implements Listener {
         List<Maps> found = Maps.filterMaps(GameType.CLASSIC, Maps.Category.CURATED, null, null);
         List<Maps> pool = found == null ? new ArrayList<>() : new ArrayList<>(found);
         pool.remove(excluded);
-        if (pool.isEmpty()) return excluded != null ? excluded : GameManager.DEFAULT_CUSTOM_GAME_MAP;
+        if (pool.isEmpty()) return excluded != null ? excluded : GameManager.defaultCustomGameMap();
         return pool.get(ThreadLocalRandom.current().nextInt(pool.size()));
     }
 

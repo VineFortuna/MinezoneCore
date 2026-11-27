@@ -1,6 +1,7 @@
 package anthony.SuperCraftBrawl.christmas;
 
 import anthony.SuperCraftBrawl.Core;
+import anthony.SuperCraftBrawl.gui.christmas.ChristmasHuntGUI;
 import anthony.SuperCraftBrawl.playerdata.PlayerData;
 
 import org.bukkit.*;
@@ -12,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -34,7 +36,7 @@ public class ChristmasHuntManager implements Listener {
     private static final List<int[]> PRESENTS = Arrays.asList(
             new int[] { 177, 105, 671 }, // christmas tree freebie (#1)
             new int[] { 288, 109, 627 }, // lush cave (#2)
-            new int[] { 253, 144, 638 }, // castle (#3)
+            new int[] { 251, 143, 690 }, // castle (#3)
             new int[] { 25, 114, 772 }, // casino (#4)
             new int[] { 63, 114, 873 }, // ice cream parlour (#5)
             new int[] { 77, 116, 926 }, // park (#6)
@@ -164,6 +166,7 @@ public class ChristmasHuntManager implements Listener {
                 .color("&8[&c&lPRESENT HUNT&8] &e" + p.getName() + " &ahas found all 10 Presents! Merry Christmas!"));
 
         launchCelebrationFireworks(p);
+        grinchThanks(p); // After everything else, so it is the last message
     }
 
     // Launches fireworks one after the other, alternating red and green/yellow
@@ -214,6 +217,76 @@ public class ChristmasHuntManager implements Listener {
                 launched++;
             }
         }.runTaskTimer(core, 0L, intervalTicks);
+    }
+
+    // ---------------------------------------------------------------- Mr. Grinch, the NPC that opens the hunt
+
+    private static final String GRINCH = "&2&lMr. Grinch> &f";
+    /** What he says, one line for each of the first clicks. Then the next click opens the hunt. */
+    private static final String[] GRINCH_LINES = {
+            "BLAH! I hate Christmas!",
+            "If you want to play me, Mr. Grinch in SCB, I need you to do something for me hehehe",
+            "Help me steal all the Christmas Presents scattered around the lobby to unlock the Grinch class",
+            "Do you have what it takes to be like me, the very mighty Mr. Grinch?"
+    };
+    /**
+     * A grumble, a cackle, a scheming mutter and a boast, one for each line. By name, since this server's Sound enum
+     * has no witch (the 1.8 client has the sound).
+     */
+    private static final String[] GRINCH_SOUNDS = {
+            "mob.villager.no", "mob.witch.idle", "mob.villager.haggle", "mob.villager.yes"
+    };
+    private static final String GRINCH_CACKLE = "mob.witch.idle";
+    private static final float[] GRINCH_PITCHES = {0.6f, 1.0f, 0.7f, 0.5f};
+    private static final String GRINCH_THANKS =
+            "Hahaha thank you for helping me steal all the presents!! You earned your reward";
+    /** A click comes in more than once on some clients, and a line should not be skipped by it. */
+    private static final long GRINCH_CLICK_GAP_MS = 600L;
+
+    /** When each player last clicked him. Forgotten when they leave. */
+    private final Map<UUID, Long> lastGrinchClick = new HashMap<UUID, Long>();
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+        lastGrinchClick.remove(e.getPlayer().getUniqueId());
+    }
+
+    /**
+     * A click on Mr. Grinch. The first clicks are him talking, one line each with a sound and how far along the
+     * chat is, and once they have heard it all every click opens the Present Hunt.
+     *
+     * @param where  where he stands, so the sounds come from him
+     */
+    public void talkToGrinch(Player p, Location where) {
+        UUID id = p.getUniqueId();
+        long now = System.currentTimeMillis();
+        Long last = lastGrinchClick.get(id);
+        if (last != null && now - last < GRINCH_CLICK_GAP_MS) return;
+        lastGrinchClick.put(id, now);
+
+        // -1 is a database that couldn't be read: better to show them the hunt than to repeat his first line forever
+        int talks = dao.getGrinchTalks(id);
+        if (talks < 0 || talks >= GRINCH_LINES.length) {
+            new ChristmasHuntGUI(core).inv.open(p);
+            return;
+        }
+
+        dao.setGrinchTalks(id, talks + 1);
+        p.sendMessage(core.color(GRINCH + GRINCH_LINES[talks] + " &a[" + (talks + 1) + "/" + GRINCH_LINES.length + "]"));
+        p.playSound(where, GRINCH_SOUNDS[talks], 1f, GRINCH_PITCHES[talks]);
+    }
+
+    /** The last thing they see when the hunt is done: he is delighted, and cackles. */
+    private void grinchThanks(final Player p) {
+        p.sendMessage(core.color(GRINCH + GRINCH_THANKS));
+        p.playSound(p.getLocation(), GRINCH_CACKLE, 1f, 0.8f);
+
+        Bukkit.getScheduler().runTaskLater(core, new Runnable() {
+            @Override
+            public void run() {
+                if (p.isOnline()) p.playSound(p.getLocation(), GRINCH_CACKLE, 1f, 1.1f);
+            }
+        }, 8L);
     }
 
     // True once the player has found every present (unlocks Grinch class)

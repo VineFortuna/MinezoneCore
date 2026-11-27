@@ -655,6 +655,92 @@ public class GameManager implements Listener, PluginMessageListener {
 			event.setCancelled(true);
 	}
 
+	/**
+	 * Lightning drops lying on the ground stay where they are when TNT goes off next to them, and when they are in
+	 * fire or lava. Both would remove them, which is a good drop gone for nobody's gain.
+	 */
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void protectLootDrops(EntityDamageEvent event) {
+		if (!(event.getEntity() instanceof Item)) return;
+		Item item = (Item) event.getEntity();
+
+		switch (event.getCause()) {
+			case BLOCK_EXPLOSION:
+			case ENTITY_EXPLOSION:
+				if (GameLootDrops.isLootDropItem(item.getItemStack()))
+					event.setCancelled(true);
+				break;
+			case FIRE:
+			case FIRE_TICK:
+			case LAVA:
+				if (GameLootDrops.isLootDropItem(item.getItemStack())) {
+					event.setCancelled(true);
+					pullOutOfFire(item);
+				}
+				break;
+			default:
+				break;
+		}
+	}
+
+	/** Drops being moved out of lava or fire, or that could not be and are left alone for a second. */
+	private final Set<UUID> pullingOutOfFire = new HashSet<UUID>();
+
+	/**
+	 * A drop that can no longer burn up is still thrown around and hidden by the lava it lies in, so it is put on the
+	 * nearest ground instead (see LootRescue). One that is only still on fire after coming out is just put out.
+	 */
+	private void pullOutOfFire(final Item item) {
+		if (!LootRescue.burns(item.getLocation().getBlock().getType())) {
+			item.setFireTicks(0);
+			return;
+		}
+		// Once at a time: the damage comes every tick, and a drop with nowhere to go is not searched for every tick
+		final UUID id = item.getUniqueId();
+		if (!pullingOutOfFire.add(id)) return;
+
+		Bukkit.getScheduler().runTask(main, new Runnable() {
+			@Override
+			public void run() {
+				if (!item.isValid()) {
+					pullingOutOfFire.remove(id);
+					return;
+				}
+
+				final World world = item.getWorld();
+				Location at = item.getLocation();
+				int[] spot = LootRescue.findSafeSpot(new LootRescue.Blocks() {
+					@Override
+					public Material typeAt(int x, int y, int z) {
+						return world.isChunkLoaded(x >> 4, z >> 4) ? world.getBlockAt(x, y, z).getType() : null;
+					}
+				}, at.getBlockX(), at.getBlockY(), at.getBlockZ());
+
+				if (spot != null) {
+					item.teleport(new Location(world, spot[0] + 0.5, spot[1] + 0.1, spot[2] + 0.5));
+					item.setVelocity(new Vector(0, 0, 0));
+					item.setFireTicks(0);
+					pullingOutOfFire.remove(id);
+				} else {
+					// Nowhere to go: look again in a second
+					Bukkit.getScheduler().runTaskLater(main, new Runnable() {
+						@Override
+						public void run() {
+							pullingOutOfFire.remove(id);
+						}
+					}, 20L);
+				}
+			}
+		});
+	}
+
+	/** Same for catching fire: a drop that is not set alight never shows burning, and never burns down. */
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void protectLootDropsFromFire(EntityCombustEvent event) {
+		if (event.getEntity() instanceof Item && GameLootDrops.isLootDropItem(((Item) event.getEntity()).getItemStack()))
+			event.setCancelled(true);
+	}
+
 	public List<Block> pBlocks = new ArrayList<Block>();
 	public List<Material> pMat = new ArrayList<Material>();
 	public BukkitRunnable pRunnable;
@@ -736,7 +822,7 @@ public class GameManager implements Listener, PluginMessageListener {
 		if (instance != null) {
 			if (instance.state == GameState.STARTED) {
 				// On the map 'Tropical', void level is 70 because of the water
-				if (instance.getMap() == Maps.Tropical) {
+				if (isTropical(instance)) {
 					if (e.getPlayer().getLocation().getY() <= 71 && e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
 						EntityDamageEvent damageEvent = new EntityDamageEvent(e.getPlayer(), DamageCause.VOID, 1000);
 						main.getServer().getPluginManager().callEvent(damageEvent);
@@ -744,7 +830,7 @@ public class GameManager implements Listener, PluginMessageListener {
 				}
 
 				if (e.getPlayer().getLocation().getY() < 50 && e.getPlayer().getGameMode() != GameMode.SPECTATOR) {
-					if (instance.getMap() == Maps.Tropical)
+					if (isTropical(instance))
 						return;
 					EntityDamageEvent damageEvent = new EntityDamageEvent(e.getPlayer(), DamageCause.VOID, 1000);
 					main.getServer().getPluginManager().callEvent(damageEvent);
@@ -855,11 +941,21 @@ public class GameManager implements Listener, PluginMessageListener {
 					}
 
 					int range = 30;
-					// A fake Instagib (the Grinch's) shoots the opposite way to where you look
+					// A fake Instagib (the Grinch's) usually shoots the wrong way, see FakeLoot.instagibAim
 						Location eye = player.getEyeLocation();
-						if (FakeLoot.isFake(item))
-							if (FakeLoot.sneaky()) // 2 times out of 3: the beam, the damage and the launch all go that way
+						if (FakeLoot.isFake(item)) {
+							// 3 times out of 4 it goes backwards or up, the beam, the damage and the launch all together
+							switch (FakeLoot.instagibAim()) {
+								case BACKWARDS:
 									eye.setDirection(eye.getDirection().multiply(-1));
+									break;
+								case UPWARDS:
+									eye.setDirection(new Vector(0, 1, 0));
+									break;
+								default:
+									break;
+							}
+						}
 						Location endLoc = eye.clone();
 					BlockIterator b = new BlockIterator(eye, 0, range);
 
@@ -2284,7 +2380,19 @@ public class GameManager implements Listener, PluginMessageListener {
     }
 
     /** Only used when there is no curated map to pick from: players who haven't chosen a default map get a random one. */
-    public static final Maps DEFAULT_CUSTOM_GAME_MAP = Maps.PileOfBodies;
+    /** The map a custom game starts on when its host hasn't picked one: PileOfBodies, or the first map if that one is gone. */
+    public static Maps defaultCustomGameMap() {
+        Maps map = Maps.get("PileOfBodies");
+        if (map != null) return map;
+        Maps[] all = Maps.values();
+        return all.length == 0 ? null : all[0];
+    }
+
+    /** On the map Tropical the void is at 70, because of the water. */
+    private static boolean isTropical(GameInstance game) {
+        Maps map = game.getMap();
+        return map != null && map.name().equals("Tropical");
+    }
 
     /*
      * Custom Games NPC: a new custom game on the leader's default map (on its own copy named <leader>_CustomGame).
@@ -2970,6 +3078,11 @@ public class GameManager implements Listener, PluginMessageListener {
 		}
 	}
 
+	/**
+	 * The Nuke: right click and three TNTs go off where you are looking. It is one item, and one is used up per click
+	 * (if two were picked up they are a stack of 2). It is recognised by its name, since the TNT and Creeper classes
+	 * and the Frenzy vote are TNT items too.
+	 */
 	@EventHandler
 	public void nukeItem(PlayerInteractEvent event) {
 		Player player = event.getPlayer();
@@ -2977,31 +3090,30 @@ public class GameManager implements Listener, PluginMessageListener {
 		GameInstance i = this.GetInstanceOfPlayer(player);
 
 		if (i != null && i.state == GameState.STARTED) {
-			if (item != null && item.getType() == Material.TNT) {
+			if (item != null && item.getType() == Material.TNT && GameLootDrops.fromItem(item) == GameLootDrops.NUKE) {
 				Action action = event.getAction();
 				if (action != Action.RIGHT_CLICK_BLOCK && action != Action.RIGHT_CLICK_AIR)
 					return;
 
-				if (item.getAmount() % 3 == 0) {
-					boolean fakeNuke = FakeLoot.isFake(item); // a fake Nuke (the Grinch's): TNT that only knocks back
-					if (item.getAmount() == 3)
-						player.getInventory().clear(player.getInventory().getHeldItemSlot());
-					else
-						item.setAmount(item.getAmount() - 3);
-					Location loc = player.getTargetBlock((HashSet<Byte>) null, 25).getLocation();
-					TNTPrimed tnt = player.getWorld().spawn(loc.add(0, 1, 0), TNTPrimed.class);
-					if (fakeNuke) FakeLoot.markEntity(tnt);
-					tnt.setFuseTicks(50);
-					tnt = player.getWorld().spawn(loc.add(1, 1, 0), TNTPrimed.class);
-					if (fakeNuke) FakeLoot.markEntity(tnt);
-					tnt.setFuseTicks(50);
-					tnt = player.getWorld().spawn(loc.add(1, 1, 1), TNTPrimed.class);
-					if (fakeNuke) FakeLoot.markEntity(tnt);
-					tnt.setFuseTicks(50);
+				boolean fakeNuke = FakeLoot.isFake(item); // a fake Nuke (the Grinch's): TNT that only knocks back
+				if (item.getAmount() <= 1)
+					player.getInventory().clear(player.getInventory().getHeldItemSlot());
+				else
+					item.setAmount(item.getAmount() - 1);
 
-					// Playing Sound
-					SoundManager.playSoundToAll(player, loc, Sound.FUSE, 1, 1);
-				}
+				Location loc = player.getTargetBlock((HashSet<Byte>) null, 25).getLocation();
+				TNTPrimed tnt = player.getWorld().spawn(loc.add(0, 1, 0), TNTPrimed.class);
+				if (fakeNuke) FakeLoot.markEntity(tnt);
+				tnt.setFuseTicks(50);
+				tnt = player.getWorld().spawn(loc.add(1, 1, 0), TNTPrimed.class);
+				if (fakeNuke) FakeLoot.markEntity(tnt);
+				tnt.setFuseTicks(50);
+				tnt = player.getWorld().spawn(loc.add(1, 1, 1), TNTPrimed.class);
+				if (fakeNuke) FakeLoot.markEntity(tnt);
+				tnt.setFuseTicks(50);
+
+				// Playing Sound
+				SoundManager.playSoundToAll(player, loc, Sound.FUSE, 1, 1);
 			}
 		}
 	}

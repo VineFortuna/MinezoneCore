@@ -6,14 +6,19 @@ import anthony.SuperCraftBrawl.cosmetics.CosmeticRegistry;
 import anthony.SuperCraftBrawl.cosmetics.DoubleJumpAnimation;
 import anthony.SuperCraftBrawl.cosmetics.ParticleHelper;
 import anthony.SuperCraftBrawl.cosmetics.PassCosmetic;
+import anthony.SuperCraftBrawl.cosmetics.ReindeerLeapSpiral;
 import net.minecraft.server.v1_8_R3.EnumParticle;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.Random;
 
 /**
  * Double jump effects. With none equipped the double jump keeps its classic snowball poof.
- * Each effect is a single short burst (no ticking), so nothing is kept between jumps.
+ * Each effect is a single short burst (no ticking), so nothing is kept between jumps. The exception is the Reindeer
+ * Leap, drawn over 13 ticks by one task that stops itself.
  */
 public final class DoubleJumpCosmetics {
 
@@ -64,25 +69,58 @@ public final class DoubleJumpCosmetics {
         };
     }
 
-    private static PassDoubleJump reindeerLeap(Core main) {
+    /**
+     * Rudolph's double helix: a red strand and a gold one, half a turn apart, spiralling down from under the feet and
+     * widening like an inverted funnel, with the occasional spark between them and a small gold ring at the bottom
+     * (the shape is ReindeerLeapSpiral's). It is drawn a slice at a time rather than all at once, so it is the one effect
+     * that isn't a single burst: one task that stops itself after 13 ticks and remembers only the spot the jump started
+     * from. The funnel stays under that spot, so it never ends up above or in front of the player. No snow.
+     */
+    private static PassDoubleJump reindeerLeap(final Core main) {
         return new PassDoubleJump(main, "reindeer_leap", "Reindeer Leap", Material.REDSTONE,
-                "&7A twirl of red and green", "&7sparkles follows your leap!") {
-            public void play(Player player) {
-                Location feet = player.getLocation();
+                "&7A red and gold double helix swirls", "&7down beneath you as you leap!") {
+            public void play(final Player player) {
+                final Location anchor = player.getLocation();
+                final Random random = new Random();
 
-                // Red and green spiral rising around the player
-                int steps = 14;
-                for (int i = 0; i < steps; i++) {
-                    double angle = i * 0.65;
-                    Location point = feet.clone().add(Math.cos(angle) * 0.8, i * 0.13, Math.sin(angle) * 0.8);
-                    if (i % 2 == 0)
-                        ParticleHelper.dust(point, 220, 30, 30);
-                    else
-                        ParticleHelper.dust(point, 30, 160, 50);
-                }
+                drawReindeerLeap(anchor, 0, random); // the first slice is there at once
+                new BukkitRunnable() {
+                    int tick = 1;
 
-                ParticleHelper.play(feet.clone().add(0, 0.3, 0), EnumParticle.VILLAGER_HAPPY, 0.4f, 0.3f, 0.4f, 0f, 5);
+                    @Override
+                    public void run() {
+                        if (tick >= ReindeerLeapSpiral.TOTAL_TICKS || !player.isOnline()) {
+                            cancel();
+                            return;
+                        }
+                        drawReindeerLeap(anchor, tick, random);
+                        tick++;
+                    }
+                }.runTaskTimer(main, 1L, 1L);
             }
         };
+    }
+
+    /** One tick of the Reindeer Leap: a slice of the helix and maybe a spark, then the growing ring. */
+    private static void drawReindeerLeap(Location anchor, int tick, Random random) {
+        if (tick < ReindeerLeapSpiral.SPIRAL_TICKS) {
+            for (double[] dot : ReindeerLeapSpiral.spiral(tick))
+                ParticleHelper.dust(below(anchor, dot), (int) dot[3], (int) dot[4], (int) dot[5]);
+
+            // An occasional spark between the strands. Speed 0, so it stays where it is and doesn't drift up
+            if (random.nextInt(2) == 0) {
+                double[] spark = ReindeerLeapSpiral.spark(tick, random.nextDouble());
+                ParticleHelper.play(below(anchor, spark), EnumParticle.FIREWORKS_SPARK, 0f, 0f, 0f, 0f, 1);
+            }
+        } else {
+            for (double[] dot : ReindeerLeapSpiral.ring(tick - ReindeerLeapSpiral.SPIRAL_TICKS))
+                ParticleHelper.dust(below(anchor, dot), (int) dot[3], (int) dot[4], (int) dot[5]);
+        }
+    }
+
+    /** A point of the shape (x, y, z from the feet) in the world. */
+    private static Location below(Location anchor, double[] offset) {
+        return new Location(anchor.getWorld(), anchor.getX() + offset[0], anchor.getY() + offset[1],
+                anchor.getZ() + offset[2]);
     }
 }

@@ -117,6 +117,7 @@ public class Core extends JavaPlugin implements Listener {
     private anthony.SuperCraftBrawl.tablist.GameTablistManager gameTablistManager;
     private anthony.SuperCraftBrawl.lobbybuild.LobbyBuildManager lobbyBuildManager;
     private anthony.SuperCraftBrawl.Game.map.MapWorldManager mapWorldManager;
+    private anthony.SuperCraftBrawl.Game.map.MapStore mapStore;
     private anthony.SuperCraftBrawl.Game.MaxHealthGuard maxHealthGuard;
     public List<Player> staffchat;
     public List<Player> globalchat;
@@ -218,6 +219,7 @@ public class Core extends JavaPlugin implements Listener {
     //BATTLE PASS (null if it failed to start):
     private anthony.SuperCraftBrawl.battlepass.BattlePassManager battlePassManager;
     private anthony.SuperCraftBrawl.sleigh.SleighManager sleighManager;
+    private anthony.SuperCraftBrawl.christmas.LobbyMusic lobbyMusic;
 
     public Core() {
         this.staffchat = new ArrayList<Player>();
@@ -501,6 +503,11 @@ public class Core extends JavaPlugin implements Listener {
 
     public anthony.SuperCraftBrawl.Game.map.MapWorldManager getMapWorldManager() {
         return mapWorldManager;
+    }
+
+    /** The maps.yml all the Super Craft Bros maps come from. */
+    public anthony.SuperCraftBrawl.Game.map.MapStore getMapStore() {
+        return mapStore;
     }
 
     /**
@@ -932,6 +939,12 @@ public class Core extends JavaPlugin implements Listener {
         else
             System.out.print("sleigh was null!");
 
+        PluginCommand minecadeLobbyCommand = getCommand("minecadelobby");
+        if (minecadeLobbyCommand != null)
+            minecadeLobbyCommand.setExecutor(new anthony.SuperCraftBrawl.commands.MinecadeLobbyCommand(this));
+        else
+            System.out.print("minecadelobby was null!");
+
         PluginCommand presentResetCommand = getCommand("presentreset");
         if (presentResetCommand != null)
             presentResetCommand.setExecutor(new anthony.SuperCraftBrawl.christmas.PresentResetCommand(this));
@@ -991,6 +1004,7 @@ public class Core extends JavaPlugin implements Listener {
         Bukkit.getServer().getPluginManager().registerEvents(lobbyBuildManager, this);
         Bukkit.getServer().getPluginManager().registerEvents(maxHealthGuard, this);
         Bukkit.getServer().getPluginManager().registerEvents(mapWorldManager, this);
+        Bukkit.getServer().getPluginManager().registerEvents(mapWorldManager.getSetupManager(), this);
         anthony.flagwars.FWPlayerListener fwPlayerListener = new anthony.flagwars.FWPlayerListener(fwGameManager);
         fwGameManager.setPlayerListener(fwPlayerListener);
         Bukkit.getServer().getPluginManager().registerEvents(fwPlayerListener, this);
@@ -1001,6 +1015,17 @@ public class Core extends JavaPlugin implements Listener {
     private void initVariables() {
         saveDefaultConfig();
         plugin = this;
+
+        // The maps come from maps.yml, read before anything that looks at them. A failure here must not stop the plugin
+        try {
+            mapStore = new anthony.SuperCraftBrawl.Game.map.MapStore(new java.io.File(getDataFolder(), "maps.yml"),
+                    () -> getResource("maps.yml"), getLogger());
+            mapStore.load();
+        } catch (Throwable t) {
+            getLogger().severe("[Maps] Couldn't load the maps: " + t);
+            t.printStackTrace();
+        }
+
         msg = new ArrayList<>();
         listener = new PlayerListener(this);
         gameManager = new GameManager(this);
@@ -1008,6 +1033,7 @@ public class Core extends JavaPlugin implements Listener {
         mapWorldManager = new anthony.SuperCraftBrawl.Game.map.MapWorldManager(this);
         try {
             mapWorldManager.deleteUnloadedCopies(); // map copies left behind if the server crashed
+            mapWorldManager.deleteAbandonedNewMaps(); // new maps from /scbsetup create that were never saved
         } catch (Exception e) {
             getLogger().warning("Couldn't clean up old map copies: " + e);
         }
@@ -1066,6 +1092,17 @@ public class Core extends JavaPlugin implements Listener {
         lobbyScoreBoard = Bukkit.getScoreboardManager().getNewScoreboard();
         explorerManager = new LobbyExplorerManager(this);
         npcManager = new NPCManager(this);
+
+        // Isolated like the Battle Pass: decoration must never stop the plugin from loading
+        if (anthony.SuperCraftBrawl.christmas.LobbyMusic.ENABLED && lobbyWorld != null) {
+            try {
+                lobbyMusic = new anthony.SuperCraftBrawl.christmas.LobbyMusic(this, lobbyWorld);
+            } catch (Throwable t) {
+                lobbyMusic = null;
+                getLogger().severe("[ChristmasMusic] Failed to start, the lobby has no music: " + t);
+                t.printStackTrace();
+            }
+        }
         getDatabaseManager().ensureSnapshotTable();
         getDatabaseManager().ensureGameTables();
         friendsManager = new FriendsManager(this);
@@ -2522,6 +2559,8 @@ public class Core extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        if (lobbyMusic != null)
+            lobbyMusic.shutdown();
         if (sleighManager != null)
             sleighManager.shutdown(); // remove its horses and stands before the lobby world is saved
         if (battlePassManager != null)

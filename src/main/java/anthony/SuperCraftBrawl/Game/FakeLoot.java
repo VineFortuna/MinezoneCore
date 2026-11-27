@@ -140,6 +140,23 @@ public final class FakeLoot {
 		return drops;
 	}
 
+	/** How a fake Instagib is fired. */
+	public enum InstagibAim {
+		/** Where the player looks, like the real one. */
+		NORMAL,
+		/** The opposite way: the beam, the damage and the launch all go behind them. */
+		BACKWARDS,
+		/** Straight up. */
+		UPWARDS
+	}
+
+	/** Three times out of four a fake Instagib goes backwards or up (those two equally often), otherwise it works. */
+	public static InstagibAim instagibAim() {
+		int roll = RANDOM.nextInt(8);
+		if (roll < 2) return InstagibAim.NORMAL; // 2 in 8
+		return roll < 5 ? InstagibAim.BACKWARDS : InstagibAim.UPWARDS; // 3 in 8 each
+	}
+
 	/** Two times out of three: how often the fakes that only sometimes do their sneaky thing do it. */
 	public static boolean sneaky() {
 		return RANDOM.nextInt(3) < 2;

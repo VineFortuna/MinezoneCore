@@ -18,13 +18,18 @@ public class HookTracker implements Listener {
 
     private final Map<UUID, FishHook> hooks = new ConcurrentHashMap<>();
     private final Map<UUID, Location> lastLocations = new ConcurrentHashMap<>();
+    /** Where each hook was thrown from, so the trail can begin as soon as the hook is a little way out. */
+    private final Map<UUID, Location> castLocations = new ConcurrentHashMap<>();
+
+    /** The trail starts once the hook is this far (in blocks) from where it was thrown: not in the player's face. */
+    private static final double MIN_START_DISTANCE = 1.5;
 
     public HookTracker(Core main) {
         main.getServer().getPluginManager().registerEvents(this, main);
     }
 
     /** Returns the hook's location while it is in the air, or null if there is no hook, it has stopped,
-     *  or this is the first poll right after casting (so the trail doesn't start in the player's face). */
+     *  or it has only just been thrown (so the trail doesn't start in the player's face). */
     public Location getFlyingLocation(Player player) {
         UUID uuid = player.getUniqueId();
         FishHook hook = hooks.get(uuid);
@@ -39,9 +44,17 @@ public class HookTracker implements Listener {
             return null;
         }
 
-        // previous is only null on the first poll right after a cast (lastLocations was cleared in onFish).
-        if (previous == null) return null;
+        // previous is only null on the first poll right after a cast (lastLocations was cleared in onFish). The trail
+        // starts there if the hook is already out of the player's face (its next poll is two ticks later, about
+        // three blocks on), instead of always waiting for that one
+        if (previous == null && !isOutOfFace(uuid, location)) return null;
         return location;
+    }
+
+    private boolean isOutOfFace(UUID uuid, Location hook) {
+        Location thrownFrom = castLocations.get(uuid);
+        return thrownFrom != null && thrownFrom.getWorld() == hook.getWorld()
+                && thrownFrom.distanceSquared(hook) >= MIN_START_DISTANCE * MIN_START_DISTANCE;
     }
 
     @EventHandler
@@ -49,6 +62,7 @@ public class HookTracker implements Listener {
         UUID uuid = event.getPlayer().getUniqueId();
         if (event.getState() == PlayerFishEvent.State.FISHING) {
             hooks.put(uuid, event.getHook());
+            castLocations.put(uuid, event.getHook().getLocation());
             lastLocations.remove(uuid);
         } else {
             stop(uuid);
@@ -63,5 +77,6 @@ public class HookTracker implements Listener {
     private void stop(UUID uuid) {
         hooks.remove(uuid);
         lastLocations.remove(uuid);
+        castLocations.remove(uuid);
     }
 }

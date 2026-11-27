@@ -247,6 +247,9 @@ public class GenericModeGUI implements InventoryProvider {
 					break;
 				case CHRISTMAS:
 					material = Material.GOLD_RECORD;
+					break;
+				case EASTER:
+					material = Material.RECORD_5;
 			}
 		}
 

@@ -451,7 +451,7 @@ public abstract class ScopedStatLeaderboard extends LeaderboardBase {
     /** The invisible hitbox that makes the board clickable, sent to the same viewers as the global lines. */
     private void sendClickHitboxGlobalSelective(Location title, double lowestLineY) {
         BoardClickHitbox.Hitbox hitbox = BoardClickHitbox.create(title, lowestLineY);
-        globalEntityIds.add(hitbox.id);
+        globalEntityIds.addAll(hitbox.ids);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (isViewerLifetime(player)) {
@@ -464,7 +464,7 @@ public abstract class ScopedStatLeaderboard extends LeaderboardBase {
     private void sendClickHitboxToViewer(Player viewer, Location title, double lowestLineY) {
         BoardClickHitbox.Hitbox hitbox = BoardClickHitbox.create(title, lowestLineY);
         hitbox.sendTo(viewer);
-        viewerEntityIds.computeIfAbsent(viewer.getUniqueId(), k -> new ArrayList<Integer>()).add(hitbox.id);
+        viewerEntityIds.computeIfAbsent(viewer.getUniqueId(), k -> new ArrayList<Integer>()).addAll(hitbox.ids);
     }
 
     private EntityArmorStand makeStand(Location loc, String name) {

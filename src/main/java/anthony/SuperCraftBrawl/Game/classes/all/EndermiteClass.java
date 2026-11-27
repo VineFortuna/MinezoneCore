@@ -112,7 +112,7 @@ public class EndermiteClass extends BaseClass {
     public void tick(int gameTicks) {
         if (!isPlayerAlive()) return;
         phaseAbility.updateActionBar(player, this);
-        if (!player.getInventory().contains(weapon)) {
+        if (!player.getInventory().contains(weapon) && !GrinchClass.isHoldingSwappedWeapon(player, this)) {
             player.getInventory().setItem(0, weapon);
         }
 

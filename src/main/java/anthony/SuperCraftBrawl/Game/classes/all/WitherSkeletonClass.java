@@ -82,7 +82,8 @@ public class WitherSkeletonClass extends BaseClass {
     public void tick(int gameTicks) {
         if (instance.classes.containsKey(player) && instance.classes.get(player).getLives() > 0
                 && instance.classes.get(player).getType() == ClassType.WitherSkeleton)
-            if (!(player.getInventory().contains(this.getAttackWeapon())))
+            if (!(player.getInventory().contains(this.getAttackWeapon()))
+                    && !GrinchClass.isHoldingSwappedWeapon(player, this))
                 player.getInventory().setItem(0, this.getAttackWeapon());
 
         if (this.used) {
