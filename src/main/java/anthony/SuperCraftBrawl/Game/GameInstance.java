@@ -1193,13 +1193,7 @@ public class GameInstance implements WinEffects.Host {
                     }
                 }
 
-                if (ticks == 5) {
-                    removeReadyItems(); // too late to ready up
-                    removeFrenzyVoteItems(); // and to vote for Frenzy
-                    convertToFrenzyIfVoted();
-                    removeClassSelectors(); // /frenzy can still have switched the game type
-                    if (isOneForAllVoting()) endOneForAllVoting();
-                }
+                if (ticks == 5) finalizeGameVotes();
 
                 timeToStartSeconds--;
             }
@@ -1890,19 +1884,23 @@ public class GameInstance implements WinEffects.Host {
         player.updateInventory();
     }
 
-    /** The countdown reached 5s: the game turns Frenzy if most players voted for it. */
-    private void convertToFrenzyIfVoted() {
-        if (!canVoteForFrenzy()) return;
+    /*
+     * The countdown reached 5s, or the game was started early (everyone ready, /startgame): voting closes. The game
+     * turns Frenzy if most players voted for it, and One For All's vote picks its class.
+     */
+    public void finalizeGameVotes() {
+        removeReadyItems(); // too late to ready up
+        removeFrenzyVoteItems(); // and to vote for Frenzy
 
-        int votes = countFrenzyVotes();
-        if (votes == 0) return;
+        if (canVoteForFrenzy() && countFrenzyVotes() >= frenzyVotesNeeded()) {
+            gameType = GameType.FRENZY;
+            frenzyFromVote = true;
+            TellAll(color("&2&l(!) &rThe game mode has been set to &e&lFrenzy"));
+            updateModeLine();
+        }
 
-        if (votes < frenzyVotesNeeded()) return;
-
-        gameType = GameType.FRENZY;
-        frenzyFromVote = true;
-        TellAll(color("&2&l(!) &rThe game mode has been set to &e&lFrenzy"));
-        updateModeLine();
+        removeClassSelectors(); // /frenzy can still have switched the game type
+        if (isOneForAllVoting()) endOneForAllVoting();
     }
 
     private void tipMessages() {

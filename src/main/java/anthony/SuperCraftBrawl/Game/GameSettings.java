@@ -147,6 +147,7 @@ public class GameSettings {
 			game.gameStartTime.cancel();
 		}
 
+		game.finalizeGameVotes(); // the countdown's 5s tick is skipped
 		game.StartGame();
 	}
 
